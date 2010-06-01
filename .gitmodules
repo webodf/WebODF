@@ -1,3 +1,6 @@
 [submodule "odfkit"]
 	path = odfkit
 	url = git@gitorious.org:+odfkit-developers/webkit/odfkit.git
+[submodule "testfonts"]
+	path = testfonts
+	url = git://gitorious.org/qtwebkit/testfonts.git
