@@ -1,0 +1,3 @@
+[submodule "odfkit"]
+	path = odfkit
+	url = git@gitorious.org:+odfkit-developers/webkit/odfkit.git
