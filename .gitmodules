@@ -4,3 +4,9 @@
 [submodule "testfonts"]
 	path = testfonts
 	url = git://gitorious.org/qtwebkit/testfonts.git
+[submodule "lpod-python"]
+	path = lpod-python
+	url = git://code.lpod-project.org/lpod-python.git
+[submodule "lpod-docs"]
+	path = lpod-docs
+	url = git://code.lpod-project.org/lpod-docs.git
