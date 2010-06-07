@@ -39,17 +39,52 @@
     }
 
     function showFile(e) {
+      e.stopPropagation();
       var data;
       try {
         data = load_binary_resource(e.target);
       } catch (e) {
       }
       var zip = document.getElementById('zip');
-      zip.innerHTML = data;
+      zip.innerHTML = '';
+      var stream = new a3d.ByteArray(data);
+      var ok = true;
+      while (ok) {
+        try {
+          var entry = createEntry(stream);
+          zip.appendChild(entry);
+          ok = stream.pos < stream.length;
+        } catch (e) {
+          ok = false;
+        }
+      }
       return false;
     }
+
+    function createEntry(stream) {
+      var div = document.createElement('div');
+      stream.pos += 18;
+      var csize = stream.readUInt32LE();
+      var size = stream.readUInt32LE();
+      var len = stream.readUInt16LE();
+      var elen = stream.readUInt16LE();
+      var name = stream.data.substr(stream.pos, len);
+      stream.pos += len + elen;
+      div.appendChild(document.createTextNode(name + ' ' + size + ' ' + len));
+      stream.pos += csize;
+      var next = stream.readUInt32LE();
+      if (next == 0x08074b50) {
+          stream.pos += 12;
+      } else if (next == 0) {
+          stream.pos += 8;
+      } else {
+          stream.pos -= 4;
+      }
+      return div;
+    }
+
 function load_binary_resource(url) {  
-  // this only works in firefox and arora, konqueror and opera do not load binary data
+  // this only works in firefox and webkit ports like rekonq and arora, konqueror and opera do not load binary data
   var req = new XMLHttpRequest();  
   req.open('GET', url, false);  
   req.overrideMimeType('text/plain; charset=x-user-defined');  
