@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>JavaScriptZip demo</title>
+  <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
+  <script src="filelist.js" type="text/javascript" charset="utf-8"></script>
+  <style type="text/css" media="screen">
+    .box {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      background-color: blue;
+      -webkit-transition-property: -webkit-transform;
+      -webkit-transition-duration: 5s;
+      -webkit-transform: translate(0, 0);
+    }
+
+    .moved {
+      -webkit-transform: translateX(300px);
+    }
+  </style>
+  <script type="text/javascript" charset="utf-8">
+    if (window.layoutTestController) {
+      layoutTestController.dumpAsText();
+      layoutTestController.waitUntilDone();
+    }
+
+    function test()
+    {
+      var t = window.getComputedStyle(document.getElementById('box')).webkitTransform;
+      // grab the x value from the matrix()
+      var lastValueRE = /([\.\d]+),[^,]+\)$/;
+      var xTranslate = lastValueRE.exec(t)[1];
+      var result = (xTranslate > 0) ? 'PASS' : 'FAIL: transition should be running, so x > 0';
+      document.getElementById('result').innerHTML = result;
+
+      if (window.layoutTestController)
+          layoutTestController.notifyDone();
+    }
+
+    function showFile(e) {
+      var data;
+      try {
+        data = load_binary_resource(e.target);
+      } catch (e) {
+      }
+      var zip = document.getElementById('zip');
+      zip.innerHTML = data;
+      return false;
+    }
+function load_binary_resource(url) {  
+  // this only works in firefox and arora, konqueror and opera do not load binary data
+  var req = new XMLHttpRequest();  
+  req.open('GET', url, false);  
+  req.overrideMimeType('text/plain; charset=x-user-defined');  
+  req.send(null);
+  if (req.status != 200) {
+    alert(req.status + " " + req.statusText);
+    return '';
+  }
+  return req.responseText;  
+}
+
+    function createFileLink(path) {
+      var a = document.createElement('a');
+      a.href = path;
+      a.appendChild(document.createTextNode(path));
+      a.onclick = showFile;
+      return a;
+    }
+    function fillList()
+    {
+      var body = document.getElementById('list');
+      for (var f in fileList) {
+        body.appendChild(createFileLink(fileList[f]));
+        body.appendChild(document.createTextNode(' '));
+      }
+    }
+  </script>
+</head>
+<body id='body' onload="fillList()">
+<div id='list'></div>
+<div id='zip'/>
+</body>
+</html>
