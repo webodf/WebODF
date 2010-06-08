@@ -3,8 +3,11 @@
 <head>
   <title>JavaScriptZip demo</title>
   <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
+  <script src="zip.js" type="text/javascript" charset="utf-8"></script>
+  <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
   <script src="filelist.js" type="text/javascript" charset="utf-8"></script>
   <style type="text/css" media="screen">
+    div { display: inline-block; }
     .box {
       position: relative;
       width: 100px;
@@ -20,81 +23,56 @@
     }
   </style>
   <script type="text/javascript" charset="utf-8">
-    if (window.layoutTestController) {
-      layoutTestController.dumpAsText();
-      layoutTestController.waitUntilDone();
-    }
-
-    function test()
-    {
-      var t = window.getComputedStyle(document.getElementById('box')).webkitTransform;
-      // grab the x value from the matrix()
-      var lastValueRE = /([\.\d]+),[^,]+\)$/;
-      var xTranslate = lastValueRE.exec(t)[1];
-      var result = (xTranslate > 0) ? 'PASS' : 'FAIL: transition should be running, so x > 0';
-      document.getElementById('result').innerHTML = result;
-
-      if (window.layoutTestController)
-          layoutTestController.notifyDone();
-    }
 
     function showFile(e) {
       e.stopPropagation();
-      var data;
+      var ziplist = document.getElementById('ziplist');
+      ziplist.innerHTML = '';
+      var preview = document.getElementById('preview');
+      preview.innerHTML = '';
+      var zip;
       try {
-        data = load_binary_resource(e.target);
+        zip = new jsodfkit.Zip(e.target);
       } catch (e) {
+        ziplist.innerHTML = e;
+        return false;
       }
-      var zip = document.getElementById('zip');
-      zip.innerHTML = '';
-      var stream = new a3d.ByteArray(data);
-      var ok = true;
-      while (ok) {
-        try {
-          var entry = createEntry(stream);
-          zip.appendChild(entry);
-          ok = stream.pos < stream.length;
-        } catch (e) {
-          ok = false;
+      for (var i in zip.entries) {
+        if (zip.entries[i].uncompressedSize > 0) {
+          ziplist.appendChild(createZipEntry(zip, i));
+          ziplist.appendChild(document.createElement('br'));
         }
       }
       return false;
     }
 
-    function createEntry(stream) {
-      var div = document.createElement('div');
-      stream.pos += 18;
-      var csize = stream.readUInt32LE();
-      var size = stream.readUInt32LE();
-      var len = stream.readUInt16LE();
-      var elen = stream.readUInt16LE();
-      var name = stream.data.substr(stream.pos, len);
-      stream.pos += len + elen;
-      div.appendChild(document.createTextNode(name + ' ' + size + ' ' + len));
-      stream.pos += csize;
-      var next = stream.readUInt32LE();
-      if (next == 0x08074b50) {
-          stream.pos += 12;
-      } else if (next == 0) {
-          stream.pos += 8;
-      } else {
-          stream.pos -= 4;
+    function showEntry(e) {
+      e.stopPropagation();
+      var t = e.target;
+      var l = '';//e.targetElement;
+      for (var i in e.target) {
+        l += i + ' ';
       }
-      return div;
+      var preview = document.getElementById('preview');
+      preview.innerHTML = '';
+      try {
+        var data = t.zipentry.load(t.zip.stream);
+        preview.innerHTML = data;
+      } catch (e) {
+        preview.innerHTML = e + '<br/>' + t.localName + '<br/>' + l;
+      }
+      return false;
     }
 
-function load_binary_resource(url) {  
-  // this only works in firefox and webkit ports like rekonq and arora, konqueror and opera do not load binary data
-  var req = new XMLHttpRequest();  
-  req.open('GET', url, false);  
-  req.overrideMimeType('text/plain; charset=x-user-defined');  
-  req.send(null);
-  if (req.status != 200) {
-    alert(req.status + " " + req.statusText);
-    return '';
-  }
-  return req.responseText;  
-}
+    function createZipEntry(zip, i) {
+      var a = document.createElement('a');
+      a.zip = zip;
+      a.zipentry = a.zip.entries[i];
+      a.href = a.zip.uri + '/' + a.zipentry.filename;
+      a.appendChild(document.createTextNode(a.zipentry.filename));
+      a.onclick = showEntry;
+      return a;
+    }
 
     function createFileLink(path) {
       var a = document.createElement('a');
@@ -103,18 +81,20 @@ function load_binary_resource(url) {
       a.onclick = showFile;
       return a;
     }
+
     function fillList()
     {
       var body = document.getElementById('list');
       for (var f in fileList) {
         body.appendChild(createFileLink(fileList[f]));
-        body.appendChild(document.createTextNode(' '));
+        body.appendChild(document.createElement('br'));
       }
     }
   </script>
 </head>
 <body id='body' onload="fillList()">
 <div id='list'></div>
-<div id='zip'/>
+<div id='ziplist'></div>
+<div id='preview'></div>
 </body>
 </html>
