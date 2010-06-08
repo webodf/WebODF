@@ -42,7 +42,7 @@ var convertUTF8ArrayToBase64 = function(bin){
     for (var i = 0, l = bin.length; i < l; i += 3){
         var c0 = bin[i], c1 = bin[i+1], c2 = bin[i+2];
         if (c0 >= 256 || c1 >= 256 || c2 >= 256)
-            throw 'unsupported character found';
+            throw 'unsupported character found ' + c0 + ' ' + c1 + ' ' + c2;
         var n = (c0 << 16) | (c1 << 8) | c2;
         b64.push(
             b64charcodes[ n >>> 18],
