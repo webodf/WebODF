@@ -9,19 +9,6 @@
   <script src="filelist.js" type="text/javascript" charset="utf-8"></script>
   <style type="text/css" media="screen">
     div { display: inline-block; }
-    .box {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      background-color: blue;
-      -webkit-transition-property: -webkit-transform;
-      -webkit-transition-duration: 5s;
-      -webkit-transform: translate(0, 0);
-    }
-
-    .moved {
-      -webkit-transform: translateX(300px);
-    }
   </style>
   <script type="text/javascript" charset="utf-8">
 
@@ -49,7 +36,6 @@
 
     function createImageElement(data) {
       var img = document.createElement('img');
-      //img.src = 'data:;base64,' + Base64.convertUTF8ArrayToBase64(data);
       img.src = 'data:;base64,' + Base64.toBase64(data);
       return img;
     }

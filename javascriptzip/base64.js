@@ -28,7 +28,7 @@ var b64tab = function(bin){
 
 var stringToArray = function(s){
     var a = [];
-    for (var i = 0, l = s.length; i < l; i ++) a[i] = s.charCodeAt(i);
+    for (var i = 0, l = s.length; i < l; i ++) a[i] = s.charCodeAt(i) & 0xff;
     return a;
 };
 
