@@ -45,7 +45,7 @@
       var preview = document.getElementById('preview');
       preview.innerHTML = '';
       try {
-        var data = e.target.zipentry.load(e.target.zip.stream);
+        var data = e.target.zipentry.load(e.target.zip.uri);
         var name = e.target.zipentry.filename;
         var ext = name.substr(name.length-4);
         if (ext == '.png' || ext == '.jpg' || ext == '.svg') {
@@ -90,6 +90,6 @@
 <body id='body' onload="fillList()">
 <div id='list'></div>
 <div id='ziplist'></div>
-<div id='preview'></div>
+<div contenteditable id='preview'></div>
 </body>
 </html>
