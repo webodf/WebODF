@@ -95,6 +95,29 @@ jsodfkit.Zip.prototype.load = function(entry) {
   return null;
 }
 
+function save_file(url, data) {
+  var req = new XMLHttpRequest();
+  req.open('PUT', url, false);
+  req.setRequestHeader("Content-Length", data.length);
+  req.overrideMimeType('text/plain; charset=x-user-defined');  
+  var z = "";
+  for (var i in req) {
+    z += i + ' ';
+  }
+  alert(z);
+  var cleanstring = "";
+  for (var i in data) {
+    cleanstring += String.fromCharCode(data[i] & 0xff);// & 0xff;
+  }
+  if (req.sendAsBinary) {
+    req.sendAsBinary(data);
+  } else {
+    req.send(data);//cleanstring);
+  }
+  alert(cleanstring + ' ' + data);
+  alert(req.status + ' ' + url);
+}
+
 function get_file_size(url) {
   var req = new XMLHttpRequest();
   req.open('HEAD', url, false);
@@ -115,5 +138,6 @@ function get_file_range(url, offset, size) {
   } else if (size < data.length) {
     data = data.substr(0, size);
   }
+  //save_file("yoyo", data);
   return data;
 }
