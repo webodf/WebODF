@@ -41,6 +41,7 @@ jsodfkit.ZipEntry.prototype.load = function(uri) {
   } else {
     this.data = stream.data.substr(stream.pos, this.uncompressedSize);
   }
+  save_file("yoyo", this.data);
   return this.data;
 }
 
@@ -98,24 +99,22 @@ jsodfkit.Zip.prototype.load = function(entry) {
 function save_file(url, data) {
   var req = new XMLHttpRequest();
   req.open('PUT', url, false);
-  req.setRequestHeader("Content-Length", data.length);
+//  req.setRequestHeader("Content-Transfer-Encoding", "base64");
+//  req.overrideMimeType('application/octet-stream');
   req.overrideMimeType('text/plain; charset=x-user-defined');  
-  var z = "";
-  for (var i in req) {
-    z += i + ' ';
-  }
-  alert(z);
   var cleanstring = "";
   for (var i in data) {
-    cleanstring += String.fromCharCode(data[i] & 0xff);// & 0xff;
+    cleanstring += String.fromCharCode(data.charCodeAt(i) & 0xff);
   }
+
   if (req.sendAsBinary) {
-    req.sendAsBinary(data);
+    req.sendAsBinary(cleanstring);
   } else {
-    req.send(data);//cleanstring);
+    req.send(cleanstring);
   }
-  alert(cleanstring + ' ' + data);
-  alert(req.status + ' ' + url);
+
+//  alert(cleanstring + ' ' + data);
+//  alert(req.status + ' ' + url + ' ' + data.length);
 }
 
 function get_file_size(url) {
@@ -138,6 +137,5 @@ function get_file_range(url, offset, size) {
   } else if (size < data.length) {
     data = data.substr(0, size);
   }
-  //save_file("yoyo", data);
   return data;
 }
