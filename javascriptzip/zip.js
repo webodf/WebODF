@@ -98,10 +98,7 @@ jsodfkit.Zip.prototype.load = function(entry) {
 
 function save_file(url, data) {
   var req = new XMLHttpRequest();
-  req.open('PUT', url, false);
-//  req.setRequestHeader("Content-Transfer-Encoding", "base64");
-//  req.overrideMimeType('application/octet-stream');
-  req.overrideMimeType('text/plain; charset=x-user-defined');  
+  req.open('POST', url, false);
   var cleanstring = "";
   for (var i in data) {
     cleanstring += String.fromCharCode(data.charCodeAt(i) & 0xff);
@@ -110,11 +107,16 @@ function save_file(url, data) {
   if (req.sendAsBinary) {
     req.sendAsBinary(cleanstring);
   } else {
-    req.send(cleanstring);
+    // does not work, all input to send is always encoded as UTF-8 in WebKit
+//    req.setRequestHeader('Content-transfer-encoding', 'quoted-printable');
+//    req.setRequestHeader('Transfer-encoding', 'quoted-printable');
+//    req.setRequestHeader('Transfer-Encoding', 'quoted-printable');
+    data = Base64.toBase64(data);
+    alert(data);
+    req.setRequestHeader('Content-Type', 'application/octet-stream');
+    req.setRequestHeader('Content-Transfer-Encoding', 'base64');
+    req.send(data);//encodeQuotedPrintable(data));
   }
-
-//  alert(cleanstring + ' ' + data);
-//  alert(req.status + ' ' + url + ' ' + data.length);
 }
 
 function get_file_size(url) {
