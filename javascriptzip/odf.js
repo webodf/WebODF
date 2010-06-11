@@ -2,27 +2,31 @@ Ext.BLANK_IMAGE_URL = './ext/resources/images/default/s.gif';
 
 Ext.onReady(function(){
 
+  Ext.QuickTips.init();
+
+  var tabpanel = new Ext.TabPanel({
+    region:'center',
+  });
+
   var tree = new Ext.tree.TreePanel({
-    region:'west',
-    width:200,
-    split:true,
-    collapsible:true,
+    title: 'Documents',
+    region: 'west',
+    width: 200,
+    split: true,
+    collapsible: true,
     rootVisible: false,
+    enableTabScroll:true,
+    defaults: {autoScroll:true},
     root: { nodeType: 'node' },
   });
-  var panel = new Ext.Panel({
-    layout:'border',
-    height:1000,
-    //autoHeight:true,
-    renderTo:Ext.getBody(),
-    items:[
-      {region:'center',layout:'fit',frame:true,border:false},
-      tree
-    ]
+
+  var viewport = new Ext.Viewport({
+    layout: 'border',
+    items: [ tabpanel, tree ]
   });
 
   // put data in the tree
-  fillTree(tree.getRootNode(), './a/b/');
+  fillTree(tree.getRootNode(), './a/', tabpanel);
 });
 
 function getFileList(url, suffix) {
@@ -78,50 +82,77 @@ function getOdtList(url) {
   return getFileList(url, '.odt');
 }
 
-function getTree(url) {
+function getTree(url, tabpanel) {
   var tree = [];
   var list = getDirList(url);
   var root = getRoot(list);
   var foundfile = false;
   for (var i in list) {
     if (typeof list[i] != 'string' || list[i] == root) continue;
-    var children = getTree(list[i]);
+    var children = getTree(list[i], tabpanel);
     if (!children) continue;
-    foundfile = true;
-    var entry = new Object();
     var text = list[i].substr(root.length);
-    entry.id = list[i];
-    entry.text = text.substr(0, text.length-1);
-    entry.cls = 'folder';
-    entry.editable = false;
-    entry.children = children;
-    tree[tree.length] = entry;
+    tree[tree.length] = ({
+      id: list[i],
+      text: text.substr(0, text.length-1),
+      cls: 'folder',
+      editable: false,
+      children: children
+    });
+    foundfile = true;
   }
   list = getOdtList(url);
   for (var i in list) {
     if (typeof list[i] != 'string') continue;
-    var entry = new Object();
-    entry.id = list[i];
-    entry.text = list[i].substr(root.length);
-    entry.cls = 'file';
-    entry.leaf = true;
-    entry.editable = false;
-    entry.listeners = { click: function(node) { loadODF(node.id); } };
-    entry.href = 'odf.html#'+list[i]
-    tree[tree.length] = entry;
+    tree[tree.length] = ({
+      id: list[i],
+      text: list[i].substr(root.length),
+      cls: 'file',
+      leaf: true,
+      editable: false,
+      listeners: {
+        click: function(node) { loadODF(node.id, tabpanel, node.text); }
+      }
+    });
     foundfile = true;
   }
   if (foundfile) return tree;
   return null;
 }
 
-function fillTree(root, dir) {
-  var filetree = getTree('./a/');
+function fillTree(root, dir, tabpanel) {
+  var filetree = getTree('./a/', tabpanel);
   if (filetree) {
     root.appendChild(filetree);
   }
 }
 
-function loadODF(url) {
-//  alert(url);
+function loadODF(url, panel, title) {
+  var tab = panel.find('url', url);
+  if (tab.length) {
+    for (var t in tab) {
+      if (typeof tab[t] == 'object') {
+        panel.setActiveTab(tab[t]);
+        return;
+      }
+    }
+  }
+  var newTab = new Ext.BoxComponent({
+    title: title,
+    tabTip: url,
+    url: url,
+    closable: true,
+    autoEl: {
+        tag: 'iframe',
+        name: url,
+        src: 'odf.html#' + url,
+        frameBorder: 0,
+        style: {
+            border: '0 none'
+        }
+    },
+    region: 'center'
+  });
+  panel.add(newTab);
+  panel.setActiveTab(newTab);
 }

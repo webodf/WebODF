@@ -41,7 +41,7 @@ jsodfkit.ZipEntry.prototype.load = function(uri) {
   } else {
     this.data = stream.data.substr(stream.pos, this.uncompressedSize);
   }
-  save_file("yoyo", this.data);
+  //save_file("yoyo", this.data);
   return this.data;
 }
 
@@ -86,7 +86,7 @@ jsodfkit.Zip = function(uri) {
   }
 }
 
-jsodfkit.Zip.prototype.load = function(entry) {
+jsodfkit.Zip.prototype.load = function(filename) {
   for (var i in this.entries) {
     i = this.entries[i];
     if (i.filename == filename) {
