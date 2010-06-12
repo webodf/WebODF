@@ -30,8 +30,8 @@
     }
     office|spreadsheet {
       display: block;
-      background: white;
       border-collapse: collapse;
+      empty-cells: show;
       font-family: sans-serif;
       font-size: 10pt;
     }
@@ -50,6 +50,10 @@
       border: 0px;
       padding: 1px;
       margin: 0px;
+    }
+    office|spreadsheet table|table {
+      background: white;
+      margin: 3px;
     }
     office|spreadsheet table|table-cell {
       border: 1px solid #cccccc;
