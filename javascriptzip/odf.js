@@ -9,21 +9,31 @@ Ext.onReady(function(){
     minValue: 0.1,
     maxValue: 10,
     values: [1],
-    listeners: {
-      change: {
-        fn: setZoom
-      }
-    }
+    listeners: { change: { fn: setZoom } }
   });
 
   function setZoom(a, zoomlevel, b) {
     var tab = tabpanel.getActiveTab();
-    tab.el.dom.contentDocument.body.style.zoom = zoomlevel;
-    tab.el.dom.contentDocument.body.style.MozTransform = 'scale('+zoomlevel+')';
+    if (!tab) return;
+    var body = tab.el.dom.contentDocument.body;
+    body.style.zoom = zoomlevel;
+    body.style.MozTransform = 'scale('+zoomlevel+')';
+  }
+
+  var editButton = new Ext.Button({
+    enableToggle: true,
+    text: 'Editable',
+    listeners: { toggle: { fn: editToggle } }
+  });
+
+  function editToggle(a, pressed) {
+    var tab = tabpanel.getActiveTab();
+    if (!tab) return;
+    tab.el.dom.contentDocument.body.contentEditable = pressed;
   }
 
   var tabpanel = new Ext.TabPanel({
-    tbar: [ 'Zoom: ', slider ],
+    tbar: [ 'Zoom: ', slider, editButton ],
     region:'center',
   });
 
