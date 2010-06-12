@@ -20,6 +20,16 @@ Ext.onReady(function(){
     root: { nodeType: 'node' },
   });
 
+  var thumbgrid = new Ext.Panel({
+    width: 200,
+    split: true,
+    collapsible: true,
+    region: 'east',
+    title: 'Animated DataView',
+    layout: 'fit',
+    //    items : dataview,
+  });
+
   var viewport = new Ext.Viewport({
     layout: 'border',
     items: [ tabpanel, tree ]
@@ -82,6 +92,19 @@ function getOdtList(url) {
   return getFileList(url, '.odt');
 }
 
+function getThumbUrl(url) {
+  var data;
+  try {
+    var zip = new jsodfkit.Zip(url);
+    data = zip.load('Thumbnails/thumbnail.png');
+  } catch (e) {
+  }
+  if (data) {
+      return 'data:;base64,' + Base64.toBase64(data);
+  }
+  return null;
+}
+
 function getTree(url, tabpanel) {
   var tree = [];
   var list = getDirList(url);
@@ -94,6 +117,7 @@ function getTree(url, tabpanel) {
     var text = list[i].substr(root.length);
     tree[tree.length] = ({
       id: list[i],
+      qtip: list[i],
       text: text.substr(0, text.length-1),
       cls: 'folder',
       editable: false,
@@ -104,8 +128,14 @@ function getTree(url, tabpanel) {
   list = getOdtList(url);
   for (var i in list) {
     if (typeof list[i] != 'string') continue;
+    var qtip = list[i];
+    var thumbdataurl = getThumbUrl(list[i]);
+    if (thumbdataurl) {
+      qtip += '<img src="' + thumbdataurl + '"/>';
+    }
     tree[tree.length] = ({
       id: list[i],
+      qtip: qtip,
       text: list[i].substr(root.length),
       cls: 'file',
       leaf: true,
