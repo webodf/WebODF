@@ -14,18 +14,26 @@
     @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
     @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
     @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+    @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
     text|p, text|h {
       display: block;
       border: 1px solid black;
       padding: 3px 3px 3px 3px;
       margin: 5px 5px 5px 5px;
-/*      position: absolute; */
     }
     text|h {
       font-weight: bold;
     }
     office|text {
       display: block;
+      background: white;
+    }
+    office|spreadsheet {
+      display: block;
+      background: white;
+      border-collapse: collapse;
+      font-family: sans-serif;
+      font-size: 10pt;
     }
     office|presentation {
       background: #888888;
@@ -37,6 +45,27 @@
       height: 4in;
       background: white;
       margin: 3px;
+    }
+    office|spreadsheet text|p {
+      border: 0px;
+      padding: 1px;
+      margin: 0px;
+    }
+    office|spreadsheet table|table-cell {
+      border: 1px solid #cccccc;
+    }
+    table|table {
+      display: table;
+      border: 1px solid black;
+    }
+    table|table-row {
+      display: table-row;
+    }
+    table|table-column {
+      display: table-column;
+    }
+    table|table-cell {
+      display: table-cell;
     }
     text|p[text|style-name='list.start'] {
       color: red;
@@ -70,6 +99,7 @@ function loadFile(url) {
   clear();
 
   var ziplist = document.body;
+  document.body.innerHTML = 'Loading...';
   var zip;
   try {
     zip = new jsodfkit.Zip(url);
@@ -89,6 +119,7 @@ function loadFile(url) {
     content = document.importNode(content.firstChild, true);
     contentxml.appendChild(content);
   }
+  clear();
   document.body.appendChild(contentxml);
 }
   </script>
@@ -97,8 +128,5 @@ function loadFile(url) {
 </head>
  
 <body contenteditable onload='init()'>
-<div id='contentxml'></div>
-<div id='stylesxml'></div>
-<div id='metaxml'></div>
 </body>
 </html>
