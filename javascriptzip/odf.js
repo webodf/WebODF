@@ -4,7 +4,25 @@ Ext.onReady(function(){
 
   Ext.QuickTips.init();
 
+  var slider = new Ext.Slider({
+    width: 300,
+    minValue: 0.1,
+    maxValue: 10,
+    values: [1],
+    listeners: {
+      change: {
+        fn: setZoom
+      }
+    }
+  });
+
+  function setZoom(a, zoomlevel, b) {
+    var tab = tabpanel.getActiveTab();
+    tab.el.dom.contentDocument.body.style.zoom = zoomlevel;
+  }
+
   var tabpanel = new Ext.TabPanel({
+    tbar: [ 'Zoom: ', slider ],
     region:'center',
   });
 
@@ -19,16 +37,6 @@ Ext.onReady(function(){
     enableTabScroll:true,
     defaults: {autoScroll:true},
     root: { nodeType: 'node' },
-  });
-
-  var thumbgrid = new Ext.Panel({
-    width: 200,
-    split: true,
-    collapsible: true,
-    region: 'east',
-    title: 'Animated DataView',
-    layout: 'fit',
-    //    items : dataview,
   });
 
   var viewport = new Ext.Viewport({

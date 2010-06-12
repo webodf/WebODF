@@ -55,6 +55,20 @@
       background: white;
       margin: 3px;
     }
+    office|spreadsheet table|table:after {
+      /* show sheet name the end of the sheet */
+      content: attr(table|name);
+    }
+    office|spreadsheet table|table-row {
+      counter-increment: row;
+    }
+    office|spreadsheet table|table-row:before {
+      width: 3em;
+      background: #cccccc;
+      border: 1px solid black;
+      text-align: center;
+      content: counter(row);
+    }
     office|spreadsheet table|table-cell {
       border: 1px solid #cccccc;
     }
@@ -132,5 +146,6 @@ function loadFile(url) {
 </head>
  
 <body contenteditable onload='init()'>
+hello
 </body>
 </html>
