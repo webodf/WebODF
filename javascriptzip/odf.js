@@ -36,62 +36,62 @@ Ext.onReady(function(){
     items: [ tabpanel, tree ]
   });
 
-  // put data in the tree
-  fillTree(tree.getRootNode(), './a/', tabpanel);
-});
+  function getParentNode(root, uri) {
+    var parts = uri.split('/');
+    var node = root;
+    var id = parts[0];
+    for (var i = 1; i<parts.length-1; ++i) {
+      var n = node.findChild('text', parts[i], false);
+      id += '/' + parts[i];
+      if (!n) {
+        n = {
+          id: id,
+          text: parts[i],
+          qtip: uri,
+          cls: 'folder',
+          editable: false,
+          nodeType: 'node',
+          singleClickExpand: true
+        };
+        n = node.appendChild(n);
+      }
+      node = n;
+    }
+    return node;
+  }
 
-function getFileList(url, suffix) {
-  var req = new XMLHttpRequest();
-  req.open('PROPFIND', url, false);
-  req.setRequestHeader('Depth', '1');
-  req.send();
-  if (req.status < 200 || req.status >= 300) {
-    throw new Error(req.status + ' ' + req.statusText + ' ' + req.responseText);
-  }
-  var xml = req.responseXML;
-  if (!xml) {
-    throw new Error('No proper XML response.');
-  }
-  var refs = xml.getElementsByTagNameNS('DAV:', 'href');
-  var list = [];
-  var len = suffix.length;
-  for (var i in refs) {
-    if (refs[i].firstChild) {
-      var name = refs[i].firstChild.nodeValue;
-      if (name.substr(name.length-len) == suffix) {
-        list[list.length] = name;
+  function listFilesCallback(directories, files) {
+    var root = tree.getRootNode();
+    for (var i in files) {
+      var f = files[i];
+      if (typeof f == 'string') {
+        var parentNode = getParentNode(root, f);
+        var qtip = f;
+        var thumbdataurl = getThumbUrl(f);
+        if (thumbdataurl) {
+          qtip += '<img src="' + thumbdataurl + '"/>';
+        }
+        parentNode.appendChild({
+          id: f,
+          qtip: qtip,
+          text: f.substr(f.lastIndexOf('/')+1),
+          cls: 'file',
+          leaf: true,
+          editable: false,
+          listeners: {
+            click: function(node) { loadODF(node.id, tabpanel, node.text); }
+          }
+        });
       }
     }
   }
-  return list;
-}
-
-function getRoot(list) {
-  var root = '';
-  var minlength = 9999;
-  for (var i in list) {
-    if (typeof list[i] != 'string') continue;
-    if (list[i].length < minlength) {
-      root = list[i];
-      minlength = root.length;
-    }
+  function listFilesDoneCallback() {
   }
-  for (var i in list) {
-    if (typeof list[i] != 'string') continue;
-    if (list[i].substr(0, root.length) != root) {
-      return '';
-    }
-  }
-  return root;
-}
 
-function getDirList(url) {
-  return getFileList(url, '/');
-}
-
-function getOdtList(url) {
-  return getFileList(url, '.odt');
-}
+  // put data in the tree
+  listFiles('kofficetests/', /\.od[tps]$/i, listFilesCallback,
+    listFilesDoneCallback);
+});
 
 function getThumbUrl(url) {
   var data;
@@ -99,63 +99,12 @@ function getThumbUrl(url) {
     var zip = new jsodfkit.Zip(url);
     data = zip.load('Thumbnails/thumbnail.png');
   } catch (e) {
+    return null;
   }
   if (data) {
       return 'data:;base64,' + Base64.toBase64(data);
   }
   return null;
-}
-
-function getTree(url, tabpanel) {
-  var tree = [];
-  var list = getDirList(url);
-  var root = getRoot(list);
-  var foundfile = false;
-  for (var i in list) {
-    if (typeof list[i] != 'string' || list[i] == root) continue;
-    var children = getTree(list[i], tabpanel);
-    if (!children) continue;
-    var text = list[i].substr(root.length);
-    tree[tree.length] = ({
-      id: list[i],
-      qtip: list[i],
-      text: text.substr(0, text.length-1),
-      cls: 'folder',
-      editable: false,
-      children: children
-    });
-    foundfile = true;
-  }
-  list = getOdtList(url);
-  for (var i in list) {
-    if (typeof list[i] != 'string') continue;
-    var qtip = list[i];
-    var thumbdataurl = getThumbUrl(list[i]);
-    if (thumbdataurl) {
-      qtip += '<img src="' + thumbdataurl + '"/>';
-    }
-    tree[tree.length] = ({
-      id: list[i],
-      qtip: qtip,
-      text: list[i].substr(root.length),
-      cls: 'file',
-      leaf: true,
-      editable: false,
-      listeners: {
-        click: function(node) { loadODF(node.id, tabpanel, node.text); }
-      }
-    });
-    foundfile = true;
-  }
-  if (foundfile) return tree;
-  return null;
-}
-
-function fillTree(root, dir, tabpanel) {
-  var filetree = getTree('./a/', tabpanel);
-  if (filetree) {
-    root.appendChild(filetree);
-  }
 }
 
 function loadODF(url, panel, title) {
