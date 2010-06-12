@@ -13,6 +13,7 @@ Ext.onReady(function(){
     region: 'west',
     width: 200,
     split: true,
+    autoScroll: true,
     collapsible: true,
     rootVisible: false,
     enableTabScroll:true,
