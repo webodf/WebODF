@@ -19,6 +19,7 @@ Ext.onReady(function(){
   function setZoom(a, zoomlevel, b) {
     var tab = tabpanel.getActiveTab();
     tab.el.dom.contentDocument.body.style.zoom = zoomlevel;
+    tab.el.dom.contentDocument.body.style.MozTransform = 'scale('+zoomlevel+')';
   }
 
   var tabpanel = new Ext.TabPanel({
