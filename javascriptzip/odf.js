@@ -94,6 +94,7 @@ Ext.onReady(function(){
 });
 
 function getThumbUrl(url) {
+  return null;
   var data;
   try {
     var zip = new jsodfkit.Zip(url);
