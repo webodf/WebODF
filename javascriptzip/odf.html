@@ -3,11 +3,37 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <style type="text/css" media="screen">
+    body, html, div {
+      padding: 0px;
+      margin: 0px;
+      border: 0px;
+    }
+  </style>
+  <style type="text/css" media="screen">
     @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
-    text|p {
+    @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
+    @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+    text|p, text|h {
       display: block;
       border: 1px solid black;
-      padding: 3px;
+      padding: 3px 3px 3px 3px;
+      margin: 5px 5px 5px 5px;
+    }
+    text|h {
+      font-weight: bold;
+    }
+    office|text {
+      display: block;
+    }
+    office|presentation {
+      background: #888888;
+      display: block;
+    }
+    draw|page {
+      display: block;
+      width: 6in;
+      height: 4in;
+      background: white;
       margin: 3px;
     }
     text|p[text|style-name='list.start'] {
