@@ -7,6 +7,7 @@
       padding: 0px;
       margin: 0px;
       border: 0px;
+      background: #888888;
     }
   </style>
   <style type="text/css" media="screen">
@@ -18,6 +19,7 @@
       border: 1px solid black;
       padding: 3px 3px 3px 3px;
       margin: 5px 5px 5px 5px;
+/*      position: absolute; */
     }
     text|h {
       font-weight: bold;
@@ -27,7 +29,7 @@
     }
     office|presentation {
       background: #888888;
-      display: block;
+      display: inline-block;
     }
     draw|page {
       display: block;
@@ -94,7 +96,7 @@ function loadFile(url) {
   <title></title>
 </head>
  
-<body onload='init()'>
+<body contenteditable onload='init()'>
 <div id='contentxml'></div>
 <div id='stylesxml'></div>
 <div id='metaxml'></div>
