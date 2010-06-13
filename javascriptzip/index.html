@@ -1,95 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
 <head>
-  <title>JavaScriptZip demo</title>
-  <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
-  <script src="zip.js" type="text/javascript" charset="utf-8"></script>
-  <script src="base64.js" type="text/javascript" charset="utf-8"></script>
-  <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
-  <script src="filelist.js" type="text/javascript" charset="utf-8"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="stylesheet" type="text/css" href="ext/resources/css/ext-all.css">
   <style type="text/css" media="screen">
-    div { display: inline-block; }
   </style>
-  <script type="text/javascript" charset="utf-8">
-
-    function showFile(e) {
-      e.stopPropagation();
-      var ziplist = document.getElementById('ziplist');
-      ziplist.innerHTML = '';
-      var preview = document.getElementById('preview');
-      preview.innerHTML = '';
-      var zip;
-      try {
-        zip = new jsodfkit.Zip(e.target);
-      } catch (e) {
-        ziplist.innerHTML = e;
-        return false;
-      }
-      for (var i in zip.entries) {
-        if (zip.entries[i].uncompressedSize > 0) {
-          ziplist.appendChild(createZipEntry(zip, i));
-          ziplist.appendChild(document.createElement('br'));
-        }
-      }
-      return false;
-    }
-
-    function createImageElement(data) {
-      var img = document.createElement('img');
-      img.src = 'data:;base64,' + Base64.toBase64(data);
-      return img;
-    }
-
-    function showEntry(e) {
-      e.stopPropagation();
-      var preview = document.getElementById('preview');
-      preview.innerHTML = '';
-      try {
-        var data = e.target.zipentry.load(e.target.zip.uri);
-        var name = e.target.zipentry.filename;
-        var ext = name.substr(name.length-4);
-        if (ext == '.png' || ext == '.jpg' || ext == '.svg') {
-          preview.appendChild(createImageElement(data));
-        } else {
-          preview.innerHTML = data;
-        }
-      } catch (e) {
-        preview.innerHTML = e;
-      }
-      return false;
-    }
-
-    function createZipEntry(zip, i) {
-      var a = document.createElement('a');
-      a.zip = zip;
-      a.zipentry = a.zip.entries[i];
-      a.href = a.zip.uri + '/' + a.zipentry.filename;
-      a.appendChild(document.createTextNode(a.zipentry.filename));
-      a.onclick = showEntry;
-      return a;
-    }
-
-    function createFileLink(path) {
-      var a = document.createElement('a');
-      a.href = path;
-      a.appendChild(document.createTextNode(path));
-      a.onclick = showFile;
-      return a;
-    }
-
-    function fillList()
-    {
-      var body = document.getElementById('list');
-      for (var f in fileList) {
-        body.appendChild(createFileLink(fileList[f]));
-        body.appendChild(document.createElement('br'));
-      }
-    }
-  </script>
+  <!-- requirements -->
+  <script type="text/javascript" src="ext/adapter/ext/ext-base.js"></script>
+  <script type="text/javascript" src="ext/ext-all-debug.js"></script>
+  <script type="text/javascript" src="zip.js"></script>
+  <script src="base64.js" type="text/javascript" charset="utf-8"></script>
+  <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
+  <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
+  <script src="filelister.js" type="text/javascript" charset="utf-8"></script>
+  <!-- application -->
+  <script type="text/javascript" src="gui.js"></script>
+ 
+  <title id="page-title">WebODF?</title>
 </head>
-<body id='body' onload="fillList()">
-<div id='list'></div>
-<div id='ziplist'></div>
-<div contenteditable id='preview'></div>
+<body>
 </body>
 </html>
