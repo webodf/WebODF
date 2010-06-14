@@ -52,6 +52,22 @@ function style2css(stylesheet, stylesxmldom) {
         'list-level-style-bullet', 'outline-level-style', 'span']
   };
 
+  var textPropertySimpleMapping = [
+    [ fons, 'color', 'color' ],
+    // this sets the element background, not just the text background
+    [ fons, 'background-color', 'background-color' ],
+    [ fons, 'font-weight', 'font-weight' ],
+    [ fons, 'font-style', 'font-style' ],
+  ];
+
+  var paragraphPropertySimpleMapping = [
+    [ fons, 'text-align', 'text-align' ],
+    [ fons, 'padding-left', 'padding-left' ],
+    [ fons, 'padding-right', 'padding-right' ],
+    [ fons, 'padding-top', 'padding-top' ],
+    [ fons, 'padding-bottom', 'padding-bottom' ],
+  ];
+
   // make stylesheet empty
   while (stylesheet.cssRules.length) {
     stylesheet.deleteRule(stylesheet.cssRules.length-1);
@@ -124,24 +140,8 @@ function style2css(stylesheet, stylesxmldom) {
 
   function getTextProperties(props) {
     var rule = '';
+    rule += applySimpleMapping(props, textPropertySimpleMapping);
     var value;
-    value = props.getAttributeNS(fons, 'color');
-    if (value) {
-      rule += 'color: ' + value + ';';
-    }
-    value = props.getAttributeNS(fons, 'background-color');
-    if (value) {
-      // this sets the element background, not just the text background
-      rule += 'background-color: ' + value + ';';
-    }
-    value = props.getAttributeNS(fons, 'font-weight');
-    if (value) {
-      rule += 'font-weight: ' + value + ';';
-    }
-    value = props.getAttributeNS(fons, 'font-style');
-    if (value) {
-      rule += 'font-style: ' + value + ';';
-    }
     value = props.getAttributeNS(stylens, 'text-underline-style');
     if (value == 'solid') {
       rule += 'text-decoration: underline;';
@@ -149,14 +149,20 @@ function style2css(stylesheet, stylesxmldom) {
     return rule;
   }
 
+  function applySimpleMapping(props, mapping) {
+    var rule = '';
+    for (var r in mapping) {
+      var value = props.getAttributeNS(r[0], r[1]);
+      if (value) {
+        rule += r[2] + ':' + value + ';';
+      }
+    }
+    return rule;
+  }
+
   function getParagraphProperties(props) {
     var rule = '';
-    var value;
-    value = props.getAttributeNS(fons, 'text-align');
-    if (value) {
-      rule += 'text-align: ' + value + ';';
-    }
-
+    rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
     return rule;
   }
 
