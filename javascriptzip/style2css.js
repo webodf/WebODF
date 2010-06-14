@@ -61,11 +61,7 @@ function style2css(stylesheet, stylesxmldom) {
   for (var prefix in namespaces) {
     var rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
     if (!is_chrome) { // TODO find workaround for chrome
-      try {
-        stylesheet.insertRule(rule, stylesheet.cssRules.length);
-      } catch (e) {
-        throw e + ' ' + rule;
-      }
+      stylesheet.insertRule(rule, stylesheet.cssRules.length);
     }
   }
 
@@ -78,8 +74,11 @@ function style2css(stylesheet, stylesxmldom) {
   while (i) {
     var rule = createRule(i);
     if (rule) {
-//alert(rule);
-      stylesheet.insertRule(rule, stylesheet.cssRules.length);
+      try {
+        stylesheet.insertRule(rule, stylesheet.cssRules.length);
+      } catch (e) {
+        throw e + ' ' + rule;
+      }
     }
     i = iter.iterateNext();
   }
