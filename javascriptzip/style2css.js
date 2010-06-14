@@ -73,7 +73,7 @@ function style2css(stylesheet, stylesxmldom) {
   var i = iter.iterateNext();
   while (i) {
     var rule = createRule(i);
-    if (rule && rule.length > 0) {
+    if (rule) {
       try {
         stylesheet.insertRule(rule, stylesheet.cssRules.length);
       } catch (e) {
@@ -112,6 +112,9 @@ function style2css(stylesheet, stylesxmldom) {
     properties = style.getElementsByTagNameNS(stylens, 'paragraph-properties');
     if (properties.length > 0) {
       rule += getParagraphProperties(properties.item(0));
+    }
+    if (rule.length == 0) {
+      return null;
     }
     return selector + '{' + rule + '}';
   }
