@@ -66,6 +66,15 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'padding-right', 'padding-right' ],
     [ fons, 'padding-top', 'padding-top' ],
     [ fons, 'padding-bottom', 'padding-bottom' ],
+    [ fons, 'border-left', 'border-left' ],
+    [ fons, 'border-right', 'border-right' ],
+    [ fons, 'border-top', 'border-top' ],
+    [ fons, 'border-bottom', 'border-bottom' ],
+    [ fons, 'margin-left', 'margin-left' ],
+    [ fons, 'margin-right', 'margin-right' ],
+    [ fons, 'margin-top', 'margin-top' ],
+    [ fons, 'margin-bottom', 'margin-bottom' ],
+    [ fons, 'border', 'border' ],
   ];
 
   // make stylesheet empty
@@ -138,6 +147,18 @@ function style2css(stylesheet, stylesxmldom) {
     return selector + '{' + rule + '}';
   }
 
+  function applySimpleMapping(props, mapping) {
+    var rule = '';
+    for (var r in mapping) {
+      r = mapping[r];
+      var value = props.getAttributeNS(r[0], r[1]);
+      if (value) {
+        rule += r[2] + ':' + value + ';';
+      }
+    }
+    return rule;
+  }
+
   function getTextProperties(props) {
     var rule = '';
     rule += applySimpleMapping(props, textPropertySimpleMapping);
@@ -145,17 +166,6 @@ function style2css(stylesheet, stylesxmldom) {
     value = props.getAttributeNS(stylens, 'text-underline-style');
     if (value == 'solid') {
       rule += 'text-decoration: underline;';
-    }
-    return rule;
-  }
-
-  function applySimpleMapping(props, mapping) {
-    var rule = '';
-    for (var r in mapping) {
-      var value = props.getAttributeNS(r[0], r[1]);
-      if (value) {
-        rule += r[2] + ':' + value + ';';
-      }
     }
     return rule;
   }
