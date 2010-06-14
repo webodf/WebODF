@@ -58,6 +58,7 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'background-color', 'background-color' ],
     [ fons, 'font-weight', 'font-weight' ],
     [ fons, 'font-style', 'font-style' ],
+    [ fons, 'font-size', 'font-size' ]
   ];
 
   var paragraphPropertySimpleMapping = [
@@ -166,6 +167,13 @@ function style2css(stylesheet, stylesxmldom) {
     if (value == 'solid') {
       rule += 'text-decoration: underline;';
     }
+    value = props.getAttributeNS(stylens, 'font-name');
+    if (value) {
+      value = getFontDeclaration(value);
+      if (value) {
+        rule += 'font-family: ' + value + ';';
+      }
+    }
     return rule;
   }
 
@@ -173,6 +181,10 @@ function style2css(stylesheet, stylesxmldom) {
     var rule = '';
     rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
     return rule;
+  }
+
+  function getFontDeclaration(name) {
+    return '"'+name+'"';
   }
 
   // css vs odf styles
