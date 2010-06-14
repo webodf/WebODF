@@ -6,12 +6,15 @@ function style2css(stylesheet, stylesxmldom) {
   var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
   var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
   var fons="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0";
+  var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+  var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
   var namespaces = {
-    // TODO use actual prefixes used in the document
-    style: stylens,
+    draw: drawns,
+    fo: fons,
     office: officens,
+    style: stylens,
+    table: tablens,
     text: textns,
-    fo: fons
   };
 
   var familynamespaceprefixes = {
