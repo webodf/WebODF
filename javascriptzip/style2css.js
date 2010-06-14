@@ -81,18 +81,17 @@ function style2css(stylesheet, stylesxmldom) {
   while (stylesheet.cssRules.length) {
     stylesheet.deleteRule(stylesheet.cssRules.length-1);
   }
-
   var doc = stylesxmldom.ownerDocument;
-
   // add @namespace rules
-  var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
   for (var prefix in namespaces) {
     var rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
-    if (!is_chrome) { // TODO find workaround for chrome
+    try {
       stylesheet.insertRule(rule, stylesheet.cssRules.length);
+    } catch (e) {
+      // WebKit can throw an exception here, but it will have retained the
+      // namespace declarations anyway.
     }
   }
-
   var namespaceResolver = function(prefix) {
     return namespaces[prefix];
   }

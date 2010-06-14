@@ -5,7 +5,6 @@
 
 text|p, text|h {
   display: block;
-/*  border: 1px solid black; */
   padding: 3px 3px 3px 3px;
   margin: 5px 5px 5px 5px;
 }

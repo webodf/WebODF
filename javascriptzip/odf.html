@@ -2,10 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <style id='stylesxmlcss' type="text/css" media="screen">
-  </style>
-  <style id='contentxmlcss' type="text/css" media="screen">
-  </style>
   <style type="text/css" media="screen">
     body, html, div {
       padding: 0px;
@@ -15,6 +11,38 @@
     }
   </style>
   <link rel="stylesheet" type="text/css" href="defaultodfstyle.css"></link>
+  <style id='stylesxmlcss' type="text/css">
+/* define namespaces here, because in WebKit they cannot be added dynamically */
+@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
+@namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
+@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+@namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
+@namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
+@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
+  </style>
+  <style id='autostylesxmlcss' type="text/css">
+/* define namespaces here, because in WebKit they cannot be added dynamically */
+@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
+@namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
+@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+@namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
+@namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
+@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
+  </style>
+  <style id='contentxmlcss' type="text/css">
+/* define namespaces here, because in WebKit they cannot be added dynamically */
+@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
+@namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
+@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+@namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
+@namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
+@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
+  </style>
+  <!--
+  <link id="stylesxmlcss" rel="stylesheet" type="text/css" href="namespaces.css"></link>
+  <link id="autostylesxmlcss" rel="stylesheet" type="text/css" href="namespaces.css"></link>
+  <link id="contentxmlcss" rel="stylesheet" type="text/css" href="namespaces.css"></link>
+  -->
   <script src="zip.js" type="text/javascript" charset="utf-8"></script>
   <script src="base64.js" type="text/javascript" charset="utf-8"></script>
   <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
