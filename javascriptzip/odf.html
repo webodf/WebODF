@@ -2,6 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style id='stylesxmlcss' type="text/css" media="screen">
+  </style>
+  <style id='contentxmlcss' type="text/css" media="screen">
+  </style>
   <style type="text/css" media="screen">
     body, html, div {
       padding: 0px;
@@ -10,90 +14,16 @@
       background: #888888;
     }
   </style>
-  <style type="text/css" media="screen">
-    @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
-    @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
-    @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
-    @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
-    text|p, text|h {
-      display: block;
-      border: 1px solid black;
-      padding: 3px 3px 3px 3px;
-      margin: 5px 5px 5px 5px;
-    }
-    text|h {
-      font-weight: bold;
-    }
-    office|text {
-      display: block;
-      background: white;
-    }
-    office|spreadsheet {
-      display: block;
-      border-collapse: collapse;
-      empty-cells: show;
-      font-family: sans-serif;
-      font-size: 10pt;
-    }
-    office|presentation {
-      background: #888888;
-      display: inline-block;
-    }
-    draw|page {
-      display: block;
-      width: 6in;
-      height: 4in;
-      background: white;
-      margin: 3px;
-    }
-    office|spreadsheet text|p {
-      border: 0px;
-      padding: 1px;
-      margin: 0px;
-    }
-    office|spreadsheet table|table {
-      background: white;
-      margin: 3px;
-    }
-    office|spreadsheet table|table:after {
-      /* show sheet name the end of the sheet */
-      content: attr(table|name);
-    }
-    office|spreadsheet table|table-row {
-      counter-increment: row;
-    }
-    office|spreadsheet table|table-row:before {
-      width: 3em;
-      background: #cccccc;
-      border: 1px solid black;
-      text-align: center;
-      content: counter(row);
-    }
-    office|spreadsheet table|table-cell {
-      border: 1px solid #cccccc;
-    }
-    table|table {
-      display: table;
-      border: 1px solid black;
-    }
-    table|table-row {
-      display: table-row;
-    }
-    table|table-column {
-      display: table-column;
-    }
-    table|table-cell {
-      display: table-cell;
-    }
-    text|p[text|style-name='list.start'] {
-      color: red;
-    }
-  </style>
+  <link rel="stylesheet" type="text/css" href="defaultodfstyle.css"></link>
   <script src="zip.js" type="text/javascript" charset="utf-8"></script>
   <script src="base64.js" type="text/javascript" charset="utf-8"></script>
   <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
   <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
+  <script src="style2css.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
+
+var xhtmlns = "http://www.w3.org/1999/xhtml";
+
 function init() {
   var location = new String(document.location);
   var pos = location.indexOf('#');
@@ -107,14 +37,14 @@ function init() {
     document.body.innerHTML = e;
   }
 }
-function clear() {
-  while (document.body.firstChild) {
-    document.body.removeChild(document.body.firstChild);
+function clear(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
   }
 }
 
 function loadFile(url) {
-  clear();
+  clear(document.body);
 
   var ziplist = document.body;
   document.body.innerHTML = 'Loading...';
@@ -129,17 +59,75 @@ function loadFile(url) {
   if (!xmldata || xmldata.length == 0) {
     throw "Cannot read content.xml";
   }
-  var contentxml = document.createElement('div');
-  contentxml.id = 'contentxml';
   var parser = new DOMParser();
-  var content = parser.parseFromString(xmldata, 'text/xml');
-  if (content && content.firstChild) {
-    content = document.importNode(content.firstChild, true);
-    contentxml.appendChild(content);
-  }
-  clear();
-  document.body.appendChild(contentxml);
+  var contentxml = parser.parseFromString(xmldata, 'text/xml');
+
+  clear(document.body);
+  handleContentXmlLoaded(contentxml);
+
+  xmldata = zip.load('styles.xml');
+  var stylesxml = parser.parseFromString(xmldata, 'text/xml');
+  handleStylesXmlLoaded(stylesxml);
 }
+
+var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+
+/**
+ * A new content.xml has been loaded. Update the live document with it.
+ **/
+function handleContentXmlLoaded(contentxml) {
+  // replace content.xml in the live document
+  var contentcontainer = document.getElementById('contentxml');
+  if (!contentcontainer) {
+      contentcontainer = document.createElementNS(xhtmlns, "div");
+      document.body.appendChild(contentcontainer);
+  }
+  clear(contentcontainer);
+  if (contentxml && contentxml.firstChild) {
+    contentxml = document.importNode(contentxml.firstChild, true);
+    contentcontainer.appendChild(contentxml);
+  }
+  var contentxmlcss = document.getElementById('contentxmlcss');
+  var automaticstyles = contentxml.getElementsByTagNameNS(officens, 'automatic-styles');
+  if (automaticstyles.length > 0) {
+    automaticstyles = automaticstyles.item(0);
+    try {
+      style2css(contentxmlcss.sheet, automaticstyles);
+    } catch (e) {
+      alert(e);
+    }
+  }
+}
+/**
+ * A new styles.xml has been loaded. Update the live document with it.
+ **/
+function handleStylesXmlLoaded(stylesxml) {
+  // replace styles.xml in the live document
+  var stylescontainer = document.getElementById('stylesxml');
+  if (!stylescontainer) {
+      stylescontainer = document.createElementNS(xhtmlns, "div");
+      document.body.appendChild(stylescontainer);
+  }
+  clear(stylescontainer);
+  if (stylesxml && stylesxml.firstChild) {
+    stylesxml = document.importNode(stylesxml.firstChild, true);
+    stylescontainer.appendChild(stylesxml);
+  }
+
+  // update the css translation of the styles
+  stylesxml = stylesxml.getElementsByTagNameNS(officens, 'styles');
+  if (stylesxml.length < 1) {
+    return;
+  }
+  stylesxml = stylesxml.item(0);
+  var stylesxmlcss = document.getElementById('stylesxmlcss');
+  try {
+    style2css(stylesxmlcss.sheet, stylesxml);
+  } catch (e) {
+    alert(e);
+  }
+}
+
   </script>
  
   <title></title>
