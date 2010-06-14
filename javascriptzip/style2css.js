@@ -73,7 +73,7 @@ function style2css(stylesheet, stylesxmldom) {
   var i = iter.iterateNext();
   while (i) {
     var rule = createRule(i);
-    if (rule) {
+    if (rule && rule.length > 0) {
       try {
         stylesheet.insertRule(rule, stylesheet.cssRules.length);
       } catch (e) {
