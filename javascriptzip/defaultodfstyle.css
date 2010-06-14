@@ -3,6 +3,9 @@
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 
+office|document-styles {
+  display: none;
+}
 text|p, text|h {
   display: block;
   padding: 3px 3px 3px 3px;
