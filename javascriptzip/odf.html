@@ -38,11 +38,11 @@
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
   </style>
-  <!--
-  <link id="stylesxmlcss" rel="stylesheet" type="text/css" href="namespaces.css"></link>
-  <link id="autostylesxmlcss" rel="stylesheet" type="text/css" href="namespaces.css"></link>
-  <link id="contentxmlcss" rel="stylesheet" type="text/css" href="namespaces.css"></link>
-  -->
+  <style id='positioncss' type="text/css">
+/* define namespaces here, because in WebKit they cannot be added dynamically */
+@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
+@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
+  </style>
   <script src="zip.js" type="text/javascript" charset="utf-8"></script>
   <script src="base64.js" type="text/javascript" charset="utf-8"></script>
   <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
@@ -125,6 +125,10 @@ function handleContentXmlLoaded(contentxml) {
       alert(e);
     }
   }
+
+  // experiment
+  var positioncss = document.getElementById('positioncss');
+  modifyImages(contentxml, positioncss.sheet);
 }
 /**
  * A new styles.xml has been loaded. Update the live document with it.
@@ -154,6 +158,37 @@ function handleStylesXmlLoaded(stylesxml) {
   } catch (e) {
     alert(e);
   }
+}
+  var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+  var svgns="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+
+function modifyImages(contentxml, stylesheet) {
+  var namespaces = {
+    draw: drawns,
+    svg: svgns
+  };
+  var namespaceResolver = function(prefix) {
+    return namespaces[prefix];
+  }
+  var doc = contentxml.ownerDocument;
+  var frames = contentxml.getElementsByTagNameNS(drawns, 'frame');
+  for (var i=0; i<frames.length; ++i) {
+    setFramePosition(i, frames.item(i), stylesheet);
+  }
+}
+function setFramePosition(id, frame, stylesheet) {
+  frame.setAttribute('styleid', id);
+  var rule = 'position: relative;';
+  var x = frame.getAttributeNS(svgns, 'x');
+  if (x) { rule += 'top: ' + x + ';'; }
+  var y = frame.getAttributeNS(svgns, 'x');
+  if (y) { rule += 'left: ' + y + ';'; }
+  var width = frame.getAttributeNS(svgns, 'width');
+  if (width) { rule += 'width: ' + width + ';'; }
+  var height = frame.getAttributeNS(svgns, 'height');
+  if (height) { rule += 'height: ' + height + ';' }
+  rule = 'draw|frame[styleid="' + id + '"] {' + rule + '}';
+  stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
 
   </script>

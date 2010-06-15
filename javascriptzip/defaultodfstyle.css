@@ -6,6 +6,10 @@
 office|document-styles {
   display: none;
 }
+office|automatic-styles {
+  display: none;
+}
+
 text|p, text|h {
   display: block;
   padding: 3px 3px 3px 3px;
@@ -42,8 +46,8 @@ office|presentation {
 }
 draw|page {
   display: block;
-  width: 6in;
-  height: 4in;
+  height: 19.05cm;
+  width: 25.4cm;
   background: white;
   margin: 3px;
 }
@@ -86,6 +90,9 @@ table|table-column {
 table|table-cell {
   display: table-cell;
 }
-text|p[text|style-name='list.start'] {
-  color: red;
+draw|frame {
+  display: block;
+}
+draw|image {
+  display: block;
 }
