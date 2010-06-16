@@ -68,8 +68,12 @@ RemoteFileReader.prototype.getFileRange = function(url, offset, size, callback){
   if (remotefile) {
     var data = remotefile.get(offset, size);
     if (data) {
-      callback(data);
-      return;
+      if (callback) {
+        callback(data);
+        return null;
+      } else {
+        return data;
+      }
     }
   } else {
     remotefile = new RemoteFile(url);
@@ -95,14 +99,14 @@ RemoteFileReader.prototype.callback = function() {
     return d;
   }
   function cleanData(data) {
-    return String.fromCharCode(cleanDataToArray(data));
+    return String.fromCharCode.apply(String, cleanDataToArray(data));
   }
 
   if (this.req.readyState != 4) return null;
   var data = null;
   var job = this.currentJob;
   this.currentJob = null;
-  if (this.req.status == 200) {
+  if (this.req.status == 206 || this.req.status == 200) {
     // get the file size
     var totallen = this.getFileLengthFromResponseHeader();
     if (totallen >= 0) {
@@ -127,9 +131,9 @@ RemoteFileReader.prototype.getFileLengthFromResponseHeader = function() {
     var range = this.req.getResponseHeader('Content-Range');
     var length = -1;
     if (range && range.lastIndexOf('/') != -1) {
-      length = parseInt(range.substr(totallen.lastIndexOf('/')+1));
+      length = parseInt(range.substr(range.lastIndexOf('/')+1));
     }
-    return (isNan(length)) ?-1 :length;
+    return (isNaN(length)) ?-1 :length;
 }
 RemoteFileReader.prototype.doNextRequest = function() {
   this.currentJob = this.queue.shift();
@@ -144,8 +148,9 @@ RemoteFileReader.prototype.doNextRequest = function() {
   range = 'bytes=' + range.offset + '-' + (range.offset + range.size);
   this.req.setRequestHeader('Range', range);
   if (hascallback) {
+    var reader = this;
     this.req.onreadystatechange = function(evt) {
-      this.callback(job);
+      reader.callback(job);
     };
   } else {
     this.req.onreadystatechange = null;
@@ -158,6 +163,74 @@ RemoteFileReader.prototype.doNextRequest = function() {
 }
 var remotefilereader = new RemoteFileReader();
 
+ZipEntry = function(stream) {
+  var sig = stream.readUInt32LE();
+  if (sig != 0x02014b50) {
+    throw new Error('Central directory entry has wrong signature at position '
+      + (stream.pos - 4) + '.' + sig);
+  }
+  // stream should be positioned at the start of the CDS entry for the file
+  stream.pos += 6;
+  this.compressionMethod = stream.readUInt16LE();
+  stream.pos += 8;
+  this.compressedSize = stream.readUInt32LE();
+  this.uncompressedSize = stream.readUInt32LE();
+  var namelen = stream.readUInt16();
+  var extralen = stream.readUInt16();
+  var commentlen = stream.readUInt16();
+  stream.pos += 8;
+  this.offset = stream.readUInt32LE();
+  this.filename = stream.data.substr(stream.pos, namelen);
+  stream.pos += namelen + extralen + commentlen;
+}
+ZipEntry.prototype.load = function(url, offset, size, callback) {
+  // if data has already been downloaded, use that
+  if (this.data) {
+    if (callback) {
+      callback(this.data);
+      return;
+    } else {
+      return this.data;
+    }
+  }
+
+  var f = null;
+  if (callback) {
+    var entry = this;
+    f = function(data) {
+      entry.handleEntryData(data, callback);
+    };
+  }
+  var data = remotefilereader.getFileRange(url, offset, size, f);
+  if (callback) {
+    return null;
+  }
+  return this.handleEntryData(data);
+}
+ZipEntry.prototype.handleEntryData = function(data, callback) {
+  var stream = new a3d.ByteArray(data);
+  var sig = stream.readUInt32LE();
+  if (sig != 0x04034b50) {
+    throw new Error('File entry signature is wrong.' + sig + ' ' + data.length);
+  }
+  stream.pos += 22;
+  var filenamelen = stream.readUInt16LE();
+  var extralen = stream.readUInt16LE();
+  stream.pos += filenamelen + extralen;
+  var datasize = (this.compressionMethod)
+      ? this.compressedSize : this.uncompressedSize;
+  if (this.compressionMethod) {
+    this.data = stream.data.substr(stream.pos, this.compressedSize);
+    this.data = RawDeflate.inflate(this.data);
+  } else {
+    this.data = stream.data.substr(stream.pos, this.uncompressedSize);
+  }
+  if (callback) {
+    callback(this.data);
+    return null;
+  }
+  return this.data;
+}
 function Zip(url, entriesReadCallback) {
   this.url = url;
   // determine the file size
@@ -177,29 +250,93 @@ function Zip(url, entriesReadCallback) {
   this.readCentralDirectoryEnd();
 }
 Zip.prototype.readCentralDirectoryEnd = function(callback) {
-}
-
-/*
-  get_file_range(url, 0, 1024, sizeKnownCallback);
-
-  function get_file_range(url, offset, size, callback) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, callback);
-    req.overrideMimeType('text/plain; charset=x-user-defined');
-    var range = 'bytes='+offset+'-'+(offset+size);
-    req.setRequestHeader('Range', range);
-    if (callback) {
-      req.onreadystatechange = function(evt) {
-        if (req.readyState != 4) return;
-      };
-    }
-    req.send(null);
-    var data = req.responseText;
-    if (size > data.length) {
-      throw new Error('Got ' + data.length + ' bytes instead of ' + size + '.');
-    } else if (size < data.length) {
-      data = data.substr(0, size);
-    }
-    return data;
+  if (this.filesize <= 0) {
+    throw "File must be non-zero size, but has size " + this.filesize + '.';
   }
-*/
+  var f = null;
+  if (callback) {
+    var zip = this;
+    f = function(data) {
+      zip.handleCentralDirectoryEnd(data, callback);
+    };
+  }
+  var end = remotefilereader.getFileRange(this.url, this.filesize-22, 22, f);
+  if (callback) {
+    return;
+  }
+  this.handleCentralDirectoryEnd(end);
+}
+Zip.prototype.handleCentralDirectoryEnd = function(data, callback) {
+  if (data.length != 22) {
+    throw "Central directory length should be 22.";
+  }
+  var stream = new a3d.ByteArray(data);
+  var sig = stream.readUInt32LE();
+  if (sig != 0x06054b50) {
+    throw new Error('Central directory signature is wrong.');
+  }
+  var disk = stream.readUInt16LE();
+  if (disk != 0) {
+    throw new Error('Zip files with non-zero disk numbers are not supported.');
+  }
+  var cddisk = stream.readUInt16LE();
+  if (cddisk != 0) {
+    throw new Error('Zip files with non-zero disk numbers are not supported.');
+  }
+  var diskNEntries = stream.readUInt16LE();
+  this.nEntries = stream.readUInt16LE();
+  if (diskNEntries != this.nEntries) {
+    throw new Error('Number of entries is inconsistent.');
+  }
+  var cdsSize = stream.readUInt32LE();
+  var cdsOffset = stream.readUInt16LE();
+  this.cdsOffset = this.filesize - 22 - cdsSize;
+
+  // for some reason cdsOffset is not always equal to offset calculated from the
+  // central directory size. The latter is reliable.
+  var f = null;
+  if (callback) {
+    var zip = this;
+    f = function(data) {
+      zip.handleCentralDirectory(data, callback);
+    };
+  }
+  var cd = remotefilereader.getFileRange(this.url, this.cdsOffset,
+      this.filesize - this.cdsOffset, f);
+  if (callback) {
+    return;
+  }
+  this.handleCentralDirectory(cd);
+}
+Zip.prototype.handleCentralDirectory = function(data, callback) {
+  // parse the central directory
+  var stream = new a3d.ByteArray(data);
+  this.entries = [];
+  for (var i=0; i<this.nEntries; ++i) {
+    this.entries[this.entries.length] = new ZipEntry(stream);
+  }
+  if (callback) {
+    callback(this);
+  }
+}
+Zip.prototype.load = function(filename, callback) {
+  var entry = null;
+  var end = this.filesize;
+  for (var i in this.entries) {
+    i = this.entries[i];
+    if (entry) {
+      end = i.offset;
+      break;
+    }
+    if (i.filename == filename) {
+      entry = i;
+    }
+  }
+  if (entry) {
+    return entry.load(this.url, entry.offset, end-entry.offset, callback);
+  }
+  if (callback) {
+    callback(null);
+  }
+  return null;
+}
