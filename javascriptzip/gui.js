@@ -86,11 +86,7 @@ Ext.onReady(function(){
       if (typeof f == 'string') {
         var parentNode = getParentNode(root, f);
         var qtip = f;
-        var thumbdataurl = getThumbUrl(f);
-        if (thumbdataurl) {
-          qtip += '<img src="' + thumbdataurl + '"/>';
-        }
-        parentNode.appendChild({
+        var node = parentNode.appendChild({
           id: f,
           qtip: qtip,
           text: f.substr(f.lastIndexOf('/')+1),
@@ -101,6 +97,7 @@ Ext.onReady(function(){
             click: function(node) { loadODF(node.id, tabpanel, node.text); }
           }
         });
+        addThumbnail(node);
       }
     }
   }
@@ -108,23 +105,19 @@ Ext.onReady(function(){
   }
 
   // put data in the tree
-  listFiles('kofficetests/', /\.od[tps]$/i, listFilesCallback,
+  listFiles('./kofficetests/', /\.od[tps]$/i, listFilesCallback,
     listFilesDoneCallback);
 });
 
-function getThumbUrl(url) {
-  // return null;
-  var data;
-  try {
-    var zip = new Zip(url);
-    data = zip.load('Thumbnails/thumbnail.png');
-  } catch (e) {
-    return null;
-  }
-  if (data) {
-      return 'data:;base64,' + Base64.toBase64(data); // window.atob(data)
-  }
-  return null;
+function addThumbnail(node) {
+  var url = node.id;
+  var zip = new Zip(url, function(zip) {
+    zip.load('Thumbnails/thumbnail.png', function(data) {
+      if (data == null) return;
+      var url = 'data:;base64,' + Base64.toBase64(data);
+      node.attributes.qtip += '<img src="' + url + '"/>';
+    });
+  });
 }
 
 function loadODF(url, panel, title) {

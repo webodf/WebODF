@@ -125,6 +125,9 @@ RemoteFileReader.prototype.callback = function() {
   if (job.callback) {
     job.callback(data);
   }
+  if (this.queue.length && !this.busy()) {
+    this.doNextRequest();
+  }
   return data;
 }
 RemoteFileReader.prototype.getFileLengthFromResponseHeader = function() {
@@ -240,7 +243,7 @@ function Zip(url, entriesReadCallback) {
     var zip = this;
     callback = function(size) {
       zip.filesize = size;
-      zip.readCentralDirectoryEnd(entriesReadCallback); 
+      zip.readCentralDirectoryEnd(entriesReadCallback);
     }
   }
   this.filesize = remotefilereader.getFileSize(url, callback);
@@ -251,7 +254,7 @@ function Zip(url, entriesReadCallback) {
 }
 Zip.prototype.readCentralDirectoryEnd = function(callback) {
   if (this.filesize <= 0) {
-    throw "File must be non-zero size, but has size " + this.filesize + '.';
+    throw "File '" + this.url + "' must be non-zero size, but has size " + this.filesize + '.';
   }
   var f = null;
   if (callback) {
