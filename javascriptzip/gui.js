@@ -113,7 +113,7 @@ Ext.onReady(function(){
 });
 
 function getThumbUrl(url) {
-  return null;
+  // return null;
   var data;
   try {
     var zip = new jsodfkit.Zip(url);
@@ -122,7 +122,7 @@ function getThumbUrl(url) {
     return null;
   }
   if (data) {
-      return 'data:;base64,' + Base64.toBase64(data);
+      return 'data:;base64,' + Base64.toBase64(data); // window.atob(data)
   }
   return null;
 }

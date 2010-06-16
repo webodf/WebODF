@@ -1,4 +1,5 @@
 var fileList = [
+'kofficetests/odf/134010.ods',
 '../../../odfkit/odfkit/odfkit/LayoutTests/fast/odf/script-tests/hello-odf-2.odt',
 '../../../odfkit/odfkit/odfkit/LayoutTests/fast/odf/script-tests/hello-odf-1.odt',
 '../../../odfkit/odfkit/odfkit/LayoutTests/platform/mac/fast/loader/resources/mimeTypeExamples/example-ods.ods',
