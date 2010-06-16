@@ -116,7 +116,7 @@ function getThumbUrl(url) {
   // return null;
   var data;
   try {
-    var zip = new jsodfkit.Zip(url);
+    var zip = new Zip(url);
     data = zip.load('Thumbnails/thumbnail.png');
   } catch (e) {
     return null;

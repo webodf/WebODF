@@ -4,12 +4,9 @@
   <title>JavaScriptZip demo</title>
   <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
   <script src="zip.js" type="text/javascript" charset="utf-8"></script>
-  <script src="base64.js" type="text/javascript" charset="utf-8"></script>
   <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
   <script src="filelist.js" type="text/javascript" charset="utf-8"></script>
-  <style type="text/css" media="screen">
-    div { display: inline-block; }
-  </style>
+  <script src="base64.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
 
     function showFile(e) {
@@ -20,18 +17,22 @@
       preview.innerHTML = '';
       var zip;
       try {
-        zip = new jsodfkit.Zip(e.target);
+        zip = new Zip(e.target, handleLoadedZip);
       } catch (e) {
         ziplist.innerHTML = e;
+        throw e;
         return false;
       }
+      return false;
+    }
+    function handleLoadedZip(zip) {
+      var ziplist = document.getElementById('ziplist');
       for (var i in zip.entries) {
         if (zip.entries[i].uncompressedSize > 0) {
           ziplist.appendChild(createZipEntry(zip, i));
           ziplist.appendChild(document.createElement('br'));
         }
       }
-      return false;
     }
 
     function createImageElement(data) {
@@ -40,22 +41,25 @@
       return img;
     }
 
+    function handleEntryData(name, data) {
+      var preview = document.getElementById('preview');
+      var ext = name.substr(name.length-4);
+      if (ext == '.png' || ext == '.jpg' || ext == '.svg') {
+        preview.appendChild(createImageElement(data));
+      } else {
+        preview.innerHTML = data;
+      }
+    }
+
     function showEntry(e) {
       e.stopPropagation();
       var preview = document.getElementById('preview');
-      preview.innerHTML = '';
-      try {
-        var data = e.target.zipentry.load(e.target.zip.uri);
-        var name = e.target.zipentry.filename;
-        var ext = name.substr(name.length-4);
-        if (ext == '.png' || ext == '.jpg' || ext == '.svg') {
-          preview.appendChild(createImageElement(data));
-        } else {
-          preview.innerHTML = data;
-        }
-      } catch (e) {
-        preview.innerHTML = e;
-      }
+      preview.innerHTML = 'loading...';
+
+      var name = e.target.zipentry.filename;
+      e.target.zip.load(e.target.zipentry.filename, function(data) {
+        handleEntryData(name, data);
+      });
       return false;
     }
 
@@ -84,6 +88,8 @@
         body.appendChild(createFileLink(fileList[f]));
         body.appendChild(document.createElement('br'));
       }
+      // emulate click event to simplify debugging
+      showFile({target:'kofficetests/odf/134010.ods', stopPropagation:function(){}});
     }
   </script>
 </head>

@@ -78,7 +78,7 @@ function loadFile(url) {
   document.body.innerHTML = 'Loading...';
   var zip;
   try {
-    zip = new jsodfkit.Zip(url);
+    zip = new Zip(url);
   } catch (e) {
     ziplist.innerHTML = e;
     return;
