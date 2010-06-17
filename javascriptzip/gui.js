@@ -70,7 +70,10 @@ Ext.onReady(function(){
           cls: 'folder',
           editable: false,
           nodeType: 'node',
-          singleClickExpand: true
+          singleClickExpand: true,
+          listeners: {
+            beforechildrenrendered: loadThumbnails
+          }
         };
         n = node.appendChild(n);
       }
@@ -97,11 +100,20 @@ Ext.onReady(function(){
             click: function(node) { loadODF(node.id, tabpanel, node.text); }
           }
         });
-        addThumbnail(node);
+//        addThumbnail(node);
       }
     }
   }
   function listFilesDoneCallback() {
+  }
+
+  function loadThumbnails(node) {
+    for (var n in node.childNodes) {
+      n = node.childNodes[n];
+      if (n.leaf) {
+        addThumbnail(n);
+      }
+    }
   }
 
   // put data in the tree
@@ -115,7 +127,16 @@ function addThumbnail(node) {
     zip.load('Thumbnails/thumbnail.png', function(data) {
       if (data == null) return;
       var url = 'data:;base64,' + Base64.toBase64(data);
-      node.attributes.qtip += '<img src="' + url + '"/>';
+      node.attributes.qtip += '<br/><img src="' + url + '"/>';
+      var el = node.getUI().getEl();
+      var spans = el.getElementsByTagName('span');
+      for (var i = 0; i < spans.length; i++) {
+        var s = spans.item(i);
+        if (s.getAttribute('qtip')) {
+          s.setAttribute('qtip', node.attributes.qtip);
+        }
+      }
+      return;
     });
   });
 }

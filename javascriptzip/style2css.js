@@ -78,6 +78,14 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'border', 'border' ],
   ];
 
+  var tablecellPropertySimpleMapping = [
+    [ fons, 'background-color', 'background-color' ],
+    [ fons, 'border-left', 'border-left' ],
+    [ fons, 'border-right', 'border-right' ],
+    [ fons, 'border-top', 'border-top' ],
+    [ fons, 'border-bottom', 'border-bottom' ],
+  ];
+
   // make stylesheet empty
   while (stylesheet.cssRules.length) {
     stylesheet.deleteRule(stylesheet.cssRules.length-1);
@@ -141,6 +149,10 @@ function style2css(stylesheet, stylesxmldom) {
     if (properties.length > 0) {
       rule += getParagraphProperties(properties.item(0));
     }
+    properties = style.getElementsByTagNameNS(stylens, 'table-cell-properties');
+    if (properties.length > 0) {
+      rule += getTableCellProperties(properties.item(0));
+    }
     if (rule.length == 0) {
       return null;
     }
@@ -180,6 +192,12 @@ function style2css(stylesheet, stylesxmldom) {
   function getParagraphProperties(props) {
     var rule = '';
     rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
+    return rule;
+  }
+
+  function getTableCellProperties(props) {
+    var rule = '';
+    rule += applySimpleMapping(props, tablecellPropertySimpleMapping);
     return rule;
   }
 

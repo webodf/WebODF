@@ -19,6 +19,9 @@ function RemoteFile(url) {
 RemoteFile.prototype.get = function(offset, size) {
   for (var f in this.fragments) {
     f = this.fragments[f];
+    if (f.offset == offset && f.data.length == size) {
+      return f.data;
+    }
     if (f.offset <= offset && offset + size <= f.offset + f.data.length) {
       return f.data.slice(offset-f.offset, size);
     }
@@ -107,6 +110,10 @@ RemoteFileReader.prototype.callback = function() {
   var job = this.currentJob;
   this.currentJob = null;
   if (this.req.status == 206 || this.req.status == 200) {
+    var sum = 0;
+    for (var i in this.req.responseText) {
+      sum += this.req.responseText.charCodeAt(i) & 0xff;
+    }
     // get the file size
     var totallen = this.getFileLengthFromResponseHeader();
     if (totallen >= 0) {
@@ -138,6 +145,7 @@ RemoteFileReader.prototype.getFileLengthFromResponseHeader = function() {
     }
     return (isNaN(length)) ?-1 :length;
 }
+var httpreqcount = 0;
 RemoteFileReader.prototype.doNextRequest = function() {
   this.currentJob = this.queue.shift();
   if (!this.currentJob) {
@@ -146,9 +154,12 @@ RemoteFileReader.prototype.doNextRequest = function() {
   var job = this.currentJob;
   var range = job.remotefile.getOptimalRange(job.offset, job.size);
   var hascallback = job.callback != null;
+  document.title = ++httpreqcount;
   this.req.open('GET', job.remotefile.url, hascallback);
-  this.req.overrideMimeType('text/plain; charset=x-user-defined');
-  range = 'bytes=' + range.offset + '-' + (range.offset + range.size);
+  if (navigator.userAgent.indexOf("MSIE") == -1) {
+    this.req.overrideMimeType('text/plain; charset=x-user-defined');
+  }
+  range = 'bytes=' + range.offset + '-' + (range.offset + range.size - 1);
   this.req.setRequestHeader('Range', range);
   if (hascallback) {
     var reader = this;
@@ -166,11 +177,11 @@ RemoteFileReader.prototype.doNextRequest = function() {
 }
 var remotefilereader = new RemoteFileReader();
 
-ZipEntry = function(stream) {
+ZipEntry = function(url, stream) {
   var sig = stream.readUInt32LE();
   if (sig != 0x02014b50) {
     throw new Error('Central directory entry has wrong signature at position '
-      + (stream.pos - 4) + '.' + sig);
+      + (stream.pos - 4) + ' for file "' + url + '": '+stream.data.length);
   }
   // stream should be positioned at the start of the CDS entry for the file
   stream.pos += 6;
@@ -316,7 +327,7 @@ Zip.prototype.handleCentralDirectory = function(data, callback) {
   var stream = new a3d.ByteArray(data);
   this.entries = [];
   for (var i=0; i<this.nEntries; ++i) {
-    this.entries[this.entries.length] = new ZipEntry(stream);
+    this.entries[this.entries.length] = new ZipEntry(this.url, stream);
   }
   if (callback) {
     callback(this);

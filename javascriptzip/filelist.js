@@ -27,5 +27,8 @@ var fileList = [
 '../../../ictu/ictu/odfquality/ah-tk-20092010-2140/ah-tk-20092010-2140.odt',
 '../../../ictu/ictu/odfquality/kv-tk-2010Z06142/kv-tk-2010Z06142.odt',
 '../../../ictu/ictu/odfquality/stb-2010-161/stb-2010-161.odt',
-'./kofficetests/odf/charts/Areacharts.odp'
+'kofficetests/odf/charts/Areacharts.odp',
+'kofficetests/odf/xenophon.odt',
+'kofficetests/odf/134010.ods',
+'kofficetests/interoperability/kword/oowriter/oow_pic_flip_vertical.odt'
 ];

@@ -62,7 +62,7 @@ office|spreadsheet table|table {
 }
 office|spreadsheet table|table:after {
   /* show sheet name the end of the sheet */
-  content: attr(table|name);
+  /*content: attr(table|name);*/ /* gives parsing error in opera */
 }
 office|spreadsheet table|table-row {
   counter-increment: row;
