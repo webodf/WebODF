@@ -6,9 +6,9 @@ Ext.onReady(function(){
 
   var slider = new Ext.Slider({
     width: 300,
-    minValue: 0.1,
-    maxValue: 10,
-    values: [1],
+    minValue: -5,
+    maxValue: 5,
+    values: [0],
     listeners: { change: { fn: setZoom } }
   });
 
@@ -16,6 +16,7 @@ Ext.onReady(function(){
     var tab = tabpanel.getActiveTab();
     if (!tab) return;
     var body = tab.el.dom.contentDocument.body;
+    zoomlevel = Math.pow(10, zoomlevel/10.0);
     body.style.zoom = zoomlevel;
     body.style.MozTransform = 'scale('+zoomlevel+')';
   }
