@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle(tr("MDI"));
     setUnifiedTitleAndToolBarOnMac(true);
+
+    OdfView *child = createOdfView();
+    if (child->loadFile("../kofficetests/odf/DanskTest01.odt")) {
+        child->showMaximized();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -46,7 +51,7 @@ void MainWindow::open()
         OdfView *child = createOdfView();
         if (child->loadFile(fileName)) {
             statusBar()->showMessage(tr("File loaded"), 2000);
-            child->show();
+            child->showMaximized();
         } else {
             child->close();
         }

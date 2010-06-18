@@ -9,10 +9,14 @@ QT += network \
     xmlpatterns \
     testlib
 TARGET = nativeQtClient
+INCLUDEPATH+=/usr/include/minizip
+LIBS+=-lquazip
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
-    odfview.cpp
+    odfview.cpp \
+    odfcontainer.cpp
 HEADERS += mainwindow.h \
-    odfview.h
+    odfview.h \
+    odfcontainer.h
 FORMS += mainwindow.ui
