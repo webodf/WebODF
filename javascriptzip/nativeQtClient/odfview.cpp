@@ -1,6 +1,7 @@
 #include "odfview.h"
 #include <QtCore/QByteArray>
 #include <QtWebKit/QWebFrame>
+#include <QtWebKit/QWebInspector>
 #include "odfcontainer.h"
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
@@ -13,27 +14,36 @@ class OdfView::OdfNetworkAccessManager : public QNetworkAccessManager {
 private:
     class DummyNetworkReply : public QNetworkReply {
     public:
-        DummyNetworkReply(QObject* parent) :QNetworkReply(parent) {}
+        DummyNetworkReply(QNetworkAccessManager* parent) :QNetworkReply(parent) {
+        }
     private:
-        void abort() {}
-        qint64 readData(char*, qint64) { return -1; }
+        void abort() {
+            qDebug() << "abort called";
+        }
+        qint64 readData(char*, qint64) {
+            qDebug()<<"read...";return -1;
+            setError(QNetworkReply::ContentAccessDenied, tr("Access denied."));
+        }
     };
     QDir dir;
     QDir odfdir;
     QStringList allowedFiles;
 public:
     OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
-        allowedFiles << "qtodf.html" << "style2css.js" << "defaultodfstyle.css";
+        allowedFiles << "odf.html" << "style2css.js" << "defaultodfstyle.css";
     }
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
-        if (op != GetOperation) return 0;
+        QNetworkRequest r(req);
         QFileInfo fileinfo = req.url().toLocalFile();
-        if (allowedFiles.contains(fileinfo.fileName()) && fileinfo.dir() == dir) {
-            return QNetworkAccessManager::createRequest(op, req, data);
+        if (op != GetOperation
+                || !allowedFiles.contains(fileinfo.fileName())
+                || fileinfo.dir() != dir) {
+            // changing the url seems to be the only easy way to deny
+            // requests
+            r.setUrl(QUrl("error:not-allowed"));
         }
-        qDebug() << "not loading " << req.url();
-        return new DummyNetworkReply(this);
+        return QNetworkAccessManager::createRequest(op, r, data);
     }
 };
 
@@ -52,6 +62,10 @@ OdfView::OdfView()
     odfcontainer = 0;
     setPage(new OdfPage(this));
     connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(slotLoadFinished(bool)));
+    page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+
+    //QWebInspector *inspector = new QWebInspector(this);
+    //inspector->setPage(page());
 
     // use our own networkaccessmanager that gives limited access to the local
     // file system
@@ -59,7 +73,7 @@ OdfView::OdfView()
     page()->setNetworkAccessManager(networkaccessmanager);
 
     // for now, we simply point to the file, we want to read
-    setUrl(QUrl("../qtodf.html"));
+    setUrl(QUrl("../odf.html"));
     loaded = false;
 }
 
@@ -80,8 +94,7 @@ OdfView::slotLoadFinished(bool ok) {
     if (!ok) return;
     QWebFrame *frame = page()->mainFrame();
     frame->addToJavaScriptWindowObject("odf", odfcontainer);
-    QVariant output = frame->evaluateJavaScript("refreshOdf();");
-    qDebug() << output;
+    frame->evaluateJavaScript("refreshOdf();");
 }
 
 #include "moc_odfview.cpp"

@@ -43,21 +43,45 @@
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
   </style>
+  <!--
   <script src="zip.js" type="text/javascript" charset="utf-8"></script>
   <script src="base64.js" type="text/javascript" charset="utf-8"></script>
   <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
   <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
+  -->
   <script src="style2css.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
 
 var xhtmlns = "http://www.w3.org/1999/xhtml";
 
+var dynamicOdfJavascript = null;
+
+function loadJavascript() {
+  var req = new XMLHttpRequest();
+  var js = "";
+  var jsfiles = ['base64.js', 'bytearray.js', 'rawinflate.js', 'zip.js'];
+  for (var i in jsfiles) {
+    req.open('GET', jsfiles[i], null);
+    req.send(null);
+    js += req.responseText;
+    alert(req.responseText);
+  }
+  if (js.length ) {
+    dynamicOdfJavascript = js;
+  }
+}
+
 function init() {
+  // try to load the javascript required when no native ODF support is available
+  loadJavascript();
+
+  // if the url has a fragment (#...), try to load the file it represents
   var location = new String(document.location);
   var pos = location.indexOf('#');
-  if (pos != -1) {
-    location = location.substr(pos+1);
+  if (pos == -1) {
+    return;
   }
+  location = location.substr(pos+1);
   document.body.innerHTML = location;
   try {
     loadFile(location);
@@ -78,7 +102,7 @@ function loadFile(url) {
   document.body.innerHTML = 'Loading...';
   var zip;
   try {
-    zip = new Zip(url);
+    zip = eval(dynamicOdfJavascript + '; new Zip("' + url + '");');
   } catch (e) {
     ziplist.innerHTML = e;
     return;
@@ -190,7 +214,14 @@ function setFramePosition(id, frame, stylesheet) {
   rule = 'draw|frame[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
-
+function refreshOdf() {
+  var parser = new DOMParser();
+  var contentxml = window.odf.getContentXml();
+  var doc = parser.parseFromString(contentxml, "text/xml");
+  var root = doc.documentElement;
+  root = document.importNode(root, true);
+  document.body.appendChild(root);
+}
   </script>
  
   <title></title>

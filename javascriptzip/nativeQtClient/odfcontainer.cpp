@@ -17,7 +17,6 @@ OdfContainer::OdfContainer(const QUrl& u, QObject* parent) :QObject(parent), url
 {
     quazip = new QuaZip(u.toLocalFile());
     quazip->open(QuaZip::mdUnzip);
-    qDebug() << quazip->getEntriesCount();
 }
 
 OdfContainer::~OdfContainer() {
