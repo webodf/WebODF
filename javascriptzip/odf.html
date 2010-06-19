@@ -64,7 +64,6 @@ function loadJavascript() {
     req.open('GET', jsfiles[i], null);
     req.send(null);
     js += req.responseText;
-    alert(req.responseText);
   }
   if (js.length ) {
     dynamicOdfJavascript = js;
