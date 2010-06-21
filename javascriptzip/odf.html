@@ -10,7 +10,7 @@
       background: #888888;
     }
   </style>
-  <link rel="stylesheet" type="text/css" href="defaultodfstyle.css"></link>
+  <link rel="stylesheet" type="text/css" href="defaultodfstyle.css"/>
   <style id='stylesxmlcss' type="text/css">
 /* define namespaces here, because in WebKit they cannot be added dynamically */
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
@@ -43,12 +43,6 @@
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
   </style>
-  <!--
-  <script src="zip.js" type="text/javascript" charset="utf-8"></script>
-  <script src="base64.js" type="text/javascript" charset="utf-8"></script>
-  <script src="bytearray.js" type="text/javascript" charset="utf-8"></script>
-  <script src="rawinflate.js" type="text/javascript" charset="utf-8"></script>
-  -->
   <script src="style2css.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
 
@@ -56,10 +50,10 @@ var xhtmlns = "http://www.w3.org/1999/xhtml";
 
 var dynamicOdfJavascript = null;
 
-function loadJavascript() {
+function loadJavascript(jsfiles) {
+  if (dynamicOdfJavascript) return;
   var req = new XMLHttpRequest();
   var js = "";
-  var jsfiles = ['base64.js', 'bytearray.js', 'rawinflate.js', 'zip.js'];
   for (var i in jsfiles) {
     req.open('GET', jsfiles[i], null);
     req.send(null);
@@ -71,8 +65,20 @@ function loadJavascript() {
 }
 
 function init() {
-  // try to load the javascript required when no native ODF support is available
-  loadJavascript();
+  // if there is no native 'window.odf' object, create one
+  if (!window.odf) {
+    // try to load the javascript required when no native ODF support is
+    // available
+    // if there is no native window.odf, there still might be a window.qtodf
+    var jsfiles;
+    if (window.qtodf) {
+      jsfiles = ['qtodf.js'];
+    } else {
+      jsfiles = ['base64.js','bytearray.js','rawinflate.js','zip.js','odf.js'];
+    }
+    loadJavascript(jsfiles);
+    window.odf = eval(dynamicOdfJavascript);
+  }
 
   // if the url has a fragment (#...), try to load the file it represents
   var location = new String(document.location);
@@ -81,44 +87,30 @@ function init() {
     return;
   }
   location = location.substr(pos+1);
-  document.body.innerHTML = location;
-  try {
-    loadFile(location);
-  } catch(e) {
-    document.body.innerHTML = e;
-  }
+  // open the odf container
+  window.odfcontainer = new window.odf.OdfContainer(location);
+  refreshOdf();
 }
+
 function clear(element) {
   while (element.firstChild) {
     element.removeChild(element.firstChild);
   }
 }
 
-function loadFile(url) {
-  clear(document.body);
-
-  var ziplist = document.body;
-  document.body.innerHTML = 'Loading...';
-  var zip;
-  try {
-    zip = eval(dynamicOdfJavascript + '; new Zip("' + url + '");');
-  } catch (e) {
-    ziplist.innerHTML = e;
-    return;
-  }
-  var xmldata = zip.load('content.xml');
-  if (!xmldata || xmldata.length == 0) {
-    throw "Cannot read content.xml";
-  }
-  var parser = new DOMParser();
-  var contentxml = parser.parseFromString(xmldata, 'text/xml');
+function refreshOdf() {
+  // synchronize the object a window.odfcontainer with the view
+  var container = window.odfcontainer;
 
   clear(document.body);
-  handleContentXmlLoaded(contentxml);
 
-  xmldata = zip.load('styles.xml');
-  var stylesxml = parser.parseFromString(xmldata, 'text/xml');
-  handleStylesXmlLoaded(stylesxml);
+  var documentcontent = container.getXmlNode('content.xml');
+
+  clear(document.body);
+  handleContentXmlLoaded(documentcontent);
+
+  var documentstyles = container.getXmlNode('styles.xml');
+  handleStylesXmlLoaded(documentstyles);
 }
 
 var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -213,16 +205,20 @@ function setFramePosition(id, frame, stylesheet) {
   rule = 'draw|frame[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
+/*
 function refreshOdf() {
+  var odfcontainer = new window.odf.OdfContainer('hi');
+  alert(odfcontainer);
+
   var parser = new DOMParser();
-  var contentxml = window.odf.getContentXml();
+  var contentxml = odfcontainer.getContentXml();
   var doc = parser.parseFromString(contentxml, "text/xml");
   var root = doc.documentElement;
   root = document.importNode(root, true);
   document.body.appendChild(root);
 }
+*/
   </script>
- 
   <title></title>
 </head>
  
