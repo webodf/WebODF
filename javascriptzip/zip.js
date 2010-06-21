@@ -236,6 +236,12 @@ ZipEntry.prototype.handleEntryData = function(data, callback) {
   if (this.compressionMethod) {
     this.data = stream.data.substr(stream.pos, this.compressedSize);
     this.data = RawDeflate.inflate(this.data);
+    // assume the input data is utf8 for now if it starts with '<'
+    // this can be done better, perhaps even with special encoding respecting
+    // deflate functions
+    if (this.data.length > 0 && this.data[0] == '<') {
+      this.data = window.Base64.convertUTF8StringToUTF16String(this.data);
+    }
   } else {
     this.data = stream.data.substr(stream.pos, this.uncompressedSize);
   }
