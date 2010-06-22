@@ -9,6 +9,10 @@ namespace Ui {
 }
 
 class OdfView;
+class QFileSystemModel;
+class QTreeView;
+class QDockWidget;
+class QModelIndex;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -19,6 +23,7 @@ public:
 private slots:
     void open();
     OdfView *createOdfView();
+    void loadOdf(const QModelIndex& index);
 
 private:
     QMdiSubWindow *findMdiChild(const QString &fileName);
@@ -31,6 +36,9 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    QFileSystemModel* dirmodel;
+    QTreeView* dirview;
+    QDockWidget* dirdock;
 };
 
 #endif // MAINWINDOW_H

@@ -1,8 +1,8 @@
 #include "odfview.h"
 #include <QtCore/QByteArray>
 #include <QtWebKit/QWebFrame>
-#include <QtWebKit/QWebInspector>
 #include "odfcontainer.h"
+#include "odf.h"
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -30,7 +30,8 @@ private:
     QStringList allowedFiles;
 public:
     OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
-        allowedFiles << "odf.html" << "style2css.js" << "defaultodfstyle.css";
+        allowedFiles << "odf.html" << "style2css.js" << "defaultodfstyle.css"
+                << "qtodf.js";
     }
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
@@ -41,6 +42,7 @@ public:
                 || fileinfo.dir() != dir) {
             // changing the url seems to be the only easy way to deny
             // requests
+            qDebug() << "deny " << req.url();
             r.setUrl(QUrl("error:not-allowed"));
         }
         return QNetworkAccessManager::createRequest(op, r, data);
@@ -57,32 +59,42 @@ namespace {
     };
 }
 
-OdfView::OdfView()
+OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
-    odfcontainer = 0;
+    odf = new Odf(this);
+
     setPage(new OdfPage(this));
     connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(slotLoadFinished(bool)));
     page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
-    //QWebInspector *inspector = new QWebInspector(this);
-    //inspector->setPage(page());
+    connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
+            this, SLOT(slotInitWindowObjects()));
 
     // use our own networkaccessmanager that gives limited access to the local
     // file system
-    networkaccessmanager = new OdfNetworkAccessManager(QDir(".."));
+    networkaccessmanager = new OdfNetworkAccessManager(QDir("../.."));
     page()->setNetworkAccessManager(networkaccessmanager);
 
     // for now, we simply point to the file, we want to read
-    setUrl(QUrl("../odf.html"));
+    setUrl(QUrl("../../odf.html"));
     loaded = false;
 }
 
 OdfView::~OdfView() {
 }
 
+void
+OdfView::slotInitWindowObjects()
+{
+    QWebFrame *frame = page()->mainFrame();
+    frame->addToJavaScriptWindowObject("qtodf", odf);
+}
+
 bool
 OdfView::loadFile(const QString &fileName) {
-    odfcontainer = new OdfContainer(fileName, this);
+    curFile = fileName;
+    identifier = QString::number(qrand());
+    odf->addFile(identifier, fileName);
     if (loaded) {
         slotLoadFinished(true);
     }
@@ -92,9 +104,12 @@ OdfView::loadFile(const QString &fileName) {
 void
 OdfView::slotLoadFinished(bool ok) {
     if (!ok) return;
+    loaded = true;
     QWebFrame *frame = page()->mainFrame();
-    frame->addToJavaScriptWindowObject("odf", odfcontainer);
-    frame->evaluateJavaScript("refreshOdf();");
+    QString js = "window.odfcontainer = new window.odf.OdfContainer('"
+                 + identifier + "'); refreshOdf();";
+    QVariant out = frame->evaluateJavaScript(js);
+    qDebug() << out;
 }
 
 #include "moc_odfview.cpp"

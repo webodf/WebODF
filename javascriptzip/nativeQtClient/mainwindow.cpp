@@ -3,6 +3,10 @@
 #include "odfview.h"
 #include <QtGui/QFileDialog>
 #include <QtGui/QMdiArea>
+#include <QtGui/QFileSystemModel>
+#include <QtGui/QTreeView>
+#include <QtGui/QDockWidget>
+#include <QtCore/QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,13 +17,36 @@ MainWindow::MainWindow(QWidget *parent) :
     createActions();
     createToolBars();
 
-    setWindowTitle(tr("MDI"));
+    setWindowTitle(tr("Odf Viewer"));
     setUnifiedTitleAndToolBarOnMac(true);
 
+    QStringList odfNameFilter;
+    odfNameFilter << "*.odt" << "*.ods" << "*.odp";
+    dirmodel = new QFileSystemModel(this);
+    dirmodel->setNameFilters(odfNameFilter);
+    dirmodel->setFilter(QDir::AllDirs|QDir::AllEntries|QDir::NoDotAndDotDot);
+    dirview = new QTreeView(this);
+    dirview->setModel(dirmodel);
+    dirview->setHeaderHidden(true);
+    dirview->setAnimated(true);
+    for (int i = 1; i < dirmodel->columnCount(); i++) {
+        dirview->setColumnHidden(i, true);
+    }
+    QString rootpath = "/home/oever/work/odfkit/odfkit/javascriptzip/kofficetests";
+    dirmodel->setRootPath(rootpath);
+    const QModelIndex rootindex = dirmodel->index(rootpath);
+    dirview->setRootIndex(rootindex);
+    dirdock = new QDockWidget(this);
+    dirdock->setWidget(dirview);
+    addDockWidget(Qt::LeftDockWidgetArea, dirdock);
+
+    connect(dirview, SIGNAL(clicked(QModelIndex)), this, SLOT(loadOdf(QModelIndex)));
+/*
     OdfView *child = createOdfView();
     if (child->loadFile("../kofficetests/odf/DanskTest01.odt")) {
         child->showMaximized();
     }
+*/
 }
 
 MainWindow::~MainWindow()
@@ -40,7 +67,8 @@ void MainWindow::changeEvent(QEvent *e)
 }
 void MainWindow::open()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, QString(), QString(), tr("Office Files (*.odt *.odp *.ods)"));
+    QString fileName = QFileDialog::getOpenFileName(this, QString(), QString(),
+        tr("Office Files (*.odt *.odp *.ods)"));
     if (!fileName.isEmpty()) {
         QMdiSubWindow *existing = findMdiChild(fileName);
         if (existing) {
@@ -83,8 +111,35 @@ QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName)
 
 OdfView *MainWindow::createOdfView()
 {
-    OdfView *view = new OdfView();
+    OdfView *view = new OdfView(this);
     ui->mdiArea->addSubWindow(view);
-
     return view;
+}
+
+void
+MainWindow::loadOdf(const QModelIndex& index) {
+    if (dirmodel->isDir(index)) {
+        if (dirview->isExpanded(index)) {
+            dirview->collapse(index);
+        } else {
+            dirview->expand(index);
+        }
+        return;
+    }
+    QString path = dirmodel->filePath(index);
+    path = QFileInfo(path).canonicalFilePath();
+    QMdiSubWindow* w = findMdiChild(path);
+    OdfView* v = (w) ?dynamic_cast<OdfView*>(w->widget()) :0;
+    if (v == 0) {
+        w = ui->mdiArea->activeSubWindow();
+        v = (w) ?dynamic_cast<OdfView*>(w->widget()) :0;
+    }
+    if (v == 0) {
+        v = new OdfView(this);
+        v->showMaximized();
+        w = ui->mdiArea->addSubWindow(v);
+        w->showMaximized();
+    }
+    ui->mdiArea->setActiveSubWindow(w);
+    v->loadFile(path);
 }

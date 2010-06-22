@@ -3,26 +3,30 @@
 
 #include <QtWebKit/QWebView>
 
-class OdfContainer;
+class Odf;
 
 class OdfView : public QWebView
 {
 Q_OBJECT
 public:
-    OdfView();
+    OdfView(QWidget* parent);
     ~OdfView();
-    bool loadFile(const QString &fileName);
     QString currentFile() { return curFile; }
+
+public slots:
+    bool loadFile(const QString &fileName);
 
 private slots:
     void slotLoadFinished(bool ok);
+    void slotInitWindowObjects();
 
 private:
     bool loaded;
     QString curFile;
+    QString identifier;
     class OdfNetworkAccessManager;
     OdfNetworkAccessManager* networkaccessmanager;
-    OdfContainer* odfcontainer;
+    Odf* odf;
 };
 
 #endif // ODFVIEW_H

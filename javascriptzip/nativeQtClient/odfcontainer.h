@@ -12,17 +12,13 @@ Q_OBJECT
 public:
     OdfContainer(const QUrl& url, QObject* parent);
     ~OdfContainer();
-    Q_PROPERTY(QString name READ getName SCRIPTABLE true);
 
-public slots:
-    QString getContentXml();
-    QString getStylesXml();
+    QUrl url() const { return url_; }
+    QString loadAsString(const QString& path);
 
 private:
-    const QUrl url;
+    const QUrl url_;
     QuaZip* quazip;
-
-    QString getName() const { return "hello"; }
 };
 
 #endif // ODFCONTAINER_H
