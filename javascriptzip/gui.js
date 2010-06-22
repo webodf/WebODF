@@ -9,7 +9,7 @@ Ext.onReady(function(){
     minValue: -5,
     maxValue: 5,
     values: [0],
-    listeners: { change: { fn: setZoom } }
+    listeners: { changecomplete: { fn: setZoom } }
   });
 
   function setZoom(a, zoomlevel, b) {
@@ -112,7 +112,10 @@ Ext.onReady(function(){
     for (var n in node.childNodes) {
       n = node.childNodes[n];
       if (n.leaf) {
-        addThumbnail(n);
+        try {
+          addThumbnail(n);
+        } catch (e) {
+        }
       }
     }
   }
