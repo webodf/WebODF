@@ -14,7 +14,8 @@ Odf = function(){
         return null;
       }
       var parser = new DOMParser();
-      return parser.parseFromString(xmldata, 'text/xml');
+      var node = parser.parseFromString(xmldata, 'text/xml');
+      return node;
     }
     /**
      * Open file and parse it. Return the Xml Node. Return the root node of the

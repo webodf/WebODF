@@ -104,13 +104,13 @@ function refreshOdf() {
 
   clear(document.body);
 
-  var documentcontent = container.getXmlNode('content.xml');
+  var xmlnode = container.getXmlNode('styles.xml');
+  handleStylesXmlLoaded(xmlnode);
 
-  clear(document.body);
-  handleContentXmlLoaded(documentcontent);
-
-  var documentstyles = container.getXmlNode('styles.xml');
-  handleStylesXmlLoaded(documentstyles);
+  // do content last, because otherwise the document is constantly updated
+  // whenever the css changes
+  xmlnode = container.getXmlNode('content.xml');
+  handleContentXmlLoaded(xmlnode);
 }
 
 var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -124,11 +124,6 @@ function handleContentXmlLoaded(contentxml) {
   if (!contentcontainer) {
       contentcontainer = document.createElementNS(xhtmlns, "div");
       document.body.appendChild(contentcontainer);
-  }
-  clear(contentcontainer);
-  if (contentxml && contentxml.firstChild) {
-    contentxml = document.importNode(contentxml.firstChild, true);
-    contentcontainer.appendChild(contentxml);
   }
   var contentxmlcss = document.getElementById('contentxmlcss');
   var automaticstyles = contentxml.getElementsByTagNameNS(officens, 'automatic-styles');
@@ -144,6 +139,13 @@ function handleContentXmlLoaded(contentxml) {
   // experiment
   var positioncss = document.getElementById('positioncss');
   modifyImages(contentxml, positioncss.sheet);
+
+  // only append the content at the end
+  clear(contentcontainer);
+  if (contentxml && contentxml.firstChild) {
+    contentxml = document.importNode(contentxml.firstChild, true);
+    contentcontainer.appendChild(contentxml);
+  }
 }
 /**
  * A new styles.xml has been loaded. Update the live document with it.
@@ -205,19 +207,6 @@ function setFramePosition(id, frame, stylesheet) {
   rule = 'draw|frame[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
-/*
-function refreshOdf() {
-  var odfcontainer = new window.odf.OdfContainer('hi');
-  alert(odfcontainer);
-
-  var parser = new DOMParser();
-  var contentxml = odfcontainer.getContentXml();
-  var doc = parser.parseFromString(contentxml, "text/xml");
-  var root = doc.documentElement;
-  root = document.importNode(root, true);
-  document.body.appendChild(root);
-}
-*/
   </script>
   <title></title>
 </head>

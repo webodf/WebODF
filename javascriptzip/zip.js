@@ -118,7 +118,10 @@ RemoteFileReader.prototype.callback = function() {
     var totallen = this.getFileLengthFromResponseHeader();
     if (totallen >= 0) {
       // clean up data, can be slow for big requests, perhaps use worker thread
-      data = cleanData(this.req.responseText);
+      data = this.req.responseText;
+      if (data.length < 200000) {
+        data = cleanData(data);
+      }
       // store the full retrieved range in the remove file
       job.remotefile.add(job.offset, data);
       // get the requested range
@@ -239,7 +242,8 @@ ZipEntry.prototype.handleEntryData = function(data, callback) {
     // assume the input data is utf8 for now if it starts with '<'
     // this can be done better, perhaps even with special encoding respecting
     // deflate functions
-    if (this.data.length > 0 && this.data[0] == '<') {
+    if (this.data.length > 0 && this.data.length < 200000
+            && this.data[0] == '<') {
       this.data = window.Base64.convertUTF8StringToUTF16String(this.data);
     }
   } else {
