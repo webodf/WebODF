@@ -6,6 +6,7 @@
 #include <QtGui/QFileSystemModel>
 #include <QtGui/QTreeView>
 #include <QtGui/QDockWidget>
+#include <QtCore/QDir>
 #include <QtCore/QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -32,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 1; i < dirmodel->columnCount(); i++) {
         dirview->setColumnHidden(i, true);
     }
-    QString rootpath = "/home/oever/work/odfkit/odfkit/javascriptzip/kofficetests";
+    QString rootpath = QDir::homePath();
     dirmodel->setRootPath(rootpath);
     const QModelIndex rootindex = dirmodel->index(rootpath);
     dirview->setRootIndex(rootindex);
@@ -52,6 +53,25 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void
+MainWindow::openFile(const QString& path)
+{
+    QMdiSubWindow* w = findMdiChild(path);
+    OdfView* v = (w) ?dynamic_cast<OdfView*>(w->widget()) :0;
+    if (v == 0) {
+        w = ui->mdiArea->activeSubWindow();
+        v = (w) ?dynamic_cast<OdfView*>(w->widget()) :0;
+    }
+    if (v == 0) {
+        v = new OdfView(this);
+        v->showMaximized();
+        w = ui->mdiArea->addSubWindow(v);
+        w->showMaximized();
+    }
+    ui->mdiArea->setActiveSubWindow(w);
+    v->loadFile(path);
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -128,18 +148,5 @@ MainWindow::loadOdf(const QModelIndex& index) {
     }
     QString path = dirmodel->filePath(index);
     path = QFileInfo(path).canonicalFilePath();
-    QMdiSubWindow* w = findMdiChild(path);
-    OdfView* v = (w) ?dynamic_cast<OdfView*>(w->widget()) :0;
-    if (v == 0) {
-        w = ui->mdiArea->activeSubWindow();
-        v = (w) ?dynamic_cast<OdfView*>(w->widget()) :0;
-    }
-    if (v == 0) {
-        v = new OdfView(this);
-        v->showMaximized();
-        w = ui->mdiArea->addSubWindow(v);
-        w->showMaximized();
-    }
-    ui->mdiArea->setActiveSubWindow(w);
-    v->loadFile(path);
+    openFile(path);
 }
