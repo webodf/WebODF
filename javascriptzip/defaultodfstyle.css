@@ -106,4 +106,9 @@ text|list-item:before { /* prefix each list-item with a roman numeral */
     content: counter(list-num, upper-roman) ". ";
 }
 
+text|a {
+    color: blue;
+    text-decoration: underline;
+}
+
 
