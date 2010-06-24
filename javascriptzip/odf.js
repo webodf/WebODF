@@ -53,7 +53,8 @@ Odf = function(){
     }
     return {
         /* export the public api */
-        OdfContainer: OdfContainer
+        OdfContainer: OdfContainer,
+        getContainer: function(url) {return new OdfContainer(url); }
     };
 }();
 
