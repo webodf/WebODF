@@ -36,7 +36,13 @@ public:
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
         QNetworkRequest r(req);
-        QFileInfo fileinfo = req.url().toLocalFile();
+        QString path;
+        if (dir.absolutePath().startsWith(":")) {
+            path = req.url().toString().mid(3);
+        } else {
+            path = req.url().toLocalFile();
+        }
+        QFileInfo fileinfo = path;
         if (op != GetOperation
                 || !allowedFiles.contains(fileinfo.fileName())
                 || fileinfo.dir() != dir) {
@@ -61,9 +67,8 @@ namespace {
 
 OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
-    odf = new Odf(this);
-
     setPage(new OdfPage(this));
+    odf = new Odf(page()->mainFrame(), this);
     connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(slotLoadFinished(bool)));
     page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
@@ -72,11 +77,12 @@ OdfView::OdfView(QWidget* parent) :QWebView(parent)
 
     // use our own networkaccessmanager that gives limited access to the local
     // file system
-    networkaccessmanager = new OdfNetworkAccessManager(QDir("../.."));
+    QString prefix = ":/";
+    networkaccessmanager = new OdfNetworkAccessManager(QDir(prefix));
     page()->setNetworkAccessManager(networkaccessmanager);
 
     // for now, we simply point to the file, we want to read
-    setUrl(QUrl("../../odf.html"));
+    setUrl(QUrl("qrc"+prefix+"odf.html"));
     loaded = false;
 }
 
