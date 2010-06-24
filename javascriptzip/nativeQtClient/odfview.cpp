@@ -48,8 +48,8 @@ public:
                 || fileinfo.dir() != dir) {
             // changing the url seems to be the only easy way to deny
             // requests
-            qDebug() << "deny " << req.url();
-            r.setUrl(QUrl("error:not-allowed"));
+            qDebug() << "undeny " << req.url();
+            //r.setUrl(QUrl("error:not-allowed"));
         }
         return QNetworkAccessManager::createRequest(op, r, data);
     }
