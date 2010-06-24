@@ -122,7 +122,78 @@ function style2css(stylesheet, stylesxmldom) {
   return;
 
   // helper functions
-
+  
+  function getStyleMap(stylesnode) {
+    // put all style elements in a hash map by family and name
+    var stylemap = {};
+    var iter = doc.evaluate("style:style", stylesnode, namespaceresolver, XPathResult.ANY_TYPE, null);
+    var node = iter.iteratorNext();
+    while (node) {
+      var name = style.getAttributeNS(stylens, 'name');
+      var family = style.getAttributeNS(stylens, 'family');
+      if (!stylemap[family]) {
+        stylemap[family] = {};
+      }
+      stylemap[family][name] = node;
+      node = iter.iteratorNext();
+    }
+    return stylemap;
+  }
+  
+  function findStyle(stylestree, name) {
+    if (!name) return null;
+    if (stylestree[name]) return stylestree[name];
+    for (var n in stylestree) {
+      var style = findStyle(stylestree[n], name);
+      if (style) {
+        return style;
+      }
+    }
+    return null;
+  }
+  
+  function addStyleToStyleTree(stylename, stylesmap, stylestree) {
+    var style = stylesmap[stylename];
+    if (!style) return;
+    var parentname = style.getAttributeNS(stylens, 'parent-style-name');
+	var parentstyle = null;
+    if (parentname) {
+      parentstyle = findStyle(stylestree, parentname);
+      if (!parentstyle && stylesmap[parentname]) {
+        addStyleToStyleTree(parentname, stylesmap[parentname]);
+        parentstyle = stylesmap[parentname];
+        stylesmap[parentname] = null;
+      }
+	}
+    if (parentstyle) {
+      if (!parentstyle.derivedStyles) {
+        parentstyle.derivedStyles = [];
+      }
+      parentstyle.derivedStyles.push(style);
+    } else {
+      // no parent so add the root
+	  
+	}
+  }
+  
+  function addStyleMapToStyleTree(stylesmap, stylestree) {
+    for (var name in stylesmap) {
+	  addStyleToStyleTree(name, stylesmap, stylestree);
+	  /*
+      var style = findStyle(stylestree, name);
+      if (style) {
+        // a style with this name already exists
+        continue;
+      }
+      var parentname = style.getAttributeNS(stylens, 'parent-style-name');
+      var parentstyle = findStyle(stylestree, parentname);
+      if (!parentstyle) {
+        parentstyle = stylesmap[];
+      }
+      */
+    }
+  }
+  
   function createSelector(family, name) {
     var prefix = familynamespaceprefixes[family];
     if (prefix == null) return null;
