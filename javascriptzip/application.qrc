@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>odf.html</file>
+        <file>style2css.js</file>
+        <file>defaultodfstyle.css</file>
+        <file>qtodf.js</file>
+    </qresource>
+</RCC>
