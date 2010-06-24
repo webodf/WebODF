@@ -96,3 +96,14 @@ draw|frame {
 draw|image {
   display: block;
 }
+text|list { /* reset the list numbering for each list */
+    counter-reset: list-num;
+}
+text|list-item {
+    counter-increment: list-num;
+}
+text|list-item:before { /* prefix each list-item with a roman numeral */
+    content: counter(list-num, upper-roman) ". ";
+}
+
+
