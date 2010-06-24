@@ -76,6 +76,7 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'margin-top', 'margin-top' ],
     [ fons, 'margin-bottom', 'margin-bottom' ],
     [ fons, 'border', 'border' ],
+    [ fons, 'background-color', 'background-color' ],
   ];
 
   var tablecellPropertySimpleMapping = [
