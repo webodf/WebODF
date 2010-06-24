@@ -1,6 +1,7 @@
 function style2css(stylesheet, stylesxmldom) {
 
   // helper constants
+  var xlinkns = 'http://www.w3.org/1999/xlink';
 
   var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
   var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -9,6 +10,7 @@ function style2css(stylesheet, stylesxmldom) {
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
   var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
   var namespaces = {
+    xlink: xlinkns,
     draw: drawns,
     fo: fons,
     office: officens,
@@ -59,6 +61,10 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'font-weight', 'font-weight' ],
     [ fons, 'font-style', 'font-style' ],
     [ fons, 'font-size', 'font-size' ]
+  ];
+
+  var bgImageSimpleMapping = [
+    [ xlinkns, 'href', 'background-image' ]
   ];
 
   var paragraphPropertySimpleMapping = [
@@ -193,6 +199,13 @@ function style2css(stylesheet, stylesxmldom) {
   function getParagraphProperties(props) {
     var rule = '';
     rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
+    var imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
+    if (imageProps.length > 0) {
+        //var url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
+        var url = "http://chani.ca/avatar.png";
+        rule += "background-image: url('" + url + "');";
+        rule += "background-repeat: repeat;"; //FIXME test
+    }
     return rule;
   }
 
