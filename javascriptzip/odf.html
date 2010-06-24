@@ -65,8 +65,12 @@ function loadJavascript(jsfiles) {
 }
 
 function init() {
-  // if there is no native 'window.odf' object, create one
-  if (!window.odf) {
+  // create a native ODF object
+  if (false) { // TODO check if there is a global ODF object
+    window.odf = new ODF();
+//    window.odf.OdfContainer = function() {};
+//    window.odf.OdfContainer.prototype.getXmlNode() = function() {};
+  } else {
     // try to load the javascript required when no native ODF support is
     // available
     // if there is no native window.odf, there still might be a window.qtodf
@@ -88,7 +92,7 @@ function init() {
   }
   location = location.substr(pos+1);
   // open the odf container
-  window.odfcontainer = new window.odf.OdfContainer(location);
+  window.odfcontainer = window.odf.getContainer(location);
   refreshOdf();
 }
 
