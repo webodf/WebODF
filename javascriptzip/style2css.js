@@ -1,6 +1,7 @@
 function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) {
 
   // helper constants
+  var xlinkns = 'http://www.w3.org/1999/xlink';
 
   var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
   var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -62,7 +63,7 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   ];
 
   var bgImageSimpleMapping = [
-    [ xlinkns, 'repeat', 'background-repeat' ]
+    [ stylens, 'repeat', 'background-repeat' ]
   ];
 
   var paragraphPropertySimpleMapping = [
