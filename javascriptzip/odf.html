@@ -110,6 +110,14 @@ function refreshOdf() {
 
   var stylesxmlnode = container.getXmlNode('styles.xml');
   var contentxmlnode = container.getXmlNode('content.xml');
+  if (!stylesxmlnode || !stylesxmlnode.documentElement) {
+    throw "No styles element found.";
+  }
+  if (!contentxmlnode || !contentxmlnode.documentElement) {
+    throw "No content element found.";
+  }
+  stylesxmlnode = document.importNode(stylesxmlnode.documentElement, true);
+  contentxmlnode = document.importNode(contentxmlnode.documentElement, true);
   handleStyles(stylesxmlnode, contentxmlnode);
 
   // do content last, because otherwise the document is constantly updated
@@ -129,18 +137,6 @@ function handleContentXmlLoaded(contentxml, stylesxml) {
       contentcontainer = document.createElementNS(xhtmlns, "div");
       document.body.appendChild(contentcontainer);
   }
-  /*
-  var contentxmlcss = document.getElementById('contentxmlcss');
-  var automaticstyles = contentxml.getElementsByTagNameNS(officens, 'automatic-styles');
-  if (automaticstyles.length > 0) {
-    automaticstyles = automaticstyles.item(0);
-    try {
-      style2css(contentxmlcss.sheet, automaticstyles);
-    } catch (e) {
-      alert(e);
-    }
-  }
-  */
 
   // experiment
   var positioncss = document.getElementById('positioncss');
@@ -148,10 +144,7 @@ function handleContentXmlLoaded(contentxml, stylesxml) {
 
   // only append the content at the end
   clear(contentcontainer);
-  if (contentxml && contentxml.firstChild) {
-    contentxml = document.importNode(contentxml.firstChild, true);
-    contentcontainer.appendChild(contentxml);
-  }
+  contentcontainer.appendChild(contentxml);
 }
 function getDirectChild(ns, name, node) {
   node = (node) ?node.firstChild :null;
@@ -173,20 +166,17 @@ function handleStyles(stylesxml, contentxml) {
       document.body.appendChild(stylescontainer);
   }
   clear(stylescontainer);
-  if (stylesxml && stylesxml.firstChild) {
-    stylesxml = document.importNode(stylesxml.firstChild, true);
-    stylescontainer.appendChild(stylesxml);
-  }
+  //alert(stylesxml);
+  stylescontainer.appendChild(stylesxml);
 
   // update the css translation of the styles
-  stylestyles = getDirectChild(officens, 'styles', stylesxml);
+  var stylestyles = getDirectChild(officens, 'styles', stylesxml);
   styleautostyles = getDirectChild(officens, 'automatic-styles', stylesxml);
-  contentautostyles = getDirectChild(officens, 'automatic-styles', contentxml.documentElement);
+  contentautostyles = getDirectChild(officens, 'automatic-styles', contentxml);
   
   var stylesxmlcss = document.getElementById('stylesxmlcss');
-    style2css(stylesxmlcss.sheet, stylestyles, styleautostyles, contentautostyles);
   try {
-    //style2css(stylesxmlcss.sheet, stylestyles, styleautostyles, contentautostyles);
+    style2css(stylesxmlcss.sheet, stylestyles, styleautostyles, contentautostyles);
   } catch (e) {
     alert(e);
     throw e;
