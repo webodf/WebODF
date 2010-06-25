@@ -1,8 +1,11 @@
 #include "odfview.h"
-#include <QtCore/QByteArray>
-#include <QtWebKit/QWebFrame>
+
 #include "odfcontainer.h"
 #include "odf.h"
+#include "zipnetworkreply.h"
+
+#include <QtCore/QByteArray>
+#include <QtWebKit/QWebFrame>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -35,6 +38,12 @@ public:
     }
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
+        if (req.url().scheme() == "odfkit") {
+            //data is inside the current zip file
+            qDebug() << "zip! " << req.url();
+            return new ZipNetworkReply(this, req, op);
+        }
+
         QNetworkRequest r(req);
         QString path;
         if (dir.absolutePath().startsWith(":")) {
@@ -48,8 +57,8 @@ public:
                 || fileinfo.dir() != dir) {
             // changing the url seems to be the only easy way to deny
             // requests
-            qDebug() << "undeny " << req.url();
-            //r.setUrl(QUrl("error:not-allowed"));
+            qDebug() << "deny " << req.url();
+            r.setUrl(QUrl("error:not-allowed"));
         }
         return QNetworkAccessManager::createRequest(op, r, data);
     }

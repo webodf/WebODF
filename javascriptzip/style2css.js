@@ -64,7 +64,7 @@ function style2css(stylesheet, stylesxmldom) {
   ];
 
   var bgImageSimpleMapping = [
-    [ xlinkns, 'href', 'background-image' ]
+    [ xlinkns, 'repeat', 'background-repeat' ]
   ];
 
   var paragraphPropertySimpleMapping = [
@@ -201,10 +201,11 @@ function style2css(stylesheet, stylesxmldom) {
     rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
     var imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
     if (imageProps.length > 0) {
-        //var url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
-        var url = "http://chani.ca/avatar.png";
-        rule += "background-image: url('" + url + "');";
-        rule += "background-repeat: repeat;"; //FIXME test
+        var url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
+        //var url = "http://chani.ca/avatar.png";
+        rule += "background-image: url('odfkit:" + url + "');";
+        //rule += "background-repeat: repeat;"; //FIXME test
+        rule += applySimpleMapping(imageProps, bgImageSimpleMapping);
     }
     return rule;
   }
