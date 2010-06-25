@@ -10,7 +10,7 @@ QT += network \
     testlib
 TARGET = nativeQtClient
 INCLUDEPATH += /usr/include/minizip
-RESOURCES     = ../application.qrc
+RESOURCES     = ../webodf/application.qrc
 LIBS += -lquazip
 TEMPLATE = app
 SOURCES += main.cpp \

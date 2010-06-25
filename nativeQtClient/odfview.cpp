@@ -75,14 +75,15 @@ OdfView::OdfView(QWidget* parent) :QWebView(parent)
 
     // use our own networkaccessmanager that gives limited access to the local
     // file system
-    //QString prefix = ":/";
-    QString prefix = "../..";
+    QString prefix = "../webodf/";
+    QString htmlfile = prefix + "odf.html";
+    if (!QFileInfo(htmlfile).exists()) {
+         prefix = ":/";
+         htmlfile = "qrc:/odf.html";
+    }
     networkaccessmanager = new OdfNetworkAccessManager(QDir(prefix));
     page()->setNetworkAccessManager(networkaccessmanager);
-
-    // for now, we simply point to the file, we want to read
-    //setUrl(QUrl("qrc"+prefix+"odf.html"));
-    setUrl(QUrl("../../odf.html"));
+    setUrl(QUrl(htmlfile));
     loaded = false;
 }
 
