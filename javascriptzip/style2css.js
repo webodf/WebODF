@@ -1,6 +1,7 @@
 function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) {
 
   // helper constants
+  var xlinkns = 'http://www.w3.org/1999/xlink';
 
   var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
   var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -59,6 +60,10 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     [ fons, 'font-weight', 'font-weight' ],
     [ fons, 'font-style', 'font-style' ],
     [ fons, 'font-size', 'font-size' ]
+  ];
+
+  var bgImageSimpleMapping = [
+    [ stylens, 'repeat', 'background-repeat' ]
   ];
 
   var paragraphPropertySimpleMapping = [
@@ -276,6 +281,15 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   function getParagraphProperties(props) {
     var rule = '';
     rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
+    var imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
+    if (imageProps.length > 0) {
+        var url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
+        if (url) {
+            rule += "background-image: url('odfkit:" + url + "');";
+            //rule += "background-repeat: repeat;"; //FIXME test
+            rule += applySimpleMapping(imageProps.item(0), bgImageSimpleMapping);
+        }
+    }
     return rule;
   }
 

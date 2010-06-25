@@ -13,6 +13,7 @@ Q_OBJECT
 public:
     Odf(QWebFrame* f, QObject* parent) :QObject(parent), frame(f) {}
     OdfContainer* getContainer(const QString& url);
+    OdfContainer* getOpenContainer(const QString& id);
 
     void addFile(const QString& containerid, const QString& path);
 public slots:
