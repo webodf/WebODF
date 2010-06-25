@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
   <style type="text/css" media="screen">
     body, html, div {
       padding: 0px;
@@ -108,13 +108,21 @@ function refreshOdf() {
 
   clear(document.body);
 
-  var xmlnode = container.getXmlNode('styles.xml');
-  handleStylesXmlLoaded(xmlnode);
+  var stylesxmlnode = container.getXmlNode('styles.xml');
+  var contentxmlnode = container.getXmlNode('content.xml');
+  if (!stylesxmlnode || !stylesxmlnode.documentElement) {
+    throw "No styles element found.";
+  }
+  if (!contentxmlnode || !contentxmlnode.documentElement) {
+    throw "No content element found.";
+  }
+  stylesxmlnode = document.importNode(stylesxmlnode.documentElement, true);
+  contentxmlnode = document.importNode(contentxmlnode.documentElement, true);
+  handleStyles(stylesxmlnode, contentxmlnode);
 
   // do content last, because otherwise the document is constantly updated
   // whenever the css changes
-  xmlnode = container.getXmlNode('content.xml');
-  handleContentXmlLoaded(xmlnode);
+  handleContentXmlLoaded(contentxmlnode);
 }
 
 var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -122,22 +130,12 @@ var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
 /**
  * A new content.xml has been loaded. Update the live document with it.
  **/
-function handleContentXmlLoaded(contentxml) {
+function handleContentXmlLoaded(contentxml, stylesxml) {
   // replace content.xml in the live document
   var contentcontainer = document.getElementById('contentxml');
   if (!contentcontainer) {
       contentcontainer = document.createElementNS(xhtmlns, "div");
       document.body.appendChild(contentcontainer);
-  }
-  var contentxmlcss = document.getElementById('contentxmlcss');
-  var automaticstyles = contentxml.getElementsByTagNameNS(officens, 'automatic-styles');
-  if (automaticstyles.length > 0) {
-    automaticstyles = automaticstyles.item(0);
-    try {
-      style2css(contentxmlcss.sheet, automaticstyles);
-    } catch (e) {
-      alert(e);
-    }
   }
 
   // experiment
@@ -146,15 +144,21 @@ function handleContentXmlLoaded(contentxml) {
 
   // only append the content at the end
   clear(contentcontainer);
-  if (contentxml && contentxml.firstChild) {
-    contentxml = document.importNode(contentxml.firstChild, true);
-    contentcontainer.appendChild(contentxml);
+  contentcontainer.appendChild(contentxml);
+}
+function getDirectChild(ns, name, node) {
+  node = (node) ?node.firstChild :null;
+  while (node) {
+    if (node.localName == name && node.namespaceURI == ns) {
+      return node;
+    }
+    node = node.nextSibling;
   }
 }
 /**
  * A new styles.xml has been loaded. Update the live document with it.
  **/
-function handleStylesXmlLoaded(stylesxml) {
+function handleStyles(stylesxml, contentxml) {
   // replace styles.xml in the live document
   var stylescontainer = document.getElementById('stylesxml');
   if (!stylescontainer) {
@@ -162,22 +166,20 @@ function handleStylesXmlLoaded(stylesxml) {
       document.body.appendChild(stylescontainer);
   }
   clear(stylescontainer);
-  if (stylesxml && stylesxml.firstChild) {
-    stylesxml = document.importNode(stylesxml.firstChild, true);
-    stylescontainer.appendChild(stylesxml);
-  }
+  //alert(stylesxml);
+  stylescontainer.appendChild(stylesxml);
 
   // update the css translation of the styles
-  stylesxml = stylesxml.getElementsByTagNameNS(officens, 'styles');
-  if (stylesxml.length < 1) {
-    return;
-  }
-  stylesxml = stylesxml.item(0);
+  var stylestyles = getDirectChild(officens, 'styles', stylesxml);
+  styleautostyles = getDirectChild(officens, 'automatic-styles', stylesxml);
+  contentautostyles = getDirectChild(officens, 'automatic-styles', contentxml);
+  
   var stylesxmlcss = document.getElementById('stylesxmlcss');
   try {
-    style2css(stylesxmlcss.sheet, stylesxml);
+    style2css(stylesxmlcss.sheet, stylestyles, styleautostyles, contentautostyles);
   } catch (e) {
     alert(e);
+    throw e;
   }
 }
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
