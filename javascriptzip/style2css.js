@@ -10,7 +10,6 @@ function style2css(stylesheet, stylesxmldom) {
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
   var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
   var namespaces = {
-    xlink: xlinkns,
     draw: drawns,
     fo: fons,
     office: officens,
@@ -202,10 +201,11 @@ function style2css(stylesheet, stylesxmldom) {
     var imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
     if (imageProps.length > 0) {
         var url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
-        //var url = "http://chani.ca/avatar.png";
-        rule += "background-image: url('odfkit:" + url + "');";
-        //rule += "background-repeat: repeat;"; //FIXME test
-        rule += applySimpleMapping(imageProps, bgImageSimpleMapping);
+        if (url) {
+            rule += "background-image: url('odfkit:" + url + "');";
+            //rule += "background-repeat: repeat;"; //FIXME test
+            rule += applySimpleMapping(imageProps.item(0), bgImageSimpleMapping);
+        }
     }
     return rule;
   }

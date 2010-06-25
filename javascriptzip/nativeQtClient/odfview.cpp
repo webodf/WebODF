@@ -15,22 +15,10 @@
 
 class OdfView::OdfNetworkAccessManager : public QNetworkAccessManager {
 private:
-    class DummyNetworkReply : public QNetworkReply {
-    public:
-        DummyNetworkReply(QNetworkAccessManager* parent) :QNetworkReply(parent) {
-        }
-    private:
-        void abort() {
-            qDebug() << "abort called";
-        }
-        qint64 readData(char*, qint64) {
-            qDebug()<<"read...";return -1;
-            setError(QNetworkReply::ContentAccessDenied, tr("Access denied."));
-        }
-    };
     QDir dir;
     QDir odfdir;
     QStringList allowedFiles;
+    OdfContainer *currentFile;
 public:
     OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
         allowedFiles << "odf.html" << "style2css.js" << "defaultodfstyle.css"
@@ -41,7 +29,7 @@ public:
         if (req.url().scheme() == "odfkit") {
             //data is inside the current zip file
             qDebug() << "zip! " << req.url();
-            return new ZipNetworkReply(this, req, op);
+            return new ZipNetworkReply(this, currentFile, req, op);
         }
 
         QNetworkRequest r(req);
@@ -62,6 +50,7 @@ public:
         }
         return QNetworkAccessManager::createRequest(op, r, data);
     }
+    void setCurrentFile(OdfContainer *file) {currentFile = file;}
 };
 
 namespace {
@@ -112,6 +101,7 @@ OdfView::loadFile(const QString &fileName) {
     curFile = fileName;
     identifier = QString::number(qrand());
     odf->addFile(identifier, fileName);
+    networkaccessmanager->setCurrentFile(odf->getOpenContainer(identifier));
     if (loaded) {
         slotLoadFinished(true);
     }

@@ -15,6 +15,7 @@ public:
 
     QUrl url() const { return url_; }
     QString loadAsString(const QString& path);
+    QIODevice* getFile(const QString &path, QObject *parent);
 
 private:
     const QUrl url_;

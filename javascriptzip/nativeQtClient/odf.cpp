@@ -7,6 +7,10 @@ OdfContainer* Odf::getContainer(const QString& url) {
     return new OdfContainer(url, this);
 }
 
+OdfContainer* Odf::getOpenContainer(const QString& id) {
+    return openfiles.value(id);
+}
+
 void
 Odf::addFile(const QString& containerid, const QString& path)
 {

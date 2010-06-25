@@ -32,3 +32,12 @@ OdfContainer::loadAsString(const QString& path)
 {
     return readzipfile(quazip, path);
 }
+
+QIODevice* OdfContainer::getFile(const QString &path, QObject *parent)
+{
+    //we do NOT use setCurrentFile here, because the iodevice needs to stay valid
+    //even if some other getFile request comes in right after this one.
+    return new QuaZipFile(quazip->getZipName(), path, QuaZip::csSensitive, parent);
+}
+
+
