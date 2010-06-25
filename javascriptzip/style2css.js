@@ -232,7 +232,6 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     if (rule.length == 0) {
       return;
     }
-	if (name == 'Parent_20_Element_20_List') alert(rule);
     rule = selector + '{' + rule + '}';
     stylesheet.insertRule(rule, stylesheet.cssRules.length);
   }
