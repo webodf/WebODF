@@ -114,40 +114,15 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   for (var family in familynamespaceprefixes) {
     var tree = styletree[family] = {};
     addStyleMapToStyleTree(stylenodes[family], tree);
-    //addStyleMapToStyleTree(styleautnodes[family], tree);
-    //addStyleMapToStyleTree(contentautostyles[family], tree);
+    addStyleMapToStyleTree(styleautnodes[family], tree);
+    addStyleMapToStyleTree(contentautostyles[family], tree);
     
-	var something = false;
     for (var name in tree) {
-	  something = true;
       addRules(stylesheet, family, name, tree[name]);
     }
-    if (tree['Standard']) {
-		alert(family + ": " + Object.keys(tree));
-	}
   }
   return;
   
-  var iter = doc.evaluate("style:style",
-      stylestyles, namespaceResolver, XPathResult.ANY_TYPE, null);
-  var i = iter.iterateNext();
-  while (i) {
-    var rule = createRule(i);
-    if (rule) {
-      try {
-        stylesheet.insertRule(rule, stylesheet.cssRules.length);
-      } catch (e) {
-        throw e + ' ' + rule;
-      }
-    }
-    i = iter.iterateNext();
-  }
-  return;
-  
-  // debug function
-  //function listStylesWithDescendents(tree) {
-  //}
-
   // helper functions
   
   function getStyleMap(stylesnode) {
@@ -183,15 +158,14 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   function addStyleToStyleTree(stylename, stylesmap, stylestree) {
     var style = stylesmap[stylename];
     if (!style) {
-		alert("no style for stylename " + stylename);
-		return;
-	}
+      return;
+    }
     var parentname = style.getAttributeNS(stylens, 'parent-style-name');
     var parentstyle = null;
     if (parentname) {
       parentstyle = findStyle(stylestree, parentname);
       if (!parentstyle && stylesmap[parentname]) {
-		// parent style has not been handled yet, do that now
+        // parent style has not been handled yet, do that now
         addStyleToStyleTree(parentname, stylesmap, stylestree);
         parentstyle = stylesmap[parentname];
         stylesmap[parentname] = null;
@@ -218,9 +192,11 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   function getSelectors(family, name, node) {
     var selectors = [];
     selectors.push(createSelector(family, name));
-	if (node.derivedStyles) alert("get " + name + " : " + Object.keys(node.derivedStyles));
     for (var n in node.derivedStyles) {
-      selectors.concat(getSelectors(family, n, node.derivedStyles[n]));
+      var ss = getSelectors(family, n, node.derivedStyles[n]);
+      for (var s in ss) {
+        selectors.push(ss[s]);
+      }
     }
     return selectors;
   }
@@ -236,10 +212,8 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   }
   
   function addRule(sheet, family, name, node) {
-	var selectors = getSelectors(family, name, node);
-	var selector = selectors.join(',');
-	if (node.derivedStyles)	alert(name+": "+Object.keys(node.derivedStyles));
-    if (selector == null || selector.length == 0) return;
+    var selectors = getSelectors(family, name, node);
+    var selector = selectors.join(',');
     
     var rule = '';
     var properties = node.getElementsByTagNameNS(stylens, 'text-properties');
@@ -262,10 +236,10 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   }
   
   function addRules(sheet, family, name, node) {
-	addRule(sheet, family, name, node);
-	for (var n in node.derivedStyles) {
-	  addRules(sheet, family, n, node.derivedStyles[n]);
-	}
+    addRule(sheet, family, name, node);
+    for (var n in node.derivedStyles) {
+      addRules(sheet, family, n, node.derivedStyles[n]);
+    }
   }
 
   function applySimpleMapping(props, mapping) {
@@ -317,10 +291,5 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   // css vs odf styles
   // ODF styles occur in families. A family is a group of odf elements to
   // which an element applies. ODF families can be mapped to a group of css elements
-
-
-  // initial implemenation doing just the text family
-
-
 
 }
