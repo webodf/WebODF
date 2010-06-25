@@ -1,7 +1,6 @@
-function style2css(stylesheet, stylesxmldom) {
+function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) {
 
   // helper constants
-  var xlinkns = 'http://www.w3.org/1999/xlink';
 
   var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
   var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
@@ -10,7 +9,6 @@ function style2css(stylesheet, stylesxmldom) {
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
   var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
   var namespaces = {
-    xlink: xlinkns,
     draw: drawns,
     fo: fons,
     office: officens,
@@ -63,10 +61,6 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'font-size', 'font-size' ]
   ];
 
-  var bgImageSimpleMapping = [
-    [ xlinkns, 'href', 'background-image' ]
-  ];
-
   var paragraphPropertySimpleMapping = [
     [ fons, 'text-align', 'text-align' ],
     [ fons, 'padding-left', 'padding-left' ],
@@ -82,7 +76,6 @@ function style2css(stylesheet, stylesxmldom) {
     [ fons, 'margin-top', 'margin-top' ],
     [ fons, 'margin-bottom', 'margin-bottom' ],
     [ fons, 'border', 'border' ],
-    [ fons, 'background-color', 'background-color' ],
   ];
 
   var tablecellPropertySimpleMapping = [
@@ -97,7 +90,7 @@ function style2css(stylesheet, stylesxmldom) {
   while (stylesheet.cssRules.length) {
     stylesheet.deleteRule(stylesheet.cssRules.length-1);
   }
-  var doc = stylesxmldom.ownerDocument;
+  var doc = stylestyles.ownerDocument;
   // add @namespace rules
   for (var prefix in namespaces) {
     var rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
@@ -111,8 +104,32 @@ function style2css(stylesheet, stylesxmldom) {
   var namespaceResolver = function(prefix) {
     return namespaces[prefix];
   }
+  
+  // add the various styles
+  stylenodes = getStyleMap(stylestyles);
+  styleautnodes = getStyleMap(styleautostyles);
+  contentautostyles = getStyleMap(contentautostyles);
+  
+  var styletree = {};
+  for (var family in familynamespaceprefixes) {
+    var tree = styletree[family] = {};
+    addStyleMapToStyleTree(stylenodes[family], tree);
+    //addStyleMapToStyleTree(styleautnodes[family], tree);
+    //addStyleMapToStyleTree(contentautostyles[family], tree);
+    
+	var something = false;
+    for (var name in tree) {
+	  something = true;
+      addRules(stylesheet, family, name, tree[name]);
+    }
+    if (tree['Standard']) {
+		alert(family + ": " + Object.keys(tree));
+	}
+  }
+  return;
+  
   var iter = doc.evaluate("style:style",
-      stylesxmldom, namespaceResolver, XPathResult.ANY_TYPE, null);
+      stylestyles, namespaceResolver, XPathResult.ANY_TYPE, null);
   var i = iter.iterateNext();
   while (i) {
     var rule = createRule(i);
@@ -125,33 +142,37 @@ function style2css(stylesheet, stylesxmldom) {
     }
     i = iter.iterateNext();
   }
-//  alert(stylesheet.cssRules.length + ' = count');
   return;
+  
+  // debug function
+  //function listStylesWithDescendents(tree) {
+  //}
 
   // helper functions
   
   function getStyleMap(stylesnode) {
     // put all style elements in a hash map by family and name
     var stylemap = {};
-    var iter = doc.evaluate("style:style", stylesnode, namespaceresolver, XPathResult.ANY_TYPE, null);
-    var node = iter.iteratorNext();
+    var iter = doc.evaluate("style:style", stylesnode, namespaceResolver, XPathResult.ANY_TYPE, null);
+    var node = iter.iterateNext();
     while (node) {
-      var name = style.getAttributeNS(stylens, 'name');
-      var family = style.getAttributeNS(stylens, 'family');
+      var name = node.getAttributeNS(stylens, 'name');
+      var family = node.getAttributeNS(stylens, 'family');
       if (!stylemap[family]) {
         stylemap[family] = {};
       }
       stylemap[family][name] = node;
-      node = iter.iteratorNext();
+      node = iter.iterateNext();
     }
     return stylemap;
   }
   
   function findStyle(stylestree, name) {
-    if (!name) return null;
+    if (!name || !stylestree) return null;
     if (stylestree[name]) return stylestree[name];
+    var derivedStyles = stylestree.derivedStyles;
     for (var n in stylestree) {
-      var style = findStyle(stylestree[n], name);
+      var style = findStyle(stylestree[n].derivedStyles, name);
       if (style) {
         return style;
       }
@@ -161,44 +182,47 @@ function style2css(stylesheet, stylesxmldom) {
   
   function addStyleToStyleTree(stylename, stylesmap, stylestree) {
     var style = stylesmap[stylename];
-    if (!style) return;
+    if (!style) {
+		alert("no style for stylename " + stylename);
+		return;
+	}
     var parentname = style.getAttributeNS(stylens, 'parent-style-name');
-	var parentstyle = null;
+    var parentstyle = null;
     if (parentname) {
       parentstyle = findStyle(stylestree, parentname);
       if (!parentstyle && stylesmap[parentname]) {
-        addStyleToStyleTree(parentname, stylesmap[parentname]);
+		// parent style has not been handled yet, do that now
+        addStyleToStyleTree(parentname, stylesmap, stylestree);
         parentstyle = stylesmap[parentname];
         stylesmap[parentname] = null;
       }
-	}
+    }
     if (parentstyle) {
       if (!parentstyle.derivedStyles) {
-        parentstyle.derivedStyles = [];
+        parentstyle.derivedStyles = {};
       }
-      parentstyle.derivedStyles.push(style);
+      parentstyle.derivedStyles[stylename] = style;
     } else {
       // no parent so add the root
-	  
-	}
+      stylestree[stylename] = style;      
+    }
   }
   
   function addStyleMapToStyleTree(stylesmap, stylestree) {
     for (var name in stylesmap) {
-	  addStyleToStyleTree(name, stylesmap, stylestree);
-	  /*
-      var style = findStyle(stylestree, name);
-      if (style) {
-        // a style with this name already exists
-        continue;
-      }
-      var parentname = style.getAttributeNS(stylens, 'parent-style-name');
-      var parentstyle = findStyle(stylestree, parentname);
-      if (!parentstyle) {
-        parentstyle = stylesmap[];
-      }
-      */
+      addStyleToStyleTree(name, stylesmap, stylestree);
+      stylesmap[name] = null;
     }
+  }
+  
+  function getSelectors(family, name, node) {
+    var selectors = [];
+    selectors.push(createSelector(family, name));
+	if (node.derivedStyles) alert("get " + name + " : " + Object.keys(node.derivedStyles));
+    for (var n in node.derivedStyles) {
+      selectors.concat(getSelectors(family, n, node.derivedStyles[n]));
+    }
+    return selectors;
   }
   
   function createSelector(family, name) {
@@ -210,31 +234,38 @@ function style2css(stylesheet, stylesxmldom) {
     return prefix+'|'+familytagnames[family].join(namepart+','+prefix+'|')
         + namepart;
   }
-
-  function createRule(style) {
-    var name = style.getAttributeNS(stylens, 'name');
-    if (name == null) return null;
-    var family = style.getAttributeNS(stylens, 'family');
-    var selector = createSelector(family, name);
-    if (selector == null) return null;
-
+  
+  function addRule(sheet, family, name, node) {
+	var selectors = getSelectors(family, name, node);
+	var selector = selectors.join(',');
+	if (node.derivedStyles)	alert(name+": "+Object.keys(node.derivedStyles));
+    if (selector == null || selector.length == 0) return;
+    
     var rule = '';
-    var properties = style.getElementsByTagNameNS(stylens, 'text-properties');
+    var properties = node.getElementsByTagNameNS(stylens, 'text-properties');
     if (properties.length > 0) {
       rule += getTextProperties(properties.item(0));
     }
-    properties = style.getElementsByTagNameNS(stylens, 'paragraph-properties');
+    properties = node.getElementsByTagNameNS(stylens, 'paragraph-properties');
     if (properties.length > 0) {
       rule += getParagraphProperties(properties.item(0));
     }
-    properties = style.getElementsByTagNameNS(stylens, 'table-cell-properties');
+    properties = node.getElementsByTagNameNS(stylens, 'table-cell-properties');
     if (properties.length > 0) {
       rule += getTableCellProperties(properties.item(0));
     }
     if (rule.length == 0) {
-      return null;
+      return;
     }
-    return selector + '{' + rule + '}';
+    rule = selector + '{' + rule + '}';
+    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+  }
+  
+  function addRules(sheet, family, name, node) {
+	addRule(sheet, family, name, node);
+	for (var n in node.derivedStyles) {
+	  addRules(sheet, family, n, node.derivedStyles[n]);
+	}
   }
 
   function applySimpleMapping(props, mapping) {
@@ -270,13 +301,6 @@ function style2css(stylesheet, stylesxmldom) {
   function getParagraphProperties(props) {
     var rule = '';
     rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
-    var imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
-    if (imageProps.length > 0) {
-        //var url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
-        var url = "http://chani.ca/avatar.png";
-        rule += "background-image: url('" + url + "');";
-        rule += "background-repeat: repeat;"; //FIXME test
-    }
     return rule;
   }
 
