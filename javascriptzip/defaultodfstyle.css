@@ -32,6 +32,13 @@ text|line-break:before {
 office|text {
   display: block;
   background: white;
+  width: 216mm; /* default to A4 width */
+  min-height: 279mm;
+  padding-left: 32mm;
+  padding-right: 32mm;
+  padding-top: 25mm;
+  padding-bottom: 13mm;
+  margin: 2px;
 }
 office|spreadsheet {
   display: block;
@@ -96,14 +103,8 @@ draw|frame {
 draw|image {
   display: block;
 }
-text|list { /* reset the list numbering for each list */
-    counter-reset: list-num;
-}
 text|list-item {
-    counter-increment: list-num;
-}
-text|list-item:before { /* prefix each list-item with a roman numeral */
-    content: counter(list-num, upper-roman) ". ";
+    display: list-item;
 }
 
 text|a {
