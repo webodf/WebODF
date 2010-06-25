@@ -62,6 +62,7 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   ];
 
   var paragraphPropertySimpleMapping = [
+    [ fons, 'background-color', 'background-color' ],
     [ fons, 'text-align', 'text-align' ],
     [ fons, 'padding-left', 'padding-left' ],
     [ fons, 'padding-right', 'padding-right' ],
@@ -231,6 +232,7 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     if (rule.length == 0) {
       return;
     }
+	if (name == 'Parent_20_Element_20_List') alert(rule);
     rule = selector + '{' + rule + '}';
     stylesheet.insertRule(rule, stylesheet.cssRules.length);
   }

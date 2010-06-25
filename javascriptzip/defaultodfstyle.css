@@ -23,11 +23,11 @@ text|s:before { /* this needs to be the number of spaces given by text:c */
 }
 text|tab:before {
   display: inline;
-  content: '	';
+  content: '        ';
 }
-text|line-break:before {
-  display: inline;
-  content: '\A'; /* "\A" is a forced line break similar to <BR> in HTML */
+text|line-break {
+  content: " ";
+  display: block;
 }
 office|text {
   display: block;
