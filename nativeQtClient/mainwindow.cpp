@@ -11,6 +11,7 @@
 
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     createActions();
     createToolBars();
+
+    QCoreApplication::setOrganizationName("KO");
+    //QCoreApplication::setOrganizationDomain("example.com");
+    QCoreApplication::setApplicationName("Odf Viewer");
+
+    QSettings settings;
 
     setWindowTitle(tr("Odf Viewer"));
     setUnifiedTitleAndToolBarOnMac(true);
@@ -36,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 1; i < dirmodel->columnCount(); i++) {
         dirview->setColumnHidden(i, true);
     }
-    QString rootpath = QDir::homePath();
+    QString rootpath = settings.value("rootpath", QDir::homePath()).toString();
     dirmodel->setRootPath(rootpath);
     const QModelIndex rootindex = dirmodel->index(rootpath);
     dirview->setRootIndex(rootindex);
@@ -165,6 +172,8 @@ void MainWindow::setPath(const QString &path)
     dirmodel->setRootPath(path);
     const QModelIndex rootindex = dirmodel->index(path);
     dirview->setRootIndex(rootindex);
+    QSettings settings;
+    settings.setValue("rootpath", path);
 }
 
 
