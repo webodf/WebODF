@@ -9,6 +9,9 @@
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 
+#include <QVBoxLayout>
+#include <QLineEdit>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -37,11 +40,17 @@ MainWindow::MainWindow(QWidget *parent) :
     dirmodel->setRootPath(rootpath);
     const QModelIndex rootindex = dirmodel->index(rootpath);
     dirview->setRootIndex(rootindex);
+    QLineEdit *dirPath = new QLineEdit(rootpath, this);
     dirdock = new QDockWidget(this);
-    dirdock->setWidget(dirview);
+    QWidget *w = new QWidget(dirdock);
+    QVBoxLayout *layout = new QVBoxLayout(w);
+    dirdock->setWidget(w);
+    layout->addWidget(dirPath);
+    layout->addWidget(dirview);
     addDockWidget(Qt::LeftDockWidgetArea, dirdock);
 
     connect(dirview, SIGNAL(clicked(QModelIndex)), this, SLOT(loadOdf(QModelIndex)));
+    connect(dirPath, SIGNAL(textChanged(QString)), this, SLOT(setPath(QString)));
 /*
     OdfView *child = createOdfView();
     if (child->loadFile("../kofficetests/odf/DanskTest01.odt")) {
@@ -150,3 +159,13 @@ MainWindow::loadOdf(const QModelIndex& index) {
     path = QFileInfo(path).canonicalFilePath();
     openFile(path);
 }
+
+void MainWindow::setPath(const QString &path)
+{
+    dirmodel->setRootPath(path);
+    const QModelIndex rootindex = dirmodel->index(path);
+    dirview->setRootIndex(rootindex);
+}
+
+
+

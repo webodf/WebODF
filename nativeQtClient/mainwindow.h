@@ -25,6 +25,7 @@ private slots:
     void open();
     OdfView *createOdfView();
     void loadOdf(const QModelIndex& index);
+    void setPath(const QString &path);
 
 private:
     QMdiSubWindow *findMdiChild(const QString &fileName);
