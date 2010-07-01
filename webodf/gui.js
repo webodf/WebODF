@@ -122,27 +122,44 @@ Ext.onReady(function(){
 
   // put data in the tree
   listFiles('./kofficetests/', /\.od[tps]$/i, listFilesCallback,
-    listFilesDoneCallback);
+      listFilesDoneCallback);
 });
 
 function addThumbnail(node) {
   var url = node.id;
-  var zip = new Zip(url, function(zip) {
-    zip.load('Thumbnails/thumbnail.png', function(data) {
-      if (data == null) return;
-      var url = 'data:;base64,' + Base64.toBase64(data);
-      node.attributes.qtip += '<br/><img src="' + url + '"/>';
-      var el = node.getUI().getEl();
-      var spans = el.getElementsByTagName('span');
-      for (var i = 0; i < spans.length; i++) {
-        var s = spans.item(i);
-        if (s.getAttribute('qtip')) {
-          s.setAttribute('qtip', node.attributes.qtip);
-        }
+  var partcallback = function(part) {
+    if (node.attributes.qtip.indexOf('<img') != -1) return;
+    var url = part.getUrl();
+	var l = -1;
+    if (url) l=url.length;
+    if (url == null) return;
+    node.attributes.qtip += '<br/><img src="' + url + '"/>';
+    var el = node.getUI().getEl();
+    var spans = el.getElementsByTagName('span');
+    for (var i = 0; i < spans.length; i++) {
+      var s = spans.item(i);
+      if (s.getAttribute('qtip')) {
+        s.setAttribute('qtip', node.attributes.qtip);
       }
-      return;
-    });
-  });
+    }
+    return;
+  };
+  var odfcallback = function(odf) {
+    if (node.attributes.qtip.indexOf('<img') != -1) return;
+    var part = odf.getPart('Thumbnails/thumbnail.png');
+    if (part == null) return;
+    var url = part.getUrl();
+    if (url == null) {
+      part.onstatereadychange = partcallback;
+      part.load();
+    } else {
+      partcallback(part);
+    }
+  };
+  var odf = Odf.getContainer(url);
+  odfcallback(odf);
+  odf.onstatereadychange = odfcallback;
+  odf.load('Thumbnails/thumbnail.png');
 }
 
 function loadODF(url, panel, title) {

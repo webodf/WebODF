@@ -155,24 +155,31 @@ RemoteFileReader.prototype.doNextRequest = function() {
     return;
   }
   var job = this.currentJob;
-  var range = job.remotefile.getOptimalRange(job.offset, job.size);
   var hascallback = job.callback != null;
-  document.title = ++httpreqcount;
-  this.req.open('GET', job.remotefile.url, hascallback);
-  if (navigator.userAgent.indexOf("MSIE") == -1) {
-    this.req.overrideMimeType('text/plain; charset=x-user-defined');
+  // check if the data has been retrieved in the meantime
+  var data = job.remotefile.get(job.offset, job.size);
+  if (data && hascallback) {
+    this.callback(job);
   }
-  range = 'bytes=' + range.offset + '-' + (range.offset + range.size - 1);
-  this.req.setRequestHeader('Range', range);
-  if (hascallback) {
-    var reader = this;
-    this.req.onreadystatechange = function(evt) {
-      reader.callback(job);
-    };
-  } else {
-    this.req.onreadystatechange = null;
+  if (!data) {
+    var range = job.remotefile.getOptimalRange(job.offset, job.size);
+    document.title = ++httpreqcount;
+    this.req.open('GET', job.remotefile.url, hascallback);
+    if (navigator.userAgent.indexOf("MSIE") == -1) {
+      this.req.overrideMimeType('text/plain; charset=x-user-defined');
+    }
+    range = 'bytes=' + range.offset + '-' + (range.offset + range.size - 1);
+    this.req.setRequestHeader('Range', range);
+    if (hascallback) {
+      var reader = this;
+      this.req.onreadystatechange = function(evt) {
+        reader.callback(job);
+      };
+    } else {
+      this.req.onreadystatechange = null;
+    }
+    this.req.send(null);
   }
-  this.req.send(null);
   if (!hascallback) {
     return this.callback(job);
   }
@@ -268,7 +275,7 @@ function Zip(url, entriesReadCallback) {
     }
   }
   this.filesize = remotefilereader.getFileSize(url, callback);
-  if (this.filesize == -1) {
+  if (callback || this.filesize == -1) {
     return;
   }
   this.readCentralDirectoryEnd();

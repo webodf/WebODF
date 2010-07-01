@@ -34,6 +34,9 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
 
   function getNextFileListWithIndexHtml() {
     var url = todoList.shift();
+    while (url && typeof url != 'string') {
+      url = todoList.shift();
+    }
     if (!url) {
       if (doneCallback) {
         doneCallback();

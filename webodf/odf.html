@@ -93,7 +93,7 @@ function init() {
   location = location.substr(pos+1);
   // open the odf container
   window.odfcontainer = window.odf.getContainer(location);
-  refreshOdf();
+  window.odfcontainer.onstatereadychange = refreshOdf;
 }
 
 function clear(element) {
