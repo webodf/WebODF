@@ -9,6 +9,10 @@
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 
+#include <QVBoxLayout>
+#include <QLineEdit>
+#include <QSettings>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -17,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     createActions();
     createToolBars();
+
+    QCoreApplication::setOrganizationName("KO");
+    //QCoreApplication::setOrganizationDomain("example.com");
+    QCoreApplication::setApplicationName("Odf Viewer");
+
+    QSettings settings;
 
     setWindowTitle(tr("Odf Viewer"));
     setUnifiedTitleAndToolBarOnMac(true);
@@ -33,15 +43,21 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 1; i < dirmodel->columnCount(); i++) {
         dirview->setColumnHidden(i, true);
     }
-    QString rootpath = QDir::homePath();
+    QString rootpath = settings.value("rootpath", QDir::homePath()).toString();
     dirmodel->setRootPath(rootpath);
     const QModelIndex rootindex = dirmodel->index(rootpath);
     dirview->setRootIndex(rootindex);
+    QLineEdit *dirPath = new QLineEdit(rootpath, this);
     dirdock = new QDockWidget(this);
-    dirdock->setWidget(dirview);
+    QWidget *w = new QWidget(dirdock);
+    QVBoxLayout *layout = new QVBoxLayout(w);
+    dirdock->setWidget(w);
+    layout->addWidget(dirPath);
+    layout->addWidget(dirview);
     addDockWidget(Qt::LeftDockWidgetArea, dirdock);
 
     connect(dirview, SIGNAL(clicked(QModelIndex)), this, SLOT(loadOdf(QModelIndex)));
+    connect(dirPath, SIGNAL(textChanged(QString)), this, SLOT(setPath(QString)));
 /*
     OdfView *child = createOdfView();
     if (child->loadFile("../kofficetests/odf/DanskTest01.odt")) {
@@ -150,3 +166,15 @@ MainWindow::loadOdf(const QModelIndex& index) {
     path = QFileInfo(path).canonicalFilePath();
     openFile(path);
 }
+
+void MainWindow::setPath(const QString &path)
+{
+    dirmodel->setRootPath(path);
+    const QModelIndex rootindex = dirmodel->index(path);
+    dirview->setRootIndex(rootindex);
+    QSettings settings;
+    settings.setValue("rootpath", path);
+}
+
+
+
