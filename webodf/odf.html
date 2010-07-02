@@ -18,6 +18,7 @@
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 @namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
+@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
   </style>
@@ -28,6 +29,7 @@
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 @namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
+@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
   </style>
@@ -38,6 +40,7 @@
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 @namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
+@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
   </style>
@@ -209,9 +212,9 @@ function setFramePosition(id, frame, stylesheet) {
   var rule = 'position: absolute;';
   //rule += 'opacity:0.6; background:blue;';
   var x = frame.getAttributeNS(svgns, 'x');
-  if (x) { rule += 'top: ' + x + ';'; }
-  var y = frame.getAttributeNS(svgns, 'x');
-  if (y) { rule += 'left: ' + y + ';'; }
+  if (x) { rule += 'left: ' + x + ';'; }
+  var y = frame.getAttributeNS(svgns, 'y');
+  if (y) { rule += 'top: ' + y + ';'; }
   var width = frame.getAttributeNS(svgns, 'width');
   if (width) { rule += 'width: ' + width + ';'; }
   var height = frame.getAttributeNS(svgns, 'height');

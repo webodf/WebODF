@@ -58,6 +58,7 @@ draw|page {
   width: 25.4cm;
   background: white;
   margin: 3px;
+  position: relative;
 }
 office|spreadsheet text|p {
   border: 0px;

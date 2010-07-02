@@ -3,13 +3,14 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   // helper constants
   var xlinkns = 'http://www.w3.org/1999/xlink';
 
-  var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-  var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
-  var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-  var fons="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0";
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
-  var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
+  var fons="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0";
+  var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
   var presentationns="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0";
+  var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+  var svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+  var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
+  var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
   var namespaces = {
     draw: drawns,
     fo: fons,
@@ -89,6 +90,14 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     [ fons, 'margin-bottom', 'margin-bottom' ],
     [ fons, 'border', 'border' ],
   ];
+  
+  var graphicPropertySimpleMapping = [
+    [ drawns, 'fill-color', 'background-color' ],
+    [ fons, 'min-height', 'min-height' ],
+    [ drawns, 'stroke', 'border' ],
+    [ svgns, 'stroke-color', 'border-color' ],
+  ];
+
 
   var tablecellPropertySimpleMapping = [
     [ fons, 'background-color', 'background-color' ],
@@ -251,6 +260,10 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     if (properties) {
       rule += getParagraphProperties(properties);
     }
+    properties = getDirectChild(node, stylens, 'graphic-properties');
+    if (properties) {
+      rule += getGraphicProperties(properties);
+    }
     properties = getDirectChild(node, stylens, 'table-cell-properties');
     if (properties) {
       rule += getTableCellProperties(properties);
@@ -320,6 +333,12 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     return rule;
   }
 
+  function getGraphicProperties(props) {
+    var rule = '';
+    rule += applySimpleMapping(props, graphicPropertySimpleMapping);
+    return rule;
+  }
+  
   function getTableCellProperties(props) {
     var rule = '';
     rule += applySimpleMapping(props, tablecellPropertySimpleMapping);
