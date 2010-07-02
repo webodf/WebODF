@@ -20,14 +20,23 @@ Odf::addFile(const QString& containerid, const QString& path)
 }
 
 QString
-Odf::load(QString containerid, QString path, QString odfcontainerid)
+Odf::load(QString containerid, QString path, QString callbackid)
 {
     OdfContainer* c = openfiles.value(containerid);
     QString result;
     if (c) {
         result = c->loadAsString(path);
     }
-    // TODO: call the callback with escaped result data
-    // frame->evaluateJavaScript("window.qtodf."+odfcontainerid+".callback("+result+");")
+    if (!callbackid.isNull()) {
+        callbackdata = result;
+        // call the callback with escaped result data
+        QVariant out = frame->evaluateJavaScript("window.qtodf." + callbackid
+                + "(window.qtodf.callbackdata);window.qtodf." + callbackid
+                +"=null;");
+        if (out.toString().length()) {
+            qDebug() << out.toString();
+        }
+        callbackdata = QString();
+    }
     return result;
 }

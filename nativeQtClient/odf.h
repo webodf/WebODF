@@ -16,11 +16,16 @@ public:
     OdfContainer* getOpenContainer(const QString& id);
 
     void addFile(const QString& containerid, const QString& path);
+
+    Q_PROPERTY(QString callbackdata READ getCallbackData);
 public slots:
-    QString load(QString containerid, QString path, QString odfcontainerid);
+    QString load(QString containerid, QString path, QString callbackid);
 private:
     QMap<QString, OdfContainer*> openfiles;
     QWebFrame* const frame;
+    QString callbackdata;
+
+    QString getCallbackData() const { return callbackdata; }
 };
 
 #endif // ODF_H
