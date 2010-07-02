@@ -16,6 +16,7 @@
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
@@ -25,6 +26,7 @@
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
@@ -34,6 +36,7 @@
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
@@ -203,7 +206,8 @@ function modifyImages(contentxml, stylesheet) {
 }
 function setFramePosition(id, frame, stylesheet) {
   frame.setAttribute('styleid', id);
-  var rule = 'position: relative;';
+  var rule = 'position: absolute;';
+  //rule += 'opacity:0.6; background:blue;';
   var x = frame.getAttributeNS(svgns, 'x');
   if (x) { rule += 'top: ' + x + ';'; }
   var y = frame.getAttributeNS(svgns, 'x');

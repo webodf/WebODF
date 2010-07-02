@@ -9,10 +9,12 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   var fons="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0";
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
   var tablens="urn:oasis:names:tc:opendocument:xmlns:table:1.0";
+  var presentationns="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0";
   var namespaces = {
     draw: drawns,
     fo: fons,
     office: officens,
+    presentation: presentationns,
     style: stylens,
     table: tablens,
     text: textns,
@@ -21,6 +23,7 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   var familynamespaceprefixes = {
     graphic: 'draw',
     paragraph: 'text',
+    presentation: 'presentation',
     ruby: 'text',
     section: 'text',
     table: 'table',
@@ -36,6 +39,9 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
         'illustration-index-entry-template', 'index-source-style',
         'object-index-entry-template', 'p', 'table-index-entry-template',
         'table-of-content-entry-template', 'user-index-entry-template'],
+    presentation: ['caption', 'circle', 'connector', 'control', 'custom-shape',
+        'ellipse', 'frame', 'g', 'line', 'measure', 'page-thumbnail', 'path',
+        'polygon', 'polyline', 'rect', 'regular-polygon'],
     ruby: ['ruby', 'ruby-text'],
     section: ['alphabetical-index', 'bibliography', 'illustration-index',
         'index-title', 'object-index', 'section', 'table-of-content',
@@ -211,10 +217,25 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     var prefix = familynamespaceprefixes[family];
     if (prefix == null) return null;
     var namepart = '['+prefix+'|style-name="'+name+'"]';
+    if (prefix == 'presentation') {
+		prefix = 'draw';
+		namepart = '[presentation|style-name="'+name+'"]';
+	}
     var selector = '';
     var first = true;
     return prefix+'|'+familytagnames[family].join(namepart+','+prefix+'|')
         + namepart;
+  }
+  
+  function getDirectChild(node, ns, name) {
+    if (!node) return null;
+    var c = node.firstChild;
+	while (c) {
+      if (c.namespaceURI == ns && c.localName == name) {
+		  return c;
+	  }
+	  c = c.nextSibling;
+	}
   }
   
   function addRule(sheet, family, name, node) {
@@ -222,23 +243,29 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
     var selector = selectors.join(',');
     
     var rule = '';
-    var properties = node.getElementsByTagNameNS(stylens, 'text-properties');
-    if (properties.length > 0) {
-      rule += getTextProperties(properties.item(0));
+    var properties = getDirectChild(node, stylens, 'text-properties');
+    if (properties) {
+      rule += getTextProperties(properties);
     }
-    properties = node.getElementsByTagNameNS(stylens, 'paragraph-properties');
-    if (properties.length > 0) {
-      rule += getParagraphProperties(properties.item(0));
+    properties = getDirectChild(node, stylens, 'paragraph-properties');
+    if (properties) {
+      rule += getParagraphProperties(properties);
     }
-    properties = node.getElementsByTagNameNS(stylens, 'table-cell-properties');
-    if (properties.length > 0) {
-      rule += getTableCellProperties(properties.item(0));
+    properties = getDirectChild(node, stylens, 'table-cell-properties');
+    if (properties) {
+      rule += getTableCellProperties(properties);
     }
     if (rule.length == 0) {
       return;
     }
     rule = selector + '{' + rule + '}';
-    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+	try {
+      stylesheet.insertRule(rule, stylesheet.cssRules.length);
+	} catch (e) {
+	  alert(rule);
+	  throw e;
+	}
+	//if (rule.indexOf('presentation')!=-1){alert(rule);throw rule;}
   }
   
   function addRules(sheet, family, name, node) {

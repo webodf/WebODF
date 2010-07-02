@@ -1,4 +1,5 @@
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
+@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
@@ -112,4 +113,6 @@ text|a {
     text-decoration: underline;
 }
 
-
+presentation|notes {
+    display: none;
+}
