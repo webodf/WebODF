@@ -104,6 +104,12 @@ draw|frame {
 }
 draw|image {
   display: block;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 text|list-item {
     display: list-item;

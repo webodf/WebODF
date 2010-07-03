@@ -192,6 +192,7 @@ function handleStyles(stylesxml, contentxml) {
 }
   var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
   var svgns="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+  var xlinkns = 'http://www.w3.org/1999/xlink';
 
 function modifyImages(contentxml, stylesheet) {
   var namespaces = {
@@ -204,7 +205,11 @@ function modifyImages(contentxml, stylesheet) {
   var doc = contentxml.ownerDocument;
   var frames = contentxml.getElementsByTagNameNS(drawns, 'frame');
   for (var i=0; i<frames.length; ++i) {
-    setFramePosition(i, frames.item(i), stylesheet);
+    setFramePosition('frame'+i, frames.item(i), stylesheet);
+  }
+  var images = contentxml.getElementsByTagNameNS(drawns, 'image');
+  for (var i=0; i<images.length; ++i) {
+    setImage('image'+i, images.item(i), stylesheet);
   }
 }
 function setFramePosition(id, frame, stylesheet) {
@@ -220,6 +225,13 @@ function setFramePosition(id, frame, stylesheet) {
   var height = frame.getAttributeNS(svgns, 'height');
   if (height) { rule += 'height: ' + height + ';' }
   rule = 'draw|frame[styleid="' + id + '"] {' + rule + '}';
+  stylesheet.insertRule(rule, stylesheet.cssRules.length);
+}
+function setImage(id, image, stylesheet) {
+  image.setAttribute('styleid', id);
+  var url = image.getAttributeNS(xlinkns, 'href');
+  var rule = "background-image: url('odfkit:" + url + "');";
+  rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
   </script>
