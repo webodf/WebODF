@@ -50,6 +50,9 @@ Odf = function(){
       }
       return this.parseXml(filepath, xmldata);
     }
+    OdfContainer.prototype.getPartUrl = function(partname) {
+      return 'odfkit:' + partname;
+    }
     return {
         /* export the public api */
         OdfContainer: OdfContainer

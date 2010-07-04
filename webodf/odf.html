@@ -128,7 +128,7 @@ function refreshOdf() {
 
       // do content last, because otherwise the document is constantly updated
       // whenever the css changes
-      handleContentXmlLoaded(contentxmlnode);
+      handleContentXmlLoaded(container, contentxmlnode);
     });
   });
 }
@@ -138,7 +138,7 @@ var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
 /**
  * A new content.xml has been loaded. Update the live document with it.
  **/
-function handleContentXmlLoaded(contentxml, stylesxml) {
+function handleContentXmlLoaded(container, contentxml) {
   // replace content.xml in the live document
   var contentcontainer = document.getElementById('contentxml');
   if (!contentcontainer) {
@@ -148,7 +148,7 @@ function handleContentXmlLoaded(contentxml, stylesxml) {
 
   // experiment
   var positioncss = document.getElementById('positioncss');
-  modifyImages(contentxml, positioncss.sheet);
+  modifyImages(container, contentxml, positioncss.sheet);
 
   // only append the content at the end
   clear(contentcontainer);
@@ -194,7 +194,7 @@ function handleStyles(stylesxml, contentxml) {
   var svgns="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
   var xlinkns = 'http://www.w3.org/1999/xlink';
 
-function modifyImages(contentxml, stylesheet) {
+function modifyImages(container, contentxml, stylesheet) {
   var namespaces = {
     draw: drawns,
     svg: svgns
@@ -209,7 +209,7 @@ function modifyImages(contentxml, stylesheet) {
   }
   var images = contentxml.getElementsByTagNameNS(drawns, 'image');
   for (var i=0; i<images.length; ++i) {
-    setImage('image'+i, images.item(i), stylesheet);
+    setImage('image'+i, container, images.item(i), stylesheet);
   }
 }
 function setFramePosition(id, frame, stylesheet) {
@@ -227,10 +227,11 @@ function setFramePosition(id, frame, stylesheet) {
   rule = 'draw|frame[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
-function setImage(id, image, stylesheet) {
+function setImage(id, container, image, stylesheet) {
   image.setAttribute('styleid', id);
   var url = image.getAttributeNS(xlinkns, 'href');
-  var rule = "background-image: url('odfkit:" + url + "');";
+  url = container.getPartUrl(url);
+  var rule = "background-image: url(" + url + ");";
   rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }

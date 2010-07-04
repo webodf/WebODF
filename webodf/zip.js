@@ -102,7 +102,12 @@ RemoteFileReader.prototype.callback = function() {
     return d;
   }
   function cleanData(data) {
-    return String.fromCharCode.apply(String, cleanDataToArray(data));
+    try {
+      data = String.fromCharCode.apply(String, cleanDataToArray(data));
+    } catch (e) {
+      // ignore and return dirty data
+    }
+    return data;
   }
 
   if (this.req.readyState != 4) return null;
@@ -110,18 +115,12 @@ RemoteFileReader.prototype.callback = function() {
   var job = this.currentJob;
   this.currentJob = null;
   if (this.req.status == 206 || this.req.status == 200) {
-    var sum = 0;
-    for (var i in this.req.responseText) {
-      sum += this.req.responseText.charCodeAt(i) & 0xff;
-    }
     // get the file size
     var totallen = this.getFileLengthFromResponseHeader();
     if (totallen >= 0) {
       // clean up data, can be slow for big requests, perhaps use worker thread
       data = this.req.responseText;
-      if (data.length < 200000) {
-        data = cleanData(data);
-      }
+      data = cleanData(data);
       // store the full retrieved range in the remove file
       job.remotefile.add(job.offset, data);
       // get the requested range
@@ -251,7 +250,7 @@ ZipEntry.prototype.handleEntryData = function(data, callback) {
     // deflate functions
     if (this.data.length > 0 && this.data.length < 200000
             && this.data[0] == '<') {
-      this.data = window.Base64.convertUTF8StringToUTF16String(this.data);
+        this.data = window.Base64.convertUTF8StringToUTF16String(this.data);
     }
   } else {
     this.data = stream.data.substr(stream.pos, this.uncompressedSize);

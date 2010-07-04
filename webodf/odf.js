@@ -83,21 +83,35 @@ Odf = function(){
       }
       return this.parseXml(filepath, xmldata);
     }
-    OdfContainer.prototype.load = function(filepath) {
-      var this_ = this;
-      var callback = function(data) {
-        if (this_.onchange) {
-          this_.onchange(this_);
-        }
-        if (this_.onstatereadychange) {
-          this_.onstatereadychange(this_);
+    OdfContainer.prototype.load = function(filepath, callback) {
+      var self = this;
+      var c = null;
+      if (callback) {
+        c = function(data) {
+          if (this_.onchange) {
+            this_.onchange(this_);
+          }
+          if (this_.onstatereadychange) {
+            this_.onstatereadychange(this_);
+          }
         }
       };
-	  //alert('hi');
-      this.zip.load(filepath, callback);
+      return this.zip.load(filepath, c);
     }
     OdfContainer.prototype.getPart = function(partname) {
       return new OdfPart(partname, this.zip);
+    }
+    OdfContainer.prototype.getPartUrl = function(partname) {
+      // todo: deprecate in favor of getPart(partname).getUrl
+      var data = this.load(partname);
+      var url = 'data:;base64,';
+      var chunksize = 90000; // must be multiple of 3 and less than 100000
+      var i = 0;
+      while (i < data.length) {
+        url += Base64.toBase64(data.substr(i, chunksize));
+        i += chunksize;
+      }
+      return url;
     }
     // private constructor
     function OdfPart(name, zip) {
