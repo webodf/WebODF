@@ -18,6 +18,9 @@
       background: black;
       margin-left:auto; margin-right:auto;
     }
+    #stylesxml {
+      display: none;
+    }
   </style>
   <link rel="stylesheet" type="text/css" href="defaultodfstyle.css"/>
   <style id='stylesxmlcss' type="text/css">
@@ -184,6 +187,7 @@ function handleStyles(stylesxml, contentxml) {
   var stylescontainer = document.getElementById('stylesxml');
   if (!stylescontainer) {
       stylescontainer = document.createElementNS(xhtmlns, "div");
+      stylescontainer.id = 'stylesxml';
       document.body.appendChild(stylescontainer);
   }
   clear(stylescontainer);
@@ -203,9 +207,10 @@ function handleStyles(stylesxml, contentxml) {
     throw e;
   }
 }
-  var drawns="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
-  var svgns="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
-  var xlinkns = 'http://www.w3.org/1999/xlink';
+  var drawns  = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+  var svgns   = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+  var textns  = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+  var xlinkns = "http://www.w3.org/1999/xlink";
 
 function modifyImages(container, contentxml, stylesheet) {
   var namespaces = {
@@ -227,8 +232,12 @@ function modifyImages(container, contentxml, stylesheet) {
 }
 function setFramePosition(id, frame, stylesheet) {
   frame.setAttribute('styleid', id);
-  var rule = 'position: absolute;';
-  //rule += 'opacity:0.6; background:blue;';
+  var rule;
+  if (frame.getAttributeNS(textns, 'anchor-type') == "as-char") {
+    rule = 'display: inline-block;';
+  } else {
+    rule = 'position: absolute;';
+  }
   var x = frame.getAttributeNS(svgns, 'x');
   if (x) { rule += 'left: ' + x + ';'; }
   var y = frame.getAttributeNS(svgns, 'y');
