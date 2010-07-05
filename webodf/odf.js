@@ -107,7 +107,7 @@ Odf = function(){
       var url = 'data:;base64,';
       var chunksize = 90000; // must be multiple of 3 and less than 100000
       var i = 0;
-      while (i < data.length) {
+      while (data && i < data.length) {
         url += Base64.toBase64(data.substr(i, chunksize));
         i += chunksize;
       }

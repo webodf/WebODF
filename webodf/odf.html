@@ -48,6 +48,8 @@
 /* define namespaces here, because in WebKit they cannot be added dynamically */
 @namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
 @namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
+@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
+office|presentation draw|page { display:none; }
   </style>
   <script src="style2css.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
@@ -74,8 +76,6 @@ function init() {
   // create a native ODF object
   if (false) { // TODO check if there is a global ODF object
     window.odf = new ODF();
-//    window.odf.OdfContainer = function() {};
-//    window.odf.OdfContainer.prototype.getXmlNode() = function() {};
   } else {
     // try to load the javascript required when no native ODF support is
     // available
@@ -146,9 +146,12 @@ function handleContentXmlLoaded(container, contentxml) {
       document.body.appendChild(contentcontainer);
   }
 
-  // experiment
   var positioncss = document.getElementById('positioncss');
-  modifyImages(container, contentxml, positioncss.sheet);
+  var css = positioncss.sheet;
+  modifyImages(container, contentxml, css);
+  slidecssindex = css.insertRule(
+      'office|presentation draw|page:nth-child(n) { display:block; }',
+      css.cssRules.length);  
 
   // only append the content at the end
   clear(contentcontainer);
@@ -230,15 +233,66 @@ function setFramePosition(id, frame, stylesheet) {
 function setImage(id, container, image, stylesheet) {
   image.setAttribute('styleid', id);
   var url = image.getAttributeNS(xlinkns, 'href');
-  url = container.getPartUrl(url);
+  try {
+    url = container.getPartUrl(url);
+  } catch (e) {
+  }
   var rule = "background-image: url(" + url + ");";
   rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
   stylesheet.insertRule(rule, stylesheet.cssRules.length);
+}
+/** temporary function to make a presentation when 'f' is pressed **/
+var maxSlideRule = "{display: block;}";
+function makePresentation() {
+  presentation = true;
+  activeSlide -= 1;
+  nextSlide();
+}
+function unmakePresentation() {
+  presentation = false;
+  setSlideStyle('n', maxSlideRule);
+}
+function nextSlide() {
+  activeSlide += 1;
+  if (activeSlide < 1) activeSlide = 1;
+  setSlideStyle(activeSlide, maxSlideRule);
+}
+function previousSlide() {
+  activeSlide -= 2;
+  nextSlide();
+}
+function setSlideStyle(slide, style) {
+  var css = document.getElementById('positioncss').sheet;
+  var r = css.cssRules;
+  css.deleteRule(slidecssindex);
+  slidecssindex = css.insertRule('office|presentation draw|page:nth-child('+slide+')'
+    + maxSlideRule, css.cssRules.length);
+}
+var presentation = false;
+var activeSlide = 1;
+var slidecssindex = 0;
+window.onkeyup = function(e) {
+  if (e.keyCode == 70) { // f
+    if (presentation) {
+      unmakePresentation();
+    } else {
+      makePresentation();
+    }
+    return;
+  }
+  if (!presentation) {
+    return;
+  }
+  if (e.keyCode == 8) { // backspace
+    previousSlide();
+  } else {
+    nextSlide();
+  }
 }
   </script>
   <title></title>
 </head>
  
-<body onload='init()'>
+<body onload='init()' >
 </body>
 </html>

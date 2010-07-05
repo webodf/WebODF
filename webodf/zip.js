@@ -94,8 +94,9 @@ RemoteFileReader.prototype.getFileRange = function(url, offset, size, callback){
 }
 RemoteFileReader.prototype.callback = function() {
   function cleanDataToArray(data) {
-    var d = new Array(data.length);
+    if (data == null) return null;
     var length = data.length;
+    var d = new Array(length);
     for (var i=0; i<length; ++i) {
       d[i] = data.charCodeAt(i) & 0xff;
     }
