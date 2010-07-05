@@ -266,10 +266,18 @@ function makePresentation() {
   presentation = true;
   activeSlide -= 1;
   nextSlide();
+  var ppi = 98; // larger than 96 to avoid scaling problems
+  var pageheight = 8.27; // inches of hardcoded value
+  var zoomlevel = window.screen.height/ppi/pageheight;
+  document.body.style.zoom = zoomlevel;
+  document.body.style.MozTransform = 'scale('+zoomlevel+')';
 }
 function unmakePresentation() {
   presentation = false;
   setSlideStyle('n', "{display: block;}");
+  var zoomlevel = 1.0;
+  document.body.style.zoom = zoomlevel;
+  document.body.style.MozTransform = 'scale('+zoomlevel+')';
 }
 function nextSlide() {
   activeSlide += 1;
