@@ -191,7 +191,6 @@ function handleStyles(stylesxml, contentxml) {
       document.body.appendChild(stylescontainer);
   }
   clear(stylescontainer);
-  //alert(stylesxml);
   stylescontainer.appendChild(stylesxml);
 
   // update the css translation of the styles
@@ -267,8 +266,11 @@ function makePresentation() {
   activeSlide -= 1;
   nextSlide();
   var ppi = 98; // larger than 96 to avoid scaling problems
+  var pagewidth = 11.02; // inches of hardcoded value
   var pageheight = 8.27; // inches of hardcoded value
-  var zoomlevel = window.screen.height/ppi/pageheight;
+  var zoomlevelw = window.innerWidth/ppi/pagewidth;
+  var zoomlevelh = window.innerHeight/ppi/pageheight;
+  var zoomlevel = (zoomlevelw > zoomlevelh) ?zoomlevelh :zoomlevelw;
   document.body.style.zoom = zoomlevel;
   document.body.style.MozTransform = 'scale('+zoomlevel+')';
 }
