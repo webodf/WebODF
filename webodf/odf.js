@@ -10,24 +10,31 @@ Odf = function(){
       // private functions can be defined via OdfContainerPrivate.prototype
       // without exposing them
 
-      // public variables
-      this.url = url;
+      // declare public variables
       this.onstatereadychange = null;
       this.onchange = null;
-      this.zip = null;
-      this.documentElement = null;
+      this.INVALID = 0;
+      this.READY = 1;
+      this.LOADING = 2;
+      this.LISTINGLOADED = 3;
+      this.SAVING = 4;
+      this.MODIFIED = 5;
+      this.state = null;
+      this.rootElement = null;
+      this.parts = null;
 
-      // private variables
+      // declare private variables
+      var zip = null;
 
       // private functions
       var updateNodes = function(data) {
       };
       var loadComponents = function() {
         // always load content.xml, meta.xml, styles.xml and settings.xml
-        self.zip.load('content.xml', updateNodes);
-        self.zip.load('styles.xml', updateNodes);
-        self.zip.load('meta.xml', updateNodes);
-        self.zip.load('settings.xml', updateNodes);
+        zip.load('content.xml', updateNodes);
+        zip.load('styles.xml', updateNodes);
+        zip.load('meta.xml', updateNodes);
+        zip.load('settings.xml', updateNodes);
       };
       var createElement = function(type) {
         var interface = new type();
@@ -49,54 +56,57 @@ Odf = function(){
           self.onstatereadychange(self);
         }
       };
-      this.zip = new Zip(url, callback);
-      this.documentElement = createElement(ODFDocumentElement);
-
-      // private functions
-    }
-    OdfContainer.prototype.parseXml = function(filepath, xmldata) {
-      if (!xmldata || xmldata.length == 0) {
-        this.error = "Cannot read " + filepath + ".";
-        return null;
-      }
-      var parser = new DOMParser();
-      return parser.parseFromString(xmldata, 'text/xml');
-    }
-    /**
-     * Open file and parse it. Return the Xml Node. Return the root node of the
-     * file or null if this is not possible.
-     * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
-     * elements 'document-content', 'document-styles', 'document-meta', or
-     * 'document-settings' will be returned respectively.
-     **/
-    OdfContainer.prototype.getXmlNode = function(filepath, callback) {
-      var c = null;
-      if (callback) {
-        var this_ = this;
-        c = function(xmldata) {
-          callback(this_.parseXml(filepath, xmldata));
-        };
-      }
-      var xmldata = this.zip.load(filepath, c);
-      if (callback) {
-        return null;
-      }
-      return this.parseXml(filepath, xmldata);
-    }
-    OdfContainer.prototype.load = function(filepath, callback) {
-      var self = this;
-      var c = null;
-      if (callback) {
-        c = function(data) {
-          if (this_.onchange) {
-            this_.onchange(this_);
-          }
-          if (this_.onstatereadychange) {
-            this_.onstatereadychange(this_);
-          }
+      var parseXml = function(filepath, xmldata) {
+        if (!xmldata || xmldata.length == 0) {
+          this.error = "Cannot read " + filepath + ".";
+          return null;
         }
+        var parser = new DOMParser();
+        return parser.parseFromString(xmldata, 'text/xml');
       };
-      return this.zip.load(filepath, c);
+      var load = function(filepath, callback) {
+        var c = null;
+        if (callback) {
+          c = function(data) {
+            if (self.onchange) {
+              self.onchange(self);
+            }
+            if (self.onstatereadychange) {
+              self.onstatereadychange(self);
+            }
+          };
+        }
+        return zip.load(filepath, c);
+      }
+      // public functions
+      /**
+       * Open file and parse it. Return the Xml Node. Return the root node of the
+       * file or null if this is not possible.
+       * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
+       * elements 'document-content', 'document-styles', 'document-meta', or
+       * 'document-settings' will be returned respectively.
+       **/
+      this.getXmlNode = function(filepath, callback) {
+        var c = null;
+        if (callback) {
+          c = function(xmldata) {
+            callback(parseXml(filepath, xmldata));
+          };
+        }
+        var xmldata = zip.load(filepath, c);
+        if (callback) {
+          return null;
+        }
+        return parseXml(filepath, xmldata);
+      };
+
+      // initialize private variables
+      zip = new Zip(url, callback);
+
+      // initialize public variables
+      this.state = this.INVALID;
+      this.rootElement = createElement(ODFDocumentElement);
+      this.parts = new OdfPartList(this);
     }
     OdfContainer.prototype.getPart = function(partname) {
       return new OdfPart(partname, this.zip);
@@ -136,6 +146,14 @@ Odf = function(){
           return 'data:;base64,' + Base64.toBase64(this.data);
       }
       return null;
+    }
+    function OdfPartList(odfcontainer) {
+      var self = this;
+      // declare public variables
+      this.length = 0;
+      this.item = function(index) {
+        
+      };
     }
     function ODFElement() {
     }
