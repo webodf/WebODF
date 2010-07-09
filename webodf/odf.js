@@ -99,6 +99,21 @@ Odf = function(){
       }
       return parseXml(filepath, xmldata);
     };
+    this.getPart = function(partname) {
+      return new OdfPart(partname, zip);
+    };
+    this.getPartUrl = function(partname) {
+      // todo: deprecate in favor of getPart(partname).getUrl
+      var data = load(partname);
+      var url = 'data:;base64,';
+      var chunksize = 90000; // must be multiple of 3 and less than 100000
+      var i = 0;
+      while (data && i < data.length) {
+        url += Base64.toBase64(data.substr(i, chunksize));
+        i += chunksize;
+      }
+      return url;
+    };
 
     // initialize private variables
     zip = new Zip(url, callback);
@@ -107,22 +122,6 @@ Odf = function(){
     this.state = this.INVALID;
     this.rootElement = createElement(ODFDocumentElement);
     this.parts = new OdfPartList(this);
-  }
-    
-  OdfContainer.prototype.getPart = function(partname) {
-    return new OdfPart(partname, this.zip);
-  }
-  OdfContainer.prototype.getPartUrl = function(partname) {
-    // todo: deprecate in favor of getPart(partname).getUrl
-    var data = this.load(partname);
-    var url = 'data:;base64,';
-    var chunksize = 90000; // must be multiple of 3 and less than 100000
-    var i = 0;
-    while (data && i < data.length) {
-      url += Base64.toBase64(data.substr(i, chunksize));
-      i += chunksize;
-    }
-    return url;
   }
   // private constructor
   function OdfPart(name, zip) {
