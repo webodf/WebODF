@@ -251,13 +251,24 @@ function setFramePosition(id, frame, stylesheet) {
 function setImage(id, container, image, stylesheet) {
   image.setAttribute('styleid', id);
   var url = image.getAttributeNS(xlinkns, 'href');
+  var callback = function(url) {
+    var rule = "background-image: url(" + url + ");";
+    rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
+    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+  };
   try {
-    url = container.getPartUrl(url);
+    if (container.getPartUrl) {
+      url = container.getPartUrl(url);
+      callback(url);
+    } else {
+      var part = container.getPart(url);
+      part.load();
+      part.onchange = function(part) {
+        callback(part.url);
+      };
+    }
   } catch (e) {
   }
-  var rule = "background-image: url(" + url + ");";
-  rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
-  stylesheet.insertRule(rule, stylesheet.cssRules.length);
 }
 /** temporary function to make a presentation when 'f' is pressed **/
 var maxSlideRule = "{display: block;border: 0px;}";

@@ -50,7 +50,7 @@ Odf = function(){
     var callback = function(zip) {
       loadComponents();
       if (self.onchange) {
-        self.onchange(this_);
+        self.onchange(self);
       }
       if (self.onstatereadychange) {
         self.onstatereadychange(self);
@@ -58,7 +58,7 @@ Odf = function(){
     };
     var parseXml = function(filepath, xmldata) {
       if (!xmldata || xmldata.length == 0) {
-        this.error = "Cannot read " + filepath + ".";
+        self.error = "Cannot read " + filepath + ".";
         return null;
       }
       var parser = new DOMParser();
@@ -100,19 +100,7 @@ Odf = function(){
       return parseXml(filepath, xmldata);
     };
     this.getPart = function(partname) {
-      return new OdfPart(partname, zip);
-    };
-    this.getPartUrl = function(partname) {
-      // todo: deprecate in favor of getPart(partname).getUrl
-      var data = load(partname);
-      var url = 'data:;base64,';
-      var chunksize = 90000; // must be multiple of 3 and less than 100000
-      var i = 0;
-      while (data && i < data.length) {
-        url += Base64.toBase64(data.substr(i, chunksize));
-        i += chunksize;
-      }
-      return url;
+      return new OdfPart(partname, self, zip);
     };
 
     // initialize private variables
@@ -124,22 +112,63 @@ Odf = function(){
     this.parts = new OdfPartList(this);
   }
   // private constructor
-  function OdfPart(name, zip) {
+  function OdfPart(name, container, zip) {
+    var self = this;
+
+    // declare public variables
+    this.size = 0;
+    this.type = null;
     this.name = name;
-    this.zip = zip;
-  }
-  OdfPart.prototype.load = function() {
-    var this_ = this;
-    var callback = function(data) {
-      this_.data = data;
-      if (this_.onchange) {
-        this_.onchange(this_);
+    this.container = container;
+    this.url = null;
+    this.document = null;
+    this.onreadystatechange = null;
+    this.onchange = null;
+    this.EMPTY = 0;
+    this.LOADING = 1;
+    this.DONE = 2;
+    this.state = this.EMPTY;
+
+    // declare private variables
+    var privatedata = null;
+
+    // private functions
+    var createUrl = function() {
+      self.url = null;
+      if (!privatedata) {
+        return;
       }
-      if (this_.onstatereadychange) {
-        this_.onstatereadychange(this_);
+      self.url = 'data:;base64,';
+      // to avoid exceptions, base64 encoding is done in chunks
+      var chunksize = 90000; // must be multiple of 3 and less than 100000
+      var i = 0;
+      while (i < privatedata.length) {
+        self.url += Base64.toBase64(privatedata.substr(i, chunksize));
+        i += chunksize;
       }
     };
-    this.zip.load(this.name, callback);
+    var createDocument = function() {
+    };
+    // public functions
+    this.load = function() {
+      var callback = function(data) {
+        privatedata = data;
+        createUrl();
+        createDocument();
+        if (self.onchange) {
+          self.onchange(self);
+        }
+        if (self.onstatereadychange) {
+          self.onstatereadychange(self);
+        }
+      };
+      zip.load(name, callback);
+    };
+    this.abort = function() {
+      // TODO
+    };
+  }
+  OdfPart.prototype.load = function() {
   }
   OdfPart.prototype.getUrl = function() {
     if (this.data) {
