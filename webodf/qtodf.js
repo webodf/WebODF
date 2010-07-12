@@ -3,13 +3,30 @@
  * It requires the presence of a window.qtodf object.
  **/
 Odf = function(){
-	window.qtodf.nextcallbackid = 0;
-    function OdfContainer(url) {
-        // TODO: support single xml file serialization and different ODF
-        // versions
-        this.url = url;
-    }
-    OdfContainer.prototype.parseXml = function(filepath, xmldata) {
+  window.qtodf.nextcallbackid = 0;
+  function OdfContainer(url) {
+    var self = this;
+    // declare public variables
+    this.onstatereadychange = null;
+    this.onchange = null;
+    this.INVALID = 0;
+    this.READY = 1;
+    this.LOADING = 2;
+    this.LISTINGLOADED = 3;
+    this.SAVING = 4;
+    this.MODIFIED = 5;
+    this.state = null;
+    this.rootElement = null;
+    this.parts = null;
+    
+    // declare private variables
+    var zip = null;
+
+    // private functions
+    // TODO: support single xml file serialization and different ODF
+    // versions
+    this.url = url;
+    var parseXml = function(filepath, xmldata) {
       if (!xmldata || xmldata.length == 0) {
         this.error = "Cannot read " + filepath + ".";
         return null;
@@ -19,16 +36,17 @@ Odf = function(){
       return node;
     }
     /**
-	 * This function puts a callback object on the global object and returns an
-	 * id. This id is used by the native code to retrieve the callback and call
-	 * it.
-	 **/
-    OdfContainer.prototype.registerCallback = function(callbackfunction) {
+     * This function puts a callback object on the global object and returns an
+     * id. This id is used by the native code to retrieve the callback and call
+     * it.
+     **/
+    var registerCallback = function(callbackfunction) {
       var callbackid = 'callback' + window.qtodf.nextcallbackid;
-	  window.qtodf.nextcallbackid += 1;
-	  window.qtodf[callbackid] = callbackfunction;
-	  return callbackid;
-	}
+      window.qtodf.nextcallbackid += 1;
+      window.qtodf[callbackid] = callbackfunction;
+      return callbackid;
+    };
+    // public functions
     /**
      * Open file and parse it. Return the Xml Node. Return the root node of the
      * file or null if this is not possible.
@@ -36,25 +54,25 @@ Odf = function(){
      * elements 'document-content', 'document-styles', 'document-meta', or
      * 'document-settings' will be returned respectively.
      **/
-    OdfContainer.prototype.getXmlNode = function(filepath, callback) {
+    this.getXmlNode = function(filepath, callback) {
       var callbackid = null;
-	  if (callback) {
-		  var self = this;
-		  callbackid = this.registerCallback(function(xmldata) {
-			  callback(self.parseXml(filepath, xmldata));
-	      });
-	  }
+      if (callback) {
+        callbackid = registerCallback(function(xmldata) {
+          callback(parseXml(filepath, xmldata));
+        });
+      }
       var xmldata = window.qtodf.load(this.url, filepath, callbackid);
       if (callback) {
         return null;
       }
-      return this.parseXml(filepath, xmldata);
+      return parseXml(filepath, xmldata);
     }
-    OdfContainer.prototype.getPartUrl = function(partname) {
-      return 'odfkit:' + partname;
-    }
-    return {
-        /* export the public api */
-        OdfContainer: OdfContainer
-    };
+  }
+  OdfContainer.prototype.getPartUrl = function(partname) {
+    return encodeURI('odfkit:' + partname);
+  }
+  return {
+    /* export the public api */
+    OdfContainer: OdfContainer
+  };
 }();
