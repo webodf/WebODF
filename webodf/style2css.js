@@ -1,4 +1,4 @@
-function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) {
+function style2css(stylesheet, styles, autostyles) {
 
   // helper constants
   var xlinkns = 'http://www.w3.org/1999/xlink';
@@ -111,7 +111,7 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   while (stylesheet.cssRules.length) {
     stylesheet.deleteRule(stylesheet.cssRules.length-1);
   }
-  var doc = stylestyles.ownerDocument;
+  var doc = styles.ownerDocument;
   // add @namespace rules
   for (var prefix in namespaces) {
     var rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
@@ -127,17 +127,15 @@ function style2css(stylesheet, stylestyles, styleautostyles, contentautostyles) 
   }
   
   // add the various styles
-  stylenodes = getStyleMap(stylestyles);
-  styleautnodes = getStyleMap(styleautostyles);
-  contentautostyles = getStyleMap(contentautostyles);
+  stylenodes = getStyleMap(styles);
+  styleautnodes = getStyleMap(autostyles);
   
   var styletree = {};
   for (var family in familynamespaceprefixes) {
     var tree = styletree[family] = {};
     addStyleMapToStyleTree(stylenodes[family], tree);
     addStyleMapToStyleTree(styleautnodes[family], tree);
-    addStyleMapToStyleTree(contentautostyles[family], tree);
-    
+
     for (var name in tree) {
       addRules(stylesheet, family, name, tree[name]);
     }

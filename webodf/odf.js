@@ -2,6 +2,7 @@
  * This is a pure javascript implementation of the first simple OdfKit api.
  **/
 Odf = function(){
+  var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
   function OdfContainer(url) {
     var self = this;
 
@@ -13,29 +14,111 @@ Odf = function(){
     // declare public variables
     this.onstatereadychange = null;
     this.onchange = null;
-    this.INVALID = 0;
-    this.READY = 1;
-    this.LOADING = 2;
-    this.LISTINGLOADED = 3;
-    this.SAVING = 4;
-    this.MODIFIED = 5;
     this.state = null;
     this.rootElement = null;
     this.parts = null;
 
     // declare private variables
-    var zip = null;
+    var zip = null;    
 
     // private functions
-    var updateNodes = function(data) {
+    var importRootNode = function(xmldoc) {
+      var doc = self.rootElement.ownerDocument;
+      return doc.importNode(xmldoc.documentElement, true);
+    };
+    var handleStylesXml = function(xmldoc) {
+      var node = importRootNode(xmldoc);
+      if (!node || node.localName != 'document-styles'
+          || node.namespaceURI != officens) {
+        self.state = OdfContainer.INVALID;
+        return;
+      }
+      var root = self.rootElement;
+      root.styles = getDirectChild(node, officens, 'styles');
+      setChild(root, root.styles);
+      root.automaticStyles = getDirectChild(node, officens, 'automatic-styles');
+      setChild(root, root.automaticStyles);
+      root.masterStyles = getDirectChild(node, officens, 'master-styles');
+      setChild(root, root.masterStyles);
+    };
+    var handleContentXml = function(xmldoc) {
+      var node = importRootNode(xmldoc);
+      if (!node || node.localName != 'document-content'
+          || node.namespaceURI != officens) {
+        self.state = OdfContainer.INVALID;
+        return;
+      }
+      var root = self.rootElement;
+      root.body = getDirectChild(node, officens, 'body');
+      setChild(root, root.body);
+      var automaticStyles = getDirectChild(node, officens, 'automatic-styles');
+      if (root.automaticStyles && automaticStyles) {
+        var c = automaticStyles.firstChild;
+        while (c) {
+          root.automaticStyles.appendChild(c);
+          c = automaticStyles.firstChild; // works because node c moved
+        }
+      } else {
+        root.automaticStyles = automaticStyles;
+        setChild(root.automaticStyles, automaticStyles);
+      }
+    };
+    var handleMetaXml = function(xmldoc) {
+      var node = importRootNode(xmldoc);
+      if (node || node.localName != 'document-meta'
+          || node.namespaceURI != officens) {
+        return;
+      }
+      var root = self.rootElement;
+      root.meta = getDirectChild(node, officens, 'meta');
+      setChild(root, root.meta);
+    };
+    var handleSettingsXml = function(xmldoc) {
+      var node = importRootNode(xmldoc);
+      if (node || node.localName != 'document-settings'
+          || node.namespaceURI != officens) {
+        return;
+      }
+      var root = self.rootElement;
+      root.settings = getDirectChild(node, officens, 'settings');
+      setChild(root, root.settings);
     };
     var loadComponents = function() {
       // always load content.xml, meta.xml, styles.xml and settings.xml
-      zip.load('content.xml', updateNodes);
-      zip.load('styles.xml', updateNodes);
-      zip.load('meta.xml', updateNodes);
-      zip.load('settings.xml', updateNodes);
+      getXmlNode('styles.xml', function(xmldoc) {
+        handleStylesXml(xmldoc);
+        if (self.state == OdfContainer.INVALID) {
+          return;
+        }
+        getXmlNode('content.xml', function(xmldoc) {
+          handleContentXml(xmldoc);
+          if (self.state == OdfContainer.INVALID) {
+            return;
+          }
+          getXmlNode('meta.xml', function(xmldoc) {
+            handleMetaXml(xmldoc);
+            if (self.state == OdfContainer.INVALID) {
+              return;
+            }
+            getXmlNode('settings.xml', function(xmldoc) {
+              handleSettingsXml(xmldoc);
+              if (self.state != OdfContainer.INVALID) {
+                setState(OdfContainer.DONE);
+              }
+            });            
+          });          
+        });
+      });
     };
+    var setState = function(state) {
+      self.state = state;
+      if (self.onchange) {
+        self.onchange(self);
+      }
+      if (self.onstatereadychange) {
+        self.onstatereadychange(self);
+      }
+    }
     var createElement = function(type) {
       var interface = new type();
       var original = document.createElementNS(
@@ -49,12 +132,6 @@ Odf = function(){
     // versions
     var callback = function(zip) {
       loadComponents();
-      if (self.onchange) {
-        self.onchange(self);
-      }
-      if (self.onstatereadychange) {
-        self.onstatereadychange(self);
-      }
     };
     var parseXml = function(filepath, xmldata) {
       if (!xmldata || xmldata.length == 0) {
@@ -86,7 +163,7 @@ Odf = function(){
      * elements 'document-content', 'document-styles', 'document-meta', or
      * 'document-settings' will be returned respectively.
      **/
-    this.getXmlNode = function(filepath, callback) {
+    var getXmlNode = function(filepath, callback) {
       var c = null;
       if (callback) {
         c = function(xmldata) {
@@ -107,10 +184,16 @@ Odf = function(){
     zip = new Zip(url, callback);
 
     // initialize public variables
-    this.state = this.INVALID;
+    this.state = OdfContainer.LOADING;
     this.rootElement = createElement(ODFDocumentElement);
     this.parts = new OdfPartList(this);
   }
+  OdfContainer.EMPTY = 0;
+  OdfContainer.LOADING = 1;
+  OdfContainer.DONE = 2;
+  OdfContainer.INVALID = 3;
+  OdfContainer.SAVING = 4;
+  OdfContainer.MODIFIED = 5;
   // private constructor
   function OdfPart(name, container, zip) {
     var self = this;
@@ -190,6 +273,41 @@ Odf = function(){
   ODFDocumentElement.prototype.constructor = ODFDocumentElement;
   function ODFDocumentElement(odfcontainer) {
     this.OdfContainer = odfcontainer;
+  }
+  function getDirectChild(node, ns, name) {
+    node = (node) ?node.firstChild :null;
+    while (node) {
+      if (node.localName == name && node.namespaceURI == ns) {
+        return node;
+      }
+      node = node.nextSibling;
+    }
+  }
+  var nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
+      'automatic-styles', 'master-styles', 'body'];
+  function getNodePosition(child) {
+    var childpos = 0;
+    for (var i in nodeorder) {
+      if (child.namespaceURI == officens && child.localName == nodeorder[i]) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  function setChild(node, child) {
+    if (!child) return;
+    var childpos = getNodePosition(child);
+    if (childpos == -1) return;
+    var pos = 0;
+    var c = node.firstChild;
+    while (c) {
+      var pos = getNodePosition(c);
+      if (pos != -1 && pos > childpos) {
+        break;
+      }
+      c = c.nextSibling;
+    }
+    node.insertBefore(child, c);
   }
   return {
     /* export the public api */
