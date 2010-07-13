@@ -65,7 +65,7 @@ Odf = function(){
     };
     var handleMetaXml = function(xmldoc) {
       var node = importRootNode(xmldoc);
-      if (node || node.localName != 'document-meta'
+      if (!node || node.localName != 'document-meta'
           || node.namespaceURI != officens) {
         return;
       }
@@ -75,7 +75,7 @@ Odf = function(){
     };
     var handleSettingsXml = function(xmldoc) {
       var node = importRootNode(xmldoc);
-      if (node || node.localName != 'document-settings'
+      if (!node || node.localName != 'document-settings'
           || node.namespaceURI != officens) {
         return;
       }
