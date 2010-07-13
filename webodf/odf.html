@@ -121,7 +121,9 @@ function clear(element) {
 }
 
 function refreshOdf() {
+
   var OdfContainer = window.odf.OdfContainer;
+
   if (window.odfcontainer.state != OdfContainer.DONE) {
     return;
   }
@@ -135,7 +137,6 @@ function refreshOdf() {
   document.importNode(odfnode, true);
 
   handleStyles(odfnode);
-
   // do content last, because otherwise the document is constantly updated
   // whenever the css changes
   handleContent(container, odfnode);
