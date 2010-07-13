@@ -120,9 +120,9 @@ Odf = function(){
       }
     }
     var createElement = function(type) {
-      var interface = new type();
       var original = document.createElementNS(
-        interface.namespaceURI, interface.localName);
+          type.namespaceURI, type.localName);
+      var interface = new type();
       for (var method in interface) {
         original[method] = interface[method];
       }
@@ -274,6 +274,8 @@ Odf = function(){
   function ODFDocumentElement(odfcontainer) {
     this.OdfContainer = odfcontainer;
   }
+  ODFDocumentElement.namespaceURI = officens;
+  ODFDocumentElement.localName = 'document';
   function getDirectChild(node, ns, name) {
     node = (node) ?node.firstChild :null;
     while (node) {

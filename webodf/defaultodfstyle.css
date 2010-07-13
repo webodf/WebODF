@@ -4,11 +4,11 @@
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 
-office|document-styles {
+office|document > * {
   display: none;
 }
-office|automatic-styles {
-  display: none;
+office|body {
+  display: block;
 }
 
 text|p, text|h {
