@@ -35,7 +35,9 @@ function style2css(stylesheet, styles, autostyles) {
   };
 
   var familytagnames = {
-    graphic: ['frame'],
+    graphic: ['circle', 'connected', 'control', 'custom-shape', 'ellipse',
+        'frame', 'g', 'line', 'measure', 'page', 'page-thumbnail', 'path',
+        'polygon', 'polyline', 'rect', 'regular-polygon' ],
     paragraph: ['alphabetical-index-entry-template', 'h',
         'illustration-index-entry-template', 'index-source-style',
         'object-index-entry-template', 'p', 'table-index-entry-template',
@@ -93,6 +95,7 @@ function style2css(stylesheet, styles, autostyles) {
   
   var graphicPropertySimpleMapping = [
     [ drawns, 'fill-color', 'background-color' ],
+    [ drawns, 'fill', 'background' ],
     [ fons, 'min-height', 'min-height' ],
     [ drawns, 'stroke', 'border' ],
     [ svgns, 'stroke-color', 'border-color' ],
@@ -248,7 +251,6 @@ function style2css(stylesheet, styles, autostyles) {
   function addRule(sheet, family, name, node) {
     var selectors = getSelectors(family, name, node);
     var selector = selectors.join(',');
-    
     var rule = '';
     var properties = getDirectChild(node, stylens, 'text-properties');
     if (properties) {
