@@ -58,12 +58,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(dirview, SIGNAL(clicked(QModelIndex)), this, SLOT(loadOdf(QModelIndex)));
     connect(dirPath, SIGNAL(textChanged(QString)), this, SLOT(setPath(QString)));
-/*
-    OdfView *child = createOdfView();
-    if (child->loadFile("../kofficetests/odf/DanskTest01.odt")) {
-        child->showMaximized();
-    }
-*/
 }
 
 MainWindow::~MainWindow()
