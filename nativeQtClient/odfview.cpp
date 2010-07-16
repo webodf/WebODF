@@ -4,6 +4,9 @@
 #include "odf.h"
 #include "zipnetworkreply.h"
 
+#include "odfpage.h"
+#include "odfnetworkaccessmanager.h"
+
 #include <QtCore/QByteArray>
 #include <QtWebKit/QWebFrame>
 #include <QtNetwork/QNetworkAccessManager>
@@ -13,54 +16,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 
-class OdfView::OdfNetworkAccessManager : public QNetworkAccessManager {
-private:
-    QDir dir;
-    QDir odfdir;
-    QStringList allowedFiles;
-    OdfContainer *currentFile;
-public:
-    OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
-        allowedFiles << "odf.html" << "style2css.js" << "defaultodfstyle.css"
-                << "qtodf.js";
-    }
-    QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
-                                 QIODevice* data = 0) {
-        if (req.url().scheme() == "odfkit") {
-            //data is inside the current zip file
-            qDebug() << "zip! " << req.url();
-            return new ZipNetworkReply(this, currentFile, req, op);
-        }
-
-        QNetworkRequest r(req);
-        QString path;
-        if (dir.absolutePath().startsWith(":")) {
-            path = req.url().toString().mid(3);
-        } else {
-            path = req.url().toLocalFile();
-        }
-        QFileInfo fileinfo = path;
-        if (op != GetOperation
-                || !allowedFiles.contains(fileinfo.fileName())
-                || fileinfo.dir() != dir) {
-            // changing the url seems to be the only easy way to deny
-            // requests
-            qDebug() << "deny " << req.url();
-            r.setUrl(QUrl("error:not-allowed"));
-        }
-        return QNetworkAccessManager::createRequest(op, r, data);
-    }
-    void setCurrentFile(OdfContainer *file) {currentFile = file;}
-};
-
 namespace {
-    class OdfPage : public QWebPage {
-    public:
-        OdfPage(QObject* parent) :QWebPage(parent) {}
-        void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString & sourceID) {
-            qDebug() << message;
-        }
-    };
 }
 
 OdfView::OdfView(QWidget* parent) :QWebView(parent)

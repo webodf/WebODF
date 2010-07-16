@@ -4,6 +4,7 @@
 #include <QtWebKit/QWebView>
 
 class Odf;
+class OdfNetworkAccessManager;
 
 class OdfView : public QWebView
 {
@@ -24,7 +25,6 @@ private:
     bool loaded;
     QString curFile;
     QString identifier;
-    class OdfNetworkAccessManager;
     OdfNetworkAccessManager* networkaccessmanager;
     Odf* odf;
 };

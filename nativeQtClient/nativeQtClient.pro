@@ -10,7 +10,7 @@ QT += network \
     testlib
 TARGET = nativeQtClient
 INCLUDEPATH += /usr/include/minizip
-RESOURCES     = ../webodf/application.qrc
+RESOURCES = ../webodf/application.qrc
 LIBS += -lquazip
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -18,10 +18,14 @@ SOURCES += main.cpp \
     zipnetworkreply.cpp \
     odfview.cpp \
     odfcontainer.cpp \
-    odf.cpp
+    odf.cpp \
+    odfnetworkaccessmanager.cpp \
+    odfpage.cpp
 HEADERS += mainwindow.h \
     zipnetworkreply.h \
     odfview.h \
     odfcontainer.h \
-    odf.h
+    odf.h \
+    odfnetworkaccessmanager.h \
+    odfpage.h
 FORMS += mainwindow.ui
