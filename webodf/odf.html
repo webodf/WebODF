@@ -331,6 +331,15 @@ window.onkeyup = function(e) {
     nextSlide();
   }
 }
+function fixOdf() {
+  var x = new XMLSerializer();
+  x = x.serializeToString(document.body.firstChild);
+  var parser = new DOMParser();
+  var dom = parser.parseFromString(x, "text/xml");
+  dom = document.importNode(dom.documentElement, true);
+  document.body.removeChild(document.body.firstChild);
+  document.body.appendChild(dom);
+}
   </script>
   <title></title>
 </head>

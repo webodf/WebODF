@@ -16,9 +16,6 @@
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 
-namespace {
-}
-
 OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
     setPage(new OdfPage(this));

@@ -20,12 +20,14 @@ SOURCES += main.cpp \
     odfcontainer.cpp \
     odf.cpp \
     odfnetworkaccessmanager.cpp \
-    odfpage.cpp
+    odfpage.cpp \
+    odftohtmlconverter.cpp
 HEADERS += mainwindow.h \
     zipnetworkreply.h \
     odfview.h \
     odfcontainer.h \
     odf.h \
     odfnetworkaccessmanager.h \
-    odfpage.h
+    odfpage.h \
+    odftohtmlconverter.h
 FORMS += mainwindow.ui

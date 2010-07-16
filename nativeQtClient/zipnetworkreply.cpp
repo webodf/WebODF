@@ -14,8 +14,11 @@ ZipNetworkReply::ZipNetworkReply(QObject* parent, OdfContainer *odf, const QNetw
     setOperation(op);
     QNetworkReply::open(QIODevice::ReadOnly);
 
-    //the name of the file within the zip
+    //the name of the file within the zip, mid(2) removes the './'
     QString fileName = req.url().toString(QUrl::RemoveScheme);
+    if (fileName.startsWith("./")) {
+        fileName = fileName.mid(2);
+    }
     qDebug() << fileName;
 
     m_file = odf->getFile(fileName, this);
@@ -37,12 +40,14 @@ ZipNetworkReply::ZipNetworkReply(QObject* parent, OdfContainer *odf, const QNetw
 
 void ZipNetworkReply::close()
 {
+    qDebug() << "close";
     QNetworkReply::close();
     m_file->close();
 }
 
 void ZipNetworkReply::abort()
 {
+    qDebug() << "abort";
     QNetworkReply::close();
     m_file->close();
 }
