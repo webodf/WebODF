@@ -1,0 +1,3 @@
+[submodule "webodf/extjs"]
+	path = webodf/extjs
+	url = git://github.com/probonogeek/extjs.git
