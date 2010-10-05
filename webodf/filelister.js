@@ -6,26 +6,59 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
     doneList = [],
     dirpattern = /\/$/;
 
+    function getHref(responseElement) {
+        var n = responseElement.firstChild;
+        while (n && !(n.namespaceURI === 'DAV:' && n.localName === 'href')) {
+            n = n.nextSibling;
+        }
+        return n && n.firstChild && n.firstChild.nodeValue;
+    }
+
+    function isDirectory(responseElement) {
+        var n = responseElement.firstChild;
+        while (n &&
+                !(n.namespaceURI === 'DAV:' && n.localName === 'propstat')) {
+            n = n.nextSibling;
+        }
+        n = n && n.firstChild; 
+        while (n &&
+                !(n.namespaceURI === 'DAV:' && n.localName === 'prop')) {
+            n = n.nextSibling;
+        }
+        n = n && n.firstChild; 
+        while (n && !(n.namespaceURI === 'DAV:' &&
+                      n.localName === 'resourcetype')) {
+            n = n.nextSibling;
+        }
+        n = n && n.firstChild; 
+        while (n &&
+                !(n.namespaceURI === 'DAV:' && n.localName === 'collection')) {
+            n = n.nextSibling;
+        }
+        return n;
+    }
+
     function processWebDavResponse(xml) {
         if (!xml) {
             throw new Error('No proper XML response.');
+        }
         
-        var refs = xml.getElementsByTagNameNS('DAV:', 'href'),
+        var refs = xml.getElementsByTagNameNS('DAV:', 'response'),
             directories = [],
             files = [],
-            i, d, name;
+            i, d, href;
         for (i in refs) {
-            if (refs[i].firstChild) {
-                name = refs[i].firstChild.nodeValue;
-                if (dirpattern.test(name)) {
-                    directories.push(name);
-                } else if (filepattern.test(name)) {
-                    files.push(name);
+            if (refs[i]) {
+                href = getHref(refs[i]);
+                if (isDirectory(refs[i])) {
+                    directories.push(href);
+                } else if (filepattern.test(href)) {
+                    files.push(href);
                 }
             }
         }
         for (d in directories) {
-            if (d) {
+            if (typeof directories[d] === "string") {
                 d = directories[d];
                 if (doneList.indexOf(d) === -1 && todoList.indexOf(d) === -1) {
                     todoList.push(d);
@@ -118,7 +151,7 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
     }
 
     todoList.push(startdir);
-//    getNextFileListWithWebDav();
-    getNextFileListWithIndexHtml();
+    getNextFileListWithWebDav();
+//    getNextFileListWithIndexHtml();
 }
 
