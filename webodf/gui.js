@@ -85,24 +85,22 @@ Ext.onReady(function(){
 
   function listFilesCallback(directories, files) {
     var root = tree.getRootNode();
-    for (var i in files) {
+    for (var i = 0; i < files.length; i += 1) {
       var f = files[i];
-      if (typeof f == 'string') {
-        var parentNode = getParentNode(root, f);
-        var qtip = f;
-        var node = parentNode.appendChild({
-          id: f,
-          qtip: qtip,
-          text: f.substr(f.lastIndexOf('/')+1),
-          cls: 'file',
-          leaf: true,
-          editable: false,
-          listeners: {
-            click: function(node) { loadODF(node.id, tabpanel, node.text); }
-          }
-        });
+      var parentNode = getParentNode(root, f);
+      var qtip = f;
+      var node = parentNode.appendChild({
+        id: f,
+        qtip: qtip,
+        text: f.substr(f.lastIndexOf('/')+1),
+        cls: 'file',
+        leaf: true,
+        editable: false,
+        listeners: {
+          click: function(node) { loadODF(node.id, tabpanel, node.text); }
+        }
+      });
 //        addThumbnail(node);
-      }
     }
   }
   function listFilesDoneCallback() {
