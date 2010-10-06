@@ -47,22 +47,18 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
             directories = [],
             files = [],
             i, d, href;
-        for (i in refs) {
-            if (refs[i]) {
-                href = getHref(refs[i]);
-                if (isDirectory(refs[i])) {
-                    directories.push(href);
-                } else if (filepattern.test(href)) {
-                    files.push(href);
-                }
+        for (i = 0; i < refs.length; i += 1) {
+            href = getHref(refs[i]);
+            if (isDirectory(refs[i])) {
+                directories.push(href);
+            } else if (filepattern.test(href)) {
+                files.push(href);
             }
         }
-        for (d in directories) {
-            if (typeof directories[d] === "string") {
-                d = directories[d];
-                if (doneList.indexOf(d) === -1 && todoList.indexOf(d) === -1) {
-                    todoList.push(d);
-                }
+        for (i = 0; i < directories.length; i += 1) {
+            d = directories[i];
+            if (doneList.indexOf(d) === -1 && todoList.indexOf(d) === -1) {
+                todoList.push(d);
             }
         }
         fileCallback(directories, files);
@@ -101,7 +97,7 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
             matches,
             files = [],
             directories = [],
-            name, d;
+            name, d, i;
         while ((matches = re.exec(text)) !== null) {
             name = matches[1];
             if (dirpattern.test(name)) {
@@ -110,12 +106,10 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
                 files.push(base + name);
             }
         }
-        for (d in directories) {
-            if (d) {
-                d = directories[d];
-                if (doneList.indexOf(d) === -1 && todoList.indexOf(d) === -1) {
-                    todoList.push(d);
-                }
+        for (i = 0; i < directories.length; d += 1) {
+            d = directories[i];
+            if (doneList.indexOf(d) === -1 && todoList.indexOf(d) === -1) {
+                todoList.push(d);
             }
         }
         fileCallback(directories, files);
