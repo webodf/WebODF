@@ -1,6 +1,6 @@
 body {
     font-family: "Bitstream Vera Sans", helvetica;
-    background: transparent;
+    background: white;
     background-image: url(footer1.jpg);
     background-repeat: no-repeat;
     background-position: bottom center;
@@ -54,4 +54,7 @@ a {
 }
 img {
     max-width: 100%;
+}
+p.newsdate {
+    float: right;
 }
