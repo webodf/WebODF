@@ -1,0 +1,50 @@
+body {
+    font-family: "Bitstream Vera Sans", helvetica;
+    background: transparent;
+    background-image: url(footer1.jpg);
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    min-height: 471px;
+}
+h1, h2, h3, h4, p {
+    max-width: 40em;
+}
+h1, h2, h3, h4 {
+    color: #2850a0;
+}
+h1 {
+    font-size: 400%;
+}
+body {
+    text-align: center;
+}
+div.body {
+    position: relative;
+    left: auto;
+    right: auto;
+}
+div.logo, div.main {
+    display: table-cell;
+    vertical-align: top;
+}
+div.links {
+    float: right;
+    text-align: right;
+}
+div.links ul {
+    list-style-type: none;
+}
+div.links ul a {
+    text-decoration: none;
+}
+div.main {
+    text-align: left;
+    max-width: 40em;
+    background: #dde0f4;
+    padding-left: 2em;
+    padding-right: 2em;
+}
+a {
+    text-decoration: none;
+    color: #2850a0;
+}
