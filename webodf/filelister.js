@@ -3,8 +3,9 @@
 function listFiles(startdir, filepattern, fileCallback, doneCallback) {
 
     var todoList = [],
-    doneList = [],
-    dirpattern = /\/$/;
+        doneList = [],
+        dirpattern = /\/$/,
+        hasWEBDAV = false;
 
     function getHref(responseElement) {
         var n = responseElement.firstChild;
@@ -82,8 +83,15 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
             }
             if (req.status >= 200 && req.status < 300) {
                 processWebDavResponse(req.responseXML);
+                hasWEBDAV = true;
             }
-            getNextFileListWithWebDav();
+            if (hasWEBDAV) {
+                getNextFileListWithWebDav();
+            } else {
+                todoList.push(url);
+                doneList = [];
+                getNextFileListWithIndexHtml();
+            }
         };
         req.setRequestHeader('Depth', '1');
         req.send(null);
@@ -127,7 +135,6 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
             }
             return;
         }
-
         req = new XMLHttpRequest();
         req.open('GET', url, true);
         req.onreadystatechange = function (evt) {
@@ -143,9 +150,7 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
 
         doneList.push(url);
     }
-
     todoList.push(startdir);
     getNextFileListWithWebDav();
-//    getNextFileListWithIndexHtml();
 }
 
