@@ -106,7 +106,7 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
                 files.push(base + name);
             }
         }
-        for (i = 0; i < directories.length; d += 1) {
+        for (i = 0; i < directories.length; i += 1) {
             d = directories[i];
             if (doneList.indexOf(d) === -1 && todoList.indexOf(d) === -1) {
                 todoList.push(d);
