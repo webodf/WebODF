@@ -1,5 +1,5 @@
 /*global Ext listFiles Zip Base64*/
-Ext.BLANK_IMAGE_URL = "../extjs/resources/images/default/s.gif";
+Ext.BLANK_IMAGE_URL = "extjs/resources/images/default/s.gif";
 
 function addThumbnail(node) {
     var url = node.id,
