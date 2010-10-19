@@ -26,6 +26,7 @@ div.body {
 div.logo, div.main {
     display: table-cell;
     vertical-align: top;
+    padding-right: 1em;
 }
 div.links {
     float: right;
@@ -41,10 +42,16 @@ div.main {
     text-align: left;
     max-width: 40em;
     background: #dde0f4;
-    padding-left: 2em;
-    padding-right: 2em;
+    padding-left: 3em;
+    padding-right: 3em;
+    -moz-border-radius: 1em;
+    border-radius: 1em;
+    -webkit-border-radius: 1em;
 }
 a {
     text-decoration: none;
     color: #2850a0;
+}
+img {
+    max-width: 100%;
 }
