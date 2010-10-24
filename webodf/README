@@ -1,0 +1,14 @@
+This directory contains the javacript code to WebODF as well as applications that use it. The applications are browser applications, commandline applications and unit tests.
+
+lib/
+lib/core/    Parts of WebODF that also work on JavaScript runtimes without a
+             document window.
+lib/gui/     Parts of WebODF that require a domtree
+
+The library should be able to run in a number of different runtimes. Currently these are:
+ - a webbrowser
+ - node.js
+ - rhino
+A common API is implemented for these three environments in the files lib/browser.js, lib/node.js and lib/rhino.js respectively.
+
+
