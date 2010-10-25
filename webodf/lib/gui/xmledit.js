@@ -16,17 +16,9 @@ function createXMLEdit(element, stylesheet, listener) {
     }
 
     // generic css for doing xml formatting: color tags and do indentation
-    simplecss = cssprefix + "*," + cssprefix + ":visited, " + cssprefix + ":link {display:block; margin: 0px; margin-left: 10px; font-size: medium; color: black; background: white; font-variant: normal; font-weight: normal; font-style: normal; font-family: sans-serif; text-decoration: none; white-space: pre-wrap; height: auto; width: auto;}\n" +
-        cssprefix + ":before {color: blue;}\n" +
-        cssprefix + ":after {color: blue;}\n" +
-        cssprefix + "customns|atts {display:inline; margin: 0px; white-space: normal;}\n" +
-        cssprefix + "customns|atts:after {content: '>';}\n" +
-        cssprefix + "customns|attn {display:inline; margin: 0px; white-space: pre; color: blue;}\n" +
-        cssprefix + "customns|attn:before {content: '\\A        ';}\n" +
-        cssprefix + "customns|attn:first-child:before {content: ' ';}\n" +
-        cssprefix + "customns|attv {display:inline; margin: 0px; white-space: pre;}\n" +
-        cssprefix + "customns|attv:before {content: '=\"';}\n" +
-        cssprefix + "customns|attv:after {content: '\"';}\n" +
+    simplecss = cssprefix + "*," + cssprefix + ":visited, " + cssprefix + ":link {display:block; margin: 0px; margin-left: 10px; font-size: medium; color: black; background: white; font-variant: normal; font-weight: normal; font-style: normal; font-family: sans-serif; text-decoration: none; white-space: pre-wrap; height: auto; width: auto}\n" +
+        cssprefix + ":before {color: blue; content: '<' attr(customns_name) attr(customns_atts) '>';}\n" +
+        cssprefix + ":after {color: blue; content: '</' attr(customns_name) '>';}\n" +
         cssprefix + "{overflow: auto;}\n";
 
     function listenEvent(eventTarget, eventType, eventHandler) {
@@ -46,7 +38,7 @@ function createXMLEdit(element, stylesheet, listener) {
             event.returnValue = false;
         }
     }
-    
+
     function isCaretMoveCommand(charCode) {
         if (charCode >= 16 && charCode <= 20) {
             return true;
@@ -56,21 +48,38 @@ function createXMLEdit(element, stylesheet, listener) {
         }
         return false;
     }
-    
+
     function handleKeyDown(event) {
-        //event = event || (window && window.event);
         var charCode = event.charCode || event.keyCode;
         if (isCaretMoveCommand(charCode)) {
             return;
         }
         cancelEvent(event);
     }
-    
+
     function handleKeyPress(event) {
         handleKeyDown(event);
     }
 
+    function handleClick(event) {
+        var sel = element.ownerDocument.defaultView.getSelection(),
+            r = sel.getRangeAt(0),
+            n = r.startContainer;
+        // if cursor is in customns node, move up to the top one
+        if (n.parentNode.namespaceURI === customNS) {
+            while (n.parentNode.namespaceURI === customNS) {
+                n = n.parentNode;
+            }
+            r = n.ownerDocument.createRange();
+            r.setStart(n.nextSibling, 0);
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+        }
+    }
+
     function initElement(element) {
+        listenEvent(element, "click", handleClick);
         listenEvent(element, "keydown", handleKeyDown);
         listenEvent(element, "keypress", handleKeyPress);
         // ignore drop events, dragstart, drag, dragenter, dragover are ok for now
@@ -96,7 +105,7 @@ function createXMLEdit(element, stylesheet, listener) {
 
     function addExplicitAttributes(node) {
         var n = node.firstChild,
-            atts, attse, a, i, e, d, ref;
+            atts, attsv, a, i, d;
         d = node.ownerDocument;
         while (n && n !== node) {
             if (n.nodeType === 1) {
@@ -105,40 +114,26 @@ function createXMLEdit(element, stylesheet, listener) {
             n = n.nextSibling || n.parentNode;
         }
         atts = node.attributes;
-        attse = d.createElementNS(customNS, "customns:atts");
+        attsv = "";
         for (i = atts.length - 1; i >= 0; i -= 1) {
             a = atts.item(i);
-            e = d.createElementNS(customNS, "customns:attn");
-            e.appendChild(d.createTextNode(a.nodeName));
-            attse.appendChild(e);
-            e = d.createElementNS(customNS, "customns:attv");
-            e.appendChild(d.createTextNode(a.nodeValue));
-            attse.appendChild(e);
+            attsv = attsv + " " + a.nodeName + "=\"" + a.nodeValue + "\"";
         }
-        node.insertBefore(attse, node.firstChild);
+        node.setAttribute("customns_name", node.nodeName);
+        node.setAttribute("customns_atts", attsv);
     }
 
-    function getTagNames(node, prefixes, tagnames) {
-        var n = node.firstChild,
-            localnames, atts, att, i, ns;
+    function getNamespacePrefixes(node, prefixes) {
+        var n = node.firstChild, atts, att, i;
         while (n && n !== node) {
             if (n.nodeType === 1) {
-                getTagNames(n, prefixes, tagnames);
-                ns = n.namespaceURI || "";
-                localnames = tagnames[ns];
-                if (!localnames) {
-                    localnames = {};
-                    tagnames[ns] = localnames;
-                }
-                if (!(n.namespaceURI in prefixes)) {
-                    prefixes[ns] = null;
-                }
-                localnames[n.nodeName] = null;
+                getNamespacePrefixes(n, prefixes);
                 atts = n.attributes;
                 for (i = atts.length - 1; i >= 0; i -= 1) {
                     att = atts.item(i);
+                    // record the prefix that the document uses for namespaces
                     if (att.namespaceURI === "http://www.w3.org/2000/xmlns/") {
-                        if (!(att.localName in prefixes)) {
+                        if (!prefixes[att.nodeValue]) {
                             prefixes[att.nodeValue] = att.localName;
                         }
                     }
@@ -148,52 +143,48 @@ function createXMLEdit(element, stylesheet, listener) {
         }
     }
 
-    function generateMissingOrDoublePrefixes(prefixes) {
+    function generateUniquePrefixes(prefixes) {
         var taken = {},
-            p, i = 0;
-        for (p in prefixes) {
-            if (p && (prefixes[p] in taken || prefixes[p] === null ||
-                    prefixes[p] === "xmlns")) {
-                prefixes[p] = "ns" + i;
-                i += 1;
-            } else {
-                taken[p] = null;
+            ns, p, i = 0;
+        for (ns in prefixes) {
+            if (ns) {
+                p = prefixes[ns];
+                if (!p || p in taken || p === "xmlns") {
+                    do {
+                        p = "ns" + i;
+                        i += 1;
+                    } while (p in taken);
+                    prefixes[ns] = p;
+                }
+                taken[p] = true;
             }
         }
     }
 
+    // the CSS neededed for the XML edit view depends on the prefixes
     function createCssFromXmlInstance(node) {
         // collect all prefixes and elements
-        var prefixes = {},
-            tagnames = {},
+        var prefixes = {},    // namespace prefixes as they occur in the XML
             css = "@namespace customns url(customns);\n",
             name, pre, ns, names, csssel;
-        getTagNames(node, prefixes, tagnames);
-        generateMissingOrDoublePrefixes(prefixes);
-        for (name in prefixes) {
-            if (name && prefixes.hasOwnProperty(name)) {
-                css = css + "@namespace " + prefixes[name] + " url(" + name +
-                        ");\n";
+        getNamespacePrefixes(node, prefixes);
+        generateUniquePrefixes(prefixes);
+/*
+        for (ns in prefixes) {
+            if (ns) {
+                css = css + "@namepace " + prefixes[ns] + " url(" + ns + ");\n";
             }
         }
-        for (ns in tagnames) {
-            if (tagnames.hasOwnProperty(ns)) {
-                if (ns) {
-                    pre = cssprefix + prefixes[ns] + "|";
-                } else {
-                    pre = cssprefix;
-                }
-                names = tagnames[ns];
-                for (name in names) {
-                    if (names.hasOwnProperty(name)) {
-                        csssel = pre + name.replace(/\w+:/, "");
-                        css = css + csssel + ":before { content: '<" + name +
-                                "';}\n" + csssel + ":after { content: '</" +
-                                name + ">';}\n";
-                    }
-                }
+        for (ns in prefixes) {
+            if (ns) {
+                pre = cssprefix + prefixes[ns] + "|";
+                css = css + pre + ":before { content: '<" + prefixes[ns] +
+                        ":' attr(customns_name); }\n" +
+                        pre + ":after { content: '</" + prefixes[ns] +
+                        ":' attr(customns_name) '>'; }\n";
             }
         }
+*/
         return css;
     }
 
