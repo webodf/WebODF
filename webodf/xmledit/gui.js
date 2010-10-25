@@ -91,5 +91,5 @@ Ext.onReady(function () {
 
     // load the xml
     loadXML('requirements.xml', tabpanel);
-    //loadXML('../content.xml', tabpanel);
+    loadXML('../content.xml', tabpanel);
 });
