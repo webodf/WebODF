@@ -16,7 +16,7 @@ function createXMLEdit(element, stylesheet, listener) {
     }
 
     // generic css for doing xml formatting: color tags and do indentation
-    simplecss = cssprefix + "*," + cssprefix + ":visited, " + cssprefix + ":link {display:block; margin: 0px; margin-left: 10px; font-size: medium; color: black; background: white; font-variant: normal; font-weight: normal; font-style: normal; font-family: sans-serif; text-decoration: none; white-space: pre;}\n" +
+    simplecss = cssprefix + "*," + cssprefix + ":visited, " + cssprefix + ":link {display:block; margin: 0px; margin-left: 10px; font-size: medium; color: black; background: white; font-variant: normal; font-weight: normal; font-style: normal; font-family: sans-serif; text-decoration: none; white-space: pre-wrap; height: auto; width: auto;}\n" +
         cssprefix + ":before {color: blue;}\n" +
         cssprefix + ":after {color: blue;}\n" +
         cssprefix + "customns|atts {display:inline; margin: 0px; white-space: normal;}\n" +
@@ -105,13 +105,13 @@ function createXMLEdit(element, stylesheet, listener) {
             n = n.nextSibling || n.parentNode;
         }
         atts = node.attributes;
-        attse = d.createElementNS(customNS, "atts");
+        attse = d.createElementNS(customNS, "customns:atts");
         for (i = atts.length - 1; i >= 0; i -= 1) {
             a = atts.item(i);
-            e = d.createElementNS(customNS, "attn");
+            e = d.createElementNS(customNS, "customns:attn");
             e.appendChild(d.createTextNode(a.nodeName));
             attse.appendChild(e);
-            e = d.createElementNS(customNS, "attv");
+            e = d.createElementNS(customNS, "customns:attv");
             e.appendChild(d.createTextNode(a.nodeValue));
             attse.appendChild(e);
         }
