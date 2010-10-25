@@ -21,7 +21,7 @@ function createXMLEdit(element, stylesheet, listener) {
         cssprefix + ":after {color: blue;}\n" +
         cssprefix + "customns|atts {display:inline; margin: 0px; white-space: normal;}\n" +
         cssprefix + "customns|atts:after {content: '>';}\n" +
-        cssprefix + "customns|attn {display:inline; margin: 0px; white-space: pre;}\n" +
+        cssprefix + "customns|attn {display:inline; margin: 0px; white-space: pre; color: blue;}\n" +
         cssprefix + "customns|attn:before {content: '\\A        ';}\n" +
         cssprefix + "customns|attn:first-child:before {content: ' ';}\n" +
         cssprefix + "customns|attv {display:inline; margin: 0px; white-space: pre;}\n" +
@@ -133,7 +133,7 @@ function createXMLEdit(element, stylesheet, listener) {
                 if (!(n.namespaceURI in prefixes)) {
                     prefixes[ns] = null;
                 }
-                localnames[n.localName] = null;
+                localnames[n.nodeName] = null;
                 atts = n.attributes;
                 for (i = atts.length - 1; i >= 0; i -= 1) {
                     att = atts.item(i);
@@ -186,7 +186,7 @@ function createXMLEdit(element, stylesheet, listener) {
                 names = tagnames[ns];
                 for (name in names) {
                     if (names.hasOwnProperty(name)) {
-                        csssel = pre + name;
+                        csssel = pre + name.replace(/\w+:/, "");
                         css = css + csssel + ":before { content: '<" + name +
                                 "';}\n" + csssel + ":after { content: '</" +
                                 name + ">';}\n";
