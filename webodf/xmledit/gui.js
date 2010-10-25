@@ -91,5 +91,7 @@ Ext.onReady(function () {
 
     // load the xml
     loadXML('requirements.xml', tabpanel);
-    loadXML('index.html', tabpanel);
+    //loadXML('../mso.xml', tabpanel);
+  //  loadXML('index.html', tabpanel);
+  //  loadXML('../OpenDocument-v1.2-cd05-part3.html', tabpanel);
 });

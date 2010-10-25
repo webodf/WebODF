@@ -3,9 +3,12 @@ function createXMLEdit(element, stylesheet, listener) {
     var that = {},
         simplecss,
         cssprefix,
-        originalDocument;
+        originalDocument,
+        customNS = "customns";
 
-    element.id = "xml" + Math.floor(Math.random() * 10000);
+    if (!element.id) {
+        element.id = "xml" + Math.floor(Math.random() * 10000);
+    }
     element.contentEditable = true;
     cssprefix = "#" + element.id + " ";
 
@@ -13,9 +16,107 @@ function createXMLEdit(element, stylesheet, listener) {
     }
 
     // generic css for doing xml formatting: color tags and do indentation
-    simplecss = cssprefix + "* {display:block; margin-left: 10px;}\n" +
+    simplecss = cssprefix + "*," + cssprefix + ":visited, " + cssprefix + ":link {display:block; margin: 0px; margin-left: 10px; font-size: medium; color: black; background: white; font-variant: normal; font-weight: normal; font-style: normal; font-family: sans-serif; text-decoration: none; white-space: pre;}\n" +
         cssprefix + ":before {color: blue;}\n" +
-        cssprefix + ":after {color: blue;}\n";
+        cssprefix + ":after {color: blue;}\n" +
+        cssprefix + "customns|atts {display:inline; margin: 0px; white-space: normal;}\n" +
+        cssprefix + "customns|atts:after {content: '>';}\n" +
+        cssprefix + "customns|attn {display:inline; margin: 0px; white-space: pre;}\n" +
+        cssprefix + "customns|attn:before {content: '\\A        ';}\n" +
+        cssprefix + "customns|attn:first-child:before {content: ' ';}\n" +
+        cssprefix + "customns|attv {display:inline; margin: 0px; white-space: pre;}\n" +
+        cssprefix + "customns|attv:before {content: '=\"';}\n" +
+        cssprefix + "customns|attv:after {content: '\"';}\n" +
+        cssprefix + "{overflow: auto;}\n";
+
+    function listenEvent(eventTarget, eventType, eventHandler) {
+        if (eventTarget.addEventListener) {
+            eventTarget.addEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.attachEvent) {
+            eventType = "on" + eventType;
+            eventTarget.attachEvent(eventType, eventHandler);
+        } else {
+            eventTarget["on" + eventType] = eventHandler;
+        }
+    }
+    function cancelEvent(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    }
+    
+    function isCaretMoveCommand(charCode) {
+        if (charCode >= 16 && charCode <= 20) {
+            return true;
+        }
+        if (charCode >= 33 && charCode <= 40) { //arrows,home,end,pgup,pgdown
+            return true;
+        }
+        return false;
+    }
+    
+    function handleKeyDown(event) {
+        //event = event || (window && window.event);
+        var charCode = event.charCode || event.keyCode;
+        if (isCaretMoveCommand(charCode)) {
+            return;
+        }
+        cancelEvent(event);
+    }
+    
+    function handleKeyPress(event) {
+        handleKeyDown(event);
+    }
+
+    function initElement(element) {
+        listenEvent(element, "keydown", handleKeyDown);
+        listenEvent(element, "keypress", handleKeyPress);
+        // ignore drop events, dragstart, drag, dragenter, dragover are ok for now
+        listenEvent(element, "drop", cancelEvent);
+        listenEvent(element, "dragend", cancelEvent);
+        // pasting is also disallowed for now
+        listenEvent(element, "beforepaste", cancelEvent);
+        listenEvent(element, "paste", cancelEvent);
+    }
+
+    function cleanWhitespace(node) {
+        var n = node.firstChild, p,
+            re = /^\s*$/;
+        while (n && n !== node) {
+            cleanWhitespace(n);
+            p = n;
+            n = n.nextSibling || n.parentNode;
+            if (p.nodeType === 3 && re.test(p.nodeValue)) {
+                p.parentNode.removeChild(p);
+            }
+        }
+    }
+
+    function addExplicitAttributes(node) {
+        var n = node.firstChild,
+            atts, attse, a, i, e, d, ref;
+        d = node.ownerDocument;
+        while (n && n !== node) {
+            if (n.nodeType === 1) {
+                addExplicitAttributes(n);
+            }
+            n = n.nextSibling || n.parentNode;
+        }
+        atts = node.attributes;
+        attse = d.createElementNS(customNS, "atts");
+        for (i = atts.length - 1; i >= 0; i -= 1) {
+            a = atts.item(i);
+            e = d.createElementNS(customNS, "attn");
+            e.appendChild(d.createTextNode(a.nodeName));
+            attse.appendChild(e);
+            e = d.createElementNS(customNS, "attv");
+            e.appendChild(d.createTextNode(a.nodeValue));
+            attse.appendChild(e);
+        }
+        node.insertBefore(attse, node.firstChild);
+    }
 
     function getTagNames(node, prefixes, tagnames) {
         var n = node.firstChild,
@@ -65,7 +166,7 @@ function createXMLEdit(element, stylesheet, listener) {
         // collect all prefixes and elements
         var prefixes = {},
             tagnames = {},
-            css = "",
+            css = "@namespace customns url(customns);\n",
             name, pre, ns, names, csssel;
         getTagNames(node, prefixes, tagnames);
         generateMissingOrDoublePrefixes(prefixes);
@@ -87,7 +188,7 @@ function createXMLEdit(element, stylesheet, listener) {
                     if (names.hasOwnProperty(name)) {
                         csssel = pre + name;
                         css = css + csssel + ":before { content: '<" + name +
-                                ">';}\n" + csssel + ":after { content: '</" +
+                                "';}\n" + csssel + ":after { content: '</" +
                                 name + ">';}\n";
                     }
                 }
@@ -110,6 +211,9 @@ function createXMLEdit(element, stylesheet, listener) {
     }
     function setXML(xml) {
         var node = element.ownerDocument.importNode(xml.documentElement, true);
+
+        cleanWhitespace(node);
+
         originalDocument = xml;
         while (element.lastChild) {
             element.removeChild(element.lastChild);
@@ -117,7 +221,11 @@ function createXMLEdit(element, stylesheet, listener) {
         element.appendChild(node);
 
         updateCSS();
+
+        addExplicitAttributes(node);
     }
+
+    initElement(element);
 
     that.updateCSS = updateCSS;
     that.setXML = setXML;
