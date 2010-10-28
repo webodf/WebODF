@@ -1,4 +1,4 @@
-/*global window XMLHttpRequest require console process setTimeout Packages print readFile*/
+/*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile*/
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -62,9 +62,10 @@ function BrowserRuntime(logoutput) {
         var node, doc;
         if (logoutput) {
             doc = logoutput.ownerDocument;
-            node = doc.createElement('span');
-            node.appendChild(doc.createTextNode(msg + '\n'));
+            node = doc.createElement("span");
+            node.appendChild(doc.createTextNode(msg));
             logoutput.appendChild(node);
+            logoutput.appendChild(doc.createElement("br"));
         }
     }
     this.readFile = function (path, encoding, callback) {
@@ -141,7 +142,7 @@ function BrowserRuntime(logoutput) {
     this.log = log;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
-        return [];
+        return ["../lib"];
     };
 }
 
@@ -177,10 +178,10 @@ function NodeJSRuntime() {
  * @implements {Runtime}
  */
 function RhinoRuntime() {
-    var dom = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
+    var dom,// = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
         builder,
         entityresolver;
-
+/*
     dom.setValidating(false);
     dom.setNamespaceAware(true);
     dom.setExpandEntityReferences(false);
@@ -199,6 +200,7 @@ function RhinoRuntime() {
     //dom.setEntityResolver(entityresolver);
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
+*/
 
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),
@@ -241,7 +243,7 @@ function RhinoRuntime() {
     this.log = print;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
-        return [];
+        return ["lib"];
     };
 }
 
@@ -264,8 +266,10 @@ var runtime = (function () {
         var topname = packageNameComponents[0],
             i, pkg;
         // ensure top level package exists
+        //pkg = eval("if (typeof " + topname + " === 'undefined') {" +
+        //        "eval('" + topname + " = {};');}; var a___ = " + topname);
         pkg = eval("if (typeof " + topname + " === 'undefined') {" +
-                "eval('" + topname + " = {};');}; " + topname);
+                "eval('" + topname + " = {};');}" + topname);
         for (i = 1; i < packageNameComponents.length - 1; i += 1) {
             if (!(packageNameComponents[i] in pkg)) {
                 pkg = pkg[packageNameComponents[i]] = {};
@@ -299,7 +303,6 @@ var runtime = (function () {
                 }
             }
             if (code === undefined) {
-                rt.log(JSON.stringify(eval(classpath)));
                 throw "Cannot load class " + classpath;
             }
             definePackage(classpath.split("."));
@@ -310,7 +313,7 @@ var runtime = (function () {
     };
 }());
 
-(function () {
+(function (args) {
     function run(argv) {
         if (argv.length === 0) {
             return;
@@ -328,6 +331,6 @@ var runtime = (function () {
     if (typeof(require) !== "undefined") {
         run(process.argv.slice(2));
     } else if (typeof(window) === "undefined") {
-        run(arguments);
+        run(args);
     }
-}());
+}(typeof arguments !== "undefined" && arguments.slice && arguments.slice()));
