@@ -151,7 +151,8 @@ function BrowserRuntime(logoutput) {
  * @implements {Runtime}
  */
 function NodeJSRuntime() {
-    var fs = require('fs');
+    var fs = require('fs'),
+        currentDirectory = "";
 
     function isFile(path, callback) {
         fs.stat(path, function (err, stats) {
@@ -171,6 +172,12 @@ function NodeJSRuntime() {
     this.libraryPaths = function () {
         return [__dirname];
     };
+    this.setCurrentDirectory = function (dir) {
+        currentDirectory = dir;
+    };
+    this.currentDirectory = function () {
+        return currentDirectory;
+    };
 }
 
 /**
@@ -178,10 +185,10 @@ function NodeJSRuntime() {
  * @implements {Runtime}
  */
 function RhinoRuntime() {
-    var dom,// = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
+    var dom = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
         builder,
-        entityresolver;
-/*
+        entityresolver,
+        currentDirectory = "";
     dom.setValidating(false);
     dom.setNamespaceAware(true);
     dom.setExpandEntityReferences(false);
@@ -200,7 +207,6 @@ function RhinoRuntime() {
     //dom.setEntityResolver(entityresolver);
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
-*/
 
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),
@@ -245,6 +251,12 @@ function RhinoRuntime() {
     this.libraryPaths = function () {
         return ["lib"];
     };
+    this.setCurrentDirectory = function (dir) {
+        currentDirectory = dir;
+    };
+    this.currentDirectory = function () {
+        return currentDirectory;
+    };
 }
 
 /**
@@ -275,17 +287,47 @@ var runtime = (function () {
                 pkg = pkg[packageNameComponents[i]] = {};
             }
         }
+        return pkg;
     }
     /**
      * @param {string} classpath
      * @returns {Object|undefined}
      */
     runtime.loadClass = function (classpath) {
-        var impl,
-            code,
-            path,
-            rt = runtime,
-            dirs, i;
+        if (IS_COMPILED_CODE) {
+            return;
+        }
+        var impl;
+        function load(classpath) {
+            var code, path, dirs, i, names;
+            path = classpath.replace(".", "/") + ".js";
+            names = classpath.split(".");
+            dirs = runtime.libraryPaths();
+            dirs.push(runtime.currentDirectory());
+            for (i = 0; i < dirs.length; i += 1) {
+                try {
+                    code = runtime.readFileSync(dirs[i] + "/" + path, "utf8");
+                    if (code && code.length) {
+                        break;
+                    }
+                } catch (ex) {
+                }
+            }
+            if (code === undefined) {
+                throw "Cannot load class " + classpath;
+            }
+            definePackage(names);
+            try {
+                code = eval(classpath + " = eval(code);");
+            } catch (e) {
+                runtime.log("Error loading " + classpath + " " + e);
+                throw e;
+            }
+            if (!code || code.name !== names[names.length - 1]) {
+                runtime.log("Loaded code is not for " + names[names.length - 1]);
+                throw "Loaded code is not for " + names[names.length - 1];
+            }
+        }
         if (classpath in cache) {
             return cache[classpath];
         }
@@ -293,20 +335,9 @@ var runtime = (function () {
         try {
             impl = eval(classpath);
         } catch (e) {
-            path = classpath.replace(".", "/") + ".js";
-            dirs = rt.libraryPaths();
-            for (i = 0; i < dirs.length; i += 1) {
-                try {
-                    code = rt.readFileSync(dirs[i] + "/" + path, "utf8");
-                    break;
-                } catch (ex) {
-                }
-            }
-            if (code === undefined) {
-                throw "Cannot load class " + classpath;
-            }
-            definePackage(classpath.split("."));
-            impl = eval(code);
+        }
+        if (impl === undefined) {
+            impl = load(classpath);
         }
         cache[classpath] = impl;
         return impl;
@@ -318,7 +349,14 @@ var runtime = (function () {
         if (argv.length === 0) {
             return;
         }
-        runtime.readFile(argv[0], "utf8", function (err, data) {
+        var script = argv[0];
+        runtime.readFile(script, "utf8", function (err, data) {
+            var path = "",
+                paths = runtime.libraryPaths();
+            if (script.indexOf("/") !== -1) {
+                path = script.substring(0, script.indexOf("/"));
+            }
+            runtime.setCurrentDirectory(path);
             if (err) {
                 runtime.log(err);
             } else {

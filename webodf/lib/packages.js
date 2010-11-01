@@ -1,1 +1,2 @@
 var core = {};
+var gui = {};

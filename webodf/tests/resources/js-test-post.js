@@ -1,3 +1,4 @@
+/*
 function finishJSTest()
 {
     shouldBeTrue("successfullyParsed");
@@ -11,3 +12,4 @@ if (window.jsTestIsAsync) {
         layoutTestController.waitUntilDone();
 } else
     finishJSTest();
+*/

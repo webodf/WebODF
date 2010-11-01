@@ -1,9 +1,11 @@
-/*global exports require*/
-function createXMLEdit(element, stylesheet, listener) {
-    var that = {},
-        simplecss,
+/*global gui*/
+/**
+ * @constructor
+ */
+gui.XMLEdit = function XMLEdit(element, stylesheet) {
+    var simplecss,
         cssprefix,
-        originalDocument,
+        documentElement,
         customNS = "customns";
 
     if (!element.id) {
@@ -62,10 +64,12 @@ function createXMLEdit(element, stylesheet, listener) {
     }
 
     function handleClick(event) {
+//        alert(event.target.nodeName);
         var sel = element.ownerDocument.defaultView.getSelection(),
             r = sel.getRangeAt(0),
             n = r.startContainer;
         // if cursor is in customns node, move up to the top one
+        /*
         if (n.parentNode.namespaceURI === customNS) {
             while (n.parentNode.namespaceURI === customNS) {
                 n = n.parentNode;
@@ -76,6 +80,17 @@ function createXMLEdit(element, stylesheet, listener) {
             sel.removeAllRanges();
             sel.addRange(r);
         }
+*/
+/*
+            r = element.ownerDocument.createRange();
+            r.setStart(event.target.nodeName, 0);
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+*/
+alert(sel.getRangeAt(0).startContainer.nodeName);
+
+        cancelEvent(event);
     }
 
     function initElement(element) {
@@ -198,14 +213,15 @@ function createXMLEdit(element, stylesheet, listener) {
         stylesheet = stylesheet.parentNode.replaceChild(css, stylesheet);
     }
     function getXML() {
-        return "<a/>";
+        return documentElement;
     }
     function setXML(xml) {
-        var node = element.ownerDocument.importNode(xml.documentElement, true);
+        var node = xml.documentElement || xml;
+        node = element.ownerDocument.importNode(node, true);
+        documentElement = node;
 
         cleanWhitespace(node);
 
-        originalDocument = xml;
         while (element.lastChild) {
             element.removeChild(element.lastChild);
         }
@@ -218,9 +234,7 @@ function createXMLEdit(element, stylesheet, listener) {
 
     initElement(element);
 
-    that.updateCSS = updateCSS;
-    that.setXML = setXML;
-    that.getXML = getXML;
-    return that;
-}
-exports.createXMLEdit = createXMLEdit;
+    this.updateCSS = updateCSS;
+    this.setXML = setXML;
+    this.getXML = getXML;
+};

@@ -18,6 +18,9 @@
  * Even when the selection allows for a cursor, it might be desireable to hide
  * the cursor by not letting it be part of the DOM.
  **/
+/**
+ * @constructor
+ */
 function Cursor(selection, document) {
     "use strict";
     var cursorns,

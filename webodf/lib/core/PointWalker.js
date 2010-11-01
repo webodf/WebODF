@@ -1,18 +1,17 @@
-/** A simple walker that allows finegrained stepping through the DOM.
-    It does not support node filtering.
-    TODO: write a position walker that uses a treewalker
-**/
-var createPointWalker = function (node, my) {
+/*global core*/
+/**
+ * A simple walker that allows finegrained stepping through the DOM.
+ * It does not support node filtering.
+ * TODO: write a position walker that uses a treewalker
+ * @constructor
+ */
+core.PointWalker = function PointWalker(node) {
     "use strict";
-    var that,
-        currentNode = node,
+    var currentNode = node,
         before = null, // node before the point
         after = node && node.firstChild, // node after the point
         root = node,
         pos = 0;
-    my = my || {};
-
-    that = {};
 
     function getPosition(node) {
         var p = -1;
@@ -23,11 +22,12 @@ var createPointWalker = function (node, my) {
         return p;
     }
     /**
-     * Move the walker to the point given by @node and @position.
-     * @node must be the root of this walker or part of the tree of this walker.
-     * @position must be a valid position in @node.
+     * Move the walker to the point given by @p node and @p position.
+     * @param node must be the root of this walker or part of the tree of this
+     *         walker.
+     * @param position must be a valid position in @node.
      **/
-    that.setPoint = function (node, position) {
+    this.setPoint = function (node, position) {
         currentNode = node;
         pos = position;
         if (currentNode.nodeType === currentNode.TEXT_NODE) {
@@ -46,7 +46,7 @@ var createPointWalker = function (node, my) {
             }
         }
     };
-    that.stepForward = function () {
+    this.stepForward = function () {
         // if this is a text node, move to the next position in the text
         if (currentNode.nodeType === currentNode.TEXT_NODE) {
             if (pos < currentNode.nodeValue.length) {
@@ -81,7 +81,7 @@ var createPointWalker = function (node, my) {
         }
         return false;
     };
-    that.stepBackward = function () {
+    this.stepBackward = function () {
         // if this is a text node, move to the next position in the text
         if (currentNode.nodeType === currentNode.TEXT_NODE) {
             if (pos > 0) {
@@ -116,17 +116,16 @@ var createPointWalker = function (node, my) {
         }
         return false;
     };
-    that.node = function () {
+    this.node = function () {
         return currentNode;
     };
-    that.position = function () {
+    this.position = function () {
         return pos;
     };
-    that.precedingSibling = function () {
+    this.precedingSibling = function () {
         return before;
     };
-    that.followingSibling = function () {
+    this.followingSibling = function () {
         return after;
     };
-    return that;
 };

@@ -1,3 +1,4 @@
+/*
 if (window.layoutTestController)
     layoutTestController.dumpAsText();
 
@@ -259,3 +260,4 @@ function gc() {
             gcRec(10)
     }
 }
+*/
