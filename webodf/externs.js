@@ -25,3 +25,37 @@ function readFile(path, encoding) {}
  * @param {string} msg
  */
 function print(msg) {}
+/**
+ * @param {string} msg
+ */
+function alert(msg) {}
+var Math = {};
+var XMLHttpRequest;
+var undefined;
+function setTimeout(callback, time) {}
+var Packages = {};
+var window = {};
+var eval = function(code) {}
+var arguments;
+/**
+ * @constructor
+ */
+function Node() {}
+/**
+ * @constructor
+ * @extends {Node}
+ */
+function Document() {}
+/**
+ * @constructor
+ * @extends {Node}
+ */
+function Element() {}
+/**
+ * @constructor
+ */
+function Selection() {}
+/*
+ * @type {Document}
+ */
+var document = {};

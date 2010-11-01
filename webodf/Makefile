@@ -23,7 +23,7 @@ compiledrhinotest: compiled.js
 
 # --compilation_level ADVANCED_OPTIMIZATIONS does not work
 compiled.js: $(JSFILES) externs.js
-	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' --warning_level VERBOSE --compilation_level SIMPLE_OPTIMIZATIONS --formatting PRETTY_PRINT --externs externs.js $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) --js_output_file compiled.js
+	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' --warning_level VERBOSE --compilation_level SIMPLE_OPTIMIZATIONS --formatting PRETTY_PRINT --externs externs.js --use_only_custom_externs true $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) --js_output_file compiled.js
 
 # make sure targets are deleted if a build exits with a non-zero status code
 .DELETE_ON_ERROR:
