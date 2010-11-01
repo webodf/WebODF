@@ -266,10 +266,13 @@ function RhinoRuntime() {
 var runtime = (function () {
     if (typeof(window) !== "undefined") {
         return new BrowserRuntime(window.document.getElementById("logoutput"));
-    } else if (typeof(require) !== "undefined") {
-        return new NodeJSRuntime();
+    } else {
+        if (typeof(require) !== "undefined") {
+            return new NodeJSRuntime();
+        } else {
+            return new RhinoRuntime();
+        }
     }
-    return new RhinoRuntime();
 }());
 
 (function () {
@@ -278,8 +281,6 @@ var runtime = (function () {
         var topname = packageNameComponents[0],
             i, pkg;
         // ensure top level package exists
-        //pkg = eval("if (typeof " + topname + " === 'undefined') {" +
-        //        "eval('" + topname + " = {};');}; var a___ = " + topname);
         pkg = eval("if (typeof " + topname + " === 'undefined') {" +
                 "eval('" + topname + " = {};');}" + topname);
         for (i = 1; i < packageNameComponents.length - 1; i += 1) {
@@ -294,14 +295,19 @@ var runtime = (function () {
      * @returns {Object|undefined}
      */
     runtime.loadClass = function (classpath) {
-        if (IS_COMPILED_CODE) {
-            return;
+        if (classpath in cache) {
+            return cache[classpath];
         }
-        var impl;
+        var names = classpath.split("."),
+            impl;
+        if (IS_COMPILED_CODE) {
+            impl = eval(classpath + ";");
+            cache[classpath] = impl;
+            return impl;
+        }
         function load(classpath) {
-            var code, path, dirs, i, names;
+            var code, path, dirs, i;
             path = classpath.replace(".", "/") + ".js";
-            names = classpath.split(".");
             dirs = runtime.libraryPaths();
             dirs.push(runtime.currentDirectory());
             for (i = 0; i < dirs.length; i += 1) {
@@ -323,27 +329,18 @@ var runtime = (function () {
                 runtime.log("Error loading " + classpath + " " + e);
                 throw e;
             }
-            if (!code || code.name !== names[names.length - 1]) {
-                runtime.log("Loaded code is not for " + names[names.length - 1]);
-                throw "Loaded code is not for " + names[names.length - 1];
-            }
-        }
-        if (classpath in cache) {
-            return cache[classpath];
+            return code;
         }
         // check if the class in context already
-        try {
-            impl = eval(classpath);
-        } catch (e) {
-        }
-        if (impl === undefined) {
-            impl = load(classpath);
+        impl = load(classpath);
+        if (!impl || impl.name !== names[names.length - 1]) {
+            runtime.log("Loaded code is not for " + names[names.length - 1]);
+            throw "Loaded code is not for " + names[names.length - 1];
         }
         cache[classpath] = impl;
         return impl;
     };
 }());
-
 (function (args) {
     function run(argv) {
         if (argv.length === 0) {
@@ -366,9 +363,9 @@ var runtime = (function () {
         });
     }
     // if rhino or node.js, run the scripts provided as arguments
-    if (typeof(require) !== "undefined") {
+    if (runtime.constructor.name === "NodeJSRuntime") {
         run(process.argv.slice(2));
-    } else if (typeof(window) === "undefined") {
+    } else if (runtime.constructor.name === "RhinoRuntime") {
         run(args);
     }
 }(typeof arguments !== "undefined" && arguments.slice && arguments.slice()));
