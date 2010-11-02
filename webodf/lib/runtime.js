@@ -342,6 +342,14 @@ var runtime = (function () {
         }
         var names = classpath.split("."),
             impl;
+        try {
+            impl = eval(classpath);
+            if (impl) {
+                cache[classpath] = true;
+                return;
+            }
+        } catch (e) {
+        }
         function load(classpath) {
             var code, path, dirs, i;
             path = classpath.replace(".", "/") + ".js";
@@ -376,7 +384,7 @@ var runtime = (function () {
             runtime.log("Loaded code is not for " + names[names.length - 1]);
             throw "Loaded code is not for " + names[names.length - 1];
         }
-        cache[classpath] = impl;
+        cache[classpath] = true;
     };
 }());
 (function (args) {

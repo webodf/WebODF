@@ -44,6 +44,10 @@ Array.prototype.slice = function (opt_begin, opt_end) {};
  */
 Array.prototype.push = function (var_args) {};
 /**
+ * @type {number}
+ */
+Array.prototype.length;
+/**
  * @constructor
  * @param {*=} opt_str
  * @return {string}
@@ -68,6 +72,19 @@ function isNaN(num) {}
  * @constructor
  */
 function DOMImplementation() {}
+/**
+ * @param {string} namespaceURI
+ * @param {string} publicId
+ * @param {DocumentType} doctype
+ * @return {Document}
+ * @nosideeffects
+ */
+DOMImplementation.prototype.createDocument = function(namespaceURI, publicId, doctype) {};
+/**
+ * @constructor
+ * @extends {Node}
+ */
+function DocumentType() {}
 
 /**
  * @constructor

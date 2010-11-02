@@ -15,15 +15,16 @@ nodetest: $(JSFILES)
 rhinotest: $(JSFILES)
 	java -jar $(RHINOJAR) -debug lib/runtime.js tests/tests.js
 
-compilednodetest: compiled.js
-	$(NODE) compiled.js
+compilednodetest: simplecompiled.js
+	$(NODE) simplecompiled.js
 
-compiledrhinotest: compiled.js
-	java -jar $(RHINOJAR) -debug compiled.js
+compiledrhinotest: simplecompiled.js
+	java -jar $(RHINOJAR) -debug simplecompiled.js
 
-# --compilation_level ADVANCED_OPTIMIZATIONS does not work
-simplecompiled.js: $(JSFILES) externs.js
-	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' --warning_level VERBOSE --compilation_level SIMPLE_OPTIMIZATIONS --formatting PRETTY_PRINT --externs externs2.js $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > simplecompiled.js
+# simplecompiled.js should actually work, creating compiled.js is just to
+# trigger compiler errors
+simplecompiled.js: $(JSFILES)
+	java -jar $(COMPILERJAR) --warning_level VERBOSE --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > simplecompiled.js
 
 compiled.js: $(JSFILES) externs.js
 	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' --warning_level VERBOSE --compilation_level ADVANCED_OPTIMIZATIONS --formatting PRETTY_PRINT --externs externs.js --use_only_custom_externs true $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > compiled.js
