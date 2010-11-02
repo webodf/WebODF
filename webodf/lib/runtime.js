@@ -48,6 +48,10 @@ Runtime.prototype.setTimeout = function (callback, milliseconds) {};
  * @return {Array.<string>}
  */
 Runtime.prototype.libraryPaths = function () {};
+/**
+ * @return {string}
+ */
+Runtime.prototype.type = function () {};
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -144,6 +148,9 @@ function BrowserRuntime(logoutput) {
     this.libraryPaths = function () {
         return ["../lib"];
     };
+    this.type = function () {
+        return "BrowserRuntime";
+    };
 }
 
 /**
@@ -177,6 +184,9 @@ function NodeJSRuntime() {
     };
     this.currentDirectory = function () {
         return currentDirectory;
+    };
+    this.type = function () {
+        return "NodeJSRuntime";
     };
 }
 
@@ -257,6 +267,9 @@ function RhinoRuntime() {
     this.currentDirectory = function () {
         return currentDirectory;
     };
+    this.type = function () {
+        return "RhinoRuntime";
+    };
 }
 
 /**
@@ -292,19 +305,17 @@ var runtime = (function () {
     }
     /**
      * @param {string} classpath
-     * @returns {Object|undefined}
+     * @returns {undefined}
      */
     runtime.loadClass = function (classpath) {
+        if (IS_COMPILED_CODE) {
+            return;
+        }
         if (classpath in cache) {
-            return cache[classpath];
+            return;
         }
         var names = classpath.split("."),
             impl;
-        if (IS_COMPILED_CODE) {
-            impl = eval(classpath + ";");
-            cache[classpath] = impl;
-            return impl;
-        }
         function load(classpath) {
             var code, path, dirs, i;
             path = classpath.replace(".", "/") + ".js";
@@ -338,12 +349,11 @@ var runtime = (function () {
             throw "Loaded code is not for " + names[names.length - 1];
         }
         cache[classpath] = impl;
-        return impl;
     };
 }());
 (function (args) {
     function run(argv) {
-        if (argv.length === 0) {
+        if (!argv.length) {
             return;
         }
         var script = argv[0];
@@ -363,9 +373,9 @@ var runtime = (function () {
         });
     }
     // if rhino or node.js, run the scripts provided as arguments
-    if (runtime.constructor.name === "NodeJSRuntime") {
+    if (runtime.type() === "NodeJSRuntime") {
         run(process.argv.slice(2));
-    } else if (runtime.constructor.name === "RhinoRuntime") {
+    } else if (runtime.type() === "RhinoRuntime") {
         run(args);
     }
 }(typeof arguments !== "undefined" && arguments.slice && arguments.slice()));

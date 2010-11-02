@@ -1,11 +1,75 @@
 /**
+ * es3
+ */
+/**
+ * @constructor
+ * @param {...*} var_args
+ * @return {!Array}
+ * @nosideeffects
+ */
+function Array(var_args) {}
+/**
+ * @param {...*} var_args
+ * @return {!Array}
+ * @this {Object}
+ * @nosideeffects
+ */
+Array.prototype.concat = function (var_args) {};
+/**
+ * @param {*=} opt_begin Zero-based index at which to begin extraction.  A
+ *     non-number type will be auto-cast by the browser to a number.
+ * @param {*=} opt_end Zero-based index at which to end extraction.  slice
+ *     extracts up to but not including end.
+ * @return {!Array}
+ * @this {Object}
+ * @nosideeffects
+ */
+Array.prototype.slice = function (opt_begin, opt_end) {};
+/**
+ * @constructor
+ * @param {*=} opt_str
+ * @return {string}
+ * @nosideeffects
+ */
+function String(opt_str) {}
+/**
+ * @param {*=} opt_separator
+ * @param {number=} opt_limit
+ * @return {!Array.<string>}
+ * @nosideeffects
+ */
+String.prototype.split = function (opt_separator, opt_limit) {};
+
+/**
+ * @constructor
+ */
+function NodeJSObject() {}
+/**
  * @param {string} path
+ * @param {string} encoding
+ * @param {Function} callback
+ * @return {undefined}
+ */
+NodeJSObject.prototype.readFile = function (path, encoding, callback) {};
+/**
+ * @param {string} path
+ * @param {string} encoding
+ * @return {undefined}
+ */
+NodeJSObject.prototype.readFileSync = function (path, encoding) {};
+/**
+ * @param {string} path
+ * @return {NodeJSObject}
  */
 function require(path) {}
 /**
  * @type {Object.<string, function(...)>}
  */
-var console;
+function console() {}
+/**
+ * @param {string} msg
+ */
+console.prototype.log = function (msg) {};
 var process = {
     argv: []
 };
@@ -33,7 +97,49 @@ var Math = {};
 var XMLHttpRequest;
 var undefined;
 function setTimeout(callback, time) {}
-var Packages = {};
+var Packages = {
+    javax: {
+        xml: {
+            parsers: {
+            }
+        }
+    },
+    org: {
+        xml: {
+            sax: {
+                EntityResolver: function () {},
+                InputSource: function (reader) {}
+            }
+        }
+    },
+    java: {
+        io: {
+            File: function (path) {},
+            FileReader: function (path) {}
+        }
+    }
+};
+/**
+ * @constructor
+ */
+Packages.javax.xml.parsers.DocumentBuilder = function () {};
+Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver = function () {};
+/**
+ * @constructor
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory = function () {};
+/**
+ * @return {Packages.javax.xml.parsers.DocumentBuilderFactory}
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newInstance = function () {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setValidating = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setNamespaceAware = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setExpandEntityReferences = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setSchema = function (value) {};
+/**
+ * @return {Packages.javax.xml.parsers.DocumentBuilder}
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newDocumentBuilder = function () {};
 var window = {};
 var eval = function(code) {}
 var arguments;
