@@ -47,9 +47,15 @@ core.PointWalker = function PointWalker(node) {
         }
     };
     this.stepForward = function () {
+        var len;
         // if this is a text node, move to the next position in the text
         if (currentNode.nodeType === currentNode.TEXT_NODE) {
-            if (pos < currentNode.nodeValue.length) {
+            if (typeof currentNode.nodeValue.length === "number") {
+                len = currentNode.nodeValue.length;
+            } else {
+                len = currentNode.nodeValue.length();
+            }
+            if (pos < len) {
                 pos += 1;
                 return true;
             }
@@ -99,7 +105,11 @@ core.PointWalker = function PointWalker(node) {
                 currentNode = before;
                 before = null;
                 after = null;
-                pos = currentNode.nodeValue.length;
+                if (typeof currentNode.nodeValue.length === "number") {
+                    pos = currentNode.nodeValue.length;
+                } else {
+                    pos = currentNode.nodeValue.length();
+                }
             } else {
                 after = before;
                 before = before.previousSibling;
