@@ -17,25 +17,22 @@ core.UnitTest.prototype.tearDown = function () {};
  */
 core.UnitTest.prototype.description = function () {};
 /**
- * @return {Array.<Function>}
+ * @return {Object.<string, Function>}
  */
 core.UnitTest.prototype.tests = function () {};
 
 /**
  * @constructor
  */
-core.UnitTestRunner = function () {
+core.UnitTestRunner = function UnitTestRunner() {
     function debug(msg) {
         runtime.log(msg);
     }
-    function escapeHTML(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    }
     function testFailed(msg) {
-        debug('<span><span class="fail">FAIL</span> ' + escapeHTML(msg) + '</span>');
+        runtime.log("fail", msg);
     }
     function testPassed(msg) {
-        debug('<span><span class="pass">PASS</span> ' + escapeHTML(msg) + '</span>');
+        runtime.log("pass", msg);
     }
     function areArraysEqual(a, b) {
         var i;
@@ -74,7 +71,13 @@ core.UnitTestRunner = function () {
         }
         return "" + v;
     }
-    function shouldBe(a, b) {
+    /**
+     * @param {Object} t
+     * @param {string} a
+     * @param {string} b
+     * @return {undefined}
+     */
+    function shouldBe(t, a, b) {
         if (typeof a !== "string" || typeof b !== "string") {
             debug("WARN: shouldBe() expects string arguments");
         }
@@ -96,8 +99,38 @@ core.UnitTestRunner = function () {
             testFailed(a + " should be " + bv + " (of type " + typeof bv + "). Was " + av + " (of type " + typeof av + ").");
         }
     }
-};
-core.UnitTestRunner.prototype.shouldBe = function () {
+    /**
+     * @param {Object} t
+     * @param {string} a
+     * @return {undefined}
+     */
+    function shouldBeNonNull(t, a) {
+        var exception, av;
+        try {
+            av = eval(a);
+        } catch (e) {
+            exception = e;
+        }
+
+        if (exception) {
+            testFailed(a + " should be non-null. Threw exception " + exception);
+        } else if (av !== null) {
+            testPassed(a + " is non-null.");
+        } else {
+            testFailed(a + " should be non-null. Was " + av);
+        }
+    }
+    /**
+     * @param {Object} t
+     * @param {string} a
+     * @return {undefined}
+     */
+    function shouldBeNull(t, a) {
+        shouldBe(t, a, "null");
+    }
+    this.shouldBeNull = shouldBeNull;
+    this.shouldBeNonNull = shouldBeNonNull;
+    this.shouldBe = shouldBe;
 };
 
 /**
@@ -108,9 +141,14 @@ core.UnitTester = function UnitTester() {
     this.runTests = function (TestClass) {
         var test = new TestClass(runner), i, t, tests;
         tests = test.tests();
-        for (i = 0; i < tests.length; i += 1) {
-            t = tests[i];
-            t();
+        for (i in tests) {
+            if (tests.hasOwnProperty(i)) {
+                runtime.log("Running " + i);
+                t = tests[i];
+                test.setUp();
+                t();
+                test.tearDown();
+            }
         }
     };
 };

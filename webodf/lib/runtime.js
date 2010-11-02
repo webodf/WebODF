@@ -34,10 +34,11 @@ Runtime.prototype.loadXML = function (path, callback) {};
  */
 Runtime.prototype.isFile = function (path, callback) {};
 /**
- * @param {string} msg
+ * @param {string} msgOrCategory
+ * @param {string=} msg
  * @return undefined
  */
-Runtime.prototype.log = function (msg) {};
+Runtime.prototype.log = function (msgOrCategory, msg) {};
 /**
  * @param {function():undefined} callback
  * @param {number} milliseconds
@@ -66,10 +67,22 @@ var IS_COMPILED_CODE = false;
  * @param {Element} logoutput
  */
 function BrowserRuntime(logoutput) {
-    function log(msg) {
-        var node, doc;
+    function log(msgOrCategory, msg) {
+        var node, doc, category;
+        if (msg) {
+            category = msgOrCategory;
+        } else {
+            msg = msgOrCategory;
+        }
         if (logoutput) {
             doc = logoutput.ownerDocument;
+            if (category) {
+                node = doc.createElement("span");
+                node.className = category;
+                node.appendChild(doc.createTextNode(category));
+                logoutput.appendChild(node);
+                logoutput.appendChild(doc.createTextNode(" "));
+            }
             node = doc.createElement("span");
             node.appendChild(doc.createTextNode(msg));
             logoutput.appendChild(node);
@@ -150,7 +163,7 @@ function BrowserRuntime(logoutput) {
     this.log = log;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
-        return ["../lib"];
+        return ["../lib", "."];
     };
     this.type = function () {
         return "BrowserRuntime";
@@ -333,7 +346,9 @@ var runtime = (function () {
             var code, path, dirs, i;
             path = classpath.replace(".", "/") + ".js";
             dirs = runtime.libraryPaths();
-            dirs.push(runtime.currentDirectory());
+            if (runtime.currentDirectory) {
+                dirs.push(runtime.currentDirectory());
+            }
             for (i = 0; i < dirs.length; i += 1) {
                 try {
                     code = runtime.readFileSync(dirs[i] + "/" + path, "utf8");

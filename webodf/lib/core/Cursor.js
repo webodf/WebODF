@@ -157,7 +157,9 @@ core.Cursor = function Cursor(selection, document) {
     this.updateToSelection = function () {
         var range;
         removeCursor();
+runtime.log("HMM " + selection.rangeCount);
         if (selection.rangeCount === 1) {
+runtime.log("HMM ");
             range = selection.getRangeAt(0);
             if (range.collapsed) {
                 putCursor(range.startContainer, range.startOffset);
@@ -167,4 +169,4 @@ core.Cursor = function Cursor(selection, document) {
     this.remove = function () {
         removeCursor();
     };
-}
+};

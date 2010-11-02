@@ -3,7 +3,7 @@ runtime.loadClass("core.PointWalker");
 
 /**
  * @constructor
- * @param runner {core.UnitTestRunner}
+ * @param runner {UnitTestRunner}
  * @implements {core.UnitTest}
  */
 core.PointWalkerTests = function PointWalkerTests(runner) {
@@ -21,20 +21,20 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         while (t.walker.stepForward()) {
             t.countForward += 1;
         }
-        r.shouldBe("t.countForward", "t.count");
-        r.shouldBe("t.walker.precedingSibling()", "t.node.lastChild");
-        r.shouldBe("t.walker.followingSibling()", "null");
+        r.shouldBe(t, "t.countForward", "t.count");
+        r.shouldBe(t, "t.walker.precedingSibling()", "t.node.lastChild");
+        r.shouldBe(t, "t.walker.followingSibling()", "null");
         if (endpos !== null) {
-            r.shouldBe("t.walker.position()", "t.endpos");
+            r.shouldBe(t, "t.walker.position()", "t.endpos");
         }
         t.walker.setPoint(t.node, endpos);
         while (t.walker.stepBackward()) {
             t.countBackward += 1;
         }
-        r.shouldBe("t.countBackward", "t.count");
-        r.shouldBe("t.walker.precedingSibling()", "null");
-        r.shouldBe("t.walker.followingSibling()", "t.node.firstChild");
-        r.shouldBe("t.walker.position()", "0");
+        r.shouldBe(t, "t.countBackward", "t.count");
+        r.shouldBe(t, "t.walker.precedingSibling()", "null");
+        r.shouldBe(t, "t.walker.followingSibling()", "t.node.firstChild");
+        r.shouldBe(t, "t.walker.position()", "0");
     }
 
     function testEmptyDocument() {
@@ -51,19 +51,19 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         t = {};
         t.doc = doc;
         t.walker = new core.PointWalker(t.doc);
-        r.shouldBe("t.walker.position()", "0");
-        r.shouldBe("t.walker.stepForward()", "true");
-        r.shouldBe("t.walker.position()", "0");
-        r.shouldBe("t.walker.stepForward()", "true");
-        r.shouldBe("t.walker.position()", "1");
-        r.shouldBe("t.walker.stepForward()", "false");
-        r.shouldBe("t.walker.position()", "1");
-        r.shouldBe("t.walker.stepBackward()", "true");
-        r.shouldBe("t.walker.position()", "0");
-        r.shouldBe("t.walker.stepBackward()", "true");
-        r.shouldBe("t.walker.position()", "0");
-        r.shouldBe("t.walker.stepBackward()", "false");
-        r.shouldBe("t.walker.position()", "0");
+        r.shouldBe(t, "t.walker.position()", "0");
+        r.shouldBe(t, "t.walker.stepForward()", "true");
+        r.shouldBe(t, "t.walker.position()", "0");
+        r.shouldBe(t, "t.walker.stepForward()", "true");
+        r.shouldBe(t, "t.walker.position()", "1");
+        r.shouldBe(t, "t.walker.stepForward()", "false");
+        r.shouldBe(t, "t.walker.position()", "1");
+        r.shouldBe(t, "t.walker.stepBackward()", "true");
+        r.shouldBe(t, "t.walker.position()", "0");
+        r.shouldBe(t, "t.walker.stepBackward()", "true");
+        r.shouldBe(t, "t.walker.position()", "0");
+        r.shouldBe(t, "t.walker.stepBackward()", "false");
+        r.shouldBe(t, "t.walker.position()", "0");
     
         textnode1 = doc.createTextNode("hello, ");
         textnode2 = doc.createTextNode("big ");
@@ -89,7 +89,9 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [ testEmptyDocument ];
+        return {
+            testEmptyDocument: testEmptyDocument
+        };
     };
     this.description = function () {
         return "Test the PointWalker class.";
