@@ -4,18 +4,15 @@ runtime.loadClass("core.PointWalkerTests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("gui.XMLEditTests");
 
-var coretests = [
-    core.PointWalkerTests,
-    core.CursorTests
-];
-var guitests = [
-    gui.XMLEditTests
-];
+var tests = [];
 
-var tests = coretests.slice();
+if (runtime.type() !== "NodeJSRuntime") {
+    tests.push(core.PointWalkerTests);
+}
 
-if (typeof window !== "undefined") {
-    tests = tests.concat(guitests);
+if (runtime.type() === "BrowserRuntime") {
+    tests.push(core.CursorTests);
+    tests.push(gui.XMLEditTests);
 }
 
 var tester = new core.UnitTester();

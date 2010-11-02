@@ -1,4 +1,4 @@
-/*global document core runtime*/
+/*global core runtime*/
 runtime.loadClass("core.PointWalker");
 
 /**
@@ -38,7 +38,7 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
     }
 
     function testEmptyDocument() {
-        var doc = document.implementation.createDocument("", "p", null),
+        var doc = runtime.getDOMImplementation().createDocument("", "p", null),
             p = doc.firstChild,
             textnode1,
             textnode2,

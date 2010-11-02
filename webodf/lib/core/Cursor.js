@@ -1,3 +1,4 @@
+/*global core*/
 /**
  * A cursor is a dom node that visually represents a cursor in a DOM tree.
  * It should stay synchronized with the selection in the document. When
@@ -21,7 +22,7 @@
 /**
  * @constructor
  */
-function Cursor(selection, document) {
+core.Cursor = function Cursor(selection, document) {
     "use strict";
     var cursorns,
         cursorNode;

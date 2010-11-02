@@ -3,6 +3,18 @@
  */
 /**
  * @constructor
+ * @param {*=} opt_value
+ * @nosideeffects
+ */
+function Object(opt_value) {}
+/**
+ * @param {*} propertyName Implicitly cast to a string.
+ * @return {boolean}
+ * @nosideeffects
+ */
+Object.prototype.hasOwnProperty = function (propertyName) {};
+/**
+ * @constructor
  * @param {...*} var_args
  * @return {!Array}
  * @nosideeffects
@@ -26,6 +38,12 @@ Array.prototype.concat = function (var_args) {};
  */
 Array.prototype.slice = function (opt_begin, opt_end) {};
 /**
+ * @param {...*} var_args
+ * @return {number} The new length of the array.
+ * @this {Object}
+ */
+Array.prototype.push = function (var_args) {};
+/**
  * @constructor
  * @param {*=} opt_str
  * @return {string}
@@ -39,6 +57,17 @@ function String(opt_str) {}
  * @nosideeffects
  */
 String.prototype.split = function (opt_separator, opt_limit) {};
+/**
+ * @param {*} num
+ * @return {boolean}
+ * @nosideeffects
+ */
+function isNaN(num) {}
+
+/**
+ * @constructor
+ */
+function DOMImplementation() {}
 
 /**
  * @constructor
@@ -123,7 +152,12 @@ var Packages = {
  * @constructor
  */
 Packages.javax.xml.parsers.DocumentBuilder = function () {};
-Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver = function () {};
+Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver = 
+function () {};
+/**
+ * @return {DOMImplementation}
+ */
+Packages.javax.xml.parsers.DocumentBuilder.prototype.getDOMImplementation = function () {};
 /**
  * @constructor
  */

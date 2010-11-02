@@ -1,4 +1,5 @@
-/*global document core runtime window*/
+/*global core runtime window*/
+runtime.loadClass("core.Cursor");
 
 /**
  * @constructor
@@ -31,8 +32,8 @@ core.CursorTests = function CursorTests(runner) {
 
     function setupEmptyDoc() {
         var selection = window.getSelection(),
-            doc = document.implementation.createDocument("", "p", null),
-            cursor = new Cursor(selection, doc);
+            doc = runtime.getDOMImplementation.createDocument("", "p", null),
+            cursor = new core.Cursor(selection, doc);
         r.shouldBeNonNull(selection);
         t = { selection: selection, doc: doc, cursor: cursor };
     }
@@ -173,7 +174,7 @@ core.CursorTests = function CursorTests(runner) {
         var t = [], test;
         for (test in tests) {
             if (tests.hasOwnProperty(test)) {
-                t.append(test);
+                t.push(tests[test]);
             }
         }
         return t;

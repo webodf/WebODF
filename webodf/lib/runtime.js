@@ -52,6 +52,10 @@ Runtime.prototype.libraryPaths = function () {};
  * @return {string}
  */
 Runtime.prototype.type = function () {};
+/**
+ * @return {DOMImplementation|undefined}
+ */
+Runtime.prototype.getDOMImplementation = function () {};
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -151,6 +155,9 @@ function BrowserRuntime(logoutput) {
     this.type = function () {
         return "BrowserRuntime";
     };
+    this.getDOMImplementation = function () {
+        return window.document.implementation;
+    };
 }
 
 /**
@@ -187,6 +194,9 @@ function NodeJSRuntime() {
     };
     this.type = function () {
         return "NodeJSRuntime";
+    };
+    this.getDOMImplementation = function () {
+        return;
     };
 }
 
@@ -269,6 +279,9 @@ function RhinoRuntime() {
     };
     this.type = function () {
         return "RhinoRuntime";
+    };
+    this.getDOMImplementation = function () {
+        return builder.getDOMImplementation();
     };
 }
 
