@@ -138,6 +138,9 @@ core.UnitTestRunner = function UnitTestRunner() {
  */
 core.UnitTester = function UnitTester() {
     var runner = new core.UnitTestRunner();
+    /**
+     * @param {Function} TestClass the constructor for the test class
+     */
     this.runTests = function (TestClass) {
         var test = new TestClass(runner), i, t, tests;
         runtime.log("Running " + TestClass.name + ": " + test.description());

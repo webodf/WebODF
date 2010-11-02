@@ -1,8 +1,8 @@
 /**
- * The core package.
+ * @namespace The core package.
  */
 var core = {};
 /**
- * The gui package.
+ * @namespace The gui package.
  */
 var gui = {};

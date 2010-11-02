@@ -10,10 +10,19 @@
 # * instrument the unit tests for determining unit test coverage.
 # * generated documentation with jsdoc
 
+# COMPILERJAR should point the JAR file of the Closure Compiler.
+# http://code.google.com/closure/compiler/
 COMPILERJAR=/tmp/compiler.jar
+# RHINOJAR should point the Rhino JAR file. http://www.mozilla.org/rhino/
 RHINOJAR=/usr/share/java/rhino.jar
+# NODE should point to the Node.JS executable. http://nodejs.org/
 NODE=/tmp/node-v0.2.4/node
+# JSCOVERAGE should point to the JSCoverage executable.
+# http://siliconforks.com/jscoverage/
 JSCOVERAGE=/tmp/jscoverage-0.5.1/jscoverage
+# JSDOCDIR should point to the directory where the JSDoc JAR, code and template
+# can be found
+# http://code.google.com/p/jsdoc-toolkit/
 JSDOCDIR=/tmp/jsdoc_toolkit-2.3.2/jsdoc-toolkit
 
 LIBJSFILES := $(wildcard lib/*.js lib/*/*.js lib/*/*/*.js)
