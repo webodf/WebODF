@@ -140,6 +140,7 @@ core.UnitTester = function UnitTester() {
     var runner = new core.UnitTestRunner();
     this.runTests = function (TestClass) {
         var test = new TestClass(runner), i, t, tests;
+        runtime.log("Running " + TestClass.name + ": " + test.description());
         tests = test.tests();
         for (i in tests) {
             if (tests.hasOwnProperty(i)) {
