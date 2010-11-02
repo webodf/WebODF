@@ -3,7 +3,7 @@
 /**
  * @interface
  */
-core.UnitTest = function () {};
+core.UnitTest = function UnitTest() {};
 /**
  * @return {undefined}
  */
@@ -100,8 +100,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
     }
     /**
-     * @param {Object} t
-     * @param {string} a
+     * @param {Object} t context in which values to be tested are placed
+     * @param {string} a the value to be checked
      * @return {undefined}
      */
     function shouldBeNonNull(t, a) {
@@ -121,8 +121,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
     }
     /**
-     * @param {Object} t
-     * @param {string} a
+     * @param {Object} t context in which values to be tested are placed
+     * @param {string} a the value to be checked
      * @return {undefined}
      */
     function shouldBeNull(t, a) {

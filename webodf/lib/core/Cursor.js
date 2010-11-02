@@ -1,5 +1,6 @@
 /*global core*/
 /**
+ * @class
  * A cursor is a dom node that visually represents a cursor in a DOM tree.
  * It should stay synchronized with the selection in the document. When
  * there is only one collapsed selection range, a cursor should be shown at
@@ -18,9 +19,10 @@
  *
  * Even when the selection allows for a cursor, it might be desireable to hide
  * the cursor by not letting it be part of the DOM.
- **/
-/**
+ *
  * @constructor
+ * @param {Selection} selection The selection to which the cursor corresponds
+ * @param {Document} document The document in which the cursor is placed
  */
 core.Cursor = function Cursor(selection, document) {
     "use strict";
@@ -148,24 +150,33 @@ core.Cursor = function Cursor(selection, document) {
             putCursorIntoContainer(container, offset);
         }
     }
+    /**
+     * Obtain the node representing the cursor.
+     * @return {Element}
+     */
     this.getNode = function () {
         return cursorNode;
     };
     /**
      * Synchronize the cursor with the current selection.
-     **/
+     * If there is a single collapsed selection range, the cursor will be placed
+     * there. If not, the cursor will be removed from the document tree.
+     * @return {undefined}
+     */
     this.updateToSelection = function () {
         var range;
         removeCursor();
-runtime.log("HMM " + selection.rangeCount);
         if (selection.rangeCount === 1) {
-runtime.log("HMM ");
             range = selection.getRangeAt(0);
             if (range.collapsed) {
                 putCursor(range.startContainer, range.startOffset);
             }
         }
     };
+    /**
+     * Remove the cursor from the document tree.
+     * @return {undefined}
+     */
     this.remove = function () {
         removeCursor();
     };
