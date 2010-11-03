@@ -214,3 +214,4 @@ window.Base64 = {
 };
 
 })();
+var Base64 = window.Base64;

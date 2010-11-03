@@ -1,4 +1,4 @@
-/*global DOMParser document OdfPart Zip Base64*/
+/*global DOMParser document Zip Base64*/
 /**
  * This is a pure javascript implementation of the first simple OdfKit api.
  **/
@@ -44,6 +44,9 @@ var Odf = (function () {
         }
         node.insertBefore(child, c);
     }
+    /**
+     * @constructor
+     */
     function ODFElement() {
     }
     function ODFDocumentElement(odfcontainer) {
@@ -53,6 +56,75 @@ var Odf = (function () {
     ODFDocumentElement.prototype.constructor = ODFDocumentElement;
     ODFDocumentElement.namespaceURI = officens;
     ODFDocumentElement.localName = 'document';
+    // private constructor
+    /**
+     * @constructor
+     */
+    function OdfPart(name, container, zip) {
+        var self = this,
+            privatedata;
+
+        // declare public variables
+        this.size = 0;
+        this.type = null;
+        this.name = name;
+        this.container = container;
+        this.url = null;
+        this.document = null;
+        this.onreadystatechange = null;
+        this.onchange = null;
+        this.EMPTY = 0;
+        this.LOADING = 1;
+        this.DONE = 2;
+        this.state = this.EMPTY;
+
+        // private functions
+        function createUrl() {
+            self.url = null;
+            if (!privatedata) {
+                return;
+            }
+            self.url = 'data:;base64,';
+            // to avoid exceptions, base64 encoding is done in chunks
+            var chunksize = 90000, // must be multiple of 3 and less than 100000
+                i = 0;
+            while (i < privatedata.length) {
+                self.url += Base64.toBase64(privatedata.substr(i, chunksize));
+                i += chunksize;
+            }
+        }
+        function createDocument() {
+        }
+        // public functions
+        this.load = function () {
+            var callback = function (data) {
+                privatedata = data;
+                createUrl();
+                createDocument();
+                if (self.onchange) {
+                    self.onchange(self);
+                }
+                if (self.onstatereadychange) {
+                    self.onstatereadychange(self);
+                }
+            };
+            zip.load(name, callback);
+        };
+        this.abort = function () {
+            // TODO
+        };
+    }
+    OdfPart.prototype.load = function () {
+    };
+    OdfPart.prototype.getUrl = function () {
+        if (this.data) {
+            return 'data:;base64,' + Base64.toBase64(this.data);
+        }
+        return null;
+    };
+    /**
+     * @constructor
+     */
     function OdfPartList(odfcontainer) {
         var self = this;
         // declare public variables
@@ -60,6 +132,9 @@ var Odf = (function () {
         this.item = function (index) {
         };
     }
+    /**
+     * @constructor
+     */
     function OdfContainer(url) {
         var self = this,
             zip = null;
@@ -258,69 +333,6 @@ var Odf = (function () {
     OdfContainer.INVALID = 3;
     OdfContainer.SAVING = 4;
     OdfContainer.MODIFIED = 5;
-    // private constructor
-    function OdfPart(name, container, zip) {
-        var self = this,
-            privatedata;
-
-        // declare public variables
-        this.size = 0;
-        this.type = null;
-        this.name = name;
-        this.container = container;
-        this.url = null;
-        this.document = null;
-        this.onreadystatechange = null;
-        this.onchange = null;
-        this.EMPTY = 0;
-        this.LOADING = 1;
-        this.DONE = 2;
-        this.state = this.EMPTY;
-
-        // private functions
-        function createUrl() {
-            self.url = null;
-            if (!privatedata) {
-                return;
-            }
-            self.url = 'data:;base64,';
-            // to avoid exceptions, base64 encoding is done in chunks
-            var chunksize = 90000, // must be multiple of 3 and less than 100000
-                i = 0;
-            while (i < privatedata.length) {
-                self.url += Base64.toBase64(privatedata.substr(i, chunksize));
-                i += chunksize;
-            }
-        }
-        function createDocument() {
-        }
-        // public functions
-        this.load = function () {
-            var callback = function (data) {
-                privatedata = data;
-                createUrl();
-                createDocument();
-                if (self.onchange) {
-                    self.onchange(self);
-                }
-                if (self.onstatereadychange) {
-                    self.onstatereadychange(self);
-                }
-            };
-            zip.load(name, callback);
-        };
-        this.abort = function () {
-            // TODO
-        };
-    }
-    OdfPart.prototype.load = function () {
-    };
-    OdfPart.prototype.getUrl = function () {
-        if (this.data) {
-            return 'data:;base64,' + Base64.toBase64(this.data);
-        }
-        return null;
-    };
     return {
         /* export the public api */
         OdfContainer: OdfContainer,
