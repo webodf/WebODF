@@ -146,28 +146,29 @@ var convertUTF16StringToUTF8String = function(uni){
     return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(stringToArray(uni)));
 };
 
+var convertUTF16StringToBase64;
 if (window.btoa){
     var btoa = window.btoa;
-    var convertUTF16StringToBase64 = function (uni){
+    convertUTF16StringToBase64 = function (uni){
         return btoa(convertUTF16StringToUTF8String(uni));
     };
 }
 else {
     var btoa = convertUTF8StringToBase64;
-    var convertUTF16StringToBase64 = function (uni){
+    convertUTF16StringToBase64 = function (uni){
         return convertUTF8ArrayToBase64(convertUTF16StringToUTF8Array(uni));
     };
 }
-
+var convertBase64ToUTF16String;
 if (window.atob){
     var atob = window.atob;
-    var convertBase64ToUTF16String = function (b64){
+    convertBase64ToUTF16String = function (b64){
         return convertUTF8StringToUTF16String(atob(b64));
     };
 }
 else {
     var atob = convertBase64ToUTF8String;
-    var convertBase64ToUTF16String = function (b64){
+    convertBase64ToUTF16String = function (b64){
         return convertUTF8ArrayToUTF16String(convertBase64ToUTF8Array(b64));
     };
 }
