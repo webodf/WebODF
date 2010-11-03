@@ -120,7 +120,8 @@ function BrowserRuntime(logoutput) {
         }
     };
     this.readFileSync = function (path, encoding) {
-        var xmlHttp = new XMLHttpRequest();
+        var xmlHttp = new XMLHttpRequest(),
+            result;
         xmlHttp.open('GET', path, false);
         if (encoding) {
             xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
@@ -129,9 +130,12 @@ function BrowserRuntime(logoutput) {
         }
         try {
             xmlHttp.send(null);
+            if (xmlHttp.status === 200) {
+                result = xmlHttp.responseText;
+            }
         } catch (e) {
         }
-        return xmlHttp.responseText;
+        return result;
     };
     this.loadXML = function (path, callback) {
         var xmlHttp = new XMLHttpRequest();
