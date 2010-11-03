@@ -25,7 +25,7 @@ JSCOVERAGE=/tmp/jscoverage-0.5.1/jscoverage
 # http://code.google.com/p/jsdoc-toolkit/
 JSDOCDIR=/tmp/jsdoc_toolkit-2.3.2/jsdoc-toolkit
 
-LIBJSFILES := $(wildcard lib/*.js lib/*/*.js lib/*/*/*.js) bytearray.js rawinflate.js base64.js zip.js odf.js
+LIBJSFILES := $(wildcard lib/*.js lib/*/*.js lib/*/*/*.js) base64.js bytearray.js rawinflate.js zip.js odf.js
 TESTJSFILES := $(wildcard tests/*/*.js tests/*/*/*.js tests/*.js)
 JSFILES := $(LIBJSFILES) $(TESTJSFILES)
 

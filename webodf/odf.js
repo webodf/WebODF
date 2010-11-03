@@ -2,7 +2,8 @@
 /**
  * This is a pure javascript implementation of the first simple OdfKit api.
  **/
-var Odf = (function () {
+var odf;
+odf = (function () {
     var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'];
@@ -341,4 +342,3 @@ var Odf = (function () {
         }
     };
 }());
-
