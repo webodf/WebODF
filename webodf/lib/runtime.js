@@ -390,6 +390,7 @@ var runtime = (function () {
     };
 }());
 (function (args) {
+    args = Array.prototype.slice.call(args);
     function run(argv) {
         if (!argv.length) {
             return;
@@ -421,4 +422,4 @@ var runtime = (function () {
     } else if (runtime.type() === "RhinoRuntime") {
         run(args);
     }
-}(typeof arguments !== "undefined" && arguments.slice && arguments.slice()));
+}(typeof arguments !== "undefined"));

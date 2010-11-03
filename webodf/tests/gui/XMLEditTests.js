@@ -47,7 +47,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
             textnode3,
             em;
     
-        xmledit.setXml(doc);
+        xmledit.setXML(doc);
     
         checkWalker(doc, 2, 1);
         checkWalker(p, 0, 0);
@@ -102,7 +102,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         testSimpleDocument(xmledit);
     
         css.parentNode.removeChild(css);
-        testarea.parentNode.removechild(testarea);
+        testarea.parentNode.removeChild(testarea);
     }
     
     this.setUp = function () {

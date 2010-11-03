@@ -28,15 +28,12 @@ core.CursorTests = function CursorTests(runner) {
             range.setEnd(startnode, startoffset);
         }
         selection.addRange(range);
-runtime.log(selection.rangeCount + " " + startnode.nodeName);
     }
 
     function setupEmptyDoc() {
         var selection = window.getSelection(),
             doc = runtime.getDOMImplementation().createDocument("", "p", null),
             cursor = new core.Cursor(selection, doc);
-        selection = doc.getSelection();
-runtime.log("SEL " + selection);
         t = { selection: selection, doc: doc, cursor: cursor };
         runner.shouldBeNonNull(t, selection);
     }

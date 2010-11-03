@@ -63,7 +63,10 @@
 @namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
 office|presentation draw|page { display:none; }
   </style>
-  <script src="style2css.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+  var core = {};
+  </script>
+  <script src="lib/core/Style2CSS.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
 
 var xhtmlns = "http://www.w3.org/1999/xhtml";
@@ -174,9 +177,10 @@ function getDirectChild(ns, name, node) {
  **/
 function handleStyles(odfelement) {
   // update the css translation of the styles  
-  var stylesxmlcss = document.getElementById('stylesxmlcss');
+  var stylesxmlcss = document.getElementById('stylesxmlcss'),
+      style2css = new core.Style2CSS();
   try {
-    style2css(stylesxmlcss.sheet, odfelement.styles,
+    style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
         odfelement.automaticStyles);
   } catch (e) {
     alert(e);

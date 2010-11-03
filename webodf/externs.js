@@ -1,176 +1,111 @@
-/**
- * es3
- */
-/**
- * @constructor
- * @param {*=} opt_value
- * @nosideeffects
- */
-function Object(opt_value) {}
-/**
- * @param {*} propertyName Implicitly cast to a string.
- * @return {boolean}
- * @nosideeffects
- */
-Object.prototype.hasOwnProperty = function (propertyName) {};
-/**
- * @constructor
- * @param {...*} var_args
- * @return {!Array}
- * @nosideeffects
- */
-function Array(var_args) {}
-/**
- * @param {...*} var_args
- * @return {!Array}
- * @this {Object}
- * @nosideeffects
- */
-Array.prototype.concat = function (var_args) {};
-/**
- * @param {*=} opt_begin Zero-based index at which to begin extraction.  A
- *     non-number type will be auto-cast by the browser to a number.
- * @param {*=} opt_end Zero-based index at which to end extraction.  slice
- *     extracts up to but not including end.
- * @return {!Array}
- * @this {Object}
- * @nosideeffects
- */
-Array.prototype.slice = function (opt_begin, opt_end) {};
-/**
- * @param {...*} var_args
- * @return {number} The new length of the array.
- * @this {Object}
- */
-Array.prototype.push = function (var_args) {};
-/**
- * @type {number}
- */
-Array.prototype.length;
-/**
- * @constructor
- * @param {*=} opt_str
- * @return {string}
- * @nosideeffects
- */
-function String(opt_str) {}
-/**
- * @param {*=} opt_separator
- * @param {number=} opt_limit
- * @return {!Array.<string>}
- * @nosideeffects
- */
-String.prototype.split = function (opt_separator, opt_limit) {};
-/**
- * @param {*} num
- * @return {boolean}
- * @nosideeffects
- */
-function isNaN(num) {}
-
-/**
- * @constructor
- */
-function DOMImplementation() {}
-/**
- * @param {string} namespaceURI
- * @param {string} publicId
- * @param {DocumentType} doctype
- * @return {Document}
- * @nosideeffects
- */
-DOMImplementation.prototype.createDocument = function(namespaceURI, publicId, doctype) {};
-/**
- * @constructor
- * @extends {Node}
- */
-function DocumentType() {}
-
+/*global Packages*/
 /**
  * @constructor
  */
 function NodeJSObject() {}
 /**
- * @param {string} path
- * @param {string} encoding
- * @param {Function} callback
+ * @param {!string} path
+ * @param {function(...)} callback
  * @return {undefined}
+ */
+NodeJSObject.prototype.stat = function (path, callback) {};
+/**
+ * @param {!string} path
+ * @param {?string} encoding
+ * @param {function(...)} callback
+ * @return {?string}
  */
 NodeJSObject.prototype.readFile = function (path, encoding, callback) {};
 /**
- * @param {string} path
- * @param {string} encoding
- * @return {undefined}
+ * @param {!string} path
+ * @param {?string} encoding
+ * @return {?string}
  */
 NodeJSObject.prototype.readFileSync = function (path, encoding) {};
 /**
- * @param {string} path
- * @return {NodeJSObject}
+ * @param {!string} className
+ * @return {!NodeJSObject}
  */
-function require(path) {}
+function require(className) {}
 /**
- * @type {Object.<string, function(...)>}
+ * @constructor
  */
-function console() {}
+function NodeJSConsole() {}
 /**
- * @param {string} msg
+ * @type {!NodeJSConsole}
  */
-console.prototype.log = function (msg) {};
-var process = {
-    argv: []
-};
+var console;
 /**
- * @type {string}
+ * @constructor
+ */
+function NodeJSProcess() {}
+/**
+ * @param {!number} exitCode
+ * @return {undefined}
+ */
+NodeJSProcess.prototype.exit = function (exitCode) {};
+/**
+ * @type {!Array}
+ */
+NodeJSProcess.prototype.argv = [];
+/**
+ * @type {!NodeJSProcess}
+ */
+var process;
+/**
+ * @type {!string}
  */
 var __dirname;
-var JSON = {
-    stringify: function (object) {}
-};
 /**
- * @param {string} path
- * @param {string} encoding
- */
-function readFile(path, encoding) {}
-/**
- * @param {string} msg
+ * @param {!string} msg
+ * @return {undefined}
  */
 function print(msg) {}
 /**
- * @param {string} msg
+ * @param {!string} path
+ * @param {?string} encoding
+ * @return {?string}
  */
-function alert(msg) {}
-var Math = {};
-var XMLHttpRequest;
-var undefined;
-function setTimeout(callback, time) {}
-var Packages = {
-    javax: {
-        xml: {
-            parsers: {
-            }
-        }
-    },
-    org: {
-        xml: {
-            sax: {
-                EntityResolver: function () {},
-                InputSource: function (reader) {}
-            }
-        }
-    },
-    java: {
-        io: {
-            File: function (path) {},
-            FileReader: function (path) {}
-        }
-    }
-};
+function readFile(path, encoding) {}
+/**
+ * @param {!number} exitCode
+ * @return {undefined}
+ */
+function quit(exitCode) {}
+/**
+ * @namespace
+ */
+Packages.javax = {};
+/**
+ * @namespace
+ */
+Packages.javax.xml = {};
+/**
+ * @namespace
+ */
+Packages.javax.xml.validation = {};
+/**
+ * @constructor
+ */
+Packages.javax.xml.validation.Schema = function () {};
+/**
+ * @namespace
+ */
+Packages.javax.xml.parsers = {};
 /**
  * @constructor
  */
 Packages.javax.xml.parsers.DocumentBuilder = function () {};
-Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver = 
-function () {};
+/**
+ * @param {!Object} entityresolver
+ * @return {undefined}
+ */
+Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver = function (entityresolver) {};
+/**
+ * @param {!Packages.org.xml.sax.InputSource} source 
+ * @return {Document}
+ */
+Packages.javax.xml.parsers.DocumentBuilder.prototype.parse = function (source) {};
 /**
  * @return {DOMImplementation}
  */
@@ -180,44 +115,53 @@ Packages.javax.xml.parsers.DocumentBuilder.prototype.getDOMImplementation = func
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory = function () {};
 /**
- * @return {Packages.javax.xml.parsers.DocumentBuilderFactory}
+ * @return {!Packages.javax.xml.parsers.DocumentBuilderFactory}
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newInstance = function () {};
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setValidating = function (value) {};
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setNamespaceAware = function (value) {};
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setExpandEntityReferences = function (value) {};
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setSchema = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance = function () {};
 /**
- * @return {Packages.javax.xml.parsers.DocumentBuilder}
+ * @param {!boolean} value
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setValidating = function (value) {};
+/**
+ * @param {!boolean} value
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setNamespaceAware = function (value) {};
+/**
+ * @param {!boolean} value
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setExpandEntityReferences = function (value) {};
+/**
+ * @param {?Packages.javax.xml.validation.Schema} schema
+ */
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setSchema = function (schema) {};
+/**
+ * @return {!Packages.javax.xml.parsers.DocumentBuilder}
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newDocumentBuilder = function () {};
-var window = {};
-var eval = function(code) {}
-var arguments;
 /**
- * @param {number} exitStatus
- * @return {undefined}
+ * @namespace
  */
-function quit(exitStatus) {}
+Packages.org = {};
 /**
- * @constructor
+ * @namespace
  */
-function Node() {}
+Packages.org.xml.sax = {};
 /**
- * @constructor
- * @extends {Node}
+ * @param {!Object} definition
+ * @return {!Object}
  */
-function Document() {}
+Packages.org.xml.sax.EntityResolver = function (definition) {};
 /**
- * @constructor
- * @extends {Node}
+ * @namespace
  */
-function Element() {}
+Packages.java.io = {};
 /**
  * @constructor
+ * @param {!string} path
  */
-function Selection() {}
-/*
- * @type {Document}
+Packages.java.io.FileReader = function (path) {};
+/**
+ * @constructor
+ * @param {!Packages.java.io.FileReader} reader
  */
-var document = {};
+Packages.org.xml.sax.InputSource = function (reader) {};

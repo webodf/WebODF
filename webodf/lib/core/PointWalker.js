@@ -1,9 +1,10 @@
-/*global core*/
+/*global core Node*/
 /**
  * A simple walker that allows finegrained stepping through the DOM.
  * It does not support node filtering.
  * TODO: write a position walker that uses a treewalker
  * @constructor
+ * @param {!Node} node
  */
 core.PointWalker = function PointWalker(node) {
     "use strict";
@@ -13,6 +14,10 @@ core.PointWalker = function PointWalker(node) {
         root = node,
         pos = 0;
 
+    /**
+     * @param {!Node} node
+     * @return {!number}
+     */
     function getPosition(node) {
         var p = -1;
         while (node) {
@@ -23,14 +28,14 @@ core.PointWalker = function PointWalker(node) {
     }
     /**
      * Move the walker to the point given by @p node and @p position.
-     * @param node must be the root of this walker or part of the tree of this
-     *         walker.
-     * @param position must be a valid position in @node.
+     * @param {!Element} node must be the root of this walker or part of the
+     *                   tree of this walker.
+     * @param {!number} position must be a valid position in @node.
      **/
     this.setPoint = function (node, position) {
         currentNode = node;
         pos = position;
-        if (currentNode.nodeType === currentNode.TEXT_NODE) {
+        if (currentNode.nodeType === Node.TEXT_NODE) {
             after = null;
             before = null;
         } else {
@@ -46,6 +51,9 @@ core.PointWalker = function PointWalker(node) {
             }
         }
     };
+    /**
+     * @return {!boolean}
+     */
     this.stepForward = function () {
         var len;
         // if this is a text node, move to the next position in the text
@@ -87,6 +95,9 @@ core.PointWalker = function PointWalker(node) {
         }
         return false;
     };
+    /**
+     * @return {!boolean}
+     */
     this.stepBackward = function () {
         // if this is a text node, move to the next position in the text
         if (currentNode.nodeType === currentNode.TEXT_NODE) {
@@ -126,15 +137,27 @@ core.PointWalker = function PointWalker(node) {
         }
         return false;
     };
+    /**
+     * @return {?Node}
+     */
     this.node = function () {
         return currentNode;
     };
+    /**
+     * @return {!number}
+     */
     this.position = function () {
         return pos;
     };
+    /**
+     * @return {?Node}
+     */
     this.precedingSibling = function () {
         return before;
     };
+    /**
+     * @return {?Node}
+     */
     this.followingSibling = function () {
         return after;
     };

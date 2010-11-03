@@ -1,4 +1,4 @@
-/*global core*/
+/*global core Node*/
 /**
  * @class
  * A cursor is a dom node that visually represents a cursor in a DOM tree.
@@ -122,9 +122,9 @@ core.Cursor = function Cursor(selection, document) {
         // before the cursor. The latter node is removed after the selection
         // has been adapted.
         if (cursorNode.previousSibling &&
-                cursorNode.previousSibling.nodeType === cursorNode.TEXT_NODE &&
+                cursorNode.previousSibling.nodeType === Node.TEXT_NODE &&
                 cursorNode.nextSibling &&
-                cursorNode.nextSibling.nodeType === cursorNode.TEXT_NODE) {
+                cursorNode.nextSibling.nodeType === Node.TEXT_NODE) {
             textnodetoremove = cursorNode.nextSibling;
             cursorNode.previousSibling.appendData(textnodetoremove.nodeValue);
         }

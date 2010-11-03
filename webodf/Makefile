@@ -54,11 +54,14 @@ compiledrhinotest: simplecompiled.js
 
 # simplecompiled.js should actually work, creating compiled.js is just to
 # trigger compiler errors
+SHAREDARGS=--warning_level VERBOSE --formatting PRETTY_PRINT --jscomp_error accessControls --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error deprecated --jscomp_error fileoverviewTags --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error nonStandardJsDocs --jscomp_error strictModuleDepCheck --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error visibility
+
 simplecompiled.js: $(JSFILES)
-	java -jar $(COMPILERJAR) --warning_level VERBOSE --compilation_level WHITESPACE_ONLY --formatting PRETTY_PRINT $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > simplecompiled.js
+	java -jar $(COMPILERJAR) $(SHAREDARGS) --compilation_level WHITESPACE_ONLY $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > simplecompiled.js
 
 compiled.js: $(JSFILES) externs.js
-	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' --warning_level VERBOSE --compilation_level ADVANCED_OPTIMIZATIONS --formatting PRETTY_PRINT --externs externs.js --use_only_custom_externs true $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > compiled.js
+	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' $(SHAREDARGS) --compilation_level ADVANCED_OPTIMIZATIONS --externs externs.js  $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > compiled.js
+#--use_only_custom_externs true
 
 clean:
 	$(RM) -rf compiled.js simplecompiled.js docs instrumented

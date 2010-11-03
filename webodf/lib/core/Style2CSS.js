@@ -1,7 +1,9 @@
-/*global XPathResult*/
-function style2css(stylesheet, styles, autostyles) {
-
-  // helper constants
+/*global XPathResult core*/
+/**
+ * @constructor
+ */
+core.Style2CSS = function Style2CSS() {
+    // helper constants
     var xlinkns = 'http://www.w3.org/1999/xlink',
 
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
@@ -112,14 +114,22 @@ function style2css(stylesheet, styles, autostyles) {
             [ fons, 'border-right', 'border-right' ],
             [ fons, 'border-top', 'border-top' ],
             [ fons, 'border-bottom', 'border-bottom' ]
-        ],
-        doc, prefix, namespaceResolver, styletree, tree, name, rule, family,
-        stylenodes, styleautonodes;
-    
+        ];
     
     // helper functions
-    
-    function getStyleMap(stylesnode) {
+    /**
+     * @param {string} prefix
+     * @return {string}
+     */
+    function namespaceResolver(prefix) {
+        return namespaces[prefix];
+    }
+    /**
+     * @param {!Document} doc
+     * @param {!Element} stylesnode
+     * @return {!Object}
+     */
+    function getStyleMap(doc, stylesnode) {
         // put all style elements in a hash map by family and name
         var stylemap = {}, iter, node, name, family;
         iter = doc.evaluate("style:style", stylesnode, namespaceResolver,
@@ -136,7 +146,11 @@ function style2css(stylesheet, styles, autostyles) {
         }
         return stylemap;
     }
-    
+    /**
+     * @param {?Object} stylestree
+     * @param {?string} name
+     * @return {?string}
+     */
     function findStyle(stylestree, name) {
         if (!name || !stylestree) {
             return null;
@@ -156,7 +170,12 @@ function style2css(stylesheet, styles, autostyles) {
         }
         return null;
     }
-    
+    /**
+     * @param {!string} stylename
+     * @param {!Object} stylesmap
+     * @param {!Object} stylestree
+     * @return {undefined}
+     */
     function addStyleToStyleTree(stylename, stylesmap, stylestree) {
         var style = stylesmap[stylename], parentname, parentstyle;
         if (!style) {
@@ -183,7 +202,11 @@ function style2css(stylesheet, styles, autostyles) {
             stylestree[stylename] = style;            
         }
     }
-    
+    /**
+     * @param {!Object} stylesmap
+     * @param {!Object} stylestree
+     * @return {undefined}
+     */
     function addStyleMapToStyleTree(stylesmap, stylestree) {
         var name;
         for (name in stylesmap) {
@@ -193,7 +216,11 @@ function style2css(stylesheet, styles, autostyles) {
             }
         }
     }
-    
+    /**
+     * @param {!string} family
+     * @param {!string} name
+     * @return {?string}
+     */
     function createSelector(family, name) {
         var prefix = familynamespaceprefixes[family],
             namepart,
@@ -210,7 +237,12 @@ function style2css(stylesheet, styles, autostyles) {
         return prefix + '|' + familytagnames[family].join(
                 namepart + ',' + prefix + '|') + namepart;
     }
-    
+    /**
+     * @param {!string} family
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {!Array}
+     */
     function getSelectors(family, name, node) {
         var selectors = [], n, ss, s;
         selectors.push(createSelector(family, name));
@@ -226,7 +258,12 @@ function style2css(stylesheet, styles, autostyles) {
         }
         return selectors;
     }
-    
+    /**
+     * @param {?Element} node
+     * @param {!string} ns
+     * @param {!string} name
+     * @return {?Element}
+     */
     function getDirectChild(node, ns, name) {
         if (!node) {
             return null;
@@ -234,12 +271,17 @@ function style2css(stylesheet, styles, autostyles) {
         var c = node.firstChild;
         while (c) {
             if (c.namespaceURI === ns && c.localName === name) {
-                return c;
+                return /**@type{Element}*/(c);
             }
             c = c.nextSibling;
         }
+        return null;
     }
-
+    /**
+     * @param {!Element} props
+     * @param {!Object} mapping
+     * @return {!string}
+     */
     function applySimpleMapping(props, mapping) {
         var rule = '', r, value;
         for (r in mapping) {
@@ -253,11 +295,17 @@ function style2css(stylesheet, styles, autostyles) {
         }
         return rule;
     }
-
+    /**
+     * @param {!string} name
+     * @return {!string}
+     */
     function getFontDeclaration(name) {
         return '"' + name + '"';
     }
-
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
     function getTextProperties(props) {
         var rule = '', value;
         rule += applySimpleMapping(props, textPropertySimpleMapping);
@@ -274,9 +322,12 @@ function style2css(stylesheet, styles, autostyles) {
         }
         return rule;
     }
-
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
     function getParagraphProperties(props) {
-        var rule = '', imageProps, url;
+        var rule = '', imageProps, url, element;
         rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
         imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
         if (imageProps.length > 0) {
@@ -284,25 +335,37 @@ function style2css(stylesheet, styles, autostyles) {
             if (url) {
                 rule += "background-image: url('odfkit:" + url + "');";
                 //rule += "background-repeat: repeat;"; //FIXME test
-                rule += applySimpleMapping(imageProps.item(0),
-                        bgImageSimpleMapping);
+                element = /**@type{!Element}*/(imageProps.item(0));
+                rule += applySimpleMapping(element, bgImageSimpleMapping);
             }
         }
         return rule;
     }
-
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
     function getGraphicProperties(props) {
         var rule = '';
         rule += applySimpleMapping(props, graphicPropertySimpleMapping);
         return rule;
     }
-    
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
     function getTableCellProperties(props) {
         var rule = '';
         rule += applySimpleMapping(props, tablecellPropertySimpleMapping);
         return rule;
     }
-    
+    /**
+     * @param {!StyleSheet} sheet
+     * @param {!string} family
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {undefined}
+     */
     function addRule(sheet, family, name, node) {
         var selectors = getSelectors(family, name, node),
             selector = selectors.join(','),
@@ -328,13 +391,19 @@ function style2css(stylesheet, styles, autostyles) {
         }
         rule = selector + '{' + rule + '}';
         try {
-            stylesheet.insertRule(rule, stylesheet.cssRules.length);
+            sheet.insertRule(rule, sheet.cssRules.length);
         } catch (e) {
             throw e;
         }
     //if (rule.indexOf('presentation')!=-1){alert(rule);throw rule;}
     }
-    
+    /**
+     * @param {!StyleSheet} sheet
+     * @param {!string} family
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {undefined}
+     */
     function addRules(sheet, family, name, node) {
         addRule(sheet, family, name, node);
         var n;
@@ -348,43 +417,54 @@ function style2css(stylesheet, styles, autostyles) {
     // css vs odf styles
     // ODF styles occur in families. A family is a group of odf elements to
     // which an element applies. ODF families can be mapped to a group of css elements
- 
-    // make stylesheet empty
-    while (stylesheet.cssRules.length) {
-        stylesheet.deleteRule(stylesheet.cssRules.length - 1);
-    }
-    doc = styles.ownerDocument;
-    // add @namespace rules
-    for (prefix in namespaces) {
-        if (namespaces.hasOwnProperty(prefix)) {
-            rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
-            try {
-                stylesheet.insertRule(rule, stylesheet.cssRules.length);
-            } catch (e) {
-                // WebKit can throw an exception here, but it will have retained
-                // the namespace declarations anyway.
-            }
-        }
-    }
-    namespaceResolver = function (prefix) {
-        return namespaces[prefix];
-    };
-    
-    // add the various styles
-    stylenodes = getStyleMap(styles);
-    styleautonodes = getStyleMap(autostyles);
-    
-    for (family in familynamespaceprefixes) {
-        if (familynamespaceprefixes.hasOwnProperty(family)) {
-            tree = styletree[family] = {};
-            addStyleMapToStyleTree(stylenodes[family], tree);
-            addStyleMapToStyleTree(styleautonodes[family], tree);
 
-            for (name in tree) {
-                if (tree.hasOwnProperty(name)) {
-                    addRules(stylesheet, family, name, tree[name]);
+    /**
+     * @param {!StyleSheet} stylesheet
+     * @param {!Element} styles
+     * @param {!Element} autostyles
+     * @return {undefined}
+     */ 
+    this.style2css = function (stylesheet, styles, autostyles) {
+        var doc, prefix, styletree, tree, name, rule, family,
+            stylenodes, styleautonodes;
+    
+        // make stylesheet empty
+        while (stylesheet.cssRules.length) {
+            stylesheet.deleteRule(stylesheet.cssRules.length - 1);
+        }
+        doc = styles.ownerDocument;
+        if (!doc) {
+            return;
+        }
+        // add @namespace rules
+        for (prefix in namespaces) {
+            if (namespaces.hasOwnProperty(prefix)) {
+                rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
+                try {
+                    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+                } catch (e) {
+                    // WebKit can throw an exception here, but it will have retained
+                    // the namespace declarations anyway.
                 }
             }
         }
-    }
-}
+        
+        // add the various styles
+        stylenodes = getStyleMap(doc, styles);
+        styleautonodes = getStyleMap(doc, autostyles);
+        styletree = {}; 
+        for (family in familynamespaceprefixes) {
+            if (familynamespaceprefixes.hasOwnProperty(family)) {
+                tree = styletree[family] = {};
+                addStyleMapToStyleTree(stylenodes[family], tree);
+                addStyleMapToStyleTree(styleautonodes[family], tree);
+    
+                for (name in tree) {
+                    if (tree.hasOwnProperty(name)) {
+                        addRules(stylesheet, family, name, tree[name]);
+                    }
+                }
+            }
+        }
+    };
+};
