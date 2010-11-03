@@ -16,7 +16,8 @@ if (runtime.type() === "BrowserRuntime") {
 }
 
 var tester = new core.UnitTester();
-for (var i = 0; i < tests.length; i += 1) {
+for (var i = 0; i < tests.length && tester.countFailedTests() === 0; i += 1) {
     runtime.log("Running test '" + tests[i].name + "'.");
     tester.runTests(tests[i]);
 }
+tester.countFailedTests();

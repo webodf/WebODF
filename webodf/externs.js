@@ -195,6 +195,11 @@ var window = {};
 var eval = function(code) {}
 var arguments;
 /**
+ * @param {number} exitStatus
+ * @return {undefined}
+ */
+function quit(exitStatus) {}
+/**
  * @constructor
  */
 function Node() {}

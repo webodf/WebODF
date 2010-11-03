@@ -1,4 +1,4 @@
-/*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile*/
+/*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile quit*/
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -211,6 +211,7 @@ function NodeJSRuntime() {
     this.getDOMImplementation = function () {
         return;
     };
+    this.exit = process.exit;
 }
 
 /**
@@ -296,6 +297,7 @@ function RhinoRuntime() {
     this.getDOMImplementation = function () {
         return builder.getDOMImplementation();
     };
+    this.exit = quit;
 }
 
 /**
@@ -395,7 +397,8 @@ var runtime = (function () {
         var script = argv[0];
         runtime.readFile(script, "utf8", function (err, data) {
             var path = "",
-                paths = runtime.libraryPaths();
+                paths = runtime.libraryPaths(),
+                exitCode;
             if (script.indexOf("/") !== -1) {
                 path = script.substring(0, script.indexOf("/"));
             }
@@ -403,8 +406,12 @@ var runtime = (function () {
             if (err) {
                 runtime.log(err);
             } else {
-                eval(data);
-                run(argv.slice(1));
+                exitCode = eval(data);
+                if (exitCode) {
+                    runtime.exit(exitCode);
+                } else {
+                    run(argv.slice(1));
+                }
             }
         });
     }

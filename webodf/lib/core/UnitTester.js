@@ -25,10 +25,12 @@ core.UnitTest.prototype.tests = function () {};
  * @constructor
  */
 core.UnitTestRunner = function UnitTestRunner() {
+    var failedTests = 0;
     function debug(msg) {
         runtime.log(msg);
     }
     function testFailed(msg) {
+        failedTests += 1;
         runtime.log("fail", msg);
     }
     function testPassed(msg) {
@@ -131,6 +133,9 @@ core.UnitTestRunner = function UnitTestRunner() {
     this.shouldBeNull = shouldBeNull;
     this.shouldBeNonNull = shouldBeNonNull;
     this.shouldBe = shouldBe;
+    this.countFailedTests = function () {
+        return failedTests;
+    };
 };
 
 /**
@@ -154,5 +159,8 @@ core.UnitTester = function UnitTester() {
                 test.tearDown();
             }
         }
+    };
+    this.countFailedTests = function () {
+        return runner.countFailedTests();
     };
 };
