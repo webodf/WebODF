@@ -5,6 +5,7 @@
  * http://www.onicos.com/staff/iz/amuse/javascript/expert/inflate.txt
  */
 
+var RawDeflate = {};
 (function(){
 
 /* Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
@@ -72,11 +73,16 @@ var zip_border = new Array(  // Order of the bit length code lengths
     16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15);
 /* objects (inflate) */
 
+/**
+ * @constructor
+ */
 var zip_HuftList = function() {
     this.next = null;
     this.list = null;
 }
-
+/**
+ * @constructor
+ */
 var zip_HuftNode = function() {
     this.e = 0; // number of extra bits or operation
     this.b = 0; // number of bits in this code or subcode
@@ -86,6 +92,9 @@ var zip_HuftNode = function() {
     this.t = null; // (zip_HuftNode) pointer to next level of table
 }
 
+/**
+ * @constructor
+ */
 var zip_HuftBuild = function(b,	// code lengths in bits (all assumed <= BMAX)
 		       n,	// number of codes (assumed <= N_MAX)
 		       s,	// number of simple-valued codes (0..s-1)
@@ -485,7 +494,7 @@ var zip_inflate_fixed = function(buff, off, size) {
 	// distance table
 	for(i = 0; i < 30; i++)	// make an incomplete code set
 	    l[i] = 5;
-	zip_fixed_bd = 5;
+	var zip_fixed_bd = 5;
 
 	h = new zip_HuftBuild(l, 30, 0, zip_cpdist, zip_cpdext, zip_fixed_bd);
 	if(h.status > 1) {
@@ -598,8 +607,6 @@ var zip_inflate_dynamic = function(buff, off, size) {
     if(zip_bl == 0)	// no literals or lengths
 	h.status = 1;
     if(h.status != 0) {
-	if(h.status == 1)
-	    ;// **incomplete literal tree**
 	return -1;		// incomplete code set
     }
     zip_tl = h.root;
@@ -617,9 +624,6 @@ var zip_inflate_dynamic = function(buff, off, size) {
 	return -1;
     }
 
-    if(h.status == 1) {
-	;// **incomplete distance tree**
-    }
     if(h.status != 0)
 	return -1;
 
@@ -747,7 +751,6 @@ var zip_inflate = function(str) {
     return aout.join("");
 }
 
-if (! window.RawDeflate) RawDeflate = {};
 RawDeflate.inflate = zip_inflate;
 
 })();

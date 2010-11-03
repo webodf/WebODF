@@ -9,6 +9,9 @@
 * Project home: http://www.odfkit.org/
 */
 
+/**
+ * @constructor
+ */
 function RemoteFile(url) {
     if (!url) {
         throw "Url must be provided.";
@@ -40,6 +43,9 @@ RemoteFile.prototype.getOptimalRange = function (offset, size) {
     // TODO: calculate optimal range
     return {offset: offset, size: size};
 };
+/**
+ * @constructor
+ */
 function RemoteFileReader() {
     this.minimumRequestSize = 1024; // size for minimal range to ask for
     // object has a 
@@ -173,7 +179,7 @@ RemoteFileReader.prototype.doNextRequest = function () {
         range,
         reader;
     if (data && hascallback) {
-        this.callback(job);
+        this.callback(); // job);
     }
     if (!data) {
         range = job.remotefile.getOptimalRange(job.offset, job.size);
@@ -196,12 +202,17 @@ RemoteFileReader.prototype.doNextRequest = function () {
         this.req.send(null);
     }
     if (!hascallback) {
-        return this.callback(job);
+        return this.callback(); //job);
     }
     return null;
 };
 var remotefilereader = new RemoteFileReader();
 
+/**
+ * @constructor
+ * @param {!string} url
+ * @param {!a3d.ByteArray} stream
+ */
 function ZipEntry(url, stream) {
     var sig = stream.readUInt32LE(),
         namelen, extralen, commentlen;
@@ -217,9 +228,9 @@ function ZipEntry(url, stream) {
     stream.pos += 8;
     this.compressedSize = stream.readUInt32LE();
     this.uncompressedSize = stream.readUInt32LE();
-    namelen = stream.readUInt16();
-    extralen = stream.readUInt16();
-    commentlen = stream.readUInt16();
+    namelen = stream.readUInt16LE();
+    extralen = stream.readUInt16LE();
+    commentlen = stream.readUInt16LE();
     stream.pos += 8;
     this.offset = stream.readUInt32LE();
     this.filename = stream.data.substr(stream.pos, namelen);
@@ -248,7 +259,7 @@ ZipEntry.prototype.load = function (url, offset, size, callback) {
     if (callback) {
         return null;
     }
-    return this.handleEntryData(data);
+    return this.handleEntryData(data, null);
 };
 ZipEntry.prototype.handleEntryData = function (data, callback) {
     var stream = new a3d.ByteArray(data),
@@ -282,6 +293,9 @@ ZipEntry.prototype.handleEntryData = function (data, callback) {
     }
     return this.data;
 };
+/**
+ * @constructor
+ */
 function Zip(url, entriesReadCallback) {
     this.url = url;
     // determine the file size
@@ -299,7 +313,7 @@ function Zip(url, entriesReadCallback) {
     if (callback || this.filesize === -1) {
         return;
     }
-    this.readCentralDirectoryEnd();
+    this.readCentralDirectoryEnd(null);
 }
 Zip.prototype.readCentralDirectoryEnd = function (callback) {
     if (this.filesize <= 0) {
@@ -318,7 +332,7 @@ Zip.prototype.readCentralDirectoryEnd = function (callback) {
     if (callback) {
         return;
     }
-    this.handleCentralDirectoryEnd(end);
+    this.handleCentralDirectoryEnd(end, null);
 };
 Zip.prototype.handleCentralDirectoryEnd = function (data, callback) {
     if (data.length !== 22) {
@@ -361,7 +375,7 @@ Zip.prototype.handleCentralDirectoryEnd = function (data, callback) {
     if (callback) {
         return;
     }
-    this.handleCentralDirectory(cd);
+    this.handleCentralDirectory(cd, null);
 };
 Zip.prototype.handleCentralDirectory = function (data, callback) {
     // parse the central directory

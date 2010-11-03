@@ -1,4 +1,6 @@
+/*jslint nomen: false, evil: true*/
 /*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile quit*/
+
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
