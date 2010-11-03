@@ -35,7 +35,7 @@ core.PointWalker = function PointWalker(node) {
     this.setPoint = function (node, position) {
         currentNode = node;
         pos = position;
-        if (currentNode.nodeType === Node.TEXT_NODE) {
+        if (currentNode.nodeType === 3) { // Node.TEXT_NODE
             after = null;
             before = null;
         } else {
@@ -57,7 +57,7 @@ core.PointWalker = function PointWalker(node) {
     this.stepForward = function () {
         var len;
         // if this is a text node, move to the next position in the text
-        if (currentNode.nodeType === currentNode.TEXT_NODE) {
+        if (currentNode.nodeType === 3) { // TEXT_NODE
             if (typeof currentNode.nodeValue.length === "number") {
                 len = currentNode.nodeValue.length;
             } else {
@@ -69,12 +69,12 @@ core.PointWalker = function PointWalker(node) {
             }
         }
         if (after) {
-            if (after.nodeType === currentNode.ELEMENT_NODE) {
+            if (after.nodeType === 1) { // ELEMENT_NODE
                 currentNode = after;
                 before = null;
                 after = currentNode.firstChild;
                 pos = 0;
-            } else if (after.nodeType === currentNode.TEXT_NODE) {
+            } else if (after.nodeType === 3) { // TEXT_NODE
                 currentNode = after;
                 before = null;
                 after = null;
@@ -100,19 +100,19 @@ core.PointWalker = function PointWalker(node) {
      */
     this.stepBackward = function () {
         // if this is a text node, move to the next position in the text
-        if (currentNode.nodeType === currentNode.TEXT_NODE) {
+        if (currentNode.nodeType === 3) { // TEXT_NODE
             if (pos > 0) {
                 pos -= 1;
                 return true;
             }
         }
         if (before) {
-            if (before.nodeType === currentNode.ELEMENT_NODE) {
+            if (before.nodeType === 1) { // ELEMENT_NODE
                 currentNode = before;
                 before = currentNode.lastChild;
                 after = null;
                 pos = getPosition(before) + 1;
-            } else if (before.nodeType === currentNode.TEXT_NODE) {
+            } else if (before.nodeType === 3) { // TEXT_NODE
                 currentNode = before;
                 before = null;
                 after = null;

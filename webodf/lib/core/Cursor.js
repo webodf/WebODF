@@ -122,9 +122,9 @@ core.Cursor = function Cursor(selection, document) {
         // before the cursor. The latter node is removed after the selection
         // has been adapted.
         if (cursorNode.previousSibling &&
-                cursorNode.previousSibling.nodeType === Node.TEXT_NODE &&
+                cursorNode.previousSibling.nodeType === 3 && // TEXT_NODE
                 cursorNode.nextSibling &&
-                cursorNode.nextSibling.nodeType === Node.TEXT_NODE) {
+                cursorNode.nextSibling.nodeType === 3) { // TEXT_NODE
             textnodetoremove = cursorNode.nextSibling;
             cursorNode.previousSibling.appendData(textnodetoremove.nodeValue);
         }
@@ -144,9 +144,9 @@ core.Cursor = function Cursor(selection, document) {
     }
     // put the cursor at a particular position
     function putCursor(container, offset) {
-        if (container.nodeType === container.TEXT_NODE) {
+        if (container.nodeType === 3) { // TEXT_NODE
             putCursorIntoTextNode(container, offset);
-        } else if (container.nodeType !== container.DOCUMENT_NODE) {
+        } else if (container.nodeType !== 9) { // DOCUMENT_NODE
             putCursorIntoContainer(container, offset);
         }
     }
