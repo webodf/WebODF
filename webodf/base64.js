@@ -38,8 +38,8 @@ var Base64 = (function () {
         }(b64chars)),
         convertUTF16StringToBase64,
         convertBase64ToUTF16String,
-        btoa = window.btoa,
-        atob = window.atob;
+        btoa = window && window.btoa,
+        atob = window && window.atob;
 
     /**
      * @param {!string} s
