@@ -11,6 +11,7 @@
 
 /**
  * @constructor
+ * @param {!string} url
  */
 function RemoteFile(url) {
     if (!url) {
@@ -21,6 +22,11 @@ function RemoteFile(url) {
     this.size = -1;
     this.valid = true;
 }
+/**
+ * @param {!number} offset
+ * @param {!number} size
+ * return {?string}
+ */
 RemoteFile.prototype.get = function (offset, size) {
     for (var f in this.fragments) {
         if (this.fragments.hasOwnProperty(f)) {
@@ -36,9 +42,19 @@ RemoteFile.prototype.get = function (offset, size) {
     }
     return null;
 };
+/**
+ * @param {!number} offset
+ * @param {!string} data
+ * @return {undefined}
+ */
 RemoteFile.prototype.add = function (offset, data) {
     this.fragments.push({offset: offset, data: data});
 };
+/**
+ * @param {!number} offset
+ * @param {!number} size
+ * @return {!Object}
+ */
 RemoteFile.prototype.getOptimalRange = function (offset, size) {
     // TODO: calculate optimal range
     return {offset: offset, size: size};
@@ -54,12 +70,20 @@ function RemoteFileReader() {
     this.currentJob = null;
     this.cache = {};
 }
-// return true if the RemoteFileReader is currently busy
+/**
+ * return true if the RemoteFileReader is currently busy
+ * @return {!boolean}
+ */
 RemoteFileReader.prototype.busy = function () {
     return this.currentJob !== null;
 };
-// return the size for a file or -1 if the file size cannot be determined
-// if a callback is supplied, the call is asynchroneous
+/**
+ * return the size for a file or -1 if the file size cannot be determined
+ * if a callback is supplied, the call is asynchroneous
+ * @param {!string} url
+ * @param {?function(!number)} callback
+ * @return {!number}
+ */
 RemoteFileReader.prototype.getFileSize = function (url, callback) {
     var f = null,
         reader = this;
@@ -74,8 +98,15 @@ RemoteFileReader.prototype.getFileSize = function (url, callback) {
     }
     return this.cache[url].size;
 };
-// Read a range of data from a file. if the data cannot be read, null is
-// is returned. If a callback is supplied, the call is asynchroneous
+/**
+ * Read a range of data from a file. if the data cannot be read, null is
+ * is returned. If a callback is supplied, the call is asynchroneous
+ * @param {!string} url
+ * @param {!number} offset
+ * @param {!number} size
+ * @param {?function(?string)} callback
+ * @return {?string}
+ */
 RemoteFileReader.prototype.getFileRange = function (url, offset, size, callback) {
     // check if this data is available already
     var remotefile = this.cache[url],
@@ -104,7 +135,14 @@ RemoteFileReader.prototype.getFileRange = function (url, offset, size, callback)
     // and then do the synchroneous call
     return null;
 };
+/**
+ * @return {?string}
+ */
 RemoteFileReader.prototype.callback = function () {
+    /**
+     * @param {!string} data
+     * @return {?Array}
+     */
     function cleanDataToArray(data) {
         if (data === null) {
             return null;
@@ -117,6 +155,10 @@ RemoteFileReader.prototype.callback = function () {
         }
         return d;
     }
+    /**
+     * @param {!string} data
+     * @return {!string}
+     */
     function cleanData(data) {
         try {
             data = String.fromCharCode.apply(String, cleanDataToArray(data));
@@ -158,6 +200,9 @@ RemoteFileReader.prototype.callback = function () {
     }
     return data;
 };
+/**
+ * @return {!number}
+ */
 RemoteFileReader.prototype.getFileLengthFromResponseHeader = function () {
     var range = this.req.getResponseHeader('Content-Range'),
         length = -1;
@@ -167,10 +212,13 @@ RemoteFileReader.prototype.getFileLengthFromResponseHeader = function () {
     return (isNaN(length)) ? -1 : length;
 };
 var httpreqcount = 0;
+/**
+ * @return {?string}
+ */
 RemoteFileReader.prototype.doNextRequest = function () {
     this.currentJob = this.queue.shift();
     if (!this.currentJob) {
-        return;
+        return null;
     }
     var job = this.currentJob,
         hascallback = job.callback !== null,
@@ -236,12 +284,19 @@ function ZipEntry(url, stream) {
     this.filename = stream.data.substr(stream.pos, namelen);
     stream.pos += namelen + extralen + commentlen;
 }
+/**
+ * @param {!string} url
+ * @param {!number} offset
+ * @param {!number} size
+ * @param {?function(!string)} callback
+ * @return {?string}
+ */
 ZipEntry.prototype.load = function (url, offset, size, callback) {
     // if data has already been downloaded, use that
     if (this.data) {
         if (callback) {
             callback(this.data);
-            return;
+            return null;
         } else {
             return this.data;
         }
@@ -315,6 +370,10 @@ function Zip(url, entriesReadCallback) {
     }
     this.readCentralDirectoryEnd(null);
 }
+/**
+ * @param {?function()} callback
+ * @return {undefined}
+ */
 Zip.prototype.readCentralDirectoryEnd = function (callback) {
     if (this.filesize <= 0) {
         throw "File '" + this.url + "' must be non-zero size, but has size " +
@@ -334,6 +393,11 @@ Zip.prototype.readCentralDirectoryEnd = function (callback) {
     }
     this.handleCentralDirectoryEnd(end, null);
 };
+/**
+ * @param {!string} data
+ * @param {?function()} callback
+ * @return {undefined}
+ */
 Zip.prototype.handleCentralDirectoryEnd = function (data, callback) {
     if (data.length !== 22) {
         throw "Central directory length should be 22.";
@@ -377,6 +441,11 @@ Zip.prototype.handleCentralDirectoryEnd = function (data, callback) {
     }
     this.handleCentralDirectory(cd, null);
 };
+/**
+ * @param {!string} data
+ * @param {?function(Zip)} callback
+ * @return {undefined}
+ */
 Zip.prototype.handleCentralDirectory = function (data, callback) {
     // parse the central directory
     var stream = new a3d.ByteArray(data), i;
@@ -388,6 +457,11 @@ Zip.prototype.handleCentralDirectory = function (data, callback) {
         callback(this);
     }
 };
+/**
+ * @param {!string} filename
+ * @param {?function(?string)} callback
+ * @return {?string}
+ */
 Zip.prototype.load = function (filename, callback) {
     var entry = null,
         end = this.filesize,
