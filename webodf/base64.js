@@ -38,8 +38,7 @@ var Base64 = (function () {
         }(b64chars)),
         convertUTF16StringToBase64,
         convertBase64ToUTF16String,
-        btoa = window && window.btoa,
-        atob = window && window.atob;
+        btoa, atob;
 
     /**
      * @param {!string} s
@@ -179,7 +178,8 @@ var Base64 = (function () {
         return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(stringToArray(uni)));
     }
     
-    if (btoa) {
+    if ((typeof window !== "undefined") && window.btoa) {
+        btoa = window.btoa;
         convertUTF16StringToBase64 = function (uni) {
             return btoa(convertUTF16StringToUTF8String(uni));
         };
@@ -189,7 +189,8 @@ var Base64 = (function () {
             return convertUTF8ArrayToBase64(convertUTF16StringToUTF8Array(uni));
         };
     }
-    if (atob) {
+    if ((typeof window !== "undefined") && window.atob) {
+        atob = window.atob;
         convertBase64ToUTF16String = function (b64) {
             return convertUTF8StringToUTF16String(atob(b64));
         };
