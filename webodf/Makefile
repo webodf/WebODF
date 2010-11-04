@@ -47,10 +47,10 @@ rhinotest: $(JSFILES)
 	java -jar $(RHINOJAR) -debug lib/runtime.js tests/tests.js
 
 compilednodetest: simplecompiled.js
-	$(NODE) simplecompiled.js
+	cd tests && $(NODE) ../simplecompiled.js
 
 compiledrhinotest: simplecompiled.js
-	java -jar $(RHINOJAR) -debug simplecompiled.js
+	cd tests && java -jar $(RHINOJAR) -debug ../simplecompiled.js
 
 # simplecompiled.js should actually work, creating compiled.js is just to
 # trigger compiler errors

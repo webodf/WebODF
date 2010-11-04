@@ -1,5 +1,5 @@
 /*jslint nomen: false, evil: true*/
-/*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile quit*/
+/*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile quit Buffer*/
 
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
@@ -11,44 +11,52 @@
  */
 function Runtime() {}
 /**
- * @param {string} path
- * @param {string} encoding
- * @param {function(string=,string=):undefined} callback
- * @return undefined
+ * @param {!string} path
+ * @param {!number} offset
+ * @param {!number} length
+ * @param {!function(string=,string=):undefined} callback
+ * @return {undefined}
+ */
+Runtime.prototype.read = function (path, offset, length, callback) {};
+/**
+ * @param {!string} path
+ * @param {!string} encoding
+ * @param {!function(string=,string=):undefined} callback
+ * @return {undefined}
  */
 Runtime.prototype.readFile = function (path, encoding, callback) {};
 /**
- * @param {string} path
- * @param {string} encoding
- * @return {string}
+ * @param {!string} path
+ * @param {!string} encoding
+ * @return {!string}
  */
 Runtime.prototype.readFileSync = function (path, encoding) {};
 /**
- * @param {string} path
- * @param {function((string|Document)):undefined} callback
- * @return undefined
+ * @param {!string} path
+ * @param {!function((string|Document)):undefined} callback
+ * @return {undefined}
  */
 Runtime.prototype.loadXML = function (path, callback) {};
 /**
- * @param {string} path
- * @param {function(boolean):undefined} callback
- * @return undefined
+ * @param {!string} path
+ * @param {!function(boolean):undefined} callback
+ * @return {undefined}
  */
 Runtime.prototype.isFile = function (path, callback) {};
 /**
- * @param {string} msgOrCategory
- * @param {string=} msg
- * @return undefined
+ * @param {!string} msgOrCategory
+ * @param {!string=} msg
+ * @return {undefined}
  */
 Runtime.prototype.log = function (msgOrCategory, msg) {};
 /**
- * @param {function():undefined} callback
- * @param {number} milliseconds
- * @return undefined
+ * @param {!function():undefined} callback
+ * @param {!number} milliseconds
+ * @return {undefined}
  */
 Runtime.prototype.setTimeout = function (callback, milliseconds) {};
 /**
- * @return {Array.<string>}
+ * @return {!Array.<string>}
  */
 Runtime.prototype.libraryPaths = function () {};
 /**
@@ -56,7 +64,7 @@ Runtime.prototype.libraryPaths = function () {};
  */
 Runtime.prototype.type = function () {};
 /**
- * @return {DOMImplementation|undefined}
+ * @return {?DOMImplementation}
  */
 Runtime.prototype.getDOMImplementation = function () {};
 
@@ -121,6 +129,15 @@ function BrowserRuntime(logoutput) {
             callback(e.message);
         }
     };
+    this.read = function (path, offset, length, callback) {
+        this.readFile(path, null, function (err, data) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, data.substring(offset, length + offset));
+            }
+        });
+    };
     this.readFileSync = function (path, encoding) {
         var xmlHttp = new XMLHttpRequest(),
             result;
@@ -177,6 +194,8 @@ function BrowserRuntime(logoutput) {
     this.getDOMImplementation = function () {
         return window.document.implementation;
     };
+    this.exit = function (exitCode) {
+    };
 }
 
 /**
@@ -197,6 +216,22 @@ function NodeJSRuntime() {
     }
 
     this.readFile = fs.readFile;
+    this.read = function (path, offset, length, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
+        fs.open(path, "r+", 666, function (err, fd) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            var buffer = new Buffer(length);
+            fs.read(fd, buffer, 0, length, offset, function (err, bytesRead) {
+                fs.close(fd);
+                callback(err, buffer.toString("binary", 0, bytesRead));
+            });
+        });
+    };
     this.readFileSync = fs.readFileSync;
     this.loadXML = loadXML;
     this.isFile = isFile;
@@ -268,12 +303,21 @@ function RhinoRuntime() {
             callback(null, data);
         }
     }
+    /**
+     * @param {!string} path
+     * @param {!string=} encoding
+     * @return {?string}
+     */
     function runtimeReadFileSync(path, encoding) {
         var file = new Packages.java.io.File(path);
         if (!file.isFile()) {
-            return undefined;
+            return null;
         }
-        return readFile(path, encoding);
+        if (encoding) {
+            return readFile(path, encoding);
+        } else {
+            return readFile(path);
+        }
     }
     function isFile(path, callback) {
         var file = new Packages.java.io.File(path);
@@ -284,6 +328,18 @@ function RhinoRuntime() {
 
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
+    this.read = function (path, offset, length, callback) {
+        // TODO: adapt to read only a part instead of the whole file
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
+        var data = runtimeReadFileSync(path);
+        if (data) {
+            callback(null, data.substring(offset, offset + length));
+        } else {
+            callback("Cannot read " + path);
+        }
+    };
     this.readFileSync = readFile;
     this.isFile = isFile;
     this.log = print;
@@ -428,4 +484,4 @@ var runtime = (function () {
     } else if (runtime.type() === "RhinoRuntime") {
         run(args);
     }
-}(typeof arguments !== "undefined"));
+}(typeof arguments !== "undefined" && arguments));

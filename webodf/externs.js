@@ -23,6 +23,30 @@ NodeJSObject.prototype.readFile = function (path, encoding, callback) {};
  */
 NodeJSObject.prototype.readFileSync = function (path, encoding) {};
 /**
+ * @param {!string} path
+ * @param {!string} flags
+ * @param {!number} mode
+ * @param {!function(string, !number):undefined} callback
+ * @return {undefined}
+ */
+NodeJSObject.prototype.open = function (path, flags, mode, callback) {};
+/**
+ * @param {!number} fd
+ * @param {!Buffer} buffer
+ * @param {!number} offset
+ * @param {!number} length
+ * @param {!number} position
+ * @param {function(string, !number)} callback
+ * @return {undefined}
+ */
+NodeJSObject.prototype.read = function (fd, buffer, offset, length, position, callback) {};
+/**
+ * @param {!number} fd
+ * @param {function(!string)} callback
+ * @return {undefined}
+ */
+NodeJSObject.prototype.close = function (fd, callback) {};
+/**
  * @param {!string} className
  * @return {!NodeJSObject}
  */
@@ -57,13 +81,18 @@ var process;
  */
 var __dirname;
 /**
+ * @constructor
+ * @param {!number} length
+ */
+function Buffer(length) {}
+/**
  * @param {!string} msg
  * @return {undefined}
  */
 function print(msg) {}
 /**
  * @param {!string} path
- * @param {?string} encoding
+ * @param {!string=} encoding
  * @return {?string}
  */
 function readFile(path, encoding) {}
