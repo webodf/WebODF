@@ -174,6 +174,9 @@ runtime.log(t.cursor.getNode().nodeName);
     this.tests = function () {
         return tests;
     };
+    this.asyncTests = function () {
+        return {};
+    };
 };
 core.CursorTests.name = "CursorTests";
 core.CursorTests.prototype.description = function () {

@@ -17,9 +17,13 @@ core.UnitTest.prototype.tearDown = function () {};
  */
 core.UnitTest.prototype.description = function () {};
 /**
- * @return {Object.<string, Function>}
+ * @return {Object.<!string, !function():undefined>}
  */
 core.UnitTest.prototype.tests = function () {};
+/**
+ * @return {Object.<!string, !function(!function():undefined):undefined>}
+ */
+core.UnitTest.prototype.asyncTests = function () {};
 
 /**
  * @constructor
@@ -145,9 +149,10 @@ core.UnitTester = function UnitTester() {
     var runner = new core.UnitTestRunner();
     /**
      * @param {Function} TestClass the constructor for the test class
+     * @param {!function():undefined} callback
      */
-    this.runTests = function (TestClass) {
-        var test = new TestClass(runner), i, t, tests;
+    this.runTests = function (TestClass, callback) {
+        var test = new TestClass(runner), i, t, tests, asynctests, keys = [];
         runtime.log("Running " + TestClass.name + ": " + test.description());
         tests = test.tests();
         for (i in tests) {
@@ -159,6 +164,26 @@ core.UnitTester = function UnitTester() {
                 test.tearDown();
             }
         }
+        asynctests = test.asyncTests();
+        for (i in asynctests) {
+            if (asynctests.hasOwnProperty(i)) {
+                keys.push(i);
+            }
+        }
+        function runAsyncTests(todo) {
+            if (todo.length === 0) {
+                callback();
+                return;
+            }
+            runtime.log("Running " + i);
+            t = asynctests[todo[0]];
+            test.setUp();
+            t(function () {
+                test.tearDown();
+                runAsyncTests(todo.slice(1));
+            });
+        }
+        runAsyncTests(keys);
     };
     this.countFailedTests = function () {
         return runner.countFailedTests();

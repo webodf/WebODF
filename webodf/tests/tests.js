@@ -1,4 +1,5 @@
 /*global window runtime core gui*/
+runtime.loadClass("RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.PointWalkerTests");
 runtime.loadClass("core.CursorTests");
@@ -16,8 +17,19 @@ if (runtime.type() === "BrowserRuntime") {
 }
 
 var tester = new core.UnitTester();
-for (var i = 0; i < tests.length; i += 1) {
-    runtime.log("Running test '" + tests[i].name + "'.");
-    tester.runTests(tests[i]);
+
+/**
+ * @param {!Array.<Function>} tests
+ * @return {!number}
+ */
+function runNextTest(tests) {
+    if (tests.length === 0) {
+        return tester.countFailedTests();
+    }
+    runtime.log("Running test '" + tests[0].name + "'.");
+    tester.runTests(tests[0], function () {
+        runNextTest(tests.slice(1));
+    });
+    return -1;
 }
-tester.countFailedTests();
+runNextTest(tests);

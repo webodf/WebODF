@@ -93,6 +93,9 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
             testEmptyDocument: testEmptyDocument
         };
     };
+    this.asyncTests = function () {
+        return {};
+    };
     this.description = function () {
         return "Test the PointWalker class.";
     };
