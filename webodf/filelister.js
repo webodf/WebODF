@@ -65,40 +65,6 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
         fileCallback(directories, files);
     }
 
-    function getNextFileListWithWebDav() {
-        var url = todoList.shift(),
-            req;
-        if (!url) {
-            if (doneCallback) {
-                doneCallback();
-            }
-            return;
-        }
-
-        req = new XMLHttpRequest();
-        req.open('PROPFIND', url, true);
-        req.onreadystatechange = function (evt) {
-            if (req.readyState !== 4) {
-                return;
-            }
-            if (req.status >= 200 && req.status < 300) {
-                processWebDavResponse(req.responseXML);
-                hasWEBDAV = true;
-            }
-            if (hasWEBDAV) {
-                getNextFileListWithWebDav();
-            } else {
-                todoList.push(url);
-                doneList = [];
-                getNextFileListWithIndexHtml();
-            }
-        };
-        req.setRequestHeader('Depth', '1');
-        req.send(null);
-
-        doneList.push(url);
-    }
-
     function processIndexHtmlResponse(base, text) {
         // use regex because index.html is usually not valid xml
         var re = /href="([^\/\?"][^"]*)"/ig,
@@ -150,6 +116,41 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
 
         doneList.push(url);
     }
+
+    function getNextFileListWithWebDav() {
+        var url = todoList.shift(),
+            req;
+        if (!url) {
+            if (doneCallback) {
+                doneCallback();
+            }
+            return;
+        }
+
+        req = new XMLHttpRequest();
+        req.open('PROPFIND', url, true);
+        req.onreadystatechange = function (evt) {
+            if (req.readyState !== 4) {
+                return;
+            }
+            if (req.status >= 200 && req.status < 300) {
+                processWebDavResponse(req.responseXML);
+                hasWEBDAV = true;
+            }
+            if (hasWEBDAV) {
+                getNextFileListWithWebDav();
+            } else {
+                todoList.push(url);
+                doneList = [];
+                getNextFileListWithIndexHtml();
+            }
+        };
+        req.setRequestHeader('Depth', '1');
+        req.send(null);
+
+        doneList.push(url);
+    }
+
     todoList.push(startdir);
     getNextFileListWithWebDav();
 }
