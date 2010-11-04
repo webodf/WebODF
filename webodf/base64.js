@@ -1,10 +1,12 @@
-/*jslint bitwise: false */
+/*jslint bitwise: false*/
+/*global window*/
 /*
  * $Id: base64.js,v 0.9 2009/03/01 20:51:18 dankogai Exp dankogai $
  */
-
-(function () {
-
+/**
+ * @namespace
+ */
+var Base64 = (function () {
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
     
@@ -33,7 +35,11 @@
                 t[bin.charAt(i)] = i;
             }
             return t;
-        }(b64chars));
+        }(b64chars)),
+        convertUTF16StringToBase64,
+        convertBase64ToUTF16String,
+        btoa = window.btoa,
+        atob = window.atob;
 
     /**
      * @param {!string} s
@@ -71,161 +77,161 @@
                 b64charcodes[n         & 63]
             );
         }
-        while (padlen -= 1) {
+        for (; padlen > 0; padlen -= 1) {
             b64[b64.length - padlen - 1] = '='.charCodeAt(0);
         }
         return String.fromCharCode.apply(String, b64);
-    };
+    }
     
-    var convertBase64ToUTF8Array = function(b64){
+    function convertBase64ToUTF8Array(b64) {
         b64 = b64.replace(/[^A-Za-z0-9+\/]+/g, '');
-        var bin = [];
-        var padlen = b64.length % 4;
-        for (var i = 0, l = b64.length; i < l; i += 4){
-            var n = ((b64tab[b64.charAt(i  )] || 0) << 18)
-                |   ((b64tab[b64.charAt(i+1)] || 0) << 12)
-                |   ((b64tab[b64.charAt(i+2)] || 0) <<  6)
-                |   ((b64tab[b64.charAt(i+3)] || 0));
+        var bin = [],
+            padlen = b64.length % 4,
+            i, l = b64.length, n;
+        for (i = 0; i < l; i += 4) {
+            n = ((b64tab[b64.charAt(i)]     || 0) << 18) |
+                ((b64tab[b64.charAt(i + 1)] || 0) << 12) |
+                ((b64tab[b64.charAt(i + 2)] || 0) <<  6) |
+                ((b64tab[b64.charAt(i + 3)] || 0));
             bin.push(
-                (  n >> 16 ),
-                ( (n >>  8) & 0xff ),
-                (  n        & 0xff )
+                (n >> 16),
+                ((n >>  8) & 0xff),
+                (n         & 0xff)
             );
         }
-        bin.length -= [0,0,2,1][padlen];
+        bin.length -= [0, 0, 2, 1][padlen];
         return bin;
-    };
+    }
     
-    var convertUTF16ArrayToUTF8Array = function(uni){
-        var bin = [];
-        for (var i = 0, l = uni.length; i < l; i++){
-            var n = uni[i];
-            if (n < 0x80)
+    function convertUTF16ArrayToUTF8Array(uni) {
+        var bin = [], i, l = uni.length, n;
+        for (i = 0; i < l; i += 1) {
+            n = uni[i];
+            if (n < 0x80) {
                 bin.push(n);
-            else if (n < 0x800)
+            } else if (n < 0x800) {
                 bin.push(
                     0xc0 | (n >>>  6),
                     0x80 | (n & 0x3f));
-            else
+            } else {
                 bin.push(
                     0xe0 | ((n >>> 12) & 0x0f),
                     0x80 | ((n >>>  6) & 0x3f),
                     0x80 |  (n         & 0x3f));
+            }
         }
         return bin;
-    };
+    }
     
-    var convertUTF8ArrayToUTF16Array = function(bin){
-        var uni = [];
-        for (var i = 0, l = bin.length; i < l; i++){
-            var c0 = bin[i];
-            if    (c0 < 0x80){
+    function convertUTF8ArrayToUTF16Array(bin) {
+        var uni = [], i, l = bin.length,
+            c0, c1, c2;
+        for (i = 0; i < l; i += 1) {
+            c0 = bin[i];
+            if (c0 < 0x80) {
                 uni.push(c0);
-            }else{
-                var c1 = bin[++i];
-                if (c0 < 0xe0){
+            } else {
+                i += 1;
+                c1 = bin[i];
+                if (c0 < 0xe0) {
                     uni.push(((c0 & 0x1f) << 6) | (c1 & 0x3f));
-                }else{
-                    var c2 = bin[++i];
-                    uni.push(
-                           ((c0 & 0x0f) << 12) | ((c1 & 0x3f) << 6) | (c2 & 0x3f)
+                } else {
+                    i += 1;
+                    c2 = bin[i];
+                    uni.push(((c0 & 0x0f) << 12) | ((c1 & 0x3f) << 6) |
+                            (c2 & 0x3f)
                     );
                 }
             }
         }
         return uni;
-    };
+    }
     
-    var convertUTF8StringToBase64 = function(bin){
+    function convertUTF8StringToBase64(bin) {
         return convertUTF8ArrayToBase64(stringToArray(bin));
-    };
+    }
     
-    var convertBase64ToUTF8String = function(b64){
+    function convertBase64ToUTF8String(b64) {
         return String.fromCharCode.apply(String, convertBase64ToUTF8Array(b64));
-    };
+    }
     
-    var convertUTF8StringToUTF16Array = function(bin){
+    function convertUTF8StringToUTF16Array(bin) {
         return convertUTF8ArrayToUTF16Array(stringToArray(bin));
-    };
+    }
     
-    var convertUTF8ArrayToUTF16String = function(bin){
+    function convertUTF8ArrayToUTF16String(bin) {
         return String.fromCharCode.apply(String, convertUTF8ArrayToUTF16Array(bin));
-    };
+    }
     
-    var convertUTF8StringToUTF16String = function(bin){
+    function convertUTF8StringToUTF16String(bin) {
         return String.fromCharCode.apply(String, convertUTF8ArrayToUTF16Array(stringToArray(bin)));
-    };
+    }
     
-    var convertUTF16StringToUTF8Array = function(uni){
+    function convertUTF16StringToUTF8Array(uni) {
         return convertUTF16ArrayToUTF8Array(stringToArray(uni));
-    };
+    }
     
-    var convertUTF16ArrayToUTF8String = function(uni){
+    function convertUTF16ArrayToUTF8String(uni) {
         return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(uni));
-    };
+    }
     
-    var convertUTF16StringToUTF8String = function(uni){
+    function convertUTF16StringToUTF8String(uni) {
         return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(stringToArray(uni)));
-    };
+    }
     
-    var convertUTF16StringToBase64;
-    if (window.btoa){
-        var btoa = window.btoa;
-        convertUTF16StringToBase64 = function (uni){
+    if (btoa) {
+        convertUTF16StringToBase64 = function (uni) {
             return btoa(convertUTF16StringToUTF8String(uni));
         };
-    }
-    else {
-        var btoa = convertUTF8StringToBase64;
-        convertUTF16StringToBase64 = function (uni){
+    } else {
+        btoa = convertUTF8StringToBase64;
+        convertUTF16StringToBase64 = function (uni) {
             return convertUTF8ArrayToBase64(convertUTF16StringToUTF8Array(uni));
         };
     }
-    var convertBase64ToUTF16String;
-    if (window.atob){
-        var atob = window.atob;
-        convertBase64ToUTF16String = function (b64){
+    if (atob) {
+        convertBase64ToUTF16String = function (b64) {
             return convertUTF8StringToUTF16String(atob(b64));
         };
-    }
-    else {
-        var atob = convertBase64ToUTF8String;
-        convertBase64ToUTF16String = function (b64){
+    } else {
+        atob = convertBase64ToUTF8String;
+        convertBase64ToUTF16String = function (b64) {
             return convertUTF8ArrayToUTF16String(convertBase64ToUTF8Array(b64));
         };
     }
     
-    window.Base64 = {
-        convertUTF8ArrayToBase64:convertUTF8ArrayToBase64,
-        convertByteArrayToBase64:convertUTF8ArrayToBase64,
-        convertBase64ToUTF8Array:convertBase64ToUTF8Array,
-        convertBase64ToByteArray:convertBase64ToUTF8Array,
-        convertUTF16ArrayToUTF8Array:convertUTF16ArrayToUTF8Array,
-        convertUTF16ArrayToByteArray:convertUTF16ArrayToUTF8Array,
-        convertUTF8ArrayToUTF16Array:convertUTF8ArrayToUTF16Array,
-        convertByteArrayToUTF16Array:convertUTF8ArrayToUTF16Array,
-        convertUTF8StringToBase64:convertUTF8StringToBase64,
-        convertBase64ToUTF8String:convertBase64ToUTF8String,
-        convertUTF8StringToUTF16Array:convertUTF8StringToUTF16Array,
-        convertUTF8ArrayToUTF16String:convertUTF8ArrayToUTF16String,
-        convertByteArrayToUTF16String:convertUTF8ArrayToUTF16String,
-        convertUTF8StringToUTF16String:convertUTF8StringToUTF16String,
-        convertUTF16StringToUTF8Array:convertUTF16StringToUTF8Array,
-        convertUTF16StringToByteArray:convertUTF16StringToUTF8Array,
-        convertUTF16ArrayToUTF8String:convertUTF16ArrayToUTF8String,
-        convertUTF16StringToUTF8String:convertUTF16StringToUTF8String,
-        convertUTF16StringToBase64:convertUTF16StringToBase64,
-        convertBase64ToUTF16String:convertBase64ToUTF16String,
-        fromBase64:convertBase64ToUTF8String,
-        toBase64:convertUTF8StringToBase64,
-        atob:atob,
-        btoa:btoa,
-        utob:convertUTF16StringToUTF8String,
-        btou:convertUTF8StringToUTF16String,
-        encode:convertUTF16StringToBase64,
-        encodeURI:function(u){
-            return convertUTF16StringToBase64(u).replace(/[+\/]/g, function(m0){
-                return m0 == '+' ? '-' : '_';
+    return {
+        convertUTF8ArrayToBase64: convertUTF8ArrayToBase64,
+        convertByteArrayToBase64: convertUTF8ArrayToBase64,
+        convertBase64ToUTF8Array: convertBase64ToUTF8Array,
+        convertBase64ToByteArray: convertBase64ToUTF8Array,
+        convertUTF16ArrayToUTF8Array: convertUTF16ArrayToUTF8Array,
+        convertUTF16ArrayToByteArray: convertUTF16ArrayToUTF8Array,
+        convertUTF8ArrayToUTF16Array: convertUTF8ArrayToUTF16Array,
+        convertByteArrayToUTF16Array: convertUTF8ArrayToUTF16Array,
+        convertUTF8StringToBase64: convertUTF8StringToBase64,
+        convertBase64ToUTF8String: convertBase64ToUTF8String,
+        convertUTF8StringToUTF16Array: convertUTF8StringToUTF16Array,
+        convertUTF8ArrayToUTF16String: convertUTF8ArrayToUTF16String,
+        convertByteArrayToUTF16String: convertUTF8ArrayToUTF16String,
+        convertUTF8StringToUTF16String: convertUTF8StringToUTF16String,
+        convertUTF16StringToUTF8Array: convertUTF16StringToUTF8Array,
+        convertUTF16StringToByteArray: convertUTF16StringToUTF8Array,
+        convertUTF16ArrayToUTF8String: convertUTF16ArrayToUTF8String,
+        convertUTF16StringToUTF8String: convertUTF16StringToUTF8String,
+        convertUTF16StringToBase64: convertUTF16StringToBase64,
+        convertBase64ToUTF16String: convertBase64ToUTF16String,
+        fromBase64: convertBase64ToUTF8String,
+        toBase64: convertUTF8StringToBase64,
+        atob: atob,
+        btoa: btoa,
+        utob: convertUTF16StringToUTF8String,
+        btou: convertUTF8StringToUTF16String,
+        encode: convertUTF16StringToBase64,
+        encodeURI: function (u) {
+            return convertUTF16StringToBase64(u).replace(/[+\/]/g,
+                    function (m0) {
+                return m0 === '+' ? '-' : '_';
             }).replace(/=+$/, '');
         },
         decode:function(a){
@@ -234,6 +240,4 @@
             }));
         }
     };
-    
 })();
-var Base64 = window.Base64;
