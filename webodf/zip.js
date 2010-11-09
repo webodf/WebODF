@@ -1,4 +1,4 @@
-/*global XMLHttpRequest document navigator a3d RawDeflate Base64*/
+/*global XMLHttpRequest document navigator a3d RawDeflate runtime core*/
 /*jslint bitwise: false*/
 /*
 * @preserve
@@ -9,13 +9,16 @@
 * Project home: http://www.odfkit.org/
 */
 
+runtime.loadClass("core.Base64");
+
 /**
  * @constructor
  */
 function Zip(url, entriesReadCallback) {
     var httpreqcount = 0,
         remotefilereader,
-        entries, filesize, nEntries, callback;
+        entries, filesize, nEntries, callback,
+        base64 = new core.Base64();
     
     /**
      * @constructor
@@ -343,7 +346,7 @@ function Zip(url, entriesReadCallback) {
             // deflate functions
             if (this.data.length > 0 && this.data.length < 200000 &&
                     this.data[0] === '<') {
-                this.data = Base64.convertUTF8StringToUTF16String(this.data);
+                this.data = base64.convertUTF8StringToUTF16String(this.data);
             }
         } else {
             this.data = stream.data.substr(stream.pos, this.uncompressedSize);

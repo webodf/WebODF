@@ -1,12 +1,12 @@
 /*jslint bitwise: false*/
-/*global window*/
+/*global window core*/
 /*
  * $Id: base64.js,v 0.9 2009/03/01 20:51:18 dankogai Exp dankogai $
  */
 /**
  * @namespace
  */
-var Base64 = (function () {
+core.Base64 = (function () {
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
     
@@ -200,45 +200,49 @@ var Base64 = (function () {
             return convertUTF8ArrayToUTF16String(convertBase64ToUTF8Array(b64));
         };
     }
-    
-    return {
-        convertUTF8ArrayToBase64: convertUTF8ArrayToBase64,
-        convertByteArrayToBase64: convertUTF8ArrayToBase64,
-        convertBase64ToUTF8Array: convertBase64ToUTF8Array,
-        convertBase64ToByteArray: convertBase64ToUTF8Array,
-        convertUTF16ArrayToUTF8Array: convertUTF16ArrayToUTF8Array,
-        convertUTF16ArrayToByteArray: convertUTF16ArrayToUTF8Array,
-        convertUTF8ArrayToUTF16Array: convertUTF8ArrayToUTF16Array,
-        convertByteArrayToUTF16Array: convertUTF8ArrayToUTF16Array,
-        convertUTF8StringToBase64: convertUTF8StringToBase64,
-        convertBase64ToUTF8String: convertBase64ToUTF8String,
-        convertUTF8StringToUTF16Array: convertUTF8StringToUTF16Array,
-        convertUTF8ArrayToUTF16String: convertUTF8ArrayToUTF16String,
-        convertByteArrayToUTF16String: convertUTF8ArrayToUTF16String,
-        convertUTF8StringToUTF16String: convertUTF8StringToUTF16String,
-        convertUTF16StringToUTF8Array: convertUTF16StringToUTF8Array,
-        convertUTF16StringToByteArray: convertUTF16StringToUTF8Array,
-        convertUTF16ArrayToUTF8String: convertUTF16ArrayToUTF8String,
-        convertUTF16StringToUTF8String: convertUTF16StringToUTF8String,
-        convertUTF16StringToBase64: convertUTF16StringToBase64,
-        convertBase64ToUTF16String: convertBase64ToUTF16String,
-        fromBase64: convertBase64ToUTF8String,
-        toBase64: convertUTF8StringToBase64,
-        atob: atob,
-        btoa: btoa,
-        utob: convertUTF16StringToUTF8String,
-        btou: convertUTF8StringToUTF16String,
-        encode: convertUTF16StringToBase64,
-        encodeURI: function (u) {
+
+    /**
+     * @constructor
+     */ 
+    function Base64() {
+        this.convertUTF8ArrayToBase64 = convertUTF8ArrayToBase64;
+        this.convertByteArrayToBase64 = convertUTF8ArrayToBase64;
+        this.convertBase64ToUTF8Array = convertBase64ToUTF8Array;
+        this.convertBase64ToByteArray = convertBase64ToUTF8Array;
+        this.convertUTF16ArrayToUTF8Array = convertUTF16ArrayToUTF8Array;
+        this.convertUTF16ArrayToByteArray = convertUTF16ArrayToUTF8Array;
+        this.convertUTF8ArrayToUTF16Array = convertUTF8ArrayToUTF16Array;
+        this.convertByteArrayToUTF16Array = convertUTF8ArrayToUTF16Array;
+        this.convertUTF8StringToBase64 = convertUTF8StringToBase64;
+        this.convertBase64ToUTF8String = convertBase64ToUTF8String;
+        this.convertUTF8StringToUTF16Array = convertUTF8StringToUTF16Array;
+        this.convertUTF8ArrayToUTF16String = convertUTF8ArrayToUTF16String;
+        this.convertByteArrayToUTF16String = convertUTF8ArrayToUTF16String;
+        this.convertUTF8StringToUTF16String = convertUTF8StringToUTF16String;
+        this.convertUTF16StringToUTF8Array = convertUTF16StringToUTF8Array;
+        this.convertUTF16StringToByteArray = convertUTF16StringToUTF8Array;
+        this.convertUTF16ArrayToUTF8String = convertUTF16ArrayToUTF8String;
+        this.convertUTF16StringToUTF8String = convertUTF16StringToUTF8String;
+        this.convertUTF16StringToBase64 = convertUTF16StringToBase64;
+        this.convertBase64ToUTF16String = convertBase64ToUTF16String;
+        this.fromBase64 = convertBase64ToUTF8String;
+        this.toBase64 = convertUTF8StringToBase64;
+        this.atob = atob;
+        this.btoa = btoa;
+        this.utob = convertUTF16StringToUTF8String;
+        this.btou = convertUTF8StringToUTF16String;
+        this.encode = convertUTF16StringToBase64;
+        this.encodeURI = function (u) {
             return convertUTF16StringToBase64(u).replace(/[+\/]/g,
                     function (m0) {
                 return m0 === '+' ? '-' : '_';
             }).replace(/=+$/, '');
-        },
-        decode:function(a){
+        };
+        this.decode =function(a){
             return convertBase64ToUTF16String(a.replace(/[-_]/g, function(m0){
                 return m0 == '-' ? '+' : '/';
             }));
-        }
+        };
     };
+    return Base64;
 })();

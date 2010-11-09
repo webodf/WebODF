@@ -12,3 +12,18 @@ The library should be able to run in a number of different runtimes. Currently t
 A common API is implemented for these three environments in the files lib/browser.js, lib/node.js and lib/rhino.js respectively.
 
 
+
+Requirements on the code
+
+There are several requirements that need to met before code can be considered for inclusion in WebODF. Most requirements can be checked automatically, a few have to be checked by hand. A contribution must:
+ - be contributed under the appropriate license
+ - be javascript
+ - not give any warnings in a JSLint check
+ - be unchanged when passed through jsbeautifier
+ - compile with the closure compiler
+ - must pass all the unit tests that were passed before
+   - as separate js files in the currenlty used Node.JS implementation
+   - as a single compiled file in the currenlty used Node.JS implementation
+   - as separate js files in the currenlty used Rhino implementation
+   - as a single compiled file Rhino implementation
+ - must have equal or greater code coverage for the each of the test runs

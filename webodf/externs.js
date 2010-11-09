@@ -1,4 +1,4 @@
-/*global Packages*/
+/*global Packages HTMLStyleElement*/
 /**
  * @constructor
  */
@@ -194,3 +194,8 @@ Packages.java.io.FileReader = function (path) {};
  * @param {!Packages.java.io.FileReader} reader
  */
 Packages.org.xml.sax.InputSource = function (reader) {};
+
+/**
+ * @type {!StyleSheet}
+ */
+HTMLStyleElement.prototype.sheet;

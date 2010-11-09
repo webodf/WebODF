@@ -12,7 +12,7 @@
 
 # COMPILERJAR should point the JAR file of the Closure Compiler.
 # http://code.google.com/closure/compiler/
-COMPILERJAR=/tmp/compiler.jar
+COMPILERJAR=compiler.jar
 # RHINOJAR should point the Rhino JAR file. http://www.mozilla.org/rhino/
 RHINOJAR=/usr/share/java/rhino.jar
 # NODE should point to the Node.JS executable. http://nodejs.org/
@@ -25,7 +25,7 @@ JSCOVERAGE=/tmp/jscoverage-0.5.1/jscoverage
 # http://code.google.com/p/jsdoc-toolkit/
 JSDOCDIR=/tmp/jsdoc_toolkit-2.3.2/jsdoc-toolkit
 
-LIBJSFILES := $(wildcard lib/*.js lib/*/*.js lib/*/*/*.js) base64.js bytearray.js rawinflate.js zip.js odf.js
+LIBJSFILES := $(wildcard lib/*.js lib/*/*.js lib/*/*/*.js) bytearray.js rawinflate.js zip.js odf2.js
 TESTJSFILES := $(wildcard tests/*/*.js tests/*/*/*.js tests/*.js)
 JSFILES := $(LIBJSFILES) $(TESTJSFILES)
 

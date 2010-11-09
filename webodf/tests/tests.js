@@ -3,6 +3,7 @@ runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.PointWalkerTests");
 runtime.loadClass("core.CursorTests");
+runtime.loadClass("core.Base64");
 runtime.loadClass("gui.XMLEditTests");
 
 var tests = [core.RuntimeTests];

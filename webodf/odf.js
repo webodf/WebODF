@@ -1,344 +1,314 @@
-/*global DOMParser document Zip Base64*/
+/*global runtime XMLHttpRequest document core XPathResult XMLSerializer DOMParser*/
+runtime.loadClass("odf.OdfContainer");
+
+var xhtmlns = "http://www.w3.org/1999/xhtml";
+
+var dynamicOdfJavascript = null;
+
+/*
+ * @param {!Array.<!string>} jsfiles
+ * @return {undefined}
+function loadJavascript(jsfiles) {
+    if (dynamicOdfJavascript) {
+        return;
+    }
+    var req = new XMLHttpRequest(),
+        js = "", i;
+    for (var i in jsfiles) {
+        req.open('GET', jsfiles[i], null);
+        req.send(null);
+        js += req.responseText;
+    }
+    if (js.length ) {
+        dynamicOdfJavascript = js;
+    }
+}
+*/
 /**
- * This is a pure javascript implementation of the first simple OdfKit api.
+ * A new styles.xml has been loaded. Update the live document with it.
  **/
-var odf;
-odf = (function () {
-    var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
-            'automatic-styles', 'master-styles', 'body'];
-    function getDirectChild(node, ns, name) {
-        node = (node) ? node.firstChild : null;
-        while (node) {
-            if (node.localName === name && node.namespaceURI === ns) {
-                return node;
-            }
-            node = node.nextSibling;
-        }
+function handleStyles(odfelement) {
+    // update the css translation of the styles    
+    var stylesxmlcss = document.getElementById('stylesxmlcss'),
+            style2css = new core.Style2CSS();
+    stylesxmlcss = /**@type{HTMLStyleElement}*/(stylesxmlcss);
+    try {
+        style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
+                odfelement.automaticStyles);
+    } catch (e) {
+        throw e;
     }
-    function getNodePosition(child) {
-        var childpos = 0, i;
-        for (i in nodeorder) {
-            if (child.namespaceURI === officens &&
-                    child.localName === nodeorder[i]) {
-                return i;
-            }
-        }
-        return -1;
+}
+var officens  = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+var drawns    = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+var fons      = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0";
+var svgns     = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+var textns    = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+var xlinkns   = "http://www.w3.org/1999/xlink";
+var presentation = false;
+var activeSlide = 1;
+var slidecssindex = 0;
+function setFramePosition(id, frame, stylesheet) {
+    frame.setAttribute('styleid', id);
+    var rule,
+        anchor = frame.getAttributeNS(textns, 'anchor-type'),
+        x = frame.getAttributeNS(svgns, 'x'),
+        y = frame.getAttributeNS(svgns, 'y'),
+        width, height, minheight, minwidth;
+    if (anchor === "as-char") {
+        rule = 'display: inline-block;';
+    } else if (anchor || x || y) {
+        rule = 'position: absolute;';
+    } else {
+        rule = 'display: block;';
     }
-    function setChild(node, child) {
-        if (!child) {
-            return;
-        }
-        var childpos = getNodePosition(child),
-            pos,
-            c = node.firstChild;
-        if (childpos === -1) {
-            return;
-        }
-        while (c) {
-            pos = getNodePosition(c);
-            if (pos !== -1 && pos > childpos) {
-                break;
-            }
-            c = c.nextSibling;
-        }
-        node.insertBefore(child, c);
+    if (x) {
+        rule += 'left: ' + x + ';';
     }
-    /**
-     * @constructor
-     */
-    function ODFElement() {
+    if (y) {
+        rule += 'top: ' + y + ';';
     }
-    function ODFDocumentElement(odfcontainer) {
-        this.OdfContainer = odfcontainer;
+    width = frame.getAttributeNS(svgns, 'width');
+    if (width) {
+        rule += 'width: ' + width + ';';
     }
-    ODFDocumentElement.prototype = new ODFElement();
-    ODFDocumentElement.prototype.constructor = ODFDocumentElement;
-    ODFDocumentElement.namespaceURI = officens;
-    ODFDocumentElement.localName = 'document';
-    // private constructor
-    /**
-     * @constructor
-     */
-    function OdfPart(name, container, zip) {
-        var self = this,
-            privatedata;
-
-        // declare public variables
-        this.size = 0;
-        this.type = null;
-        this.name = name;
-        this.container = container;
-        this.url = null;
-        this.document = null;
-        this.onreadystatechange = null;
-        this.onchange = null;
-        this.EMPTY = 0;
-        this.LOADING = 1;
-        this.DONE = 2;
-        this.state = this.EMPTY;
-
-        // private functions
-        function createUrl() {
-            self.url = null;
-            if (!privatedata) {
-                return;
-            }
-            self.url = 'data:;base64,';
-            // to avoid exceptions, base64 encoding is done in chunks
-            var chunksize = 90000, // must be multiple of 3 and less than 100000
-                i = 0;
-            while (i < privatedata.length) {
-                self.url += Base64.toBase64(privatedata.substr(i, chunksize));
-                i += chunksize;
-            }
-        }
-        function createDocument() {
-        }
-        // public functions
-        this.load = function () {
-            var callback = function (data) {
-                privatedata = data;
-                createUrl();
-                createDocument();
-                if (self.onchange) {
-                    self.onchange(self);
-                }
-                if (self.onstatereadychange) {
-                    self.onstatereadychange(self);
-                }
+    height = frame.getAttributeNS(svgns, 'height');
+    if (height) {
+        rule += 'height: ' + height + ';';
+    }
+    minheight = frame.getAttributeNS(fons, 'min-height');
+    if (minheight) {
+        rule += 'min-height: ' + minheight + ';';
+    }
+    minwidth = frame.getAttributeNS(fons, 'min-width'); 
+    if (minwidth) {
+        rule += 'min-width: ' + minwidth + ';';
+    }
+    rule = 'draw|' + frame.localName + '[styleid="' + id + '"] {' + rule + '}';
+    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+}
+function setImage(id, container, image, stylesheet) {
+    image.setAttribute('styleid', id);
+    var url = image.getAttributeNS(xlinkns, 'href'),
+        part;
+    function callback(url) {
+        var rule = "background-image: url(" + url + ");";
+        rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
+        stylesheet.insertRule(rule, stylesheet.cssRules.length);
+    }
+    try {
+        if (container.getPartUrl) {
+            url = container.getPartUrl(url);
+            callback(url);
+        } else {
+            part = container.getPart(url);
+            part.load();
+            part.onchange = function (part) {
+                callback(part.url);
             };
-            zip.load(name, callback);
-        };
-        this.abort = function () {
-            // TODO
-        };
+        }
+    } catch (e) {
     }
-    OdfPart.prototype.load = function () {
-    };
-    OdfPart.prototype.getUrl = function () {
-        if (this.data) {
-            return 'data:;base64,' + Base64.toBase64(this.data);
-        }
-        return null;
-    };
-    /**
-     * @constructor
-     */
-    function OdfPartList(odfcontainer) {
-        var self = this;
-        // declare public variables
-        this.length = 0;
-        this.item = function (index) {
-        };
+}
+function modifyImages(container, odfbody, stylesheet) {
+    var namespaces = {
+            draw: drawns,
+            fo: fons,
+            svg: svgns
+        },
+        doc = odfbody.ownerDocument,
+        drawiter,
+        node,
+        frames,
+        i,
+        images;
+    function namespaceResolver(prefix) {
+        return namespaces[prefix];
     }
-    /**
-     * @constructor
-     */
-    function OdfContainer(url) {
-        var self = this,
-            zip = null;
+    drawiter = doc.evaluate("*//draw:*" +
+            "[@svg:x|@svg:y|@svg:width|@svg:height|@fo:min-height|@fo:min-width]",
+            odfbody, namespaceResolver, XPathResult.ANY_TYPE, null);
+    node = drawiter.iterateNext();
+    frames = [];
+    while (node) {
+        frames[frames.length] = node;
+        node = drawiter.iterateNext();
+    }
+    for (i = 0; i < frames.length; i += 1) {
+        node = frames[i];
+        setFramePosition('frame' + i, node, stylesheet);
+    }
+    images = odfbody.getElementsByTagNameNS(drawns, 'image');
+    for (i = 0; i < images.length; i += 1) {
+        setImage('image' + i, container, images.item(i), stylesheet);
+    }
+}
+function clear(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+/**
+ * A new content.xml has been loaded. Update the live document with it.
+ **/
+function handleContent(container, odfnode) {
 
-        // NOTE each instance of OdfContainer has a copy of the private functions
-        // it would be better to have a class OdfContainerPrivate where the
-        // private functions can be defined via OdfContainerPrivate.prototype
-        // without exposing them
+    var positioncss = /**@type{HTMLStyleElement}*/(document.getElementById('positioncss')),
+        css = positioncss.sheet;
+    modifyImages(container, odfnode.body, css);
+    slidecssindex = css.insertRule(
+            'office|presentation draw|page:nth-child(n) { display:block; }',
+            css.cssRules.length);    
 
-        // declare public variables
-        this.onstatereadychange = null;
-        this.onchange = null;
-        this.state = null;
-        this.rootElement = null;
-        this.parts = null;
+    // only append the content at the end
+    clear(document.body);
+    document.body.appendChild(odfnode);
+}
+function refreshOdf() {
+    var OdfContainer = runtime.getWindow().odf.OdfContainer,
+        container,
+        odfnode;
 
-        // private functions
-        function importRootNode(xmldoc) {
-            var doc = self.rootElement.ownerDocument;
-            return doc.importNode(xmldoc.documentElement, true);
+    if (runtime.getWindow().odfcontainer.state !== OdfContainer.DONE) {
+        return;
+    }
+
+    // synchronize the object a window.odfcontainer with the view
+    container = runtime.getWindow().odfcontainer;
+
+    clear(document.body);
+
+    odfnode = container.rootElement;
+    document.importNode(odfnode, true);
+
+    handleStyles(odfnode);
+    // do content last, because otherwise the document is constantly updated
+    // whenever the css changes
+    handleContent(container, odfnode);
+}
+
+function init() {
+/*
+    // create a native ODF object
+    if (false) { // TODO check if there is a global ODF object
+        window.odf = new ODF();
+    } else {
+        // try to load the javascript required when no native ODF support is
+        // available
+        // if there is no native window.odf, there still might be a window.qtodf
+        var jsfiles;
+        if (window.qtodf) {
+            jsfiles = ['qtodf.js'];
+        } else {
+            jsfiles = ['base64.js','bytearray.js','rawinflate.js','zip.js','odf.js'];
         }
-        function handleStylesXml(xmldoc) {
-            var node = importRootNode(xmldoc),
-                root = self.rootElement;
-            if (!node || node.localName !== 'document-styles' ||
-                    node.namespaceURI !== officens) {
-                self.state = OdfContainer.INVALID;
-                return;
-            }
-            root.styles = getDirectChild(node, officens, 'styles');
-            setChild(root, root.styles);
-            root.automaticStyles = getDirectChild(node, officens, 'automatic-styles');
-            setChild(root, root.automaticStyles);
-            root.masterStyles = getDirectChild(node, officens, 'master-styles');
-            setChild(root, root.masterStyles);
+        loadJavascript(jsfiles);
+        window.odf = eval(dynamicOdfJavascript);
+    }
+*/
+    // if the url has a fragment (#...), try to load the file it represents
+    var location = String(document.location),
+        pos = location.indexOf('#'),
+        window = runtime.getWindow();
+    if (pos === -1 || !window) {
+        return;
+    }
+    location = location.substr(pos + 1);
+    // open the odf container
+    window.odfcontainer = window.odf.getContainer(location);
+    window.odfcontainer.onstatereadychange = refreshOdf;
+}
+
+function getDirectChild(ns, name, node) {
+    node = (node) ? node.firstChild : null;
+    while (node) {
+        if (node.localName === name && node.namespaceURI === ns) {
+            return node;
         }
-        function handleContentXml(xmldoc) {
-            var node = importRootNode(xmldoc),
-                root,
-                automaticStyles,
-                c;
-            if (!node || node.localName !== 'document-content' ||
-                    node.namespaceURI !== officens) {
-                self.state = OdfContainer.INVALID;
-                return;
-            }
-            root = self.rootElement;
-            root.body = getDirectChild(node, officens, 'body');
-            setChild(root, root.body);
-            automaticStyles = getDirectChild(node, officens, 'automatic-styles');
-            if (root.automaticStyles && automaticStyles) {
-                c = automaticStyles.firstChild;
-                while (c) {
-                    root.automaticStyles.appendChild(c);
-                    c = automaticStyles.firstChild; // works because node c moved
-                }
+        node = node.nextSibling;
+    }
+}
+
+/** temporary function to make a presentation when 'f' is pressed **/
+(function () {
+    // this code is only useful for applications with a window
+    if (!runtime.getWindow()) {
+        return;
+    }
+
+    var maxSlideRule = "{display: block;border: 0px;}";
+    function setSlideStyle(slide, style) {
+        var positioncss = /**@type{HTMLStyleElement}*/(document.getElementById('positioncss')),
+            css = positioncss.sheet,
+            r = css.cssRules,
+            div;
+        css.deleteRule(slidecssindex);
+        slidecssindex = css.insertRule('office|presentation draw|page:nth-child(' +
+            slide + ')' + style, css.cssRules.length);
+        div = document.getElementById('contentxml');
+        if (slide !== 'n') {
+            div.className = 'fullscreen';
+        } else {
+            div.className = null;
+        }
+    }
+    function nextSlide() {
+        activeSlide += 1;
+        if (activeSlide < 1) {
+            activeSlide = 1;
+        }
+        setSlideStyle(activeSlide, maxSlideRule);
+    }
+    function makePresentation() {
+        presentation = true;
+        activeSlide -= 1;
+        nextSlide();
+        var ppi = 98, // larger than 96 to avoid scaling problems
+            pagewidth = 11.02, // inches of hardcoded value
+            pageheight = 8.27, // inches of hardcoded value
+            window = runtime.getWindow(),
+            zoomlevelw = window.innerWidth / ppi / pagewidth,
+            zoomlevelh = window.innerHeight / ppi / pageheight,
+            zoomlevel = (zoomlevelw > zoomlevelh) ? zoomlevelh : zoomlevelw;
+        document.body.style.zoom = zoomlevel;
+        document.body.style.MozTransform = 'scale(' + zoomlevel + ')';
+    }
+    function unmakePresentation() {
+        presentation = false;
+        setSlideStyle('n', "{display: block;}");
+        var zoomlevel = 1.0;
+        document.body.style.zoom = zoomlevel;
+        document.body.style.MozTransform = 'scale(' + zoomlevel + ')';
+    }
+    function previousSlide() {
+        activeSlide -= 2;
+        nextSlide();
+    }
+    runtime.getWindow().onkeyup = function (e) {
+        if (e.keyCode === 70) { // f
+            if (presentation) {
+                unmakePresentation();
             } else {
-                root.automaticStyles = automaticStyles;
-                setChild(root.automaticStyles, automaticStyles);
+                makePresentation();
             }
+            return;
         }
-        function handleMetaXml(xmldoc) {
-            var node = importRootNode(xmldoc),
-                root;
-            if (!node || node.localName !== 'document-meta' ||
-                    node.namespaceURI !== officens) {
-                return;
-            }
-            root = self.rootElement;
-            root.meta = getDirectChild(node, officens, 'meta');
-            setChild(root, root.meta);
+        if (!presentation) {
+            return;
         }
-        function handleSettingsXml(xmldoc) {
-            var node = importRootNode(xmldoc),
-                root;
-            if (!node || node.localName !== 'document-settings' ||
-                    node.namespaceURI !== officens) {
-                return;
-            }
-            root = self.rootElement;
-            root.settings = getDirectChild(node, officens, 'settings');
-            setChild(root, root.settings);
-        }
-        function parseXml(filepath, xmldata) {
-            if (!xmldata || xmldata.length === 0) {
-                self.error = "Cannot read " + filepath + ".";
-                return null;
-            }
-            var parser = new DOMParser();
-            return parser.parseFromString(xmldata, 'text/xml');
-        }
-        function getXmlNode(filepath, callback) {
-            var c = null,
-                xmldata;
-            if (callback) {
-                c = function (xmldata) {
-                    callback(parseXml(filepath, xmldata));
-                };
-            }
-            xmldata = zip.load(filepath, c);
-            if (callback) {
-                return null;
-            }
-            return parseXml(filepath, xmldata);
-        }
-        function setState(state) {
-            self.state = state;
-            if (self.onchange) {
-                self.onchange(self);
-            }
-            if (self.onstatereadychange) {
-                self.onstatereadychange(self);
-            }
-        }
-        function loadComponents() {
-            // always load content.xml, meta.xml, styles.xml and settings.xml
-            getXmlNode('styles.xml', function (xmldoc) {
-                handleStylesXml(xmldoc);
-                if (self.state === OdfContainer.INVALID) {
-                    return;
-                }
-                getXmlNode('content.xml', function (xmldoc) {
-                    handleContentXml(xmldoc);
-                    if (self.state === OdfContainer.INVALID) {
-                        return;
-                    }
-                    getXmlNode('meta.xml', function (xmldoc) {
-                        handleMetaXml(xmldoc);
-                        if (self.state === OdfContainer.INVALID) {
-                            return;
-                        }
-                        getXmlNode('settings.xml', function (xmldoc) {
-                            handleSettingsXml(xmldoc);
-                            if (self.state !== OdfContainer.INVALID) {
-                                setState(OdfContainer.DONE);
-                            }
-                        });                        
-                    });                    
-                });
-            });
-        }
-        function createElement(Type) {
-            var original = document.createElementNS(
-                    Type.namespaceURI, Type.localName),
-                method,
-                iface = new Type();
-            for (method in iface) {
-                if (iface.hasOwnProperty(method)) {
-                    original[method] = iface[method];
-                }
-            }
-            return original;
-        }
-        // TODO: support single xml file serialization and different ODF
-        // versions
-        function callback(zip) {
-            loadComponents();
-        }
-        function load(filepath, callback) {
-            var c = null;
-            if (callback) {
-                c = function (data) {
-                    if (self.onchange) {
-                        self.onchange(self);
-                    }
-                    if (self.onstatereadychange) {
-                        self.onstatereadychange(self);
-                    }
-                };
-            }
-            return zip.load(filepath, c);
-        }
-        // public functions
-        /**
-         * Open file and parse it. Return the Xml Node. Return the root node of the
-         * file or null if this is not possible.
-         * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
-         * elements 'document-content', 'document-styles', 'document-meta', or
-         * 'document-settings' will be returned respectively.
-         **/
-        this.getPart = function (partname) {
-            return new OdfPart(partname, self, zip);
-        };
-
-        // initialize private variables
-        zip = new Zip(url, callback);
-
-        // initialize public variables
-        this.state = OdfContainer.LOADING;
-        this.rootElement = createElement(ODFDocumentElement);
-        this.parts = new OdfPartList(this);
-    }
-    OdfContainer.EMPTY = 0;
-    OdfContainer.LOADING = 1;
-    OdfContainer.DONE = 2;
-    OdfContainer.INVALID = 3;
-    OdfContainer.SAVING = 4;
-    OdfContainer.MODIFIED = 5;
-    return {
-        /* export the public api */
-        OdfContainer: OdfContainer,
-        getContainer: function (url) {
-            return new OdfContainer(url);
+        if (e.keyCode === 8) { // backspace
+            previousSlide();
+        } else {
+            nextSlide();
         }
     };
+    function fixOdf() {
+        var x = new XMLSerializer(), parser, dom;
+        x = x.serializeToString(document.body.firstChild);
+        parser = new DOMParser();
+        dom = parser.parseFromString(x, "text/xml");
+        dom = document.importNode(dom.documentElement, true);
+        document.body.removeChild(document.body.firstChild);
+        document.body.appendChild(dom);
+    }
 }());

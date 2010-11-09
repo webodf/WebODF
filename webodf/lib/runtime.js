@@ -67,6 +67,10 @@ Runtime.prototype.type = function () {};
  * @return {?DOMImplementation}
  */
 Runtime.prototype.getDOMImplementation = function () {};
+/**
+ * @return {?Window}
+ */
+Runtime.prototype.getWindow = function () {};
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -196,6 +200,9 @@ function BrowserRuntime(logoutput) {
     };
     this.exit = function (exitCode) {
     };
+    this.getWindow = function () {
+        return window;
+    };
 }
 
 /**
@@ -253,6 +260,9 @@ function NodeJSRuntime() {
         return;
     };
     this.exit = process.exit;
+    this.getWindow = function () {
+        return null;
+    };
 }
 
 /**
@@ -360,6 +370,9 @@ function RhinoRuntime() {
         return builder.getDOMImplementation();
     };
     this.exit = quit;
+    this.getWindow = function () {
+        return null;
+    };
 }
 
 /**
