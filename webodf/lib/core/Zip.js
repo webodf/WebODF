@@ -1,4 +1,4 @@
-/*global XMLHttpRequest document navigator a3d RawDeflate runtime core*/
+/*global XMLHttpRequest document navigator runtime core*/
 /*jslint bitwise: false*/
 /*
 * @preserve
@@ -14,11 +14,12 @@ runtime.loadClass("core.Base64");
 /**
  * @constructor
  */
-function Zip(url, entriesReadCallback) {
+core.Zip = function Zip(url, entriesReadCallback) {
     var httpreqcount = 0,
         remotefilereader,
         entries, filesize, nEntries, callback,
-        base64 = new core.Base64();
+        base64 = new core.Base64(),
+        inflate = new core.RawInflate().inflate;
     
     /**
      * @constructor
@@ -268,7 +269,7 @@ function Zip(url, entriesReadCallback) {
     /**
      * @constructor
      * @param {!string} url
-     * @param {!a3d.ByteArray} stream
+     * @param {!core.ByteArray} stream
      */
     function ZipEntry(url, stream) {
         var sig = stream.readUInt32LE(),
@@ -326,7 +327,7 @@ function Zip(url, entriesReadCallback) {
         return this.handleEntryData(data, null);
     };
     ZipEntry.prototype.handleEntryData = function (data, callback) {
-        var stream = new a3d.ByteArray(data),
+        var stream = new core.ByteArray(data),
             sig = stream.readUInt32LE(),
             filenamelen, extralen, datasize;
         if (sig !== 0x04034b50) {
@@ -340,7 +341,7 @@ function Zip(url, entriesReadCallback) {
                 : this.uncompressedSize;
         if (this.compressionMethod) {
             this.data = stream.data.substr(stream.pos, this.compressedSize);
-            this.data = RawDeflate.inflate(this.data);
+            this.data = inflate(this.data);
             // assume the input data is utf8 for now if it starts with '<'
             // this can be done better, perhaps even with special encoding respecting
             // deflate functions
@@ -364,7 +365,7 @@ function Zip(url, entriesReadCallback) {
      */
     function handleCentralDirectory(data, callback) {
         // parse the central directory
-        var stream = new a3d.ByteArray(data), i;
+        var stream = new core.ByteArray(data), i;
         entries = [];
         for (i = 0; i < nEntries; i += 1) {
             entries[entries.length] = new ZipEntry(url, stream);
@@ -382,7 +383,7 @@ function Zip(url, entriesReadCallback) {
         if (data.length !== 22) {
             throw "Central directory length should be 22.";
         }
-        var stream = new a3d.ByteArray(data), sig, disk, cddisk, diskNEntries,
+        var stream = new core.ByteArray(data), sig, disk, cddisk, diskNEntries,
             cdsSize, cdsOffset, f, zip, cd;
         sig = stream.readUInt32LE();
         if (sig !== 0x06054b50) {
@@ -489,4 +490,4 @@ function Zip(url, entriesReadCallback) {
         return;
     }
     readCentralDirectoryEnd(null);
-}
+};

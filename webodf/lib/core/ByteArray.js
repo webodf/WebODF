@@ -1,10 +1,10 @@
+/*global core*/
 /*jslint plusplus: false, bitwise: false */
-var a3d = {};
 /**
  * @constructor
  * @param {!string} data
  */
-a3d.ByteArray = function (data) {
+core.ByteArray = function (data) {
     /**
      * @type {!number}
      */

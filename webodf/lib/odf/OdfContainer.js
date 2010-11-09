@@ -1,4 +1,4 @@
-/*global DOMParser document Zip core runtime odf*/
+/*global DOMParser document core runtime odf*/
 runtime.loadClass("core.Base64");
 /**
  * This is a pure javascript implementation of the first simple OdfKit api.
@@ -322,7 +322,7 @@ odf.OdfContainer = (function () {
         };
 
         // initialize private variables
-        zip = new Zip(url, callback);
+        zip = new core.Zip(url, callback);
 
         // initialize public variables
         this.state = OdfContainer.LOADING;

@@ -1,3 +1,4 @@
+/*global core*/
 /*
  * $Id: rawinflate.js,v 0.2 2009/03/01 18:32:24 dankogai Exp $
  *
@@ -5,8 +6,10 @@
  * http://www.onicos.com/staff/iz/amuse/javascript/expert/inflate.txt
  */
 
-var RawDeflate = {};
-(function(){
+/**
+ * @constructor
+ */
+core.RawInflate = function () {
 
 /* Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
  * Version: 1.0.0.1
@@ -751,6 +754,6 @@ var zip_inflate = function(str) {
     return aout.join("");
 }
 
-RawDeflate.inflate = zip_inflate;
+this.inflate = zip_inflate;
 
-})();
+};
