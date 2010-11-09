@@ -4,7 +4,7 @@
  * @constructor
  * @param {!string} data
  */
-core.ByteArray = function (data) {
+core.ByteArray = function ByteArray(data) {
     /**
      * @type {!number}
      */

@@ -3,10 +3,10 @@ runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.PointWalkerTests");
 runtime.loadClass("core.CursorTests");
-runtime.loadClass("core.Base64");
+runtime.loadClass("core.ZipTests");
 runtime.loadClass("gui.XMLEditTests");
 
-var tests = [core.RuntimeTests];
+var tests = [core.RuntimeTests, core.ZipTests];
 
 if (runtime.type() !== "NodeJSRuntime") {
     tests.push(core.PointWalkerTests);

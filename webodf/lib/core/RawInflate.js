@@ -9,7 +9,7 @@
 /**
  * @constructor
  */
-core.RawInflate = function () {
+core.RawInflate = function RawInflate() {
 
 /* Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
  * Version: 1.0.0.1

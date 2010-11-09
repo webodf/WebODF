@@ -66,7 +66,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         if (typeof(expected) === "number" && isNaN(expected)) {
             return typeof(actual) === "number" && isNaN(actual);
         }
-        if (Object.prototype.toString.call(expected) === Object.prototype.toString.call([])) {
+        if (Object.prototype.toString.call(expected) ===
+                Object.prototype.toString.call([])) {
             return areArraysEqual(actual, expected);
         }
         return false;
@@ -78,9 +79,9 @@ core.UnitTestRunner = function UnitTestRunner() {
         return "" + v;
     }
     /**
-     * @param {Object} t
-     * @param {string} a
-     * @param {string} b
+     * @param {!Object} t
+     * @param {!string} a
+     * @param {!string} b
      * @return {undefined}
      */
     function shouldBe(t, a, b) {
@@ -106,8 +107,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
     }
     /**
-     * @param {Object} t context in which values to be tested are placed
-     * @param {string} a the value to be checked
+     * @param {!Object} t context in which values to be tested are placed
+     * @param {!string} a the value to be checked
      * @return {undefined}
      */
     function shouldBeNonNull(t, a) {
@@ -127,8 +128,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
     }
     /**
-     * @param {Object} t context in which values to be tested are placed
-     * @param {string} a the value to be checked
+     * @param {!Object} t context in which values to be tested are placed
+     * @param {!string} a the value to be checked
      * @return {undefined}
      */
     function shouldBeNull(t, a) {

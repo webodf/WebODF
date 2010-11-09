@@ -44,6 +44,12 @@ Runtime.prototype.loadXML = function (path, callback) {};
  */
 Runtime.prototype.isFile = function (path, callback) {};
 /**
+ * @param {!string} path
+ * @param {!function(number):undefined} callback
+ * @return {undefined}
+ */
+Runtime.prototype.getFileSize = function (path, callback) {};
+/**
  * @param {!string} msgOrCategory
  * @param {!string=} msg
  * @return {undefined}
@@ -187,6 +193,9 @@ function BrowserRuntime(logoutput) {
     this.isFile = function (path, callback) {
         throw "Not implemented.";
     };
+    this.getFileSize = function (path, callback) {
+        throw "Not implemented.";
+    };
     this.log = log;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
@@ -214,6 +223,9 @@ function NodeJSRuntime() {
         currentDirectory = "";
 
     function isFile(path, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         fs.stat(path, function (err, stats) {
             callback(!err && stats.isFile());
         });
@@ -242,6 +254,18 @@ function NodeJSRuntime() {
     this.readFileSync = fs.readFileSync;
     this.loadXML = loadXML;
     this.isFile = isFile;
+    this.getFileSize = function (path, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
+        fs.stat(path, function (err, stats) {
+            if (err) {
+                callback(-1);
+            } else {
+                callback(stats.size);
+            }
+        });
+    };
     this.log = console.log;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
@@ -330,6 +354,9 @@ function RhinoRuntime() {
         }
     }
     function isFile(path, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         var file = new Packages.java.io.File(path);
         callback(file.isFile());
     }
@@ -351,7 +378,14 @@ function RhinoRuntime() {
         }
     };
     this.readFileSync = readFile;
-    this.isFile = isFile;
+    this.isFile = isFile; 
+    this.getFileSize = function (path, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
+        var file = new Packages.java.io.File(path);
+        callback(file.length());
+    };
     this.log = print;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
