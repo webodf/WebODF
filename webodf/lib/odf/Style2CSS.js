@@ -1,8 +1,8 @@
-/*global XPathResult core*/
+/*global XPathResult odf*/
 /**
  * @constructor
  */
-core.Style2CSS = function Style2CSS() {
+odf.Style2CSS = function Style2CSS() {
     // helper constants
     var xlinkns = 'http://www.w3.org/1999/xlink',
 
@@ -395,7 +395,6 @@ core.Style2CSS = function Style2CSS() {
         } catch (e) {
             throw e;
         }
-    //if (rule.indexOf('presentation')!=-1){alert(rule);throw rule;}
     }
     /**
      * @param {!StyleSheet} sheet

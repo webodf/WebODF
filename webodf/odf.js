@@ -1,36 +1,16 @@
-/*global runtime XMLHttpRequest document core XPathResult XMLSerializer DOMParser*/
+/*global runtime XMLHttpRequest document core XPathResult XMLSerializer DOMParser odf*/
 runtime.loadClass("odf.OdfContainer");
+runtime.loadClass("odf.Style2CSS");
 
 var xhtmlns = "http://www.w3.org/1999/xhtml";
 
-var dynamicOdfJavascript = null;
-
-/*
- * @param {!Array.<!string>} jsfiles
- * @return {undefined}
-function loadJavascript(jsfiles) {
-    if (dynamicOdfJavascript) {
-        return;
-    }
-    var req = new XMLHttpRequest(),
-        js = "", i;
-    for (var i in jsfiles) {
-        req.open('GET', jsfiles[i], null);
-        req.send(null);
-        js += req.responseText;
-    }
-    if (js.length ) {
-        dynamicOdfJavascript = js;
-    }
-}
-*/
 /**
  * A new styles.xml has been loaded. Update the live document with it.
  **/
 function handleStyles(odfelement) {
     // update the css translation of the styles    
     var stylesxmlcss = document.getElementById('stylesxmlcss'),
-            style2css = new core.Style2CSS();
+            style2css = new odf.Style2CSS();
     stylesxmlcss = /**@type{HTMLStyleElement}*/(stylesxmlcss);
     try {
         style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
@@ -165,10 +145,9 @@ function handleContent(container, odfnode) {
     document.body.appendChild(odfnode);
 }
 function refreshOdf() {
-    var OdfContainer = runtime.getWindow().odf.OdfContainer,
+    var OdfContainer = odf.OdfContainer,
         container,
         odfnode;
-
     if (runtime.getWindow().odfcontainer.state !== OdfContainer.DONE) {
         return;
     }
@@ -188,24 +167,6 @@ function refreshOdf() {
 }
 
 function init() {
-/*
-    // create a native ODF object
-    if (false) { // TODO check if there is a global ODF object
-        window.odf = new ODF();
-    } else {
-        // try to load the javascript required when no native ODF support is
-        // available
-        // if there is no native window.odf, there still might be a window.qtodf
-        var jsfiles;
-        if (window.qtodf) {
-            jsfiles = ['qtodf.js'];
-        } else {
-            jsfiles = ['base64.js','bytearray.js','rawinflate.js','zip.js','odf.js'];
-        }
-        loadJavascript(jsfiles);
-        window.odf = eval(dynamicOdfJavascript);
-    }
-*/
     // if the url has a fragment (#...), try to load the file it represents
     var location = String(document.location),
         pos = location.indexOf('#'),
@@ -215,7 +176,7 @@ function init() {
     }
     location = location.substr(pos + 1);
     // open the odf container
-    window.odfcontainer = window.odf.getContainer(location);
+    window.odfcontainer = odf.OdfContainer.getContainer(location);
     window.odfcontainer.onstatereadychange = refreshOdf;
 }
 

@@ -211,7 +211,7 @@ function BrowserRuntime(logoutput) {
     this.log = log;
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
-        return ["../lib", "."];
+        return ["../lib", "."]; // TODO: find a good solution
     };
     this.type = function () {
         return "BrowserRuntime";

@@ -1,5 +1,6 @@
 /*global DOMParser document core runtime odf*/
 runtime.loadClass("core.Base64");
+runtime.loadClass("core.Zip");
 /**
  * This is a pure javascript implementation of the first simple OdfKit api.
  **/
@@ -99,7 +100,7 @@ odf.OdfContainer = (function () {
         }
         // public functions
         this.load = function () {
-            var callback = function (data) {
+            zip.load(name, function (err, data) {
                 privatedata = data;
                 createUrl();
                 createDocument();
@@ -109,8 +110,7 @@ odf.OdfContainer = (function () {
                 if (self.onstatereadychange) {
                     self.onstatereadychange(self);
                 }
-            };
-            zip.load(name, callback);
+            });
         };
         this.abort = function () {
             // TODO
@@ -229,18 +229,9 @@ odf.OdfContainer = (function () {
             return parser.parseFromString(xmldata, 'text/xml');
         }
         function getXmlNode(filepath, callback) {
-            var c = null,
-                xmldata;
-            if (callback) {
-                c = function (xmldata) {
-                    callback(parseXml(filepath, xmldata));
-                };
-            }
-            xmldata = zip.load(filepath, c);
-            if (callback) {
-                return null;
-            }
-            return parseXml(filepath, xmldata);
+            zip.load(filepath, function (err, xmldata) {
+                callback(parseXml(filepath, xmldata));
+            });
         }
         function setState(state) {
             self.state = state;
@@ -292,22 +283,15 @@ odf.OdfContainer = (function () {
         }
         // TODO: support single xml file serialization and different ODF
         // versions
-        function callback(zip) {
-            loadComponents();
-        }
         function load(filepath, callback) {
-            var c = null;
-            if (callback) {
-                c = function (data) {
-                    if (self.onchange) {
-                        self.onchange(self);
-                    }
-                    if (self.onstatereadychange) {
-                        self.onstatereadychange(self);
-                    }
-                };
-            }
-            return zip.load(filepath, c);
+            zip.load(filepath, function (err, data) {
+                if (self.onchange) {
+                    self.onchange(self);
+                }
+                if (self.onstatereadychange) {
+                    self.onstatereadychange(self);
+                }
+            });
         }
         // public functions
         /**
@@ -322,7 +306,14 @@ odf.OdfContainer = (function () {
         };
 
         // initialize private variables
-        zip = new core.Zip(url, callback);
+        zip = new core.Zip(url, function (err, zipobject) {
+            zip = zipobject;
+            if (err) {
+                zip.error = err;
+            } else {
+                loadComponents();
+            }
+        });
 
         // initialize public variables
         this.state = OdfContainer.LOADING;

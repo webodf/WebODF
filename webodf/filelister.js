@@ -48,6 +48,9 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
             directories = [],
             files = [],
             i, d, href;
+        if (refs.length === 0) {
+            throw new Error('No proper XML response.');
+        }
         for (i = 0; i < refs.length; i += 1) {
             href = getHref(refs[i]);
             if (isDirectory(refs[i])) {
@@ -134,8 +137,11 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
                 return;
             }
             if (req.status >= 200 && req.status < 300) {
-                processWebDavResponse(req.responseXML);
-                hasWEBDAV = true;
+                try {
+                    processWebDavResponse(req.responseXML);
+                    hasWEBDAV = true;
+                } catch (e) {
+                }
             }
             if (hasWEBDAV) {
                 getNextFileListWithWebDav();

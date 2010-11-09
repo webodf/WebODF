@@ -186,17 +186,15 @@ core.Zip = function Zip(url, entriesReadCallback) {
     function load(filename, callback) {
         var entry = null,
             end = filesize,
-            i;
-        for (i in entries) {
-            if (entries.hasOwnProperty(i)) {
-                i = entries[i];
-                if (entry) {
-                    end = i.offset;
-                    break;
-                }
-                if (i.filename === filename) {
-                    entry = i;
-                }
+            e, i;
+        for (i = 0; i < entries.length; i += 1) {
+            e = entries[i];
+            if (entry) {
+                end = e.offset;
+                break;
+            }
+            if (e.filename === filename) {
+                entry = e;
             }
         }
         if (entry) {
@@ -210,13 +208,15 @@ core.Zip = function Zip(url, entriesReadCallback) {
     filesize = -1;
     runtime.getFileSize(url, function (size) {
         filesize = size;
-        if (filesize <= 0) {
-            entriesReadCallback("File '" + url +
-                    "' must be non-zero size, but has size " + filesize + '.',
-                    zip);
+        if (filesize < 0) {
+            entriesReadCallback("File '" + url + "' cannot be read.", zip);
         } else {
             runtime.read(url, filesize - 22, 22, function (err, data) {
-                handleCentralDirectoryEnd(data, entriesReadCallback);
+                if (err) {
+                    entriesReadCallback(err, zip);
+                } else {
+                    handleCentralDirectoryEnd(data, entriesReadCallback);
+                }
             });
         }
     });
