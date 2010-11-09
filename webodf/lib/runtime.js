@@ -191,10 +191,22 @@ function BrowserRuntime(logoutput) {
         }
     };
     this.isFile = function (path, callback) {
-        throw "Not implemented.";
+        this.readFile(path, null, function (err, data) {
+            if (err) {
+                callback(false);
+            } else {
+                callback(true);
+            }
+        });
     };
     this.getFileSize = function (path, callback) {
-        throw "Not implemented.";
+        this.readFile(path, null, function (err, data) {
+            if (err) {
+                callback(-1);
+            } else {
+                callback(data.length);
+            }
+        });
     };
     this.log = log;
     this.setTimeout = setTimeout;
