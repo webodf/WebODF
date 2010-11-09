@@ -176,7 +176,7 @@ core.UnitTester = function UnitTester() {
                 callback();
                 return;
             }
-            runtime.log("Running " + i);
+            runtime.log("Running " + todo[0]);
             t = asynctests[todo[0]];
             test.setUp();
             t(function () {

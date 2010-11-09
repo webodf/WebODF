@@ -33,12 +33,28 @@ core.ZipTests = function ZipTests(runner) {
         });
     }
 
-    function testHiUncompressed(callback) {
-        var zip = new core.Zip("core/hi-uncompressed.zip", function (err) {
+    function testHi(path, callback) {
+        var zip = new core.Zip(path, function (err, zip) {
             t.err = err;
+            t.zip = zip;
             r.shouldBeNull(t, "t.err");
-            callback();
+            zip.load("hello", function (err, data) {
+                t.err = err;
+                r.shouldBeNull(t, "t.err");
+                t.data = data;
+                r.shouldBe(t, "t.data.length", "16");
+                r.shouldBe(t, "t.data", "'bonjour\\nbonjour\\n'");
+                callback();
+            });
         });
+    }
+
+    function testHiUncompressed(callback) {
+        testHi("core/hi-uncompressed.zip", callback);
+    }
+
+    function testHiCompressed(callback) {
+        testHi("core/hi-compressed.zip", callback);
     }
 
     this.setUp = function () {
@@ -54,7 +70,8 @@ core.ZipTests = function ZipTests(runner) {
         return {
             testNonExistingFile: testNonExistingFile,
             testNonZipFile: testNonZipFile,
-            testHiUncompressed: testHiUncompressed
+            testHiUncompressed: testHiUncompressed,
+            testHiCompressed: testHiCompressed
         };
     };
 };

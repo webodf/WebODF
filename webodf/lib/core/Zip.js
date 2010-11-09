@@ -1,5 +1,4 @@
-/*global document navigator runtime core*/
-/*jslint bitwise: false*/
+/*global runtime core*/
 /*
 * @preserve
 * OdfKit
@@ -16,14 +15,16 @@ runtime.loadClass("core.ByteArray");
 /**
  * @constructor
  * @param {!string} url path to zip file, should be readable by the runtime
- * @param {!function(?string)} entriesReadCallback callback indicating the zip
- *        has loaded this list of entries, the argument is a string that
- *        indicates error if present
+ * @param {!function(?string, !core.Zip)} entriesReadCallback callback
+ *        indicating the zip
+ *        has loaded this list of entries, the arguments are a string that
+ *        indicates error if present and the created object
  */
 core.Zip = function Zip(url, entriesReadCallback) {
     var entries, filesize, nEntries,
         base64 = new core.Base64(),
-        inflate = new core.RawInflate().inflate;
+        inflate = new core.RawInflate().inflate,
+        zip = this;
     
     /**
      * @constructor
@@ -100,8 +101,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
             this.data = stream.data.substr(stream.pos, this.compressedSize);
             this.data = inflate(this.data);
             // assume the input data is utf8 for now if it starts with '<'
-            // this can be done better, perhaps even with special encoding respecting
-            // deflate functions
+            // this can be done better, perhaps even with special encoding
+            // respecting deflate functions
             if (this.data.length > 0 && this.data.length < 200000 &&
                     this.data[0] === '<') {
                 this.data = base64.convertUTF8StringToUTF16String(this.data);
@@ -113,7 +114,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     };
     /**
      * @param {!string} data
-     * @param {!function(?string)} callback
+     * @param {!function(?string, !core.Zip)} callback
      * @return {undefined}
      */
     function handleCentralDirectory(data, callback) {
@@ -123,45 +124,47 @@ core.Zip = function Zip(url, entriesReadCallback) {
         for (i = 0; i < nEntries; i += 1) {
             e = new ZipEntry(url, stream);
             if (e.error) {
-                callback(e.error);
+                callback(e.error, zip);
                 return;
             }
             entries[entries.length] = e;
         }
         // report that entries are listed and no error occured
-        callback(null);
+        callback(null, zip);
     }
     /**
      * @param {!string} data
-     * @param {!function(?string)} callback
+     * @param {!function(?string, !core.Zip)} callback
      * @return {undefined}
      */
     function handleCentralDirectoryEnd(data, callback) {
         if (data.length !== 22) {
-            callback("Central directory length should be 22.");
+            callback("Central directory length should be 22.", zip);
             return;
         }
         var stream = new core.ByteArray(data), sig, disk, cddisk, diskNEntries,
             cdsSize, cdsOffset;
         sig = stream.readUInt32LE();
         if (sig !== 0x06054b50) {
-            callback('Central directory signature is wrong.');
+            callback('Central directory signature is wrong.', zip);
             return;
         }
         disk = stream.readUInt16LE();
         if (disk !== 0) {
-            callback('Zip files with non-zero disk numbers are not supported.');
+            callback('Zip files with non-zero disk numbers are not supported.',
+                    zip);
             return;
         }
         cddisk = stream.readUInt16LE();
         if (cddisk !== 0) {
-            callback('Zip files with non-zero disk numbers are not supported.');
+            callback('Zip files with non-zero disk numbers are not supported.',
+                    zip);
             return;
         }
         diskNEntries = stream.readUInt16LE();
         nEntries = stream.readUInt16LE();
         if (diskNEntries !== nEntries) {
-            callback('Number of entries is inconsistent.');
+            callback('Number of entries is inconsistent.', zip);
             return;
         }
         cdsSize = stream.readUInt32LE();
@@ -209,7 +212,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
         filesize = size;
         if (filesize <= 0) {
             entriesReadCallback("File '" + url +
-                    "' must be non-zero size, but has size " + filesize + '.');
+                    "' must be non-zero size, but has size " + filesize + '.',
+                    zip);
         } else {
             runtime.read(url, filesize - 22, 22, function (err, data) {
                 handleCentralDirectoryEnd(data, entriesReadCallback);

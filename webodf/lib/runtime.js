@@ -119,10 +119,10 @@ function BrowserRuntime(logoutput) {
                     callback("File is empty.");
                 } else if (xmlHttp.status === 200 || xmlHttp.status === 0) {
                     // report file
-                    callback(undefined, xmlHttp.responseText);
+                    callback(null, xmlHttp.responseText);
                 } else {
                     // report error
-                    callback(xmlHttp.responseText);
+                    callback(xmlHttp.responseText || xmlHttp.statusText);
                 }
             }
         }
@@ -351,19 +351,18 @@ function RhinoRuntime() {
     }
     /**
      * @param {!string} path
-     * @param {!string=} encoding
+     * @param {?string} encoding
      * @return {?string}
      */
     function runtimeReadFileSync(path, encoding) {
-        var file = new Packages.java.io.File(path);
+        var file = new Packages.java.io.File(path), data, i;
         if (!file.isFile()) {
             return null;
         }
         if (encoding) {
             return readFile(path, encoding);
-        } else {
-            return readFile(path);
         }
+        return readFile(path, "latin1"); // read binary, seems hacky but works
     }
     function isFile(path, callback) {
         if (currentDirectory) {
@@ -382,7 +381,7 @@ function RhinoRuntime() {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
         }
-        var data = runtimeReadFileSync(path);
+        var data = runtimeReadFileSync(path, null);
         if (data) {
             callback(null, data.substring(offset, offset + length));
         } else {

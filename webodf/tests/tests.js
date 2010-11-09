@@ -28,8 +28,9 @@ function runNextTest(tests) {
         runtime.exit(tester.countFailedTests());
         return;
     }
-    runtime.log("Running test '" + tests[0].name + "'.");
-    tester.runTests(tests[0], function () {
+    var test = tests[0];
+    runtime.log("Running test '" + test.name + "'.");
+    tester.runTests(test, function () {
         runNextTest(tests.slice(1));
     });
 }
