@@ -39,7 +39,7 @@ http.createServer(function (request, response) {
                     return;
                 }
                 response.writeHead(200);
-                response.write("<html><head><title/></head><body>");
+                response.write("<html><head><title></title></head><body>");
                 var i, l = files.length, file;
                 for (i = 0; i < l; i += 1) {
                     file = files[i].replace("&", "&amp;")
