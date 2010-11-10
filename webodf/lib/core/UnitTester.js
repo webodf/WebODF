@@ -13,7 +13,7 @@ core.UnitTest.prototype.setUp = function () {};
  */
 core.UnitTest.prototype.tearDown = function () {};
 /**
- * @return {string}
+ * @return {!string}
  */
 core.UnitTest.prototype.description = function () {};
 /**
@@ -97,13 +97,15 @@ core.UnitTestRunner = function UnitTestRunner() {
         bv = eval(b);
 
         if (exception) {
-            testFailed(a + " should be " + bv + ". Threw exception " + exception);
+            testFailed(a + " should be " + bv + ". Threw exception " +
+                    exception);
         } else if (isResultCorrect(av, bv)) {
             testPassed(a + " is " + b);
         } else if (typeof(av) === typeof(bv)) {
             testFailed(a + " should be " + bv + ". Was " + stringify(av) + ".");
         } else {
-            testFailed(a + " should be " + bv + " (of type " + typeof bv + "). Was " + av + " (of type " + typeof av + ").");
+            testFailed(a + " should be " + bv + " (of type " + typeof bv +
+                    "). Was " + av + " (of type " + typeof av + ").");
         }
     }
     /**
@@ -147,22 +149,36 @@ core.UnitTestRunner = function UnitTestRunner() {
  * @constructor
  */
 core.UnitTester = function UnitTester() {
-    var runner = new core.UnitTestRunner();
+    var failedTests = 0,
+        results = {};
     /**
      * @param {Function} TestClass the constructor for the test class
      * @param {!function():undefined} callback
+     * @return {undefined}
      */
     this.runTests = function (TestClass, callback) {
-        var test = new TestClass(runner), i, t, tests, asynctests, keys = [];
+        // check that this test has not been run or started yet
+        if (TestClass.name in results) {
+            runtime.log("Test " + TestClass.name + " has already run.");
+            return;
+        }
+
+        var runner = new core.UnitTestRunner(),
+            test = new TestClass(runner),
+            testResults = {},
+            i, t, tests, asynctests, keys = [],
+            lastFailCount;
         runtime.log("Running " + TestClass.name + ": " + test.description());
         tests = test.tests();
         for (i in tests) {
             if (tests.hasOwnProperty(i)) {
                 runtime.log("Running " + i);
+                lastFailCount = runner.countFailedTests();
                 t = tests[i];
                 test.setUp();
                 t();
                 test.tearDown();
+                testResults[i] = lastFailCount === runner.countFailedTests();
             }
         }
         asynctests = test.asyncTests();
@@ -173,20 +189,33 @@ core.UnitTester = function UnitTester() {
         }
         function runAsyncTests(todo) {
             if (todo.length === 0) {
+                results[TestClass.name] = testResults;
+                failedTests += runner.countFailedTests();
                 callback();
                 return;
             }
             runtime.log("Running " + todo[0]);
+            lastFailCount = runner.countFailedTests();
             t = asynctests[todo[0]];
             test.setUp();
             t(function () {
                 test.tearDown();
+                testResults[t.name] = lastFailCount === runner.countFailedTests();
                 runAsyncTests(todo.slice(1));
             });
         }
         runAsyncTests(keys);
     };
+    /**
+     * @return {!number}
+     **/
     this.countFailedTests = function () {
-        return runner.countFailedTests();
+        return failedTests;
+    };
+    /**
+     * @return {!Object}
+     **/
+    this.results = function () {
+        return results;
     };
 };
