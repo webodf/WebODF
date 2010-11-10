@@ -73,10 +73,10 @@ core.Base64 = (function () {
                 b64charcodes[n >>> 18],
                 b64charcodes[(n >>> 12) & 63],
                 b64charcodes[(n >>>  6) & 63],
-                b64charcodes[n         & 63]
+                b64charcodes[n          & 63]
             );
         }
-        for (; padlen > 0; padlen -= 1) {
+        for (padlen -= 1; padlen >= 0; padlen -= 1) {
             b64[b64.length - padlen - 1] = '='.charCodeAt(0);
         }
         return String.fromCharCode.apply(String, b64);
