@@ -220,17 +220,23 @@ odf.OdfContainer = (function () {
             root.settings = getDirectChild(node, officens, 'settings');
             setChild(root, root.settings);
         }
-        function parseXml(filepath, xmldata) {
-            if (!xmldata || xmldata.length === 0) {
-                self.error = "Cannot read " + filepath + ".";
-                return null;
-            }
-            var parser = new DOMParser();
-            return parser.parseFromString(xmldata, 'text/xml');
-        }
+        /**
+         * @param {!string} filepath
+         * @param {!function(?string,?Document)} callback
+         * @return {undefined}
+         */
         function getXmlNode(filepath, callback) {
             zip.load(filepath, function (err, xmldata) {
-                callback(parseXml(filepath, xmldata));
+                if (err) {
+                    callback(err, null);
+                    return;
+                }
+                // assume the xml input data is utf8
+                // this can be done better
+                xmldata = base64.convertUTF8StringToUTF16String(xmldata);
+                var parser = new DOMParser();
+                xmldata = parser.parseFromString(xmldata, "text/xml");
+                callback(null, xmldata);
             });
         }
         function setState(state) {
@@ -242,24 +248,27 @@ odf.OdfContainer = (function () {
                 self.onstatereadychange(self);
             }
         }
+        /**
+         * @return {undefined}
+         */
         function loadComponents() {
             // always load content.xml, meta.xml, styles.xml and settings.xml
-            getXmlNode('styles.xml', function (xmldoc) {
+            getXmlNode('styles.xml', function (err, xmldoc) {
                 handleStylesXml(xmldoc);
                 if (self.state === OdfContainer.INVALID) {
                     return;
                 }
-                getXmlNode('content.xml', function (xmldoc) {
+                getXmlNode('content.xml', function (err, xmldoc) {
                     handleContentXml(xmldoc);
                     if (self.state === OdfContainer.INVALID) {
                         return;
                     }
-                    getXmlNode('meta.xml', function (xmldoc) {
+                    getXmlNode('meta.xml', function (err, xmldoc) {
                         handleMetaXml(xmldoc);
                         if (self.state === OdfContainer.INVALID) {
                             return;
                         }
-                        getXmlNode('settings.xml', function (xmldoc) {
+                        getXmlNode('settings.xml', function (err, xmldoc) {
                             handleSettingsXml(xmldoc);
                             if (self.state !== OdfContainer.INVALID) {
                                 setState(OdfContainer.DONE);
@@ -295,8 +304,8 @@ odf.OdfContainer = (function () {
         }
         // public functions
         /**
-         * Open file and parse it. Return the Xml Node. Return the root node of the
-         * file or null if this is not possible.
+         * Open file and parse it. Return the Xml Node. Return the root node of
+         * the file or null if this is not possible.
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
          * elements 'document-content', 'document-styles', 'document-meta', or
          * 'document-settings' will be returned respectively.
