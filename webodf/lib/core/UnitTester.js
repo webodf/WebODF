@@ -17,11 +17,11 @@ core.UnitTest.prototype.tearDown = function () {};
  */
 core.UnitTest.prototype.description = function () {};
 /**
- * @return {Object.<!string, !function():undefined>}
+ * @return {Array.<!function():undefined>}
  */
 core.UnitTest.prototype.tests = function () {};
 /**
- * @return {Object.<!string, !function(!function():undefined):undefined>}
+ * @return {Array.<!function(!function():undefined):undefined>}
  */
 core.UnitTest.prototype.asyncTests = function () {};
 
@@ -166,26 +166,18 @@ core.UnitTester = function UnitTester() {
         var runner = new core.UnitTestRunner(),
             test = new TestClass(runner),
             testResults = {},
-            i, t, tests, asynctests, keys = [],
+            i, t, tests,
             lastFailCount;
         runtime.log("Running " + TestClass.name + ": " + test.description());
         tests = test.tests();
-        for (i in tests) {
-            if (tests.hasOwnProperty(i)) {
-                runtime.log("Running " + i);
-                lastFailCount = runner.countFailedTests();
-                t = tests[i];
-                test.setUp();
-                t();
-                test.tearDown();
-                testResults[i] = lastFailCount === runner.countFailedTests();
-            }
-        }
-        asynctests = test.asyncTests();
-        for (i in asynctests) {
-            if (asynctests.hasOwnProperty(i)) {
-                keys.push(i);
-            }
+        for (i = 0; i < tests.length; i += 1) {
+            t = tests[i];
+            runtime.log("Running " + t.name);
+            lastFailCount = runner.countFailedTests();
+            test.setUp();
+            t();
+            test.tearDown();
+            testResults[t.name] = lastFailCount === runner.countFailedTests();
         }
         function runAsyncTests(todo) {
             if (todo.length === 0) {
@@ -194,17 +186,18 @@ core.UnitTester = function UnitTester() {
                 callback();
                 return;
             }
-            runtime.log("Running " + todo[0]);
+            t = todo[0];
+            runtime.log("Running " + t.name);
             lastFailCount = runner.countFailedTests();
-            t = asynctests[todo[0]];
             test.setUp();
             t(function () {
                 test.tearDown();
-                testResults[t.name] = lastFailCount === runner.countFailedTests();
+                testResults[t.name] = lastFailCount ===
+                        runner.countFailedTests();
                 runAsyncTests(todo.slice(1));
             });
         }
-        runAsyncTests(keys);
+        runAsyncTests(test.asyncTests());
     };
     /**
      * @return {!number}

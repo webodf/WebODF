@@ -25,13 +25,13 @@ core.RuntimeTests = function RuntimeTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return {
-        };
+        return [
+        ];
     };
     this.asyncTests = function () {
-        return {
-            testRead: testRead
-        };
+        return [
+            testRead
+        ];
     };
     this.description = function () {
         return "Test the runtime.";

@@ -44,9 +44,9 @@ core.CursorTests = function CursorTests(runner) {
         t.doc.documentElement.appendChild(t.textnode);
     }
     
-    tests = {
+    tests = [
         // create a document, add a cursor and check that the cursor is present
-        testOnEmptyDocument1: function () {
+        function testOnEmptyDocument1() {
             // if the document is the container of the selection, the cursor
             // can not be in the DOM
             setupEmptyDoc(); 
@@ -54,16 +54,15 @@ core.CursorTests = function CursorTests(runner) {
             t.cursor.updateToSelection();
             r.shouldBeNull(t, "t.cursor.getNode().parentNode");
         },
-        testOnEmptyDocument2: function () {
+        function testOnEmptyDocument2() {
             setupEmptyDoc(); 
             setSelection(t.selection, t.doc.documentElement, 0);
             t.cursor.updateToSelection();
-runtime.log(t.cursor.getNode().nodeName);
             r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");
             r.shouldBeNull(t, "t.cursor.getNode().nextSibling");
         },
-        testOnSimpleText: function () { 
+        function testOnSimpleText() { 
             setupSimpleTextDoc(); 
             // put the cursor at the start of the text node 
             setSelection(t.selection, t.textnode, 0);
@@ -72,7 +71,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");
             r.shouldBe(t, "t.cursor.getNode().nextSibling.nodeValue", "'abc'");
         },
-        testOnSimpleText2: function () { 
+        function testOnSimpleText2() { 
             setupSimpleTextDoc(); 
             // put the cursor in the middle of the text node 
             setSelection(t.selection, t.textnode, 1);
@@ -81,7 +80,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBe(t, "t.cursor.getNode().previousSibling.nodeValue", "'a'");
             r.shouldBe(t, "t.cursor.getNode().nextSibling.nodeValue", "'bc'");
         },
-        testOnSimpleText3: function () { 
+        function testOnSimpleText3() { 
             setupSimpleTextDoc(); 
             // put the cursor at the end of the text node
             setSelection(t.selection, t.textnode, 3);
@@ -90,7 +89,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBe("t.cursor.getNode().previousSibling.nodeValue", "'abc'");
             r.shouldBeNull("t.cursor.getNode().nextSibling");
         },
-        testOnSimpleText4: function () {
+        function testOnSimpleText4() {
             var textnode2; 
             setupSimpleTextDoc(); 
             // put the cursor between 'a' and 'b', then change the selection to
@@ -104,7 +103,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBe("t.cursor.getNode().previousSibling.nodeValue", "'ab'");
             r.shouldBe("t.cursor.getNode().nextSibling.nodeValue", "'c'");
         },
-        testOnSimpleText5: function () {
+        function testOnSimpleText5() {
             var textnode2; 
             setupSimpleTextDoc(); 
             // put the cursor between 'a' and 'b', then change the selection to
@@ -122,7 +121,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBe("t.range.endContainer", "t.textnode");
             r.shouldBe("t.range.endOffset", "3");
         },
-        testOnSimpleText5b: function () {
+        function testOnSimpleText5b() {
             var textnode2; 
             setupSimpleTextDoc(); 
             setSelection(t.selection, t.textnode, 1);
@@ -138,7 +137,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBe("t.range.endContainer", "t.textnode");
             r.shouldBe("t.range.endOffset", "3");
         },
-        testOnSimpleText6: function () {
+        function testOnSimpleText6() {
             var somenode, textnode2;
             setupSimpleTextDoc();
             // add a child node to the cursor
@@ -164,7 +163,7 @@ runtime.log(t.cursor.getNode().nodeName);
             r.shouldBe("t.range.endOffset", "3");
             r.shouldBe("t.range.collapsed", "false");
         }
-    };
+    ];
     this.setUp = function () {
         t = {};
     };
@@ -175,7 +174,7 @@ runtime.log(t.cursor.getNode().nodeName);
         return tests;
     };
     this.asyncTests = function () {
-        return {};
+        return [];
     };
 };
 core.CursorTests.name = "CursorTests";

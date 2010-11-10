@@ -64,15 +64,15 @@ core.ZipTests = function ZipTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return {};
+        return [];
     };
     this.asyncTests = function () {
-        return {
-            testNonExistingFile: testNonExistingFile,
-            testNonZipFile: testNonZipFile,
-            testHiUncompressed: testHiUncompressed,
-            testHiCompressed: testHiCompressed
-        };
+        return [
+            testNonExistingFile,
+            testNonZipFile,
+            testHiUncompressed,
+            testHiCompressed
+        ];
     };
 };
 core.ZipTests.prototype.description = function () {

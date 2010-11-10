@@ -89,12 +89,12 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return {
-            testEmptyDocument: testEmptyDocument
-        };
+        return [
+            testEmptyDocument
+        ];
     };
     this.asyncTests = function () {
-        return {};
+        return [];
     };
     this.description = function () {
         return "Test the PointWalker class.";

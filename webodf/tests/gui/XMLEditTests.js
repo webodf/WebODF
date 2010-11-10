@@ -115,7 +115,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         return [ testSimpleDocument ];
     };
     this.asyncTests = function () {
-        return {};
+        return [];
     };
     this.description = function () {
         return "Test the XML editor class.";
