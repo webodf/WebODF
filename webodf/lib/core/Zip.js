@@ -8,7 +8,6 @@
 * Project home: http://www.odfkit.org/
 */
 
-runtime.loadClass("core.Base64");
 runtime.loadClass("core.RawInflate");
 runtime.loadClass("core.ByteArray");
 
@@ -22,7 +21,6 @@ runtime.loadClass("core.ByteArray");
  */
 core.Zip = function Zip(url, entriesReadCallback) {
     var entries, filesize, nEntries,
-        base64 = new core.Base64(),
         inflate = new core.RawInflate().inflate,
         zip = this;
     
@@ -85,7 +83,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     ZipEntry.prototype.handleEntryData = function (data, callback) {
         var stream = new core.ByteArray(data),
             sig = stream.readUInt32LE(),
-            filenamelen, extralen, datasize;
+            filenamelen, extralen;
         if (sig !== 0x04034b50) {
             callback('File entry signature is wrong.' + sig + ' ' +
                     data.length, null);
@@ -95,20 +93,16 @@ core.Zip = function Zip(url, entriesReadCallback) {
         filenamelen = stream.readUInt16LE();
         extralen = stream.readUInt16LE();
         stream.pos += filenamelen + extralen;
-        datasize = (this.compressionMethod) ? this.compressedSize
-                : this.uncompressedSize;
         if (this.compressionMethod) {
             this.data = stream.data.substr(stream.pos, this.compressedSize);
             this.data = inflate(this.data);
-            // assume the input data is utf8 for now if it starts with '<'
-            // this can be done better, perhaps even with special encoding
-            // respecting deflate functions
-            if (this.data.length > 0 && this.data.length < 200000 &&
-                    this.data[0] === '<') {
-                this.data = base64.convertUTF8StringToUTF16String(this.data);
-            }
         } else {
             this.data = stream.data.substr(stream.pos, this.uncompressedSize);
+        }
+        if (this.uncompressedSize !== this.data.length) {
+            callback("The amount of bytes read was " + this.data.length +
+                    " instead of " + this.uncompressedSize);
+            return;
         }
         callback(null, this.data);
     };
