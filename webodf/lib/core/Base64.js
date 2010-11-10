@@ -163,7 +163,25 @@ core.Base64 = (function () {
     }
     
     function convertUTF8StringToUTF16String(bin) {
-        return String.fromCharCode.apply(String, convertUTF8ArrayToUTF16Array(stringToArray(bin)));
+        var str = "", i, l = bin.length, c0, c1, c2;
+        for (i = 0; i < l; i += 1) {
+            c0 = bin.charCodeAt(i) & 0xff;
+            if (c0 < 0x80) {
+                str += String.fromCharCode(c0);
+            } else {
+                i += 1;
+                c1 = bin.charCodeAt(i) & 0xff;
+                if (c0 < 0xe0) {
+                    str += String.fromCharCode(((c0 & 0x1f) << 6)|(c1 & 0x3f));
+                } else {
+                    i += 1;
+                    c2 = bin.charCodeAt(i) & 0xff;
+                    str += String.fromCharCode(((c0 & 0x0f) << 12) |
+                            ((c1 & 0x3f) << 6) | (c2 & 0x3f));
+                }
+            }
+        }
+        return str;
     }
     
     function convertUTF16StringToUTF8Array(uni) {
