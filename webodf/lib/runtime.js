@@ -209,7 +209,9 @@ function BrowserRuntime(logoutput) {
         });
     };
     this.log = log;
-    this.setTimeout = setTimeout;
+    this.setTimeout = function (f, msec) {
+        setTimeout(f, msec);
+    };
     this.libraryPaths = function () {
         return ["../lib", ".", "lib"]; // TODO: find a good solution
                                        // probably let html app specify it
@@ -372,8 +374,6 @@ function RhinoRuntime() {
         var file = new Packages.java.io.File(path);
         callback(file.isFile());
     }
-    function setTimeout(path, callback) {
-    }
 
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
@@ -399,7 +399,9 @@ function RhinoRuntime() {
         callback(file.length());
     };
     this.log = print;
-    this.setTimeout = setTimeout;
+    this.setTimeout = function (f, msec) {
+        f();
+    };
     this.libraryPaths = function () {
         return ["lib"];
     };
