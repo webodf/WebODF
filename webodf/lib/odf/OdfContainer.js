@@ -233,10 +233,15 @@ odf.OdfContainer = (function () {
                 }
                 // assume the xml input data is utf8
                 // this can be done better
-                xmldata = base64.convertUTF8StringToUTF16String(xmldata);
-                var parser = new DOMParser();
-                xmldata = parser.parseFromString(xmldata, "text/xml");
-                callback(null, xmldata);
+                base64.convertUTF8StringToUTF16String(xmldata,
+                        function (str, done) {
+                    if (done) {
+                        var parser = new DOMParser();
+                        str = parser.parseFromString(str, "text/xml");
+                        callback(null, str);
+                    }
+                    return true;
+                });
             });
         }
         function setState(state) {
