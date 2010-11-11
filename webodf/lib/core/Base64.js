@@ -1,5 +1,5 @@
 /*jslint bitwise: false*/
-/*global window core*/
+/*global core runtime*/
 /*
  * $Id: base64.js,v 0.9 2009/03/01 20:51:18 dankogai Exp dankogai $
  */
@@ -161,10 +161,15 @@ core.Base64 = (function () {
     function convertUTF8ArrayToUTF16String(bin) {
         return String.fromCharCode.apply(String, convertUTF8ArrayToUTF16Array(bin));
     }
-    
-    function convertUTF8StringToUTF16String(bin) {
-        var str = "", i, l = bin.length, c0, c1, c2;
-        for (i = 0; i < l; i += 1) {
+    /**
+     * @param {!Array.<number>|!string} bin
+     * @param {!number} i
+     * @param {!number} end
+     * @return {!string}
+     */
+    function convertUTF8StringToUTF16String_internal(bin, i, end) {
+        var str = "", c0, c1, c2;
+        for (; i < end; i += 1) {
             c0 = bin.charCodeAt(i) & 0xff;
             if (c0 < 0x80) {
                 str += String.fromCharCode(c0);
@@ -183,6 +188,48 @@ core.Base64 = (function () {
         }
         return str;
     }
+
+    /**
+     * Convert a utf-8 array into a utf-16 string.
+     * The input array is treated as a list of values between 0 and 255.
+     * This function works with a callback and splits the work up in parts
+     * between which it yields to the main thread.
+     * After each part the progress is reported with the callback function that
+     * also passes a booleant that indicates if the job has finished.
+     * If the conversion should stop, the callback should return false.
+     *
+     * @param {!Array.<number>|!string} bin
+     * @param {!function(!string, boolean):boolean} callback
+     * @return {undefined}
+     */
+    function convertUTF8StringToUTF16String(bin, callback) {
+        var partsize = 100000,
+            numparts = bin.length / partsize,
+            str = "",
+            pos = 0;
+        if (bin.length < partsize) {
+            callback(convertUTF8StringToUTF16String_internal(bin, 0,
+                    bin.length), true);
+            return;
+        }
+        // make a local copy if the input is a string, to avoid modification
+        if (typeof bin !== "string") {
+            bin = bin.slice();
+        }
+        function f() {
+            var end = pos + partsize;
+            if (end > bin.length) {
+                end = bin.length;
+            }
+            str += convertUTF8StringToUTF16String_internal(bin, pos, end);
+            pos = end;
+            end = pos === bin.length;
+            if (callback(str, end) && !end) {
+                runtime.setTimeout(f, 0);
+            }
+        }
+        f();
+    }
     
     function convertUTF16StringToUTF8Array(uni) {
         return convertUTF16ArrayToUTF8Array(stringToArray(uni));
@@ -195,9 +242,9 @@ core.Base64 = (function () {
     function convertUTF16StringToUTF8String(uni) {
         return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(stringToArray(uni)));
     }
-    
-    if ((typeof window !== "undefined") && window.btoa) {
-        btoa = window.btoa;
+
+    btoa = runtime.getWindow() && runtime.getWindow().btoa; 
+    if (btoa) {
         convertUTF16StringToBase64 = function (uni) {
             return btoa(convertUTF16StringToUTF8String(uni));
         };
@@ -207,10 +254,11 @@ core.Base64 = (function () {
             return convertUTF8ArrayToBase64(convertUTF16StringToUTF8Array(uni));
         };
     }
-    if ((typeof window !== "undefined") && window.atob) {
-        atob = window.atob;
+    atob = runtime.getWindow() && runtime.getWindow().atob;
+    if (atob) {
         convertBase64ToUTF16String = function (b64) {
-            return convertUTF8StringToUTF16String(atob(b64));
+            var b = atob(b64);
+            return convertUTF8StringToUTF16String_internal(b, 0, b.length);
         };
     } else {
         atob = convertBase64ToUTF8String;

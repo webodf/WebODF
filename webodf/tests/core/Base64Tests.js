@@ -26,6 +26,32 @@ core.Base64Tests = function Base64Tests(runner) {
         r.shouldBe(t, "t.encoded", "'QUFB'");
     }
 
+    function testConvertUTF8StringToUTF16String(callback) {
+        var bin = "1234567890";
+        while (bin.length < 100000) {
+            bin += bin;
+        }
+        t.numcallbacks = 0;
+        base64.convertUTF8StringToUTF16String(bin, function (str, done) {
+            runtime.log("base64.convertUTF8StringToUTF16String");
+            t.numcallbacks += 1;
+            t.done = done;
+            if (t.numcallbacks === 1) {
+                r.shouldBe(t, "t.done", "false");
+            } else {
+                r.shouldBe(t, "t.done", "true");
+            }
+            if (done) {
+                r.shouldBe(t, "t.numcallbacks", "2");
+                t.str = str;
+                t.bin = bin;
+                r.shouldBe(t, "t.str.length", "t.bin.length");
+                callback();
+            }
+            return true;
+        });
+    }
+
     this.setUp = function () {
         t = {};
     };
@@ -39,7 +65,7 @@ core.Base64Tests = function Base64Tests(runner) {
         ];
     };
     this.asyncTests = function () {
-        return [];
+        return [ testConvertUTF8StringToUTF16String ];
     };
     this.description = function () {
         return "Test the Base64 class.";
