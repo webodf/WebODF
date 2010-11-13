@@ -26,6 +26,7 @@ var tester = new core.UnitTester();
  */
 function runNextTest(tests) {
     if (tests.length === 0) {
+        //runtime.log(JSON.stringify(tester.results()));
         runtime.exit(tester.countFailedTests());
         return;
     }
