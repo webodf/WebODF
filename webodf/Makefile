@@ -59,8 +59,8 @@ SHAREDARGS=--warning_level VERBOSE --formatting PRETTY_PRINT --jscomp_error acce
 simplecompiled.js: $(JSFILES)
 	java -jar $(COMPILERJAR) $(SHAREDARGS) --compilation_level WHITESPACE_ONLY $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > simplecompiled.js
 
-compiled.js: $(JSFILES) externs.js
-	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' $(SHAREDARGS) --compilation_level ADVANCED_OPTIMIZATIONS --externs externs.js  $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > compiled.js
+compiled.js: $(JSFILES) tools/externs.js
+	java -jar $(COMPILERJAR) --define='IS_COMPILED_CODE=true' $(SHAREDARGS) --compilation_level ADVANCED_OPTIMIZATIONS --externs tools/externs.js  $(foreach JSFILE,$(JSFILES), --js $(JSFILE)) > compiled.js
 #--use_only_custom_externs true
 
 clean:
