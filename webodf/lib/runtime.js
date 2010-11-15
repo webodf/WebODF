@@ -159,7 +159,7 @@ function BrowserRuntime(logoutput) {
         }
         try {
             xmlHttp.send(null);
-            if (xmlHttp.status === 200) {
+            if (xmlHttp.status === 200 || xmlHttp.status === 0) {
                 result = xmlHttp.responseText;
             }
         } catch (e) {
