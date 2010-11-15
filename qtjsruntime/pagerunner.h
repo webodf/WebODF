@@ -79,9 +79,6 @@ private:
         QImage pixmap(mainFrame()->contentsSize(),
                 QImage::Format_ARGB32_Premultiplied);
         QPainter painter(&pixmap);
-        //painter.setRenderHint(QPainter::Antialiasing|QPainter::HighQualityAntialiasing);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         mainFrame()->render(&painter);
         painter.end();
         pixmap.save(filename);
