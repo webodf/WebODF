@@ -41,6 +41,14 @@ NodeJSObject.prototype.open = function (path, flags, mode, callback) {};
  */
 NodeJSObject.prototype.read = function (fd, buffer, offset, length, position, callback) {};
 /**
+ * @param {!string} path
+ * @param {!string} data
+ * @param {!string} encoding
+ * @param {!function(?string):undefined} callback
+ * @return {undefined}
+ */
+NodeJSObject.prototype.writeFile = function (path, data, encoding, callback) {};
+/**
  * @param {!number} fd
  * @param {function(!string)} callback
  * @return {undefined}
@@ -191,9 +199,24 @@ Packages.java.io = {};
 Packages.java.io.FileReader = function (path) {};
 /**
  * @constructor
+ * @param {!string} path
+ */
+Packages.java.io.FileOutputStream = function (path) {};
+/**
+ * @param {!number} b
+ * @return {undefined}
+ */
+Packages.java.io.FileOutputStream.prototype.write = function (b) {};
+/**
+ * @return {undefined}
+ */
+Packages.java.io.FileOutputStream.prototype.close = function () {};
+/**
+ * @constructor
  * @param {!Packages.java.io.FileReader} reader
  */
 Packages.org.xml.sax.InputSource = function (reader) {};
+
 
 /**
  * @type {!StyleSheet}

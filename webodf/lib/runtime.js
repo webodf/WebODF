@@ -39,6 +39,14 @@ Runtime.prototype.readFileSync = function (path, encoding) {};
 Runtime.prototype.loadXML = function (path, callback) {};
 /**
  * @param {!string} path
+ * @param {!string} data
+ * @param {?string} encoding
+ * @param {!function(?string):undefined} callback
+ * @return {undefined}
+ */
+Runtime.prototype.writeFile = function (path, data, encoding, callback) {};
+/**
+ * @param {!string} path
  * @param {!function(boolean):undefined} callback
  * @return {undefined}
  */
@@ -138,6 +146,9 @@ function BrowserRuntime(logoutput) {
         } catch (e) {
             callback(e.message);
         }
+    };
+    this.writeFile = function (path, data, encoding, callback) {
+        throw "Not implemented.";
     };
     this.read = function (path, offset, length, callback) {
         this.readFile(path, null, function (err, data) {
@@ -250,6 +261,11 @@ function NodeJSRuntime() {
     }
 
     this.readFile = fs.readFile;
+    this.writeFile = function (path, data, encoding, callback) {
+        fs.writeFile(path, data, encoding || "binary", function (err) {
+            callback(err || null);
+        });
+    };
     this.read = function (path, offset, length, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -377,6 +393,18 @@ function RhinoRuntime() {
 
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
+    this.writeFile = function (path, data, encoding, callback) {
+        if (encoding) {
+            throw "Non-binary encoding not implemented.";
+        }
+        var out = new Packages.java.io.FileOutputStream(path),
+            i, l = data.length;
+        for (i = 0; i < l; i += 1) {
+            out.write(data.charCodeAt(i));
+        }
+        out.close();
+        callback(null);
+    };
     this.read = function (path, offset, length, callback) {
         // TODO: adapt to read only a part instead of the whole file
         if (currentDirectory) {

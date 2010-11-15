@@ -1,4 +1,5 @@
 /*global runtime core*/
+/*jslint bitwise: false*/
 /*
 * @preserve
 * OdfKit
@@ -14,7 +15,7 @@ runtime.loadClass("core.ByteArray");
 /**
  * @constructor
  * @param {!string} url path to zip file, should be readable by the runtime
- * @param {!function(?string, !core.Zip)} entriesReadCallback callback
+ * @param {?function(?string, !core.Zip):undefined} entriesReadCallback callback
  *        indicating the zip
  *        has loaded this list of entries, the arguments are a string that
  *        indicates error if present and the created object
@@ -23,7 +24,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     var entries, filesize, nEntries,
         inflate = new core.RawInflate().inflate,
         zip = this;
-    
+ 
     /**
      * @constructor
      * @param {!string} url
@@ -192,21 +193,135 @@ core.Zip = function Zip(url, entriesReadCallback) {
             }
         }
         if (entry) {
-            entry.load(url, entry.offset, end - entry.offset, callback);
+            if (entry.data) {
+                callback(null, entry.data);
+            } else {
+                entry.load(url, entry.offset, end - entry.offset, callback);
+            }
+        } else {
+            callback(filename + " not found.", null);
         }
+    }
+    /**
+     * Add or replace an entry to the zip file.
+     * This data is not stored to disk yet, and therefore, no callback is
+     * necessary.
+     * @param {!string} filename
+     * @param {!string} data
+     * @param {!boolean} compressed
+     * @return {undefined}
+     */
+    function save(filename, data, compressed) {
+        var e = { filename: filename, data: data, compressed: compressed },
+            i, olde;
+        for (i = 0; i < entries.length; i += 1) {
+            olde = entries[i];
+            if (olde.filename === filename) {
+                entries[i] = e;
+                return;
+            }
+        }
+        entries.push(e);
+    }
+    function uint32LE(value) {
+        return String.fromCharCode(value & 0xff) +
+            String.fromCharCode((value<<8) & 0xff) +
+            String.fromCharCode((value<<16) & 0xff) +
+            String.fromCharCode((value<<24) & 0xff);
+    }
+    function uint16LE(value) {
+        return String.fromCharCode(value & 0xff) +
+            String.fromCharCode((value<<8) & 0xff);
+    }
+    /**
+     * @param {!ZipEntry} entry
+     * @return {!string}
+     */
+    function writeEntry(entry) {
+        // each entry is currently stored uncompressed
+        var data = "PK\x03\x04\x0a\x00\x00\x00\x00\x00";
+        // mtime = mdate = 0 for now
+        data += "\x00\x00\x00\x00";
+        // crc = 0 for now
+        data += "^\xc62\x0c";
+        //data += "\x00\x00\x00\x00";
+        data += uint32LE(entry.data.length); // compressedSize
+        data += uint32LE(entry.data.length); // uncompressedSize
+        data += uint16LE(entry.filename.length); // namelen
+        data += uint16LE(0); // extralen
+        data += entry.filename;
+        data += entry.data;
+        return data;
+    }
+    /**
+     * @param {!ZipEntry} entry
+     * @param {!number} offset
+     * @return {!string}
+     */
+    function writeCODEntry(entry, offset) {
+        // each entry is currently stored uncompressed
+        var data = "PK\x01\x02\x1e\x03\x0a\x00\x00\x00\x00\x00";
+        // mtime = mdate = 0 for now
+        data += "\x00\x00\x00\x00";
+        // crc = 0 for now
+        data += "^\xc62\x0c";
+        //data += "\x00\x00\x00\x00";
+        data += uint32LE(entry.data.length); // compressedSize
+        data += uint32LE(entry.data.length); // uncompressedSize
+        data += uint16LE(entry.filename.length); // namelen
+        // extralen, commalen, diskno, file attributes
+        data += "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+        data += uint32LE(offset);
+        data += entry.filename;
+        return data;
+    }
+    /**
+     * Write the zipfile to the given path.
+     * @param {!function(?string):undefined} callback receiving possible err
+     * @return {undefined}
+     */
+    function write(callback) {
+        var data = "", i, e, codoffset, offset = 0, codsize;
+        // write entries
+        for (i = 0; i < entries.length; i += 1) {
+            data += writeEntry(entries[i]);
+        }
+        // write central directory
+        codoffset = data.length;
+        for (i = 0; i < entries.length; i += 1) {
+            e = entries[i];
+            data += writeCODEntry(e, offset);
+            offset += e.filename.length + e.data.length + 34;
+        }
+        codsize = data.length - codoffset;
+        data += "PK\x05\x06\x00\x00\x00\x00";
+        data += uint16LE(entries.length);
+        data += uint16LE(entries.length);
+        data += uint32LE(codsize);
+        data += uint32LE(codoffset);
+        data += "\x00\x00";
+        runtime.writeFile(url, data, null, callback);
     }
 
     this.load = load;
+    this.save = save;
+    this.write = write;
 
     // determine the file size
     filesize = -1;
+    // if no callback is defined, this is a new file
+    if (entriesReadCallback === null) {
+        entries = [];
+        return;
+    }
     runtime.getFileSize(url, function (size) {
         filesize = size;
         if (filesize < 0) {
             entriesReadCallback("File '" + url + "' cannot be read.", zip);
         } else {
             runtime.read(url, filesize - 22, 22, function (err, data) {
-                if (err) {
+                // todo: refactor entire zip class
+                if (err || entriesReadCallback === null) {
                     entriesReadCallback(err, zip);
                 } else {
                     handleCentralDirectoryEnd(data, entriesReadCallback);

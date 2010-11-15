@@ -57,6 +57,24 @@ core.ZipTests = function ZipTests(runner) {
         testHi("core/hi-compressed.zip", callback);
     }
 
+    function testCreateZip(callback) {
+        var zip = new core.Zip("writetest.zip", null),
+            data = "application/vnd.oasis.opendocument.text";
+        zip.save("mimetype", data, false);
+        zip.load("mimetype", function (err, newdata) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            t.data = data;
+            t.newdata = newdata;
+            r.shouldBe(t, "t.data", "t.newdata");
+            zip.write(function (err) {
+                t.err = err;
+                r.shouldBeNull(t, "t.err");
+                callback();
+            });
+        });
+    }
+
     this.setUp = function () {
         t = {};
     };
@@ -71,7 +89,8 @@ core.ZipTests = function ZipTests(runner) {
             testNonExistingFile,
             testNonZipFile,
             testHiUncompressed,
-            testHiCompressed
+            testHiCompressed,
+            testCreateZip
         ];
     };
 };
