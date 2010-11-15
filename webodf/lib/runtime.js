@@ -171,9 +171,9 @@ function BrowserRuntime(logoutput) {
         } else {
             xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
         }
-        xmlHttp.setRequestHeader("Content-Length", data.length);
         try {
-            if (xmlHttp.sendAsBinary) {
+            if (!encoding && xmlHttp.sendAsBinary) {
+                xmlHttp.setRequestHeader("Content-Length", data.length);
                 xmlHttp.sendAsBinary(data);
             } else {
                 xmlHttp.send(data);
