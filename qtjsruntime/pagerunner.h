@@ -2,6 +2,7 @@
 #define PAGERUNNER_H
 
 #include <QtCore/QTextStream>
+#include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QPainter>
 #include <QtGui/QPrinter>
@@ -45,6 +46,9 @@ public:
     }
 public slots:
     void finished() {
+        QTimer::singleShot(50, this, SLOT(reallyFinished()));
+    }
+    void reallyFinished() {
         QWebElement span
             = mainFrame()->documentElement().findAll("span").last();
         out << span.toInnerXml() << endl;
@@ -52,11 +56,9 @@ public slots:
         // save to bitmap
         QWidget w;
         setView(&w);
-        QPixmap pixmap(mainFrame()->contentsSize());
-        render(pixmap);
-        pixmap.save("render.png");
-        print("render.pdf");
-
+        setViewportSize(mainFrame()->contentsSize());
+        renderToFile("render.png");
+        printToFile("render.pdf");
         qApp->exit(0);
     }
 private:
@@ -73,12 +75,18 @@ private:
     bool javaScriptPrompt(QWebFrame*, const QString&, const QString&, QString*){
         return false;
     }
-    void render(QPixmap& pixmap) {
-        setViewportSize(pixmap.size());
+    void renderToFile(const QString& filename) {
+        QImage pixmap(mainFrame()->contentsSize(),
+                QImage::Format_ARGB32_Premultiplied);
         QPainter painter(&pixmap);
+        //painter.setRenderHint(QPainter::Antialiasing|QPainter::HighQualityAntialiasing);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         mainFrame()->render(&painter);
+        painter.end();
+        pixmap.save(filename);
     }
-    void print(const QString& filename) {
+    void printToFile(const QString& filename) {
         QPrinter printer(QPrinter::HighResolution);
         printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setOutputFileName(filename);
