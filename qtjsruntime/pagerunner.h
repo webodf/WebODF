@@ -26,26 +26,36 @@ public:
     }
 };
 
-class PageRunner : public QObject {
+class PageRunner : public QWebPage {
 Q_OBJECT
 private:
-    QWebPage* webpage;
     QNetworkAccessManager* nam;
+    QTextStream out;
+    QTextStream err;
 public:
     PageRunner(const QString& url)
-            : webpage(new QWebPage(this)),
-              nam(new NAM(QUrl(url).host(), QUrl(url).port())) {
-        webpage->setNetworkAccessManager(nam);
-        webpage->mainFrame()->load(url);
-        connect(webpage, SIGNAL(loadFinished(bool)), this, SLOT(finished()));
+            : QWebPage(0),
+              nam(new NAM(QUrl(url).host(), QUrl(url).port())),
+              out(stdout),
+              err(stderr) {
+        setNetworkAccessManager(nam);
+        mainFrame()->load(url);
+        connect(this, SIGNAL(loadFinished(bool)), this, SLOT(finished()));
     }
 public slots:
     void finished() {
         QWebElement span
-            = webpage->mainFrame()->documentElement().findAll("span").last();
-        QTextStream out(stdout);
-        out << span.toInnerXml();
+            = mainFrame()->documentElement().findAll("span").last();
+        out << span.toInnerXml() << endl;
         qApp->exit(0);
+    }
+private:
+    void javaScriptConsoleMessage(const QString& message, int lineNumber,
+            const QString& sourceID) {
+        err << sourceID << ":" << lineNumber << " " << message << endl;
+    }
+    void javaScriptAlert(QWebFrame* /*frame*/, const QString& msg) {
+        err << "ALERT: " << msg << endl;
     }
 };
 
