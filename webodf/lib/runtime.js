@@ -148,7 +148,39 @@ function BrowserRuntime(logoutput) {
         }
     };
     this.writeFile = function (path, data, encoding, callback) {
-        throw "Not implemented.";
+        var xmlHttp = new XMLHttpRequest();
+        function handleResult() {
+            if (xmlHttp.readyState === 4) {
+                if (xmlHttp.status === 0 && !xmlHttp.responseText) {
+                    // for local files there is no difference between missing
+                    // and empty files, so empty files are considered as errors
+                    callback("File is empty.");
+                } else if (xmlHttp.status === 200 || xmlHttp.status === 0) {
+                    // report file
+                    callback(null);
+                } else {
+                    // report error
+                    callback(xmlHttp.responseText || xmlHttp.statusText);
+                }
+            }
+        }
+        xmlHttp.open('PUT', path, true);
+        xmlHttp.onreadystatechange = handleResult;
+        if (encoding) {
+            xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
+        } else {
+            xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
+        }
+        xmlHttp.setRequestHeader("Content-Length", data.length);
+        try {
+            if (xmlHttp.sendAsBinary) {
+                xmlHttp.sendAsBinary(data);
+            } else {
+                xmlHttp.send(data);
+            }
+        } catch (e) {
+            callback(e.message);
+        }
     };
     this.read = function (path, offset, length, callback) {
         this.readFile(path, null, function (err, data) {

@@ -9,7 +9,24 @@ var sys = require("sys"),
 http.createServer(function (request, response) {
     var uri = url.parse(request.url).pathname,
         filename = path.join(process.cwd(), uri);
-    console.log(url + " " + uri + " " + filename);
+    console.log(request.method + " " + url + " " + uri + " " + filename);
+    function put() {
+        var alldata = "";
+        request.on("data", function (data) {
+            alldata += data;
+        });
+        request.on("end", function () {
+            fs.writeFile(filename, alldata, "binary", function (err) {
+                // todo: add error handling
+                response.writeHead(200);
+                response.end();
+            });
+        });
+    }
+    if (request.method === "PUT") {
+        put(request, response);
+        return;
+    }
     fs.stat(filename, function (err, stats) {
         if (!err && stats.isFile()) {
             fs.readFile(filename, "binary", function (err, file) {
