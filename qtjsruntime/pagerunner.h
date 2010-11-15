@@ -2,8 +2,9 @@
 #define PAGERUNNER_H
 
 #include <QtCore/QTextStream>
-#include <QtCore/QDebug>
 #include <QtGui/QApplication>
+#include <QtGui/QPainter>
+#include <QtGui/QPrinter>
 #include <QtNetwork/QNetworkReply>
 #include <QtWebKit/QWebPage>
 #include <QtWebKit/QWebFrame>
@@ -47,6 +48,15 @@ public slots:
         QWebElement span
             = mainFrame()->documentElement().findAll("span").last();
         out << span.toInnerXml() << endl;
+
+        // save to bitmap
+        QWidget w;
+        setView(&w);
+        QPixmap pixmap(mainFrame()->contentsSize());
+        render(pixmap);
+        pixmap.save("render.png");
+        print("render.pdf");
+
         qApp->exit(0);
     }
 private:
@@ -56,6 +66,23 @@ private:
     }
     void javaScriptAlert(QWebFrame* /*frame*/, const QString& msg) {
         err << "ALERT: " << msg << endl;
+    }
+    bool shouldInterruptJavaScript() {
+        return false;
+    }
+    bool javaScriptPrompt(QWebFrame*, const QString&, const QString&, QString*){
+        return false;
+    }
+    void render(QPixmap& pixmap) {
+        setViewportSize(pixmap.size());
+        QPainter painter(&pixmap);
+        mainFrame()->render(&painter);
+    }
+    void print(const QString& filename) {
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOutputFileName(filename);
+        mainFrame()->print(&printer);
     }
 };
 
