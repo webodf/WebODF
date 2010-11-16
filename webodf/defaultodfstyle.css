@@ -52,6 +52,7 @@ office|spreadsheet {
   font-family: sans-serif;
   font-size: 10pt;
   text-align: left;
+  page-break-inside: avoid;
 }
 office|presentation {
   display: inline-block;
@@ -64,6 +65,19 @@ draw|page {
   background: white;
   margin: 3px;
   position: relative;
+  overflow: hidden;
+}
+presentation|notes {
+    display: none;
+}
+@media print {
+  draw|page {
+    border: 1pt solid black;
+    page-break-inside: avoid;
+  }
+  presentation|notes {
+    /*TODO*/
+  }
 }
 office|spreadsheet text|p {
   border: 0px;
@@ -128,8 +142,4 @@ text|list-item {
 text|a {
     color: blue;
     text-decoration: underline;
-}
-
-presentation|notes {
-    display: none;
 }
