@@ -10,6 +10,7 @@ main(int argc, char** argv) {
         return 1;
     }
     QApplication app(argc, argv);
+    app.setApplicationName(argv[0]);
     PageRunner p(argv[1]);
     return app.exec();
 }
