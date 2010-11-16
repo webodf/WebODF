@@ -9,5 +9,5 @@ INCLUDEPATH += .
 QT += webkit network
 
 # Input
-HEADERS += pagerunner.h
+HEADERS += pagerunner.h nam.h
 SOURCES += qtjsruntime.cpp
