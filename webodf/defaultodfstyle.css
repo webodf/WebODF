@@ -44,6 +44,7 @@ office|text {
   padding-bottom: 13mm;
   margin: 2px;
   text-align: left;
+  overflow: hidden;
 }
 office|spreadsheet {
   display: block;
@@ -53,6 +54,7 @@ office|spreadsheet {
   font-size: 10pt;
   text-align: left;
   page-break-inside: avoid;
+  overflow: hidden;
 }
 office|presentation {
   display: inline-block;
