@@ -48,6 +48,31 @@ core.Zip = function Zip(url, entriesReadCallback) {
         }
         return crc ^ (-1);
     }
+
+    /**
+     * @param {!number} dostime
+     * @return {!Date}
+     */
+    function dosTime2Date(dostime) {
+        var year = (dostime >> 25) + 80,
+            month = ((dostime >> 21) & 0x0f) - 1,
+            mday = (dostime >> 16) & 0x1f,
+            hour = (dostime >> 11) & 0x0f,
+            min = (dostime >> 5) & 0x3f,
+            sec = (dostime & 0x1f) << 1;
+        return new Date(year, month, mday, hour, min, sec);
+    }
+    /**
+     * @param {!Date} date
+     * @return {!number}
+     */
+    function date2DosTime(date) {
+        var y = date.getFullYear();
+        return y < 1980 ? 0 :
+            ((y - 1980) << 25) | (date.getMonth() << 21) |
+            (date.getDate() << 16) | (date.getHours() << 11) |
+            (date.getMinutes() << 5) | (date.getSeconds() >> 1);
+    }
  
     /**
      * @constructor
@@ -72,7 +97,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
         // file
         stream.pos += 6;
         this.compressionMethod = stream.readUInt16LE();
-        stream.pos += 8;
+        this.date = dosTime2Date(stream.readUInt32LE());
+        stream.pos += 4;
         this.compressedSize = stream.readUInt32LE();
         this.uncompressedSize = stream.readUInt32LE();
         namelen = stream.readUInt16LE();
@@ -233,10 +259,12 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @param {!string} filename
      * @param {!string} data
      * @param {!boolean} compressed
+     * @param {!Date} date
      * @return {undefined}
      */
-    function save(filename, data, compressed) {
-        var e = { filename: filename, data: data, compressed: compressed },
+    function save(filename, data, compressed, date) {
+        var e = { filename: filename, data: data, compressed: compressed,
+                  date: date },
             i, olde;
         for (i = 0; i < entries.length; i += 1) {
             olde = entries[i];
@@ -264,8 +292,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     function writeEntry(entry) {
         // each entry is currently stored uncompressed
         var data = "PK\x03\x04\x0a\x00\x00\x00\x00\x00";
-        // mtime = mdate = 0 for now
-        data += "\x00\x00\x00\x00";
+        data += uint32LE(date2DosTime(entry.date));
         data += uint32LE(crc32(entry.data));
         data += uint32LE(entry.data.length); // compressedSize
         data += uint32LE(entry.data.length); // uncompressedSize
@@ -284,7 +311,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         // each entry is currently stored uncompressed
         var data = "PK\x01\x02\x1e\x03\x0a\x00\x00\x00\x00\x00";
         // mtime = mdate = 0 for now
-        data += "\x00\x00\x00\x00";
+        data += uint32LE(date2DosTime(entry.date));
         data += uint32LE(crc32(entry.data));
         data += uint32LE(entry.data.length); // compressedSize
         data += uint32LE(entry.data.length); // uncompressedSize

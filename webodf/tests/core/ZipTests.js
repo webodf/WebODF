@@ -60,7 +60,7 @@ core.ZipTests = function ZipTests(runner) {
     function testCreateZip(callback) {
         var zip = new core.Zip("writetest.zip", null),
             data = "application/vnd.oasis.opendocument.text";
-        zip.save("mimetype", data, false);
+        zip.save("mimetype", data, false, new Date());
         zip.load("mimetype", function (err, newdata) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
