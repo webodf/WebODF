@@ -216,9 +216,8 @@ Packages.java.io.FileOutputStream.prototype.close = function () {};
  * @param {!Packages.java.io.FileReader} reader
  */
 Packages.org.xml.sax.InputSource = function (reader) {};
-
-
 /**
  * @type {!StyleSheet}
  */
 HTMLStyleElement.prototype.sheet;
+XMLHttpRequest.prototype.sendAsBinary = function (data) {};
