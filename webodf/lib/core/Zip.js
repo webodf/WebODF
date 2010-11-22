@@ -85,7 +85,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
             compressionMethod,
             compressedSize,
             uncompressedSize,
-            offset;
+            offset, crc,
+            entry = this;
 
         function handleEntryData(data, callback) {
             var stream = new core.ByteArray(data),
@@ -111,6 +112,13 @@ core.Zip = function Zip(url, entriesReadCallback) {
                         " instead of " + uncompressedSize);
                 return;
             }
+/*
+ * This check is disabled for performance reasons
+            if (crc !== crc32(data)) {
+                runtime.log("Warning: CRC32 for " + entry.filename +
+                    " is wrong.");
+            }
+*/
             this.data = data;
             callback(null, data);
         }
@@ -150,7 +158,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         stream.pos += 6;
         compressionMethod = stream.readUInt16LE();
         this.date = dosTime2Date(stream.readUInt32LE());
-        stream.pos += 4;
+        crc = stream.readUInt32LE();
         compressedSize = stream.readUInt32LE();
         uncompressedSize = stream.readUInt32LE();
         namelen = stream.readUInt16LE();
