@@ -587,9 +587,13 @@ var runtime = (function () {
             }
             runtime.setCurrentDirectory(path);
             function run() {
-                var script, path, paths, args, argv; // hide variables
+                var script, path, paths, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
-                runtime.exit(eval(code));
+                result = eval(code);
+                if (result) {
+                    runtime.exit(result);
+                }
+                return;
             }
             if (err) {
                 runtime.log(err);
