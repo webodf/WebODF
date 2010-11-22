@@ -81,7 +81,59 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function ZipEntry(url, stream) {
         var sig = stream.readUInt32LE(),
-            namelen, extralen, commentlen;
+            namelen, extralen, commentlen,
+            compressionMethod,
+            compressedSize,
+            uncompressedSize,
+            offset;
+
+        function handleEntryData(data, callback) {
+            var stream = new core.ByteArray(data),
+                sig = stream.readUInt32LE(),
+                filenamelen, extralen;
+            if (sig !== 0x04034b50) {
+                callback('File entry signature is wrong.' + sig + ' ' +
+                        data.length, null);
+                return;
+            }
+            stream.pos += 22;
+            filenamelen = stream.readUInt16LE();
+            extralen = stream.readUInt16LE();
+            stream.pos += filenamelen + extralen;
+            if (compressionMethod) {
+                data = stream.data.substr(stream.pos, compressedSize);
+                data = inflate(data);
+            } else {
+                data = stream.data.substr(stream.pos, uncompressedSize);
+            }
+            if (uncompressedSize !== data.length) {
+                callback("The amount of bytes read was " + data.length +
+                        " instead of " + uncompressedSize);
+                return;
+            }
+            this.data = data;
+            callback(null, data);
+        }
+        /**
+         * @param {!string} url
+         * @param {!function(?string, ?string)} callback with err and data
+         * @return {undefined}
+         */
+        function load(url, callback) {
+            // if data has already been downloaded, use that
+            if (this.data) {
+                callback(null, this.data);
+            }
+            var size = compressedSize + 34 + namelen + extralen;
+            runtime.read(url, offset, size, function (err, data) {
+                if (err) {
+                    callback(err, data);
+                } else {
+                    handleEntryData(data, callback);
+                }
+            });
+        }
+        this.load = load;
         /**
          * @type {?string}
          */
@@ -96,67 +148,19 @@ core.Zip = function Zip(url, entriesReadCallback) {
         // stream should be positioned at the start of the CDS entry for the
         // file
         stream.pos += 6;
-        this.compressionMethod = stream.readUInt16LE();
+        compressionMethod = stream.readUInt16LE();
         this.date = dosTime2Date(stream.readUInt32LE());
         stream.pos += 4;
-        this.compressedSize = stream.readUInt32LE();
-        this.uncompressedSize = stream.readUInt32LE();
+        compressedSize = stream.readUInt32LE();
+        uncompressedSize = stream.readUInt32LE();
         namelen = stream.readUInt16LE();
         extralen = stream.readUInt16LE();
         commentlen = stream.readUInt16LE();
         stream.pos += 8;
-        this.offset = stream.readUInt32LE();
+        offset = stream.readUInt32LE();
         this.filename = stream.data.substr(stream.pos, namelen);
         stream.pos += namelen + extralen + commentlen;
     }
-    /**
-     * @param {!string} url
-     * @param {!number} offset
-     * @param {!number} size
-     * @param {!function(?string, ?string)} callback with err and data
-     * @return {undefined}
-     */
-    ZipEntry.prototype.load = function (url, offset, size, callback) {
-        // if data has already been downloaded, use that
-        if (this.data) {
-            callback(null, this.data);
-        }
-    
-        var entry = this;
-        runtime.read(url, offset, size, function (err, data) {
-            if (err) {
-                callback(err, data);
-            } else {
-                entry.handleEntryData(data, callback);
-            }
-        });
-    };
-    ZipEntry.prototype.handleEntryData = function (data, callback) {
-        var stream = new core.ByteArray(data),
-            sig = stream.readUInt32LE(),
-            filenamelen, extralen;
-        if (sig !== 0x04034b50) {
-            callback('File entry signature is wrong.' + sig + ' ' +
-                    data.length, null);
-            return;
-        }
-        stream.pos += 22;
-        filenamelen = stream.readUInt16LE();
-        extralen = stream.readUInt16LE();
-        stream.pos += filenamelen + extralen;
-        if (this.compressionMethod) {
-            this.data = stream.data.substr(stream.pos, this.compressedSize);
-            this.data = inflate(this.data);
-        } else {
-            this.data = stream.data.substr(stream.pos, this.uncompressedSize);
-        }
-        if (this.uncompressedSize !== this.data.length) {
-            callback("The amount of bytes read was " + this.data.length +
-                    " instead of " + this.uncompressedSize);
-            return;
-        }
-        callback(null, this.data);
-    };
     /**
      * @param {!string} data
      * @param {!function(?string, !core.Zip)} callback
@@ -234,19 +238,16 @@ core.Zip = function Zip(url, entriesReadCallback) {
             e, i;
         for (i = 0; i < entries.length; i += 1) {
             e = entries[i];
-            if (entry) {
-                end = e.offset;
-                break;
-            }
             if (e.filename === filename) {
                 entry = e;
+                break;
             }
         }
         if (entry) {
             if (entry.data) {
                 callback(null, entry.data);
             } else {
-                entry.load(url, entry.offset, end - entry.offset, callback);
+                entry.load(url, callback);
             }
         } else {
             callback(filename + " not found.", null);
