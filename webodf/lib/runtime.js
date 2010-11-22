@@ -579,23 +579,23 @@ var runtime = (function () {
             return;
         }
         var script = argv[0];
-        runtime.readFile(script, "utf8", function (err, data) {
+        runtime.readFile(script, "utf8", function (err, code) {
             var path = "",
-                paths = runtime.libraryPaths(),
-                exitCode;
+                paths = runtime.libraryPaths();
             if (script.indexOf("/") !== -1) {
                 path = script.substring(0, script.indexOf("/"));
             }
             runtime.setCurrentDirectory(path);
+            function run() {
+                var script, path, paths, args, argv; // hide variables
+                // execute script and make arguments available via argv
+                runtime.exit(eval(code));
+            }
             if (err) {
                 runtime.log(err);
             } else {
-                exitCode = eval(data);
-                if (exitCode) {
-                    runtime.exit(exitCode);
-                } else {
-                    run(argv.slice(1));
-                }
+                // run the script with arguments bound to arguments parameter
+                run.apply(null, argv);
             }
         });
     }
