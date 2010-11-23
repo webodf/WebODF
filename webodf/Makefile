@@ -16,7 +16,7 @@ COMPILERJAR=compiler.jar
 # RHINOJAR should point the Rhino JAR file. http://www.mozilla.org/rhino/
 RHINOJAR=/usr/share/java/rhino.jar
 # NODE should point to the Node.JS executable. http://nodejs.org/
-NODE=/tmp/node-v0.2.4/node
+NODE=/tmp/node-v0.2.5/node
 # JSCOVERAGE should point to the JSCoverage executable.
 # http://siliconforks.com/jscoverage/
 JSCOVERAGE=/tmp/jscoverage-0.5.1/jscoverage
