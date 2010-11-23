@@ -123,11 +123,10 @@ core.Zip = function Zip(url, entriesReadCallback) {
             callback(null, data);
         }
         /**
-         * @param {!string} url
          * @param {!function(?string, ?string)} callback with err and data
          * @return {undefined}
          */
-        function load(url, callback) {
+        function load(callback) {
             // if data has already been downloaded, use that
             if (this.data) {
                 callback(null, this.data);
@@ -255,7 +254,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             if (entry.data) {
                 callback(null, entry.data);
             } else {
-                entry.load(url, callback);
+                entry.load(callback);
             }
         } else {
             callback(filename + " not found.", null);
@@ -362,6 +361,9 @@ core.Zip = function Zip(url, entriesReadCallback) {
     this.load = load;
     this.save = save;
     this.write = write;
+    this.getEntries = function () {
+        return entries.slice();
+    };
 
     // determine the file size
     filesize = -1;
