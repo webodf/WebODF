@@ -104,6 +104,12 @@ core.Zip = function Zip(url, entriesReadCallback) {
             stream.pos += filenamelen + extralen;
             if (compressionMethod) {
                 data = stream.data.substr(stream.pos, compressedSize);
+                if (compressedSize !== data.length) {
+                    callback("The amount of compressed bytes read was " +
+                        data.length + " instead of " + compressedSize +
+                        " for " + entry.filename + " in " + url + ".");
+                    return;
+                }
                 data = inflate(data);
             } else {
                 data = stream.data.substr(stream.pos, uncompressedSize);
@@ -134,7 +140,9 @@ core.Zip = function Zip(url, entriesReadCallback) {
                 callback(null, entry.data);
                 return;
             }
-            var size = compressedSize + 34 + namelen + extralen;
+            // the 256 at the end is security for when local extra field is
+            // larger
+            var size = compressedSize + 34 + namelen + extralen + 256;
             runtime.read(url, offset, size, function (err, data) {
                 if (err) {
                     callback(err, data);
