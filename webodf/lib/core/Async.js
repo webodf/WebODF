@@ -1,4 +1,4 @@
-/*global runtime core*/
+/*global core*/
 
 /**
  * @constructor

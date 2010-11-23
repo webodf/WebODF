@@ -54,13 +54,14 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @return {!Date}
      */
     function dosTime2Date(dostime) {
-        var year = (dostime >> 25) + 80,
+        var year = ((dostime >> 25) & 0x7f) + 1980,
             month = ((dostime >> 21) & 0x0f) - 1,
             mday = (dostime >> 16) & 0x1f,
             hour = (dostime >> 11) & 0x0f,
             min = (dostime >> 5) & 0x3f,
-            sec = (dostime & 0x1f) << 1;
-        return new Date(year, month, mday, hour, min, sec);
+            sec = (dostime & 0x1f) << 1,
+            d = new Date(year, month, mday, hour, min, sec);
+        return d;
     }
     /**
      * @param {!Date} date
@@ -69,7 +70,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     function date2DosTime(date) {
         var y = date.getFullYear();
         return y < 1980 ? 0 :
-            ((y - 1980) << 25) | (date.getMonth() << 21) |
+            ((y - 1980) << 25) | ((date.getMonth() + 1) << 21) |
             (date.getDate() << 16) | (date.getHours() << 11) |
             (date.getMinutes() << 5) | (date.getSeconds() >> 1);
     }
@@ -109,7 +110,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
             }
             if (uncompressedSize !== data.length) {
                 callback("The amount of bytes read was " + data.length +
-                        " instead of " + uncompressedSize);
+                        " instead of " + uncompressedSize + " for " +
+                        entry.filename + " in " + url + ".");
                 return;
             }
 /*
@@ -119,7 +121,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
                     " is wrong.");
             }
 */
-            this.data = data;
+            entry.data = data;
             callback(null, data);
         }
         /**
@@ -128,8 +130,9 @@ core.Zip = function Zip(url, entriesReadCallback) {
          */
         function load(callback) {
             // if data has already been downloaded, use that
-            if (this.data) {
-                callback(null, this.data);
+            if (entry.data !== undefined) {
+                callback(null, entry.data);
+                return;
             }
             var size = compressedSize + 34 + namelen + extralen;
             runtime.read(url, offset, size, function (err, data) {
@@ -336,17 +339,18 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @return {undefined}
      */
     function write(callback) {
-        var data = "", i, e, codoffset, offset = 0, codsize;
+        var data = "", i, e, codoffset, codsize,
+            offsets = [0];
         // write entries
         for (i = 0; i < entries.length; i += 1) {
             data += writeEntry(entries[i]);
+            offsets.push(data.length);
         }
         // write central directory
         codoffset = data.length;
         for (i = 0; i < entries.length; i += 1) {
             e = entries[i];
-            data += writeCODEntry(e, offset);
-            offset += e.filename.length + e.data.length + 34;
+            data += writeCODEntry(e, offsets[i]);
         }
         codsize = data.length - codoffset;
         data += "PK\x05\x06\x00\x00\x00\x00";

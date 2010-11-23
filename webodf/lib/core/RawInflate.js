@@ -83,6 +83,7 @@ var zip_HuftList = function() {
     this.next = null;
     this.list = null;
 }
+
 /**
  * @constructor
  */
@@ -497,7 +498,7 @@ var zip_inflate_fixed = function(buff, off, size) {
 	// distance table
 	for(i = 0; i < 30; i++)	// make an incomplete code set
 	    l[i] = 5;
-	var zip_fixed_bd = 5;
+	zip_fixed_bd = 5;
 
 	h = new zip_HuftBuild(l, 30, 0, zip_cpdist, zip_cpdext, zip_fixed_bd);
 	if(h.status > 1) {
@@ -610,6 +611,8 @@ var zip_inflate_dynamic = function(buff, off, size) {
     if(zip_bl == 0)	// no literals or lengths
 	h.status = 1;
     if(h.status != 0) {
+	if(h.status == 1)
+	    ;// **incomplete literal tree**
 	return -1;		// incomplete code set
     }
     zip_tl = h.root;
@@ -627,6 +630,9 @@ var zip_inflate_dynamic = function(buff, off, size) {
 	return -1;
     }
 
+    if(h.status == 1) {
+	;// **incomplete distance tree**
+    }
     if(h.status != 0)
 	return -1;
 
@@ -755,5 +761,4 @@ var zip_inflate = function(str) {
 }
 
 this.inflate = zip_inflate;
-
 };
