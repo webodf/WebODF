@@ -464,6 +464,7 @@ var zip_inflate_stored = function(buff, off, size) {
     return n;
 }
 
+var zip_fixed_bd;
 var zip_inflate_fixed = function(buff, off, size) {
     /* decompress an inflated type 1 (fixed Huffman codes) block.  We should
        either replace this with a custom decoder, or at least precompute the
@@ -611,8 +612,8 @@ var zip_inflate_dynamic = function(buff, off, size) {
     if(zip_bl == 0)	// no literals or lengths
 	h.status = 1;
     if(h.status != 0) {
-	if(h.status == 1)
-	    ;// **incomplete literal tree**
+	//if(h.status == 1)
+	//    ;// **incomplete literal tree**
 	return -1;		// incomplete code set
     }
     zip_tl = h.root;
@@ -630,9 +631,9 @@ var zip_inflate_dynamic = function(buff, off, size) {
 	return -1;
     }
 
-    if(h.status == 1) {
-	;// **incomplete distance tree**
-    }
+    //if(h.status == 1) {
+//	;// **incomplete distance tree**
+    //}
     if(h.status != 0)
 	return -1;
 
