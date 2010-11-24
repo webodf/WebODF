@@ -1,4 +1,4 @@
-/*global DOMParser document core runtime odf*/
+/*global runtime odf core*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 /**
@@ -9,6 +9,12 @@ odf.OdfContainer = (function () {
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
         base64 = new core.Base64();
+    /**
+     * @param {?Node} node
+     * @param {!string} ns
+     * @param {!string} name
+     * @return {?Node}
+     */
     function getDirectChild(node, ns, name) {
         node = (node) ? node.firstChild : null;
         while (node) {
@@ -18,9 +24,13 @@ odf.OdfContainer = (function () {
             node = node.nextSibling;
         }
     }
+    /**
+     * @param {!Node} child
+     * @return {!number}
+     */
     function getNodePosition(child) {
-        var childpos = 0, i;
-        for (i in nodeorder) {
+        var childpos = 0, i, l = nodeorder.length;
+        for (i = 0; i < l; i += 1) {
             if (child.namespaceURI === officens &&
                     child.localName === nodeorder[i]) {
                 return i;
@@ -28,6 +38,11 @@ odf.OdfContainer = (function () {
         }
         return -1;
     }
+    /**
+     * @param {!Node} node
+     * @param {?Node} child
+     * @return {undefined}
+     */
     function setChild(node, child) {
         if (!child) {
             return;
@@ -62,6 +77,9 @@ odf.OdfContainer = (function () {
     // private constructor
     /**
      * @constructor
+     * @param {!string} name
+     * @param {!OdfContainer} container
+     * @param {!core.Zip} zip
      */
     function OdfPart(name, container, zip) {
         var self = this,
@@ -96,14 +114,11 @@ odf.OdfContainer = (function () {
                 i += chunksize;
             }
         }
-        function createDocument() {
-        }
         // public functions
         this.load = function () {
             zip.load(name, function (err, data) {
                 privatedata = data;
                 createUrl();
-                createDocument();
                 if (self.onchange) {
                     self.onchange(self);
                 }
@@ -126,6 +141,7 @@ odf.OdfContainer = (function () {
     };
     /**
      * @constructor
+     * @param {!OdfContainer} odfcontainer
      */
     function OdfPartList(odfcontainer) {
         var self = this;
@@ -136,6 +152,7 @@ odf.OdfContainer = (function () {
     }
     /**
      * @constructor
+     * @param {!string} url
      */
     function OdfContainer(url) {
         var self = this,
@@ -154,10 +171,18 @@ odf.OdfContainer = (function () {
         this.parts = null;
 
         // private functions
+        /**
+         * @param {!Document} xmldoc
+         * @return {!Node}
+         */
         function importRootNode(xmldoc) {
             var doc = self.rootElement.ownerDocument;
             return doc.importNode(xmldoc.documentElement, true);
         }
+        /**
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
         function handleStylesXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root = self.rootElement;
@@ -173,6 +198,10 @@ odf.OdfContainer = (function () {
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
         }
+        /**
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
         function handleContentXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root,
@@ -193,11 +222,15 @@ odf.OdfContainer = (function () {
                     root.automaticStyles.appendChild(c);
                     c = automaticStyles.firstChild; // works because node c moved
                 }
-            } else {
+            } else if (automaticStyles) {
                 root.automaticStyles = automaticStyles;
                 setChild(root.automaticStyles, automaticStyles);
             }
         }
+        /**
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
         function handleMetaXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root;
@@ -209,6 +242,10 @@ odf.OdfContainer = (function () {
             root.meta = getDirectChild(node, officens, 'meta');
             setChild(root, root.meta);
         }
+        /**
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
         function handleSettingsXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root;
@@ -297,6 +334,11 @@ odf.OdfContainer = (function () {
         }
         // TODO: support single xml file serialization and different ODF
         // versions
+        /**
+         * @param {!string} filepath
+         * @param {function(?string, ?string):undefined} callback
+         * @return {undefined}
+         */
         function load(filepath, callback) {
             zip.load(filepath, function (err, data) {
                 if (self.onchange) {
@@ -314,6 +356,8 @@ odf.OdfContainer = (function () {
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
          * elements 'document-content', 'document-styles', 'document-meta', or
          * 'document-settings' will be returned respectively.
+         * @param {!string} partname
+         * @return {!OdfPart}
          **/
         this.getPart = function (partname) {
             return new OdfPart(partname, self, zip);
@@ -340,6 +384,10 @@ odf.OdfContainer = (function () {
     OdfContainer.INVALID = 3;
     OdfContainer.SAVING = 4;
     OdfContainer.MODIFIED = 5;
+    /**
+     * @param {!string} url
+     * @return {!OdfContainer}
+     */
     OdfContainer.getContainer = function (url) {
         return new OdfContainer(url);
     };
