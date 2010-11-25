@@ -63,10 +63,17 @@ odf.OdfContainer = (function () {
         node.insertBefore(child, c);
     }
     /**
+     * A DOM element that is part of and ODF part of a DOM.
      * @constructor
+     * @extends {Element}
      */
     function ODFElement() {
     }
+    /**
+     * The root element of an ODF document.
+     * @constructor
+     * @extends {ODFElement}
+     */
     function ODFDocumentElement(odfcontainer) {
         this.OdfContainer = odfcontainer;
     }
