@@ -115,6 +115,8 @@ function BrowserRuntime(logoutput) {
             node.appendChild(doc.createTextNode(msg));
             logoutput.appendChild(node);
             logoutput.appendChild(doc.createElement("br"));
+        } else if (console) {
+            console.log(msg);
         }
     }
     this.readFile = function (path, encoding, callback) {
