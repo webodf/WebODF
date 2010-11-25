@@ -6,11 +6,11 @@
 #include "pagerunner.h"
 int
 main(int argc, char** argv) {
-    if (argc != 2) {
+    if (argc < 2) {
         return 1;
     }
     QApplication app(argc, argv);
     app.setApplicationName(argv[0]);
-    PageRunner p(argv[1]);
+    PageRunner p(QCoreApplication::arguments().mid(1));
     return app.exec();
 }
