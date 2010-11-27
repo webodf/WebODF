@@ -49,6 +49,12 @@ NodeJSObject.prototype.read = function (fd, buffer, offset, length, position, ca
  */
 NodeJSObject.prototype.writeFile = function (path, data, encoding, callback) {};
 /**
+ * @param {!string} path
+ * @param {!function(?string):undefined} callback
+ * @return {undefined}
+ */
+NodeJSObject.prototype.unlink = function (path, callback) {};
+/**
  * @param {!number} fd
  * @param {function(!string)} callback
  * @return {undefined}

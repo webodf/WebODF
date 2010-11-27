@@ -20,14 +20,14 @@ function Runtime() {}
 Runtime.prototype.read = function (path, offset, length, callback) {};
 /**
  * @param {!string} path
- * @param {!string} encoding
+ * @param {!string} encoding text encoding or 'binary'
  * @param {!function(string=,string=):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.readFile = function (path, encoding, callback) {};
 /**
  * @param {!string} path
- * @param {!string} encoding
+ * @param {!string} encoding text encoding or 'binary'
  * @return {!string}
  */
 Runtime.prototype.readFileSync = function (path, encoding) {};
@@ -40,7 +40,7 @@ Runtime.prototype.loadXML = function (path, callback) {};
 /**
  * @param {!string} path
  * @param {!string} data
- * @param {?string} encoding
+ * @param {!string} encoding text encoding or "binary"
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
@@ -57,6 +57,12 @@ Runtime.prototype.isFile = function (path, callback) {};
  * @return {undefined}
  */
 Runtime.prototype.getFileSize = function (path, callback) {};
+/**
+ * @param {!string} path
+ * @param {!function(?string):undefined} callback
+ * @return {undefined}
+ */
+Runtime.prototype.deleteFile = function (path, callback) {};
 /**
  * @param {!string} msgOrCategory
  * @param {!string=} msg
@@ -119,9 +125,31 @@ function BrowserRuntime(logoutput) {
             console.log(msg);
         }
     }
+    // tentative function to fix problems with sending binary data
+    function cleanDataString(s) {
+        var str = "", i, l = s.length;
+        for (i = 0; i < l; i += 1) {
+            str += String.fromCharCode(s.charCodeAt(i) & 0xff);
+        }
+        return str;
+    }
+/*
+    function makeBlob(data) {
+        var builder = new BlobBuilder(),
+            buffer = new ArrayBuffer(data.length),
+            ui8a = new Uint8Array(data, 0),
+            i, l = data.length;
+        for (i = 0; i < l; i += 1) {
+            ui8a[i] = data.charCodeAt(i) & 0xff;
+        }
+        builder.append(data);
+        return builder.getBlob();
+    }
+*/
     this.readFile = function (path, encoding, callback) {
         var xmlHttp = new XMLHttpRequest();
         function handleResult() {
+            var data;
             if (xmlHttp.readyState === 4) {
                 if (xmlHttp.status === 0 && !xmlHttp.responseText) {
                     // for local files there is no difference between missing
@@ -129,7 +157,12 @@ function BrowserRuntime(logoutput) {
                     callback("File is empty.");
                 } else if (xmlHttp.status === 200 || xmlHttp.status === 0) {
                     // report file
-                    callback(null, xmlHttp.responseText);
+                    if (encoding === "binary") {
+                        data = cleanDataString(xmlHttp.responseText);
+                    } else {
+                        data = xmlHttp.responseText;
+                    }
+                    callback(null, data);
                 } else {
                     // report error
                     callback(xmlHttp.responseText || xmlHttp.statusText);
@@ -138,7 +171,7 @@ function BrowserRuntime(logoutput) {
         }
         xmlHttp.open('GET', path, true);
         xmlHttp.onreadystatechange = handleResult;
-        if (encoding) {
+        if (encoding !== "binary") {
             xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
         } else {
             xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
@@ -157,25 +190,25 @@ function BrowserRuntime(logoutput) {
                     // for local files there is no difference between missing
                     // and empty files, so empty files are considered as errors
                     callback("File is empty.");
-                } else if (xmlHttp.status === 200 || xmlHttp.status === 0) {
-                    // report file
+                } else if ((xmlHttp.status >= 200 && xmlHttp.status < 300) ||
+                           xmlHttp.status === 0) {
+                    // report success
                     callback(null);
                 } else {
                     // report error
-                    callback(xmlHttp.responseText || xmlHttp.statusText);
+                    callback("Status " + xmlHttp.status + ": " +
+                            xmlHttp.responseText || xmlHttp.statusText);
                 }
             }
         }
         xmlHttp.open('PUT', path, true);
         xmlHttp.onreadystatechange = handleResult;
-        if (encoding) {
+        if (encoding !== "binary") {
             xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
-        } else {
-            xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
         }
         try {
-            if (!encoding && xmlHttp.sendAsBinary) {
-                xmlHttp.setRequestHeader("Content-Length", data.length);
+            if (encoding === "binary" && xmlHttp.sendAsBinary) {
+                data = cleanDataString(data);
                 xmlHttp.sendAsBinary(data);
             } else {
                 xmlHttp.send(data);
@@ -184,8 +217,22 @@ function BrowserRuntime(logoutput) {
             callback(e.message);
         }
     };
+    this.deleteFile = function (path, callback) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open('DELETE', path, true);
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState === 4) {
+                if (xmlHttp.status < 200 && xmlHttp.status >= 300) {
+                    callback(xmlHttp.responseText);
+                } else {
+                    callback(null);
+                }
+            }
+        };
+        xmlHttp.send(null);
+    };
     this.read = function (path, offset, length, callback) {
-        this.readFile(path, null, function (err, data) {
+        this.readFile(path, "binary", function (err, data) {
             if (err) {
                 callback(err);
             } else {
@@ -197,7 +244,7 @@ function BrowserRuntime(logoutput) {
         var xmlHttp = new XMLHttpRequest(),
             result;
         xmlHttp.open('GET', path, false);
-        if (encoding) {
+        if (encoding !== "binary") {
             xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
         } else {
             xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
@@ -236,22 +283,25 @@ function BrowserRuntime(logoutput) {
         }
     };
     this.isFile = function (path, callback) {
-        this.readFile(path, null, function (err, data) {
-            if (err) {
-                callback(false);
-            } else {
-                callback(true);
-            }
+        this.getFileSize(path, function (size) {
+            callback(size !== -1);
         });
     };
     this.getFileSize = function (path, callback) {
-        this.readFile(path, null, function (err, data) {
-            if (err) {
-                callback(-1);
-            } else {
-                callback(data.length);
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("HEAD", path, true);
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState !== 4) {
+                return;
             }
-        });
+            var cl = xmlHttp.getResponseHeader("Content-Length");
+            if (cl) {
+                callback(parseInt(cl, 10));
+            } else { 
+                callback(-1);
+            }
+        };
+        xmlHttp.send(null);
     };
     this.log = log;
     this.setTimeout = function (f, msec) {
@@ -293,13 +343,27 @@ function NodeJSRuntime() {
     function loadXML(path, callback) {
         throw "Not implemented.";
     }
-
-    this.readFile = fs.readFile;
+    this.readFile = function (path, encoding, callback) {
+        if (encoding !== "binary") {
+            fs.readFile(path, encoding, callback);
+        } else {
+            // we have to encode the returned buffer to a string
+            // it would be nice if we would have a blob or buffer object
+            fs.readFile(path, null, function (err, data) {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                callback(null, data.toString("binary"));
+            });
+        }
+    };
     this.writeFile = function (path, data, encoding, callback) {
-        fs.writeFile(path, data, encoding || "binary", function (err) {
+        fs.writeFile(path, data, encoding, function (err) {
             callback(err || null);
         });
     };
+    this.deleteFile = fs.unlink;
     this.read = function (path, offset, length, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -398,13 +462,16 @@ function RhinoRuntime() {
         if (!file.isFile()) {
             callback(path + " is not a file.");
         } else {
+            if (encoding === "binary") {
+                encoding = "latin1"; // read binary, seems hacky but works
+            }
             data = readFile(path, encoding);
             callback(null, data);
         }
     }
     /**
      * @param {!string} path
-     * @param {?string} encoding
+     * @param {!string} encoding
      * @return {?string}
      */
     function runtimeReadFileSync(path, encoding) {
@@ -412,10 +479,10 @@ function RhinoRuntime() {
         if (!file.isFile()) {
             return null;
         }
-        if (encoding) {
-            return readFile(path, encoding);
+        if (encoding === "binary") {
+            encoding = "latin1"; // read binary, seems hacky but works
         }
-        return readFile(path, "latin1"); // read binary, seems hacky but works
+        return readFile(path, encoding);
     }
     function isFile(path, callback) {
         if (currentDirectory) {
@@ -424,11 +491,10 @@ function RhinoRuntime() {
         var file = new Packages.java.io.File(path);
         callback(file.isFile());
     }
-
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
     this.writeFile = function (path, data, encoding, callback) {
-        if (encoding) {
+        if (encoding !== "binary") {
             throw "Non-binary encoding not implemented.";
         }
         var out = new Packages.java.io.FileOutputStream(path),
@@ -439,12 +505,20 @@ function RhinoRuntime() {
         out.close();
         callback(null);
     };
+    this.deleteFile = function (path, callback) {
+        var file = new Packages.java.io.File(path);
+        if (file['delete']()) {
+            callback(null);
+        } else {
+            callback("Could not delete " + path);
+        }
+    };
     this.read = function (path, offset, length, callback) {
         // TODO: adapt to read only a part instead of the whole file
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
         }
-        var data = runtimeReadFileSync(path, null);
+        var data = runtimeReadFileSync(path, "binary");
         if (data) {
             callback(null, data.substring(offset, offset + length));
         } else {

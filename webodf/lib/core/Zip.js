@@ -74,7 +74,6 @@ core.Zip = function Zip(url, entriesReadCallback) {
             (date.getDate() << 16) | (date.getHours() << 11) |
             (date.getMinutes() << 5) | (date.getSeconds() >> 1);
     }
- 
     /**
      * @constructor
      * @param {!string} url
@@ -213,7 +212,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             cdsSize, cdsOffset;
         sig = stream.readUInt32LE();
         if (sig !== 0x06054b50) {
-            callback('Central directory signature is wrong.', zip);
+            callback('Central directory signature is wrong: ' + sig, zip);
             return;
         }
         disk = stream.readUInt16LE();
@@ -367,7 +366,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         data += uint32LE(codsize);
         data += uint32LE(codoffset);
         data += "\x00\x00";
-        runtime.writeFile(url, data, null, callback);
+        runtime.writeFile(url, data, "binary", callback);
     }
 
     this.load = load;
