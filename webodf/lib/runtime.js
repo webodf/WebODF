@@ -147,91 +147,93 @@ function BrowserRuntime(logoutput) {
     }
 */
     this.readFile = function (path, encoding, callback) {
-        var xmlHttp = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
         function handleResult() {
             var data;
-            if (xmlHttp.readyState === 4) {
-                if (xmlHttp.status === 0 && !xmlHttp.responseText) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 0 && !xhr.responseText) {
                     // for local files there is no difference between missing
                     // and empty files, so empty files are considered as errors
                     callback("File is empty.");
-                } else if (xmlHttp.status === 200 || xmlHttp.status === 0) {
+                } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        data = cleanDataString(xmlHttp.responseText);
+                        data = cleanDataString(xhr.responseText);
                     } else {
-                        data = xmlHttp.responseText;
+                        data = xhr.responseText;
                     }
                     callback(null, data);
                 } else {
                     // report error
-                    callback(xmlHttp.responseText || xmlHttp.statusText);
+                    callback(xhr.responseText || xhr.statusText);
                 }
             }
         }
-        xmlHttp.open('GET', path, true);
-        xmlHttp.onreadystatechange = handleResult;
+        xhr.open('GET', path, true);
+        xhr.onreadystatechange = handleResult;
         if (encoding !== "binary") {
-            xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
+            xhr.overrideMimeType("text/plain; charset=" + encoding);
         } else {
-            xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
         }
         try {
-            xmlHttp.send(null);
+            xhr.send(null);
         } catch (e) {
             callback(e.message);
         }
     };
     this.writeFile = function (path, data, encoding, callback) {
-        var xmlHttp = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
         function handleResult() {
-            if (xmlHttp.readyState === 4) {
-                if (xmlHttp.status === 0 && !xmlHttp.responseText) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 0 && !xhr.responseText) {
                     // for local files there is no difference between missing
                     // and empty files, so empty files are considered as errors
                     callback("File is empty.");
-                } else if ((xmlHttp.status >= 200 && xmlHttp.status < 300) ||
-                           xmlHttp.status === 0) {
+                } else if ((xhr.status >= 200 && xhr.status < 300) ||
+                           xhr.status === 0) {
                     // report success
                     callback(null);
                 } else {
                     // report error
-                    callback("Status " + xmlHttp.status + ": " +
-                            xmlHttp.responseText || xmlHttp.statusText);
+                    callback("Status " + xhr.status + ": " +
+                            xhr.responseText || xhr.statusText);
                 }
             }
         }
-        xmlHttp.open('PUT', path, true);
-        xmlHttp.onreadystatechange = handleResult;
+        xhr.open('PUT', path, true);
+        xhr.onreadystatechange = handleResult;
         if (encoding !== "binary") {
-            xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
+            xhr.overrideMimeType("text/plain; charset=" + encoding);
         }
         try {
-            if (encoding === "binary" && xmlHttp.sendAsBinary) {
+            if (encoding === "binary" && xhr.sendAsBinary) {
                 data = cleanDataString(data);
-                xmlHttp.sendAsBinary(data);
+                xhr.sendAsBinary(data);
             } else {
-                xmlHttp.send(data);
+                xhr.send(data);
             }
         } catch (e) {
             callback(e.message);
         }
     };
     this.deleteFile = function (path, callback) {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open('DELETE', path, true);
-        xmlHttp.onreadystatechange = function () {
-            if (xmlHttp.readyState === 4) {
-                if (xmlHttp.status < 200 && xmlHttp.status >= 300) {
-                    callback(xmlHttp.responseText);
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', path, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status < 200 && xhr.status >= 300) {
+                    callback(xhr.responseText);
                 } else {
                     callback(null);
                 }
             }
         };
-        xmlHttp.send(null);
+        xhr.send(null);
     };
     this.read = function (path, offset, length, callback) {
+//        xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
+//               (offset + length - 1));
         this.readFile(path, "binary", function (err, data) {
             if (err) {
                 callback(err);
@@ -241,43 +243,43 @@ function BrowserRuntime(logoutput) {
         });
     };
     this.readFileSync = function (path, encoding) {
-        var xmlHttp = new XMLHttpRequest(),
+        var xhr = new XMLHttpRequest(),
             result;
-        xmlHttp.open('GET', path, false);
+        xhr.open('GET', path, false);
         if (encoding !== "binary") {
-            xmlHttp.overrideMimeType("text/plain; charset=" + encoding);
+            xhr.overrideMimeType("text/plain; charset=" + encoding);
         } else {
-            xmlHttp.overrideMimeType("text/plain; charset=x-user-defined");
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
         }
         try {
-            xmlHttp.send(null);
-            if (xmlHttp.status === 200 || xmlHttp.status === 0) {
-                result = xmlHttp.responseText;
+            xhr.send(null);
+            if (xhr.status === 200 || xhr.status === 0) {
+                result = xhr.responseText;
             }
         } catch (e) {
         }
         return result;
     };
     this.loadXML = function (path, callback) {
-        var xmlHttp = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest();
         function handleResult() {
-            if (xmlHttp.readyState === 4) {
-                if (xmlHttp.status === 0 && !xmlHttp.responseText) {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 0 && !xhr.responseText) {
                     callback("File is empty.");
-                } else if (xmlHttp.status === 200 || xmlHttp.status === 0) {
+                } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
-                    callback(xmlHttp.responseXML);
+                    callback(xhr.responseXML);
                 } else {
                     // report error
-                    callback(xmlHttp.responseText);
+                    callback(xhr.responseText);
                 }
             }
         }
-        xmlHttp.open("GET", path, true);
-        xmlHttp.overrideMimeType("text/xml");
-        xmlHttp.onreadystatechange = handleResult;
+        xhr.open("GET", path, true);
+        xhr.overrideMimeType("text/xml");
+        xhr.onreadystatechange = handleResult;
         try {
-            xmlHttp.send(null);
+            xhr.send(null);
         } catch (e) {
             callback(e.message);
         }
@@ -288,20 +290,20 @@ function BrowserRuntime(logoutput) {
         });
     };
     this.getFileSize = function (path, callback) {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("HEAD", path, true);
-        xmlHttp.onreadystatechange = function () {
-            if (xmlHttp.readyState !== 4) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("HEAD", path, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState !== 4) {
                 return;
             }
-            var cl = xmlHttp.getResponseHeader("Content-Length");
+            var cl = xhr.getResponseHeader("Content-Length");
             if (cl) {
                 callback(parseInt(cl, 10));
             } else { 
                 callback(-1);
             }
         };
-        xmlHttp.send(null);
+        xhr.send(null);
     };
     this.log = log;
     this.setTimeout = function (f, msec) {
