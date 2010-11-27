@@ -1,4 +1,4 @@
-/*global require console process*/
+/*global require console process Buffer*/
 /* A Node.JS http server*/
 var sys = require("sys"),
     http = require("http"),
@@ -11,14 +11,20 @@ http.createServer(function (request, response) {
         filename = path.join(process.cwd(), uri);
     console.log(request.method + " " + url + " " + uri + " " + filename);
     function put() {
-        var alldata = "";
+        var contentlength = parseInt(request.headers["content-length"], 10),
+            alldata = new Buffer(contentlength), sum = 0;
         request.on("data", function (data) {
-            alldata += data;
+            data.copy(alldata, sum, 0);
+            sum += data.length;
         });
         request.on("end", function () {
             fs.writeFile(filename, alldata, "binary", function (err) {
-                // todo: add error handling
-                response.writeHead(200);
+                if (err) {
+                    response.writeHead(500);
+                    response.write(err);
+                } else {
+                    response.writeHead(200);
+                }
                 response.end();
             });
         });
@@ -27,53 +33,76 @@ http.createServer(function (request, response) {
         put(request, response);
         return;
     }
+    if (request.method === "DELETE") {
+        fs.unlink(filename, function (err) {
+            if (err) {
+                response.writeHead(500);
+            } else {
+                response.writeHead(200);
+            }
+            response.end();
+        });
+        return;
+    }
     fs.stat(filename, function (err, stats) {
         if (!err && stats.isFile()) {
             fs.readFile(filename, "binary", function (err, file) {
                 if (err) {
                     response.writeHead(500, {"Content-Type": "text/plain"});
-                    response.write(err + "\n");
+                    if (request.method !== "HEAD") {
+                        response.write(err + "\n");
+                    }
                     response.end();
                     return;
                 }
-                response.writeHead(200);
-                response.write(file, "binary");
+                response.writeHead(200, {"Content-Length": stats.size});
+                if (request.method !== "HEAD") {
+                    response.write(file, "binary");
+                }
                 response.end();
             });
         } else if (!err && stats.isDirectory()) {
             if (uri.length === 0 || uri[uri.length - 1] !== "/") {
                 response.writeHead(301, {"Content-Type": "text/plain",
                         "Location": uri + "/"});
-                response.write("Moved permanently\n");
+                if (request.method !== "HEAD") {
+                    response.write("Moved permanently\n");
+                }
                 response.end();
                 return;
             }
             fs.readdir(filename, function (err, files) {
                 if (err) {
                     response.writeHead(500, {"Content-Type": "text/plain"});
-                    response.write(err + "\n");
+                    if (request.method !== "HEAD") {
+                        response.write(err + "\n");
+                    }
                     response.end();
                     return;
                 }
                 response.writeHead(200);
-                response.write("<html><head><title></title></head><body>");
-                var i, l = files.length, file;
-                for (i = 0; i < l; i += 1) {
-                    file = files[i].replace("&", "&amp;")
-                            .replace("<", "&gt;");
-                    response.write("<a href=\"");
-                    response.write(file);
-                    response.write("\">");
-                    response.write(file.replace("\"", "\\\""));
-                    response.write("</a>\n");
+                if (request.method !== "HEAD") {
+                    response.write("<html><head><title></title></head><body>");
+                    var i, l = files.length, file;
+                    for (i = 0; i < l; i += 1) {
+                        file = files[i].replace("&", "&amp;")
+                                .replace("<", "&gt;");
+                        response.write("<a href=\"");
+                        response.write(file);
+                        response.write("\">");
+                        response.write(file.replace("\"", "\\\""));
+                        response.write("</a>\n");
+                    }
+                    response.write("</body></html>\n");
                 }
-                response.write("</body></html>\n");
                 response.end();
             });
         } else {
             console.log("Not found: " + uri);
             response.writeHead(404, {"Content-Type": "text/plain"});
-            response.write("404 Not Found\n");
+            if (request.method !== "HEAD") {
+                response.write("404 Not Found\n");
+            }
             response.end();
         }
     });
