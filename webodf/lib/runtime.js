@@ -101,6 +101,7 @@ var IS_COMPILED_CODE = false;
  * @param {Element} logoutput
  */
 function BrowserRuntime(logoutput) {
+    var cache = {};
     function log(msgOrCategory, msg) {
         var node, doc, category;
         if (msg) {
@@ -159,6 +160,7 @@ function BrowserRuntime(logoutput) {
                     // report file
                     if (encoding === "binary") {
                         data = cleanDataString(xhr.responseText);
+                        cache[path] = data;
                     } else {
                         data = xhr.responseText;
                     }
@@ -181,6 +183,39 @@ function BrowserRuntime(logoutput) {
         } catch (e) {
             callback(e.message);
         }
+    };
+    this.read = function (path, offset, length, callback) {
+        if (path in cache) {
+            callback(null, cache[path].substring(offset, length + offset));
+            return;
+        }
+        this.readFile(path, "binary", function (err, data) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, data.substring(offset, length + offset));
+            }
+        });
+        //xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
+        //       (offset + length - 1));
+    };
+    this.readFileSync = function (path, encoding) {
+        var xhr = new XMLHttpRequest(),
+            result;
+        xhr.open('GET', path, false);
+        if (encoding !== "binary") {
+            xhr.overrideMimeType("text/plain; charset=" + encoding);
+        } else {
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        }
+        try {
+            xhr.send(null);
+            if (xhr.status === 200 || xhr.status === 0) {
+                result = xhr.responseText;
+            }
+        } catch (e) {
+        }
+        return result;
     };
     this.writeFile = function (path, data, encoding, callback) {
         var xhr = new XMLHttpRequest();
@@ -230,35 +265,6 @@ function BrowserRuntime(logoutput) {
             }
         };
         xhr.send(null);
-    };
-    this.read = function (path, offset, length, callback) {
-//        xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
-//               (offset + length - 1));
-        this.readFile(path, "binary", function (err, data) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, data.substring(offset, length + offset));
-            }
-        });
-    };
-    this.readFileSync = function (path, encoding) {
-        var xhr = new XMLHttpRequest(),
-            result;
-        xhr.open('GET', path, false);
-        if (encoding !== "binary") {
-            xhr.overrideMimeType("text/plain; charset=" + encoding);
-        } else {
-            xhr.overrideMimeType("text/plain; charset=x-user-defined");
-        }
-        try {
-            xhr.send(null);
-            if (xhr.status === 200 || xhr.status === 0) {
-                result = xhr.responseText;
-            }
-        } catch (e) {
-        }
-        return result;
     };
     this.loadXML = function (path, callback) {
         var xhr = new XMLHttpRequest();
