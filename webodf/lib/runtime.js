@@ -320,7 +320,7 @@ function BrowserRuntime(logoutput) {
     this.read = read;//wrap(nativeio.read, 3) || read;
     this.readFileSync = readFileSync;
     this.writeFile = wrap(nativeio.writeFile, 3) || writeFile;
-    this.deleteFile = deleteFile;
+    this.deleteFile = wrap(nativeio.deleteFile, 1) || deleteFile;
     this.loadXML = loadXML;
     this.isFile = isFile;
     this.getFileSize = wrap(nativeio.getFileSize, 1) || getFileSize;
@@ -339,6 +339,9 @@ function BrowserRuntime(logoutput) {
         return window.document.implementation;
     };
     this.exit = function (exitCode) {
+        if (nativeio.exit) {
+            nativeio.exit(exitCode);
+        }
     };
     this.getWindow = function () {
         return window;

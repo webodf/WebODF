@@ -1,4 +1,4 @@
-/*global Packages HTMLStyleElement*/
+/*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement*/
 /**
  * @constructor
  */
@@ -227,3 +227,4 @@ Packages.org.xml.sax.InputSource = function (reader) {};
  */
 HTMLStyleElement.prototype.sheet;
 XMLHttpRequest.prototype.sendAsBinary = function (data) {};
+window.nativeio = {};

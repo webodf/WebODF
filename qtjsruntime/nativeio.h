@@ -5,7 +5,9 @@
 
 #include <QtWebKit/QWebPage>
 #include <QtWebKit/QWebFrame>
+#include <QtGui/QApplication>
 #include <QtCore/QObject>
+#include <QtCore/QTextCodec>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QDebug>
@@ -24,7 +26,7 @@ public slots:
         QString result = "null";
         if (!f.open(QIODevice::WriteOnly)) {
             result = "'Could not open file for writing.'";
-        } else {
+        } else if (encoding == "binary") {
             char buffer[1024];
             int i = 0, todo;
             while (i < data.length()) {
@@ -38,8 +40,20 @@ public slots:
                 }
                 i += todo;
             }
-            f.close();
+        } else {
+            QTextCodec* codec = QTextCodec::codecForName(encoding.toAscii());
+            if (codec == NULL) {
+                result = "'Encoding " + encoding + " is unknown.'";
+            } else {
+                QTextEncoder* encoder = codec->makeEncoder();
+                QByteArray d = encoder->fromUnicode(d);
+                delete encoder;
+                if (f.write(d) != d.length()) {
+                    result = "'Error writing.'";
+                }
+            }
         }
+        f.close();
         webpage->mainFrame()->evaluateJavaScript(callbackName +
                 "(" + result + ");");
     }
@@ -51,6 +65,18 @@ public slots:
         }
         webpage->mainFrame()->evaluateJavaScript(callbackName +
                 "(" + QString::number(result) + ");");
+    }
+    void deleteFile(const QString& path, const QString& callbackName) {
+        QFile file(path);
+        if (file.remove()) {
+            webpage->mainFrame()->evaluateJavaScript(callbackName + "(null)");
+        } else {
+            webpage->mainFrame()->evaluateJavaScript(callbackName +
+                    "('Error deleting file.')");
+        }
+    }
+    void exit(int exitcode) {
+        qApp->exit(exitcode);
     }
 };
 
