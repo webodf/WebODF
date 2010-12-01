@@ -2,6 +2,7 @@
 #define PAGERUNNER_H
 
 #include "nam.h"
+#include "nativeio.h"
 #include <QtWebKit/QWebPage>
 #include <QtWebKit/QWebFrame>
 #include <QtWebKit/QWebElement>
@@ -24,6 +25,7 @@ private:
     QWidget* const view;
     QTime time;
     bool scriptMode;
+    NativeIO* nativeio;
 public:
     PageRunner(const QStringList& arguments)
             : QWebPage(0),
@@ -31,9 +33,13 @@ public:
               nam(new NAM(QUrl(url).host(), QUrl(url).port(), this)),
               out(stdout),
               err(stderr),
-              view(new QWidget()) {
+              view(new QWidget()),
+              nativeio(new NativeIO(this)) {
         setNetworkAccessManager(nam);
         connect(this, SIGNAL(loadFinished(bool)), this, SLOT(finished()));
+        connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
+            this, SLOT(slotInitWindowObjects()));
+
         setView(view);
         scriptMode = arguments[0].endsWith(".js");
         if (scriptMode) {
@@ -49,7 +55,7 @@ public:
                 "<script src=\"" + arguments[0].toUtf8() + "\"></script>"
                 "</body></html>\n";
             QTemporaryFile tmp("XXXXXX.html");
-            tmp.setAutoRemove(false);
+            tmp.setAutoRemove(true);
             tmp.open();
             tmp.write(html);
             tmp.close();
@@ -61,7 +67,7 @@ public:
     ~PageRunner() {
         delete view;
     }
-public slots:
+private slots:
     void finished() {
         connect(this, SIGNAL(contentsChanged()), this, SLOT(noteChange()));
         connect(this, SIGNAL(downloadRequested(QNetworkRequest)),
@@ -98,6 +104,9 @@ public slots:
             printToFile("render.pdf");
             qApp->exit(0);
         }
+    }
+    void slotInitWindowObjects() {
+        mainFrame()->addToJavaScriptWindowObject("nativeio", nativeio);
     }
 private:
     void javaScriptConsoleMessage(const QString& message, int lineNumber,
