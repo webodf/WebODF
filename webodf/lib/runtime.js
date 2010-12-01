@@ -304,6 +304,8 @@ function BrowserRuntime(logoutput) {
             return null;
         }
         return function () {
+            // clear cache
+            cache = {};
             // assume the last argument is a callback function
             var callback = arguments[nargs],
                 args = Array.prototype.slice.call(arguments, 0, nargs),
