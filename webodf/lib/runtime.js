@@ -101,7 +101,8 @@ var IS_COMPILED_CODE = false;
  * @param {Element} logoutput
  */
 function BrowserRuntime(logoutput) {
-    var cache = {};
+    var cache = {},
+        nativeio = window.nativeio || {};
     function log(msgOrCategory, msg) {
         var node, doc, category;
         if (msg) {
@@ -134,20 +135,7 @@ function BrowserRuntime(logoutput) {
         }
         return str;
     }
-/*
-    function makeBlob(data) {
-        var builder = new BlobBuilder(),
-            buffer = new ArrayBuffer(data.length),
-            ui8a = new Uint8Array(data, 0),
-            i, l = data.length;
-        for (i = 0; i < l; i += 1) {
-            ui8a[i] = data.charCodeAt(i) & 0xff;
-        }
-        builder.append(data);
-        return builder.getBlob();
-    }
-*/
-    this.readFile = function (path, encoding, callback) {
+    function readFile(path, encoding, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
             var data;
@@ -183,8 +171,8 @@ function BrowserRuntime(logoutput) {
         } catch (e) {
             callback(e.message);
         }
-    };
-    this.read = function (path, offset, length, callback) {
+    }
+    function read(path, offset, length, callback) {
         if (path in cache) {
             callback(null, cache[path].substring(offset, length + offset));
             return;
@@ -198,8 +186,8 @@ function BrowserRuntime(logoutput) {
         });
         //xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
         //       (offset + length - 1));
-    };
-    this.readFileSync = function (path, encoding) {
+    }
+    function readFileSync(path, encoding) {
         var xhr = new XMLHttpRequest(),
             result;
         xhr.open('GET', path, false);
@@ -216,8 +204,8 @@ function BrowserRuntime(logoutput) {
         } catch (e) {
         }
         return result;
-    };
-    this.writeFile = function (path, data, encoding, callback) {
+    }
+    function writeFile(path, data, encoding, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
             if (xhr.readyState === 4) {
@@ -251,8 +239,8 @@ function BrowserRuntime(logoutput) {
         } catch (e) {
             callback(e.message);
         }
-    };
-    this.deleteFile = function (path, callback) {
+    }
+    function deleteFile(path, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', path, true);
         xhr.onreadystatechange = function () {
@@ -265,8 +253,8 @@ function BrowserRuntime(logoutput) {
             }
         };
         xhr.send(null);
-    };
-    this.loadXML = function (path, callback) {
+    }
+    function loadXML(path, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
             if (xhr.readyState === 4) {
@@ -289,13 +277,13 @@ function BrowserRuntime(logoutput) {
         } catch (e) {
             callback(e.message);
         }
-    };
-    this.isFile = function (path, callback) {
+    }
+    function isFile(path, callback) {
         this.getFileSize(path, function (size) {
             callback(size !== -1);
         });
-    };
-    this.getFileSize = function (path, callback) {
+    }
+    function getFileSize(path, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open("HEAD", path, true);
         xhr.onreadystatechange = function () {
@@ -310,7 +298,32 @@ function BrowserRuntime(logoutput) {
             }
         };
         xhr.send(null);
-    };
+    }
+    function wrap(nativeFunction, nargs) {
+        if (!nativeFunction) {
+            return null;
+        }
+        return function () {
+            // assume the last argument is a callback function
+            var callback = arguments[nargs],
+                args = Array.prototype.slice.call(arguments, 0, nargs),
+                callbackname = "callback" + String(Math.random()).substring(2);
+            window[callbackname] = function () {
+                delete window[callbackname];
+                callback.apply(this, arguments);
+            };
+            args.push(callbackname);
+            nativeFunction.apply(this, args);
+        };
+    }
+    this.readFile = readFile;
+    this.read = read;//wrap(nativeio.read, 3) || read;
+    this.readFileSync = readFileSync;
+    this.writeFile = wrap(nativeio.writeFile, 3) || writeFile;
+    this.deleteFile = deleteFile;
+    this.loadXML = loadXML;
+    this.isFile = isFile;
+    this.getFileSize = wrap(nativeio.getFileSize, 1) || getFileSize;
     this.log = log;
     this.setTimeout = function (f, msec) {
         setTimeout(f, msec);
