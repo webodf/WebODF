@@ -82,18 +82,20 @@ http.createServer(function (request, response) {
                 }
                 response.writeHead(200);
                 if (request.method !== "HEAD") {
+                    files.sort();
                     response.write("<html><head><title></title></head><body>");
+                    response.write("<table>");
                     var i, l = files.length, file;
                     for (i = 0; i < l; i += 1) {
                         file = files[i].replace("&", "&amp;")
                                 .replace("<", "&gt;");
-                        response.write("<a href=\"");
+                        response.write("<tr><td><a href=\"");
                         response.write(file);
                         response.write("\">");
                         response.write(file.replace("\"", "\\\""));
-                        response.write("</a>\n");
+                        response.write("</a></td></tr>\n");
                     }
-                    response.write("</body></html>\n");
+                    response.write("</table></body></html>\n");
                 }
                 response.end();
             });
