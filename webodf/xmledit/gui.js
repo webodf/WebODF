@@ -1,8 +1,6 @@
 /*global Ext runtime gui*/
 runtime.loadClass("gui.XMLEdit");
 
-Ext.BLANK_IMAGE_URL = '../extjs/resources/images/default/s.gif';
-
 function createXMLEdit(element, url) {
     var head = element.ownerDocument.getElementsByTagName("head")[0],
         xmlcss = element.ownerDocument.createElement("style"),
@@ -21,16 +19,10 @@ function createXMLEdit(element, url) {
 function loadXML(url, panel, title) {
     title = title || url;
     var tab = panel.find('url', url),
-        t,
-        newTab,
-        xmledt;
+        newTab;
     if (tab.length) {
-        for (t in tab) {
-            if (typeof tab[t] === 'object') {
-                panel.setActiveTab(tab[t]);
-                return;
-            }
-        }
+        panel.setActiveTab(tab[0]);
+        return;
     }
     newTab = new Ext.BoxComponent({
         title: title,
@@ -80,6 +72,7 @@ Ext.onReady(function () {
         rootVisible: false,
         enableTabScroll: true,
         defaults: {autoScroll: true},
+        collapsed: true,
         root: { nodeType: 'node' }
     });
 
