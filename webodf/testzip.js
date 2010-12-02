@@ -69,8 +69,12 @@ function compareZips(zipa, zipb, callback) {
                     callback(err);
                     return;
                 }
+                var i = 0, l = dataa.length;
                 if (dataa !== datab) {
-                    callback("Data is not equal for " + entry.filename + ".");
+                    for (i = 0; i < l && dataa[i] === datab[i]; i += 1) {}
+                    callback("Data is not equal for " + entry.filename +
+                            " at position " + i + ": " + dataa.charCodeAt(i) +
+                            " vs " + datab.charCodeAt(i) + ".");
                 } else {
                     callback(null);
                 }
@@ -89,7 +93,7 @@ function testZip(filepatha, callback) {
             return;
         }
         // open a new zip file and copy all entries from zipa to zipb
-        var filepathb = "/tmp/tmp.zip",
+        var filepathb = "tmp323.zip",
             zipb = new core.Zip(filepathb, null),
             entries = zipa.getEntries(),
             i, entriesDone = 0;
