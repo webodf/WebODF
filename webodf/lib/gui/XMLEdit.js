@@ -1,4 +1,5 @@
-/*global gui*/
+/*global gui runtime*/
+runtime.loadClass("core.PointWalker");
 /**
  * @constructor
  */
@@ -9,7 +10,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         customNS = "customns";
 
     if (!element.id) {
-        element.id = "xml" + Math.floor(Math.random() * 10000);
+        element.id = "xml" + String(Math.random()).substring(2);
     }
     element.contentEditable = true;
     cssprefix = "#" + element.id + " ";
@@ -88,7 +89,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
             sel.removeAllRanges();
             sel.addRange(r);
 */
-alert(sel.getRangeAt(0).startContainer.nodeName);
+//alert(sel.getRangeAt(0).startContainer.nodeName);
 
         cancelEvent(event);
     }
@@ -105,11 +106,11 @@ alert(sel.getRangeAt(0).startContainer.nodeName);
         listenEvent(element, "paste", cancelEvent);
     }
 
+    // remove all textnodes that contain only whitespace
     function cleanWhitespace(node) {
         var n = node.firstChild, p,
             re = /^\s*$/;
         while (n && n !== node) {
-            cleanWhitespace(n);
             p = n;
             n = n.nextSibling || n.parentNode;
             if (p.nodeType === 3 && re.test(p.nodeValue)) {
@@ -117,17 +118,13 @@ alert(sel.getRangeAt(0).startContainer.nodeName);
             }
         }
     }
-
-    function addExplicitAttributes(node) {
-        var n = node.firstChild,
-            atts, attsv, a, i, d;
-        d = node.ownerDocument;
-        while (n && n !== node) {
-            if (n.nodeType === 1) {
-                addExplicitAttributes(n);
-            }
-            n = n.nextSibling || n.parentNode;
-        }
+    /**
+     * @param {!Node} node
+     * @return {undefined}
+     */
+    function setCssHelperAttributes(node) {
+        var atts, attsv, a, i;
+        // write all attributes in a string that is shown via the css
         atts = node.attributes;
         attsv = "";
         for (i = atts.length - 1; i >= 0; i -= 1) {
@@ -136,6 +133,22 @@ alert(sel.getRangeAt(0).startContainer.nodeName);
         }
         node.setAttribute("customns_name", node.nodeName);
         node.setAttribute("customns_atts", attsv);
+    }
+    /**
+     * @param {!Node} node
+     * @return {undefined}
+     */
+    function addExplicitAttributes(node) {
+        var n = node.firstChild;
+        // recurse over the dom
+        while (n && n !== node) {
+            if (n.nodeType === 1) {
+                addExplicitAttributes(n);
+            }
+            n = n.nextSibling || n.parentNode;
+        }
+        setCssHelperAttributes(node);
+        cleanWhitespace(node);
     }
 
     function getNamespacePrefixes(node, prefixes) {
@@ -158,16 +171,22 @@ alert(sel.getRangeAt(0).startContainer.nodeName);
         }
     }
 
+    /**
+     * Give each namespace a unique prefix.
+     * @param {Object.<?string,?string>} prefixes Map with namespace as key and
+     *                                          prefix as value
+     * @return {undefined}
+     */
     function generateUniquePrefixes(prefixes) {
         var taken = {},
-            ns, p, i = 0;
+            ns, p, n = 0;
         for (ns in prefixes) {
             if (ns) {
                 p = prefixes[ns];
                 if (!p || p in taken || p === "xmlns") {
                     do {
-                        p = "ns" + i;
-                        i += 1;
+                        p = "ns" + n;
+                        n += 1;
                     } while (p in taken);
                     prefixes[ns] = p;
                 }
@@ -220,7 +239,7 @@ alert(sel.getRangeAt(0).startContainer.nodeName);
         node = element.ownerDocument.importNode(node, true);
         documentElement = node;
 
-        cleanWhitespace(node);
+        addExplicitAttributes(node);
 
         while (element.lastChild) {
             element.removeChild(element.lastChild);
@@ -228,8 +247,6 @@ alert(sel.getRangeAt(0).startContainer.nodeName);
         element.appendChild(node);
 
         updateCSS();
-
-        addExplicitAttributes(node);
     }
 
     initElement(element);
