@@ -1,6 +1,5 @@
-/*global Ext require window XMLHttpRequest*/
-var xmledit = require("../lib/gui/xmledit.js");
-var runtime = require("../lib/browser.js").createRuntime(window, XMLHttpRequest);
+/*global Ext runtime gui*/
+runtime.loadClass("gui.XMLEdit");
 
 Ext.BLANK_IMAGE_URL = '../extjs/resources/images/default/s.gif';
 
@@ -11,7 +10,7 @@ function createXMLEdit(element, url) {
 
     xmlcss.type = "text/css";
     head.appendChild(xmlcss);
-    xmledt = xmledit.createXMLEdit(element, xmlcss);
+    xmledt = new gui.XMLEdit(element, xmlcss);
     runtime.loadXML(url, function (xml) {
         if (xml.documentElement) {
             xmledt.setXML(xml);
