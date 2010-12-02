@@ -2,3 +2,7 @@ instrumented/
 webodf/docs/
 webodf/compiled.js
 webodf/simplecompiled.js
+qtjsruntime/moc_*
+qtjsruntime/*.o
+qtjsruntime/Makefile
+qtjsruntime/qtjsruntime
