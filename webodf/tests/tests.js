@@ -7,15 +7,20 @@ runtime.loadClass("core.ZipTests");
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("gui.XMLEditTests");
 
-var tests = [core.RuntimeTests, core.ZipTests, core.Base64Tests];
+var tests = [
+    core.RuntimeTests, // temporarily disabled, enable at next commit!
+    core.ZipTests,
+    core.Base64Tests
+];
 
 if (runtime.type() !== "NodeJSRuntime") {
     tests.push(core.PointWalkerTests);
 }
 
 if (runtime.type() === "BrowserRuntime") {
-    // tests.push(core.CursorTests);
-    // tests.push(gui.XMLEditTests);
+    tests.push(gui.CaretTests);
+    tests.push(core.CursorTests);
+    tests.push(gui.XMLEditTests);
 }
 
 var tester = new core.UnitTester();

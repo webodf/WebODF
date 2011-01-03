@@ -33,7 +33,7 @@ core.CursorTests = function CursorTests(runner) {
     function setupEmptyDoc() {
         var selection = window.getSelection(),
             doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            cursor = new core.Cursor(selection, doc);
+            cursor = new core.Cursor(selection, doc, false);
         t = { selection: selection, doc: doc, cursor: cursor };
         runner.shouldBeNonNull(t, selection);
     }

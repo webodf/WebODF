@@ -1,5 +1,7 @@
-/*global gui runtime*/
+/*global runtime core gui*/
 runtime.loadClass("core.PointWalker");
+runtime.loadClass("core.Cursor");
+//runtime.loadClass("gui.Caret");
 /**
  * @constructor
  */
@@ -7,12 +9,13 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
     var simplecss,
         cssprefix,
         documentElement,
-        customNS = "customns";
+        customNS = "customns",
+        walker = null;
 
     if (!element.id) {
         element.id = "xml" + String(Math.random()).substring(2);
     }
-    element.contentEditable = true;
+//    element.contentEditable = true;
     cssprefix = "#" + element.id + " ";
 
     function installHandlers() {
@@ -52,16 +55,52 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         return false;
     }
 
+    function syncSelectionWithWalker() {
+        var sel = element.ownerDocument.defaultView.getSelection(),
+            r;
+        if (!sel || sel.rangeCount <= 0 || !walker) {
+            return;
+        }
+        r = sel.getRangeAt(0);
+        walker.setPoint(r.startContainer, r.startOffset);
+    }
+
+    function syncWalkerWithSelection() {
+        var sel = element.ownerDocument.defaultView.getSelection(),
+            n, r;
+        sel.removeAllRanges();
+        if (!walker || !walker.node()) {
+            return;
+        }
+        n = walker.node();
+        r = n.ownerDocument.createRange();
+        r.setStart(n, walker.position());
+        r.collapse(true);
+        sel.addRange(r);
+    }
+
     function handleKeyDown(event) {
         var charCode = event.charCode || event.keyCode;
-        if (isCaretMoveCommand(charCode)) {
+        // cursor movement
+        walker = null;
+        if (walker && charCode === 39) { // right arrow
+            syncSelectionWithWalker();
+        alert(walker.node() + " " + walker.position());
+            walker.stepForward();
+            syncWalkerWithSelection();
+        alert(walker.node() + " " + walker.position());
+        } else if (walker && charCode === 37) { //left arrow
+            syncSelectionWithWalker();
+            walker.stepBackward();
+            syncWalkerWithSelection();
+        } else if (isCaretMoveCommand(charCode)) {
             return;
         }
         cancelEvent(event);
     }
 
     function handleKeyPress(event) {
-        handleKeyDown(event);
+//        handleKeyDown(event);
     }
 
     function handleClick(event) {
@@ -89,7 +128,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
             sel.removeAllRanges();
             sel.addRange(r);
 */
-//alert(sel.getRangeAt(0).startContainer.nodeName);
+//alert(sel.getRangeAt(0).startContainer.nodeName + " " + sel.getRangeAt(0).startOffset);
 
         cancelEvent(event);
     }
@@ -98,6 +137,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         listenEvent(element, "click", handleClick);
         listenEvent(element, "keydown", handleKeyDown);
         listenEvent(element, "keypress", handleKeyPress);
+        //listenEvent(element, "mouseup", handleMouseUp);
         // ignore drop events, dragstart, drag, dragenter, dragover are ok for now
         listenEvent(element, "drop", cancelEvent);
         listenEvent(element, "dragend", cancelEvent);
@@ -247,6 +287,8 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         element.appendChild(node);
 
         updateCSS();
+
+        walker = new core.PointWalker(node);
     }
 
     initElement(element);
