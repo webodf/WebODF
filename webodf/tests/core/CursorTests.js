@@ -33,7 +33,7 @@ core.CursorTests = function CursorTests(runner) {
     function setupEmptyDoc() {
         var selection = window.getSelection(),
             doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            cursor = new core.Cursor(selection, doc, false);
+            cursor = new core.Cursor(selection, doc);
         t = { selection: selection, doc: doc, cursor: cursor };
         runner.shouldBeNonNull(t, selection);
     }
@@ -86,8 +86,8 @@ core.CursorTests = function CursorTests(runner) {
             setSelection(t.selection, t.textnode, 3);
             t.cursor.updateToSelection();
             r.shouldBeNonNull("t.cursor.getNode().parentNode");
-            r.shouldBe("t.cursor.getNode().previousSibling.nodeValue", "'abc'");
-            r.shouldBeNull("t.cursor.getNode().nextSibling");
+            r.shouldBe(t, "t.cursor.getNode().previousSibling.nodeValue", "'abc'");
+            r.shouldBeNull(t, "t.cursor.getNode().nextSibling");
         },
         function testOnSimpleText4() {
             var textnode2; 
@@ -99,9 +99,9 @@ core.CursorTests = function CursorTests(runner) {
             textnode2 = t.cursor.getNode().nextSibling;
             setSelection(t.selection, textnode2, 1);
             t.cursor.updateToSelection();
-            r.shouldBeNonNull("t.cursor.getNode().parentNode");
-            r.shouldBe("t.cursor.getNode().previousSibling.nodeValue", "'ab'");
-            r.shouldBe("t.cursor.getNode().nextSibling.nodeValue", "'c'");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
+            r.shouldBe(t, "t.cursor.getNode().previousSibling.nodeValue", "'ab'");
+            r.shouldBe(t, "t.cursor.getNode().nextSibling.nodeValue", "'c'");
         },
         function testOnSimpleText5() {
             var textnode2; 
@@ -113,13 +113,13 @@ core.CursorTests = function CursorTests(runner) {
             textnode2 = t.cursor.getNode().nextSibling;
             setSelection(t.selection, t.textnode, 0, textnode2, 2);
             t.cursor.updateToSelection();
-            r.shouldBe("t.selection.rangeCount", "1");
-            r.shouldBeNull("t.cursor.getNode().parentNode");
+            r.shouldBe(t, "t.selection.rangeCount", "1");
+            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
             t.range = t.selection.getRangeAt(0);
-            r.shouldBe("t.range.startContainer", "t.textnode");
-            r.shouldBe("t.range.startOffset", "0");
-            r.shouldBe("t.range.endContainer", "t.textnode");
-            r.shouldBe("t.range.endOffset", "3");
+            r.shouldBe(t, "t.range.startContainer", "t.textnode");
+            r.shouldBe(t, "t.range.startOffset", "0");
+            r.shouldBe(t, "t.range.endContainer", "t.textnode");
+            r.shouldBe(t, "t.range.endOffset", "3");
         },
         function testOnSimpleText5b() {
             var textnode2; 
@@ -129,13 +129,13 @@ core.CursorTests = function CursorTests(runner) {
             textnode2 = t.cursor.getNode().nextSibling;
             setSelection(t.selection, t.textnode.parentNode, 1, textnode2, 2);
             t.cursor.updateToSelection();
-            r.shouldBe("t.selection.rangeCount", "1");
-            r.shouldBeNull("t.cursor.getNode().parentNode");
+            r.shouldBe(t, "t.selection.rangeCount", "1");
+            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
             t.range = t.selection.getRangeAt(0);
-            r.shouldBe("t.range.startContainer", "t.textnode");
-            r.shouldBe("t.range.startOffset", "1");
-            r.shouldBe("t.range.endContainer", "t.textnode");
-            r.shouldBe("t.range.endOffset", "3");
+            r.shouldBe(t, "t.range.startContainer", "t.textnode");
+            r.shouldBe(t, "t.range.startOffset", "1");
+            r.shouldBe(t, "t.range.endContainer", "t.textnode");
+            r.shouldBe(t, "t.range.endOffset", "3");
         },
         function testOnSimpleText6() {
             var somenode, textnode2;
@@ -146,7 +146,7 @@ core.CursorTests = function CursorTests(runner) {
             // select a single position so the cursor is put in the document
             setSelection(t.selection, t.textnode, 1);
             t.cursor.updateToSelection();
-            r.shouldBeNonNull("t.cursor.getNode().parentNode");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             textnode2 = t.cursor.getNode().nextSibling;
             // select a range starting at the node in the cursor, but extends
             // out of the the cursor
@@ -155,13 +155,13 @@ core.CursorTests = function CursorTests(runner) {
             // merged
             setSelection(t.selection, somenode, 0, textnode2, 2);
             t.cursor.updateToSelection();
-            r.shouldBeNull("t.cursor.getNode().parentNode");
+            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
             t.range = t.selection.getRangeAt(0);
-            r.shouldBe("t.range.startContainer", "t.textnode");
-            r.shouldBe("t.range.startOffset", "1");
-            r.shouldBe("t.range.endContainer", "t.textnode");
-            r.shouldBe("t.range.endOffset", "3");
-            r.shouldBe("t.range.collapsed", "false");
+            r.shouldBe(t, "t.range.startContainer", "t.textnode");
+            r.shouldBe(t, "t.range.startOffset", "1");
+            r.shouldBe(t, "t.range.endContainer", "t.textnode");
+            r.shouldBe(t, "t.range.endOffset", "3");
+            r.shouldBe(t, "t.range.collapsed", "false");
         }
     ];
     this.setUp = function () {
