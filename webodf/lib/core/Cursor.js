@@ -23,9 +23,8 @@
  * @constructor
  * @param {Selection} selection The selection to which the cursor corresponds
  * @param {Document} document The document in which the cursor is placed
- * @param {boolean} hideCaretInTextNode
  */
-core.Cursor = function Cursor(selection, document, hideCaretInTextNode) {
+core.Cursor = function Cursor(selection, document) {
     "use strict";
     var cursorns,
         cursorNode;
