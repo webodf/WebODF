@@ -16,8 +16,16 @@ private:
     OdfContainer *currentFile;
 public:
     OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
-        allowedFiles << "odf.html" << "style2css.js" << "defaultodfstyle.css"
-                << "qtodf.js";
+        allowedFiles << "odf.html"
+                << "defaultodfstyle.css"
+                << "odf.js"
+                << "lib/runtime.js"
+                << "lib/core/Base64.js"
+                << "lib/core/ByteArray.js"
+                << "lib/core/RawInflate.js"
+                << "lib/core/Zip.js"
+                << "lib/odf/OdfContainer.js"
+                << "lib/odf/Style2CSS.js";
     }
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
@@ -35,13 +43,12 @@ public:
         } else {
             path = req.url().toLocalFile();
         }
-        QFileInfo fileinfo = path;
+        QString relpath = dir.relativeFilePath(path);
         if (op != GetOperation
-                || !allowedFiles.contains(fileinfo.fileName())
-                || fileinfo.dir() != dir) {
+                || !allowedFiles.contains(relpath)) {
             // changing the url seems to be the only easy way to deny
             // requests
-            qDebug() << "deny " << req.url();
+            qDebug() << "deny " << req.url() << " " << relpath;
             r.setUrl(QUrl("error:not-allowed"));
         }
         return QNetworkAccessManager::createRequest(op, r, data);

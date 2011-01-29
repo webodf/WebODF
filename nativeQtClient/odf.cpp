@@ -1,5 +1,6 @@
 #include "odf.h"
 #include "odfcontainer.h"
+#include <QtCore/QFile>
 #include <QtCore/QDebug>
 #include <QtWebKit/QWebFrame>
 
@@ -17,6 +18,10 @@ Odf::addFile(const QString& containerid, const QString& path)
     if (!openfiles.contains(containerid)) {
         openfiles.insert(containerid, new OdfContainer(path, this));
     }
+    QFile file(path);
+    file.open(QIODevice::ReadOnly);
+    filedata[containerid] = file.readAll();
+    file.close();
 }
 
 QString
@@ -39,4 +44,20 @@ Odf::load(QString containerid, QString path, QString callbackid)
         callbackdata = QString();
     }
     return result;
+}
+QString
+Odf::read(QString containerid, int offset, int length) {
+    const QByteArray& data = filedata[containerid];
+    QString out(length, 0);
+    if (length + offset > data.length()) {
+        length = data.length() - offset;
+    }
+    for (int i = 0; i < length; ++i) {
+        out[i] = data[i+offset];
+    }
+    return out;
+}
+int
+Odf::getFileSize(QString containerid) {
+    return filedata[containerid].length();
 }

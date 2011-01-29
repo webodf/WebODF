@@ -2,7 +2,6 @@
 
 #include "odfcontainer.h"
 #include "odf.h"
-#include "zipnetworkreply.h"
 
 #include "odfpage.h"
 #include "odfnetworkaccessmanager.h"
@@ -55,6 +54,7 @@ OdfView::loadFile(const QString &fileName) {
     curFile = fileName;
     identifier = QString::number(qrand());
     odf->addFile(identifier, fileName);
+    QWebFrame *frame = page()->mainFrame();
     networkaccessmanager->setCurrentFile(odf->getOpenContainer(identifier));
     if (loaded) {
         slotLoadFinished(true);
@@ -65,9 +65,17 @@ OdfView::loadFile(const QString &fileName) {
 void
 OdfView::slotLoadFinished(bool ok) {
     if (!ok) return;
+    qDebug() << "slotLoadFinished";
     loaded = true;
     QWebFrame *frame = page()->mainFrame();
-    QString js = "window.odfcontainer = new window.odf.OdfContainer('"
+    QString js =
+        "runtime.read = function(path, offset, length, callback) {"
+        "    callback(null, qtodf.read(path, offset, length));"
+        "};"
+        "runtime.getFileSize = function(path, callback) {"
+        "    callback(qtodf.getFileSize(path));"
+        "};"
+        "window.odfcontainer = new window.odf.OdfContainer('"
                  + identifier + "'); refreshOdf();";
     QVariant out = frame->evaluateJavaScript(js);
     qDebug() << out;

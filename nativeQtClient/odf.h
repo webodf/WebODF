@@ -20,10 +20,13 @@ public:
     Q_PROPERTY(QString callbackdata READ getCallbackData);
 public slots:
     QString load(QString containerid, QString path, QString callbackid);
+    QString read(QString containerid, int offset, int length);
+    int getFileSize(QString containerid);
 private:
     QMap<QString, OdfContainer*> openfiles;
     QWebFrame* const frame;
     QString callbackdata;
+    QMap<QString, QByteArray> filedata;
 
     QString getCallbackData() const { return callbackdata; }
 };
