@@ -370,6 +370,11 @@ odf.OdfContainer = (function () {
             return new OdfPart(partname, self, zip);
         };
 
+        // initialize public variables
+        this.state = OdfContainer.LOADING;
+        this.rootElement = createElement(ODFDocumentElement);
+        this.parts = new OdfPartList(this);
+
         // initialize private variables
         zip = new core.Zip(url, function (err, zipobject) {
             zip = zipobject;
@@ -379,11 +384,6 @@ odf.OdfContainer = (function () {
                 loadComponents();
             }
         });
-
-        // initialize public variables
-        this.state = OdfContainer.LOADING;
-        this.rootElement = createElement(ODFDocumentElement);
-        this.parts = new OdfPartList(this);
     }
     OdfContainer.EMPTY = 0;
     OdfContainer.LOADING = 1;
