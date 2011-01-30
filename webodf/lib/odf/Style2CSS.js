@@ -132,17 +132,17 @@ odf.Style2CSS = function Style2CSS() {
     function getStyleMap(doc, stylesnode) {
         // put all style elements in a hash map by family and name
         var stylemap = {}, iter, node, name, family;
-        iter = doc.evaluate("style:style", stylesnode, namespaceResolver,
-                XPathResult.ANY_TYPE, null);
-        node = iter.iterateNext();
+        node = stylesnode.firstChild;
         while (node) {
-            name = node.getAttributeNS(stylens, 'name');
-            family = node.getAttributeNS(stylens, 'family');
-            if (!stylemap[family]) {
-                stylemap[family] = {};
+            if (node.namespaceURI === stylens && node.localName === 'style') {
+                name = node.getAttributeNS(stylens, 'name');
+                family = node.getAttributeNS(stylens, 'family');
+                if (!stylemap[family]) {
+                    stylemap[family] = {};
+                }
+                stylemap[family][name] = node;
             }
-            stylemap[family][name] = node;
-            node = iter.iterateNext();
+            node = node.nextSibling;
         }
         return stylemap;
     }

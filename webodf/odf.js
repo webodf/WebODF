@@ -34,12 +34,15 @@ function setFramePosition(id, frame, stylesheet) {
         anchor = frame.getAttributeNS(textns, 'anchor-type'),
         x = frame.getAttributeNS(svgns, 'x'),
         y = frame.getAttributeNS(svgns, 'y'),
-        width, height, minheight, minwidth;
+        width = frame.getAttributeNS(svgns, 'width'),
+        height = frame.getAttributeNS(svgns, 'height'),
+        minheight = frame.getAttributeNS(fons, 'min-height'),
+        minwidth = frame.getAttributeNS(fons, 'min-width'); 
     if (anchor === "as-char") {
         rule = 'display: inline-block;';
     } else if (anchor || x || y) {
         rule = 'position: absolute;';
-    } else {
+    } else if (width || height || minheight || minwidth) {
         rule = 'display: block;';
     }
     if (x) {
@@ -48,24 +51,23 @@ function setFramePosition(id, frame, stylesheet) {
     if (y) {
         rule += 'top: ' + y + ';';
     }
-    width = frame.getAttributeNS(svgns, 'width');
     if (width) {
         rule += 'width: ' + width + ';';
     }
-    height = frame.getAttributeNS(svgns, 'height');
     if (height) {
         rule += 'height: ' + height + ';';
     }
-    minheight = frame.getAttributeNS(fons, 'min-height');
     if (minheight) {
         rule += 'min-height: ' + minheight + ';';
     }
-    minwidth = frame.getAttributeNS(fons, 'min-width'); 
     if (minwidth) {
         rule += 'min-width: ' + minwidth + ';';
     }
-    rule = 'draw|' + frame.localName + '[styleid="' + id + '"] {' + rule + '}';
-    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+    if (rule) {
+        rule = 'draw|' + frame.localName + '[styleid="' + id + '"] {' + rule +
+            '}';
+        stylesheet.insertRule(rule, stylesheet.cssRules.length);
+    }
 }
 function setImage(id, container, image, stylesheet) {
     image.setAttribute('styleid', id);
@@ -82,12 +84,13 @@ function setImage(id, container, image, stylesheet) {
             callback(url);
         } else {
             part = container.getPart(url);
-            part.load();
             part.onchange = function (part) {
                 callback(part.url);
             };
+            part.load();
         }
     } catch (e) {
+        alert('slight problem');
     }
 }
 function modifyImages(container, odfbody, stylesheet) {
@@ -105,15 +108,34 @@ function modifyImages(container, odfbody, stylesheet) {
     function namespaceResolver(prefix) {
         return namespaces[prefix];
     }
-    drawiter = doc.evaluate("*//draw:*" +
-            "[@svg:x|@svg:y|@svg:width|@svg:height|@fo:min-height|@fo:min-width]",
-            odfbody, namespaceResolver, XPathResult.ANY_TYPE, null);
-    node = drawiter.iterateNext();
     frames = [];
+    node = odfbody.firstChild;
+    while (node && node !== odfbody) {
+        if (node.namespaceURI === drawns) {
+            frames[frames.length] = node;
+  //  alert(frames.length + " " + node.localName);
+        }
+        if (node.firstChild) {
+            node = node.firstChild;
+        } else {
+            while (node !== odfbody && !node.nextSibling) {
+                node = node.parentNode;
+            }
+            if (node.nextSibling) {
+                node = node.nextSibling;
+            }
+        }
+    }
+/*
+    drawiter = doc.evaluate("*"+"//draw:*" +
+            "[@svg:x|@svg:y|@svg:width|@svg:height|@fo:min-height|@fo:min-width]",
+            odfbody, namespaceResolver, 0, null);
+    node = drawiter.iterateNext();
     while (node) {
         frames[frames.length] = node;
         node = drawiter.iterateNext();
     }
+*/
     for (i = 0; i < frames.length; i += 1) {
         node = frames[i];
         setFramePosition('frame' + i, node, stylesheet);
@@ -159,7 +181,6 @@ function refreshOdf() {
 
     odfnode = container.rootElement;
     document.importNode(odfnode, true);
-
     handleStyles(odfnode);
     // do content last, because otherwise the document is constantly updated
     // whenever the css changes
