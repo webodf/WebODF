@@ -74,7 +74,7 @@ public class WebODFSelector extends ListActivity {
 	final private String odfmime = "mimetypeapplication/vnd.oasis.opendocument.";
 
 	private boolean seemsODFFile(File file) {
-		if (!file.canRead() || file.length() < 100) {
+		if (file.length() < 100) {
 			return false;
 		}
 		boolean valid = false;
@@ -98,7 +98,7 @@ public class WebODFSelector extends ListActivity {
 			FilenameFilter filter = new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					File sel = new File(dir, filename);
-					return sel.isDirectory() || seemsODFFile(sel);
+					return sel.canRead() && (sel.isDirectory() || seemsODFFile(sel));
 				}
 			};
 			String[] list = mPath.list(filter);
