@@ -12,12 +12,8 @@ function handleStyles(odfelement) {
     var stylesxmlcss = document.getElementById('stylesxmlcss'),
             style2css = new odf.Style2CSS();
     stylesxmlcss = /**@type{HTMLStyleElement}*/(stylesxmlcss);
-    try {
-        style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
+    style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
                 odfelement.automaticStyles);
-    } catch (e) {
-        throw e;
-    }
 }
 var officens  = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
 var drawns    = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
@@ -113,7 +109,6 @@ function modifyImages(container, odfbody, stylesheet) {
     while (node && node !== odfbody) {
         if (node.namespaceURI === drawns) {
             frames[frames.length] = node;
-  //  alert(frames.length + " " + node.localName);
         }
         if (node.firstChild) {
             node = node.firstChild;
@@ -126,16 +121,6 @@ function modifyImages(container, odfbody, stylesheet) {
             }
         }
     }
-/*
-    drawiter = doc.evaluate("*"+"//draw:*" +
-            "[@svg:x|@svg:y|@svg:width|@svg:height|@fo:min-height|@fo:min-width]",
-            odfbody, namespaceResolver, 0, null);
-    node = drawiter.iterateNext();
-    while (node) {
-        frames[frames.length] = node;
-        node = drawiter.iterateNext();
-    }
-*/
     for (i = 0; i < frames.length; i += 1) {
         node = frames[i];
         setFramePosition('frame' + i, node, stylesheet);

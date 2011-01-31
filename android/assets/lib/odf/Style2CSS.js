@@ -132,6 +132,9 @@ odf.Style2CSS = function Style2CSS() {
     function getStyleMap(doc, stylesnode) {
         // put all style elements in a hash map by family and name
         var stylemap = {}, iter, node, name, family;
+        if (!stylesnode) {
+            return stylemap;
+        }
         node = stylesnode.firstChild;
         while (node) {
             if (node.namespaceURI === stylens && node.localName === 'style') {
@@ -431,7 +434,13 @@ odf.Style2CSS = function Style2CSS() {
         while (stylesheet.cssRules.length) {
             stylesheet.deleteRule(stylesheet.cssRules.length - 1);
         }
-        doc = styles.ownerDocument;
+        doc = null;
+        if (styles) {
+            doc = styles.ownerDocument;
+        }
+        if (autostyles) {
+            doc = autostyles.ownerDocument;
+        }
         if (!doc) {
             return;
         }
