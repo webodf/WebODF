@@ -159,7 +159,7 @@ function handleContent(container, odfnode) {
         css = positioncss.sheet;
     modifyImages(container, odfnode.body, css);
     slidecssindex = css.insertRule(
-            'office|presentation draw|page:nth-child(n) { display:block; }',
+            'office|presentation draw|page:nth-child(1n) { display:block; }',
             css.cssRules.length);    
 
     // only append the content at the end
