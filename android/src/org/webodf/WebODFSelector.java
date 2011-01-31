@@ -11,17 +11,29 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class WebODFSelector extends ListActivity {
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mRoot = null;
+		String state = Environment.getExternalStorageState();
+		// if there is no SD Card or other storage the app will crash when
+		// accessing it
+		if (Environment.MEDIA_MOUNTED.equals(state)
+				|| Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+			mRoot = Environment.getExternalStorageDirectory();
+		}
+		mPath = mRoot;
+
 		updateList();
 		ListView lv = getListView();
 		lv.setTextFilterEnabled(true);
@@ -42,12 +54,13 @@ public class WebODFSelector extends ListActivity {
 				startActivity(intent);
 			}
 		});
-/* code to immediatly open document which is handy when debugging
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setDataAndType(Uri.fromFile(new File(new File(mPath, "download"), "DanskTest08.odt")),
-				"application/vnd.oasis.opendocument.text");
-		startActivity(intent);
-*/
+		/*
+		 * code to immediately open document which is handy when debugging
+		 * Intent intent = new Intent(Intent.ACTION_VIEW);
+		 * intent.setDataAndType(Uri.fromFile(new File(new File(mPath,
+		 * "download"), "DanskTest08.odt")),
+		 * "application/vnd.oasis.opendocument.text"); startActivity(intent);
+		 */
 	}
 
 	private void updateList() {
@@ -55,8 +68,8 @@ public class WebODFSelector extends ListActivity {
 				loadFileList()));
 	}
 
-	final private File mRoot = Environment.getExternalStorageDirectory();
-	private File mPath = mRoot;
+	private File mRoot;
+	private File mPath;
 
 	final private String odfmime = "mimetypeapplication/vnd.oasis.opendocument.";
 
@@ -81,7 +94,7 @@ public class WebODFSelector extends ListActivity {
 	}
 
 	private String[] loadFileList() {
-		if (mPath.exists()) {
+		if (mPath != null && mPath.exists()) {
 			FilenameFilter filter = new FilenameFilter() {
 				public boolean accept(File dir, String filename) {
 					File sel = new File(dir, filename);
@@ -101,5 +114,11 @@ public class WebODFSelector extends ListActivity {
 		} else {
 			return new String[0];
 		}
+	}
+
+	void log(String msg) {
+		String tag = "WebODF";
+		Toast.makeText(this, tag + " -- " + msg, Toast.LENGTH_LONG).show();
+		Log.d(tag, msg);
 	}
 }

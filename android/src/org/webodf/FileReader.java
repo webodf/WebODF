@@ -16,10 +16,6 @@ public class FileReader {
 		size = f.length();
 	}
 
-	public String getit() {
-		return "oh my";
-	}
-
 	public long length() {
 		return size;
 	}
