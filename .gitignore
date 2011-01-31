@@ -6,3 +6,5 @@ qtjsruntime/moc_*
 qtjsruntime/*.o
 qtjsruntime/Makefile
 qtjsruntime/qtjsruntime
+android/bin
+android/gen
