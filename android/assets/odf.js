@@ -165,7 +165,6 @@ function refreshOdf() {
         // do content last, because otherwise the document is constantly updated
         // whenever the css changes
         handleContent(container, odfnode);
-        alert("done");
     }
         
     if (state === OdfContainer.DONE) {
