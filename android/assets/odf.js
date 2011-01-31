@@ -153,23 +153,26 @@ function handleContent(container, odfnode) {
 }
 function refreshOdf() {
     var OdfContainer = odf.OdfContainer,
-        container,
-        odfnode;
-    if (runtime.getWindow().odfcontainer.state !== OdfContainer.DONE) {
-        return;
-    }
-
+        container = runtime.getWindow().odfcontainer,
+        state = container.state;
+        
     // synchronize the object a window.odfcontainer with the view
-    container = runtime.getWindow().odfcontainer;
-
-    clear(document.body);
-
-    odfnode = container.rootElement;
-    document.importNode(odfnode, true);
-    handleStyles(odfnode);
-    // do content last, because otherwise the document is constantly updated
-    // whenever the css changes
-    handleContent(container, odfnode);
+    function callback() {
+        clear(document.body);
+        var odfnode = container.rootElement;
+        document.importNode(odfnode, true);
+        handleStyles(odfnode);
+        // do content last, because otherwise the document is constantly updated
+        // whenever the css changes
+        handleContent(container, odfnode);
+        alert("done");
+    }
+        
+    if (state === OdfContainer.DONE) {
+        callback();
+    } else { //if (state === OdfContainer.LOADING) {
+        container.onchange = callback;
+    }
 }
 
 function init() {
