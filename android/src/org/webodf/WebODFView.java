@@ -32,6 +32,7 @@ public class WebODFView extends Activity {
 		webSettings.setJavaScriptEnabled(true);
 		webSettings.setSupportZoom(true);
 		webSettings.setBuiltInZoomControls(true);
+		webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 		mWebView.addJavascriptInterface(filereader, "filereader");
 
 		mWebView.loadUrl("file:///android_asset/odf.html");
