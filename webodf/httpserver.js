@@ -9,7 +9,9 @@ var sys = require("sys"),
 http.createServer(function (request, response) {
     var uri = url.parse(request.url).pathname,
         filename = path.join(process.cwd(), uri);
-    console.log(request.method + " " + url + " " + uri + " " + filename);
+    if (uri !== '/favicon.ico') {
+        console.log(request.method + " " + uri);
+    }
     function put() {
         var contentlength = parseInt(request.headers["content-length"], 10),
             alldata = new Buffer(contentlength), sum = 0;
@@ -100,7 +102,9 @@ http.createServer(function (request, response) {
                 response.end();
             });
         } else {
-            console.log("Not found: " + uri);
+            if (uri !== '/favicon.ico') {
+                console.log("Not found: " + uri);
+            }
             response.writeHead(404, {"Content-Type": "text/plain"});
             if (request.method !== "HEAD") {
                 response.write("404 Not Found\n");
