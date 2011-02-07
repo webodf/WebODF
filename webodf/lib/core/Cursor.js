@@ -166,11 +166,8 @@ core.Cursor = function Cursor(selection, document) {
     this.updateToSelection = function () {
         var range;
         removeCursor();
-        if (selection.rangeCount === 1) {
-            range = selection.getRangeAt(0);
-            if (range.collapsed) {
-                putCursor(range.startContainer, range.startOffset);
-            }
+        if (selection.focusNode) {
+            putCursor(selection.focusNode, selection.focusOffset);
         }
     };
     /**

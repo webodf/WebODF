@@ -1,4 +1,4 @@
-/*global core runtime window*/
+/*global core runtime*/
 runtime.loadClass("core.Cursor");
 
 /**
@@ -7,7 +7,9 @@ runtime.loadClass("core.Cursor");
  * @implements {core.UnitTest}
  */
 core.CursorTests = function CursorTests(runner) {
-    var r = runner, tests, t = {};
+    var r = runner, tests, t = {},
+        maindoc = runtime.getWindow().document,
+        testarea = maindoc.getElementById("testarea");
     /**
      * @param {Selection} selection
      * @param {Node} startnode
@@ -28,42 +30,50 @@ core.CursorTests = function CursorTests(runner) {
             range.setEnd(startnode, startoffset);
         }
         selection.addRange(range);
+        if (range.startContainer !== startnode) {
+            alert("EVIL");
+        }
     }
 
-    function setupEmptyDoc() {
-        var selection = window.getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            cursor = new core.Cursor(selection, doc);
-        t = { selection: selection, doc: doc, cursor: cursor };
+    function setupEmptyRootNode() {
+        var selection = runtime.getWindow().getSelection(),
+            root = maindoc.createElementNS("", "p"),
+            cursor = new core.Cursor(selection, maindoc);
+        testarea.appendChild(root);
+        t = { selection: selection, root: root, cursor: cursor };
         runner.shouldBeNonNull(t, selection);
     }
  
     function setupSimpleTextDoc() {
-        setupEmptyDoc();
-        t.textnode = t.doc.createTextNode("abc");
-        t.doc.documentElement.appendChild(t.textnode);
+        setupEmptyRootNode();
+        t.textnode = maindoc.createTextNode("abc");
+        t.root.appendChild(t.textnode);
     }
-    
+ 
     tests = [
         // create a document, add a cursor and check that the cursor is present
-        function testOnEmptyDocument1() {
+        function testOnEmptyNode1() {
             // if the document is the container of the selection, the cursor
             // can not be in the DOM
-            setupEmptyDoc(); 
-            setSelection(t.selection, t.doc, 0);
+            setupEmptyRootNode(); 
+            setSelection(t.selection, t.root, 0);
             t.cursor.updateToSelection();
-            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
+            //r.shouldBeNull(t, "t.cursor.getNode().parentNode");
         },
-        function testOnEmptyDocument2() {
-            setupEmptyDoc(); 
-            setSelection(t.selection, t.doc.documentElement, 0);
+        function testOnEmptyNode2() {
+            setupEmptyRootNode(); 
+            setSelection(t.selection, t.root, 0);
+       //     t.selection.focusNode = r.root;
+            var range = t.selection.getRangeAt(0);
+alert((t.selection.focusNode === t.root) + " " + t.selection.rangeCount
++ (range.startContainer===t.root) + " " + (range.endContainer===t.root));
             t.cursor.updateToSelection();
             r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");
             r.shouldBeNull(t, "t.cursor.getNode().nextSibling");
         },
         function testOnSimpleText() { 
-            setupSimpleTextDoc(); 
+            setupSimpleTextDoc();
             // put the cursor at the start of the text node 
             setSelection(t.selection, t.textnode, 0);
             t.cursor.updateToSelection();
@@ -114,7 +124,8 @@ core.CursorTests = function CursorTests(runner) {
             setSelection(t.selection, t.textnode, 0, textnode2, 2);
             t.cursor.updateToSelection();
             r.shouldBe(t, "t.selection.rangeCount", "1");
-            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
+// only null if working on a separate document
+//            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
             t.range = t.selection.getRangeAt(0);
             r.shouldBe(t, "t.range.startContainer", "t.textnode");
             r.shouldBe(t, "t.range.startOffset", "0");
@@ -130,7 +141,8 @@ core.CursorTests = function CursorTests(runner) {
             setSelection(t.selection, t.textnode.parentNode, 1, textnode2, 2);
             t.cursor.updateToSelection();
             r.shouldBe(t, "t.selection.rangeCount", "1");
-            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
+// only null if working on a separate document
+//            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
             t.range = t.selection.getRangeAt(0);
             r.shouldBe(t, "t.range.startContainer", "t.textnode");
             r.shouldBe(t, "t.range.startOffset", "1");
@@ -141,7 +153,7 @@ core.CursorTests = function CursorTests(runner) {
             var somenode, textnode2;
             setupSimpleTextDoc();
             // add a child node to the cursor
-            somenode = t.doc.createElement("p");
+            somenode = maindoc.createElement("p");
             t.cursor.getNode().appendChild(somenode);
             // select a single position so the cursor is put in the document
             setSelection(t.selection, t.textnode, 1);
@@ -155,7 +167,8 @@ core.CursorTests = function CursorTests(runner) {
             // merged
             setSelection(t.selection, somenode, 0, textnode2, 2);
             t.cursor.updateToSelection();
-            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
+// only null if working on a separate document
+//            r.shouldBeNull(t, "t.cursor.getNode().parentNode");
             t.range = t.selection.getRangeAt(0);
             r.shouldBe(t, "t.range.startContainer", "t.textnode");
             r.shouldBe(t, "t.range.startOffset", "1");
@@ -166,9 +179,15 @@ core.CursorTests = function CursorTests(runner) {
     ];
     this.setUp = function () {
         t = {};
+        while (testarea.firstChild) {
+            testarea.removeChild(testarea.firstChild);
+        }
     };
     this.tearDown = function () {
         t = {};
+        while (testarea.firstChild) {
+            testarea.removeChild(testarea.firstChild);
+        }
     };
     this.tests = function () {
         return tests;
