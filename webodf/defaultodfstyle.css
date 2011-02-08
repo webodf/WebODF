@@ -140,8 +140,24 @@ draw|image {
 text|list-item {
     display: list-item;
 }
-
 text|a {
     color: blue;
     text-decoration: underline;
+}
+text|note-citation {
+    vertical-align: super;
+    font-size: smaller;
+}
+text|note-body {
+    display: none;
+}
+text|note:hover text|note-citation {
+    background: #dddddd;
+}
+text|note:hover text|note-body {
+    display: block;
+    left:1em;
+    max-width: 80%;
+    position: absolute;
+    background: #ffffaa;
 }
