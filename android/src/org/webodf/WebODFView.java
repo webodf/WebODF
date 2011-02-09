@@ -1,5 +1,6 @@
 package org.webodf;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -16,13 +17,10 @@ import android.widget.Toast;
 
 public class WebODFView extends Activity {
 	WebView mWebView;
-	FileReader filereader;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		
-		filereader = new FileReader(this, getIntent().getData().getPath());
 
 		mWebView = (WebView) findViewById(R.id.webview);
 		mWebView.setNetworkAvailable(false);
@@ -33,7 +31,6 @@ public class WebODFView extends Activity {
 		webSettings.setSupportZoom(true);
 		webSettings.setBuiltInZoomControls(true);
 		webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-		mWebView.addJavascriptInterface(filereader, "filereader");
 
 		mWebView.loadUrl("file:///android_asset/odf.html");
 	}
@@ -57,20 +54,19 @@ public class WebODFView extends Activity {
 
 		@Override
 		public void onPageFinished(WebView view, String url) {
-			//mWebView.loadUrl("javascript:(function() {alert(counter.getit());})() ");
-			//String data = fileToBase64String(getIntent().getData().getPath());
+			String path = getIntent().getData().getPath();
+			long length = (new File(path)).length();
+			String data = fileToBase64String(path);
 			mWebView.loadUrl("javascript:(function() { "
-				//	+ "var data = window.atob(\"" + data + "\");"
+					+ "var data = window.atob(\""
+					+ data
+					+ "\");"
 					+ "runtime.read = function(path, offset, length, callback) {"
-					+ "      var s = filereader.read(offset, length);"
-					+ "      callback(null, String(s));"
-					+ "};"
-					+ "runtime.getFileSize = function(path, callback) {"
-					+ "    callback(filereader.length());"
-					+ "};"
+					+ "      callback(null, data.substr(offset, length));"
+					+ "};" + "runtime.getFileSize = function(path, callback) {"
+					+ "    callback(" + length + ");" + "};"
 					+ "window.odfcontainer = new window.odf.OdfContainer('"
-					+ "        odffile'); refreshOdf();"
-					+ "})()");
+					+ "        odffile'); refreshOdf();" + "})()");
 		}
 
 		@Override
