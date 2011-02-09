@@ -318,7 +318,9 @@ odf.OdfContainer = (function () {
                             return;
                         }
                         getXmlNode('settings.xml', function (err, xmldoc) {
-                            handleSettingsXml(xmldoc);
+                            if (xmldoc) {
+                                handleSettingsXml(xmldoc);
+                            }
                             if (self.state !== OdfContainer.INVALID) {
                                 setState(OdfContainer.DONE);
                             }
