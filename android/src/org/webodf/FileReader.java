@@ -3,6 +3,7 @@ package org.webodf;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 
 public class FileReader {
 	private final WebODFView view;
@@ -20,8 +21,9 @@ public class FileReader {
 		return size;
 	}
 
-	public String read(int offset, int length) {
-		StringBuilder sb = new StringBuilder();
+	public void read(int offset, int length, String callbackname) {
+		StringWriter sw = new StringWriter();
+		Base64OutputStream base64 = new Base64OutputStream(sw);
 		FileInputStream fi;
 		try {
 			fi = new FileInputStream(path);
@@ -29,20 +31,16 @@ public class FileReader {
 			offset = 0;
 			int c;
 			while (offset < length && (c = fi.read()) != -1) {
-				sb.append((char) c);
+				base64.write(c);
 				offset++;
 			}
 			fi.close();
+			base64.close();
+			sw.close();
 		} catch (IOException e) {
 		}
-		if (offset != length) {
-			view.log("there is a problem: " + Integer.toString(offset) + " vs "
-					+ Integer.toString(length));
-		}
-		if (sb.length() != length) {
-			view.log("there is ze problem: " + Integer.toString(sb.length())
-					+ " vs " + Integer.toString(length));
-		}
-		return sb.toString();
+		view.mWebView.loadUrl("javascript:(function() {"
+				+ callbackname + "(window.atob(\"" + sw.toString() + "\"));"
+				+ "})()");
 	}
 }

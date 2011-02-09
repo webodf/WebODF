@@ -1,6 +1,5 @@
 package org.webodf;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -17,10 +16,13 @@ import android.widget.Toast;
 
 public class WebODFView extends Activity {
 	WebView mWebView;
+	FileReader mFileReader;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+
+		mFileReader = new FileReader(this, getIntent().getData().getPath());
 
 		mWebView = (WebView) findViewById(R.id.webview);
 		mWebView.setNetworkAvailable(false);
@@ -31,6 +33,7 @@ public class WebODFView extends Activity {
 		webSettings.setSupportZoom(true);
 		webSettings.setBuiltInZoomControls(true);
 		webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+		mWebView.addJavascriptInterface(mFileReader, "filereader");
 
 		mWebView.loadUrl("file:///android_asset/odf.html");
 	}
@@ -51,20 +54,19 @@ public class WebODFView extends Activity {
 	}
 
 	private class WebODFViewClient extends WebViewClient {
-
+		
 		@Override
 		public void onPageFinished(WebView view, String url) {
-			String path = getIntent().getData().getPath();
-			long length = (new File(path)).length();
-			String data = fileToBase64String(path);
-			mWebView.loadUrl("javascript:(function() { "
-					+ "var data = window.atob(\""
-					+ data
-					+ "\");"
+			mWebView.loadUrl("javascript:(function() {"
 					+ "runtime.read = function(path, offset, length, callback) {"
-					+ "      callback(null, data.substr(offset, length));"
-					+ "};" + "runtime.getFileSize = function(path, callback) {"
-					+ "    callback(" + length + ");" + "};"
+					+ "    var name = 'filereadercallback' + String(Math.random()).substring(2);"
+					+ "    window[name] = function(data) {"
+					+ "        callback(null, data);"
+					+ "        window[name] = undefined;"
+					+ "    };"
+					+ "    filereader.read(offset, length, name);" + "};"
+					+ "runtime.getFileSize = function(path, callback) {"
+					+ "    callback(" + mFileReader.length() + ");" + "};"
 					+ "window.odfcontainer = new window.odf.OdfContainer('"
 					+ "        odffile'); refreshOdf();" + "})()");
 		}
