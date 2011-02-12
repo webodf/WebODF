@@ -7,7 +7,7 @@
 #include <QtWebKit/QWebView>
 #include <QtCore/QTimer>
 #include <QtCore/QDebug>
-#include <QDomDocument>
+#include <QtXml/QDomDocument>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 

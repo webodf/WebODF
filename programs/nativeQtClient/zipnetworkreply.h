@@ -1,7 +1,7 @@
 #ifndef ZIPNETWORKREPLY_H
 #define ZIPNETWORKREPLY_H
 
-#include <QNetworkReply>
+#include <QtNetwork/QNetworkReply>
 
 class OdfContainer;
 

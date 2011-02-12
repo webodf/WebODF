@@ -1,7 +1,7 @@
 #ifndef ODFTOHTMLCONVERTER_H
 #define ODFTOHTMLCONVERTER_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class QWebPage;
 class Odf;

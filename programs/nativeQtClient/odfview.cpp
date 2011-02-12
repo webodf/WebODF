@@ -80,5 +80,3 @@ OdfView::slotLoadFinished(bool ok) {
     QVariant out = frame->evaluateJavaScript(js);
     qDebug() << out;
 }
-
-#include "moc_odfview.cpp"

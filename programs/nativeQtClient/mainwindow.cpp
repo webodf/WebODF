@@ -1,17 +1,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "odfview.h"
-#include <QtGui/QFileDialog>
-#include <QtGui/QMdiArea>
-#include <QtGui/QFileSystemModel>
-#include <QtGui/QTreeView>
 #include <QtGui/QDockWidget>
-#include <QtCore/QDir>
+#include <QtGui/QFileDialog>
+#include <QtGui/QFileSystemModel>
+#include <QtGui/QLineEdit>
+#include <QtGui/QMdiArea>
+#include <QtGui/QTreeView>
+#include <QtGui/QVBoxLayout>
 #include <QtCore/QDebug>
-
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QSettings>
+#include <QtCore/QDir>
+#include <QtCore/QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

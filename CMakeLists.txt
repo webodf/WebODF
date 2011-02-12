@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 # builds and packages programs that use WebODF.
 
 # Find installed dependencies
-ENABLE_TESTING()
+find_package(Qt4 COMPONENTS QtWebKit QtXml)
 
 # Tools must be obtained to work with:
 include (ExternalProject)
@@ -65,3 +65,4 @@ ExternalProject_Add(
 set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
 
 add_subdirectory(webodf)
+add_subdirectory(programs)
