@@ -421,7 +421,9 @@ function NodeJSRuntime() {
             }
         });
     };
-    this.log = console.log;
+    this.log = function (msg) {
+        process.stderr.write(msg + '\n');
+    };
     this.setTimeout = setTimeout;
     this.libraryPaths = function () {
         return [__dirname];

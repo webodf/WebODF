@@ -87,6 +87,10 @@ NodeJSProcess.prototype.exit = function (exitCode) {};
  */
 NodeJSProcess.prototype.argv = [];
 /**
+ * @type {!Object}
+ */
+NodeJSProcess.prototype.stderr = {};
+/**
  * @type {!NodeJSProcess}
  */
 var process;
