@@ -31,7 +31,10 @@ function compareZips(zipa, zipb, callback) {
     var entriesa = zipa.getEntries(),
         l = entriesa.length,
         entriesb = zipb.getEntries(),
-        i, j, entrya, entryb;
+        i,
+        j,
+        entrya,
+        entryb;
     // compare the number of entries
     if (entriesb.length !== l) {
         callback("Number of entries is not equal.");
@@ -71,7 +74,9 @@ function compareZips(zipa, zipb, callback) {
                 }
                 var i = 0, l = dataa.length;
                 if (dataa !== datab) {
-                    for (i = 0; i < l && dataa[i] === datab[i]; i += 1) {}
+                    for (i = 0; i < l && dataa[i] === datab[i];) {
+                        i += 1;
+                    }
                     callback("Data is not equal for " + entry.filename +
                             " at position " + i + ": " + dataa.charCodeAt(i) +
                             " vs " + datab.charCodeAt(i) + ".");
@@ -96,7 +101,8 @@ function testZip(filepatha, callback) {
         var filepathb = "tmp323.zip",
             zipb = new core.Zip(filepathb, null),
             entries = zipa.getEntries(),
-            i, entriesDone = 0;
+            i,
+            entriesDone = 0;
         async.forEach(entries, function (entry, callback) {
             copyEntry(entry, zipb, callback);
         }, function (err) {

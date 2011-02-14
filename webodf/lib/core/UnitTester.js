@@ -1,5 +1,5 @@
 /*global runtime core*/
-
+/*jslint evil: true*/
 /**
  * @interface
  */
@@ -63,8 +63,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         if (actual === expected) {
             return true;
         }
-        if (typeof(expected) === "number" && isNaN(expected)) {
-            return typeof(actual) === "number" && isNaN(actual);
+        if (typeof expected === "number" && isNaN(expected)) {
+            return typeof actual === "number" && isNaN(actual);
         }
         if (Object.prototype.toString.call(expected) ===
                 Object.prototype.toString.call([])) {
@@ -76,7 +76,7 @@ core.UnitTestRunner = function UnitTestRunner() {
         if (v === 0 && 1 / v < 0) {
             return "-0";
         }
-        return "" + v;
+        return String(v);
     }
     /**
      * @param {!Object} t
@@ -101,7 +101,7 @@ core.UnitTestRunner = function UnitTestRunner() {
                     exception);
         } else if (isResultCorrect(av, bv)) {
             testPassed(a + " is " + b);
-        } else if (typeof(av) === typeof(bv)) {
+        } else if (typeof av === typeof bv) {
             testFailed(a + " should be " + bv + ". Was " + stringify(av) + ".");
         } else {
             testFailed(a + " should be " + bv + " (of type " + typeof bv +
@@ -166,7 +166,9 @@ core.UnitTester = function UnitTester() {
         var runner = new core.UnitTestRunner(),
             test = new TestClass(runner),
             testResults = {},
-            i, t, tests,
+            i,
+            t,
+            tests,
             lastFailCount;
         runtime.log("Running " + TestClass.name + ": " + test.description());
         tests = test.tests();
@@ -193,7 +195,7 @@ core.UnitTester = function UnitTester() {
             t(function () {
                 test.tearDown();
                 testResults[t.name] = lastFailCount ===
-                        runner.countFailedTests();
+                    runner.countFailedTests();
                 runAsyncTests(todo.slice(1));
             });
         }

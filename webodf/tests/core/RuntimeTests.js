@@ -1,4 +1,5 @@
 /*global core runtime*/
+/*jslint bitwise: false*/
 
 /**
  * @constructor
@@ -41,7 +42,9 @@ core.RuntimeTests = function RuntimeTests(runner) {
                 t.data = data;
                 t.clean = clean;
                 r.shouldBe(t, "t.data.length", "t.clean.length");
-                for (i = 0; i < max && data[i] === clean[i]; i += 1) {}
+                for (i = 0; i < max && data[i] === clean[i];) {
+                    i += 1;
+                }
                 if (i !== max) {
                     runtime.log(data.charCodeAt(i) + " vs " +
                         clean.charCodeAt(i));

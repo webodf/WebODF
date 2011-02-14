@@ -85,10 +85,8 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         walker = null;
         if (walker && charCode === 39) { // right arrow
             syncSelectionWithWalker();
-        alert(walker.node() + " " + walker.position());
             walker.stepForward();
             syncWalkerWithSelection();
-        alert(walker.node() + " " + walker.position());
         } else if (walker && charCode === 37) { //left arrow
             syncSelectionWithWalker();
             walker.stepBackward();

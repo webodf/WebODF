@@ -1,4 +1,5 @@
 /*global XMLHttpRequest*/
+/*jslint regexp: false*/
 /** asynchroneous function that lists all files **/
 function listFiles(startdir, filepattern, fileCallback, doneCallback) {
 
@@ -47,7 +48,9 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
         var refs = xml.getElementsByTagNameNS('DAV:', 'response'),
             directories = [],
             files = [],
-            i, d, href;
+            i,
+            d,
+            href;
         if (refs.length === 0) {
             throw new Error('No proper XML response.');
         }
@@ -74,7 +77,9 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
             matches,
             files = [],
             directories = [],
-            name, d, i;
+            name,
+            d,
+            i;
         while ((matches = re.exec(text)) !== null) {
             name = matches[1];
             if (dirpattern.test(name)) {

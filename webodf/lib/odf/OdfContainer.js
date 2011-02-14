@@ -1,4 +1,4 @@
-/*global runtime odf core*/
+/*global runtime odf core DOMParser document*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 /**

@@ -42,7 +42,8 @@ core.Cursor = function Cursor(selection, document) {
             len = container.length;
             ref = container.nextSibling;
             textnode = document.createTextNode(
-                    container.substringData(offset, len));
+                container.substringData(offset, len)
+            );
             container.deleteData(offset, len);
             if (ref) {
                 parent.insertBefore(textnode, ref);

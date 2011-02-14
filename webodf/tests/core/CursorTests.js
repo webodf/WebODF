@@ -31,7 +31,7 @@ core.CursorTests = function CursorTests(runner) {
         }
         selection.addRange(range);
         if (range.startContainer !== startnode) {
-            alert("EVIL");
+            runtime.log("EVIL");
         }
     }
 
@@ -65,8 +65,6 @@ core.CursorTests = function CursorTests(runner) {
             setSelection(t.selection, t.root, 0);
        //     t.selection.focusNode = r.root;
             var range = t.selection.getRangeAt(0);
-alert((t.selection.focusNode === t.root) + " " + t.selection.rangeCount
-+ (range.startContainer===t.root) + " " + (range.endContainer===t.root));
             t.cursor.updateToSelection();
             r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");

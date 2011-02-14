@@ -1,4 +1,4 @@
-/*jslint bitwise: false*/
+/*jslint bitwise: false, regexp: false*/
 /*global core runtime*/
 /*
  * $Id: base64.js,v 0.9 2009/03/01 20:51:18 dankogai Exp dankogai $
@@ -55,8 +55,12 @@ core.Base64 = (function () {
     function convertUTF8ArrayToBase64(bin) {
         var padlen = 0,
             b64 = [],
-            i, l = bin.length,
-            c0, c1, c2, n;
+            i,
+            l = bin.length,
+            c0,
+            c1,
+            c2,
+            n;
         while (bin.length % 3) {
             bin.push(0);
             padlen += 1;
@@ -86,7 +90,9 @@ core.Base64 = (function () {
         b64 = b64.replace(/[^A-Za-z0-9+\/]+/g, '');
         var bin = [],
             padlen = b64.length % 4,
-            i, l = b64.length, n;
+            i,
+            l = b64.length,
+            n;
         for (i = 0; i < l; i += 4) {
             n = ((b64tab[b64.charAt(i)]     || 0) << 18) |
                 ((b64tab[b64.charAt(i + 1)] || 0) << 12) |
@@ -111,12 +117,14 @@ core.Base64 = (function () {
             } else if (n < 0x800) {
                 bin.push(
                     0xc0 | (n >>>  6),
-                    0x80 | (n & 0x3f));
+                    0x80 | (n & 0x3f)
+                );
             } else {
                 bin.push(
                     0xe0 | ((n >>> 12) & 0x0f),
                     0x80 | ((n >>>  6) & 0x3f),
-                    0x80 |  (n         & 0x3f));
+                    0x80 |  (n         & 0x3f)
+                );
             }
         }
         return bin;
@@ -139,7 +147,7 @@ core.Base64 = (function () {
                     c2 = bin[i];
                     uni.push(((c0 & 0x0f) << 12) | ((c1 & 0x3f) << 6) |
                             (c2 & 0x3f)
-                    );
+                        );
                 }
             }
         }
@@ -159,7 +167,8 @@ core.Base64 = (function () {
     }
     
     function convertUTF8ArrayToUTF16String(bin) {
-        return String.fromCharCode.apply(String, convertUTF8ArrayToUTF16Array(bin));
+        return String.fromCharCode.apply(String,
+            convertUTF8ArrayToUTF16Array(bin));
     }
     /**
      * @param {!Array.<number>|!string} bin
@@ -177,7 +186,8 @@ core.Base64 = (function () {
                 i += 1;
                 c1 = bin.charCodeAt(i) & 0xff;
                 if (c0 < 0xe0) {
-                    str += String.fromCharCode(((c0 & 0x1f) << 6)|(c1 & 0x3f));
+                    str += String.fromCharCode(((c0 & 0x1f) << 6) |
+                        (c1 & 0x3f));
                 } else {
                     i += 1;
                     c2 = bin.charCodeAt(i) & 0xff;
@@ -236,11 +246,13 @@ core.Base64 = (function () {
     }
     
     function convertUTF16ArrayToUTF8String(uni) {
-        return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(uni));
+        return String.fromCharCode.apply(String,
+                 convertUTF16ArrayToUTF8Array(uni));
     }
     
     function convertUTF16StringToUTF8String(uni) {
-        return String.fromCharCode.apply(String, convertUTF16ArrayToUTF8Array(stringToArray(uni)));
+        return String.fromCharCode.apply(String,
+                 convertUTF16ArrayToUTF8Array(stringToArray(uni)));
     }
 
     btoa = runtime.getWindow() && runtime.getWindow().btoa; 
@@ -301,14 +313,15 @@ core.Base64 = (function () {
         this.encodeURI = function (u) {
             return convertUTF16StringToBase64(u).replace(/[+\/]/g,
                     function (m0) {
-                return m0 === '+' ? '-' : '_';
-            }).replace(/=+$/, '');
+                    return m0 === '+' ? '-' : '_';
+                }).replace(/\\=+$/, '');
         };
-        this.decode =function(a){
-            return convertBase64ToUTF16String(a.replace(/[-_]/g, function(m0){
-                return m0 == '-' ? '+' : '/';
-            }));
+        this.decode = function (a) {
+            return convertBase64ToUTF16String(a.replace(/[\-_]/g,
+                function (m0) {
+                    return m0 === '-' ? '+' : '/';
+                }));
         };
-    };
+    }
     return Base64;
-})();
+}());

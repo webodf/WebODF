@@ -1,5 +1,6 @@
-/*jslint nomen: false, evil: true*/
-/*global window XMLHttpRequest require console process __dirname setTimeout Packages print readFile quit Buffer*/
+/*jslint nomen: false, evil: true, bitwise: false */
+/*global window XMLHttpRequest require console process __dirname setTimeout
+  Packages print readFile quit Buffer*/
 
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
@@ -466,7 +467,8 @@ function RhinoRuntime() {
                     source = new Packages.org.xml.sax.InputSource(reader);
                 return source;
             };
-            file = /[^\/]*$/.exec(systemId);
+            file = systemId;
+            //file = /[^\/]*$/.exec(systemId); // what should this do?
             return open(file);
         }
     });
@@ -526,7 +528,8 @@ function RhinoRuntime() {
             throw "Non-binary encoding not implemented.";
         }
         var out = new Packages.java.io.FileOutputStream(path),
-            i, l = data.length;
+            i,
+            l = data.length;
         for (i = 0; i < l; i += 1) {
             out.write(data.charCodeAt(i));
         }
@@ -592,10 +595,10 @@ function RhinoRuntime() {
  * @type {Runtime}
  */
 var runtime = (function () {
-    if (typeof(window) !== "undefined") {
+    if (typeof window !== "undefined") {
         return new BrowserRuntime(window.document.getElementById("logoutput"));
     } else {
-        if (typeof(require) !== "undefined") {
+        if (typeof require !== "undefined") {
             return new NodeJSRuntime();
         } else {
             return new RhinoRuntime();
@@ -607,7 +610,8 @@ var runtime = (function () {
     var cache = {};
     function definePackage(packageNameComponents) {
         var topname = packageNameComponents[0],
-            i, pkg;
+            i,
+            pkg;
         // ensure top level package exists
         pkg = eval("if (typeof " + topname + " === 'undefined') {" +
                 "eval('" + topname + " = {};');}" + topname);
@@ -701,6 +705,7 @@ var runtime = (function () {
             }
             if (err) {
                 runtime.log(err);
+                runtime.exit(1);
             } else {
                 // run the script with arguments bound to arguments parameter
                 run.apply(null, argv);

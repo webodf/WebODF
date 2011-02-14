@@ -1,4 +1,5 @@
 /*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement*/
+/*jslint nomen: false */
 /**
  * @constructor
  */
@@ -39,7 +40,8 @@ NodeJSObject.prototype.open = function (path, flags, mode, callback) {};
  * @param {function(string, !number)} callback
  * @return {undefined}
  */
-NodeJSObject.prototype.read = function (fd, buffer, offset, length, position, callback) {};
+NodeJSObject.prototype.read = function (fd, buffer, offset, length, position,
+        callback) {};
 /**
  * @param {!string} path
  * @param {!string} data
@@ -147,16 +149,19 @@ Packages.javax.xml.parsers.DocumentBuilder = function () {};
  * @param {!Object} entityresolver
  * @return {undefined}
  */
-Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver = function (entityresolver) {};
+Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver =
+    function (entityresolver) {};
 /**
  * @param {!Packages.org.xml.sax.InputSource} source 
  * @return {Document}
  */
-Packages.javax.xml.parsers.DocumentBuilder.prototype.parse = function (source) {};
+Packages.javax.xml.parsers.DocumentBuilder.prototype.parse =
+    function (source) {};
 /**
  * @return {DOMImplementation}
  */
-Packages.javax.xml.parsers.DocumentBuilder.prototype.getDOMImplementation = function () {};
+Packages.javax.xml.parsers.DocumentBuilder.prototype.getDOMImplementation =
+    function () {};
 /**
  * @constructor
  */
@@ -168,23 +173,28 @@ Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance = function () {};
 /**
  * @param {!boolean} value
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setValidating = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setValidating =
+    function (value) {};
 /**
  * @param {!boolean} value
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setNamespaceAware = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setNamespaceAware =
+    function (value) {};
 /**
  * @param {!boolean} value
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setExpandEntityReferences = function (value) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype
+    .setExpandEntityReferences = function (value) {};
 /**
  * @param {?Packages.javax.xml.validation.Schema} schema
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setSchema = function (schema) {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setSchema =
+    function (schema) {};
 /**
  * @return {!Packages.javax.xml.parsers.DocumentBuilder}
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newDocumentBuilder = function () {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newDocumentBuilder =
+    function () {};
 /**
  * @namespace
  */

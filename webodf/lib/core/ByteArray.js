@@ -19,10 +19,10 @@ core.ByteArray = function ByteArray(data) {
     this.readUInt32LE = function () {
         var data = this.data,
             pos = (this.pos += 4);
-        return  ((data.charCodeAt(--pos) & 0xFF) << 24) |
-                ((data.charCodeAt(--pos) & 0xFF) << 16) |
-                ((data.charCodeAt(--pos) & 0xFF) <<  8) |
-                 (data.charCodeAt(--pos) & 0xFF);
+        return ((data.charCodeAt(--pos) & 0xFF) << 24) |
+            ((data.charCodeAt(--pos) & 0xFF) << 16) |
+            ((data.charCodeAt(--pos) & 0xFF) <<  8) |
+            (data.charCodeAt(--pos) & 0xFF);
     };
     /**
      * @return {number}
@@ -31,6 +31,6 @@ core.ByteArray = function ByteArray(data) {
         var data = this.data,
             pos = (this.pos += 2);
         return ((data.charCodeAt(--pos) & 0xFF) << 8) |
-                (data.charCodeAt(--pos) & 0xFF);
+            (data.charCodeAt(--pos) & 0xFF);
     };
 };

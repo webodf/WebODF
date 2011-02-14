@@ -17,7 +17,6 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
     function getActiveRange(node) {
         var range;
         if (selection.rangeCount === 0) {
-alert('hi');
             selection.addRange(node.ownerDocument.createRange());
         }
         return selection.getRangeAt(selection.rangeCount - 1);

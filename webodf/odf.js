@@ -1,4 +1,4 @@
-/*global runtime XMLHttpRequest document core XPathResult XMLSerializer DOMParser odf*/
+/*global runtime XMLHttpRequest document core XPathResult XMLSerializer DOMParser odf alert*/
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Style2CSS");
 
@@ -9,9 +9,10 @@ var xhtmlns = "http://www.w3.org/1999/xhtml";
  **/
 function handleStyles(odfelement) {
     // update the css translation of the styles    
-    var stylesxmlcss = document.getElementById('stylesxmlcss'),
-            style2css = new odf.Style2CSS();
-    stylesxmlcss = /**@type{HTMLStyleElement}*/(stylesxmlcss);
+    var rawstylesxmlcss = document.getElementById('stylesxmlcss'),
+            style2css = new odf.Style2CSS(),
+            stylesxmlcss;
+    stylesxmlcss = /**@type{HTMLStyleElement}*/(rawstylesxmlcss);
     style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
                 odfelement.automaticStyles);
 }
