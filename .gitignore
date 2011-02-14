@@ -1,13 +1,3 @@
 android/bin
 android/gen
-instrumented/
 nativeQtClient/nativeQtClient.pro.user
-qtjsruntime/*.o
-qtjsruntime/Makefile
-qtjsruntime/moc_*
-qtjsruntime/qtjsruntime
-qtjsruntime/qtjsruntime.pro.user
-webodf/compiled.js
-webodf/compiler.jar
-webodf/docs/
-webodf/simplecompiled.js
