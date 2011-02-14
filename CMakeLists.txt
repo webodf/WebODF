@@ -1,5 +1,5 @@
 # WebODF is mostly a JavaScript project. CMake needs to know about the C++ parts
-project (WebODF CXX Java)
+project (WebODF C CXX Java)
 cmake_minimum_required(VERSION 2.8)
 
 # This makefile 'compiles' WebODF using various tools, instruments the code and
