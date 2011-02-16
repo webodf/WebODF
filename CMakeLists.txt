@@ -64,5 +64,8 @@ ExternalProject_Add(
 )
 set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
 
+# Android
+find_path(ANDROID_SDK_DIR platform-tools/aapt)
+
 add_subdirectory(webodf)
 add_subdirectory(programs)
