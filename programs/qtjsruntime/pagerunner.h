@@ -50,7 +50,6 @@ public:
             }
             html = "<html>"
                 "<head><base href=\".\"></base><title></title></head><body>"
-                "<script src=\"../lib/runtime.js\"></script>"
                 "<script>var arguments=[" + html + "];</script>"
                 "<script src=\"" + arguments[0].toUtf8() + "\"></script>"
                 "</body></html>\n";

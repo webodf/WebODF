@@ -335,6 +335,8 @@ function BrowserRuntime(logoutput) {
         return ["../lib", ".", "lib"]; // TODO: find a good solution
                                        // probably let html app specify it
     };
+    this.setCurrentDirectory = function (dir) {
+    };
     this.type = function () {
         return "BrowserRuntime";
     };
@@ -717,5 +719,7 @@ var runtime = (function () {
         run(process.argv.slice(2));
     } else if (runtime.type() === "RhinoRuntime") {
         run(args);
+    } else {
+        run(args.slice(1));
     }
 }(typeof arguments !== "undefined" && arguments));
