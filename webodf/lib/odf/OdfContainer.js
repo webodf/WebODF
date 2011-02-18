@@ -183,8 +183,22 @@ odf.OdfContainer = (function () {
          * @return {!Node}
          */
         function importRootNode(xmldoc) {
-            var doc = self.rootElement.ownerDocument;
-            return doc.importNode(xmldoc.documentElement, true);
+            var doc = self.rootElement.ownerDocument,
+                node;
+            try {
+                node = doc.importNode(xmldoc.documentElement, true);
+            } catch (e) {
+            }
+            return node;
+        }
+        function setState(state) {
+            self.state = state;
+            if (self.onchange) {
+                self.onchange(self);
+            }
+            if (self.onstatereadychange) {
+                self.onstatereadychange(self);
+            }
         }
         /**
          * @param {!Document} xmldoc
@@ -195,7 +209,7 @@ odf.OdfContainer = (function () {
                 root = self.rootElement;
             if (!node || node.localName !== 'document-styles' ||
                     node.namespaceURI !== officens) {
-                self.state = OdfContainer.INVALID;
+                setState(OdfContainer.INVALID);
                 return;
             }
             root.styles = getDirectChild(node, officens, 'styles');
@@ -216,7 +230,7 @@ odf.OdfContainer = (function () {
                 c;
             if (!node || node.localName !== 'document-content' ||
                     node.namespaceURI !== officens) {
-                self.state = OdfContainer.INVALID;
+                setState(OdfContainer.INVALID);
                 return;
             }
             root = self.rootElement;
@@ -287,15 +301,6 @@ odf.OdfContainer = (function () {
                     return true;
                 });
             });
-        }
-        function setState(state) {
-            self.state = state;
-            if (self.onchange) {
-                self.onchange(self);
-            }
-            if (self.onstatereadychange) {
-                self.onstatereadychange(self);
-            }
         }
         /**
          * @return {undefined}
