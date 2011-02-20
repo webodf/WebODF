@@ -25,6 +25,7 @@ odf.OdfContainer = (function () {
         }
     }
     /**
+     * Return the position the node should get according to the ODF flat format.
      * @param {!Node} child
      * @return {!number}
      */
@@ -39,6 +40,8 @@ odf.OdfContainer = (function () {
         return -1;
     }
     /**
+     * Put the element at the right position in the parent.
+     * The right order is given by the value returned from getNodePosition.
      * @param {!Node} node
      * @param {?Node} child
      * @return {undefined}
@@ -266,7 +269,7 @@ odf.OdfContainer = (function () {
                 }
             } else if (automaticStyles) {
                 root.automaticStyles = automaticStyles;
-                setChild(root.automaticStyles, automaticStyles);
+                setChild(root, automaticStyles);
             }
         }
         /**
