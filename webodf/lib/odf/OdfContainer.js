@@ -177,6 +177,24 @@ odf.OdfContainer = (function () {
         this.rootElement = null;
         this.parts = null;
 
+        /**
+         * @param {!Element} element
+         * @return {undefined}
+         */
+        function removeProcessingInstructions(element) {
+            var n = element.firstChild, next, e;
+            while (n) {
+                next = n.nextSibling;
+                if (n.nodeType === 1) { // ELEMENT
+                    e = /**@type{!Element}*/(n);
+                    removeProcessingInstructions(e);
+                } else if (n.nodeType === 7) { // PROCESSING_INSTRUCTION_NODE
+                    element.removeChild(n);
+                }
+                n = next;
+            }
+        }
+
         // private functions
         /**
          * @param {!Document} xmldoc
@@ -185,6 +203,9 @@ odf.OdfContainer = (function () {
         function importRootNode(xmldoc) {
             var doc = self.rootElement.ownerDocument,
                 node;
+            // remove all processing instructions
+            // TODO: replace cursor processing instruction with an element
+            removeProcessingInstructions(xmldoc.documentElement);
             try {
                 node = doc.importNode(xmldoc.documentElement, true);
             } catch (e) {
