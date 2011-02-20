@@ -387,6 +387,7 @@ odf.OdfContainer = (function () {
             zip = zipobject;
             if (err) {
                 zip.error = err;
+                setState(OdfContainer.INVALID);
             } else {
                 loadComponents();
             }
