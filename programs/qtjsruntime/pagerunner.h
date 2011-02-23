@@ -60,7 +60,13 @@ public:
             tmp.close();
             mainFrame()->load(tmp.fileName());
         } else {
-            mainFrame()->load(url);
+            QUrl absurl = url;
+            if (url.isRelative()) {
+                absurl = QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absoluteFilePath());
+                absurl.setQueryItems(url.queryItems());
+                absurl.setFragment(url.fragment());
+            }
+            mainFrame()->load(absurl);
         }
     }
     ~PageRunner() {
