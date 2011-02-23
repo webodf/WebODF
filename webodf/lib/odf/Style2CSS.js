@@ -5,7 +5,6 @@
 odf.Style2CSS = function Style2CSS() {
     // helper constants
     var xlinkns = 'http://www.w3.org/1999/xlink',
-
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
@@ -20,8 +19,10 @@ odf.Style2CSS = function Style2CSS() {
             office: officens,
             presentation: presentationns,
             style: stylens,
+            svg: svgns,
             table: tablens,
-            text: textns
+            text: textns,
+            xlink: xlinkns
         },
 
         familynamespaceprefixes = {
@@ -271,10 +272,11 @@ odf.Style2CSS = function Style2CSS() {
         if (!node) {
             return null;
         }
-        var c = node.firstChild;
+        var c = node.firstChild, e;
         while (c) {
             if (c.namespaceURI === ns && c.localName === name) {
-                return /**@type{Element}*/(c);
+                e = /**@type{Element}*/(c);
+                return e;
             }
             c = c.nextSibling;
         }
@@ -418,7 +420,8 @@ odf.Style2CSS = function Style2CSS() {
 
     // css vs odf styles
     // ODF styles occur in families. A family is a group of odf elements to
-    // which an element applies. ODF families can be mapped to a group of css elements
+    // which an element applies. ODF families can be mapped to a group of css
+    // elements
 
     /**
      * @param {!StyleSheet} stylesheet
@@ -429,7 +432,6 @@ odf.Style2CSS = function Style2CSS() {
     this.style2css = function (stylesheet, styles, autostyles) {
         var doc, prefix, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
-    
         // make stylesheet empty
         while (stylesheet.cssRules.length) {
             stylesheet.deleteRule(stylesheet.cssRules.length - 1);
@@ -451,8 +453,8 @@ odf.Style2CSS = function Style2CSS() {
                 try {
                     stylesheet.insertRule(rule, stylesheet.cssRules.length);
                 } catch (e) {
-                    // WebKit can throw an exception here, but it will have retained
-                    // the namespace declarations anyway.
+                    // WebKit can throw an exception here, but it will have
+                    // retained the namespace declarations anyway.
                 }
             }
         }
