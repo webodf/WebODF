@@ -7,27 +7,12 @@ runtime.loadClass("odf.Style2CSS");
  * stylesheets are loaded.
  **/
 odf.OdfCanvas = (function () {
-    var drawns  = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        fons    = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        presentationns
-                = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
-        stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        svgns   = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-        tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
-        textns  = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        xlinkns = "http://www.w3.org/1999/xlink",
-        namespaces = {
-            draw: drawns,
-            fo: fons,
-            office: officens,
-            presentation: presentationns,
-            style: stylens,
-            svg: svgns,
-            table: tablens,
-            text: textns,
-            xlink: xlinkns
-        };
+    var namespaces = (new odf.Style2CSS()).namespaces,
+        drawns  = namespaces.draw,
+        fons    = namespaces.fo,
+        svgns   = namespaces.svg,
+        textns  = namespaces.text,
+        xlinkns = namespaces.xlink;
 
     /**
      * @param {!Element} element

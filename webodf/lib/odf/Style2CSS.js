@@ -423,6 +423,8 @@ odf.Style2CSS = function Style2CSS() {
     // which an element applies. ODF families can be mapped to a group of css
     // elements
 
+    this.namespaces = namespaces;
+
     /**
      * @param {!StyleSheet} stylesheet
      * @param {!Element} styles
