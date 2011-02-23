@@ -116,7 +116,8 @@ void MainWindow::open()
 }
 void MainWindow::createActions()
 {
-    openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+    //openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+    openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip(tr("Open an existing file"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));

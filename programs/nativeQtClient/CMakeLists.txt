@@ -8,8 +8,7 @@ QT4_WRAP_CPP(NATIVEQTCLIENT_MOC
     odfcontainer.h 
     odf.h
     odfnetworkaccessmanager.h
-    odfpage.h
-    odftohtmlconverter.h)
+    odfpage.h)
 QT4_WRAP_UI(NATIVEQTCLIENT_UI mainwindow.ui)
 QT4_ADD_RESOURCES(NATIVEQTCLIENT_RES ../../webodf/application.qrc)
 add_executable(nativeQtClient
@@ -20,8 +19,7 @@ add_executable(nativeQtClient
     odfcontainer.cpp
     odf.cpp
     odfnetworkaccessmanager.cpp
-    odfpage.cpp
-    odftohtmlconverter.cpp ${NATIVEQTCLIENT_MOC} ${NATIVEQTCLIENT_UI}
+    odfpage.cpp ${NATIVEQTCLIENT_MOC} ${NATIVEQTCLIENT_UI}
     ${NATIVEQTCLIENT_RES})
 
 target_link_libraries(nativeQtClient ${QT_LIBRARIES} quazip)

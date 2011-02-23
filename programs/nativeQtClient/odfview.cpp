@@ -65,7 +65,6 @@ OdfView::loadFile(const QString &fileName) {
 void
 OdfView::slotLoadFinished(bool ok) {
     if (!ok) return;
-    qDebug() << "slotLoadFinished";
     loaded = true;
     QWebFrame *frame = page()->mainFrame();
     QString js =
@@ -78,5 +77,4 @@ OdfView::slotLoadFinished(bool ok) {
         "window.odfcontainer = new window.odf.OdfContainer('"
                  + identifier + "'); refreshOdf();";
     QVariant out = frame->evaluateJavaScript(js);
-    qDebug() << out;
 }

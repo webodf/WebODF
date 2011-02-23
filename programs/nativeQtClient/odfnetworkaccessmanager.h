@@ -29,10 +29,8 @@ public:
     }
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
-        qDebug() << req.url();
         if (req.url().scheme() == "odfkit") {
             //data is inside the current zip file
-            qDebug() << "zip! " << req.url();
             return new ZipNetworkReply(this, currentFile, req, op);
         }
 
@@ -48,7 +46,6 @@ public:
                 || !allowedFiles.contains(relpath)) {
             // changing the url seems to be the only easy way to deny
             // requests
-            qDebug() << "deny " << req.url() << " " << relpath;
             r.setUrl(QUrl("error:not-allowed"));
         }
         return QNetworkAccessManager::createRequest(op, r, data);

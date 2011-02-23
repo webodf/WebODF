@@ -38,9 +38,6 @@ Odf::load(QString containerid, QString path, QString callbackid)
         QVariant out = frame->evaluateJavaScript("window.qtodf." + callbackid
                 + "(window.qtodf.callbackdata);window.qtodf." + callbackid
                 +"=null;");
-        if (out.toString().length()) {
-            qDebug() << out.toString();
-        }
         callbackdata = QString();
     }
     return result;
