@@ -57,7 +57,13 @@ http.createServer(function (request, response) {
                     response.end();
                     return;
                 }
-                response.writeHead(200, {"Content-Length": stats.size});
+                var head = {"Content-Length": stats.size};
+                if (filename.substr(-3) === ".js") {
+                    head["Content-Type"] = "text/javascript";
+                } else if (filename.substr(-4) === ".css") {
+                    head["Content-Type"] = "text/css";
+                }
+                response.writeHead(200, head);
                 if (request.method !== "HEAD") {
                     response.write(file, "binary");
                 }
