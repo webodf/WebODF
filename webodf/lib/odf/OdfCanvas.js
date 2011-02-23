@@ -9,9 +9,24 @@ runtime.loadClass("odf.Style2CSS");
 odf.OdfCanvas = (function () {
     var drawns  = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         fons    = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        presentationns
+                = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
         svgns   = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+        tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns  = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        xlinkns = "http://www.w3.org/1999/xlink";
+        xlinkns = "http://www.w3.org/1999/xlink",
+        namespaces = {
+            draw: drawns,
+            fo: fons,
+            office: officens,
+            presentations: presentationns,
+            svg: svgns,
+            table: tablens,
+            text: textns,
+            xlink: xlinkns
+        };
+
     function clear(element) {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
@@ -20,12 +35,11 @@ odf.OdfCanvas = (function () {
     /**
      * A new styles.xml has been loaded. Update the live document with it.
      **/
-    function handleStyles(odfelement) {
+    function handleStyles(odfelement, rawstylesxmlcss) {
         // update the css translation of the styles    
         var document = odfelement.ownerDocument,
-            rawstylesxmlcss = document.getElementById('stylesxmlcss'),
-                style2css = new odf.Style2CSS(),
-                stylesxmlcss;
+            style2css = new odf.Style2CSS(),
+            stylesxmlcss;
         stylesxmlcss = /**@type{HTMLStyleElement}*/(rawstylesxmlcss);
         style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
                     odfelement.automaticStyles);
@@ -96,12 +110,7 @@ odf.OdfCanvas = (function () {
         }
     }
     function modifyImages(container, odfbody, stylesheet) {
-        var namespaces = {
-                draw: drawns,
-                fo: fons,
-                svg: svgns
-            },
-            doc = odfbody.ownerDocument,
+        var doc = odfbody.ownerDocument,
             drawiter,
             node,
             frames,
@@ -136,22 +145,23 @@ odf.OdfCanvas = (function () {
             setImage('image' + i, container, images.item(i), stylesheet);
         }
     }
+
     /**
-     * A new content.xml has been loaded. Update the live document with it.
-     **/
-    function handleContent(container, odfnode) {
-        var document = odfnode.ownerDocument,
-            positioncss = /**@type{HTMLStyleElement}*/(
-                document.getElementById('positioncss')),
-            css = positioncss.sheet;
-        modifyImages(container, odfnode.body, css);
-//        slidecssindex = css.insertRule(
-//                'office|presentation draw|page:nth-child(1n) { display:block; }',
-//                css.cssRules.length);    
-    
-        // only append the content at the end
-        clear(document.body);
-        document.body.appendChild(odfnode);
+     * @param {!Document} element Put and ODF Canvas inside this element.
+     */
+    function addStyleSheet(document) {
+        var styles = document.createElement('style'),
+            head = document.getElementsByTagName('head')[0],
+            text = '', prefix;
+        for (prefix in namespaces) {
+            if (prefix) {
+                text += "@namespace " + prefix + " url(" + namespaces[prefix] +
+                        ");\n";
+            }
+        }
+        styles.appendChild(document.createTextNode(text));
+        head.appendChild(styles);
+        return styles;
     }
 
     /**
@@ -160,7 +170,26 @@ odf.OdfCanvas = (function () {
      */
     function OdfCanvas(element) {
         var self = this,
-            odfcontainer;
+            document = element.ownerDocument,
+            odfcontainer,
+            slidecssindex = 0,
+            stylesxmlcss = addStyleSheet(document),
+            positioncss = addStyleSheet(document);
+
+        /**
+         * A new content.xml has been loaded. Update the live document with it.
+         **/
+        function handleContent(container, odfnode, positioncss) {
+            var css = positioncss.sheet;
+            modifyImages(container, odfnode.body, css);
+            slidecssindex = css.insertRule(
+                'office|presentation draw|page:nth-child(1n) { display:block; }',
+                css.cssRules.length);    
+    
+            // only append the content at the end
+            clear(element);
+            element.appendChild(odfnode);
+        }
         function refreshOdf(container) {
             if (odfcontainer !== container) {
                 return;
@@ -171,10 +200,10 @@ odf.OdfCanvas = (function () {
                 clear(element);
                 var odfnode = container.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
-                handleStyles(odfnode);
+                handleStyles(odfnode, stylesxmlcss);
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
-                handleContent(container, odfnode);
+                handleContent(container, odfnode, positioncss);
             }
         
             if (odfcontainer.state === odf.OdfContainer.DONE) {
