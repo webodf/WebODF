@@ -39,9 +39,17 @@ public:
 
         QMap<QString, QString> settings = parseArguments(args);
         QStringList arguments = args.mid(settings.size() * 2);
-        url = QUrl(arguments[0]);
         exportpdf = settings.value("export-pdf");
         exportpng = settings.value("export-png");
+        url = QUrl(arguments[0]);
+        if (url.scheme() == "file" || url.isRelative()) {
+            QFileInfo info(url.toLocalFile());
+            if (!info.isReadable() || !info.isFile()) {
+                QTextStream err(stderr);
+                err << "Cannot read file '" + url.toString() + "'.\n";
+                qApp->exit(1);
+            }
+        }
 
         setNetworkAccessManager(nam);
         connect(this, SIGNAL(loadFinished(bool)), this, SLOT(finished()));
