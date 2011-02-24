@@ -26,15 +26,23 @@ private:
     QTime time;
     bool scriptMode;
     NativeIO* nativeio;
+    QString exportpdf;
+    QString exportpng;
 public:
-    PageRunner(const QStringList& arguments)
+    PageRunner(const QStringList& args)
             : QWebPage(0),
-              url(arguments[0]),
               nam(new NAM(QUrl(url).host(), QUrl(url).port(), this)),
               out(stdout),
               err(stderr),
               view(new QWidget()),
               nativeio(new NativeIO(this)) {
+
+        QMap<QString, QString> settings = parseArguments(args);
+        QStringList arguments = args.mid(settings.size() * 2);
+        url = QUrl(arguments[0]);
+        exportpdf = settings.value("export-pdf");
+        exportpng = settings.value("export-png");
+
         setNetworkAccessManager(nam);
         connect(this, SIGNAL(loadFinished(bool)), this, SLOT(finished()));
         connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
@@ -101,18 +109,16 @@ private slots:
             changed = false;
             return;
         }
-        if (scriptMode) {
-            qApp->exit(0);
-        } else {
-            QWebElement span
-                = mainFrame()->documentElement().findAll("span").last();
-
-            // save to bitmap
+        if (!exportpdf.isEmpty() || !exportpng.isEmpty()) {
             setViewportSize(mainFrame()->contentsSize());
-            renderToFile("render.png");
-            printToFile("render.pdf");
-            qApp->exit(0);
         }
+        if (!exportpng.isEmpty()) {
+            renderToFile(exportpng);
+        }
+        if (!exportpdf.isEmpty()) {
+            printToFile(exportpdf);
+        }
+        qApp->exit(0);
     }
     void slotInitWindowObjects() {
         mainFrame()->addToJavaScriptWindowObject("nativeio", nativeio);
@@ -156,7 +162,18 @@ private:
     // overload because default impl was causing a crash
     QString userAgentForUrl(const QUrl&) const {
         return QString();
-    } 
+    }
+    QMap<QString, QString> parseArguments(const QStringList& args) {
+        int i = 0;
+        QMap<QString, QString> settings;
+        while (i + 2 < args.length()) {
+            if (args[i].startsWith("--")) {
+                settings[args[i].mid(2)] = args[i+1];
+            }
+            i += 2;
+        }
+        return settings;
+    }
 };
 
 #endif

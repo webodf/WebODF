@@ -4,9 +4,13 @@
  * be assumed to be a webpage that will be opened in
  */
 #include "pagerunner.h"
+#include <QtCore/QTextStream>
 int
 main(int argc, char** argv) {
     if (argc < 2) {
+        QTextStream err(stderr);
+        err << "Usage: " << argv[0] << " [--render-pdf pdffile] "
+               "[--render-png pngfile] html/javascripfile [arguments]\n";
         return 1;
     }
     QApplication app(argc, argv);
