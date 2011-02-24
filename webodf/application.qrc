@@ -1,14 +1,14 @@
 <RCC>
     <qresource prefix="/">
-        <file>odf.html</file>
         <file>defaultodfstyle.css</file>
-        <file>lib/runtime.js</file>
-        <file>lib/core/Zip.js</file>
-        <file>lib/core/RawInflate.js</file>
         <file>lib/core/Base64.js</file>
         <file>lib/core/ByteArray.js</file>
-        <file>lib/odf/Style2CSS.js</file>
+        <file>lib/core/RawInflate.js</file>
+        <file>lib/core/Zip.js</file>
+        <file>lib/odf/OdfCanvas.js</file>
         <file>lib/odf/OdfContainer.js</file>
-        <file>odf.js</file>
+        <file>lib/odf/Style2CSS.js</file>
+        <file>lib/runtime.js</file>
+        <file>odf.html</file>
     </qresource>
 </RCC>
