@@ -115,7 +115,11 @@ odf.OdfContainer = (function () {
             if (!privatedata) {
                 return;
             }
-            self.url = 'data:;base64,';
+            if (privatedata.substr(1, 3) === "PNG") {
+                self.url = 'data:image/png;base64,';
+            } else {
+                self.url = 'data:;base64,';
+            }
             // to avoid exceptions, base64 encoding is done in chunks
             // it would make sense to move this to base64.toBase64
             var chunksize = 45000, // must be multiple of 3 and less than 50000
