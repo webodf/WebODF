@@ -60,11 +60,15 @@ public:
             tmp.close();
             mainFrame()->load(tmp.fileName());
         } else {
-            QUrl absurl = url;
+            // Make the url absolute. If it is not done here, QWebFrame will do
+            // it, and it will lose the query and fragment part.
+            QUrl absurl;
             if (url.isRelative()) {
                 absurl = QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absoluteFilePath());
                 absurl.setQueryItems(url.queryItems());
                 absurl.setFragment(url.fragment());
+            } else {
+                absurl = url;
             }
             mainFrame()->load(absurl);
         }
