@@ -14,60 +14,28 @@
       background: black;
       text-align: center;
     }
-    div.fullscreen {
-      background: black;
-      margin-left:auto; margin-right:auto;
-    }
-    #stylesxml {
-      display: none;
-    }
   </style>
   <link rel="stylesheet" type="text/css" href="defaultodfstyle.css"/>
-  <style id='stylesxmlcss' type="text/css">
-/* define namespaces here, because in WebKit they cannot be added dynamically */
-@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
-@namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
-@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
-@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
-@namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
-@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
-@namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
-@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
-  </style>
-  <style id='autostylesxmlcss' type="text/css">
-/* define namespaces here, because in WebKit they cannot be added dynamically */
-@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
-@namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
-@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
-@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
-@namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
-@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
-@namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
-@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
-  </style>
-  <style id='contentxmlcss' type="text/css">
-/* define namespaces here, because in WebKit they cannot be added dynamically */
-@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
-@namespace fo url(urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0);
-@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
-@namespace presentation url(urn:oasis:names:tc:opendocument:xmlns:presentation:1.0);
-@namespace style url(urn:oasis:names:tc:opendocument:xmlns:style:1.0);
-@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
-@namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
-@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
-  </style>
-  <style id='positioncss' type="text/css">
-/* define namespaces here, because in WebKit they cannot be added dynamically */
-@namespace draw url(urn:oasis:names:tc:opendocument:xmlns:drawing:1.0);
-@namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
-@namespace office url(urn:oasis:names:tc:opendocument:xmlns:office:1.0);
-office|presentation draw|page { display:none; }
-  </style>
   <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
-  <script src="odf.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+function init() {
+    runtime.loadClass("odf.OdfCanvas");
+    // if the url has a fragment (#...), try to load the file it represents
+    var location = String(document.location),
+        pos = location.indexOf('#'),
+        odfelement = document.getElementById("odf"),
+        odfcanvas = new odf.OdfCanvas(odfelement);
+    if (pos === -1 || !window) {
+        return;
+    }
+    location = location.substr(pos + 1);
+    odfcanvas.load(location);
+}
+  </script>
   <title></title>
 </head>
  
 <body onload='init()' >
+  <div id="odf"/>
 </body>
 </html>
