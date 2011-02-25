@@ -25,6 +25,10 @@ core.Zip = function Zip(url, entriesReadCallback) {
         inflate = new core.RawInflate().inflate,
         zip = this;
 
+    /**
+     * @param {string} str
+     * @return {!number}
+     */
     function crc32(str) {
         // Calculate the crc32 polynomial of a string  
         // 
@@ -40,10 +44,13 @@ core.Zip = function Zip(url, entriesReadCallback) {
             i,
             iTop,
             x = 0,
-            y = 0;
-    
+            y = 0,
+            length = 0;
+        if (str) {
+            length = str.length;
+        }
         crc = crc ^ (-1);
-        for (i = 0, iTop = str.length; i < iTop; i += 1) {
+        for (i = 0, iTop = length; i < iTop; i += 1) {
             y = (crc ^ str.charCodeAt(i)) & 0xFF;
             x = table[y];
             crc = (crc >>> 8) ^ x;
@@ -317,15 +324,21 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function writeEntry(entry) {
         // each entry is currently stored uncompressed
-        var data = "PK\x03\x04\x0a\x00\x00\x00\x00\x00";
+        var data = "PK\x03\x04\x0a\x00\x00\x00\x00\x00",
+            length = 0;
+        if (entry.data) {
+            length = entry.data.length;
+        }
         data += uint32LE(date2DosTime(entry.date));
         data += uint32LE(crc32(entry.data));
-        data += uint32LE(entry.data.length); // compressedSize
-        data += uint32LE(entry.data.length); // uncompressedSize
+        data += uint32LE(length); // compressedSize
+        data += uint32LE(length); // uncompressedSize
         data += uint16LE(entry.filename.length); // namelen
         data += uint16LE(0); // extralen
         data += entry.filename;
-        data += entry.data;
+        if (entry.data) {
+            data += entry.data;
+        }
         return data;
     }
     /**
@@ -335,12 +348,16 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function writeCODEntry(entry, offset) {
         // each entry is currently stored uncompressed
-        var data = "PK\x01\x02\x1e\x03\x0a\x00\x00\x00\x00\x00";
+        var data = "PK\x01\x02\x1e\x03\x0a\x00\x00\x00\x00\x00",
+            length = 0;
+        if (entry.data) {
+            length = entry.data.length;
+        }
         // mtime = mdate = 0 for now
         data += uint32LE(date2DosTime(entry.date));
         data += uint32LE(crc32(entry.data));
-        data += uint32LE(entry.data.length); // compressedSize
-        data += uint32LE(entry.data.length); // uncompressedSize
+        data += uint32LE(length); // compressedSize
+        data += uint32LE(length); // uncompressedSize
         data += uint16LE(entry.filename.length); // namelen
         // extralen, commalen, diskno, file attributes
         data += "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
@@ -356,6 +373,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
     function write(callback) {
         var data = "", i, e, codoffset, codsize,
             offsets = [0];
+        // make sure all data is in memory, for each entry that has data
+        // undefined, try to load the entry
         // write entries
         for (i = 0; i < entries.length; i += 1) {
             data += writeEntry(entries[i]);
