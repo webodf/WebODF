@@ -2,7 +2,8 @@
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 /**
- * This is a pure javascript implementation of the first simple OdfKit api.
+ * The OdfContainer class manages the various parts that constitues an ODF
+ * document.
  **/
 odf.OdfContainer = (function () {
     var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
@@ -375,23 +376,6 @@ odf.OdfContainer = (function () {
             }
             return original;
         }
-        // TODO: support single xml file serialization and different ODF
-        // versions
-        /**
-         * @param {!string} filepath
-         * @param {function(?string, ?string):undefined} callback
-         * @return {undefined}
-         */
-        function load(filepath, callback) {
-            zip.load(filepath, function (err, data) {
-                if (self.onchange) {
-                    self.onchange(self);
-                }
-                if (self.onstatereadychange) {
-                    self.onstatereadychange(self);
-                }
-            });
-        }
         // public functions
         /**
          * Open file and parse it. Return the Xml Node. Return the root node of
@@ -404,6 +388,17 @@ odf.OdfContainer = (function () {
          **/
         this.getPart = function (partname) {
             return new OdfPart(partname, self, zip);
+        };
+        /**
+         * @param {function(?string):undefined} callback
+         * @return {undefined}
+         */
+        this.save = function (callback) {
+            // TODO: update the zip entries with the data from the live
+            // ODF DOM!
+            zip.write(function (err) {
+                callback(err);
+            });
         };
 
         // initialize public variables
