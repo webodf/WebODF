@@ -380,10 +380,15 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function loadAllEntries(position, callback) {
         if (position === entries.length) {
-            callback(undefined);
+            callback(null);
             return;
         }
-        entries[position].load(function (err) {
+        var entry = entries[position];
+        if (entry.data !== undefined) {
+            loadAllEntries(position + 1, callback);
+            return;
+        }
+        entry.load(function (err) {
             if (err) {
                 callback(err);
                 return;
