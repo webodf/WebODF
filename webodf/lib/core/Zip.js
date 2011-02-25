@@ -21,9 +21,11 @@ runtime.loadClass("core.ByteArray");
  *        indicates error if present and the created object
  */
 core.Zip = function Zip(url, entriesReadCallback) {
-    var entries, filesize, nEntries,
-        inflate = new core.RawInflate().inflate,
-        zip = this;
+    var /**@type{Array.<!ZipEntry>}*/ entries,
+        /**@type{number}*/ filesize,
+        /**@type{number}*/ nEntries,
+        /**@type{Function}*/ inflate = new core.RawInflate().inflate,
+        /**@type{!core.Zip}*/ zip = this;
 
     /**
      * @param {string} str
@@ -84,12 +86,15 @@ core.Zip = function Zip(url, entriesReadCallback) {
             (date.getMinutes() << 5) | (date.getSeconds() >> 1);
     }
     /**
+     * Create a new ZipEntry.
+     * If the stream is not provided, the object should be initialized
+     * with ZipEntry.set()
      * @constructor
      * @param {!string} url
-     * @param {!core.ByteArray} stream
+     * @param {!core.ByteArray=} stream
      */
     function ZipEntry(url, stream) {
-        var sig = stream.readUInt32LE(),
+        var sig,
             namelen,
             extralen,
             commentlen,
@@ -165,9 +170,29 @@ core.Zip = function Zip(url, entriesReadCallback) {
         }
         this.load = load;
         /**
+         * @param {!string} filename
+         * @param {!string} data
+         * @param {!boolean} compressed
+         * @param {!Date} date
+         * @return {undefined}
+         */
+        function set(filename, data, compressed, date) {
+            entry.filename = filename;
+            entry.data = data;
+            entry.compressed = compressed;
+            entry.date = date;
+        }
+        this.set = set;
+        /**
          * @type {?string}
          */
         this.error = null;
+
+        if (!stream) {
+            return;
+        }
+        sig = stream.readUInt32LE();
+
         if (sig !== 0x02014b50) {
             this.error =
                 "Central directory entry has wrong signature at position " +
@@ -295,18 +320,18 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @return {undefined}
      */
     function save(filename, data, compressed, date) {
-        var e = { filename: filename, data: data, compressed: compressed,
-                date: date },
-            i,
-            olde;
+        var i,
+            entry;
         for (i = 0; i < entries.length; i += 1) {
-            olde = entries[i];
-            if (olde.filename === filename) {
-                entries[i] = e;
+            entry = entries[i];
+            if (entry.filename === filename) {
+                entry.set(filename, data, compressed, date);
                 return;
             }
         }
-        entries.push(e);
+        entry = new ZipEntry(url);
+        entry.set(filename, data, compressed, date);
+        entries.push(entry);
     }
     /**
      * @param {!number} value
