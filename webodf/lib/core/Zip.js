@@ -2,11 +2,11 @@
 /*jslint bitwise: false, maxlen: 8000*/
 /*
 * @preserve
-* OdfKit
+* WebODF
 * Copyright (c) 2010 Jos van den Oever 
 * Licensed under the ... License:
 *
-* Project home: http://www.odfkit.org/
+* Project home: http://www.webodf.org/
 */
 
 runtime.loadClass("core.RawInflate");
@@ -308,12 +308,20 @@ core.Zip = function Zip(url, entriesReadCallback) {
         }
         entries.push(e);
     }
+    /**
+     * @param {!number} value
+     * @return {!string}
+     */
     function uint32LE(value) {
         return String.fromCharCode(value & 0xff) +
             String.fromCharCode((value >> 8) & 0xff) +
             String.fromCharCode((value >> 16) & 0xff) +
             String.fromCharCode((value >> 24) & 0xff);
     }
+    /**
+     * @param {!number} value
+     * @return {!string}
+     */
     function uint16LE(value) {
         return String.fromCharCode(value & 0xff) +
             String.fromCharCode((value >> 8) & 0xff);
@@ -366,34 +374,58 @@ core.Zip = function Zip(url, entriesReadCallback) {
         return data;
     }
     /**
+     * @param {!number} position
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
+    function loadAllEntries(position, callback) {
+        if (position === entries.length) {
+            callback(undefined);
+            return;
+        }
+        entries[position].load(function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            loadAllEntries(position + 1, callback);
+        });
+    }
+    /**
      * Write the zipfile to the given path.
      * @param {!function(?string):undefined} callback receiving possible err
      * @return {undefined}
      */
     function write(callback) {
-        var data = "", i, e, codoffset, codsize,
-            offsets = [0];
         // make sure all data is in memory, for each entry that has data
         // undefined, try to load the entry
-        // write entries
-        for (i = 0; i < entries.length; i += 1) {
-            data += writeEntry(entries[i]);
-            offsets.push(data.length);
-        }
-        // write central directory
-        codoffset = data.length;
-        for (i = 0; i < entries.length; i += 1) {
-            e = entries[i];
-            data += writeCODEntry(e, offsets[i]);
-        }
-        codsize = data.length - codoffset;
-        data += "PK\x05\x06\x00\x00\x00\x00";
-        data += uint16LE(entries.length);
-        data += uint16LE(entries.length);
-        data += uint32LE(codsize);
-        data += uint32LE(codoffset);
-        data += "\x00\x00";
-        runtime.writeFile(url, data, "binary", callback);
+        loadAllEntries(0, function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            var data = "", i, e, codoffset, codsize,
+                offsets = [0];
+            // write entries
+            for (i = 0; i < entries.length; i += 1) {
+                data += writeEntry(entries[i]);
+                offsets.push(data.length);
+            }
+            // write central directory
+            codoffset = data.length;
+            for (i = 0; i < entries.length; i += 1) {
+                e = entries[i];
+                data += writeCODEntry(e, offsets[i]);
+            }
+            codsize = data.length - codoffset;
+            data += "PK\x05\x06\x00\x00\x00\x00";
+            data += uint16LE(entries.length);
+            data += uint16LE(entries.length);
+            data += uint32LE(codsize);
+            data += uint32LE(codoffset);
+            data += "\x00\x00";
+            runtime.writeFile(url, data, "binary", callback);
+        });
     }
 
     this.load = load;
