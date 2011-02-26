@@ -7,6 +7,10 @@ var core = {};
  */
 var gui = {};
 /**
+ * @namespace The dom package.
+ */
+var dom = {};
+/**
  * @namespace The ODF package.
  */
 var odf = {};

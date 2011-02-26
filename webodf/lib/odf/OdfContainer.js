@@ -1,6 +1,7 @@
-/*global runtime odf core DOMParser document*/
+/*global runtime core dom odf DOMParser document*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
+runtime.loadClass("dom.LSSerializer");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
@@ -40,6 +41,19 @@ odf.OdfContainer = (function () {
         }
         return -1;
     }
+    /**
+     * Class that filters runtime specific nodes from the DOM.
+     * @constructor
+     */
+    function OdfNodeFilter() {
+    }
+    /**
+     * @param {!Node} node
+     * @return {!number}
+     */
+    OdfNodeFilter.acceptNode = function (node) {
+        return 1; // FILTER_ACCEPT
+    };
     /**
      * Put the element at the right position in the parent.
      * The right order is given by the value returned from getNodePosition.
@@ -206,6 +220,9 @@ odf.OdfContainer = (function () {
 
         // private functions
         /**
+         * Import the document elementnode into the DOM of OdfContainer.
+         * Any processing instructions are removed, since importing them
+         * gives an exception.
          * @param {!Document} xmldoc
          * @return {!Node}
          */
@@ -244,7 +261,8 @@ odf.OdfContainer = (function () {
             }
             root.styles = getDirectChild(node, officens, 'styles');
             setChild(root, root.styles);
-            root.automaticStyles = getDirectChild(node, officens, 'automatic-styles');
+            root.automaticStyles = getDirectChild(node, officens,
+                    'automatic-styles');
             setChild(root, root.automaticStyles);
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
@@ -323,8 +341,14 @@ odf.OdfContainer = (function () {
                 // this can be done better
                 base64.convertUTF8StringToUTF16String(xmldata,
                         function (str, done) {
+                    var b, parser;
+                    b = base64.convertUTF16StringToUTF8String(str);
+                    if (b !== xmldata) {
+                        runtime.log("we have ze problem for " + filepath);
+                        runtime.log(b.length + " " + xmldata.length);
+                    }
                     if (done) {
-                        var parser = new DOMParser();
+                        parser = new DOMParser();
                         str = parser.parseFromString(str, "text/xml");
                         callback(null, str);
                     }
@@ -364,6 +388,29 @@ odf.OdfContainer = (function () {
                 });
             });
         }
+        function serializeMetaXml() {
+            var serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><o:document-meta xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            s += serializer.writeToString(self.rootElement.meta);
+            s += "</o:document-meta>";
+            return s;
+        }
+        function serializeSettingsXml() {
+            var serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-settings xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            s += serializer.writeToString(self.rootElement.settings);
+            s += "</o:document-settings>";
+            return s;
+        }
+        function serializeStylesXml() {
+            var serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-styles xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            s += serializer.writeToString(self.rootElement.styles);
+            s += serializer.writeToString(self.rootElement.automaticStyles);
+            s += serializer.writeToString(self.rootElement.masterStyles);
+            s += "</o:document-styles>";
+            return base64.convertUTF16StringToUTF8String(s);
+        }
         function createElement(Type) {
             var original = document.createElementNS(
                     Type.namespaceURI, Type.localName),
@@ -378,7 +425,7 @@ odf.OdfContainer = (function () {
         }
         // public functions
         /**
-         * Open file and parse it. Return the Xml Node. Return the root node of
+         * Open file and parse it. Return the XML Node. Return the root node of
          * the file or null if this is not possible.
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
          * elements 'document-content', 'document-styles', 'document-meta', or
@@ -394,6 +441,13 @@ odf.OdfContainer = (function () {
          * @return {undefined}
          */
         this.save = function (callback) {
+            // the assumption so far is that all ODF parts are serialized
+            // already, but meta, settings, styles and content should be
+            // refreshed
+            zip.save("settings.xml", serializeSettingsXml(), true, new Date());
+            zip.save("meta.xml", serializeMetaXml(), true, new Date());
+            zip.save("styles.xml", serializeStylesXml(), true, new Date());
+ 
             // TODO: update the zip entries with the data from the live
             // ODF DOM!
             zip.write(function (err) {

@@ -1,5 +1,8 @@
 
-set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js lib/core/RawDeflate.js lib/core/ByteArray.js lib/core/RawInflate.js lib/core/Cursor.js lib/core/UnitTester.js lib/core/PointWalker.js lib/core/Async.js lib/core/Zip.js lib/gui/Caret.js lib/gui/SelectionMover.js lib/gui/XMLEdit.js lib/odf/OdfContainer.js lib/odf/Style2CSS.js lib/odf/OdfCanvas.js)
+set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js lib/core/RawDeflate.js lib/core/ByteArray.js lib/core/RawInflate.js lib/core/Cursor.js lib/core/UnitTester.js lib/core/PointWalker.js lib/core/Async.js lib/core/Zip.js
+    lib/gui/Caret.js lib/gui/SelectionMover.js lib/gui/XMLEdit.js
+    lib/dom/LSSerializerFilter.js lib/dom/LSSerializer.js
+    lib/odf/OdfContainer.js lib/odf/Style2CSS.js lib/odf/OdfCanvas.js)
 
 set(TESTJSFILES tests/core/ZipTests.js
     tests/core/Base64Tests.js
