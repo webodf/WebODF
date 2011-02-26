@@ -26,7 +26,7 @@ if (CMAKE_Java_RUNTIME)
 
   set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --formatting PRETTY_PRINT --jscomp_error accessControls --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error deprecated --jscomp_error fileoverviewTags --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error nonStandardJsDocs --jscomp_error strictModuleDepCheck --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error visibility)
 
-  foreach(JSFILE ${LIBJSFILES})
+  foreach(JSFILE ${LIBJSFILES} ${TESTJSFILES})
     set(SHARED_CLOSURE_ARGS ${SHARED_CLOSURE_ARGS}
         --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
   endforeach(JSFILE ${LIBJSFILES})
@@ -38,7 +38,7 @@ if (CMAKE_Java_RUNTIME)
          ${SHARED_CLOSURE_ARGS}
          --compilation_level WHITESPACE_ONLY
          --js_output_file simplecompiled.js
-    DEPENDS ${LIBJSFILES}
+    DEPENDS ${LIBJSFILES} ${TESTJSFILES}
   )
 
   add_custom_command(
@@ -50,7 +50,7 @@ if (CMAKE_Java_RUNTIME)
          --compilation_level ADVANCED_OPTIMIZATIONS
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file compiled.js
-    DEPENDS ${LIBJSFILES} tools/externs.js
+    DEPENDS ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
   )
 
   add_custom_target(syntaxcheck ALL DEPENDS simplecompiled.js compiled.js)
