@@ -130,17 +130,19 @@ odf.OdfContainer = (function () {
             if (!privatedata) {
                 return;
             }
-            if (privatedata.substr(1, 3) === "PNG") {
+            var /**@const@type{!Runtime.ByteArray}*/p = privatedata,
+                chunksize = 45000, // must be multiple of 3 and less than 50000
+                i = 0;
+            if (p[1] === 0x50 && p[2] === 0x4E && p[3] === 0x47) {
                 self.url = 'data:image/png;base64,';
             } else {
                 self.url = 'data:;base64,';
             }
             // to avoid exceptions, base64 encoding is done in chunks
             // it would make sense to move this to base64.toBase64
-            var chunksize = 45000, // must be multiple of 3 and less than 50000
-                i = 0;
             while (i < privatedata.length) {
-                self.url += base64.toBase64(privatedata.substr(i, chunksize));
+                self.url += base64.convertUTF8ArrayToBase64(
+                       p.slice(i, i + chunksize));
                 i += chunksize;
             }
         }
@@ -339,21 +341,10 @@ odf.OdfContainer = (function () {
                 }
                 // assume the xml input data is utf8
                 // this can be done better
-                base64.convertUTF8StringToUTF16String(xmldata,
-                        function (str, done) {
-                    var b, parser;
-                    b = base64.convertUTF16StringToUTF8String(str);
-                    if (b !== xmldata) {
-                        runtime.log("we have ze problem for " + filepath);
-                        runtime.log(b.length + " " + xmldata.length);
-                    }
-                    if (done) {
-                        parser = new DOMParser();
-                        str = parser.parseFromString(str, "text/xml");
-                        callback(null, str);
-                    }
-                    return true;
-                });
+                var str = runtime.byteArrayToString(xmldata, "utf8"),
+                    parser = new DOMParser();
+                str = parser.parseFromString(str, "text/xml");
+                callback(null, str);
             });
         }
         /**
@@ -388,6 +379,9 @@ odf.OdfContainer = (function () {
                 });
             });
         }
+        /**
+         * @return {!string}
+         */
         function serializeMetaXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><o:document-meta xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
@@ -395,6 +389,9 @@ odf.OdfContainer = (function () {
             s += "</o:document-meta>";
             return s;
         }
+        /**
+         * @return {!string}
+         */
         function serializeSettingsXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-settings xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
@@ -402,6 +399,9 @@ odf.OdfContainer = (function () {
             s += "</o:document-settings>";
             return s;
         }
+        /**
+         * @return {!string}
+         */
         function serializeStylesXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-styles xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
@@ -409,7 +409,18 @@ odf.OdfContainer = (function () {
             s += serializer.writeToString(self.rootElement.automaticStyles);
             s += serializer.writeToString(self.rootElement.masterStyles);
             s += "</o:document-styles>";
-            return base64.convertUTF16StringToUTF8String(s);
+            return s;
+        }
+        /**
+         * @return {!string}
+         */
+        function serializeContentXml() {
+            var serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-content xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            s += serializer.writeToString(self.rootElement.automaticStyles);
+            s += serializer.writeToString(self.rootElement.body);
+            s += "</o:document-content>";
+            return s;
         }
         function createElement(Type) {
             var original = document.createElementNS(
@@ -444,12 +455,16 @@ odf.OdfContainer = (function () {
             // the assumption so far is that all ODF parts are serialized
             // already, but meta, settings, styles and content should be
             // refreshed
-            zip.save("settings.xml", serializeSettingsXml(), true, new Date());
-            zip.save("meta.xml", serializeMetaXml(), true, new Date());
-            zip.save("styles.xml", serializeStylesXml(), true, new Date());
- 
-            // TODO: update the zip entries with the data from the live
-            // ODF DOM!
+            // update the zip entries with the data from the live ODF DOM
+            var data;
+            data = runtime.byteArrayFromString(serializeSettingsXml(), "utf8");
+            zip.save("settings.xml", data, true, new Date());
+            data = runtime.byteArrayFromString(serializeMetaXml(), "utf8");
+            zip.save("meta.xml", data, true, new Date());
+            data = runtime.byteArrayFromString(serializeStylesXml(), "utf8");
+            zip.save("styles.xml", data, true, new Date());
+            data = runtime.byteArrayFromString(serializeContentXml(), "utf8");
+            zip.save("content.xml", data, true, new Date());
             zip.write(function (err) {
                 callback(err);
             });

@@ -102,9 +102,10 @@ var process;
 var __dirname;
 /**
  * @constructor
- * @param {!number} length
+ * @param {!number|!Array.<!number>|!string} arg1
+ * @param {!string=} encoding
  */
-function Buffer(length) {}
+function Buffer(arg1, encoding) {}
 /**
  * @param {!string} msg
  * @return {undefined}

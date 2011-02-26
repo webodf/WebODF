@@ -138,6 +138,9 @@ dom.LSSerializer = function LSSerializer() {
      * @return {!string}
      */
     this.writeToString = function (node) {
+        if (!node) {
+            return "";
+        }
         var /**@const@type{!Object.<string,string>}*/ nsmap = {};
         return serializeNode(nsmap, node);
     };

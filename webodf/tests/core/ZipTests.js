@@ -41,7 +41,7 @@ core.ZipTests = function ZipTests(runner) {
             zip.load("hello", function (err, data) {
                 t.err = err;
                 r.shouldBeNull(t, "t.err");
-                t.data = data;
+                t.data = runtime.byteArrayToString(data, "utf8");
                 r.shouldBe(t, "t.data.length", "16");
                 r.shouldBe(t, "t.data", "'bonjour\\nbonjour\\n'");
                 callback();
@@ -59,7 +59,8 @@ core.ZipTests = function ZipTests(runner) {
 
     function testCreateZip(callback) {
         var zip = new core.Zip("writetest.zip", null),
-            data = "application/vnd.oasis.opendocument.text";
+            data = runtime.byteArrayFromString(
+                    "application/vnd.oasis.opendocument.text", "utf8");
         zip.save("mimetype", data, false, new Date());
         zip.load("mimetype", function (err, newdata) {
             t.err = err;

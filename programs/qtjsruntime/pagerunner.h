@@ -131,6 +131,10 @@ private slots:
     void slotInitWindowObjects() {
         mainFrame()->addToJavaScriptWindowObject("nativeio", nativeio);
     }
+    bool shouldInterruptJavaScript() {
+        changed = true;
+        return false;
+    }
 private:
     void javaScriptConsoleMessage(const QString& message, int lineNumber,
             const QString& sourceID) {
@@ -144,10 +148,6 @@ private:
     void javaScriptAlert(QWebFrame* /*frame*/, const QString& msg) {
         changed = true;
         err << "ALERT: " << msg << endl;
-    }
-    bool shouldInterruptJavaScript() {
-        changed = true;
-        return false;
     }
     bool javaScriptPrompt(QWebFrame*, const QString&, const QString&, QString*){
         changed = true;
