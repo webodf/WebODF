@@ -12,17 +12,56 @@
  */
 function Runtime() {}
 /**
+ * Abstraction of byte arrays.
+ * @constructor
+ * @param {!number} size
+ */
+Runtime.ByteArray = function (size) {};
+/**
+ * @type {!number}
+ */
+Runtime.ByteArray.prototype.length = 0;
+/**
+ * @param {!number} start
+ * @param {!number} end
+ * @return {!Runtime.ByteArray}
+ */
+Runtime.ByteArray.prototype.slice = function (start, end) {};
+/**
+ * @param {!Array.<number>} array
+ * @return {!Runtime.ByteArray}
+ */
+Runtime.prototype.byteArrayFromArray = function (array) {};
+/**
+ * @param {!string} string
+ * @param {!string} encoding
+ * @return {!Runtime.ByteArray}
+ */
+Runtime.prototype.byteArrayFromString = function (string, encoding) {};
+/**
+ * @param {!Runtime.ByteArray} bytearray
+ * @param {!string} encoding
+ * @return {!string}
+ */
+Runtime.prototype.byteArrayToString = function (bytearray, encoding) {};
+/**
+ * @param {!Runtime.ByteArray} bytearray1
+ * @param {!Runtime.ByteArray} bytearray2
+ * @return {!Runtime.ByteArray}
+ */
+Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {};
+/**
  * @param {!string} path
  * @param {!number} offset
  * @param {!number} length
- * @param {!function(string=,string=):undefined} callback
+ * @param {!function(string,Runtime.ByteArray):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.read = function (path, offset, length, callback) {};
 /**
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
- * @param {!function(string=,string=):undefined} callback
+ * @param {!function(string,string):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.readFile = function (path, encoding, callback) {};
@@ -40,12 +79,11 @@ Runtime.prototype.readFileSync = function (path, encoding) {};
 Runtime.prototype.loadXML = function (path, callback) {};
 /**
  * @param {!string} path
- * @param {!string} data
- * @param {!string} encoding text encoding or "binary"
+ * @param {!Runtime.ByteArray} data
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.writeFile = function (path, data, encoding, callback) {};
+Runtime.prototype.writeFile = function (path, data, callback) {};
 /**
  * @param {!string} path
  * @param {!function(boolean):undefined} callback
@@ -102,8 +140,99 @@ var IS_COMPILED_CODE = false;
  * @param {Element} logoutput
  */
 function BrowserRuntime(logoutput) {
-    var cache = {},
+    var self = this,
+        cache = {},
+        // nativeio is a binding point for io of native runtime
         nativeio = window.nativeio || {};
+
+    function byteArrayToString(bytearray) {
+        var s = "", i, l = bytearray.length;
+        for (i = 0; i < l; i += 1) {
+            s += String.fromCharCode(bytearray[i] & 0xff);
+        }
+        return s;
+    }
+    function utf8ByteArrayToString(bytearray) {
+        var s = "", i, l = bytearray.length,
+            c0, c1, c2;
+        for (i = 0; i < l; i += 1) {
+            c0 = bytearray[i];
+            if (c0 < 0x80) {
+                s += String.fromCharCode(c0);
+            } else {
+                i += 1;
+                c1 = bytearray[i];
+                if (c0 < 0xe0) {
+                    s += String.fromCharCode(((c0 & 0x1f) << 6) | (c1 & 0x3f));
+                } else {
+                    i += 1;
+                    c2 = bytearray[i];
+                    s += String.fromCharCode(((c0 & 0x0f) << 12) |
+                            ((c1 & 0x3f) << 6) | (c2 & 0x3f));
+                }
+            }
+        }
+        return s;
+    }
+    function utf8ByteArrayFromString(string) {
+        var bytearray = [], i, l = string.length, n;
+        for (i = 0; i < l; i += 1) {
+            n = string.charCodeAt(i);
+            if (n < 0x80) {
+                bytearray.push(n);
+            } else if (n < 0x800) {
+                bytearray.push(
+                    0xc0 | (n >>>  6),
+                    0x80 | (n & 0x3f)
+                );
+            } else {
+                bytearray.push(
+                    0xe0 | ((n >>> 12) & 0x0f),
+                    0x80 | ((n >>>  6) & 0x3f),
+                    0x80 |  (n         & 0x3f)
+                );
+            }
+        }
+        return bytearray;
+    }
+    function byteArrayFromString(string) {
+        // ignore encoding for now
+        var a = [], i, l = string.length;
+        for (i = 0; i < l; i += 1) {
+            a[i] = string.charCodeAt(i) & 0xff;
+        }
+        return a;
+    }
+    /**
+     * @constructor
+     * @param {!number} size
+     */
+    this.ByteArray = function ByteArray(size) {
+        return new Array(size);
+    };
+    this.byteArrayFromArray = function (array) {
+        return array.slice();
+    };
+    this.byteArrayFromString = function (string, encoding) {
+        if (encoding === "utf8") {
+            return utf8ByteArrayFromString(string);
+        } else if (encoding !== "binary") {
+            self.log("unknown encoding: " + encoding);
+        }
+        return byteArrayFromString(string);
+    };
+    this.byteArrayToString = function (bytearray, encoding) {
+        if (encoding === "utf8") {
+            return utf8ByteArrayToString(bytearray);
+        } else if (encoding !== "binary") {
+            self.log("unknown encoding: " + encoding);
+        }
+        return byteArrayToString(bytearray);
+    };
+    this.concatByteArrays = function (bytearray1, bytearray2) {
+        return bytearray1.concat(bytearray2);
+    };
+
     function log(msgOrCategory, msg) {
         var node, doc, category;
         if (msg) {
@@ -128,14 +257,6 @@ function BrowserRuntime(logoutput) {
             console.log(msg);
         }
     }
-    // tentative function to fix problems with sending binary data
-    function cleanDataString(s) {
-        var str = "", i, l = s.length;
-        for (i = 0; i < l; i += 1) {
-            str += String.fromCharCode(s.charCodeAt(i) & 0xff);
-        }
-        return str;
-    }
     function readFile(path, encoding, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
@@ -148,7 +269,7 @@ function BrowserRuntime(logoutput) {
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        data = cleanDataString(xhr.responseText);
+                        data = self.byteArrayFromString(xhr.responseText);
                         cache[path] = data;
                     } else {
                         data = xhr.responseText;
@@ -175,18 +296,39 @@ function BrowserRuntime(logoutput) {
     }
     function read(path, offset, length, callback) {
         if (path in cache) {
-            callback(null, cache[path].substring(offset, length + offset));
+            callback(null, cache[path].slice(offset, offset + length));
             return;
         }
-        this.readFile(path, "binary", function (err, data) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, data.substring(offset, length + offset));
+        var xhr = new XMLHttpRequest();
+        function handleResult() {
+            var data;
+            if (xhr.readyState === 4) {
+                if (xhr.status === 0 && !xhr.responseText) {
+                    // for local files there is no difference between missing
+                    // and empty files, so empty files are considered as errors
+                    callback("File is empty.");
+                } else if (xhr.status === 200 || xhr.status === 0) {
+                    // report file
+                    data = new self.byteArrayFromString(xhr.responseText,
+                            "binary");
+                    cache[path] = data;
+                    callback(null, data.slice(offset, offset + length));
+                } else {
+                    // report error
+                    callback(xhr.responseText || xhr.statusText);
+                }
             }
-        });
+        }
+        xhr.open('GET', path, true);
+        xhr.onreadystatechange = handleResult;
+        xhr.overrideMimeType("text/plain; charset=x-user-defined");
         //xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
         //       (offset + length - 1));
+        try {
+            xhr.send(null);
+        } catch (e) {
+            callback(e.message);
+        }
     }
     function readFileSync(path, encoding) {
         var xhr = new XMLHttpRequest(),
@@ -206,7 +348,7 @@ function BrowserRuntime(logoutput) {
         }
         return result;
     }
-    function writeFile(path, data, encoding, callback) {
+    function writeFile(path, data, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
             if (xhr.readyState === 4) {
@@ -227,17 +369,15 @@ function BrowserRuntime(logoutput) {
         }
         xhr.open('PUT', path, true);
         xhr.onreadystatechange = handleResult;
-        if (encoding !== "binary") {
-            xhr.overrideMimeType("text/plain; charset=" + encoding);
-        }
+        data = self.byteArrayToString(data, "binary");
         try {
-            if (encoding === "binary" && xhr.sendAsBinary) {
-                data = cleanDataString(data);
+            if (xhr.sendAsBinary) {
                 xhr.sendAsBinary(data);
             } else {
                 xhr.send(data);
             }
         } catch (e) {
+            self.log("HUH? " + e + " " + data);
             callback(e.message);
         }
     }
@@ -322,7 +462,17 @@ function BrowserRuntime(logoutput) {
     this.readFile = readFile;
     this.read = read;//wrap(nativeio.read, 3) || read;
     this.readFileSync = readFileSync;
-    this.writeFile = wrap(nativeio.writeFile, 3) || writeFile;
+    if (nativeio) {
+        this.writeFile = (function () {
+            var f = wrap(nativeio.writeFile, 2);
+            return function (path, data, callback) {
+                var d = this.byteArrayToString(data, "binary");
+                f(path, d, callback);
+            };
+        }());
+    } else {
+        this.writeFile = writeFile;
+    }
     this.deleteFile = wrap(nativeio.deleteFile, 1) || deleteFile;
     this.loadXML = loadXML;
     this.isFile = isFile;
@@ -358,8 +508,42 @@ function BrowserRuntime(logoutput) {
  * @implements {Runtime}
  */
 function NodeJSRuntime() {
-    var fs = require('fs'),
+    var self = this,
+        fs = require('fs'),
         currentDirectory = "";
+
+    /**
+     * @constructor
+     * @extends {Runtime.ByteArray}
+     * @param {!number} size
+     */
+    this.ByteArray = function (size) {
+        return new Buffer(size);
+    };
+
+    this.byteArrayFromArray = function (array) {
+        var ba = new Buffer(array.length),
+            i, l = array.length;
+        for (i = 0; i < l; i += 1) {
+            ba[i] = array[i];
+        }
+        return ba;
+    };
+
+    this.concatByteArrays = function (a, b) {
+        var ba = new Buffer(a.length + b.length);
+        a.copy(ba, 0, 0);
+        b.copy(ba, a.length, 0);
+        return ba;
+    };
+
+    this.byteArrayFromString = function (string, encoding) {
+        return new Buffer(string, encoding);
+    };
+
+    this.byteArrayToString = function (bytearray, encoding) {
+        return bytearray.toString(encoding);
+    };
 
     function isFile(path, callback) {
         if (currentDirectory) {
@@ -376,6 +560,8 @@ function NodeJSRuntime() {
         if (encoding !== "binary") {
             fs.readFile(path, encoding, callback);
         } else {
+            fs.readFile(path, null, callback);
+/*
             // we have to encode the returned buffer to a string
             // it would be nice if we would have a blob or buffer object
             fs.readFile(path, null, function (err, data) {
@@ -385,10 +571,12 @@ function NodeJSRuntime() {
                 }
                 callback(null, data.toString("binary"));
             });
+*/
         }
     };
-    this.writeFile = function (path, data, encoding, callback) {
-        fs.writeFile(path, data, encoding, function (err) {
+    this.writeFile = function (path, data, callback) {
+        console.log(data.length);
+        fs.writeFile(path, data, "binary", function (err) {
             callback(err || null);
         });
     };
@@ -405,7 +593,7 @@ function NodeJSRuntime() {
             var buffer = new Buffer(length);
             fs.read(fd, buffer, 0, length, offset, function (err, bytesRead) {
                 fs.close(fd);
-                callback(err, buffer.toString("binary", 0, bytesRead));
+                callback(err, buffer);
             });
         });
     };
@@ -477,6 +665,31 @@ function RhinoRuntime() {
     //dom.setEntityResolver(entityresolver);
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
+
+    /**
+     * @constructor
+     */
+    this.ByteArray = function ByteArray() {
+        return [];
+    };
+    this.byteArrayFromArray = function (array) {
+        return array;
+    };
+    this.byteArrayFromString = function (string, encoding) {
+        // ignore encoding for now
+        var a = [], i, l = string.length;
+        for (i = 0; i < l; i += 1) {
+            a[i] = string.charCodeAt(i) & 0xff;
+        }
+        return a;
+    };
+    this.byteArrayToString = function (bytearray, encoding) {
+        // ignore encoding for now
+        return String.fromCharCode.apply(String, bytearray);
+    };
+    this.concatByteArrays = function (bytearray1, bytearray2) {
+        return bytearray1.concat(bytearray2);
+    };
 
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),

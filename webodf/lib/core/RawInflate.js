@@ -328,7 +328,7 @@ var zip_HuftBuild = function(b,	// code lengths in bits (all assumed <= BMAX)
 var zip_GET_BYTE = function() {
     if(zip_inflate_data.length == zip_inflate_pos)
 	return -1;
-    return zip_inflate_data.charCodeAt(zip_inflate_pos++) & 0xff;
+    return zip_inflate_data[zip_inflate_pos++];
 }
 
 var zip_NEEDBITS = function(n) {
@@ -741,24 +741,17 @@ var zip_inflate_internal = function(buff, off, size) {
     return n;
 }
 
-var zip_inflate = function(str) {
+var zip_inflate = function(data, size) {
     var i, j;
 
     zip_inflate_start();
-    zip_inflate_data = str;
+    zip_inflate_data = data;
     zip_inflate_pos = 0;
 
-    var buff = new Array(1024);
-    var aout = [];
-    while((i = zip_inflate_internal(buff, 0, buff.length)) > 0) {
-	var cbuf = new Array(i);
-	for(j = 0; j < i; j++){
-	    cbuf[j] = String.fromCharCode(buff[j]);
-	}
-	aout[aout.length] = cbuf.join("");
-    }
+    var buff = new runtime.ByteArray(size);
+    zip_inflate_internal(buff, 0, size);
     zip_inflate_data = null; // G.C.
-    return aout.join("");
+    return buff;
 }
 
 this.inflate = zip_inflate;

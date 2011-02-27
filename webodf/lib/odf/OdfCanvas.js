@@ -110,7 +110,7 @@ odf.OdfCanvas = (function () {
                 part.load();
             }
         } catch (e) {
-            runtime.log('slight problem');
+            runtime.log('slight problem: ' + e);
         }
     }
     /**

@@ -13,7 +13,7 @@ core.RuntimeTests = function RuntimeTests(runner) {
         runtime.read("tests.js", 2, 6, function (err, data) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
-            t.data = data;
+            t.data = runtime.byteArrayToString(data, "utf8");
             r.shouldBe(t, "t.data", "'global'");
             callback();
         });
@@ -23,17 +23,20 @@ core.RuntimeTests = function RuntimeTests(runner) {
      * Test writing a binary file and reading it back.
      */
     function testWrite(callback) {
-        var content = "", i, max = 1024, filename, clean;
+        var content = new core.ByteArrayWriter("utf8"),
+            i, max = 1024, filename, clean;
         for (i = 0; i < max; i += 1) {
-            content += String.fromCharCode(i);
+            content.appendArray([i]);
         }
+        content = content.getByteArray();
         filename = "tmp" + Math.random();
-        clean = "";
+        clean = new core.ByteArrayWriter("utf8");
         for (i = 0; i < max; i += 1) {
-            clean += String.fromCharCode(content.charCodeAt(i) & 0xff);
+            clean.appendArray([content[i] & 0xff]);
         }
+        clean = clean.getByteArray();
         // now content has content different from what is on the server
-        runtime.writeFile(filename, content, "binary", function (err) {
+        runtime.writeFile(filename, content, function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             runtime.readFile(filename, "binary", function (err, data) {
@@ -46,13 +49,11 @@ core.RuntimeTests = function RuntimeTests(runner) {
                     i += 1;
                 }
                 if (i !== max) {
-                    runtime.log(data.charCodeAt(i) + " vs " +
-                        clean.charCodeAt(i));
+                    runtime.log("at " + i + " " + data[i] + " vs " + clean[i]);
                 }
                 t.i = i;
                 t.max = max;
                 r.shouldBe(t, "t.i", "t.max");
-                r.shouldBe(t, "t.data", "t.clean");
                 // cleanup
                 runtime.deleteFile(filename, function (err) {
                     callback();

@@ -21,36 +21,15 @@ public:
     }
 public slots:
     void writeFile(const QString& path, const QString& data,
-            const QString& encoding, const QString& callbackName) {
+            const QString& callbackName) {
+        QByteArray d = data.toLatin1();
         QFile f(path);
         QString result = "null";
         if (!f.open(QIODevice::WriteOnly)) {
             result = "'Could not open file for writing.'";
-        } else if (encoding == "binary") {
-            char buffer[1024];
-            int i = 0, todo;
-            while (i < data.length()) {
-                todo = qMin(data.length() - i, 1024);
-                for (int j = 0; j < todo; ++j) {
-                    buffer[j] = data[i+j].unicode() & 0xff;
-                }
-                if (f.write(buffer, todo) != todo) {
-                    result = "'Error writing.'";
-                    break;
-                }
-                i += todo;
-            }
         } else {
-            QTextCodec* codec = QTextCodec::codecForName(encoding.toAscii());
-            if (codec == NULL) {
-                result = "'Encoding " + encoding + " is unknown.'";
-            } else {
-                QTextEncoder* encoder = codec->makeEncoder();
-                QByteArray d = encoder->fromUnicode(d);
-                delete encoder;
-                if (f.write(d) != d.length()) {
-                    result = "'Error writing.'";
-                }
+            if (f.write(d) != d.length()) {
+                result = "'Error writing.'";
             }
         }
         f.close();
