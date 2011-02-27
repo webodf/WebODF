@@ -1,6 +1,6 @@
 /*jslint nomen: false, evil: true, bitwise: false */
 /*global window XMLHttpRequest require console process __dirname setTimeout
-  Packages print readFile quit Buffer*/
+  Packages print readFile quit Buffer ArrayBuffer Uint8Array*/
 
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
@@ -145,6 +145,25 @@ function BrowserRuntime(logoutput) {
         // nativeio is a binding point for io of native runtime
         nativeio = window.nativeio || {};
 
+    // if Uint8Array is available, use that
+    if (window.ArrayBuffer && window.Uint8Array) {
+        /**
+         * @constructor
+         * @param {!number} size
+         */
+        this.ByteArray = function ByteArray(size) {
+            return new Uint8Array(new ArrayBuffer(size));
+        };
+    } else {
+        /**
+         * @constructor
+         * @param {!number} size
+         */
+        this.ByteArray = function ByteArray(size) {
+            return new Array(size);
+        };
+    }
+
     function byteArrayToString(bytearray) {
         var s = "", i, l = bytearray.length;
         for (i = 0; i < l; i += 1) {
@@ -175,41 +194,36 @@ function BrowserRuntime(logoutput) {
         return s;
     }
     function utf8ByteArrayFromString(string) {
-        var bytearray = [], i, l = string.length, n;
+        var l = string.length,
+            bytearray = new self.ByteArray(l),
+            i, n, j = 0;
         for (i = 0; i < l; i += 1) {
             n = string.charCodeAt(i);
             if (n < 0x80) {
-                bytearray.push(n);
+                bytearray[j] = n;
+                j += 1;
             } else if (n < 0x800) {
-                bytearray.push(
-                    0xc0 | (n >>>  6),
-                    0x80 | (n & 0x3f)
-                );
+                bytearray[j] = 0xc0 | (n >>>  6);
+                bytearray[j + 1] = 0x80 | (n & 0x3f);
+                j += 2;
             } else {
-                bytearray.push(
-                    0xe0 | ((n >>> 12) & 0x0f),
-                    0x80 | ((n >>>  6) & 0x3f),
-                    0x80 |  (n         & 0x3f)
-                );
+                bytearray[j] = 0xe0 | ((n >>> 12) & 0x0f);
+                bytearray[j + 1] = 0x80 | ((n >>>  6) & 0x3f);
+                bytearray[j + 2] = 0x80 |  (n         & 0x3f);
+                j += 3;
             }
         }
         return bytearray;
     }
     function byteArrayFromString(string) {
         // ignore encoding for now
-        var a = [], i, l = string.length;
+        var l = string.length,
+            a = new self.ByteArray(l), i;
         for (i = 0; i < l; i += 1) {
             a[i] = string.charCodeAt(i) & 0xff;
         }
         return a;
     }
-    /**
-     * @constructor
-     * @param {!number} size
-     */
-    this.ByteArray = function ByteArray(size) {
-        return new Array(size);
-    };
     this.byteArrayFromArray = function (array) {
         return array.slice();
     };
