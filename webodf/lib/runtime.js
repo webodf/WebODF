@@ -589,7 +589,6 @@ function NodeJSRuntime() {
         }
     };
     this.writeFile = function (path, data, callback) {
-        console.log(data.length);
         fs.writeFile(path, data, "binary", function (err) {
             callback(err || null);
         });
