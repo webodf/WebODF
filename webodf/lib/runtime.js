@@ -8,19 +8,17 @@
 
 /**
  * Abstraction of the runtime environment.
+ * @class
  * @interface
  */
 function Runtime() {}
 /**
  * Abstraction of byte arrays.
  * @constructor
+ * @extends {Array}
  * @param {!number} size
  */
 Runtime.ByteArray = function (size) {};
-/**
- * @type {!number}
- */
-Runtime.ByteArray.prototype.length = 0;
 /**
  * @param {!number} start
  * @param {!number} end
@@ -138,6 +136,7 @@ Runtime.prototype.getWindow = function () {};
 var IS_COMPILED_CODE = false;
 
 /**
+ * @this {Runtime}
  * @param {!Runtime.ByteArray} bytearray
  * @param {!string} encoding
  * @return {!string}
@@ -174,12 +173,16 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     }
     if (encoding === "utf8") {
         return utf8ByteArrayToString(bytearray);
+    } else if (encoding !== "binary") {
+        this.log("Unsupported encoding: " + encoding);
     }
     return byteArrayToString(bytearray);
 };
 
 /**
+ * @class
  * @constructor
+ * @augments Runtime
  * @implements {Runtime}
  * @param {Element} logoutput
  */
@@ -189,12 +192,15 @@ function BrowserRuntime(logoutput) {
         // nativeio is a binding point for io of native runtime
         nativeio = window.nativeio || {};
 
-    // if Uint8Array is available, use that
     /**
      * @constructor
+     * @augments Runtime.ByteArray
+     * @inner
+     * @extends {Runtime.ByteArray}
      * @param {!number} size
      */
     this.ByteArray = (window.ArrayBuffer && window.Uint8Array)
+        // if Uint8Array is available, use that
         ? function ByteArray(size) {
             return new Uint8Array(new ArrayBuffer(size));
           }
