@@ -190,8 +190,9 @@ function BrowserRuntime(logoutput) {
     var self = this,
         cache = {},
         // nativeio is a binding point for io of native runtime
-        nativeio = window.nativeio || {};
-
+        nativeio = window.nativeio || {},
+        useNativeArray = window.ArrayBuffer && window.Uint8Array;
+    
     /**
      * @constructor
      * @augments Runtime.ByteArray
@@ -199,13 +200,28 @@ function BrowserRuntime(logoutput) {
      * @extends {Runtime.ByteArray}
      * @param {!number} size
      */
-    this.ByteArray = (window.ArrayBuffer && window.Uint8Array)
+    this.ByteArray = (useNativeArray)
         // if Uint8Array is available, use that
         ? function ByteArray(size) {
             return new Uint8Array(new ArrayBuffer(size));
           }
         : function ByteArray(size) {
             return new Array(size);
+          };
+    this.concatByteArrays = (useNativeArray)
+        ? function (bytearray1, bytearray2) {
+              var i, l1 = bytearray1.length, l2 = bytearray2.length,
+                  a = new this.ByteArray(l1 + l2);
+              for (i = 0; i < l1; i += 1) {
+                  a[i] = bytearray1[i];
+              }
+              for (i = 0; i < l2; i += 1) {
+                  a[i + l1] = bytearray2[i];
+              }
+              return a;
+          }
+        : function (bytearray1, bytearray2) {
+              return bytearray1.concat(bytearray2);
           };
     function utf8ByteArrayFromString(string) {
         var l = string.length,
@@ -248,9 +264,6 @@ function BrowserRuntime(logoutput) {
             self.log("unknown encoding: " + encoding);
         }
         return byteArrayFromString(string);
-    };
-    this.concatByteArrays = function (bytearray1, bytearray2) {
-        return bytearray1.concat(bytearray2);
     };
     this.byteArrayToString = Runtime.byteArrayToString;
 
@@ -485,7 +498,7 @@ function BrowserRuntime(logoutput) {
     this.readFileSync = readFileSync;
     if (nativeio) {
         this.writeFile = (function () {
-            var f = wrap(nativeio.writeFile, 2);
+            var f = wrap(nativeio.writeFile, 2) || writeFile;
             return function (path, data, callback) {
                 var d = this.byteArrayToString(data, "binary");
                 f(path, d, callback);
