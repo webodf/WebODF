@@ -292,6 +292,10 @@ function BrowserRuntime(logoutput) {
         }
     }
     function readFile(path, encoding, callback) {
+        if (path in cache) {
+            callback(null, cache[path]);
+            return;
+        }
         var xhr = new XMLHttpRequest();
         function handleResult() {
             var data;
@@ -303,11 +307,12 @@ function BrowserRuntime(logoutput) {
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        data = self.byteArrayFromString(xhr.responseText);
-                        cache[path] = data;
+                        data = self.byteArrayFromString(xhr.responseText,
+                                "binary");
                     } else {
                         data = xhr.responseText;
                     }
+                    cache[path] = data;
                     callback(null, data);
                 } else {
                     // report error
@@ -496,7 +501,7 @@ function BrowserRuntime(logoutput) {
     this.readFile = readFile;
     this.read = read;//wrap(nativeio.read, 3) || read;
     this.readFileSync = readFileSync;
-    if (nativeio) {
+    if (nativeio.writeFile) {
         this.writeFile = (function () {
             var f = wrap(nativeio.writeFile, 2) || writeFile;
             return function (path, data, callback) {
