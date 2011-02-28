@@ -408,7 +408,12 @@ function BrowserRuntime(logoutput) {
         }
         xhr.open('PUT', path, true);
         xhr.onreadystatechange = handleResult;
-        data = self.byteArrayToString(data, "binary");
+        if (data.buffer) { // ArrayBufferView will have an ArrayBuffer property
+            data = data.buffer; // webkit supports sending an ArrayBuffer
+        } else {
+            // encode into a string, this works in FireFox >= 3
+            data = self.byteArrayToString(data, "binary");
+        }
         try {
             if (xhr.sendAsBinary) {
                 xhr.sendAsBinary(data);
