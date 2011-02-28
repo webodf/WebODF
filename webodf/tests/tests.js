@@ -18,7 +18,7 @@ if (runtime.type() !== "NodeJSRuntime") {
 }
 
 if (runtime.type() === "BrowserRuntime") {
-    tests.push(gui.CaretTests);
+//    tests.push(gui.CaretTests);
     tests.push(core.CursorTests);
     tests.push(gui.XMLEditTests);
 }
