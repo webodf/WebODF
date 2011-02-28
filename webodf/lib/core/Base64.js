@@ -53,37 +53,30 @@ core.Base64 = (function () {
     }
     
     function convertUTF8ArrayToBase64(bin) {
-        var padlen = 0,
-            b64 = [],
+        var n,
+            b64 = "",
             i,
-            l = bin.length,
-            c0,
-            c1,
-            c2,
-            n;
-        while (bin.length % 3) {
-            bin.push(0);
-            padlen += 1;
-        }
+            l = bin.length - 2;
         for (i = 0; i < l; i += 3) {
-            c0 = bin[i];
-            c1 = bin[i + 1];
-            c2 = bin[i + 2];
-            if (c0 >= 256 || c1 >= 256 || c2 >= 256) {
-                throw 'unsupported character found ' + c0 + ' ' + c1 + ' ' + c2;
-            }
-            n = (c0 << 16) | (c1 << 8) | c2;
-            b64.push(
-                b64charcodes[n >>> 18],
-                b64charcodes[(n >>> 12) & 63],
-                b64charcodes[(n >>>  6) & 63],
-                b64charcodes[n          & 63]
-            );
+            n = (bin[i] << 16) | (bin[i + 1] << 8) | bin[i + 2];
+            b64 += b64chars[n >>> 18];
+            b64 += b64chars[(n >>> 12) & 63];
+            b64 += b64chars[(n >>>  6) & 63];
+            b64 += b64chars[n          & 63];
         }
-        for (padlen -= 1; padlen >= 0; padlen -= 1) {
-            b64[b64.length - padlen - 1] = '='.charCodeAt(0);
+        if (i === l + 1) { // 1 byte left
+            n = bin[i] << 4;
+            b64 += b64chars[n >>> 6];
+            b64 += b64chars[n & 63];
+            b64 += "==";
+        } else if (i === l) { // 2 bytes left
+            n = (bin[i] << 10) | (bin[i + 1] << 2);
+            b64 += b64chars[n >>> 12];
+            b64 += b64chars[(n >>> 6) & 63];
+            b64 += b64chars[n & 63];
+            b64 += "=";
         }
-        return String.fromCharCode.apply(String, b64);
+        return b64;
     }
     
     function convertBase64ToUTF8Array(b64) {
