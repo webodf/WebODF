@@ -59,9 +59,12 @@ Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {};
  */
 Runtime.prototype.read = function (path, offset, length, callback) {};
 /**
+ * Read the contents of a file. Returns the result via a callback. If the
+ * encoding is 'binary', the result is returned as a Runtime.ByteArray,
+ * otherwise, it is returned as a string.
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
- * @param {!function(string,string):undefined} callback
+ * @param {!function(string,(string|Runtime.ByteArray)):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.readFile = function (path, encoding, callback) {};
@@ -135,35 +138,11 @@ Runtime.prototype.getWindow = function () {};
 var IS_COMPILED_CODE = false;
 
 /**
- * @constructor
- * @implements {Runtime}
- * @param {Element} logoutput
+ * @param {!Runtime.ByteArray} bytearray
+ * @param {!string} encoding
+ * @return {!string}
  */
-function BrowserRuntime(logoutput) {
-    var self = this,
-        cache = {},
-        // nativeio is a binding point for io of native runtime
-        nativeio = window.nativeio || {};
-
-    // if Uint8Array is available, use that
-    if (window.ArrayBuffer && window.Uint8Array) {
-        /**
-         * @constructor
-         * @param {!number} size
-         */
-        this.ByteArray = function ByteArray(size) {
-            return new Uint8Array(new ArrayBuffer(size));
-        };
-    } else {
-        /**
-         * @constructor
-         * @param {!number} size
-         */
-        this.ByteArray = function ByteArray(size) {
-            return new Array(size);
-        };
-    }
-
+Runtime.byteArrayToString = function (bytearray, encoding) {
     function byteArrayToString(bytearray) {
         var s = "", i, l = bytearray.length;
         for (i = 0; i < l; i += 1) {
@@ -193,6 +172,35 @@ function BrowserRuntime(logoutput) {
         }
         return s;
     }
+    if (encoding === "utf8") {
+        return utf8ByteArrayToString(bytearray);
+    }
+    return byteArrayToString(bytearray);
+};
+
+/**
+ * @constructor
+ * @implements {Runtime}
+ * @param {Element} logoutput
+ */
+function BrowserRuntime(logoutput) {
+    var self = this,
+        cache = {},
+        // nativeio is a binding point for io of native runtime
+        nativeio = window.nativeio || {};
+
+    // if Uint8Array is available, use that
+    /**
+     * @constructor
+     * @param {!number} size
+     */
+    this.ByteArray = (window.ArrayBuffer && window.Uint8Array)
+        ? function ByteArray(size) {
+            return new Uint8Array(new ArrayBuffer(size));
+          }
+        : function ByteArray(size) {
+            return new Array(size);
+          };
     function utf8ByteArrayFromString(string) {
         var l = string.length,
             bytearray = new self.ByteArray(l),
@@ -235,17 +243,10 @@ function BrowserRuntime(logoutput) {
         }
         return byteArrayFromString(string);
     };
-    this.byteArrayToString = function (bytearray, encoding) {
-        if (encoding === "utf8") {
-            return utf8ByteArrayToString(bytearray);
-        } else if (encoding !== "binary") {
-            self.log("unknown encoding: " + encoding);
-        }
-        return byteArrayToString(bytearray);
-    };
     this.concatByteArrays = function (bytearray1, bytearray2) {
         return bytearray1.concat(bytearray2);
     };
+    this.byteArrayToString = Runtime.byteArrayToString;
 
     function log(msgOrCategory, msg) {
         var node, doc, category;
@@ -681,9 +682,10 @@ function RhinoRuntime() {
 
     /**
      * @constructor
+     * @param {!number} size
      */
-    this.ByteArray = function ByteArray() {
-        return [];
+    this.ByteArray = function ByteArray(size) {
+        return new Array(size);
     };
     this.byteArrayFromArray = function (array) {
         return array;
@@ -696,10 +698,7 @@ function RhinoRuntime() {
         }
         return a;
     };
-    this.byteArrayToString = function (bytearray, encoding) {
-        // ignore encoding for now
-        return String.fromCharCode.apply(String, bytearray);
-    };
+    this.byteArrayToString = Runtime.byteArrayToString;
     this.concatByteArrays = function (bytearray1, bytearray2) {
         return bytearray1.concat(bytearray2);
     };
@@ -716,14 +715,16 @@ function RhinoRuntime() {
     }
     function runtimeReadFile(path, encoding, callback) {
         var file = new Packages.java.io.File(path),
-            data;
+            data,
+            // read binary, seems hacky but works
+            rhinoencoding = (encoding === "binary") ? "latin1" : encoding;
         if (!file.isFile()) {
             callback(path + " is not a file.");
         } else {
+            data = readFile(path, rhinoencoding);
             if (encoding === "binary") {
-                encoding = "latin1"; // read binary, seems hacky but works
+                data = this.byteArrayFromString(data, "binary");
             }
-            data = readFile(path, encoding);
             callback(null, data);
         }
     }
@@ -751,15 +752,12 @@ function RhinoRuntime() {
     }
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
-    this.writeFile = function (path, data, encoding, callback) {
-        if (encoding !== "binary") {
-            throw "Non-binary encoding not implemented.";
-        }
+    this.writeFile = function (path, data, callback) {
         var out = new Packages.java.io.FileOutputStream(path),
             i,
             l = data.length;
         for (i = 0; i < l; i += 1) {
-            out.write(data.charCodeAt(i));
+            out.write(data[i]);
         }
         out.close();
         callback(null);
@@ -779,7 +777,8 @@ function RhinoRuntime() {
         }
         var data = runtimeReadFileSync(path, "binary");
         if (data) {
-            callback(null, data.substring(offset, offset + length));
+            callback(null, this.byteArrayFromString(
+                     data.substring(offset, offset + length), "binary"));
         } else {
             callback("Cannot read " + path);
         }
@@ -949,3 +948,4 @@ var runtime = (function () {
         run(args.slice(1));
     }
 }(typeof arguments !== "undefined" && arguments));
+

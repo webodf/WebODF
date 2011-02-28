@@ -1,4 +1,4 @@
-/*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement*/
+/*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement */
 /*jslint nomen: false */
 /**
  * @constructor
@@ -243,3 +243,13 @@ Packages.org.xml.sax.InputSource = function (reader) {};
 HTMLStyleElement.prototype.sheet;
 XMLHttpRequest.prototype.sendAsBinary = function (data) {};
 window.nativeio = {};
+/**
+ * @constructor
+ * @param {!number} size
+ */
+function ArrayBuffer(size) {}
+/**
+ * @constructor
+ * @param {!ArrayBuffer} buffer
+ */
+function Uint8Array(buffer) {}
