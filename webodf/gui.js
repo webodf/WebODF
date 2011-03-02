@@ -195,6 +195,6 @@ Ext.onReady(function () {
     });
 
     // put data in the tree
-    listFiles('./tests/', /\.od[tps]$/i, listFilesCallback,
+    listFiles('./', /\.od[tps]$/i, listFilesCallback,
             listFilesDoneCallback);
 });
