@@ -1,0 +1,127 @@
+<keys xmlns="urn:odfkeys"
+  xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+  xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+  xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+  xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+  xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+  xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0"
+  >
+ <doc>
+  <h2>ODF reference checker</h2>
+  <p>ODF documents use string keys and references to link different parts of the document. There are quite a few different groups of keys. The description of how these keys work in the specification is not trivial to implement, because not keys behave differently depending on the context in which they are defined. E.g. a style has a family. If the family is 'text', then only certain attributes on certain elements in certain parts of the ODF document may refer to that style.</p>
+  <p>For a beginning and even intermediate ODF developer or document producer, this is quite complicated. Also, there is not currently an easy way to check if all the references are correct. This document aims to make it easier to figure out what groups of keys exist and from which elements they may be linked.</p>
+  <p>The document consists of one &lt;key> element for each group of keys. Each group has a name and is defined by one or more XPath expressions in &lt;def> elements. Any string that matches the XPath expression in a particular document is part of the set of keys of that group. Each key in a set must be unique.</p>
+  <p>In addition, each &lt;key> has a number of &lt;ref> elements that define the positions in the document where a key may be referenced. Each reference must exist in the set of keys that are found via the &lt;def> elements.</p>
+  <p>The format of this document is designed to be easy to read but also to make it easy to use in a reference checker. This document comes with checked implemented in XSL. The XSL is called bootstrap.xsl and is used in two transformation steps. Here is shown how to run the check with <tt>xsltproc</tt>:</p>
+  <pre>xsltproc bootstrap.xsl odfkeys.xml > checkkeys.xsl</pre>
+  <pre>xsltproc bootstrap.xsl content.xml</pre>
+  <p>The check can be run on content.xml files, on styles.xml files and on flat ODF files.</p>
+  <h2>Definitions</h2>
+  <dl>
+   <dt>$stylesfontfaces</dt>
+   <dd>This variable refers to the subset of font face definitions that are available to the style elements. Styles.xml may not refer to font faces defined in content.xml.</dd>
+   <dt>$fontfaces</dt>
+   <dd>This variable refers to all font face definitions.</dd>
+   <dt>$officestyles</dt>
+   <dd>This variable refers to the element office:styles.</dd>
+   <dt>$stylesautostyles</dt>
+   <dd>This variable refers to the element office:automatic-styles in styles.xml.</dd>
+   <dt>$contentautostyles</dt>
+   <dd>This variable refers to the element office:automatic-styles in content.xml. When evaluating a styles.xml document, it is an empty set.</dd>
+   <dt>$masterstyles</dt>
+   <dd>This variable refers to the office:master-styles element.</dd>
+   <dt>$body</dt>
+   <dd>This variable refers to the office:body element. When evaluating a styles.xml document, it is an empty set.</dd>
+  </dl>
+  <h2>TODO</h2> 
+  <ul>
+   <li>implement &lt;refs/> to check refs of type styleNameRefs</li>
+   <li>check for unused automatic styles</li>
+   <li>check that there are no circular dependencies in style inheritance</li>
+  </ul>
+ </doc>
+ <key name="gradients">
+  <def>$officestyles/draw:gradient/@draw:name</def>
+  <def>$officestyles/svg:linearGradient/@draw:name</def>
+  <def>$officestyles/svg:radialGradient/@draw:name</def>
+  <ref>$officestyles//@draw:fill-gradient-name</ref>
+  <ref>$stylesautostyles//@draw:fill-gradient-name</ref>
+  <ref>$contentautostyles//@draw:fill-gradient-name</ref>
+ </key>
+ <key name="hatch">
+  <def>$officestyles/draw:hatch/@draw:name</def>
+  <ref>$officestyles//@draw:fill-hatch-name</ref>
+  <ref>$stylesautostyles//@draw:fill-hatch-name</ref>
+  <ref>$contentautostyles//@draw:fill-hatch-name</ref>
+ </key>
+ <key name="fill-image">
+  <def>$officestyles/draw:fill-image/@draw:name</def>
+  <ref>$officestyles//@draw:fill-image-name</ref>
+  <ref>$stylesautostyles//@draw:fill-image-name</ref>
+  <ref>$contentautostyles//@draw:fill-image-name</ref>
+ </key>
+ <key name="marker">
+  <def>$officestyles/draw:marker/@draw:name</def>
+  <ref>$officestyles//@draw:marker-start</ref>
+  <ref>$officestyles//@draw:marker-end</ref>
+  <ref>$stylesautostyles//@draw:marker-start</ref>
+  <ref>$stylesautostyles//@draw:marker-end</ref>
+  <ref>$contentautostyles//@draw:marker-start</ref>
+  <ref>$contentautostyles//@draw:marker-end</ref>
+ </key>
+ <key name="stroke-dash">
+  <def>$officestyles/draw:stroke-dash/@draw:name</def>
+  <ref>$officestyles//@draw:stroke-dash</ref>
+  <ref>$stylesautostyles//@draw:stroke-dash</ref>
+  <ref>$contentautostyles//@draw:stroke-dash</ref>
+  <refs>$officestyles//@draw:stroke-dash-names</refs>
+  <refs>$stylesautostyles//@draw:stroke-dash-names</refs>
+  <refs>$contentautostyles//@draw:stroke-dash-names</refs>
+ </key>
+ <key name="opacity">
+  <def>$officestyles/draw:opacity/@draw:name</def>
+  <ref>$officestyles//@draw:opacity-name</ref>
+  <ref>$stylesautostyles//@draw:opacity-name</ref>
+  <ref>$contentautostyles//@draw:opacity-name</ref>
+ </key>
+ <key name="styles-font-face">
+  <def>$stylesfontfaces/style:font-face/@style:name</def>
+  <ref>$officestyles//style:text-properties/@style:font-name</ref>
+  <ref>$officestyles//style:text-properties/@style:font-name-asian</ref>
+  <ref>$officestyles//style:text-properties/@style:font-name-complex</ref>
+  <ref>$officestyles//style:list-level-properties/@style:font-name</ref>
+  <ref>$stylesautostyles//style:text-properties/@style:font-name</ref>
+  <ref>$stylesautostyles//style:text-properties/@style:font-name-asian</ref>
+  <ref>$stylesautostyles//style:text-properties/@style:font-name-complex</ref>
+  <ref>$stylesautostyles//style:list-level-properties/@style:font-name</ref>
+ </key>
+ <key name="font-face">
+  <def>$fontfaces/style:font-face/@style:name</def>
+  <ref>$contentautostyles//style:text-properties/@style:font-name</ref>
+  <ref>$contentautostyles//style:text-properties/@style:font-name-asian</ref>
+  <ref>$contentautostyles//style:text-properties/@style:font-name-complex</ref>
+  <ref>$contentautostyles//style:list-level-properties/@style:font-name</ref>
+ </key>
+ <key name="common-chart-style">
+  <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
+ </key>
+ <key name="common-text-style">
+  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='text']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='text']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='text']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-text-style">
+  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+  <def>$stylesautostyles/style:style[@style:family='text']/@style:name</def>
+  <ref>$masterstyles//text:span/@text:style-name</ref>
+ </key>
+ <key name="content-text-style">
+  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+  <def>$contentautostyles/style:style[@style:family='text']/@style:name</def>
+  <ref>$body//text:span/@text:style-name</ref>
+ </key>
+</keys>
