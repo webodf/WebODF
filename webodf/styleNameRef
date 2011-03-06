@@ -1,3 +1,5 @@
+# cat styles.xml|xmlstarlet sel -N style=urn:oasis:names:tc:opendocument:xmlns:style:1.0 -t -m "//*[@style:family='graphic']/@style:name" -v . -
+
 character
 	text:main-entry-style-name	text:alphabetical-index-source
 	text:style-name	text:index-entry-bibliography
