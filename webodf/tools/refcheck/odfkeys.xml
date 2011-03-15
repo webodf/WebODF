@@ -142,6 +142,31 @@
   <def>$stylesautostyles/style:page-layout/@style:name</def>
   <ref>$body/office:presentation/draw:page/presentation:notes/@style:page-layout-name</ref>
  </key>
+ <key name="common-list-styles">
+  <def>$officestyles/text:list-style/@style:name</def>
+  <def>$officestyles//style:graphic-properties/text:list-style/@style:name</def>
+  <ref emptyok="true">$officestyles/style:style/@style:list-style-name</ref>
+ </key>
+ <key name="styles-list-styles">
+  <def>$officestyles/text:list-style/@style:name</def>
+  <def>$officestyles//style:graphic-properties/text:list-style/@style:name</def>
+  <def>$stylesautostyles/text:list-style/@style:name</def>
+  <def>$stylesautostyles//style:graphic-properties/text:list-style/@style:name</def>
+  <ref emptyok="true">$stylesautostyles/style:style/@style:list-style-name</ref>
+  <ref>$masterstyles//text:list/@text:style-name</ref>
+  <ref>$masterstyles//text:numbered-paragraphs/@text:style-name</ref>
+  <ref>$masterstyles//text:list-item/@text:style-override</ref>
+ </key>
+ <key name="content-list-styles">
+  <def>$officestyles/text:list-style/@style:name</def>
+  <def>$officestyles//style:graphic-properties/text:list-style/@style:name</def>
+  <def>$contentautostyles/text:list-style/@style:name</def>
+  <def>$contentautostyles//style:graphic-properties/text:list-style/@style:name</def>
+  <ref emptyok="true">$contentautostyles/style:style/@style:list-style-name</ref>
+  <ref>$body//text:list/@text:style-name</ref>
+  <ref>$body//text:numbered-paragraphs/@text:style-name</ref>
+  <ref>$body//text:list-item/@text:style-override</ref>
+ </key>
 
 <!-- unfinished -->
 <!--
