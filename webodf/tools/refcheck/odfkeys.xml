@@ -14,7 +14,7 @@
   <p>In addition, each &lt;key> has a number of &lt;ref> elements that define the positions in the document where a key may be referenced. Each reference must exist in the set of keys that are found via the &lt;def> elements.</p>
   <p>The format of this document is designed to be easy to read but also to make it easy to use in a reference checker. This document comes with checked implemented in XSL. The XSL is called bootstrap.xsl and is used in two transformation steps. Here is shown how to run the check with <tt>xsltproc</tt>:</p>
   <pre>xsltproc bootstrap.xsl odfkeys.xml > checkkeys.xsl</pre>
-  <pre>xsltproc bootstrap.xsl content.xml</pre>
+  <pre>xsltproc checkkeys.xsl content.xml</pre>
   <p>The check can be run on content.xml files, on styles.xml files and on flat ODF files.</p>
   <h2>Definitions</h2>
   <dl>
@@ -40,7 +40,7 @@
    <li>check that there are no circular dependencies in style inheritance</li>
   </ul>
  </doc>
- <key name="gradients">
+ <key name="gradient">
   <def>$officestyles/draw:gradient/@draw:name</def>
   <def>$officestyles/svg:linearGradient/@draw:name</def>
   <def>$officestyles/svg:radialGradient/@draw:name</def>
@@ -102,18 +102,56 @@
   <ref>$contentautostyles//style:text-properties/@style:font-name-complex</ref>
   <ref>$contentautostyles//style:list-level-properties/@style:font-name</ref>
  </key>
+ <key name="master-page">
+  <def>$masterstyles/style:master-page/@style:name</def>
+  <!--draw:master-page-name-->
+  <ref>$body/office:drawing/draw:page/@draw:master-page-name</ref>
+  <ref>$body/office:presentation/draw:page/@draw:master-page-name</ref>
+  <!--style:master-page-name-->
+  <ref>$officestyles/style:style[@style:family='paragraph']/@style:master-page-name</ref>
+  <ref>$officestyles/style:style[@style:family='table']/@style:master-page-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='paragraph']/@style:master-page-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='table']/@style:master-page-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='paragraph']/@style:master-page-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='table']/@style:master-page-name</ref>
+  <!--style:next-style-name-->
+  <ref>$masterstyles/style:master-page/@style:next-style-name</ref>
+  <!--text:master-page-name-->
+  <ref>$officestyles/text:notes-configuration/@text:master-page-name</ref>
+  <ref>$officestyles/style:default-style[@style:family='section']/style:section-properties/text:notes-configuration/@text:master-page-name</ref>
+  <ref>$officestyles/style:style[@style:family='section']/style:section-properties/text:notes-configuration/@text:master-page-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='section']/style:section-properties/text:notes-configuration/@text:master-page-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='section']/style:section-properties/text:notes-configuration/@text:master-page-name</ref>
+  <ref>$body/office:text/text:page-sequence/text:page/@text:master-page-name</ref>
+  <!--style:parent-style-name: not handled: likely an error in the specification -->
+ </key>
+
+<!-- unfinished -->
+<!--
+ <var name="chartelements" value="chart:axis chart:chart chart:data-label chart:data-point chart:equation chart:error-indicator chart:floor chart:footer chart:grid chart:legend chart:mean-value chart:plot-area chart:regression-curve chart:series chart:stock-gain-marker chart:stock-loss-marker chart:stock-range-line chart:subtitle chart:title chart:wall"/>
+ <key name="common-chart-styl">
+  <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-chart-style">
+  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+  <def>$stylesautostyles/style:style[@style:family='text']/@style:name</def>
+  <ref>$masterstyles//text:span/@text:style-name</ref>
+ </key>
+ <key name="content-chart-style">
+  <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
+  <def>$contentautostyles/style:style[@style:family='chart']/@style:name</def>
+  <ref>$body//text:span/@text:style-name</ref>
+ </key>
  <key name="common-chart-style">
   <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
   <ref>$officestyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
   <ref>$stylesautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
   <ref>$contentautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
  </key>
- <key name="common-text-style">
-  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
-  <ref>$officestyles/style:style[@style:family='text']/@style:parent-style-name</ref>
-  <ref>$stylesautostyles/style:style[@style:family='text']/@style:parent-style-name</ref>
-  <ref>$contentautostyles/style:style[@style:family='text']/@style:parent-style-name</ref>
- </key>
+ -->
  <key name="styles-text-style">
   <def>$officestyles/style:style[@style:family='text']/@style:name</def>
   <def>$stylesautostyles/style:style[@style:family='text']/@style:name</def>
