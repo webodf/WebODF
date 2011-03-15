@@ -20,10 +20,27 @@
   </xsl:for-each>
  </xsl:template>
 
+ <xsl:template name="getdefs">
+  <xsl:param name="name"/>
+  <xsl:param name="separator"/>
+  <xsl:variable name="key" select="../o:key[@name=$name]"/>
+  <xsl:if test="$key/@extends">
+   <xsl:call-template name="getdefs">
+    <xsl:with-param name="name" select="$key/@extends"/>
+    <xsl:with-param name="separator" select="$separator"/>
+   </xsl:call-template>
+   <xsl:text>|</xsl:text>
+  </xsl:if>
+  <xsl:call-template name="join">
+   <xsl:with-param name="values" select="$key/o:def"/>
+   <xsl:with-param name="separator" select="$separator"/>
+  </xsl:call-template>
+ </xsl:template>
+
  <xsl:template match="o:key" mode="define">
   <xsl:variable name="def">
-   <xsl:call-template name="join">
-    <xsl:with-param name="values" select="o:def"/>
+   <xsl:call-template name="getdefs">
+    <xsl:with-param name="name" select="@name"/>
     <xsl:with-param name="separator" select="'|'"/>
    </xsl:call-template>
   </xsl:variable>

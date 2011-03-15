@@ -139,7 +139,7 @@
   <ref>$masterstyles/style:handout-master/@style:page-layout-name</ref>
  </key>
  <key name="content-page-layout">
-  <def>$stylesautostyles/style:page-layout/@style:name</def>
+  <def>$contentautostyles/style:page-layout/@style:name</def>
   <ref>$body/office:presentation/draw:page/presentation:notes/@style:page-layout-name</ref>
  </key>
  <key name="common-list-styles">
@@ -147,9 +147,7 @@
   <def>$officestyles//style:graphic-properties/text:list-style/@style:name</def>
   <ref emptyok="true">$officestyles/style:style/@style:list-style-name</ref>
  </key>
- <key name="styles-list-styles">
-  <def>$officestyles/text:list-style/@style:name</def>
-  <def>$officestyles//style:graphic-properties/text:list-style/@style:name</def>
+ <key name="styles-list-styles" extends="common-list-styles">
   <def>$stylesautostyles/text:list-style/@style:name</def>
   <def>$stylesautostyles//style:graphic-properties/text:list-style/@style:name</def>
   <ref emptyok="true">$stylesautostyles/style:style/@style:list-style-name</ref>
@@ -157,9 +155,7 @@
   <ref>$masterstyles//text:numbered-paragraphs/@text:style-name</ref>
   <ref>$masterstyles//text:list-item/@text:style-override</ref>
  </key>
- <key name="content-list-styles">
-  <def>$officestyles/text:list-style/@style:name</def>
-  <def>$officestyles//style:graphic-properties/text:list-style/@style:name</def>
+ <key name="content-list-styles" extends="common-list-styles">
   <def>$contentautostyles/text:list-style/@style:name</def>
   <def>$contentautostyles//style:graphic-properties/text:list-style/@style:name</def>
   <ref emptyok="true">$contentautostyles/style:style/@style:list-style-name</ref>
@@ -167,11 +163,21 @@
   <ref>$body//text:numbered-paragraphs/@text:style-name</ref>
   <ref>$body//text:list-item/@text:style-override</ref>
  </key>
+ <key name="common-data-styles">
+  <def>$officestyles/number:number-style/@style:name</def>
+  <def>$officestyles/number:currency-style/@style:name</def>
+  <def>$officestyles/number:percentage-style/@style:name</def>
+  <def>$officestyles/number:date-style/@style:name</def>
+  <def>$officestyles/number:time-style/@style:name</def>
+  <def>$officestyles/number:boolean-style/@style:name</def>
+  <def>$officestyles/number:text-style/@style:name</def>
+  <ref>$officestyles/style:style/@style:data-style-name</ref>
+ </key>
 
 <!-- unfinished -->
 <!--
  <var name="chartelements" value="chart:axis chart:chart chart:data-label chart:data-point chart:equation chart:error-indicator chart:floor chart:footer chart:grid chart:legend chart:mean-value chart:plot-area chart:regression-curve chart:series chart:stock-gain-marker chart:stock-loss-marker chart:stock-range-line chart:subtitle chart:title chart:wall"/>
- <key name="common-chart-styl">
+ <key name="common-chart-style">
   <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
   <ref>$officestyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
   <ref>$stylesautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
@@ -187,20 +193,18 @@
   <def>$contentautostyles/style:style[@style:family='chart']/@style:name</def>
   <ref>$body//text:span/@text:style-name</ref>
  </key>
- <key name="common-chart-style">
-  <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
-  <ref>$officestyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
-  <ref>$stylesautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
-  <ref>$contentautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
- </key>
  -->
- <key name="styles-text-style">
+ <key name="common-text-style">
   <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='text']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='text']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='text']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-text-style" extends="common-text-style">
   <def>$stylesautostyles/style:style[@style:family='text']/@style:name</def>
   <ref>$masterstyles//text:span/@text:style-name</ref>
  </key>
- <key name="content-text-style">
-  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+ <key name="content-text-style" extends="common-text-style">
   <def>$contentautostyles/style:style[@style:family='text']/@style:name</def>
   <ref>$body//text:span/@text:style-name</ref>
  </key>
