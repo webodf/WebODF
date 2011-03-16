@@ -1,4 +1,5 @@
 <keys xmlns="urn:odfkeys"
+  xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0"
   xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
   xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0"
   xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0"
@@ -172,28 +173,136 @@
   <def>$officestyles/number:boolean-style/@style:name</def>
   <def>$officestyles/number:text-style/@style:name</def>
   <ref>$officestyles/style:style/@style:data-style-name</ref>
+  <ref>$officestyles/style:style/@style:percentage-data-style-name</ref>
  </key>
-
-<!-- unfinished -->
-<!--
- <var name="chartelements" value="chart:axis chart:chart chart:data-label chart:data-point chart:equation chart:error-indicator chart:floor chart:footer chart:grid chart:legend chart:mean-value chart:plot-area chart:regression-curve chart:series chart:stock-gain-marker chart:stock-loss-marker chart:stock-range-line chart:subtitle chart:title chart:wall"/>
+ <key name="styles-data-styles" extends="common-data-styles">
+  <def>$stylesautostyles/number:number-style/@style:name</def>
+  <def>$stylesautostyles/number:currency-style/@style:name</def>
+  <def>$stylesautostyles/number:percentage-style/@style:name</def>
+  <def>$stylesautostyles/number:date-style/@style:name</def>
+  <def>$stylesautostyles/number:time-style/@style:name</def>
+  <def>$stylesautostyles/number:boolean-style/@style:name</def>
+  <def>$stylesautostyles/number:text-style/@style:name</def>
+  <ref>$stylesautostyles/style:style/@style:data-style-name</ref>
+  <ref>$stylesautostyles/style:style/@style:percentage-data-style-name</ref>
+  <ref>$masterstyles//text:creation-date/@style:data-style-name</ref>
+  <ref>$masterstyles//text:creation-time/@style:data-style-name</ref>
+  <ref>$masterstyles//text:database-display/@style:data-style-name</ref>
+  <ref>$masterstyles//text:date/@style:data-style-name</ref>
+  <ref>$masterstyles//text:editing-duration/@style:data-style-name</ref>
+  <ref>$masterstyles//text:expression/@style:data-style-name</ref>
+  <ref>$masterstyles//text:meta-field/@style:data-style-name</ref>
+  <ref>$masterstyles//text:modification-date/@style:data-style-name</ref>
+  <ref>$masterstyles//text:modification-time/@style:data-style-name</ref>
+  <ref>$masterstyles//text:print-date/@style:data-style-name</ref>
+  <ref>$masterstyles//text:print-time/@style:data-style-name</ref>
+  <ref>$masterstyles//text:table-formula/@style:data-style-name</ref>
+  <ref>$masterstyles//text:time/@style:data-style-name</ref>
+  <ref>$masterstyles//text:user-defined/@style:data-style-name</ref>
+  <ref>$masterstyles//text:user-field-get/@style:data-style-name</ref>
+  <ref>$masterstyles//text:user-field-input/@style:data-style-name</ref>
+  <ref>$masterstyles//text:variable-get/@style:data-style-name</ref>
+  <ref>$masterstyles//text:variable-input/@style:data-style-name</ref>
+  <ref>$masterstyles//text:variable-set/@style:data-style-name</ref>
+ </key>
+ <key name="content-data-styles" extends="common-data-styles">
+  <def>$contentautostyles/number:number-style/@style:name</def>
+  <def>$contentautostyles/number:currency-style/@style:name</def>
+  <def>$contentautostyles/number:percentage-style/@style:name</def>
+  <def>$contentautostyles/number:date-style/@style:name</def>
+  <def>$contentautostyles/number:time-style/@style:name</def>
+  <def>$contentautostyles/number:boolean-style/@style:name</def>
+  <def>$contentautostyles/number:text-style/@style:name</def>
+  <ref>$contentautostyles/style:style/@style:data-style-name</ref>
+  <ref>$contentautostyles/style:style/@style:percentage-data-style-name</ref>
+  <ref>$body/office:presentation/presentation:date-time-decl/@style:data-style-name</ref>
+  <ref>$body//text:creation-date/@style:data-style-name</ref>
+  <ref>$body//text:creation-time/@style:data-style-name</ref>
+  <ref>$body//text:database-display/@style:data-style-name</ref>
+  <ref>$body//text:date/@style:data-style-name</ref>
+  <ref>$body//text:editing-duration/@style:data-style-name</ref>
+  <ref>$body//text:expression/@style:data-style-name</ref>
+  <ref>$body//text:meta-field/@style:data-style-name</ref>
+  <ref>$body//text:modification-date/@style:data-style-name</ref>
+  <ref>$body//text:modification-time/@style:data-style-name</ref>
+  <ref>$body//text:print-date/@style:data-style-name</ref>
+  <ref>$body//text:print-time/@style:data-style-name</ref>
+  <ref>$body//text:table-formula/@style:data-style-name</ref>
+  <ref>$body//text:time/@style:data-style-name</ref>
+  <ref>$body//text:user-defined/@style:data-style-name</ref>
+  <ref>$body//text:user-field-get/@style:data-style-name</ref>
+  <ref>$body//text:user-field-input/@style:data-style-name</ref>
+  <ref>$body//text:variable-get/@style:data-style-name</ref>
+  <ref>$body//text:variable-input/@style:data-style-name</ref>
+  <ref>$body//text:variable-set/@style:data-style-name</ref>
+ </key>
  <key name="common-chart-style">
   <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
   <ref>$officestyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
   <ref>$stylesautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
   <ref>$contentautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
  </key>
- <key name="styles-chart-style">
-  <def>$officestyles/style:style[@style:family='text']/@style:name</def>
+ <key name="styles-chart-style" extends="common-chart-style">
   <def>$stylesautostyles/style:style[@style:family='text']/@style:name</def>
-  <ref>$masterstyles//text:span/@text:style-name</ref>
+  <ref>$masterstyles//chart:axis/@chart:style-name</ref>
+  <ref>$masterstyles//chart:chart/@chart:style-name</ref>
+  <ref>$masterstyles//chart:data-label/@chart:style-name</ref>
+  <ref>$masterstyles//chart:data-point/@chart:style-name</ref>
+  <ref>$masterstyles//chart:equation/@chart:style-name</ref>
+  <ref>$masterstyles//chart:error-indicator/@chart:style-name</ref>
+  <ref>$masterstyles//chart:floor/@chart:style-name</ref>
+  <ref>$masterstyles//chart:footer/@chart:style-name</ref>
+  <ref>$masterstyles//chart:grid/@chart:style-name</ref>
+  <ref>$masterstyles//chart:legend/@chart:style-name</ref>
+  <ref>$masterstyles//chart:mean-value/@chart:style-name</ref>
+  <ref>$masterstyles//chart:plot-area/@chart:style-name</ref>
+  <ref>$masterstyles//chart:regression-curve/@chart:style-name</ref>
+  <ref>$masterstyles//chart:series/@chart:style-name</ref>
+  <ref>$masterstyles//chart:stock-gain-marker/@chart:style-name</ref>
+  <ref>$masterstyles//chart:stock-loss-marker/@chart:style-name</ref>
+  <ref>$masterstyles//chart:stock-range-line/@chart:style-name</ref>
+  <ref>$masterstyles//chart:subtitle/@chart:style-name</ref>
+  <ref>$masterstyles//chart:title/@chart:style-name</ref>
+  <ref>$masterstyles//chart:wall/@chart:style-name</ref>
  </key>
- <key name="content-chart-style">
-  <def>$officestyles/style:style[@style:family='chart']/@style:name</def>
+ <key name="content-chart-style" extends="common-chart-style">
   <def>$contentautostyles/style:style[@style:family='chart']/@style:name</def>
-  <ref>$body//text:span/@text:style-name</ref>
+  <ref>$body//chart:axis/@chart:style-name</ref>
+  <ref>$body//chart:chart/@chart:style-name</ref>
+  <ref>$body//chart:data-label/@chart:style-name</ref>
+  <ref>$body//chart:data-point/@chart:style-name</ref>
+  <ref>$body//chart:equation/@chart:style-name</ref>
+  <ref>$body//chart:error-indicator/@chart:style-name</ref>
+  <ref>$body//chart:floor/@chart:style-name</ref>
+  <ref>$body//chart:footer/@chart:style-name</ref>
+  <ref>$body//chart:grid/@chart:style-name</ref>
+  <ref>$body//chart:legend/@chart:style-name</ref>
+  <ref>$body//chart:mean-value/@chart:style-name</ref>
+  <ref>$body//chart:plot-area/@chart:style-name</ref>
+  <ref>$body//chart:regression-curve/@chart:style-name</ref>
+  <ref>$body//chart:series/@chart:style-name</ref>
+  <ref>$body//chart:stock-gain-marker/@chart:style-name</ref>
+  <ref>$body//chart:stock-loss-marker/@chart:style-name</ref>
+  <ref>$body//chart:stock-range-line/@chart:style-name</ref>
+  <ref>$body//chart:subtitle/@chart:style-name</ref>
+  <ref>$body//chart:title/@chart:style-name</ref>
+  <ref>$body//chart:wall/@chart:style-name</ref>
  </key>
- -->
+ <key name="common-ruby-style">
+  <def>$officestyles/style:style[@style:family='ruby']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='ruby']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='ruby']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='ruby']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-ruby-style" extends="common-ruby-style">
+  <def>$stylesautostyles/style:style[@style:family='ruby']/@style:name</def>
+  <ref>$masterstyles//text:ruby/@text:style-name</ref>
+ </key>
+ <key name="content-ruby-style" extends="common-ruby-style">
+  <def>$contentautostyles/style:style[@style:family='ruby']/@style:name</def>
+  <ref>$body//text:ruby/@text:style-name</ref>
+ </key>
+<!-- clearly unfinished below here: more refs needed -->
  <key name="common-text-style">
   <def>$officestyles/style:style[@style:family='text']/@style:name</def>
   <ref>$officestyles/style:style[@style:family='text']/@style:parent-style-name</ref>
@@ -208,4 +317,139 @@
   <def>$contentautostyles/style:style[@style:family='text']/@style:name</def>
   <ref>$body//text:span/@text:style-name</ref>
  </key>
+ <key name="common-paragraph-style">
+  <def>$officestyles/style:style[@style:family='paragraph']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='paragraph']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='paragraph']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='paragraph']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-paragraph-style" extends="common-paragraph-style">
+  <def>$stylesautostyles/style:style[@style:family='paragraph']/@style:name</def>
+  <ref>$masterstyles//text:p/@text:style-name</ref>
+ </key>
+ <key name="content-paragraph-style" extends="common-paragraph-style">
+  <def>$contentautostyles/style:style[@style:family='paragraph']/@style:name</def>
+  <ref>$body//text:p/@text:style-name</ref>
+ </key>
+ <key name="common-section-style">
+  <def>$officestyles/style:style[@style:family='section']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='section']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='section']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='section']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-section-style" extends="common-section-style">
+  <def>$stylesautostyles/style:style[@style:family='section']/@style:name</def>
+  <ref>$masterstyles//text:alphabetical-index/@text:style-name</ref>
+ </key>
+ <key name="content-section-style" extends="common-section-style">
+  <def>$contentautostyles/style:style[@style:family='section']/@style:name</def>
+  <ref>$body//text:alphabetical-index/@text:style-name</ref>
+ </key>
+
+ <key name="common-table-style">
+  <def>$officestyles/style:style[@style:family='table']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='table']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='table']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='table']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-table-style" extends="common-table-style">
+  <def>$stylesautostyles/style:style[@style:family='table']/@style:name</def>
+  <ref>$masterstyles//table:table/@table:style-name</ref>
+ </key>
+ <key name="content-table-style" extends="common-table-style">
+  <def>$contentautostyles/style:style[@style:family='table']/@style:name</def>
+  <ref>$body//table:table/@table:style-name</ref>
+ </key>
+
+ <key name="common-table-column-style">
+  <def>$officestyles/style:style[@style:family='table-column']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='table-column']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='table-column']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='table-column']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-table-column-style" extends="common-table-column-style">
+  <def>$stylesautostyles/style:style[@style:family='table-column']/@style:name</def>
+  <ref>$masterstyles//table:table-column/@table:style-name</ref>
+ </key>
+ <key name="content-table-column-style" extends="common-table-column-style">
+  <def>$contentautostyles/style:style[@style:family='table-column']/@style:name</def>
+  <ref>$body//table:table-column/@table:style-name</ref>
+ </key>
+
+ <key name="common-table-row-style">
+  <def>$officestyles/style:style[@style:family='table-row']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='table-row']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='table-row']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='table-row']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-table-row-style" extends="common-table-row-style">
+  <def>$stylesautostyles/style:style[@style:family='table-row']/@style:name</def>
+  <ref>$masterstyles//table:table-row/@table:style-name</ref>
+ </key>
+ <key name="content-table-row-style" extends="common-table-row-style">
+  <def>$contentautostyles/style:style[@style:family='table-row']/@style:name</def>
+  <ref>$body//table:table-row/@table:style-name</ref>
+ </key>
+
+ <key name="common-table-cell-style">
+  <def>$officestyles/style:style[@style:family='table-cell']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='table-cell']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='table-cell']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='table-cell']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-table-cell-style" extends="common-table-cell-style">
+  <def>$stylesautostyles/style:style[@style:family='table-cell']/@style:name</def>
+  <ref>$masterstyles//table:table-cell/@table:style-name</ref>
+ </key>
+ <key name="content-table-cell-style" extends="common-table-cell-style">
+  <def>$contentautostyles/style:style[@style:family='table-cell']/@style:name</def>
+  <ref>$body//table:table-cell/@table:style-name</ref>
+ </key>
+
+ <key name="common-graphic-style">
+  <def>$officestyles/style:style[@style:family='graphic']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='graphic']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='graphic']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='graphic']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-graphic-style" extends="common-graphic-style">
+  <def>$stylesautostyles/style:style[@style:family='graphic']/@style:name</def>
+  <ref>$masterstyles//draw:rect/@draw:style-name</ref>
+ </key>
+ <key name="content-graphic-style" extends="common-graphic-style">
+  <def>$contentautostyles/style:style[@style:family='graphic']/@style:name</def>
+  <ref>$body//draw:rect/@draw:style-name</ref>
+ </key>
+
+ <key name="common-presentation-style">
+  <def>$officestyles/style:style[@style:family='presentation']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='presentation']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='presentation']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='presentation']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-presentation-style" extends="common-presentation-style">
+  <def>$stylesautostyles/style:style[@style:family='presentation']/@style:name</def>
+  <ref>$masterstyles//draw:rect/@presentation:style-name</ref>
+ </key>
+ <key name="content-presentation-style" extends="common-presentation-style">
+  <def>$contentautostyles/style:style[@style:family='presentation']/@style:name</def>
+  <ref>$body//draw:rect/@presentation:style-name</ref>
+ </key>
+
+ <key name="common-drawing-page-style">
+  <def>$officestyles/style:style[@style:family='drawing-page']/@style:name</def>
+  <ref>$officestyles/style:style[@style:family='drawing-page']/@style:parent-style-name</ref>
+  <ref>$stylesautostyles/style:style[@style:family='drawing-page']/@style:parent-style-name</ref>
+  <ref>$contentautostyles/style:style[@style:family='drawing-page']/@style:parent-style-name</ref>
+ </key>
+ <key name="styles-drawing-page-style" extends="common-drawing-page-style">
+  <def>$stylesautostyles/style:style[@style:family='drawing-page']/@style:name</def>
+  <ref>$masterstyles/style:handout-master/@draw:style-name</ref>
+ </key>
+ <key name="content-drawing-page-style" extends="common-drawing-page-style">
+  <def>$contentautostyles/style:style[@style:family='drawing-page']/@style:name</def>
+  <ref>$body/office:drawing/draw:page/@draw:style-name</ref>
+  <ref>$body/office:presentation/draw:page/@draw:style-name</ref>
+ </key>
+
 </keys>
