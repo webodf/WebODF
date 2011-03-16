@@ -243,7 +243,7 @@
   <ref>$contentautostyles/style:style[@style:family='chart']/@style:parent-style-name</ref>
  </key>
  <key name="styles-chart-style" extends="common-chart-style">
-  <def>$stylesautostyles/style:style[@style:family='text']/@style:name</def>
+  <def>$stylesautostyles/style:style[@style:family='chart']/@style:name</def>
   <ref>$masterstyles//chart:axis/@chart:style-name</ref>
   <ref>$masterstyles//chart:chart/@chart:style-name</ref>
   <ref>$masterstyles//chart:data-label/@chart:style-name</ref>
