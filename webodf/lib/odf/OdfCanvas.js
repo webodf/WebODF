@@ -1,6 +1,5 @@
 /*global runtime odf*/
 runtime.loadClass("odf.OdfContainer");
-runtime.loadClass("odf.Style2CSS");
 /**
  * This class manages a loaded ODF document that is shown in an element.
  * It takes care of giving visual feedback on loading, ensures that the

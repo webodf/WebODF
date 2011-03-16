@@ -1,13 +1,16 @@
-/*global runtime core dom odf DOMParser document*/
+/*global runtime core dom odf DOMParser document XPathResult */
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("dom.LSSerializer");
+runtime.loadClass("odf.Style2CSS");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
  **/
 odf.OdfContainer = (function () {
-    var officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+    var style2CSS = new odf.Style2CSS(),
+        namespaces = style2CSS.namespaces,
+        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
         base64 = new core.Base64();
@@ -42,18 +45,84 @@ odf.OdfContainer = (function () {
         return -1;
     }
     /**
-     * Class that filters runtime specific nodes from the DOM.
-     * @constructor
+     * @param {!Document} doc
+     * @param {!Element} node
+     * @param {!string} xpath
+     * @return {Element}
      */
-    function OdfNodeFilter() {
+    function getODFElementWithXPath(doc, node, xpath) {
+        return doc.evaluate(xpath, node, style2CSS.namespaceResolver,
+                XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
     }
     /**
-     * @param {!Node} node
-     * @return {!number}
+     * @param {!Document} doc
+     * @param {!Element} node
+     * @param {!string} xpath
+     * @return {!XPathResult}
      */
-    OdfNodeFilter.acceptNode = function (node) {
-        return 1; // FILTER_ACCEPT
-    };
+    function getODFNodesWithXPath(doc, node, xpath) {
+        return doc.evaluate(xpath, node, style2CSS.namespaceResolver,
+                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
+    }
+    /**
+     * @param {!Element} odfroot
+     * @param {!string} elementName
+     * @return {!Object}
+     */ 
+    function listUsedStyles(odfroot, elementName) {
+        // go through the elements under elementName to find all styles
+        // in use
+        var doc = odfroot.ownerDocument,
+            iterator = getODFNodesWithXPath(doc, odfroot,
+                elementName + "//@*[local-name()='style-name']"),
+            styles = {}, attr, familyname, familystyles, element;
+        attr = iterator.iterateNext();
+        while (attr) {
+            familyname = style2CSS.getStyleFamily(attr);
+            familystyles = styles[familyname];
+            if (!familystyles) {
+                familystyles = styles[familyname] = {};
+            }
+            familystyles[attr.nodeValue] = 1;
+            attr = iterator.iterateNext();
+        }
+        return styles;
+    }
+    /**
+     * Class that filters runtime specific nodes from the DOM.
+     * @constructor
+     * @param {!Element} odfroot
+     * @param {!string=} usedStylesElementName
+     */
+    function OdfNodeFilter(odfroot, usedStylesElementName) {
+        var automaticStyles = odfroot.automaticStyles,
+            stylesUsed = null;
+        if (usedStylesElementName) {
+            stylesUsed = listUsedStyles(odfroot, usedStylesElementName);
+        }
+        // stylesUsedInContent = listUsedStyles("office:body");
+        // stylesUsedInStyles = listUsedStyles("office:master-styles");
+        /**
+         * @param {!Node} node
+         * @return {!number}
+         */
+        this.acceptNode = function (node) {
+            var styleName, styleFamily;
+            if (styleName && stylesUsed && node.nodeType === 1 &&
+                    node.parentNode === automaticStyles) {
+                styleFamily = node.getAttributeNS(namespaces.style, "family");
+                styleName = node.getAttributeNS(namespaces.style, "name");
+                if (styleFamily && styleName && stylesUsed[styleFamily] &&
+                        stylesUsed[styleFamily][styleName]) {
+                    return 1; // FILTER_ACCEPT
+                }
+                runtime.log("reject " + styleFamily + " " + styleName + " for " + usedStylesElementName);
+                return 2; // FILTER_REJECT
+            }
+            //runtime.log(node.nodeName);
+            return 1; // FILTER_ACCEPT
+        };
+    }
     /**
      * Put the element at the right position in the parent.
      * The right order is given by the value returned from getNodePosition.
@@ -249,6 +318,23 @@ odf.OdfContainer = (function () {
                 self.onstatereadychange(self);
             }
         }
+        function removeUnusedAutomaticStyles(automaticStyles, masterStyles) {
+            var stylesUsed = listUsedStyles(masterStyles, "."),
+                n, next, styleFamily, styleName;
+            n = automaticStyles.firstChild;
+            while (n) {
+                next = n.nextSibling;
+                if (n.nodeType === 1) { // ELEMENT
+                    styleFamily = n.getAttributeNS(namespaces.style, "family");
+                    styleName = n.getAttributeNS(namespaces.style, "name");
+                    if (!(styleFamily && styleName && stylesUsed[styleFamily] &&
+                            stylesUsed[styleFamily][styleName])) {
+                        runtime.log("remove " + styleFamily + " " + styleName);
+                    }
+                }
+                n = next;
+            }
+        }
         /**
          * @param {!Document} xmldoc
          * @return {undefined}
@@ -268,6 +354,8 @@ odf.OdfContainer = (function () {
             setChild(root, root.automaticStyles);
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
+            removeUnusedAutomaticStyles(root.automaticStyles,
+                    root.masterStyles);
         }
         /**
          * @param {!Document} xmldoc
@@ -385,6 +473,7 @@ odf.OdfContainer = (function () {
         function serializeMetaXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><o:document-meta xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            serializer.filter = new OdfNodeFilter(self.rootElement);
             s += serializer.writeToString(self.rootElement.meta);
             s += "</o:document-meta>";
             return s;
@@ -395,6 +484,7 @@ odf.OdfContainer = (function () {
         function serializeSettingsXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-settings xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            serializer.filter = new OdfNodeFilter(self.rootElement);
             s += serializer.writeToString(self.rootElement.settings);
             s += "</o:document-settings>";
             return s;
@@ -405,6 +495,8 @@ odf.OdfContainer = (function () {
         function serializeStylesXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-styles xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            serializer.filter = new OdfNodeFilter(self.rootElement,
+                    "office:master-styles");
             s += serializer.writeToString(self.rootElement.styles);
             s += serializer.writeToString(self.rootElement.automaticStyles);
             s += serializer.writeToString(self.rootElement.masterStyles);
@@ -417,6 +509,8 @@ odf.OdfContainer = (function () {
         function serializeContentXml() {
             var serializer = new dom.LSSerializer(),
                 /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-content xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            serializer.filter = new OdfNodeFilter(self.rootElement,
+                    "office:body");
             s += serializer.writeToString(self.rootElement.automaticStyles);
             s += serializer.writeToString(self.rootElement.body);
             s += "</o:document-content>";
