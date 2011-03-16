@@ -101,7 +101,7 @@
     <x:param name="item"/>
     <x:if test="count($list[.=$item])!=1">
      <x:message>
-      <x:value-of select="concat($item, ' is not unique in ', $listname, '.')"/>
+      <x:value-of select="concat('The key with value &quot;', $item, '&quot; is uses more than once in ', $listname, '.')"/>
      </x:message>
     </x:if>
    </x:template>
@@ -126,7 +126,7 @@
     <x:param name="reference"/>
     <x:if test="count($definitions[.=$reference])=0">
      <x:message>
-      <x:value-of select="concat($reference, ' is not found in ', $name, '.')"/>
+      <x:value-of select="concat('There is no key with value &quot;', $reference, '&quot; in the key list ', $name, '.')"/>
      </x:message>
     </x:if>
    </x:template>
