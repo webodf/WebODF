@@ -9,7 +9,7 @@ function createXMLEdit(element, url) {
     xmlcss.type = "text/css";
     head.appendChild(xmlcss);
     xmledt = new gui.XMLEdit(element, xmlcss);
-    runtime.loadXML(url, function (xml) {
+    runtime.loadXML(url, function (err, xml) {
         if (xml.documentElement) {
             xmledt.setXML(xml);
         }

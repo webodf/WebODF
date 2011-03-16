@@ -447,7 +447,7 @@ function BrowserRuntime(logoutput) {
                     callback("File is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
-                    callback(xhr.responseXML);
+                    callback(null, xhr.responseXML);
                 } else {
                     // report error
                     callback(xhr.responseText);
@@ -739,8 +739,10 @@ function RhinoRuntime() {
             document = builder.parse(file);
         } catch (err) {
             print(err);
+            callback(err);
+            return;
         }
-        callback(document);
+        callback(null, document);
     }
     function runtimeReadFile(path, encoding, callback) {
         var file = new Packages.java.io.File(path),
