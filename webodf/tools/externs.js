@@ -307,7 +307,7 @@ TreeWalker.prototype.previousNode = function () {};
 TreeWalker.prototype.nextNode = function () {};
 /**
  * @param {!Node} root
- * @param {!number=} whatToShow
+ * @param {!number} whatToShow
  * @param {NodeFilter=} filter
  * @param {boolean=} entityReferenceExpansion
  * @return {!TreeWalker}
