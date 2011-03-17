@@ -2,13 +2,15 @@
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("dom.LSSerializer");
+runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Style2CSS");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
  **/
 odf.OdfContainer = (function () {
-    var style2CSS = new odf.Style2CSS(),
+    var styleInfo = new odf.StyleInfo(),
+        style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
@@ -65,42 +67,17 @@ odf.OdfContainer = (function () {
                 XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
     }
     /**
-     * @param {!Element} odfroot
-     * @param {!string} elementName
-     * @return {!Object}
-     */ 
-    function listUsedStyles(odfroot, elementName) {
-        // go through the elements under elementName to find all styles
-        // in use
-        // cast should not be needed, ownerDocument should not be null
-        var doc = /**@type{!Document}*/(odfroot.ownerDocument),
-            iterator = getODFNodesWithXPath(doc, odfroot,
-                elementName + "//@*[local-name()='style-name']"),
-            styles = {}, attr, familyname, familystyles, element;
-        attr = iterator.iterateNext();
-        while (attr) {
-            familyname = style2CSS.getStyleFamily(attr);
-            familystyles = styles[familyname];
-            if (!familystyles) {
-                familystyles = styles[familyname] = {};
-            }
-            familystyles[attr.nodeValue] = 1;
-            attr = iterator.iterateNext();
-        }
-        return styles;
-    }
-    /**
      * Class that filters runtime specific nodes from the DOM.
      * @constructor
      * @implements {dom.LSSerializerFilter}
      * @param {!Element} odfroot
-     * @param {!string=} usedStylesElementName
+     * @param {!Element=} usedStylesElement
      */
-    function OdfNodeFilter(odfroot, usedStylesElementName) {
+    function OdfNodeFilter(odfroot, usedStylesElement) {
         var automaticStyles = odfroot.automaticStyles,
             stylesUsed = null;
-        if (usedStylesElementName) {
-            stylesUsed = listUsedStyles(odfroot, usedStylesElementName);
+        if (usedStylesElement) {
+            stylesUsed = styleInfo.getUsedStylesForAutomatic(usedStylesElement);
         }
         // stylesUsedInContent = listUsedStyles("office:body");
         // stylesUsedInStyles = listUsedStyles("office:master-styles");
@@ -118,7 +95,7 @@ odf.OdfContainer = (function () {
                         stylesUsed[styleFamily][styleName]) {
                     return 1; // FILTER_ACCEPT
                 }
-                runtime.log("reject " + styleFamily + " " + styleName + " for " + usedStylesElementName);
+//                runtime.log("reject " + styleFamily + " " + styleName + " for " + usedStylesElementName);
                 return 2; // FILTER_REJECT
             }
             //runtime.log(node.nodeName);
@@ -320,6 +297,7 @@ odf.OdfContainer = (function () {
                 self.onstatereadychange(self);
             }
         }
+/*
         function removeUnusedAutomaticStyles(automaticStyles, masterStyles) {
             var stylesUsed = listUsedStyles(masterStyles, "."),
                 n, next, styleFamily, styleName;
@@ -337,6 +315,7 @@ odf.OdfContainer = (function () {
                 n = next;
             }
         }
+*/
         /**
          * @param {!Document} xmldoc
          * @return {undefined}
@@ -356,8 +335,8 @@ odf.OdfContainer = (function () {
             setChild(root, root.automaticStyles);
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
-            removeUnusedAutomaticStyles(root.automaticStyles,
-                    root.masterStyles);
+            //removeUnusedAutomaticStyles(root.automaticStyles,
+            //        root.masterStyles);
         }
         /**
          * @param {!Document} xmldoc
@@ -496,11 +475,15 @@ odf.OdfContainer = (function () {
          */
         function serializeStylesXml() {
             var serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-styles xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-styles xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">",
+                automaticStyles;
             serializer.filter = new OdfNodeFilter(self.rootElement,
-                    "office:master-styles");
+                    self.rootElement.masterStyles);
             s += serializer.writeToString(self.rootElement.styles);
-            s += serializer.writeToString(self.rootElement.automaticStyles);
+            automaticStyles = self.rootElement.automaticStyles;
+//            automaticStyles = style2CSS.getUsedAutomaticStyles(
+//                    self.rootElement.automaticStyles, self.rootElement.masterStyles);
+            s += serializer.writeToString(automaticStyles);
             s += serializer.writeToString(self.rootElement.masterStyles);
             s += "</o:document-styles>";
             return s;
@@ -510,10 +493,14 @@ odf.OdfContainer = (function () {
          */
         function serializeContentXml() {
             var serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-content xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-content xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">",
+                automaticStyles;
             serializer.filter = new OdfNodeFilter(self.rootElement,
-                    "office:body");
-            s += serializer.writeToString(self.rootElement.automaticStyles);
+                    self.rootElement.body);
+            automaticStyles = self.rootElement.automaticStyles;
+//            automaticStyles = style2CSS.getUsedAutomaticStyles(
+//                    self.rootElement.automaticStyles, self.rootElement.body);
+            s += serializer.writeToString(automaticStyles);
             s += serializer.writeToString(self.rootElement.body);
             s += "</o:document-content>";
             return s;

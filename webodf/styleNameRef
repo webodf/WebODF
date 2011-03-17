@@ -1,18 +1,73 @@
 # cat styles.xml|xmlstarlet sel -N style=urn:oasis:names:tc:opendocument:xmlns:style:1.0 -t -m "//*[@style:family='graphic']/@style:name" -v . -
 
-character
-	text:main-entry-style-name	text:alphabetical-index-source
-	text:style-name	text:index-entry-bibliography
-	text:style-name	text:index-entry-chapter
-	text:style-name	text:index-entry-link-end
-	text:style-name	text:index-entry-link-start
-	text:style-name	text:index-entry-page-number
-	text:style-name text:index-entry-span
-	text:style-name	text:index-entry-tab-stop
-	text:style-name	text:index-entry-text
-	text:style-name	text:index-title-template
-	text:style-name	text:list-level-style-bullet
-	text:style-name	text:outline-level-style
+gradient
+	draw:fill-gradient-name	style:drawing-page-properties
+	draw:fill-gradient-name	style:graphic-properties
+
+hatch
+	draw:fill-hatch-name	style:drawing-page-properties
+	draw:fill-hatch-name	style:graphic-properties
+
+fill-image
+	draw:fill-image-name	style:drawing-page-properties
+	draw:fill-image-name	style:graphic-properties
+
+marker
+	draw:marker-end	style:graphic-properties
+	draw:marker-start	style:graphic-properties
+
+dash
+	draw:stroke-dash	style:graphic-properties
+
+opacity
+	draw:opacity-name	style:drawing-page-properties
+	draw:opacity-name	style:graphic-properties
+
+master page
+	draw:master-page-name	draw:page
+	style:master-page-name	style:style
+	style:next-style-name	style:master-page
+	text:master-page-name	text:notes-configuration
+	text:master-page-name	text:page
+
+presentation-page-layout
+	presentation:presentation-page-layout-name	draw:page
+	presentation:presentation-page-layout-name	draw:handout-master
+
+page-layout
+	style:page-layout-name	presentation:notes
+	style:page-layout-name	style:handout-master
+	style:page-layout-name	style:master-page
+
+list
+	text:style-name	text:list
+	text:style-name	text:numbered-paragraph
+	text:style-override	text:list-item
+	style:list-style-name	style:style
+
+data
+	style:data-style-name	style:style
+	style:percentage-data-style-name	style:style
+	style:data-style-name	presentation:date-time-decl
+	style:data-style-name	text:creation-date
+	style:data-style-name	text:creation-time
+	style:data-style-name	text:database-display
+	style:data-style-name	text:date
+	style:data-style-name	text:editing-duration
+	style:data-style-name	text:expression
+	style:data-style-name	text:meta-field
+	style:data-style-name	text:modification-date
+	style:data-style-name	text:modification-time
+	style:data-style-name	text:print-date
+	style:data-style-name	text:print-time
+	style:data-style-name	text:table-formula
+	style:data-style-name	text:time
+	style:data-style-name	text:user-defined
+	style:data-style-name	text:user-field-get
+	style:data-style-name	text:user-field-input
+	style:data-style-name	text:variable-get
+	style:data-style-name	text:variable-input
+	style:data-style-name	text:variable-set
 
 chart
 	chart:style-name	chart:axis
@@ -36,22 +91,13 @@ chart
 	chart:style-name	chart:title
 	chart:style-name	chart:wall
 
-dash
-	draw:stroke-dash	style:graphic-properties
+----
 
 drawing-page
 	draw:style-name	draw:page
 	draw:style-name	presentation:notes
 	draw:style-name	style:handout-master
 	draw:style-name	style:master-page
-
-fill-image
-	draw:fill-image-name	style:drawing-page-properties
-	draw:fill-image-name	style:graphic-properties
-
-gradient
-	draw:fill-gradient-name	style:drawing-page-properties
-	draw:fill-gradient-name	style:graphic-properties
 
 graphic
 	draw:style-name	dr3d:cube
@@ -76,25 +122,6 @@ graphic
 	draw:style-name	draw:rect
 	draw:style-name	draw:regular-polygon
 	draw:style-name	office:annotation
-
-hatch
-	draw:fill-hatch-name	style:drawing-page-properties
-	draw:fill-hatch-name	style:graphic-properties
-
-list
-	text:style-name	text:list
-	text:style-name	text:numbered-paragraph
-	text:style-override	text:list-item
-
-marker(end)
-	draw:marker-end	style:graphic-properties
-
-marker(start)
-	draw:marker-start	style:graphic-properties
-
-opacitygradient
-	draw:opacity-name	style:drawing-page-properties
-	draw:opacity-name	style:graphic-properties
 
 paragraph
 	draw:text-style-name	draw:caption
@@ -131,10 +158,10 @@ paragraph
 	text:style-name	text:index-source-style
 	text:style-name	text:object-index-entry-template
 	text:style-name	text:p
-	text:style-name text:table-index-entry-template
-	text:style-name text:table-of-content-entry-template
-	text:style-name text:table-index-entry-template
-	text:style-name text:user-index-entry-template
+	text:style-name	text:table-index-entry-template
+	text:style-name	text:table-of-content-entry-template
+	text:style-name	text:table-index-entry-template
+	text:style-name	text:user-index-entry-template
 	style:register-truth-ref-style-name	style:page-layout-properties
 
 presentation
@@ -159,10 +186,10 @@ presentation
 	presentation:style-name	draw:polyline
 	presentation:style-name	draw:rect
 	presentation:style-name	draw:regular-polygon
-	presentation:style-name	office-annotation
+	presentation:style-name	office:annotation
 
 ruby
-	text:style-name text:ruby
+	text:style-name	text:ruby
 
 section
 	text:style-name	text:alphabetical-index
@@ -170,10 +197,10 @@ section
 	text:style-name	text:illustration-index
 	text:style-name	text:index-title
 	text:style-name	text:object-index
-	text:style-name text:section
-	text:style-name text:table-of-content
-	text:style-name text:table-index
-	text:style-name text:user-index
+	text:style-name	text:section
+	text:style-name	text:table-of-content
+	text:style-name	text:table-index
+	text:style-name	text:user-index
 
 table-cell
 	db:default-cell-style-name	db:column
@@ -217,51 +244,25 @@ text
 	text:style-name	text:alphabetical-index
 	text:style-name	text:linenumbering-configuration
 	text:style-name	text:list-level-style-number
-	text:style-name text:ruby-text
-	text:style-name text:span
+	text:style-name	text:ruby-text
+	text:style-name	text:span
 	text:visited-style-name	text:a
 	style:text-line-through-text-style	style:text-properties
+	text:main-entry-style-name	text:alphabetical-index-source
+	text:style-name	text:index-entry-bibliography
+	text:style-name	text:index-entry-chapter
+	text:style-name	text:index-entry-link-end
+	text:style-name	text:index-entry-link-start
+	text:style-name	text:index-entry-page-number
+	text:style-name	text:index-entry-span
+	text:style-name	text:index-entry-tab-stop
+	text:style-name	text:index-entry-text
+	text:style-name	text:index-title-template
+	text:style-name	text:list-level-style-bullet
+	text:style-name	text:outline-level-style
 
-data style
-	style:data-style-name	presentation:date-time-decl
-	style:data-style-name	style:style
-	style:data-style-name	text:creation-date
-	style:data-style-name	text:creation-time
-	style:data-style-name	text:database-display
-	style:data-style-name	text:date
-	style:data-style-name	text:editing-duration
-	style:data-style-name	text:expression
-	style:data-style-name	text:meta-field
-	style:data-style-name	text:modification-date
-	style:data-style-name	text:modification-time
-	style:data-style-name	text:print-date
-	style:data-style-name	text:print-time
-	style:data-style-name	text:table-formula
-	style:data-style-name	text:time
-	style:data-style-name	text:user-defined
-	style:data-style-name	text:user-field-get
-	style:data-style-name	text:user-field-input
-	style:data-style-name	text:variable-get
-	style:data-style-name	text:variable-input
-	style:data-style-name	text:variable-set
-	style:percentage-data-style-name	style:style
 
 ---
-master page
-	draw:master-page-name	draw:page
-	style:master-page-name	style:style
-	style:next-style-name	style:master-page
-	text:master-page-name	text:notes-configuration
-	text:master-page-name	text:page
-
-style:presentation-page-layout
-	presentation:presentation-page-layout-name	draw:page
-	presentation:presentation-page-layout-name	draw:handout-master
-
-page layout style
-	style:page-layout-name	presentation:notes
-	style:page-layout-name	style:handout-master
-	style:page-layout-name	style:master-page
 
 conditional style
 	text:cond-style-name	text:h

@@ -125,10 +125,6 @@ odf.Style2CSS = function Style2CSS() {
     function namespaceResolver(prefix) {
         return namespaces[prefix];
     }
-    this.getStyleFamily = (function () {
-        var map = {};
-        // invert familytagnames
-    }());
     /**
      * @param {!Document} doc
      * @param {!Element} stylesnode
