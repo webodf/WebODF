@@ -72,7 +72,8 @@ odf.OdfContainer = (function () {
     function listUsedStyles(odfroot, elementName) {
         // go through the elements under elementName to find all styles
         // in use
-        var doc = odfroot.ownerDocument,
+        // cast should not be needed, ownerDocument should not be null
+        var doc = /**@type{!Document}*/(odfroot.ownerDocument),
             iterator = getODFNodesWithXPath(doc, odfroot,
                 elementName + "//@*[local-name()='style-name']"),
             styles = {}, attr, familyname, familystyles, element;
@@ -91,6 +92,7 @@ odf.OdfContainer = (function () {
     /**
      * Class that filters runtime specific nodes from the DOM.
      * @constructor
+     * @implements {dom.LSSerializerFilter}
      * @param {!Element} odfroot
      * @param {!string=} usedStylesElementName
      */
