@@ -9,7 +9,7 @@ function validate(relaxng, url) {
         if (err) {
             runtime.log("Could not read " + url + ": " + err);
         } else {
-            walker = dom.createTreeWalker(dom.documentElement, 0xFFFFFFFF);
+            walker = dom.createTreeWalker(dom.firstChild, 0xFFFFFFFF);
             relaxng.validate(walker, function (err) {
                 if (err) {
                     runtime.log(err);
