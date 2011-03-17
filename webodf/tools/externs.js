@@ -1,4 +1,4 @@
-/*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement */
+/*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement Document*/
 /*jslint nomen: false */
 /**
  * @constructor
@@ -253,3 +253,63 @@ function ArrayBuffer(size) {}
  * @param {!ArrayBuffer} buffer
  */
 function Uint8Array(buffer) {}
+/**
+ * @interface
+ */
+function TreeWalker() {}
+/**
+ * @const@type{!Node}
+ */
+TreeWalker.prototype.root;
+/**
+ * @const@type{number}
+ */
+TreeWalker.prototype.whatToShow;
+/**
+ * @const@type{NodeFilter}
+ */
+TreeWalker.prototype.filter;
+/**
+ * @const@type{boolean}
+ */
+TreeWalker.prototype.expandEntityReferences;
+/**
+ * @type{Node}
+ */
+TreeWalker.prototype.currentNode;
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.parentNode = function () {};
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.firstChild = function () {};
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.lastChild = function () {};
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.previousSibling = function () {};
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.nextSibling = function () {};
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.previousNode = function () {};
+/**
+ * @return {Node}
+ */
+TreeWalker.prototype.nextNode = function () {};
+/**
+ * @param {!Node} root
+ * @param {!number=} whatToShow
+ * @param {NodeFilter=} filter
+ * @param {boolean=} entityReferenceExpansion
+ * @return {!TreeWalker}
+ */
+Document.prototype.createTreeWalker = function (root, whatToShow, filter, entityReferenceExpansion) {};
