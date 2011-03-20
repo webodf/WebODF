@@ -18,6 +18,7 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param {!Node=} context
      */
     function RelaxNGParseError(error, context) {
+        this.message = error;
     }
 
     /**
@@ -114,7 +115,6 @@ dom.RelaxNG = function RelaxNG(url) {
     function validateOptional(elementdef, walker) {
         // the group of definitions in this list is optional, we try to parse it
         // if there is an error, we stop
-        runtime.log(walker.currentNode.nodeName + " " + elementdef.name);
         var start = walker.currentNode,
             errors = validate(elementdef, walker);
         if (errors) {
@@ -125,7 +125,6 @@ dom.RelaxNG = function RelaxNG(url) {
     }
 
     function validateOneOrMore(elementdef, walker) {
-runtime.log("ONEORMORE");
         // The list of definitions in the elements list should be completely traversed
         // at least once
         // If a second or later round fails, the walker should go back to the start of
@@ -158,16 +157,17 @@ runtime.log("ONEORMORE");
      * If element if of the right type, it is entered and the validation continues
      * inside the element. After validation, regardless of whether an error occurred,
      * the walker is at the same depth in the dom tree.
+     * @param elementdef
+     * @param walker
+     * @return {Array.<RelaxNGParseError>}
      */
     function validateElement(elementdef, walker) {
-runtime.log("hi");
         // forward until an element is seen, then check the name
         var /**@type{Node}*/ node = walker.currentNode,
             /**@type{number}*/ type = node ? node.nodeType : 0,
             error;
         // find the next element, skip text nodes with only whitespace
         while (type > 1) {
-runtime.log("validateElement " + type);
             if (type !== 3 || !/^\s+$/.test(walker.currentNode.nodeValue)) {// TEXT_NODE
                 return [new RelaxNGParseError("Not allowed node of type " + type +
                         ".")];
@@ -176,21 +176,26 @@ runtime.log("validateElement " + type);
             type = node ? node.nodeType : 0;
         }
         if (!node) {
-            runtime.log("node was empty!");
             return [new RelaxNGParseError("Missing element " + elementdef.a.name)];
         }
-runtime.log("validateElement " + node.nodeName + " " + elementdef.a.name);
         if (qName(node) !== elementdef.a.name) {
             return [new RelaxNGParseError("Found " + node.nodeName +
                     " instead of " + elementdef.a.name + ".", node)];
         }
-runtime.log("yo");
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
             error = validate(elementdef, walker);
+            // there should be no content left
+            if (walker.nextSibling()) {
+                return [new RelaxNGParseError("Spurious elements.")];
+            }
+            if (walker.parentNode() !== node) {
+                return [new RelaxNGParseError("Implementation error.")];
+            }
         }
-        walker.currentNode = node;
+        // move to the next node
+        node = walker.nextSibling() || walker.parentNode();
         return error;
     }
 
@@ -211,7 +216,6 @@ runtime.log("yo");
                 return validateElement(e, walker);
             }
         }
-        runtime.log("Element " + name + " is not allowed here.");
         return [new RelaxNGParseError("Element " + name + " is not allowed here.")];
     }
 
@@ -219,40 +223,39 @@ runtime.log("yo");
      * Validate the next part
      * @param {!Object} elementdef
      * @param {!TreeWalker} walker
-     * @return {undefined}
+     * @return {Array.<RelaxNGParseError>}
      */
     validate = function validate(elementdef, walker) {
-runtime.log("validate '" + elementdef.name + "'");
-        var i, e;
-        for (i = 0; i < elementdef.e.length; i += 1) {
+        var i, e, err;
+        for (i = 0; !err && i < elementdef.e.length; i += 1) {
             // skip until an element is encountered, then enter it
             e = elementdef.e[i];
-runtime.log("vv " + i + "'" + e.name + "'");
             if (e.name === "element") {
-                validateElement(e, walker);
+                err = validateElement(e, walker);
             } else if (e.name === "choice") {
-                validateChoice(e, walker);
+                err = validateChoice(e, walker);
             } else if (e.name === "attribute") {
-                validateAttribute(e, walker);
+                err = validateAttribute(e, walker);
             } else if (e.name === "oneOrMore") {
-                validateOneOrMore(e, walker);
+                err = validateOneOrMore(e, walker);
                 e.name = "attribute"; // ignore attribute
             } else if (e.name === "interleave") {
-                validateInterleave(e, walker);
+                err = validateInterleave(e, walker);
                 // skip interleave for now: it's for attributes
                 e.name = "interleave";
             } else if (e.name === "optional") {
-                validateOptional(e, walker);
+                err = validateOptional(e, walker);
             } else {
                 runtime.log("unknown type: " + e.name);
             }
         }
+        return err;
     };
 
     /**
      * Validate the elements pointed to by the TreeWalker
      * @param {!TreeWalker} walker
-     * @param {!function(string):undefined} callback
+     * @param {!function(Array.<RelaxNGParseError>):undefined} callback
      * @return {undefined}
      */
     function validateXML(walker, callback) {
@@ -268,7 +271,7 @@ runtime.log("vv " + i + "'" + e.name + "'");
         }
         walker.currentNode = walker.root;
         var errors = validate(start, walker);
-        callback(errormessage + " number of errors: " + ((errors) ? errors.length : 0));
+        callback(errors);
     }
     this.validate = validateXML;
 
