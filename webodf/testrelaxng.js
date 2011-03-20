@@ -13,7 +13,7 @@ function validate(relaxng, url) {
                     var i;
                     runtime.log("Found " + err.length + " error validating " + url + ":");
                     for (i = 0; i < err.length; i += 1) {
-                        runtime.log(err[i].message);
+                        runtime.log(err[i].message());
                     }
                 }
             });
