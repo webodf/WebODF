@@ -129,19 +129,29 @@ dom.LSSerializer = function LSSerializer() {
         }
         return s;
     }
+    function invertMap(map) {
+        var m = {}, i;
+        for (i in map) {
+            if (map.hasOwnProperty(i)) {
+                m[map[i]] = i;
+            }
+        }
+        return m;
+    }
     /**
      * @type {dom.LSSerializerFilter}
      */
     this.filter = null;
     /**
      * @param {!Node} node
+     * @param {!Object.<string,string>} nsmap
      * @return {!string}
      */
-    this.writeToString = function (node) {
+    this.writeToString = function (node, nsmap) {
         if (!node) {
             return "";
         }
-        var /**@const@type{!Object.<string,string>}*/ nsmap = {};
+        nsmap = nsmap ? invertMap(nsmap) : {};
         return serializeNode(nsmap, node);
     };
 };

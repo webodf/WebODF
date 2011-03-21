@@ -87,7 +87,7 @@ odf.OdfContainer = (function () {
          */
         this.acceptNode = function (node) {
             var styleName, styleFamily;
-            if (styleName && stylesUsed && node.nodeType === 1 &&
+            if (stylesUsed && node.nodeType === 1 &&
                     node.parentNode === automaticStyles) {
                 styleFamily = node.getAttributeNS(namespaces.style, "family");
                 styleName = node.getAttributeNS(namespaces.style, "name");
@@ -328,6 +328,8 @@ odf.OdfContainer = (function () {
                 setState(OdfContainer.INVALID);
                 return;
             }
+            root.fontFaceDecls = getDirectChild(node, officens, 'font-face-decls');
+            setChild(root, root.fontFaceDecls);
             root.styles = getDirectChild(node, officens, 'styles');
             setChild(root, root.styles);
             root.automaticStyles = getDirectChild(node, officens,
@@ -345,7 +347,7 @@ odf.OdfContainer = (function () {
         function handleContentXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root,
-                automaticStyles,
+                automaticStyles, fontFaceDecls,
                 c;
             if (!node || node.localName !== 'document-content' ||
                     node.namespaceURI !== officens) {
@@ -353,8 +355,17 @@ odf.OdfContainer = (function () {
                 return;
             }
             root = self.rootElement;
-            root.body = getDirectChild(node, officens, 'body');
-            setChild(root, root.body);
+            fontFaceDecls = getDirectChild(node, officens, 'font-face-decls');
+            if (root.fontFaceDecls && fontFaceDecls) {
+                c = fontFaceDecls.firstChild;
+                while (c) {
+                    root.fontFaceDecls.appendChild(c);
+                    c = fontFaceDecls.firstChild;
+                }
+            } else if (fontFaceDecls) {
+                root.fontFaceDecls = fontFaceDecls;
+                setChild(root, fontFaceDecls);
+            }
             automaticStyles = getDirectChild(node, officens, 'automatic-styles');
             if (root.automaticStyles && automaticStyles) {
                 c = automaticStyles.firstChild;
@@ -366,6 +377,8 @@ odf.OdfContainer = (function () {
                 root.automaticStyles = automaticStyles;
                 setChild(root, automaticStyles);
             }
+            root.body = getDirectChild(node, officens, 'body');
+            setChild(root, root.body);
         }
         /**
          * @param {!Document} xmldoc
@@ -448,61 +461,77 @@ odf.OdfContainer = (function () {
                 });
             });
         }
+        function documentElement(name, map) {
+            var s = "", i;
+            for (i in map) {
+                if (map.hasOwnProperty(i)) {
+                    s += " xmlns:" + i + "=\"" + map[i] + "\"";
+                }
+            }
+            return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:" + name + " " +
+                    s + " office:version=\"1.2\">";
+        }
         /**
          * @return {!string}
          */
         function serializeMetaXml() {
-            var serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><o:document-meta xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            var nsmap = style2CSS.namespaces,
+                serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = documentElement("document-meta", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement);
-            s += serializer.writeToString(self.rootElement.meta);
-            s += "</o:document-meta>";
+            s += serializer.writeToString(self.rootElement.meta, nsmap);
+            s += "</office:document-meta>";
             return s;
         }
         /**
          * @return {!string}
          */
         function serializeSettingsXml() {
-            var serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-settings xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">";
+            var nsmap = style2CSS.namespaces,
+                serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = documentElement("document-settings", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement);
-            s += serializer.writeToString(self.rootElement.settings);
-            s += "</o:document-settings>";
+            s += serializer.writeToString(self.rootElement.settings, nsmap);
+            s += "</office:document-settings>";
             return s;
         }
         /**
          * @return {!string}
          */
         function serializeStylesXml() {
-            var serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-styles xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">",
+            var nsmap = style2CSS.namespaces,
+                serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = documentElement("document-styles", nsmap),
                 automaticStyles;
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.masterStyles);
-            s += serializer.writeToString(self.rootElement.styles);
+            s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
+            s += serializer.writeToString(self.rootElement.styles, nsmap);
             automaticStyles = self.rootElement.automaticStyles;
 //            automaticStyles = style2CSS.getUsedAutomaticStyles(
 //                    self.rootElement.automaticStyles, self.rootElement.masterStyles);
-            s += serializer.writeToString(automaticStyles);
-            s += serializer.writeToString(self.rootElement.masterStyles);
-            s += "</o:document-styles>";
+            s += serializer.writeToString(automaticStyles, nsmap);
+            s += serializer.writeToString(self.rootElement.masterStyles, nsmap);
+            s += "</office:document-styles>";
             return s;
         }
         /**
          * @return {!string}
          */
         function serializeContentXml() {
-            var serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<o:document-content xmlns:o=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" o:version=\"1.2\">",
+            var nsmap = style2CSS.namespaces,
+                serializer = new dom.LSSerializer(),
+                /**@type{!string}*/ s = documentElement("document-content", nsmap),
                 automaticStyles;
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.body);
+            s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
             automaticStyles = self.rootElement.automaticStyles;
 //            automaticStyles = style2CSS.getUsedAutomaticStyles(
 //                    self.rootElement.automaticStyles, self.rootElement.body);
-            s += serializer.writeToString(automaticStyles);
-            s += serializer.writeToString(self.rootElement.body);
-            s += "</o:document-content>";
+            s += serializer.writeToString(automaticStyles, nsmap);
+            s += serializer.writeToString(self.rootElement.body, nsmap);
+            s += "</office:document-content>";
             return s;
         }
         function createElement(Type) {
