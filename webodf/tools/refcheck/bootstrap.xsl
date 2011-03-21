@@ -101,7 +101,7 @@
     <x:param name="item"/>
     <x:if test="count($list[.=$item])!=1">
      <x:message>
-      <x:value-of select="concat('The key with value &quot;', $item, '&quot; is uses more than once in ', $listname, '.')"/>
+      <x:value-of select="concat('The key with value &quot;', $item, '&quot; is used more than once in ', $listname, '.')"/>
      </x:message>
     </x:if>
    </x:template>
@@ -130,6 +130,7 @@
      </x:message>
     </x:if>
    </x:template>
+
    <x:template name="checkReferences">
     <x:param name="name"/>
     <x:param name="definitions"/>
@@ -174,7 +175,7 @@
    </x:template>
 
    <x:template match="/office:document-content">
-    <x:variable name="stylesxml" select="document('styles.xml')/office:document-styles" />
+    <x:variable name="stylesxml" select="document('styles.xml', .)/office:document-styles" />
     <x:variable name="stylesfontfaces" select="$stylesxml/office:font-face-decls" />
     <x:call-template name="check">
      <x:with-param name="stylesfontfaces" select="$stylesfontfaces"/>
