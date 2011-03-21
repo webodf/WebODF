@@ -4,8 +4,7 @@
  */
 odf.StyleInfo = function StyleInfo() {
     // helper constants
-    var xlinkns = 'http://www.w3.org/1999/xlink',
-        chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
+    var chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
         dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
         dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
@@ -272,11 +271,17 @@ odf.StyleInfo = function StyleInfo() {
         var elname = elements[element.localName],
             elns = elname && elname[element.namespaceURI],
             length = elns ? elns.length : 0,
-            i, attr;
+            i, attr, group, map;
         for (i = 0; i < length; i += 1) {
             attr = element.getAttributeNS(elns[i].ns, elns[i].localname);
             if (attr) { // a style has been found!
-                keys[elns[i].keygroup] = attr;
+                group = elns[i].keygroup;
+                map = keys[group];
+                if (map) { 
+                    map[attr] = 1;
+                } else {
+                    keys[group] = { attr: 1 };
+                }
             }
         }
         i = element.firstChild;
