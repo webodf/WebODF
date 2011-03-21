@@ -110,7 +110,7 @@ dom.RelaxNG = function RelaxNG(url) {
             if (e.length > 1 && (name === "define" || name === "oneOrMore" ||
                     name === "zeroOrMore" || name === "optional" || name === "list" ||
                     name === "mixed" || name === "element")) {
-                e = splitToDuos({ name: "group", e: e});
+                e = splitToDuos({ name: "group", e: e}).e;
             }
             // if node has only one child, replace node with child
             if (e.length === 1 && (name === "choice" || name === "group" ||
@@ -206,7 +206,6 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param elementdef
      * @param walker
      * @return {Array.<RelaxNGParseError>}
-     */
     function validateOptional(elementdef, walker) {
         // the group of definitions in this list is optional, we try to parse it
         // if there is an error, we stop
@@ -219,6 +218,7 @@ dom.RelaxNG = function RelaxNG(url) {
         // optional elements cannot return errors
         return null;
     }
+     */
     /**
      * @param elementdef
      * @param walker
@@ -246,7 +246,6 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param elementdef
      * @param walker
      * @return {Array.<RelaxNGParseError>}
-     */
     function validateZeroOrMore(elementdef, walker) {
         // If a round fails, the walker should go back to the start of
         // the last successful traversal
@@ -263,6 +262,7 @@ dom.RelaxNG = function RelaxNG(url) {
         }
         return err;
     }
+     */
     /**
      * @param {!Node} node
      * @return {!string}
@@ -383,7 +383,6 @@ dom.RelaxNG = function RelaxNG(url) {
      * @return {Array.<RelaxNGParseError>}
      */
     validate = function validate(elementdef, walker) {
-runtime.log("validate " + elementdef.name);
         var i, e, err = null;
         for (i = 0; !err && i < elementdef.e.length; i += 1) {
             // skip until an element is encountered, then enter it
@@ -396,12 +395,8 @@ runtime.log("validate " + elementdef.name);
                 err = validateAttribute(e, walker);
             } else if (e.name === "oneOrMore") {
                 err = validateOneOrMore(e, walker);
-            } else if (e.name === "zeroOrMore") {
-                err = validateZeroOrMore(e, walker);
             } else if (e.name === "interleave") {
                 err = validateInterleave(e, walker);
-            } else if (e.name === "optional") {
-                err = validateOptional(e, walker);
             } else {
                 runtime.log("unknown type: " + e.name);
             }
