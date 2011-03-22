@@ -494,7 +494,8 @@ odf.OdfContainer = (function () {
                 /**@type{!string}*/ s = documentElement("document-content", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.body);
-            s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
+            // Until there is code to  determine if a font is referenced only from
+            // all font declaratios will be stored in styles.xml
             s += serializer.writeToString(self.rootElement.automaticStyles, nsmap);
             s += serializer.writeToString(self.rootElement.body, nsmap);
             s += "</office:document-content>";
