@@ -75,30 +75,23 @@ odf.OdfContainer = (function () {
      */
     function OdfNodeFilter(odfroot, usedStylesElement) {
         var automaticStyles = odfroot.automaticStyles,
-            stylesUsed = null;
+            usedKeysList;
         if (usedStylesElement) {
-            stylesUsed = styleInfo.getUsedStylesForAutomatic(usedStylesElement);
+            usedKeysList = new styleInfo.UsedKeysList(usedStylesElement);
         }
-        // stylesUsedInContent = listUsedStyles("office:body");
-        // stylesUsedInStyles = listUsedStyles("office:master-styles");
         /**
          * @param {!Node} node
          * @return {!number}
          */
         this.acceptNode = function (node) {
             var styleName, styleFamily;
-            if (stylesUsed && node.nodeType === 1 &&
-                    node.parentNode === automaticStyles) {
-                styleFamily = node.getAttributeNS(namespaces.style, "family");
-                styleName = node.getAttributeNS(namespaces.style, "name");
-                if (styleFamily && styleName && stylesUsed[styleFamily] &&
-                        stylesUsed[styleFamily][styleName]) {
+            if (usedKeysList && node.parentNode === automaticStyles &&
+                    node.nodeType === 1) {
+                if (usedKeysList.uses(node)) {
                     return 1; // FILTER_ACCEPT
                 }
-//                runtime.log("reject " + styleFamily + " " + styleName + " for " + usedStylesElementName);
                 return 2; // FILTER_REJECT
             }
-            //runtime.log(node.nodeName);
             return 1; // FILTER_ACCEPT
         };
     }
@@ -297,25 +290,6 @@ odf.OdfContainer = (function () {
                 self.onstatereadychange(self);
             }
         }
-/*
-        function removeUnusedAutomaticStyles(automaticStyles, masterStyles) {
-            var stylesUsed = listUsedStyles(masterStyles, "."),
-                n, next, styleFamily, styleName;
-            n = automaticStyles.firstChild;
-            while (n) {
-                next = n.nextSibling;
-                if (n.nodeType === 1) { // ELEMENT
-                    styleFamily = n.getAttributeNS(namespaces.style, "family");
-                    styleName = n.getAttributeNS(namespaces.style, "name");
-                    if (!(styleFamily && styleName && stylesUsed[styleFamily] &&
-                            stylesUsed[styleFamily][styleName])) {
-                        runtime.log("remove " + styleFamily + " " + styleName);
-                    }
-                }
-                n = next;
-            }
-        }
-*/
         /**
          * @param {!Document} xmldoc
          * @return {undefined}
@@ -501,16 +475,12 @@ odf.OdfContainer = (function () {
         function serializeStylesXml() {
             var nsmap = style2CSS.namespaces,
                 serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = documentElement("document-styles", nsmap),
-                automaticStyles;
+                /**@type{!string}*/ s = documentElement("document-styles", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.masterStyles);
             s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
             s += serializer.writeToString(self.rootElement.styles, nsmap);
-            automaticStyles = self.rootElement.automaticStyles;
-//            automaticStyles = style2CSS.getUsedAutomaticStyles(
-//                    self.rootElement.automaticStyles, self.rootElement.masterStyles);
-            s += serializer.writeToString(automaticStyles, nsmap);
+            s += serializer.writeToString(self.rootElement.automaticStyles, nsmap);
             s += serializer.writeToString(self.rootElement.masterStyles, nsmap);
             s += "</office:document-styles>";
             return s;
@@ -521,15 +491,11 @@ odf.OdfContainer = (function () {
         function serializeContentXml() {
             var nsmap = style2CSS.namespaces,
                 serializer = new dom.LSSerializer(),
-                /**@type{!string}*/ s = documentElement("document-content", nsmap),
-                automaticStyles;
+                /**@type{!string}*/ s = documentElement("document-content", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.body);
             s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
-            automaticStyles = self.rootElement.automaticStyles;
-//            automaticStyles = style2CSS.getUsedAutomaticStyles(
-//                    self.rootElement.automaticStyles, self.rootElement.body);
-            s += serializer.writeToString(automaticStyles, nsmap);
+            s += serializer.writeToString(self.rootElement.automaticStyles, nsmap);
             s += serializer.writeToString(self.rootElement.body, nsmap);
             s += "</office:document-content>";
             return s;

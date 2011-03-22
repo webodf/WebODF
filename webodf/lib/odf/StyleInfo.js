@@ -10,6 +10,7 @@ odf.StyleInfo = function StyleInfo() {
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         formns = "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+        numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
         stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
@@ -207,7 +208,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: stylens, en: 'handout-master', ans: drawns, a: 'style-name'},
                 { ens: stylens, en: 'master-page', ans: drawns, a: 'style-name'}
             ],
-            list: [
+            "list-style": [
                 { ens: textns, en: 'list', ans: textns, a: 'style-name'},
                 { ens: textns, en: 'numbered-paragraph', ans: textns, a: 'style-name'},
                 { ens: textns, en: 'list-item', ans: textns, a: 'style-override'},
@@ -267,32 +268,40 @@ odf.StyleInfo = function StyleInfo() {
         },
         elements;
 
+    /**
+     * @param {!Element} element
+     * @param {!Object.<string,Object.<string,number>>} keys
+     * @return {undefined}
+     */
     function getUsedStylesForAutomatic(element, keys) {
         var elname = elements[element.localName],
             elns = elname && elname[element.namespaceURI],
             length = elns ? elns.length : 0,
-            i, attr, group, map;
+            i, attr, group, map, e;
         for (i = 0; i < length; i += 1) {
             attr = element.getAttributeNS(elns[i].ns, elns[i].localname);
             if (attr) { // a style has been found!
                 group = elns[i].keygroup;
                 map = keys[group];
-                if (map) { 
-                    map[attr] = 1;
-                } else {
-                    keys[group] = { attr: 1 };
+                if (!map) {
+                    map = keys[group] = {};
                 }
+                map[attr] = 1;
             }
         }
         i = element.firstChild;
         while (i) {
             if (i.nodeType === 1) {
-                getUsedStylesForAutomatic(i, keys);
+                e = /**@type{!Element}*/(i);
+                getUsedStylesForAutomatic(e, keys);
             }
             i = i.nextSibling;
         }
     }
 
+    /**
+     * @param {!Object.<Array.<Object.<string,string>>>} elementstyles
+     */
     function inverse(elementstyles) {
         var keyname, i, list, item, l, elements = {}, map, array;
         for (keyname in elementstyles) {
@@ -310,8 +319,34 @@ odf.StyleInfo = function StyleInfo() {
         return elements;
     }
 
-    this.getUsedStylesForAutomatic = function (element) {
-        return getUsedStylesForAutomatic(element, {});
+    /**
+     * @constructor
+     * @param {!Element} element
+     */
+    this.UsedKeysList = function (element) {
+        var usedKeys = {};
+
+        /**
+         * @param {!Element} element
+         * @return {!boolean}
+         */
+        this.uses = function (element) {
+            var localName = element.localName,
+                name = element.getAttributeNS(drawns, "name") ||
+                        element.getAttributeNS(stylens, "name"),
+                keyName, map;
+            if (localName === "style") {
+                keyName = element.getAttributeNS(stylens, "family");
+            } else if (element.namespaceURI === numberns) {
+                keyName = "data";
+            } else {
+                keyName = localName; // list-style or page-layout
+            }
+            map = usedKeys[keyName];
+            return map ? (map[name] > 0) : false;
+        };
+
+        getUsedStylesForAutomatic(element, usedKeys);
     };
     elements = inverse(elementstyles);
 };
