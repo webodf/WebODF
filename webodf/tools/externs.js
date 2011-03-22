@@ -254,6 +254,16 @@ function ArrayBuffer(size) {}
  */
 function Uint8Array(buffer) {}
 /**
+ * @param {!number=} begin
+ * @param {!number=} end
+ * @return {!Uint8Array}
+ */
+Uint8Array.prototype.subarray = function (begin, end) {};
+/**
+ * @const@type{!number}
+ */
+Uint8Array.prototype.length;
+/**
  * @interface
  */
 function TreeWalker() {}

@@ -178,7 +178,6 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     }
     return byteArrayToString(bytearray);
 };
-
 /**
  * @class
  * @constructor
@@ -203,6 +202,21 @@ function BrowserRuntime(logoutput) {
     this.ByteArray = (useNativeArray)
         // if Uint8Array is available, use that
         ? function ByteArray(size) {
+            Uint8Array.prototype.slice = function (begin, end) {
+                if (end === undefined) {
+                    if (begin === undefined) {
+                        begin = 0;
+                    }
+                    end = this.length;
+                }
+                var view = this.subarray(begin, end), array, i;
+                end -= begin;
+                array = new Uint8Array(new ArrayBuffer(end));
+                for (i = 0; i < end; i += 1) {
+                    array[i] = view[i];
+                }
+                return array;
+            };
             return new Uint8Array(new ArrayBuffer(size));
           }
         : function ByteArray(size) {
@@ -407,7 +421,9 @@ function BrowserRuntime(logoutput) {
         }
         xhr.open('PUT', path, true);
         xhr.onreadystatechange = handleResult;
-        if (data.buffer) { // ArrayBufferView will have an ArrayBuffer property
+        // ArrayBufferView will have an ArrayBuffer property, in WebKit, XHR can send()
+        // an ArrayBuffer, In Firefox, one must use sendAsBinary with a string
+        if (data.buffer && !xhr.sendAsBinary) {
             data = data.buffer; // webkit supports sending an ArrayBuffer
         } else {
             // encode into a string, this works in FireFox >= 3
