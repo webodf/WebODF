@@ -11,7 +11,9 @@ odf.OdfCanvas = (function () {
         fons    = namespaces.fo,
         svgns   = namespaces.svg,
         textns  = namespaces.text,
-        xlinkns = namespaces.xlink;
+        xlinkns = namespaces.xlink,
+        window = runtime.getWindow(),
+        editparagraph;
 
     /**
      * @param {!Element} element
@@ -239,6 +241,86 @@ odf.OdfCanvas = (function () {
             odfcontainer = new odf.OdfContainer(url);
             odfcontainer.onstatereadychange = refreshOdf;
         };
+
+        function listenEvent(eventTarget, eventType, eventHandler) {
+            if (eventTarget.addEventListener) {
+                eventTarget.addEventListener(eventType, eventHandler, false);
+            } else if (eventTarget.attachEvent) {
+                eventType = "on" + eventType;
+                eventTarget.attachEvent(eventType, eventHandler);
+            } else {
+                eventTarget["on" + eventType] = eventHandler;
+            }
+        }
+
+        function cancelPropagation(event) {
+            if (event.stopPropagation) {
+                event.stopPropagation();
+            } else {
+                event.cancelBubble = true;
+            }
+        }
+
+        function cancelEvent(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                event.returnValue = false;
+                event.cancelBubble = true;
+            }
+        }
+
+        function stopEditing() {
+            var fragment = editparagraph.ownerDocument.createDocumentFragment();
+            while (editparagraph.firstChild) {
+                fragment.insertBefore(editparagraph.firstChild, null);
+            }
+            editparagraph.parentNode.replaceChild(fragment, editparagraph);
+        }
+
+        function processClick(evt) {
+            evt = evt || window.event;
+            // go up until we find a text:p, if we find it, wrap it in <p> and make that
+            // editable
+            var e = evt.target, selection = window.getSelection(),
+                range = selection.getRangeAt(0),
+                startContainer = range && range.startContainer,
+                startOffset = range && range.startOffset,
+                endContainer = range && range.endContainer,
+                endOffset = range && range.endOffset;
+            while (e && !((e.localName === "p" || e.localName === "h") &&
+                    e.namespaceURI === textns)) {
+                e = e.parentNode;
+            }
+            if (!e || e.parentNode === editparagraph) {
+                return;
+            }
+
+            if (!editparagraph) {
+                editparagraph = e.ownerDocument.createElement("p");
+                editparagraph.setAttribute("contenteditable", true);
+                editparagraph.style.margin = "0px";
+                editparagraph.style.padding = "0px";
+                editparagraph.style.border = "0px";
+            } else if (editparagraph.parentNode) {
+                stopEditing();
+            }
+            e.parentNode.replaceChild(editparagraph, e);
+            editparagraph.appendChild(e);
+
+            // set the cursor or selection at the right position
+            if (range) {
+                selection.removeAllRanges();
+                range = e.ownerDocument.createRange();
+                range.setStart(startContainer, startOffset);
+                range.setEnd(endContainer, endOffset);
+                selection.addRange(range);
+            }
+            cancelEvent(evt);
+        }
+
+        listenEvent(element, "click", processClick);
     }
     return OdfCanvas;
 }());
