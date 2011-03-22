@@ -348,8 +348,7 @@ function BrowserRuntime(logoutput) {
                     callback("File is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
-                    data = new self.byteArrayFromString(xhr.responseText,
-                            "binary");
+                    data = self.byteArrayFromString(xhr.responseText, "binary");
                     cache[path] = data;
                     callback(null, data.slice(offset, offset + length));
                 } else {
