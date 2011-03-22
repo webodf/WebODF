@@ -310,6 +310,7 @@ odf.OdfCanvas = (function () {
             editparagraph.appendChild(e);
 
             // set the cursor or selection at the right position
+            editparagraph.focus(); // needed in FF to show cursor in the paragraph
             if (range) {
                 selection.removeAllRanges();
                 range = e.ownerDocument.createRange();
