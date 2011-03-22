@@ -116,13 +116,15 @@ dom.LSSerializer = function LSSerializer() {
         if (accept === 1) {
             s += startNode(nsmap, node);
         }
-        child = node.firstChild;
-        while (child) {
-            s += serializeNode(nsmap, child);
-            child = child.nextSibling;
-        }
-        if (node.nodeValue) {
-            s += node.nodeValue;
+        if (accept === 1 || accept === 3) {
+            child = node.firstChild;
+            while (child) {
+                s += serializeNode(nsmap, child);
+                child = child.nextSibling;
+            }
+            if (node.nodeValue) {
+                s += node.nodeValue;
+            }
         }
         if (accept === 1) {
             s += endNode(node);
