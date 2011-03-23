@@ -238,9 +238,15 @@ function BrowserRuntime(logoutput) {
               return bytearray1.concat(bytearray2);
           };
     function utf8ByteArrayFromString(string) {
-        var l = string.length,
-            bytearray = new self.ByteArray(l),
-            i, n, j = 0;
+        var l = string.length, bytearray, i, n, j = 0;
+        // first determine the length in bytes
+        for (i = 0; i < l; i += 1) {
+            n = string.charCodeAt(i);
+            j += 1 + (n > 0x80) + (n > 0x800);
+        }
+        // allocate a buffer and convert to a utf8 array
+        bytearray = new self.ByteArray(j);
+        j = 0;
         for (i = 0; i < l; i += 1) {
             n = string.charCodeAt(i);
             if (n < 0x80) {
@@ -401,6 +407,7 @@ function BrowserRuntime(logoutput) {
         return result;
     }
     function writeFile(path, data, callback) {
+        cache[path] = data;
         var xhr = new XMLHttpRequest();
         function handleResult() {
             if (xhr.readyState === 4) {
