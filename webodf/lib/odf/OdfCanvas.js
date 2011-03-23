@@ -242,6 +242,19 @@ odf.OdfCanvas = (function () {
             odfcontainer.onstatereadychange = refreshOdf;
         };
 
+        function stopEditing() {
+            var fragment = editparagraph.ownerDocument.createDocumentFragment();
+            while (editparagraph.firstChild) {
+                fragment.insertBefore(editparagraph.firstChild, null);
+            }
+            editparagraph.parentNode.replaceChild(fragment, editparagraph);
+        }
+
+        this.save = function (callback) {
+            stopEditing();
+            odfcontainer.save(callback);
+        };
+
         function listenEvent(eventTarget, eventType, eventHandler) {
             if (eventTarget.addEventListener) {
                 eventTarget.addEventListener(eventType, eventHandler, false);
@@ -269,14 +282,6 @@ odf.OdfCanvas = (function () {
                 event.returnValue = false;
                 event.cancelBubble = true;
             }
-        }
-
-        function stopEditing() {
-            var fragment = editparagraph.ownerDocument.createDocumentFragment();
-            while (editparagraph.firstChild) {
-                fragment.insertBefore(editparagraph.firstChild, null);
-            }
-            editparagraph.parentNode.replaceChild(fragment, editparagraph);
         }
 
         function processClick(evt) {
