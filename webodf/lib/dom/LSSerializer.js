@@ -79,10 +79,11 @@ dom.LSSerializer = function LSSerializer() {
             }
             for (i in nsmap) {
                 if (nsmap.hasOwnProperty(i)) {
-                    if (nsmap[i]) {
-                        s += " xmlns:" + nsmap[i] + "=\"" + i + "\"";
-                    } else {
+                    prefix = nsmap[i];
+                    if (!prefix) {
                         s += " xmlns=\"" + i + "\"";
+                    } else if (prefix !== "xmlns") {
+                        s += " xmlns:" + nsmap[i] + "=\"" + i + "\"";
                     }
                 }
             }
