@@ -85,6 +85,9 @@ odf.OdfContainer = (function () {
          */
         this.acceptNode = function (node) {
             var styleName, styleFamily;
+            if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
+                return 3; // FILTER_SKIP
+            } else
             if (usedKeysList && node.parentNode === automaticStyles &&
                     node.nodeType === 1) {
                 if (usedKeysList.uses(node)) {

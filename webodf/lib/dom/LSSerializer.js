@@ -65,16 +65,18 @@ dom.LSSerializer = function LSSerializer() {
             length = atts.length;
             for (i = 0; i < length; i += 1) {
                 attr = /**@type{!Attr}*/(atts.item(i));
-                accept = (self.filter) ? self.filter.acceptNode(attr) : 1;
-                if (accept === 1) {
-                    // xml attributes always need a prefix for a namespace
-                    if (attr.namespaceURI) {
-                       prefix = attributePrefix(nsmap, attr.prefix,
-                               attr.namespaceURI);
-                    } else {
-                       prefix = "";
+                if (attr.namespaceURI !== "http://www.w3.org/2000/xmlns/") {
+                    accept = (self.filter) ? self.filter.acceptNode(attr) : 1;
+                    if (accept === 1) {
+                        // xml attributes always need a prefix for a namespace
+                        if (attr.namespaceURI) {
+                           prefix = attributePrefix(nsmap, attr.prefix,
+                                   attr.namespaceURI);
+                        } else {
+                           prefix = "";
+                        }
+                        attstr += " " + serializeAttribute(prefix, attr);
                     }
-                    attstr += " " + serializeAttribute(prefix, attr);
                 }
             }
             for (i in nsmap) {
