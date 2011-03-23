@@ -10,7 +10,7 @@ dom.RelaxNG = function RelaxNG(url) {
         errormessage,
         queue = [],
         start,
-        validate,
+        validateNonEmptyPattern,
         nsmap = {};
 
     /**
@@ -22,7 +22,11 @@ dom.RelaxNG = function RelaxNG(url) {
         this.message = function () {
             if (context) {
                 error += (context.nodeType === 1) ? " Element " : " Node ";
-                error += context.nodeName + " with value '" + context.nodeValue + "'.";
+                error += context.nodeName;
+                if (context.nodeValue) {
+                    error += " with value '" + context.nodeValue + "'";
+                }
+                error += ".";
             }
             return error;
         };
@@ -50,12 +54,10 @@ dom.RelaxNG = function RelaxNG(url) {
             if (e.e.length <= 2) {
                 return e;
             }
+            var o = { name: e.name, e: e.e.slice(0, 2) };
             return splitToDuos({
                 name: e.name,
-                e: [
-                    { name: e.name, e: e.e.slice(0, 2) },
-                    e.e.slice(2)
-                ]
+                e: [ o ].concat(e.e.slice(2))
             });
         }
    
@@ -110,7 +112,7 @@ dom.RelaxNG = function RelaxNG(url) {
             if (e.length > 1 && (name === "define" || name === "oneOrMore" ||
                     name === "zeroOrMore" || name === "optional" || name === "list" ||
                     name === "mixed" || name === "element")) {
-                e = splitToDuos({ name: "group", e: e}).e;
+                e = [{ name: "group", e: e}];
             }
             // if node has only one child, replace node with child
             if (e.length === 1 && (name === "choice" || name === "group" ||
@@ -200,7 +202,7 @@ dom.RelaxNG = function RelaxNG(url) {
      */
     function validateAttribute(elementdef, walker) {
         // the attribute should be on the parent of the current node
-        runtime.log("hi");
+        runtime.log("validate " + elementdef.names);
     }
     /**
      * @param elementdef
@@ -232,7 +234,7 @@ dom.RelaxNG = function RelaxNG(url) {
         var node, i = 0, err;
         do {
             node = walker.currentNode;
-            err = validate(elementdef, walker);
+            err = validateNonEmptyPattern(elementdef.e[0], walker);
             i += 1;
         } while (!err);
         if (i > 1) { // at least one round was without error
@@ -278,6 +280,41 @@ dom.RelaxNG = function RelaxNG(url) {
         return node && node.nodeType === 3 && /^\s+$/.test(node.nodeValue);
     }
     /**
+     * @param elementdef
+     * @param walker
+     * @return {Array.<RelaxNGParseError>}
+     */
+    function validatePattern(elementdef, walker) {
+        if (elementdef.name !== "empty") {
+            return validateNonEmptyPattern(elementdef, walker);
+        }
+        // walker.currentNode points to first child of an element
+        // the content may only be whitespace
+        var /**@type{Node}*/ node = walker.currentNode,
+            /**@type{number}*/ type = node ? node.nodeType : 0;
+        // find the next element, skip text nodes with only whitespace
+        while (type === 3) { // TEXT_NODE
+            if (!/^\s+$/.test(walker.currentNode.nodeValue)) {
+                return [new RelaxNGParseError("Text not allowed here.", node)];
+            }
+            node = walker.nextSibling();
+            type = node ? node.nodeType : 0;
+        }
+        if (node) {
+            return [new RelaxNGParseError("Node not allowed.", node)];
+        }
+        return null;
+    }
+    /**
+     * @param elementdef
+     * @param walker
+     * @return {Array.<RelaxNGParseError>}
+     */
+    function validateTop(elementdef, walker) {
+        // notAllowed not implemented atm
+        return validatePattern(elementdef, walker);
+    }
+    /**
      * Validate an element.
      * Function forwards the walker until an element is met.
      * If element if of the right type, it is entered and the validation continues
@@ -291,7 +328,7 @@ dom.RelaxNG = function RelaxNG(url) {
         // forward until an element is seen, then check the name
         var /**@type{Node}*/ node = walker.currentNode,
             /**@type{number}*/ type = node ? node.nodeType : 0,
-            error;
+            error = null;
         // find the next element, skip text nodes with only whitespace
         while (type > 1) {
             if (type !== 3 || !/^\s+$/.test(walker.currentNode.nodeValue)) {// TEXT_NODE
@@ -311,7 +348,7 @@ dom.RelaxNG = function RelaxNG(url) {
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
-            error = validate(elementdef, walker);
+            error = validateTop(elementdef.e[0], walker);
             // there should be no content left
             while (walker.nextSibling()) {
                 if (!isWhitespace(walker.currentNode)) {
@@ -334,7 +371,7 @@ dom.RelaxNG = function RelaxNG(url) {
      */
     function validateChoice(elementdef, walker) {
         // loop through child definitions and return if a match is found
-        var i, e, l = elementdef.e.length, name, node = walker.currentNode;
+        var i, e, name, node = walker.currentNode, error;
         while (node && isWhitespace(node)) {
             node = walker.nextSibling();
         }
@@ -345,13 +382,24 @@ dom.RelaxNG = function RelaxNG(url) {
             return [new RelaxNGParseError("Expected element.", walker.currentNode)];
         }
         name = walker.currentNode.nodeName;
-        for (i = 0; i < l; i += 1) {
+        if (elementdef.e.length !== 2) {
+            throw "Choice with wrong # of options: " + elementdef.e.length;
+        }
+        for (i = 0; i < 2; i += 1) {
             e = elementdef.e[i];
-            if (e.name !== "element") {
-                throw "Choice must only have 'element' children, not " + e.name + ".";
-            }
-            if (e.names.indexOf(qName(walker.currentNode)) === -1) {
-                return validateElement(e, walker);
+            if (e.name === "choice") {
+                error = validateChoice(e, walker);
+                if (!error) {
+                    return null;
+                }
+            } else if (e.name === "element") {
+                if (e.names.indexOf(qName(walker.currentNode)) === -1) {
+                    return validateElement(e, walker);
+                }
+            } else {
+runtime.log(e[0].name + " " + e[1].name + " " + e[2].name);
+                throw "Choice must only have 'element' or 'choice' children, not " +
+                        e.name + "." + elementdef.e.length;
             }
         }
         return [new RelaxNGParseError("Element " + name + " is not allowed here.")];
@@ -369,7 +417,7 @@ dom.RelaxNG = function RelaxNG(url) {
             start = walker.currentNode;
             for (i = 0; i < elementdef.e.length; i += 1) {
                 node = walker.currentNode;
-                err = validate(elementdef.e[i], walker);
+                err = validateNonEmptyPattern(elementdef.e[i], walker);
                 if (err) {
                     walker.currentNode = node;
                 }
@@ -377,29 +425,46 @@ dom.RelaxNG = function RelaxNG(url) {
         } while (start !== walker.currentNode);
     }
     /**
-     * Validate the next part
-     * @param {!Object} elementdef
-     * @param {!TreeWalker} walker
+     * @param elementdef
+     * @param walker
      * @return {Array.<RelaxNGParseError>}
      */
-    validate = function validate(elementdef, walker) {
-        var i, e, err = null;
-        for (i = 0; !err && i < elementdef.e.length; i += 1) {
-            // skip until an element is encountered, then enter it
-            e = elementdef.e[i];
-            if (e.name === "element") {
-                err = validateElement(e, walker);
-            } else if (e.name === "choice") {
-                err = validateChoice(e, walker);
-            } else if (e.name === "attribute") {
-                err = validateAttribute(e, walker);
-            } else if (e.name === "oneOrMore") {
-                err = validateOneOrMore(e, walker);
-            } else if (e.name === "interleave") {
-                err = validateInterleave(e, walker);
-            } else {
-                runtime.log("unknown type: " + e.name);
-            }
+    function validateGroup(elementdef, walker) {
+        if (elementdef.e.length !== 2) {
+            throw "Group with wrong # of options: " + elementdef.e.length;
+        }
+        return validateNonEmptyPattern(elementdef.e[0], walker) ||
+                validateNonEmptyPattern(elementdef.e[1], walker);
+    }
+    /**
+     * @param elementdef
+     * @param walker
+     * @return {Array.<RelaxNGParseError>}
+     */
+    validateNonEmptyPattern = function validateNonEmptyPattern(elementdef, walker) {
+        var name = elementdef.name, err;
+        if (name === "text") {
+            err = [new RelaxNGParseError("text not implemented.")];
+        } else if (name === "data") {
+            err = [new RelaxNGParseError("data not implemented.")];
+        } else if (name === "value") {
+            err = [new RelaxNGParseError("value not implemented.")];
+        } else if (name === "list") {
+            err = [new RelaxNGParseError("list not implemented.")];
+        } else if (name === "attribute") {
+            err = validateAttribute(elementdef, walker);
+        } else if (name === "element") {
+            err = validateElement(elementdef, walker);
+        } else if (name === "oneOrMore") {
+            err = validateOneOrMore(elementdef, walker);
+        } else if (name === "choice") {
+            err = validateChoice(elementdef, walker);
+        } else if (name === "group") {
+            err = validateGroup(elementdef, walker);
+        } else if (name === "interleave") {
+            err = validateInterleave(elementdef, walker);
+        } else {
+            err = [new RelaxNGParseError(name + " not implemented.")];
         }
         return err;
     };
@@ -421,7 +486,7 @@ dom.RelaxNG = function RelaxNG(url) {
             return;
         }
         walker.currentNode = walker.root;
-        var errors = validate(start, walker);
+        var errors = validatePattern(start.e[0], walker);
         callback(errors);
     }
     this.validate = validateXML;
