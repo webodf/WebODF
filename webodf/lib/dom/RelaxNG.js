@@ -18,7 +18,7 @@ dom.RelaxNG = function RelaxNG(url) {
     /**
      * @constructor
      * @param {!string} error
-     * @param {!Node=} context
+     * @param {Node=} context
      */
     function RelaxNGParseError(error, context) {
         this.message = function () {
@@ -270,27 +270,6 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateAttribute(elementdef, walker, element) {
-        var att, a, l = elementdef.localnames.length, i;
-        for (i = 0; i < l; i += 1) {
-            a = element.getAttributeNS(elementdef.namespaces[i],
-                    elementdef.localnames[i]);
-            if (att && a) {
-                return [new RelaxNGParseError("Attribute defined too often.", a)];
-            }
-            att = a;
-        }
-        if (!att) {
-            return [new RelaxNGParseError("Attribute not found: " + elementdef.names,
-                    element)];
-        }
-    }
-    /**
-     * @param elementdef
-     * @param walker
-     * @param {Element} element
-     * @return {Array.<RelaxNGParseError>}
-     */
     function validateOneOrMore(elementdef, walker, element) {
         // The list of definitions in the elements list should be completely traversed
         // at least once
@@ -327,13 +306,39 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param elementdef
      * @param walker
      * @param {Element} element
+     * @param {string=} data
      * @return {Array.<RelaxNGParseError>}
      */
-    function validatePattern(elementdef, walker, element) {
+    function validatePattern(elementdef, walker, element, data) {
         if (elementdef.name === "empty") {
             return null;
         }
-        return validateNonEmptyPattern(elementdef, walker, element);
+        return validateNonEmptyPattern(elementdef, walker, element, data);
+    }
+    /**
+     * @param elementdef
+     * @param walker
+     * @param {Element} element
+     * @return {Array.<RelaxNGParseError>}
+     */
+    function validateAttribute(elementdef, walker, element) {
+        if (elementdef.e.length !== 1) {
+            throw "Attribute with wrong # of options: " + elementdef.e.length;
+        }
+        var att, a, l = elementdef.localnames.length, i;
+        for (i = 0; i < l; i += 1) {
+            a = element.getAttributeNS(elementdef.namespaces[i],
+                    elementdef.localnames[i]);
+            if (att && a) {
+                return [new RelaxNGParseError("Attribute defined too often.", element)];
+            }
+            att = a;
+        }
+        if (!att) {
+            return [new RelaxNGParseError("Attribute not found: " + elementdef.names,
+                    element)];
+        }
+        return validatePattern(elementdef.e[0], walker, element, att);
     }
     /**
      * @param elementdef
@@ -412,9 +417,10 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param elementdef
      * @param walker
      * @param {Element} element
+     * @param {string=} data
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateChoice(elementdef, walker, element) {
+    function validateChoice(elementdef, walker, element, data) {
         // loop through child definitions and return if a match is found
         if (elementdef.e.length !== 2) {
             throw "Choice with wrong # of options: " + elementdef.e.length;
@@ -423,7 +429,7 @@ dom.RelaxNG = function RelaxNG(url) {
         // if the first option is empty, just check the second one for debugging
         // but the total choice is alwasy ok
         if (elementdef.e[0].name === "empty") {
-            err = validateNonEmptyPattern(elementdef.e[1], walker, element);
+            err = validateNonEmptyPattern(elementdef.e[1], walker, element, data);
             if (err) {
                 walker.currentNode = node;
             }
@@ -432,7 +438,7 @@ dom.RelaxNG = function RelaxNG(url) {
         err = validatePattern(elementdef.e[0], walker, element);
         if (err) {
             walker.currentNode = node;
-            err = validateNonEmptyPattern(elementdef.e[1], walker, element);
+            err = validateNonEmptyPattern(elementdef.e[1], walker, element, data);
         }
         return err;
     }
@@ -474,19 +480,23 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param elementdef
      * @param walker
      * @param {Element} element
+     * @param {string=} data
      * @return {Array.<RelaxNGParseError>}
      */
     validateNonEmptyPattern = function validateNonEmptyPattern(elementdef, walker,
-                element) {
-        var name = elementdef.name, err;
+                element, data) {
+        var name = elementdef.name, err = null;
         if (name === "text") {
             throw "text not implemented.";
         } else if (name === "data") {
-            throw "data not implemented.";
+            err = null; // data not implemented
         } else if (name === "value") {
-            throw "value not implemented.";
+            if (data !== elementdef.text) {
+                err = [new RelaxNGParseError("Wrong value, should be " +
+                        elementdef.text, element)];
+            }
         } else if (name === "list") {
-            throw "list not implemented.";
+            err = null; // list not implemented
         } else if (name === "attribute") {
             err = validateAttribute(elementdef, walker, element);
         } else if (name === "element") {
@@ -494,7 +504,7 @@ dom.RelaxNG = function RelaxNG(url) {
         } else if (name === "oneOrMore") {
             err = validateOneOrMore(elementdef, walker, element);
         } else if (name === "choice") {
-            err = validateChoice(elementdef, walker, element);
+            err = validateChoice(elementdef, walker, element, data);
         } else if (name === "group") {
             err = validateGroup(elementdef, walker, element);
         } else if (name === "interleave") {
