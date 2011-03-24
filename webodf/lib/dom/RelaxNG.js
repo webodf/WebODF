@@ -12,7 +12,8 @@ dom.RelaxNG = function RelaxNG(url) {
         start,
         validateNonEmptyPattern,
         nsmap = {},
-        depth = 0, p = "                                                                ";
+        depth = 0,
+        p = "                                                                ";
 
     /**
      * @constructor
@@ -31,7 +32,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
             return error;
         };
-        runtime.log(p.slice(0, depth) + this.message());
+        runtime.log("[" + p.slice(0, depth) + this.message() + "]");
     }
     /**
      * handle validation requests that were added while schema was loading
@@ -226,7 +227,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 runtime.log(err);
                 return err;
             }
-runtime.log(JSON.stringify(start, null, "  "));
+            //runtime.log(JSON.stringify(start, null, "  "));
             return null;
         }
         return main();
@@ -234,18 +235,20 @@ runtime.log(JSON.stringify(start, null, "  "));
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateAttribute(elementdef, walker) {
+    function validateAttribute(elementdef, walker, element) {
         // the attribute should be on the parent of the current node
-        //runtime.log("validate " + elementdef.names);
+        runtime.log("validate " + elementdef.names);
     }
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateOneOrMore(elementdef, walker) {
+    function validateOneOrMore(elementdef, walker, element) {
         // The list of definitions in the elements list should be completely traversed
         // at least once
         // If a second or later round fails, the walker should go back to the start of
@@ -253,7 +256,7 @@ runtime.log(JSON.stringify(start, null, "  "));
         var node, i = 0, err;
         do {
             node = walker.currentNode;
-            err = validateNonEmptyPattern(elementdef.e[0], walker);
+            err = validateNonEmptyPattern(elementdef.e[0], walker, element);
             i += 1;
         } while (!err);
         if (i > 1) { // at least one round was without error
@@ -280,23 +283,24 @@ runtime.log(JSON.stringify(start, null, "  "));
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validatePattern(elementdef, walker) {
+    function validatePattern(elementdef, walker, element) {
         if (elementdef.name === "empty") {
             return null;
         }
-        return validateNonEmptyPattern(elementdef, walker);
+        return validateNonEmptyPattern(elementdef, walker, element);
     }
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateTop(elementdef, walker) {
-runtime.log(elementdef.name);
+    function validateTop(elementdef, walker, element) {
         // notAllowed not implemented atm
-        return validatePattern(elementdef, walker);
+        return validatePattern(elementdef, walker, element);
     }
     /**
      * Validate an element.
@@ -306,10 +310,14 @@ runtime.log(elementdef.name);
      * the walker is at the same depth in the dom tree.
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateElement(elementdef, walker) {
-depth++;
+    function validateElement(elementdef, walker, element) {
+        if (elementdef.e.length !== 1) {
+            throw "Element with wrong # of options: " + elementdef.e.length;
+        }
+        depth += 1;
         // forward until an element is seen, then check the name
         var /**@type{Node}*/ node = walker.currentNode,
             /**@type{number}*/ type = node ? node.nodeType : 0,
@@ -317,7 +325,7 @@ depth++;
         // find the next element, skip text nodes with only whitespace
         while (type > 1) {
             if (type !== 3 || !/^\s+$/.test(walker.currentNode.nodeValue)) {// TEXT_NODE
-depth--;
+                depth -= 1;
                 return [new RelaxNGParseError("Not allowed node of type " + type +
                         ".")];
             }
@@ -325,37 +333,34 @@ depth--;
             type = node ? node.nodeType : 0;
         }
         if (!node) {
-depth--;
+            depth -= 1;
             return [new RelaxNGParseError("Missing element " + elementdef.names)];
         }
         if (elementdef.names.indexOf(qName(node)) === -1) {
-depth--;
+            depth -= 1;
             return [new RelaxNGParseError("Found " + node.nodeName +
                     " instead of " + elementdef.names + ".", node)];
         }
-runtime.log(p.slice(0,depth)+"try " + qName(node));
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
-            error = validateTop(elementdef.e[0], walker);
+            error = validateTop(elementdef.e[0], walker, element);
             // there should be no content left
             while (walker.nextSibling()) {
                 if (!isWhitespace(walker.currentNode)) {
-depth--;
+                    depth -= 1;
                     return [new RelaxNGParseError("Spurious content.",
                             walker.currentNode)];
                 }
             }
             if (walker.parentNode() !== node) {
-depth--;
+                depth -= 1;
                 return [new RelaxNGParseError("Implementation error.")];
             }
+        } else {
+            error = validateTop(elementdef.e[0], walker, element);
         }
-runtime.log(p.slice(0,depth)+"did " + qName(node));
-if (qName(node) === "office:document-content") {
-runtime.log(p.slice(0,depth)+"almost there " + (error && error[0].message()));
-}
-depth--;
+        depth -= 1;
         // move to the next node
         node = walker.nextSibling() || walker.parentNode();
         return error;
@@ -363,9 +368,10 @@ depth--;
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateChoice(elementdef, walker) {
+    function validateChoice(elementdef, walker, element) {
         // loop through child definitions and return if a match is found
         if (elementdef.e.length !== 2) {
             throw "Choice with wrong # of options: " + elementdef.e.length;
@@ -374,57 +380,61 @@ depth--;
         // if the first option is empty, just check the second one for debugging
         // but the total choice is alwasy ok
         if (elementdef.e[0].name === "empty") {
-            err = validateNonEmptyPattern(elementdef.e[1], walker);
+            err = validateNonEmptyPattern(elementdef.e[1], walker, element);
             if (err) {
                 walker.currentNode = node;
             }
             return null;
         }
-        err = validatePattern(elementdef.e[0], walker);
+        err = validatePattern(elementdef.e[0], walker, element);
         if (err) {
             walker.currentNode = node;
-            err = validateNonEmptyPattern(elementdef.e[1], walker);
+            err = validateNonEmptyPattern(elementdef.e[1], walker, element);
         }
         return err;
     }
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateInterleave(elementdef, walker) {
+    function validateInterleave(elementdef, walker, element) {
         if (elementdef.e.length !== 2) {
             throw "Interleave with wrong # of options: " + elementdef.e.length + ".";
         }
         var node = walker.currentNode, err;
-        err = validateNonEmptyPattern(elementdef.e[0], walker);
+        err = validateNonEmptyPattern(elementdef.e[0], walker, element);
         if (err) {
             walker.currentNode = node;
-            return validateNonEmptyPattern(elementdef.e[1], walker) ||
-                validateNonEmptyPattern(elementdef.e[0], walker);
+            return validateNonEmptyPattern(elementdef.e[1], walker, element) ||
+                validateNonEmptyPattern(elementdef.e[0], walker, element);
         }
-        err = validateNonEmptyPattern(elementdef.e[1], walker);
+        err = validateNonEmptyPattern(elementdef.e[1], walker, element);
         return err;
     }
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateGroup(elementdef, walker) {
+    function validateGroup(elementdef, walker, element) {
         if (elementdef.e.length !== 2) {
             throw "Group with wrong # of options: " + elementdef.e.length;
         }
-runtime.log(elementdef.e[0].name + " " + elementdef.e[1].name);
-        return validateNonEmptyPattern(elementdef.e[0], walker) ||
-                validateNonEmptyPattern(elementdef.e[1], walker);
+        //runtime.log(elementdef.e[0].name + " " + elementdef.e[1].name);
+        return validateNonEmptyPattern(elementdef.e[0], walker, element) ||
+                validateNonEmptyPattern(elementdef.e[1], walker, element);
     }
     /**
      * @param elementdef
      * @param walker
+     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    validateNonEmptyPattern = function validateNonEmptyPattern(elementdef, walker) {
+    validateNonEmptyPattern = function validateNonEmptyPattern(elementdef, walker,
+                element) {
         var name = elementdef.name, err;
         if (name === "text") {
             throw "text not implemented.";
@@ -435,17 +445,17 @@ runtime.log(elementdef.e[0].name + " " + elementdef.e[1].name);
         } else if (name === "list") {
             throw "list not implemented.";
         } else if (name === "attribute") {
-            err = validateAttribute(elementdef, walker);
+            err = validateAttribute(elementdef, walker, element);
         } else if (name === "element") {
-            err = validateElement(elementdef, walker);
+            err = validateElement(elementdef, walker, element);
         } else if (name === "oneOrMore") {
-            err = validateOneOrMore(elementdef, walker);
+            err = validateOneOrMore(elementdef, walker, element);
         } else if (name === "choice") {
-            err = validateChoice(elementdef, walker);
+            err = validateChoice(elementdef, walker, element);
         } else if (name === "group") {
-            err = validateGroup(elementdef, walker);
+            err = validateGroup(elementdef, walker, element);
         } else if (name === "interleave") {
-            err = validateInterleave(elementdef, walker);
+            err = validateInterleave(elementdef, walker, element);
         } else {
             throw name + " not allowed in nonEmptyPattern.";
         }
@@ -469,7 +479,7 @@ runtime.log(elementdef.e[0].name + " " + elementdef.e[1].name);
             return;
         }
         walker.currentNode = walker.root;
-        var errors = validatePattern(start.e[0], walker);
+        var errors = validatePattern(start.e[0], walker, walker.root);
         callback(errors);
     }
     this.validate = validateXML;
