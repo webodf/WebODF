@@ -63,6 +63,33 @@ dom.RelaxNG = function RelaxNG(url) {
                 e: [ o ].concat(e.e.slice(2))
             });
         }
+
+        function splitQName(name) {
+            var r = name.split(":", 2),
+                prefix = "", i;
+            if (r.length === 1) {
+                r = ["", r[0]];
+            } else {
+                prefix = r[0];
+            }
+            for (i in nsmap) {
+                if (nsmap[i] === prefix) {
+                    r[0] = i;
+                }
+            }
+            return r;
+        }
+
+        function splitQNames(def) {
+            var i, l = def.names.length, name,
+                localnames = def.localnames = new Array(l),
+                namespaces = def.namespaces = new Array(l);
+            for (i = 0; i < l; i += 1) {
+                name = splitQName(def.names[i]);
+                namespaces[i] = name[0];
+                localnames[i] = name[1];
+            }
+        }
    
         function parse(element) {
             // parse all elements from the Relax NG namespace into JavaScript objects
@@ -199,6 +226,11 @@ dom.RelaxNG = function RelaxNG(url) {
                 delete def.e;
                 def.name = "empty";
             }
+            // for attributes we need to have the list of namespaces and localnames
+            // readily available, so we split up the qnames
+            if (name === "attribute") {
+                splitQNames(def);
+            }
         }
 
         function main() {
@@ -239,8 +271,19 @@ dom.RelaxNG = function RelaxNG(url) {
      * @return {Array.<RelaxNGParseError>}
      */
     function validateAttribute(elementdef, walker, element) {
-        // the attribute should be on the parent of the current node
-        runtime.log("validate " + elementdef.names);
+        var att, a, l = elementdef.localnames.length, i;
+        for (i = 0; i < l; i += 1) {
+            a = element.getAttributeNS(elementdef.namespaces[i],
+                    elementdef.localnames[i]);
+            if (att && a) {
+                return [new RelaxNGParseError("Attribute defined too often.", a)];
+            }
+            att = a;
+        }
+        if (!att) {
+            return [new RelaxNGParseError("Attribute not found: " + elementdef.names,
+                    element)];
+        }
     }
     /**
      * @param elementdef
@@ -344,7 +387,7 @@ dom.RelaxNG = function RelaxNG(url) {
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
-            error = validateTop(elementdef.e[0], walker, element);
+            error = validateTop(elementdef.e[0], walker, node);
             // there should be no content left
             while (walker.nextSibling()) {
                 if (!isWhitespace(walker.currentNode)) {
@@ -358,7 +401,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 return [new RelaxNGParseError("Implementation error.")];
             }
         } else {
-            error = validateTop(elementdef.e[0], walker, element);
+            error = validateTop(elementdef.e[0], walker, node);
         }
         depth -= 1;
         // move to the next node
