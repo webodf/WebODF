@@ -2,46 +2,17 @@
 <grammar
 	xmlns="http://relaxng.org/ns/structure/1.0"
 	xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
-	xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
 >
 	<start>
-		<ref name="office-document-content"/>
-	</start>
-	<define name="office-document-content">
 		<element name="office:document-content">
-			<ref name="office-document-common-attrs"/>
-			<ref name="office-body"/>
-		</element>
-	</define>
-	<define name="office-document-common-attrs">
-		<interleave>
-			<attribute name="office:version">
-				<value>1.2</value>
-			</attribute>
-		</interleave>
-	</define>
-	<define name="office-body">
-		<element name="office:body">
-			<element name="office:text">
-				<zeroOrMore>
-					<ref name="text-p"/>
-				</zeroOrMore>
-			</element>
-		</element>
-	</define>
-	<define name="text-p">
-		<element name="text:p">
-			<zeroOrMore>
-				<ref name="paragraph-content"/>
-			</zeroOrMore>
-		</element>
-	</define>
-	<define name="paragraph-content">
-		<choice>
-			<text/>
-			<element name="text:s">
+			<interleave>
+				<attribute name="office:version">
+					<value>1.2</value>
+				</attribute>
+			</interleave>
+			<element name="office:body">
 				<empty/>
 			</element>
-		</choice>
-	</define>
+		</element>
+	</start>
 </grammar>
