@@ -9,16 +9,11 @@
 	</start>
 	<define name="office-document-content">
 		<element name="office:document-content">
-			<ref name="office-document-common-attrs"/>
-			<ref name="office-body"/>
-		</element>
-	</define>
-	<define name="office-document-common-attrs">
-		<interleave>
 			<attribute name="office:version">
 				<value>1.2</value>
 			</attribute>
-		</interleave>
+			<ref name="office-body"/>
+		</element>
 	</define>
 	<define name="office-body">
 		<element name="office:body">
