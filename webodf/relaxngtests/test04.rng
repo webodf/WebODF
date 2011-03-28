@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar
+	xmlns="http://relaxng.org/ns/structure/1.0"
+	xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+	xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+>
+	<start>
+		<ref name="office-document-content"/>
+	</start>
+	<define name="office-document-content">
+		<element name="office:document-content">
+			<ref name="office-document-common-attrs"/>
+			<ref name="office-body"/>
+		</element>
+	</define>
+	<define name="office-document-common-attrs">
+		<interleave>
+			<attribute name="office:version">
+				<value>1.2</value>
+			</attribute>
+		</interleave>
+	</define>
+	<define name="office-body">
+		<element name="office:body">
+			<ref name="office-body-content"/>
+		</element>
+	</define>
+	<define name="office-body-content">
+		<choice>
+			<element name="office:text">
+				<ref name="office-text-content-main"/>
+			</element>
+		</choice>
+	</define>
+	<define name="office-text-content-main">
+		<zeroOrMore>
+			<ref name="text-content"/>
+		</zeroOrMore>
+	</define>
+	<define name="text-content">
+		<choice>
+			<ref name="text-p"/>
+		</choice>
+	</define>
+	<define name="text-p">
+		<element name="text:p">
+			<zeroOrMore>
+				<ref name="paragraph-content"/>
+			</zeroOrMore>
+		</element>
+	</define>
+	<define name="paragraph-content">
+		<choice>
+			<text/>
+			<element name="text:s">
+				<empty/>
+			</element>
+			<element name="text:tab">
+				<empty/>
+			</element>
+		</choice>
+	</define>
+</grammar>
