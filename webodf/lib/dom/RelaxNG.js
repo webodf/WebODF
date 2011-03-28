@@ -148,6 +148,7 @@ dom.RelaxNG = function RelaxNG(url) {
             if (e.length === 1 && (name === "choice" || name === "group" ||
                     name === "interleave")) {
                 name = e[0].name;
+                names = e[0].names;
                 a = e[0].a;
                 text = e[0].text;
                 e = e[0].e;
@@ -259,7 +260,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 runtime.log(err);
                 return err;
             }
-            //runtime.log(JSON.stringify(start, null, "  "));
+//            runtime.log(JSON.stringify(start, null, "  "));
             return null;
         }
         return main();
@@ -389,6 +390,7 @@ dom.RelaxNG = function RelaxNG(url) {
             return [new RelaxNGParseError("Found " + node.nodeName +
                     " instead of " + elementdef.names + ".", node)];
         }
+//runtime.log(p.slice(0, depth) + qName(node));
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
@@ -480,6 +482,27 @@ dom.RelaxNG = function RelaxNG(url) {
      * @param elementdef
      * @param walker
      * @param {Element} element
+     * @return {Array.<RelaxNGParseError>}
+     */
+    function validateText(elementdef, walker, element) {
+        var /**@type{Node}*/ node = walker.currentNode,
+            /**@type{number}*/ type = node ? node.nodeType : 0,
+            error = null;
+        // find the next element, skip text nodes with only whitespace
+        while (type !== 3) {
+            if (type === 1) {
+                return [new RelaxNGParseError("Element not allowd here.", element)];
+            }
+            node = walker.nextSibling();
+            type = node ? node.nodeType : 0;
+        }
+        walker.nextSibling();
+        return null;
+    }
+    /**
+     * @param elementdef
+     * @param walker
+     * @param {Element} element
      * @param {string=} data
      * @return {Array.<RelaxNGParseError>}
      */
@@ -487,13 +510,13 @@ dom.RelaxNG = function RelaxNG(url) {
                 element, data) {
         var name = elementdef.name, err = null;
         if (name === "text") {
-            throw "text not implemented.";
+            err = validateText(elementdef, walker, element);
         } else if (name === "data") {
             err = null; // data not implemented
         } else if (name === "value") {
             if (data !== elementdef.text) {
-                err = [new RelaxNGParseError("Wrong value, should be " +
-                        elementdef.text, element)];
+                err = [new RelaxNGParseError("Wrong value, should be '" +
+                        elementdef.text + "', not '" + data + "'", element)];
             }
         } else if (name === "list") {
             err = null; // list not implemented
