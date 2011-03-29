@@ -423,7 +423,7 @@ dom.RelaxNG = function RelaxNG(url) {
         }
         depth -= 1;
         // move to the next node
-        node = walker.nextSibling() || walker.parentNode();
+        node = walker.nextSibling();
         return error;
     }
     /**
@@ -507,6 +507,7 @@ dom.RelaxNG = function RelaxNG(url) {
             node = walker.nextSibling();
             type = node ? node.nodeType : 0;
         }
+        walker.nextSibling();
         return null;
     }
     /**
