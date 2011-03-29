@@ -500,9 +500,9 @@ dom.RelaxNG = function RelaxNG(url) {
             /**@type{number}*/ type = node ? node.nodeType : 0,
             error = null;
         // find the next element, skip text nodes with only whitespace
-        while (type !== 3) {
+        while (node !== element && type !== 3) {
             if (type === 1) {
-                return [new RelaxNGParseError("Element not allowd here.", element)];
+                return [new RelaxNGParseError("Element not allowed here.", node)];
             }
             node = walker.nextSibling();
             type = node ? node.nodeType : 0;
