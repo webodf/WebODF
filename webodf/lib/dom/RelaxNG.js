@@ -468,12 +468,11 @@ dom.RelaxNG = function RelaxNG(url) {
         var node = walker.currentNode, err, tryfirstagain;
         err = validateNonEmptyPattern(elementdef.e[0], walker, element);
         if (err) {
-//runtime.log("VVV");
             walker.currentNode = node;
             return validateNonEmptyPattern(elementdef.e[1], walker, element) ||
                 validateNonEmptyPattern(elementdef.e[0], walker, element);
         }
-        tryfirstagain = walker.currentNode === node;
+        tryfirstagain = walker.currentNode === node && node !== element;
         err = validateNonEmptyPattern(elementdef.e[1], walker, element);
         if (!err && tryfirstagain) {
             err = validateNonEmptyPattern(elementdef.e[0], walker, element);
