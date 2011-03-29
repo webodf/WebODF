@@ -5,8 +5,7 @@
                  office:mimetype="application/vnd.oasis.opendocument.text">
    <office:styles>
       <style:default-style style:family="text"/>
-      <style:style style:name="Standard" style:family="text">
-      </style:style>
+      <style:style style:name="Standard" style:family="text"/>
    </office:styles>
    <office:body>
       <office:text/>

@@ -16,16 +16,15 @@
 			</attribute>
 			<element name="office:styles">
 				<interleave>
-					<interleave>
-						<zeroOrMore>
+					<choice>
+						<empty/>
+						<oneOrMore>
 							<ref name="style-style"/>
-						</zeroOrMore>
-					</interleave>
-					<zeroOrMore>
-						<element name="style:default-style">
-							<ref name="style-style-content"/>
-						</element>
-					</zeroOrMore>
+						</oneOrMore>
+					</choice>
+					<element name="style:default-style">
+						<ref name="style-style-content"/>
+					</element>
 				</interleave>
 			</element>
 			<element name="office:body">
