@@ -1,6 +1,15 @@
 /*global runtime dom*/
 
 /**
+ * RelaxNG can check a DOM tree against a Relax NG schema
+ * The RelaxNG implementation is currently not complete. Relax NG should not report
+ * errors on valid DOM trees, but it will not check all constraints that a Relax NG
+ * file can define. The current implementation does not load external parts of a Relax
+ * NG file.
+ * The main purpose of this Relax NG engine is to validate runtime ODF documents.
+ * The DOM tree is traversed via a TreeWalker. A custom TreeWalker implementation can
+ * hide parts of a DOM tree. This is useful in WebODF, where special elements and
+ * attributes in the runtime DOM tree.
  * @constructor
  * @param {!string} url path to the Relax NG schema
  */
@@ -561,6 +570,7 @@ dom.RelaxNG = function RelaxNG(url) {
     }
     this.validate = validateXML;
 
+    // load and parse the Relax NG
     runtime.loadXML(url, function (err, dom) {
         loaded = true;
         if (err) {
