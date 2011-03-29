@@ -439,7 +439,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
             return null;
         }
-        err = validatePattern(elementdef.e[0], walker, element);
+        err = validatePattern(elementdef.e[0], walker, element, data);
         if (err) {
             walker.currentNode = node;
             err = validateNonEmptyPattern(elementdef.e[1], walker, element, data);
