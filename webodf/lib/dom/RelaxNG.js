@@ -260,7 +260,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 runtime.log(err);
                 return err;
             }
-//            runtime.log(JSON.stringify(start, null, "  "));
+            //runtime.log(JSON.stringify(start, null, "  "));
             return null;
         }
         return main();
@@ -281,7 +281,7 @@ dom.RelaxNG = function RelaxNG(url) {
             node = walker.currentNode;
             err = validateNonEmptyPattern(elementdef.e[0], walker, element);
             i += 1;
-        } while (!err);
+        } while (!err && node !== walker.currentNode);
         if (i > 1) { // at least one round was without error
             // set position back to position of before last failed round
             walker.currentNode = node;
@@ -373,7 +373,9 @@ dom.RelaxNG = function RelaxNG(url) {
             error = null;
         // find the next element, skip text nodes with only whitespace
         while (type > 1) {
-            if (type !== 3 || !/^\s+$/.test(walker.currentNode.nodeValue)) {// TEXT_NODE
+            if (type !== 8 &&
+                    (type !== 3 ||
+                     !/^\s+$/.test(walker.currentNode.nodeValue))) {// TEXT_NODE
                 depth -= 1;
                 return [new RelaxNGParseError("Not allowed node of type " + type +
                         ".")];
@@ -390,14 +392,14 @@ dom.RelaxNG = function RelaxNG(url) {
             return [new RelaxNGParseError("Found " + node.nodeName +
                     " instead of " + elementdef.names + ".", node)];
         }
-//runtime.log(p.slice(0, depth) + qName(node));
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
             error = validateTop(elementdef.e[0], walker, node);
             // there should be no content left
             while (walker.nextSibling()) {
-                if (!isWhitespace(walker.currentNode)) {
+                type = walker.currentNode.nodeType;
+                if (!isWhitespace(walker.currentNode) && type !== 8) {
                     depth -= 1;
                     return [new RelaxNGParseError("Spurious content.",
                             walker.currentNode)];
@@ -496,7 +498,6 @@ dom.RelaxNG = function RelaxNG(url) {
             node = walker.nextSibling();
             type = node ? node.nodeType : 0;
         }
-        walker.nextSibling();
         return null;
     }
     /**
