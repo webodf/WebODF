@@ -241,6 +241,21 @@ dom.RelaxNG = function RelaxNG(url) {
             if (name === "attribute") {
                 splitQNames(def);
             }
+            // for interleaving validation, it is convenient to join all interleave
+            // elements that touch into one element
+            if (name === "interleave") {
+                // at this point the interleave will have two child elements,
+                // but the child interleave elements may have a different number
+                if (e[0].name === "interleave") {
+                    if (e[1].name === "interleave") {
+                        def.e = e[0].e.concat(e[1].e);
+                    } else {
+                        def.e = [e[1]].concat(e[0].e);
+                    }
+                } else if (e[1].name === "interleave") {
+                    def.e = [e[0]].concat(e[1].e);
+                }
+            }
         }
 
         function main() {
@@ -462,24 +477,44 @@ dom.RelaxNG = function RelaxNG(url) {
      * @return {Array.<RelaxNGParseError>}
      */
     function validateInterleave(elementdef, walker, element) {
-        if (elementdef.e.length !== 2) {
-            throw "Interleave with wrong # of options: " + elementdef.e.length + ".";
+        var l = elementdef.e.length, n = new Array(l), err, i, todo = l, donethisround,
+            node, subnode;
+        // the interleave is done when all items are 'true' and no 
+        while (todo > 0) {
+            donethisround = 0;
+            node = walker.currentNode;
+            for (i = 0; i < l; i += 1) {
+                subnode = walker.currentNode;
+                if (n[i] !== true && n[i] !== subnode) {
+                    err = validateNonEmptyPattern(elementdef.e[i], walker, element);
+                    if (err) {
+                        walker.currentNode = subnode;
+                        if (n[i] === undefined) {
+                            n[i] = false;
+                        }
+                    } else if (subnode === walker.currentNode) {
+                        donethisround += 1;
+                        n[i] = subnode;
+                    } else {
+                        donethisround += 1;
+                        n[i] = true; // no error and progress
+                    }
+                }
+            }
+            if (node === walker.currentNode && donethisround === todo) {
+                return null;
+            }
+            if (donethisround === 0) {
+                return [new RelaxNGParseError("Interleave does not match.", element)];
+            }
+            todo = 0;
+            for (i = 0; i < l; i += 1) {
+                if (n[i] !== true) {
+                    todo += 1;
+                }
+            }
         }
-        var node1 = walker.currentNode, err, node2;
-        err = validateNonEmptyPattern(elementdef.e[0], walker, element);
-        if (err) {
-            walker.currentNode = node1;
-            return validateNonEmptyPattern(elementdef.e[1], walker, element) ||
-                validateNonEmptyPattern(elementdef.e[0], walker, element);
-        }
-        // if the first pattern caused no progression (walker.currentNode === node1),
-        // but the second pattern did, it is worthwhile to try the first pattern again
-        node2 = walker.currentNode;
-        err = validateNonEmptyPattern(elementdef.e[1], walker, element);
-        if (!err && node1 === node2 && node2 !== walker.currentNode) {
-            err = validateNonEmptyPattern(elementdef.e[0], walker, element);
-        }
-        return err;
+        return null;
     }
     /**
      * @param elementdef
