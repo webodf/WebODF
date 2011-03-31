@@ -492,9 +492,10 @@ dom.RelaxNG = function RelaxNG(url) {
                         if (n[i] === undefined) {
                             n[i] = false;
                         }
-                    } else if (subnode === walker.currentNode) {
+                    } else if (subnode === walker.currentNode ||
+                            elementdef.e[i].name === "oneOrMore") {
                         donethisround += 1;
-                        n[i] = subnode;
+                        n[i] = subnode; // no error and try this one again later
                     } else {
                         donethisround += 1;
                         n[i] = true; // no error and progress
