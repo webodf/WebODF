@@ -28,11 +28,13 @@
 		<interleave>
 			<choice>
 				<empty/>
+				<oneOrMore>
 					<element name="number:boolean-style">
 						<attribute name="style:name">
 							<data type="NCName"/>
 						</attribute>
 					</element>
+				</oneOrMore>
 			</choice>
 			<element name="number:text-style">
 				<attribute name="style:name">

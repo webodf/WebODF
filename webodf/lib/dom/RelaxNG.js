@@ -478,7 +478,7 @@ dom.RelaxNG = function RelaxNG(url) {
      */
     function validateInterleave(elementdef, walker, element) {
         var l = elementdef.e.length, n = new Array(l), err, i, todo = l, donethisround,
-            node, subnode;
+            node, subnode, e;
         // the interleave is done when all items are 'true' and no 
         while (todo > 0) {
             donethisround = 0;
@@ -486,14 +486,19 @@ dom.RelaxNG = function RelaxNG(url) {
             for (i = 0; i < l; i += 1) {
                 subnode = walker.currentNode;
                 if (n[i] !== true && n[i] !== subnode) {
-                    err = validateNonEmptyPattern(elementdef.e[i], walker, element);
+                    e = elementdef.e[i];
+                    err = validateNonEmptyPattern(e, walker, element);
                     if (err) {
                         walker.currentNode = subnode;
                         if (n[i] === undefined) {
                             n[i] = false;
                         }
                     } else if (subnode === walker.currentNode ||
-                            elementdef.e[i].name === "oneOrMore") {
+                            // this is a bit dodgy, there should be a rule to see
+                            // if multiple elements are allowed
+                            e.name === "oneOrMore" ||
+                            (e.name === "choice" && (e.e[0].name === "oneOrMore" ||
+                                                     e.e[1].name === "oneOrMore"))) {
                         donethisround += 1;
                         n[i] = subnode; // no error and try this one again later
                     } else {
