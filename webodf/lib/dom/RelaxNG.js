@@ -354,12 +354,19 @@ dom.RelaxNG = function RelaxNG(url) {
         for (i = 0; i < l; i += 1) {
             a = element.getAttributeNS(elementdef.namespaces[i],
                     elementdef.localnames[i]);
-            if (att && a) {
+            // if an element is not present, getAttributeNS will return an empty string
+            // but an empty string is possible attribute value, so an extra check is
+            // needed
+            if (a === "" && !element.hasAttributeNS(elementdef.namespaces[i],
+                    elementdef.localnames[i])) {
+                a = undefined;
+            }
+            if (att !== undefined && a !== undefined) {
                 return [new RelaxNGParseError("Attribute defined too often.", element)];
             }
             att = a;
         }
-        if (!att) {
+        if (att === undefined) {
             return [new RelaxNGParseError("Attribute not found: " + elementdef.names,
                     element)];
         }
