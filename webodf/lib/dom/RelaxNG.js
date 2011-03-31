@@ -505,7 +505,12 @@ dom.RelaxNG = function RelaxNG(url) {
                 return null;
             }
             if (donethisround === 0) {
-                return [new RelaxNGParseError("Interleave does not match.", element)];
+                for (i = 0; i < l; i += 1) {
+                    if (n[i] === false) {
+                        return [new RelaxNGParseError("Interleave does not match.", element)];
+                    }
+                }
+                return null;
             }
             todo = 0;
             for (i = 0; i < l; i += 1) {
