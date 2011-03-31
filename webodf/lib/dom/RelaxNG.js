@@ -122,6 +122,8 @@ dom.RelaxNG = function RelaxNG(url) {
                     ce = parse(c);
                     if (ce.name === "name") {
                         names.push(ce.text);
+                    } else if (ce.name === "choice" && ce.names.length) {
+                        names = names.concat(ce.names);
                     } else {
                         e.push(ce);
                     }
@@ -224,12 +226,14 @@ dom.RelaxNG = function RelaxNG(url) {
                         delete def.e;
                         def.name = "empty";
                     } else {
-                        def.name = e[1].name;
-                        def.e = e[1].e;
+                        name = def.name = e[1].name;
+                        def.names = e[1].names;
+                        e = def.e = e[1].e;
                     }
                 } else if (e[1].name === "empty") {
-                    def.name = e[0].name;
-                    def.e = e[0].e;
+                    name = def.name = e[0].name;
+                    def.names = e[0].names;
+                    e = def.e = e[0].e;
                 }
             }
             if (name === "oneOrMore" && e[0].name === "empty") {
@@ -248,12 +252,12 @@ dom.RelaxNG = function RelaxNG(url) {
                 // but the child interleave elements may have a different number
                 if (e[0].name === "interleave") {
                     if (e[1].name === "interleave") {
-                        def.e = e[0].e.concat(e[1].e);
+                        e = def.e = e[0].e.concat(e[1].e);
                     } else {
-                        def.e = [e[1]].concat(e[0].e);
+                        e = def.e = [e[1]].concat(e[0].e);
                     }
                 } else if (e[1].name === "interleave") {
-                    def.e = [e[0]].concat(e[1].e);
+                    e = def.e = [e[0]].concat(e[1].e);
                 }
             }
         }
