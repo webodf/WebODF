@@ -22,7 +22,300 @@ dom.RelaxNG = function RelaxNG(url) {
         validateNonEmptyPattern,
         nsmap = {},
         depth = 0,
-        p = "                                                                ";
+        p = "                                                                ",
+        
+/*== implementation according to
+ *   http://www.thaiopensource.com/relaxng/derivative.html */
+        notAllowed = {
+            type: "notAllowed",
+            nullable: false,
+            textDeriv: function (context, text) {
+                return notAllowed;
+            },
+            startTagOpenDeriv: function () { return notAllowed; }
+        },
+        empty = {
+            type: "empty",
+            nullable: true,
+            textDeriv: function (context, text) {
+                return notAllowed;
+            },
+            startTagOpenDeriv: function () { return notAllowed; }
+        },
+        text = {
+            type: "text",
+            nullable: true,
+            textDeriv: function (context, textt) {
+                return text;
+            },
+            startTagOpenDeriv: function () { return notAllowed; }
+        },
+        applyAfter;
+
+    function createChoice(p1, p2) {
+        if (p1 === notAllowed) { return p2; }
+        if (p2 === notAllowed) { return p1; }
+        return {
+            type: "choice",
+            p1: p1,
+            p2: p2,
+            nullable: p1.nullable || p2.nullable,
+            textDeriv: function (context, text) {
+                return createChoice(p1.textDeriv(context, text),
+                    p2.textDeriv(context, text));
+            },
+            startTagOpenDeriv: function (node) {
+                return createChoice(p1.startTagOpenDeriv(node),
+                    p2.startTagOpenDeriv(node));
+            },
+            attDeriv: function (context, attribute) {
+                return createChoice(p1.attDeriv(context, attribute),
+                    p2.attDeriv(context, attribute));
+            },
+            startTagCloseDeriv: function () {
+                return createChoice(p1.startTagCloseDeriv(),
+                    p2.startTagCloseDeriv());
+            }
+        };
+    }
+    function createInterleave(p1, p2) {
+        if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
+        if (p1 === empty) { return p2; }
+        if (p2 === empty) { return p1; }
+        return {
+            type: "interleave",
+            p1: p1,
+            p2: p2,
+            nullable: p1.nullable && p2.nullable,
+            textDeriv: function (context, text) {
+                return createChoice(
+                    createInterleave(p1.textDeriv(context, text), p2),
+                    createInterleave(p1, p2.textDeriv(context, text))
+                );
+            },
+            startTagOpenDeriv: function (node) {
+                return createChoice(
+                    applyAfter(function (p) { return createInterleave(p, p2); },
+                               p1.startTagOpenDeriv(node)),
+                    applyAfter(function (p) { return createInterleave(p1, p); },
+                               p2.startTagOpenDeriv(node)));
+            },
+            attDeriv: function (context, attribute) {
+                return createChoice(
+                    createInterleave(p1.attDeriv(context, attribute), p2),
+                    createInterleave(p1, p2.attDeriv(context, attribute)));
+            },
+            startTagCloseDeriv: function () {
+                return createInterleave(p1.startTagCloseDeriv(),
+                    p2.startTagCloseDeriv());
+            }
+        };
+    }
+    function createGroup(p1, p2) {
+        if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
+        if (p1 === empty) { return p2; }
+        if (p2 === empty) { return p1; }
+        return {
+            type: "group",
+            p1: p1,
+            p2: p2,
+            nullable: p1.nullable && p2.nullable,
+            textDeriv: function (context, text) {
+                var p = createGroup(p1.textDeriv(context, text), p2);
+                if (p1.nullable) {
+                    return createChoice(p, p2.textDeriv(context, text));
+                }
+                return p;
+            },
+            startTagOpenDeriv: function (node) {
+                var x = applyAfter(function (p) { return createGroup(p, p2); },
+                        p1.startTagOpenDeriv(node));
+                if (p1.nullable) {
+                    return createChoice(x, p2.startTagOpenDeriv(node));
+                }
+                return x;
+            },
+            attDeriv: function (context, attribute) {
+                return createChoice(
+                    createGroup(p1.attDeriv(context, attribute), p2),
+                    createGroup(p1, p2.attDeriv(context, attribute)));
+            },
+            startTagCloseDeriv: function () {
+                return createGroup(p1.startTagCloseDeriv(),
+                    p2.startTagCloseDeriv());
+            }
+        };
+    }
+    function createAfter(p1, p2) {
+        if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
+        if (p1 === empty) { return p2; }
+        if (p2 === empty) { return p1; }
+        return {
+            type: "after",
+            p1: p1,
+            p2: p2,
+            nullable: false,
+            textDeriv: function (context, text) {
+                return createAfter(p1.textDeriv(context, text), p2);
+            },
+            startTagOpenDeriv: function (node) {
+                return applyAfter(function (p) { return createAfter(p, p2); },
+                    p1.startTagOpenDeriv(node));
+            },
+            attDeriv: function (context, attribute) {
+                return createAfter(p1.attDeriv(context, attribute), p2);
+            },
+            startTagCloseDeriv: function () {
+                return createAfter(p1.startTagCloseDeriv, p2);
+            }
+        };
+    }
+    function createOneOrMore(p) {
+        if (p === notAllowed) { return notAllowed; }
+        return {
+            type: "oneOrMore",
+            p: p,
+            nullable: p.nullable,
+            textDeriv: function (context, text) {
+                return createGroup(p.textDeriv(context, text),
+                            createChoice(p, empty));
+            },
+            startTagOpenDeriv: function (node) {
+                return applyAfter(function (pf) {
+                    return createGroup(pf, createChoice(p, empty));
+                }, p.startTagOpenDeriv(node));
+            },
+            attDeriv: function (context, attribute) {
+                return createGroup(p.attDeriv(context, attribute),
+                    createChoice(p, empty));
+            },
+            startTagCloseDeriv: function () {
+                return createOneOrMore(p.startTagCloseDeriv());
+            }
+        };
+    }
+    function createElement(nc, p) {
+        return {
+            type: "element",
+            nc: nc,
+            p: p,
+            nullable: false,
+            startTagOpenDeriv: function (node) {
+                if (nc.contains(node)) {
+                    return createAfter(p, empty);
+                }
+                return notAllowed;
+            }
+        };
+    }
+    function createAttribute(nc, p) {
+        return {
+            type: "attribute",
+            nullable: false,
+            attDeriv: function (context, attribute) {
+                if (nc.contains(attribute)) { // && p.valueMatch(context,
+//                        attribute.nodeValue)) {
+                    return empty;
+                }
+                return notAllowed;
+            },
+            startTagCloseDeriv: function () { return notAllowed; }
+        };
+    }
+    function createList() {
+        return {
+            type: "list",
+            nullable: false
+        };
+    }
+    function createValue(value) {
+runtime.log("CREATEVALUE " + value);
+        return {
+            type: "value",
+            nullable: false,
+            value: value
+        };
+    }
+    function createData() {
+        return {
+            type: "data",
+            nullable: false
+        };
+    }
+    function createDataExcept() {
+        return {
+            type: "dataExcept",
+            nullable: false
+        };
+    }
+    applyAfter = function applyAfter(f, p) {
+        if (p.type === "after") {
+            return createAfter(p.p1, f(p.p2));
+        } else if (p.type === "choice") {
+            return createChoice(applyAfter(f, p.p1), applyAfter(f, p.p2));
+        }
+        return p;
+    };
+    function attsDeriv(context, pattern, attributes, position) {
+        if (position >= attributes.length) {
+            return pattern;
+        }
+        return attsDeriv(context,
+            pattern.attDeriv(context, attributes.item(position)),
+            attributes, position);
+    }
+    function childDeriv(context, pattern, childNode) {
+        if (childNode.type === 3) {
+            return pattern.textDeriv(context, pattern, childNode.nodeValue);
+        }
+        return pattern.startTagOpenDeriv(childNode)
+                      .attsDeriv(context, childNode.attributes(), 0)
+                      .startTagCloseDeriv()
+                      .childrenDeriv(context, childNode)
+                      .endTagDeriv();
+    }
+    function makePattern(pattern, defines) {
+runtime.log("makepattern " + pattern.name);
+        if (pattern.name === "ref") {
+            var ref = pattern.a.name;
+runtime.log("REF " + ref);
+            pattern = defines[ref];
+            if (pattern.name !== undefined) {
+                pattern  = defines[ref] = makePattern(pattern.e[0], defines);
+            }
+            return pattern;
+        }
+        switch (pattern.name) {
+            case 'empty':
+                return empty;
+            case 'notAllowed':
+                return notAllowed;
+            case 'text':
+                return text;
+            case 'choice':
+                return createChoice(makePattern(pattern.e[0], defines),
+                    makePattern(pattern.e[1], defines));
+            case 'interleave':
+                return createInterleave(makePattern(pattern.e[0], defines),
+                    makePattern(pattern.e[1], defines));
+            case 'group':
+                return createGroup(makePattern(pattern.e[0], defines),
+                    makePattern(pattern.e[1], defines));
+            case 'oneOrMore':
+                return createOneOrMore(makePattern(pattern.e[0]));
+            case 'element':
+                return createElement(makePattern(pattern.e[0], defines),
+                    makePattern(pattern.e[1], defines));
+            case 'attribute':
+                return createAttribute(makePattern(pattern.e[0], defines),
+                    makePattern(pattern.e[1], defines));
+            case 'value':
+                return createValue(pattern.text);
+        }
+        runtime.log("boo " + pattern.name);
+    }
+
+/*== */
 
     /**
      * @constructor
@@ -41,7 +334,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
             return error;
         };
-        runtime.log("[" + p.slice(0, depth) + this.message() + "]");
+//        runtime.log("[" + p.slice(0, depth) + this.message() + "]");
     }
     /**
      * handle validation requests that were added while schema was loading
@@ -101,8 +394,10 @@ dom.RelaxNG = function RelaxNG(url) {
         }
    
         function parse(element) {
-            // parse all elements from the Relax NG namespace into JavaScript objects
-            var e = [], a = {}, c = element.firstChild, atts = element.attributes,
+            // parse all elements from the Relax NG namespace into JavaScript
+            // objects
+            var e = [], a = {}, c = element.firstChild,
+                atts = element.attributes,
                 att, i, text = "", name = element.localName, names = [], ce;
             for (i = 0; i < atts.length; i += 1) {
                 att = atts.item(i);
@@ -110,6 +405,7 @@ dom.RelaxNG = function RelaxNG(url) {
                     if (att.localName === "name" &&
                             (name === "element" || name === "attribute")) {
                         names.push(att.value);
+                        a[att.localName] = att.value;
                     } else {
                         a[att.localName] = att.value;
                     }
@@ -140,20 +436,45 @@ dom.RelaxNG = function RelaxNG(url) {
             // 4.4 type attribute of value element
             if (name === "value" && a.type === undefined) {
                 a.type = "token";
+                a.datatypeLibrary = "";
             }
             // 4.5 href attribute
             // 4.6 externalRef element
             // 4.7 include element
             // 4.8 name attribute of element and attribute elements
-            // already done earlier in this function
+            if ((name === "attribute" || name === "element") &&
+                    a.name !== undefined) {
+               i = splitQName(a.name);
+               e = [{name: "name", text: i[1], a: {ns: i[0]}}].concat(e);
+               delete a.name;
+            }
             // 4.9 ns attribute
+            if (name === "name" || name === "nsName" || name === "value") {
+                if (a.ns === undefined) {
+                    a.ns = ""; // TODO
+                }
+            } else {
+                delete a.ns;
+            }
             // 4.10 QNames
+            if (name === "name") {
+                i = splitQName(text);
+                a.ns = i[0];
+                text = i[1];
+            }
             // 4.11 div element
             // 4.12 Number of child elements
             if (e.length > 1 && (name === "define" || name === "oneOrMore" ||
-                    name === "zeroOrMore" || name === "optional" || name === "list" ||
-                    name === "mixed" || name === "element")) {
-                e = [{name: "group", e: splitToDuos({ name: "group", e: e}).e }];
+                    name === "zeroOrMore" || name === "optional" ||
+                    name === "list" || name === "mixed")) {
+                e = [{name: "group", e: splitToDuos({name: "group", e: e}).e}];
+            }
+            if (e.length > 2 && name === "element") {
+                e = [e[0]].concat(
+                    {name: "group", e: splitToDuos({name: "group", e: e}).e});
+            }
+            if (e.length === 1 && name === "attribute") {
+                e.push({name: "text", text: text});
             }
             // if node has only one child, replace node with child
             if (e.length === 1 && (name === "choice" || name === "group" ||
@@ -240,13 +561,13 @@ dom.RelaxNG = function RelaxNG(url) {
                 delete def.e;
                 def.name = "empty";
             }
-            // for attributes we need to have the list of namespaces and localnames
-            // readily available, so we split up the qnames
+            // for attributes we need to have the list of namespaces and
+            // localnames readily available, so we split up the qnames
             if (name === "attribute") {
                 splitQNames(def);
             }
-            // for interleaving validation, it is convenient to join all interleave
-            // elements that touch into one element
+            // for interleaving validation, it is convenient to join all
+            // interleave elements that touch into one element
             if (name === "interleave") {
                 // at this point the interleave will have two child elements,
                 // but the child interleave elements may have a different number
@@ -260,6 +581,18 @@ dom.RelaxNG = function RelaxNG(url) {
                     e = def.e = [e[0]].concat(e[1].e);
                 }
             }
+        }
+
+        function newMakePattern(pattern, defines) {
+            var copy = {}, i;
+            for (i in defines) {
+                if (defines.hasOwnProperty(i)) {
+                    copy[i] = defines[i];
+                }
+            }
+            i = makePattern(pattern, copy);
+runtime.log("done with newMakePattern");
+            return i;
         }
 
         function main() {
@@ -277,6 +610,7 @@ dom.RelaxNG = function RelaxNG(url) {
             if (!start) {
                 return "No Relax NG start element was found.";
             }
+            //newMakePattern(start.e[0], defines);
             try {
                 resolveDefines(start, defines);
                 for (i in defines) {
