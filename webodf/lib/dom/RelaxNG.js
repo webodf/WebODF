@@ -471,7 +471,8 @@ runtime.log("REF " + ref);
             }
             if (e.length > 2 && name === "element") {
                 e = [e[0]].concat(
-                    {name: "group", e: splitToDuos({name: "group", e: e}).e});
+                    {name: "group", e: splitToDuos(
+                        {name: "group", e: e.slice(1)}).e});
             }
             if (e.length === 1 && name === "attribute") {
                 e.push({name: "text", text: text});
@@ -685,8 +686,8 @@ runtime.log("done with newMakePattern");
      * @return {Array.<RelaxNGParseError>}
      */
     function validateAttribute(elementdef, walker, element) {
-        if (elementdef.e.length !== 1) {
-            throw "Attribute with wrong # of options: " + elementdef.e.length;
+        if (elementdef.e.length !== 2) {
+            throw "Attribute with wrong # of elements: " + elementdef.e.length;
         }
         var att, a, l = elementdef.localnames.length, i;
         for (i = 0; i < l; i += 1) {
@@ -708,7 +709,7 @@ runtime.log("done with newMakePattern");
             return [new RelaxNGParseError("Attribute not found: " + elementdef.names,
                     element)];
         }
-        return validatePattern(elementdef.e[0], walker, element, att);
+        return validatePattern(elementdef.e[1], walker, element, att);
     }
     /**
      * @param elementdef
@@ -732,8 +733,8 @@ runtime.log("done with newMakePattern");
      * @return {Array.<RelaxNGParseError>}
      */
     function validateElement(elementdef, walker, element) {
-        if (elementdef.e.length !== 1) {
-            throw "Element with wrong # of options: " + elementdef.e.length;
+        if (elementdef.e.length !== 2) {
+            throw "Element with wrong # of elements: " + elementdef.e.length;
         }
         depth += 1;
         // forward until an element is seen, then check the name
@@ -764,7 +765,7 @@ runtime.log("done with newMakePattern");
         // the right element was found, now parse the contents
         if (walker.firstChild()) {
             // currentNode now points to the first child node of this element
-            error = validateTop(elementdef.e[0], walker, node);
+            error = validateTop(elementdef.e[1], walker, node);
             // there should be no content left
             while (walker.nextSibling()) {
                 type = walker.currentNode.nodeType;
@@ -779,7 +780,7 @@ runtime.log("done with newMakePattern");
                 return [new RelaxNGParseError("Implementation error.")];
             }
         } else {
-            error = validateTop(elementdef.e[0], walker, node);
+            error = validateTop(elementdef.e[1], walker, node);
         }
         depth -= 1;
         // move to the next node
@@ -880,7 +881,7 @@ runtime.log("done with newMakePattern");
      */
     function validateGroup(elementdef, walker, element) {
         if (elementdef.e.length !== 2) {
-            throw "Group with wrong # of options: " + elementdef.e.length;
+            throw "Group with wrong # of members: " + elementdef.e.length;
         }
         //runtime.log(elementdef.e[0].name + " " + elementdef.e[1].name);
         return validateNonEmptyPattern(elementdef.e[0], walker, element) ||
@@ -914,8 +915,8 @@ runtime.log("done with newMakePattern");
      * @param {string=} data
      * @return {Array.<RelaxNGParseError>}
      */
-    validateNonEmptyPattern = function validateNonEmptyPattern(elementdef, walker,
-                element, data) {
+    validateNonEmptyPattern = function validateNonEmptyPattern(elementdef,
+                walker, element, data) {
         var name = elementdef.name, err = null;
         if (name === "text") {
             err = validateText(elementdef, walker, element);
