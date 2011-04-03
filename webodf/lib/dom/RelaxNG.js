@@ -29,10 +29,12 @@ dom.RelaxNG = function RelaxNG(url) {
         notAllowed = {
             type: "notAllowed",
             nullable: false,
-            textDeriv: function (context, text) {
-                return notAllowed;
-            },
-            startTagOpenDeriv: function () { return notAllowed; }
+            textDeriv: function () { return notAllowed; },
+            startTagOpenDeriv: function () { return notAllowed; },
+            attDeriv: function () { return notAllowed; },
+            startTagCloseDeriv: function () { return notAllowed; },
+            childrenDeriv: function () { return notAllowed; },
+            endTagDeriv: function () { return notAllowed; }
         },
         empty = {
             type: "empty",
@@ -40,7 +42,8 @@ dom.RelaxNG = function RelaxNG(url) {
             textDeriv: function (context, text) {
                 return notAllowed;
             },
-            startTagOpenDeriv: function () { return notAllowed; }
+            startTagOpenDeriv: function () { return notAllowed; },
+            attDeriv: function (context, attribute) { return notAllowed; }
         },
         text = {
             type: "text",
@@ -50,7 +53,8 @@ dom.RelaxNG = function RelaxNG(url) {
             },
             startTagOpenDeriv: function () { return notAllowed; }
         },
-        applyAfter;
+        applyAfter,
+        rootPattern;
 
     function createChoice(p1, p2) {
         if (p1 === notAllowed) { return p2; }
@@ -136,6 +140,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 return x;
             },
             attDeriv: function (context, attribute) {
+runtime.log("A " + p1.type + " " + p2.type);
                 return createChoice(
                     createGroup(p1.attDeriv(context, attribute), p2),
                     createGroup(p1, p2.attDeriv(context, attribute)));
@@ -150,6 +155,7 @@ dom.RelaxNG = function RelaxNG(url) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
+        runtime.log("createAfter");
         return {
             type: "after",
             p1: p1,
@@ -205,7 +211,8 @@ dom.RelaxNG = function RelaxNG(url) {
                     return createAfter(p, empty);
                 }
                 return notAllowed;
-            }
+            },
+            attDeriv: function (context, attribute) { return notAllowed; }
         };
     }
     function createAttribute(nc, p) {
@@ -229,7 +236,6 @@ dom.RelaxNG = function RelaxNG(url) {
         };
     }
     function createValue(value) {
-runtime.log("CREATEVALUE " + value);
         return {
             type: "value",
             nullable: false,
@@ -257,36 +263,54 @@ runtime.log("CREATEVALUE " + value);
         return p;
     };
     function attsDeriv(context, pattern, attributes, position) {
+        if (pattern === notAllowed) {
+            return notAllowed;
+        }
         if (position >= attributes.length) {
             return pattern;
         }
-        return attsDeriv(context,
-            pattern.attDeriv(context, attributes.item(position)),
+        if (position === 0) {
+            // TODO: loop over attributes to update namespace mapping
+            position = 0;
+        }
+        var a = attributes.item(position);
+        if (a.namespaceURI === "http://www.w3.org/2000/xmlns/") { // always ok
+            // when we have a context, put the namespace in there at this point
+            position += 1;
+            if (position >= attributes.length) {
+                return pattern;
+            }
+        }
+        a = attsDeriv(context, pattern.attDeriv(context, attributes.item(position)),
             attributes, position);
+        runtime.log("a " + " " + pattern.type + " " + position + " " + a.type);
+        return a;
     }
-    function childDeriv(context, pattern, childNode) {
+    function childDeriv(context, pattern, walker) {
+        var childNode = walker.currentNode, p;
         if (childNode.type === 3) {
             return pattern.textDeriv(context, pattern, childNode.nodeValue);
         }
-        return pattern.startTagOpenDeriv(childNode)
-                      .attsDeriv(context, childNode.attributes(), 0)
-                      .startTagCloseDeriv()
-                      .childrenDeriv(context, childNode)
-                      .endTagDeriv();
+        p = pattern.startTagOpenDeriv(childNode);
+runtime.log(p.type);
+        p = attsDeriv(context, p, childNode.attributes, 0);
+        p = p.startTagCloseDeriv();
+        p = p.childrenDeriv(context, childNode);
+        p = p.endTagDeriv();
+        return p;
     }
     function createNameClass(ns, name) {
         return {
             contains: function (node) {
+runtime.log(node.namespaceURI + " " + ns + " " + node.localName + " " + name);
                 return node.namespaceURI === ns && node.localName === name;
             }
         };
     }
     function makePattern(pattern, defines) {
         var p;
-runtime.log("makepattern " + pattern.name);
         if (pattern.name === "ref") {
             p = pattern.a.name;
-runtime.log("REF " + p);
             pattern = defines[p];
             if (pattern.name !== undefined) {
                 pattern  = defines[p] = makePattern(pattern.e[0], defines);
@@ -619,9 +643,9 @@ runtime.log("done with newMakePattern");
                 }
             }
             if (!start) {
-                return "No Relax NG start element was found.";
+                return [new RelaxNGParseError("No Relax NG start element was found.")];
             }
-            //newMakePattern(start.e[0], defines);
+            rootPattern = newMakePattern(start.e[0], defines);
             try {
                 resolveDefines(start, defines);
                 for (i in defines) {
@@ -976,6 +1000,13 @@ runtime.log("done with newMakePattern");
         walker.currentNode = walker.root;
         var errors = validatePattern(start.e[0], walker, walker.root);
         callback(errors);
+
+        if (rootPattern) {
+            walker.currentNode = walker.root;
+            errors = childDeriv(null, rootPattern, walker);
+            runtime.log(JSON.stringify(errors));
+        }
+        runtime.log("done " + rootPattern);
     }
     this.validate = validateXML;
 
