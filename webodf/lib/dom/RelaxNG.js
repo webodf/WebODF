@@ -250,13 +250,19 @@ dom.RelaxNG = function RelaxNG(url) {
         return {
             type: "value",
             nullable: false,
-            value: value
+            value: value,
+            textDeriv: function () { return empty; },
+            attDeriv: function () { return notAllowed; },
+            startTagCloseDeriv: function () { return this; }
         };
     }
     function createData() {
         return {
             type: "data",
-            nullable: false
+            nullable: false,
+            textDeriv: function () { return empty; },
+            attDeriv: function () { return notAllowed; },
+            startTagCloseDeriv: function () { return this; }
         };
     }
     function createDataExcept() {
@@ -399,6 +405,9 @@ runtime.log("5> " + p.type);
                 return createOneOrMore(makePattern(pattern.e[0], defines));
             case 'element':
                 p = pattern.e[0];
+if (p.name !== "name") {
+        runtime.log(p.name + " " + p.a.name);
+}
                 return createElement(createNameClass(p.a.ns, p.text),
                     makePattern(pattern.e[1], defines));
             case 'attribute':
@@ -409,6 +418,8 @@ runtime.log("5> " + p.type);
                 return createValue(pattern.text);
             case 'data':
                 return createData();
+            case 'list':
+                return createList();
         }
         throw "No support for " + pattern.name;
     }
@@ -516,8 +527,10 @@ runtime.log("5> " + p.type);
                     ce = parse(c);
                     if (ce.name === "name") {
                         names.push(ce.text);
+                        e.push(ce);
                     } else if (ce.name === "choice" && ce.names.length) {
                         names = names.concat(ce.names);
+                        e.push(ce);
                     } else {
                         e.push(ce);
                     }
@@ -1066,7 +1079,7 @@ runtime.log("done with newMakePattern");
 
         if (rootPattern) {
             walker.currentNode = walker.root;
-            errors = childDeriv(null, rootPattern, walker);
+ //           errors = childDeriv(null, rootPattern, walker);
             runtime.log(JSON.stringify(errors));
         }
         runtime.log("done " + rootPattern);
