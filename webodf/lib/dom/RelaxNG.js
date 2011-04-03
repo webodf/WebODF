@@ -324,7 +324,7 @@ dom.RelaxNG = function RelaxNG(url) {
         p = pattern;
         for (i = 0; p !== notAllowed && i < childNodes.length; i += 1) {
             childNode = childNodes[i];
-runtime.log(i + " " + p.type + " " + childNode.nodeName);
+//runtime.log(i + " " + p.type + " " + childNode.nodeName);
             if (typeof childNode === "string") {
                 if (/^\s*$/.test(childNode)) {
                     p = createChoice(p, p.textDeriv(context, childNode));
@@ -335,7 +335,7 @@ runtime.log(i + " " + p.type + " " + childNode.nodeName);
                 walker.currentNode = childNode;
                 p = childDeriv(context, p, walker);
             }
-runtime.log(i + "_" + p.type + " " + childNode.nodeName);
+//runtime.log(i + "_" + p.type + " " + childNode.nodeName);
         }
         walker.currentNode = element;
         return p;
@@ -345,17 +345,17 @@ runtime.log(i + "_" + p.type + " " + childNode.nodeName);
 //        if (childNode.type === 3) {
 //            return pattern.textDeriv(context, pattern, childNode.nodeValue);
 //        }
-runtime.log("0> " + pattern.type + " " + childNode.nodeType + " " + childNode.nodeName);
+//runtime.log("0> " + pattern.type + " " + childNode.nodeType + " " + childNode.nodeName);
         p = pattern.startTagOpenDeriv(childNode);
-runtime.log("1> " + p.type);
+//runtime.log("1> " + p.type);
         p = attsDeriv(context, p, childNode.attributes, 0);
-runtime.log("2> " + p.type);
+//runtime.log("2> " + p.type);
         p = p.startTagCloseDeriv();
-runtime.log("3> " + p.type);
+//runtime.log("3> " + p.type);
         p = childrenDeriv(context, p, walker);
-runtime.log("4> " + p.type);
+//runtime.log("4> " + p.type);
         p = p.endTagDeriv();
-runtime.log("5> " + p.type);
+//runtime.log("5> " + p.type);
         return p;
     };
     function createNameClass(ns, name) {
@@ -703,7 +703,6 @@ if (p.name !== "name") {
                 }
             }
             i = makePattern(pattern, copy);
-runtime.log("done with newMakePattern");
             return i;
         }
 
@@ -1079,10 +1078,11 @@ runtime.log("done with newMakePattern");
 
         if (rootPattern) {
             walker.currentNode = walker.root;
- //           errors = childDeriv(null, rootPattern, walker);
-            runtime.log(JSON.stringify(errors));
+            errors = childDeriv(null, rootPattern, walker);
+            if (!errors.nullable) {
+                runtime.log("Error parsing.");
+            }
         }
-        runtime.log("done " + rootPattern);
     }
     this.validate = validateXML;
 
