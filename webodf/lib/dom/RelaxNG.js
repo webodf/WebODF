@@ -195,8 +195,9 @@ dom.RelaxNG = function RelaxNG(url) {
                             createChoice(p, empty));
             },
             startTagOpenDeriv: function (node) {
+                var oneOrMore = this;
                 return applyAfter(function (pf) {
-                    return createGroup(pf, createChoice(p, empty));
+                    return createGroup(pf, createChoice(oneOrMore, empty));
                 }, p.startTagOpenDeriv(node));
             },
             attDeriv: function (context, attribute) {
