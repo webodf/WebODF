@@ -81,7 +81,6 @@ dom.RelaxNG = function RelaxNG(url) {
                     p2.attDeriv(context, attribute));
             },
             startTagCloseDeriv: function () {
-runtime.log("p1 " + p1.type + " " + p2.type);
                 return createChoice(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
@@ -150,7 +149,6 @@ runtime.log("p1 " + p1.type + " " + p2.type);
                     createGroup(p1, p2.attDeriv(context, attribute)));
             },
             startTagCloseDeriv: function () {
-runtime.log("p1 " + p1.type + " " + p2.type);
                 return createGroup(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
@@ -158,14 +156,12 @@ runtime.log("p1 " + p1.type + " " + p2.type);
     }
     function createAfter(p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
-runtime.log("createAfter " + p1);
         return {
             type: "after",
             p1: p1,
             p2: p2,
             nullable: false,
             textDeriv: function (context, text) {
-runtime.log("derive after " + p1);
                 return createAfter(p1.textDeriv(context, text), p2);
             },
             startTagOpenDeriv: function (node) {
@@ -213,9 +209,9 @@ runtime.log("derive after " + p1);
             nc: nc,
             p: p,
             nullable: false,
+            textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function (node) {
                 if (nc.contains(node)) {
-runtime.log("AAFTER " + p.type);
                     return createAfter(p, empty);
                 }
                 return notAllowed;
@@ -317,7 +313,11 @@ runtime.log("AAFTER " + p.type);
             childNode = childNodes[i];
 runtime.log(i + " " + p.type + " " + childNode.nodeName);
             if (typeof childNode === "string") {
-                p = p.textDeriv(context, childNode);
+                if (/^\s*$/.test(childNode)) {
+                    p = createChoice(p, p.textDeriv(context, childNode));
+                } else {
+                    p = p.textDeriv(context, childNode);
+                }
             } else {
                 walker.currentNode = childNode;
                 p = childDeriv(context, p, walker);
