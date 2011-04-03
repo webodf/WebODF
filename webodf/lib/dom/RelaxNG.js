@@ -222,6 +222,7 @@ runtime.log("A " + p1.type + " " + p2.type);
             attDeriv: function (context, attribute) {
                 if (nc.contains(attribute)) { // && p.valueMatch(context,
 //                        attribute.nodeValue)) {
+runtime.log("yay");
                     return empty;
                 }
                 return notAllowed;
@@ -275,7 +276,6 @@ runtime.log("A " + p1.type + " " + p2.type);
         }
         var a = attributes.item(position);
         if (a.namespaceURI === "http://www.w3.org/2000/xmlns/") { // always ok
-            // when we have a context, put the namespace in there at this point
             position += 1;
             if (position >= attributes.length) {
                 return pattern;
