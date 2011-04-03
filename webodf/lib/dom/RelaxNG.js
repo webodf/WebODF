@@ -279,11 +279,12 @@ dom.RelaxNG = function RelaxNG(url) {
             position = 0;
         }
         var a = attributes.item(position);
-        if (a.namespaceURI === "http://www.w3.org/2000/xmlns/") { // always ok
+        while (a.namespaceURI === "http://www.w3.org/2000/xmlns/") { // always ok
             position += 1;
             if (position >= attributes.length) {
                 return pattern;
             }
+            a = attributes.item(position);
         }
         a = attsDeriv(context, pattern.attDeriv(context, attributes.item(position)),
             attributes, position + 1);
@@ -391,8 +392,10 @@ runtime.log("5> " + p.type);
                     makePattern(pattern.e[1], defines));
             case 'value':
                 return createValue(pattern.text);
+            case 'data':
+                return createData();
         }
-        runtime.log("boo " + pattern.name);
+        throw "No support for " + pattern.name;
     }
 
 /*== */
