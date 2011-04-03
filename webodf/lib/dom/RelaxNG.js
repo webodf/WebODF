@@ -33,27 +33,31 @@ dom.RelaxNG = function RelaxNG(url) {
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return notAllowed; },
-            childrenDeriv: function () { return notAllowed; },
             endTagDeriv: function () { return notAllowed; }
         },
         empty = {
             type: "empty",
             nullable: true,
-            textDeriv: function (context, text) {
+            textDeriv: function () {
                 return notAllowed;
             },
             startTagOpenDeriv: function () { return notAllowed; },
-            attDeriv: function (context, attribute) { return notAllowed; }
+            attDeriv: function (context, attribute) { return notAllowed; },
+            startTagCloseDeriv: function () { return empty; },
+            endTagDeriv: function () { return notAllowed; }
         },
         text = {
             type: "text",
             nullable: true,
-            textDeriv: function (context, textt) {
+            textDeriv: function () {
                 return text;
             },
-            startTagOpenDeriv: function () { return notAllowed; }
+            startTagOpenDeriv: function () { return notAllowed; },
+            startTagCloseDeriv: function () { return text; },
+            endTagDeriv: function () { return notAllowed; }
         },
         applyAfter,
+        childDeriv,
         rootPattern;
 
     function createChoice(p1, p2) {
@@ -77,6 +81,7 @@ dom.RelaxNG = function RelaxNG(url) {
                     p2.attDeriv(context, attribute));
             },
             startTagCloseDeriv: function () {
+runtime.log("p1 " + p1.type + " " + p2.type);
                 return createChoice(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
@@ -140,12 +145,12 @@ dom.RelaxNG = function RelaxNG(url) {
                 return x;
             },
             attDeriv: function (context, attribute) {
-runtime.log("A " + p1.type + " " + p2.type);
                 return createChoice(
                     createGroup(p1.attDeriv(context, attribute), p2),
                     createGroup(p1, p2.attDeriv(context, attribute)));
             },
             startTagCloseDeriv: function () {
+runtime.log("p1 " + p1.type + " " + p2.type);
                 return createGroup(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
@@ -153,15 +158,14 @@ runtime.log("A " + p1.type + " " + p2.type);
     }
     function createAfter(p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
-        if (p1 === empty) { return p2; }
-        if (p2 === empty) { return p1; }
-        runtime.log("createAfter");
+runtime.log("createAfter " + p1);
         return {
             type: "after",
             p1: p1,
             p2: p2,
             nullable: false,
             textDeriv: function (context, text) {
+runtime.log("derive after " + p1);
                 return createAfter(p1.textDeriv(context, text), p2);
             },
             startTagOpenDeriv: function (node) {
@@ -172,7 +176,10 @@ runtime.log("A " + p1.type + " " + p2.type);
                 return createAfter(p1.attDeriv(context, attribute), p2);
             },
             startTagCloseDeriv: function () {
-                return createAfter(p1.startTagCloseDeriv, p2);
+                return createAfter(p1.startTagCloseDeriv(), p2);
+            },
+            endTagDeriv: function () {
+                return (p1.nullable) ? p2 : notAllowed;
             }
         };
     }
@@ -208,11 +215,13 @@ runtime.log("A " + p1.type + " " + p2.type);
             nullable: false,
             startTagOpenDeriv: function (node) {
                 if (nc.contains(node)) {
+runtime.log("AAFTER " + p.type);
                     return createAfter(p, empty);
                 }
                 return notAllowed;
             },
-            attDeriv: function (context, attribute) { return notAllowed; }
+            attDeriv: function (context, attribute) { return notAllowed; },
+            startTagCloseDeriv: function () { return this; }
         };
     }
     function createAttribute(nc, p) {
@@ -222,7 +231,6 @@ runtime.log("A " + p1.type + " " + p2.type);
             attDeriv: function (context, attribute) {
                 if (nc.contains(attribute)) { // && p.valueMatch(context,
 //                        attribute.nodeValue)) {
-runtime.log("yay");
                     return empty;
                 }
                 return notAllowed;
@@ -282,27 +290,65 @@ runtime.log("yay");
             }
         }
         a = attsDeriv(context, pattern.attDeriv(context, attributes.item(position)),
-            attributes, position);
-        runtime.log("a " + " " + pattern.type + " " + position + " " + a.type);
+            attributes, position + 1);
         return a;
     }
-    function childDeriv(context, pattern, walker) {
-        var childNode = walker.currentNode, p;
-        if (childNode.type === 3) {
-            return pattern.textDeriv(context, pattern, childNode.nodeValue);
+    function childrenDeriv(context, pattern, walker) {
+        var element = walker.currentNode,
+            childNode = walker.firstChild(),
+            numberOfTextNodes = 0,
+            childNodes = [], i, p;
+        // simple incomplete implementation: only use non-empty text nodes
+        while (childNode) {
+            if (childNode.nodeType === 1) {
+                childNodes.push(childNode);
+            } else if (childNode.nodeType === 3 && !/^\s*$/.test(childNode.nodeValue)) {
+                childNodes.push(childNode.nodeValue);
+                numberOfTextNodes += 1;
+            }
+            childNode = walker.nextSibling();
         }
-        p = pattern.startTagOpenDeriv(childNode);
-runtime.log(p.type);
-        p = attsDeriv(context, p, childNode.attributes, 0);
-        p = p.startTagCloseDeriv();
-        p = p.childrenDeriv(context, childNode);
-        p = p.endTagDeriv();
+        // if there is no nodes at all, add an empty text node
+        if (childNodes.length === 0) {
+            childNodes = [""];
+        }
+        p = pattern;
+        for (i = 0; p !== notAllowed && i < childNodes.length; i += 1) {
+            childNode = childNodes[i];
+runtime.log(i + " " + p.type + " " + childNode.nodeName);
+            if (typeof childNode === "string") {
+                p = p.textDeriv(context, childNode);
+            } else {
+                walker.currentNode = childNode;
+                p = childDeriv(context, p, walker);
+            }
+runtime.log(i + "_" + p.type + " " + childNode.nodeName);
+        }
+        walker.currentNode = element;
         return p;
     }
+    childDeriv = function childDeriv(context, pattern, walker) {
+        var childNode = walker.currentNode, p;
+//        if (childNode.type === 3) {
+//            return pattern.textDeriv(context, pattern, childNode.nodeValue);
+//        }
+runtime.log("0> " + pattern.type + " " + childNode.nodeType + " " + childNode.nodeName);
+        p = pattern.startTagOpenDeriv(childNode);
+runtime.log("1> " + p.type);
+        p = attsDeriv(context, p, childNode.attributes, 0);
+runtime.log("2> " + p.type);
+        p = p.startTagCloseDeriv();
+runtime.log("3> " + p.type);
+        p = childrenDeriv(context, p, walker);
+runtime.log("4> " + p.type);
+        p = p.endTagDeriv();
+runtime.log("5> " + p.type);
+        return p;
+    };
     function createNameClass(ns, name) {
         return {
             contains: function (node) {
-runtime.log(node.namespaceURI + " " + ns + " " + node.localName + " " + name);
+//runtime.log(node.namespaceURI + " " + ns + " " + node.localName + " " + name);
                 return node.namespaceURI === ns && node.localName === name;
             }
         };
