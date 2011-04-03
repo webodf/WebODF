@@ -53,6 +53,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 return text;
             },
             startTagOpenDeriv: function () { return notAllowed; },
+            attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return text; },
             endTagDeriv: function () { return notAllowed; }
         },
@@ -83,6 +84,9 @@ dom.RelaxNG = function RelaxNG(url) {
             startTagCloseDeriv: function () {
                 return createChoice(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
+            },
+            endTagDeriv: function () {
+                return createChoice(p1.endTagDeriv(), p2.endTagDeriv());
             }
         };
     }
@@ -381,7 +385,7 @@ runtime.log("5> " + p.type);
                 return createGroup(makePattern(pattern.e[0], defines),
                     makePattern(pattern.e[1], defines));
             case 'oneOrMore':
-                return createOneOrMore(makePattern(pattern.e[0]));
+                return createOneOrMore(makePattern(pattern.e[0], defines));
             case 'element':
                 p = pattern.e[0];
                 return createElement(createNameClass(p.a.ns, p.text),
@@ -703,7 +707,6 @@ runtime.log("done with newMakePattern");
                     }
                 }
             } catch (err) {
-                runtime.log(err);
                 return err;
             }
             //runtime.log(JSON.stringify(start, null, "  "));
