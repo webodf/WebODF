@@ -2,14 +2,14 @@
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
- * The RelaxNG implementation is currently not complete. Relax NG should not report
- * errors on valid DOM trees, but it will not check all constraints that a Relax NG
- * file can define. The current implementation does not load external parts of a Relax
- * NG file.
- * The main purpose of this Relax NG engine is to validate runtime ODF documents.
- * The DOM tree is traversed via a TreeWalker. A custom TreeWalker implementation can
- * hide parts of a DOM tree. This is useful in WebODF, where special elements and
- * attributes in the runtime DOM tree.
+ * The RelaxNG implementation is currently not complete. Relax NG should not
+ * report errors on valid DOM trees, but it will not check all constraints that
+ * a Relax NG file can define. The current implementation does not load external
+ * parts of a Relax NG file.
+ * The main purpose of this Relax NG engine is to validate runtime ODF
+ * documents. The DOM tree is traversed via a TreeWalker. A custom TreeWalker
+ * implementation can hide parts of a DOM tree. This is useful in WebODF, where
+ * special elements and attributes in the runtime DOM tree.
  * @constructor
  * @param {!string} url path to the Relax NG schema
  */
@@ -274,14 +274,22 @@ runtime.log("CREATEVALUE " + value);
                       .childrenDeriv(context, childNode)
                       .endTagDeriv();
     }
+    function createNameClass(ns, name) {
+        return {
+            contains: function (node) {
+                return node.namespaceURI === ns && node.localName === name;
+            }
+        };
+    }
     function makePattern(pattern, defines) {
+        var p;
 runtime.log("makepattern " + pattern.name);
         if (pattern.name === "ref") {
-            var ref = pattern.a.name;
-runtime.log("REF " + ref);
-            pattern = defines[ref];
+            p = pattern.a.name;
+runtime.log("REF " + p);
+            pattern = defines[p];
             if (pattern.name !== undefined) {
-                pattern  = defines[ref] = makePattern(pattern.e[0], defines);
+                pattern  = defines[p] = makePattern(pattern.e[0], defines);
             }
             return pattern;
         }
@@ -304,10 +312,12 @@ runtime.log("REF " + ref);
             case 'oneOrMore':
                 return createOneOrMore(makePattern(pattern.e[0]));
             case 'element':
-                return createElement(makePattern(pattern.e[0], defines),
+                p = pattern.e[0];
+                return createElement(createNameClass(p.a.ns, p.text),
                     makePattern(pattern.e[1], defines));
             case 'attribute':
-                return createAttribute(makePattern(pattern.e[0], defines),
+                p = pattern.e[0];
+                return createAttribute(createNameClass(p.a.ns, p.text),
                     makePattern(pattern.e[1], defines));
             case 'value':
                 return createValue(pattern.text);
