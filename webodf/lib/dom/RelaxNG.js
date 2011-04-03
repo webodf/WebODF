@@ -15,6 +15,7 @@
  */
 dom.RelaxNG = function RelaxNG(url) {
     var rngns = "http://relaxng.org/ns/structure/1.0",
+        xmlns = "http://www.w3.org/2000/xmlns/",
         loaded = false,
         errormessage,
         queue = [],
@@ -283,7 +284,7 @@ dom.RelaxNG = function RelaxNG(url) {
             position = 0;
         }
         var a = attributes.item(position);
-        while (a.namespaceURI === "http://www.w3.org/2000/xmlns/") { // always ok
+        while (a.namespaceURI === xmlns) { // always ok
             position += 1;
             if (position >= attributes.length) {
                 return pattern;
@@ -359,12 +360,21 @@ runtime.log("5> " + p.type);
         };
     }
     function makePattern(pattern, defines) {
-        var p;
+        var p, i;
         if (pattern.name === "ref") {
             p = pattern.a.name;
             pattern = defines[p];
             if (pattern.name !== undefined) {
-                pattern  = defines[p] = makePattern(pattern.e[0], defines);
+                // create an empty object in the store to enable circular dependencies
+                defines[p] = {};
+                pattern = makePattern(pattern.e[0], defines);
+                // copy the properties of the new object into the predefined one
+                for (i in pattern) {
+                    if (pattern.hasOwnProperty(i)) {
+                        defines[p][i] = pattern[i];
+                    }
+                }
+                pattern = defines[p];
             }
             return pattern;
         }
@@ -496,7 +506,7 @@ runtime.log("5> " + p.type);
                     } else {
                         a[att.localName] = att.value;
                     }
-                } else if (att.namespaceURI === "http://www.w3.org/2000/xmlns/") {
+                } else if (att.namespaceURI === xmlns) {
                     nsmap[att.value] = att.localName;
                 }
             }
