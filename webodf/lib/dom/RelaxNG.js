@@ -722,7 +722,7 @@ if (p.name !== "name") {
             if (!start) {
                 return [new RelaxNGParseError("No Relax NG start element was found.")];
             }
-            //rootPattern = newMakePattern(start.e[0], defines);
+            rootPattern = newMakePattern(start.e[0], defines);
             try {
                 resolveDefines(start, defines);
                 for (i in defines) {
