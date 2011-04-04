@@ -526,10 +526,11 @@ if (p.name !== "name") {
                 if (c.nodeType === 1 && c.namespaceURI === rngns) {
                     ce = parse(c);
                     if (ce.name === "name") {
-                        names.push(ce.text);
+                        names.push(nsmap[ce.a.ns] + ":" + ce.text);
                         e.push(ce);
                     } else if (ce.name === "choice" && ce.names.length) {
                         names = names.concat(ce.names);
+                        delete ce.names;
                         e.push(ce);
                     } else {
                         e.push(ce);
@@ -721,7 +722,7 @@ if (p.name !== "name") {
             if (!start) {
                 return [new RelaxNGParseError("No Relax NG start element was found.")];
             }
-            rootPattern = newMakePattern(start.e[0], defines);
+            //rootPattern = newMakePattern(start.e[0], defines);
             try {
                 resolveDefines(start, defines);
                 for (i in defines) {
