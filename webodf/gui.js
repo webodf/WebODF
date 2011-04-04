@@ -1,26 +1,34 @@
-/*global Ext listFiles Zip Base64*/
+/*global Ext runtime core listFiles*/
+runtime.loadClass("core.Zip");
+runtime.loadClass("core.Base64");
 Ext.BLANK_IMAGE_URL = "extjs/resources/images/default/s.gif";
 
 function addThumbnail(node) {
     var url = node.id,
-        zip = new Zip(url, function (zip) {
-        zip.load('Thumbnails/thumbnail.png', function (data) {
+    zip = new core.Zip(url, function (err, zipobject) {
+        zip = zipobject;
+        if (err) {
+            return;
+        }
+        zip.load('Thumbnails/thumbnail.png', function (err, data) {
             if (data === null) {
                 return;
             }
-            var url = 'data:;base64,' + Base64.toBase64(data),
-                el,
-                spans,
-                i,
-                s;
-            node.attributes.qtip += '<br/><img src="' + url + '"/>';
+            var url = 'data:;base64,' +
+                    (new core.Base64()).convertUTF8ArrayToBase64(data),
+                el, spans, i, s;
+
             el = node.getUI().getEl();
-            spans = el.getElementsByTagName('span');
-            for (i = 0; i < spans.length; i += 1) {
-                s = spans.item(i);
-                if (s.getAttribute('qtip')) {
-                    s.setAttribute('qtip', node.attributes.qtip);
+            if (el) {
+                spans = el.getElementsByTagName('span');
+                for (i = 0; i < spans.length; i += 1) {
+                    s = spans.item(i);
+                    if (s.getAttribute('qtip')) {
+                        s.setAttribute('qtip', node.attributes.qtip);
+                    }
                 }
+            } else {
+                node.attributes.qtip += '<br/><img src="' + url + '"/>';
             }
         });
     });
@@ -150,7 +158,7 @@ Ext.onReady(function () {
                     click: callback
                 }
             });
-//                addThumbnail(node);
+                addThumbnail(node);
         }
     }
 
@@ -195,6 +203,6 @@ Ext.onReady(function () {
     });
 
     // put data in the tree
-    listFiles('./', /\.od[tps]$/i, listFilesCallback,
+    listFiles('./DeltaXML-TC4/', /\.od[tps]$/i, listFilesCallback,
             listFilesDoneCallback);
 });
