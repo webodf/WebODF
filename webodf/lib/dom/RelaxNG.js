@@ -27,6 +27,20 @@ dom.RelaxNG = function RelaxNG(url) {
         
 /*== implementation according to
  *   http://www.thaiopensource.com/relaxng/derivative.html */
+        patterncache = {},
+        createUnique = function createUnique(object) {
+            // find an object with the same hash and return that object
+            var hash, o;
+            if (object.hash) {
+                hash = object.hash();
+                o = patterncache[hash];
+                if (!o) {
+                    o = patterncache[hash] = object;
+                }
+                object = o;
+            }
+            return object;
+        },
         notAllowed = {
             type: "notAllowed",
             nullable: false,
@@ -63,7 +77,7 @@ dom.RelaxNG = function RelaxNG(url) {
     function createChoice(p1, p2) {
         if (p1 === notAllowed) { return p2; }
         if (p2 === notAllowed) { return p1; }
-        return {
+        return createUnique({
             type: "choice",
             p1: p1,
             p2: p2,
@@ -90,13 +104,13 @@ dom.RelaxNG = function RelaxNG(url) {
             valueMatch: function (context, text) {
                 return p1.valueMatch(context, text) || p2.valueMatch(context, text);
             }
-        };
+        });
     }
     function createInterleave(p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
-        return {
+        return createUnique({
             type: "interleave",
             p1: p1,
             p2: p2,
@@ -123,13 +137,13 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createInterleave(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
-        };
+        });
     }
     function createGroup(p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
-        return {
+        return createUnique({
             type: "group",
             p1: p1,
             p2: p2,
@@ -160,11 +174,11 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createGroup(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
-        };
+        });
     }
     function createAfter(p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
-        return {
+        return createUnique({
             type: "after",
             p1: p1,
             p2: p2,
@@ -185,11 +199,11 @@ dom.RelaxNG = function RelaxNG(url) {
             endTagDeriv: function () {
                 return (p1.nullable) ? p2 : notAllowed;
             }
-        };
+        });
     }
     function createOneOrMore(p) {
         if (p === notAllowed) { return notAllowed; }
-        return {
+        return createUnique({
             type: "oneOrMore",
             p: p,
             nullable: p.nullable,
@@ -210,10 +224,10 @@ dom.RelaxNG = function RelaxNG(url) {
             startTagCloseDeriv: function () {
                 return createOneOrMore(p.startTagCloseDeriv());
             }
-        };
+        });
     }
     function createElement(nc, p) {
-        return {
+        return createUnique({
             type: "element",
             nc: nc,
             p: p,
@@ -227,10 +241,10 @@ dom.RelaxNG = function RelaxNG(url) {
             },
             attDeriv: function (context, attribute) { return notAllowed; },
             startTagCloseDeriv: function () { return this; }
-        };
+        });
     }
     function createAttribute(nc, p) {
-        return {
+        return createUnique({
             type: "attribute",
             nullable: false,
             attDeriv: function (context, attribute) {
@@ -242,17 +256,17 @@ dom.RelaxNG = function RelaxNG(url) {
                 return notAllowed;
             },
             startTagCloseDeriv: function () { return notAllowed; }
-        };
+        });
     }
     function createList() {
-        return {
+        return createUnique({
             type: "list",
             nullable: false,
             valueMatch: function (context, text) { return true; }
-        };
+        });
     }
     function createValue(value) {
-        return {
+        return createUnique({
             type: "value",
             nullable: false,
             value: value,
@@ -264,23 +278,23 @@ dom.RelaxNG = function RelaxNG(url) {
             valueMatch: function (context, text) {
                 return (text === value) ? empty : notAllowed;
             }
-        };
+        });
     }
     function createData() {
-        return {
+        return createUnique({
             type: "data",
             nullable: false,
             textDeriv: function () { return empty; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return this; },
             valueMatch: function (context, text) { return true; }
-        };
+        });
     }
     function createDataExcept() {
-        return {
+        return createUnique({
             type: "dataExcept",
             nullable: false
-        };
+        });
     }
     applyAfter = function applyAfter(f, p) {
         if (p.type === "after") {
