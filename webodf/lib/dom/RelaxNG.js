@@ -358,13 +358,30 @@ dom.RelaxNG = function RelaxNG(url) {
 //runtime.log("5> " + p.type);
         return p;
     };
-    function createNameClass(ns, name) {
-        return {
-            contains: function (node) {
-//runtime.log(node.namespaceURI + " " + ns + " " + node.localName + " " + name);
-                return node.namespaceURI === ns && node.localName === name;
-            }
-        };
+    function createNameClass(pattern) {
+        var name, ns;
+        if (pattern.name === "name") {
+            name = pattern.text;
+            ns = pattern.a.ns;
+            return {
+                contains: function (node) {
+                    return node.namespaceURI === ns && node.localName === name;
+                }
+            };
+        } else if (pattern.name === "choice") {
+            return {
+                contains: function (node) {
+                    var i;
+                    for (i = 0; i < pattern.e.length; i += 1) {
+                        if (pattern.e[0].text === node.localName &&
+                                pattern.e[0].a.ns === node.namespaceURI) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            };
+        }
     }
     function makePattern(pattern, defines) {
         var p, i;
@@ -404,15 +421,10 @@ dom.RelaxNG = function RelaxNG(url) {
             case 'oneOrMore':
                 return createOneOrMore(makePattern(pattern.e[0], defines));
             case 'element':
-                p = pattern.e[0];
-if (p.name !== "name") {
-        runtime.log(p.name + " " + p.a.name);
-}
-                return createElement(createNameClass(p.a.ns, p.text),
+                return createElement(createNameClass(pattern.e[0]),
                     makePattern(pattern.e[1], defines));
             case 'attribute':
-                p = pattern.e[0];
-                return createAttribute(createNameClass(p.a.ns, p.text),
+                return createAttribute(createNameClass(pattern.e[0]),
                     makePattern(pattern.e[1], defines));
             case 'value':
                 return createValue(pattern.text);
