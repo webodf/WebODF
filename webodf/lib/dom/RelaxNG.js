@@ -33,11 +33,19 @@ dom.RelaxNG = function RelaxNG(url) {
             var hash, o;
             if (object.hash) {
                 hash = object.hash();
-                o = patterncache[hash];
-                if (!o) {
-                    o = patterncache[hash] = object;
+            } else {
+                try {
+                    hash = JSON.stringify(object);
+                } catch (e) {
                 }
-                object = o;
+            }
+            if (hash !== undefined) {
+                o = patterncache[hash];
+                if (o === undefined) {
+                    o = patterncache[hash] = object;
+                } else {
+                    object = o;
+                }
             }
             return object;
         },
@@ -247,6 +255,8 @@ dom.RelaxNG = function RelaxNG(url) {
         return createUnique({
             type: "attribute",
             nullable: false,
+            nc: nc,
+            p: p,
             attDeriv: function (context, attribute) {
                 //runtime.log(p.type);
                 if (nc.contains(attribute) && p.valueMatch(context,
@@ -280,10 +290,11 @@ dom.RelaxNG = function RelaxNG(url) {
             }
         });
     }
-    function createData() {
+    function createData(type) {
         return createUnique({
             type: "data",
             nullable: false,
+            dataType: type,
             textDeriv: function () { return empty; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return this; },
@@ -397,6 +408,8 @@ dom.RelaxNG = function RelaxNG(url) {
             name = pattern.text;
             ns = pattern.a.ns;
             return {
+                name: pattern.text,
+                ns: pattern.a.ns,
                 contains: function (node) {
                     return node.namespaceURI === ns && node.localName === name;
                 }
@@ -462,7 +475,7 @@ dom.RelaxNG = function RelaxNG(url) {
             case 'value':
                 return createValue(pattern.text);
             case 'data':
-                return createData();
+                return createData(pattern.a.type);
             case 'list':
                 return createList();
         }
