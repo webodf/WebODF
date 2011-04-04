@@ -6,6 +6,27 @@ var sys = require("sys"),
     path = require("path"),
     fs = require("fs");
 
+function statFile(dir, filelist, position, callback) {
+    if (position >= filelist.length) {
+        return callback(null, filelist);
+    }
+    fs.stat(dir + "/" + filelist[position], function (err, stats) {
+        if (stats && stats.isDirectory()) {
+            filelist[position] = filelist[position] + "/";
+        }
+        statFile(dir, filelist, position + 1, callback);
+    });
+}
+
+function listFiles(dir, callback) {
+    fs.readdir(dir, function (err, files) {
+        if (err) {
+            return callback(err);
+        }
+        statFile(dir, files, 0, callback);
+    });
+}
+
 http.createServer(function (request, response) {
     var uri = url.parse(request.url).pathname,
         filename = path.join(process.cwd(), uri);
@@ -79,7 +100,7 @@ http.createServer(function (request, response) {
                 response.end();
                 return;
             }
-            fs.readdir(filename, function (err, files) {
+            listFiles(filename, function (err, files) {
                 if (err) {
                     response.writeHead(500, {"Content-Type": "text/plain"});
                     if (request.method !== "HEAD") {
