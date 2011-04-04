@@ -39,9 +39,7 @@ dom.RelaxNG = function RelaxNG(url) {
         empty = {
             type: "empty",
             nullable: true,
-            textDeriv: function () {
-                return notAllowed;
-            },
+            textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function (context, attribute) { return notAllowed; },
             startTagCloseDeriv: function () { return empty; },
@@ -88,6 +86,9 @@ dom.RelaxNG = function RelaxNG(url) {
             },
             endTagDeriv: function () {
                 return createChoice(p1.endTagDeriv(), p2.endTagDeriv());
+            },
+            valueMatch: function (context, text) {
+                return p1.valueMatch(context, text) || p2.valueMatch(context, text);
             }
         };
     }
@@ -144,6 +145,8 @@ dom.RelaxNG = function RelaxNG(url) {
                 var x = applyAfter(function (p) { return createGroup(p, p2); },
                         p1.startTagOpenDeriv(node));
                 if (p1.nullable) {
+//runtime.log("IUO " + JSON.stringify(p2,0,"    "));
+//runtime.log("IU " + JSON.stringify(p2.startTagOpenDeriv(node),0,"    "));
                     return createChoice(x, p2.startTagOpenDeriv(node));
                 }
                 return x;
@@ -192,7 +195,7 @@ dom.RelaxNG = function RelaxNG(url) {
             nullable: p.nullable,
             textDeriv: function (context, text) {
                 return createGroup(p.textDeriv(context, text),
-                            createChoice(p, empty));
+                            createChoice(this, empty));
             },
             startTagOpenDeriv: function (node) {
                 var oneOrMore = this;
@@ -231,8 +234,9 @@ dom.RelaxNG = function RelaxNG(url) {
             type: "attribute",
             nullable: false,
             attDeriv: function (context, attribute) {
-                if (nc.contains(attribute)) { // && p.valueMatch(context,
-//                        attribute.nodeValue)) {
+                //runtime.log(p.type);
+                if (nc.contains(attribute) && p.valueMatch(context,
+                        attribute.nodeValue)) {
                     return empty;
                 }
                 return notAllowed;
@@ -243,7 +247,8 @@ dom.RelaxNG = function RelaxNG(url) {
     function createList() {
         return {
             type: "list",
-            nullable: false
+            nullable: false,
+            valueMatch: function (context, text) { return true; }
         };
     }
     function createValue(value) {
@@ -251,9 +256,14 @@ dom.RelaxNG = function RelaxNG(url) {
             type: "value",
             nullable: false,
             value: value,
-            textDeriv: function () { return empty; },
+            textDeriv: function (context, text) {
+                return (text === value) ? empty : notAllowed;
+            },
             attDeriv: function () { return notAllowed; },
-            startTagCloseDeriv: function () { return this; }
+            startTagCloseDeriv: function () { return this; },
+            valueMatch: function (context, text) {
+                return (text === value) ? empty : notAllowed;
+            }
         };
     }
     function createData() {
@@ -262,7 +272,8 @@ dom.RelaxNG = function RelaxNG(url) {
             nullable: false,
             textDeriv: function () { return empty; },
             attDeriv: function () { return notAllowed; },
-            startTagCloseDeriv: function () { return this; }
+            startTagCloseDeriv: function () { return this; },
+            valueMatch: function (context, text) { return true; }
         };
     }
     function createDataExcept() {
@@ -324,38 +335,46 @@ dom.RelaxNG = function RelaxNG(url) {
         p = pattern;
         for (i = 0; p !== notAllowed && i < childNodes.length; i += 1) {
             childNode = childNodes[i];
-//runtime.log(i + " " + p.type + " " + childNode.nodeName);
+//runtime.log(i + " " + p.type + " " + (childNode.nodeName || childNode));
+//runtime.log("A " + JSON.stringify(p,0,"    "));
             if (typeof childNode === "string") {
                 if (/^\s*$/.test(childNode)) {
+//runtime.log("C");
                     p = createChoice(p, p.textDeriv(context, childNode));
                 } else {
+//runtime.log("E");
                     p = p.textDeriv(context, childNode);
                 }
             } else {
+//runtime.log("D");
                 walker.currentNode = childNode;
                 p = childDeriv(context, p, walker);
             }
-//runtime.log(i + "_" + p.type + " " + childNode.nodeName);
+//runtime.log("B " + JSON.stringify(p,0,"    "));
+//runtime.log(i + "_" + p.type + " " + (childNode.nodeName || childNode));
         }
         walker.currentNode = element;
         return p;
     }
     childDeriv = function childDeriv(context, pattern, walker) {
         var childNode = walker.currentNode, p;
-//        if (childNode.type === 3) {
-//            return pattern.textDeriv(context, pattern, childNode.nodeValue);
-//        }
 //runtime.log("0> " + pattern.type + " " + childNode.nodeType + " " + childNode.nodeName);
+//runtime.log("> " + JSON.stringify(pattern, 0,"    "));
         p = pattern.startTagOpenDeriv(childNode);
-//runtime.log("1> " + p.type);
+//runtime.log("1> " + p.type + " " + childNode.nodeName);
+//runtime.log("> " + JSON.stringify(p,0,"    "));
         p = attsDeriv(context, p, childNode.attributes, 0);
-//runtime.log("2> " + p.type);
+//runtime.log("2> " + p.type + " " + childNode.nodeName);
+//runtime.log("> " + JSON.stringify(p,0,"    "));
         p = p.startTagCloseDeriv();
-//runtime.log("3> " + p.type);
+//runtime.log("3> " + p.type + " " + childNode.nodeName);
+//runtime.log("> " + JSON.stringify(p,0,"    "));
         p = childrenDeriv(context, p, walker);
-//runtime.log("4> " + p.type);
+//runtime.log("4> " + p.type + " " + childNode.nodeName);
+//runtime.log("> " + JSON.stringify(p,0,"    "));
         p = p.endTagDeriv();
-//runtime.log("5> " + p.type);
+//runtime.log("5> " + p.type + " " + childNode.nodeName);
+//runtime.log("> " + JSON.stringify(p,0,"    "));
         return p;
     };
     function createNameClass(pattern) {
@@ -1090,6 +1109,7 @@ dom.RelaxNG = function RelaxNG(url) {
         callback(errors);
 
         if (rootPattern) {
+            runtime.log("new validation");
             walker.currentNode = walker.root;
             errors = childDeriv(null, rootPattern, walker);
             if (!errors.nullable) {
