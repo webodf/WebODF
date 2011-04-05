@@ -560,7 +560,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
         }
    
-        function parse(element) {
+        function parse(element, elements) {
             // parse all elements from the Relax NG namespace into JavaScript
             // objects
             var e = [], a = {}, c = element.firstChild,
@@ -586,7 +586,7 @@ dom.RelaxNG = function RelaxNG(url) {
                     if (ce.name === "name") {
                         names.push(nsmap[ce.a.ns] + ":" + ce.text);
                         e.push(ce);
-                    } else if (ce.name === "choice" && ce.names.length) {
+                    } else if (ce.name === "choice" && ce.names && ce.names.length) {
                         names = names.concat(ce.names);
                         delete ce.names;
                         e.push(ce);
@@ -674,7 +674,23 @@ dom.RelaxNG = function RelaxNG(url) {
                 name = "choice";
                 e = [ {name: "oneOrMore", e: [ e[0] ] }, { name: "empty" } ];
             }
-            return { name: name, a: a, e: e, text: text, names: names };
+            // create the definition
+            ce = { name: name };
+            if (e.length > 0) { ce.e = e; }
+            for (i in a) {
+                if (a.hasOwnProperty(i)) {
+                    ce.a = a;
+                    break;
+                }
+            }
+            if (text !== undefined) { ce.text = text; }
+            if (names.length > 0) { ce.names = names; }
+            return ce;
+
+            // part one of 4.19
+//            if (name === "elements") {
+                
+            //return { name: name, a: a, e: e, text: text, names: names };
         }
     
         function resolveDefines(def, defines) {
@@ -766,7 +782,8 @@ dom.RelaxNG = function RelaxNG(url) {
         }
 
         function main() {
-            var grammar = parse(dom && dom.documentElement),
+            var elements = {},
+                grammar = parse(dom && dom.documentElement, elements),
                 i, e, defines = {};
 
             for (i = 0; i < grammar.e.length; i += 1) {
@@ -1136,7 +1153,7 @@ dom.RelaxNG = function RelaxNG(url) {
         callback(errors);
 
         if (rootPattern) {
-            runtime.log("new validation");
+//            runtime.log("new validation");
             walker.currentNode = walker.root;
             errors = childDeriv(null, rootPattern, walker);
             if (!errors.nullable) {
