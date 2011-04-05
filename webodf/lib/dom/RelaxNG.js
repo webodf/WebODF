@@ -85,6 +85,7 @@ dom.RelaxNG = function RelaxNG(url) {
     function createChoice(p1, p2) {
         if (p1 === notAllowed) { return p2; }
         if (p2 === notAllowed) { return p1; }
+        if (p1 === p2) { return p1; }
         return createUnique({
             type: "choice",
             p1: p1,
@@ -167,8 +168,6 @@ dom.RelaxNG = function RelaxNG(url) {
                 var x = applyAfter(function (p) { return createGroup(p, p2); },
                         p1.startTagOpenDeriv(node));
                 if (p1.nullable) {
-//runtime.log("IUO " + JSON.stringify(p2,0,"    "));
-//runtime.log("IU " + JSON.stringify(p2.startTagOpenDeriv(node),0,"    "));
                     return createChoice(x, p2.startTagOpenDeriv(node));
                 }
                 return x;
@@ -258,7 +257,6 @@ dom.RelaxNG = function RelaxNG(url) {
             nc: nc,
             p: p,
             attDeriv: function (context, attribute) {
-                //runtime.log(p.type);
                 if (nc.contains(attribute) && p.valueMatch(context,
                         attribute.nodeValue)) {
                     return empty;
@@ -429,22 +427,22 @@ dom.RelaxNG = function RelaxNG(url) {
             };
         }
     }
-    function makePattern(pattern, defines) {
+    function makePattern(pattern, elements) {
         var p, i;
-        if (pattern.name === "ref") {
-            p = pattern.a.name;
-            pattern = defines[p];
+        if (pattern.name === "elementref") {
+            p = pattern.id || 0;
+            pattern = elements[p];
             if (pattern.name !== undefined) {
                 // create an empty object in the store to enable circular dependencies
-                defines[p] = {};
-                pattern = makePattern(pattern.e[0], defines);
+                elements[p] = {};
+                pattern = makePattern(pattern, elements);
                 // copy the properties of the new object into the predefined one
                 for (i in pattern) {
                     if (pattern.hasOwnProperty(i)) {
-                        defines[p][i] = pattern[i];
+                        elements[p][i] = pattern[i];
                     }
                 }
-                pattern = defines[p];
+                pattern = elements[p];
             }
             return pattern;
         }
@@ -456,22 +454,25 @@ dom.RelaxNG = function RelaxNG(url) {
             case 'text':
                 return text;
             case 'choice':
-                return createChoice(makePattern(pattern.e[0], defines),
-                    makePattern(pattern.e[1], defines));
+                return createChoice(makePattern(pattern.e[0], elements),
+                    makePattern(pattern.e[1], elements));
             case 'interleave':
-                return createInterleave(makePattern(pattern.e[0], defines),
-                    makePattern(pattern.e[1], defines));
+                p = makePattern(pattern.e[0], elements);
+                for (i = 1; i < pattern.e.length; i += 1) {
+                    p = createInterleave(p, makePattern(pattern.e[i], elements));
+                }
+                return p;
             case 'group':
-                return createGroup(makePattern(pattern.e[0], defines),
-                    makePattern(pattern.e[1], defines));
+                return createGroup(makePattern(pattern.e[0], elements),
+                    makePattern(pattern.e[1], elements));
             case 'oneOrMore':
-                return createOneOrMore(makePattern(pattern.e[0], defines));
+                return createOneOrMore(makePattern(pattern.e[0], elements));
             case 'element':
                 return createElement(createNameClass(pattern.e[0]),
-                    makePattern(pattern.e[1], defines));
+                    makePattern(pattern.e[1], elements));
             case 'attribute':
                 return createAttribute(createNameClass(pattern.e[0]),
-                    makePattern(pattern.e[1], defines));
+                    makePattern(pattern.e[1], elements));
             case 'value':
                 return createValue(pattern.text);
             case 'data':
@@ -715,7 +716,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
             e = def.e;
             // 4.20 notAllowed element
-            // 4.21 emtpy element
+            // 4.21 empty element
             if (name === "choice") {
                 if (!e || !e[1] || e[1].name === "empty") {
                     if (!e || !e[0] || e[0].name === "empty") {
@@ -774,9 +775,7 @@ dom.RelaxNG = function RelaxNG(url) {
             while (def.e && i < def.e.length) {
                 e = def.e[i];
                 if (e.name === "elementref") {
-                    if (e.id === undefined) {
-                        e.id = 0;
-                    }
+                    e.id = e.id || 0;
                     def.e[i] = elements[e.id];
                 } else if (e.name !== "element") {
                     resolveElements(e, elements);
@@ -785,11 +784,11 @@ dom.RelaxNG = function RelaxNG(url) {
             }
         }
 
-        function newMakePattern(pattern, defines) {
+        function newMakePattern(pattern, elements) {
             var copy = {}, i;
-            for (i in defines) {
-                if (defines.hasOwnProperty(i)) {
-                    copy[i] = defines[i];
+            for (i in elements) {
+                if (elements.hasOwnProperty(i)) {
+                    copy[i] = elements[i];
                 }
             }
             i = makePattern(pattern, copy);
@@ -812,7 +811,6 @@ dom.RelaxNG = function RelaxNG(url) {
             if (!start) {
                 return [new RelaxNGParseError("No Relax NG start element was found.")];
             }
-//            rootPattern = newMakePattern(start.e[0], defines);
             resolveDefines(start, defines);
             for (i in defines) {
                 if (defines.hasOwnProperty(i)) {
@@ -822,6 +820,7 @@ dom.RelaxNG = function RelaxNG(url) {
             for (i = 0; i < elements.length; i += 1) {
                 resolveDefines(elements[i], defines);
             }
+            rootPattern = newMakePattern(start.e[0], elements);
             resolveElements(start, elements);
             for (i = 0; i < elements.length; i += 1) {
                 resolveElements(elements[i], elements);
