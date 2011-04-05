@@ -550,7 +550,7 @@ dom.RelaxNG = function RelaxNG(url) {
         }
 
         function splitQNames(def) {
-            var i, l = def.names.length, name,
+            var i, l = (def.names) ? def.names.length : 0, name,
                 localnames = def.localnames = new Array(l),
                 namespaces = def.namespaces = new Array(l);
             for (i = 0; i < l; i += 1) {
@@ -582,7 +582,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
             while (c) {
                 if (c.nodeType === 1 && c.namespaceURI === rngns) {
-                    ce = parse(c);
+                    ce = parse(c, elements);
                     if (ce.name === "name") {
                         names.push(nsmap[ce.a.ns] + ":" + ce.text);
                         e.push(ce);
@@ -676,7 +676,7 @@ dom.RelaxNG = function RelaxNG(url) {
             }
             // create the definition
             ce = { name: name };
-            if (e.length > 0) { ce.e = e; }
+            if (e && e.length > 0) { ce.e = e; }
             for (i in a) {
                 if (a.hasOwnProperty(i)) {
                     ce.a = a;
@@ -684,18 +684,19 @@ dom.RelaxNG = function RelaxNG(url) {
                 }
             }
             if (text !== undefined) { ce.text = text; }
-            if (names.length > 0) { ce.names = names; }
-            return ce;
+            if (names && names.length > 0) { ce.names = names; }
 
             // part one of 4.19
-//            if (name === "elements") {
-                
-            //return { name: name, a: a, e: e, text: text, names: names };
+            if (name === "element") {
+                ce.id = elements.length;
+                elements.push(ce);
+                ce = { name: "elementref", id: ce.id };
+            }
+            return ce;
         }
     
         function resolveDefines(def, defines) {
             var i = 0, e, defs, end, name = def.name;
-            def.resolved = true;
             while (def.e && i < def.e.length) {
                 e = def.e[i];
                 if (e.name === "ref") {
@@ -709,9 +710,7 @@ dom.RelaxNG = function RelaxNG(url) {
                     def.e = def.e.concat(end);
                 } else {
                     i += 1;
-                    if (!e.resolved) {
-                        resolveDefines(e, defines);
-                    }
+                    resolveDefines(e, defines);
                 }
             }
             e = def.e;
@@ -770,6 +769,22 @@ dom.RelaxNG = function RelaxNG(url) {
             }
         }
 
+        function resolveElements(def, elements) {
+            var i = 0, e, name;
+            while (def.e && i < def.e.length) {
+                e = def.e[i];
+                if (e.name === "elementref") {
+                    if (e.id === undefined) {
+                        e.id = 0;
+                    }
+                    def.e[i] = elements[e.id];
+                } else if (e.name !== "element") {
+                    resolveElements(e, elements);
+                }
+                i += 1;
+            }
+        }
+
         function newMakePattern(pattern, defines) {
             var copy = {}, i;
             for (i in defines) {
@@ -782,7 +797,7 @@ dom.RelaxNG = function RelaxNG(url) {
         }
 
         function main() {
-            var elements = {},
+            var elements = [],
                 grammar = parse(dom && dom.documentElement, elements),
                 i, e, defines = {};
 
@@ -797,16 +812,19 @@ dom.RelaxNG = function RelaxNG(url) {
             if (!start) {
                 return [new RelaxNGParseError("No Relax NG start element was found.")];
             }
-            rootPattern = newMakePattern(start.e[0], defines);
-            try {
-                resolveDefines(start, defines);
-                for (i in defines) {
-                    if (defines.hasOwnProperty(i)) {
-                        resolveDefines(defines[i], defines);
-                    }
+//            rootPattern = newMakePattern(start.e[0], defines);
+            resolveDefines(start, defines);
+            for (i in defines) {
+                if (defines.hasOwnProperty(i)) {
+                    resolveDefines(defines[i], defines);
                 }
-            } catch (err) {
-                return err;
+            }
+            for (i = 0; i < elements.length; i += 1) {
+                resolveDefines(elements[i], defines);
+            }
+            resolveElements(start, elements);
+            for (i = 0; i < elements.length; i += 1) {
+                resolveElements(elements[i], elements);
             }
             //runtime.log(JSON.stringify(start, null, "  "));
             return null;
@@ -942,7 +960,7 @@ dom.RelaxNG = function RelaxNG(url) {
             depth -= 1;
             return [new RelaxNGParseError("Missing element " + elementdef.names)];
         }
-        if (elementdef.names.indexOf(qName(node)) === -1) {
+        if (elementdef.names && elementdef.names.indexOf(qName(node)) === -1) {
             depth -= 1;
             return [new RelaxNGParseError("Found " + node.nodeName +
                     " instead of " + elementdef.names + ".", node)];
