@@ -34,10 +34,7 @@ dom.RelaxNG = function RelaxNG(url) {
             if (object.hash) {
                 hash = object.hash();
             } else {
-                try {
-                    hash = JSON.stringify(object);
-                } catch (e) {
-                }
+                hash = JSON.stringify(object);
             }
             if (hash !== undefined) {
                 o = patterncache[hash];
@@ -233,12 +230,12 @@ dom.RelaxNG = function RelaxNG(url) {
             }
         });
     }
-    function createElement(nc, p) {
+    function createElement(nc, p, id) {
         return createUnique({
             type: "element",
             nc: nc,
-            p: p,
             nullable: false,
+            hash: function () { return id; },
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function (node) {
                 if (nc.contains(node)) {
@@ -469,14 +466,14 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createOneOrMore(makePattern(pattern.e[0], elements));
             case 'element':
                 return createElement(createNameClass(pattern.e[0]),
-                    makePattern(pattern.e[1], elements));
+                    makePattern(pattern.e[1], elements), pattern.id || 0);
             case 'attribute':
                 return createAttribute(createNameClass(pattern.e[0]),
                     makePattern(pattern.e[1], elements));
             case 'value':
                 return createValue(pattern.text);
             case 'data':
-                return createData(pattern.a.type);
+                return createData(pattern.a && pattern.a.type);
             case 'list':
                 return createList();
         }
