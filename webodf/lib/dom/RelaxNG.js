@@ -27,28 +27,19 @@ dom.RelaxNG = function RelaxNG(url) {
         
 /*== implementation according to
  *   http://www.thaiopensource.com/relaxng/derivative.html */
-        patterncache = {},
-        createUnique = function createUnique(object) {
-            // find an object with the same hash and return that object
-            var hash, o;
-            if (object.hash) {
-                hash = object.hash();
-            } else {
-                hash = JSON.stringify(object);
-            }
-            if (hash !== undefined) {
-                o = patterncache[hash];
-                if (o === undefined) {
-                    o = patterncache[hash] = object;
-                } else {
-                    object = o;
-                }
-            }
-            return object;
-        },
+        createChoice,
+        createInterleave,
+        createGroup,
+        createAfter,
+        createOneOrMore,
+        createValue,
+        createAttribute,
+        createNameClass,
+        createData,
         notAllowed = {
             type: "notAllowed",
             nullable: false,
+            hash: "notAllowed",
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function () { return notAllowed; },
@@ -58,6 +49,7 @@ dom.RelaxNG = function RelaxNG(url) {
         empty = {
             type: "empty",
             nullable: true,
+            hash: "empty",
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function (context, attribute) { return notAllowed; },
@@ -67,9 +59,8 @@ dom.RelaxNG = function RelaxNG(url) {
         text = {
             type: "text",
             nullable: true,
-            textDeriv: function () {
-                return text;
-            },
+            hash: "text",
+            textDeriv: function () { return text; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return text; },
@@ -79,11 +70,54 @@ dom.RelaxNG = function RelaxNG(url) {
         childDeriv,
         rootPattern;
 
-    function createChoice(p1, p2) {
+    function memoize1arg(type, func) {
+        return (function () {
+            var cache = {}, cachecount = 0;
+            return function (a) {
+//if (!a.hash) {runtime.log("No hash for type " + a.type + " " + JSON.stringify(a)); }
+                var ahash = a.hash || a.toString(),
+                    v;
+                v = cache[ahash];
+                if (v !== undefined) {
+                    return v;
+                }
+                cache[ahash] = v = func(a);
+                v.hash = type + cachecount.toString();
+                cachecount += 1;
+                return v;
+            };
+        }());
+    }
+    function memoize2arg(type, func) {
+        return (function () {
+            var cache = {}, cachecount = 0;
+            return function (a, b) {
+if (!a.hash) {runtime.log("No hash for type " + a.type + " " + JSON.stringify(a)); }
+if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)); }
+                var ahash = a.hash || a.toString(),
+                    bhash = b.hash || b.toString(),
+                    v, m;
+                m = cache[ahash];
+                if (m === undefined) {
+                    cache[ahash] = m = {};
+                } else {
+                    v = m[bhash];
+                    if (v !== undefined) {
+                        return v;
+                    }
+                }
+                m[bhash] = v = func(a, b);
+                v.hash = type + cachecount.toString();
+                cachecount += 1;
+                return v;
+            };
+        }());
+    }
+    createChoice = memoize2arg("choice", function (p1, p2) {
         if (p1 === notAllowed) { return p2; }
         if (p2 === notAllowed) { return p1; }
         if (p1 === p2) { return p1; }
-        return createUnique({
+        return {
             type: "choice",
             p1: p1,
             p2: p2,
@@ -110,13 +144,13 @@ dom.RelaxNG = function RelaxNG(url) {
             valueMatch: function (context, text) {
                 return p1.valueMatch(context, text) || p2.valueMatch(context, text);
             }
-        });
-    }
-    function createInterleave(p1, p2) {
+        };
+    });
+    createInterleave = memoize2arg("interleave", function (p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
-        return createUnique({
+        return {
             type: "interleave",
             p1: p1,
             p2: p2,
@@ -143,13 +177,13 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createInterleave(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
-        });
-    }
-    function createGroup(p1, p2) {
+        };
+    });
+    createGroup = memoize2arg("group", function (p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
-        return createUnique({
+        return {
             type: "group",
             p1: p1,
             p2: p2,
@@ -178,11 +212,11 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createGroup(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
             }
-        });
-    }
-    function createAfter(p1, p2) {
+        };
+    });
+    createAfter = memoize2arg("after", function (p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
-        return createUnique({
+        return {
             type: "after",
             p1: p1,
             p2: p2,
@@ -203,11 +237,11 @@ dom.RelaxNG = function RelaxNG(url) {
             endTagDeriv: function () {
                 return (p1.nullable) ? p2 : notAllowed;
             }
-        });
-    }
-    function createOneOrMore(p) {
+        };
+    });
+    createOneOrMore = memoize1arg("oneormore", function (p) {
         if (p === notAllowed) { return notAllowed; }
-        return createUnique({
+        return {
             type: "oneOrMore",
             p: p,
             nullable: p.nullable,
@@ -228,14 +262,15 @@ dom.RelaxNG = function RelaxNG(url) {
             startTagCloseDeriv: function () {
                 return createOneOrMore(p.startTagCloseDeriv());
             }
-        });
-    }
+        };
+    });
     function createElement(nc, p, id) {
-        return createUnique({
+        id = "element" + id.toString();
+        return {
             type: "element",
             nc: nc,
             nullable: false,
-            hash: function () { return id; },
+            hash: id,
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function (node) {
                 if (nc.contains(node)) {
@@ -245,10 +280,10 @@ dom.RelaxNG = function RelaxNG(url) {
             },
             attDeriv: function (context, attribute) { return notAllowed; },
             startTagCloseDeriv: function () { return this; }
-        });
+        };
     }
-    function createAttribute(nc, p) {
-        return createUnique({
+    createAttribute = memoize2arg("attribute", function (nc, p) {
+        return {
             type: "attribute",
             nullable: false,
             nc: nc,
@@ -261,17 +296,17 @@ dom.RelaxNG = function RelaxNG(url) {
                 return notAllowed;
             },
             startTagCloseDeriv: function () { return notAllowed; }
-        });
-    }
+        };
+    });
     function createList() {
-        return createUnique({
+        return {
             type: "list",
             nullable: false,
             valueMatch: function (context, text) { return true; }
-        });
+        };
     }
-    function createValue(value) {
-        return createUnique({
+    createValue = memoize1arg("value", function (value) {
+        return {
             type: "value",
             nullable: false,
             value: value,
@@ -283,10 +318,10 @@ dom.RelaxNG = function RelaxNG(url) {
             valueMatch: function (context, text) {
                 return (text === value) ? empty : notAllowed;
             }
-        });
-    }
-    function createData(type) {
-        return createUnique({
+        };
+    });
+    createData = memoize1arg("data", function (type) {
+        return {
             type: "data",
             nullable: false,
             dataType: type,
@@ -294,13 +329,14 @@ dom.RelaxNG = function RelaxNG(url) {
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return this; },
             valueMatch: function (context, text) { return true; }
-        });
-    }
+        };
+    });
     function createDataExcept() {
-        return createUnique({
+        return {
             type: "dataExcept",
-            nullable: false
-        });
+            nullable: false,
+            hash: "dataExcept"
+        };
     }
     applyAfter = function applyAfter(f, p) {
         if (p.type === "after") {
@@ -397,7 +433,7 @@ dom.RelaxNG = function RelaxNG(url) {
 //runtime.log("> " + JSON.stringify(p,0,"    "));
         return p;
     };
-    function createNameClass(pattern) {
+    createNameClass = function createNameClass(pattern) {
         var name, ns;
         if (pattern.name === "name") {
             name = pattern.text;
@@ -405,6 +441,7 @@ dom.RelaxNG = function RelaxNG(url) {
             return {
                 name: pattern.text,
                 ns: pattern.a.ns,
+                hash: "{" + ns + "}" + name,
                 contains: function (node) {
                     return node.namespaceURI === ns && node.localName === name;
                 }
@@ -423,7 +460,7 @@ dom.RelaxNG = function RelaxNG(url) {
                 }
             };
         }
-    }
+    };
     function makePattern(pattern, elements) {
         var p, i;
         if (pattern.name === "elementref") {
