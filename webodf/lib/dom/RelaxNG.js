@@ -36,6 +36,7 @@ dom.RelaxNG = function RelaxNG(url) {
         createAttribute,
         createNameClass,
         createData,
+        makePattern,
         notAllowed = {
             type: "notAllowed",
             nullable: false,
@@ -74,7 +75,7 @@ dom.RelaxNG = function RelaxNG(url) {
         return (function () {
             var cache = {}, cachecount = 0;
             return function (a) {
-//if (!a.hash) {runtime.log("No hash for type " + a.type + " " + JSON.stringify(a)); }
+if (typeof a !== "string" && !a.hash) {runtime.log("No hash for a of type " + a.type + " at " + type + " " + JSON.stringify(a)); }
                 var ahash = a.hash || a.toString(),
                     v;
                 v = cache[ahash];
@@ -88,15 +89,17 @@ dom.RelaxNG = function RelaxNG(url) {
             };
         }());
     }
-    function memoize2arg(type, func) {
+    function memoize2arg(type, fastfunc, func) {
         return (function () {
             var cache = {}, cachecount = 0;
             return function (a, b) {
-if (!a.hash) {runtime.log("No hash for type " + a.type + " " + JSON.stringify(a)); }
-if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)); }
-                var ahash = a.hash || a.toString(),
-                    bhash = b.hash || b.toString(),
-                    v, m;
+if (!a.hash) {runtime.log("No hash for a of type " + a.type + " at " + type + " " + JSON.stringify(a)); }
+if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " " + JSON.stringify(b)); }
+                var v = fastfunc && fastfunc(a, b),
+                    ahash, bhash, m;
+                if (v !== undefined) { return v; }
+                ahash = a.hash || a.toString();
+                bhash = b.hash || b.toString();
                 m = cache[ahash];
                 if (m === undefined) {
                     cache[ahash] = m = {};
@@ -117,6 +120,7 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
         if (p1 === notAllowed) { return p2; }
         if (p2 === notAllowed) { return p1; }
         if (p1 === p2) { return p1; }
+    }, function (p1, p2) {
         return {
             type: "choice",
             p1: p1,
@@ -140,9 +144,6 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
             },
             endTagDeriv: function () {
                 return createChoice(p1.endTagDeriv(), p2.endTagDeriv());
-            },
-            valueMatch: function (context, text) {
-                return p1.valueMatch(context, text) || p2.valueMatch(context, text);
             }
         };
     });
@@ -150,6 +151,7 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
+    }, function (p1, p2) {
         return {
             type: "interleave",
             p1: p1,
@@ -183,6 +185,7 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
+    }, function (p1, p2) {
         return {
             type: "group",
             p1: p1,
@@ -216,6 +219,7 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
     });
     createAfter = memoize2arg("after", function (p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
+    }, function (p1, p2) {
         return {
             type: "after",
             p1: p1,
@@ -264,13 +268,11 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
             }
         };
     });
-    function createElement(nc, p, id) {
-        id = "element" + id.toString();
+    function createElement(nc, p) {
         return {
             type: "element",
             nc: nc,
             nullable: false,
-            hash: id,
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function (node) {
                 if (nc.contains(node)) {
@@ -282,14 +284,18 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
             startTagCloseDeriv: function () { return this; }
         };
     }
-    createAttribute = memoize2arg("attribute", function (nc, p) {
+    function valueMatch(context, pattern, text) {
+        return (pattern.nullable && /^\s+$/.test(text)) ||
+                pattern.textDeriv(context, text).nullable;
+    }
+    createAttribute = memoize2arg("attribute", undefined, function (nc, p) {
         return {
             type: "attribute",
             nullable: false,
             nc: nc,
             p: p,
             attDeriv: function (context, attribute) {
-                if (nc.contains(attribute) && p.valueMatch(context,
+                if (nc.contains(attribute) && valueMatch(context, p,
                         attribute.nodeValue)) {
                     return empty;
                 }
@@ -302,7 +308,10 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
         return {
             type: "list",
             nullable: false,
-            valueMatch: function (context, text) { return true; }
+            hash: "list",
+            textDeriv: function (context, text) {
+                return empty;
+            }
         };
     }
     createValue = memoize1arg("value", function (value) {
@@ -314,10 +323,7 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
                 return (text === value) ? empty : notAllowed;
             },
             attDeriv: function () { return notAllowed; },
-            startTagCloseDeriv: function () { return this; },
-            valueMatch: function (context, text) {
-                return (text === value) ? empty : notAllowed;
-            }
+            startTagCloseDeriv: function () { return this; }
         };
     });
     createData = memoize1arg("data", function (type) {
@@ -327,8 +333,7 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
             dataType: type,
             textDeriv: function () { return empty; },
             attDeriv: function () { return notAllowed; },
-            startTagCloseDeriv: function () { return this; },
-            valueMatch: function (context, text) { return true; }
+            startTagCloseDeriv: function () { return this; }
         };
     });
     function createDataExcept() {
@@ -434,20 +439,24 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
         return p;
     };
     createNameClass = function createNameClass(pattern) {
-        var name, ns;
+        var name, ns, hash, i;
         if (pattern.name === "name") {
             name = pattern.text;
             ns = pattern.a.ns;
             return {
-                name: pattern.text,
-                ns: pattern.a.ns,
+                name: name,
+                ns: ns,
                 hash: "{" + ns + "}" + name,
                 contains: function (node) {
                     return node.namespaceURI === ns && node.localName === name;
                 }
             };
         } else if (pattern.name === "choice") {
+            for (i = 0; i < pattern.e.length; i += 1) {
+                 hash += "{" + pattern.e[i].ns + "}" + pattern.e[i].text + ",";
+            }
             return {
+                hash: hash,
                 contains: function (node) {
                     var i;
                     for (i = 0; i < pattern.e.length; i += 1) {
@@ -460,23 +469,31 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
                 }
             };
         }
+        return { hash: "anyName" };
     };
-    function makePattern(pattern, elements) {
+    function resolveElement(pattern, elements) {
+        var element, p, i, hash;
+        // create an empty object in the store to enable circular
+        // dependencies
+        hash = "element" + pattern.id.toString();
+        p = elements[pattern.id] = { hash: hash };
+        element = createElement(createNameClass(pattern.e[0]),
+            makePattern(pattern.e[1], elements), pattern.id);
+        // copy the properties of the new object into the predefined one
+        for (i in element) {
+            if (element.hasOwnProperty(i)) {
+                p[i] = element[i];
+            }
+        }
+        return p;
+    }
+    makePattern = function makePattern(pattern, elements) {
         var p, i;
         if (pattern.name === "elementref") {
             p = pattern.id || 0;
             pattern = elements[p];
             if (pattern.name !== undefined) {
-                // create an empty object in the store to enable circular dependencies
-                elements[p] = {};
-                pattern = makePattern(pattern, elements);
-                // copy the properties of the new object into the predefined one
-                for (i in pattern) {
-                    if (pattern.hasOwnProperty(i)) {
-                        elements[p][i] = pattern[i];
-                    }
-                }
-                pattern = elements[p];
+                return resolveElement(pattern, elements);
             }
             return pattern;
         }
@@ -493,7 +510,8 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
             case 'interleave':
                 p = makePattern(pattern.e[0], elements);
                 for (i = 1; i < pattern.e.length; i += 1) {
-                    p = createInterleave(p, makePattern(pattern.e[i], elements));
+                    p = createInterleave(p, makePattern(pattern.e[i],
+                            elements));
                 }
                 return p;
             case 'group':
@@ -501,21 +519,23 @@ if (!b.hash) {runtime.log("No hash for type " + b.type + " " + JSON.stringify(b)
                     makePattern(pattern.e[1], elements));
             case 'oneOrMore':
                 return createOneOrMore(makePattern(pattern.e[0], elements));
-            case 'element':
-                return createElement(createNameClass(pattern.e[0]),
-                    makePattern(pattern.e[1], elements), pattern.id || 0);
             case 'attribute':
                 return createAttribute(createNameClass(pattern.e[0]),
                     makePattern(pattern.e[1], elements));
             case 'value':
                 return createValue(pattern.text);
             case 'data':
-                return createData(pattern.a && pattern.a.type);
+                p = pattern.a && pattern.a.type;
+                if (p === undefined) {
+                    runtime.log(JSON.stringify(pattern));
+                    p = "";
+                }
+                return createData(p);
             case 'list':
                 return createList();
         }
         throw "No support for " + pattern.name;
-    }
+    };
 
 /*== */
 
