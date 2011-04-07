@@ -260,8 +260,9 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
                 }, p.startTagOpenDeriv(node));
             },
             attDeriv: function (context, attribute) {
+                var oneOrMore = this;
                 return createGroup(p.attDeriv(context, attribute),
-                    createChoice(p, empty));
+                    createChoice(oneOrMore, empty));
             },
             startTagCloseDeriv: function () {
                 return createOneOrMore(p.startTagCloseDeriv());
@@ -370,8 +371,8 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
             }
             a = attributes.item(position);
         }
-        a = attsDeriv(context, pattern.attDeriv(context, attributes.item(position)),
-            attributes, position + 1);
+        a = attsDeriv(context, pattern.attDeriv(context,
+                attributes.item(position)), attributes, position + 1);
         return a;
     }
     function childrenDeriv(context, pattern, walker) {
@@ -438,6 +439,20 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
 //runtime.log("> " + JSON.stringify(p,0,"    "));
         return p;
     };
+    function addNames(name, ns, pattern) {
+        if (pattern.e[0].a) {
+            name.push(pattern.e[0].text);
+            ns.push(pattern.e[0].a.ns);
+        } else {
+            addNames(name, ns, pattern.e[0]);
+        }
+        if (pattern.e[1].a) {
+            name.push(pattern.e[1].text);
+            ns.push(pattern.e[1].a.ns);
+        } else {
+            addNames(name, ns, pattern.e[1]);
+        }
+    }
     createNameClass = function createNameClass(pattern) {
         var name, ns, hash, i;
         if (pattern.name === "name") {
@@ -452,16 +467,20 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
                 }
             };
         } else if (pattern.name === "choice") {
-            for (i = 0; i < pattern.e.length; i += 1) {
-                 hash += "{" + pattern.e[i].ns + "}" + pattern.e[i].text + ",";
+            name = [];
+            ns = [];
+            addNames(name, ns, pattern);
+            hash = "";
+            for (i = 0; i < name.length; i += 1) {
+                 hash += "{" + ns[i] + "}" + name[i] + ",";
             }
             return {
                 hash: hash,
                 contains: function (node) {
                     var i;
-                    for (i = 0; i < pattern.e.length; i += 1) {
-                        if (pattern.e[0].text === node.localName &&
-                                pattern.e[0].a.ns === node.namespaceURI) {
+                    for (i = 0; i < name.length; i += 1) {
+                        if (name[i] === node.localName &&
+                                ns[i] === node.namespaceURI) {
                             return true;
                         }
                     }

@@ -5,7 +5,7 @@
   office:version="1.2">
   <office:body>
     <office:text>
-      <text:p><text:bibliography-mark text:bibliography-type="misc" text:custom5="informative"/></text:p>
+      <text:p><text:bibliography-mark text:bibliography-type="misc" text:year="F" text:url="h" text:custom5="i"/></text:p>
     </office:text>
   </office:body>
 </office:document-content>

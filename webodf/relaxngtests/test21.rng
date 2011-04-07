@@ -33,8 +33,9 @@
 				<zeroOrMore>
 					<attribute>
 						<choice>
-							<name>text:identifier</name>
+							<name>text:url</name>
 							<name>text:custom5</name>
+							<name>text:year</name>
 						</choice>
 						<data type="string"/>
 					</attribute>
