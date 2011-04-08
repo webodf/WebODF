@@ -76,11 +76,11 @@ dom.RelaxNG = function RelaxNG(url) {
         return (function () {
             var cache = {}, cachecount = 0;
             return function (a) {
-if (typeof a !== "string" && !a.hash) {runtime.log("No hash for a of type " + a.type + " at " + type + " " + JSON.stringify(a)); }
                 var ahash = a.hash || a.toString(),
                     v;
                 v = cache[ahash];
                 if (v !== undefined) {
+//runtime.log(type);
                     return v;
                 }
                 cache[ahash] = v = func(a);
@@ -94,8 +94,6 @@ if (typeof a !== "string" && !a.hash) {runtime.log("No hash for a of type " + a.
         return (function () {
             var cache = {}, cachecount = 0;
             return function (a, b) {
-if (!a.hash) {runtime.log("No hash for a of type " + a.type + " at " + type + " " + JSON.stringify(a)); }
-if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " " + JSON.stringify(b)); }
                 var v = fastfunc && fastfunc(a, b),
                     ahash, bhash, m;
                 if (v !== undefined) { return v; }
@@ -107,6 +105,7 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
                 } else {
                     v = m[bhash];
                     if (v !== undefined) {
+//runtime.log(type);
                         return v;
                     }
                 }
@@ -117,36 +116,66 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
             };
         }());
     }
+    function getUniqueLeaves(leaves, pattern) {
+        if (pattern.p1.type === "choice") {
+            getUniqueLeaves(leaves, pattern.p1);
+        } else {
+            leaves[pattern.p1.hash] = pattern.p1;
+        }
+        if (pattern.p2.type === "choice") {
+            getUniqueLeaves(leaves, pattern.p2);
+        } else {
+            leaves[pattern.p2.hash] = pattern.p2;
+        }
+    }
     createChoice = memoize2arg("choice", function (p1, p2) {
         if (p1 === notAllowed) { return p2; }
         if (p2 === notAllowed) { return p1; }
         if (p1 === p2) { return p1; }
     }, function (p1, p2) {
-        return {
-            type: "choice",
-            p1: p1,
-            p2: p2,
-            nullable: p1.nullable || p2.nullable,
-            textDeriv: function (context, text) {
-                return createChoice(p1.textDeriv(context, text),
-                    p2.textDeriv(context, text));
-            },
-            startTagOpenDeriv: function (node) {
-                return createChoice(p1.startTagOpenDeriv(node),
-                    p2.startTagOpenDeriv(node));
-            },
-            attDeriv: function (context, attribute) {
-                return createChoice(p1.attDeriv(context, attribute),
-                    p2.attDeriv(context, attribute));
-            },
-            startTagCloseDeriv: function () {
-                return createChoice(p1.startTagCloseDeriv(),
-                    p2.startTagCloseDeriv());
-            },
-            endTagDeriv: function () {
-                return createChoice(p1.endTagDeriv(), p2.endTagDeriv());
+        function makeChoice(p1, p2) {
+            return {
+                type: "choice",
+                p1: p1,
+                p2: p2,
+                nullable: p1.nullable || p2.nullable,
+                textDeriv: function (context, text) {
+                    return createChoice(p1.textDeriv(context, text),
+                        p2.textDeriv(context, text));
+                },
+                startTagOpenDeriv: function (node) {
+                    return createChoice(p1.startTagOpenDeriv(node),
+                        p2.startTagOpenDeriv(node));
+                },
+                attDeriv: function (context, attribute) {
+                    return createChoice(p1.attDeriv(context, attribute),
+                        p2.attDeriv(context, attribute));
+                },
+                startTagCloseDeriv: function () {
+                    return createChoice(p1.startTagCloseDeriv(),
+                        p2.startTagCloseDeriv());
+                },
+                endTagDeriv: function () {
+                    return createChoice(p1.endTagDeriv(), p2.endTagDeriv());
+                }
+            };
+        }
+        var leaves = {}, i;
+        getUniqueLeaves(leaves, {p1: p1, p2: p2});
+        p1 = undefined;
+        p2 = undefined;
+        for (i in leaves) {
+            if (leaves.hasOwnProperty(i)) {
+                if (p1 === undefined) {
+                    p1 = leaves[i];
+                } else if (p2 === undefined) {
+                    p2 = leaves[i];
+                } else {
+                    p2 = createChoice(p2, leaves[i]);
+                }
             }
-        };
+        }
+        return makeChoice(p1, p2);
     });
     createInterleave = memoize2arg("interleave", function (p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
@@ -898,10 +927,12 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
                 resolveDefines(elements[i], defines);
             }
             rootPattern = newMakePattern(start.e[0], elements);
+/*
             resolveElements(start, elements);
             for (i = 0; i < elements.length; i += 1) {
                 resolveElements(elements[i], elements);
             }
+*/
             //runtime.log(JSON.stringify(start, null, "  "));
             return null;
         }
@@ -1243,8 +1274,8 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
             return;
         }
         walker.currentNode = walker.root;
-        var errors = validatePattern(start.e[0], walker, walker.root);
-        callback(errors);
+        var errors;// = validatePattern(start.e[0], walker, walker.root);
+        //callback(errors);
 
         if (rootPattern) {
 //            runtime.log("new validation");
