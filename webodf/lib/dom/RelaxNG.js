@@ -15,13 +15,14 @@
  */
 dom.RelaxNG = function RelaxNG(url) {
     var rngns = "http://relaxng.org/ns/structure/1.0",
-        xmlns = "http://www.w3.org/2000/xmlns/",
+        xmlnsns = "http://www.w3.org/2000/xmlns/",
+        xmlns = "http://www.w3.org/XML/1998/namespace",
         loaded = false,
         errormessage,
         queue = [],
         start,
         validateNonEmptyPattern,
-        nsmap = {},
+        nsmap = { "http://www.w3.org/XML/1998/namespace": "xml" },
         depth = 0,
         p = "                                                                ",
         
@@ -364,7 +365,7 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
             position = 0;
         }
         var a = attributes.item(position);
-        while (a.namespaceURI === xmlns) { // always ok
+        while (a.namespaceURI === xmlnsns) { // always ok
             position += 1;
             if (position >= attributes.length) {
                 return pattern;
@@ -488,7 +489,10 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
                 }
             };
         }
-        return { hash: "anyName" };
+        return {
+            hash: "anyName",
+            contains: function () { return true; }
+        };
     };
     function resolveElement(pattern, elements) {
         var element, p, i, hash;
@@ -650,7 +654,7 @@ if (!b.hash) {runtime.log("No hash for b of type " + b.type + " at " + type + " 
                     } else {
                         a[att.localName] = att.value;
                     }
-                } else if (att.namespaceURI === xmlns) {
+                } else if (att.namespaceURI === xmlnsns) {
                     nsmap[att.value] = att.localName;
                 }
             }
