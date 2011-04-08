@@ -72,6 +72,17 @@ dom.RelaxNG = function RelaxNG(url) {
         childDeriv,
         rootPattern;
 
+    function memoize0arg(func) {
+        return (function () {
+            var cache;
+            return function () {
+                if (cache === undefined) {
+                    cache = func();
+                }
+                return cache;
+            };
+        }());
+    }
     function memoize1arg(type, func) {
         return (function () {
             var cache = {}, cachecount = 0;
@@ -85,6 +96,25 @@ dom.RelaxNG = function RelaxNG(url) {
                 cache[ahash] = v = func(a);
                 v.hash = type + cachecount.toString();
                 cachecount += 1;
+                return v;
+            };
+        }());
+    }
+    function memoizeNode(func) {
+        return (function () {
+            var cache = {};
+            return function (node) {
+                var v, m;
+                m = cache[node.localName];
+                if (m === undefined) {
+                    cache[node.localName] = m = {};
+                } else {
+                    v = m[node.namespaceURI];
+                    if (v !== undefined) {
+                        return v;
+                    }
+                }
+                m[node.namespaceURI] = v = func(node);
                 return v;
             };
         }());
@@ -172,21 +202,21 @@ dom.RelaxNG = function RelaxNG(url) {
                     return createChoice(p1.textDeriv(context, text),
                         p2.textDeriv(context, text));
                 },
-                startTagOpenDeriv: function (node) {
+                startTagOpenDeriv: memoizeNode(function (node) {
                     return createChoice(p1.startTagOpenDeriv(node),
                         p2.startTagOpenDeriv(node));
-                },
+                }),
                 attDeriv: function (context, attribute) {
                     return createChoice(p1.attDeriv(context, attribute),
                         p2.attDeriv(context, attribute));
                 },
-                startTagCloseDeriv: function () {
+                startTagCloseDeriv: memoize0arg(function () {
                     return createChoice(p1.startTagCloseDeriv(),
                         p2.startTagCloseDeriv());
-                },
-                endTagDeriv: function () {
+                }),
+                endTagDeriv: memoize0arg(function () {
                     return createChoice(p1.endTagDeriv(), p2.endTagDeriv());
-                }
+                })
             };
         }
         var leaves = {}, i;
@@ -222,22 +252,22 @@ dom.RelaxNG = function RelaxNG(url) {
                     createInterleave(p1, p2.textDeriv(context, text))
                 );
             },
-            startTagOpenDeriv: function (node) {
+            startTagOpenDeriv: memoizeNode(function (node) {
                 return createChoice(
                     applyAfter(function (p) { return createInterleave(p, p2); },
                                p1.startTagOpenDeriv(node)),
                     applyAfter(function (p) { return createInterleave(p1, p); },
                                p2.startTagOpenDeriv(node)));
-            },
+            }),
             attDeriv: function (context, attribute) {
                 return createChoice(
                     createInterleave(p1.attDeriv(context, attribute), p2),
                     createInterleave(p1, p2.attDeriv(context, attribute)));
             },
-            startTagCloseDeriv: function () {
+            startTagCloseDeriv: memoize0arg(function () {
                 return createInterleave(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
-            }
+            })
         };
     });
     createGroup = memoize2arg("group", function (p1, p2) {
@@ -270,10 +300,10 @@ dom.RelaxNG = function RelaxNG(url) {
                     createGroup(p1.attDeriv(context, attribute), p2),
                     createGroup(p1, p2.attDeriv(context, attribute)));
             },
-            startTagCloseDeriv: function () {
+            startTagCloseDeriv: memoize0arg(function () {
                 return createGroup(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
-            }
+            })
         };
     });
     createAfter = memoize2arg("after", function (p1, p2) {
@@ -287,19 +317,19 @@ dom.RelaxNG = function RelaxNG(url) {
             textDeriv: function (context, text) {
                 return createAfter(p1.textDeriv(context, text), p2);
             },
-            startTagOpenDeriv: function (node) {
+            startTagOpenDeriv: memoizeNode(function (node) {
                 return applyAfter(function (p) { return createAfter(p, p2); },
                     p1.startTagOpenDeriv(node));
-            },
+            }),
             attDeriv: function (context, attribute) {
                 return createAfter(p1.attDeriv(context, attribute), p2);
             },
-            startTagCloseDeriv: function () {
+            startTagCloseDeriv: memoize0arg(function () {
                 return createAfter(p1.startTagCloseDeriv(), p2);
-            },
-            endTagDeriv: function () {
+            }),
+            endTagDeriv: memoize0arg(function () {
                 return (p1.nullable) ? p2 : notAllowed;
-            }
+            })
         };
     });
     createOneOrMore = memoize1arg("oneormore", function (p) {
@@ -323,9 +353,9 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createGroup(p.attDeriv(context, attribute),
                     createChoice(oneOrMore, empty));
             },
-            startTagCloseDeriv: function () {
+            startTagCloseDeriv: memoize0arg(function () {
                 return createOneOrMore(p.startTagCloseDeriv());
-            }
+            })
         };
     });
     function createElement(nc, p) {
