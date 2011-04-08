@@ -114,6 +114,37 @@ dom.RelaxNG = function RelaxNG(url) {
             };
         }());
     }
+    // this memoize function can be used for functions where the order of two
+    // arguments is not important
+    function unorderedMemoize2arg(type, fastfunc, func) {
+        return (function () {
+            var cache = {}, cachecount = 0;
+            return function (a, b) {
+                var v = fastfunc && fastfunc(a, b),
+                    ahash, bhash, m;
+                if (v !== undefined) { return v; }
+                ahash = a.hash || a.toString();
+                bhash = b.hash || b.toString();
+                if (ahash < bhash) {
+                    m = ahash; ahash = bhash; bhash = m;
+                    m = a; a = b; b = m;
+                }
+                m = cache[ahash];
+                if (m === undefined) {
+                    cache[ahash] = m = {};
+                } else {
+                    v = m[bhash];
+                    if (v !== undefined) {
+                        return v;
+                    }
+                }
+                m[bhash] = v = func(a, b);
+                v.hash = type + cachecount.toString();
+                cachecount += 1;
+                return v;
+            };
+        }());
+    }
     function getUniqueLeaves(leaves, pattern) {
         if (pattern.p1.type === "choice") {
             getUniqueLeaves(leaves, pattern.p1);
@@ -175,7 +206,7 @@ dom.RelaxNG = function RelaxNG(url) {
         }
         return makeChoice(p1, p2);
     });
-    createInterleave = memoize2arg("interleave", function (p1, p2) {
+    createInterleave = unorderedMemoize2arg("interleave", function (p1, p2) {
         if (p1 === notAllowed || p2 === notAllowed) { return notAllowed; }
         if (p1 === empty) { return p2; }
         if (p2 === empty) { return p1; }
@@ -558,6 +589,9 @@ dom.RelaxNG = function RelaxNG(url) {
                 return createValue(pattern.text);
             case 'data':
                 p = pattern.a && pattern.a.type;
+                if (p === undefined) {
+                    p = "";
+                }
                 return createData(p);
             case 'list':
                 return createList();
