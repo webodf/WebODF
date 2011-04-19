@@ -1,4 +1,4 @@
-/*global odf*/
+/*global odf runtime*/
 /**
  * @constructor
  */
@@ -35,7 +35,8 @@ odf.Style2CSS = function Style2CSS() {
             'table-cell': 'table',
             'table-column': 'table',
             'table-row': 'table',
-            text: 'text'
+            text: 'text',
+            list: 'text'
         },
 
         familytagnames = {
@@ -67,7 +68,8 @@ odf.Style2CSS = function Style2CSS() {
                 'index-entry-span', 'index-entry-tab-stop', 'index-entry-text',
                 'index-title-template', 'linenumbering-configuration',
                 'list-level-style-number', 'list-level-style-bullet',
-                'outline-level-style', 'span']
+                'outline-level-style', 'span'],
+            list: ['list-item']
         },
 
         textPropertySimpleMapping = [
@@ -132,19 +134,24 @@ odf.Style2CSS = function Style2CSS() {
      */
     function getStyleMap(doc, stylesnode) {
         // put all style elements in a hash map by family and name
-        var stylemap = {}, iter, node, name, family;
+        var stylemap = {}, node, name, family, map;
         if (!stylesnode) {
             return stylemap;
         }
         node = stylesnode.firstChild;
         while (node) {
             if (node.namespaceURI === stylens && node.localName === 'style') {
-                name = node.getAttributeNS(stylens, 'name');
                 family = node.getAttributeNS(stylens, 'family');
-                if (!stylemap[family]) {
-                    stylemap[family] = {};
-                }
-                stylemap[family][name] = node;
+            } else if (node.namespaceURI === textns &&
+                    node.localName === 'list-style') {
+                family = "list";
+            }
+            name = family && node.getAttributeNS(stylens, 'name');
+            if (name) {
+               if (!stylemap[family]) {
+                   stylemap[family] = {};
+               }
+               stylemap[family][name] = node;
             }
             node = node.nextSibling;
         }
@@ -371,7 +378,7 @@ odf.Style2CSS = function Style2CSS() {
      * @param {!Element} node
      * @return {undefined}
      */
-    function addRule(sheet, family, name, node) {
+    function addStyleRule(sheet, family, name, node) {
         var selectors = getSelectors(family, name, node),
             selector = selectors.join(','),
             rule = '',
@@ -399,6 +406,112 @@ odf.Style2CSS = function Style2CSS() {
             sheet.insertRule(rule, sheet.cssRules.length);
         } catch (e) {
             throw e;
+        }
+    }
+    /**
+     * @param {!Element} node
+     * @return {!string}
+     */
+    function getNumberRule(node) {
+        var style = node.getAttributeNS(stylens, "num-format"),
+            suffix = node.getAttributeNS(stylens, "num-suffix"),
+            prefix = node.getAttributeNS(stylens, "num-prefix"),
+            rule = "",
+            stylemap = {'1': 'decimal', a: 'lower-latin', A: 'upper-latin',
+                i: 'lower-roman', I: 'upper-roman'},
+            content = "";
+        content = prefix || "";
+        if (style in stylemap) {
+            content += " counter(list, " + stylemap[style] + ")";
+        } else if (style) {
+            content += "'" + style + "';";
+        } else {
+            content += " ''";
+        }
+        if (suffix) {
+            content += " '" + suffix + "'";
+        }
+        rule = "content: " + content + ";";
+        return rule;
+    }
+    /**
+     * @param {!Element} node
+     * @return {!string}
+     */
+    function getImageRule(node) {
+        var rule = "content: none;";
+        return rule;
+    }
+    /**
+     * @param {!Element} node
+     * @return {!string}
+     */
+    function getBulletRule(node) {
+        var rule = "",
+            bulletChar = node.getAttributeNS(textns, "bullet-char");
+        return "content: '" + bulletChar + "';";
+    }
+    /**
+     * @param {!StyleSheet} sheet
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {undefined}
+     */
+    function addListStyleRule(sheet, name, node, itemrule) {
+        var selector = 'text|list[text|style-name="' + name +
+                '"]',
+            level = node.getAttributeNS(textns, "level"),
+            rule = "";
+        level = level && parseInt(level, 10);
+        while (level > 1) {
+            selector += " > text|list-item > text|list";
+            level -= 1;
+        }
+        selector += " > list-item:before";
+        rule = itemrule;
+        rule = selector + '{' + rule + '}';
+        try {
+            sheet.insertRule(rule, sheet.cssRules.length);
+        } catch (e) {
+            throw e;
+        }
+    }
+    /**
+     * @param {!StyleSheet} sheet
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {undefined}
+     */
+    function addListStyleRules(sheet, name, node) {
+        var n = node.firstChild, itemrule;
+        while (n) {
+            if (n.namespaceURI === textns) {
+                if (n.localName === "list-level-style-number") {
+                    itemrule = getNumberRule(n);
+                    addListStyleRule(sheet, name, n, itemrule);
+                } else if (n.localName === "list-level-style-image") {
+                    itemrule = getImageRule(n);
+                    addListStyleRule(sheet, name, n, itemrule);
+                } else if (n.localName === "list-level-style-bullet") {
+                    itemrule = getBulletRule(n);
+                    addListStyleRule(sheet, name, n, itemrule);
+                }
+            }
+            n = n.nextSibling;
+        }
+    }
+    /**
+     * @param {!StyleSheet} sheet
+     * @param {!string} family
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {undefined}
+     */
+    function addRule(sheet, family, name, node) {
+        if (family === "list") {
+            addListStyleRules(sheet, name, node);
+        } else {
+            addStyleRule(sheet, family, name, node);
         }
     }
     /**

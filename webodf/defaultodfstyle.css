@@ -137,12 +137,22 @@ draw|image {
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
 }
-text|list-item:before {
-    display: inline-block;
-    content: '•';
+text|list {
+    display: block;
+    padding-left: 1.5em;
+    counter-reset: list;
 }
 text|list-item {
     display: block;
+}
+text|list-item:before {
+    display: inline-block;
+    content: '•';
+    counter-increment: list;
+    width: 0.5em;
+    margin-left: -0.5em;
+    padding: 0px;
+    border: 0px;
 }
 text|list-item > *:first-child {
     display: inline-block;
