@@ -137,8 +137,15 @@ draw|image {
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
 }
+text|list-item:before {
+    display: inline-block;
+    content: '•';
+}
 text|list-item {
-    display: list-item;
+    display: block;
+}
+text|list-item > *:first-child {
+    display: inline-block;
 }
 text|a {
     color: blue;
