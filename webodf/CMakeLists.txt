@@ -93,7 +93,7 @@ add_custom_target(simplenodetest ALL
 add_custom_command(
         OUTPUT instrumented/index.html
         COMMAND ${JSCOVERAGE}
-        ARGS ${CMAKE_CURRENT_SOURCE_DIR}
+        ARGS --exclude=extjs --exclude=extjs/.git ${CMAKE_CURRENT_SOURCE_DIR}
              ${CMAKE_CURRENT_BINARY_DIR}/instrumented
         DEPENDS ${LIBJSFILES}
 )

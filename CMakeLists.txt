@@ -17,8 +17,8 @@ include (ExternalProject)
 # Closure Compiler
 ExternalProject_Add(
 	ClosureCompiler
-	URL "http://closure-compiler.googlecode.com/files/compiler-20110119.tar.gz"
-	URL_MD5 1e88d14026e63051df2aa3a89c9efcf3
+	URL "http://closure-compiler.googlecode.com/files/compiler-20110405.tar.gz"
+	URL_MD5 ca6f97574bbb6e66debf146f6abfc486
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
         INSTALL_COMMAND ""
@@ -50,8 +50,8 @@ set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 # Node.JS
 ExternalProject_Add(
 	NodeJS
-	URL "http://nodejs.org/dist/node-v0.4.5.tar.gz"
-	URL_MD5 7d7536aab7c6320f160b42c18c48bb30
+	URL "http://nodejs.org/dist/node-v0.4.6.tar.gz"
+	URL_MD5 adc911c886fbe0f283cf994403fd4e3c
 	INSTALL_COMMAND ""
 )
 set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/src/NodeJS-build/default/node)
@@ -61,6 +61,7 @@ ExternalProject_Add(
 	JSCoverage
 	URL "http://siliconforks.com/jscoverage/download/jscoverage-0.5.1.tar.bz2"
 	URL_MD5 a70d79a6759367fbcc0bcc18d6866ff3
+	PATCH_COMMAND patch -p0 < ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch
 	CONFIGURE_COMMAND "./configure"
 	BUILD_IN_SOURCE 1
 	INSTALL_COMMAND ""
