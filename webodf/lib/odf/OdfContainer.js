@@ -30,6 +30,7 @@ odf.OdfContainer = (function () {
             }
             node = node.nextSibling;
         }
+        return null;
     }
     /**
      * Return the position the node should get according to the ODF flat format.

@@ -483,18 +483,19 @@ odf.Style2CSS = function Style2CSS() {
      * @return {undefined}
      */
     function addListStyleRules(sheet, name, node) {
-        var n = node.firstChild, itemrule;
+        var n = node.firstChild, e, itemrule;
         while (n) {
             if (n.namespaceURI === textns) {
+                e = /**@type{!Element}*/(n);
                 if (n.localName === "list-level-style-number") {
-                    itemrule = getNumberRule(n);
-                    addListStyleRule(sheet, name, n, itemrule);
+                    itemrule = getNumberRule(e);
+                    addListStyleRule(sheet, name, e, itemrule);
                 } else if (n.localName === "list-level-style-image") {
-                    itemrule = getImageRule(n);
-                    addListStyleRule(sheet, name, n, itemrule);
+                    itemrule = getImageRule(e);
+                    addListStyleRule(sheet, name, e, itemrule);
                 } else if (n.localName === "list-level-style-bullet") {
-                    itemrule = getBulletRule(n);
-                    addListStyleRule(sheet, name, n, itemrule);
+                    itemrule = getBulletRule(e);
+                    addListStyleRule(sheet, name, e, itemrule);
                 }
             }
             n = n.nextSibling;

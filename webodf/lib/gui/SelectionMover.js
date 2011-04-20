@@ -160,4 +160,5 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             });
         }
     };
+    return this;
 };

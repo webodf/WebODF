@@ -662,7 +662,12 @@ function NodeJSRuntime() {
             });
         });
     };
-    this.readFileSync = fs.readFileSync;
+    this.readFileSync = function (path, encoding) {
+        if (!encoding) {
+            return "";
+        }
+        return fs.readFileSync(path, encoding);
+    };
     this.loadXML = loadXML;
     this.isFile = isFile;
     this.getFileSize = function (path, callback) {
@@ -680,7 +685,9 @@ function NodeJSRuntime() {
     this.log = function (msg) {
         process.stderr.write(msg + '\n');
     };
-    this.setTimeout = setTimeout;
+    this.setTimeout = function (f, msec) {
+        setTimeout(f, msec);
+    };
     this.libraryPaths = function () {
         return [__dirname];
     };
@@ -694,7 +701,7 @@ function NodeJSRuntime() {
         return "NodeJSRuntime";
     };
     this.getDOMImplementation = function () {
-        return;
+        return null;
     };
     this.exit = process.exit;
     this.getWindow = function () {
@@ -836,7 +843,12 @@ function RhinoRuntime() {
             callback("Cannot read " + path);
         }
     };
-    this.readFileSync = readFile;
+    this.readFileSync = function (path, encoding) {
+        if (!encoding) {
+            return "";
+        }
+        return readFile(path, encoding);
+    };
     this.isFile = isFile; 
     this.getFileSize = function (path, callback) {
         if (currentDirectory) {
