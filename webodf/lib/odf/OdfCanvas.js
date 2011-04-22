@@ -218,6 +218,9 @@ odf.OdfCanvas = (function () {
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(container, odfnode);
+                if (self.onstatereadychange) {
+                    self.onstatereadychange();
+                }
             }
         
             if (odfcontainer.state === odf.OdfContainer.DONE) {
