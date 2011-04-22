@@ -146,7 +146,8 @@ odf.Style2CSS = function Style2CSS() {
                     node.localName === 'list-style') {
                 family = "list";
             }
-            name = family && node.getAttributeNS(stylens, 'name');
+            name = family && node.getAttributeNS &&
+                    node.getAttributeNS(stylens, 'name');
             if (name) {
                if (!stylemap[family]) {
                    stylemap[family] = {};
