@@ -54,12 +54,9 @@ function initCanvas(odfelement) {
 function save() {
     odfcanvas.odfContainer().save(function (err) {
         if (err) {
-            alert(err);
+            runtime.log(err);
         }
     });
-}
-function reload() {
-    initCanvas();
 }
 Ext.onReady(function () {
     var toolbar, canvas, viewport;

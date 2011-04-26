@@ -29,7 +29,7 @@ if (CMAKE_Java_RUNTIME)
   foreach(JSFILE ${LIBJSFILES} ${TESTJSFILES})
     set(SHARED_CLOSURE_ARGS ${SHARED_CLOSURE_ARGS}
         --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
-  endforeach(JSFILE ${LIBJSFILES})
+  endforeach(JSFILE ${LIBJSFILES} ${TESTJSFILES})
 
   add_custom_command(
     OUTPUT simplecompiled.js
@@ -53,7 +53,36 @@ if (CMAKE_Java_RUNTIME)
     DEPENDS ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
   )
 
-  add_custom_target(syntaxcheck ALL DEPENDS simplecompiled.js compiled.js)
+  add_custom_command(
+    OUTPUT odfedit.js
+    COMMAND ${CMAKE_Java_RUNTIME}
+    ARGS -jar ${CLOSURE_JAR}
+         --define='IS_COMPILED_CODE=true'
+         ${SHARED_CLOSURE_ARGS}
+         --js ${CMAKE_CURRENT_SOURCE_DIR}/odfedit.js
+         --compilation_level ADVANCED_OPTIMIZATIONS
+         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
+         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
+         --js_output_file odfedit.js
+    DEPENDS ${LIBJSFILES} ${TESTJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js odfedit.js
+  )
+
+  add_custom_command(
+    OUTPUT gui.js
+    COMMAND ${CMAKE_Java_RUNTIME}
+    ARGS -jar ${CLOSURE_JAR}
+         --define='IS_COMPILED_CODE=true'
+         ${SHARED_CLOSURE_ARGS}
+         --js ${CMAKE_CURRENT_SOURCE_DIR}/filelister.js
+         --js ${CMAKE_CURRENT_SOURCE_DIR}/gui.js
+         --compilation_level ADVANCED_OPTIMIZATIONS
+         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
+         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
+         --js_output_file gui.js
+    DEPENDS ${LIBJSFILES} ${TESTJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js filelister.js gui.js
+  )
+
+  add_custom_target(syntaxcheck ALL DEPENDS simplecompiled.js compiled.js odfedit.js gui.js)
 
   add_custom_target(rhinotest
   	COMMAND ${CMAKE_Java_RUNTIME} -jar ${RHINO}

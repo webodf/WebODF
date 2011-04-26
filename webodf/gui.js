@@ -3,6 +3,10 @@ runtime.loadClass("core.Zip");
 runtime.loadClass("core.Base64");
 Ext.BLANK_IMAGE_URL = "extjs/resources/images/default/s.gif";
 
+/**
+ * @param {Ext.data.Node} node
+ * @return {undefined}
+ */
 function addThumbnail(node) {
     var url = node.id,
     zip = new core.Zip(url, function (err, zipobject) {
@@ -34,6 +38,12 @@ function addThumbnail(node) {
     });
 }
 
+/**
+ * @param {!string} url
+ * @param {!Ext.TabPanel} panel
+ * @param {!string} title
+ * @return {undefined}
+ */
 function loadODF(url, panel, title) {
     var tab = panel.find('url', url),
         t,
@@ -71,7 +81,12 @@ Ext.onReady(function () {
 
     Ext.QuickTips.init();
 
-    function editToggle(a, pressed) {
+    /**
+     * @param {!Ext.Button} button
+     * @param {!boolean} pressed
+     * @return {undefined}
+     */
+    function editToggle(button, pressed) {
         var tab = tabpanel.getActiveTab();
         if (!tab) {
             return;
@@ -79,7 +94,13 @@ Ext.onReady(function () {
         tab.el.dom.contentDocument.body.contentEditable = pressed;
     }
 
-    function setZoom(a, zoomlevel, b) {
+    /**
+     * @param {!Object} slider
+     * @param {!number} zoomlevel
+     * @param {!Object} thumb
+     * @return {undefined}
+     */
+    function setZoom(slider, zoomlevel, thumb) {
         var tab = tabpanel.getActiveTab(),
             body;
         if (!tab) {
@@ -91,6 +112,10 @@ Ext.onReady(function () {
         body.style.MozTransform = 'scale(' + zoomlevel + ')';
     }
 
+    /**
+     * @param {Ext.data.Node} node
+     * @return {undefined}
+     */
     function loadThumbnails(node) {
         var n, i;
         for (i = 0; i < node.childNodes.length; i += 1) {
@@ -104,6 +129,11 @@ Ext.onReady(function () {
         }
     }
 
+    /**
+     * @param {!Ext.data.Node} root
+     * @param {!string} uri
+     * @return {!Ext.data.Node}
+     */
     function getParentNode(root, uri) {
         var parts = uri.split('/'),
             node = root,
@@ -133,6 +163,11 @@ Ext.onReady(function () {
         return node;
     }
 
+    /**
+     * @param {!Array.<!string>} directories
+     * @param {!Array.<!string>} files
+     * @return {undefined}
+     */
     function listFilesCallback(directories, files) {
         var root = tree.getRootNode(),
             i,
@@ -162,6 +197,9 @@ Ext.onReady(function () {
         }
     }
 
+    /**
+     * @return {undefined}
+     */
     function listFilesDoneCallback() {
     }
 
