@@ -39,13 +39,22 @@ Ext.tree.TreeNodeUI = function (settings) {};
  * @constructor
  */
 Ext.tree.TreePanel = function (settings) {};
+/**
+ * @return {!Ext.data.Node}
+ */
 Ext.tree.TreePanel.prototype.getRootNode = function () {};
 /**
  * @constructor
  */
 Ext.BoxComponent = function (settings) {};
+/**
+ * @return {!Ext.Element}
+ */
 Ext.BoxComponent.prototype.getEl = function () {};
-Ext.BoxComponent.prototype.el = {};
+/**
+ * @type {!Ext.Element}
+ */
+Ext.BoxComponent.prototype.el;
 /**
  * @constructor
  */
@@ -54,8 +63,14 @@ Ext.Button = function (settings) {};
  * @constructor
  */
 Ext.Element = function (settings) {};
-Ext.Element.prototype.dom = {};
+/**
+ * @type {!Element}
+ */
+Ext.Element.prototype.dom;
 Ext.QuickTips = {};
+/**
+ * @return {undefined}
+ */
 Ext.QuickTips.init = function () {};
 /**
  * @constructor
@@ -76,7 +91,14 @@ Ext.TabPanel.prototype.add = function (component) {};
  * @return {!Array}
  */
 Ext.TabPanel.prototype.find = function (prop, value) {};
+/**
+ * @return {!Ext.BoxComponent}
+ */
 Ext.TabPanel.prototype.getActiveTab = function () {};
+/**
+ * @param {!Ext.BoxComponent} tab
+ * @return {undefined}
+ */
 Ext.TabPanel.prototype.setActiveTab = function (tab) {};
 /**
  * @constructor
