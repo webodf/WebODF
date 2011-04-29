@@ -1,5 +1,6 @@
 /*global runtime odf*/
 runtime.loadClass("odf.OdfContainer");
+runtime.loadClass("odf.Formatting");
 /**
  * This class manages a loaded ODF document that is shown in an element.
  * It takes care of giving visual feedback on loading, ensures that the
@@ -8,6 +9,125 @@ runtime.loadClass("odf.OdfContainer");
  * @param {!Element} element Put and ODF Canvas inside this element.
  **/
 odf.OdfCanvas = (function () {
+    function listenEvent(eventTarget, eventType, eventHandler) {
+        if (eventTarget.addEventListener) {
+            eventTarget.addEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.attachEvent) {
+            eventType = "on" + eventType;
+            eventTarget.attachEvent(eventType, eventHandler);
+        } else {
+            eventTarget["on" + eventType] = eventHandler;
+        }
+    }
+
+    /**
+     * Class that listens to events and sends a signal if the selection changes.
+     * @constructor
+     * @param {!Element} element
+     */
+    function SelectionWatcher(element) {
+        var selection = [], count = 0;
+        /**
+         * @param {!Element} ancestor
+         * @param {Node} descendant
+         * @return {!boolean}
+         */
+        function isAncestorOf(ancestor, descendant) {
+            while (descendant) {
+                if (descendant === ancestor) {
+                    return true;
+                }
+                descendant = descendant.parentNode;
+            }
+            return false;
+        }
+        /**
+         * @param {!Element} element
+         * @param {!Range} range
+         * @return {!boolean}
+         */
+        function fallsWithin(element, range) {
+            return isAncestorOf(element, range.startContainer) &&
+                isAncestorOf(element, range.endContainer);
+        }
+        /**
+         * @return {!Array.<!Range>}
+         */
+        function getCurrentSelection() {
+            var s = [], selection = runtime.getWindow().getSelection(), i, r;
+            for (i = 0; i < selection.rangeCount; i += 1) {
+                r = selection.getRangeAt(i);
+                // check if the nodes in the range fall completely within the
+                // element
+                if (r !== null && fallsWithin(element, r)) {
+                    s.push(r);
+                }
+            }
+            return s;
+        }
+        /**
+         * @param {Range} rangeA
+         * @param {Range} rangeB
+         * @return {!boolean}
+         */
+        function rangesNotEqual(rangeA, rangeB) {
+            if (rangeA === rangeB) {
+                return false;
+            }
+            if (rangeA === null || rangeB === null) {
+                return true;
+            }
+            return rangeA.startContainer !== rangeB.startContainer ||
+                   rangeA.startOffset !== rangeB.startOffset ||
+                   rangeA.endContainer !== rangeB.endContainer ||
+                   rangeA.endOffset !== rangeB.endOffset; 
+        }
+        /**
+         * @return {undefined}
+         */
+        function emitNewSelection() {
+            count += 1;
+            runtime.log("selection changed " + count);
+        }
+        /**
+         * @param {!Array.<!Range>} selection
+         * @return {!Array.<!Range>}
+         */
+        function copySelection(selection) {
+            var s = new Array(selection.length), i, oldr, r,
+                doc = element.ownerDocument;
+            for (i = 0; i < selection.length; i += 1) {
+                oldr = selection[i];
+                r = doc.createRange();
+                r.setStart(oldr.startContainer, oldr.startOffset);
+                r.setEnd(oldr.endContainer, oldr.endOffset);
+                s[i] = r;
+            }
+            return s;
+        }
+        /**
+         * @return {undefined}
+         */
+        function checkSelection() {
+            var s = getCurrentSelection(), i;
+            if (s.length === selection.length) {
+                for (i = 0; i < s.length; i += 1) {
+                    if (rangesNotEqual(s[i], selection[i])) {
+                        break;
+                    }
+                }
+                if (i === s.length) {
+                    return; // no change
+                }
+            }
+            selection = s;
+            selection = copySelection(s);
+            emitNewSelection();
+        }
+        listenEvent(element, "mouseup", checkSelection);
+        listenEvent(element, "keyup", checkSelection);
+        listenEvent(element, "keydown", checkSelection);
+    }
     var namespaces = (new odf.Style2CSS()).namespaces,
         drawns  = namespaces.draw,
         fons    = namespaces.fo,
@@ -181,7 +301,9 @@ odf.OdfCanvas = (function () {
     odf.OdfCanvas = function OdfCanvas(element) {
         var self = this,
             document = element.ownerDocument,
-            odfcontainer,
+            /**@type{odf.OdfContainer}*/ odfcontainer,
+            /**@type{odf.Formatting}*/ formatting,
+            selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
             stylesxmlcss = addStyleSheet(document),
             positioncss = addStyleSheet(document);
@@ -244,6 +366,7 @@ odf.OdfCanvas = (function () {
             element.innerHTML = 'loading ' + url;
             // open the odf container
             odfcontainer = new odf.OdfContainer(url);
+            formatting = new odf.Formatting(odfcontainer);
             odfcontainer.onstatereadychange = refreshOdf;
         };
 
@@ -259,17 +382,6 @@ odf.OdfCanvas = (function () {
             stopEditing();
             odfcontainer.save(callback);
         };
-
-        function listenEvent(eventTarget, eventType, eventHandler) {
-            if (eventTarget.addEventListener) {
-                eventTarget.addEventListener(eventType, eventHandler, false);
-            } else if (eventTarget.attachEvent) {
-                eventType = "on" + eventType;
-                eventTarget.attachEvent(eventType, eventHandler);
-            } else {
-                eventTarget["on" + eventType] = eventHandler;
-            }
-        }
 
         function cancelPropagation(event) {
             if (event.stopPropagation) {

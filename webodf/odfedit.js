@@ -155,7 +155,8 @@ Ext.ODFEditor = Ext.extend(Ext.BoxComponent, {
 
 var ODFEditor = Ext.extend(Ext.Panel, {
     initComponent: function () {
-        var me = this;
+        var me = this,
+            statusMessage = new Ext.Toolbar.TextItem('');
         function buttonHandler(button, event) {
         }
         me.defaults = {
@@ -182,6 +183,8 @@ var ODFEditor = Ext.extend(Ext.Panel, {
                 icon: 'extjs/examples/shared/icons/save.gif',
                 handler: buttonHandler,
                 cls: 'x-btn-icon'
+            }, {
+                xtype: 'tbseparator'
             }, {
                 tag: 'select',
                 //html: this.createFontOptions()
@@ -233,8 +236,18 @@ var ODFEditor = Ext.extend(Ext.Panel, {
                     iconCls: 'x-edit-insertunorderedlist',
                     cls: 'x-btn-icon'
                 }]
-            }]
+            }, {
+                xtype: 'tbfill'
+            },
+            statusMessage 
+            ]
         };
+/*
+        me.bbar = {
+            xtype: 'toolbar',
+            items: [ {xtype: "tbfill" }, statusMessage ]
+        };
+*/
         ODFEditor.superclass.initComponent.call(this);
     }
 });

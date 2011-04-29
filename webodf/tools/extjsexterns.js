@@ -121,5 +121,13 @@ Ext.TabPanel.prototype.setActiveTab = function (tab) {};
 /**
  * @constructor
  */
+Ext.Toolbar = function (settings) {};
+/**
+ * @constructor
+ */
+Ext.Toolbar.TextItem = function (text) {};
+/**
+ * @constructor
+ */
 Ext.Viewport = function (settings) {};
 Ext.onReady = function (callback) {};
