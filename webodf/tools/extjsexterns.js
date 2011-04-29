@@ -30,6 +30,11 @@ Ext.data.Node.prototype.findChild = function (attribute, value, deep) {};
  * @type {!Object}
  */
 Ext.data.Node.prototype.attributes = {};
+/**
+ * @param {!string} id
+ * @return {Ext.Component}
+ */
+Ext.getCmp = function (id) {};
 Ext.tree = {};
 /**
  * @constructor
@@ -45,6 +50,7 @@ Ext.tree.TreePanel = function (settings) {};
 Ext.tree.TreePanel.prototype.getRootNode = function () {};
 /**
  * @constructor
+ * @extends {Ext.Component}
  */
 Ext.BoxComponent = function (settings) {};
 /**
@@ -52,17 +58,29 @@ Ext.BoxComponent = function (settings) {};
  */
 Ext.BoxComponent.prototype.getEl = function () {};
 /**
- * @type {!Ext.Element}
- */
-Ext.BoxComponent.prototype.el;
-/**
  * @constructor
  */
 Ext.Button = function (settings) {};
 /**
  * @constructor
  */
+Ext.Component = function (settings) {};
+/**
+ * @type {Object}
+ */
+Ext.Component.prototype.superclass = {};
+/**
+ * @type {!Ext.Element}
+ */
+Ext.Component.prototype.el;
+/**
+ * @constructor
+ */
 Ext.Element = function (settings) {};
+/**
+ * @constructor
+ */
+Ext.Panel = function (settings) {};
 /**
  * @type {!Element}
  */

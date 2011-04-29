@@ -1,4 +1,7 @@
 /*global runtime document odf window Ext*/
+/**
+ * @type {odf.OdfCanvas}
+ */
 var odfcanvas;
 
 /**
@@ -155,11 +158,11 @@ var ODFEditor = Ext.extend(Ext.Panel, {
         var me = this;
         function buttonHandler(button, event) {
         }
-        this.defaults = {
+        me.defaults = {
         };
-        this.initialConfig = Ext.apply({
-        }, this.initialConfig);
-        this.items = [{
+        me.initialConfig = Ext.apply({
+        }, me.initialConfig);
+        me.items = [{
             xtype: 'box',
             id: 'canvas',
             autoEl: {
@@ -172,7 +175,7 @@ var ODFEditor = Ext.extend(Ext.Panel, {
             autoScroll: true,
             scroll: true
         }];
-        this.tbar = {
+        me.tbar = {
             xtype: 'toolbar',
             items: [{
                 xtype: 'button',

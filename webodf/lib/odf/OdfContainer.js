@@ -7,6 +7,8 @@ runtime.loadClass("odf.Style2CSS");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
+ * @constructor
+ * @param {!string} url
  **/
 odf.OdfContainer = (function () {
     var styleInfo = new odf.StyleInfo(),
@@ -148,7 +150,7 @@ odf.OdfContainer = (function () {
     /**
      * @constructor
      * @param {!string} name
-     * @param {!OdfContainer} container
+     * @param {!odf.OdfContainer} container
      * @param {!core.Zip} zip
      */
     function OdfPart(name, container, zip) {
@@ -218,7 +220,7 @@ odf.OdfContainer = (function () {
     };
     /**
      * @constructor
-     * @param {!OdfContainer} odfcontainer
+     * @param {!odf.OdfContainer} odfcontainer
      */
     function OdfPartList(odfcontainer) {
         var self = this;
@@ -231,7 +233,7 @@ odf.OdfContainer = (function () {
      * @constructor
      * @param {!string} url
      */
-    function OdfContainer(url) {
+    odf.OdfContainer = function OdfContainer(url) {
         var self = this,
             zip = null;
 
@@ -498,8 +500,8 @@ odf.OdfContainer = (function () {
                 /**@type{!string}*/ s = documentElement("document-content", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.body);
-            // Until there is code to  determine if a font is referenced only from
-            // all font declaratios will be stored in styles.xml
+            // Until there is code to  determine if a font is referenced only
+            // from all font declaratios will be stored in styles.xml
             s += serializer.writeToString(self.rootElement.automaticStyles, nsmap);
             s += serializer.writeToString(self.rootElement.body, nsmap);
             s += "</office:document-content>";
@@ -568,19 +570,19 @@ odf.OdfContainer = (function () {
                 loadComponents();
             }
         });
-    }
-    OdfContainer.EMPTY = 0;
-    OdfContainer.LOADING = 1;
-    OdfContainer.DONE = 2;
-    OdfContainer.INVALID = 3;
-    OdfContainer.SAVING = 4;
-    OdfContainer.MODIFIED = 5;
+    };
+    odf.OdfContainer.EMPTY = 0;
+    odf.OdfContainer.LOADING = 1;
+    odf.OdfContainer.DONE = 2;
+    odf.OdfContainer.INVALID = 3;
+    odf.OdfContainer.SAVING = 4;
+    odf.OdfContainer.MODIFIED = 5;
     /**
      * @param {!string} url
-     * @return {!OdfContainer}
+     * @return {!odf.OdfContainer}
      */
-    OdfContainer.getContainer = function (url) {
-        return new OdfContainer(url);
+    odf.OdfContainer.getContainer = function (url) {
+        return new odf.OdfContainer(url);
     };
-    return OdfContainer;
+    return odf.OdfContainer;
 }());

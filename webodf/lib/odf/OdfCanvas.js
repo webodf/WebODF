@@ -4,6 +4,8 @@ runtime.loadClass("odf.OdfContainer");
  * This class manages a loaded ODF document that is shown in an element.
  * It takes care of giving visual feedback on loading, ensures that the
  * stylesheets are loaded.
+ * @constructor
+ * @param {!Element} element Put and ODF Canvas inside this element.
  **/
 odf.OdfCanvas = (function () {
     var namespaces = (new odf.Style2CSS()).namespaces,
@@ -176,7 +178,7 @@ odf.OdfCanvas = (function () {
      * @constructor
      * @param {!Element} element Put and ODF Canvas inside this element.
      */
-    function OdfCanvas(element) {
+    odf.OdfCanvas = function OdfCanvas(element) {
         var self = this,
             document = element.ownerDocument,
             odfcontainer,
@@ -330,6 +332,6 @@ odf.OdfCanvas = (function () {
         }
 
         listenEvent(element, "click", processClick);
-    }
-    return OdfCanvas;
+    };
+    return odf.OdfCanvas;
 }());
