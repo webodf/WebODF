@@ -1,37 +1,60 @@
 /*global odf runtime*/
 /**
  * @constructor
- * @param {!odf.OdfContainer} odfContainer 
  */
-odf.Formatting = function Formatting(odfContainer) {
+odf.Formatting = function Formatting() {
+    var /**@type{odf.OdfContainer}*/ odfContainer;
 
     /**
-     * Return the current selection as an array of ranges.
-     * @return {!Array.<Range>}
+     * @param {!Element} element
+     * @return {Element}
      */
-    function getSelection() {
-        return [];
+    function getParentStyle(element) {
+        var e = element.firstChild;
+        if (e.nodeType === 1) { // Element
+            return e;
+        }
+        return null;
     }
 
     /**
+     * @param {!odf.OdfContainer} odfcontainer
+     * @return {undefined}
+     */
+    this.setOdfContainer = function (odfcontainer) {
+        odfContainer = odfcontainer;
+    };
+    /**
      * Return true if all parts of the selection are bold.
+     * @param {!Array.<!Range>} selection
      * @return {!boolean}
      */
-    this.isBold = function () {
+    this.isCompletelyBold = function (selection) {
         return false;
     };
     /**
+     * Get the alignment or undefined if no uniform alignment is found
+     * @param {!Array.<!Range>} selection
+     * @return {!string|undefined}
+     */
+    this.getAlignment = function (selection) {
+        var styles = this.getParagraphStyles(selection), i, l = styles.length;
+        return undefined;
+    };
+    /**
      * Get the list of paragraph styles that covered by the current selection.
+     * @param {!Array.<!Range>} selection
      * @return {!Array.<Element>}
      */
-    this.getParagraphStyles = function () {
+    this.getParagraphStyles = function (selection) {
         return [];
     };
     /**
      * Get the list of text styles that are covered by the current selection.
+     * @param {!Array.<!Range>} selection
      * @return {!Array.<Element>}
      */
-    this.getTextStyles = function () {
+    this.getTextStyles = function (selection) {
         return [];
     };
 };

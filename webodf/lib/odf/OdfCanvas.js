@@ -26,7 +26,7 @@ odf.OdfCanvas = (function () {
      * @param {!Element} element
      */
     function SelectionWatcher(element) {
-        var selection = [], count = 0;
+        var selection = [], count = 0, listeners = [];
         /**
          * @param {!Element} ancestor
          * @param {Node} descendant
@@ -86,8 +86,10 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         function emitNewSelection() {
-            count += 1;
-            runtime.log("selection changed " + count);
+            var i, l = listeners.length;
+            for (i = 0; i < l; i += 1) {
+                listeners[i](element, selection);
+            }
         }
         /**
          * @param {!Array.<!Range>} selection
@@ -124,6 +126,20 @@ odf.OdfCanvas = (function () {
             selection = copySelection(s);
             emitNewSelection();
         }
+        /**
+         * @param {!string} eventName
+         * @param {!function(!Element, !Array.<!Range>)} handler
+         * @return {undefined}
+         */
+        this.addListener = function (eventName, handler) {
+            var i, l = listeners.length;
+            for (i = 0; i < l; i += 1) {
+                if (listeners[i] === handler) {
+                    return;
+                }
+            }
+            listeners.push(handler);
+        };
         listenEvent(element, "mouseup", checkSelection);
         listenEvent(element, "keyup", checkSelection);
         listenEvent(element, "keydown", checkSelection);
@@ -302,7 +318,7 @@ odf.OdfCanvas = (function () {
         var self = this,
             document = element.ownerDocument,
             /**@type{odf.OdfContainer}*/ odfcontainer,
-            /**@type{odf.Formatting}*/ formatting,
+            /**@type{!odf.Formatting}*/ formatting = new odf.Formatting(),
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
             stylesxmlcss = addStyleSheet(document),
@@ -366,7 +382,7 @@ odf.OdfCanvas = (function () {
             element.innerHTML = 'loading ' + url;
             // open the odf container
             odfcontainer = new odf.OdfContainer(url);
-            formatting = new odf.Formatting(odfcontainer);
+            formatting.setOdfContainer(odfcontainer);
             odfcontainer.onstatereadychange = refreshOdf;
         };
 
@@ -442,6 +458,23 @@ odf.OdfCanvas = (function () {
             }
             cancelEvent(evt);
         }
+
+        /**
+         * @param {!string} eventName
+         * @param {!function(*)} handler
+         * @return {undefined}
+         */
+        this.addListener = function (eventName, handler) {
+            if (eventName === "selectionchange") {
+                selectionWatcher.addListener(eventName, handler);
+            }
+        };
+        /**
+         * @return {!odf.Formatting}
+         */
+        this.getFormatting = function () {
+            return formatting;
+        };
 
         listenEvent(element, "click", processClick);
     };
