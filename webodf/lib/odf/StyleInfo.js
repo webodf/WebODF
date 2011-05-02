@@ -270,6 +270,24 @@ odf.StyleInfo = function StyleInfo() {
 
     /**
      * @param {!Element} element
+     * @return {string|null}
+     */
+    function getStyleName(element) {
+        var elname = elements[element.localName],
+            elns = elname && elname[element.namespaceURI],
+            length = elns ? elns.length : 0,
+            i, attr;
+        for (i = 0; i < length; i += 1) {
+            attr = element.getAttributeNS(elns[i].ns, elns[i].localname);
+            if (attr) { // a style has been found!
+                return attr;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param {!Element} element
      * @param {!Object.<string,Object.<string,number>>} keys
      * @return {undefined}
      */
@@ -312,7 +330,8 @@ odf.StyleInfo = function StyleInfo() {
                     item = list[i];
                     map = elements[item.en] = elements[item.en] || {};
                     array = map[item.ens] = map[item.ens] || [];
-                    array.push({ns: item.ans, localname: item.a, keygroup: keyname});
+                    array.push(
+                        {ns: item.ans, localname: item.a, keygroup: keyname});
                 }
             }
         }
@@ -348,5 +367,8 @@ odf.StyleInfo = function StyleInfo() {
 
         getUsedStylesForAutomatic(element, usedKeys);
     };
+
+    this.getStyleName = getStyleName;
+
     elements = inverse(elementstyles);
 };
