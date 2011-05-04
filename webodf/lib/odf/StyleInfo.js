@@ -294,9 +294,11 @@ odf.StyleInfo = function StyleInfo() {
             i, attr;
         for (i = 0; i < length; i += 1) {
             attr = element.getAttributeNS(elns[i].ns, elns[i].localname);
+/*
             if (attr) { // a style has been found!
                 return attr;
             }
+*/
         }
         return null;
     }
