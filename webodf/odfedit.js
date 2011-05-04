@@ -63,8 +63,9 @@ function initCanvas(odfelement) {
     odfcanvas.load(location);
     odfcanvas.addListener("selectionchange", function (element, selection) {
         var formatting = odfcanvas.getFormatting(),
-            completelyBold = formatting.isCompletelyBold(selection);
-        runtime.log("selection changed " + completelyBold);
+            completelyBold = formatting.isCompletelyBold(selection),
+            alignment = formatting.getAlignment(selection);
+        runtime.log("selection changed " + completelyBold + " " + alignment);
     });
 }
 /**

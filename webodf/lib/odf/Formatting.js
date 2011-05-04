@@ -14,9 +14,29 @@ odf.Formatting = function Formatting() {
      */
     function RangeElementIterator(range) {
         /**
+         * @param {Node} parent
+         * @param {!number} n
+         * @return {Node}
+         */
+        function getNthChild(parent, n) {
+            var c = parent && parent.firstChild;
+            while (c && n) {
+                c = c.nextSibling;
+                n -= 1;
+            }
+            return c;
+        }
+        var start = getNthChild(range.startContainer, range.startOffset),
+            end = getNthChild(range.endContainer, range.endOffset),
+            current = start;
+        /**
          * @return {Element|null}
          */
         this.next = function () {
+            var c = current;
+            if (c === null) {
+                return c;
+            }
             return null;
         };
     }
@@ -38,12 +58,10 @@ odf.Formatting = function Formatting() {
      * @return {!Array.<!Element>}
      */
     function getParagraphStyles(range) {
-        var iter = new RangeElementIterator(range), e, styles = [],
-            styleRef;
+        var iter = new RangeElementIterator(range), e, styles = [];
         e = iter.next();
         while (e) {
-            styleRef = styleInfo.getStyleRef(e);
-            if (styleRef) {
+            if (styleInfo.canElementHaveStyle("paragraph", e)) {
                 styles.push(e);
             }
         }

@@ -269,10 +269,25 @@ odf.StyleInfo = function StyleInfo() {
         elements;
 
     /**
+     * Return if a particular element can have a style for a particular family.
+     * @param {!string} family
      * @param {!Element} element
-     * @return {string|null}
+     * @return {!boolean}
      */
-    function getStyleName(element) {
+    function canElementHaveStyle(family, element) {
+        var elname = elements[element.localName],
+            elns = elname && elname[element.namespaceURI],
+            length = elns ? elns.length : 0,
+            i;
+        return elns && elns.length > 0;
+    }
+
+    /**
+     * @param {!string} family
+     * @param {!Element} element
+     * @return {{name:string,family:string}|null}
+     */
+    function getStyleRef(family, element) {
         var elname = elements[element.localName],
             elns = elname && elname[element.namespaceURI],
             length = elns ? elns.length : 0,
@@ -368,7 +383,7 @@ odf.StyleInfo = function StyleInfo() {
         getUsedStylesForAutomatic(element, usedKeys);
     };
 
-    this.getStyleName = getStyleName;
+    this.canElementHaveStyle = canElementHaveStyle;
 
     elements = inverse(elementstyles);
 };
