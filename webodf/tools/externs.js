@@ -242,7 +242,13 @@ Packages.org.xml.sax.InputSource = function (reader) {};
  */
 HTMLStyleElement.prototype.sheet;
 XMLHttpRequest.prototype.sendAsBinary = function (data) {};
+/**
+ * @const@type{!string}
+ */
+XMLHttpRequest.prototype.responseBody;
 window.nativeio = {};
+var VBArray = {};
+VBArray.prototype.toArray = function () {};
 /**
  * @interface
  */

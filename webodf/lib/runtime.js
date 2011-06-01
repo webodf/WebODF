@@ -335,7 +335,7 @@ function BrowserRuntime(logoutput) {
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        if (VBArray) { // IE9
+                        if (typeof VBArray !== "undefined") { // IE9
                             data = new VBArray(xhr.responseBody).toArray();
                         } else {
                             data = self.byteArrayFromString(xhr.responseText,
