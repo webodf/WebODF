@@ -1,4 +1,4 @@
-/*global window runtime core gui RuntimeTests*/
+/*global window runtime Runtime core gui RuntimeTests*/
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.PointWalkerTests");
@@ -36,7 +36,7 @@ function runNextTest(tests) {
         return;
     }
     var test = tests[0];
-    runtime.log("Running test '" + test.name + "'.");
+    runtime.log("Running test '" + Runtime.getFunctionName(test) + "'.");
     tester.runTests(test, function () {
         runNextTest(tests.slice(1));
     });

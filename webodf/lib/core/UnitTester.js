@@ -1,4 +1,4 @@
-/*global runtime core*/
+/*global runtime Runtime core*/
 /*jslint evil: true*/
 /**
  * @interface
@@ -157,44 +157,49 @@ core.UnitTester = function UnitTester() {
      * @return {undefined}
      */
     this.runTests = function (TestClass, callback) {
-        // check that this test has not been run or started yet
-        if (TestClass.name in results) {
-            runtime.log("Test " + TestClass.name + " has already run.");
-            return;
-        }
-
-        var runner = new core.UnitTestRunner(),
+        var testName = Runtime.getFunctionName(TestClass),
+            tname,
+            runner = new core.UnitTestRunner(),
             test = new TestClass(runner),
             testResults = {},
             i,
             t,
             tests,
             lastFailCount;
-        runtime.log("Running " + TestClass.name + ": " + test.description());
+
+        // check that this test has not been run or started yet
+        if (testName in results) {
+            runtime.log("Test " + testName + " has already run.");
+            return;
+        }
+
+        runtime.log("Running " + testName + ": " + test.description());
         tests = test.tests();
         for (i = 0; i < tests.length; i += 1) {
             t = tests[i];
-            runtime.log("Running " + t.name);
+            tname = Runtime.getFunctionName(t);
+            runtime.log("Running " + tname);
             lastFailCount = runner.countFailedTests();
             test.setUp();
             t();
             test.tearDown();
-            testResults[t.name] = lastFailCount === runner.countFailedTests();
+            testResults[tname] = lastFailCount === runner.countFailedTests();
         }
         function runAsyncTests(todo) {
             if (todo.length === 0) {
-                results[TestClass.name] = testResults;
+                results[testName] = testResults;
                 failedTests += runner.countFailedTests();
                 callback();
                 return;
             }
             t = todo[0];
-            runtime.log("Running " + t.name);
+            var tname = Runtime.getFunctionName(t);
+            runtime.log("Running " + tname);
             lastFailCount = runner.countFailedTests();
             test.setUp();
             t(function () {
                 test.tearDown();
-                testResults[t.name] = lastFailCount ===
+                testResults[tname] = lastFailCount ===
                     runner.countFailedTests();
                 runAsyncTests(todo.slice(1));
             });

@@ -1,6 +1,7 @@
 /*jslint nomen: false, evil: true, bitwise: false */
 /*global window XMLHttpRequest require console process __dirname setTimeout
-  Packages print readFile quit Buffer ArrayBuffer Uint8Array navigator*/
+  Packages print readFile quit Buffer ArrayBuffer Uint8Array navigator
+  VBArray */
 
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
@@ -178,6 +179,14 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     }
     return byteArrayToString(bytearray);
 };
+Runtime.getFunctionName = function getFunctionName(f) {
+    var m;
+    if (f.name === undefined) {
+        m = new RegExp("function\\s+(\\w+)").exec(f);
+        return m && m[1];
+    }
+    return f.name;
+};
 /**
  * @class
  * @constructor
@@ -191,32 +200,6 @@ function BrowserRuntime(logoutput) {
         // nativeio is a binding point for io of native runtime
         nativeio = window.nativeio || {},
         useNativeArray = window.ArrayBuffer && window.Uint8Array;
-
-    this.IEversion = undefined;
-    // Returns the version of Internet Explorer or a -1
-    // (indicating the use of another browser).
-    function getInternetExplorerVersion() {
-        var ua = navigator && navigator.userAgent,
-            re = new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})"),
-            m = re.exec(ua);
-        if (navigator.appName === 'Microsoft Internet Explorer' && m) {
-            return parseFloat(m[1]);
-        }
-        return -1;
-    }
-    function checkIEVersion() {
-        var msg = "You're not using Internet Explorer.",
-            ver = getInternetExplorerVersion();
-        if (ver === -1) {
-            self.IEversion = undefined;
-        } else if (ver < 9) {
-            self.log("You should upgrade your copy of Internet Explorer or use FireFox.");
-            self.IEversion = false;
-        } else {
-            self.IEversion = true;
-        }
-    }
-    checkIEVersion();
     /**
      * @constructor
      * @augments Runtime.ByteArray
@@ -352,8 +335,12 @@ function BrowserRuntime(logoutput) {
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        data = self.byteArrayFromString(xhr.responseText,
+                        if (VBArray) { // IE9
+                            data = new VBArray(xhr.responseBody).toArray();
+                        } else {
+                            data = self.byteArrayFromString(xhr.responseText,
                                 "binary");
+                        }
                     } else {
                         data = xhr.responseText;
                     }
@@ -395,7 +382,11 @@ function BrowserRuntime(logoutput) {
                     callback("File is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
-                    data = self.byteArrayFromString(xhr.responseText, "binary");
+                    if (typeof VBArray !== "undefined") {
+                        data = new VBArray(xhr.responseBody).toArray();
+                    } else {
+                        data = self.byteArrayFromString(xhr.responseText, "binary");
+                    }
                     cache[path] = data;
                     callback(null, data.slice(offset, offset + length));
                 } else {
@@ -996,10 +987,8 @@ var runtime = (function () {
         }
         // check if the class in context already
         impl = load(classpath);
-        function checkFunctionName(n, name) {
-            return runtime.IEversion || n === name;
-        }
-        if (!impl || !checkFunctionName(impl.name, names[names.length - 1])) {
+        if (!impl || Runtime.getFunctionName(impl) !==
+                names[names.length - 1]) {
             runtime.log("Loaded code is not for " + names[names.length - 1]);
             throw "Loaded code is not for " + names[names.length - 1];
         }
