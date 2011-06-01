@@ -1,6 +1,6 @@
 /*jslint nomen: false, evil: true, bitwise: false */
 /*global window XMLHttpRequest require console process __dirname setTimeout
-  Packages print readFile quit Buffer ArrayBuffer Uint8Array*/
+  Packages print readFile quit Buffer ArrayBuffer Uint8Array navigator*/
 
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
@@ -191,7 +191,32 @@ function BrowserRuntime(logoutput) {
         // nativeio is a binding point for io of native runtime
         nativeio = window.nativeio || {},
         useNativeArray = window.ArrayBuffer && window.Uint8Array;
-    
+
+    this.IEversion = undefined;
+    // Returns the version of Internet Explorer or a -1
+    // (indicating the use of another browser).
+    function getInternetExplorerVersion() {
+        var ua = navigator && navigator.userAgent,
+            re = new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})"),
+            m = re.exec(ua);
+        if (navigator.appName === 'Microsoft Internet Explorer' && m) {
+            return parseFloat(m[1]);
+        }
+        return -1;
+    }
+    function checkIEVersion() {
+        var msg = "You're not using Internet Explorer.",
+            ver = getInternetExplorerVersion();
+        if (ver === -1) {
+            self.IEversion = undefined;
+        } else if (ver < 9) {
+            self.log("You should upgrade your copy of Internet Explorer or use FireFox.");
+            self.IEversion = false;
+        } else {
+            self.IEversion = true;
+        }
+    }
+    checkIEVersion();
     /**
      * @constructor
      * @augments Runtime.ByteArray
@@ -342,10 +367,12 @@ function BrowserRuntime(logoutput) {
         }
         xhr.open('GET', path, true);
         xhr.onreadystatechange = handleResult;
-        if (encoding !== "binary") {
-            xhr.overrideMimeType("text/plain; charset=" + encoding);
-        } else {
-            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        if (xhr.overrideMimeType) {
+            if (encoding !== "binary") {
+                xhr.overrideMimeType("text/plain; charset=" + encoding);
+            } else {
+                xhr.overrideMimeType("text/plain; charset=x-user-defined");
+            }
         }
         try {
             xhr.send(null);
@@ -379,7 +406,9 @@ function BrowserRuntime(logoutput) {
         }
         xhr.open('GET', path, true);
         xhr.onreadystatechange = handleResult;
-        xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        if (xhr.overrideMimeType) {
+            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        }
         //xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
         //       (offset + length - 1));
         try {
@@ -392,10 +421,12 @@ function BrowserRuntime(logoutput) {
         var xhr = new XMLHttpRequest(),
             result;
         xhr.open('GET', path, false);
-        if (encoding !== "binary") {
-            xhr.overrideMimeType("text/plain; charset=" + encoding);
-        } else {
-            xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        if (xhr.overrideMimeType) {
+            if (encoding !== "binary") {
+                xhr.overrideMimeType("text/plain; charset=" + encoding);
+            } else {
+                xhr.overrideMimeType("text/plain; charset=x-user-defined");
+            }
         }
         try {
             xhr.send(null);
@@ -965,7 +996,10 @@ var runtime = (function () {
         }
         // check if the class in context already
         impl = load(classpath);
-        if (!impl || impl.name !== names[names.length - 1]) {
+        function checkFunctionName(n, name) {
+            return runtime.IEversion || n === name;
+        }
+        if (!impl || !checkFunctionName(impl.name, names[names.length - 1])) {
             runtime.log("Loaded code is not for " + names[names.length - 1]);
             throw "Loaded code is not for " + names[names.length - 1];
         }
