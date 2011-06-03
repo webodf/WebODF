@@ -1,4 +1,4 @@
-/*global runtime dom*/
+/*global runtime xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -13,7 +13,7 @@
  * @constructor
  * @param {!string} url path to the Relax NG schema
  */
-dom.RelaxNG = function RelaxNG(url) {
+xmldom.RelaxNG = function RelaxNG(url) {
     var rngns = "http://relaxng.org/ns/structure/1.0",
         xmlnsns = "http://www.w3.org/2000/xmlns/",
         xmlns = "http://www.w3.org/XML/1998/namespace",

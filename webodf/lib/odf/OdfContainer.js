@@ -1,7 +1,7 @@
-/*global runtime core dom odf DOMParser document XPathResult */
+/*global runtime core xmldom odf DOMParser document XPathResult */
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
-runtime.loadClass("dom.LSSerializer");
+runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Style2CSS");
 /**
@@ -72,7 +72,7 @@ odf.OdfContainer = (function () {
     /**
      * Class that filters runtime specific nodes from the DOM.
      * @constructor
-     * @implements {dom.LSSerializerFilter}
+     * @implements {xmldom.LSSerializerFilter}
      * @param {!Element} odfroot
      * @param {!Element=} usedStylesElement
      */
@@ -90,8 +90,7 @@ odf.OdfContainer = (function () {
             var styleName, styleFamily;
             if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
                 return 3; // FILTER_SKIP
-            } else
-            if (usedKeysList && node.parentNode === automaticStyles &&
+            } else if (usedKeysList && node.parentNode === automaticStyles &&
                     node.nodeType === 1) {
                 if (usedKeysList.uses(node)) {
                     return 1; // FILTER_ACCEPT
@@ -456,7 +455,7 @@ odf.OdfContainer = (function () {
          */
         function serializeMetaXml() {
             var nsmap = style2CSS.namespaces,
-                serializer = new dom.LSSerializer(),
+                serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = documentElement("document-meta", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement);
             s += serializer.writeToString(self.rootElement.meta, nsmap);
@@ -468,7 +467,7 @@ odf.OdfContainer = (function () {
          */
         function serializeSettingsXml() {
             var nsmap = style2CSS.namespaces,
-                serializer = new dom.LSSerializer(),
+                serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = documentElement("document-settings", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement);
             s += serializer.writeToString(self.rootElement.settings, nsmap);
@@ -480,7 +479,7 @@ odf.OdfContainer = (function () {
          */
         function serializeStylesXml() {
             var nsmap = style2CSS.namespaces,
-                serializer = new dom.LSSerializer(),
+                serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = documentElement("document-styles", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.masterStyles);
@@ -496,7 +495,7 @@ odf.OdfContainer = (function () {
          */
         function serializeContentXml() {
             var nsmap = style2CSS.namespaces,
-                serializer = new dom.LSSerializer(),
+                serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = documentElement("document-content", nsmap);
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.body);

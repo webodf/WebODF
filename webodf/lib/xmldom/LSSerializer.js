@@ -1,4 +1,4 @@
-/*global dom*/
+/*global xmldom*/
 if (typeof Object.create !== 'function') {
     Object.create = function (o) {
         /**
@@ -14,7 +14,7 @@ if (typeof Object.create !== 'function') {
  * Partial implementation of LSSerializer
  * @constructor
  */
-dom.LSSerializer = function LSSerializer() {
+xmldom.LSSerializer = function LSSerializer() {
     var /**@const@type{!LSSerializer}*/ self = this;
 
     /**
@@ -144,7 +144,7 @@ dom.LSSerializer = function LSSerializer() {
         return m;
     }
     /**
-     * @type {dom.LSSerializerFilter}
+     * @type {xmldom.LSSerializerFilter}
      */
     this.filter = null;
     /**

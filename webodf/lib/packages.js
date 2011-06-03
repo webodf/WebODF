@@ -7,9 +7,9 @@ var core = {};
  */
 var gui = {};
 /**
- * @namespace The dom package.
+ * @namespace The xmldom package.
  */
-var dom = {};
+var xmldom = {};
 /**
  * @namespace The ODF package.
  */
