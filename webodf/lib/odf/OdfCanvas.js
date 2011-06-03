@@ -1,3 +1,4 @@
+/*jslint sub: true*/
 /*global runtime odf*/
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
@@ -381,7 +382,7 @@ odf.OdfCanvas = (function () {
          * @param {!string} url
          * @return {undefined}
          */
-        this.load = function (url) {
+        this["load"] = function (url) {
             element.innerHTML = 'loading ' + url;
             // open the odf container
             odfcontainer = new odf.OdfContainer(url);

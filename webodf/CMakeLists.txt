@@ -64,10 +64,11 @@ if (CMAKE_Java_RUNTIME)
     ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
-         --compilation_level SIMPLE_OPTIMIZATIONS
+         --js ${CMAKE_CURRENT_SOURCE_DIR}/lib/export.js
+         --compilation_level ADVANCED_OPTIMIZATIONS
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf.js
-    DEPENDS ${LIBJSFILES} tools/externs.js
+    DEPENDS ${LIBJSFILES} lib/export.js tools/externs.js
   )
 
   add_custom_command(

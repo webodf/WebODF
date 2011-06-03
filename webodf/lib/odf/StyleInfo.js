@@ -18,7 +18,7 @@ odf.StyleInfo = function StyleInfo() {
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         elementstyles = {
-            text: [
+            "text": [
                 { ens: stylens, en: 'tab-stop', ans: stylens, a: 'leader-text-style'},
                 { ens: stylens, en: 'drop-cap', ans: stylens, a: 'style-name'},
                 { ens: textns, en: 'notes-configuration', ans: textns, a: 'citation-body-style-name'},
@@ -44,7 +44,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: textns, en: 'list-level-style-bullet', ans: textns, a: 'style-name'},
                 { ens: textns, en: 'outline-level-style', ans: textns, a: 'style-name'}
             ],
-            paragraph: [
+            "paragraph": [
                 { ens: drawns, en: 'caption', ans: drawns, a: 'text-style-name'},
                 { ens: drawns, en: 'circle', ans: drawns, a: 'text-style-name'},
                 { ens: drawns, en: 'connector', ans: drawns, a: 'text-style-name'},
@@ -85,7 +85,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: textns, en: 'user-index-entry-template', ans: textns, a: 'style-name'},
                 { ens: stylens, en: 'page-layout-properties', ans: stylens, a: 'register-truth-ref-style-name'}
             ],
-            chart: [
+            "chart": [
                 { ens: chartns, en: 'axis', ans: chartns, a: 'style-name'},
                 { ens: chartns, en: 'chart', ans: chartns, a: 'style-name'},
                 { ens: chartns, en: 'data-label', ans: chartns, a: 'style-name'},
@@ -107,7 +107,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: chartns, en: 'title', ans: chartns, a: 'style-name'},
                 { ens: chartns, en: 'wall', ans: chartns, a: 'style-name'}
             ],
-            section: [
+            "section": [
                 { ens: textns, en: 'alphabetical-index', ans: textns, a: 'style-name'},
                 { ens: textns, en: 'bibliography', ans: textns, a: 'style-name'},
                 { ens: textns, en: 'illustration-index', ans: textns, a: 'style-name'},
@@ -118,10 +118,10 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: textns, en: 'table-index', ans: textns, a: 'style-name'},
                 { ens: textns, en: 'user-index', ans: textns, a: 'style-name'}
             ],
-            ruby: [
+            "ruby": [
                 { ens: textns, en: 'ruby', ans: textns, a: 'style-name'}
             ],
-            table: [
+            "table": [
                 { ens: dbns, en: 'query', ans: dbns, a: 'style-name'},
                 { ens: dbns, en: 'table-representation', ans: dbns, a: 'style-name'},
                 { ens: tablens, en: 'background', ans: tablens, a: 'style-name'},
@@ -154,7 +154,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: tablens, en: 'odd-rows', ans: tablens, a: 'style-name'},
                 { ens: tablens, en: 'table-cell', ans: tablens, a: 'style-name'}
             ],
-            graphic: [
+            "graphic": [
                 { ens: dr3dns, en: 'cube', ans: drawns, a: 'style-name'},
                 { ens: dr3dns, en: 'extrude', ans: drawns, a: 'style-name'},
                 { ens: dr3dns, en: 'rotate', ans: drawns, a: 'style-name'},
@@ -178,7 +178,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: drawns, en: 'regular-polygon', ans: drawns, a: 'style-name'},
                 { ens: officens, en: 'annotation', ans: drawns, a: 'style-name'}
             ],
-            presentation: [
+            "presentation": [
                 { ens: dr3dns, en: 'cube', ans: presentationns, a: 'style-name'},
                 { ens: dr3dns, en: 'extrude', ans: presentationns, a: 'style-name'},
                 { ens: dr3dns, en: 'rotate', ans: presentationns, a: 'style-name'},
@@ -236,7 +236,7 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: textns, en: 'variable-input', ans: stylens, a: 'data-style-name'},
                 { ens: textns, en: 'variable-set', ans: stylens, a: 'data-style-name'}
             ],
-            data: [
+            "data": [
                 { ens: stylens, en: 'style', ans: stylens, a: 'data-style-name'},
                 { ens: stylens, en: 'style', ans: stylens, a: 'percentage-data-style-name'},
                 { ens: presentationns, en: 'date-time-decl', ans: stylens, a: 'data-style-name'},
