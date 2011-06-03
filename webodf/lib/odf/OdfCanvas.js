@@ -297,7 +297,10 @@ odf.OdfCanvas = (function () {
      * @param {Document} document Put and ODF Canvas inside this element.
      */
     function addStyleSheet(document) {
-        var styles = document.createElement('style'),
+        // use cloneNode on an exisiting HTMLStyleElement, because in
+        // Chromium 12, document.createElement('style') does not give a
+        // HTMLStyleElement
+        var styles = document.getElementsByTagName("style")[0].cloneNode(false),
             head = document.getElementsByTagName('head')[0],
             text = '', prefix;
         for (prefix in namespaces) {
