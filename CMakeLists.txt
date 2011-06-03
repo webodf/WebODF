@@ -17,8 +17,8 @@ include (ExternalProject)
 # Closure Compiler
 ExternalProject_Add(
 	ClosureCompiler
-	URL "http://closure-compiler.googlecode.com/files/compiler-20110405.tar.gz"
-	URL_MD5 ca6f97574bbb6e66debf146f6abfc486
+	URL "http://closure-compiler.googlecode.com/files/compiler-20110502.tar.gz"
+	URL_MD5 15172a78a842b173a77665f1a83f8acd
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
         INSTALL_COMMAND ""
