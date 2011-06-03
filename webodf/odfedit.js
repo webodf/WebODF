@@ -78,7 +78,7 @@ function save() {
         }
     });
 }
-Ext.ODFEditor = Ext.extend(Ext.BoxComponent, {
+Ext.ODFEditor = Ext.extend(Ext.component.Component, {
     buttonTips : {
         bold : {
             title: 'Bold (Ctrl+B)',

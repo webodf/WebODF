@@ -5,31 +5,32 @@ Ext.data = {};
 /**
  * @constructor
  */
-Ext.data.Node = function (settings) {};
+Ext.data.Model = function (settings) {};
 /**
- * @param {!Ext.data.Node|!Object} node
- * @return {!Ext.data.Node}
+ * @param {!string} fieldName
+ * @return {!string}
  */
-Ext.data.Node.prototype.appendChild = function (node) {};
+Ext.data.Model.prototype.get = function (fieldName) {};
 /**
- * @type {!Array.<Ext.data.Node>}
+ * @return {!boolean}
  */
-Ext.data.Node.prototype.childNodes = [];
+Ext.data.Model.isExpanded = function () {};
 /**
- * @return {!Ext.tree.TreeNodeUI}
+ * @constructor
  */
-Ext.data.Node.prototype.getUI = function () {};
+Ext.data.NodeInterface = function () {};
 /**
  * @param {!string} attribute
  * @param {*} value
  * @param {boolean=} deep
- * @return {Ext.data.Node}
+ * @return {Ext.data.NodeInterface}
  */
-Ext.data.Node.prototype.findChild = function (attribute, value, deep) {};
+Ext.data.NodeInterface.prototype.findChild = function (attribute, value, deep) {};
 /**
- * @type {!Object}
+ * @param {!Ext.data.NodeInterface|!Object} node
+ * @return {!Ext.data.NodeInterface}
  */
-Ext.data.Node.prototype.attributes = {};
+Ext.data.NodeInterface.prototype.appendChild = function (node) {};
 /**
  * @param {!string} id
  * @return {Ext.Component}
@@ -39,24 +40,21 @@ Ext.tree = {};
 /**
  * @constructor
  */
-Ext.tree.TreeNodeUI = function (settings) {};
+Ext.tree.Panel = function (settings) {};
 /**
- * @constructor
+ * @return {!Ext.data.NodeInterface}
  */
-Ext.tree.TreePanel = function (settings) {};
-/**
- * @return {!Ext.data.Node}
- */
-Ext.tree.TreePanel.prototype.getRootNode = function () {};
+Ext.tree.Panel.prototype.getRootNode = function () {};
+Ext.component = {};
 /**
  * @constructor
  * @extends {Ext.Component}
  */
-Ext.BoxComponent = function (settings) {};
+Ext.component.Component = function (settings) {};
 /**
  * @return {!Ext.Element}
  */
-Ext.BoxComponent.prototype.getEl = function () {};
+Ext.component.Component.prototype.getEl = function () {};
 /**
  * @constructor
  */
@@ -94,30 +92,38 @@ Ext.QuickTips.init = function () {};
  * @constructor
  */
 Ext.Slider = function (settings) {};
+Ext.util = {};
 /**
  * @constructor
  */
-Ext.TabPanel = function (settings) {};
+Ext.util.MixedCollection = function () {};
+/**
+ * @param {!Function} f
+ */
+Ext.util.MixedCollection.prototype.findBy = function (f) {};
+Ext.tab = {};
+/**
+ * @constructor
+ */
+Ext.tab.Panel = function (settings) {};
 /**
  * @param {!Object} component
  * @return {undefined}
  */
-Ext.TabPanel.prototype.add = function (component) {};
+Ext.tab.Panel.prototype.add = function (component) {};
 /**
- * @param {!string} prop
- * @param {!string} value
- * @return {!Array}
+ * @return {!Ext.Component}
  */
-Ext.TabPanel.prototype.find = function (prop, value) {};
+Ext.tab.Panel.prototype.getActiveTab = function () {};
 /**
- * @return {!Ext.BoxComponent}
- */
-Ext.TabPanel.prototype.getActiveTab = function () {};
-/**
- * @param {!Ext.BoxComponent} tab
+ * @param {!Ext.Component} tab
  * @return {undefined}
  */
-Ext.TabPanel.prototype.setActiveTab = function (tab) {};
+Ext.tab.Panel.prototype.setActiveTab = function (tab) {};
+/**
+ * @type {!Ext.util.MixedCollection}
+ */
+Ext.tab.Panel.prototype.items;
 /**
  * @constructor
  */

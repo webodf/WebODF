@@ -1,14 +1,14 @@
 /*global Ext runtime core listFiles*/
 runtime.loadClass("core.Zip");
 runtime.loadClass("core.Base64");
-Ext.BLANK_IMAGE_URL = "extjs/resources/images/default/s.gif";
 
 /**
- * @param {Ext.data.Node} node
+ * @param {Ext.data.Model} node
  * @return {undefined}
  */
 function addThumbnail(node) {
-    var url = node.id,
+    var url = node.get('id'), zip;
+/*
     zip = new core.Zip(url, function (err, zipobject) {
         zip = zipobject;
         if (err) {
@@ -21,7 +21,6 @@ function addThumbnail(node) {
             var url = 'data:;base64,' +
                     (new core.Base64()).convertUTF8ArrayToBase64(data),
                 el, spans, i, s;
-
             el = node.getUI().getEl();
             if (el) {
                 spans = el.getElementsByTagName('span');
@@ -36,27 +35,25 @@ function addThumbnail(node) {
             }
         });
     });
+*/
 }
 
 /**
  * @param {!string} url
- * @param {!Ext.TabPanel} panel
+ * @param {!Ext.tab.Panel} panel
  * @param {!string} title
  * @return {undefined}
  */
 function loadODF(url, panel, title) {
-    var tab = panel.find('url', url),
-        t,
+    var tab = panel.items.findBy(function (item) {
+            return item.url === url;
+        }),
         newTab;
-    if (tab.length) {
-        for (t in tab) {
-            if (typeof tab[t] === 'object') {
-                panel.setActiveTab(tab[t]);
-                return;
-            }
-        }
+    if (tab) {
+        panel.setActiveTab(tab);
+        return;
     }
-    newTab = new Ext.BoxComponent({
+    newTab = Ext.create('Ext.container.Container', {
         title: title,
         tabTip: url,
         url: url,
@@ -113,26 +110,9 @@ Ext.onReady(function () {
     }
 
     /**
-     * @param {Ext.data.Node} node
-     * @return {undefined}
-     */
-    function loadThumbnails(node) {
-        var n, i;
-        for (i = 0; i < node.childNodes.length; i += 1) {
-            n = node.childNodes[i];
-            if (n.leaf) {
-                try {
-                    addThumbnail(n);
-                } catch (e) {
-                }
-            }
-        }
-    }
-
-    /**
-     * @param {!Ext.data.Node} root
+     * @param {!Ext.data.NodeInterface} root
      * @param {!string} uri
-     * @return {!Ext.data.Node}
+     * @return {!Ext.data.NodeInterface}
      */
     function getParentNode(root, uri) {
         var parts = uri.split('/'),
@@ -148,13 +128,7 @@ Ext.onReady(function () {
                     id: id,
                     text: parts[i],
                     qtip: uri,
-                    cls: 'folder',
-                    editable: false,
-                    nodeType: 'node',
-                    singleClickExpand: true,
-                    listeners: {
-                        beforechildrenrendered: loadThumbnails
-                    }
+                    cls: 'folder'
                 };
                 n = node.appendChild(n);
             }
@@ -174,10 +148,7 @@ Ext.onReady(function () {
             f,
             parentNode,
             qtip,
-            node,
-            callback = function (node) {
-                loadODF(node.id, tabpanel, node.text);
-            };
+            node;
         for (i = 0; i < files.length; i += 1) {
             f = files[i];
             parentNode = getParentNode(root, f);
@@ -188,12 +159,10 @@ Ext.onReady(function () {
                 text: f.substr(f.lastIndexOf('/') + 1),
                 cls: 'file',
                 leaf: true,
-                editable: false,
-                listeners: {
-                    click: callback
-                }
+                editable: false
             });
-                addThumbnail(node);
+            f = /**@type{!Ext.data.Model}*/(node);
+            addThumbnail(f);
         }
     }
 
@@ -217,12 +186,12 @@ Ext.onReady(function () {
         listeners: { changecomplete: { fn: setZoom } }
     });
 
-    tabpanel = new Ext.TabPanel({
+    tabpanel = Ext.create('Ext.tab.Panel', {
         tbar: [ 'Zoom: ', slider, editButton ],
         region: 'center'
     });
 
-    tree = new Ext.tree.TreePanel({
+    tree = Ext.create('Ext.tree.Panel', {
         title: 'Documents',
         region: 'west',
         width: 200,
@@ -232,6 +201,19 @@ Ext.onReady(function () {
         rootVisible: false,
         enableTabScroll: true,
         defaults: {autoScroll: true},
+        listeners: {
+            itemclick: function (view, rec) {
+                if (rec.get('cls') === 'file') {
+                    loadODF(rec.get('id'), tabpanel, rec.get('text'));
+                } else if (rec.get('cls') === 'folder') {
+                    if (rec.isExpanded()) {
+                        rec.collapse();
+                    } else {
+                        rec.expand();
+                    }
+                }
+            }
+        },
         root: { nodeType: 'node' }
     });
 
