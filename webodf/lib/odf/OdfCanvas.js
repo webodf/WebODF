@@ -382,7 +382,7 @@ odf.OdfCanvas = (function () {
          * @param {!string} url
          * @return {undefined}
          */
-        this["load"] = function (url) {
+        this["load"] = this.load = function (url) {
             element.innerHTML = 'loading ' + url;
             // open the odf container
             odfcontainer = new odf.OdfContainer(url);

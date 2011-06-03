@@ -24,7 +24,7 @@ add_custom_target(jslintcheck ALL
 
 if (CMAKE_Java_RUNTIME)
 
-  set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --formatting PRETTY_PRINT --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error nonStandardJsDocs --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
+  set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error nonStandardJsDocs --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
 
   foreach(JSFILE ${LIBJSFILES})
     set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
@@ -42,6 +42,7 @@ if (CMAKE_Java_RUNTIME)
     ARGS -jar ${CLOSURE_JAR}
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
          --compilation_level WHITESPACE_ONLY
+         --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js
     DEPENDS ${LIBJSFILES} ${TESTJSFILES}
   )
@@ -53,6 +54,7 @@ if (CMAKE_Java_RUNTIME)
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
          --compilation_level ADVANCED_OPTIMIZATIONS
+         --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file compiled.js
     DEPENDS ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
@@ -64,10 +66,24 @@ if (CMAKE_Java_RUNTIME)
     ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
-         --js ${CMAKE_CURRENT_SOURCE_DIR}/lib/export.js
-         --compilation_level ADVANCED_OPTIMIZATIONS
+         --compilation_level SIMPLE_OPTIMIZATIONS
+         --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf.js
+    DEPENDS ${LIBJSFILES} tools/externs.js
+  )
+
+  add_custom_command(
+    OUTPUT webodf-experimental.js
+    COMMAND ${CMAKE_Java_RUNTIME}
+    ARGS -jar ${CLOSURE_JAR}
+         --define IS_COMPILED_CODE=true
+         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
+         --js ${CMAKE_CURRENT_SOURCE_DIR}/lib/export.js
+         --compilation_level ADVANCED_OPTIMIZATIONS
+         --formatting PRINT_INPUT_DELIMITER
+         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
+         --js_output_file webodf-experimental.js
     DEPENDS ${LIBJSFILES} lib/export.js tools/externs.js
   )
 
@@ -78,6 +94,7 @@ if (CMAKE_Java_RUNTIME)
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
          --compilation_level WHITESPACE_ONLY
+         --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf-debug.js
     DEPENDS ${LIBJSFILES} tools/externs.js
@@ -91,6 +108,7 @@ if (CMAKE_Java_RUNTIME)
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
          --js ${CMAKE_CURRENT_SOURCE_DIR}/odfedit.js
          --compilation_level ADVANCED_OPTIMIZATIONS
+         --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file odfedit.js
@@ -106,13 +124,14 @@ if (CMAKE_Java_RUNTIME)
          --js ${CMAKE_CURRENT_SOURCE_DIR}/filelister.js
          --js ${CMAKE_CURRENT_SOURCE_DIR}/gui.js
          --compilation_level ADVANCED_OPTIMIZATIONS
+         --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file gui.js
     DEPENDS ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js filelister.js gui.js
   )
 
-  add_custom_target(syntaxcheck ALL DEPENDS simplecompiled.js webodf.js webodf-debug.js compiled.js odfedit.js gui.js)
+  add_custom_target(syntaxcheck ALL DEPENDS simplecompiled.js webodf.js webodf-experimental.js webodf-debug.js compiled.js odfedit.js gui.js)
 
   add_custom_target(rhinotest
   	COMMAND ${CMAKE_Java_RUNTIME} -jar ${RHINO}
