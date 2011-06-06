@@ -23,8 +23,8 @@ add_custom_target(jslintcheck ALL
 )
 
 if (CMAKE_Java_RUNTIME)
-
-  set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error nonStandardJsDocs --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
+  # nonStandardJsDocs is not used because we use @licstart @licend and @source
+  set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
 
   foreach(JSFILE ${LIBJSFILES})
     set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
