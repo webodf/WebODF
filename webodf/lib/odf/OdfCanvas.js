@@ -330,12 +330,17 @@ odf.OdfCanvas = (function () {
      * @param {Document} document Put and ODF Canvas inside this element.
      */
     function addStyleSheet(document) {
+        var styles = document.getElementsByTagName("style"),
+            head = document.getElementsByTagName('head')[0],
+            text = '', prefix, a = "", b;
         // use cloneNode on an exisiting HTMLStyleElement, because in
         // Chromium 12, document.createElement('style') does not give a
         // HTMLStyleElement
-        var styles = document.getElementsByTagName("style")[0].cloneNode(false),
-            head = document.getElementsByTagName('head')[0],
-            text = '', prefix;
+        if (styles && styles.length > 0) {
+            styles = styles[0].cloneNode(false);
+        } else {
+            styles = document.createElement('style');
+        }
         for (prefix in namespaces) {
             if (prefix) {
                 text += "@namespace " + prefix + " url(" + namespaces[prefix] +
@@ -377,7 +382,7 @@ odf.OdfCanvas = (function () {
             element.appendChild(odfnode);
         }
         /**
-         * @param {!Object} container
+         * @param {!odf.OdfContainer} container
          * @return {undefined}
          **/
         function refreshOdf(container) {
@@ -391,6 +396,8 @@ odf.OdfCanvas = (function () {
                 element.style.display = "inline-block";
                 var odfnode = container.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
+
+                formatting.setOdfContainer(container);
                 handleStyles(odfnode, stylesxmlcss);
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
@@ -402,7 +409,7 @@ odf.OdfCanvas = (function () {
         
             if (odfcontainer.state === odf.OdfContainer.DONE) {
                 callback();
-            } else { //if (state === OdfContainer.LOADING) {
+            } else {
                 odfcontainer.onchange = callback;
             }
         }
@@ -418,8 +425,10 @@ odf.OdfCanvas = (function () {
         this["load"] = this.load = function (url) {
             element.innerHTML = 'loading ' + url;
             // open the odf container
-            odfcontainer = new odf.OdfContainer(url);
-            formatting.setOdfContainer(odfcontainer);
+            odfcontainer = new odf.OdfContainer(url, function (container) {
+                odfcontainer = container;
+                refreshOdf(container);
+            });
             odfcontainer.onstatereadychange = refreshOdf;
         };
 

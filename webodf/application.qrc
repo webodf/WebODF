@@ -1,14 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>webodf.css</file>
-        <file>lib/core/Base64.js</file>
-        <file>lib/core/ByteArray.js</file>
-        <file>lib/core/RawInflate.js</file>
-        <file>lib/core/Zip.js</file>
-        <file>lib/odf/OdfCanvas.js</file>
-        <file>lib/odf/OdfContainer.js</file>
-        <file>lib/odf/Style2CSS.js</file>
-        <file>lib/runtime.js</file>
-        <file>odf.html</file>
+        <file>webodf.js</file>
+        <file>embedodf.html</file>
     </qresource>
 </RCC>

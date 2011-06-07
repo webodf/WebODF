@@ -34,7 +34,6 @@
 /*global window XMLHttpRequest require console process __dirname setTimeout
   Packages print readFile quit Buffer ArrayBuffer Uint8Array navigator
   VBArray */
-
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */

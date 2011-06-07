@@ -7,11 +7,9 @@
 OdfContainer* Odf::getContainer(const QString& url) {
     return new OdfContainer(url, this);
 }
-
 OdfContainer* Odf::getOpenContainer(const QString& id) {
     return openfiles.value(id);
 }
-
 void
 Odf::addFile(const QString& containerid, const QString& path)
 {
@@ -22,25 +20,6 @@ Odf::addFile(const QString& containerid, const QString& path)
     file.open(QIODevice::ReadOnly);
     filedata[containerid] = file.readAll();
     file.close();
-}
-
-QString
-Odf::load(QString containerid, QString path, QString callbackid)
-{
-    OdfContainer* c = openfiles.value(containerid);
-    QString result;
-    if (c) {
-        result = c->loadAsString(path);
-    }
-    if (!callbackid.isNull()) {
-        callbackdata = result;
-        // call the callback with escaped result data
-        QVariant out = frame->evaluateJavaScript("window.qtodf." + callbackid
-                + "(window.qtodf.callbackdata);window.qtodf." + callbackid
-                +"=null;");
-        callbackdata = QString();
-    }
-    return result;
 }
 QString
 Odf::read(QString containerid, int offset, int length) {
@@ -53,6 +32,16 @@ Odf::read(QString containerid, int offset, int length) {
         out[i] = data[i+offset];
     }
     return out;
+}
+QString
+Odf::readFileSync(QString path) {
+    path = prefix.resolved(path).toLocalFile();
+    QString content;
+    QFile file(path);
+    file.open(QIODevice::ReadOnly);
+    content = QString::fromUtf8(file.readAll());
+    file.close();
+    return content;
 }
 int
 Odf::getFileSize(QString containerid) {

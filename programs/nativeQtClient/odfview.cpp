@@ -17,8 +17,15 @@
 
 OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
+    QString prefix = "../../webodf/"; // set this to the right value when debugging
+    QString htmlfile = QDir(prefix).absoluteFilePath("embedodf.html");
+    qDebug() << htmlfile;
+    if (!QFileInfo(htmlfile).exists()) {
+        prefix = ":/";
+        htmlfile = "qrc:/embedodf.html";
+    }
     setPage(new OdfPage(this));
-    odf = new Odf(page()->mainFrame(), this);
+    odf = new Odf(page()->mainFrame(), prefix, this);
     connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(slotLoadFinished(bool)));
     page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
@@ -27,12 +34,6 @@ OdfView::OdfView(QWidget* parent) :QWebView(parent)
 
     // use our own networkaccessmanager that gives limited access to the local
     // file system
-    QString prefix = "../webodf";
-    QString htmlfile = prefix + "/odf.html";
-    if (!QFileInfo(htmlfile).exists()) {
-        prefix = ":/";
-        htmlfile = "qrc:/odf.html";
-    }
     networkaccessmanager = new OdfNetworkAccessManager(QDir(prefix));
     page()->setNetworkAccessManager(networkaccessmanager);
     setUrl(QUrl(htmlfile));
@@ -54,27 +55,31 @@ OdfView::loadFile(const QString &fileName) {
     curFile = fileName;
     identifier = QString::number(qrand());
     odf->addFile(identifier, fileName);
-    QWebFrame *frame = page()->mainFrame();
     networkaccessmanager->setCurrentFile(odf->getOpenContainer(identifier));
     if (loaded) {
         slotLoadFinished(true);
     }
     return true;
 }
-
 void
 OdfView::slotLoadFinished(bool ok) {
     if (!ok) return;
     loaded = true;
     QWebFrame *frame = page()->mainFrame();
     QString js =
+        "runtime.readFileSync = function(path) {"
+        "    return qtodf.readFileSync(path);"
+        "};"
         "runtime.read = function(path, offset, length, callback) {"
-        "    callback(null, qtodf.read(path, offset, length));"
+        "    var data = qtodf.read(path, offset, length);"
+        "    data = runtime.byteArrayFromString(data, 'binary');"
+        "    callback(null, data);"
         "};"
         "runtime.getFileSize = function(path, callback) {"
         "    callback(qtodf.getFileSize(path));"
         "};"
-        "window.odfcontainer = new window.odf.OdfContainer('"
-                 + identifier + "'); refreshOdf();";
-    QVariant out = frame->evaluateJavaScript(js);
+        "runtime.loadClass('odf.OdfCanvas');"
+        "window.canvas = new odf.OdfCanvas(document.getElementById('odf'));"
+        "window.canvas.load('" + identifier + "');";
+    frame->evaluateJavaScript(js);
 }

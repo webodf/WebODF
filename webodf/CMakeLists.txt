@@ -61,7 +61,7 @@ if (CMAKE_Java_RUNTIME)
   )
 
   add_custom_command(
-    OUTPUT webodf.js
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
     COMMAND ${CMAKE_Java_RUNTIME}
     ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
@@ -69,7 +69,7 @@ if (CMAKE_Java_RUNTIME)
          --compilation_level SIMPLE_OPTIMIZATIONS
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --js_output_file webodf.js
+         --js_output_file ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
     DEPENDS ${LIBJSFILES} tools/externs.js
   )
 

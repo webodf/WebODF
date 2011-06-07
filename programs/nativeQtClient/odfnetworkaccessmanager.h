@@ -16,16 +16,10 @@ private:
     OdfContainer *currentFile;
 public:
     OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
-        allowedFiles << "odf.html"
+        allowedFiles << "embedodf.html"
                 << "webodf.css"
-                << "odf.js"
-                << "lib/runtime.js"
-                << "lib/core/Base64.js"
-                << "lib/core/ByteArray.js"
-                << "lib/core/RawInflate.js"
-                << "lib/core/Zip.js"
-                << "lib/odf/OdfContainer.js"
-                << "lib/odf/Style2CSS.js";
+                << "webodf.js"
+                << "lib/runtime.js";
     }
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& req,
                                  QIODevice* data = 0) {
@@ -33,7 +27,6 @@ public:
             //data is inside the current zip file
             return new ZipNetworkReply(this, currentFile, req, op);
         }
-
         QNetworkRequest r(req);
         QString path;
         if (dir.absolutePath().startsWith(":")) {

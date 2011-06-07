@@ -3,6 +3,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
+#include <QtCore/QUrl>
 
 class OdfContainer;
 class QWebFrame;
@@ -11,7 +12,7 @@ class Odf : public QObject
 {
 Q_OBJECT
 public:
-    Odf(QWebFrame* f, QObject* parent) :QObject(parent), frame(f) {}
+    Odf(QWebFrame* f, QUrl p, QObject* parent) :QObject(parent), frame(f), prefix(p) {}
     OdfContainer* getContainer(const QString& url);
     OdfContainer* getOpenContainer(const QString& id);
 
@@ -19,12 +20,13 @@ public:
 
     Q_PROPERTY(QString callbackdata READ getCallbackData);
 public slots:
-    QString load(QString containerid, QString path, QString callbackid);
     QString read(QString containerid, int offset, int length);
+    QString readFileSync(QString path);
     int getFileSize(QString containerid);
 private:
     QMap<QString, OdfContainer*> openfiles;
     QWebFrame* const frame;
+    QUrl prefix;
     QString callbackdata;
     QMap<QString, QByteArray> filedata;
 

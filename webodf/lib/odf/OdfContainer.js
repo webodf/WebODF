@@ -41,6 +41,7 @@ runtime.loadClass("odf.Style2CSS");
  * document.
  * @constructor
  * @param {!string} url
+ * @param {!Function|null} onstatereadychange
  **/
 odf.OdfContainer = (function () {
     var styleInfo = new odf.StyleInfo(),
@@ -263,8 +264,9 @@ odf.OdfContainer = (function () {
     /**
      * @constructor
      * @param {!string} url
+     * @param {!Function|null} onstatereadychange
      */
-    odf.OdfContainer = function OdfContainer(url) {
+    odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
             zip = null;
 
@@ -274,7 +276,7 @@ odf.OdfContainer = (function () {
         // without exposing them
 
         // declare public variables
-        this.onstatereadychange = null;
+        this.onstatereadychange = onstatereadychange;
         this.onchange = null;
         this.state = null;
         this.rootElement = null;
@@ -613,7 +615,7 @@ odf.OdfContainer = (function () {
      * @return {!odf.OdfContainer}
      */
     odf.OdfContainer.getContainer = function (url) {
-        return new odf.OdfContainer(url);
+        return new odf.OdfContainer(url, null);
     };
     return odf.OdfContainer;
 }());
