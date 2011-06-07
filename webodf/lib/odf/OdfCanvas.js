@@ -388,6 +388,7 @@ odf.OdfCanvas = (function () {
             // synchronize the object a window.odfcontainer with the view
             function callback() {
                 clear(element);
+                element.style.display = "inline-block";
                 var odfnode = container.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
                 handleStyles(odfnode, stylesxmlcss);
