@@ -17,7 +17,7 @@ private:
 public:
     OdfNetworkAccessManager(const QDir& localdir) :dir(localdir) {
         allowedFiles << "odf.html"
-                << "defaultodfstyle.css"
+                << "webodf.css"
                 << "odf.js"
                 << "lib/runtime.js"
                 << "lib/core/Base64.js"

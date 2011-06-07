@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>defaultodfstyle.css</file>
+        <file>webodf.css</file>
         <file>lib/core/Base64.js</file>
         <file>lib/core/ByteArray.js</file>
         <file>lib/core/RawInflate.js</file>
