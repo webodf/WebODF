@@ -10,8 +10,8 @@
 office|document > *, office|document-content > * {
   display: none;
 }
-office|body {
-  display: block;
+office|body, office|document {
+  display: inline-block;
 }
 
 text|p, text|h {
@@ -137,11 +137,44 @@ draw|image {
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
 }
-text|list-item {
-    display: list-item;
+text|list {
+    display: block;
+    padding-left: 1.5em;
+    counter-reset: list;
 }
-
+text|list-item {
+    display: block;
+}
+text|list-item:before {
+    display: inline-block;
+    content: '•';
+    counter-increment: list;
+    width: 0.5em;
+    margin-left: -0.5em;
+    padding: 0px;
+    border: 0px;
+}
+text|list-item > *:first-child {
+    display: inline-block;
+}
 text|a {
     color: blue;
     text-decoration: underline;
+}
+text|note-citation {
+    vertical-align: super;
+    font-size: smaller;
+}
+text|note-body {
+    display: none;
+}
+text|note:hover text|note-citation {
+    background: #dddddd;
+}
+text|note:hover text|note-body {
+    display: block;
+    left:1em;
+    max-width: 80%;
+    position: absolute;
+    background: #ffffaa;
 }

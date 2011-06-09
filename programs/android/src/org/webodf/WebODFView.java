@@ -35,7 +35,7 @@ public class WebODFView extends Activity {
 		webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 		mWebView.addJavascriptInterface(mFileReader, "filereader");
 
-		mWebView.loadUrl("file:///android_asset/odf.html");
+		mWebView.loadUrl("file:///android_asset/embedodf.html");
 	}
 
 	private class WebODFChromeClient extends WebChromeClient {
@@ -61,14 +61,16 @@ public class WebODFView extends Activity {
 					+ "runtime.read = function(path, offset, length, callback) {"
 					+ "    var name = 'filereadercallback' + String(Math.random()).substring(2);"
 					+ "    window[name] = function(data) {"
+					+ "        data = runtime.byteArrayFromString(data, 'binary');"
 					+ "        callback(null, data);"
 					+ "        window[name] = undefined;"
 					+ "    };"
 					+ "    filereader.read(offset, length, name);" + "};"
 					+ "runtime.getFileSize = function(path, callback) {"
 					+ "    callback(" + mFileReader.length() + ");" + "};"
-					+ "window.odfcontainer = new window.odf.OdfContainer('"
-					+ "        odffile'); refreshOdf();" + "})()");
+					+ "window.canvas = new odf.OdfCanvas(document.getElementById('odf'));"
+					+ "window.canvas.load('odffile');"
+					+ "}());");
 		}
 
 		@Override
