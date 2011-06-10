@@ -362,7 +362,7 @@ function BrowserRuntime(logoutput) {
                 if (xhr.status === 0 && !xhr.responseText) {
                     // for local files there is no difference between missing
                     // and empty files, so empty files are considered as errors
-                    callback("File is empty.");
+                    callback("File " + path + " is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
@@ -410,7 +410,7 @@ function BrowserRuntime(logoutput) {
                 if (xhr.status === 0 && !xhr.responseText) {
                     // for local files there is no difference between missing
                     // and empty files, so empty files are considered as errors
-                    callback("File is empty.");
+                    callback("File " + path + " is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (typeof VBArray !== "undefined") {
@@ -467,7 +467,7 @@ function BrowserRuntime(logoutput) {
                 if (xhr.status === 0 && !xhr.responseText) {
                     // for local files there is no difference between missing
                     // and empty files, so empty files are considered as errors
-                    callback("File is empty.");
+                    callback("File " + path + " is empty.");
                 } else if ((xhr.status >= 200 && xhr.status < 300) ||
                            xhr.status === 0) {
                     // report success
@@ -519,7 +519,7 @@ function BrowserRuntime(logoutput) {
         function handleResult() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 0 && !xhr.responseText) {
-                    callback("File is empty.");
+                    callback("File " + path + " is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     callback(null, xhr.responseXML);
