@@ -33,25 +33,6 @@
 /*global runtime xmldom*/
 runtime.loadClass("xmldom.RelaxNGParser");
 
-function validate(relaxng, url) {
-    runtime.loadXML(url, function (err, dom) {
-        var walker;
-        if (err) {
-            runtime.log("Could not read " + url + ": " + err);
-        } else {
-            walker = dom.createTreeWalker(dom.firstChild, 0xFFFFFFFF);
-            relaxng.validate(walker, function (err) {
-                if (err) {
-                    var i;
-                    runtime.log("Found " + err.length + " error validating " + url + ":");
-                    for (i = 0; i < err.length; i += 1) {
-                        runtime.log(err[i].message());
-                    }
-                }
-            });
-        }
-    });
-}
 var nsmap = {
         "http://purl.org/dc/elements/1.1/": "purl",
         "http://www.w3.org/1998/Math/MathML": "mathml",
@@ -72,17 +53,16 @@ var nsmap = {
         "urn:oasis:names:tc:opendocument:xmlns:office:1.0": "office",
         "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0": "presentation",
         "urn:oasis:names:tc:opendocument:xmlns:script:1.0": "script",
+        "urn:oasis:names:tc:opendocument:xmlns:smil-compatible:1.0": "smilc",
         "urn:oasis:names:tc:opendocument:xmlns:style:1.0": "style",
         "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0": "svgc",
         "urn:oasis:names:tc:opendocument:xmlns:table:1.0": "table",
         "urn:oasis:names:tc:opendocument:xmlns:text:1.0": "text",
-        "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": "xslfoc",
-        "urn:oasis:names:tc:opendocument:xmlns:smil-compatible:1.0": "smilc"
+        "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": "xslfoc"
     },
     relaxngurl = arguments[1],
     parser = new xmldom.RelaxNGParser(relaxngurl),
-    definedAttributes = {},
-    definedStarts = {};
+    definedAttributes = {};
 
 function out(string) {
     runtime.log(string);
@@ -121,21 +101,7 @@ function writeMembers(className, e) {
         nsname,
         name;
     if (e.name === "element") {
-        if (e.e[0].name === "name") {
-            name = getName(e.e[0]);
-            ne = className + "_" + name;
-            if (!(ne in definedStarts)) {
-                definedStarts[ne] = 1;
-                ne = e.e[0];
-                nsname = nsmap[ne.a.ns] + ":" + ne.text;
-                out("    /**");
-                out("     * Start <" + nsname + ">.");
-                out("     */");
-                out("    " + name + "WriterData start" + name + "() {");
-                out("        return " + name + "WriterData(xml);");
-                out("    }");
-            }
-        }
+        name = null;
     } else if (e.name === "attribute") {
         if (e.e[0].name === "name") {
             name = getName(e.e[0]);
@@ -147,7 +113,7 @@ function writeMembers(className, e) {
                 out("    /**");
                 out("     * Set attribute " + nsname + ".");
                 out("     */");
-                out("    void write" + name + "(const QString& value) {");
+                out("    inline void write" + name + "(const QString& value) {");
                 out("        xml->addAttribute(\"" + nsname + "\", value);");
                 out("    }");
             }
@@ -172,48 +138,127 @@ function writeMembers(className, e) {
     }
 }
 
-function defineClass(e) {
-    var ne = e.e[0],
+function defineClass(e, parents, children) {
+    var c, p,
+        ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
         name = getName(ne);
+    out("/**");
+    out(" * Serialize a <" + nsname + "> element.");
+    out(" */");
     out("class " + name + "Writer {");
+    for (c in children) {
+        if (children.hasOwnProperty(c) && c !== name) {
+            out("friend class " + c + "Writer;");
+        }
+    }
     out("private:");
-    out("    KoXmlWriter* const xml;");
+    out("    inline void start() { xml->startElement(\"" + nsname + "\"); }");
     out("public:");
-    out("    explicit " + name + "Writer(const " + name + "WriterData& data) :xml(data.xml) {");
-    out("        xml->startElement(\"" + nsname + "\");");
-    out("    }");
+    out("    KoXmlWriter* const xml;");
+    for (p in parents) {
+        if (parents.hasOwnProperty(p)) {
+            out("    inline explicit " + name + "Writer(const " + p +
+                    "Writer& p);");
+        }
+    }
+    out("    inline explicit " + name +
+            "Writer(KoXmlWriter* xml_) :xml(xml_) { start(); }");
     out("    ~" + name + "Writer() { xml->endElement(); }");
     writeMembers(name, e.e[1]);
     out("};");
 }
 
+function defineConstructors(e, parents) {
+    var p,
+        ne = e.e[0],
+        nsname = nsmap[ne.a.ns] + ":" + ne.text,
+        name = getName(ne);
+    for (p in parents) {
+        if (parents.hasOwnProperty(p)) {
+            out(name + "Writer::" + name + "Writer(const " + p + "Writer& p) :xml(p.xml) { start(); }");
+        }
+    }
+}
+
+function getChildren(e, children) {
+    var name;
+    if (e.name === "element") {
+        if (e.e[0].name === "name") {
+            name = getName(e.e[0]);
+            children[name] = 1;
+        }
+    } else if (e.name === "choice" || e.name === "interleave"
+            || e.name === "group") {
+        getChildren(e.e[0], children);
+        getChildren(e.e[1], children);
+    } else if (e.name === "oneOrMore") {
+        getChildren(e.e[0], children);
+    } else if (e.name === "attribute" || e.name === "value" ||
+            e.name === "data" || e.name === "text" || e.name === "empty") {
+        name = null; // ignore
+    } else {
+        runtime.log("OOPS " + e.name);
+        throw null;
+    }
+}
+
+function childrenToParents(childrenmap) {
+    var p, children, c, parents = {};
+    for (p in childrenmap) {
+        if (childrenmap.hasOwnProperty(p)) {
+            children = childrenmap[p];
+            for (c in children) {
+                if (children.hasOwnProperty(c)) {
+                    if (!(c in parents)) {
+                        parents[c] = {};
+                    }
+                    parents[c][p] = 1;
+                }
+            }
+        }
+    }
+    return parents;
+}
+
 function toCPP(elements) {
-    var i, e, name, definedClasses = {};
-    out("#include </home/oever/work/nokia/inst/include/KoXmlWriter.h>");
+    out("#include <KoXmlWriter.h>");
+
+    // first get a mapping for all the parents
+    var children = {}, parents = {}, i, e, name, c, definedClasses;
     for (i = 0; i < elements.length; i += 1) {
         e = elements[i];
         if (e.name === "element" && e.e[0].name === "name") {
             name = getName(e.e[0]);
-            if (!(name in definedClasses)) {
-                out("class " + name + "WriterData {");
-                out("friend class " + name + "Writer;");
-                out("private:");
-                out("    KoXmlWriter* const xml;");
-                out("public:");
-                out("    " + name + "WriterData(KoXmlWriter* xml_) :xml(xml_) {}");
-                out("};");
-                definedClasses[name] = 1;
+            out("class " + name + "Writer;");
+            if (!(name in children)) {
+                c = {};
+                getChildren(e.e[1], c);
+                children[name] = c;
             }
         }
     }
+    parents = childrenToParents(children);
+
     definedClasses = {};
     for (i = 0; i < elements.length; i += 1) {
         e = elements[i];
         if (e.name === "element" && e.e[0].name === "name") {
             name = getName(e.e[0]);
             if (!(name in definedClasses)) {
-                defineClass(e);
+                defineClass(e, parents[name], children[name]);
+                definedClasses[name] = 1;
+            }
+        }
+    }
+
+    definedClasses = {};
+    for (i = 0; i < elements.length; i += 1) {
+        e = elements[i];
+        if (e.name === "element" && e.e[0].name === "name") {
+            name = getName(e.e[0]);
+            if (!(name in definedClasses)) {
+                defineConstructors(e, parents[name]);
                 definedClasses[name] = 1;
             }
         }
