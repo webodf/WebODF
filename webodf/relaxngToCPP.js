@@ -1,0 +1,236 @@
+/**
+ * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @licstart
+ * The JavaScript code in this page is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public License
+ * (GNU AGPL) as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.  The code is distributed
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL for more details.
+ *
+ * As additional permission under GNU AGPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * As a special exception to the AGPL, any HTML file which merely makes function
+ * calls to this code, and for that purpose includes it by reference shall be
+ * deemed a separate work for copyright law purposes. In addition, the copyright
+ * holders of this code give you permission to combine this code with free
+ * software libraries that are released under the GNU LGPL. You may copy and
+ * distribute such a system following the terms of the GNU AGPL for this code
+ * and the LGPL for the libraries. If you modify this code, you may extend this
+ * exception to your version of the code, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your
+ * version.
+ *
+ * This license applies to this entire compilation.
+ * @licend
+ * @source: http://www.webodf.org/
+ * @source: http://gitorious.org/odfkit/webodf/
+ */
+/*global runtime xmldom*/
+runtime.loadClass("xmldom.RelaxNGParser");
+
+function validate(relaxng, url) {
+    runtime.loadXML(url, function (err, dom) {
+        var walker;
+        if (err) {
+            runtime.log("Could not read " + url + ": " + err);
+        } else {
+            walker = dom.createTreeWalker(dom.firstChild, 0xFFFFFFFF);
+            relaxng.validate(walker, function (err) {
+                if (err) {
+                    var i;
+                    runtime.log("Found " + err.length + " error validating " + url + ":");
+                    for (i = 0; i < err.length; i += 1) {
+                        runtime.log(err[i].message());
+                    }
+                }
+            });
+        }
+    });
+}
+var nsmap = {
+        "http://purl.org/dc/elements/1.1/": "purl",
+        "http://www.w3.org/1998/Math/MathML": "mathml",
+        "http://www.w3.org/1999/xhtml": "xhtml",
+        "http://www.w3.org/1999/xlink": "xlink",
+        "http://www.w3.org/2002/xforms": "xforms",
+        "http://www.w3.org/2003/g/data-view#": "dv",
+        "http://www.w3.org/XML/1998/namespace": "xmlns",
+        "urn:oasis:names:tc:opendocument:xmlns:animation:1.0": "animation",
+        "urn:oasis:names:tc:opendocument:xmlns:chart:1.0": "chart",
+        "urn:oasis:names:tc:opendocument:xmlns:config:1.0": "config",
+        "urn:oasis:names:tc:opendocument:xmlns:database:1.0": "database",
+        "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0": "datastyle",
+        "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0": "dr3d",
+        "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0": "drawing",
+        "urn:oasis:names:tc:opendocument:xmlns:form:1.0": "form",
+        "urn:oasis:names:tc:opendocument:xmlns:meta:1.0": "meta",
+        "urn:oasis:names:tc:opendocument:xmlns:office:1.0": "office",
+        "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0": "presentation",
+        "urn:oasis:names:tc:opendocument:xmlns:script:1.0": "script",
+        "urn:oasis:names:tc:opendocument:xmlns:style:1.0": "style",
+        "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0": "svgc",
+        "urn:oasis:names:tc:opendocument:xmlns:table:1.0": "table",
+        "urn:oasis:names:tc:opendocument:xmlns:text:1.0": "text",
+        "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": "xslfoc",
+        "urn:oasis:names:tc:opendocument:xmlns:smil-compatible:1.0": "smilc"
+    },
+    relaxngurl = arguments[1],
+    parser = new xmldom.RelaxNGParser(relaxngurl),
+    definedAttributes = {},
+    definedStarts = {};
+
+function out(string) {
+    runtime.log(string);
+}
+
+function toCamelCase(s) {
+    var str = "", i, up = true;
+    for (i = 0; i < s.length; i += 1) {
+        if (up) {
+            str += s.substr(i, 1).toUpperCase();
+        } else {
+            str += s.substr(i, 1);
+        }
+        up = false;
+        while (/\W/.test(s.substr(i + 1, 1))) {
+            up = true;
+            i += 1;
+        }
+    }
+    return str;
+}
+
+function getName(e) {
+    var name;
+    try {
+        name = toCamelCase(nsmap[e.a.ns]) + toCamelCase(e.text);
+    } catch (err) {
+        runtime.log(e.name);
+        runtime.log(JSON.stringify(e));
+        throw err;
+    }
+    return name;
+}
+function writeMembers(className, e) {
+    var ne,
+        nsname,
+        name;
+    if (e.name === "element") {
+        if (e.e[0].name === "name") {
+            name = getName(e.e[0]);
+            ne = className + "_" + name;
+            if (!(ne in definedStarts)) {
+                definedStarts[ne] = 1;
+                ne = e.e[0];
+                nsname = nsmap[ne.a.ns] + ":" + ne.text;
+                out("    /**");
+                out("     * Start <" + nsname + ">.");
+                out("     */");
+                out("    " + name + "WriterData start" + name + "() {");
+                out("        return " + name + "WriterData(xml);");
+                out("    }");
+            }
+        }
+    } else if (e.name === "attribute") {
+        if (e.e[0].name === "name") {
+            name = getName(e.e[0]);
+            ne = className + "_" + name;
+            if (!(ne in definedAttributes)) {
+                definedAttributes[ne] = 1;
+                ne = e.e[0];
+                nsname = nsmap[ne.a.ns] + ":" + ne.text;
+                out("    /**");
+                out("     * Set attribute " + nsname + ".");
+                out("     */");
+                out("    void write" + name + "(const QString& value) {");
+                out("        xml->addAttribute(\"" + nsname + "\", value);");
+                out("    }");
+            }
+        }
+    } else if (e.name === "choice" || e.name === "interleave"
+            || e.name === "group") {
+        writeMembers(className, e.e[0]);
+        writeMembers(className, e.e[1]);
+    } else if (e.name === "oneOrMore") {
+        writeMembers(className, e.e[0]);
+    } else if (e.name === "value") {
+        name = null; // todo 
+    } else if (e.name === "data") {
+        name = null; // todo 
+    } else if (e.name === "text") {
+        out("    void addTextNode(const QString& str) { xml->addTextNode(str); }");
+    } else if (e.name === "empty") {
+        name = null; // todo 
+    } else {
+        runtime.log("OOPS " + e.name);
+        throw null;
+    }
+}
+
+function defineClass(e) {
+    var ne = e.e[0],
+        nsname = nsmap[ne.a.ns] + ":" + ne.text,
+        name = getName(ne);
+    out("class " + name + "Writer {");
+    out("private:");
+    out("    KoXmlWriter* const xml;");
+    out("public:");
+    out("    explicit " + name + "Writer(const " + name + "WriterData& data) :xml(data.xml) {");
+    out("        xml->startElement(\"" + nsname + "\");");
+    out("    }");
+    out("    ~" + name + "Writer() { xml->endElement(); }");
+    writeMembers(name, e.e[1]);
+    out("};");
+}
+
+function toCPP(elements) {
+    var i, e, name, definedClasses = {};
+    out("#include </home/oever/work/nokia/inst/include/KoXmlWriter.h>");
+    for (i = 0; i < elements.length; i += 1) {
+        e = elements[i];
+        if (e.name === "element" && e.e[0].name === "name") {
+            name = getName(e.e[0]);
+            if (!(name in definedClasses)) {
+                out("class " + name + "WriterData {");
+                out("friend class " + name + "Writer;");
+                out("private:");
+                out("    KoXmlWriter* const xml;");
+                out("public:");
+                out("    " + name + "WriterData(KoXmlWriter* xml_) :xml(xml_) {}");
+                out("};");
+                definedClasses[name] = 1;
+            }
+        }
+    }
+    definedClasses = {};
+    for (i = 0; i < elements.length; i += 1) {
+        e = elements[i];
+        if (e.name === "element" && e.e[0].name === "name") {
+            name = getName(e.e[0]);
+            if (!(name in definedClasses)) {
+                defineClass(e);
+                definedClasses[name] = 1;
+            }
+        }
+    }
+}
+
+// load and parse the Relax NG
+runtime.loadXML(relaxngurl, function (err, dom) {
+    var parser = new xmldom.RelaxNGParser();
+    if (err) {
+        runtime.log(err);
+    } else {
+        err = parser.parseRelaxNGDOM(dom);
+        if (err) {
+            runtime.log(err);
+        } else {
+            toCPP(parser.elements);
+        }
+    }
+});
