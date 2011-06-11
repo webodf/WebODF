@@ -66,7 +66,6 @@ var nsmap = {
 function out(string) {
     runtime.log(string);
 }
-
 function toCamelCase(s) {
     var str = "", i, up = true;
     for (i = 0; i < s.length; i += 1) {
@@ -94,7 +93,30 @@ function getNames(e, names) {
         getNames(e.e[1], names);
     }
 }
-function writeMembers(e, atts) {
+function parseAttributes(e, att) {
+    var i, name;
+    if (e.name === "choice" || e.name === "interleave"
+            || e.name === "group") {
+        for (i = 0; i < e.e.length; i += 1) {
+            parseAttributes(e.e[i], att);
+        }
+    } else if (e.name === "value") {
+//runtime.log("value " + e.text);
+        name = null; // todo 
+    } else if (e.name === "data") {
+//runtime.log("data " + e.type);
+        name = null; // todo 
+    } else if (e.name === "list") {
+//runtime.log("list " + e.text);
+        name = null; // todo 
+    } else if (e.name === "empty") {
+        name = null; // todo 
+    } else {
+        runtime.log("OOPS " + e.name);
+        throw null;
+    }
+}
+function writeMembers(e, atts, optional) {
     var ne, nsname, i, name, names;
     if (e.name === "element") {
         name = null;
@@ -107,18 +129,26 @@ function writeMembers(e, atts) {
             if (!(name in atts)) {
                 nsname = nsmap[ne.a.ns] + ":" + ne.text;
                 out("    /**");
-                out("     * Set attribute " + nsname + ".");
+                if (optional) {
+                    out("     * Set optional attribute " + nsname + ".");
+                } else {
+                    out("     * Set required attribute " + nsname + ".");
+                }
                 out("     */");
                 out("    inline void write" + name + "(const QString& value) {");
                 out("        xml->addAttribute(\"" + nsname + "\", value);");
                 out("    }");
-                atts[name] = 1;
+                atts[name] = {};
             }
+            parseAttributes(e.e[1], atts[name]);
         }
-    } else if (e.name === "choice" || e.name === "interleave"
-            || e.name === "group") {
+    } else if (e.name === "choice" || e.name === "interleave") {
         for (i = 0; i < e.e.length; i += 1) {
-            writeMembers(e.e[i], atts);
+            writeMembers(e.e[i], atts, true);
+        }
+    } else if (e.name === "group") {
+        for (i = 0; i < e.e.length; i += 1) {
+            writeMembers(e.e[i], atts, optional);
         }
     } else if (e.name === "oneOrMore") {
         writeMembers(e.e[0], atts);
@@ -135,7 +165,6 @@ function writeMembers(e, atts) {
         throw null;
     }
 }
-
 function defineClass(e, parents, children) {
     var c, p,
         ne = e.e[0],
@@ -162,11 +191,11 @@ function defineClass(e, parents, children) {
     }
     out("    inline explicit " + name +
             "Writer(KoXmlWriter* xml_) :xml(xml_) { start(); }");
-    out("    ~" + name + "Writer() { xml->endElement(); }");
-    writeMembers(e.e[1], {});
+    out("    void end() { xml->endElement(); }");
+    out("    void operator=(const " + name + "Writer&) { }");
+    writeMembers(e.e[1], {}, false);
     out("};");
 }
-
 function defineConstructors(e, parents) {
     var p,
         ne = e.e[0],
@@ -178,7 +207,6 @@ function defineConstructors(e, parents) {
         }
     }
 }
-
 function getChildren(e, children) {
     var name, i, names;
     if (e.name === "element") {
@@ -202,7 +230,6 @@ function getChildren(e, children) {
         throw null;
     }
 }
-
 function childrenToParents(childrenmap) {
     var p, children, c, parents = {};
     for (p in childrenmap) {
@@ -219,14 +246,6 @@ function childrenToParents(childrenmap) {
         }
     }
     return parents;
-}
-function copy(e) {
-    var ec = {}, i;
-    for (i in e) {
-        if (e.hasOwnProperty(i)) {
-            ec[i] = e[i];
-        }
-    }
 }
 function toCPP(elements) {
     out("#include <KoXmlWriter.h>");
