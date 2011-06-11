@@ -182,7 +182,7 @@ function defineConstructors(e, parents) {
 }
 
 function getChildren(e, children) {
-    var name;
+    var name, i;
     if (e.name === "element") {
         if (e.e[0].name === "name") {
             name = getName(e.e[0]);
@@ -190,8 +190,9 @@ function getChildren(e, children) {
         }
     } else if (e.name === "choice" || e.name === "interleave"
             || e.name === "group") {
-        getChildren(e.e[0], children);
-        getChildren(e.e[1], children);
+        for (i = 0; i < e.e.length; i += 1) {
+            getChildren(e.e[i], children);
+        }
     } else if (e.name === "oneOrMore") {
         getChildren(e.e[0], children);
     } else if (e.name === "attribute" || e.name === "value" ||
@@ -225,43 +226,44 @@ function toCPP(elements) {
     out("#include <KoXmlWriter.h>");
 
     // first get a mapping for all the parents
-    var children = {}, parents = {}, i, e, name, c, definedClasses;
+    var children = {}, parents = {}, i, e, name, c,
+        elementMap = {}, sortedElementNames = [];
     for (i = 0; i < elements.length; i += 1) {
         e = elements[i];
         if (e.name === "element" && e.e[0].name === "name") {
             name = getName(e.e[0]);
-            out("class " + name + "Writer;");
             if (!(name in children)) {
                 c = {};
                 getChildren(e.e[1], c);
                 children[name] = c;
+                elementMap[name] = e;
+                sortedElementNames.push(name);
             }
+/*
+        } else if (e.name === "element") {
+            //runtime.log("Element with not name, but " + e.e[0].name);
+            //runtime.log(JSON.stringify(e, null, " "));
+            //return;
+        } else {
+            //runtime.log(JSON.stringify(e, null, " "));
+            //return;
+*/
         }
     }
     parents = childrenToParents(children);
+    sortedElementNames.sort();
 
-    definedClasses = {};
-    for (i = 0; i < elements.length; i += 1) {
-        e = elements[i];
-        if (e.name === "element" && e.e[0].name === "name") {
-            name = getName(e.e[0]);
-            if (!(name in definedClasses)) {
-                defineClass(e, parents[name], children[name]);
-                definedClasses[name] = 1;
-            }
-        }
+    for (i = 0; i < sortedElementNames.length; i += 1) {
+        name = sortedElementNames[i];
+        out("class " + name + "Writer;");
     }
-
-    definedClasses = {};
-    for (i = 0; i < elements.length; i += 1) {
-        e = elements[i];
-        if (e.name === "element" && e.e[0].name === "name") {
-            name = getName(e.e[0]);
-            if (!(name in definedClasses)) {
-                defineConstructors(e, parents[name]);
-                definedClasses[name] = 1;
-            }
-        }
+    for (i = 0; i < sortedElementNames.length; i += 1) {
+        name = sortedElementNames[i];
+        defineClass(elementMap[name], parents[name], children[name]);
+    }
+    for (i = 0; i < sortedElementNames.length; i += 1) {
+        name = sortedElementNames[i];
+        defineConstructors(elementMap[name], parents[name]);
     }
 }
 
