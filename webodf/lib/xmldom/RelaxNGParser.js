@@ -49,7 +49,8 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         rngns = "http://relaxng.org/ns/structure/1.0",
         xmlnsns = "http://www.w3.org/2000/xmlns/",
         start,
-        nsmap = { "http://www.w3.org/XML/1998/namespace": "xml" };
+        nsmap = { "http://www.w3.org/XML/1998/namespace": "xml" },
+        parse;
 
     /**
      * @constructor
@@ -106,13 +107,9 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             localnames[i] = name[1];
         }
     }
-   
-    function parse(element, elements) {
-        // parse all elements from the Relax NG namespace into JavaScript
-        // objects
-        var e = [], a = {}, c = element.firstChild,
-            atts = element.attributes,
-            att, i, text = "", name = element.localName, names = [], ce;
+
+    function copyAttributes(atts, name, names) {
+        var a = {}, i, att;
         for (i = 0; i < atts.length; i += 1) {
             att = atts.item(i);
             if (!att.namespaceURI) {
@@ -127,6 +124,11 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
                 nsmap[att.value] = att.localName;
             }
         }
+        return a;
+    }
+
+    function parseChildren(c, e, elements, names) {
+        var text = "", ce;
         while (c) {
             if (c.nodeType === 1 && c.namespaceURI === rngns) {
                 ce = parse(c, elements);
@@ -146,6 +148,17 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             }
             c = c.nextSibling;
         }
+        return text;
+    }
+ 
+    parse = function parse(element, elements) {
+        // parse all elements from the Relax NG namespace into JavaScript
+        // objects
+        var e = [], a, ce,
+            i, text, name = element.localName, names = [];
+        a = copyAttributes(element.attributes, name, names);
+        text = parseChildren(element.firstChild, e, elements, names);
+
         // 4.2 strip leading and trailing whitespace
         if (name !== "value" && name !== "param") {
             text = /^\s*([\s\S]*\S)?\s*$/.exec(text)[1];
@@ -241,7 +254,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             ce = { name: "elementref", id: ce.id };
         }
         return ce;
-    }
+    };
 
     function resolveDefines(def, defines) {
         var i = 0, e, defs, end, name = def.name;
