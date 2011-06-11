@@ -84,17 +84,16 @@ function toCamelCase(s) {
     }
     return str;
 }
-
 function getName(e) {
-    var name;
-    try {
-        name = toCamelCase(nsmap[e.a.ns]) + toCamelCase(e.text);
-    } catch (err) {
-        runtime.log(e.name);
-        runtime.log(JSON.stringify(e));
-        throw err;
+    return toCamelCase(nsmap[e.a.ns]) + toCamelCase(e.text);
+}
+function getNames(e, names) {
+    if (e.name === "name") {
+        names.push(e);
+    } else if (e.name === "choice") {
+        getNames(e.e[0], names);
+        getNames(e.e[1], names);
     }
-    return name;
 }
 function writeMembers(className, e) {
     var ne,
@@ -142,7 +141,7 @@ function defineClass(e, parents, children) {
     var c, p,
         ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
-        name = getName(ne);
+        name = ne.cppname;
     out("/**");
     out(" * Serialize a <" + nsname + "> element.");
     out(" */");
@@ -173,7 +172,7 @@ function defineConstructors(e, parents) {
     var p,
         ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
-        name = getName(ne);
+        name = ne.cppname;
     for (p in parents) {
         if (parents.hasOwnProperty(p)) {
             out(name + "Writer::" + name + "Writer(const " + p + "Writer& p) :xml(p.xml) { start(); }");
@@ -182,11 +181,12 @@ function defineConstructors(e, parents) {
 }
 
 function getChildren(e, children) {
-    var name, i;
+    var name, i, names;
     if (e.name === "element") {
-        if (e.e[0].name === "name") {
-            name = getName(e.e[0]);
-            children[name] = 1;
+        names = [];
+        getNames(e.e[0], names);
+        for (i = 0; i < names.length; i += 1) {
+            children[names[i].cppname] = 1;
         }
     } else if (e.name === "choice" || e.name === "interleave"
             || e.name === "group") {
@@ -221,37 +221,48 @@ function childrenToParents(childrenmap) {
     }
     return parents;
 }
-
+function copy(e) {
+    var ec = {}, i;
+    for (i in e) {
+        if (e.hasOwnProperty(i)) {
+            ec[i] = e[i];
+        }
+    }
+}
 function toCPP(elements) {
     out("#include <KoXmlWriter.h>");
 
     // first get a mapping for all the parents
-    var children = {}, parents = {}, i, e, name, c,
+    var children = {}, parents = {}, i, j, ce, ec, name, names, c,
         elementMap = {}, sortedElementNames = [];
     for (i = 0; i < elements.length; i += 1) {
-        e = elements[i];
-        if (e.name === "element" && e.e[0].name === "name") {
-            name = getName(e.e[0]);
-            if (!(name in children)) {
-                c = {};
-                getChildren(e.e[1], c);
-                children[name] = c;
-                elementMap[name] = e;
-                sortedElementNames.push(name);
+        ce = elements[i];
+        if (ce.name !== "element") {
+            runtime.log("Error in parsed data.");
+            return;
+        }
+        names = [];
+        getNames(ce.e[0], names);
+        for (j = 0; j < names.length; j += 1) {
+            name = getName(names[j]);
+            while (name in elementMap) {
+                name = name + "_";
             }
-/*
-        } else if (e.name === "element") {
-            //runtime.log("Element with not name, but " + e.e[0].name);
-            //runtime.log(JSON.stringify(e, null, " "));
-            //return;
-        } else {
-            //runtime.log(JSON.stringify(e, null, " "));
-            //return;
-*/
+            names[j].cppname = name;
+            ec = {e: [names[j], ce.e[1]]};
+            elementMap[name] = ec;
+            sortedElementNames.push(name);
         }
     }
-    parents = childrenToParents(children);
     sortedElementNames.sort();
+
+    for (i = 0; i < sortedElementNames.length; i += 1) {
+        name = sortedElementNames[i];
+        c = {};
+        getChildren(elementMap[name].e[1], c);
+        children[name] = c;
+    }
+    parents = childrenToParents(children);
 
     for (i = 0; i < sortedElementNames.length; i += 1) {
         name = sortedElementNames[i];
