@@ -48,7 +48,7 @@ runtime.loadClass("xmldom.RelaxNGParser");
  * @constructor
  * @param {!string} url path to the Relax NG schema
  */
-xmldom.RelaxNG = function RelaxNG(url) {
+xmldom.RelaxNG2 = function RelaxNG2(url) {
     var rngns = "http://relaxng.org/ns/structure/1.0",
         xmlnsns = "http://www.w3.org/2000/xmlns/",
         start,
