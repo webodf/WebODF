@@ -153,6 +153,9 @@ function writeAttributeSetter(name, type, a) {
      out("    }");
 }
 function writeAttribute(name, a) {
+    if (!a.optional) {
+        return;
+    }
     var i, type, done = {}, needfallback = true;
     for (i = 0; i < a.types.length; i += 1) {
         needfallback = false;
@@ -170,15 +173,67 @@ function writeAttribute(name, a) {
     if (needfallback) {
         writeAttributeSetter(name, "const QString&", a);
     }
-//    if (a.types.length === 0) {
-//        out("OOPS " + JSON.stringify(a));
-//    }
 }
-function writeAttributes(atts) {
+function writeOptionalAttributes(atts) {
     var name;
     for (name in atts) {
         if (atts.hasOwnProperty(name)) {
             writeAttribute(name, atts[name]);
+        }
+    }
+}
+function writeFixedRequiredAttributes(atts) {
+    var name, a;
+    for (name in atts) {
+        if (atts.hasOwnProperty(name)) {
+            a = atts[name];
+            if (!a.optional && a.types.length === 0 && a.values.length === 1) {
+                 out("        xml->addAttribute(\"" + a.nsname + "\", \"" +
+                     a.values[0] + "\");");
+            }
+        }
+    }
+}
+function getRequiredAttributeArguments(atts) {
+    var name, a, s = "", type;
+    for (name in atts) {
+        if (atts.hasOwnProperty(name)) {
+            a = atts[name];
+            if (!a.optional && (a.types.length > 0 || a.values.length !== 1)) {
+                type = typemap[a.types[0]] || a.types[0] || "const QString&";
+                if (s) {
+                    s += ", ";
+                }
+                s += type + " " + name.toLowerCase();
+            }
+        }
+    }
+    return s;
+}
+function getRequiredAttributeCall(atts) {
+    var name, a, s = "";
+    for (name in atts) {
+        if (atts.hasOwnProperty(name)) {
+            a = atts[name];
+            if (!a.optional && (a.types.length > 0 || a.values.length !== 1)) {
+                if (s) {
+                    s += ", ";
+                }
+                s += name.toLowerCase();
+            }
+        }
+    }
+    return s;
+}
+function writeRequiredAttributesSetters(atts) {
+    var name, a;
+    for (name in atts) {
+        if (atts.hasOwnProperty(name)) {
+            a = atts[name];
+            if (!a.optional && (a.types.length > 0 || a.values.length !== 1)) {
+                out("        xml->addAttribute(\"" + a.nsname + "\", " +
+                    name.toLowerCase() + ");");
+            }
         }
     }
 }
@@ -204,16 +259,16 @@ function writeMembers(e, atts, optional) {
             }
             parseAttributes(e.e[1], atts[name]);
         }
-    } else if (e.name === "choice" || e.name === "interleave") {
+    } else if (e.name === "choice") {
         for (i = 0; i < e.e.length; i += 1) {
             writeMembers(e.e[i], atts, true);
         }
-    } else if (e.name === "group") {
+    } else if (e.name === "interleave" || e.name === "group") {
         for (i = 0; i < e.e.length; i += 1) {
             writeMembers(e.e[i], atts, optional);
         }
     } else if (e.name === "oneOrMore") {
-        writeMembers(e.e[0], atts);
+        writeMembers(e.e[0], atts, optional);
     } else if (e.name === "value") {
         name = null; // todo 
     } else if (e.name === "data") {
@@ -228,7 +283,7 @@ function writeMembers(e, atts, optional) {
     }
 }
 function defineClass(e, parents, children) {
-    var c, p,
+    var c, p, i,
         ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
         name = ne.cppname, atts = {};
@@ -241,22 +296,33 @@ function defineClass(e, parents, children) {
             out("friend class " + c + "Writer;");
         }
     }
+    out("public:");
+    writeMembers(e.e[1], atts, false);
+    writeOptionalAttributes(atts);
+    e.requiredAttributes = getRequiredAttributeArguments(atts);
+    e.requiredAttributeCall = getRequiredAttributeCall(atts);
     out("private:");
-    out("    inline void start() { xml->startElement(\"" + nsname + "\"); }");
+    out("    inline void start(" + e.requiredAttributes + ") {");
+    out("        xml->startElement(\"" + nsname + "\");");
+    if (e.requiredAttributes) {
+        e.requiredAttributes = ", " + e.requiredAttributes;
+    }
+    writeFixedRequiredAttributes(atts);
+    writeRequiredAttributesSetters(atts);
+    out("    }");
     out("public:");
     out("    KoXmlWriter* const xml;");
     for (p in parents) {
         if (parents.hasOwnProperty(p)) {
             out("    inline explicit " + name + "Writer(const " + p +
-                    "Writer& p);");
+                    "Writer& p" + e.requiredAttributes + ");");
         }
     }
-    out("    inline explicit " + name +
-            "Writer(KoXmlWriter* xml_) :xml(xml_) { start(); }");
+    out("    inline explicit " + name + "Writer(KoXmlWriter* xml_" +
+            e.requiredAttributes +
+            ") :xml(xml_) { start(" + e.requiredAttributeCall + "); }");
     out("    void end() { xml->endElement(); }");
     out("    void operator=(const " + name + "Writer&) { }");
-    writeMembers(e.e[1], atts, false);
-    writeAttributes(atts);
     out("};");
 }
 function defineConstructors(e, parents) {
@@ -266,7 +332,9 @@ function defineConstructors(e, parents) {
         name = ne.cppname;
     for (p in parents) {
         if (parents.hasOwnProperty(p)) {
-            out(name + "Writer::" + name + "Writer(const " + p + "Writer& p) :xml(p.xml) { start(); }");
+            out(name + "Writer::" + name + "Writer(const " + p +
+                "Writer& p" + e.requiredAttributes +
+                ") :xml(p.xml) { start(" + e.requiredAttributeCall + "); }");
         }
     }
 }
