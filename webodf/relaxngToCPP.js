@@ -94,7 +94,7 @@ function getNames(e, names) {
         getNames(e.e[1], names);
     }
 }
-function writeMembers(className, e, atts) {
+function writeMembers(e, atts) {
     var ne, nsname, i, name, names;
     if (e.name === "element") {
         name = null;
@@ -117,10 +117,11 @@ function writeMembers(className, e, atts) {
         }
     } else if (e.name === "choice" || e.name === "interleave"
             || e.name === "group") {
-        writeMembers(className, e.e[0], atts);
-        writeMembers(className, e.e[1], atts);
+        for (i = 0; i < e.e.length; i += 1) {
+            writeMembers(e.e[i], atts);
+        }
     } else if (e.name === "oneOrMore") {
-        writeMembers(className, e.e[0], atts);
+        writeMembers(e.e[0], atts);
     } else if (e.name === "value") {
         name = null; // todo 
     } else if (e.name === "data") {
@@ -162,7 +163,7 @@ function defineClass(e, parents, children) {
     out("    inline explicit " + name +
             "Writer(KoXmlWriter* xml_) :xml(xml_) { start(); }");
     out("    ~" + name + "Writer() { xml->endElement(); }");
-    writeMembers(name, e.e[1], {});
+    writeMembers(e.e[1], {});
     out("};");
 }
 
