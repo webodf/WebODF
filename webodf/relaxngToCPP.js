@@ -61,8 +61,7 @@ var nsmap = {
         "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": "xslfoc"
     },
     relaxngurl = arguments[1],
-    parser = new xmldom.RelaxNGParser(relaxngurl),
-    definedAttributes = {};
+    parser = new xmldom.RelaxNGParser(relaxngurl);
 
 function out(string) {
     runtime.log(string);
@@ -95,19 +94,17 @@ function getNames(e, names) {
         getNames(e.e[1], names);
     }
 }
-function writeMembers(className, e) {
-    var ne,
-        nsname,
-        name;
+function writeMembers(className, e, atts) {
+    var ne, nsname, i, name, names;
     if (e.name === "element") {
         name = null;
     } else if (e.name === "attribute") {
-        if (e.e[0].name === "name") {
-            name = getName(e.e[0]);
-            ne = className + "_" + name;
-            if (!(ne in definedAttributes)) {
-                definedAttributes[ne] = 1;
-                ne = e.e[0];
+        names = [];
+        getNames(e.e[0], names);
+        for (i = 0; i < names.length; i += 1) {
+            ne = names[i];
+            name = getName(ne);
+            if (!(name in atts)) {
                 nsname = nsmap[ne.a.ns] + ":" + ne.text;
                 out("    /**");
                 out("     * Set attribute " + nsname + ".");
@@ -115,14 +112,15 @@ function writeMembers(className, e) {
                 out("    inline void write" + name + "(const QString& value) {");
                 out("        xml->addAttribute(\"" + nsname + "\", value);");
                 out("    }");
+                atts[name] = 1;
             }
         }
     } else if (e.name === "choice" || e.name === "interleave"
             || e.name === "group") {
-        writeMembers(className, e.e[0]);
-        writeMembers(className, e.e[1]);
+        writeMembers(className, e.e[0], atts);
+        writeMembers(className, e.e[1], atts);
     } else if (e.name === "oneOrMore") {
-        writeMembers(className, e.e[0]);
+        writeMembers(className, e.e[0], atts);
     } else if (e.name === "value") {
         name = null; // todo 
     } else if (e.name === "data") {
@@ -164,7 +162,7 @@ function defineClass(e, parents, children) {
     out("    inline explicit " + name +
             "Writer(KoXmlWriter* xml_) :xml(xml_) { start(); }");
     out("    ~" + name + "Writer() { xml->endElement(); }");
-    writeMembers(name, e.e[1]);
+    writeMembers(name, e.e[1], {});
     out("};");
 }
 
