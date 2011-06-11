@@ -77,9 +77,9 @@ runtime.loadXML(relaxngurl, function (err, dom) {
     parser = new xmldom.RelaxNGParser();
     relaxng = new xmldom.RelaxNG();
     relaxng2 = new xmldom.RelaxNG2();
-    err = parser.parseRelaxNGDOM(dom, relaxng.newMakePattern);
-    relaxng.init(parser.start, parser.rootPattern, parser.nsmap);
-    relaxng2.init(parser.start, parser.rootPattern, parser.nsmap);
+    err = parser.parseRelaxNGDOM(dom, relaxng.makePattern);
+    relaxng.init(parser.rootPattern);
+    relaxng2.init(parser.start, parser.nsmap);
     start = parser.start;
     rootPattern = parser.rootPattern;
     nsmap = parser.nsmap;
