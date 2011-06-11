@@ -60,6 +60,25 @@ var nsmap = {
         "urn:oasis:names:tc:opendocument:xmlns:text:1.0": "text",
         "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": "xslfoc"
     },
+    typemap = {
+        "string": "const QString&",
+        "NCName": "const QString&",
+        "date": "const QString&",
+        "time": "const QString&",
+        "dateTime": "const QString&",
+        "duration": "const QString&",
+        "anyURI": "const QString&",
+        "ID": "const QString&",
+        "IDREF": "const QString&",
+        "IDREFS": "const QString&",
+        "QName": "const QString&",
+        "token": "const QString&",
+        "language": "const QString&",
+        "positiveInteger": "quint32",
+        "nonNegativeInteger": "quint32",
+        "integer": "qint32",
+        "decimal": "double"
+    },
     relaxngurl = arguments[1],
     parser = new xmldom.RelaxNGParser(relaxngurl);
 
@@ -101,19 +120,66 @@ function parseAttributes(e, att) {
             parseAttributes(e.e[i], att);
         }
     } else if (e.name === "value") {
-//runtime.log("value " + e.text);
-        name = null; // todo 
+        att.values.push(e.text);
     } else if (e.name === "data") {
-//runtime.log("data " + e.type);
-        name = null; // todo 
+        att.types.push(e.a.type);
     } else if (e.name === "list") {
-//runtime.log("list " + e.text);
         name = null; // todo 
     } else if (e.name === "empty") {
-        name = null; // todo 
+        att.empty = true;
     } else {
         runtime.log("OOPS " + e.name);
         throw null;
+    }
+}
+function writeAttributeSetter(name, type, a) {
+     var i, s = "";
+     out("    /**");
+     if (a.optional) {
+         out("     * Set optional attribute " + a.nsname + ".");
+     } else {
+         out("     * Set required attribute " + a.nsname + ".");
+     }
+     if (a.values.length > 0) {
+         s = "Choose one of these values: '" + a.values[0] + "'";
+         for (i = 1; i < a.values.length; i += 1) {
+             s += ", '" + a.values[i] + "'";
+         }
+         out("     * " + s + ".");
+     }
+     out("     */");
+     out("    inline void write" + name + "(" + type + " value) {");
+     out("        xml->addAttribute(\"" + a.nsname + "\", value);");
+     out("    }");
+}
+function writeAttribute(name, a) {
+    var i, type, done = {}, needfallback = true;
+    for (i = 0; i < a.types.length; i += 1) {
+        needfallback = false;
+        type = typemap[a.types[i]] || a.types[i];
+        if (!(type in done)) {
+            done[type] = 1;
+            writeAttributeSetter(name, type, a);
+        }
+    }
+    if (a.values.indexOf("true") !== -1 &&
+            a.values.indexOf("false") !== -1 && !("bool" in done)) {
+        needfallback = false;
+        writeAttributeSetter(name, "bool", a);
+    }
+    if (needfallback) {
+        writeAttributeSetter(name, "const QString&", a);
+    }
+//    if (a.types.length === 0) {
+//        out("OOPS " + JSON.stringify(a));
+//    }
+}
+function writeAttributes(atts) {
+    var name;
+    for (name in atts) {
+        if (atts.hasOwnProperty(name)) {
+            writeAttribute(name, atts[name]);
+        }
     }
 }
 function writeMembers(e, atts, optional) {
@@ -128,17 +194,13 @@ function writeMembers(e, atts, optional) {
             name = getName(ne);
             if (!(name in atts)) {
                 nsname = nsmap[ne.a.ns] + ":" + ne.text;
-                out("    /**");
-                if (optional) {
-                    out("     * Set optional attribute " + nsname + ".");
-                } else {
-                    out("     * Set required attribute " + nsname + ".");
-                }
-                out("     */");
-                out("    inline void write" + name + "(const QString& value) {");
-                out("        xml->addAttribute(\"" + nsname + "\", value);");
-                out("    }");
-                atts[name] = {};
+                atts[name] = {
+                    nsname: nsname,
+                    values: [],
+                    types: [],
+                    optional: optional,
+                    empty: false
+                };
             }
             parseAttributes(e.e[1], atts[name]);
         }
@@ -169,7 +231,7 @@ function defineClass(e, parents, children) {
     var c, p,
         ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
-        name = ne.cppname;
+        name = ne.cppname, atts = {};
     out("/**");
     out(" * Serialize a <" + nsname + "> element.");
     out(" */");
@@ -193,7 +255,8 @@ function defineClass(e, parents, children) {
             "Writer(KoXmlWriter* xml_) :xml(xml_) { start(); }");
     out("    void end() { xml->endElement(); }");
     out("    void operator=(const " + name + "Writer&) { }");
-    writeMembers(e.e[1], {}, false);
+    writeMembers(e.e[1], atts, false);
+    writeAttributes(atts);
     out("};");
 }
 function defineConstructors(e, parents) {
