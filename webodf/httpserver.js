@@ -60,7 +60,7 @@ function listFiles(dir, callback) {
 }
 
 http.createServer(function (request, response) {
-    var uri = url.parse(request.url).pathname,
+    var uri = unescape(url.parse(request.url).pathname),
         filename = path.join(process.cwd(), uri);
     if (uri !== '/favicon.ico') {
         console.log(request.method + " " + uri);
