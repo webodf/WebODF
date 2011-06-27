@@ -73,7 +73,7 @@ core.CursorTests = function CursorTests(runner) {
             cursor = new core.Cursor(selection, maindoc);
         testarea.appendChild(root);
         t = { selection: selection, root: root, cursor: cursor };
-        runner.shouldBeNonNull(t, selection);
+        runner.shouldBeNonNull(t, "t.selection");
     }
  
     function setupSimpleTextDoc() {

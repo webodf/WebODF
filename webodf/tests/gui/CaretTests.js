@@ -47,7 +47,7 @@ gui.CaretTests = function CaretTests(runner) {
             doc = runtime.getDOMImplementation().createDocument("", "p", null),
             caret = new gui.Caret(selection, doc);
         t = { selection: selection, doc: doc }; //, cursor: cursor };
-        runner.shouldBeNonNull(t, selection);
+        runner.shouldBeNonNull(t, "t.selection");
     }
     function setupSimpleTextDoc() {
         setupEmptyDoc();

@@ -51,9 +51,10 @@ core.PointWalker = function PointWalker(node) {
      * @return {!number}
      */
     function getPosition(node) {
-        var p = -1;
-        while (node) {
-            node = node.previousSibling;
+        var /**@type{!number}*/ p = -1,
+            /**@type{Node}*/ n = node;
+        while (n) {
+            n = n.previousSibling;
             p += 1;
         }
         return p;

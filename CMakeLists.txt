@@ -17,8 +17,8 @@ include (ExternalProject)
 # Closure Compiler
 ExternalProject_Add(
 	ClosureCompiler
-	URL "http://closure-compiler.googlecode.com/files/compiler-20110502.tar.gz"
-	URL_MD5 15172a78a842b173a77665f1a83f8acd
+	URL "http://closure-compiler.googlecode.com/files/compiler-20110615.tar.gz"
+	URL_MD5 7ba597fa67b187df23413eb0ca50f4cb
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
         INSTALL_COMMAND ""
@@ -28,8 +28,8 @@ set(CLOSURE_JAR ${CMAKE_BINARY_DIR}/ClosureCompiler-prefix/src/ClosureCompiler/c
 # Rhino
 ExternalProject_Add(
 	Rhino
-	URL "ftp://ftp.mozilla.org/pub/mozilla.org/js/rhino1_7R2.zip"
-	URL_MD5 40d0a9abec8169e42920214b37fa8e0e
+	URL "ftp://ftp.mozilla.org/pub/mozilla.org/js/rhino1_7R3.zip"
+	URL_MD5 99d94103662a8d0b571e247a77432ac5
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
@@ -50,8 +50,8 @@ set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 # Node.JS
 ExternalProject_Add(
 	NodeJS
-	URL "http://nodejs.org/dist/node-v0.4.7.tar.gz"
-	URL_MD5 7b955c8d5897ab3f3d5c21b7a04abdec
+	URL "http://nodejs.org/dist/node-v0.4.8.tar.gz"
+	URL_MD5 22c9f69370069fe81678592cc8ae48f1
 	INSTALL_COMMAND ""
 )
 set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/src/NodeJS-build/default/node)

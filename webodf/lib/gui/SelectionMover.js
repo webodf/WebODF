@@ -75,8 +75,13 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
         if (selection.rangeCount === 0) {
             return;
         }
-        var range = selection.getRangeAt(0);
-        pointWalker.setPoint(range.startContainer, range.startOffset);
+        var range = selection.getRangeAt(0),
+            /**@type{Element}*/ element;
+        if (!range.startContainer || range.startContainer.nodeType !== 1) {
+            return;
+        }
+        element = /**@type{!Element}*/(range.startContainer);
+        pointWalker.setPoint(element, range.startOffset);
         move();
         setStart(pointWalker.node(), pointWalker.position());
     }
@@ -85,8 +90,13 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             return;
         }
         move();
-        var range = selection.getRangeAt(0);
-        pointWalker.setPoint(range.startContainer, range.startOffset);
+        var range = selection.getRangeAt(0),
+            /**@type{Element}*/ element;
+        if (!range.startContainer || range.startContainer.nodeType !== 1) {
+            return;
+        }
+        element = /**@type{!Element}*/(range.startContainer);
+        pointWalker.setPoint(element, range.startOffset);
     }
 /*
     function fallbackMoveLineUp() {
@@ -122,13 +132,23 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
         cursor.updateToSelection();
     }
     function moveCursorLeft() {
-        pointWalker.setPoint(selection.focusNode, selection.focusOffset);
+        var /**@type{Element}*/ element;
+        if (!selection.focusNode || selection.focusNode.nodeType !== 1) {
+            return;
+        }
+        element = /**@type{!Element}*/(selection.focusNode);
+        pointWalker.setPoint(element, selection.focusOffset);
         pointWalker.stepBackward();
         moveCursor(pointWalker.node(), pointWalker.position(), false);
     }
     function moveCursorRight() {
         cursor.remove();
-        pointWalker.setPoint(selection.focusNode, selection.focusOffset);
+        var /**@type{Element}*/ element;
+        if (!selection.focusNode || selection.focusNode.nodeType !== 1) {
+            return;
+        }
+        element = /**@type{!Element}*/(selection.focusNode);
+        pointWalker.setPoint(element, selection.focusOffset);
         pointWalker.stepForward();
         moveCursor(pointWalker.node(), pointWalker.position(), false);
     }
