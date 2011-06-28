@@ -44,7 +44,7 @@ if (CMAKE_Java_RUNTIME)
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js
-    DEPENDS ${LIBJSFILES} ${TESTJSFILES}
+    DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES}
   )
 
   add_custom_command(
@@ -57,7 +57,7 @@ if (CMAKE_Java_RUNTIME)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file compiled.js
-    DEPENDS ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
   )
 
   add_custom_command(
@@ -70,7 +70,7 @@ if (CMAKE_Java_RUNTIME)
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
-    DEPENDS ${LIBJSFILES} tools/externs.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
   )
   add_custom_target(webodf.js SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js)
 
@@ -85,7 +85,7 @@ if (CMAKE_Java_RUNTIME)
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf-experimental.js
-    DEPENDS ${LIBJSFILES} lib/export.js tools/externs.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} lib/export.js tools/externs.js
   )
 
   add_custom_command(
@@ -98,7 +98,7 @@ if (CMAKE_Java_RUNTIME)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf-debug.js
-    DEPENDS ${LIBJSFILES} tools/externs.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
   )
 
   add_custom_command(
@@ -113,7 +113,7 @@ if (CMAKE_Java_RUNTIME)
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file odfedit.js
-    DEPENDS ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js odfedit.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js odfedit.js
   )
 
   add_custom_command(
@@ -129,7 +129,7 @@ if (CMAKE_Java_RUNTIME)
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file gui.js
-    DEPENDS ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js filelister.js gui.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js filelister.js gui.js
   )
 
   add_custom_target(syntaxcheck ALL DEPENDS simplecompiled.js webodf.js webodf-experimental.js webodf-debug.js compiled.js odfedit.js gui.js)
