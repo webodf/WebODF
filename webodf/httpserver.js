@@ -30,13 +30,14 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global require console process Buffer*/
+/*global require console process Buffer unescape*/
 /* A Node.JS http server*/
 var sys = require("sys"),
     http = require("http"),
     url = require("url"),
     path = require("path"),
-    fs = require("fs");
+    fs = require("fs"),
+    lookForIndexHtml = true;
 
 function statFile(dir, filelist, position, callback) {
     if (position >= filelist.length) {
@@ -99,7 +100,7 @@ http.createServer(function (request, response) {
         });
         return;
     }
-    fs.stat(filename, function (err, stats) {
+    function handleStat(err, stats, lookForIndexHtml) {
         if (!err && stats.isFile()) {
             fs.readFile(filename, "binary", function (err, file) {
                 if (err) {
@@ -123,6 +124,17 @@ http.createServer(function (request, response) {
                 response.end();
             });
         } else if (!err && stats.isDirectory()) {
+            if (lookForIndexHtml) {
+                fs.stat(filename + "/index.html", function (err, stats) {
+                    if (err) {
+                        fs.stat(filename, handleStat);
+                    } else {
+                        filename = filename + "/index.html";
+                        handleStat(err, stats);
+                    }
+                });
+                return;
+            }
             if (uri.length === 0 || uri[uri.length - 1] !== "/") {
                 response.writeHead(301, {"Content-Type": "text/plain",
                         "Location": uri + "/"});
@@ -170,6 +182,9 @@ http.createServer(function (request, response) {
             }
             response.end();
         }
+    }
+    fs.stat(filename, function (err, stats) {
+        handleStat(err, stats, lookForIndexHtml);
     });
 }).listen(8124, "127.0.0.1");
 
