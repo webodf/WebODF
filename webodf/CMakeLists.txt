@@ -72,6 +72,7 @@ if (CMAKE_Java_RUNTIME)
          --js_output_file ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
     DEPENDS ${LIBJSFILES} tools/externs.js
   )
+  add_custom_target(webodf.js SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js)
 
   add_custom_command(
     OUTPUT webodf-experimental.js
