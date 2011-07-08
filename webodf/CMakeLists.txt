@@ -89,7 +89,7 @@ if (CMAKE_Java_RUNTIME)
   )
 
   add_custom_command(
-    OUTPUT webodf-debug.js
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf-debug.js
     COMMAND ${CMAKE_Java_RUNTIME}
     ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
@@ -100,6 +100,8 @@ if (CMAKE_Java_RUNTIME)
          --js_output_file webodf-debug.js
     DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
   )
+  add_custom_target(webodf-debug.js
+       SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/webodf-debug.js)
 
   add_custom_command(
     OUTPUT odfedit.js
