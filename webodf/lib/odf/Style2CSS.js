@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global odf runtime*/
+/*global odf: true, runtime: true*/
 /**
  * @constructor
  */
@@ -454,7 +454,7 @@ odf.Style2CSS = function Style2CSS() {
                 'i': 'lower-roman', 'I': 'upper-roman'},
             content = "";
         content = prefix || "";
-        if (style in stylemap) {
+        if (stylemap.hasOwnProperty(style)) {
             content += " counter(list, " + stylemap[style] + ")";
         } else if (style) {
             content += "'" + style + "';";

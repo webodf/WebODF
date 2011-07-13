@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global odf runtime*/
+/*global odf: true, runtime: true*/
 /**
  * @constructor
  */

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global document core gui runtime*/
+/*global document: true, core: true, gui: true, runtime: true*/
 runtime.loadClass("core.PointWalker");
 runtime.loadClass("gui.XMLEdit");
 

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core gui*/
+/*global runtime: true, core: true, gui: true*/
 runtime.loadClass("core.PointWalker");
 runtime.loadClass("core.Cursor");
 //runtime.loadClass("gui.Caret");
@@ -251,13 +251,13 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         var taken = {},
             ns, p, n = 0;
         for (ns in prefixes) {
-            if (ns) {
+            if (prefixes.hasOwnProperty(ns) && ns) {
                 p = prefixes[ns];
-                if (!p || p in taken || p === "xmlns") {
+                if (!p || taken.hasOwnProperty(p) || p === "xmlns") {
                     do {
                         p = "ns" + n;
                         n += 1;
-                    } while (p in taken);
+                    } while (taken.hasOwnProperty(p));
                     prefixes[ns] = p;
                 }
                 taken[p] = true;

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core Node*/
+/*global core: true, Node: true*/
 /**
  * @class
  * A cursor is a dom node that visually represents a cursor in a DOM tree.

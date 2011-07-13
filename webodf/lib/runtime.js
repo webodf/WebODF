@@ -30,10 +30,11 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*jslint nomen: false, evil: true, bitwise: false */
-/*global window XMLHttpRequest require console process __dirname setTimeout
-  Packages print readFile quit Buffer ArrayBuffer Uint8Array navigator
-  VBArray */
+/*jslint nomen: true, evil: true, bitwise: true */
+/*global window: true, XMLHttpRequest: true, require: true, console: true,
+  process: true, __dirname: true, setTimeout: true, Packages: true, print: true,
+  readFile: true, quit: true, Buffer: true, ArrayBuffer: true, Uint8Array: true,
+  navigator: true, VBArray: true */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -257,25 +258,25 @@ function BrowserRuntime(logoutput) {
                 return array;
             };
             return new Uint8Array(new ArrayBuffer(size));
-          }
+        }
         : function ByteArray(size) {
-            return new Array(size);
-          };
+            return [size];
+        };
     this.concatByteArrays = (useNativeArray)
         ? function (bytearray1, bytearray2) {
-              var i, l1 = bytearray1.length, l2 = bytearray2.length,
-                  a = new this.ByteArray(l1 + l2);
-              for (i = 0; i < l1; i += 1) {
-                  a[i] = bytearray1[i];
-              }
-              for (i = 0; i < l2; i += 1) {
-                  a[i + l1] = bytearray2[i];
-              }
-              return a;
-          }
+            var i, l1 = bytearray1.length, l2 = bytearray2.length,
+                a = new this.ByteArray(l1 + l2);
+            for (i = 0; i < l1; i += 1) {
+                a[i] = bytearray1[i];
+            }
+            for (i = 0; i < l2; i += 1) {
+                a[i + l1] = bytearray2[i];
+            }
+            return a;
+        }
         : function (bytearray1, bytearray2) {
-              return bytearray1.concat(bytearray2);
-          };
+            return bytearray1.concat(bytearray2);
+        };
     function utf8ByteArrayFromString(string) {
         var l = string.length, bytearray, i, n, j = 0;
         // first determine the length in bytes
@@ -351,7 +352,7 @@ function BrowserRuntime(logoutput) {
         }
     }
     function readFile(path, encoding, callback) {
-        if (path in cache) {
+        if (cache.hasOwnProperty(path)) {
             callback(null, cache[path]);
             return;
         }
@@ -399,7 +400,7 @@ function BrowserRuntime(logoutput) {
         }
     }
     function read(path, offset, length, callback) {
-        if (path in cache) {
+        if (cache.hasOwnProperty(path)) {
             callback(null, cache[path].slice(offset, offset + length));
             return;
         }
@@ -796,7 +797,7 @@ function RhinoRuntime() {
      * @param {!number} size
      */
     this.ByteArray = function ByteArray(size) {
-        return new Array(size);
+        return [size];
     };
     this.byteArrayFromArray = function (array) {
         return array;
@@ -961,7 +962,7 @@ var runtime = (function () {
         pkg = eval("if (typeof " + topname + " === 'undefined') {" +
                 "eval('" + topname + " = {};');}" + topname);
         for (i = 1; i < packageNameComponents.length - 1; i += 1) {
-            if (!(packageNameComponents[i] in pkg)) {
+            if (!pkg.hasOwnProperty(packageNameComponents[i])) {
                 pkg = pkg[packageNameComponents[i]] = {};
             }
         }
@@ -975,7 +976,7 @@ var runtime = (function () {
         if (IS_COMPILED_CODE) {
             return;
         }
-        if (classpath in cache) {
+        if (cache.hasOwnProperty(classpath)) {
             return;
         }
         var names = classpath.split("."),

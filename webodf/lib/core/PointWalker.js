@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core Node*/
+/*global core: true, Node: true*/
 /**
  * A simple walker that allows finegrained stepping through the DOM.
  * It does not support node filtering.

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime Runtime core*/
+/*global runtime: true, Runtime: true, core: true*/
 /*jslint evil: true*/
 /**
  * @interface
@@ -200,7 +200,7 @@ core.UnitTester = function UnitTester() {
             lastFailCount;
 
         // check that this test has not been run or started yet
-        if (testName in results) {
+        if (testName.hasOwnProperty(results)) {
             runtime.log("Test " + testName + " has already run.");
             return;
         }

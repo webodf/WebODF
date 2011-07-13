@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global core*/
-/*jslint plusplus: false, bitwise: false */
+/*jslint plusplus: true, bitwise: true */
 /**
  * @constructor
  * @param {!Runtime.ByteArray} data

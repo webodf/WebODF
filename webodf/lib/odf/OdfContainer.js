@@ -30,7 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core xmldom odf DOMParser document XPathResult */
+/*global runtime: true, core: true, xmldom: true, odf: true, DOMParser: true,
+  document: true, XPathResult: true */
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");

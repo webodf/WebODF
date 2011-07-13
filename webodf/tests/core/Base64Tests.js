@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core runtime*/
+/*global core: true, runtime: true*/
 runtime.loadClass("core.Base64");
 /**
  * @constructor

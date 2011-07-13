@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime xmldom*/
+/*global runtime: true, xmldom: true*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema

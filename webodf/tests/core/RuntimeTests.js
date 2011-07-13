@@ -30,8 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core runtime*/
-/*jslint bitwise: false*/
+/*global core: true, runtime: true*/
+/*jslint bitwise: true*/
 
 /**
  * @constructor

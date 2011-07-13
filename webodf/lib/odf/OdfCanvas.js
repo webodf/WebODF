@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint sub: true*/
-/*global runtime odf*/
+/*global runtime: true, odf: true*/
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 /**
@@ -213,7 +213,7 @@ odf.OdfCanvas = (function () {
      * @return {undefined}
      */
     function fireEvent(eventType, args) {
-        if (!(eventType in eventHandlers)) {
+        if (!eventHandlers.hasOwnProperty(eventType)) {
             return;
         }
         var handlers = eventHandlers[eventType], i;
@@ -377,7 +377,7 @@ odf.OdfCanvas = (function () {
             styles = document.createElement('style');
         }
         for (prefix in namespaces) {
-            if (prefix) {
+            if (namespaces.hasOwnProperty(prefix) && prefix) {
                 text += "@namespace " + prefix + " url(" + namespaces[prefix] +
                         ");\n";
             }

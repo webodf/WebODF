@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core gui*/
+/*global runtime: true, core: true, gui: true*/
 runtime.loadClass("core.Cursor");
 /**
  * This class modifies the selection in different ways.

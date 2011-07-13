@@ -30,8 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core*/
-/*jslint bitwise: false, maxlen: 8000*/
+/*global runtime: true, core: true*/
+/*jslint bitwise: true, maxlen: 8000*/
 /*
 * @preserve
 * WebODF

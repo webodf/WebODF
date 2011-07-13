@@ -1,4 +1,5 @@
-/*global window runtime Runtime core gui RuntimeTests*/
+/*global window: true, runtime: true, Runtime: true, core: true, gui: true,
+  RuntimeTests: true*/
 /**
  * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart

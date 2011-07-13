@@ -30,21 +30,23 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core*/
+/*global runtime: true, core: true*/
 runtime.loadClass("core.JSLint");
 
 function checkWithJSLINT(file) {
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
-            bitwise: true,
-            newcap: true,
-            nomen: true,
-            onevar: true,
-            passfail: false,
-            plusplus: true,
-            regexp: true,
-            undef: true,
-        //    white: true,
+            bitwise: false,
+            newcap: false,
+            nomen: false,
+            onevar: false,
+            passfail: true,
+            plusplus: false,
+            regexp: false,
+            undef: false,
+            sloppy: true,
+            confusion: true,
+            white: true,
             indent: 4,
             maxerr: 50
          //   maxlen: 80
