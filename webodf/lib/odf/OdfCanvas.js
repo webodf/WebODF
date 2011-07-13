@@ -42,6 +42,13 @@ runtime.loadClass("odf.Formatting");
  * @param {!Element} element Put and ODF Canvas inside this element.
  **/
 odf.OdfCanvas = (function () {
+    /**
+     * Register event listener on DOM element.
+     * @param {!Element} eventTarget
+     * @param {!string} eventType
+     * @param {!Function} eventHandler
+     * @return {undefined}
+     */
     function listenEvent(eventTarget, eventType, eventHandler) {
         if (eventTarget.addEventListener) {
             eventTarget.addEventListener(eventType, eventHandler, false);
@@ -52,7 +59,6 @@ odf.OdfCanvas = (function () {
             eventTarget["on" + eventType] = eventHandler;
         }
     }
-
     /**
      * Class that listens to events and sends a signal if the selection changes.
      * @constructor
@@ -184,8 +190,37 @@ odf.OdfCanvas = (function () {
         textns  = namespaces.text,
         xlinkns = namespaces.xlink,
         window = runtime.getWindow(),
+        /**@const@type{!Object.<!string,!Array.<!Function>>}*/ eventHandlers = {},
         editparagraph;
 
+    /**
+     * Register an event handler
+     * @param {!string} eventType
+     * @param {!Function} eventHandler
+     * @return {undefined}
+     */
+    function addEventListener(eventType, eventHandler) {
+        var handlers = eventHandlers[eventType];
+        if (handlers === undefined) {
+            handlers = eventHandlers[eventType] = [];
+        }
+        handlers.push(eventHandler);
+    }
+    /**
+     * Fire an event
+     * @param {!string} eventType
+     * @param {Array.<Object>=} args
+     * @return {undefined}
+     */
+    function fireEvent(eventType, args) {
+        if (!(eventType in eventHandlers)) {
+            return;
+        }
+        var handlers = eventHandlers[eventType], i;
+        for (i = 0; i < handlers.length; i += 1) {
+            handlers[i](args);
+        }
+    }
     /**
      * @param {!Element} element
      * @return {undefined}
@@ -402,9 +437,7 @@ odf.OdfCanvas = (function () {
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(container, odfnode);
-                if (self.onstatereadychange) {
-                    self.onstatereadychange();
-                }
+                fireEvent("statereadychange");
             }
         
             if (odfcontainer.state === odf.OdfContainer.DONE) {
@@ -513,6 +546,8 @@ odf.OdfCanvas = (function () {
         this.addListener = function (eventName, handler) {
             if (eventName === "selectionchange") {
                 selectionWatcher.addListener(eventName, handler);
+            } else {
+                addEventListener(eventName, handler);
             }
         };
         /**
