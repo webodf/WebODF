@@ -9,8 +9,8 @@ int
 main(int argc, char** argv) {
     if (argc < 2) {
         QTextStream err(stderr);
-        err << "Usage: " << argv[0] << " [--render-pdf pdffile] "
-               "[--render-png pngfile] html/javascripfile [arguments]\n";
+        err << "Usage: " << argv[0] << " [--export-pdf pdffile] "
+               "[--export-png pngfile] html/javascripfile [arguments]\n";
         return 1;
     }
     QApplication app(argc, argv);

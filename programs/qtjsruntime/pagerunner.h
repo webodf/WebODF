@@ -31,7 +31,6 @@ private:
 public:
     PageRunner(const QStringList& args)
             : QWebPage(0),
-              nam(new NAM(QUrl(url).host(), QUrl(url).port(), this)),
               out(stdout),
               err(stderr),
               view(new QWidget()),
@@ -50,6 +49,7 @@ public:
                 qApp->exit(1);
             }
         }
+        nam = new NAM(QUrl(url).host(), QUrl(url).port(), this);
 
         setNetworkAccessManager(nam);
         connect(this, SIGNAL(loadFinished(bool)), this, SLOT(finished()));
