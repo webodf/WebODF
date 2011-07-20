@@ -39,6 +39,7 @@ runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.ZipTests");
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
+runtime.loadClass("gui.CaretTests");
 runtime.loadClass("gui.XMLEditTests");
 
 var tests = [
@@ -52,9 +53,9 @@ if (runtime.type() !== "NodeJSRuntime") {
 }
 if (runtime.type() === "BrowserRuntime") {
     tests.push(core.PointWalkerTests);
-    tests.push(gui.CaretTests);
 //    tests.push(core.CursorTests);
     tests.push(xmldom.OperationalTransformDOMTests);
+    tests.push(gui.CaretTests);
 //    tests.push(gui.XMLEditTests);
 }
 
@@ -70,6 +71,12 @@ function runNextTest(tests) {
         return;
     }
     var test = tests[0];
+    if (typeof test !== "function") {
+        runtime.log("Tests contain a non-function object of type " +
+                typeof(test) + ".");
+        runtime.exit(1);
+        return;
+    }
     runtime.log("Running test '" + Runtime.getFunctionName(test) + "'.");
     try {
         tester.runTests(test, function () {
