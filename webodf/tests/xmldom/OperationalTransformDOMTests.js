@@ -1,5 +1,3 @@
-/*global window: true, runtime: true, Runtime: true, core: true, gui: true,
-  RuntimeTests: true*/
 /**
  * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
@@ -32,48 +30,50 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-runtime.loadClass("core.RuntimeTests");
-runtime.loadClass("core.UnitTester");
-runtime.loadClass("core.PointWalkerTests");
-runtime.loadClass("core.CursorTests");
-runtime.loadClass("core.ZipTests");
-runtime.loadClass("core.Base64Tests");
-runtime.loadClass("xmldom.OperationalTransformDOMTests");
-runtime.loadClass("gui.XMLEditTests");
-
-var tests = [
-    core.RuntimeTests, // temporarily disabled, enable at next commit!
-    core.ZipTests,
-    core.Base64Tests,
-    xmldom.OperationalTransformDOMTests
-];
-
-if (runtime.type() !== "NodeJSRuntime") {
-    tests.push(core.PointWalkerTests);
-}
-
-if (runtime.type() === "BrowserRuntime") {
-//    tests.push(gui.CaretTests);
-    tests.push(core.CursorTests);
-    tests.push(gui.XMLEditTests);
-}
-
-var tester = new core.UnitTester();
+/*global runtime: true, core: true, xmldom: true*/
+runtime.loadClass("xmldom.OperationalTransformDOM");
 
 /**
- * @param {!Array.<Function>} tests
- * @return {undefined}
+ * @constructor
+ * @param {core.UnitTestRunner} runner
+ * @implements {core.UnitTest}
  */
-function runNextTest(tests) {
-    if (tests.length === 0) {
-        //runtime.log(JSON.stringify(tester.results()));
-        runtime.exit(tester.countFailedTests());
-        return;
+xmldom.OperationalTransformDOMTests = function OperationalTransformDOMTests(runner) {
+    var r = runner,
+        t;
+
+    function setupEmptyDoc() {
+        var selection = runtime.getWindow().getSelection(),
+            doc = runtime.getDOMImplementation().createDocument("", "p", null),
+            caret = new gui.Caret(selection, doc);
+        t = { selection: selection, doc: doc }; //, cursor: cursor };
+        runner.shouldBeNonNull(t, "t.selection");
     }
-    var test = tests[0];
-    runtime.log("Running test '" + Runtime.getFunctionName(test) + "'.");
-    tester.runTests(test, function () {
-        runNextTest(tests.slice(1));
-    });
-}
-runNextTest(tests);
+    function setupSimpleTextDoc() {
+        setupEmptyDoc();
+        t.textnode = t.doc.createTextNode("abc");
+        t.doc.documentElement.appendChild(t.textnode);
+    }
+    function testOnUpDownTraversal() {
+    }
+
+    this.setUp = function () {
+        t = {};
+    };
+    this.tearDown = function () {
+        t = {};
+    };
+    this.tests = function () {
+        return [];
+    };
+    this.asyncTests = function () {
+        return [
+        ];
+    };
+};
+xmldom.OperationalTransformDOMTests.prototype.description = function () {
+    return "Test the OperationalTransformDOM class.";
+};
+(function () {
+    return xmldom.OperationalTransformDOMTests;
+}());
