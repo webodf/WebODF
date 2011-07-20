@@ -43,20 +43,17 @@ xmldom.OperationalTransformDOMTests = function OperationalTransformDOMTests(runn
         t;
 
     function setupEmptyDoc() {
-        var selection = runtime.getWindow().getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            caret = new gui.Caret(selection, doc);
-        t = { selection: selection, doc: doc }; //, cursor: cursor };
-        runner.shouldBeNonNull(t, "t.selection");
+        var doc = runtime.getDOMImplementation().createDocument("", "p", null);
+        t = { doc: doc };
     }
     function setupSimpleTextDoc() {
         setupEmptyDoc();
         t.textnode = t.doc.createTextNode("abc");
         t.doc.documentElement.appendChild(t.textnode);
     }
-    function testOnUpDownTraversal() {
+    function testSkip() {
+        setupEmptyDoc();
     }
-
     this.setUp = function () {
         t = {};
     };
@@ -64,7 +61,7 @@ xmldom.OperationalTransformDOMTests = function OperationalTransformDOMTests(runn
         t = {};
     };
     this.tests = function () {
-        return [];
+        return [ testSkip ];
     };
     this.asyncTests = function () {
         return [

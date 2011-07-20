@@ -37,8 +37,10 @@
  * @augments xmldom.OperationalTransformInterface
  * @implements {xmldom.OperationalTransformInterface}
  * @param {Element} root
+ * @param {xmldom.LSSerializer} serializer
  */
-xmldom.OperationalTransformDOM = function OperationalTransformDOM(root) {
+xmldom.OperationalTransformDOM = function OperationalTransformDOM(root, serializer) {
+    var pos, length;
     /**
      * Skip in the document
      * @param {!number} amount
@@ -47,8 +49,8 @@ xmldom.OperationalTransformDOM = function OperationalTransformDOM(root) {
     function retain(amount) {}
     /**
      * Insert characters
-     * Can throw an exception if the current position does not allow insertion of
-     * characters.
+     * Can throw an exception if the current position does not allow insertion
+     * of characters.
      * @param {!string} chars
      * @return {undefined}
      */
@@ -93,6 +95,12 @@ xmldom.OperationalTransformDOM = function OperationalTransformDOM(root) {
      * @return {undefined}
      */
     function updateAttributes(atts) {}
+    /**
+     * @return {!boolean}
+     */
+    function atEnd() {
+        return pos === length;
+    }
     this.retain = retain;
     this.insertCharacters = insertCharacters;
     this.insertElementStart = insertElementStart;
@@ -102,4 +110,5 @@ xmldom.OperationalTransformDOM = function OperationalTransformDOM(root) {
     this.deleteElementEnd = deleteElementEnd;
     this.replaceAttributes = replaceAttributes;
     this.updateAttributes = updateAttributes;
+    this.atEnd = atEnd;
 };

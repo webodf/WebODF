@@ -167,6 +167,12 @@ add_custom_target(nodetest ALL
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         SOURCES ${LIBJSFILES}
 )
+add_custom_target(qtjsruntimetest ALL
+	COMMAND ${CMAKE_BINARY_DIR}/programs/qtjsruntime/qtjsruntime ../lib/runtime.js tests.js
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
+        SOURCES ${LIBJSFILES}
+        DEPENDS qtjsruntime jslintcheck
+)
 add_custom_target(simplenodetest ALL
 	COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
@@ -177,6 +183,6 @@ add_custom_command(
         COMMAND ${JSCOVERAGE}
         ARGS --exclude=extjs --exclude=extjs/.git ${CMAKE_CURRENT_SOURCE_DIR}
              ${CMAKE_CURRENT_BINARY_DIR}/instrumented
-        DEPENDS ${LIBJSFILES}
+        DEPENDS ${LIBJSFILES} jslintcheck
 )
 add_custom_target(instrumented ALL DEPENDS instrumented/index.html)
