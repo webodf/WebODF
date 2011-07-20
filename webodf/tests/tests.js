@@ -1,5 +1,5 @@
 /*global window: true, runtime: true, Runtime: true, core: true, gui: true,
-  RuntimeTests: true*/
+  xmldom: true, RuntimeTests: true*/
 /**
  * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
@@ -44,22 +44,21 @@ runtime.loadClass("gui.XMLEditTests");
 var tests = [
     core.RuntimeTests, // temporarily disabled, enable at next commit!
     core.ZipTests,
-    core.Base64Tests,
-    xmldom.OperationalTransformDOMTests
+    core.Base64Tests
 ];
 
 if (runtime.type() !== "NodeJSRuntime") {
     tests.push(core.PointWalkerTests);
 }
-
 if (runtime.type() === "BrowserRuntime") {
-//    tests.push(gui.CaretTests);
-    tests.push(core.CursorTests);
-    tests.push(gui.XMLEditTests);
+    tests.push(core.PointWalkerTests);
+    tests.push(gui.CaretTests);
+//    tests.push(core.CursorTests);
+    tests.push(xmldom.OperationalTransformDOMTests);
+//    tests.push(gui.XMLEditTests);
 }
 
 var tester = new core.UnitTester();
-
 /**
  * @param {!Array.<Function>} tests
  * @return {undefined}
@@ -72,8 +71,14 @@ function runNextTest(tests) {
     }
     var test = tests[0];
     runtime.log("Running test '" + Runtime.getFunctionName(test) + "'.");
-    tester.runTests(test, function () {
-        runNextTest(tests.slice(1));
-    });
+    try {
+        tester.runTests(test, function () {
+            runNextTest(tests.slice(1));
+        });
+    } catch (e) {
+        runtime.log(JSON.stringify(e));
+        runtime.exit(1);
+        throw e;
+    }
 }
 runNextTest(tests);
