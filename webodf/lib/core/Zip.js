@@ -147,8 +147,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
                 /**@const@type{!number}*/ filenamelen,
                 /**@const@type{!number}*/ extralen;
             if (sig !== 0x04034b50) {
-                callback('File entry signature is wrong.' + sig + ' ' +
-                        data.length, null);
+                callback('File entry signature is wrong.' + sig.toString() +
+                        ' ' + data.length.toString(), null);
                 return;
             }
             stream.pos += 22;
@@ -159,8 +159,9 @@ core.Zip = function Zip(url, entriesReadCallback) {
                 data = data.slice(stream.pos, stream.pos + compressedSize);
                 if (compressedSize !== data.length) {
                     callback("The amount of compressed bytes read was " +
-                        data.length + " instead of " + compressedSize +
-                        " for " + entry.filename + " in " + url + ".", null);
+                        data.length.toString() + " instead of " +
+                        compressedSize.toString() + " for " + entry.filename +
+                        " in " + url + ".", null);
                     return;
                 }
                 data = inflate(data, uncompressedSize);
@@ -168,8 +169,9 @@ core.Zip = function Zip(url, entriesReadCallback) {
                 data = data.slice(stream.pos, stream.pos + uncompressedSize);
             }
             if (uncompressedSize !== data.length) {
-                callback("The amount of bytes read was " + data.length +
-                        " instead of " + uncompressedSize + " for " +
+                callback("The amount of bytes read was " +
+                        data.length.toString() +
+                        " instead of " + uncompressedSize.toString() + " for " +
                         entry.filename + " in " + url + ".", null);
                 return;
             }
@@ -195,8 +197,11 @@ core.Zip = function Zip(url, entriesReadCallback) {
             }
             // the 256 at the end is security for when local extra field is
             // larger
-            var /**@const@type{!number}*/ size
+            var /**@type{!number}*/ size
                 = compressedSize + 34 + namelen + extralen + 256;
+            if (size + offset > filesize) {
+                size = filesize - offset;
+            }
             runtime.read(url, offset, size, function (err, data) {
                 if (err) {
                     callback(err, data);
@@ -233,8 +238,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
         if (sig !== 0x02014b50) {
             this.error =
                 "Central directory entry has wrong signature at position " +
-                (stream.pos - 4) + ' for file "' + url + '": ' +
-                stream.data.length;
+                (stream.pos - 4).toString() + ' for file "' + url + '": ' +
+                stream.data.length.toString();
             return;
         }
         // stream should be positioned at the start of the CDS entry for the
@@ -288,7 +293,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
             cdsSize, cdsOffset;
         sig = stream.readUInt32LE();
         if (sig !== 0x06054b50) {
-            callback('Central directory signature is wrong: ' + sig, zip);
+            callback('Central directory signature is wrong: ' + sig.toString(),
+                    zip);
             return;
         }
         disk = stream.readUInt16LE();
