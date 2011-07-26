@@ -47,7 +47,6 @@ var tests = [
     core.ZipTests,
     core.Base64Tests
 ];
-
 if (runtime.type() !== "NodeJSRuntime") {
     tests.push(core.PointWalkerTests);
 }
@@ -58,7 +57,6 @@ if (runtime.type() === "BrowserRuntime") {
     tests.push(gui.CaretTests);
 //    tests.push(gui.XMLEditTests);
 }
-
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests
@@ -67,6 +65,8 @@ var tester = new core.UnitTester();
 function runNextTest(tests) {
     if (tests.length === 0) {
         //runtime.log(JSON.stringify(tester.results()));
+        runtime.log("Number of failed tests: " +
+                String(tester.countFailedTests()));
         runtime.exit(tester.countFailedTests());
         return;
     }
@@ -83,7 +83,7 @@ function runNextTest(tests) {
             runNextTest(tests.slice(1));
         });
     } catch (e) {
-        runtime.log(JSON.stringify(e));
+        runtime.log(e);
         runtime.exit(1);
         throw e;
     }
