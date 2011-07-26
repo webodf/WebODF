@@ -90,7 +90,8 @@ core.ZipTests = function ZipTests(runner) {
     }
 
     function testCreateZip(callback) {
-        var zip = new core.Zip("writetest.zip", null),
+        var filename = "writetest.zip",
+            zip = new core.Zip(filename, null),
             data = runtime.byteArrayFromString(
                     "application/vnd.oasis.opendocument.text", "utf8");
         zip.save("mimetype", data, false, new Date());
@@ -103,7 +104,9 @@ core.ZipTests = function ZipTests(runner) {
             zip.write(function (err) {
                 t.err = err;
                 r.shouldBeNull(t, "t.err");
-                callback();
+                runtime.deleteFile(filename, function (err) {
+                    callback();
+                });
             });
         });
     }
