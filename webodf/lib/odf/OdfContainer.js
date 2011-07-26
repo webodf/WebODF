@@ -222,7 +222,7 @@ odf.OdfContainer = (function () {
             // it would make sense to move this to base64.toBase64
             while (i < privatedata.length) {
                 self.url += base64.convertUTF8ArrayToBase64(
-                       p.slice(i, i + chunksize));
+                       p.slice(i, Math.min(i + chunksize, p.length)));
                 i += chunksize;
             }
         }
@@ -482,8 +482,8 @@ odf.OdfContainer = (function () {
                     s += " xmlns:" + i + "=\"" + map[i] + "\"";
                 }
             }
-            return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:" + name + " " +
-                    s + " office:version=\"1.2\">";
+            return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:" + name +
+                    " " + s + " office:version=\"1.2\">";
         }
         /**
          * @return {!string}
