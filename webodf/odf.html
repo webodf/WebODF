@@ -32,11 +32,12 @@ function init() {
     location = location.substr(pos + 1);
     odfcanvas.load(location);
 }
+window.setTimeout(init, 0);
   </script>
   <title></title>
 </head>
  
-<body onload='init()' >
+<body>
   <div id="odf"/>
 </body>
 </html>
