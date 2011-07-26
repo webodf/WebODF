@@ -2,9 +2,8 @@
 #define ODFVIEW_H
 
 #include <QtWebKit/QWebView>
-
-class Odf;
-class OdfNetworkAccessManager;
+#include <QtNetwork/QNetworkAccessManager>
+class NativeIO;
 
 class OdfView : public QWebView
 {
@@ -24,9 +23,8 @@ private slots:
 private:
     bool loaded;
     QString curFile;
-    QString identifier;
-    OdfNetworkAccessManager* networkaccessmanager;
-    Odf* odf;
+    QNetworkAccessManager* networkaccessmanager;
+    NativeIO* nativeio;
 };
 
 #endif // ODFVIEW_H

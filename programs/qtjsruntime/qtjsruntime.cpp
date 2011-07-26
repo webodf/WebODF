@@ -4,7 +4,7 @@
  * be assumed to be a webpage that will be opened in
  */
 #include "pagerunner.h"
-#include <QtCore/QTextStream>
+#include <QtGui/QApplication>
 int
 main(int argc, char** argv) {
     if (argc < 2) {

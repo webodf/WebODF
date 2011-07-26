@@ -65,7 +65,6 @@ core.Base64Tests = function Base64Tests(runner) {
         }
         t.numcallbacks = 0;
         base64.convertUTF8StringToUTF16String(bin, function (str, done) {
-            runtime.log("base64.convertUTF8StringToUTF16String");
             t.numcallbacks += 1;
             t.done = done;
             if (t.numcallbacks === 1) {

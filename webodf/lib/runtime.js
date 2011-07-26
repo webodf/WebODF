@@ -229,8 +229,6 @@ Runtime.getFunctionName = function getFunctionName(f) {
 function BrowserRuntime(logoutput) {
     var self = this,
         cache = {},
-        // nativeio is a binding point for io of native runtime
-        nativeio = window.nativeio || {},
         useNativeArray = window.ArrayBuffer && window.Uint8Array;
     /**
      * @constructor
@@ -260,7 +258,9 @@ function BrowserRuntime(logoutput) {
             return new Uint8Array(new ArrayBuffer(size));
         }
         : function ByteArray(size) {
-            return [size];
+            var a = [];
+            a.length = size;
+            return a;
         };
     this.concatByteArrays = (useNativeArray)
         ? function (bytearray1, bytearray2) {
@@ -327,6 +327,11 @@ function BrowserRuntime(logoutput) {
     };
     this.byteArrayToString = Runtime.byteArrayToString;
 
+    /**
+     * @param {!string} msgOrCategory
+     * @param {string=} msg
+     * @return {undefined}
+     */
     function log(msgOrCategory, msg) {
         var node, doc, category;
         if (msg) {
@@ -475,7 +480,7 @@ function BrowserRuntime(logoutput) {
                     callback(null);
                 } else {
                     // report error
-                    callback("Status " + xhr.status + ": " +
+                    callback("Status " + String(xhr.status) + ": " +
                             xhr.responseText || xhr.statusText);
                 }
             }
@@ -580,23 +585,13 @@ function BrowserRuntime(logoutput) {
         };
     }
     this.readFile = readFile;
-    this.read = read;//wrap(nativeio.read, 3) || read;
+    this.read = read;
     this.readFileSync = readFileSync;
-    if (nativeio.writeFile) {
-        this.writeFile = (function () {
-            var f = wrap(nativeio.writeFile, 2) || writeFile;
-            return function (path, data, callback) {
-                var d = this.byteArrayToString(data, "binary");
-                f(path, d, callback);
-            };
-        }());
-    } else {
-        this.writeFile = writeFile;
-    }
-    this.deleteFile = wrap(nativeio.deleteFile, 1) || deleteFile;
+    this.writeFile = writeFile;
+    this.deleteFile = deleteFile;
     this.loadXML = loadXML;
     this.isFile = isFile;
-    this.getFileSize = wrap(nativeio.getFileSize, 1) || getFileSize;
+    this.getFileSize = getFileSize;
     this.log = log;
     this.setTimeout = function (f, msec) {
         setTimeout(f, msec);
@@ -614,9 +609,8 @@ function BrowserRuntime(logoutput) {
         return window.document.implementation;
     };
     this.exit = function (exitCode) {
-        if (nativeio.exit) {
-            nativeio.exit(exitCode);
-        }
+        log("Calling exit with code " + String(exitCode) +
+                ", but exit() is not implemented.");
     };
     this.getWindow = function () {
         return window;

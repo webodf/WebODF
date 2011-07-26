@@ -8,7 +8,6 @@
 #include <QtGui/QMdiArea>
 #include <QtGui/QTreeView>
 #include <QtGui/QVBoxLayout>
-#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
 

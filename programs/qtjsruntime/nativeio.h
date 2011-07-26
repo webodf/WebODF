@@ -1,62 +1,35 @@
 #ifndef NATIVEIO_H
 #define NATIVEIO_H
 
-// class that exposes filesystem to web environment
-
-#include <QtWebKit/QWebPage>
-#include <QtWebKit/QWebFrame>
-#include <QtGui/QApplication>
-#include <QtCore/QObject>
-#include <QtCore/QTextCodec>
 #include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDebug>
+#include <QtCore/QMap>
 
+class QWebPage;
+
+// class that exposes filesystem to web environment
 class NativeIO : public QObject {
 Q_OBJECT
 private:
     QWebPage* webpage;
+    QString errstr;
+    const QMap<QString, QFile::Permissions> pathPermissions;
 public:
-    NativeIO(QWebPage* parent) :QObject(parent), webpage(parent) {
-    }
+    NativeIO(QObject* parent,
+             const QMap<QString, QFile::Permissions>& pathPermissions
+             = QMap<QString, QFile::Permissions>());
 public slots:
-    void writeFile(const QString& path, const QString& data,
-            const QString& callbackName) {
-        QByteArray d = data.toLatin1();
-        QFile f(path);
-        QString result = "null";
-        if (!f.open(QIODevice::WriteOnly)) {
-            result = "'Could not open file for writing.'";
-        } else {
-            if (f.write(d) != d.length()) {
-                result = "'Error writing.'";
-            }
-        }
-        f.close();
-        webpage->mainFrame()->evaluateJavaScript(callbackName +
-                "(" + result + ");");
+    /**
+     * Return the last error.
+     */
+    QString error() {
+        return errstr;
     }
-    void getFileSize(const QString& path, const QString& callbackName) {
-        QFileInfo file(path);
-        qint64 result = -1;
-        if (file.isFile()) {
-            result = file.size();
-        }
-        webpage->mainFrame()->evaluateJavaScript(callbackName +
-                "(" + QString::number(result) + ");");
-    }
-    void deleteFile(const QString& path, const QString& callbackName) {
-        QFile file(path);
-        if (file.remove()) {
-            webpage->mainFrame()->evaluateJavaScript(callbackName + "(null)");
-        } else {
-            webpage->mainFrame()->evaluateJavaScript(callbackName +
-                    "('Error deleting file.')");
-        }
-    }
-    void exit(int exitcode) {
-        qApp->exit(exitcode);
-    }
+    QString readFileSync(const QString& path, const QString& encoding);
+    QString read(const QString& path, int offset, int length);
+    void writeFile(const QString& path, const QString& data);
+    void unlink(const QString& path);
+    int getFileSize(const QString& path);
+    void exit(int exitcode);
 };
 
 #endif

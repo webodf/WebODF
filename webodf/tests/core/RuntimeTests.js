@@ -46,7 +46,6 @@ core.RuntimeTests = function RuntimeTests(runner) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             t.data = runtime.byteArrayToString(data, "utf8");
-            runtime.log(t.data);
             r.shouldBe(t, "t.data", "'global'");
             callback();
         });
@@ -82,7 +81,8 @@ core.RuntimeTests = function RuntimeTests(runner) {
                     i += 1;
                 }
                 if (i !== max) {
-                    runtime.log("at " + i + " " + data[i] + " vs " + clean[i]);
+                    runtime.log("at " + String(i) + " " + data[i] + " vs " +
+                            clean[i]);
                 }
                 t.i = i;
                 t.max = max;

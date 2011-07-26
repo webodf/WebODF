@@ -3,7 +3,6 @@
 
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
-#include <QtCore/QDebug>
 
 class NAM : public QNetworkAccessManager {
 Q_OBJECT
@@ -12,7 +11,7 @@ private:
     const int port;
     int outstandingRequests;
 public:
-    NAM(const QString& host_, int port_, QObject* parent)
+    NAM(QObject* parent, const QString& host_ = QString(), int port_ = -1)
             :QNetworkAccessManager(parent), host(host_), port(port_) {
         outstandingRequests = 0;
         connect(this, SIGNAL(finished(QNetworkReply*)),
@@ -21,10 +20,17 @@ public:
     QNetworkReply* createRequest(QNetworkAccessManager::Operation o,
             QNetworkRequest const& r, QIODevice* d) {
         outstandingRequests += 1;
-        bool samehost = r.url().host() == host
-                || r.url().host().endsWith("." + host)
-                || host.endsWith("." + r.url().host());
-        if (!samehost || r.url().port() != port) {
+        bool samehost = false;
+        if (port > 0) {
+            samehost = r.url().host() == host
+                    || r.url().host().endsWith("." + host)
+                    || host.endsWith("." + r.url().host());
+            samehost &= r.url().port() != port;
+        } else {
+            // use host string as a prefix
+            samehost = r.url().toString().startsWith(host);
+        }
+        if (!samehost) {
             // if not same host or domain and port, block
             return QNetworkAccessManager::createRequest(o, QNetworkRequest(),
                     d);
