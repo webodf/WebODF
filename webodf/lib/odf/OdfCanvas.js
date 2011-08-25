@@ -505,11 +505,16 @@ odf.OdfCanvas = (function () {
                 startContainer = range && range.startContainer,
                 startOffset = range && range.startOffset,
                 endContainer = range && range.endContainer,
-                endOffset = range && range.endOffset;
+                endOffset = range && range.endOffset,
+                editable = false;
             while (e && !((e.localName === "p" || e.localName === "h") &&
                     e.namespaceURI === textns)) {
                 e = e.parentNode;
             }
+            if (!editable) {
+                return;
+            }
+            // test code for enabling editing
             if (!e || e.parentNode === editparagraph) {
                 return;
             }
