@@ -31,8 +31,9 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global xmldom*/
+/*jslint sub: true*/
 if (typeof Object.create !== 'function') {
-    Object.create = function (o) {
+    Object['create'] = function (o) {
         /**
          * @constructor
          */
