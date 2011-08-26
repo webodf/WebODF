@@ -398,7 +398,9 @@ odf.OdfCanvas = (function () {
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
             stylesxmlcss = addStyleSheet(document),
-            positioncss = addStyleSheet(document);
+            positioncss = addStyleSheet(document),
+            editable = false;
+
         /**
          * A new content.xml has been loaded. Update the live document with it.
          * @param {!Object} container
@@ -496,6 +498,14 @@ odf.OdfCanvas = (function () {
             }
         }
 
+        this.setEditable = function () {
+            editable = true;
+        };
+
+        this.setReadable = function () {
+            editable = false;
+        };
+
         function processClick(evt) {
             evt = evt || window.event;
             // go up until we find a text:p, if we find it, wrap it in <p> and make that
@@ -505,8 +515,8 @@ odf.OdfCanvas = (function () {
                 startContainer = range && range.startContainer,
                 startOffset = range && range.startOffset,
                 endContainer = range && range.endContainer,
-                endOffset = range && range.endOffset,
-                editable = false;
+                endOffset = range && range.endOffset;
+
             while (e && !((e.localName === "p" || e.localName === "h") &&
                     e.namespaceURI === textns)) {
                 e = e.parentNode;
