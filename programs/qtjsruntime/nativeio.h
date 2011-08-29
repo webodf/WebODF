@@ -14,9 +14,10 @@ private:
     QString errstr;
     const QMap<QString, QFile::Permissions> pathPermissions;
 public:
+    typedef QMap<QString, QFile::Permissions> PathMap;
+    PathMap v;
     NativeIO(QObject* parent,
-             const QMap<QString, QFile::Permissions>& pathPermissions
-             = QMap<QString, QFile::Permissions>());
+             const PathMap& pathPermissions = PathMap());
 public slots:
     /**
      * Return the last error.
