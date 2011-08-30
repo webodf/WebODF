@@ -468,6 +468,9 @@ odf.OdfCanvas = (function () {
         };
 
         function stopEditing() {
+            if (!editparagraph) {
+                return;
+            }
             var fragment = editparagraph.ownerDocument.createDocumentFragment();
             while (editparagraph.firstChild) {
                 fragment.insertBefore(editparagraph.firstChild, null);
