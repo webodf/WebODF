@@ -81,8 +81,6 @@ function parseXml(data, errorlog, name) {
 /*** the jobs / tests ***/
 
 function ParseXMLJob() {
-//    this.inputpattern = { date: "", filename: "", data: "", error: "" };
-//    this.outputpattern = { dom: null, errors: { parseXmlErrors: [] } };
     this.inputpattern = { file: { entries: [] } };
     this.outputpattern  = {
         file: { entries: [] },
@@ -423,6 +421,8 @@ function DataRenderer(parentelement) {
         icon.style.marginRight = icon.style.marginBottom = "10px";
         addParagraph(div, "mimetype: " + data.mimetype);
         addParagraph(div, "version: " + data.version);
+        addParagraph(div, "document representation: " +
+                ((data.file.dom) ? "single XML document" :"package"));
         addErrors(div, data, false);
     }
     function dorender(data) {
@@ -516,163 +516,6 @@ function JobRunner(datarenderer) {
         }
     };
 }
-
-function ODFFile(file, path) {
-    var odffile = this,
-        zipentries,
-        files = {},
-        data,
-        dom;
-    function loadZipEntries(position, callback) {
-        if (position >= zipentries.length) {
-            if (callback) {
-                callback(odffile);
-            }
-            return;
-        }
-        var e = zipentries[position];
-        files[e.filename] = e;
-        e.load(function (error, data) {
-            e.error = error;
-            e.data = data;
-            loadZipEntries(position + 1, callback);
-        });
-    }
-    function loadZip(callback) {
-        var zip = new core.Zip(path, function (err, zip) {
-            if (err) {
-                error = err;
-            } else {
-                zipentries = zip.getEntries();
-                loadZipEntries(0, callback);
-            }
-        });
-    }
-    function loadXml(callback) {
-    }
-    function init() {
-        runtime.read(path, 0, file.size, function (err, data) {
-            if (err) {
-                error = err;
-                return;
-            }
-            // is this file a zip file?
-            if (data[0] === 80) {
-                loadZip();
-            } else {
-                loadXml();
-            }
-        });
-    }
-    init();
-}
-function FileDiagnose(element, file, path) {
-    var doc = element.ownerDocument,
-        icon = doc.createElement("img"),
-        base64 = new core.Base64(),
-        zipentries,
-        files = {},
-        data,
-        error;
-    ODFFile(file, path);
-    function analyze(error, data) {
-        if (error) {
-            addParagraph(error);
-            return;
-        }
-        var mimetype = data.slice(30, 77);
-        addParagraph(mimetype);
-    }
-    function addParagraph(text) {
-        var p = doc.createElement("p");
-        p.appendChild(doc.createTextNode(text));
-        element.appendChild(p);
-    }
-    function addSpan(parent, nodename, text) {
-        var e = doc.createElement(nodename);
-        e.appendChild(doc.createTextNode(text));
-        parent.appendChild(e);
-    }
-    function addText(parent, text) {
-        parent.appendChild(doc.createTextNode(text));
-    }
-    function init() {
-        icon.style.width = "128px";
-        icon.style.float = "left";
-        icon.style.mozBoxShadow = icon.style.webkitBoxShadow = icon.style.boxShadow = "3px 3px 4px #000";
-        icon.style.marginRight = icon.style.marginBottom = "10px";
-        var iconsrc = "", p;
-        if (file.type === "application/vnd.oasis.opendocument.text") {
-            iconsrc = "application-vnd.oasis.opendocument.text.png";
-        } else if (file.type === "application/vnd.oasis.opendocument.spreadsheet") {
-            iconsrc = "application-vnd.oasis.opendocument.spreadsheet.png";
-        } else if (file.type === "application/vnd.oasis.opendocument.presentation") {
-            iconsrc = "application-vnd.oasis.opendocument.presentation.png";
-        }
-        icon.setAttribute("src", iconsrc);
-        element.appendChild(icon);
-
-        p = doc.createElement("p");
-        element.appendChild(p);
-        addText(p, "name: ");
-        addSpan(p, "strong", file.name);
-        addText(p, " type: ");
-        addSpan(p, "strong", file.type);
-        addText(p, " size: ");
-        addSpan(p, "strong", file.size);
-        addText(p, " bytes");
-    }
-    this.setData = function (error_, data_) {
-        data = data_;
-        error = error_;
-        analyze(error, data);
-        if (error) {
-            addParagraph("Error: " + error + " " + string(data.length));
-        }
-    };
-    function addThumbnail() {
-        var src;
-        zipentry = files["Thumbnails/thumbnail.png"];
-        if (zipentry) {
-            zipentry.load(function (error, data) {
-                if (!src) {
-                    src = "data:image/png;base64," +
-                            base64.convertUTF8ArrayToBase64(data);
-                    icon.setAttribute("src", src);
-                }
-            });
-        }
-    }
-    function loadZipEntries(position) {
-        if (position >= zipentries.length) {
-            return;
-        }
-        var e = zipentries[position];
-        files[e.filename] = e;
-        e.load(function (error, data) {
-            e.error = error;
-            e.data = data;
-            loadZipEntries(position + 1);
-        });
-    }
-    function analyzeZip() {
-        var zip = new core.Zip(path, function (err, zip) {
-            var i, thumbnail;
-            if (err) {
-                addParagraph("Error: " + err);
-            } else {
-                zipentries = zip.getEntries();
-                loadZipEntries(0);
-                for (i = 0; i < zipentries.length; ++i) {
-                    addParagraph(zipentries[i].filename);
-                }
-                addThumbnail();
-            }
-        });
-    }
-    init();
-    analyzeZip();
-}
 function LoadingFile(file) {
     var data,
         error,
@@ -731,14 +574,12 @@ function Docnosis(element) {
         // cancel event and hover styling
         dragHandler(evt);
 
-        function diagnoseFile(div, file) {
-            var diagnose, loadingfile, path;
+        function diagnoseFile(file) {
+            var loadingfile, path;
             path = file.name;
             loadingfile = new LoadingFile(file);
             openedFiles[path] = loadingfile;
-            diagnose = new FileDiagnose(div, file, path);
             loadingfile.load(function (error, data) {
-                diagnose.setData(error, data);
                 jobrunnerdata.push({file:{
                     path: path,
                     data: data
@@ -752,7 +593,7 @@ function Docnosis(element) {
         for (i = 0; i < files.length; ++i) {
             div = doc.createElement("div");
             diagnoses.appendChild(div);
-            diagnoseFile(div, files[i]);
+            diagnoseFile(files[i]);
         }
     }
 
