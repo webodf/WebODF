@@ -34,7 +34,7 @@ function getConformingObjects(object, pattern, name) {
             (typeof object) === "object" &&
             (object.length === undefined || object.length < 1000) &&
             !(object instanceof Node) &&
-            !(object.constructor && object.constructor === Uint8Array);
+            !(object.constructor && object.constructor === window.Uint8Array);
     }
     for (i in object) {
         if (object.hasOwnProperty(i) && accept(object[i])) {
@@ -374,7 +374,7 @@ function RelaxNGJob() {
         if (ns === "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0") {
             if (version === "1.2") {
                 rng = "OpenDocument-v1.2-cos01-manifest-schema.rng";
-            } else if (version === "1.1" || !version) {
+            } else if (version === "1.1") {
                 rng = "OpenDocument-manifest-schema-v1.1.rng";
             } else if (version === "1.0") {
                 rng = "OpenDocument-manifest-schema-v1.0-os.rng";
@@ -382,7 +382,7 @@ function RelaxNGJob() {
         } else if (ns === "urn:oasis:names:tc:opendocument:xmlns:office:1.0") {
             if (version === "1.2") {
                 rng = "OpenDocument-v1.2-cos01-schema.rng";
-        //    } else if (version === "1.1" || !version) {
+        //    } else if (version === "1.1") {
         // not supported yet
         //        rng = "OpenDocument-schema-v1.1.rng";
         //    } else if (version === "1.0") {
@@ -413,6 +413,12 @@ function RelaxNGJob() {
         }
     }
     function getValidator(ns, version, callback) {
+        if (ns === "urn:oasis:names:tc:opendocument:xmlns:office:1.0" ||
+                ns === "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0") {
+            if (!version) {
+                version = "1.1";
+            }
+        }
         if (validators[ns] && validators[ns][version]) {
             return callback(validators[ns][version]);
         }
@@ -505,7 +511,7 @@ function DataRenderer(parentelement) {
                 } else if (o && (typeof o) === "object" &&
                         !(o instanceof Node) &&
                         !(o.constructor &&
-                          o.constructor === Uint8Array)) {
+                          o.constructor === window.Uint8Array)) {
                     addErrors(div, o, active || i === "errors");
                 }
             }

@@ -186,6 +186,6 @@ http.createServer(function (request, response) {
     fs.stat(filename, function (err, stats) {
         handleStat(err, stats, lookForIndexHtml);
     });
-}).listen(8124, "127.0.0.1");
+}).listen(8124, "192.168.1.105");//"127.0.0.1");
 
 console.log('Server running at http://127.0.0.1:8124/');
