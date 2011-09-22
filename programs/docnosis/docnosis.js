@@ -707,11 +707,16 @@ function Docnosis(element) {
         }
         // process all File objects
         var i, files, div;
-        files = evt.target.files || evt.dataTransfer.files;
-        for (i = 0; i < files.length; ++i) {
-            div = doc.createElement("div");
-            diagnoses.appendChild(div);
-            diagnoseFile(files[i]);
+        files = (evt.target && evt.target.files) ||
+                (evt.dataTransfer && evt.dataTransfer.files);
+        if (files) {
+            for (i = 0; files && i < files.length; ++i) {
+                div = doc.createElement("div");
+                diagnoses.appendChild(div);
+                diagnoseFile(files[i]);
+            }
+        } else {
+            alert("File(s) could not be opened in this browser.");
         }
     }
 
