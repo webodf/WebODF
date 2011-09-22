@@ -665,14 +665,18 @@ xmldom.RelaxNG = function RelaxNG() {
     /**
      * Validate the elements pointed to by the TreeWalker
      * @param {!TreeWalker} walker
+     * @param {!function(Array.<RelaxNGParseError>):undefined} callback
      * @return {undefined}
      */
-    this.validate = function validate(walker) {
+    this.validate = function validate(walker, callback) {
         var errors;
         walker.currentNode = walker.root;
         errors = childDeriv(null, rootPattern, walker);
         if (!errors.nullable) {
-            runtime.log("Error parsing.");
+            runtime.log("Error parsing: " + JSON.stringify(errors));
+            callback([JSON.stringify(errors)]);
+        } else {
+            callback();
         }
     };
     this.init = function init(rootPattern1) {

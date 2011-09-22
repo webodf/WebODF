@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime xmldom*/
+/*global runtime: true, xmldom: true*/
 runtime.loadClass("xmldom.RelaxNG");
 runtime.loadClass("xmldom.RelaxNG2");
 
@@ -44,8 +44,8 @@ function validate(relaxng, relaxng2, url) {
             relaxng.validate(walker, function (err) {
                 if (err) {
                     var i;
-                    runtime.log("Found " + err.length + " error validating " +
-                            url + ":");
+                    runtime.log("Found " + String(err.length) +
+                            " error validating " + url + ":");
                     for (i = 0; i < err.length; i += 1) {
                         runtime.log(err[i].message());
                     }
@@ -54,8 +54,8 @@ function validate(relaxng, relaxng2, url) {
             relaxng2.validate(walker, function (err) {
                 if (err) {
                     var i;
-                    runtime.log("Found " + err.length + " error validating " +
-                            url + ":");
+                    runtime.log("Found " + String(err.length) +
+                            " error validating " + url + ":");
                     for (i = 0; i < err.length; i += 1) {
                         runtime.log(err[i].message());
                     }
@@ -70,7 +70,7 @@ var relaxngurl = arguments[1],
 
 // load and parse the Relax NG
 runtime.loadXML(relaxngurl, function (err, dom) {
-    var parser, start, rootPattern, nsmap, i, relaxng, relaxng2;
+    var parser, i, relaxng, relaxng2;
     if (err) {
         return;
     }
@@ -80,9 +80,6 @@ runtime.loadXML(relaxngurl, function (err, dom) {
     err = parser.parseRelaxNGDOM(dom, relaxng.makePattern);
     relaxng.init(parser.rootPattern);
     relaxng2.init(parser.start, parser.nsmap);
-    start = parser.start;
-    rootPattern = parser.rootPattern;
-    nsmap = parser.nsmap;
 
     // loop over arguments to load ODF
     for (i = 2; i < args.length; i += 1) {

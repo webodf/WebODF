@@ -1,5 +1,6 @@
 runtime.loadClass("core.Zip");
 runtime.loadClass("core.Base64");
+runtime.loadClass("xmldom.RelaxNG");
 
 /** This code runs a number of tests on an ODF document.
  * Ideally, it would use ODFContainer, but for now, it uses a custome container
@@ -363,6 +364,114 @@ function GetThumbnailJob() {
         callback();
     };
 }
+function RelaxNGJob() {
+    var parser = new xmldom.RelaxNGParser(),
+        validators = {};
+    this.inputpattern = { file: {dom: null}, version: null };
+    this.outputpattern = { errors: { relaxngErrors: [] } };
+    function loadValidator(ns, version, callback) {
+        var rng;
+        if (ns === "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0") {
+            if (version === "1.2") {
+                rng = "OpenDocument-v1.2-cos01-manifest-schema.rng";
+            } else if (version === "1.1" || !version) {
+                rng = "OpenDocument-manifest-schema-v1.1.rng";
+            } else if (version === "1.0") {
+                rng = "OpenDocument-manifest-schema-v1.0-os.rng";
+            }
+        } else if (ns === "urn:oasis:names:tc:opendocument:xmlns:office:1.0") {
+            if (version === "1.2") {
+                rng = "OpenDocument-v1.2-cos01-schema.rng";
+        //    } else if (version === "1.1" || !version) {
+        // not supported yet
+        //        rng = "OpenDocument-schema-v1.1.rng";
+        //    } else if (version === "1.0") {
+        // not supported yet
+        //        rng = "OpenDocument-schema-v1.0-os.rng";
+            }
+        }
+        if (rng) {
+            runtime.loadXML(rng, function (err, dom) {
+                var relaxng;
+                if (err) {
+                    console.log(err);
+                } else {
+                    relaxng = new xmldom.RelaxNG();
+                    err = parser.parseRelaxNGDOM(dom, relaxng.makePattern);
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        relaxng.init(parser.rootPattern);
+                    }
+                }
+                validators[ns] = validators[ns] || {};
+                validators[ns][version] = relaxng;
+                callback(relaxng);
+            });
+        } else {
+            callback(null);
+        }
+    }
+    function getValidator(ns, version, callback) {
+        if (validators[ns] && validators[ns][version]) {
+            return callback(validators[ns][version]);
+        }
+        loadValidator(ns, version, callback);
+    }
+    function validate(log, dom, filename, version, callback) {
+        var ns = dom.documentElement.namespaceURI;
+        getValidator(ns, version, function (relaxng) {
+            if (!relaxng) {
+                return callback();
+            }
+            var walker = dom.createTreeWalker(dom.firstChild, 0xFFFFFFFF,
+                    { acceptNode: function(node) {
+                        return NodeFilter.FILTER_ACCEPT; }
+                    }, false),
+                err;
+console.log("START VALIDATING");
+            err = relaxng.validate(walker, function (err) {
+console.log("FINISHED VALIDATING");
+                var i;
+                if (err) {
+                    for (i = 0; i < err.length; ++i) {
+                        log.push(filename + ": " + err[i]);
+                    }
+                }
+                callback();
+            });
+        });
+    }
+    function validateEntries(log, entries, position, version, callback) {
+        if (position >= entries.length) {
+            return callback();
+        }
+        var e = entries[position];
+        if (e.dom) {
+            validate(log, e.dom, e.filename, version, function () {
+                window.setTimeout(function () {
+                    validateEntries(log, entries, position + 1, version,
+                            callback);
+                }, 0);
+            });
+        } else {
+            validateEntries(log, entries, position + 1, version, callback);
+        }
+    }
+    this.run = function (input, callback) {
+        input.errors = input.errors || {};
+        input.errors.relaxngErrors = [];
+        console.log(input.version);
+        if (input.file.dom) {
+            validate(input.errors.relaxngErrors, input.file.dom,
+                input.file.path, input.version, callback);
+            return;
+        }
+        var i, e = input.file.entries;
+        validateEntries(input.errors.relaxngErrors, input.file.entries, 0,
+            input.version, callback);
+    };
+}
 
 function DataRenderer(parentelement) {
     var doc = parentelement.ownerDocument,
@@ -461,6 +570,7 @@ function JobRunner(datarenderer) {
     jobtypes.push(new GetThumbnailJob());
     jobtypes.push(new VersionTestJob());
     jobtypes.push(new ParseXMLJob());
+    jobtypes.push(new RelaxNGJob());
 
     function run() {
         if (busy) {
@@ -472,6 +582,7 @@ function JobRunner(datarenderer) {
             job.job.run(job.object, function () {
                 busy = false;
                 if (!conformsToPattern(job.object, job.job.outputpattern)) {
+console.log(JSON.stringify(job.object.errors));
                     throw "Job does not give correct output.";
                 }
                 datarenderer.render(data);
@@ -487,6 +598,7 @@ function JobRunner(datarenderer) {
             jobtype = jobtypes[i];
             inobjects = getConformingObjects(data, jobtype.inputpattern);
             outobjects = getConformingObjects(data, jobtype.outputpattern);
+console.log(jobtype.constructor.name + " " + inobjects.length + " " + outobjects.length);
             for (j = 0; j < inobjects.length; ++j) {
                 if (outobjects.indexOf(inobjects[j]) === -1) {
                     todo.push({job: jobtype, object: inobjects[j]});
