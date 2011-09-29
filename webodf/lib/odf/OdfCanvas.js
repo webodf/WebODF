@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint sub: true*/
-/*global runtime: true, odf: true*/
+/*global runtime: true, odf: true, XPathResult: true*/
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 /**
@@ -183,7 +183,8 @@ odf.OdfCanvas = (function () {
         listenEvent(element, "keyup", checkSelection);
         listenEvent(element, "keydown", checkSelection);
     }
-    var namespaces = (new odf.Style2CSS()).namespaces,
+    var style2CSS = new odf.Style2CSS(),
+        namespaces = style2CSS.namespaces,
         drawns  = namespaces.draw,
         fons    = namespaces.fo,
         svgns   = namespaces.svg,
@@ -321,6 +322,37 @@ odf.OdfCanvas = (function () {
         }
     }
     /**
+     * @param {!Element} node
+     * @param {!string} xpath
+     * @return {!Array.<Element>}
+     */
+    function getODFElementsWithXPath(node, xpath) {
+        var doc = node.ownerDocument,
+            nodes = doc.evaluate(xpath, node, style2CSS.namespaceResolver,
+                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null),
+            elements = [], n;
+        n = nodes.iterateNext();
+        while (n !== null) {
+            if (n.nodeType === 1) {
+                elements.push(n); 
+            }
+            n = nodes.iterateNext();
+        }
+        return elements;
+    }
+    function formatParagraphAnchors(odfbody) {
+        var runtimens = "urn:webodf",
+            n, i,
+            nodes = getODFElementsWithXPath(odfbody,
+                ".//*[*[@text:anchor-type='paragraph']]");
+        for (i = 0; i < nodes.length; i += 1) {
+             n = nodes[i];
+             if (n.setAttributeNS) {
+                 n.setAttributeNS(runtimens, "containsparagraphanchor", true);
+             }
+        }
+    }
+    /**
      * @param {!Object} container
      * @param {!Element} odfbody
      * @param {!StyleSheet} stylesheet
@@ -353,13 +385,14 @@ odf.OdfCanvas = (function () {
         }
         for (i = 0; i < frames.length; i += 1) {
             node = frames[i];
-            setFramePosition('frame' + i, node, stylesheet);
+            setFramePosition('frame' + String(i), node, stylesheet);
         }
         images = odfbody.getElementsByTagNameNS(drawns, 'image');
         for (i = 0; i < images.length; i += 1) {
             node = /**@type{!Element}*/(images.item(i));
-            setImage('image' + i, container, node, stylesheet);
+            setImage('image' + String(i), container, node, stylesheet);
         }
+        formatParagraphAnchors(odfbody);
     }
     /**
      * @param {Document} document Put and ODF Canvas inside this element.

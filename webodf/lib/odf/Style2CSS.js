@@ -157,7 +157,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {string}
      */
     function namespaceResolver(prefix) {
-        return namespaces[prefix];
+        return namespaces[prefix] || null;
     }
     /**
      * @param {!Document} doc
@@ -571,9 +571,8 @@ odf.Style2CSS = function Style2CSS() {
     // elements
 
     this.namespaces = namespaces;
-    this.namespaceResolver = function (prefix) {
-        return namespaces[prefix];
-    };
+    this.namespaceResolver = namespaceResolver;
+    this.namespaceResolver.lookupNamespaceURI = this.namespaceResolver;
 
     /**
      * @param {!StyleSheet} stylesheet

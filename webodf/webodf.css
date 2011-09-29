@@ -6,6 +6,7 @@
 @namespace svg url(urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0);
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
+@namespace runtimens url(urn:webodf); /* namespace for runtime only */
 
 office|document > *, office|document-content > * {
   display: none;
@@ -21,6 +22,9 @@ text|p, text|h {
 }
 text|h {
   font-weight: bold;
+}
+*[runtimens|containsparagraphanchor] {
+  position: relative;
 }
 text|s:before { /* this needs to be the number of spaces given by text:c */
   content: ' ';
