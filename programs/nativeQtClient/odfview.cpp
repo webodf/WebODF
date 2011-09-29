@@ -17,7 +17,7 @@ OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
     QString prefix = "../../webodf/"; // set this to the right value when debugging
     QString htmlfile = QDir(prefix).absoluteFilePath("embedodf.html");
-    if (QFileInfo(htmlfile).exists()) {
+    if (!QFileInfo(htmlfile).exists()) {
         prefix = "qrc:/";
         htmlfile = "qrc:/embedodf.html";
     }
