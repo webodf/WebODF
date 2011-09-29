@@ -52,9 +52,9 @@ core.ByteArray = function ByteArray(data) {
         var data = this.data,
             pos = (this.pos += 4);
         return (data[--pos] << 24) |
-               (data[--pos] << 16) |
-               (data[--pos] <<  8) |
-                data[--pos];
+            (data[--pos] << 16) |
+            (data[--pos] <<  8) |
+            data[--pos];
     };
     /**
      * @return {number}

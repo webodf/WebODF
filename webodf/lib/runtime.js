@@ -308,7 +308,8 @@ function BrowserRuntime(logoutput) {
     function byteArrayFromString(string) {
         // ignore encoding for now
         var l = string.length,
-            a = new self.ByteArray(l), i;
+            a = new self.ByteArray(l),
+            i;
         for (i = 0; i < l; i += 1) {
             a[i] = string.charCodeAt(i) & 0xff;
         }
@@ -637,7 +638,8 @@ function NodeJSRuntime() {
 
     this.byteArrayFromArray = function (array) {
         var ba = new Buffer(array.length),
-            i, l = array.length;
+            i,
+            l = array.length;
         for (i = 0; i < l; i += 1) {
             ba[i] = array[i];
         }
@@ -886,7 +888,9 @@ function RhinoRuntime() {
         var data = runtimeReadFileSync(path, "binary");
         if (data) {
             callback(null, this.byteArrayFromString(
-                     data.substring(offset, offset + length), "binary"));
+                data.substring(offset, offset + length),
+                "binary"
+            ));
         } else {
             callback("Cannot read " + path);
         }

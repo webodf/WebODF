@@ -36,20 +36,41 @@ runtime.loadClass("core.JSLint");
 function checkWithJSLINT(file) {
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
-            bitwise: false,
-            newcap: false,
-            nomen: false,
-            onevar: false,
-            passfail: true,
-            plusplus: false,
-            regexp: false,
-            undef: false,
-            sloppy: true,
-            confusion: true,
-            white: true,
-            indent: 4,
-            maxerr: 50
-         //   maxlen: 80
+            adsafe:     false, // if ADsafe rules should be enforced
+            bitwise:    false, // if bitwise operators should be allowed
+            browser:    false, // if the standard browser globals should be predefined
+            cap:        false, // if upper case HTML should be allowed
+            confusion:  false, // if types can be used inconsistently
+            'continue': false, // if the continuation statement should be tolerated
+            css:        false, // if CSS workarounds should be tolerated
+            debug:      false, // if debugger statements should be allowed
+            devel:      false, // if logging should be allowed (console, alert, etc.)
+            eqeq:       false, // if == should be allowed
+            es5:        false, // if ES5 syntax should be allowed
+            evil:       false, // if eval should be allowed
+            forin:      false, // if for in statements need not filter
+            fragment:   false, // if HTML fragments should be allowed
+            indent:     4, // the indentation factor
+            maxerr:     10, // the maximum number of errors to allow
+            //maxlen:     300, // the maximum length of a source line
+            newcap:     false, // if constructor names capitalization is ignored
+            node:       false, // if Node.js globals should be predefined
+            nomen:      false, // if names may have dangling _
+            on:         false, // if HTML event handlers should be allowed
+            passfail:   true, // if the scan should stop on first error
+            plusplus:   false, // if increment/decrement should be allowed
+            properties: false, // if all property names must be declared with /*properties*/
+            regexp:     false, // if the . should be allowed in regexp literals
+            rhino:      false, // if the Rhino environment globals should be predefined
+            undef:      false, // if variables can be declared out of order
+            unparam:    false, // if unused parameters should be tolerated
+            safe:       false, // if use of some browser features should be restricted
+            sloppy:     true, // if the 'use strict'; pragma is optional
+            sub:        false, // if all forms of subscript notation are tolerated
+            vars:       false, // if multiple var statements per function should be allowed
+            white:      true, // if sloppy whitespace is tolerated
+            widget:     false, //  if the Yahoo Widgets globals should be predefined
+            windows:    false // if MS Windows-specific globals should be predefined
         },
         data, result, err;
 
