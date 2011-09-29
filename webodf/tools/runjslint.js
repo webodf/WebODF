@@ -58,7 +58,7 @@ function checkWithJSLINT(file) {
             file === "lib/core/RawInflate.js") {
         return;
     }
-        
+
     data = runtime.readFileSync(file, "utf-8");
     result = jslint(data, jslintconfig);
     if (!result) {

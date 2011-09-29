@@ -75,25 +75,25 @@ core.CursorTests = function CursorTests(runner) {
         t = { selection: selection, root: root, cursor: cursor };
         runner.shouldBeNonNull(t, "t.selection");
     }
- 
+
     function setupSimpleTextDoc() {
         setupEmptyRootNode();
         t.textnode = maindoc.createTextNode("abc");
         t.root.appendChild(t.textnode);
     }
- 
+
     tests = [
         // create a document, add a cursor and check that the cursor is present
         function testOnEmptyNode1() {
             // if the document is the container of the selection, the cursor
             // can not be in the DOM
-            setupEmptyRootNode(); 
+            setupEmptyRootNode();
             setSelection(t.selection, t.root, 0);
             t.cursor.updateToSelection();
             //r.shouldBeNull(t, "t.cursor.getNode().parentNode");
         },
         function testOnEmptyNode2() {
-            setupEmptyRootNode(); 
+            setupEmptyRootNode();
             setSelection(t.selection, t.root, 0);
        //     t.selection.focusNode = r.root;
             var range = t.selection.getRangeAt(0);
@@ -102,7 +102,7 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");
             r.shouldBeNull(t, "t.cursor.getNode().nextSibling");
         },
-        function testOnSimpleText() { 
+        function testOnSimpleText() {
             setupSimpleTextDoc();
             // put the cursor at the start of the text node 
             setSelection(t.selection, t.textnode, 0);
@@ -111,8 +111,8 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");
             r.shouldBe(t, "t.cursor.getNode().nextSibling.nodeValue", "'abc'");
         },
-        function testOnSimpleText2() { 
-            setupSimpleTextDoc(); 
+        function testOnSimpleText2() {
+            setupSimpleTextDoc();
             // put the cursor in the middle of the text node 
             setSelection(t.selection, t.textnode, 1);
             t.cursor.updateToSelection();
@@ -120,8 +120,8 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBe(t, "t.cursor.getNode().previousSibling.nodeValue", "'a'");
             r.shouldBe(t, "t.cursor.getNode().nextSibling.nodeValue", "'bc'");
         },
-        function testOnSimpleText3() { 
-            setupSimpleTextDoc(); 
+        function testOnSimpleText3() {
+            setupSimpleTextDoc();
             // put the cursor at the end of the text node
             setSelection(t.selection, t.textnode, 3);
             t.cursor.updateToSelection();
@@ -130,8 +130,8 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBeNull(t, "t.cursor.getNode().nextSibling");
         },
         function testOnSimpleText4() {
-            var textnode2; 
-            setupSimpleTextDoc(); 
+            var textnode2;
+            setupSimpleTextDoc();
             // put the cursor between 'a' and 'b', then change the selection to
             // be between 'b' and 'c' and update the cursor
             setSelection(t.selection, t.textnode, 1);
@@ -144,8 +144,8 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBe(t, "t.cursor.getNode().nextSibling.nodeValue", "'c'");
         },
         function testOnSimpleText5() {
-            var textnode2; 
-            setupSimpleTextDoc(); 
+            var textnode2;
+            setupSimpleTextDoc();
             // put the cursor between 'a' and 'b', then change the selection to
             // span the entire text and update the cursor
             setSelection(t.selection, t.textnode, 1);
@@ -163,8 +163,8 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBe(t, "t.range.endOffset", "3");
         },
         function testOnSimpleText5b() {
-            var textnode2; 
-            setupSimpleTextDoc(); 
+            var textnode2;
+            setupSimpleTextDoc();
             setSelection(t.selection, t.textnode, 1);
             t.cursor.updateToSelection();
             textnode2 = t.cursor.getNode().nextSibling;

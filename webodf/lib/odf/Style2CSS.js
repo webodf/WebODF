@@ -134,7 +134,7 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'margin-bottom', 'margin-bottom' ],
             [ fons, 'border', 'border' ]
         ],
-        
+
         graphicPropertySimpleMapping = [
             [ drawns, 'fill-color', 'background-color' ],
             [ drawns, 'fill', 'background' ],
@@ -142,7 +142,7 @@ odf.Style2CSS = function Style2CSS() {
             [ drawns, 'stroke', 'border' ],
             [ svgns, 'stroke-color', 'border-color' ]
         ],
-    
+
         tablecellPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'border-left', 'border-left' ],
@@ -150,7 +150,7 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border-top', 'border-top' ],
             [ fons, 'border-bottom', 'border-bottom' ]
         ];
-    
+
     // helper functions
     /**
      * @param {string} prefix
@@ -243,7 +243,7 @@ odf.Style2CSS = function Style2CSS() {
             parentstyle.derivedStyles[stylename] = style;
         } else {
             // no parent so add the root
-            stylestree[stylename] = style;            
+            stylestree[stylename] = style;
         }
     }
     /**
@@ -579,7 +579,7 @@ odf.Style2CSS = function Style2CSS() {
      * @param {!Element} styles
      * @param {!Element} autostyles
      * @return {undefined}
-     */ 
+     */
     this.style2css = function (stylesheet, styles, autostyles) {
         var doc, prefix, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
@@ -609,17 +609,17 @@ odf.Style2CSS = function Style2CSS() {
                 }
             }
         }
-        
+
         // add the various styles
         stylenodes = getStyleMap(doc, styles);
         styleautonodes = getStyleMap(doc, autostyles);
-        styletree = {}; 
+        styletree = {};
         for (family in familynamespaceprefixes) {
             if (familynamespaceprefixes.hasOwnProperty(family)) {
                 tree = styletree[family] = {};
                 addStyleMapToStyleTree(stylenodes[family], tree);
                 addStyleMapToStyleTree(styleautonodes[family], tree);
-    
+
                 for (name in tree) {
                     if (tree.hasOwnProperty(name)) {
                         addRules(stylesheet, family, name, tree[name]);

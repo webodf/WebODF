@@ -79,7 +79,7 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
 
         checkWalker(doc, 2, 1);
         checkWalker(p, 0, 0);
-    
+
         t = {};
         t.doc = doc;
         t.walker = new core.PointWalker(t.doc);
@@ -96,7 +96,7 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         r.shouldBe(t, "t.walker.position()", "0");
         r.shouldBe(t, "t.walker.stepBackward()", "false");
         r.shouldBe(t, "t.walker.position()", "0");
-    
+
         textnode1 = doc.createTextNode("hello, ");
         textnode2 = doc.createTextNode("big ");
         textnode3 = doc.createTextNode("world.");
@@ -105,7 +105,7 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         p.appendChild(em);
         em.appendChild(textnode2);
         p.appendChild(textnode3);
- 
+
         checkWalker(textnode1, 7, 7);
         checkWalker(textnode2, 4, 4);
         checkWalker(textnode3, 6, 6);

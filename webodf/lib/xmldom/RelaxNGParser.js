@@ -99,8 +99,8 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
 
     function splitQNames(def) {
         var i, l = (def.names) ? def.names.length : 0, name,
-            localnames = def.localnames = new Array(l),
-            namespaces = def.namespaces = new Array(l);
+            localnames = def.localnames = [l],
+            namespaces = def.namespaces = [l];
         for (i = 0; i < l; i += 1) {
             name = splitQName(def.names[i]);
             namespaces[i] = name[0];
@@ -150,7 +150,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         }
         return text;
     }
- 
+
     parse = function parse(element, elements) {
         // parse all elements from the Relax NG namespace into JavaScript
         // objects
@@ -386,5 +386,5 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
      * @param {!Document} dom
      * @return {?string}
      */
-    this.parseRelaxNGDOM = main; 
+    this.parseRelaxNGDOM = main;
 };

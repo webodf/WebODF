@@ -69,7 +69,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         r.shouldBe("t.walker.followingSibling()", "t.node.firstChild");
         r.shouldBe("t.walker.position()", "0");
     }
-    
+
     function testSimpleDocument(xmledit) {
         var maindoc = xmledit.ownerDocument,
             doc = maindoc.implementation.createDocument(null, "p", null),
@@ -78,12 +78,12 @@ gui.XMLEditTests = function XMLEditTests(runner) {
             textnode2,
             textnode3,
             em;
-    
+
         xmledit.setXML(doc);
-    
+
         checkWalker(doc, 2, 1);
         checkWalker(p, 0, 0);
-    
+
         t = {};
         t.doc = doc;
         t.walker = new core.PointWalker(t.doc);
@@ -100,7 +100,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         r.shouldBe("t.walker.position()", "0");
         r.shouldBe("t.walker.stepBackward()", "false");
         r.shouldBe("t.walker.position()", "0");
-    
+
         textnode1 = doc.createTextNode("hello, ");
         textnode2 = doc.createTextNode("big ");
         textnode3 = doc.createTextNode("world.");
@@ -109,7 +109,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         p.appendChild(em);
         em.appendChild(textnode2);
         p.appendChild(textnode3);
-    
+
         checkWalker(textnode1, 7, 7);
         checkWalker(textnode2, 4, 4);
         checkWalker(textnode3, 6, 6);
@@ -117,26 +117,26 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         checkWalker(p, 25, 3);
         checkWalker(doc, 27, 1);
     }
-    
+
     function testXmlEdit(document) {
         var head = document.getElementsByTagName("head")[0],
             css = document.createElement("style"),
             testarea = document.createElement("div"),
             xmledit;
-    
+
         // the xml edit requires an element to put the content and a sheet to put
         // the style
         css.type = "text/css";
         head.appendChild(css);
         document.body.appendChild(testarea);
         xmledit = new gui.XMLEdit(testarea, css);
-    
+
         testSimpleDocument(xmledit);
-    
+
         css.parentNode.removeChild(css);
         testarea.parentNode.removeChild(testarea);
     }
-    
+
     this.setUp = function () {
         t = {};
     };

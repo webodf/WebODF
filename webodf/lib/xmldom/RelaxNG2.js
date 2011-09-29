@@ -271,7 +271,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
      * @return {Array.<RelaxNGParseError>}
      */
     function validateInterleave(elementdef, walker, element) {
-        var l = elementdef.e.length, n = new Array(l), err, i, todo = l,
+        var l = elementdef.e.length, n = [l], err, i, todo = l,
             donethisround, node, subnode, e;
         // the interleave is done when all items are 'true' and no 
         while (todo > 0) {

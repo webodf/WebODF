@@ -41,7 +41,7 @@
 core.Base64 = (function () {
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
-    
+
         b64charcodes = (function () {
             var a = [], i,
                 codeA = 'A'.charCodeAt(0),
@@ -60,7 +60,7 @@ core.Base64 = (function () {
             a.push('/'.charCodeAt(0));
             return a;
         }()),
-    
+
         b64tab = (function (bin) {
             var t = {}, i, l;
             for (i = 0, l = bin.length; i < l; i += 1) {
@@ -83,7 +83,7 @@ core.Base64 = (function () {
         }
         return a;
     }
-    
+
     function convertUTF8ArrayToBase64(bin) {
         var n,
             b64 = "",
@@ -110,7 +110,7 @@ core.Base64 = (function () {
         }
         return b64;
     }
-    
+
     function convertBase64ToUTF8Array(b64) {
         b64 = b64.replace(/[^A-Za-z0-9+\/]+/g, '');
         var bin = [],
@@ -132,7 +132,7 @@ core.Base64 = (function () {
         bin.length -= [0, 0, 2, 1][padlen];
         return bin;
     }
-    
+
     function convertUTF16ArrayToUTF8Array(uni) {
         var bin = [], i, l = uni.length, n;
         for (i = 0; i < l; i += 1) {
@@ -154,7 +154,7 @@ core.Base64 = (function () {
         }
         return bin;
     }
-    
+
     function convertUTF8ArrayToUTF16Array(bin) {
         var uni = [], i, l = bin.length,
             c0, c1, c2;
@@ -178,19 +178,19 @@ core.Base64 = (function () {
         }
         return uni;
     }
-    
+
     function convertUTF8StringToBase64(bin) {
         return convertUTF8ArrayToBase64(stringToArray(bin));
     }
-    
+
     function convertBase64ToUTF8String(b64) {
         return String.fromCharCode.apply(String, convertBase64ToUTF8Array(b64));
     }
-    
+
     function convertUTF8StringToUTF16Array(bin) {
         return convertUTF8ArrayToUTF16Array(stringToArray(bin));
     }
-    
+
     function convertUTF8ArrayToUTF16String(bin) {
         return String.fromCharCode.apply(String,
             convertUTF8ArrayToUTF16Array(bin));
@@ -265,22 +265,22 @@ core.Base64 = (function () {
         }
         f();
     }
-    
+
     function convertUTF16StringToUTF8Array(uni) {
         return convertUTF16ArrayToUTF8Array(stringToArray(uni));
     }
-    
+
     function convertUTF16ArrayToUTF8String(uni) {
         return String.fromCharCode.apply(String,
                  convertUTF16ArrayToUTF8Array(uni));
     }
-    
+
     function convertUTF16StringToUTF8String(uni) {
         return String.fromCharCode.apply(String,
                  convertUTF16ArrayToUTF8Array(stringToArray(uni)));
     }
 
-    btoa = runtime.getWindow() && runtime.getWindow().btoa; 
+    btoa = runtime.getWindow() && runtime.getWindow().btoa;
     if (btoa) {
         convertUTF16StringToBase64 = function (uni) {
             return btoa(convertUTF16StringToUTF8String(uni));
@@ -306,7 +306,7 @@ core.Base64 = (function () {
 
     /**
      * @constructor
-     */ 
+     */
     function Base64() {
         this.convertUTF8ArrayToBase64 = convertUTF8ArrayToBase64;
         this.convertByteArrayToBase64 = convertUTF8ArrayToBase64;

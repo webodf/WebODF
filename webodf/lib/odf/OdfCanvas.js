@@ -119,7 +119,7 @@ odf.OdfCanvas = (function () {
             return rangeA.startContainer !== rangeB.startContainer ||
                    rangeA.startOffset !== rangeB.startOffset ||
                    rangeA.endContainer !== rangeB.endContainer ||
-                   rangeA.endOffset !== rangeB.endOffset; 
+                   rangeA.endOffset !== rangeB.endOffset;
         }
         /**
          * @return {undefined}
@@ -258,7 +258,7 @@ odf.OdfCanvas = (function () {
             width = frame.getAttributeNS(svgns, 'width'),
             height = frame.getAttributeNS(svgns, 'height'),
             minheight = frame.getAttributeNS(fons, 'min-height'),
-            minwidth = frame.getAttributeNS(fons, 'min-width'); 
+            minwidth = frame.getAttributeNS(fons, 'min-width');
         if (anchor === "as-char") {
             rule = 'display: inline-block;';
         } else if (anchor || x || y) {
@@ -334,7 +334,7 @@ odf.OdfCanvas = (function () {
         n = nodes.iterateNext();
         while (n !== null) {
             if (n.nodeType === 1) {
-                elements.push(n); 
+                elements.push(n);
             }
             n = nodes.iterateNext();
         }
@@ -445,8 +445,8 @@ odf.OdfCanvas = (function () {
             modifyImages(container, odfnode.body, css);
             slidecssindex = css.insertRule(
                 'office|presentation draw|page:nth-child(1n) { display:block; }',
-                css.cssRules.length);    
-    
+                css.cssRules.length);
+
             // only append the content at the end
             clear(element);
             element.appendChild(odfnode);
@@ -459,7 +459,7 @@ odf.OdfCanvas = (function () {
             if (odfcontainer !== container) {
                 return;
             }
- 
+
             // synchronize the object a window.odfcontainer with the view
             function callback() {
                 clear(element);
@@ -474,7 +474,7 @@ odf.OdfCanvas = (function () {
                 handleContent(container, odfnode);
                 fireEvent("statereadychange");
             }
-        
+
             if (odfcontainer.state === odf.OdfContainer.DONE) {
                 callback();
             } else {

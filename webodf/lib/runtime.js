@@ -559,7 +559,7 @@ function BrowserRuntime(logoutput) {
             var cl = xhr.getResponseHeader("Content-Length");
             if (cl) {
                 callback(parseInt(cl, 10));
-            } else { 
+            } else {
                 callback(-1);
             }
         };
@@ -897,7 +897,7 @@ function RhinoRuntime() {
         }
         return readFile(path, encoding);
     };
-    this.isFile = isFile; 
+    this.isFile = isFile;
     this.getFileSize = function (path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;

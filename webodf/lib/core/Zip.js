@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime: true, core: true*/
-/*jslint bitwise: true, maxlen: 8000*/
+/*jslint bitwise: true*/
 /*
 * @preserve
 * WebODF
@@ -318,7 +318,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         cdsSize = stream.readUInt32LE();
         cdsOffset = stream.readUInt16LE();
         cdsOffset = filesize - 22 - cdsSize;
-    
+
         // for some reason cdsOffset is not always equal to offset calculated
         // from the central directory size. The latter is reliable.
         runtime.read(url, cdsOffset, filesize - cdsOffset,

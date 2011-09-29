@@ -470,8 +470,8 @@ odf.OdfContainer = (function () {
                             if (self.state !== OdfContainer.INVALID) {
                                 setState(OdfContainer.DONE);
                             }
-                        });                        
-                    });                    
+                        });
+                    });
                 });
             });
         }
