@@ -169,6 +169,7 @@ void PageRunner::renderToFile(const QString& filename) {
 }
 void PageRunner::printToFile(const QString& filename) {
     QPrinter printer(QPrinter::HighResolution);
+    printer.setFontEmbeddingEnabled(true);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(filename);
     mainFrame()->print(&printer);
