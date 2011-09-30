@@ -218,6 +218,8 @@ odf.OdfContainer = (function () {
                 self.url = 'data:image/png;base64,';
             } else if (p[0] === 0xFF && p[1] === 0xD8 && p[2] === 0xFF) {
                 self.url = 'data:image/jpeg;base64,';
+            } else if (p[0] === 0x47 && p[1] === 0x49 && p[2] === 0x46) {
+                self.url = 'data:image/gif;base64,';
             } else {
                 self.url = 'data:;base64,';
             }
