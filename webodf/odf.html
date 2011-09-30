@@ -25,13 +25,13 @@ function init() {
     // if the url has a fragment (#...), try to load the file it represents
     var location = String(document.location),
         pos = location.indexOf('#'),
-        odfelement = document.getElementById("odf"),
-        odfcanvas = new odf.OdfCanvas(odfelement);
+        odfelement = document.getElementById("odf");
+    document.odfcanvas = new odf.OdfCanvas(odfelement);
     if (pos === -1 || !window) {
         return;
     }
     location = location.substr(pos + 1);
-    odfcanvas.load(location);
+    document.odfcanvas.load(location);
 }
 window.setTimeout(init, 0);
   </script>

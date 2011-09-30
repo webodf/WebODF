@@ -123,7 +123,7 @@ Ext.onReady(function () {
         if (!tab) {
             return;
         }
-        tab.el.dom.contentDocument.body.contentEditable = pressed;
+        tab.el.dom.contentDocument.odfcanvas.setEditable(pressed);
     }
 
     /**
@@ -258,6 +258,6 @@ Ext.onReady(function () {
     });
 
     // put data in the tree
-    listFiles('./DeltaXML-TC4/', /\.od[tps]$/i, listFilesCallback,
+    listFiles('./demodocs/', /\.od[tps]$/i, listFilesCallback,
             listFilesDoneCallback);
 });

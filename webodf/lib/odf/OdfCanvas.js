@@ -536,18 +536,17 @@ odf.OdfCanvas = (function () {
             }
         }
 
-        this.setEditable = function () {
-            editable = true;
-        };
-
-        this.setReadable = function () {
-            editable = false;
+        this.setEditable = function (iseditable) {
+            editable = iseditable;
+            if (!editable) {
+                stopEditing();
+            }
         };
 
         function processClick(evt) {
             evt = evt || window.event;
-            // go up until we find a text:p, if we find it, wrap it in <p> and make that
-            // editable
+            // go up until we find a text:p, if we find it, wrap it in <p> and
+            // make that editable
             var e = evt.target, selection = window.getSelection(),
                 range = selection.getRangeAt(0),
                 startContainer = range && range.startContainer,
@@ -569,10 +568,14 @@ odf.OdfCanvas = (function () {
 
             if (!editparagraph) {
                 editparagraph = e.ownerDocument.createElement("p");
-                editparagraph.setAttribute("contenteditable", true);
+                if (!editparagraph.style) {
+                   editparagraph = e.ownerDocument.createElementNS(
+                       "http://www.w3.org/1999/xhtml", "p");
+                }
                 editparagraph.style.margin = "0px";
                 editparagraph.style.padding = "0px";
                 editparagraph.style.border = "0px";
+                editparagraph.setAttribute("contenteditable", true);
             } else if (editparagraph.parentNode) {
                 stopEditing();
             }
