@@ -601,7 +601,7 @@ function BrowserRuntime(logoutput) {
         setTimeout(f, msec);
     };
     this.libraryPaths = function () {
-        return ["../lib", ".", "lib"]; // TODO: find a good solution
+        return ["lib"]; // TODO: find a good solution
                                        // probably let html app specify it
     };
     this.setCurrentDirectory = function (dir) {
@@ -958,7 +958,8 @@ var runtime = (function () {
 }());
 /*jslint sloppy: true*/
 (function () {
-    var cache = {};
+    var cache = {},
+        dircontents = {};
     function definePackage(packageNameComponents) {
         var topname = packageNameComponents[0],
             i,
@@ -995,19 +996,39 @@ var runtime = (function () {
         } catch (e) {
         }
         function load(classpath) {
-            var code, path, dirs, i;
+            var code, path, dir, dirs, i;
             path = classpath.replace(".", "/") + ".js";
             dirs = runtime.libraryPaths();
             if (runtime.currentDirectory) {
                 dirs.push(runtime.currentDirectory());
             }
-            for (i = 0; i < dirs.length; i += 1) {
-                try {
-                    code = runtime.readFileSync(dirs[i] + "/" + path, "utf8");
+            for (i = 0; !code && i < dirs.length; i += 1) {
+                dir = dirs[i];
+                if (!dircontents.hasOwnProperty(dir)) {
+                    code = runtime.readFileSync(dirs[i] + "/manifest.js",
+                            "utf8");
                     if (code && code.length) {
-                        break;
+                        try {
+                            dircontents[dir] = eval(code);
+                        } catch (e1) {
+                            dircontents[dir] = null;
+                            runtime.log("Cannot load manifest for " + dir +
+                                    ".");
+                        }
+                    } else {
+                        dircontents[dir] = null;
                     }
-                } catch (ex) {
+                }
+                code = null;
+                dir = dircontents[dir];
+                if (dir && dir.indexOf && dir.indexOf(path) !== -1) {
+                    try {
+                        code = runtime.readFileSync(dirs[i] + "/" + path,
+                            "utf8");
+                    } catch (e2) {
+                        runtime.log("Error loading " + classpath + " " + e2);
+                        throw e2;
+                    }
                 }
             }
             if (code === undefined) {
@@ -1016,9 +1037,9 @@ var runtime = (function () {
             definePackage(names);
             try {
                 code = eval(classpath + " = eval(code);");
-            } catch (e) {
-                runtime.log("Error loading " + classpath + " " + e);
-                throw e;
+            } catch (e4) {
+                runtime.log("Error loading " + classpath + " " + e4);
+                throw e4;
             }
             return code;
         }
