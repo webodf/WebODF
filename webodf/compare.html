@@ -19,21 +19,11 @@
   </style>
   <link rel="stylesheet" type="text/css" href="webodf.css"/>
   <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
+  <script src="compare.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
-function init() {
-    runtime.loadClass("odf.OdfCanvas");
-    // if the url has a fragment (#...), try to load the file it represents
-    var location = String(document.location),
-        pos = location.indexOf('#'),
-        odfelement = document.getElementById("odf"),
-        odfcanvas = new odf.OdfCanvas(odfelement);
-    if (pos === -1 || !window) {
-        return;
-    }
-    location = location.substr(pos + 1);
-    odfcanvas.load(location);
-}
-window.setTimeout(init, 0);
+window.setTimeout(function () {
+    init(window, document);
+}, 0);
   </script>
   <title></title>
 </head>

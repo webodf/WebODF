@@ -465,6 +465,7 @@ odf.OdfCanvas = (function () {
             function callback() {
                 clear(element);
                 element.style.display = "inline-block";
+                element.style.background = "white";
                 var odfnode = container.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
 
