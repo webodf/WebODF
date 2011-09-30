@@ -180,3 +180,6 @@ text|note:hover text|note-body {
     position: absolute;
     background: #ffffaa;
 }
+svg|title, svg|desc {
+    display: none;
+}
