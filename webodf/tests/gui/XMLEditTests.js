@@ -40,6 +40,7 @@ runtime.loadClass("gui.XMLEdit");
  * @implements {core.UnitTest}
  */
 gui.XMLEditTests = function XMLEditTests(runner) {
+    "use strict";
     var t, r = runner, tests;
 
     function checkWalker(node, count, endpos) {

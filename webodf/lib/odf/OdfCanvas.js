@@ -42,6 +42,7 @@ runtime.loadClass("odf.Formatting");
  * @param {!Element} element Put and ODF Canvas inside this element.
  **/
 odf.OdfCanvas = (function () {
+    "use strict";
     /**
      * Register event listener on DOM element.
      * @param {!Element} eventTarget

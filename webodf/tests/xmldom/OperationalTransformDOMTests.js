@@ -39,6 +39,7 @@ runtime.loadClass("xmldom.OperationalTransformDOM");
  * @implements {core.UnitTest}
  */
 xmldom.OperationalTransformDOMTests = function OperationalTransformDOMTests(runner) {
+    "use strict";
     var r = runner,
         t;
 
@@ -69,8 +70,10 @@ xmldom.OperationalTransformDOMTests = function OperationalTransformDOMTests(runn
     };
 };
 xmldom.OperationalTransformDOMTests.prototype.description = function () {
+    "use strict";
     return "Test the OperationalTransformDOM class.";
 };
 (function () {
+    "use strict";
     return xmldom.OperationalTransformDOMTests;
 }());

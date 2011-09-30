@@ -36,6 +36,7 @@
  * @constructor
  */
 core.Async = function Async() {
+    "use strict";
     /**
      * @param {!Array.<*>} items
      * @param {function(*, !function(!string):undefined):undefined} f

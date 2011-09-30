@@ -39,6 +39,7 @@ runtime.loadClass("gui.SelectionMover");
  * @implements {core.UnitTest}
  */
 gui.SelectionMoverTests = function SelectionMoverTests(runner) {
+    "use strict";
     var r = runner,
         t, testarea = runtime.getWindow().document.getElementById("testarea");
 
@@ -99,8 +100,10 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     };
 };
 gui.SelectionMoverTests.prototype.description = function () {
+    "use strict";
     return "Test the SelectionMover class.";
 };
 (function () {
+    "use strict";
     return gui.SelectionMoverTests;
 }());

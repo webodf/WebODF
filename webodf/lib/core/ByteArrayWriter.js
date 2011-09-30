@@ -37,6 +37,7 @@
  * @param {!string} encoding
  */
 core.ByteArrayWriter = function ByteArrayWriter(encoding) {
+    "use strict";
     var self = this,
         data = new runtime.ByteArray(0);
 

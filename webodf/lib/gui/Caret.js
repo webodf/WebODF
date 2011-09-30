@@ -38,6 +38,7 @@
  * @constructor
  */
 gui.Caret = function Caret(selection, rootNode) {
+    "use strict";
     var document = rootNode.ownerDocument,
         cursorns,
         cursorNode;

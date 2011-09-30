@@ -35,32 +35,33 @@
 /**
  * @interface
  */
-core.UnitTest = function UnitTest() {};
+core.UnitTest = function UnitTest() {"use strict";};
 /**
  * @return {undefined}
  */
-core.UnitTest.prototype.setUp = function () {};
+core.UnitTest.prototype.setUp = function () {"use strict";};
 /**
  * @return {undefined}
  */
-core.UnitTest.prototype.tearDown = function () {};
+core.UnitTest.prototype.tearDown = function () {"use strict";};
 /**
  * @return {!string}
  */
-core.UnitTest.prototype.description = function () {};
+core.UnitTest.prototype.description = function () {"use strict";};
 /**
  * @return {Array.<!function():undefined>}
  */
-core.UnitTest.prototype.tests = function () {};
+core.UnitTest.prototype.tests = function () {"use strict";};
 /**
  * @return {Array.<!function(!function():undefined):undefined>}
  */
-core.UnitTest.prototype.asyncTests = function () {};
+core.UnitTest.prototype.asyncTests = function () {"use strict";};
 
 /**
  * @constructor
  */
 core.UnitTestRunner = function UnitTestRunner() {
+    "use strict";
     var failedTests = 0;
     function debug(msg) {
         runtime.log(msg);
@@ -181,6 +182,7 @@ core.UnitTestRunner = function UnitTestRunner() {
  * @constructor
  */
 core.UnitTester = function UnitTester() {
+    "use strict";
     var failedTests = 0,
         results = {};
     /**

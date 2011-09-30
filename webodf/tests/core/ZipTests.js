@@ -39,6 +39,7 @@ runtime.loadClass("core.Zip");
  * @implements {core.UnitTest}
  */
 core.ZipTests = function ZipTests(runner) {
+    "use strict";
     var r = runner,
         t;
 
@@ -131,8 +132,10 @@ core.ZipTests = function ZipTests(runner) {
     };
 };
 core.ZipTests.prototype.description = function () {
+    "use strict";
     return "Test the Zip class.";
 };
 (function () {
+    "use strict";
     return core.ZipTests;
 }());

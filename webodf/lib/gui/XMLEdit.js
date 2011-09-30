@@ -38,6 +38,7 @@ runtime.loadClass("core.Cursor");
  * @constructor
  */
 gui.XMLEdit = function XMLEdit(element, stylesheet) {
+    "use strict";
     var simplecss,
         cssprefix,
         documentElement,

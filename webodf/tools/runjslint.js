@@ -34,6 +34,7 @@
 runtime.loadClass("core.JSLint");
 
 function checkWithJSLINT(file) {
+    "use strict";
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
             adsafe:     false, // if ADsafe rules should be enforced
@@ -65,7 +66,7 @@ function checkWithJSLINT(file) {
             undef:      false, // if variables can be declared out of order
             unparam:    false, // if unused parameters should be tolerated
             safe:       false, // if use of some browser features should be restricted
-            sloppy:     true, // if the 'use strict'; pragma is optional
+            sloppy:     false, // if the 'use strict'; pragma is optional
             sub:        false, // if all forms of subscript notation are tolerated
             vars:       false, // if multiple var statements per function should be allowed
             white:      true, // if sloppy whitespace is tolerated

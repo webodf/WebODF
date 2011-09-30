@@ -54,6 +54,7 @@ runtime.loadClass("core.ByteArrayWriter");
  *        indicates error if present and the created object
  */
 core.Zip = function Zip(url, entriesReadCallback) {
+    "use strict";
     var /**@type{Array.<!ZipEntry>}*/ entries,
         /**@type{number}*/ filesize,
         /**@type{number}*/ nEntries,

@@ -44,43 +44,43 @@
  * @class
  * @interface
  */
-function Runtime() {}
+function Runtime() {"use strict";}
 /**
  * Abstraction of byte arrays.
  * @constructor
  * @extends {Array}
  * @param {!number} size
  */
-Runtime.ByteArray = function (size) {};
+Runtime.ByteArray = function (size) {"use strict";};
 /**
  * @param {!number} start
  * @param {!number} end
  * @return {!Runtime.ByteArray}
  */
-Runtime.ByteArray.prototype.slice = function (start, end) {};
+Runtime.ByteArray.prototype.slice = function (start, end) {"use strict";};
 /**
  * @param {!Array.<number>} array
  * @return {!Runtime.ByteArray}
  */
-Runtime.prototype.byteArrayFromArray = function (array) {};
+Runtime.prototype.byteArrayFromArray = function (array) {"use strict";};
 /**
  * @param {!string} string
  * @param {!string} encoding
  * @return {!Runtime.ByteArray}
  */
-Runtime.prototype.byteArrayFromString = function (string, encoding) {};
+Runtime.prototype.byteArrayFromString = function (string, encoding) {"use strict";};
 /**
  * @param {!Runtime.ByteArray} bytearray
  * @param {!string} encoding
  * @return {!string}
  */
-Runtime.prototype.byteArrayToString = function (bytearray, encoding) {};
+Runtime.prototype.byteArrayToString = function (bytearray, encoding) {"use strict";};
 /**
  * @param {!Runtime.ByteArray} bytearray1
  * @param {!Runtime.ByteArray} bytearray2
  * @return {!Runtime.ByteArray}
  */
-Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {};
+Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {"use strict";};
 /**
  * @param {!string} path
  * @param {!number} offset
@@ -88,7 +88,7 @@ Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {};
  * @param {!function(string,Runtime.ByteArray):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.read = function (path, offset, length, callback) {};
+Runtime.prototype.read = function (path, offset, length, callback) {"use strict";};
 /**
  * Read the contents of a file. Returns the result via a callback. If the
  * encoding is 'binary', the result is returned as a Runtime.ByteArray,
@@ -98,72 +98,72 @@ Runtime.prototype.read = function (path, offset, length, callback) {};
  * @param {!function(string,(string|Runtime.ByteArray)):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.readFile = function (path, encoding, callback) {};
+Runtime.prototype.readFile = function (path, encoding, callback) {"use strict";};
 /**
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
  * @return {!string}
  */
-Runtime.prototype.readFileSync = function (path, encoding) {};
+Runtime.prototype.readFileSync = function (path, encoding) {"use strict";};
 /**
  * @param {!string} path
  * @param {!function((string|Document)):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.loadXML = function (path, callback) {};
+Runtime.prototype.loadXML = function (path, callback) {"use strict";};
 /**
  * @param {!string} path
  * @param {!Runtime.ByteArray} data
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.writeFile = function (path, data, callback) {};
+Runtime.prototype.writeFile = function (path, data, callback) {"use strict";};
 /**
  * @param {!string} path
  * @param {!function(boolean):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.isFile = function (path, callback) {};
+Runtime.prototype.isFile = function (path, callback) {"use strict";};
 /**
  * @param {!string} path
  * @param {!function(number):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.getFileSize = function (path, callback) {};
+Runtime.prototype.getFileSize = function (path, callback) {"use strict";};
 /**
  * @param {!string} path
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.deleteFile = function (path, callback) {};
+Runtime.prototype.deleteFile = function (path, callback) {"use strict";};
 /**
  * @param {!string} msgOrCategory
  * @param {!string=} msg
  * @return {undefined}
  */
-Runtime.prototype.log = function (msgOrCategory, msg) {};
+Runtime.prototype.log = function (msgOrCategory, msg) {"use strict";};
 /**
  * @param {!function():undefined} callback
  * @param {!number} milliseconds
  * @return {undefined}
  */
-Runtime.prototype.setTimeout = function (callback, milliseconds) {};
+Runtime.prototype.setTimeout = function (callback, milliseconds) {"use strict";};
 /**
  * @return {!Array.<string>}
  */
-Runtime.prototype.libraryPaths = function () {};
+Runtime.prototype.libraryPaths = function () {"use strict";};
 /**
  * @return {string}
  */
-Runtime.prototype.type = function () {};
+Runtime.prototype.type = function () {"use strict";};
 /**
  * @return {?DOMImplementation}
  */
-Runtime.prototype.getDOMImplementation = function () {};
+Runtime.prototype.getDOMImplementation = function () {"use strict";};
 /**
  * @return {?Window}
  */
-Runtime.prototype.getWindow = function () {};
+Runtime.prototype.getWindow = function () {"use strict";};
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -175,6 +175,7 @@ var IS_COMPILED_CODE = false;
  * @return {!string}
  */
 Runtime.byteArrayToString = function (bytearray, encoding) {
+    "use strict";
     function byteArrayToString(bytearray) {
         var s = "", i, l = bytearray.length;
         for (i = 0; i < l; i += 1) {
@@ -212,6 +213,7 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     return byteArrayToString(bytearray);
 };
 Runtime.getFunctionName = function getFunctionName(f) {
+    "use strict";
     var m;
     if (f.name === undefined) {
         m = new RegExp("function\\s+(\\w+)").exec(f);
@@ -227,6 +229,7 @@ Runtime.getFunctionName = function getFunctionName(f) {
  * @param {Element} logoutput
  */
 function BrowserRuntime(logoutput) {
+    "use strict";
     var self = this,
         cache = {},
         useNativeArray = window.ArrayBuffer && window.Uint8Array;
@@ -546,7 +549,7 @@ function BrowserRuntime(logoutput) {
         }
     }
     function isFile(path, callback) {
-        this.getFileSize(path, function (size) {
+        self.getFileSize(path, function (size) {
             callback(size !== -1);
         });
     }
@@ -623,6 +626,7 @@ function BrowserRuntime(logoutput) {
  * @implements {Runtime}
  */
 function NodeJSRuntime() {
+    "use strict";
     var self = this,
         fs = require('fs'),
         currentDirectory = "";
@@ -764,7 +768,9 @@ function NodeJSRuntime() {
  * @implements {Runtime}
  */
 function RhinoRuntime() {
-    var dom = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
+    "use strict";
+    var self = this,
+        dom = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
         builder,
         entityresolver,
         currentDirectory = "";
@@ -833,7 +839,7 @@ function RhinoRuntime() {
         } else {
             data = readFile(path, rhinoencoding);
             if (encoding === "binary") {
-                data = this.byteArrayFromString(data, "binary");
+                data = self.byteArrayFromString(data, "binary");
             }
             callback(null, data);
         }
@@ -939,6 +945,7 @@ function RhinoRuntime() {
  * @type {Runtime}
  */
 var runtime = (function () {
+    "use strict";
     if (typeof window !== "undefined") {
         return new BrowserRuntime(window.document.getElementById("logoutput"));
     } else {
@@ -949,7 +956,7 @@ var runtime = (function () {
         }
     }
 }());
-
+/*jslint sloppy: true*/
 (function () {
     var cache = {};
     function definePackage(packageNameComponents) {

@@ -40,6 +40,7 @@ runtime.loadClass("core.Cursor");
  * @return {!gui.SelectionMover}
  */
 gui.SelectionMover = function SelectionMover(selection, pointWalker) {
+    "use strict";
     var doc = pointWalker.node().ownerDocument,
         cursor = new core.Cursor(selection, doc);
     /**

@@ -39,6 +39,7 @@ runtime.loadClass("core.Cursor");
  * @implements {core.UnitTest}
  */
 core.CursorTests = function CursorTests(runner) {
+    "use strict";
     var r = runner, tests, t = {},
         maindoc = runtime.getWindow().document,
         testarea = maindoc.getElementById("testarea");
@@ -228,8 +229,10 @@ core.CursorTests = function CursorTests(runner) {
 };
 core.CursorTests.name = "CursorTests";
 core.CursorTests.prototype.description = function () {
+    "use strict";
     return "Test the Cursor class.";
 };
 (function () {
+    "use strict";
     return core.CursorTests;
 }());

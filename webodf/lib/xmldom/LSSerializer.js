@@ -34,6 +34,7 @@
 /*jslint sub: true*/
 if (typeof Object.create !== 'function') {
     Object['create'] = function (o) {
+        "use strict";
         /**
          * @constructor
          */
@@ -48,6 +49,7 @@ if (typeof Object.create !== 'function') {
  * @constructor
  */
 xmldom.LSSerializer = function LSSerializer() {
+    "use strict";
     var /**@const@type{!LSSerializer}*/ self = this;
 
     /**

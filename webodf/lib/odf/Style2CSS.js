@@ -35,6 +35,7 @@
  * @constructor
  */
 odf.Style2CSS = function Style2CSS() {
+    "use strict";
     // helper constants
     var xlinkns = 'http://www.w3.org/1999/xlink',
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",

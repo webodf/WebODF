@@ -35,6 +35,7 @@
  * @constructor
  */
 odf.StyleInfo = function StyleInfo() {
+    "use strict";
     // helper constants
     var chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
         dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",

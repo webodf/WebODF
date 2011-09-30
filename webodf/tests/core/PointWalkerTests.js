@@ -39,6 +39,7 @@ runtime.loadClass("core.PointWalker");
  * @implements {core.UnitTest}
  */
 core.PointWalkerTests = function PointWalkerTests(runner) {
+    "use strict";
     var t, r = runner;
 
     function checkWalker(node, count, endpos) {

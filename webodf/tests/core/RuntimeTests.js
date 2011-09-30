@@ -39,6 +39,7 @@
  * @implements {core.UnitTest}
  */
 core.RuntimeTests = function RuntimeTests(runner) {
+    "use strict";
     var t, r = runner;
 
     function testRead(callback) {

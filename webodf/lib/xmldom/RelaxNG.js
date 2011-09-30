@@ -51,6 +51,7 @@ runtime.loadClass("xmldom.RelaxNGParser");
  * @constructor
  */
 xmldom.RelaxNG = function RelaxNG() {
+    "use strict";
     var xmlnsns = "http://www.w3.org/2000/xmlns/",
         createChoice,
         createInterleave,

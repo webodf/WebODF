@@ -40,6 +40,7 @@
  * @param {xmldom.LSSerializer} serializer
  */
 xmldom.OperationalTransformDOM = function OperationalTransformDOM(root, serializer) {
+    "use strict";
     var pos, length;
     /**
      * Skip in the document

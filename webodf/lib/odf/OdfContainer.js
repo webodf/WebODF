@@ -45,6 +45,7 @@ runtime.loadClass("odf.Style2CSS");
  * @param {!Function|null} onstatereadychange
  **/
 odf.OdfContainer = (function () {
+    "use strict";
     var styleInfo = new odf.StyleInfo(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,

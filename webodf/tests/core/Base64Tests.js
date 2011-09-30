@@ -38,6 +38,7 @@ runtime.loadClass("core.Base64");
  * @implements {core.UnitTest}
  */
 core.Base64Tests = function Base64Tests(runner) {
+    "use strict";
     var t, r = runner, base64 = new core.Base64();
 
     function testConvertByteArrayToBase64() {

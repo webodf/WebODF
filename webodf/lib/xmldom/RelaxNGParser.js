@@ -45,6 +45,7 @@
  * @constructor
  */
 xmldom.RelaxNGParser = function RelaxNGParser() {
+    "use strict";
     var self = this,
         rngns = "http://relaxng.org/ns/structure/1.0",
         xmlnsns = "http://www.w3.org/2000/xmlns/",

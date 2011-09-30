@@ -37,6 +37,7 @@
  * @param {!Runtime.ByteArray} data
  */
 core.ByteArray = function ByteArray(data) {
+    "use strict";
     /**
      * @type {!number}
      */

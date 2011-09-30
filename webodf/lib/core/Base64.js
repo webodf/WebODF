@@ -39,6 +39,7 @@
  * @namespace
  */
 core.Base64 = (function () {
+    "use strict";
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
 

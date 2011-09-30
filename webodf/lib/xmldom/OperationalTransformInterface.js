@@ -40,13 +40,13 @@
  * @class
  * @interface
  */
-xmldom.OperationalTransformInterface = function () {};
+xmldom.OperationalTransformInterface = function () {"use strict";};
 /**
  * Skip in the document
  * @param {!number} amount
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.retain = function (amount) {};
+xmldom.OperationalTransformInterface.prototype.retain = function (amount) {"use strict";};
 /**
  * Insert characters
  * Can throw an exception if the current position does not allow insertion of
@@ -54,7 +54,7 @@ xmldom.OperationalTransformInterface.prototype.retain = function (amount) {};
  * @param {!string} chars
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.insertCharacters = function (chars) {};
+xmldom.OperationalTransformInterface.prototype.insertCharacters = function (chars) {"use strict";};
 /**
  * Insert element start
  * @param {!string} tagname
@@ -62,37 +62,37 @@ xmldom.OperationalTransformInterface.prototype.insertCharacters = function (char
  * @return {undefined}
  */
 xmldom.OperationalTransformInterface.prototype.insertElementStart = function (tagname,
-        attributes) {};
+        attributes) {"use strict";};
 /**
  * Insert element end
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.insertElementEnd = function () {};
+xmldom.OperationalTransformInterface.prototype.insertElementEnd = function () {"use strict";};
 /**
  * Delete characters
  * @param {!number} amount
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.deleteCharacters = function (amount) {};
+xmldom.OperationalTransformInterface.prototype.deleteCharacters = function (amount) {"use strict";};
 /**
  * Delete element start
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.deleteElementStart = function () {};
+xmldom.OperationalTransformInterface.prototype.deleteElementStart = function () {"use strict";};
 /**
  * Delete element end
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.deleteElementEnd = function () {};
+xmldom.OperationalTransformInterface.prototype.deleteElementEnd = function () {"use strict";};
 /**
  * Replace attributes
  * @param {!Object} atts
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.replaceAttributes = function (atts) {};
+xmldom.OperationalTransformInterface.prototype.replaceAttributes = function (atts) {"use strict";};
 /**
  * Update attributes
  * @param {!Object} atts
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.updateAttributes = function (atts) {};
+xmldom.OperationalTransformInterface.prototype.updateAttributes = function (atts) {"use strict";};

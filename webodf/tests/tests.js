@@ -63,6 +63,7 @@ var tester = new core.UnitTester();
  * @return {undefined}
  */
 function runNextTest(tests) {
+    "use strict";
     if (tests.length === 0) {
         //runtime.log(JSON.stringify(tester.results()));
         runtime.log("Number of failed tests: " +

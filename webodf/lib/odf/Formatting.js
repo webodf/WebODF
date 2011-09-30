@@ -35,6 +35,7 @@
  * @constructor
  */
 odf.Formatting = function Formatting() {
+    "use strict";
     var /**@type{odf.OdfContainer}*/ odfContainer,
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo();
 

@@ -39,6 +39,7 @@ runtime.loadClass("gui.Caret");
  * @implements {core.UnitTest}
  */
 gui.CaretTests = function CaretTests(runner) {
+    "use strict";
     var r = runner,
         t;
 
@@ -72,8 +73,10 @@ gui.CaretTests = function CaretTests(runner) {
     };
 };
 gui.CaretTests.prototype.description = function () {
+    "use strict";
     return "Test the Caret class.";
 };
 (function () {
+    "use strict";
     return gui.CaretTests;
 }());

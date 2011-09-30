@@ -48,6 +48,7 @@ runtime.loadClass("xmldom.RelaxNGParser");
  * @constructor
  */
 xmldom.RelaxNG2 = function RelaxNG2() {
+    "use strict";
     var start,
         validateNonEmptyPattern,
         nsmap,

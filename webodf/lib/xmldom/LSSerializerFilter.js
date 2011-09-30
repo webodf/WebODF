@@ -36,4 +36,5 @@
  * @interface
  */
 xmldom.LSSerializerFilter = function LSSerializerFilter() {
+    "use strict";
 };
