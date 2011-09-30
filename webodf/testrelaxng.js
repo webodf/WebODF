@@ -35,6 +35,7 @@ runtime.loadClass("xmldom.RelaxNG");
 runtime.loadClass("xmldom.RelaxNG2");
 
 function validate(relaxng, relaxng2, url) {
+    "use strict";
     runtime.loadXML(url, function (err, dom) {
         var walker;
         if (err) {
@@ -65,11 +66,12 @@ function validate(relaxng, relaxng2, url) {
     });
 }
 
-var relaxngurl = arguments[1],
-    args = arguments;
+var args = arguments,
+    relaxngurl = args[1];
 
 // load and parse the Relax NG
 runtime.loadXML(relaxngurl, function (err, dom) {
+    "use strict";
     var parser, i, relaxng, relaxng2;
     if (err) {
         return;

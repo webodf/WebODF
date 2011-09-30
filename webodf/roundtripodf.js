@@ -30,13 +30,14 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core odf*/
+/*global runtime: true, core: true, odf: true*/
 runtime.loadClass("odf.OdfContainer");
 
 /**
  * If the state of the OdfContainer is invalid, exit with an error message.
  */
 function exitOnInvalid(odffilepath, odfcontainer) {
+    "use strict";
     if (odfcontainer.state === odf.OdfContainer.INVALID) {
         runtime.log("Document " + odffilepath + " is invalid.");
         runtime.exit(1);
@@ -55,6 +56,7 @@ function exitOnInvalid(odffilepath, odfcontainer) {
  * Load an ODF document. Report an error if there is a problem.
  */
 function loadODF(odffilepath) {
+    "use strict";
     var odfcontainer = new odf.OdfContainer(odffilepath);
     odfcontainer.onstatereadychange = function () {
         exitOnInvalid(odffilepath, odfcontainer);

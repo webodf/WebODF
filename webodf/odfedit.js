@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime document odf window Ext*/
+/*global runtime: true, document: true, odf: true, window: true, Ext: true*/
 /**
  * @type {odf.OdfCanvas}
  */
@@ -40,6 +40,7 @@ var odfcanvas;
  * @return {undefined}
  */
 function fixExtJSCSS() {
+    "use strict";
     // look through all stylesheets to change the selector
     // ".x-viewport, .x-viewport body"
     // to
@@ -66,6 +67,7 @@ function fixExtJSCSS() {
  * @return {undefined}
  */
 function updateStyleComboBox() {
+    "use strict";
     var paragraphStylesBox = document.getElementById("paragraphStyleBox");
 }
 /**
@@ -73,6 +75,7 @@ function updateStyleComboBox() {
  * @return {undefined}
  */
 function initCanvas(odfelement) {
+    "use strict";
     runtime.loadClass("odf.OdfCanvas");
     // if the url has a fragment (#...), try to load the file it represents
     var location = String(document.location),
@@ -104,6 +107,7 @@ function initCanvas(odfelement) {
  * @return {undefined}
  */
 function save() {
+    "use strict";
     odfcanvas.odfContainer().save(function (err) {
         if (err) {
             runtime.log(err);
@@ -193,6 +197,7 @@ Ext.ODFEditor = Ext.extend(Ext.component.Component, {
 
 var ODFEditor = Ext.extend(Ext.Panel, {
     initComponent: function () {
+        "use strict";
         var me = this,
             statusMessage = new Ext.Toolbar.TextItem('');
         function buttonHandler(button, event) {
@@ -277,7 +282,7 @@ var ODFEditor = Ext.extend(Ext.Panel, {
             }, {
                 xtype: 'tbfill'
             },
-            statusMessage 
+            statusMessage
             ]
         };
 /*
@@ -290,6 +295,7 @@ var ODFEditor = Ext.extend(Ext.Panel, {
     }
 });
 Ext.onReady(function () {
+    "use strict";
     var canvas, viewport;
 
     Ext.QuickTips.init();

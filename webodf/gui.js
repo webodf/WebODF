@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global Ext runtime core listFiles*/
+/*global Ext:true, runtime:true, core:true, listFiles:true*/
 runtime.loadClass("core.Zip");
 runtime.loadClass("core.Base64");
 
@@ -39,6 +39,7 @@ runtime.loadClass("core.Base64");
  * @return {undefined}
  */
 function addThumbnail(node) {
+    "use strict";
     var url = node.get('id'), zip;
 /*
     zip = new core.Zip(url, function (err, zipobject) {
@@ -77,6 +78,7 @@ function addThumbnail(node) {
  * @return {undefined}
  */
 function loadODF(url, panel, title) {
+    "use strict";
     var tab = panel.items.findBy(function (item) {
             return item.url === url;
         }),
@@ -106,6 +108,7 @@ function loadODF(url, panel, title) {
 }
 
 Ext.onReady(function () {
+    "use strict";
     var editButton, tabpanel, slider, tree, viewport;
 
     Ext.QuickTips.init();

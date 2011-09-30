@@ -30,13 +30,14 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime core*/
+/*global runtime: true, core: true*/
 runtime.loadClass("core.Zip");
 
 /**
  * Load an ODF document. Report an error if there is a problem.
  */
 function roundTripZip(zipfilepath) {
+    "use strict";
     var zip = new core.Zip(zipfilepath, function (err, zip) {
         if (err) {
             runtime.log(err);

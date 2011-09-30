@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime xmldom*/
+/*global runtime: true, xmldom: true*/
 runtime.loadClass("xmldom.RelaxNGParser");
 
 var nsmap = {
@@ -79,13 +79,16 @@ var nsmap = {
         "integer": "qint32",
         "decimal": "double"
     },
-    relaxngurl = arguments[1],
+    args = arguments,
+    relaxngurl = args[1],
     parser = new xmldom.RelaxNGParser(relaxngurl);
 
 function out(string) {
+    "use strict";
     runtime.log(string);
 }
 function toCamelCase(s) {
+    "use strict";
     var str = "", i, up = true;
     for (i = 0; i < s.length; i += 1) {
         if (up) {
@@ -102,9 +105,11 @@ function toCamelCase(s) {
     return str;
 }
 function getName(e) {
+    "use strict";
     return toCamelCase(nsmap[e.a.ns]) + toCamelCase(e.text);
 }
 function getNames(e, names) {
+    "use strict";
     if (e.name === "name") {
         names.push(e);
     } else if (e.name === "choice") {
@@ -113,6 +118,7 @@ function getNames(e, names) {
     }
 }
 function parseAttributes(e, att) {
+    "use strict";
     var i, name;
     if (e.name === "choice" || e.name === "interleave"
             || e.name === "group") {
@@ -133,26 +139,28 @@ function parseAttributes(e, att) {
     }
 }
 function writeAttributeSetter(name, type, a) {
-     var i, s = "";
-     out("    /**");
-     if (a.optional) {
-         out("     * Set optional attribute " + a.nsname + ".");
-     } else {
-         out("     * Set required attribute " + a.nsname + ".");
-     }
-     if (a.values.length > 0) {
-         s = "Choose one of these values: '" + a.values[0] + "'";
-         for (i = 1; i < a.values.length; i += 1) {
-             s += ", '" + a.values[i] + "'";
-         }
-         out("     * " + s + ".");
-     }
-     out("     */");
-     out("    inline void write" + name + "(" + type + " value) {");
-     out("        xml->addAttribute(\"" + a.nsname + "\", value);");
-     out("    }");
+    "use strict";
+    var i, s = "";
+    out("    /**");
+    if (a.optional) {
+        out("     * Set optional attribute " + a.nsname + ".");
+    } else {
+        out("     * Set required attribute " + a.nsname + ".");
+    }
+    if (a.values.length > 0) {
+        s = "Choose one of these values: '" + a.values[0] + "'";
+        for (i = 1; i < a.values.length; i += 1) {
+            s += ", '" + a.values[i] + "'";
+        }
+        out("     * " + s + ".");
+    }
+    out("     */");
+    out("    inline void write" + name + "(" + type + " value) {");
+    out("        xml->addAttribute(\"" + a.nsname + "\", value);");
+    out("    }");
 }
 function writeAttribute(name, a) {
+    "use strict";
     if (!a.optional) {
         return;
     }
@@ -160,13 +168,13 @@ function writeAttribute(name, a) {
     for (i = 0; i < a.types.length; i += 1) {
         needfallback = false;
         type = typemap[a.types[i]] || a.types[i];
-        if (!(type in done)) {
+        if (!done.hasOwnProperty(type)) {
             done[type] = 1;
             writeAttributeSetter(name, type, a);
         }
     }
-    if (a.values.indexOf("true") !== -1 &&
-            a.values.indexOf("false") !== -1 && !("bool" in done)) {
+    if (a.values.indexOf("true") !== -1 && a.values.indexOf("false") !== -1 &&
+            done.hasOwnProperty("bool")) {
         needfallback = false;
         writeAttributeSetter(name, "bool", a);
     }
@@ -175,6 +183,7 @@ function writeAttribute(name, a) {
     }
 }
 function writeOptionalAttributes(atts) {
+    "use strict";
     var name;
     for (name in atts) {
         if (atts.hasOwnProperty(name)) {
@@ -183,6 +192,7 @@ function writeOptionalAttributes(atts) {
     }
 }
 function writeFixedRequiredAttributes(atts) {
+    "use strict";
     var name, a;
     for (name in atts) {
         if (atts.hasOwnProperty(name)) {
@@ -195,6 +205,7 @@ function writeFixedRequiredAttributes(atts) {
     }
 }
 function getRequiredAttributeArguments(atts) {
+    "use strict";
     var name, a, s = "", type;
     for (name in atts) {
         if (atts.hasOwnProperty(name)) {
@@ -211,6 +222,7 @@ function getRequiredAttributeArguments(atts) {
     return s;
 }
 function getRequiredAttributeCall(atts) {
+    "use strict";
     var name, a, s = "";
     for (name in atts) {
         if (atts.hasOwnProperty(name)) {
@@ -226,6 +238,7 @@ function getRequiredAttributeCall(atts) {
     return s;
 }
 function writeRequiredAttributesSetters(atts) {
+    "use strict";
     var name, a;
     for (name in atts) {
         if (atts.hasOwnProperty(name)) {
@@ -238,6 +251,7 @@ function writeRequiredAttributesSetters(atts) {
     }
 }
 function writeMembers(e, atts, optional) {
+    "use strict";
     var ne, nsname, i, name, names;
     if (e.name === "element") {
         name = null;
@@ -247,7 +261,7 @@ function writeMembers(e, atts, optional) {
         for (i = 0; i < names.length; i += 1) {
             ne = names[i];
             name = getName(ne);
-            if (!(name in atts)) {
+            if (!atts.hasOwnProperty(name)) {
                 nsname = nsmap[ne.a.ns] + ":" + ne.text;
                 atts[name] = {
                     nsname: nsname,
@@ -283,6 +297,7 @@ function writeMembers(e, atts, optional) {
     }
 }
 function defineClass(e, parents, children) {
+    "use strict";
     var c, p, i,
         ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
@@ -326,6 +341,7 @@ function defineClass(e, parents, children) {
     out("};");
 }
 function defineConstructors(e, parents) {
+    "use strict";
     var p,
         ne = e.e[0],
         nsname = nsmap[ne.a.ns] + ":" + ne.text,
@@ -339,6 +355,7 @@ function defineConstructors(e, parents) {
     }
 }
 function getChildren(e, children) {
+    "use strict";
     var name, i, names;
     if (e.name === "element") {
         names = [];
@@ -362,13 +379,14 @@ function getChildren(e, children) {
     }
 }
 function childrenToParents(childrenmap) {
+    "use strict";
     var p, children, c, parents = {};
     for (p in childrenmap) {
         if (childrenmap.hasOwnProperty(p)) {
             children = childrenmap[p];
             for (c in children) {
                 if (children.hasOwnProperty(c)) {
-                    if (!(c in parents)) {
+                    if (!parents.hasOwnProperty(c)) {
                         parents[c] = {};
                     }
                     parents[c][p] = 1;
@@ -379,6 +397,7 @@ function childrenToParents(childrenmap) {
     return parents;
 }
 function toCPP(elements) {
+    "use strict";
     out("#include <KoXmlWriter.h>");
 
     // first get a mapping for all the parents
@@ -394,7 +413,7 @@ function toCPP(elements) {
         getNames(ce.e[0], names);
         for (j = 0; j < names.length; j += 1) {
             name = getName(names[j]);
-            while (name in elementMap) {
+            while (elementMap.hasOwnProperty(name)) {
                 name = name + "_";
             }
             names[j].cppname = name;
@@ -429,6 +448,7 @@ function toCPP(elements) {
 
 // load and parse the Relax NG
 runtime.loadXML(relaxngurl, function (err, dom) {
+    "use strict";
     var parser = new xmldom.RelaxNGParser();
     if (err) {
         runtime.log(err);

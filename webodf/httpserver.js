@@ -30,16 +30,21 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global require console process Buffer unescape*/
+/*global require: true, console: true, process: true, Buffer: true,
+   unescape: true */
 /* A Node.JS http server*/
 var sys = require("sys"),
     http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs"),
-    lookForIndexHtml = true;
+    lookForIndexHtml = true,
+    ipaddress = "127.0.0.1",
+    //ipaddress = "192.168.1.105",
+    port = 8124;
 
 function statFile(dir, filelist, position, callback) {
+    "use strict";
     if (position >= filelist.length) {
         return callback(null, filelist);
     }
@@ -52,6 +57,7 @@ function statFile(dir, filelist, position, callback) {
 }
 
 function listFiles(dir, callback) {
+    "use strict";
     fs.readdir(dir, function (err, files) {
         if (err) {
             return callback(err);
@@ -61,6 +67,7 @@ function listFiles(dir, callback) {
 }
 
 http.createServer(function (request, response) {
+    "use strict";
     var uri = unescape(url.parse(request.url).pathname),
         filename = path.join(process.cwd(), uri);
     if (uri !== '/favicon.ico') {
@@ -186,6 +193,6 @@ http.createServer(function (request, response) {
     fs.stat(filename, function (err, stats) {
         handleStat(err, stats, lookForIndexHtml);
     });
-}).listen(8124, "127.0.0.1");
+}).listen(port, ipaddress);
 
-console.log('Server running at http://127.0.0.1:8124/');
+console.log('Server running at ' + ipaddress + ':' + port + '/');

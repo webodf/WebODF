@@ -31,9 +31,10 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global XMLHttpRequest*/
-/*jslint regexp: false*/
+/*jslint regexp: true*/
 /** asynchroneous function that lists all files **/
 function listFiles(startdir, filepattern, fileCallback, doneCallback) {
+    "use strict";
 
     var todoList = [],
         doneList = [],
@@ -54,17 +55,17 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
                 !(n.namespaceURI === 'DAV:' && n.localName === 'propstat')) {
             n = n.nextSibling;
         }
-        n = n && n.firstChild; 
+        n = n && n.firstChild;
         while (n &&
                 !(n.namespaceURI === 'DAV:' && n.localName === 'prop')) {
             n = n.nextSibling;
         }
-        n = n && n.firstChild; 
+        n = n && n.firstChild;
         while (n && !(n.namespaceURI === 'DAV:' &&
                       n.localName === 'resourcetype')) {
             n = n.nextSibling;
         }
-        n = n && n.firstChild; 
+        n = n && n.firstChild;
         while (n &&
                 !(n.namespaceURI === 'DAV:' && n.localName === 'collection')) {
             n = n.nextSibling;
@@ -197,4 +198,3 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
     todoList.push(startdir);
     getNextFileListWithWebDav();
 }
-
