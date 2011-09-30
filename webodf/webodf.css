@@ -13,6 +13,7 @@ office|document > *, office|document-content > * {
 }
 office|body, office|document {
   display: inline-block;
+  position: relative;
 }
 
 text|p, text|h {
@@ -39,7 +40,6 @@ text|line-break {
 }
 office|text {
   display: block;
-  background: white;
   width: 216mm; /* default to A4 width */
   min-height: 279mm;
   padding-left: 32mm;
@@ -68,7 +68,6 @@ draw|page {
   display: block;
   height: 21cm;
   width: 28cm;
-  background: white;
   margin: 3px;
   position: relative;
   overflow: hidden;
@@ -91,7 +90,6 @@ office|spreadsheet text|p {
   margin: 0px;
 }
 office|spreadsheet table|table {
-  background: white;
   margin: 3px;
 }
 office|spreadsheet table|table:after {
