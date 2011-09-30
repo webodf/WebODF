@@ -601,7 +601,7 @@ odf.Style2CSS = function Style2CSS() {
         // add @namespace rules
         for (prefix in namespaces) {
             if (namespaces.hasOwnProperty(prefix)) {
-                rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ')';
+                rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ');';
                 try {
                     stylesheet.insertRule(rule, stylesheet.cssRules.length);
                 } catch (e) {
