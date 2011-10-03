@@ -960,7 +960,7 @@ var runtime = (function () {
 (function () {
     var cache = {},
         dircontents = {};
-    function definePackage(packageNameComponents) {
+    function getOrDefinePackage(packageNameComponents) {
         var topname = packageNameComponents[0],
             i,
             pkg;
@@ -972,7 +972,7 @@ var runtime = (function () {
                 pkg = pkg[packageNameComponents[i]] = {};
             }
         }
-        return pkg;
+        return pkg[packageNameComponents[packageNameComponents.length - 1]];
     }
     /**
      * @param {string} classpath
@@ -987,13 +987,10 @@ var runtime = (function () {
         }
         var names = classpath.split("."),
             impl;
-        try {
-            impl = eval(classpath);
-            if (impl) {
-                cache[classpath] = true;
-                return;
-            }
-        } catch (e) {
+        impl = getOrDefinePackage(names);
+        if (impl) {
+            cache[classpath] = true;
+            return;
         }
         function load(classpath) {
             var code, path, dir, dirs, i;
@@ -1034,7 +1031,6 @@ var runtime = (function () {
             if (code === undefined) {
                 throw "Cannot load class " + classpath;
             }
-            definePackage(names);
             try {
                 code = eval(classpath + " = eval(code);");
             } catch (e4) {
