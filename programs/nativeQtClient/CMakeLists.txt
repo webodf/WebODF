@@ -5,7 +5,7 @@ QT4_WRAP_CPP(NATIVEQTCLIENT_MOC
     odfview.h
     ../qtjsruntime/nativeio.h
     ../qtjsruntime/nam.h
-    odfpage.h)
+    )
 QT4_WRAP_UI(NATIVEQTCLIENT_UI mainwindow.ui)
 QT4_ADD_RESOURCES(NATIVEQTCLIENT_RES ../../webodf/application.qrc)
 add_executable(nativeQtClient
