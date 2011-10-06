@@ -43,14 +43,14 @@ PageRunner::PageRunner(const QStringList& args)
     : QWebPage(0),
       out(stdout),
       err(stderr),
-      view(new QWidget()),
-      nativeio(new NativeIO(this)) {
+      view(new QWidget()) {
 
     QMap<QString, QString> settings = parseArguments(args);
     QStringList arguments = args.mid(settings.size() * 2);
     exportpdf = settings.value("export-pdf");
     exportpng = settings.value("export-png");
     url = QUrl(arguments[0]);
+    nativeio = new NativeIO(this, QFileInfo(arguments[0]).dir());
     if (url.scheme() == "file" || url.isRelative()) {
         QFileInfo info(url.toLocalFile());
         if (!info.isReadable() || !info.isFile()) {

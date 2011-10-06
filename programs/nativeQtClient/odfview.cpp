@@ -22,7 +22,7 @@ OdfView::OdfView(QWidget* parent) :QWebView(parent)
         htmlfile = "qrc:/embedodf.html";
     }
     setPage(new OdfPage(this));
-    nativeio = new NativeIO(this);
+    nativeio = new NativeIO(this, QDir(prefix));
     connect(page(), SIGNAL(loadFinished(bool)), this, SLOT(slotLoadFinished(bool)));
     page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 

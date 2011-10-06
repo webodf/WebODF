@@ -2,6 +2,7 @@
 #define NATIVEIO_H
 
 #include <QtCore/QFile>
+#include <QtCore/QDir>
 #include <QtCore/QMap>
 
 class QWebPage;
@@ -12,11 +13,12 @@ Q_OBJECT
 private:
     QWebPage* webpage;
     QString errstr;
+    const QDir basedir;
     const QMap<QString, QFile::Permissions> pathPermissions;
 public:
     typedef QMap<QString, QFile::Permissions> PathMap;
     PathMap v;
-    NativeIO(QObject* parent,
+    NativeIO(QObject* parent, const QDir& basedir,
              const PathMap& pathPermissions = PathMap());
 public slots:
     /**
