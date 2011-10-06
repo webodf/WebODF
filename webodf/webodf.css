@@ -38,6 +38,10 @@ text|line-break {
   content: " ";
   display: block;
 }
+text|tracked-changes {
+  /*Consumers that do not support change tracking, should ignore changes.*/
+  display: none;
+}
 office|text {
   display: block;
   width: 216mm; /* default to A4 width */
