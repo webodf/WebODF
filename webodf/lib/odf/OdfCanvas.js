@@ -188,6 +188,7 @@ odf.OdfCanvas = (function () {
         namespaces = style2CSS.namespaces,
         drawns  = namespaces.draw,
         fons    = namespaces.fo,
+        officens = namespaces.office,
         svgns   = namespaces.svg,
         textns  = namespaces.text,
         xlinkns = namespaces.xlink,
@@ -292,6 +293,22 @@ odf.OdfCanvas = (function () {
         }
     }
     /**
+     * @param {!Element} image
+     * @return {string}
+     **/
+    function getUrlFromBinaryDataElement(image) {
+        var node = image.firstChild;
+        while (node) {
+            if (node.namespaceURI === officens &&
+                    node.localName === "binary-data") {
+                // TODO: detect mime-type, assuming png for now
+                return "data:image/png;base64," + node.textContent;
+            }
+            node = node.nextSibling;
+        }
+        return "";
+    }
+    /**
      * @param {!string} id
      * @param {!Object} container
      * @param {!Element} image
@@ -301,25 +318,32 @@ odf.OdfCanvas = (function () {
     function setImage(id, container, image, stylesheet) {
         image.setAttribute('styleid', id);
         var url = image.getAttributeNS(xlinkns, 'href'),
-            part;
+            part,
+            node;
         function callback(url) {
             var rule = "background-image: url(" + url + ");";
             rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
             stylesheet.insertRule(rule, stylesheet.cssRules.length);
         }
-        try {
-            if (container.getPartUrl) {
-                url = container.getPartUrl(url);
-                callback(url);
-            } else {
-                part = container.getPart(url);
-                part.onchange = function (part) {
-                    callback(part.url);
-                };
-                part.load();
+        // look for a office:binary-data
+        if (url) {
+            try {
+                if (container.getPartUrl) {
+                    url = container.getPartUrl(url);
+                    callback(url);
+                } else {
+                    part = container.getPart(url);
+                    part.onchange = function (part) {
+                        callback(part.url);
+                    };
+                    part.load();
+                }
+            } catch (e) {
+                runtime.log('slight problem: ' + e);
             }
-        } catch (e) {
-            runtime.log('slight problem: ' + e);
+        } else {
+            url = getUrlFromBinaryDataElement(image);
+            callback(url);
         }
     }
     /**
