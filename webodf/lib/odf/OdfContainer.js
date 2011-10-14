@@ -339,6 +339,27 @@ odf.OdfContainer = (function () {
          * @param {!Document} xmldoc
          * @return {undefined}
          */
+        function handleFlatXml(xmldoc) {
+            var root = importRootNode(xmldoc);
+            if (!root || root.localName !== 'document' ||
+                    root.namespaceURI !== officens) {
+                setState(OdfContainer.INVALID);
+                return;
+            }
+            self.rootElement = root;
+            root.fontFaceDecls = getDirectChild(root, officens, 'font-face-decls');
+            root.styles = getDirectChild(root, officens, 'styles');
+            root.automaticStyles = getDirectChild(root, officens,
+                    'automatic-styles');
+            root.masterStyles = getDirectChild(root, officens, 'master-styles');
+            root.body = getDirectChild(root, officens, 'body');
+            root.meta = getDirectChild(root, officens, 'meta');
+            setState(OdfContainer.DONE);
+        }
+        /**
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
         function handleStylesXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root = self.rootElement;
@@ -558,6 +579,15 @@ odf.OdfContainer = (function () {
             }
             return original;
         }
+        function loadFromXML(url, callback) {
+            runtime.loadXML(url, function (err, dom) {
+                if (err) {
+                    callback(err);
+                } else {
+                    handleFlatXml(dom);
+                }
+            });
+        }
         // public functions
         /**
          * Open file and parse it. Return the XML Node. Return the root node of
@@ -603,8 +633,12 @@ odf.OdfContainer = (function () {
         zip = new core.Zip(url, function (err, zipobject) {
             zip = zipobject;
             if (err) {
-                zip.error = err;
-                setState(OdfContainer.INVALID);
+                loadFromXML(url, function (xmlerr) {
+                    if (err) {
+                        zip.error = err + "\n" + xmlerr;
+                        setState(OdfContainer.INVALID);
+                    }
+                });
             } else {
                 loadComponents();
             }

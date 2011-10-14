@@ -376,10 +376,10 @@ odf.OdfCanvas = (function () {
             if (node.firstChild) {
                 node = node.firstChild;
             } else {
-                while (node !== odfbody && !node.nextSibling) {
+                while (node && node !== odfbody && !node.nextSibling) {
                     node = node.parentNode;
                 }
-                if (node.nextSibling) {
+                if (node && node.nextSibling) {
                     node = node.nextSibling;
                 }
             }
