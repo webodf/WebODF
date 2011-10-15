@@ -123,6 +123,15 @@ http.createServer(function (request, response) {
                     head["Content-Type"] = "text/javascript";
                 } else if (filename.substr(-4) === ".css") {
                     head["Content-Type"] = "text/css";
+                } else if (filename.substr(-4) === ".odt" ||
+                        filename.substr(-5) === ".fodt") {
+                    head["Content-Type"] = "application/vnd.oasis.opendocument.text";
+                } else if (filename.substr(-4) === ".ods" ||
+                        filename.substr(-5) === ".fods") {
+                    head["Content-Type"] = "application/vnd.oasis.opendocument.presentation";
+                } else if (filename.substr(-4) === ".odp" ||
+                        filename.substr(-5) === ".fodp") {
+                    head["Content-Type"] = "application/vnd.oasis.opendocument.spreadsheet";
                 }
                 response.writeHead(200, head);
                 if (request.method !== "HEAD") {
@@ -167,11 +176,17 @@ http.createServer(function (request, response) {
                     response.write("<table>");
                     var i, l = files.length, file;
                     for (i = 0; i < l; i += 1) {
-                        file = files[i].replace("&", "&amp;")
-                                .replace("<", "&gt;");
+                        file = files[i];
+                        if (file.length > 0 && file[file.length - 1] === '/') {
+                            file = encodeURIComponent(file.slice(0, file.length - 1)) + "/";
+                        } else {
+                            file = encodeURIComponent(file);
+                        }
                         response.write("<tr><td><a href=\"");
                         response.write(file);
                         response.write("\">");
+                        file = files[i].replace("&", "&amp;")
+                                .replace("<", "&gt;");
                         response.write(file.replace("\"", "\\\""));
                         response.write("</a></td></tr>\n");
                     }
