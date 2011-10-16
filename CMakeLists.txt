@@ -11,6 +11,7 @@ find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtNetwork QtWebKit)
 if (NOT ${QT4_FOUND})
   message(WARNING "Qt4 with modules QtCore QtGui QtXml QtNetwork QtWebKit was not found. qtjsruntime will no be built.")
 endif (NOT ${QT4_FOUND})
+find_package(Java REQUIRED)
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "Compiling in the source directortory is not supported. Use for example 'mkdir build; cd build; cmake ..'.")

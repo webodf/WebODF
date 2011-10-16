@@ -1,0 +1,6 @@
+content webodf.js content/
+
+component {afe5fa21-709d-4916-b51c-56f60d574a0a} components/odfContentHandler.js
+contract @mozilla.org/uriloader/content-handler;1?type=application/vnd.oasis.opendocument.text {afe5fa21-709d-4916-b51c-56f60d574a0a}
+contract @mozilla.org/uriloader/content-handler;1?type=application/vnd.oasis.opendocument.spreadsheet {afe5fa21-709d-4916-b51c-56f60d574a0a}
+contract @mozilla.org/uriloader/content-handler;1?type=application/vnd.oasis.opendocument.presentation {afe5fa21-709d-4916-b51c-56f60d574a0a}
