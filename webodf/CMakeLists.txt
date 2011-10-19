@@ -29,7 +29,7 @@ add_custom_target(jslintcheck ALL
     SOURCES ${LIBJSFILES} ${TESTJSFILES}
 )
 
-if (CMAKE_Java_RUNTIME)
+if (Java_JAVA_EXECUTABLE)
   # nonStandardJsDocs is not used because we use @licstart @licend and @source
   set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --jscomp_off nonStandardJsDocs --summary_detail_level 3)
 
@@ -45,7 +45,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
       OUTPUT simplecompiled.js
-      COMMAND ${CMAKE_Java_RUNTIME}
+      COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
          --compilation_level WHITESPACE_ONLY
@@ -56,7 +56,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
       OUTPUT compiled.js
-      COMMAND ${CMAKE_Java_RUNTIME}
+      COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
@@ -69,7 +69,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
       OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
-      COMMAND ${CMAKE_Java_RUNTIME}
+      COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
@@ -85,7 +85,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
       OUTPUT webodf-experimental.js
-      COMMAND ${CMAKE_Java_RUNTIME}
+      COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
@@ -99,7 +99,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
       OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf-debug.js
-      COMMAND ${CMAKE_Java_RUNTIME}
+      COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
@@ -115,7 +115,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
       OUTPUT odfedit.js
-      COMMAND ${CMAKE_Java_RUNTIME}
+      COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
@@ -130,7 +130,7 @@ if (CMAKE_Java_RUNTIME)
 
   add_custom_command(
     OUTPUT gui.js
-    COMMAND ${CMAKE_Java_RUNTIME}
+    COMMAND ${Java_JAVA_EXECUTABLE}
     ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
          ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
@@ -149,21 +149,21 @@ if (CMAKE_Java_RUNTIME)
   )
 
   add_custom_target(rhinotest
-      COMMAND ${CMAKE_Java_RUNTIME} -jar ${RHINO}
+      COMMAND ${Java_JAVA_EXECUTABLE} -jar ${RHINO}
           -debug lib/runtime.js tests/tests.js
       DEPENDS Rhino
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       SOURCES ${LIBJSFILES}
   )
   add_custom_target(simplerhinotest
-      COMMAND ${CMAKE_Java_RUNTIME} -jar ${RHINO}
+      COMMAND ${Java_JAVA_EXECUTABLE} -jar ${RHINO}
           ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
       DEPENDS Rhino simplecompiled.js
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
   add_custom_command(
       OUTPUT docs/index.html
-       COMMAND ${CMAKE_Java_RUNTIME}
+       COMMAND ${Java_JAVA_EXECUTABLE}
         ARGS -jar ${JSDOCDIR}/jsrun.jar
             ${JSDOCDIR}/app/run.js -d=${CMAKE_CURRENT_BINARY_DIR}/docs
                 -t=${JSDOCDIR}/templates/jsdoc ${LIBJSFILES}
@@ -171,8 +171,13 @@ if (CMAKE_Java_RUNTIME)
         DEPENDS ${LIBJSFILES} JsDoc
   )
   add_custom_target(doc DEPENDS docs/index.html)
+  add_custom_target(simplenodetest ALL
+      COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
+      DEPENDS NodeJS simplecompiled.js
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
+  )
 
-endif (CMAKE_Java_RUNTIME)
+endif (Java_JAVA_EXECUTABLE)
 
 add_custom_target(nodetest ALL
     COMMAND ${NODE} lib/runtime.js tests/tests.js
@@ -185,11 +190,6 @@ add_custom_target(qtjsruntimetest ALL
     DEPENDS qtjsruntime jslintcheck
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
     SOURCES ${LIBJSFILES}
-)
-add_custom_target(simplenodetest ALL
-    COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
-    DEPENDS NodeJS simplecompiled.js
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
 )
 add_custom_command(
     OUTPUT instrumented/index.html
