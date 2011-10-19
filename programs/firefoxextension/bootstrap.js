@@ -1,5 +1,3 @@
-/* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 /*global Components: true, dump: true, Services: true*/
 
 var Cc = Components.classes;
@@ -10,31 +8,29 @@ var Cu = Components.utils;
 Cu["import"]('resource://gre/modules/Services.jsm');
 
 function log(str) {
-  "use strict";
-  dump(str + '\n');
+    "use strict";
+    dump(str + '\n');
 }
 
 function startup(aData, aReason) {
-  "use strict";
-  var manifestPath = 'chrome.manifest',
-      file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
-  try {
-    file.initWithPath(aData.installPath.path);
-    file.append(manifestPath);
-    Cm.QueryInterface(Ci.nsIComponentRegistrar).autoRegister(file);
-  } catch (e) {
-    log(e);
-  }
+    "use strict";
+    var manifestPath = 'chrome.manifest',
+        file = Cc['@mozilla.org/file/local;1'].createInstance(Ci.nsILocalFile);
+    try {
+        file.initWithPath(aData.installPath.path);
+        file.append(manifestPath);
+        Cm.QueryInterface(Ci.nsIComponentRegistrar).autoRegister(file);
+    } catch (e) {
+        log(e);
+    }
 }
 
 function shutdown(aData, aReason) {
-  "use strict";
+    "use strict";
 }
 
 function install(aData, aReason) {
-  "use strict";
-  //var url = 'chrome://webodf.js/content/web/viewer.html?file=%s';
-  var url = 'chrome://webodf.js/content/odf.html?file=%s';
-  Services.prefs.setCharPref('extensions.webodf.js.url', url);
+    "use strict";
+    var url = 'chrome://webodf.js/content/odf.html?file=%s';
+    Services.prefs.setCharPref('extensions.webodf.js.url', url);
 }
-

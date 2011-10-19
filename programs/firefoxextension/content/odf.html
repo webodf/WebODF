@@ -16,13 +16,31 @@
     html > body {
       background: black;
     }
+    div#toolbar {
+      background: white;
+      padding: 7px;
+      border-bottom: 1px solid black;
+    }
+    div#toolbar > span {
+      border: 1px solid black;
+      padding: 2px;
+    }
+    div#toolbar > span:hover {
+      background: #CCCCCC;
+    }
   </style>
   <link rel="stylesheet" type="text/css" href="webodf.css"/>
   <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
+var webodffirefox = {
+    url: undefined,
+    data: undefined,
+    odfcanvas: undefined
+};
 window.addEventListener('odfload', function webViewerLoad(evt) {
     runtime.loadClass("odf.OdfCanvas");
-    var params = document.location.search.substring(1).split('&'),
+    var wf = webodffirefox,
+        params = document.location.search.substring(1).split('&'),
         param,
         odfelement = document.getElementById("odf"),
         data = evt.detail;
@@ -30,7 +48,9 @@ window.addEventListener('odfload', function webViewerLoad(evt) {
         param = params[i].split('=');
         params[unescape(param[0])] = unescape(param[1]);
     }
-    document.odfcanvas = new odf.OdfCanvas(odfelement);
+    wf.url = params.file;
+    wf.data = data;
+    wf.odfcanvas = new odf.OdfCanvas(odfelement);
 
     runtime.read = function (path, offset, length, callback) {
         var d = data.slice(offset, offset + length);
@@ -39,13 +59,33 @@ window.addEventListener('odfload', function webViewerLoad(evt) {
     runtime.getFileSize = function (path, callback) {
         callback(data.length);
     }
-    document.odfcanvas.load(params.file);
+    wf.odfcanvas.load(params.file);
 }, true);
+function addButton(parent, label, onclick) {
+    var doc = parent.ownerDocument,
+        button = doc.createElement("span");
+    button.appendChild(doc.createTextNode(label));
+    button.onclick = onclick;
+    parent.appendChild(button);
+}
+function init() {
+    runtime.loadClass("core.Base64");
+    var toolbar = document.getElementById("toolbar");
+    addButton(toolbar, "download", function onclick() {
+        var wf = webodffirefox,
+            base64 = new core.Base64(),
+            b64 = base64.convertUTF8ArrayToBase64(wf.data);
+        b64 = "data:application/octet;base64," + b64;
+        window.location.href = b64;
+    });
+}
+window.setTimeout(init, 0);
   </script>
   <title></title>
 </head>
- 
 <body>
+  <div id="toolbar">
+  </div>
   <div id="odf"/>
 </body>
 </html>
