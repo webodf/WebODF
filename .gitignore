@@ -1,3 +1,5 @@
 #android/bin
 #android/gen
 nativeQtClient/nativeQtClient.pro.user
+programs/firefoxextension/content/webodf.js
+programs/firefoxextension/content/webodf.css
