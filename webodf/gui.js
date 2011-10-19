@@ -119,12 +119,11 @@ Ext.onReady(function () {
      * @return {undefined}
      */
     function editToggle(button, pressed) {
-        var tab = tabpanel.getActiveTab(), o;
+        var tab = tabpanel.getActiveTab(), o, odfcanvas = "odfcanvas";
         if (!tab) {
             return;
         }
-        o = /**@type{*}*/(tab.el.dom.contentDocument);
-        o.odfcanvas.setEditable(pressed);
+        tab.el.dom.contentDocument[odfcanvas].setEditable(pressed);
     }
 
     /**
