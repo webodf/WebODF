@@ -3,6 +3,7 @@ set(FIREFOXEXTENSIONFILES
     bootstrap.js
     install.rdf
     chrome.manifest
+    skin/default/icon.png
     content/odf.html
     components/odfContentHandler.js
 )

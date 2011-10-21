@@ -8,7 +8,7 @@
     <em:name>WebODF</em:name>
     <em:type>2</em:type>
     <em:version>0.3</em:version>
-    <em:iconURL>chrome://webodf.js/skin/logo.png</em:iconURL>
+    <em:iconURL>chrome://webodf.js/skin/icon.png</em:iconURL>
     <em:targetApplication>
       <Description>
        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
