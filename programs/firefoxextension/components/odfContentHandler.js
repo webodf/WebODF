@@ -21,10 +21,10 @@ function log(aMsg) {
 
 function fireEventTo(aName, aData, aWindow) {
     "use strict";
-    var window = aWindow.wrappedJSObject,
-        evt = window.document.createEvent('CustomEvent');
+    var mywindow = aWindow.wrappedJSObject,
+        evt = mywindow.document.createEvent('CustomEvent');
     evt.initCustomEvent('odf' + aName, false, false, aData);
-    window.document.dispatchEvent(evt);
+    mywindow.document.dispatchEvent(evt);
 }
 
 function loadDocument(aWindow, aDocumentUrl) {
@@ -45,16 +45,16 @@ function loadDocument(aWindow, aDocumentUrl) {
         var data = (xhr.mozResponseArrayBuffer || xhr.mozResponse ||
                 xhr.responseArrayBuffer || xhr.response),
             view,
-            window,
+            mywindow,
             arrayBuffer,
             view2,
             array,
             i;
         try {
             view = new Uint8Array(data);
-            window = aWindow.wrappedJSObject;
-            arrayBuffer = new window.ArrayBuffer(data.byteLength);
-            view2 = new window.Uint8Array(arrayBuffer);
+            mywindow = aWindow.wrappedJSObject;
+            arrayBuffer = new mywindow.ArrayBuffer(data.byteLength);
+            view2 = new mywindow.Uint8Array(arrayBuffer);
             view2.set(view);
             array = [];
             array.length = view2.byteLength;
@@ -152,7 +152,7 @@ odfContentHandler.prototype = {
             throw Cr.NS_ERROR_WONT_HANDLE_CONTENT;
         }
 
-        var window = null,
+        var mywindow = null,
             callbacks = aRequest.notificationCallbacks ||
                     aRequest.loadGroup.notificationCallbacks,
             uri = aRequest.URI,
@@ -163,13 +163,13 @@ odfContentHandler.prototype = {
 
         aRequest.cancel(Cr.NS_BINDING_ABORTED);
 
-        window = callbacks.getInterface(Ci.nsIDOMWindow);
-        WebProgressListener.init(window, uri.spec);
+        mywindow = callbacks.getInterface(Ci.nsIDOMWindow);
+        WebProgressListener.init(mywindow, uri.spec);
 
         try {
             url = Services.prefs.getCharPref('extensions.webodf.js.url');
             url = url.replace('%s', uri.spec);
-            window.location = url;
+            mywindow.location = url;
         } catch (e) {
             log('Error retrieving the webodf base url - ' + e);
         }

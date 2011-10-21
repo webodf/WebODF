@@ -32,6 +32,7 @@
  */
 /*global runtime: true, core: true*/
 runtime.loadClass("core.Zip");
+runtime.loadClass("core.Base64");
 
 function addFiles(zip, pos, files, callback) {
     "use strict";
@@ -43,8 +44,16 @@ function addFiles(zip, pos, files, callback) {
     }
     var path = files[pos];
     runtime.readFile(path, "binary", function (err, data) {
+        var base64;
         if (err) {
             return callback(err);
+        }
+        if (path === "content/webodf.js") {
+            // replace eval() with evil()
+            base64 = new core.Base64();
+            data = base64.convertUTF8ArrayToUTF16String(data);
+            data = data.replace(new RegExp('eval\\(', 'g'), 'evil(');
+            data = runtime.byteArrayFromString(data);
         }
         zip.save(path, data, false, new Date());
         addFiles(zip, pos + 1, files, callback);

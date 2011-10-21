@@ -31,7 +31,7 @@
   </style>
   <link rel="stylesheet" type="text/css" href="webodf.css"/>
   <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
-  <script type="text/javascript" charset="utf-8">
+  <script type="text/javascript" charset="utf-8">//<![CDATA[
 var webodffirefox = {
     url: undefined,
     data: undefined,
@@ -79,8 +79,10 @@ function init() {
         window.location.href = b64;
     });
 }
-window.setTimeout(init, 0);
-  </script>
+window.setTimeout(function () {
+    init();
+}, 0);
+//--></script>
   <title></title>
 </head>
 <body>

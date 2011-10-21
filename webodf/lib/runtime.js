@@ -598,7 +598,9 @@ function BrowserRuntime(logoutput) {
     this.getFileSize = getFileSize;
     this.log = log;
     this.setTimeout = function (f, msec) {
-        setTimeout(f, msec);
+        setTimeout(function () {
+            f();
+        }, msec);
     };
     this.libraryPaths = function () {
         return ["lib"]; // TODO: find a good solution
@@ -740,7 +742,9 @@ function NodeJSRuntime() {
         process.stderr.write(msg + '\n');
     };
     this.setTimeout = function (f, msec) {
-        setTimeout(f, msec);
+        setTimeout(function () {
+            f();
+        }, msec);
     };
     this.libraryPaths = function () {
         return [__dirname];
