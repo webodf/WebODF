@@ -1,3 +1,5 @@
+/*global runtime, Node, window, DOMParser, core, xmldom, NodeFilter, alert,
+   FileReader*/
 runtime.loadClass("core.Zip");
 runtime.loadClass("core.Base64");
 runtime.loadClass("xmldom.RelaxNG");
@@ -8,6 +10,7 @@ runtime.loadClass("xmldom.RelaxNG");
  */
 
 function conformsToPattern(object, pattern, name) {
+    "use strict";
     var i;
     if (object === undefined || object === null) {
         return pattern === null || (typeof pattern) !== "object";
@@ -25,6 +28,7 @@ function conformsToPattern(object, pattern, name) {
 }
 
 function getConformingObjects(object, pattern, name) {
+    "use strict";
     var c = [], i, j;
     name = name || "??";
     // we do not look inside long arrays and strings atm,
@@ -47,6 +51,7 @@ function getConformingObjects(object, pattern, name) {
     return c;
 }
 function parseXml(data, errorlog, name) {
+    "use strict";
     function getText(e) {
         var str = "", c = e.firstChild;
         while (c) {
@@ -82,6 +87,7 @@ function parseXml(data, errorlog, name) {
 /*** the jobs / tests ***/
 
 function ParseXMLJob() {
+    "use strict";
     this.inputpattern = { file: { entries: [] } };
     this.outputpattern  = {
         file: { entries: [] },
@@ -94,7 +100,7 @@ function ParseXMLJob() {
     };
     function parseXmlFiles(input, position, callback) {
         var e = input.file.entries,
-            filename, 
+            filename,
             ext,
             dom;
         if (position >= e.length) {
@@ -134,6 +140,7 @@ function ParseXMLJob() {
     };
 }
 function UnpackJob() {
+    "use strict";
     this.inputpattern = { file: { path: "", data: { length: 0 } } };
     this.outputpattern  = {
         file: { entries: [], dom: null }, errors: { unpackErrors: [] }
@@ -201,6 +208,7 @@ function UnpackJob() {
     };
 }
 function MimetypeTestJob(odffile) {
+    "use strict";
     this.inputpattern = {
         file: { entries: [], dom: null },
         manifest_xml: null
@@ -231,7 +239,8 @@ function MimetypeTestJob(odffile) {
         input.errors.mimetypeErrors = [];
         var mime = null,
             altmime,
-            e = input.file.entries;
+            e = input.file.entries,
+            i;
         if (input.file.dom) {
             mime = input.file.dom.documentElement.getAttributeNS(
                 "urn:oasis:names:tc:opendocument:xmlns:office:1.0", "mimetype");
@@ -240,7 +249,7 @@ function MimetypeTestJob(odffile) {
                 input.errors.mimetypeErrors.push(
                         "First file in zip is not 'mimetype'");
             }
-            for (i = 0; i < e.length; ++i) {
+            for (i = 0; i < e.length; i += 1) {
                 if (e[i].filename === "mimetype") {
                     mime = runtime.byteArrayToString(e[i].data, "binary");
                     break;
@@ -269,6 +278,7 @@ function MimetypeTestJob(odffile) {
     };
 }
 function VersionTestJob() {
+    "use strict";
     this.inputpattern = {
         file: { dom: null },
         content_xml: null,
@@ -339,6 +349,7 @@ function VersionTestJob() {
     };
 }
 function GetThumbnailJob() {
+    "use strict";
     var base64 = new core.Base64();
     this.inputpattern = { file: { entries: [] }, errors: {}, mimetype: "" };
     this.outputpattern = { thumbnail: "", errors: { thumbnailErrors: [] } };
@@ -353,7 +364,7 @@ function GetThumbnailJob() {
         } else if (mime === "application/vnd.oasis.opendocument.presentation") {
             thumb = "application-vnd.oasis.opendocument.presentation.png";
         }
-        for (i = 0; i < e.length; ++i) {
+        for (i = 0; i < e.length; i += 1) {
             if (e[i].filename === "Thumbnails/thumbnail.png") {
                 thumb = "data:image/png;base64," +
                         base64.convertUTF8ArrayToBase64(e[i].data);
@@ -365,6 +376,7 @@ function GetThumbnailJob() {
     };
 }
 function RelaxNGJob() {
+    "use strict";
     var parser = new xmldom.RelaxNGParser(),
         validators = {};
     this.inputpattern = { file: {dom: null}, version: null };
@@ -394,12 +406,12 @@ function RelaxNGJob() {
             runtime.loadXML(rng, function (err, dom) {
                 var relaxng;
                 if (err) {
-                    console.log(err);
+                    runtime.log(err);
                 } else {
                     relaxng = new xmldom.RelaxNG();
                     err = parser.parseRelaxNGDOM(dom, relaxng.makePattern);
                     if (err) {
-                        console.log(err);
+                        runtime.log(err);
                     } else {
                         relaxng.init(parser.rootPattern);
                     }
@@ -435,12 +447,12 @@ function RelaxNGJob() {
                         return NodeFilter.FILTER_ACCEPT; }
                     }, false),
                 err;
-console.log("START VALIDATING");
+runtime.log("START VALIDATING");
             err = relaxng.validate(walker, function (err) {
-console.log("FINISHED VALIDATING");
+runtime.log("FINISHED VALIDATING");
                 var i;
                 if (err) {
-                    for (i = 0; i < err.length; ++i) {
+                    for (i = 0; i < err.length; i += 1) {
                         log.push(filename + ": " + err[i]);
                     }
                 }
@@ -467,7 +479,7 @@ console.log("FINISHED VALIDATING");
     this.run = function (input, callback) {
         input.errors = input.errors || {};
         input.errors.relaxngErrors = [];
-        console.log(input.version);
+        runtime.log(input.version);
         if (input.file.dom) {
             validate(input.errors.relaxngErrors, input.file.dom,
                 input.file.path, input.version, callback);
@@ -480,6 +492,7 @@ console.log("FINISHED VALIDATING");
 }
 
 function DataRenderer(parentelement) {
+    "use strict";
     var doc = parentelement.ownerDocument,
         element = doc.createElement("div"),
         lastrendertime,
@@ -543,7 +556,7 @@ function DataRenderer(parentelement) {
     function dorender(data) {
         clear(element);
         var i;
-        for (i = 0; i < data.length; ++i) {
+        for (i = 0; i < data.length; i += 1) {
             renderFile(data[i]);
         }
     }
@@ -565,6 +578,7 @@ function DataRenderer(parentelement) {
 }
 
 function JobRunner(datarenderer) {
+    "use strict";
     var jobrunner = this,
         jobtypes = [],
         data,
@@ -588,7 +602,6 @@ function JobRunner(datarenderer) {
             job.job.run(job.object, function () {
                 busy = false;
                 if (!conformsToPattern(job.object, job.job.outputpattern)) {
-console.log(JSON.stringify(job.object.errors));
                     throw "Job does not give correct output.";
                 }
                 datarenderer.render(data);
@@ -600,12 +613,11 @@ console.log(JSON.stringify(job.object.errors));
     function update(ignore, callback) {
         var i, jobtype, j, inobjects, outobjects;
         todo = [];
-        for (i = 0; i < jobtypes.length; ++i) {
+        for (i = 0; i < jobtypes.length; i += 1) {
             jobtype = jobtypes[i];
             inobjects = getConformingObjects(data, jobtype.inputpattern);
             outobjects = getConformingObjects(data, jobtype.outputpattern);
-console.log(jobtype.constructor.name + " " + inobjects.length + " " + outobjects.length);
-            for (j = 0; j < inobjects.length; ++j) {
+            for (j = 0; j < inobjects.length; j += 1) {
                 if (outobjects.indexOf(inobjects[j]) === -1) {
                     todo.push({job: jobtype, object: inobjects[j]});
                 }
@@ -635,6 +647,7 @@ console.log(jobtype.constructor.name + " " + inobjects.length + " " + outobjects
     };
 }
 function LoadingFile(file) {
+    "use strict";
     var data,
         error,
         readRequests = [];
@@ -644,7 +657,7 @@ function LoadingFile(file) {
             data = runtime.byteArrayFromString(evt.target.result, "binary");
             error = evt.target.error && String(evt.target.error);
             var i = 0;
-            for (i = 0; i < readRequests.length; ++i) {
+            for (i = 0; i < readRequests.length; i += 1) {
                 readRequests[i]();
             }
             readRequests = undefined;
@@ -669,8 +682,9 @@ function LoadingFile(file) {
     this.load = load;
 }
 function Docnosis(element) {
+    "use strict";
     var doc = element.ownerDocument,
-        form = createForm(),
+        form,
         diagnoses = doc.createElement("div"),
         openedFiles = {},
         datarenderer = new DataRenderer(diagnoses),
@@ -710,7 +724,7 @@ function Docnosis(element) {
         files = (evt.target && evt.target.files) ||
                 (evt.dataTransfer && evt.dataTransfer.files);
         if (files) {
-            for (i = 0; files && i < files.length; ++i) {
+            for (i = 0; files && i < files.length; i += 1) {
                 div = doc.createElement("div");
                 diagnoses.appendChild(div);
                 diagnoseFile(files[i]);
@@ -760,6 +774,7 @@ function Docnosis(element) {
         };
     }
 
+    form = createForm();
     element.appendChild(form);
     element.appendChild(diagnoses);
     enhanceRuntime();
