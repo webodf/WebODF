@@ -169,19 +169,11 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     function combineDefines(combine, name, e, siblings) {
         // combineDefines is called often enough that there can only be one
         // other element with the same name
-        // if the found element still has the 'combine' attribute, nothing has
-        // been combined with it yet, and a new child element is needed
-        var i, ce, ne;
+        var i, ce;
         for (i = 0; siblings && i < siblings.length; i += 1) {
             ce = siblings[i];
             if (ce.name === "define" && ce.a && ce.a.name === name) {
-                if (ce.combine) {
-                    ne = { name: ce.combine, e: ce.e.concat(e) };
-                    delete ce.combine;
-                    ce.e = [ ne ];
-                } else {
-                    ce.e = ce.e.concat(e);
-                }
+                ce.e = [ { name: combine, e: ce.e.concat(e) } ];
                 return ce;
             }
         }
@@ -282,9 +274,6 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
 
         // create the definition
         ce = { name: name };
-        if (name === "define" && a.combine) {
-            ce.combine = a.combine;
-        }
         if (e && e.length > 0) { ce.e = e; }
         for (i in a) {
             if (a.hasOwnProperty(i)) {
