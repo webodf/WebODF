@@ -109,6 +109,16 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         }
     }
 
+    function trim(str) {
+        str = str.replace(/^\s\s*/, '');
+		var ws = /\s/,
+            i = str.length - 1;
+        while (ws.test(str.charAt(i))) {
+            i -= 1;
+        }
+        return str.slice(0, i + 1);
+    }
+
     function copyAttributes(atts, name, names) {
         var a = {}, i, att;
         for (i = 0; i < atts.length; i += 1) {
@@ -117,10 +127,12 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
                 if (att.localName === "name" &&
                         (name === "element" || name === "attribute")) {
                     names.push(att.value);
-                    a[att.localName] = att.value;
-                } else {
-                    a[att.localName] = att.value;
                 }
+                if (att.localName === "name" || att.localName === "combine" ||
+                        att.localName === "type") {
+                    att.value = trim(att.value);
+                }
+                a[att.localName] = att.value;
             } else if (att.namespaceURI === xmlnsns) {
                 nsmap[att.value] = att.localName;
             }
@@ -132,17 +144,19 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         var text = "", ce;
         while (c) {
             if (c.nodeType === 1 && c.namespaceURI === rngns) {
-                ce = parse(c, elements);
-                if (ce.name === "name") {
-                    names.push(nsmap[ce.a.ns] + ":" + ce.text);
-                    e.push(ce);
-                } else if (ce.name === "choice" && ce.names &&
-                        ce.names.length) {
-                    names = names.concat(ce.names);
-                    delete ce.names;
-                    e.push(ce);
-                } else {
-                    e.push(ce);
+                ce = parse(c, elements, e);
+                if (ce) {
+                    if (ce.name === "name") {
+                        names.push(nsmap[ce.a.ns] + ":" + ce.text);
+                        e.push(ce);
+                    } else if (ce.name === "choice" && ce.names &&
+                            ce.names.length) {
+                        names = names.concat(ce.names);
+                        delete ce.names;
+                        e.push(ce);
+                    } else {
+                        e.push(ce);
+                    }
                 }
             } else if (c.nodeType === 3) {
                 text += c.nodeValue;
@@ -152,7 +166,29 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         return text;
     }
 
-    parse = function parse(element, elements) {
+    function combineDefines(combine, name, e, siblings) {
+        // combineDefines is called often enough that there can only be one
+        // other element with the same name
+        // if the found element still has the 'combine' attribute, nothing has
+        // been combined with it yet, and a new child element is needed
+        var i, ce, ne;
+        for (i = 0; siblings && i < siblings.length; i += 1) {
+            ce = siblings[i];
+            if (ce.name === "define" && ce.a && ce.a.name === name) {
+                if (ce.combine) {
+                    ne = { name: ce.combine, e: ce.e.concat(e) };
+                    delete ce.combine;
+                    ce.e = [ ne ];
+                } else {
+                    ce.e = ce.e.concat(e);
+                }
+                return ce;
+            }
+        }
+        return null;
+    }
+
+    parse = function parse(element, elements, siblings) {
         // parse all elements from the Relax NG namespace into JavaScript
         // objects
         var e = [], a, ce,
@@ -236,8 +272,19 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             name = "choice";
             e = [ {name: "oneOrMore", e: [ e[0] ] }, { name: "empty" } ];
         }
+        // 4.17 combine attribute
+        if (name === "define" && a.combine) {
+            ce = combineDefines(a.combine, a.name, e, siblings);
+            if (ce) {
+                return;
+            }
+        }
+
         // create the definition
         ce = { name: name };
+        if (name === "define" && a.combine) {
+            ce.combine = a.combine;
+        }
         if (e && e.length > 0) { ce.e = e; }
         for (i in a) {
             if (a.hasOwnProperty(i)) {
