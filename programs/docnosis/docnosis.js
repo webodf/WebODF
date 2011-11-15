@@ -394,12 +394,10 @@ function RelaxNGJob() {
         } else if (ns === "urn:oasis:names:tc:opendocument:xmlns:office:1.0") {
             if (version === "1.2") {
                 rng = "OpenDocument-v1.2-cos01-schema.rng";
-        //    } else if (version === "1.1") {
-        // not supported yet
-        //        rng = "OpenDocument-schema-v1.1.rng";
-        //    } else if (version === "1.0") {
-        // not supported yet
-        //        rng = "OpenDocument-schema-v1.0-os.rng";
+            } else if (version === "1.1") {
+                rng = "OpenDocument-schema-v1.1.rng";
+            } else if (version === "1.0") {
+                rng = "OpenDocument-schema-v1.0-os.rng";
             }
         }
         if (rng) {
