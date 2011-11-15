@@ -22,6 +22,7 @@ private:
     NativeIO* nativeio;
     QString exportpdf;
     QString exportpng;
+    bool sawJSError;
 public:
     PageRunner(const QStringList& args);
     ~PageRunner();
@@ -45,6 +46,7 @@ private:
         } else {
             err << sourceID << ":" << lineNumber << " " << message << endl;
         }
+        sawJSError = true;
     }
     void javaScriptAlert(QWebFrame* /*frame*/, const QString& msg) {
         changed = true;

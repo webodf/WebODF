@@ -13,12 +13,13 @@ Q_OBJECT
 private:
     QWebPage* webpage;
     QString errstr;
-    const QDir basedir;
+    const QDir runtimedir;
+    const QDir cwd;
     const QMap<QString, QFile::Permissions> pathPermissions;
 public:
     typedef QMap<QString, QFile::Permissions> PathMap;
     PathMap v;
-    NativeIO(QObject* parent, const QDir& basedir,
+    NativeIO(QObject* parent, const QDir& runtimedir, const QDir& cwd,
              const PathMap& pathPermissions = PathMap());
 public slots:
     /**

@@ -40,7 +40,11 @@ QByteArray getRuntimeBindings() {
     "        return nativeio.currentDirectory();"
     "    };"
     "    runtime.libraryPaths = function () {"
-    "        return nativeio.libraryPaths();"
+    "        /* convert to javascript array */"
+    "        var p = nativeio.libraryPaths(),"
+    "            a = [], i;"
+    "        for (i in p) { a[i] = p[i]; }"
+    "        return a;"
     "    };"
     "}";
 }
@@ -56,7 +60,8 @@ PageRunner::PageRunner(const QStringList& args)
     exportpdf = settings.value("export-pdf");
     exportpng = settings.value("export-png");
     url = QUrl(arguments[0]);
-    nativeio = new NativeIO(this, QFileInfo(arguments[0]).dir());
+    nativeio = new NativeIO(this, QFileInfo(arguments[0]).dir(),
+                            QDir::current());
     if (url.scheme() == "file" || url.isRelative()) {
         QFileInfo info(url.toLocalFile());
         if (!info.isReadable() || !info.isFile()) {
@@ -71,6 +76,7 @@ PageRunner::PageRunner(const QStringList& args)
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(finished(bool)));
     connect(mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             this, SLOT(slotInitWindowObjects()));
+    sawJSError = false;
 
     setView(view);
     scriptMode = arguments[0].endsWith(".js");
@@ -149,7 +155,7 @@ void PageRunner::reallyFinished() {
     if (!exportpdf.isEmpty()) {
         printToFile(exportpdf);
     }
-    qApp->exit(0);
+    qApp->exit(sawJSError);
 }
 QMap<QString, QString> PageRunner::parseArguments(const QStringList& args) {
     int i = 0;

@@ -1,16 +1,18 @@
 #include "nativeio.h"
+#include <QtWebKit/QWebPage>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QTextCodec>
-#include <QtWebKit/QWebPage>
 
-NativeIO::NativeIO(QObject* parent, const QDir& basedir_,
+NativeIO::NativeIO(QObject* parent, const QDir& runtimedir_,
+         const QDir& cwd_,
          const QMap<QString, QFile::Permissions>& pathPermissions_)
-    :QObject(parent), basedir(basedir_), pathPermissions(pathPermissions_) {
+    :QObject(parent), runtimedir(runtimedir_), cwd(cwd_),
+      pathPermissions(pathPermissions_) {
 }
 QString
 NativeIO::readFileSync(const QString& path, const QString& encoding) {
     errstr = QString();
-    QFile file(basedir.absoluteFilePath(path));
+    QFile file(cwd.absoluteFilePath(path));
     QByteArray data;
     if (file.open(QIODevice::ReadOnly)) {
         data = file.readAll();
@@ -33,7 +35,7 @@ NativeIO::readFileSync(const QString& path, const QString& encoding) {
 QString
 NativeIO::read(const QString& path, int offset, int length) {
     errstr = QString();
-    QFile file(basedir.absoluteFilePath(path));
+    QFile file(cwd.absoluteFilePath(path));
     QByteArray data;
     if (file.open(QIODevice::ReadOnly) && (offset == 0 || file.seek(offset))) {
         int lastLength = 0;
@@ -55,7 +57,7 @@ NativeIO::read(const QString& path, int offset, int length) {
 }
 void
 NativeIO::writeFile(const QString& path, const QString& data) {
-    QFile file(basedir.absoluteFilePath(path));
+    QFile file(cwd.absoluteFilePath(path));
     errstr = QString();
     if (!file.open(QIODevice::WriteOnly)) {
         errstr = "Could not open file for writing.";
@@ -74,7 +76,7 @@ NativeIO::writeFile(const QString& path, const QString& data) {
 void
 NativeIO::unlink(const QString& path) {
     errstr = QString();
-    QFile file(basedir.absoluteFilePath(path));
+    QFile file(cwd.absoluteFilePath(path));
     if (!file.remove()) {
         errstr = "Could not delete file";
     }
@@ -82,7 +84,7 @@ NativeIO::unlink(const QString& path) {
 int
 NativeIO::getFileSize(const QString& path) {
     errstr = QString();
-    QFile file(basedir.absoluteFilePath(path));
+    QFile file(cwd.absoluteFilePath(path));
     if (!file.exists()) {
         errstr = "Could not determine file size.";
     }
@@ -94,11 +96,11 @@ NativeIO::exit(int exitcode) {
 }
 QString
 NativeIO::currentDirectory() const {
-    return basedir.absolutePath();//QDir::currentPath();
+    return QDir::currentPath();
 }
 QStringList
 NativeIO::libraryPaths() const {
     QStringList paths;
-    paths << basedir.absolutePath() << QDir::currentPath();
+    paths << runtimedir.absolutePath() << cwd.absolutePath();
     return paths;
 }
