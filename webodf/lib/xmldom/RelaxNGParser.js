@@ -59,6 +59,9 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
      * @param {Node=} context
      */
     function RelaxNGParseError(error, context) {
+        /**
+         * return {!string}
+         */
         this.message = function () {
             if (context) {
                 error += (context.nodeType === 1) ? " Element " : " Node ";
@@ -81,7 +84,10 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             e: [ o ].concat(e.e.slice(2))
         });
     }
-
+    /**
+     * @param {!string} name
+     * @return {!Array.<string>}
+     */
     function splitQName(name) {
         var r = name.split(":", 2),
             prefix = "", i;
@@ -109,6 +115,10 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         }
     }
 
+    /**
+     * @param {!string} str
+     * @return {!string}
+     */
     function trim(str) {
         str = str.replace(/^\s\s*/, '');
 		var ws = /\s/,
@@ -119,6 +129,12 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         return str.slice(0, i + 1);
     }
 
+    /**
+     * @param {!Object.<string,string>} atts
+     * @param {!string} name
+     * @param {!Array.<string>} names
+     * @return {!Object}
+     */
     function copyAttributes(atts, name, names) {
         var a = {}, i, att;
         for (i = 0; i < atts.length; i += 1) {
@@ -183,9 +199,12 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     parse = function parse(element, elements, siblings) {
         // parse all elements from the Relax NG namespace into JavaScript
         // objects
-        var e = [], a, ce,
+        var e = [],
+            /**@type{Object}*/a,
+            ce,
             i, text, name = element.localName, names = [];
         a = copyAttributes(element.attributes, name, names);
+        a.combine = a.combine || undefined;
         text = parseChildren(element.firstChild, e, elements, names);
 
         // 4.2 strip leading and trailing whitespace
@@ -383,7 +402,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
 
     function main(dom, callback) {
         var elements = [],
-            grammar = parse(dom && dom.documentElement, elements),
+            grammar = parse(dom && dom.documentElement, elements, undefined),
             i, e, defines = {};
 
         for (i = 0; i < grammar.e.length; i += 1) {
