@@ -92,3 +92,13 @@ void
 NativeIO::exit(int exitcode) {
     qApp->exit(exitcode);
 }
+QString
+NativeIO::currentDirectory() const {
+    return basedir.absolutePath();//QDir::currentPath();
+}
+QStringList
+NativeIO::libraryPaths() const {
+    QStringList paths;
+    paths << basedir.absolutePath() << QDir::currentPath();
+    return paths;
+}

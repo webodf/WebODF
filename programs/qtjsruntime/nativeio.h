@@ -33,6 +33,8 @@ public slots:
     void unlink(const QString& path);
     int getFileSize(const QString& path);
     void exit(int exitcode);
+    QString currentDirectory() const;
+    QStringList libraryPaths() const;
 };
 
 #endif

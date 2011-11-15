@@ -36,6 +36,12 @@ QByteArray getRuntimeBindings() {
     "    runtime.exit = function (exitCode) {"
     "        nativeio.exit(exitCode);"
     "    };"
+    "    runtime.currentDirectory = function () {"
+    "        return nativeio.currentDirectory();"
+    "    };"
+    "    runtime.libraryPaths = function () {"
+    "        return nativeio.libraryPaths();"
+    "    };"
     "}";
 }
 
