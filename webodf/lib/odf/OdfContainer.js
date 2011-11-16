@@ -319,10 +319,12 @@ odf.OdfContainer = (function () {
                 node;
             // remove all processing instructions
             // TODO: replace cursor processing instruction with an element
-            removeProcessingInstructions(xmldoc.documentElement);
-            try {
-                node = doc.importNode(xmldoc.documentElement, true);
-            } catch (e) {
+            if (xmldoc) {
+                removeProcessingInstructions(xmldoc.documentElement);
+                try {
+                    node = doc.importNode(xmldoc.documentElement, true);
+                } catch (e) {
+                }
             }
             return node;
         }
