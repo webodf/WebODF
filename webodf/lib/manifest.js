@@ -15,6 +15,7 @@ return [
         "gui/Caret.js",
         "gui/SelectionMover.js",
         "gui/XMLEdit.js",
+        "odf/FontLoader.js",
         "odf/Formatting.js",
         "odf/OdfCanvas.js",
         "odf/OdfContainer.js",

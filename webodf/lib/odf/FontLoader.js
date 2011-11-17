@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint sub: true*/
-/*global runtime: true, odf: true, XPathResult: true, core: true*/
+/*global runtime: true, odf: true, XPathResult: true, core: true, document: true*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("odf.Style2CSS");
 /**

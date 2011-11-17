@@ -37,6 +37,7 @@ runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.FontLoader");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
@@ -52,7 +53,8 @@ odf.OdfContainer = (function () {
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
-        base64 = new core.Base64();
+        base64 = new core.Base64(),
+        fontLoader = new odf.FontLoader();
     /**
      * @param {?Node} node
      * @param {!string} ns
@@ -381,6 +383,7 @@ odf.OdfContainer = (function () {
             setChild(root, root.masterStyles);
             //removeUnusedAutomaticStyles(root.automaticStyles,
             //        root.masterStyles);
+            fontLoader.loadFonts(root.fontFaceDecls, zip, null);
         }
         /**
          * @param {!Document} xmldoc
