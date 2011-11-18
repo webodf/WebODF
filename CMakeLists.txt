@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.8.2)
 # builds and packages programs that use WebODF.
 
 # Find installed dependencies
-find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtNetwork QtWebKit)
+find_package(Qt4 4.7.0 COMPONENTS QtCore QtGui QtXml QtNetwork QtWebKit)
 if (NOT QT4_FOUND)
   message(WARNING "Qt4 with modules QtCore QtGui QtXml QtNetwork QtWebKit was not found. qtjsruntime will no be built.")
 endif (NOT QT4_FOUND)
