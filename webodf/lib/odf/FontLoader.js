@@ -67,9 +67,13 @@ odf.FontLoader = (function () {
      */
     function getEmbeddedFontDeclarations(fontFaceDecls) {
         var decls = {},
-            fonts = getODFElementsWithXPath(fontFaceDecls,
-                        "style:font-face[svg:font-face-src]"),
+            fonts,
             i, font, name, uris, href;
+        if (!fontFaceDecls) {
+            return decls;
+        }
+        fonts = getODFElementsWithXPath(fontFaceDecls,
+                    "style:font-face[svg:font-face-src]");
         for (i = 0; i < fonts.length; i += 1) {
             font = fonts[i];
             name = font.getAttributeNS(style2CSS.namespaces["style"], "name");
