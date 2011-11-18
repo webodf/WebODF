@@ -455,6 +455,7 @@ odf.OdfCanvas = (function () {
             /**@type{!odf.Formatting}*/ formatting = new odf.Formatting(),
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
+            slidevisibilitycss = addStyleSheet(document),
             stylesxmlcss = addStyleSheet(document),
             positioncss = addStyleSheet(document),
             editable = false;
@@ -471,6 +472,14 @@ odf.OdfCanvas = (function () {
             slidecssindex = css.insertRule(
                 'office|presentation draw|page:nth-child(1n) { display:block; }',
                 css.cssRules.length);
+
+            // FIXME: this is a hack to have a defined background now
+            // should be removed as soon as we have sane background
+            // handling for pages
+            slidecssindex = css.insertRule(
+                'draw|page { background-color:#fff; }',
+                css.cssRules.length);
+
 
             // only append the content at the end
             clear(element);
@@ -510,6 +519,10 @@ odf.OdfCanvas = (function () {
 
         this.odfContainer = function () {
             return odfcontainer;
+        };
+
+        this.slidevisibilitycss = function() {
+            return slidevisibilitycss;
         };
 
         /**
