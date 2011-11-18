@@ -1,4 +1,4 @@
-#! /bin/env python
+#! /usr/bin/env python
 
 import BaseHTTPServer, SimpleHTTPServer, re, os, sys, xml.etree.ElementTree
 from xml.etree.ElementTree import Element
