@@ -51,10 +51,12 @@ odf.OdfContainer = (function () {
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
         base64 = new core.Base64(),
-        fontLoader = new odf.FontLoader();
+        fontLoader = new odf.FontLoader(),
+        partMimetypes = {};
     /**
      * @param {?Node} node
      * @param {!string} ns
@@ -215,16 +217,20 @@ odf.OdfContainer = (function () {
             }
             var /**@const@type{!Runtime.ByteArray}*/p = privatedata,
                 chunksize = 45000, // must be multiple of 3 and less than 50000
-                i = 0;
-            if (p[1] === 0x50 && p[2] === 0x4E && p[3] === 0x47) {
-                self.url = 'data:image/png;base64,';
-            } else if (p[0] === 0xFF && p[1] === 0xD8 && p[2] === 0xFF) {
-                self.url = 'data:image/jpeg;base64,';
-            } else if (p[0] === 0x47 && p[1] === 0x49 && p[2] === 0x46) {
-                self.url = 'data:image/gif;base64,';
-            } else {
-                self.url = 'data:;base64,';
+                i = 0,
+                mimetype = partMimetypes[name];
+            if (!mimetype) {
+                if (p[1] === 0x50 && p[2] === 0x4E && p[3] === 0x47) {
+                    mimetype = "image/png";
+                } else if (p[0] === 0xFF && p[1] === 0xD8 && p[2] === 0xFF) {
+                    mimetype = "image/jpeg";
+                } else if (p[0] === 0x47 && p[1] === 0x49 && p[2] === 0x46) {
+                    mimetype = "image/gif";
+                } else {
+                    mimetype = "";
+                }
             }
+            self.url = 'data:' + mimetype + ';base64,';
             // to avoid exceptions, base64 encoding is done in chunks
             // it would make sense to move this to base64.toBase64
             while (i < privatedata.length) {
@@ -456,6 +462,29 @@ odf.OdfContainer = (function () {
             setChild(root, root.settings);
         }
         /**
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
+        function handleManifestXml(xmldoc) {
+            var node = importRootNode(xmldoc),
+                root, n;
+            if (!node || node.localName !== 'manifest' ||
+                    node.namespaceURI !== manifestns) {
+                return;
+            }
+            root = self.rootElement;
+            root.manifest = node;
+            n = root.manifest.firstChild;
+            while (n) {
+                if (n.nodeType === 1 && n.localName === "file-entry" &&
+                        n.namespaceURI === manifestns) {
+                    partMimetypes[n.getAttributeNS(manifestns, "full-path")] =
+                            n.getAttributeNS(manifestns, "media-type");
+                }
+                n = n.nextSibling;
+            }
+        }
+        /**
          * @param {!string} filepath
          * @param {!function(?string,?Document)} callback
          * @return {undefined}
@@ -498,9 +527,15 @@ odf.OdfContainer = (function () {
                             if (xmldoc) {
                                 handleSettingsXml(xmldoc);
                             }
-                            if (self.state !== OdfContainer.INVALID) {
-                                setState(OdfContainer.DONE);
-                            }
+                            getXmlNode('META-INF/manifest.xml', function (err,
+                                    xmldoc) {
+                                if (xmldoc) {
+                                    handleManifestXml(xmldoc);
+                                }
+                                if (self.state !== OdfContainer.INVALID) {
+                                    setState(OdfContainer.DONE);
+                                }
+                            });
                         });
                     });
                 });
