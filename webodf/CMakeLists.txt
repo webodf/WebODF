@@ -98,19 +98,20 @@ if (Java_JAVA_EXECUTABLE)
       SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
   )
 
-  add_custom_command(
-      OUTPUT webodf-experimental.js
-      COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
-         --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
-         --js ${CMAKE_CURRENT_SOURCE_DIR}/lib/export.js
-         --compilation_level ADVANCED_OPTIMIZATIONS
-         --formatting PRINT_INPUT_DELIMITER
-         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --js_output_file webodf-experimental.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} lib/export.js tools/externs.js
-  )
+  # too hardcore for now...
+  # add_custom_command(
+  #     OUTPUT webodf-experimental.js
+  #     COMMAND ${Java_JAVA_EXECUTABLE}
+  #     ARGS -jar ${CLOSURE_JAR}
+  #        --define IS_COMPILED_CODE=true
+  #        ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
+  #        --js ${CMAKE_CURRENT_SOURCE_DIR}/lib/export.js
+  #        --compilation_level ADVANCED_OPTIMIZATIONS
+  #        --formatting PRINT_INPUT_DELIMITER
+  #        --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
+  #        --js_output_file webodf-experimental.js
+  #     DEPENDS ClosureCompiler ${LIBJSFILES} lib/export.js tools/externs.js
+  # )
 
   add_custom_command(
       OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf-debug.js
@@ -160,7 +161,7 @@ if (Java_JAVA_EXECUTABLE)
   )
 
   add_custom_target(syntaxcheck ALL
-      DEPENDS simplecompiled.js webodf.js webodf-experimental.js webodf-debug.js compiled.js odfedit.js gui.js
+      DEPENDS simplecompiled.js webodf.js webodf-debug.js compiled.js odfedit.js gui.js
   )
 
   add_custom_target(rhinotest
