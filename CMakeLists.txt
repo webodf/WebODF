@@ -85,3 +85,4 @@ find_path(ANDROID_SDK_DIR platform-tools/aapt)
 
 add_subdirectory(webodf)
 add_subdirectory(programs)
+# vim:expandtab

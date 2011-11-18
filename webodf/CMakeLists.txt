@@ -215,3 +215,4 @@ add_custom_command(
     DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
 )
 add_custom_target(instrumented ALL DEPENDS instrumented/index.html)
+# vim:expandtab
