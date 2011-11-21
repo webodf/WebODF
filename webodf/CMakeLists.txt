@@ -201,12 +201,14 @@ add_custom_target(nodetest ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     SOURCES ${LIBJSFILES}
 )
-add_custom_target(qtjsruntimetest ALL
-    COMMAND ${CMAKE_BINARY_DIR}/programs/qtjsruntime/qtjsruntime ../lib/runtime.js tests.js
-    DEPENDS qtjsruntime jslintcheck
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
-    SOURCES ${LIBJSFILES}
-)
+if (QT4_FOUND)
+  add_custom_target(qtjsruntimetest ALL
+      COMMAND ${CMAKE_BINARY_DIR}/programs/qtjsruntime/qtjsruntime ../lib/runtime.js tests.js
+      DEPENDS qtjsruntime jslintcheck
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
+      SOURCES ${LIBJSFILES}
+  )
+endif (QT4_FOUND)
 add_custom_command(
     OUTPUT instrumented/index.html
     COMMAND ${JSCOVERAGE}
