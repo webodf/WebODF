@@ -37,6 +37,9 @@
  */
 xmldom.XPath = (function () {
     "use strict";
+    function fallback(node, xpath, namespaceResolver) {
+        return [];
+    }
     /**
      * @param {!Element} node
      * @param {!string} xpath
@@ -45,9 +48,12 @@ xmldom.XPath = (function () {
      */
     function getODFElementsWithXPath(node, xpath, namespaceResolver) {
         var doc = node.ownerDocument,
-            nodes = doc.evaluate(xpath, node, namespaceResolver,
-                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null),
-            elements = [], n;
+            nodes, elements = [], n = null;
+        if (!doc || !doc.evaluate) {
+            return fallback(node, xpath, namespaceResolver);
+        }
+        nodes = doc.evaluate(xpath, node, namespaceResolver,
+            XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
         n = nodes.iterateNext();
         while (n !== null) {
             if (n.nodeType === 1) {

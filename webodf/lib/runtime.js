@@ -540,7 +540,9 @@ function BrowserRuntime(logoutput) {
             }
         }
         xhr.open("GET", path, true);
-        xhr.overrideMimeType("text/xml");
+        if (xhr.overrideMimeType) {
+            xhr.overrideMimeType("text/xml");
+        }
         xhr.onreadystatechange = handleResult;
         try {
             xhr.send(null);
