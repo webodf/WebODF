@@ -31,9 +31,10 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint sub: true*/
-/*global runtime: true, odf: true, XPathResult: true*/
+/*global runtime, odf, xmldom */
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
+runtime.loadClass("xmldom.XPath");
 /**
  * This class manages a loaded ODF document that is shown in an element.
  * It takes care of giving visual feedback on loading, ensures that the
@@ -193,6 +194,7 @@ odf.OdfCanvas = (function () {
         textns  = namespaces.text,
         xlinkns = namespaces.xlink,
         window = runtime.getWindow(),
+        xpath = new xmldom.XPath(),
         /**@const@type{!Object.<!string,!Array.<!Function>>}*/ eventHandlers = {},
         editparagraph;
 
@@ -346,30 +348,12 @@ odf.OdfCanvas = (function () {
             callback(url);
         }
     }
-    /**
-     * @param {!Element} node
-     * @param {!string} xpath
-     * @return {!Array.<Element>}
-     */
-    function getODFElementsWithXPath(node, xpath) {
-        var doc = node.ownerDocument,
-            nodes = doc.evaluate(xpath, node, style2CSS.namespaceResolver,
-                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null),
-            elements = [], n;
-        n = nodes.iterateNext();
-        while (n !== null) {
-            if (n.nodeType === 1) {
-                elements.push(n);
-            }
-            n = nodes.iterateNext();
-        }
-        return elements;
-    }
     function formatParagraphAnchors(odfbody) {
         var runtimens = "urn:webodf",
             n, i,
-            nodes = getODFElementsWithXPath(odfbody,
-                ".//*[*[@text:anchor-type='paragraph']]");
+            nodes = xpath.getODFElementsWithXPath(odfbody,
+                ".//*[*[@text:anchor-type='paragraph']]",
+                style2CSS.namespaceResolver);
         for (i = 0; i < nodes.length; i += 1) {
              n = nodes[i];
              if (n.setAttributeNS) {

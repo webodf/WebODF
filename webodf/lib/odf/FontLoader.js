@@ -31,8 +31,9 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint sub: true*/
-/*global runtime: true, odf: true, XPathResult: true, core: true, document: true*/
+/*global runtime, odf, core, document, xmldom*/
 runtime.loadClass("core.Base64");
+runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.Style2CSS");
 /**
  * This class loads embedded fonts into the CSS 
@@ -41,26 +42,8 @@ runtime.loadClass("odf.Style2CSS");
 odf.FontLoader = (function () {
     "use strict";
     var style2CSS = new odf.Style2CSS(),
+        xpath = new xmldom.XPath(),
         base64 = new core.Base64();
-    /**
-     * @param {!Element} node
-     * @param {!string} xpath
-     * @return {!Array.<Element>}
-     */
-    function getODFElementsWithXPath(node, xpath) {
-        var doc = node.ownerDocument,
-            nodes = doc.evaluate(xpath, node, style2CSS.namespaceResolver,
-                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null),
-            elements = [], n;
-        n = nodes.iterateNext();
-        while (n !== null) {
-            if (n.nodeType === 1) {
-                elements.push(n);
-            }
-            n = nodes.iterateNext();
-        }
-        return elements;
-    }
     /**
      * @param {!Element} fontFaceDecls
      * @return {!Object.<string,Object>}
@@ -72,13 +55,15 @@ odf.FontLoader = (function () {
         if (!fontFaceDecls) {
             return decls;
         }
-        fonts = getODFElementsWithXPath(fontFaceDecls,
-                    "style:font-face[svg:font-face-src]");
+        fonts = xpath.getODFElementsWithXPath(fontFaceDecls,
+                    "style:font-face[svg:font-face-src]",
+                    style2CSS.namespaceResolver);
         for (i = 0; i < fonts.length; i += 1) {
             font = fonts[i];
             name = font.getAttributeNS(style2CSS.namespaces["style"], "name");
-            uris = getODFElementsWithXPath(font,
-                "svg:font-face-src/svg:font-face-uri");
+            uris = xpath.getODFElementsWithXPath(font,
+                "svg:font-face-src/svg:font-face-uri",
+                style2CSS.namespaceResolver);
             if (uris.length > 0) {
                 href = uris[0].getAttributeNS(style2CSS.namespaces["xlink"],
                         "href");

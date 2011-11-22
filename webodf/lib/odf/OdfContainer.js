@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime: true, core: true, xmldom: true, odf: true, DOMParser: true,
-  document: true, XPathResult: true */
+  document: true */
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
@@ -87,26 +87,6 @@ odf.OdfContainer = (function () {
             }
         }
         return -1;
-    }
-    /**
-     * @param {!Document} doc
-     * @param {!Element} node
-     * @param {!string} xpath
-     * @return {Element}
-     */
-    function getODFElementWithXPath(doc, node, xpath) {
-        return doc.evaluate(xpath, node, style2CSS.namespaceResolver,
-                XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
-    }
-    /**
-     * @param {!Document} doc
-     * @param {!Element} node
-     * @param {!string} xpath
-     * @return {!XPathResult}
-     */
-    function getODFNodesWithXPath(doc, node, xpath) {
-        return doc.evaluate(xpath, node, style2CSS.namespaceResolver,
-                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
     }
     /**
      * Class that filters runtime specific nodes from the DOM.

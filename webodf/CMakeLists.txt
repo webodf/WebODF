@@ -15,6 +15,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/xmldom/RelaxNGParser.js lib/xmldom/RelaxNG.js
     lib/xmldom/RelaxNG2.js lib/xmldom/OperationalTransformInterface.js
     lib/xmldom/OperationalTransformDOM.js
+    lib/xmldom/XPath.js
 
     lib/odf/StyleInfo.js lib/odf/Style2CSS.js
     lib/odf/FontLoader.js lib/odf/OdfContainer.js
@@ -161,7 +162,7 @@ if (Java_JAVA_EXECUTABLE)
   )
 
   add_custom_target(syntaxcheck ALL
-      DEPENDS simplecompiled.js webodf.js webodf-debug.js compiled.js odfedit.js gui.js
+      DEPENDS simplecompiled.js webodf.js webodf-debug.js compiled.js
   )
 
   add_custom_target(rhinotest

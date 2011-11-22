@@ -31,12 +31,14 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 
-
-/*global runtime: true, gui: true, odf: true, XPathResult: true, core: true, document: true, window: true*/
+/*global runtime, gui, odf, core, xmldom, document, window*/
+runtime.loadClass("xmldom.XPath");
+runtime.loadClass("odf.Style2CSS");
 
 gui.PresenterUI = (function () {
 	"use strict";
 	var s2css = new odf.Style2CSS(),
+        xpath = new xmldom.XPath(),
 		nsResolver = s2css.namespaceResolver;
 
 	return function PresenterUI(odf_element) {
@@ -160,9 +162,10 @@ gui.PresenterUI = (function () {
 			// populate it
 			for (i=0 ; i< pages.length ; i += 1) {
 				html_option = document.createElement('option');
-				res = document.evaluate( './draw:frame[@presentation:class="title"]//draw:text-box/text:p',
-				  pages[i][1], nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE , null);
-				page_denom = res.singleNodeValue ? res.singleNodeValue.textContent : pages[i][0];
+                res = xpath.getODFElementsWithXPath(pages[i][1],
+                    './draw:frame[@presentation:class="title"]//draw:text-box/text:p',
+                    xmldom.XPath);
+				page_denom = (res.length > 0) ? res[0].textContent : pages[i][0];
 				html_option.textContent = (i+1)+": "+page_denom;
 				html_select.appendChild(html_option);
 			}

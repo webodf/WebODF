@@ -28,6 +28,7 @@ return [
         "xmldom/OperationalTransformInterface.js",
         "xmldom/RelaxNG.js",
         "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js"
+        "xmldom/RelaxNGParser.js",
+        "xmldom/XPath.js"
     ];
 }());
