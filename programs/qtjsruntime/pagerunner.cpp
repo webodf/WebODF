@@ -9,6 +9,7 @@
 #include <QtGui/QPainter>
 #include <QtGui/QPrinter>
 #include <QtWebKit/QWebFrame>
+#include <QtCore/QDebug>
 
 QByteArray getRuntimeBindings() {
     return
@@ -38,13 +39,6 @@ QByteArray getRuntimeBindings() {
     "    };"
     "    runtime.currentDirectory = function () {"
     "        return nativeio.currentDirectory();"
-    "    };"
-    "    runtime.libraryPaths = function () {"
-    "        /* convert to javascript array */"
-    "        var p = nativeio.libraryPaths(),"
-    "            a = [], i;"
-    "        for (i in p) { a[i] = p[i]; }"
-    "        return a;"
     "    };"
     "}";
 }
@@ -92,7 +86,14 @@ PageRunner::PageRunner(const QStringList& args)
                 "<script src=\"" + arguments[0].toUtf8() + "\"></script>";
         if (arguments[0].endsWith("runtime.js")) {
             // add runtime modification
-            html += "<script>" + getRuntimeBindings() + "</script>";
+            html += "<script>" + getRuntimeBindings() +
+                        "    runtime.libraryPaths = function () {"
+                        "        /* convert to javascript array */"
+                        "        var p = nativeio.libraryPaths(),"
+                        "            a = [], i;"
+                        "        for (i in p) { a[i] = p[i]; }"
+                        "        return a;"
+                        "    };</script>";
         }
         html += "</head><body></body></html>\n";
         QTemporaryFile tmp("XXXXXX.html");
@@ -123,7 +124,9 @@ void PageRunner::finished(bool ok) {
     if (!ok) {
         qApp->exit(1);
     }
-    mainFrame()->evaluateJavaScript(getRuntimeBindings());
+    if (!scriptMode) {
+        mainFrame()->evaluateJavaScript(getRuntimeBindings());
+    }
 
     // connect signals
     connect(this, SIGNAL(contentsChanged()), this, SLOT(noteChange()));
