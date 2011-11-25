@@ -1626,7 +1626,8 @@ core.RawDeflate = function () {
         }
         // Assert (dist == 256, "ct_init: dist != 256");
         dist >>= 7; // from now on, all distances are divided by 128
-        for (; code < zip_D_CODES; code++) {
+        n = code;
+        for (code = n; code < zip_D_CODES; code++) {
             zip_base_dist[code] = dist << 7;
             for (n = 0; n < (1 << (zip_extra_dbits[code] - 7)); n++) {
                 zip_dist_code[256 + dist++] = code;

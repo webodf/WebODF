@@ -78,7 +78,8 @@ core.RuntimeTests = function RuntimeTests(runner) {
                 t.data = data;
                 t.clean = clean;
                 r.shouldBe(t, "t.data.length", "t.clean.length");
-                for (i = 0; i < max && data[i] === clean[i];) {
+                i = 0;
+                while (i < max && data[i] === clean[i]) {
                     i += 1;
                 }
                 if (i !== max) {

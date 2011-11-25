@@ -203,20 +203,20 @@ core.Base64 = (function () {
      * @return {!string}
      */
     function convertUTF8StringToUTF16String_internal(bin, i, end) {
-        var str = "", c0, c1, c2;
-        for (; i < end; i += 1) {
-            c0 = bin.charCodeAt(i) & 0xff;
+        var str = "", c0, c1, c2, j;
+        for (j = i; j < end; j += 1) {
+            c0 = bin.charCodeAt(j) & 0xff;
             if (c0 < 0x80) {
                 str += String.fromCharCode(c0);
             } else {
-                i += 1;
-                c1 = bin.charCodeAt(i) & 0xff;
+                j += 1;
+                c1 = bin.charCodeAt(j) & 0xff;
                 if (c0 < 0xe0) {
                     str += String.fromCharCode(((c0 & 0x1f) << 6) |
                         (c1 & 0x3f));
                 } else {
-                    i += 1;
-                    c2 = bin.charCodeAt(i) & 0xff;
+                    j += 1;
+                    c2 = bin.charCodeAt(j) & 0xff;
                     str += String.fromCharCode(((c0 & 0x0f) << 12) |
                             ((c1 & 0x3f) << 6) | (c2 & 0x3f));
                 }
