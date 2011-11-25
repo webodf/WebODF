@@ -76,8 +76,7 @@ function checkWithJSLINT(file) {
         data, result, err;
 
     // these files are an exception for now
-    if (file === "lib/core/RawDeflate.js" ||
-            file === "lib/core/RawInflate.js") {
+    if (file === "lib/core/RawInflate.js") {
         return;
     }
 
