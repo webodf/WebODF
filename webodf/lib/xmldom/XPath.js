@@ -30,15 +30,204 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global xmldom, XPathResult*/
+/*global xmldom, XPathResult, runtime*/
 /**
  * Wrapper for XPath functions
  * @constructor
  */
 xmldom.XPath = (function () {
     "use strict";
+    var createXPathPathIterator;
+    /**
+     * Iterator over nodes uses in the xpath implementation
+     * @class
+     * @interface
+     */
+    function XPathIterator() {}
+    /**
+     * @return {Node}
+     */
+    XPathIterator.prototype.next = function () {};
+    /**
+     * @class
+     * @constructor
+     * @augments XPathIterator
+     * @implements {XPathIterator}
+     * @param {Array.<Node>} array
+     */
+    function ArrayIterator(array) {
+        var pos = 0;
+        this.next = function next() {
+            var val;
+            if (pos < array.length) {
+                val = array[pos];
+                pos += 1;
+            }
+            return val;
+        };
+    }
+    /**
+     * @class
+     * @constructor
+     * @augments XPathIterator
+     * @implements {XPathIterator}
+     * @param {XPathIterator} it
+     * @param {boolean} recurse
+     */
+    function AllChildElementIterator(it, recurse) {
+        var root = it.next(),
+            node = null;
+        this.next = function next() {
+            while (root) {
+                if (node) {
+                    if (recurse && node.firstChild) {
+                        node = node.firstChild;
+                    } else {
+                        while (!node.nextSibling && node !== root) {
+                            node = node.parentNode;
+                        }
+                        if (node === root) {
+                            root = it.next();
+                            node = null;
+                        } else {
+                            node = node.nextSibling;
+                        }
+                    }
+                } else {
+                    do {
+                        node = root.firstChild;
+                        if (!node) {
+                            root = it.next();
+                        }
+                    } while (root && !node);
+                }
+                if (node && node.nodeType === 1) {
+                    return node;
+                }
+            }
+            return null;
+        };
+    }
+    /**
+     * @class
+     * @constructor
+     * @augments XPathIterator
+     * @implements {XPathIterator}
+     * @param {XPathIterator} it
+     * @param {function(Node):boolean} condition
+     */
+    function ConditionIterator(it, condition) {
+        this.next = function next() {
+            var n = it.next();
+            while (n && !condition(n)) {
+                n = it.next();
+            }
+            return n;
+        };
+    }
+    /**
+     * @param {XPathIterator} it
+     * @param {string} condition
+     * @param {function(string):string} namespaceResolver
+     * @return {ConditionIterator}
+     */
+    function createConditionIterator(it, condition, namespaceResolver) {
+runtime.log(condition);
+        return new ConditionIterator(it, function (node) { return true; });
+    }
+    /**
+     * @class
+     * @constructor
+     * @augments XPathIterator
+     * @implements {XPathIterator}
+     * @param {XPathIterator} it
+     * @param {string} xpath
+     * @param {function(string):string} namespaceResolver
+     */
+    function XPathPathIterator(it, xpath, namespaceResolver) {
+        var namespace,
+            localName;
+        function init() {
+            var pos = xpath.indexOf('['),
+                l = xpath.length,
+                selector,
+                depth = 0,
+                start = 0;
+            it = new AllChildElementIterator(it, false);
+            if (pos === -1) {
+                selector = xpath;
+            } else {
+                selector = xpath.substring(0, pos);
+            }
+            if (selector !== '*') {
+                selector = selector.split(':', 2);
+                namespace = namespaceResolver(selector[0]);
+                localName = selector[1];
+                it = new ConditionIterator(it, function (node) {
+                    return node.localName === localName &&
+                        node.namespaceURI === namespace;
+                });
+            }
+            if (pos !== -1) {
+                while (pos < l) {
+                    if (xpath[pos] === ']') {
+                        depth -= 1;
+                        if (depth <= 0) {
+                            it = createConditionIterator(it,
+                                    xpath.substring(start, pos),
+                                    namespaceResolver);
+                        }
+                    } else if (xpath[pos] === '[') {
+                        if (depth <= 0) {
+                            start = pos + 1;
+                        }
+                        depth += 1;
+                    }
+                    pos += 1;
+                }
+            }
+        }
+        this.next = function next() {
+            return it.next();
+        };
+        init();
+    }
+    /**
+     * @param {!XPathIterator} it
+     * @param {!string} xpath
+     * @param {!Function} namespaceResolver
+     * @return {!XPathIterator}
+     */
+    createXPathPathIterator = function createXPathPathIterator(it, xpath, namespaceResolver) {
+        var i, xpaths = xpath.split('/'); // TODO: Need to split more carefully
+        for (i = 0; it && i < xpaths.length; i += 1) {
+            xpath = xpaths[i];
+            if (xpath === "") {
+                it = new AllChildElementIterator(it, true);
+            } else if (xpath !== ".") {
+                it = new XPathPathIterator(it, xpath, namespaceResolver);
+            }
+        }
+        return it;
+    };
+    /**
+     * @param {!Element} node
+     * @param {!string} xpath
+     * @param {!Function} namespaceResolver
+     * @return {!Array.<Element>}
+     */
     function fallback(node, xpath, namespaceResolver) {
-        return [];
+        var it = new ArrayIterator([node]),
+            i,
+            nodelist;
+        it = createXPathPathIterator(it, xpath, namespaceResolver);
+        nodelist = [];
+        i = it.next();
+        while (i) {
+            nodelist.push(i);
+            i = it.next();
+        }
+        return nodelist;
     }
     /**
      * @param {!Element} node
@@ -50,16 +239,17 @@ xmldom.XPath = (function () {
         var doc = node.ownerDocument,
             nodes, elements = [], n = null;
         if (!doc || !doc.evaluate) {
-            return fallback(node, xpath, namespaceResolver);
-        }
-        nodes = doc.evaluate(xpath, node, namespaceResolver,
-            XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
-        n = nodes.iterateNext();
-        while (n !== null) {
-            if (n.nodeType === 1) {
-                elements.push(n);
-            }
+            elements = fallback(node, xpath, namespaceResolver);
+        } else {
+            nodes = doc.evaluate(xpath, node, namespaceResolver,
+                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
             n = nodes.iterateNext();
+            while (n !== null) {
+                if (n.nodeType === 1) {
+                    elements.push(n);
+                }
+                n = nodes.iterateNext();
+            }
         }
         return elements;
     }
