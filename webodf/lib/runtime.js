@@ -998,14 +998,14 @@ var runtime = (function () {
             cache[classpath] = true;
             return;
         }
-        function load(classpath) {
-            var code, path, dir, dirs, i;
-            path = classpath.replace(".", "/") + ".js";
-            dirs = runtime.libraryPaths();
+        function getPathFromManifests(classpath) {
+            var path = classpath.replace(".", "/") + ".js",
+                dirs = runtime.libraryPaths(),
+                i, dir, code;
             if (runtime.currentDirectory) {
                 dirs.push(runtime.currentDirectory());
             }
-            for (i = 0; !code && i < dirs.length; i += 1) {
+            for (i = 0; i < dirs.length; i += 1) {
                 dir = dirs[i];
                 if (!dircontents.hasOwnProperty(dir)) {
                     code = runtime.readFileSync(dirs[i] + "/manifest.js",
@@ -1025,14 +1025,22 @@ var runtime = (function () {
                 code = null;
                 dir = dircontents[dir];
                 if (dir && dir.indexOf && dir.indexOf(path) !== -1) {
-                    try {
-                        code = runtime.readFileSync(dirs[i] + "/" + path,
-                            "utf8");
-                    } catch (e2) {
-                        runtime.log("Error loading " + classpath + " " + e2);
-                        throw e2;
-                    }
+                    return dirs[i] + "/" + path;
                 }
+            }
+            return null;
+        }
+        function load(classpath) {
+            var code, path;
+            path = getPathFromManifests(classpath);
+            if (!path) {
+                throw classpath + " is not listed in any manifest.js.";
+            }
+            try {
+                code = runtime.readFileSync(path, "utf8");
+            } catch (e2) {
+                runtime.log("Error loading " + classpath + " " + e2);
+                throw e2;
             }
             if (code === undefined) {
                 throw "Cannot load class " + classpath;
