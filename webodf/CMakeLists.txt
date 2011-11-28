@@ -27,13 +27,14 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
 set(TESTJSFILES tests/core/ZipTests.js
     tests/core/Base64Tests.js
-    tests/core/PointWalkerTests.js
     tests/core/CursorTests.js
+    tests/core/PointWalkerTests.js
     tests/core/RuntimeTests.js
-    tests/xmldom/OperationalTransformDOMTests.js
-    tests/gui/XMLEditTests.js
-    tests/gui/SelectionMoverTests.js
     tests/gui/CaretTests.js
+    tests/gui/SelectionMoverTests.js
+    tests/gui/XMLEditTests.js
+    tests/xmldom/OperationalTransformDOMTests.js
+    tests/xmldom/XPathTests.js
     tests/tests.js
 )
 

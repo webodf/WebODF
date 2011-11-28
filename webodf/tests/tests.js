@@ -39,6 +39,7 @@ runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.ZipTests");
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
+runtime.loadClass("xmldom.XPathTests");
 runtime.loadClass("gui.CaretTests");
 runtime.loadClass("gui.XMLEditTests");
 
@@ -55,6 +56,7 @@ if (runtime.type() === "BrowserRuntime") {
 //    tests.push(core.CursorTests);
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(gui.CaretTests);
+    tests.push(xmldom.XPathTests);
 //    tests.push(gui.XMLEditTests);
 }
 var tester = new core.UnitTester();

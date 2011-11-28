@@ -10,6 +10,7 @@ return [
         "gui/SelectionMoverTests.js",
         "gui/XMLEditTests.js",
         "tests.js",
-        "xmldom/OperationalTransformDOMTests.js"
+        "xmldom/OperationalTransformDOMTests.js",
+        "xmldom/XPathTests.js"
     ];
 }());

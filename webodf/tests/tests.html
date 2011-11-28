@@ -9,6 +9,13 @@
     <div id="testarea"></div>
     <div id="logoutput"></div>
     <script src="../lib/runtime.js"></script>
+<script type="text/javascript" charset="utf-8">
+runtime.libraryPaths = (function () {
+    return function () {
+        return ["../lib", "."];
+    }
+}());
+</script>
     <script src="tests.js"></script>
   </body>
 </html>
