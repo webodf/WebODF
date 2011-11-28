@@ -193,8 +193,17 @@ core.Base64 = (function () {
     }
 
     function convertUTF8ArrayToUTF16String(bin) {
-        return String.fromCharCode.apply(String,
-            convertUTF8ArrayToUTF16Array(bin));
+        // this conversion is done in chunks to avoid a stack overflow in
+        // apply()
+        var b = convertUTF8ArrayToUTF16Array(bin),
+            r = "",
+            i = 0,
+            chunksize = 45000;
+        while (i < b.length) {
+            r += String.fromCharCode.apply(String, b.slice(i, chunksize));
+            i += chunksize;
+        }
+        return r;
     }
     /**
      * @param {!Array.<number>|!string} bin
