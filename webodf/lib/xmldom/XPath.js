@@ -37,7 +37,97 @@
  */
 xmldom.XPath = (function () {
     "use strict";
-    var createXPathPathIterator;
+    var createXPathPathIterator,
+        parsePredicates;
+    /**
+     * @param {!number} a
+     * @param {!number} b
+     * @param {!number} c
+     * @return {!boolean}
+     */
+    function isSmallestPositive(a, b, c) {
+        return a !== -1 && (a < b || b === -1) && (a < c || c === -1);
+    }
+    /**
+     * Parse a subset of xpaths.
+     * The xpath predicates may contain xpaths. The location may be equated to
+     * a value. If a parsing error occurs, null is returned.
+     * @param {!string} xpath
+     * @param {!number} pos
+     * @param {!number} end
+     * @param {!Array} steps
+     * @return {!number}
+     */
+    function parseXPathStep(xpath, pos, end, steps) {
+        var location = "",
+            predicates = [],
+            value,
+            brapos = xpath.indexOf('[', pos),
+            slapos = xpath.indexOf('/', pos),
+            eqpos = xpath.indexOf('=', pos),
+            depth = 0,
+            start = 0;
+        // parse the location
+        if (isSmallestPositive(slapos, brapos, eqpos)) {
+            location = xpath.substring(pos, slapos);
+            pos = slapos + 1;
+        } else if (isSmallestPositive(brapos, slapos, eqpos)) {
+            location = xpath.substring(pos, brapos);
+            pos = parsePredicates(xpath, brapos, predicates);
+        } else if (isSmallestPositive(eqpos, slapos, brapos)) {
+            location = xpath.substring(pos, eqpos);
+            pos = eqpos;
+        } else {
+            location = xpath.substring(pos, end);
+            pos = end;
+        }
+        steps.push({location: location, predicates: predicates});
+        return pos;
+    }
+    function parseXPath(xpath) {
+        var steps = [],
+            p = 0,
+            end = xpath.length,
+            value;
+        while (p < end) {
+            p = parseXPathStep(xpath, p, end, steps);
+            if (p < end && xpath[p] === '=') {
+                value = xpath.substring(p + 1, end);
+                if (value.length > 2 &&
+                        (value[0] === '\'' || value[0] === '"')) {
+                    value = value.slice(1, value.length - 1);
+                } else {
+                    try {
+                        value = parseInt(value, 10);
+                    } catch (e) {
+                    }
+                }
+                p = end;
+            }
+        }
+        return {steps: steps, value: value};
+    }
+    parsePredicates = function parsePredicates(xpath, start, predicates) {
+        var pos = start,
+            l = xpath.length,
+            selector,
+            depth = 0;
+        while (pos < l) {
+            if (xpath[pos] === ']') {
+                depth -= 1;
+                if (depth <= 0) {
+                    predicates.push(parseXPath(xpath.substring(start, pos)));
+                }
+            } else if (xpath[pos] === '[') {
+                if (depth <= 0) {
+                    start = pos + 1;
+                }
+                depth += 1;
+            }
+            pos += 1;
+        }
+        return pos;
+    };
     /**
      * Iterator over nodes uses in the xpath implementation
      * @class
@@ -49,21 +139,52 @@ xmldom.XPath = (function () {
      */
     XPathIterator.prototype.next = function () {};
     /**
+     * @return {undefined}
+     */
+    XPathIterator.prototype.reset = function () {};
+    /**
      * @class
      * @constructor
      * @augments XPathIterator
      * @implements {XPathIterator}
-     * @param {Array.<Node>} array
      */
-    function ArrayIterator(array) {
-        var pos = 0;
+    function NodeIterator() {
+        var node, done = false;
+        this.setNode = function setNode(n) {
+            node = n;
+        };
+        this.reset = function () {
+            done = false;
+        };
         this.next = function next() {
-            var val;
-            if (pos < array.length) {
-                val = array[pos];
-                pos += 1;
-            }
+            var val = (done) ?null :node;
+            done = true;
             return val;
+        };
+    }
+    /**
+     * @class
+     * @constructor
+     * @augments XPathIterator
+     * @implements {XPathIterator}
+     * @param {XPathIterator} it
+     * @param {!string} namespace
+     * @param {!string} localName
+     */
+    function AttributeIterator(it, namespace, localName) {
+        this.reset = function reset() {
+            it.reset();
+        };
+        this.next = function next() {
+            var node = it.next(), attr;
+            while (node) {
+                node = node.getAttributeNodeNS(namespace, localName);
+                if (node) {
+                    return node;
+                }
+                node = it.next();
+            }
+            return node;
         };
     }
     /**
@@ -77,6 +198,11 @@ xmldom.XPath = (function () {
     function AllChildElementIterator(it, recurse) {
         var root = it.next(),
             node = null;
+        this.reset = function reset() {
+            it.reset();
+            root = it.next();
+            node = null;
+        };
         this.next = function next() {
             while (root) {
                 if (node) {
@@ -88,13 +214,13 @@ xmldom.XPath = (function () {
                         }
                         if (node === root) {
                             root = it.next();
-                            node = null;
                         } else {
                             node = node.nextSibling;
                         }
                     }
                 } else {
                     do {
+//                        node = (recurse) ?root :root.firstChild;
                         node = root.firstChild;
                         if (!node) {
                             root = it.next();
@@ -117,6 +243,9 @@ xmldom.XPath = (function () {
      * @param {function(Node):boolean} condition
      */
     function ConditionIterator(it, condition) {
+        this.reset = function reset() {
+            it.reset();
+        };
         this.next = function next() {
             var n = it.next();
             while (n && !condition(n)) {
@@ -127,85 +256,70 @@ xmldom.XPath = (function () {
     }
     /**
      * @param {XPathIterator} it
-     * @param {string} condition
+     * @param {string} name
      * @param {function(string):string} namespaceResolver
-     * @return {ConditionIterator}
+     * @return {!ConditionIterator}
      */
-    function createConditionIterator(it, condition, namespaceResolver) {
-runtime.log(condition);
-        return new ConditionIterator(it, function (node) { return true; });
+    function createNodenameFilter(it, name, namespaceResolver) {
+        var s = name.split(':', 2),
+            namespace = namespaceResolver(s[0]),
+            localName = s[1];
+        return new ConditionIterator(it, function (node) {
+            return node.localName === localName &&
+                node.namespaceURI === namespace;
+        });
     }
     /**
-     * @class
-     * @constructor
-     * @augments XPathIterator
-     * @implements {XPathIterator}
      * @param {XPathIterator} it
-     * @param {string} xpath
+     * @param {!Object} p
      * @param {function(string):string} namespaceResolver
+     * @return {!ConditionIterator}
      */
-    function XPathPathIterator(it, xpath, namespaceResolver) {
-        var namespace,
-            localName;
-        function init() {
-            var pos = xpath.indexOf('['),
-                l = xpath.length,
-                selector,
-                depth = 0,
-                start = 0;
-            it = new AllChildElementIterator(it, false);
-            if (pos === -1) {
-                selector = xpath;
-            } else {
-                selector = xpath.substring(0, pos);
-            }
-            if (selector !== '*') {
-                selector = selector.split(':', 2);
-                namespace = namespaceResolver(selector[0]);
-                localName = selector[1];
-                it = new ConditionIterator(it, function (node) {
-                    return node.localName === localName &&
-                        node.namespaceURI === namespace;
-                });
-            }
-            if (pos !== -1) {
-                while (pos < l) {
-                    if (xpath[pos] === ']') {
-                        depth -= 1;
-                        if (depth <= 0) {
-                            it = createConditionIterator(it,
-                                    xpath.substring(start, pos),
-                                    namespaceResolver);
-                        }
-                    } else if (xpath[pos] === '[') {
-                        if (depth <= 0) {
-                            start = pos + 1;
-                        }
-                        depth += 1;
-                    }
-                    pos += 1;
-                }
-            }
+    function createPredicateFilteredIterator(it, p, namespaceResolver) {
+        var nit = new NodeIterator(),
+            pit = createXPathPathIterator(nit, p, namespaceResolver),
+            value = p.value;
+        if (value === undefined) {
+            return new ConditionIterator(it, function (node) {
+                nit.setNode(node);
+                pit.reset();
+                return pit.next();
+            });
         }
-        this.next = function next() {
-            return it.next();
-        };
-        init();
+        return new ConditionIterator(it, function (node) {
+            nit.setNode(node);
+            pit.reset();
+            var n = pit.next();
+            // todo: distinuish between number and string
+            return n && n.nodeValue === value;
+        });
     }
     /**
      * @param {!XPathIterator} it
-     * @param {!string} xpath
+     * @param {!Object} xpath
      * @param {!Function} namespaceResolver
      * @return {!XPathIterator}
      */
-    createXPathPathIterator = function createXPathPathIterator(it, xpath, namespaceResolver) {
-        var i, xpaths = xpath.split('/'); // TODO: Need to split more carefully
-        for (i = 0; it && i < xpaths.length; i += 1) {
-            xpath = xpaths[i];
-            if (xpath === "") {
-                it = new AllChildElementIterator(it, true);
-            } else if (xpath !== ".") {
-                it = new XPathPathIterator(it, xpath, namespaceResolver);
+    createXPathPathIterator = function createXPathPathIterator(it, xpath,
+                namespaceResolver) {
+        var i, j, step, location, namespace, localName, prefix, p;
+        for (i = 0; i < xpath.steps.length; i += 1) {
+            step = xpath.steps[i];
+            location = step.location;
+            if (location === "") {
+                it = new AllChildElementIterator(it, false);
+            } else if (location[0] === '@') {
+                p = location.slice(1).split(":", 2);
+                it = new AttributeIterator(it, namespaceResolver(p[0]), p[1]);
+            } else if (location !== ".") {
+                it = new AllChildElementIterator(it, false);
+                if (location.indexOf(":") !== -1) {
+                    it = createNodenameFilter(it, location, namespaceResolver);
+                }
+            }
+            for (j = 0; j < step.predicates.length; j += 1) {
+                p = step.predicates[j];
+                it = createPredicateFilteredIterator(it, p, namespaceResolver);
             }
         }
         return it;
@@ -217,10 +331,14 @@ runtime.log(condition);
      * @return {!Array.<Element>}
      */
     function fallback(node, xpath, namespaceResolver) {
-        var it = new ArrayIterator([node]),
+        var it = new NodeIterator(),
             i,
-            nodelist;
-        it = createXPathPathIterator(it, xpath, namespaceResolver);
+            nodelist,
+            parsedXPath,
+            pos;
+        it.setNode(node);
+        parsedXPath = parseXPath(xpath);
+        it = createXPathPathIterator(it, parsedXPath, namespaceResolver);
         nodelist = [];
         i = it.next();
         while (i) {
@@ -238,7 +356,7 @@ runtime.log(condition);
     function getODFElementsWithXPath(node, xpath, namespaceResolver) {
         var doc = node.ownerDocument,
             nodes, elements = [], n = null;
-        if (!doc || !doc.evaluate) {
+        if (!doc || !doc.evaluate || !n) {
             elements = fallback(node, xpath, namespaceResolver);
         } else {
             nodes = doc.evaluate(xpath, node, namespaceResolver,

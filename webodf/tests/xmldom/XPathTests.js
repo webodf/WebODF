@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, xmldom: true, odf: true*/
+/*global runtime: true, core: true, xmldom: true, odf: true, XMLSerializer*/
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.Style2CSS");
 
@@ -55,7 +55,9 @@ xmldom.XPathTests = function XPathTests(runner) {
             r = doc.documentElement,
             fontFace = doc.createElementNS(stylens, "font-face"),
             fontFaceSrc = doc.createElementNS(svgns, "font-face-src"),
-            drawFrame = doc.createElementNS(drawns, "frame");
+            drawFrame = doc.createElementNS(drawns, "frame"),
+            p = doc.createElementNS(textns, "p");
+        r.appendChild(p);
         r.appendChild(fontFace);
         fontFace = doc.createElementNS(stylens, "font-face");
         fontFace.appendChild(fontFaceSrc);
@@ -65,22 +67,24 @@ xmldom.XPathTests = function XPathTests(runner) {
         drawFrame = doc.createElementNS(drawns, "frame");
         drawFrame.setAttributeNS(presentationns, "class", "title");
         r.appendChild(drawFrame);
-        t = { doc: doc };
+
+        t = { doc: doc, fontFace: fontFace, drawFrame: drawFrame };
     }
     function test1() {
         setupDoc();
         var xpath = new xmldom.XPath(),
             xpaths = {
-                "style:font-face[svg:font-face-src]": 1,
-                ".//*[*[@text:anchor-type='paragraph']]": 1,
-                "./draw:frame[@presentation:class='title']": 1
+                "style:font-face[svg:font-face-src]": "t.fontFace",
+                ".//*[*[@text:anchor-type='paragraph']]": "t.fontFace",
+                "./draw:frame[@presentation:class='title']": "t.drawFrame"
             },
             x;
         for (x in xpaths) {
             if (xpaths.hasOwnProperty(x)) {
                 t.result = xpath.getODFElementsWithXPath(t.doc.documentElement,
                         x, style2CSS.namespaceResolver);
-                r.shouldBe(t, "t.result.length", xpaths[x]);
+                r.shouldBe(t, "t.result.length", "1");
+                r.shouldBe(t, "t.result[0]", xpaths[x]);
             }
         }
     }
