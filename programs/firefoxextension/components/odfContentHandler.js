@@ -7,6 +7,7 @@ var Cr = Components.results;
 var Cu = Components.utils;
 
 var ODF_CONTENT_TYPE_PREFIX = 'application/vnd.oasis.opendocument.';
+var NS_ERROR_WONT_HANDLE_CONTENT = 0x805d0001;
 
 Cu["import"]('resource://gre/modules/XPCOMUtils.jsm');
 Cu["import"]('resource://gre/modules/Services.jsm');
@@ -143,36 +144,49 @@ function odfContentHandler() {
 odfContentHandler.prototype = {
     handleContent: function handleContent(aMimetype, aContext, aRequest) {
         "use strict";
+
         if (!(aMimetype.indexOf(ODF_CONTENT_TYPE_PREFIX) === 0 ||
                 aMimetype === "application/octet-stream")) {
-            throw Cr.NS_ERROR_WONT_HANDLE_CONTENT;
+            throw NS_ERROR_WONT_HANDLE_CONTENT;
         }
 
         if (!(aRequest instanceof Ci.nsIChannel)) {
-            throw Cr.NS_ERROR_WONT_HANDLE_CONTENT;
+            throw NS_ERROR_WONT_HANDLE_CONTENT;
         }
 
         var mywindow = null,
-            callbacks = aRequest.notificationCallbacks ||
-                    aRequest.loadGroup.notificationCallbacks,
+            callbacks,
             uri = aRequest.URI,
+            targetUrl = uri.spec,
+            tail = targetUrl.substring(targetUrl.length-9),
             url;
+
+        // if the url ends with a download parameter, then do not handle it
+        if (tail === "#download") {
+            throw NS_ERROR_WONT_HANDLE_CONTENT;
+        }
+
+        callbacks = aRequest.notificationCallbacks ||
+                    aRequest.loadGroup.notificationCallbacks;
         if (!callbacks) {
             return;
         }
 
-        aRequest.cancel(Cr.NS_BINDING_ABORTED);
-
         mywindow = callbacks.getInterface(Ci.nsIDOMWindow);
+
         WebProgressListener.init(mywindow, uri.spec);
 
         try {
             url = Services.prefs.getCharPref('extensions.webodf.js.url');
-            url = url.replace('%s', uri.spec);
-            mywindow.location = url;
+            //url = url.replace('%s', encodeURIComponent(targetUrl));
+            url = url.replace('%s', targetUrl);
         } catch (e) {
             log('Error retrieving the webodf base url - ' + e);
+            throw NS_ERROR_WONT_HANDLE_CONTENT;
         }
+
+        aRequest.cancel(Cr.NS_BINDING_ABORTED);
+        mywindow.location = url;
     },
 
     classID: Components.ID('{afe5fa21-709d-4916-b51c-56f60d574a0a}'),

@@ -72,16 +72,12 @@ function init() {
     runtime.loadClass("core.Base64");
     var toolbar = document.getElementById("toolbar");
     addButton(toolbar, "download", function onclick() {
-        var wf = webodffirefox,
-            base64 = new core.Base64(),
-            b64 = base64.convertUTF8ArrayToBase64(wf.data);
-        b64 = "data:application/octet;base64," + b64;
-        window.location.href = b64;
+        window.location.href = webodffirefox.url + "#download";
     });
 }
 window.setTimeout(function () {
     init();
-}, 0);
+}, 1);
 //--></script>
   <title></title>
 </head>
