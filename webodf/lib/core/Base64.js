@@ -200,7 +200,7 @@ core.Base64 = (function () {
             i = 0,
             chunksize = 45000;
         while (i < b.length) {
-            r += String.fromCharCode.apply(String, b.slice(i, chunksize));
+            r += String.fromCharCode.apply(String, b.slice(i, i + chunksize));
             i += chunksize;
         }
         return r;
