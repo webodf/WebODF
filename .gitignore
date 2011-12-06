@@ -3,3 +3,4 @@
 nativeQtClient/nativeQtClient.pro.user
 programs/firefoxextension/content/webodf.js
 programs/firefoxextension/content/webodf.css
+programs/firefoxextension/install.rdf
