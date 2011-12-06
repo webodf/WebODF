@@ -3,6 +3,9 @@ project (WebODF C CXX)
 # version 2.8.2 is needed to have support for zip files in external projects
 cmake_minimum_required(VERSION 2.8.2)
 
+# At this point, the version number that is used throughout is defined
+set(WEBODF_VERSION 0.2.0)
+
 # This makefile 'compiles' WebODF using various tools, instruments the code and
 # builds and packages programs that use WebODF.
 

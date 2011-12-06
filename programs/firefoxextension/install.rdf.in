@@ -7,7 +7,7 @@
     <em:id>uriloader@webodf.js</em:id>
     <em:name>WebODF</em:name>
     <em:type>2</em:type>
-    <em:version>0.2.0</em:version>
+    <em:version>@WEBODF_VERSION@</em:version>
     <em:iconURL>chrome://webodf.js/skin/icon.png</em:iconURL>
     <em:targetApplication>
       <!-- Firefox -->

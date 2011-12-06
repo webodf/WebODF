@@ -49,7 +49,7 @@ function addFiles(zip, pos, files, callback) {
             return callback(err);
         }
         if (path === "content/webodf.js") {
-            // replace eval() with evil()
+            // replace eval() with evil(), since Firefox does not approve of it
             base64 = new core.Base64();
             data = base64.convertUTF8ArrayToUTF16String(data);
             data = data.replace(new RegExp('eval\\(', 'g'), 'evil(');
@@ -60,7 +60,6 @@ function addFiles(zip, pos, files, callback) {
     });
 }
 
-runtime.log(arguments.length);
 var args = arguments,
     filename = args[1],
     zipmembers = [],
@@ -75,5 +74,4 @@ addFiles(zip, 0, zipmembers, function (err) {
     if (err) {
         runtime.log(err);
     }
-    runtime.log("DONE");
 });
