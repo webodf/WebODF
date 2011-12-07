@@ -146,6 +146,10 @@ draw|image {
   background-size: 100% 100%;
   -moz-background-size: 100% 100%;
 }
+/* only show the first image in frame */
+draw|frame > draw|image:nth-of-type(n+2) {
+  display: none;
+}
 text|list {
     display: block;
     padding-left: 1.5em;
