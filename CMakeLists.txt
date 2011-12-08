@@ -88,4 +88,27 @@ find_path(ANDROID_SDK_DIR platform-tools/aapt)
 
 add_subdirectory(webodf)
 add_subdirectory(programs)
+
+# package webodf
+set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
+add_custom_command(
+    OUTPUT ${WEBODFZIP}
+    # zip using javascript code running in node.js
+    COMMAND ${NODE} ARGS webodf/lib/runtime.js packwebodf.js
+        ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
+#input files
+        ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodf-debug.js
+        webodf/webodf.js
+        webodf/webodf.css
+#output files
+        webodf-debug.js
+        webodf.js
+        webodf.css
+    DEPENDS NodeJS
+        packwebodf.js
+        CMakeLists.txt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+add_custom_target(zip ALL DEPENDS ${WEBODFZIP})
+
 # vim:expandtab
