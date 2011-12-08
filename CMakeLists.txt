@@ -92,15 +92,15 @@ add_subdirectory(programs)
 # package webodf
 set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
 set(WEBODFZIP_FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodf-debug.js
-  ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodf.js
-  webodf/webodf.css
+  ${CMAKE_BINARY_DIR}/webodf/webodf-debug.js
+  ${CMAKE_BINARY_DIR}/webodf/webodf.js
+  ${CMAKE_SOURCE_DIR}/webodf/webodf.css
 )
 add_custom_command(
     OUTPUT ${WEBODFZIP}
     # zip using javascript code running in node.js
     COMMAND ${NODE} ARGS webodf/lib/runtime.js packwebodf.js
-        ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
+        ${CMAKE_BINARY_DIR}/${WEBODFZIP}
 #input files
         ${WEBODFZIP_FILES}
 #output files
@@ -110,7 +110,9 @@ add_custom_command(
     DEPENDS NodeJS
         packwebodf.js
         ${WEBODFZIP_FILES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        webodf-debug.js
+        webodf.js
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(zip ALL DEPENDS ${WEBODFZIP})
 
