@@ -85,7 +85,7 @@ if (Java_JAVA_EXECUTABLE)
   )
 
   add_custom_command(
-      OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
       COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
@@ -93,11 +93,11 @@ if (Java_JAVA_EXECUTABLE)
          --compilation_level SIMPLE_OPTIMIZATIONS
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --js_output_file ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
+         --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
       DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
   )
   add_custom_target(webodf.js
-      SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/webodf.js
+      SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
   )
 
   # too hardcore for now...
@@ -116,7 +116,7 @@ if (Java_JAVA_EXECUTABLE)
   # )
 
   add_custom_command(
-      OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/webodf-debug.js
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
       COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
@@ -124,11 +124,11 @@ if (Java_JAVA_EXECUTABLE)
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --js_output_file webodf-debug.js
+         --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
       DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
   )
   add_custom_target(webodf-debug.js
-     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/webodf-debug.js
+     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
   )
 
   add_custom_command(
