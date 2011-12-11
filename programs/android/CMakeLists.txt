@@ -1,42 +1,41 @@
 set(ANDROID_JAR ${ANDROID_SDK_DIR}/platforms/android-8/android.jar)
 file(GLOB_RECURSE ANDROID_RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
-file(GLOB_RECURSE ANDROID_JAVA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.java)
+file(GLOB_RECURSE ANDROID_ASSETS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
+file(GLOB_RECURSE ANDROID_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
 
-# copy the webodf files into the resource directory
-
-# generate gen/org/webodf/R.java
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen/org/webodf)
+set(WEBODFAPK ${CMAKE_CURRENT_BINARY_DIR}/bin/WebODF-debug.apk)
 add_custom_command(
-        OUTPUT gen/org/webodf/R.java
-        COMMAND ${ANDROID_SDK_DIR}/platform-tools/aapt
-        ARGS package -f
-             -M ${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml
-             -F webodf.apk
-             -I ${ANDROID_JAR}
-             -S ${CMAKE_CURRENT_SOURCE_DIR}/res/ -m
-             -J ${CMAKE_CURRENT_BINARY_DIR}/gen/
-        DEPENDS ${ANDROID_RES_FILES}
+    OUTPUT ${WEBODFAPK}
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/res
+        ${CMAKE_CURRENT_BINARY_DIR}/res
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_BINARY_DIR}/src
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        ${CMAKE_CURRENT_BINARY_DIR}/assets
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml
+        ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/webodf/webodf.css
+        ${CMAKE_CURRENT_BINARY_DIR}/assets/webodf.css
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/webodf/embedodf.html
+        ${CMAKE_CURRENT_BINARY_DIR}/assets/embedodf.html
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+        ${CMAKE_BINARY_DIR}/webodf/webodf.js
+        ${CMAKE_CURRENT_BINARY_DIR}/assets/webodf.js
+    COMMAND ${ANDROID_SDK_DIR}/tools/android
+        ARGS update project --path . --target android-7 --name WebODF
+    COMMAND ${ANT} ARGS debug
+    COMMAND ${ANT} ARGS release
+    DEPENDS AndroidManifest.xml ${ANDROID_RES_FILES}
+        ${ANDROID_ASSETS_FILES} ${ANDROID_SRC_FILES}
+        ${CMAKE_SOURCE_DIR}/webodf/webodf.css
+        ${CMAKE_SOURCE_DIR}/webodf/embedodf.html
+        ${CMAKE_BINARY_DIR}/webodf/webodf.js
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-# compile java files
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
-add_custom_command(
-        OUTPUT bin/org/webodf/R.class
-	COMMAND ${Java_JAVAC_EXECUTABLE}
-            -d ${CMAKE_CURRENT_BINARY_DIR}/bin/
-            -cp ${ANDROID_JAR}
-            ${ANDROID_JAVA_FILES} gen/org/webodf/R.java
-        DEPENDS ${ANDROID_JAVA_FILES}
-                ${CMAKE_CURRENT_BINARY_DIR}/gen/org/webodf/R.java
-)
-# generate a dex file
-add_custom_command(
-        OUTPUT bin/classes.dex
-        COMMAND ${ANDROID_SDK_DIR}/platform-tools/dx
-        ARGS --dex --output=bin/classes.dex
-             ${CMAKE_CURRENT_BINARY_DIR}/bin/
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/org/webodf/R.class
-)
-# pack everything in an apk
-
-add_custom_target(android ALL DEPENDS bin/classes.dex)
-#add_dependencies(android androidcompile)
+add_custom_target(apk ALL DEPENDS ${WEBODFAPK})

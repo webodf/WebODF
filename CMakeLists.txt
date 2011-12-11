@@ -86,7 +86,12 @@ ExternalProject_Add(
 set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
 
 # Android
-find_path(ANDROID_SDK_DIR platform-tools/aapt)
+if (NOT ANDROID_SDK_DIR)
+  find_path(ANDROID_SDK_DIR platform-tools/aapt)
+endif(NOT ANDROID_SDK_DIR)
+if (NOT ANT)
+  find_file(ANT NAMES ant ant.exe /usr/bin /usr/local/bin)
+endif(NOT ANT)
 
 add_subdirectory(webodf)
 add_subdirectory(programs)
