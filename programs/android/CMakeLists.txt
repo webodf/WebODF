@@ -21,7 +21,7 @@ add_custom_command(
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 add_custom_command(
         OUTPUT bin/org/webodf/R.class
-	COMMAND ${CMAKE_Java_COMPILER}
+	COMMAND ${Java_JAVAC_EXECUTABLE}
             -d ${CMAKE_CURRENT_BINARY_DIR}/bin/
             -cp ${ANDROID_JAR}
             ${ANDROID_JAVA_FILES} gen/org/webodf/R.java
