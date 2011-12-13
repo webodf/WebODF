@@ -209,7 +209,9 @@ odf.OdfCanvas = (function () {
         if (handlers === undefined) {
             handlers = eventHandlers[eventType] = [];
         }
-        handlers.push(eventHandler);
+        if (eventHandler && handlers.indexOf(eventHandler) === -1) {
+            handlers.push(eventHandler);
+        }
     }
     /**
      * Fire an event
