@@ -1,3 +1,4 @@
+/*global Ext, app*/
 app.views.FilesList = Ext.extend(Ext.Panel, {
     layout: 'fit',
     dockedItems: [{
@@ -10,6 +11,7 @@ app.views.FilesList = Ext.extend(Ext.Panel, {
         itemTpl: '{fileName}<br/><span style="font-size:x-small">{fullPath}</span>',
         listeners: {
             'itemtap': function (view, number, item) {
+                "use strict";
                 var record = app.stores.filesystem.getAt(number);
                 if (record) {
                     Ext.dispatch({
@@ -24,6 +26,7 @@ app.views.FilesList = Ext.extend(Ext.Panel, {
         grouped: true
     }],
     initComponent: function() {
+        "use strict";
         app.stores.filesystem.load();
         app.views.FilesList.superclass.initComponent.apply(this, arguments);
     }

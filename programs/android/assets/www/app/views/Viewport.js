@@ -1,4 +1,6 @@
+/*global Ext, app*/
 app.views.Viewport = Ext.extend(Ext.Panel, (function () {
+    "use strict";
     return {
         fullscreen: true,
         layout: 'card',

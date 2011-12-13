@@ -1,12 +1,15 @@
+/*global Ext, app*/
 app.controllers.files = new Ext.Controller({
 
     index: function(options) {
+        "use strict";
         app.views.viewport.setActiveItem(
             app.views.filesList, options.animation
         );
     },
 
     show: function(options) {
+        "use strict";
         var id = parseInt(options.id, 10),
             store = app.stores.filesystem,
             file = store.getAt(store.findExact('id', id));
@@ -19,6 +22,7 @@ app.controllers.files = new Ext.Controller({
     },
     
     open: function(options) {
+        "use strict";
         var id = parseInt(options.id, 10),
             store = app.stores.filesystem,
             file = store.getAt(store.findExact('id', id));

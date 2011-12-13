@@ -1,4 +1,6 @@
+/*global Ext, app, runtime, core, odf, window, FileReader, console*/
 app.views.OdfView = Ext.extend(Ext.Panel, (function () {
+    "use strict";
     var record,
         odfcanvas,
         currentPath,

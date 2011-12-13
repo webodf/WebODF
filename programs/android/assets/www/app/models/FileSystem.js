@@ -1,4 +1,6 @@
+/*global Ext, console, app, window, LocalFileSystem*/
 Ext.data.FileSystemProxy = Ext.extend(Ext.data.Proxy, (function () {
+    "use strict";
     var self = this,
         scanner;
     function Scanner(proxy) {
@@ -94,7 +96,7 @@ Ext.data.FileSystemProxy = Ext.extend(Ext.data.Proxy, (function () {
         },
     
         read : function(operation, callback, scope) {
-            scanner.scan()
+            scanner.scan();
             var thisProxy = this,
                 records = scanner.files;
 
@@ -121,7 +123,7 @@ Ext.data.FileSystemProxy = Ext.extend(Ext.data.Proxy, (function () {
 
         getId : function(url, callback) {
             var i, files = scanner.files;
-            for (i = 0; i < files.length; ++i) {
+            for (i = 0; i < files.length; i += 1) {
                 if (files[i].fullPath === url) {
                     return callback(i);
                 }
@@ -166,6 +168,7 @@ app.stores.filesystem = new Ext.data.Store({
     model: "app.models.FileSystem",
     // set sorting and grouping to be alphabetically but to ignore case
     sorters: function (a, b) {
+        "use strict";
         a = a.get('fileName').toUpperCase();
         b = b.get('fileName').toUpperCase();
         if (a > b) {
@@ -177,6 +180,7 @@ app.stores.filesystem = new Ext.data.Store({
         return 0;
     },
     getGroupString: function(record) {
+        "use strict";
         return record.get('fileName')[0].toUpperCase();
     }
 });

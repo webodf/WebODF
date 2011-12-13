@@ -1,3 +1,4 @@
+/*global Ext, app*/
 app.views.FileDetail = Ext.extend(Ext.Panel, {
     dockedItems: [{
         xtype: 'toolbar',
@@ -8,6 +9,7 @@ app.views.FileDetail = Ext.extend(Ext.Panel, {
                 ui: 'back',
                 listeners: {
                     'tap': function () {
+                        "use strict";
                         Ext.dispatch({
                             controller: app.controllers.files,
                             action: 'index',
@@ -23,6 +25,7 @@ app.views.FileDetail = Ext.extend(Ext.Panel, {
                 ui: 'action',
                 listeners: {
                     'tap': function () {
+                        "use strict";
                         Ext.dispatch({
                             controller: app.controllers.files,
                             action: 'open',
@@ -51,10 +54,11 @@ app.views.FileDetail = Ext.extend(Ext.Panel, {
         {xtype:'panel', tpl:[
             '<h4>Search</h4>',
             '<div class="field"><span class="label">Google: </span><a href="http://www.google.com/m/search?q=%22{givenName}+{familyName}%22">\'{givenName} {familyName}\'</a></div>',
-            '<div class="field"><span class="label">Bing: </span><a href="http://m.bing.com/search?q=%22{givenName}+{familyName}%22">\'{givenName} {familyName}\'</a></div>',
-        ]},
+            '<div class="field"><span class="label">Bing: </span><a href="http://m.bing.com/search?q=%22{givenName}+{familyName}%22">\'{givenName} {familyName}\'</a></div>'
+        ]}
     ],
     updateWithRecord: function(record) {
+        "use strict";
         Ext.each(this.items.items, function(item) {
             item.update(record.data);
         });
