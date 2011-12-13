@@ -1,7 +1,8 @@
 set(ANDROID_JAR ${ANDROID_SDK_DIR}/platforms/android-8/android.jar)
 file(GLOB_RECURSE ANDROID_RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
-file(GLOB_RECURSE ANDROID_ASSETS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
-file(GLOB_RECURSE ANDROID_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
+file(GLOB_RECURSE ANDROID_ASSETS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/*)
+file(GLOB_RECURSE ANDROID_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+file(GLOB_RECURSE ANDROID_LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/libs/*)
 
 set(WEBODFAPK ${CMAKE_CURRENT_BINARY_DIR}/bin/WebODF-debug.apk)
 add_custom_command(
@@ -15,24 +16,26 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/assets
         ${CMAKE_CURRENT_BINARY_DIR}/assets
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs
+        ${CMAKE_CURRENT_BINARY_DIR}/libs
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml
         ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
         ${CMAKE_SOURCE_DIR}/webodf/webodf.css
-        ${CMAKE_CURRENT_BINARY_DIR}/assets/webodf.css
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-        ${CMAKE_SOURCE_DIR}/webodf/embedodf.html
-        ${CMAKE_CURRENT_BINARY_DIR}/assets/embedodf.html
+        ${CMAKE_CURRENT_BINARY_DIR}/assets/www/webodf.css
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
-        ${CMAKE_CURRENT_BINARY_DIR}/assets/webodf.js
+        ${CMAKE_CURRENT_BINARY_DIR}/assets/www/webodf.js
     COMMAND ${ANDROID_SDK_DIR}/tools/android
         ARGS update project --path . --target android-7 --name WebODF
-    COMMAND ${ANT} ARGS debug
-    COMMAND ${ANT} ARGS release
+    COMMAND ${ANT}
+        ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.2.0.jar debug
+    COMMAND ${ANT}
+        ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.2.0.jar release
     DEPENDS AndroidManifest.xml ${ANDROID_RES_FILES}
-        ${ANDROID_ASSETS_FILES} ${ANDROID_SRC_FILES}
+        ${ANDROID_ASSETS_FILES} ${ANDROID_SRC_FILES} ${ANDROID_LIBS_FILES}
         ${CMAKE_SOURCE_DIR}/webodf/webodf.css
         ${CMAKE_SOURCE_DIR}/webodf/embedodf.html
         ${CMAKE_BINARY_DIR}/webodf/webodf.js

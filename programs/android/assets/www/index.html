@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebODF</title>
+        <link href="sencha-touch.css" rel="stylesheet" type="text/css" />
+        <link href="webodf.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="phonegap-1.2.0.js"></script>
+        <script type="text/javascript" src="sencha-touch.js"></script>
+        <script type="text/javascript" src="webodf.js"></script>
+        <script type="text/javascript" src="app/app.js"></script>
+        <script type="text/javascript" src="app/models/FileSystem.js"></script>
+        <script type="text/javascript" src="app/views/FilesList.js"></script>
+        <script type="text/javascript" src="app/views/FileDetail.js"></script>
+        <script type="text/javascript" src="app/views/OdfView.js"></script>
+        <script type="text/javascript" src="app/controllers/files.js"></script>
+        <script type="text/javascript" src="app/views/Viewport.js"></script>
+        <script type="text/javascript">
+            /*
+setTimeout(function() {
+    list('LocalFileSystem', window.LocalFileSystem);
+    list('window', window);
+}, 200);
+function list(name, object) {
+    var w, e, body, a = [];
+    body = document.getElementsByTagName('body')[0];
+    e = document.createElement('h1');
+    e.appendChild(document.createTextNode(name));
+    body.appendChild(e);
+    for (w in object) {
+        a.push(w);
+    }
+    a.sort();
+    for (w in a) {
+        w = a[w];
+        e = document.createElement('p');
+        e.appendChild(document.createTextNode(w));
+        body.appendChild(e);
+    }
+}
+            */
+window.handleOpenURL = function (url) {
+    app.openUrl(url);
+};
+handleOpenURL = function (url) {
+    app.openUrl(url);
+};
+document.addEventListener("deviceready", app.mainLaunch, false);
+        </script>
+
+        <style>
+            h4 {
+                background: #F7F7F7;
+                font-weight: bold!important;
+                margin: 0.5em 0 0!important;
+                padding: 5px;
+                border: solid #DDD;
+                border-width: 1px 0;
+            }
+            .field {
+                background:#FFFFFF;
+                font-size: 120%;
+                text-indent: -100px;
+                border-bottom: 1px solid #DDD;
+                padding:0.4em 0.4em 0.4em 100px;
+            }
+            .field .label {
+                display: inline-block;
+                color:#666;
+                text-align:right;
+                text-transform:capitalize;
+                width: 100px;
+                padding-right:1em;
+            }
+        </style>
+
+    </head><body></body>
+</html>
