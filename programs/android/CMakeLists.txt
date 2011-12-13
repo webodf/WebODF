@@ -32,8 +32,6 @@ add_custom_command(
         ARGS update project --path . --target android-7 --name WebODF
     COMMAND ${ANT}
         ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.2.0.jar debug
-    COMMAND ${ANT}
-        ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.2.0.jar release
     DEPENDS AndroidManifest.xml ${ANDROID_RES_FILES}
         ${ANDROID_ASSETS_FILES} ${ANDROID_SRC_FILES} ${ANDROID_LIBS_FILES}
         ${CMAKE_SOURCE_DIR}/webodf/webodf.css
@@ -42,3 +40,12 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_target(apk ALL DEPENDS ${WEBODFAPK})
+set(WEBODFRELEASEAPK ${CMAKE_CURRENT_BINARY_DIR}/bin/WebODF-release.apk)
+add_custom_command(
+    OUTPUT ${WEBODFRELEASEAPK}
+    COMMAND ${ANT}
+        ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.2.0.jar release
+    DEPENDS ${WEBODFAPK}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+add_custom_target(releaseapk ALL DEPENDS ${WEBODFRELEASEAPK})
