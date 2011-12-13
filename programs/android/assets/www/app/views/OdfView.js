@@ -2,7 +2,6 @@
 app.views.OdfView = Ext.extend(Ext.Panel, (function () {
     "use strict";
     var record,
-        odfcanvas,
         currentPath,
         data;
     function setRecord(r) {
@@ -10,7 +9,9 @@ app.views.OdfView = Ext.extend(Ext.Panel, (function () {
     }
     function initCanvas() {
         var cmp;
-        if (odfcanvas === undefined) {
+        if (app.views.OdfCanvas === undefined) {
+            // overload the global read function with one that only reads
+            // the data from this canvas
             runtime.read = function (path, offset, length, callback) {
                 if (path !== currentPath) {
                     return callback("File is not available.");
@@ -23,23 +24,31 @@ app.views.OdfView = Ext.extend(Ext.Panel, (function () {
                 }
                 callback(data.length);
             };
-            odfcanvas = null;
+            app.views.OdfCanvas = null;
         }
-        if (!odfcanvas) {
+        if (!app.views.OdfCanvas) {
             cmp = Ext.getCmp('webodf');
             if (cmp && cmp.el && cmp.el.dom) {
-                odfcanvas = new odf.OdfCanvas(cmp.el.dom);
+                app.views.OdfCanvas = new odf.OdfCanvas(cmp.el.dom);
             }
         }
     }
-    function load(path) {
+    function load(path, callback) {
         function initCanvasAndLoad() {
-            if (odfcanvas) {
-                odfcanvas.load(path);                
+            if (app.views.OdfCanvas) {
+                app.views.OdfCanvas.addListener("statereadychange",
+                    callback);
+                app.views.OdfCanvas.load(path);
             } else {
                 initCanvas();
                 window.setTimeout(initCanvasAndLoad, 100);
             }
+        }
+        if (app.views.OdfCanvas) {
+            app.views.OdfCanvas.addListener("statereadychange", callback);
+        }
+        if (path === currentPath) {
+            return;
         }
         window.resolveLocalFileSystemURI("file://" + path, function (file) {
             var reader = new FileReader();
@@ -51,8 +60,6 @@ app.views.OdfView = Ext.extend(Ext.Panel, (function () {
                 data = b.convertBase64ToUTF8Array(data);
                 initCanvasAndLoad();
             };
-            //reader.readAsBinaryString(file);
-            //reader.readAsArrayBuffer(file);
             // so far phonegap is very limited, ideally it would implement
             // readAsArrayBuffer and slice() on the File object
             reader.readAsDataURL(file);
@@ -60,6 +67,7 @@ app.views.OdfView = Ext.extend(Ext.Panel, (function () {
             console.log("COULD NOT RESOLVE " + path);
         });
     }
+    app.loadDocument = load;
     
     return {
         dockedItems: [{
