@@ -37,6 +37,7 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/webodf/webodf.css
         ${CMAKE_SOURCE_DIR}/webodf/embedodf.html
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
+        webodf.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_target(apk ALL DEPENDS ${WEBODFAPK})
