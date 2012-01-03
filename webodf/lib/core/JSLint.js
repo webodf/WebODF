@@ -1,5 +1,5 @@
 // jslint.js
-// 2011-11-16
+// 2011-12-21
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -155,7 +155,6 @@
 // The jslint directive is a special comment that can set one or more options.
 // The current option set is
 
-//     adsafe     true, if ADsafe rules should be enforced
 //     bitwise    true, if bitwise operators should be allowed
 //     browser    true, if the standard browser globals should be predefined
 //     cap        true, if upper case HTML should be allowed
@@ -183,7 +182,6 @@
 //     rhino      true, if the Rhino environment globals should be predefined
 //     undef      true, if variables can be declared out of order
 //     unparam    true, if unused parameters should be tolerated
-//     safe       true, if use of some browser features should be restricted
 //     sloppy     true, if the 'use strict'; pragma is optional
 //     sub        true, if all forms of subscript notation are tolerated
 //     vars       true, if multiple var statements per function should be allowed
@@ -206,7 +204,7 @@
 /*properties
     '\b': string, '\t': string, '\n': string, '\f': string, '\r': string,
     '!=': boolean, '!==': boolean, '"': string, '%': boolean, '\'': string,
-    '(begin)', '(breakage)': number, '(complexity)', '(confusion)': boolean,
+    '(begin)', '(breakage)': number, '(confusion)': boolean,
     '(context)': object, '(error)', '(identifier)', '(line)': number,
     '(loopage)': number, '(name)', '(old_property_type)', '(params)',
     '(scope)': object, '(token)', '(vars)', '(verb)', '*': boolean,
@@ -427,6 +425,41 @@ var JSLINT = (function () {
         adsafe_may,     // The widget may load approved scripts.
         adsafe_top,     // At the top of the widget script.
         adsafe_went,    // ADSAFE.go has been called.
+        allowed_option = {
+            bitwise   : true,
+            browser   : true,
+            cap       : true,
+            confusion : true,
+            'continue': true,
+            css       : true,
+            debug     : true,
+            devel     : true,
+            eqeq      : true,
+            es5       : true,
+            evil      : true,
+            forin     : true,
+            fragment  : true,
+            indent    :   10,
+            maxerr    : 1000,
+            maxlen    :  256,
+            newcap    : true,
+            node      : true,
+            nomen     : true,
+            on        : true,
+            passfail  : true,
+            plusplus  : true,
+            properties: true,
+            regexp    : true,
+            rhino     : true,
+            undef     : true,
+            unparam   : true,
+            sloppy    : true,
+            sub       : true,
+            vars      : true,
+            white     : true,
+            widget    : true,
+            windows   : true
+        },
         anonname,       // The guessed name for anonymous functions.
         approved,       // ADsafe approved urls.
 
@@ -761,7 +794,7 @@ var JSLINT = (function () {
         },
 
         funct,          // The current function, including the labels used in
-                        // the function, as well as (breakage), (complexity),
+                        // the function, as well as (breakage),
                         // (context), (loopage), (name), (params), (token),
                         // (vars), (verb)
 
@@ -900,11 +933,6 @@ var JSLINT = (function () {
             'regexp', 'string'
         ], true),
         itself,         // JSLint itself
-        jslint_limit = {
-            indent: 10,
-            maxerr: 1000,
-            maxlen: 256
-        },
         json_mode,
         lex,            // the tokenizer
         lines,
@@ -2368,14 +2396,17 @@ klass:              do {
         var name, value;
         while (next_token.id === '(string)' || next_token.identifier) {
             name = next_token.string;
+            if (!allowed_option[name]) {
+                stop('unexpected_a');
+            }
             advance();
             if (next_token.id !== ':') {
                 stop('expected_a_b', next_token, ':', artifact());
             }
             advance(':');
-            if (typeof jslint_limit[name] === 'number') {
+            if (typeof allowed_option[name] === 'number') {
                 value = next_token.number;
-                if (value > jslint_limit[name] || value <= 0 ||
+                if (value > allowed_option[name] || value <= 0 ||
                         Math.floor(value) !== value) {
                     stop('expected_small_a');
                 }
@@ -2387,15 +2418,6 @@ klass:              do {
                     option[name] = false;
                 } else {
                     stop('unexpected_a');
-                }
-                switch (name) {
-                case 'adsafe':
-                    option.safe = true;
-                    do_safe();
-                    break;
-                case 'safe':
-                    do_safe();
-                    break;
                 }
             }
             advance();
@@ -4043,75 +4065,6 @@ klass:              do {
     }
 
 
-    function complexity(exp) {
-        var score = 0;
-        if (exp) {
-            if (Array.isArray(exp)) {
-                exp.forEach(function (tok) {
-                    score += complexity(tok);
-                });
-            } else {
-                switch (exp.arity) {
-                case 'statement':
-                    switch (exp.id) {
-                    case 'if':
-                        score += complexity(exp.first) + complexity(exp.block) +
-                            complexity(exp['else']) + 1;
-                        break;
-                    case 'while':
-                    case 'do':
-                        if (exp.first.id !== 'true' && exp.first.number !== 1) {
-                            score += 1;
-                        }
-                        score += complexity(exp.first) + complexity(exp.block);
-                        break;
-                    case 'for':
-                        if (exp.second !== undefined &&
-                                exp.second.id !== 'true' &&
-                                exp.second.number !== 1) {
-                            score += 1;
-                        }
-                        score += complexity(exp.first) + complexity(exp.second) +
-                            complexity(exp.third) + complexity(exp.block);
-                        break;
-                    case 'switch':
-                        score += complexity(exp.first) +
-                            complexity(exp.second) + exp.second.length;
-                        if (exp.second[exp.second.length - 1].id === 'default') {
-                            score -= 1;
-                        }
-                        break;
-                    case 'try':
-                        if (exp.second) {
-                            score += 1;
-                        }
-                        if (exp.third) {
-                            score += 1;
-                        }
-                        score += complexity(exp.first) + complexity(exp.second) +
-                            complexity(exp.third) + complexity(exp.block);
-                        break;
-                    }
-                    break;
-                case 'prefix':
-                    score += complexity(exp.first);
-                    break;
-                case 'case':
-                case 'infix':
-                    score += complexity(exp.first) + complexity(exp.second);
-                    if (exp.id === '&&' || exp.id === '||') {
-                        score += 1;
-                    }
-                    break;
-                case 'ternary':
-                    score += complexity(exp.first) + complexity(exp.second) + complexity(exp.third);
-                    break;
-                }
-            }
-        }
-        return score;
-    }
-
 
     function do_function(func, name) {
         var old_funct      = funct,
@@ -4141,7 +4094,6 @@ klass:              do {
             property_type = funct['(old_property_type)'];
             delete funct['(old_property_type)'];
         }
-        funct['(complexity)'] = complexity(func.block) + 1;
         if (option.confusion) {
             funct['(confusion)'] = true;
         }
@@ -6208,9 +6160,10 @@ klass:              do {
                         if (script[0].second.length !== 2 ||
                                 aint(script[0].second[1], 'id', 'function') ||
                                 !script[0].second[1].first ||
-                                script[0].second[1].first.length !== 2 ||
                                 aint(script[0].second[1].first[0], 'string', 'dom') ||
-                                aint(script[0].second[1].first[1], 'string', 'lib')) {
+                                script[0].second[1].first.length > 2 ||
+                                (script[0].second[1].first.length === 2 &&
+                                aint(script[0].second[1].first[1], 'string', 'lib'))) {
                             stop('adsafe_go', next_token);
                         }
                         adsafe_went = true;
@@ -6710,7 +6663,6 @@ klass:              do {
             function_data.name = the_function['(name)'];
             function_data.params = the_function['(params)'];
             function_data.line = the_function['(line)'];
-            function_data['(complexity)'] = the_function['(complexity)'];
             data.functions.push(function_data);
         }
 
@@ -6839,7 +6791,6 @@ klass:              do {
                 detail('Outer', the_function.outer);
                 detail('Global', the_function.global);
                 detail('Label', the_function.label);
-                detail('Complexity', the_function['(complexity)']);
             }
 
             if (data.member) {
@@ -6916,10 +6867,9 @@ klass:              do {
     };
     itself.jslint = itself;
 
-    itself.edition = '2011-11-16';
+    itself.edition = '2011-12-21';
 
     return itself;
-
 }());
 core.JSLint = function JSLint() {
   this.JSLINT = JSLINT;

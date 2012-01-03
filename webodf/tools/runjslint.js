@@ -37,7 +37,6 @@ function checkWithJSLINT(file) {
     "use strict";
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
-            adsafe:     false, // if ADsafe rules should be enforced
             bitwise:    false, // if bitwise operators should be allowed
             browser:    false, // if the standard browser globals should be predefined
             cap:        false, // if upper case HTML should be allowed
