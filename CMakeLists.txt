@@ -65,8 +65,8 @@ set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 # Node.JS
 ExternalProject_Add(
     NodeJS
-    URL "http://nodejs.org/dist/v0.6.5/node-v0.6.5.tar.gz"
-    URL_MD5 0aaae7ebf357b4a67dcf1916dfc250fa
+    URL "http://nodejs.org/dist/v0.6.6/node-v0.6.6.tar.gz"
+    URL_MD5 43836ebd6e8e9059c4584e3b5ab50009
     CONFIGURE_COMMAND "./configure"
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
