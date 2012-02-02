@@ -104,6 +104,11 @@ function require(className) {}
  */
 function NodeJSConsole() {}
 /**
+ * @param {!string} msg
+ * @return {undefined}
+ */
+NodeJSConsole.prototype.log = function (msg) {};
+/**
  * @type {!NodeJSConsole}
  */
 var console;
