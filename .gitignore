@@ -4,3 +4,5 @@ nativeQtClient/nativeQtClient.pro.user
 programs/firefoxextension/content/webodf.js
 programs/firefoxextension/content/webodf.css
 programs/firefoxextension/install.rdf
+programs/ios/WebODF.xcodeproj/project.xcworkspace
+programs/ios/WebODF.xcodeproj/xcuserdata
