@@ -137,7 +137,7 @@ odf.OdfCanvas = (function () {
          * @return {!Array.<!Range>}
          */
         function copySelection(selection) {
-            var s = new Array(selection.length), i, oldr, r,
+            var s = [selection.length], i, oldr, r,
                 doc = element.ownerDocument;
             for (i = 0; i < selection.length; i += 1) {
                 oldr = selection[i];

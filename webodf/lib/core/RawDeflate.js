@@ -218,7 +218,8 @@ core.RawDeflate = function () {
     function Zip_DeflateBuffer() {
         this.next = null;
         this.len = 0;
-        this.ptr = []; this.ptr.length = zip_OUTBUFSIZ;
+        this.ptr = [];
+        this.ptr.length = zip_OUTBUFSIZ;
         this.off = 0;
     }
 
@@ -258,42 +259,60 @@ core.RawDeflate = function () {
         }
 
         zip_free_queue = zip_qhead = zip_qtail = null;
-        zip_outbuf = []; zip_outbuf.length = zip_OUTBUFSIZ;
-        zip_window = []; zip_window.length = zip_window_size;
-        zip_d_buf = []; zip_d_buf.length = zip_DIST_BUFSIZE;
-        zip_l_buf = []; zip_l_buf.length = zip_INBUFSIZ + zip_INBUF_EXTRA;
-        zip_prev = []; zip_prev.length = 1 << zip_BITS;
-        zip_dyn_ltree = []; zip_dyn_ltree.length = zip_HEAP_SIZE;
+        zip_outbuf = [];
+        zip_outbuf.length = zip_OUTBUFSIZ;
+        zip_window = [];
+        zip_window.length = zip_window_size;
+        zip_d_buf = [];
+        zip_d_buf.length = zip_DIST_BUFSIZE;
+        zip_l_buf = [];
+        zip_l_buf.length = zip_INBUFSIZ + zip_INBUF_EXTRA;
+        zip_prev = [];
+        zip_prev.length = 1 << zip_BITS;
+        zip_dyn_ltree = [];
+        zip_dyn_ltree.length = zip_HEAP_SIZE;
         for (i = 0; i < zip_HEAP_SIZE; i++) {
             zip_dyn_ltree[i] = new Zip_DeflateCT();
         }
-        zip_dyn_dtree = []; zip_dyn_dtree.length = 2 * zip_D_CODES + 1;
+        zip_dyn_dtree = [];
+        zip_dyn_dtree.length = 2 * zip_D_CODES + 1;
         for (i = 0; i < 2 * zip_D_CODES + 1; i++) {
             zip_dyn_dtree[i] = new Zip_DeflateCT();
         }
-        zip_static_ltree = []; zip_static_ltree.length = zip_L_CODES + 2;
+        zip_static_ltree = [];
+        zip_static_ltree.length = zip_L_CODES + 2;
         for (i = 0; i < zip_L_CODES + 2; i++) {
             zip_static_ltree[i] = new Zip_DeflateCT();
         }
-        zip_static_dtree = []; zip_static_dtree.length = zip_D_CODES;
+        zip_static_dtree = [];
+        zip_static_dtree.length = zip_D_CODES;
         for (i = 0; i < zip_D_CODES; i++) {
             zip_static_dtree[i] = new Zip_DeflateCT();
         }
-        zip_bl_tree = []; zip_bl_tree.length = 2 * zip_BL_CODES + 1;
+        zip_bl_tree = [];
+        zip_bl_tree.length = 2 * zip_BL_CODES + 1;
         for (i = 0; i < 2 * zip_BL_CODES + 1; i++) {
             zip_bl_tree[i] = new Zip_DeflateCT();
         }
         zip_l_desc = new Zip_DeflateTreeDesc();
         zip_d_desc = new Zip_DeflateTreeDesc();
         zip_bl_desc = new Zip_DeflateTreeDesc();
-        zip_bl_count = []; zip_bl_count.length = zip_MAX_BITS + 1;
-        zip_heap = []; zip_heap.length = 2 * zip_L_CODES + 1;
-        zip_depth = []; zip_depth.length = 2 * zip_L_CODES + 1;
-        zip_length_code = []; zip_length_code.length = zip_MAX_MATCH - zip_MIN_MATCH + 1;
-        zip_dist_code = []; zip_dist_code.length = 512;
-        zip_base_length = []; zip_base_length.length = zip_LENGTH_CODES;
-        zip_base_dist = []; zip_base_dist.length = zip_D_CODES;
-        zip_flag_buf = []; zip_flag_buf.length = parseInt(zip_LIT_BUFSIZE / 8, 10);
+        zip_bl_count = [];
+        zip_bl_count.length = zip_MAX_BITS + 1;
+        zip_heap = [];
+        zip_heap.length = 2 * zip_L_CODES + 1;
+        zip_depth = [];
+        zip_depth.length = 2 * zip_L_CODES + 1;
+        zip_length_code = [];
+        zip_length_code.length = zip_MAX_MATCH - zip_MIN_MATCH + 1;
+        zip_dist_code = [];
+        zip_dist_code.length = 512;
+        zip_base_length = [];
+        zip_base_length.length = zip_LENGTH_CODES;
+        zip_base_dist = [];
+        zip_base_dist.length = zip_D_CODES;
+        zip_flag_buf = [];
+        zip_flag_buf.length = parseInt(zip_LIT_BUFSIZE / 8, 10);
     }
 
     var zip_deflate_end = function () {
@@ -896,7 +915,8 @@ core.RawDeflate = function () {
        */
     var zip_gen_codes = function (tree,    // the tree to decorate
                max_code) {    // largest code with non zero frequency
-            var next_code = []; next_code.length = zip_MAX_BITS + 1; // next code value for each bit length
+            var next_code = [];
+            next_code.length = zip_MAX_BITS + 1; // next code value for each bit length
             var code = 0;        // running code value
             var bits;            // bit index
             var n;            // code index
@@ -1066,7 +1086,8 @@ core.RawDeflate = function () {
                 } else {
                     zip_bl_tree[zip_REPZ_11_138].fc++;
                 }
-                count = 0; prevlen = curlen;
+                count = 0;
+                prevlen = curlen;
                 if (nextlen === 0) {
                     max_count = 138;
                     min_count = 3;
@@ -1641,16 +1662,20 @@ core.RawDeflate = function () {
         }
         n = 0;
         while (n <= 143) {
-            zip_static_ltree[n++].dl = 8; zip_bl_count[8]++;
+            zip_static_ltree[n++].dl = 8;
+            zip_bl_count[8]++;
         }
         while (n <= 255) {
-            zip_static_ltree[n++].dl = 9; zip_bl_count[9]++;
+            zip_static_ltree[n++].dl = 9;
+            zip_bl_count[9]++;
         }
         while (n <= 279) {
-            zip_static_ltree[n++].dl = 7; zip_bl_count[7]++;
+            zip_static_ltree[n++].dl = 7;
+            zip_bl_count[7]++;
         }
         while (n <= 287) {
-            zip_static_ltree[n++].dl = 8; zip_bl_count[8]++;
+            zip_static_ltree[n++].dl = 8;
+            zip_bl_count[8]++;
         }
         /* Codes 286 and 287 do not exist, but we must include them in the
          * tree construction to get a canonical Huffman tree (longest code
@@ -1793,7 +1818,8 @@ core.RawDeflate = function () {
         var buff = new Array(1024);
         var aout = [];
         while ((i = zip_deflate_internal(buff, 0, buff.length)) > 0) {
-            var cbuf = []; cbuf.length = i;
+            var cbuf = [];
+            cbuf.length = i;
             for (j = 0; j < i; j++) {
                 cbuf[j] = String.fromCharCode(buff[j]);
             }
