@@ -40,8 +40,8 @@
 
 /* Begin PBXFileReference section */
 		CB099EC414DAC3E7000D7B99 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../android/assets/www; sourceTree = "<group>"; };
-		CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad.png"; sourceTree = "<group>"; };
-		CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad.png"; sourceTree = "<group>"; };
+		CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
+		CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "../Default-Landscape~ipad.png"; sourceTree = "<group>"; };
 		CB533D8C14DABDA500C733F6 /* WebODF.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebODF.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB533D9014DABDA600C733F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		CB533D9214DABDA600C733F6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -110,8 +110,6 @@
 		CB533D7E14DABDA500C733F6 = {
 			isa = PBXGroup;
 			children = (
-				CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */,
-				CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */,
 				CB099EC414DAC3E7000D7B99 /* www */,
 				CB533DAA14DABDA600C733F6 /* WebODF */,
 				CB533D8F14DABDA500C733F6 /* Frameworks */,
@@ -202,6 +200,8 @@
 		CB533DC514DABDA600C733F6 /* splash */ = {
 			isa = PBXGroup;
 			children = (
+				CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */,
+				CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */,
 				CB533DC614DABDA600C733F6 /* Default.png */,
 				CB533DC814DABDA600C733F6 /* Default@2x.png */,
 			);
@@ -302,7 +302,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "\n";
+			shellScript = "
+";
 		};
 /* End PBXShellScriptBuildPhase section */
 
