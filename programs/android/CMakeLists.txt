@@ -16,6 +16,9 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/assets
         ${CMAKE_CURRENT_BINARY_DIR}/assets
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/phonegap-1.4.0-android.js
+        ${CMAKE_CURRENT_BINARY_DIR}/assets/www/phonegap-1.4.0.js
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/libs
         ${CMAKE_CURRENT_BINARY_DIR}/libs
@@ -31,7 +34,7 @@ add_custom_command(
     COMMAND ${ANDROID_SDK_DIR}/tools/android
         ARGS update project --path . --target android-7 --name WebODF
     COMMAND ${ANT}
-        ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.2.0.jar debug
+        ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.4.0.jar debug
     DEPENDS AndroidManifest.xml ${ANDROID_RES_FILES}
         ${ANDROID_ASSETS_FILES} ${ANDROID_SRC_FILES} ${ANDROID_LIBS_FILES}
         ${CMAKE_SOURCE_DIR}/webodf/webodf.css
