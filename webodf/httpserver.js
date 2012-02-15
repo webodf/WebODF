@@ -33,8 +33,7 @@
 /*global require: true, console: true, process: true, Buffer: true,
    unescape: true */
 /* A Node.JS http server*/
-var sys = require("sys"),
-    http = require("http"),
+var http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs"),
@@ -75,7 +74,8 @@ http.createServer(function (request, response) {
     }
     function put() {
         var contentlength = parseInt(request.headers["content-length"], 10),
-            alldata = new Buffer(contentlength), sum = 0;
+            alldata = new Buffer(contentlength),
+            sum = 0;
         request.on("data", function (data) {
             data.copy(alldata, sum, 0);
             sum += data.length;
