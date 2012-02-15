@@ -8,7 +8,7 @@ class OdfPage : public QWebPage {
 public:
     OdfPage(QObject* parent) :QWebPage(parent) {}
     void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString & sourceID) {
-        qDebug() << message;
+        qDebug() << sourceID << ":" << lineNumber << ":" << message;
     }
 };
 

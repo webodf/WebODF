@@ -15,11 +15,13 @@
 
 OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
-    QString prefix = "../../webodf/"; // set this to the right value when debugging
-    QString htmlfile = QDir(prefix).absoluteFilePath("embedodf.html");
+    QString prefix = "../android/assets/"; // set this to the right value when debugging
+    QString htmlfile = QDir(prefix).absoluteFilePath("www/index.html");
+    qDebug() << "HELLO";
     if (!QFileInfo(htmlfile).exists()) {
+        qDebug() << "HELLO";
         prefix = "qrc:/";
-        htmlfile = "qrc:/embedodf.html";
+        htmlfile = "qrc:/www/index.html";
     }
     setPage(new OdfPage(this));
     nativeio = new NativeIO(this, QDir(prefix), QDir::current());

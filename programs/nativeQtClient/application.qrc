@@ -1,7 +1,19 @@
 <RCC>
     <qresource prefix="/">
-        <file>webodf.css</file>
-        <file>webodf.js</file>
-        <file>embedodf.html</file>
+        <file>www/app/app.js</file>
+        <file>www/app/controllers/files.js</file>
+        <file>www/app/models/FileSystem.js</file>
+        <file>www/app/views/FileDetail.js</file>
+        <file>www/app/views/FilesList.js</file>
+        <file>www/app/views/OdfView.js</file>
+        <file>www/app/views/Viewport.js</file>
+        <file>www/config.xml</file>
+        <file>www/icon.png</file>
+        <file>www/index.html</file>
+        <file>www/phonegap-1.4.0.js</file>
+        <file>www/sencha-touch.css</file>
+        <file>www/sencha-touch.js</file>
+        <file>www/webodf.css</file>
+        <file>www/webodf.js</file>
     </qresource>
 </RCC>

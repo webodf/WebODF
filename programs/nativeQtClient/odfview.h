@@ -5,11 +5,10 @@
 #include <QtNetwork/QNetworkAccessManager>
 class NativeIO;
 
-class OdfView : public QWebView
-{
+class OdfView : public QWebView {
 Q_OBJECT
 public:
-    OdfView(QWidget* parent);
+    OdfView(QWidget* parent = 0);
     ~OdfView();
     QString currentFile() { return curFile; }
 
