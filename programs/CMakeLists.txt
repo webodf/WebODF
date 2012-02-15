@@ -9,3 +9,5 @@ if(ANDROID_SDK_DIR AND ANT)
 endif(ANDROID_SDK_DIR AND ANT)
 
 add_subdirectory(firefoxextension)
+
+add_subdirectory(playbook)
