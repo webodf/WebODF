@@ -123,6 +123,13 @@ set(HTML5UIFILES
   sencha-touch.css sencha-touch.js
 )
 
+set(HTML5UIFILES2
+  app/app.js app/controller/Files.js app/model/FileSystem.js
+  app/views/FileDetail.js app/views/FilesList.js app/views/OdfView.js
+  app/views/Viewport.js sencha-touch.css sencha-touch.js
+  app/store/FileStore.js
+)
+
 add_subdirectory(webodf)
 add_subdirectory(programs)
 

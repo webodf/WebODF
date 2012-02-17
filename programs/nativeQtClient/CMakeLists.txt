@@ -25,22 +25,6 @@ add_custom_command(
         ${CMAKE_CURRENT_SOURCE_DIR}/application.qrc
 )
 
-macro(COPY_FILES _varname _srcdir _tgtdir)
-  foreach(_file ${ARGN})
-    GET_FILENAME_COMPONENT(_subdir ${_file} PATH)
-    FILE(MAKE_DIRECTORY ${_tgtdir}/${_subdir})
-    add_custom_command(
-      OUTPUT ${_tgtdir}/${_file}
-      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-        ${_srcdir}/${_file}
-        ${_tgtdir}/${_file}
-      DEPENDS
-        ${_srcdir}/${_file}
-    )
-    set(${_varname} ${${_varname}} ${_tgtdir}/${_file})
-  endforeach(_file)
-endmacro(COPY_FILES _directory _files)
-
 COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/webodf ${CMAKE_CURRENT_BINARY_DIR}/www
     ${LIBJSFILES})
 COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/programs/android/assets/www
