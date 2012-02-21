@@ -128,6 +128,7 @@ set(HTML5UIFILES2
   app/views/FileDetail.js app/views/FilesList.js app/views/OdfView.js
   app/views/Viewport.js sencha-touch.css sencha-touch.js
   app/store/FileStore.js
+  ZoomOut.png ZoomIn.png
 )
 
 add_subdirectory(webodf)

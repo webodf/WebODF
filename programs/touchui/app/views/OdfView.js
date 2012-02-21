@@ -8,7 +8,9 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         data,
         globalreadfunction,
         globalfilesizefunction,
-        odfcanvas;
+        odfcanvas,
+        zoom = 1,
+        dom;
     function initCanvas() {
         var cmp;
         if (globalreadfunction === undefined) {
@@ -31,7 +33,8 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                     callback(data.length);
                 }
             };
-            odfcanvas = new odf.OdfCanvas(Ext.getCmp('webodf').element.dom);
+            dom = Ext.getCmp('webodf').element.dom;
+            odfcanvas = new odf.OdfCanvas(dom);
         }
     }
     function setRecord(r) {
@@ -84,15 +87,52 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             console.log("COULD NOT RESOLVE " + path);
         });
     }
+    function tapHandler(button) {
+        var id = button.getId();
+        if (id === 'zoomin') {
+            odfcanvas.setZoomLevel(odfcanvas.getZoomLevel() * 1.25);
+        } else if (id === 'zoomout') {
+            odfcanvas.setZoomLevel(odfcanvas.getZoomLevel() * 0.8);
+        }
+    }
     return {
         extend: 'Ext.Container',
         xtype: 'odfview',
+        id: 'odfcontainer',
         config: {
             scrollable: 'both',
             items: [{
                 id: 'webodf'
+            }, {
+                xtype : 'toolbar',
+                docked: 'bottom',
+                scrollable: false,
+                defaults: {
+                    iconMask: false,
+                    ui      : 'plain',
+                    handler: tapHandler
+                },
+                items: [
+                    { id: 'zoomin', icon: 'ZoomIn.png'},
+                    { id: 'zoomout', icon: 'ZoomOut.png' }
+                ],
+                layout: {
+                    pack : 'center',
+                    align: 'center'
+                }
             }]
         },
+/*
+        constructor: function (config) {
+            this.on({
+                scope: this,
+                delegate: 'button',
+                tap: 'tapHandler'
+            });
+            this.initConfig(config);
+            this.callParent();
+        },
+*/
         updateRecord: function (record) {
             setRecord(record);
             load(record.get('fullPath'));

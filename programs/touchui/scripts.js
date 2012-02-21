@@ -55,8 +55,8 @@ function DirectoryReader(fullPath) {
             var entries = [];
             entries[entries.length] = new FileEntry("welcome.odt",
                     "welcome.odt");
-            entries[entries.length] = new FileEntry("DanskTest01.odt",
-                    "DanskTest01.odt");
+            entries[entries.length] = new FileEntry("Traktatenblad.odt",
+                    "Traktatenblad.odt");
             try {
                 onsuccess(entries);
             } catch (e) {
