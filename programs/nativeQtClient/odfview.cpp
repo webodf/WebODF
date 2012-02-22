@@ -72,13 +72,11 @@ OdfView::slotLoadFinished(bool ok) {
             "    return nativeio.readFileSync(path, encoding);"
             "};"
             "runtime.read = function (path, offset, length, callback) {"
-            "    runtime.log('READ ' + path);"
             "    var data = nativeio.read(path, offset, length);"
             "    data = runtime.byteArrayFromString(data, 'binary');"
             "    callback(nativeio.error()||null, data);"
             "};"
             "runtime.getFileSize = function (path, callback) {"
-            "    runtime.log('SIZE ' + path);"
             "    callback(nativeio.getFileSize(path));"
             "};";
     frame->evaluateJavaScript(js);

@@ -69,7 +69,6 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             if (reader.readAsArrayBuffer) {
                 reader.onloadend = function (evt) {
                     data = evt.target.result;
-runtime.log(typeof data);
                     odfcanvas.load(overridePath);
                 };
                 reader.readAsArrayBuffer(file);
