@@ -7,4 +7,4 @@ COPY_FILES(TOUCHUIDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR} webodf.css)
 COPY_FILES(TOUCHUIDEPS ${CMAKE_BINARY_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR} webodf.js)
-add_custom_target(touchuiDepencencies ALL DEPENDS ${TOUCHUIDEPS})
+add_custom_target(touchuiDepencencies ALL DEPENDS ${TOUCHUIDEPS} webodf.js)

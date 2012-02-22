@@ -649,7 +649,7 @@ odf.OdfCanvas = (function () {
         };
 
         this.setZoomLevel = function (zL) {
-            var sizer = element.firstChild.firstChild,
+            var sizer = element.firstChild,
                 odfdoc = sizer.firstChild;
             zoomLevel = zL;
             element.style.WebkitTransform = 'scale(' + zoomLevel + ')';

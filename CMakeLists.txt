@@ -114,6 +114,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/gui/PresenterUI.js lib/gui/Caret.js
     lib/gui/SelectionMover.js lib/gui/XMLEdit.js
+
+    lib/manifest.js
 )
 
 set(HTML5UIFILES

@@ -4,6 +4,12 @@ file(GLOB_RECURSE ANDROID_ASSETS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/*)
 file(GLOB_RECURSE ANDROID_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE ANDROID_LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/libs/*)
 
+COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
+    ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES2})
+COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/assets/www
+    ${CMAKE_CURRENT_BINARY_DIR}/assets/www
+    index.html icon.png phonegap-1.4.0.js)
+
 set(WEBODFAPK ${CMAKE_CURRENT_BINARY_DIR}/bin/WebODF-debug.apk)
 add_custom_command(
     OUTPUT ${WEBODFAPK}
@@ -13,9 +19,9 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_BINARY_DIR}/src
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets
-        ${CMAKE_CURRENT_BINARY_DIR}/assets
+#    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
+#        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+#        ${CMAKE_CURRENT_BINARY_DIR}/assets
     COMMAND ${CMAKE_COMMAND} ARGS -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/phonegap-1.4.0-android.js
         ${CMAKE_CURRENT_BINARY_DIR}/assets/www/phonegap-1.4.0.js
@@ -41,6 +47,7 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/webodf/embedodf.html
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
         webodf.js
+        ${APKDEPS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_target(apk ALL DEPENDS ${WEBODFAPK})

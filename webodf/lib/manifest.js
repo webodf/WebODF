@@ -1,6 +1,6 @@
 (function () {
     "use strict";
-return [
+    return [
         "core/Async.js",
         "core/Base64.js",
         "core/ByteArray.js",
