@@ -8,7 +8,7 @@ set PATH=%PATH%;%JAVA_HOME%\bin
 mkdir bin
 mkdir signed
 
-zip -r webodf.zip config.xml index.html icon.png scripts.js app sencha-touch.js sencha-touch.css webodf.js webodf.css
+zip -r webodf.zip config.xml index.html icon.png scripts.js app sencha-touch.js sencha-touch.css webodf.js webodf.css ZoomIn.png ZoomOut.png
 
 rem MAKE A DEBUG VERSION
 del bin\webodf.bar

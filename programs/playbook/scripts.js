@@ -113,13 +113,3 @@ window.requestFileSystem = function (filesystem, id, onsuccess, onerror) {
     }
 };
 var device = {};
-function go() {
-    "use strict";
-    try {
-        app.launch();
-    } catch (e) {
-        // there is one exception that does not seem to influcence running,
-        // but that we ignore to avoid inconveniencing the ordinary user
-        //alert("Error in launching: " + e);
-    }
-}
