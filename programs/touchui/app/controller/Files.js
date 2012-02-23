@@ -26,8 +26,6 @@ Ext.define('WebODFApp.controller.Files', {
     },
     push: function (view, item) {
         "use strict";
-//        alert(this.getMainView().getNavigationBar().xtype);
-//        view.navigationBar.setTitle(item.getTitle());
         if (item.xtype === "filedetail") {
             this.getOpenButton().show();
         } else {
@@ -41,6 +39,7 @@ Ext.define('WebODFApp.controller.Files', {
         } else {
             this.getOpenButton().hide();
         }
+        this.getFilesList().deselectAll();
     },
     show: function (list, index, target, record, e) {
         "use strict";
@@ -48,8 +47,6 @@ Ext.define('WebODFApp.controller.Files', {
             this.fileDetail = Ext.create('WebODFApp.view.FileDetail');
         }
         this.fileDetail.setRecord(record);
-        //this.getMainView().push({title: this.fileDetail.getTitle(),
-        //    items: [this.fileDetail] });
         this.getMainView().push(this.fileDetail);
     },
     open: function (options) {

@@ -452,6 +452,16 @@ odf.OdfCanvas = (function () {
             editable = false,
             zoomLevel = 1;
 
+        function fixContainerSize() {
+            var sizer = element.firstChild,
+                odfdoc = sizer.firstChild;
+            element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
+            element.style.WebkitTransformOrigin = 'left top';
+            element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
+                + "px";
+            element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)
+                + "px";
+        }
         /**
          * A new content.xml has been loaded. Update the live document with it.
          * @param {!Object} container
@@ -481,6 +491,7 @@ odf.OdfCanvas = (function () {
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
+            fixContainerSize();
         }
         /**
          * @param {!odf.OdfContainer} container
@@ -581,7 +592,8 @@ odf.OdfCanvas = (function () {
             // go up until we find a text:p, if we find it, wrap it in <p> and
             // make that editable
             var e = evt.target, selection = window.getSelection(),
-                range = selection.getRangeAt(0),
+                range = ((selection.rangeCount > 0)
+                     ? selection.getRangeAt(0) : null),
                 startContainer = range && range.startContainer,
                 startOffset = range && range.startOffset,
                 endContainer = range && range.endContainer,
@@ -647,18 +659,17 @@ odf.OdfCanvas = (function () {
         this.getFormatting = function () {
             return formatting;
         };
-
-        this.setZoomLevel = function (zL) {
-            var sizer = element.firstChild,
-                odfdoc = sizer.firstChild;
-            zoomLevel = zL;
-            element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
-            element.style.WebkitTransformOrigin = 'left top';
-            element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
-                + "px";
-            element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)
-                + "px";
+        /**
+         * @param {!number} zoom
+         * @return {undefined}
+         */
+        this.setZoomLevel = function (zoom) {
+            zoomLevel = zoom;
+            fixContainerSize();
         };
+        /**
+         * @return {!number}
+         */
         this.getZoomLevel = function () {
             return zoomLevel;
         };
