@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CB099EC514DAC3E7000D7B99 /* www in Resources */ = {isa = PBXBuildFile; fileRef = CB099EC414DAC3E7000D7B99 /* www */; };
 		CB099EC714DAC535000D7B99 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */; };
 		CB099EC914DAC53D000D7B99 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */; };
+		CB36D11814F68F7F0084BECB /* www in Resources */ = {isa = PBXBuildFile; fileRef = CB36D11714F68F7F0084BECB /* www */; };
 		CB533D9114DABDA600C733F6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB533D9014DABDA600C733F6 /* Foundation.framework */; };
 		CB533D9314DABDA600C733F6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB533D9214DABDA600C733F6 /* UIKit.framework */; };
 		CB533D9514DABDA600C733F6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB533D9414DABDA600C733F6 /* CoreGraphics.framework */; };
@@ -39,9 +39,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CB099EC414DAC3E7000D7B99 /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../android/assets/www; sourceTree = "<group>"; };
 		CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "../Default-Landscape~ipad.png"; sourceTree = "<group>"; };
+		CB36D11714F68F7F0084BECB /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		CB533D8C14DABDA500C733F6 /* WebODF.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebODF.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB533D9014DABDA600C733F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		CB533D9214DABDA600C733F6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -110,7 +110,7 @@
 		CB533D7E14DABDA500C733F6 = {
 			isa = PBXGroup;
 			children = (
-				CB099EC414DAC3E7000D7B99 /* www */,
+				CB36D11714F68F7F0084BECB /* www */,
 				CB533DAA14DABDA600C733F6 /* WebODF */,
 				CB533D8F14DABDA500C733F6 /* Frameworks */,
 				CB533D8D14DABDA500C733F6 /* Products */,
@@ -282,9 +282,9 @@
 				CB533DC914DABDA600C733F6 /* Default@2x.png in Resources */,
 				CB533DCD14DABDA600C733F6 /* PhoneGap.plist in Resources */,
 				CB533DD614DABDA600C733F6 /* MainViewController.xib in Resources */,
-				CB099EC514DAC3E7000D7B99 /* www in Resources */,
 				CB099EC714DAC535000D7B99 /* Default-Portrait~ipad.png in Resources */,
 				CB099EC914DAC53D000D7B99 /* Default-Landscape~ipad.png in Resources */,
+				CB36D11814F68F7F0084BECB /* www in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,8 +302,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "
-";
+			shellScript = "rsync -a ../touchui/app/ www/app/\ncp ../android/assets/www/webodf.* www/\ncp ../touchui/sencha-touch.* www/\ncp ../touchui/Zoom*.png www/\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
