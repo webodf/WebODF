@@ -37,10 +37,10 @@ function checkWithJSLINT(file) {
     "use strict";
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
+            anon:       false, // true, if the space may be omitted in anonymous function declarations
             bitwise:    false, // if bitwise operators should be allowed
             browser:    false, // if the standard browser globals should be predefined
             cap:        false, // if upper case HTML should be allowed
-            confusion:  false, // if types can be used inconsistently
             'continue': false, // if the continuation statement should be tolerated
             css:        false, // if CSS workarounds should be tolerated
             debug:      false, // if debugger statements should be allowed
@@ -57,7 +57,7 @@ function checkWithJSLINT(file) {
             node:       false, // if Node.js globals should be predefined
             nomen:      false, // if names may have dangling _
             on:         false, // if HTML event handlers should be allowed
-            passfail:   true, // if the scan should stop on first error
+            passfail:   true,  // if the scan should stop on first error
             plusplus:   false, // if increment/decrement should be allowed
             properties: false, // if all property names must be declared with /*properties*/
             regexp:     false, // if the . should be allowed in regexp literals
@@ -68,9 +68,9 @@ function checkWithJSLINT(file) {
             sloppy:     false, // if the 'use strict'; pragma is optional
             sub:        false, // if all forms of subscript notation are tolerated
             vars:       false, // if multiple var statements per function should be allowed
-            white:      true, // if sloppy whitespace is tolerated
-            widget:     false, //  if the Yahoo Widgets globals should be predefined
-            windows:    false // if MS Windows-specific globals should be predefined
+            white:      true,  // if sloppy whitespace is tolerated
+            widget:     false, // if the Yahoo Widgets globals should be predefined
+            windows:    false  // if MS Windows-specific globals should be predefined
         },
         data, result, err;
 

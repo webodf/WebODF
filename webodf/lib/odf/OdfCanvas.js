@@ -137,7 +137,7 @@ odf.OdfCanvas = (function () {
          * @return {!Array.<!Range>}
          */
         function copySelection(selection) {
-            var s = new Array(selection.length), i, oldr, r,
+            var s = [selection.length], i, oldr, r,
                 doc = element.ownerDocument;
             for (i = 0; i < selection.length; i += 1) {
                 oldr = selection[i];
@@ -195,7 +195,8 @@ odf.OdfCanvas = (function () {
         xlinkns = namespaces.xlink,
         window = runtime.getWindow(),
         xpath = new xmldom.XPath(),
-        /**@const@type{!Object.<!string,!Array.<!Function>>}*/ eventHandlers = {},
+        /**@const@type{!Object.<!string,!Array.<!Function>>}*/
+        eventHandlers = {},
         editparagraph;
 
     /**
@@ -352,15 +353,16 @@ odf.OdfCanvas = (function () {
     }
     function formatParagraphAnchors(odfbody) {
         var runtimens = "urn:webodf",
-            n, i,
+            n,
+            i,
             nodes = xpath.getODFElementsWithXPath(odfbody,
                 ".//*[*[@text:anchor-type='paragraph']]",
                 style2CSS.namespaceResolver);
         for (i = 0; i < nodes.length; i += 1) {
-             n = nodes[i];
-             if (n.setAttributeNS) {
-                 n.setAttributeNS(runtimens, "containsparagraphanchor", true);
-             }
+            n = nodes[i];
+            if (n.setAttributeNS) {
+                n.setAttributeNS(runtimens, "containsparagraphanchor", true);
+            }
         }
     }
     /**
@@ -411,7 +413,10 @@ odf.OdfCanvas = (function () {
     function addStyleSheet(document) {
         var styles = document.getElementsByTagName("style"),
             head = document.getElementsByTagName('head')[0],
-            text = '', prefix, a = "", b;
+            text = '',
+            prefix,
+            a = "",
+            b;
         // use cloneNode on an exisiting HTMLStyleElement, because in
         // Chromium 12, document.createElement('style') does not give a
         // HTMLStyleElement
@@ -444,8 +449,19 @@ odf.OdfCanvas = (function () {
             slidevisibilitycss = addStyleSheet(document),
             stylesxmlcss = addStyleSheet(document),
             positioncss = addStyleSheet(document),
-            editable = false;
+            editable = false,
+            zoomLevel = 1;
 
+        function fixContainerSize() {
+            var sizer = element.firstChild,
+                odfdoc = sizer.firstChild;
+            element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
+            element.style.WebkitTransformOrigin = 'left top';
+            element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
+                + "px";
+            element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)
+                + "px";
+        }
         /**
          * A new content.xml has been loaded. Update the live document with it.
          * @param {!Object} container
@@ -453,23 +469,29 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          **/
         function handleContent(container, odfnode) {
-            var css = positioncss.sheet;
+            var css = positioncss.sheet, sizer;
             modifyImages(container, odfnode.body, css);
             slidecssindex = css.insertRule(
-                'office|presentation draw|page:nth-child(1n) { display:block; }',
-                css.cssRules.length);
+                'office|presentation draw|page:nth-child(1n) {display:block;}',
+                css.cssRules.length
+            );
 
             // FIXME: this is a hack to have a defined background now
             // should be removed as soon as we have sane background
             // handling for pages
             slidecssindex = css.insertRule(
                 'draw|page { background-color:#fff; }',
-                css.cssRules.length);
-
+                css.cssRules.length
+            );
 
             // only append the content at the end
             clear(element);
-            element.appendChild(odfnode);
+            sizer = document.createElement('div');
+            sizer.style.display = "inline-block";
+            sizer.style.background = "white";
+            sizer.appendChild(odfnode);
+            element.appendChild(sizer);
+            fixContainerSize();
         }
         /**
          * @param {!odf.OdfContainer} container
@@ -484,7 +506,6 @@ odf.OdfCanvas = (function () {
             function callback() {
                 clear(element);
                 element.style.display = "inline-block";
-                element.style.background = "white";
                 var odfnode = container.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
 
@@ -507,7 +528,7 @@ odf.OdfCanvas = (function () {
             return odfcontainer;
         };
 
-        this.slidevisibilitycss = function() {
+        this.slidevisibilitycss = function () {
             return slidevisibilitycss;
         };
 
@@ -571,7 +592,8 @@ odf.OdfCanvas = (function () {
             // go up until we find a text:p, if we find it, wrap it in <p> and
             // make that editable
             var e = evt.target, selection = window.getSelection(),
-                range = selection.getRangeAt(0),
+                range = ((selection.rangeCount > 0)
+                     ? selection.getRangeAt(0) : null),
                 startContainer = range && range.startContainer,
                 startOffset = range && range.startOffset,
                 endContainer = range && range.endContainer,
@@ -592,8 +614,10 @@ odf.OdfCanvas = (function () {
             if (!editparagraph) {
                 editparagraph = e.ownerDocument.createElement("p");
                 if (!editparagraph.style) {
-                   editparagraph = e.ownerDocument.createElementNS(
-                       "http://www.w3.org/1999/xhtml", "p");
+                    editparagraph = e.ownerDocument.createElementNS(
+                        "http://www.w3.org/1999/xhtml",
+                        "p"
+                    );
                 }
                 editparagraph.style.margin = "0px";
                 editparagraph.style.padding = "0px";
@@ -634,6 +658,20 @@ odf.OdfCanvas = (function () {
          */
         this.getFormatting = function () {
             return formatting;
+        };
+        /**
+         * @param {!number} zoom
+         * @return {undefined}
+         */
+        this.setZoomLevel = function (zoom) {
+            zoomLevel = zoom;
+            fixContainerSize();
+        };
+        /**
+         * @return {!number}
+         */
+        this.getZoomLevel = function () {
+            return zoomLevel;
         };
 
         listenEvent(element, "click", processClick);

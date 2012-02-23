@@ -44,43 +44,43 @@
  * @class
  * @interface
  */
-function Runtime() {"use strict";}
+function Runtime() {"use strict"; }
 /**
  * Abstraction of byte arrays.
  * @constructor
  * @extends {Array}
  * @param {!number} size
  */
-Runtime.ByteArray = function (size) {"use strict";};
+Runtime.ByteArray = function (size) {"use strict"; };
 /**
  * @param {!number} start
  * @param {!number} end
  * @return {!Runtime.ByteArray}
  */
-Runtime.ByteArray.prototype.slice = function (start, end) {"use strict";};
+Runtime.ByteArray.prototype.slice = function (start, end) {"use strict"; };
 /**
  * @param {!Array.<number>} array
  * @return {!Runtime.ByteArray}
  */
-Runtime.prototype.byteArrayFromArray = function (array) {"use strict";};
+Runtime.prototype.byteArrayFromArray = function (array) {"use strict"; };
 /**
  * @param {!string} string
  * @param {!string} encoding
  * @return {!Runtime.ByteArray}
  */
-Runtime.prototype.byteArrayFromString = function (string, encoding) {"use strict";};
+Runtime.prototype.byteArrayFromString = function (string, encoding) {"use strict"; };
 /**
  * @param {!Runtime.ByteArray} bytearray
  * @param {!string} encoding
  * @return {!string}
  */
-Runtime.prototype.byteArrayToString = function (bytearray, encoding) {"use strict";};
+Runtime.prototype.byteArrayToString = function (bytearray, encoding) {"use strict"; };
 /**
  * @param {!Runtime.ByteArray} bytearray1
  * @param {!Runtime.ByteArray} bytearray2
  * @return {!Runtime.ByteArray}
  */
-Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {"use strict";};
+Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!number} offset
@@ -88,7 +88,7 @@ Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {"use str
  * @param {!function(string,Runtime.ByteArray):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.read = function (path, offset, length, callback) {"use strict";};
+Runtime.prototype.read = function (path, offset, length, callback) {"use strict"; };
 /**
  * Read the contents of a file. Returns the result via a callback. If the
  * encoding is 'binary', the result is returned as a Runtime.ByteArray,
@@ -98,72 +98,72 @@ Runtime.prototype.read = function (path, offset, length, callback) {"use strict"
  * @param {!function(string,(string|Runtime.ByteArray)):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.readFile = function (path, encoding, callback) {"use strict";};
+Runtime.prototype.readFile = function (path, encoding, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
  * @return {!string}
  */
-Runtime.prototype.readFileSync = function (path, encoding) {"use strict";};
+Runtime.prototype.readFileSync = function (path, encoding) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!function((string|Document)):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.loadXML = function (path, callback) {"use strict";};
+Runtime.prototype.loadXML = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!Runtime.ByteArray} data
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.writeFile = function (path, data, callback) {"use strict";};
+Runtime.prototype.writeFile = function (path, data, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!function(boolean):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.isFile = function (path, callback) {"use strict";};
+Runtime.prototype.isFile = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!function(number):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.getFileSize = function (path, callback) {"use strict";};
+Runtime.prototype.getFileSize = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-Runtime.prototype.deleteFile = function (path, callback) {"use strict";};
+Runtime.prototype.deleteFile = function (path, callback) {"use strict"; };
 /**
  * @param {!string} msgOrCategory
  * @param {!string=} msg
  * @return {undefined}
  */
-Runtime.prototype.log = function (msgOrCategory, msg) {"use strict";};
+Runtime.prototype.log = function (msgOrCategory, msg) {"use strict"; };
 /**
  * @param {!function():undefined} callback
  * @param {!number} milliseconds
  * @return {undefined}
  */
-Runtime.prototype.setTimeout = function (callback, milliseconds) {"use strict";};
+Runtime.prototype.setTimeout = function (callback, milliseconds) {"use strict"; };
 /**
  * @return {!Array.<string>}
  */
-Runtime.prototype.libraryPaths = function () {"use strict";};
+Runtime.prototype.libraryPaths = function () {"use strict"; };
 /**
  * @return {string}
  */
-Runtime.prototype.type = function () {"use strict";};
+Runtime.prototype.type = function () {"use strict"; };
 /**
  * @return {?DOMImplementation}
  */
-Runtime.prototype.getDOMImplementation = function () {"use strict";};
+Runtime.prototype.getDOMImplementation = function () {"use strict"; };
 /**
  * @return {?Window}
  */
-Runtime.prototype.getWindow = function () {"use strict";};
+Runtime.prototype.getWindow = function () {"use strict"; };
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -1001,7 +1001,9 @@ var runtime = (function () {
         function getPathFromManifests(classpath) {
             var path = classpath.replace(".", "/") + ".js",
                 dirs = runtime.libraryPaths(),
-                i, dir, code;
+                i,
+                dir,
+                code;
             if (runtime.currentDirectory) {
                 dirs.push(runtime.currentDirectory());
             }

@@ -15,11 +15,11 @@
 
 OdfView::OdfView(QWidget* parent) :QWebView(parent)
 {
-    QString prefix = "../../webodf/"; // set this to the right value when debugging
-    QString htmlfile = QDir(prefix).absoluteFilePath("embedodf.html");
+    QString prefix = "../android/assets/"; // set this to the right value when debugging
+    QString htmlfile = QDir(prefix).absoluteFilePath("www/index.html");
     if (!QFileInfo(htmlfile).exists()) {
         prefix = "qrc:/";
-        htmlfile = "qrc:/embedodf.html";
+        htmlfile = "qrc:/www/index.html";
     }
     setPage(new OdfPage(this));
     nativeio = new NativeIO(this, QDir(prefix), QDir::current());
@@ -63,7 +63,12 @@ OdfView::slotLoadFinished(bool ok) {
     loaded = true;
     QWebFrame *frame = page()->mainFrame();
     QString js =
+            "var originalReadFileSync = runtime.readFileSync;"
             "runtime.readFileSync = function (path, encoding) {"
+            "    if (path.substr(path.length - 3) === '.js') {"
+            "        return originalReadFileSync.apply(runtime,"
+            "           [path, encoding]);"
+            "    }"
             "    return nativeio.readFileSync(path, encoding);"
             "};"
             "runtime.read = function (path, offset, length, callback) {"
@@ -73,9 +78,6 @@ OdfView::slotLoadFinished(bool ok) {
             "};"
             "runtime.getFileSize = function (path, callback) {"
             "    callback(nativeio.getFileSize(path));"
-            "};"
-            "runtime.loadClass('odf.OdfCanvas');"
-            "window.canvas = new odf.OdfCanvas(document.getElementById('odf'));"
-            "window.canvas.load('" + curFile + "');";
+            "};";
     frame->evaluateJavaScript(js);
 }

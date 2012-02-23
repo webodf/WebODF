@@ -4,27 +4,6 @@ if(WRONGCMAKEDIR)
   message(FATAL_ERROR "You should point CMake to the parent directory.")
 endif(WRONGCMAKEDIR)
 
-set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
-    lib/core/RawDeflate.js lib/core/ByteArray.js
-    lib/core/ByteArrayWriter.js lib/core/RawInflate.js
-    lib/core/Cursor.js lib/core/UnitTester.js
-    lib/core/PointWalker.js lib/core/Async.js
-    lib/core/Zip.js
-
-    lib/xmldom/LSSerializerFilter.js lib/xmldom/LSSerializer.js
-    lib/xmldom/RelaxNGParser.js lib/xmldom/RelaxNG.js
-    lib/xmldom/RelaxNG2.js lib/xmldom/OperationalTransformInterface.js
-    lib/xmldom/OperationalTransformDOM.js
-    lib/xmldom/XPath.js
-
-    lib/odf/StyleInfo.js lib/odf/Style2CSS.js
-    lib/odf/FontLoader.js lib/odf/OdfContainer.js
-    lib/odf/Formatting.js lib/odf/OdfCanvas.js
-
-    lib/gui/PresenterUI.js lib/gui/Caret.js
-    lib/gui/SelectionMover.js lib/gui/XMLEdit.js
-)
-
 set(TESTJSFILES tests/core/ZipTests.js
     tests/core/Base64Tests.js
     tests/core/CursorTests.js
