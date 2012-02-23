@@ -1,4 +1,4 @@
-/*global Ext, runtime, core, odf, window, FileReader, console*/
+/*global Ext, runtime, core, odf, window, FileReader, PhoneGap*/
 runtime.loadClass('odf.OdfCanvas');
 Ext.define('WebODFApp.view.OdfView', (function () {
     "use strict";
@@ -44,20 +44,6 @@ Ext.define('WebODFApp.view.OdfView', (function () {
     }
     function load(path) {
         initCanvas();
-/*
-        function initCanvasAndLoad() {
-            if (app.views.OdfCanvas) {
-                app.views.OdfCanvas.addListener("statereadychange",
-                    callback);
-                app.views.OdfCanvas.load(path);
-            } else {
-                initCanvas();
-                window.setTimeout(initCanvasAndLoad, 100);
-            }
-        }
-        if (app.views.OdfCanvas) {
-            app.views.OdfCanvas.addListener("statereadychange", callback);
-        }*/
         if (path === currentPath) {
             return;
         }
@@ -66,7 +52,12 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         data = null;
         window.resolveLocalFileSystemURI("file://" + path, function (file) {
             var reader = new FileReader();
-            if (reader.readAsArrayBuffer) {
+            // so far phonegap is very limited, ideally it would implement
+            // readAsArrayBuffer and slice() on the File object
+            // right now, it has a dummy function, hence breaking simple
+            // detection of which features are implemented
+            if (reader.readAsArrayBuffer
+                    && (typeof PhoneGap === "undefined")) {
                 reader.onloadend = function (evt) {
                     data = evt.target.result;
                     odfcanvas.load(overridePath);
@@ -80,12 +71,10 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                     data = b.convertBase64ToUTF8Array(data);
                     odfcanvas.load(overridePath);
                 };
-                // so far phonegap is very limited, ideally it would implement
-                // readAsArrayBuffer and slice() on the File object
                 reader.readAsDataURL(file);
             }
         }, function () {
-            console.log("COULD NOT RESOLVE " + path);
+            runtime.log("COULD NOT RESOLVE " + path);
         });
     }
     function tapHandler(button) {
@@ -123,17 +112,6 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                 }
             }]
         },
-/*
-        constructor: function (config) {
-            this.on({
-                scope: this,
-                delegate: 'button',
-                tap: 'tapHandler'
-            });
-            this.initConfig(config);
-            this.callParent();
-        },
-*/
         updateRecord: function (record) {
             setRecord(record);
             load(record.get('fullPath'));
