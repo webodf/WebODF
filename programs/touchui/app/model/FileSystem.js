@@ -1,4 +1,4 @@
-/*global Ext, console, app, window, LocalFileSystem*/
+/*global Ext, console, app, window, LocalFileSystem, JSON, FileReader, runtime*/
 Ext.define("WebODFApp.model.FileSystemProxy", (function () {
     "use strict";
     var self = this,
@@ -8,10 +8,89 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
             done = false,
             fileSystems,
             files,
+            cachedList = [],
             dirs = {},
             lastUpdate = 0,
             lastUpdateTime = new Date();
-            
+
+        function getFileId(fullPath) {
+            var i;
+            for (i = 0; i < files.length; i += 1) {
+                if (files[i].get('fullPath') === fullPath) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        this.getFileId = getFileId;
+        function addFileEntry(entry, callback) {
+            function fail() {
+                callback(-1);
+            }
+            var id = getFileId(entry.fullPath);
+            if (id !== -1) {
+                return callback(id);
+            }
+            entry.file(function (file) {
+                var id = files.length;
+                files.push(Ext.create('WebODFApp.model.FileSystem', {
+                    id: id,
+                    fileName: entry.name,
+                    fullPath: entry.fullPath,
+                    size: file.size
+                }));
+                callback(id);
+            }, fail);
+        }
+        function parseCachedFileList(pos, callback) {
+            if (pos === cachedList.length) {
+                return callback();
+            }
+            window.resolveLocalFileSystemURI(cachedList[pos], function (entry) {
+                addFileEntry(entry, function () {
+                    parseCachedFileList(pos + 1, callback);
+                });
+            }, function () {
+                parseCachedFileList(pos + 1, callback);
+            });
+        }
+        function readCachedFileList(callback) {
+            window.resolveLocalFileSystemURI("cachedODFList.json",
+                function (fileentry) {
+                    var reader = new FileReader();
+                    reader.onloadend = function (evt) {
+                        cachedList = [];
+                        try {
+                            cachedList = JSON.parse(evt.target.result);
+                        } catch (e) {
+                            alert(e);
+                        }
+                        alert(cachedList);
+                        parseCachedFileList(0, callback);
+                    };
+                    reader.readAsText(fileentry);
+                }, function () {
+                    callback();
+                });
+        }
+        function writeCachedFileList() {
+            var i,
+                l = files.length;
+            cachedList.length = files.length;
+            for (i = 0; i < l; i += 1) {
+                cachedList[i] = files[i].get('fullPath');
+            }
+            window.resolveLocalFileSystemURI("cachedODFList.json",
+                function (fileentry) {
+                    fileentry.createWriter(function (writer) {
+                        writer.write(JSON.stringify(cachedList));
+                    }, function (e) {
+                        runtime.log(JSON.stringify(e));
+                    });
+                }, function (e) {
+                    runtime.log(JSON.stringify(e));
+                });
+        }
         function filter(name) {
             var suffix = name.substr(name.length - 4);
             return suffix === ".odt" || suffix === ".odp" || suffix === ".ods";
@@ -40,15 +119,7 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
                     callback(-1);
                 }, fail);
             } else if (entry.isFile) {
-                entry.file(function (file) {
-                    files.push(Ext.create('WebODFApp.model.FileSystem', {
-                        id: files.length,
-                        fileName: entry.name,
-                        fullPath: entry.fullPath,
-                        size: file.size
-                    }));
-                    callback(files.length - 1);
-                }, fail);
+                addFileEntry(entry, callback);
             } else {
                 fail();
             }
@@ -60,7 +131,7 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
                 var now = new Date(),
                     // a limit is needed, otherwise the # of files too large to
                     // be handled by sencha touch
-                    done = todo.length === 0 || files.length > 200,
+                    done = todo.length === 0 || files.length > 2000,
                     store = Ext.getStore('FileStore');
                 if (done || lastUpdate === 0 || (files.length - lastUpdate > 0
                         && now - lastUpdateTime > files.length * 100)) {
@@ -68,7 +139,9 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
                     lastUpdate = files.length;
                     lastUpdateTime = now;
                 }
-                if (!done) {
+                if (done) {
+                    writeCachedFileList();
+                } else {
                     load(todo.shift(), callback);
                 }
             }
@@ -86,7 +159,9 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
             }
             fileSystems = {};
             this.files = files = [];
-            addFileSystems();
+            readCachedFileList(function () {
+                addFileSystems();
+            });
         };
         this.load = load;
     }
@@ -145,11 +220,9 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
         },
 
         getId: function (url, callback) {
-            var i, files = scanner.files;
-            for (i = 0; i < files.length; i += 1) {
-                if (files[i].fullPath === url) {
-                    return callback(i);
-                }
+            var id = scanner.getFileId(url);
+            if (id !== -1) {
+                return callback(id);
             }
             window.resolveLocalFileSystemURI(url,
                 function (fileentry) {

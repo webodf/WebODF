@@ -3,6 +3,17 @@ var LocalFileSystem = {
     PERSISTENT: 0,
     TEMPORARY: 1
 };
+function FileWriter(fullPath) {
+    "use strict";
+    this.write = function (data) {
+        var blob;
+        try {
+            blob = blackberry.utils.stringToBlob(data, "UTF-8");
+            blackberry.io.file.saveFile(fullPath, blob);
+        } catch (e) {
+        }
+    };
+}
 function FileEntry(name, fullPath) {
     "use strict";
     this.isFile = true;
@@ -30,6 +41,9 @@ function FileEntry(name, fullPath) {
             onerror(e);
         }
     };
+    this.createWriter = function (onsuccess, onerror) {
+        onsuccess(new FileWriter(fullPath));
+    };
 }
 function FileReader() {
     "use strict";
@@ -44,6 +58,17 @@ function FileReader() {
                 alert("Error on reading file: " + e + " " + file.fullPath);
             }
         }, 1);
+    };
+    this.readAsText = function (file) {
+        var path = file.fullPath.substr(7);
+        try {
+            blackberry.io.file.readFile(path, function (fullPath, blob) {
+                var str = blackberry.utils.blobToString(blob, "UTF-8");
+                fr.onloadend({target: {result: str}});
+            }, true);
+        } catch (e) {
+            fr.onloadend({target: {result: "[]"}});
+        }
     };
 }
 var DirectoryReader;
@@ -85,7 +110,13 @@ function DirectoryReader(fullPath) {
 window.resolveLocalFileSystemURI = function (path, onsuccess, onerror) {
     "use strict";
     var p = path.lastIndexOf("/"),
-        name = (p === -1) ? path : path.substr(p + 1);
+        name;
+    if (p === -1) {
+        name = path;
+        path = blackberry.io.dir.appDirs.shared.documents.path + "/" + path;
+    } else {
+        name = path.substr(p + 1);
+    }
     onsuccess(new FileEntry(name, path));
 };
 window.requestFileSystem = function (filesystem, id, onsuccess, onerror) {

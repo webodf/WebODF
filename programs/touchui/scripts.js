@@ -3,6 +3,13 @@ var LocalFileSystem = {
     PERSISTENT: 0,
     TEMPORARY: 1
 };
+function FileWriter(fullPath) {
+    "use strict";
+    this.write = function (data) {
+        data = runtime.byteArrayFromString(data, "utf8");
+        runtime.writeFile(fullPath, data, function () {});
+    };
+}
 function FileEntry(name, fullPath) {
     "use strict";
     this.isFile = true;
@@ -25,13 +32,28 @@ function FileEntry(name, fullPath) {
             onerror(e);
         }
     };
+    this.createWriter = function (onsuccess, onerror) {
+        onsuccess(new FileWriter(fullPath));
+    };
 }
 function FileReader() {
     "use strict";
     var fr = this;
     this.readAsArrayBuffer = function (file) {
-        var path = file.fullPath.substr(7);
+        var path = file.fullPath;
+        if (path.substr(0, 7) === "file://") {
+            path = path.substr(7);
+        }
         runtime.readFile(path, 'binary', function (error, data) {
+            fr.onloadend({target: {result: data}});
+        });
+    };
+    this.readAsText = function (file) {
+        var path = file.fullPath;
+        if (path.substr(0, 7) === "file://") {
+            path = path.substr(7);
+        }
+        runtime.readFile(path, 'utf8', function (error, data) {
             fr.onloadend({target: {result: data}});
         });
     };
