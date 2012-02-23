@@ -119,13 +119,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 )
 
 set(HTML5UIFILES
-  app/app.js app/controllers/files.js app/models/FileSystem.js
-  app/views/FileDetail.js app/views/FilesList.js app/views/OdfView.js
-  app/views/Viewport.js config.xml icon.png index.html phonegap-1.4.0.js
-  sencha-touch.css sencha-touch.js
-)
-
-set(HTML5UIFILES2
   app/app.js app/controller/Files.js app/model/FileSystem.js
   app/views/FileDetail.js app/views/FilesList.js app/views/OdfView.js
   app/views/Viewport.js sencha-touch.css sencha-touch.js

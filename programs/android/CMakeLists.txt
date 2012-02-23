@@ -1,7 +1,7 @@
 set(ANDROID_JAR ${ANDROID_SDK_DIR}/platforms/android-8/android.jar)
 
 COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
-    ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES2})
+    ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES})
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/assets/www
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www
     index.html icon.png phonegap-1.4.1.js)
@@ -35,7 +35,7 @@ add_custom_command(
     OUTPUT ${WEBODFRELEASEAPK}
     COMMAND ${ANT}
         ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/phonegap-1.4.1.jar release
-    DEPENDS ${WEBODFAPK}
+    DEPENDS ${WEBODFAPK} webodf.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_target(releaseapk ALL DEPENDS ${WEBODFRELEASEAPK})
