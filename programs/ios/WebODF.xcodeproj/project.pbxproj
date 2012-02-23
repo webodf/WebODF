@@ -302,8 +302,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "rsync -a ../touchui/app/ www/app/\ncp ../android/assets/www/webodf.* www/\ncp ../touchui/sencha-touch.* www/\ncp ../touchui/Zoom*.png www/\n";
-			showEnvVarsInLog = 0;
+			shellScript = "rsync -a ../touchui/app/ www/app/\ncp ../../webodf/webodf.css www/\ncp ../touchui/sencha-touch.* www/\ncp ../touchui/Zoom*.png www/\nif [ ! -e www/webodf.js ]; then\n    # webodf.js should be built\n    if [ ! -e build ]; then mkdir build; fi\n    cd build\n    cmake -G Xcode ../../.. && make && cp webodf/webodf.js ..\n    if [ ! -e webodf.js ]; then\n        echo \"put webodf.js in the ios/www directory\"\n        exit 1;\n    fi\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -13,3 +13,5 @@ programs/ios/www/sencha-touch.css
 programs/ios/www/sencha-touch.js
 programs/ios/www/webodf.css
 programs/ios/www/webodf.js
+.DS_Store
+programs/ios/build/
