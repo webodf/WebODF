@@ -15,6 +15,9 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
 
         function getFileId(fullPath) {
             var i;
+            if (!files) {
+                return -1;
+            }
             for (i = 0; i < files.length; i += 1) {
                 if (files[i].get('fullPath') === fullPath) {
                     return i;
@@ -65,7 +68,6 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
                         } catch (e) {
                             alert(e);
                         }
-                        alert(cachedList);
                         parseCachedFileList(0, callback);
                     };
                     reader.readAsText(fileentry);
@@ -185,6 +187,25 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
         constructor: function (config) {
             this.initConfig(config);
             scanner = new Scanner(this);
+            this.startScanningDirectories = function () {
+                scanner.scan();
+            };
+            this.getRecord = function (url, callback) {
+                var id = scanner.getFileId(url);
+                if (id !== -1) {
+                    return callback(scanner.files[id]);
+                }
+                window.resolveLocalFileSystemURI(url,
+                    function (fileentry) {
+                        scanner.load(fileentry, function (id) {
+                            Ext.getStore('FileStore').load();
+                            callback(scanner.files[id]);
+                        });
+                    },
+                    function (evt) {
+                        callback(null);
+                    });
+            };
         },
     
         create: function (operation, callback, scope) {
@@ -192,9 +213,11 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
         },
     
         read: function (operation, callback, scope) {
-            scanner.scan();
             var me = this,
                 records = scanner.files;
+            if (!records) {
+                return;
+            }
             // return model instances in a resultset
             operation.setResultSet(new Ext.data.ResultSet({
                 //total: records.length,
@@ -217,23 +240,6 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
     
         destroy: function (operation, callback, scope) {
             finishOperation(this, operation, callback, scope);
-        },
-
-        getId: function (url, callback) {
-            var id = scanner.getFileId(url);
-            if (id !== -1) {
-                return callback(id);
-            }
-            window.resolveLocalFileSystemURI(url,
-                function (fileentry) {
-                    scanner.load(fileentry, function (id) {
-                        Ext.getStore('FileStore').load();
-                        callback(id);
-                    });
-                },
-                function (evt) {
-                    callback(-1);
-                });
         }
     };
 }()));
