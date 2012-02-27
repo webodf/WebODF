@@ -6,8 +6,10 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
     var panel,
         style2CSS = new odf.Style2CSS(),
         xpath = new xmldom.XPath(),
-        fileDetail,
-        title;
+        title,
+        image,
+        list,
+        emptyImageUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAAXNSR0IArs4c6QAAAAtJREFUCB1jYGAAAAADAAFPSAqvAAAAAElFTkSuQmCC";
     function getTitle(body) {
         var ps,
             title;
@@ -66,17 +68,33 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
                 id: 'details',
                 xtype: 'container',
                 layout: 'hbox',
-                flex: 1
+                flex: 1,
+                items: [{
+                    id: 'thumbnail',
+                    xtype: 'image',
+                    width: 256,
+                    maxWidth: "50%"
+                }, {
+                    id: 'metalist',
+                    xtype: 'list',
+                    store: {
+                        fields: ["name", "value"],
+                        data: []
+                    },
+                    itemTpl: "{name}: {value}",
+                    flex: 1
+                }]
             }],
             listeners: {
                 initialize: function () {
-                    fileDetail = this.query("#details")[0];
+                    var fileDetail = this.query("#details")[0];
                     title = this.query("#title")[0];
+                    image = fileDetail.query('#thumbnail')[0];
+                    list = fileDetail.query('#metalist')[0];
                 }
             }
         },
         updateRecord: function (record) {
-            fileDetail.removeAll();
             if (record) {
                 title.setTitle(record.get('fileName'));
             }
@@ -88,26 +106,11 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
                 metajson = [];
             metajson = metaToJSON(odfcontainer.rootElement.body,
                 odfcontainer.rootElement.meta);
-            fileDetail.add([{
-                id: 'thumbnail',
-                xtype: 'image',
-                width: 256,
-                maxWidth: "50%"
-            }, {
-                id: 'metalist',
-                xtype: 'list',
-                store: {
-                    fields: ["name", "value"],
-                    data: metajson
-                },
-                itemTpl: "{name}: {value}",
-                flex: 1
-            }]);
             part.onstatereadychange = function (part) {
-                var image = fileDetail.query('#thumbnail')[0];
-                image.setSrc(part.url);
+                image.setSrc(part.url || emptyImageUrl);
             };
             part.load();
+            list.getStore().setData(metajson);
         }
     };
 }()));
