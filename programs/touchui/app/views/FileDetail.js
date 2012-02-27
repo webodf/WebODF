@@ -76,6 +76,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
             }
         },
         updateRecord: function (record) {
+            fileDetail.removeAll();
             if (record) {
                 title.setTitle(record.get('fileName'));
             }
@@ -85,14 +86,13 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
                 odfcontainer = odfcanvas.odfContainer(),
                 part = odfcontainer.getPart("Thumbnails/thumbnail.png"),
                 metajson = [];
-            fileDetail.removeAll();
             metajson = metaToJSON(odfcontainer.rootElement.body,
                 odfcontainer.rootElement.meta);
             fileDetail.add([{
                 id: 'thumbnail',
                 xtype: 'image',
                 width: 256,
-                height: 256
+                maxWidth: "50%"
             }, {
                 id: 'metalist',
                 xtype: 'list',
