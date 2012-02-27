@@ -2,8 +2,7 @@
 runtime.loadClass('odf.OdfCanvas');
 Ext.define('WebODFApp.view.OdfView', (function () {
     "use strict";
-    var record,
-        currentPath,
+    var currentPath,
         overridePath,
         overridePathPrefix = "ODFVIEWINTERNALFILE",
         data,
@@ -11,7 +10,14 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         globalfilesizefunction,
         odfcanvas,
         zoom = 1,
-        dom;
+        dom,
+        canvasListeners = [];
+    function signalCanvasChange() {
+        var i;
+        for (i = 0; i < canvasListeners.length; i += 1) {
+            canvasListeners[i](odfcanvas);
+        }
+    }
     function initCanvas() {
         var cmp;
         if (globalreadfunction === undefined) {
@@ -36,14 +42,10 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             };
             dom = Ext.getCmp('webodf').element.dom;
             odfcanvas = new odf.OdfCanvas(dom);
+            odfcanvas.addListener("statereadychange", signalCanvasChange);
         }
     }
-    function setRecord(r) {
-        record = r;
-        initCanvas();
-    }
     function load(path) {
-        initCanvas();
         if (path === currentPath) {
             return;
         }
@@ -110,11 +112,20 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                     pack : 'center',
                     align: 'center'
                 }
-            }]
+            }],
+            listeners: {
+                painted: function () {
+                    // make sure the viewport is the right size
+                    odfcanvas.setZoomLevel(odfcanvas.getZoomLevel());
+                }
+            }
         },
         updateRecord: function (record) {
-            setRecord(record);
+            initCanvas();
             load(record.get('fullPath'));
+        },
+        addCanvasListener: function (listener) {
+            canvasListeners.push(listener);
         }
     };
 }()));

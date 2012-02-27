@@ -455,6 +455,9 @@ odf.OdfCanvas = (function () {
         function fixContainerSize() {
             var sizer = element.firstChild,
                 odfdoc = sizer.firstChild;
+            if (!odfdoc) {
+                return;
+            }
             element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
             element.style.WebkitTransformOrigin = 'left top';
             element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)

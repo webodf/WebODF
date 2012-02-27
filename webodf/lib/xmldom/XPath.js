@@ -157,7 +157,7 @@ xmldom.XPath = (function () {
             done = false;
         };
         this.next = function next() {
-            var val = (done) ?null :node;
+            var val = (done) ? null : node;
             done = true;
             return val;
         };
@@ -355,7 +355,9 @@ xmldom.XPath = (function () {
      */
     function getODFElementsWithXPath(node, xpath, namespaceResolver) {
         var doc = node.ownerDocument,
-            nodes, elements = [], n = null;
+            nodes,
+            elements = [],
+            n = null;
         if (!doc || !doc.evaluate || !n) {
             elements = fallback(node, xpath, namespaceResolver);
         } else {
