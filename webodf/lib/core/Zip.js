@@ -355,6 +355,21 @@ core.Zip = function Zip(url, entriesReadCallback) {
         }
     }
     /**
+     * @param {!string} filename
+     * @param {!Object} handler
+     * @return {undefined}
+     */
+    function loadContentXmlAsFragments(filename, handler) {
+        // the javascript implementation simply reads the file
+        load(filename, function (err, data) {
+            if (err) {
+                return handler.rootElementReady(err);
+            }
+            data = runtime.byteArrayToString(data, "utf8");
+            handler.rootElementReady(null, data, true);
+        });
+    }
+    /**
      * Add or replace an entry to the zip file.
      * This data is not stored to disk yet, and therefore, no callback is
      * necessary.
@@ -491,6 +506,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
     this.load = load;
     this.save = save;
     this.write = write;
+    // a special function that makes faster odf loading possible
+    this.loadContentXmlAsFragments = loadContentXmlAsFragments;
     this.getEntries = function () {
         return entries.slice();
     };

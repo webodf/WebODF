@@ -78,7 +78,7 @@ odf.OdfCanvas = (function () {
             queue.length = 0;
         };
         /**
-         * @param {Function} task
+         * @param {Function} loadingTask
          * @return {undefined}
          */
         this.addToQueue = function (loadingTask) {

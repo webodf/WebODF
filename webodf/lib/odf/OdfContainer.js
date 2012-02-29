@@ -263,7 +263,8 @@ odf.OdfContainer = (function () {
      */
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
-            zip = null;
+            zip = null,
+            contentXmlCompletelyLoaded = false;
 
         // NOTE each instance of OdfContainer has a copy of the private functions
         // it would be better to have a class OdfContainerPrivate where the
@@ -449,7 +450,8 @@ odf.OdfContainer = (function () {
          */
         function handleManifestXml(xmldoc) {
             var node = importRootNode(xmldoc),
-                root, n;
+                root,
+                n;
             if (!node || node.localName !== 'manifest' ||
                     node.namespaceURI !== manifestns) {
                 return;
@@ -465,6 +467,27 @@ odf.OdfContainer = (function () {
                 }
                 n = n.nextSibling;
             }
+        }
+        /**
+         * @param {!function(?string,?Document)} callback
+         * @return {undefined}
+         */
+        function getContentXmlNode(callback) {
+            var handler = {
+                rootElementReady: function (err, rootxml, done) {
+                    contentXmlCompletelyLoaded = err || done;
+                    if (err) {
+                        return callback(err);
+                    }
+                    var parser = new DOMParser();
+                    rootxml = parser.parseFromString(rootxml, "text/xml");
+                    callback(null, rootxml);
+                },
+                bodyChildElementsReady: function (err, nodes, done) {
+                    // TODO
+                }
+            };
+            zip.loadContentXmlAsFragments("content.xml", handler);
         }
         /**
          * @param {!string} filepath
@@ -495,7 +518,7 @@ odf.OdfContainer = (function () {
                 if (self.state === OdfContainer.INVALID) {
                     return;
                 }
-                getXmlNode('content.xml', function (err, xmldoc) {
+                getContentXmlNode(function (err, xmldoc) {
                     handleContentXml(xmldoc);
                     if (self.state === OdfContainer.INVALID) {
                         return;
