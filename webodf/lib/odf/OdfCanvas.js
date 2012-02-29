@@ -424,6 +424,7 @@ odf.OdfCanvas = (function () {
         function namespaceResolver(prefix) {
             return namespaces[prefix];
         }
+        // find all the frame elements
         frames = [];
         node = odfbody.firstChild;
         while (node && node !== odfbody) {
@@ -441,11 +442,25 @@ odf.OdfCanvas = (function () {
                 }
             }
         }
+        // adjust all the frame positions
         for (i = 0; i < frames.length; i += 1) {
             node = frames[i];
             setFramePosition('frame' + String(i), node, stylesheet);
         }
-        images = odfbody.getElementsByTagNameNS(drawns, 'image');
+        formatParagraphAnchors(odfbody);
+    }
+    /**
+     * Load all the images that are inside an odf element.
+     * @param {!Object} container
+     * @param {!Element} odffragment
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function loadImages(container, odffragment, stylesheet) {
+        var i,
+            images,
+            node;
+        // do delayed loading for all the images
         function loadImage(name, container, node, stylesheet) {
             // load image with a small delay to give the html ui a chance to
             // update
@@ -453,11 +468,11 @@ odf.OdfCanvas = (function () {
                 setImage(name, container, node, stylesheet);
             });
         }
+        images = odffragment.getElementsByTagNameNS(drawns, 'image');
         for (i = 0; i < images.length; i += 1) {
             node = /**@type{!Element}*/(images.item(i));
             loadImage('image' + String(i), container, node, stylesheet);
         }
-        formatParagraphAnchors(odfbody);
     }
     /**
      * @param {Document} document Put and ODF Canvas inside this element.
@@ -546,6 +561,7 @@ odf.OdfCanvas = (function () {
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
+            loadImages(container, odfnode.body, css);
             fixContainerSize();
         }
         /**

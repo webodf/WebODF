@@ -215,7 +215,8 @@ odf.OdfContainer = (function () {
             // it would make sense to move this to base64.toBase64
             while (i < privatedata.length) {
                 self.url += base64.convertUTF8ArrayToBase64(
-                       p.slice(i, Math.min(i + chunksize, p.length)));
+                    p.slice(i, Math.min(i + chunksize, p.length))
+                );
                 i += chunksize;
             }
         }
@@ -378,7 +379,8 @@ odf.OdfContainer = (function () {
         function handleContentXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root,
-                automaticStyles, fontFaceDecls,
+                automaticStyles,
+                fontFaceDecls,
                 c;
             if (!node || node.localName !== 'document-content' ||
                     node.namespaceURI !== officens) {
@@ -589,7 +591,9 @@ odf.OdfContainer = (function () {
         }
         function createElement(Type) {
             var original = document.createElementNS(
-                    Type.namespaceURI, Type.localName),
+                    Type.namespaceURI,
+                    Type.localName
+                ),
                 method,
                 iface = new Type();
             for (method in iface) {
