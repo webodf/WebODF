@@ -24,6 +24,22 @@
 				<string>org.oasis.opendocument.text</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>icon.png</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>OpenDocument Presentation</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.oasis.opendocument.presentation</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
@@ -82,6 +98,23 @@
 				<string>odt</string>
 				<key>public.mime-type</key>
 				<string>application/vnd.oasis.opendocument.text</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>org.gnu.gnu-zip-archive</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>OpenDocument Presentation</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.oasis.opendocument.presentation</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<string>odp</string>
+				<key>public.mime-type</key>
+				<string>application/vnd.oasis.opendocument.presentation</string>
 			</dict>
 		</dict>
 	</array>
