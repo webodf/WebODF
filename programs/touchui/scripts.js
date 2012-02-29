@@ -81,6 +81,8 @@ function DirectoryReader(fullPath) {
                     "Traktatenblad.odt");
             entries[entries.length] = new FileEntry("DanskTest01.odt",
                     "DanskTest01.odt");
+            entries[entries.length] = new FileEntry("plugfest-gouda.odp",
+                    "plugfest-gouda.odp");
             try {
                 onsuccess(entries);
             } catch (e) {

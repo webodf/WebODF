@@ -45,6 +45,50 @@ runtime.loadClass("xmldom.XPath");
 odf.OdfCanvas = (function () {
     "use strict";
     /**
+     * A loading queue where various tasks related to loading can be placed
+     * and will be run with 10 ms between them. This gives the ui a change to
+     * to update.
+     * @constructor
+     */
+    function LoadingQueue() {
+        var queue = [],
+            taskRunning = false;
+        /**
+         * @param {Function} task
+         * @return {undefined}
+         */
+        function run(task) {
+            taskRunning = true;
+            runtime.setTimeout(function () {
+                try {
+                    task();
+                } catch (e) {
+                    runtime.log(e);
+                }
+                taskRunning = false;
+                if (queue.length > 0) {
+                    run(queue.pop());
+                }
+            }, 10);
+        }
+        /**
+         * @return {undefined}
+         */
+        this.clearQueue = function () {
+            queue.length = 0;
+        };
+        /**
+         * @param {Function} task
+         * @return {undefined}
+         */
+        this.addToQueue = function (loadingTask) {
+            if (queue.length === 0 && !taskRunning) {
+                return run(loadingTask);
+            }
+            queue.push(loadingTask);
+        };
+    }
+    /**
      * Register event listener on DOM element.
      * @param {!Element} eventTarget
      * @param {!string} eventType
@@ -197,7 +241,8 @@ odf.OdfCanvas = (function () {
         xpath = new xmldom.XPath(),
         /**@const@type{!Object.<!string,!Array.<!Function>>}*/
         eventHandlers = {},
-        editparagraph;
+        editparagraph,
+        loadingQueue = new LoadingQueue();
 
     /**
      * Register an event handler
@@ -401,9 +446,16 @@ odf.OdfCanvas = (function () {
             setFramePosition('frame' + String(i), node, stylesheet);
         }
         images = odfbody.getElementsByTagNameNS(drawns, 'image');
+        function loadImage(name, container, node, stylesheet) {
+            // load image with a small delay to give the html ui a chance to
+            // update
+            loadingQueue.addToQueue(function () {
+                setImage(name, container, node, stylesheet);
+            });
+        }
         for (i = 0; i < images.length; i += 1) {
             node = /**@type{!Element}*/(images.item(i));
-            setImage('image' + String(i), container, node, stylesheet);
+            loadImage('image' + String(i), container, node, stylesheet);
         }
         formatParagraphAnchors(odfbody);
     }
@@ -540,6 +592,7 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this["load"] = this.load = function (url) {
+            loadingQueue.clearQueue();
             element.innerHTML = 'loading ' + url;
             // open the odf container
             odfcontainer = new odf.OdfContainer(url, function (container) {
