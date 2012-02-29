@@ -495,17 +495,14 @@ odf.OdfContainer = (function () {
          * @return {undefined}
          */
         function getXmlNode(filepath, callback) {
-            zip.load(filepath, function (err, xmldata) {
+            zip.loadAsString(filepath, function (err, xmldata) {
                 if (err) {
                     callback(err, null);
                     return;
                 }
-                // assume the xml input data is utf8
-                // this can be done better
-                var str = runtime.byteArrayToString(xmldata, "utf8"),
-                    parser = new DOMParser();
-                str = parser.parseFromString(str, "text/xml");
-                callback(null, str);
+                var parser = new DOMParser();
+                xmldata = parser.parseFromString(xmldata, "text/xml");
+                callback(null, xmldata);
             });
         }
         /**
