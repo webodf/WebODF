@@ -356,16 +356,31 @@ core.Zip = function Zip(url, entriesReadCallback) {
     }
     /**
      * @param {!string} filename
+     * @param {!function(?string, ?string)} callback receiving err and data
+     * @return {undefined}
+     */
+    function loadAsString(filename, callback) {
+        // the javascript implementation simply reads the file and converts to
+        // string
+        load(filename, function (err, data) {
+            if (err) {
+                return callback(err, null);
+            }
+            data = runtime.byteArrayToString(data, "utf8");
+            callback(null, data);
+        });
+    }
+    /**
+     * @param {!string} filename
      * @param {!Object} handler
      * @return {undefined}
      */
     function loadContentXmlAsFragments(filename, handler) {
         // the javascript implementation simply reads the file
-        load(filename, function (err, data) {
+        loadAsString(filename, function (err, data) {
             if (err) {
                 return handler.rootElementReady(err);
             }
-            data = runtime.byteArrayToString(data, "utf8");
             handler.rootElementReady(null, data, true);
         });
     }
@@ -508,6 +523,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     this.write = write;
     // a special function that makes faster odf loading possible
     this.loadContentXmlAsFragments = loadContentXmlAsFragments;
+    this.loadAsString = loadAsString;
     this.getEntries = function () {
         return entries.slice();
     };

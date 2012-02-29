@@ -477,7 +477,7 @@ odf.OdfContainer = (function () {
                 rootElementReady: function (err, rootxml, done) {
                     contentXmlCompletelyLoaded = err || done;
                     if (err) {
-                        return callback(err);
+                        return callback(err, null);
                     }
                     var parser = new DOMParser();
                     rootxml = parser.parseFromString(rootxml, "text/xml");
