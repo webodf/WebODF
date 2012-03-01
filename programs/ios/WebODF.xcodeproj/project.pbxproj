@@ -36,11 +36,13 @@
 		CB533DD114DABDA600C733F6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CB533DD014DABDA600C733F6 /* AppDelegate.m */; };
 		CB533DD414DABDA600C733F6 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB533DD314DABDA600C733F6 /* MainViewController.m */; };
 		CB533DD614DABDA600C733F6 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB533DD514DABDA600C733F6 /* MainViewController.xib */; };
+		CBD2B77314FF8E9700FC3A44 /* NativeZip.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD2B77214FF8E9700FC3A44 /* NativeZip.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "../Default-Landscape~ipad.png"; sourceTree = "<group>"; };
+		CB29ECB414FFA83C00CEAEE3 /* Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Header.h; path = Classes/Header.h; sourceTree = "<group>"; };
 		CB36D11714F68F7F0084BECB /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		CB533D8C14DABDA500C733F6 /* KO Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KO Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB533D9014DABDA600C733F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -73,6 +75,8 @@
 		CB533DD214DABDA600C733F6 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainViewController.h; path = Classes/MainViewController.h; sourceTree = "<group>"; };
 		CB533DD314DABDA600C733F6 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MainViewController.m; path = Classes/MainViewController.m; sourceTree = "<group>"; };
 		CB533DD514DABDA600C733F6 /* MainViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainViewController.xib; path = Classes/MainViewController.xib; sourceTree = "<group>"; };
+		CBD2B77114FF8E9700FC3A44 /* NativeZip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeZip.h; path = Classes/NativeZip.h; sourceTree = "<group>"; };
+		CBD2B77214FF8E9700FC3A44 /* NativeZip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NativeZip.m; path = Classes/NativeZip.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +219,9 @@
 				CB533DD014DABDA600C733F6 /* AppDelegate.m */,
 				CB533DD214DABDA600C733F6 /* MainViewController.h */,
 				CB533DD314DABDA600C733F6 /* MainViewController.m */,
+				CBD2B77114FF8E9700FC3A44 /* NativeZip.h */,
+				CBD2B77214FF8E9700FC3A44 /* NativeZip.m */,
+				CB29ECB414FFA83C00CEAEE3 /* Header.h */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -314,6 +321,7 @@
 				CB533DB114DABDA600C733F6 /* main.m in Sources */,
 				CB533DD114DABDA600C733F6 /* AppDelegate.m in Sources */,
 				CB533DD414DABDA600C733F6 /* MainViewController.m in Sources */,
+				CBD2B77314FF8E9700FC3A44 /* NativeZip.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

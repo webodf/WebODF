@@ -22,6 +22,8 @@
 	<array/>
 	<key>Plugins</key>
 	<dict>
+		<key>ZipClass</key>
+		<string>NativeZip</string>
 		<key>com.phonegap.accelerometer</key>
 		<string>PGAccelerometer</string>
 		<key>com.phonegap.camera</key>

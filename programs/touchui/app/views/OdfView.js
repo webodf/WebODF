@@ -4,7 +4,7 @@ Ext.define('WebODFApp.view.OdfView', (function () {
     "use strict";
     var currentPath,
         overridePath,
-        overridePathPrefix = "ODFVIEWINTERNALFILE",
+        overridePathPrefix = "odf:",
         data,
         globalreadfunction,
         globalfilesizefunction,
@@ -50,7 +50,7 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             return;
         }
         currentPath = path;
-        overridePath = overridePathPrefix + String(Math.random()).substring(2);
+        overridePath = overridePathPrefix + path;
         data = null;
         window.resolveLocalFileSystemURI("file://" + path, function (file) {
             var reader = new FileReader();
