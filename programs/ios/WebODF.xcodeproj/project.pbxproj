@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		CB099EC714DAC535000D7B99 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */; };
 		CB099EC914DAC53D000D7B99 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */; };
+		CB29ECBD14FFBBBB00CEAEE3 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = CB29ECBC14FFBBBB00CEAEE3 /* unzip.c */; };
+		CB29ECBF14FFBC0500CEAEE3 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = CB29ECBE14FFBC0500CEAEE3 /* ioapi.c */; };
+		CB29ECC114FFBC1B00CEAEE3 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = CB29ECC014FFBC1B00CEAEE3 /* mztools.c */; };
+		CB29ECC314FFBC5500CEAEE3 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CB29ECC214FFBC5500CEAEE3 /* libz.dylib */; };
 		CB36D11814F68F7F0084BECB /* www in Resources */ = {isa = PBXBuildFile; fileRef = CB36D11714F68F7F0084BECB /* www */; };
 		CB533D9114DABDA600C733F6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB533D9014DABDA600C733F6 /* Foundation.framework */; };
 		CB533D9314DABDA600C733F6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB533D9214DABDA600C733F6 /* UIKit.framework */; };
@@ -42,7 +46,10 @@
 /* Begin PBXFileReference section */
 		CB099EC614DAC535000D7B99 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		CB099EC814DAC53D000D7B99 /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "../Default-Landscape~ipad.png"; sourceTree = "<group>"; };
-		CB29ECB414FFA83C00CEAEE3 /* Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Header.h; path = Classes/Header.h; sourceTree = "<group>"; };
+		CB29ECBC14FFBBBB00CEAEE3 /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = unzip.c; path = WebODF/Classes/minizip/unzip.c; sourceTree = "<group>"; };
+		CB29ECBE14FFBC0500CEAEE3 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ioapi.c; path = WebODF/Classes/minizip/ioapi.c; sourceTree = "<group>"; };
+		CB29ECC014FFBC1B00CEAEE3 /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mztools.c; path = WebODF/Classes/minizip/mztools.c; sourceTree = "<group>"; };
+		CB29ECC214FFBC5500CEAEE3 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		CB36D11714F68F7F0084BECB /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		CB533D8C14DABDA500C733F6 /* KO Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KO Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB533D9014DABDA600C733F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -84,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB29ECC314FFBC5500CEAEE3 /* libz.dylib in Frameworks */,
 				CB533D9114DABDA600C733F6 /* Foundation.framework in Frameworks */,
 				CB533D9314DABDA600C733F6 /* UIKit.framework in Frameworks */,
 				CB533D9514DABDA600C733F6 /* CoreGraphics.framework in Frameworks */,
@@ -114,6 +122,10 @@
 		CB533D7E14DABDA500C733F6 = {
 			isa = PBXGroup;
 			children = (
+				CB29ECC214FFBC5500CEAEE3 /* libz.dylib */,
+				CB29ECC014FFBC1B00CEAEE3 /* mztools.c */,
+				CB29ECBE14FFBC0500CEAEE3 /* ioapi.c */,
+				CB29ECBC14FFBBBB00CEAEE3 /* unzip.c */,
 				CB36D11714F68F7F0084BECB /* www */,
 				CB533DAA14DABDA600C733F6 /* WebODF */,
 				CB533D8F14DABDA500C733F6 /* Frameworks */,
@@ -221,7 +233,6 @@
 				CB533DD314DABDA600C733F6 /* MainViewController.m */,
 				CBD2B77114FF8E9700FC3A44 /* NativeZip.h */,
 				CBD2B77214FF8E9700FC3A44 /* NativeZip.m */,
-				CB29ECB414FFA83C00CEAEE3 /* Header.h */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -322,6 +333,9 @@
 				CB533DD114DABDA600C733F6 /* AppDelegate.m in Sources */,
 				CB533DD414DABDA600C733F6 /* MainViewController.m in Sources */,
 				CBD2B77314FF8E9700FC3A44 /* NativeZip.m in Sources */,
+				CB29ECBD14FFBBBB00CEAEE3 /* unzip.c in Sources */,
+				CB29ECBF14FFBC0500CEAEE3 /* ioapi.c in Sources */,
+				CB29ECC114FFBC1B00CEAEE3 /* mztools.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

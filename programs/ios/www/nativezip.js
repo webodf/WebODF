@@ -6,25 +6,37 @@ loadAsString: function(zippath, entrypath, success, fail) {
 core.Zip = function (url, entriesReadCallback) {
     // remove 'odf:' prefix
     url = url.substr(4);
-    this.load = function () { alert("load"); };
+    var zip = this;
+    this.load = function (filename, callback) {
+        alert(filename);
+        callback(null, ""); 
+    };
     /**
      * @param {!string} filename
      * @param {!function(?string, ?string)} callback receiving err and data
      * @return {undefined}
      */
     this.loadAsString = function (filename, callback) {
-        alert(url);
-        ZipPlugin.loadAsString(url, "content.xml",
-                                 function (content) { alert(content); },
-                                 function (err) { alert("boo " + err); }
-                                 );
-        //alert("loadAsString " + filename);
+        alert(filename);
+        ZipPlugin.loadAsString(url, filename,
+            function (content) {
+                callback(null, content);
+            },
+            function (err) { callback(err, null); }
+        );
     };
     this.getEntries = function () {
         alert("getEntries");
     };
-    this.loadContentXmlAsFragments = function () {
-        alert("O");
+    this.loadContentXmlAsFragments = function (filename, handler) {
+        // the javascript implementation simply reads the file
+        zip.loadAsString(filename, function (err, data) {
+            if (err) {
+                return handler.rootElementReady(err);
+            }
+            handler.rootElementReady(null, data, true);
+        });
+
     };
     this.save = function () {
         alert("save");
