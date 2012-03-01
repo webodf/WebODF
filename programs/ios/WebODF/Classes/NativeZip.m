@@ -1,12 +1,12 @@
 #import "NativeZip.h"
-//#import "Objective-Zip/ZipReadStream.h"
-//#import "Objective-Zip/ZipFile.h"
 #import "minizip/unzip.h"
+#import "NSData+Base64.h"
 
 @implementation NativeZip
 @synthesize callbackID;
 
--(void)loadAsString:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options  
+
+-(void) load:(BOOL)base64 arguments:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
 {
     self.callbackID = [arguments objectAtIndex:0];
     NSString *zipPath = [arguments objectAtIndex:1];
@@ -38,7 +38,12 @@
                     if (r != info.uncompressed_size) {
                         jsString = [[NSString alloc] initWithString: @"cannot uncompress file"];
                     } else {
-                        jsString = [[NSString alloc] initWithUTF8String: contents];
+                        if (base64) {
+                            NSData* readData = [NSData dataWithBytes:(const void *)contents length:sizeof(unsigned char)*info.uncompressed_size];
+                            jsString = [NSString stringWithFormat:@"data:%@;base64,%@", @"mimetype", [readData base64EncodedString]];
+                        } else {                    
+                            jsString = [[NSString alloc] initWithUTF8String: contents];
+                        }
                     }
                     unzCloseCurrentFile(unzipFile);
                     free(contents);
@@ -57,6 +62,15 @@
     } else {
         [self writeJavascript: [pluginResult toErrorCallbackString:self.callbackID]];
     }
+}
+
+-(void)loadAsString:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options  
+{
+    [self load:FALSE arguments:arguments withDict:options];
+}
+-(void)loadAsDataURL:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options  
+{
+    [self load:TRUE arguments:arguments withDict:options];
 }
 
 @end

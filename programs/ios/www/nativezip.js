@@ -1,15 +1,18 @@
 var ZipPlugin = {
-loadAsString: function(zippath, entrypath, success, fail) {
-    return PhoneGap.exec(success, fail, "ZipClass", "loadAsString", [zippath, entrypath]);
-}
+    loadAsString: function(zippath, entrypath, success, fail) {
+        return PhoneGap.exec(success, fail, "ZipClass", "loadAsString", [zippath, entrypath]);
+    },
+    loadAsDataURL: function(zippath, entrypath, success, fail) {
+        return PhoneGap.exec(success, fail, "ZipClass", "loadAsDataURL", [zippath, entrypath]);
+    },
 };
 core.Zip = function (url, entriesReadCallback) {
     // remove 'odf:' prefix
     url = url.substr(4);
     var zip = this;
     this.load = function (filename, callback) {
-        alert(filename);
-        callback(null, ""); 
+        //alert(filename);
+        callback(null, "");
     };
     /**
      * @param {!string} filename
@@ -17,8 +20,15 @@ core.Zip = function (url, entriesReadCallback) {
      * @return {undefined}
      */
     this.loadAsString = function (filename, callback) {
-        alert(filename);
         ZipPlugin.loadAsString(url, filename,
+            function (content) {
+                callback(null, content);
+            },
+            function (err) { callback(err, null); }
+        );
+    };
+    this.loadAsDataURL = function (filename, callback) {
+        ZipPlugin.loadAsDataURL(url, filename,
             function (content) {
                 callback(null, content);
             },
@@ -36,7 +46,6 @@ core.Zip = function (url, entriesReadCallback) {
             }
             handler.rootElementReady(null, data, true);
         });
-
     };
     this.save = function () {
         alert("save");
