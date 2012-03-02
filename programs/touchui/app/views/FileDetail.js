@@ -97,7 +97,10 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
         },
         updateRecord: function (record) {
             if (record) {
-                fileDetail.mask();
+                fileDetail.setMasked({
+                    xtype: 'loadmask',
+                    message: 'Loading...'
+                });
                 title.setTitle(record.get('fileName'));
             }
         },
