@@ -44,6 +44,7 @@
 runtime.loadClass("core.RawInflate");
 runtime.loadClass("core.ByteArray");
 runtime.loadClass("core.ByteArrayWriter");
+runtime.loadClass("core.Base64");
 
 /**
  * @constructor
@@ -59,7 +60,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
         /**@type{number}*/ filesize,
         /**@type{number}*/ nEntries,
         /**@type{Function}*/ inflate = new core.RawInflate().inflate,
-        /**@type{!core.Zip}*/ zip = this;
+        /**@type{!core.Zip}*/ zip = this,
+        base64 = new core.Base64();
 
     /**
      * @param {!Runtime.ByteArray} data
@@ -384,6 +386,38 @@ core.Zip = function Zip(url, entriesReadCallback) {
             handler.rootElementReady(null, data, true);
         });
     }
+    function loadAsDataURL(filename, mimetype, callback) {
+        load(filename, function (err, data) {
+            if (err) {
+                return callback(err, null);
+            }
+            var /**@const@type{!Runtime.ByteArray}*/p = data,
+                chunksize = 45000, // must be multiple of 3 and less than 50000
+                i = 0,
+                url;
+            if (!mimetype) {
+                if (p[1] === 0x50 && p[2] === 0x4E && p[3] === 0x47) {
+                    mimetype = "image/png";
+                } else if (p[0] === 0xFF && p[1] === 0xD8 && p[2] === 0xFF) {
+                    mimetype = "image/jpeg";
+                } else if (p[0] === 0x47 && p[1] === 0x49 && p[2] === 0x46) {
+                    mimetype = "image/gif";
+                } else {
+                    mimetype = "";
+                }
+            }
+            url = 'data:' + mimetype + ';base64,';
+            // to avoid exceptions, base64 encoding is done in chunks
+            // it would make sense to move this to base64.toBase64
+            while (i < data.length) {
+                url += base64.convertUTF8ArrayToBase64(
+                    p.slice(i, Math.min(i + chunksize, p.length))
+                );
+                i += chunksize;
+            }
+            callback(null, url);
+        });
+    }
     /**
      * Add or replace an entry to the zip file.
      * This data is not stored to disk yet, and therefore, no callback is
@@ -524,6 +558,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     // a special function that makes faster odf loading possible
     this.loadContentXmlAsFragments = loadContentXmlAsFragments;
     this.loadAsString = loadAsString;
+    this.loadAsDataURL = loadAsDataURL;
     this.getEntries = function () {
         return entries.slice();
     };

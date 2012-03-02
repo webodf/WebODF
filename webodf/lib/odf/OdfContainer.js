@@ -190,41 +190,11 @@ odf.OdfContainer = (function () {
         this.state = this.EMPTY;
 
         // private functions
-        function createUrl() {
-            self.url = null;
-            if (!privatedata) {
-                return;
-            }
-            var /**@const@type{!Runtime.ByteArray}*/p = privatedata,
-                chunksize = 45000, // must be multiple of 3 and less than 50000
-                i = 0,
-                mimetype = partMimetypes[name];
-            if (!mimetype) {
-                if (p[1] === 0x50 && p[2] === 0x4E && p[3] === 0x47) {
-                    mimetype = "image/png";
-                } else if (p[0] === 0xFF && p[1] === 0xD8 && p[2] === 0xFF) {
-                    mimetype = "image/jpeg";
-                } else if (p[0] === 0x47 && p[1] === 0x49 && p[2] === 0x46) {
-                    mimetype = "image/gif";
-                } else {
-                    mimetype = "";
-                }
-            }
-            self.url = 'data:' + mimetype + ';base64,';
-            // to avoid exceptions, base64 encoding is done in chunks
-            // it would make sense to move this to base64.toBase64
-            while (i < privatedata.length) {
-                self.url += base64.convertUTF8ArrayToBase64(
-                    p.slice(i, Math.min(i + chunksize, p.length))
-                );
-                i += chunksize;
-            }
-        }
         // public functions
         this.load = function () {
-            zip.load(name, function (err, data) {
-                privatedata = data;
-                createUrl();
+            var mimetype = partMimetypes[name];
+            zip.loadAsDataURL(name, mimetype, function (err, url) {
+                self.url = url;
                 if (self.onchange) {
                     self.onchange(self);
                 }
