@@ -130,7 +130,9 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             canvasListeners.push(listener);
         },
         hideCanvas: function () {
-            dom.style.display = "none";
+            if (dom) {
+                dom.style.display = "none";
+            }
             if (view) {
                 view.setMasked({
                     xtype: 'loadmask',

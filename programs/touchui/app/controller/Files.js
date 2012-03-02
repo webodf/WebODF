@@ -14,7 +14,8 @@ Ext.define('WebODFApp.controller.Files', {
         control: {
             mainView: {
                 pop: 'pop',
-                push: 'push'
+                push: 'push',
+                back: 'back'
             },
             filesList: {
                 itemtap: 'show'
@@ -23,6 +24,10 @@ Ext.define('WebODFApp.controller.Files', {
                 tap: 'open'
             }
         }
+    },
+    back: function () {
+        "use strict";
+        this.odfView.hideCanvas();
     },
     push: function (view, item) {
         "use strict";
@@ -35,7 +40,6 @@ Ext.define('WebODFApp.controller.Files', {
     pop: function (view, item) {
         "use strict";
         if (item.xtype === "odfview") { // going to filedetail
-            this.odfView.hideCanvas();
             this.getOpenButton().show();
         } else {
             this.getOpenButton().hide();
@@ -54,6 +58,7 @@ Ext.define('WebODFApp.controller.Files', {
             this.odfView = Ext.create('WebODFApp.view.OdfView');
             this.odfView.addCanvasListener(this.fileDetail.canvasListener);
         }
+        this.odfView.hideCanvas();
         this.fileDetail.odfView = this.odfView;
         this.fileDetail.setRecord(record);
         this.getMainView().push(this.fileDetail);
