@@ -83,6 +83,12 @@ function DirectoryReader(fullPath) {
                     "DanskTest01.odt");
             entries[entries.length] = new FileEntry("plugfest-gouda.odp",
                     "plugfest-gouda.odp");
+            entries[entries.length] = new FileEntry("OpenDocument-v1.2.odt",
+                    "OpenDocument-v1.2.odt");
+            entries[entries.length] = new FileEntry("OpenDocument-v1.2-part1.odt",
+                    "OpenDocument-v1.2-part1.odt");
+            entries[entries.length] = new FileEntry("OpenDocument-v1.2-part2.odt",
+                    "OpenDocument-v1.2-part2.odt");
             try {
                 onsuccess(entries);
             } catch (e) {

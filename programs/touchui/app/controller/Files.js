@@ -1,4 +1,4 @@
-/*global Ext*/
+/*global Ext, runtime*/
 Ext.define('WebODFApp.controller.Files', {
     extend: 'Ext.app.Controller',
 
@@ -45,6 +45,7 @@ Ext.define('WebODFApp.controller.Files', {
         "use strict";
         // set the record in the details view and the file view
         // this way, document starts loading in the background
+        var c = this;
         if (!this.fileDetail) {
             this.fileDetail = Ext.create('WebODFApp.view.FileDetail');
         }
@@ -53,9 +54,11 @@ Ext.define('WebODFApp.controller.Files', {
             this.odfView.addCanvasListener(this.fileDetail.canvasListener);
         }
         this.fileDetail.odfView = this.odfView;
-        this.odfView.setRecord(record);
         this.fileDetail.setRecord(record);
         this.getMainView().push(this.fileDetail);
+        runtime.setTimeout(function () {
+            c.odfView.setRecord(record);
+        }, 300);
     },
     open: function (options) {
         "use strict";

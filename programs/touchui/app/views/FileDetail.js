@@ -6,6 +6,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
     var panel,
         style2CSS = new odf.Style2CSS(),
         xpath = new xmldom.XPath(),
+        fileDetail,
         title,
         image,
         list,
@@ -87,7 +88,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
             }],
             listeners: {
                 initialize: function () {
-                    var fileDetail = this.query("#details")[0];
+                    fileDetail = this.query("#details")[0];
                     title = this.query("#title")[0];
                     image = fileDetail.query('#thumbnail')[0];
                     list = fileDetail.query('#metalist')[0];
@@ -96,6 +97,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
         },
         updateRecord: function (record) {
             if (record) {
+                fileDetail.mask();
                 title.setTitle(record.get('fileName'));
             }
         },
@@ -111,6 +113,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
             };
             part.load();
             list.getStore().setData(metajson);
+            fileDetail.unmask();
         }
     };
 }()));
