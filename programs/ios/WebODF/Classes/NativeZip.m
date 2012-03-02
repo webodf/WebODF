@@ -5,12 +5,15 @@
 @implementation NativeZip
 @synthesize callbackID;
 
-
 -(void) load:(BOOL)base64 arguments:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
 {
     self.callbackID = [arguments objectAtIndex:0];
     NSString *zipPath = [arguments objectAtIndex:1];
-    NSString *entryPath = [arguments objectAtIndex:2]; 
+    NSString *entryPath = [arguments objectAtIndex:2];
+    NSString *mimetype = nil;
+    if (base64 == TRUE) {
+        mimetype = [arguments objectAtIndex:3];
+    }
     
     const char* path = [ zipPath cStringUsingEncoding:NSUTF8StringEncoding ];
     unzFile unzipFile = unzOpen(path);
@@ -20,7 +23,7 @@
 		jsString = [[NSString alloc] initWithString: @"cannot open file"];
     } else {
         path = [ entryPath cStringUsingEncoding:NSUTF8StringEncoding ];
-        int r = unzLocateFile(unzipFile, path, 1);
+        int r = unzLocateFile(unzipFile, path, 2);
         if (r != UNZ_OK) {
 		    jsString = [[NSString alloc] initWithString: @"cannot find entry"];
         } else {
@@ -40,7 +43,7 @@
                     } else {
                         if (base64) {
                             NSData* readData = [NSData dataWithBytes:(const void *)contents length:sizeof(unsigned char)*info.uncompressed_size];
-                            jsString = [NSString stringWithFormat:@"data:%@;base64,%@", @"mimetype", [readData base64EncodedString]];
+                            jsString = [NSString stringWithFormat:@"data:%@;base64,%@", mimetype, [readData base64EncodedString]];
                         } else {                    
                             jsString = [[NSString alloc] initWithUTF8String: contents];
                         }

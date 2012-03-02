@@ -1,12 +1,13 @@
 /*global PhoneGap, core*/
+
 var ZipPlugin = {
     loadAsString: function (zippath, entrypath, success, fail) {
         "use strict";
         return PhoneGap.exec(success, fail, "ZipClass", "loadAsString", [zippath, entrypath]);
     },
-    loadAsDataURL: function (zippath, entrypath, success, fail) {
+    loadAsDataURL: function (zippath, entrypath, mimetype, success, fail) {
         "use strict";
-        return PhoneGap.exec(success, fail, "ZipClass", "loadAsDataURL", [zippath, entrypath]);
+        return PhoneGap.exec(success, fail, "ZipClass", "loadAsDataURL", [zippath, entrypath, mimetype]);
     }
 };
 core.Zip = function (url, entriesReadCallback) {
@@ -18,11 +19,6 @@ core.Zip = function (url, entriesReadCallback) {
         //alert(filename);
         callback(null, "");
     };
-    /**
-     * @param {!string} filename
-     * @param {!function(?string, ?string)} callback receiving err and data
-     * @return {undefined}
-     */
     this.loadAsString = function (filename, callback) {
         ZipPlugin.loadAsString(url, filename,
             function (content) {
@@ -31,8 +27,8 @@ core.Zip = function (url, entriesReadCallback) {
             function (err) { callback(err, null); }
             );
     };
-    this.loadAsDataURL = function (filename, callback) {
-        ZipPlugin.loadAsDataURL(url, filename,
+    this.loadAsDataURL = function (filename, mimetype, callback) {
+        ZipPlugin.loadAsDataURL(url, filename, mimetype,
             function (content) {
                 callback(null, content);
             },
