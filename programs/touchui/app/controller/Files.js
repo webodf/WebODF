@@ -52,7 +52,6 @@ Ext.define('WebODFApp.controller.Files', {
             this.odfView = Ext.create('WebODFApp.view.OdfView');
             this.odfView.addCanvasListener(this.fileDetail.canvasListener);
         }
-        this.odfView.setRecord(this.fileDetail.getRecord());
         this.fileDetail.odfView = this.odfView;
         this.odfView.setRecord(record);
         this.fileDetail.setRecord(record);
