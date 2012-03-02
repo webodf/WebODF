@@ -11,7 +11,8 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         odfcanvas,
         zoom = 1,
         dom,
-        canvasListeners = [];
+        canvasListeners = [],
+        view;
     function signalCanvasChange() {
         var i;
         for (i = 0; i < canvasListeners.length; i += 1) {
@@ -121,11 +122,25 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             }
         },
         updateRecord: function (record) {
+            view = this;
             initCanvas();
             load(record.get('fullPath'));
         },
         addCanvasListener: function (listener) {
             canvasListeners.push(listener);
+        },
+        hideCanvas: function () {
+            dom.style.display = "none";
+            if (view) {
+                view.mask();
+            }
+        },
+        showCanvas: function () {
+            if (view) {
+                view.unmask();
+            }
+            dom.style.display = "inline-block";
+            odfcanvas.setZoomLevel(odfcanvas.getZoomLevel());
         }
     };
 }()));

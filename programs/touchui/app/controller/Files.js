@@ -35,6 +35,7 @@ Ext.define('WebODFApp.controller.Files', {
     pop: function (view, item) {
         "use strict";
         if (item.xtype === "odfview") { // going to filedetail
+            this.odfView.hideCanvas();
             this.getOpenButton().show();
         } else {
             this.getOpenButton().hide();
@@ -62,10 +63,15 @@ Ext.define('WebODFApp.controller.Files', {
     },
     open: function (options) {
         "use strict";
+        var c = this;
         if (!this.odfView) {
             this.odfView = Ext.create('WebODFApp.view.OdfView');
         }
+        this.odfView.hideCanvas();
         this.odfView.setRecord(this.fileDetail.getRecord());
         this.getMainView().push(this.odfView);
+        runtime.setTimeout(function () {
+            c.odfView.showCanvas();
+        }, 300);
     }
 });

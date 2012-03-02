@@ -21,7 +21,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
             title = ps[0].nodeValue;
         } else {
             ps = xpath.getODFElementsWithXPath(body,
-                 ".//text:p", style2CSS.namespaceResolver);
+                ".//text:p", style2CSS.namespaceResolver);
             if (ps && ps.length) {
                 title = ps[0].nodeValue;
             }
@@ -107,7 +107,7 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
                 part = odfcontainer.getPart("Thumbnails/thumbnail.png"),
                 metajson = [];
             metajson = metaToJSON(odfcontainer.rootElement.body,
-                odfcontainer.rootElement.meta);
+                    odfcontainer.rootElement.meta);
             part.onstatereadychange = function (part) {
                 image.setSrc(part.url || emptyImageUrl);
             };
