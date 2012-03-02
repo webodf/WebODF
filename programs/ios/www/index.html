@@ -19,7 +19,8 @@
   <script type="text/javascript">
 var applicationReady = false,
     deviceReady = false,
-    startScanningDirectories;
+    startScanningDirectories,
+    application;
 document.addEventListener("deviceready", function () {
     deviceReady = true;
     if (applicationReady) {
@@ -31,6 +32,7 @@ document.addEventListener("deviceready", function () {
  */
 onApplicationLaunch = function (app) {
     "use strict";
+    application = app;
     applicationReady = true;
     startScanningDirectories = function () {
         if (typeof invokeString !== "undefined" && invokeString) {
@@ -42,6 +44,9 @@ onApplicationLaunch = function (app) {
         startScanningDirectories();
     }
 };
+function handleOpenURL(url) {
+    application.openUrl(url);
+}
   </script>
  </head><body></body>
 </html>
