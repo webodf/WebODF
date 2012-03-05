@@ -25,14 +25,19 @@ core.Zip = function (url, entriesReadCallback) {
     this.loadAsDOM = function (filename, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
-            var data;
+            var xml;
+            console.log("loading " + filename + " status " + xhr.status + " readyState " + xhr.readyState);
             if (xhr.readyState === 4) {
-                if (xhr.status === 0 && !xhr.responseXML) {
+                xml = xhr.responseXML;
+                console.log("done accessing responseXML " + xml + " " + (xhr.responseText && xhr.responseText.length)
+                    + " " + xhr.statusText);
+                console.log("statusText " + xhr.statusText);
+                if (xhr.status === 0 && !xml) {
                     // empty files are considered as errors
                     callback("File " + path + " is not valid XML.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     try {
-                        callback(null, xhr.responseXML);
+                        callback(null, xml);
                     } catch (e) {
                         console.log(e);
                     }
@@ -47,12 +52,15 @@ core.Zip = function (url, entriesReadCallback) {
         xhr.send(null);
     };
     this.loadAsDataURL = function (filename, mimetype, callback) {
+        callback(null, "http://zipserver" + url + "?" + filename);
+        /*
         ZipPlugin.loadAsDataURL(url, filename, mimetype,
             function (content) {
                 callback(null, content);
             },
             function (err) { callback(err, null); }
             );
+            */
     };
     this.getEntries = function () {
         alert("getEntries");

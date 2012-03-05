@@ -100,7 +100,7 @@
                 break;
             }
         }
-    } 
+    }
     
     if (forceStartupRotation) {
         NSLog(@"supportedOrientations: %@", self.viewController.supportedOrientations);
