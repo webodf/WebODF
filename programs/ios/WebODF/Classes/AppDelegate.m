@@ -116,7 +116,7 @@
     
     NSString *path = @"./cache";
     NSUInteger discCapacity = 1*1024*1024;
-    NSUInteger memoryCapacity = 16*1024*1024;
+    NSUInteger memoryCapacity = 0*1024*1024;
     
     WebViewCache *cache =
     [[WebViewCache alloc] initWithMemoryCapacity: memoryCapacity

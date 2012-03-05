@@ -15,26 +15,16 @@
 {
     [super removeAllCachedResponses];
     NSURL *url = [request URL];
-   // if ([url isFileURL] && [url query]) {
-    if ([url query]) {
+        if ([url query]) {
         NSData *somedata = [self getSomeData:[url path] entry:[url query]];
-        NSURLResponse *response = [[NSURLResponse alloc] initWithURL:url
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:url
                               MIMEType:@"text/xml"
                  expectedContentLength:[somedata length]
                       textEncodingName:nil];
         NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] 
             initWithResponse:response data:somedata];
-
-        // FIXME setting capacity here feels wrong.
-        [super setMemoryCapacity:8*1024*1024];
-        NSLog(@"going to add an entry of %i bytes", [somedata length]);
-        NSLog(@"capacity of cache M/D: %i/%i", [self memoryCapacity], [self diskCapacity]);
-        NSLog(@"capacity of super cache M/D: %i/%i", [super memoryCapacity], [super diskCapacity]);
-        NSLog(@" pre cache M/D: %i/%i", [super currentMemoryUsage], [super currentDiskUsage]);
-        [super storeCachedResponse:cachedResponse forRequest:request];
+        return cachedResponse;
     }
-    NSLog(@"post cache M/D: %i/%i", [super currentMemoryUsage], [super currentDiskUsage]);
-    NSLog(@"cache size M/D: %i/%i", [super memoryCapacity], [super diskCapacity]);
     return [super cachedResponseForRequest:request];
 }
 
@@ -44,7 +34,6 @@
     const char* path = [ zip cStringUsingEncoding:NSUTF8StringEncoding ];
     unzFile unzipFile = unzOpen(path);
     NSData *data = nil;
-    BOOL error = TRUE;
     if (!unzipFile) {
 		NSLog(@"cannot open file %@", zip);
     } else {
@@ -72,7 +61,6 @@
                     }
                     unzCloseCurrentFile(unzipFile);
                     free(contents);
-                    error = FALSE;
                 }
             }
         }
