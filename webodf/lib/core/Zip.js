@@ -418,6 +418,17 @@ core.Zip = function Zip(url, entriesReadCallback) {
             callback(null, url);
         });
     }
+    function loadAsDOM(filename, callback) {
+        loadAsString(filename, function (err, xmldata) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            var parser = new DOMParser();
+            xmldata = parser.parseFromString(xmldata, "text/xml");
+            callback(null, xmldata);
+        });
+    }
     /**
      * Add or replace an entry to the zip file.
      * This data is not stored to disk yet, and therefore, no callback is
@@ -558,6 +569,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     // a special function that makes faster odf loading possible
     this.loadContentXmlAsFragments = loadContentXmlAsFragments;
     this.loadAsString = loadAsString;
+    this.loadAsDOM = loadAsDOM;
     this.loadAsDataURL = loadAsDataURL;
     this.getEntries = function () {
         return entries.slice();

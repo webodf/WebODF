@@ -19,7 +19,9 @@
 	<key>OpenAllWhitelistURLsInWebView</key>
 	<false/>
 	<key>ExternalHosts</key>
-	<array/>
+	<array>
+		<string>zipserver</string>
+	</array>
 	<key>Plugins</key>
 	<dict>
 		<key>ZipClass</key>

@@ -465,15 +465,7 @@ odf.OdfContainer = (function () {
          * @return {undefined}
          */
         function getXmlNode(filepath, callback) {
-            zip.loadAsString(filepath, function (err, xmldata) {
-                if (err) {
-                    callback(err, null);
-                    return;
-                }
-                var parser = new DOMParser();
-                xmldata = parser.parseFromString(xmldata, "text/xml");
-                callback(null, xmldata);
-            });
+            zip.loadAsDOM(filepath, callback);
         }
         /**
          * @return {undefined}
@@ -485,7 +477,7 @@ odf.OdfContainer = (function () {
                 if (self.state === OdfContainer.INVALID) {
                     return;
                 }
-                getContentXmlNode(function (err, xmldoc) {
+                getXmlNode('content.xml', function (err, xmldoc) {
                     handleContentXml(xmldoc);
                     if (self.state === OdfContainer.INVALID) {
                         return;

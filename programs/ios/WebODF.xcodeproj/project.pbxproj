@@ -41,6 +41,7 @@
 		CB533DD414DABDA600C733F6 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB533DD314DABDA600C733F6 /* MainViewController.m */; };
 		CB533DD614DABDA600C733F6 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB533DD514DABDA600C733F6 /* MainViewController.xib */; };
 		CBD2B77314FF8E9700FC3A44 /* NativeZip.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD2B77214FF8E9700FC3A44 /* NativeZip.m */; };
+		CBDCA69D1504EAEB00C706C7 /* WebViewCache.m in Sources */ = {isa = PBXBuildFile; fileRef = CBDCA69C1504EAEB00C706C7 /* WebViewCache.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +85,8 @@
 		CB533DD514DABDA600C733F6 /* MainViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainViewController.xib; path = Classes/MainViewController.xib; sourceTree = "<group>"; };
 		CBD2B77114FF8E9700FC3A44 /* NativeZip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeZip.h; path = Classes/NativeZip.h; sourceTree = "<group>"; };
 		CBD2B77214FF8E9700FC3A44 /* NativeZip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NativeZip.m; path = Classes/NativeZip.m; sourceTree = "<group>"; };
+		CBDCA69B1504EAEB00C706C7 /* WebViewCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebViewCache.h; path = Classes/WebViewCache.h; sourceTree = "<group>"; };
+		CBDCA69C1504EAEB00C706C7 /* WebViewCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WebViewCache.m; path = Classes/WebViewCache.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -227,6 +230,8 @@
 		CB533DCE14DABDA600C733F6 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				CBDCA69B1504EAEB00C706C7 /* WebViewCache.h */,
+				CBDCA69C1504EAEB00C706C7 /* WebViewCache.m */,
 				CB533DCF14DABDA600C733F6 /* AppDelegate.h */,
 				CB533DD014DABDA600C733F6 /* AppDelegate.m */,
 				CB533DD214DABDA600C733F6 /* MainViewController.h */,
@@ -336,6 +341,7 @@
 				CB29ECBD14FFBBBB00CEAEE3 /* unzip.c in Sources */,
 				CB29ECBF14FFBC0500CEAEE3 /* ioapi.c in Sources */,
 				CB29ECC114FFBC1B00CEAEE3 /* mztools.c in Sources */,
+				CBDCA69D1504EAEB00C706C7 /* WebViewCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -416,7 +422,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Jos van den Oever (GJ9RDPR233)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = /Users/Shared/PhoneGap/Frameworks;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -437,7 +443,7 @@
 					/usr/lib/libSystem.B.dylib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "8A253628-DC77-4EEA-8543-53315AA93987";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -451,7 +457,7 @@
 					armv6,
 					"$(ARCHS_STANDARD_32_BIT)",
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Jos van den Oever (GJ9RDPR233)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = /Users/Shared/PhoneGap/Frameworks;
@@ -472,7 +478,7 @@
 					/usr/lib/libSystem.B.dylib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "8A253628-DC77-4EEA-8543-53315AA93987";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
