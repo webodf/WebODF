@@ -124,6 +124,7 @@ set(HTML5UIFILES
   app/views/Viewport.js sencha-touch.css sencha-touch.js
   app/store/FileStore.js
   ZoomOut.png ZoomIn.png
+  zoom-fit-width.png zoom-fit-best.png zoom-fit-height.png
 )
 
 add_subdirectory(webodf)

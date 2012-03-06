@@ -81,11 +81,20 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         });
     }
     function tapHandler(button) {
-        var id = button.getId();
+        var id = button.getId(),
+            dom = Ext.getCmp('odfcontainer').element.dom,
+            width = dom.offsetWidth,
+            height = dom.offsetHeight;
         if (id === 'zoomin') {
             odfcanvas.setZoomLevel(odfcanvas.getZoomLevel() * 1.25);
         } else if (id === 'zoomout') {
             odfcanvas.setZoomLevel(odfcanvas.getZoomLevel() * 0.8);
+        } else if (id === 'fit-best') {
+            odfcanvas.fitToContainingElement(width, height);
+        } else if (id === 'fit-width') {
+            odfcanvas.fitToWidth(width);
+        } else if (id ===  'fit-height') {
+            odfcanvas.fitToHeight(height);
         }
     }
     return {
@@ -107,7 +116,10 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                 },
                 items: [
                     { id: 'zoomin', icon: 'ZoomIn.png'},
-                    { id: 'zoomout', icon: 'ZoomOut.png' }
+                    { id: 'zoomout', icon: 'ZoomOut.png' },
+                    { id: 'fit-best', icon: 'zoom-fit-best.png' },
+                    { id: 'fit-height', icon: 'zoom-fit-height.png' },
+                    { id: 'fit-width', icon: 'zoom-fit-width.png' }
                 ],
                 layout: {
                     pack : 'center',

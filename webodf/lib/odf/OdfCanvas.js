@@ -745,6 +745,38 @@ odf.OdfCanvas = (function () {
         this.getZoomLevel = function () {
             return zoomLevel;
         };
+        /**
+         * @param {!number} width
+         * @param {!number} height
+         * @return {undefined}
+         */
+        this.fitToContainingElement = function (width, height) {
+            var realWidth = element.offsetWidth / zoomLevel,
+                realHeight = element.offsetHeight / zoomLevel;
+            zoomLevel = width / realWidth;
+            if (height / realHeight < zoomLevel) {
+                zoomLevel = height / realHeight;
+            }
+            fixContainerSize();
+        };
+        /**
+         * @param {!number} width
+         * @return {undefined}
+         */
+        this.fitToWidth = function (width) {
+            var realWidth = element.offsetWidth / zoomLevel;
+            zoomLevel = width / realWidth;
+            fixContainerSize();
+        };
+        /**
+         * @param {!number} height
+         * @return {undefined}
+         */
+        this.fitToHeight = function (height) {
+            var realHeight = element.offsetHeight / zoomLevel;
+            zoomLevel = height / realHeight;
+            fixContainerSize();
+        };
 
         listenEvent(element, "click", processClick);
     };
