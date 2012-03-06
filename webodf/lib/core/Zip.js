@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true*/
+/*global runtime, core, DOMParser*/
 /*jslint bitwise: true*/
 /*
 * @preserve
