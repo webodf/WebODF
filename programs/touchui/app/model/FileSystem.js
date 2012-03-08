@@ -160,12 +160,12 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
                 return;
             }
             fileSystems = {};
-            this.files = files = [];
             readCachedFileList(function () {
                 addFileSystems();
             });
         };
         this.load = load;
+        this.files = files = [];
     }
     function finishOperation(proxy, operation, callback, scope) {
         if (operation) {
