@@ -101,7 +101,7 @@ odf.OdfCanvas = (function () {
             }
             sheet.insertRule('office|presentation draw|page {display:none;}', 0);
             sheet.insertRule("office|presentation draw|page:nth-child(" +
-                position + "n) {display:block;}", 1);
+                position + ") {display:block;}", 1);
         }
         /**
          * @return {undefined}
