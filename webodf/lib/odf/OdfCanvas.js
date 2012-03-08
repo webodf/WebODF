@@ -89,6 +89,39 @@ odf.OdfCanvas = (function () {
         };
     }
     /**
+     * @constructor
+     * @param css
+     */
+    function PageSwitcher(css) {
+        var sheet = css.sheet,
+            position = 1;
+        function updateCSS() {
+            while (sheet.cssRules.length > 0) {
+                sheet.deleteRule(0);
+            }
+            sheet.insertRule('office|presentation draw|page {display:none;}', 0);
+            sheet.insertRule("office|presentation draw|page:nth-child(" +
+                position + "n) {display:block;}", 1);
+        }
+        /**
+         * @return {undefined}
+         */
+        this.showNextPage = function () {
+            position += 1;
+            updateCSS();
+        };
+        /**
+         * @return {undefined}
+         */
+        this.showPreviousPage = function () {
+            if (position > 1) {
+                position -= 1;
+                updateCSS();
+            }
+        };
+        this.css = css;
+    }
+    /**
      * Register event listener on DOM element.
      * @param {!Element} eventTarget
      * @param {!string} eventType
@@ -513,7 +546,7 @@ odf.OdfCanvas = (function () {
             /**@type{!odf.Formatting}*/ formatting = new odf.Formatting(),
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
-            slidevisibilitycss = addStyleSheet(document),
+            pageSwitcher = new PageSwitcher(addStyleSheet(document)),
             stylesxmlcss = addStyleSheet(document),
             positioncss = addStyleSheet(document),
             editable = false,
@@ -541,18 +574,17 @@ odf.OdfCanvas = (function () {
         function handleContent(container, odfnode) {
             var css = positioncss.sheet, sizer;
             modifyImages(container, odfnode.body, css);
+/*
             slidecssindex = css.insertRule(
                 'office|presentation draw|page:nth-child(1n) {display:block;}',
                 css.cssRules.length
             );
-
+*/
             // FIXME: this is a hack to have a defined background now
             // should be removed as soon as we have sane background
             // handling for pages
-            slidecssindex = css.insertRule(
-                'draw|page { background-color:#fff; }',
-                css.cssRules.length
-            );
+            css.insertRule('draw|page { background-color:#fff; }',
+                css.cssRules.length);
 
             // only append the content at the end
             clear(element);
@@ -598,11 +630,9 @@ odf.OdfCanvas = (function () {
         this.odfContainer = function () {
             return odfcontainer;
         };
-
         this.slidevisibilitycss = function () {
-            return slidevisibilitycss;
+            return pageSwitcher.css;
         };
-
         /**
          * @param {!string} url
          * @return {undefined}
@@ -776,6 +806,23 @@ odf.OdfCanvas = (function () {
             var realHeight = element.offsetHeight / zoomLevel;
             zoomLevel = height / realHeight;
             fixContainerSize();
+        };
+        /**
+         * @return {undefined}
+         */
+        this.showNextPage = function () {
+            pageSwitcher.showNextPage();
+        };
+        /**
+         * @return {undefined}
+         */
+        this.showPreviousPage = function () {
+            pageSwitcher.showPreviousPage();
+        };
+        /**
+         * @return {undefined}
+         */
+        this.showAllPages = function () {
         };
 
         listenEvent(element, "click", processClick);

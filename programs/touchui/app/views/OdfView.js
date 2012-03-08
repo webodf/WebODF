@@ -1,5 +1,6 @@
-/*global Ext, runtime, core, odf, window, FileReader, PhoneGap*/
+/*global Ext, runtime, core, odf, window, FileReader, PhoneGap, gui*/
 runtime.loadClass('odf.OdfCanvas');
+
 Ext.define('WebODFApp.view.OdfView', (function () {
     "use strict";
     var currentPath,
@@ -93,8 +94,12 @@ Ext.define('WebODFApp.view.OdfView', (function () {
             odfcanvas.fitToContainingElement(width, height);
         } else if (id === 'fit-width') {
             odfcanvas.fitToWidth(width);
-        } else if (id ===  'fit-height') {
+        } else if (id === 'fit-height') {
             odfcanvas.fitToHeight(height);
+        } else if (id === 'next') {
+            odfcanvas.showNextPage();
+        } else if (id === 'previous') {
+            odfcanvas.showPreviousPage();
         }
     }
     return {
@@ -115,6 +120,8 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                     handler: tapHandler
                 },
                 items: [
+                    { id: 'previous', icon: 'go-previous.png'},
+                    { id: 'next', icon: 'go-next.png' },
                     { id: 'zoomin', icon: 'ZoomIn.png'},
                     { id: 'zoomout', icon: 'ZoomOut.png' },
                     { id: 'fit-best', icon: 'zoom-fit-best.png' },

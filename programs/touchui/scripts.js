@@ -121,3 +121,10 @@ window.requestFileSystem = function (filesystem, id, onsuccess, onerror) {
     }
 };
 var device = {};
+/*
+ * override launch function to quickly open a file for testing
+onApplicationLaunch = function (app) {
+    "use strict";
+    app.openUrl("plugfest-gouda.odp");
+};
+*/

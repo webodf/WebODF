@@ -123,7 +123,7 @@ set(HTML5UIFILES
   app/views/FileDetail.js app/views/FilesList.js app/views/OdfView.js
   app/views/Viewport.js sencha-touch.css sencha-touch.js
   app/store/FileStore.js
-  ZoomOut.png ZoomIn.png
+  ZoomOut.png ZoomIn.png go-previous.png go-next.png
   zoom-fit-width.png zoom-fit-best.png zoom-fit-height.png
 )
 
