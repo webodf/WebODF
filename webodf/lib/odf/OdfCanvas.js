@@ -101,7 +101,11 @@ odf.OdfCanvas = (function () {
             }
             sheet.insertRule('office|presentation draw|page {display:none;}', 0);
             sheet.insertRule("office|presentation draw|page:nth-child(" +
+<<<<<<< HEAD
                 position + ") {display:block;}", 1);
+=======
+                position + "n) {display:block;}", 1);
+>>>>>>> 3ff38d9... Add buttons and functions to switch between slides.
         }
         /**
          * @return {undefined}
