@@ -507,6 +507,134 @@ odf.OdfCanvas = (function () {
             loadImage('image' + String(i), container, node, stylesheet);
         }
     }
+<<<<<<< HEAD
+=======
+	/**
+     * @param {!string} id
+     * @param {!Object} container
+     * @param {!Element} plugin
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     **/
+    function setVideo(id, container, plugin, stylesheet) {
+	var video, source, url, videoType, doc = plugin.ownerDocument, part, node;
+	
+	
+	//
+	// TODO: verify that we have a valid video
+	// TODO: insert error message in place if we do not
+	//
+	// Determine whether the plugin is a supported video type
+	// From file extension - future improvement would be to compare
+	// against manifest for mime-type
+	
+	url = plugin.getAttributeNS(xlinkns, 'href');
+	
+	
+        function callback(url) {	    
+	    video = doc.createElement('video');
+	    video.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+	    video.setAttribute('width', '100%');
+	    video.setAttribute('height', '100%');
+	    video.setAttribute('controls', 'controls');
+	    
+	    source = doc.createElement('source');
+	    source.setAttribute('src', url);		
+	    source.setAttribute('type', videoType);
+	    
+	    video.appendChild(source);
+	    plugin.parentNode.appendChild(video);
+	    
+        }
+        // look for a office:binary-data
+        if (url) {
+            try {
+                if (container.getPartUrl) {
+                    url = container.getPartUrl(url);
+                    callback(url);
+                } else {
+                    part = container.getPart(url);
+                    part.onchange = function (part) {
+                        callback(part.url);
+                    };
+                    part.load();
+                }
+            } catch (e) {
+                runtime.log('slight problem: ' + e);
+            }
+        } else {
+	    // this will fail  atm - following function assumes PNG data
+            url = getUrlFromBinaryDataElement(image);
+            callback(url);
+        }
+	
+	
+	
+	
+	
+	/*
+	videoType = videoHref.substring( videoHref.lastIndexOf('.'));
+	
+	switch(videoType) {
+	  case 'mp4':
+	  case 'm4v':
+	    videoType='video/mp4';
+	    break;
+	    
+	  default:
+	    // Unrecognised file type
+	    // we could create a placeholder "unrecognised plugin" element 
+	    video = doc.createElement('div');
+	    video.setAttribute('class', 'pluginerror');
+	    video.innerHTML('Unrecognised Plugin');
+	    plugin.parentNode.appendChild(video);
+	    return;
+	}
+	
+	video = doc.createElement('video');
+	video.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+	video.setAttribute('width', '100%');
+	video.setAttribute('height', '100%');
+	video.setAttribute('controls', 'controls');
+	
+	source = doc.createElement('source');
+	source.setAttribute('src', videoHref);		
+	source.setAttribute('type', videoType);
+	
+	video.appendChild(source);
+        plugin.parentNode.appendChild(video);
+*/
+    }
+    /**
+     * Load all the video that are inside an odf element.
+     * @param {!Object} container
+     * @param {!Element} odffragment
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function loadVideos(container, odffragment, stylesheet) {
+        var i,
+            plugins,
+            node;
+		// do delayed loading for all the videos
+        function loadVideo(name, container, node, stylesheet) {
+            // load image with a small delay to give the html ui a chance to
+            // update
+            loadingQueue.addToQueue(function () {
+                setVideo(name, container, node, stylesheet);
+            });
+        }	
+        // embedded video is stored in a draw:plugin element
+        plugins = odffragment.getElementsByTagNameNS(drawns, 'plugin');
+		runtime.log('Loading Videos:');
+        for (i = 0; i < plugins.length; i += 1) {
+			runtime.log('...Found a video.');
+            node = /**@type{!Element}*/(plugins.item(i));
+            loadVideo('video' + String(i), container, node, stylesheet);
+	    //setVideo('video' + String(i), container, node, stylesheet);
+        }
+    }
+>>>>>>> 9132a86... Added support for video DataURIs
     /**
      * @param {Document} document Put and ODF Canvas inside this element.
      */
@@ -594,6 +722,10 @@ odf.OdfCanvas = (function () {
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
             loadImages(container, odfnode.body, css);
+<<<<<<< HEAD
+=======
+	    loadVideos(container, odfnode.body, css);
+>>>>>>> 9132a86... Added support for video DataURIs
             fixContainerSize();
         }
         /**
