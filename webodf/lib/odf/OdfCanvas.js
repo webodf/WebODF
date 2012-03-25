@@ -531,7 +531,8 @@ odf.OdfCanvas = (function () {
 	url = plugin.getAttributeNS(xlinkns, 'href');
 	
 	
-        function callback(url) {	    
+        function callback(url) {	   
+	    runtime.log('writing video to document:' + url); 
 	    video = doc.createElement('video');
 	    video.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
 	    video.setAttribute('width', '100%');
@@ -540,7 +541,7 @@ odf.OdfCanvas = (function () {
 	    
 	    source = doc.createElement('source');
 	    source.setAttribute('src', url);		
-	    source.setAttribute('type', videoType);
+	    source.setAttribute('type', 'video/mp4');
 	    
 	    video.appendChild(source);
 	    plugin.parentNode.appendChild(video);
@@ -550,9 +551,11 @@ odf.OdfCanvas = (function () {
         if (url) {
             try {
                 if (container.getPartUrl) {
+		    runtime.log('using getPartUrl');
                     url = container.getPartUrl(url);
                     callback(url);
                 } else {
+		    runtime.log('using getPart');
                     part = container.getPart(url);
                     part.onchange = function (part) {
                         callback(part.url);
@@ -563,7 +566,8 @@ odf.OdfCanvas = (function () {
                 runtime.log('slight problem: ' + e);
             }
         } else {
-	    // this will fail  atm - following function assumes PNG data
+	    // this will fail  atm - following function assumes PNG data]
+	    runtime.log('using PNG data fallback');
             url = getUrlFromBinaryDataElement(image);
             callback(url);
         }
