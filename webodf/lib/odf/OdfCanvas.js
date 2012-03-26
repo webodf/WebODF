@@ -519,28 +519,17 @@ odf.OdfCanvas = (function () {
     function setVideo(id, container, plugin, stylesheet) {
 	var video, source, url, videoType, doc = plugin.ownerDocument, part, node;
 	
-	
-	//
-	// TODO: verify that we have a valid video
-	// TODO: insert error message in place if we do not
-	//
-	// Determine whether the plugin is a supported video type
-	// From file extension - future improvement would be to compare
-	// against manifest for mime-type
-	
 	url = plugin.getAttributeNS(xlinkns, 'href');
-	
-	
+		
         function callback(url) {	   
 	    runtime.log('writing video to document:' + url); 
-	    video = doc.createElement('video');
-	    video.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-	    video.setAttribute('width', '100%');
-	    video.setAttribute('height', '100%');
+	    video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
 	    video.setAttribute('controls', 'controls');
 	    
 	    source = doc.createElement('source');
 	    source.setAttribute('src', url);		
+	    
+	    
 	    source.setAttribute('type', 'video/mp4');
 	    
 	    video.appendChild(source);
@@ -571,43 +560,6 @@ odf.OdfCanvas = (function () {
             url = getUrlFromBinaryDataElement(image);
             callback(url);
         }
-	
-	
-	
-	
-	
-	/*
-	videoType = videoHref.substring( videoHref.lastIndexOf('.'));
-	
-	switch(videoType) {
-	  case 'mp4':
-	  case 'm4v':
-	    videoType='video/mp4';
-	    break;
-	    
-	  default:
-	    // Unrecognised file type
-	    // we could create a placeholder "unrecognised plugin" element 
-	    video = doc.createElement('div');
-	    video.setAttribute('class', 'pluginerror');
-	    video.innerHTML('Unrecognised Plugin');
-	    plugin.parentNode.appendChild(video);
-	    return;
-	}
-	
-	video = doc.createElement('video');
-	video.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-	video.setAttribute('width', '100%');
-	video.setAttribute('height', '100%');
-	video.setAttribute('controls', 'controls');
-	
-	source = doc.createElement('source');
-	source.setAttribute('src', videoHref);		
-	source.setAttribute('type', videoType);
-	
-	video.appendChild(source);
-        plugin.parentNode.appendChild(video);
-*/
     }
     /**
      * Load all the video that are inside an odf element.
@@ -622,7 +574,7 @@ odf.OdfCanvas = (function () {
             node;
 		// do delayed loading for all the videos
         function loadVideo(name, container, node, stylesheet) {
-            // load image with a small delay to give the html ui a chance to
+            // load video with a small delay to give the html ui a chance to
             // update
             loadingQueue.addToQueue(function () {
                 setVideo(name, container, node, stylesheet);
@@ -635,7 +587,6 @@ odf.OdfCanvas = (function () {
 			runtime.log('...Found a video.');
             node = /**@type{!Element}*/(plugins.item(i));
             loadVideo('video' + String(i), container, node, stylesheet);
-	    //setVideo('video' + String(i), container, node, stylesheet);
         }
     }
 >>>>>>> 9132a86... Added support for video DataURIs
