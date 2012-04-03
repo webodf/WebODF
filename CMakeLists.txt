@@ -42,7 +42,7 @@ endif(Java_JAVA_EXECUTABLE)
 if(Java_JAVA_EXECUTABLE)
     ExternalProject_Add(
         Rhino
-        URL "ftp://ftp.mozilla.org/pub/mozilla.org/js/rhino1_7R3.zip"
+        URL "http://ftp.mozilla.org/pub/js/rhino1_7R3.zip"
         URL_MD5 99d94103662a8d0b571e247a77432ac5
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
