@@ -40,13 +40,13 @@
  * @class
  * @interface
  */
-xmldom.OperationalTransformInterface = function () {"use strict";};
+xmldom.OperationalTransformInterface = function () {"use strict"; };
 /**
  * Skip in the document
  * @param {!number} amount
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.retain = function (amount) {"use strict";};
+xmldom.OperationalTransformInterface.prototype.retain = function (amount) {"use strict"; };
 /**
  * Insert characters
  * Can throw an exception if the current position does not allow insertion of
@@ -54,45 +54,44 @@ xmldom.OperationalTransformInterface.prototype.retain = function (amount) {"use 
  * @param {!string} chars
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.insertCharacters = function (chars) {"use strict";};
+xmldom.OperationalTransformInterface.prototype.insertCharacters = function (chars) {"use strict"; };
 /**
  * Insert element start
  * @param {!string} tagname
  * @param {!Object} attributes
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.insertElementStart = function (tagname,
-        attributes) {"use strict";};
+xmldom.OperationalTransformInterface.prototype.insertElementStart = function (tagname, attributes) {"use strict"; };
 /**
  * Insert element end
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.insertElementEnd = function () {"use strict";};
+xmldom.OperationalTransformInterface.prototype.insertElementEnd = function () {"use strict"; };
 /**
  * Delete characters
  * @param {!number} amount
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.deleteCharacters = function (amount) {"use strict";};
+xmldom.OperationalTransformInterface.prototype.deleteCharacters = function (amount) {"use strict"; };
 /**
  * Delete element start
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.deleteElementStart = function () {"use strict";};
+xmldom.OperationalTransformInterface.prototype.deleteElementStart = function () {"use strict"; };
 /**
  * Delete element end
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.deleteElementEnd = function () {"use strict";};
+xmldom.OperationalTransformInterface.prototype.deleteElementEnd = function () {"use strict"; };
 /**
  * Replace attributes
  * @param {!Object} atts
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.replaceAttributes = function (atts) {"use strict";};
+xmldom.OperationalTransformInterface.prototype.replaceAttributes = function (atts) {"use strict"; };
 /**
  * Update attributes
  * @param {!Object} atts
  * @return {undefined}
  */
-xmldom.OperationalTransformInterface.prototype.updateAttributes = function (atts) {"use strict";};
+xmldom.OperationalTransformInterface.prototype.updateAttributes = function (atts) {"use strict"; };
