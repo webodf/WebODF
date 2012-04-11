@@ -331,7 +331,7 @@ odf.OdfCanvas = (function () {
      * @return {undefined}
      **/
     function handleStyles(odfelement, stylesxmlcss) {
-        // update the css translation of the styles    
+        // update the css translation of the styles
         var style2css = new odf.Style2CSS();
         style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
                     odfelement.automaticStyles);
@@ -516,8 +516,12 @@ odf.OdfCanvas = (function () {
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	/**
+=======
+    /**
+>>>>>>> f364e8d... Fix whitespace.
      * @param {!string} id
      * @param {!Object} container
      * @param {!Element} plugin
@@ -525,34 +529,32 @@ odf.OdfCanvas = (function () {
      * @return {undefined}
      **/
     function setVideo(id, container, plugin, stylesheet) {
-	var video, source, url, videoType, doc = plugin.ownerDocument, part, node;
-	
-	url = plugin.getAttributeNS(xlinkns, 'href');
-		
-        function callback(url) {	   
-	    runtime.log('writing video to document:' + url); 
-	    video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
-	    video.setAttribute('controls', 'controls');
-	    
-	    source = doc.createElement('source');
-	    source.setAttribute('src', url);		
-	    
-	    
-	    source.setAttribute('type', 'video/mp4');
-	    
-	    video.appendChild(source);
-	    plugin.parentNode.appendChild(video);
-	    
+    var video, source, url, videoType, doc = plugin.ownerDocument, part, node;
+
+    url = plugin.getAttributeNS(xlinkns, 'href');
+
+        function callback(url) {
+            runtime.log('writing video to document:' + url);
+            video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
+            video.setAttribute('controls', 'controls');
+
+            source = doc.createElement('source');
+            source.setAttribute('src', url);
+
+            source.setAttribute('type', 'video/mp4');
+
+            video.appendChild(source);
+            plugin.parentNode.appendChild(video);
         }
         // look for a office:binary-data
         if (url) {
             try {
                 if (container.getPartUrl) {
-		    runtime.log('using getPartUrl');
+            runtime.log('using getPartUrl');
                     url = container.getPartUrl(url);
                     callback(url);
                 } else {
-		    runtime.log('using getPart');
+            runtime.log('using getPart');
                     part = container.getPart(url);
                     part.onchange = function (part) {
                         callback(part.url);
@@ -563,8 +565,8 @@ odf.OdfCanvas = (function () {
                 runtime.log('slight problem: ' + e);
             }
         } else {
-	    // this will fail  atm - following function assumes PNG data]
-	    runtime.log('using PNG data fallback');
+        // this will fail  atm - following function assumes PNG data]
+        runtime.log('using PNG data fallback');
             url = getUrlFromBinaryDataElement(plugin);
             callback(url);
         }
@@ -580,19 +582,19 @@ odf.OdfCanvas = (function () {
         var i,
             plugins,
             node;
-		// do delayed loading for all the videos
+        // do delayed loading for all the videos
         function loadVideo(name, container, node, stylesheet) {
             // load video with a small delay to give the html ui a chance to
             // update
             loadingQueue.addToQueue(function () {
                 setVideo(name, container, node, stylesheet);
             });
-        }	
+        }
         // embedded video is stored in a draw:plugin element
         plugins = odffragment.getElementsByTagNameNS(drawns, 'plugin');
-		runtime.log('Loading Videos:');
+        runtime.log('Loading Videos:');
         for (i = 0; i < plugins.length; i += 1) {
-			runtime.log('...Found a video.');
+            runtime.log('...Found a video.');
             node = /**@type{!Element}*/(plugins.item(i));
             loadVideo('video' + String(i), container, node, stylesheet);
         }
@@ -686,9 +688,13 @@ odf.OdfCanvas = (function () {
             element.appendChild(sizer);
             loadImages(container, odfnode.body, css);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	    loadVideos(container, odfnode.body, css);
 >>>>>>> 9132a86... Added support for video DataURIs
+=======
+        loadVideos(container, odfnode.body, css);
+>>>>>>> f364e8d... Fix whitespace.
             fixContainerSize();
         }
         /**
