@@ -555,7 +555,7 @@ odf.OdfCanvas = (function () {
             try {
                 if (container.getPartUrl) {
                     url = container.getPartUrl(url);
-                    callback(url);
+                    callback(url, 'video/mp4');
                 } else {
                     part = container.getPart(url);
                     part.onchange = function (part) {
@@ -568,9 +568,9 @@ odf.OdfCanvas = (function () {
             }
         } else {
         // this will fail  atm - following function assumes PNG data]
-            runtime.log('using PNG data fallback');
+            runtime.log('using MP4 data fallback');
                 url = getUrlFromBinaryDataElement(plugin);
-                callback(url);
+                callback(url, 'video/mp4');
         }
     }
     /**
