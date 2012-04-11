@@ -565,7 +565,7 @@ odf.OdfCanvas = (function () {
         } else {
 	    // this will fail  atm - following function assumes PNG data]
 	    runtime.log('using PNG data fallback');
-            url = getUrlFromBinaryDataElement(image);
+            url = getUrlFromBinaryDataElement(plugin);
             callback(url);
         }
     }
