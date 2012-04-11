@@ -529,9 +529,9 @@ odf.OdfCanvas = (function () {
      * @return {undefined}
      **/
     function setVideo(id, container, plugin, stylesheet) {
-    var video, source, url, videoType, doc = plugin.ownerDocument, part, node;
+        var video, source, url, videoType, doc = plugin.ownerDocument, part, node;
 
-    url = plugin.getAttributeNS(xlinkns, 'href');
+        url = plugin.getAttributeNS(xlinkns, 'href');
 
         function callback(url) {
             runtime.log('writing video to document:' + url);
@@ -550,15 +550,15 @@ odf.OdfCanvas = (function () {
         if (url) {
             try {
                 if (container.getPartUrl) {
-            runtime.log('using getPartUrl');
-                    url = container.getPartUrl(url);
-                    callback(url);
+                    runtime.log('using getPartUrl');
+                            url = container.getPartUrl(url);
+                            callback(url);
                 } else {
-            runtime.log('using getPart');
-                    part = container.getPart(url);
-                    part.onchange = function (part) {
-                        callback(part.url);
-                    };
+                    runtime.log('using getPart');
+                            part = container.getPart(url);
+                            part.onchange = function (part) {
+                                callback(part.url);
+                            };
                     part.load();
                 }
             } catch (e) {
@@ -566,9 +566,9 @@ odf.OdfCanvas = (function () {
             }
         } else {
         // this will fail  atm - following function assumes PNG data]
-        runtime.log('using PNG data fallback');
-            url = getUrlFromBinaryDataElement(plugin);
-            callback(url);
+            runtime.log('using PNG data fallback');
+                url = getUrlFromBinaryDataElement(plugin);
+                callback(url);
         }
     }
     /**
@@ -593,6 +593,7 @@ odf.OdfCanvas = (function () {
         // embedded video is stored in a draw:plugin element
         plugins = odffragment.getElementsByTagNameNS(drawns, 'plugin');
         runtime.log('Loading Videos:');
+        
         for (i = 0; i < plugins.length; i += 1) {
             runtime.log('...Found a video.');
             node = /**@type{!Element}*/(plugins.item(i));
@@ -689,12 +690,16 @@ odf.OdfCanvas = (function () {
             loadImages(container, odfnode.body, css);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	    loadVideos(container, odfnode.body, css);
 >>>>>>> 9132a86... Added support for video DataURIs
 =======
         loadVideos(container, odfnode.body, css);
 >>>>>>> f364e8d... Fix whitespace.
+=======
+            loadVideos(container, odfnode.body, css);
+>>>>>>> 1fceb4c... Whitespace/indent fix.
             fixContainerSize();
         }
         /**
