@@ -181,6 +181,7 @@ odf.OdfContainer = (function () {
         this.name = name;
         this.container = container;
         this.url = null;
+        this.mimetype = null;
         this.document = null;
         this.onreadystatechange = null;
         this.onchange = null;
@@ -193,6 +194,7 @@ odf.OdfContainer = (function () {
         // public functions
         this.load = function () {
             var mimetype = partMimetypes[name];
+            this.mimetype = mimetype;
             zip.loadAsDataURL(name, mimetype, function (err, url) {
                 self.url = url;
                 if (self.onchange) {

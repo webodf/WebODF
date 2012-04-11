@@ -533,32 +533,34 @@ odf.OdfCanvas = (function () {
 
         url = plugin.getAttributeNS(xlinkns, 'href');
 
-        function callback(url) {
-            runtime.log('writing video to document:' + url);
-            video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
-            video.setAttribute('controls', 'controls');
+        function callback(url, mimetype) {
+            // test for video mimetypes
+            if (mimetype.substr(0,6)==='video/') {
+                video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
+                video.setAttribute('controls', 'controls');
 
-            source = doc.createElement('source');
-            source.setAttribute('src', url);
+                source = doc.createElement('source');
+                source.setAttribute('src', url);
+                source.setAttribute('type', mimetype);
 
-            source.setAttribute('type', 'video/mp4');
-
-            video.appendChild(source);
-            plugin.parentNode.appendChild(video);
+                video.appendChild(source);
+                plugin.parentNode.appendChild(video);
+            }
+            else {
+                plugin.innerHtml = 'Unrecognised Plugin';
+            }
         }
         // look for a office:binary-data
         if (url) {
             try {
                 if (container.getPartUrl) {
-                    runtime.log('using getPartUrl');
-                            url = container.getPartUrl(url);
-                            callback(url);
+                    url = container.getPartUrl(url);
+                    callback(url);
                 } else {
-                    runtime.log('using getPart');
-                            part = container.getPart(url);
-                            part.onchange = function (part) {
-                                callback(part.url);
-                            };
+                    part = container.getPart(url);
+                    part.onchange = function (part) {
+                        callback(part.url, part.mimetype);
+                    };
                     part.load();
                 }
             } catch (e) {
