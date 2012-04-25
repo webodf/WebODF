@@ -400,6 +400,11 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         }
     }
 
+    /**
+     * @param {!Document} dom
+     * @param {!Function} callback
+     * @return {?Array}
+     */
     function main(dom, callback) {
         var elements = [],
             grammar = parse(dom && dom.documentElement, elements, undefined),
@@ -440,7 +445,8 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     }
     /**
      * @param {!Document} dom
-     * @return {?string}
+     * @param {!Function} callback
+     * @return {?Array}
      */
     this.parseRelaxNGDOM = main;
 };
