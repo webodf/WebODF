@@ -459,12 +459,15 @@ xmldom.RelaxNG = function RelaxNG() {
         };
     }
     applyAfter = function applyAfter(f, p) {
+        var result;
         if (p.type === "after") {
-            return createAfter(p.p1, f(p.p2));
+            result = createAfter(p.p1, f(p.p2));
         } else if (p.type === "choice") {
-            return createChoice(applyAfter(f, p.p1), applyAfter(f, p.p2));
+            result = createChoice(applyAfter(f, p.p1), applyAfter(f, p.p2));
+        } else {
+            result = p;
         }
-        return p;
+        return result;
     };
     function attsDeriv(context, pattern, attributes, position) {
         if (pattern === notAllowed) {
@@ -550,11 +553,11 @@ xmldom.RelaxNG = function RelaxNG() {
         }
     }
     createNameClass = function createNameClass(pattern) {
-        var name, ns, hash, i;
+        var name, ns, hash, i, result;
         if (pattern.name === "name") {
             name = pattern.text;
             ns = pattern.a.ns;
-            return {
+            result = {
                 name: name,
                 ns: ns,
                 hash: "{" + ns + "}" + name,
@@ -570,7 +573,7 @@ xmldom.RelaxNG = function RelaxNG() {
             for (i = 0; i < name.length; i += 1) {
                  hash += "{" + ns[i] + "}" + name[i] + ",";
             }
-            return {
+            result = {
                 hash: hash,
                 contains: function (node) {
                     var i;
@@ -583,11 +586,13 @@ xmldom.RelaxNG = function RelaxNG() {
                     return false;
                 }
             };
+        } else {
+            result = {
+                hash: "anyName",
+                contains: function () { return true; }
+            };
         }
-        return {
-            hash: "anyName",
-            contains: function () { return true; }
-        };
+        return result;
     };
     function resolveElement(pattern, elements) {
         var element, p, i, hash;

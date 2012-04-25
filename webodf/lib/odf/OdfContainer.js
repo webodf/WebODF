@@ -106,17 +106,20 @@ odf.OdfContainer = (function () {
          * @return {!number}
          */
         this.acceptNode = function (node) {
-            var styleName, styleFamily;
+            var styleName, styleFamily, result;
             if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
-                return 3; // FILTER_SKIP
+                result = 3; // FILTER_SKIP
             } else if (usedKeysList && node.parentNode === automaticStyles &&
                     node.nodeType === 1) {
                 if (usedKeysList.uses(node)) {
-                    return 1; // FILTER_ACCEPT
+                    result = 1; // FILTER_ACCEPT
+                } else {
+                    result = 2; // FILTER_REJECT
                 }
-                return 2; // FILTER_REJECT
+            } else {
+                result = 1; // FILTER_ACCEPT
             }
-            return 1; // FILTER_ACCEPT
+            return result;
         };
     }
     /**

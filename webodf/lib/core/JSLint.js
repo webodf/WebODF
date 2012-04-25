@@ -1,5 +1,5 @@
 // jslint.js
-// 2012-01-26
+// 2012-04-15
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -183,6 +183,7 @@
 //     undef      true, if variables can be declared out of order
 //     unparam    true, if unused parameters should be tolerated
 //     sloppy     true, if the 'use strict'; pragma is optional
+//     stupid     true, if really stupid practices are tolerated
 //     sub        true, if all forms of subscript notation are tolerated
 //     vars       true, if multiple var statements per function should be allowed
 //     white      true, if sloppy whitespace is tolerated
@@ -202,117 +203,101 @@
 // For example:
 
 /*properties
-    '\b', '\t', '\n', '\f', '\r', '!=', '!==', '"', '%', '\'', '(begin)',
-    '(breakage)', '(context)', '(error)', '(identifier)', '(line)',
-    '(loopage)', '(name)', '(params)', '(scope)', '(token)', '(vars)',
-    '(verb)', '*', '+', '-', '/', '<', '<=', '==', '===', '>',
-    '>=', ADSAFE, Array, Date, E, Function, LN10, LN2, LOG10E, LOG2E,
-    MAX_VALUE, MIN_VALUE, NEGATIVE_INFINITY, Object, PI, POSITIVE_INFINITY,
-    SQRT1_2, SQRT2, '\\', a, a_label, a_not_allowed, a_not_defined, a_scope,
-    abbr, acronym, address, adsafe, adsafe_a, adsafe_autocomplete,
-    adsafe_bad_id, adsafe_div, adsafe_fragment, adsafe_go, adsafe_html,
-    adsafe_id, adsafe_id_go, adsafe_lib, adsafe_lib_second, adsafe_missing_id,
-    adsafe_name_a, adsafe_placement, adsafe_prefix_a, adsafe_script,
-    adsafe_source, adsafe_subscript_a, adsafe_tag, all, already_defined, and,
-    anon, applet, apply, approved, area, arity, article, aside, assign,
-    assign_exception, assignment_function_expression, at, attribute_case_a,
-    audio, autocomplete, avoid_a, b, background, 'background-attachment',
-    'background-color', 'background-image', 'background-position',
-    'background-repeat', bad_assignment, bad_color_a, bad_constructor,
-    bad_entity, bad_html, bad_id_a, bad_in_a, bad_invocation, bad_name_a,
-    bad_new, bad_number, bad_operand, bad_style, bad_type, bad_url_a, bad_wrap,
-    base, bdo, big, bind, bitwise, block, blockquote, body, border,
-    'border-bottom', 'border-bottom-color', 'border-bottom-left-radius',
-    'border-bottom-right-radius', 'border-bottom-style', 'border-bottom-width',
-    'border-collapse', 'border-color', 'border-left', 'border-left-color',
-    'border-left-style', 'border-left-width', 'border-radius', 'border-right',
-    'border-right-color', 'border-right-style', 'border-right-width',
-    'border-spacing', 'border-style', 'border-top', 'border-top-color',
-    'border-top-left-radius', 'border-top-right-radius', 'border-top-style',
-    'border-top-width', 'border-width', bottom, br, braille, browser, button,
-    c, call, canvas, cap, caption, 'caption-side', ceil, center, charAt,
-    charCodeAt, character, cite, clear, clip, closure, cm, code, col, colgroup,
-    color, combine_var, command, concat, conditional_assignment, confusing_a,
-    confusing_regexp, constructor, constructor_name_a, content, continue,
-    control_a, 'counter-increment', 'counter-reset', create, css, cursor, d,
-    dangerous_comment, dangling_a, data, datalist, dd, debug, defineProperties,
-    defineProperty, del, deleted, details, devel, dfn, dialog, dir, direction,
-    display, disrupt, div, dl, dt, duplicate_a, edge, edition, else, em, embed,
-    embossed, empty, 'empty-cells', empty_block, empty_case, empty_class,
-    entityify, eqeq, errors, es5, eval, every, evidence, evil, ex, exception,
-    exec, expected_a, expected_a_at_b_c, expected_a_b, expected_a_b_from_c_d,
-    expected_at_a, expected_attribute_a, expected_attribute_value_a,
-    expected_class_a, expected_fraction_a, expected_id_a,
-    expected_identifier_a, expected_identifier_a_reserved, expected_lang_a,
-    expected_linear_a, expected_media_a, expected_name_a,
-    expected_nonstandard_style_attribute, expected_number_a,
-    expected_operator_a, expected_percent_a, expected_positive_a,
-    expected_pseudo_a, expected_selector_a, expected_small_a,
-    expected_space_a_b, expected_string_a, expected_style_attribute,
-    expected_style_pattern, expected_tagname_a, expected_type_a, f, fieldset,
-    figure, filter, first, flag, float, floor, font, 'font-family',
-    'font-size', 'font-size-adjust', 'font-stretch', 'font-style',
-    'font-variant', 'font-weight', footer, for, forEach, for_if, forin, form,
-    fragment, frame, frameset, freeze, from, fromCharCode, fud, funct,
-    function, function_block, function_eval, function_loop, function_statement,
-    function_strict, functions, getDate, getDay, getFullYear, getHours,
-    getMilliseconds, getMinutes, getMonth, getOwnPropertyDescriptor,
-    getOwnPropertyNames, getPrototypeOf, getSeconds, getTime,
-    getTimezoneOffset, getUTCDate, getUTCDay, getUTCFullYear, getUTCHours,
-    getUTCMilliseconds, getUTCMinutes, getUTCMonth, getUTCSeconds, getYear,
-    global, globals, h1, h2, h3, h4, h5, h6, handheld, hasOwnProperty, head,
-    header, height, hgroup, hr, 'hta:application', html, html_confusion_a,
-    html_handlers, i, id, identifier, identifier_function, iframe, img, immed,
-    implied_evil, in, indent, indexOf, infix_in, init, input, ins, insecure_a,
-    isAlpha, isArray, isDigit, isExtensible, isFrozen, isNaN, isPrototypeOf,
-    isSealed, join, jslint, json, kbd, keygen, keys, label, label_a_b, labeled,
-    lang, lastIndex, lastIndexOf, lbp, leading_decimal_a, led, left, legend,
-    length, 'letter-spacing', li, lib, line, 'line-height', link, 'list-style',
-    'list-style-image', 'list-style-position', 'list-style-type', map, margin,
-    'margin-bottom', 'margin-left', 'margin-right', 'margin-top', mark,
-    'marker-offset', match, 'max-height', 'max-width', maxerr, maxlen, member,
-    menu, message, meta, meter, 'min-height', 'min-width', missing_a,
-    missing_a_after_b, missing_option, missing_property, missing_space_a_b,
-    missing_url, missing_use_strict, mixed, mm, mode, move_invocation,
-    move_var, n, name, name_function, nav, nested_comment, newcap, node,
-    noframes, nomen, noscript, not, not_a_constructor, not_a_defined,
-    not_a_function, not_a_label, not_a_scope, not_greater, now, nud, number,
-    object, ol, on, opacity, open, optgroup, option, outer, outline,
-    'outline-color', 'outline-style', 'outline-width', output, overflow,
-    'overflow-x', 'overflow-y', p, padding, 'padding-bottom', 'padding-left',
-    'padding-right', 'padding-top', 'page-break-after', 'page-break-before',
-    param, parameter_a_get_b, parameter_set_a, params, paren, parent, parse,
-    passfail, pc, plusplus, pop, position, postscript, pre, predef,
-    preventExtensions, print, progress, projection, properties,
-    propertyIsEnumerable, prototype, pt, push, px, q, quote, quotes, r, radix,
-    range, raw, read_only, reason, redefinition_a, reduce, reduceRight, regexp,
-    replace, report, reserved, reserved_a, reverse, rhino, right, rp, rt, ruby,
-    safe, samp, scanned_a_b, screen, script, seal, search, second, section,
-    select, setDate, setDay, setFullYear, setHours, setMilliseconds,
-    setMinutes, setMonth, setSeconds, setTime, setTimezoneOffset, setUTCDate,
-    setUTCDay, setUTCFullYear, setUTCHours, setUTCMilliseconds, setUTCMinutes,
-    setUTCMonth, setUTCSeconds, setYear, shift, slash_equal, slice, sloppy,
-    small, some, sort, source, span, speech, splice, split, src,
-    statement_block, stopping, strange_loop, strict, string, stringify, strong,
-    style, styleproperty, sub, subscript, substr, substring, sup, supplant, t,
-    table, 'table-layout', tag_a_in_b, tbody, td, test, 'text-align',
-    'text-decoration', 'text-indent', 'text-shadow', 'text-transform',
-    textarea, tfoot, th, thead, third, thru, time, title, toDateString,
-    toExponential, toFixed, toISOString, toJSON, toLocaleDateString,
-    toLocaleLowerCase, toLocaleString, toLocaleTimeString, toLocaleUpperCase,
-    toLowerCase, toPrecision, toString, toTimeString, toUTCString, toUpperCase,
-    token, too_long, too_many, top, tr, trailing_decimal_a, tree, trim, tt,
-    tty, tv, type, u, ul, unclosed, unclosed_comment, unclosed_regexp, undef,
-    undefined, unescaped_a, unexpected_a, unexpected_char_a_b,
-    unexpected_comment, unexpected_property_a, unexpected_space_a_b,
+    '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'',
+    '(arguments)', '(begin)', '(breakage)', '(context)', '(error)',
+    '(identifier)', '(line)', '(loopage)', '(name)', '(params)', '(scope)',
+    '(token)', '(vars)', '(verb)', '*', '+', '-', '/', '<', '<=', '==',
+    '===', '>', '>=', ADSAFE, Array, Date, Function, Object, '\\', a,
+    a_label, a_not_allowed, a_not_defined, a_scope, abbr, acronym, address,
+    adsafe, adsafe_a, adsafe_autocomplete, adsafe_bad_id, adsafe_div,
+    adsafe_fragment, adsafe_go, adsafe_html, adsafe_id, adsafe_id_go, adsafe_lib,
+    adsafe_lib_second, adsafe_missing_id, adsafe_name_a, adsafe_placement,
+    adsafe_prefix_a, adsafe_script, adsafe_source, adsafe_subscript_a,
+    adsafe_tag, all, already_defined, and, anon, applet, apply, approved, area,
+    arity, article, aside, assign, assign_exception,
+    assignment_function_expression, at, attribute_case_a, audio, autocomplete,
+    avoid_a, b, background, 'background-attachment', 'background-color',
+    'background-image', 'background-position', 'background-repeat',
+    bad_assignment, bad_color_a, bad_constructor, bad_entity, bad_html, bad_id_a,
+    bad_in_a, bad_invocation, bad_name_a, bad_new, bad_number, bad_operand,
+    bad_style, bad_type, bad_url_a, bad_wrap, base, bdo, big, bitwise, block,
+    blockquote, body, border, 'border-bottom', 'border-bottom-color',
+    'border-bottom-left-radius', 'border-bottom-right-radius',
+    'border-bottom-style', 'border-bottom-width', 'border-collapse',
+    'border-color', 'border-left', 'border-left-color', 'border-left-style',
+    'border-left-width', 'border-radius', 'border-right', 'border-right-color',
+    'border-right-style', 'border-right-width', 'border-spacing', 'border-style',
+    'border-top', 'border-top-color', 'border-top-left-radius',
+    'border-top-right-radius', 'border-top-style', 'border-top-width',
+    'border-width', bottom, br, braille, browser, button, c, call, canvas, cap,
+    caption, 'caption-side', center, charAt, charCodeAt, character, cite, clear,
+    clip, closure, cm, code, col, colgroup, color, combine_var, command,
+    conditional_assignment, confusing_a, confusing_regexp, constructor_name_a,
+    content, continue, control_a, 'counter-increment', 'counter-reset', create,
+    css, cursor, d, dangerous_comment, dangling_a, data, datalist, dd, debug,
+    del, deleted, details, devel, dfn, dialog, dir, direction, display, disrupt,
+    div, dl, dt, duplicate_a, edge, edition, else, em, embed, embossed, empty,
+    'empty-cells', empty_block, empty_case, empty_class, entityify, eqeq, errors,
+    es5, eval, evidence, evil, ex, exception, exec, expected_a,
+    expected_a_at_b_c, expected_a_b, expected_a_b_from_c_d, expected_at_a,
+    expected_attribute_a, expected_attribute_value_a, expected_class_a,
+    expected_fraction_a, expected_id_a, expected_identifier_a,
+    expected_identifier_a_reserved, expected_lang_a, expected_linear_a,
+    expected_media_a, expected_name_a, expected_nonstandard_style_attribute,
+    expected_number_a, expected_operator_a, expected_percent_a,
+    expected_positive_a, expected_pseudo_a, expected_selector_a,
+    expected_small_a, expected_space_a_b, expected_string_a,
+    expected_style_attribute, expected_style_pattern, expected_tagname_a,
+    expected_type_a, f, fieldset, figure, filter, first, flag, float, floor,
+    font, 'font-family', 'font-size', 'font-size-adjust', 'font-stretch',
+    'font-style', 'font-variant', 'font-weight', footer, forEach, for_if, forin,
+    form, fragment, frame, frameset, from, fromCharCode, fud, funct, function,
+    function_block, function_eval, function_loop, function_statement,
+    function_strict, functions, global, globals, h1, h2, h3, h4, h5, h6,
+    handheld, hasOwnProperty, head, header, height, hgroup, hr,
+    'hta:application', html, html_confusion_a, html_handlers, i, id, identifier,
+    identifier_function, iframe, img, immed, implied_evil, in, indent, indexOf,
+    infix_in, init, input, ins, insecure_a, isAlpha, isArray, isDigit, isNaN,
+    join, jslint, json, kbd, keygen, keys, label, labeled, lang, lbp,
+    leading_decimal_a, led, left, legend, length, 'letter-spacing', li, lib,
+    line, 'line-height', link, 'list-style', 'list-style-image',
+    'list-style-position', 'list-style-type', map, margin, 'margin-bottom',
+    'margin-left', 'margin-right', 'margin-top', mark, 'marker-offset', match,
+    'max-height', 'max-width', maxerr, maxlen, member, menu, message, meta,
+    meter, 'min-height', 'min-width', missing_a, missing_a_after_b,
+    missing_option, missing_property, missing_space_a_b, missing_url,
+    missing_use_strict, mixed, mm, mode, move_invocation, move_var, n, name,
+    name_function, nav, nested_comment, newcap, node, noframes, nomen, noscript,
+    not, not_a_constructor, not_a_defined, not_a_function, not_a_label,
+    not_a_scope, not_greater, nud, number, object, octal_a, ol, on, opacity,
+    open, optgroup, option, outer, outline, 'outline-color', 'outline-style',
+    'outline-width', output, overflow, 'overflow-x', 'overflow-y', p, padding,
+    'padding-bottom', 'padding-left', 'padding-right', 'padding-top',
+    'page-break-after', 'page-break-before', param, parameter_a_get_b,
+    parameter_arguments_a, parameter_set_a, params, paren, parent, passfail, pc,
+    plusplus, pop, position, postscript, pre, predef, print, progress,
+    projection, properties, prototype, pt, push, px, q, quote, quotes, r, radix,
+    range, raw, read_only, reason, redefinition_a, regexp, replace, report,
+    reserved, reserved_a, rhino, right, rp, rt, ruby, safe, samp, scanned_a_b,
+    screen, script, search, second, section, select, shift, slash_equal, slice,
+    sloppy, small, sort, source, span, speech, split, src, statement_block,
+    stopping, strange_loop, strict, string, strong, stupid, style, styleproperty,
+    sub, subscript, substr, sup, supplant, sync_a, t, table, 'table-layout',
+    tag_a_in_b, tbody, td, test, 'text-align', 'text-decoration', 'text-indent',
+    'text-shadow', 'text-transform', textarea, tfoot, th, thead, third, thru,
+    time, title, toLowerCase, toString, toUpperCase, token, too_long, too_many,
+    top, tr, trailing_decimal_a, tree, tt, tty, tv, type, u, ul, unclosed,
+    unclosed_comment, unclosed_regexp, undef, undefined, unescaped_a,
+    unexpected_a, unexpected_char_a_b, unexpected_comment, unexpected_else,
+    unexpected_label_a, unexpected_property_a, unexpected_space_a_b,
     'unicode-bidi', unnecessary_initialize, unnecessary_use, unparam,
-    unreachable_a_b, unrecognized_style_attribute_a, unrecognized_tag_a,
-    unsafe, unshift, unused, url, urls, use_array, use_braces, use_charAt,
-    use_object, use_or, use_param, used_before_a, valueOf, var, var_a_not,
-    vars, 'vertical-align', video, visibility, warn, was, weird_assignment,
-    weird_condition, weird_new, weird_program, weird_relation, weird_ternary,
-    white, 'white-space', widget, width, windows, 'word-spacing', 'word-wrap',
-    wrap, wrap_immediate, wrap_regexp, write_is_wrong, writeable, 'z-index'
+    unreachable_a_b, unrecognized_style_attribute_a, unrecognized_tag_a, unsafe,
+    unused, url, urls, use_array, use_braces, use_charAt, use_object, use_or,
+    use_param, used_before_a, var, var_a_not, vars, 'vertical-align', video,
+    visibility, was, weird_assignment, weird_condition, weird_new, weird_program,
+    weird_relation, weird_ternary, white, 'white-space', widget, width, windows,
+    'word-spacing', 'word-wrap', wrap, wrap_immediate, wrap_regexp,
+    write_is_wrong, writeable, 'z-index'
 */
 
 // The global directive is used to declare global variables that can
@@ -372,6 +357,7 @@ var JSLINT = (function () {
             undef     : true,
             unparam   : true,
             sloppy    : true,
+            stupid    : true,
             sub       : true,
             vars      : true,
             white     : true,
@@ -411,10 +397,10 @@ var JSLINT = (function () {
 // web browser environment.
 
         browser = array_to_object([
-            'clearInterval', 'clearTimeout', 'document', 'event', 'frames',
-            'history', 'Image', 'localStorage', 'location', 'name', 'navigator',
-            'Option', 'parent', 'screen', 'sessionStorage', 'setInterval',
-            'setTimeout', 'Storage', 'window', 'XMLHttpRequest'
+            'clearInterval', 'clearTimeout', 'document', 'event', 'FormData',
+            'frames', 'history', 'Image', 'localStorage', 'location', 'name',
+            'navigator', 'Option', 'parent', 'screen', 'sessionStorage',
+            'setInterval', 'setTimeout', 'Storage', 'window', 'XMLHttpRequest'
         ], false),
 
 // bundle contains the text messages.
@@ -540,7 +526,6 @@ var JSLINT = (function () {
                 "hasOwnProperty method instead.",
             insecure_a: "Insecure '{a}'.",
             isNaN: "Use the isNaN function to compare with NaN.",
-            label_a_b: "Label '{a}' on '{b}' statement.",
             lang: "lang is deprecated.",
             leading_decimal_a: "A leading decimal point can be confused with a dot: '.{a}'.",
             missing_a: "Missing '{a}'.",
@@ -563,6 +548,8 @@ var JSLINT = (function () {
             not_a_label: "'{a}' is not a label.",
             not_a_scope: "'{a}' is out of scope.",
             not_greater: "'{a}' should not be greater than '{b}'.",
+            octal_a: "Don't use octal: '{a}'. Use '\\u....' instead.",
+            parameter_arguments_a: "Do not mutate parameter '{a}' when using 'arguments'.",
             parameter_a_get_b: "Unexpected parameter '{a}' in get {b} function.",
             parameter_set_a: "Expected parameter (value) in set {a} function.",
             radix: "Missing radix parameter.",
@@ -576,6 +563,7 @@ var JSLINT = (function () {
             strange_loop: "Strange loop.",
             strict: "Strict violation.",
             subscript: "['{a}'] is better written in dot notation.",
+            sync_a: "Unexpected sync method: '{a}'.",
             tag_a_in_b: "A '<{a}>' must be within '<{b}>'.",
             too_long: "Line too long.",
             too_many: "Too many errors.",
@@ -589,6 +577,8 @@ var JSLINT = (function () {
             unexpected_a: "Unexpected '{a}'.",
             unexpected_char_a_b: "Unexpected character '{a}' in {b}.",
             unexpected_comment: "Unexpected comment.",
+            unexpected_else: "Unexpected 'else' after 'return'.",
+            unexpected_label_a: "Unexpected label '{a}'.",
             unexpected_property_a: "Unexpected /*property*/ '{a}'.",
             unexpected_space_a_b: "Unexpected space between '{a}' and '{b}'.",
             unnecessary_initialize: "It is not necessary to initialize '{a}' " +
@@ -691,7 +681,8 @@ var JSLINT = (function () {
             'r': '\r',
             '"': '"',
             '/': '/',
-            '\\': '\\'
+            '\\': '\\',
+            '!': '!'
         },
 
         devel = array_to_object([
@@ -940,9 +931,8 @@ var JSLINT = (function () {
 
 // unsafe comment or string
         ax = /@cc|<\/?|script|\]\s*\]|<\s*!|&lt/i,
-// carriage return, or carriage return linefeed
-        crx = /\r/g,
-        crlfx = /\r\n/g,
+// carriage return, carriage return linefeed, or linefeed
+        crlfx = /\r\n?|\n/,
 // unsafe characters that are silently deleted by one or more browsers
         cx = /[\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/,
 // query characters for ids
@@ -960,7 +950,7 @@ var JSLINT = (function () {
 // outer html token
         ox = /[>&]|<[\/!]?|--/,
 // attributes characters
-        qx = /[^a-zA-Z0-9+\-_\/ ]/,
+        qx = /[^a-zA-Z0-9+\-_\/. ]/,
 // style
         sx = /^\s*([{}:#%.=,>+\[\]@()"';]|[*$\^~]=|[a-zA-Z_][a-zA-Z0-9_\-]*|[0-9]+|<\/|\/\*)/,
         ssx = /^\s*([@#!"'};:\-%.=,+\[\]()*_]|[a-zA-Z][a-zA-Z0-9._\-]*|\/\*?|\d+(?:\.\d+)?|<\/)/,
@@ -1137,7 +1127,7 @@ var JSLINT = (function () {
 
     function warn(message, offender, a, b, c, d) {
         var character, line, warning;
-        offender = offender || next_token;  // `~
+        offender = offender || next_token;  // ~~
         line = offender.line || 0;
         character = offender.from || 0;
         warning = {
@@ -1195,9 +1185,8 @@ var JSLINT = (function () {
         if (it[name] !== expected) {
             warn('expected_a_b', it, expected, it[name]);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
 
@@ -1387,9 +1376,11 @@ var JSLINT = (function () {
                             hex(2);
                             break;
                         default:
-                            c = descapes[c];
-                            if (typeof c !== 'string') {
-                                warn_at('unexpected_a', line, character, '\\');
+                            if (typeof descapes[c] !== 'string') {
+                                warn_at(c >= '0' && c <= '7' ? 'octal_a' : 'unexpected_a',
+                                    line, character, '\\' + c);
+                            } else {
+                                c = descapes[c];
                             }
                         }
                     }
@@ -1698,10 +1689,7 @@ klass:              do {
         return {
             init: function (source) {
                 if (typeof source === 'string') {
-                    lines = source
-                        .replace(crlfx, '\n')
-                        .replace(crx, '\n')
-                        .split('\n');
+                    lines = source.split(crlfx);
                 } else {
                     lines = source;
                 }
@@ -2225,7 +2213,7 @@ klass:              do {
             if (next_token.id === ':') {
                 for (;;) {
                     advance();
-                    if (next_token.id === ',' || next_token.id === '*/' || next_token.id === '(end)') {
+                    if (next_token.id !== '(string)' && !next_token.identifier) {
                         break;
                     }
                 }
@@ -2295,17 +2283,17 @@ klass:              do {
                 open: true,
                 was: indent
             };
-        } else if (mode === 'statement') {
-            indent = {
-                at: indent.at,
-                open: true,
-                was: indent
-            };
         } else if (!indent) {
             indent = {
                 at: 1,
                 mode: 'statement',
                 open: true
+            };
+        } else if (mode === 'statement') {
+            indent = {
+                at: indent.at,
+                open: true,
+                was: indent
             };
         } else {
             open = mode === 'var' || next_token.line !== token.line;
@@ -2421,12 +2409,10 @@ klass:              do {
             advance();
             semicolon();
             strict_mode = true;
-            option.newcap = false;
             option.undef = false;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
 
@@ -2474,7 +2460,8 @@ klass:              do {
         } else {
             if (a.id === '.' && b.id === '[' && b.arity === 'infix') {
                 return a.second.string === b.second.string && b.second.id === '(string)';
-            } else if (a.id === '[' && a.arity === 'infix' && b.id === '.') {
+            }
+            if (a.id === '[' && a.arity === 'infix' && b.id === '.') {
                 return a.second.string === b.second.string && a.second.id === '(string)';
             }
         }
@@ -2525,9 +2512,8 @@ klass:              do {
                     warn('leading_decimal_a', token, artifact());
                     advance();
                     return token;
-                } else {
-                    stop('expected_identifier_a', token, token.id);
                 }
+                stop('expected_identifier_a', token, token.id);
             }
             while (rbp < next_token.lbp) {
                 advance();
@@ -2679,11 +2665,10 @@ klass:              do {
             }
             if (typeof f === 'function') {
                 return f(left, this);
-            } else {
-                this.first = left;
-                this.second = expression(p);
-                return this;
             }
+            this.first = left;
+            this.second = expression(p);
+            return this;
         };
         return x;
     }
@@ -2782,6 +2767,13 @@ klass:              do {
                     }
                 } else {
                     stop('read_only');
+                }
+                if (funct['(params)']) {
+                    funct['(params)'].forEach(function (value) {
+                        if (value.string === left.string) {
+                            value.assign = true;
+                        }
+                    });
                 }
             } else if (option.safe) {
                 l = left;
@@ -2892,12 +2884,10 @@ klass:              do {
             advance(':');
             scope = Object.create(old_scope);
             add_label(label, 'label');
-            if (next_token.labeled !== true) {
-                warn('label_a_b', next_token, label.string, artifact());
+            if (next_token.labeled !== true || funct === global_funct) {
+                stop('unexpected_label_a', label);
             } else if (jx.test(label.string + ':')) {
                 warn('url', label);
-            } else if (funct === global_funct) {
-                stop('unexpected_a', token);
             }
             next_token.label = label;
         }
@@ -3204,6 +3194,7 @@ klass:              do {
         } else if (option.safe) {
             warn('adsafe_a', x);
         }
+        funct['(arguments)'] = true;
     });
     reservevar('eval', function (x) {
         if (option.safe) {
@@ -3363,7 +3354,7 @@ klass:              do {
         }
         var right = expression(130);
         if ((right.id === '(number)' && right.number === 0) || right.id === '(string)') {
-            warn('unexpected_a', left);
+            warn('unexpected_a', right);
         }
         if (left.id === right.id && left.id === '(number)') {
             left.number -= right.number;
@@ -3628,9 +3619,15 @@ klass:              do {
         no_space();
         step_out(')', this);
         if (value.id === 'function') {
-            if (next_token.id === '(') {
+            switch (next_token.id) {
+            case '(':
                 warn('move_invocation');
-            } else {
+                break;
+            case '.':
+            case '[':
+                warn('unexpected_a');
+                break;
+            default:
                 warn('bad_wrap', this);
             }
         }
@@ -3652,6 +3649,8 @@ klass:              do {
         } else if (!option.evil && left && left.string === 'document' &&
                 (name === 'write' || name === 'writeln')) {
             warn('write_is_wrong', left);
+        } else if (!option.stupid && name.indexOf('Sync') > 0) {
+            warn('sync_a', token);
         } else if (option.adsafe) {
             if (!adsafe_top && left.string === 'ADSAFE') {
                 if (name === 'id' || name === 'lib') {
@@ -3800,7 +3799,7 @@ klass:              do {
         if (next_token.id === ')') {
             no_space();
             step_out(')', paren);
-            return;
+            return params;
         }
         for (;;) {
             edge();
@@ -3843,6 +3842,13 @@ klass:              do {
         func.first = funct['(params)'] = function_params();
         one_space();
         func.block = block(false);
+        if (funct['(arguments)']) {
+            func.first.forEach(function (value) {
+                if (value.assign) {
+                    warn('parameter_arguments_a', value, value.string);
+                }
+            });
+        }
         funct      = old_funct;
         option     = old_option;
         scope      = old_scope;
@@ -3895,7 +3901,7 @@ klass:              do {
                     warn('function_loop', get);
                 }
                 p = get.first;
-                if (p) {
+                if (p && p.length) {
                     warn('parameter_a_get_b', p[0], p[0].string, i);
                 }
                 comma();
@@ -4063,6 +4069,23 @@ klass:              do {
         do_function(this, id);
         if (funct['(loopage)']) {
             warn('function_loop');
+        }
+        switch (next_token.id) {
+        case ';':
+        case '(':
+        case ')':
+        case ',':
+        case ']':
+        case '}':
+        case ':':
+            break;
+        case '.':
+            if (peek().string !== 'bind' || peek(1).id !== '(') {
+                warn('unexpected_a');
+            }
+            break;
+        default:
+            stop('unexpected_a');
         }
         this.arity = 'function';
         return this;
@@ -4483,7 +4506,7 @@ klass:              do {
     });
 
     disrupt_stmt('return', function () {
-        if (funct === global_funct) {
+        if (funct === global_funct && xmode !== 'scriptstring') {
             warn('unexpected_a', this);
         }
         this.arity = 'statement';
@@ -4493,6 +4516,9 @@ klass:              do {
                 warn('wrap_regexp');
             }
             this.first = expression(20);
+        }
+        if (peek(0).id === '}' && peek(1).id === 'else') {
+            warn('unexpected_else', this);
         }
         return this;
     });
@@ -4688,7 +4714,8 @@ klass:              do {
                 }
                 advance(')', paren);
                 return true;
-            } else if (css_colorData[next_token.string] === true) {
+            }
+            if (css_colorData[next_token.string] === true) {
                 advance();
                 return true;
             }
@@ -5189,23 +5216,22 @@ klass:              do {
             }
             advance();
             return css_any;
+        }
+        if (!next_token.identifier) {
+            warn('expected_style_attribute');
         } else {
-            if (!next_token.identifier) {
-                warn('expected_style_attribute');
+            if (Object.prototype.hasOwnProperty.call(css_attribute_data,
+                    next_token.string)) {
+                v = css_attribute_data[next_token.string];
             } else {
-                if (Object.prototype.hasOwnProperty.call(css_attribute_data,
-                        next_token.string)) {
-                    v = css_attribute_data[next_token.string];
-                } else {
-                    v = css_any;
-                    if (!option.css) {
-                        warn('unrecognized_style_attribute_a');
-                    }
+                v = css_any;
+                if (!option.css) {
+                    warn('unrecognized_style_attribute_a');
                 }
             }
-            advance();
-            return v;
         }
+        advance();
+        return v;
     }
 
 
@@ -5289,12 +5315,11 @@ klass:              do {
                 }
             }
             return;
-        } else {
-            if (next_token.identifier &&
-                    (next_token.string === 'odd' || next_token.string === 'even')) {
-                advance();
-                return;
-            }
+        }
+        if (next_token.identifier &&
+                (next_token.string === 'odd' || next_token.string === 'even')) {
+            advance();
+            return;
         }
         warn('unexpected_a');
     }
@@ -5941,6 +5966,9 @@ klass:              do {
                 advance('>');
                 break;
             case '(end)':
+                if (stack.length !== 0) {
+                    warn('missing_a', next_token, '</' + stack.pop().string + '>');
+                }
                 return;
             default:
                 if (next_token.id === '(end)') {
@@ -6107,7 +6135,7 @@ klass:              do {
             indent = null;
             advance('(end)');
         } catch (e) {
-            if (e) {        // `~
+            if (e) {        // ~~
                 JSLINT.errors.push({
                     reason    : e.message,
                     line      : e.line || next_token.line,
@@ -6216,8 +6244,8 @@ klass:              do {
 
     itself.report = function (errors_only) {
         var data = itself.data(), err, evidence, i, italics, j, key, keys,
-            length, mem = '', name, names, output = [], snippets, the_function,
-            warning;
+            length, mem = '', name, names, not_first, output = [], snippets,
+            the_function, warning;
 
         function detail(h, value) {
             var comma_needed, singularity;
@@ -6330,27 +6358,31 @@ klass:              do {
                     mem = '    ';
                     italics = 0;
                     j = 0;
+                    not_first = false;
                     for (i = 0; i < keys.length; i += 1) {
                         key = keys[i];
-                        name = ix.test(key)
-                            ? key
-                            : '\'' + key.entityify().replace(nx, sanitize) + '\'';
-                        length += name.length + 2;
-                        if (data.member[key] === 1) {
-                            name = '<i>' + name + '</i>';
-                            italics += 1;
-                            j = 1;
+                        if (data.member[key] > 0) {
+                            if (not_first) {
+                                mem += ', ';
+                            }
+                            name = ix.test(key)
+                                ? key
+                                : '\'' + key.entityify().replace(nx, sanitize) + '\'';
+                            length += name.length + 2;
+                            if (data.member[key] === 1) {
+                                name = '<i>' + name + '</i>';
+                                italics += 1;
+                                j = 1;
+                            }
+                            if (mem.length + name.length - (italics * 7) > 80) {
+                                output.push(mem + '<br>');
+                                mem = '    ';
+                                italics = j;
+                            }
+                            mem += name;
+                            j = 0;
+                            not_first = true;
                         }
-                        if (i < keys.length - 1) {
-                            name += ', ';
-                        }
-                        if (mem.length + name.length - (italics * 7) > 80) {
-                            output.push(mem + '<br>');
-                            mem = '    ';
-                            italics = j;
-                        }
-                        mem += name;
-                        j = 0;
                     }
                     output.push(mem + '<br>*/</pre>');
                 }
@@ -6361,7 +6393,7 @@ klass:              do {
     };
     itself.jslint = itself;
 
-    itself.edition = '2012-01-26';
+    itself.edition = '2012-04-15';
 
     return itself;
 }());

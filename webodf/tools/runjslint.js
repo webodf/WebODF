@@ -66,6 +66,7 @@ function checkWithJSLINT(file) {
             unparam:    false, // if unused parameters should be tolerated
             safe:       false, // if use of some browser features should be restricted
             sloppy:     false, // if the 'use strict'; pragma is optional
+            stupid:     true,  // true if stupid practices are tolerated
             sub:        false, // if all forms of subscript notation are tolerated
             vars:       false, // if multiple var statements per function should be allowed
             white:      true,  // if sloppy whitespace is tolerated

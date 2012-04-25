@@ -205,12 +205,16 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
         }
         return s;
     }
+    var result;
     if (encoding === "utf8") {
-        return utf8ByteArrayToString(bytearray);
-    } else if (encoding !== "binary") {
-        this.log("Unsupported encoding: " + encoding);
+        result = utf8ByteArrayToString(bytearray);
+    } else {
+        if (encoding !== "binary") {
+            this.log("Unsupported encoding: " + encoding);
+        }
+        result = byteArrayToString(bytearray);
     }
-    return byteArrayToString(bytearray);
+    return result;
 };
 Runtime.getFunctionName = function getFunctionName(f) {
     "use strict";
@@ -322,12 +326,16 @@ function BrowserRuntime(logoutput) {
         return array.slice();
     };
     this.byteArrayFromString = function (string, encoding) {
+        var result;
         if (encoding === "utf8") {
-            return utf8ByteArrayFromString(string);
-        } else if (encoding !== "binary") {
-            self.log("unknown encoding: " + encoding);
+            result = utf8ByteArrayFromString(string);
+        } else {
+            if (encoding !== "binary") {
+                self.log("unknown encoding: " + encoding);
+            }
+            result = byteArrayFromString(string);
         }
-        return byteArrayFromString(string);
+        return result;
     };
     this.byteArrayToString = Runtime.byteArrayToString;
 
@@ -952,15 +960,15 @@ function RhinoRuntime() {
  */
 var runtime = (function () {
     "use strict";
+    var result;
     if (typeof window !== "undefined") {
-        return new BrowserRuntime(window.document.getElementById("logoutput"));
+        result = new BrowserRuntime(window.document.getElementById("logoutput"));
+    } else if (typeof require !== "undefined") {
+        result = new NodeJSRuntime();
     } else {
-        if (typeof require !== "undefined") {
-            return new NodeJSRuntime();
-        } else {
-            return new RhinoRuntime();
-        }
+        result = new RhinoRuntime();
     }
+    return result;
 }());
 /*jslint sloppy: true*/
 (function () {
