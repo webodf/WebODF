@@ -101,15 +101,7 @@ odf.OdfCanvas = (function () {
             }
             sheet.insertRule('office|presentation draw|page {display:none;}', 0);
             sheet.insertRule("office|presentation draw|page:nth-child(" +
-<<<<<<< HEAD
-<<<<<<< HEAD
                 position + ") {display:block;}", 1);
-=======
-                position + "n) {display:block;}", 1);
->>>>>>> 3ff38d9... Add buttons and functions to switch between slides.
-=======
-                position + ") {display:block;}", 1);
->>>>>>> 36a8d14... Fix css for android device.
         }
         /**
          * @return {undefined}
@@ -515,13 +507,7 @@ odf.OdfCanvas = (function () {
             loadImage('image' + String(i), container, node, stylesheet);
         }
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 	/**
-=======
-    /**
->>>>>>> f364e8d... Fix whitespace.
      * @param {!string} id
      * @param {!Object} container
      * @param {!Element} plugin
@@ -535,7 +521,7 @@ odf.OdfCanvas = (function () {
 
         function callback(url, mimetype) {
             // test for video mimetypes
-            if (mimetype.substr(0,6)==='video/') {
+            if (mimetype.substr(0, 6) === 'video/') {
                 video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
                 video.setAttribute('controls', 'controls');
 
@@ -545,8 +531,7 @@ odf.OdfCanvas = (function () {
 
                 video.appendChild(source);
                 plugin.parentNode.appendChild(video);
-            }
-            else {
+            } else {
                 plugin.innerHtml = 'Unrecognised Plugin';
             }
         }
@@ -569,8 +554,8 @@ odf.OdfCanvas = (function () {
         } else {
         // this will fail  atm - following function assumes PNG data]
             runtime.log('using MP4 data fallback');
-                url = getUrlFromBinaryDataElement(plugin);
-                callback(url, 'video/mp4');
+            url = getUrlFromBinaryDataElement(plugin);
+            callback(url, 'video/mp4');
         }
     }
     /**
@@ -602,7 +587,6 @@ odf.OdfCanvas = (function () {
             loadVideo('video' + String(i), container, node, stylesheet);
         }
     }
->>>>>>> 9132a86... Added support for video DataURIs
     /**
      * @param {Document} document Put and ODF Canvas inside this element.
      */
@@ -690,18 +674,7 @@ odf.OdfCanvas = (function () {
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
             loadImages(container, odfnode.body, css);
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	    loadVideos(container, odfnode.body, css);
->>>>>>> 9132a86... Added support for video DataURIs
-=======
-        loadVideos(container, odfnode.body, css);
->>>>>>> f364e8d... Fix whitespace.
-=======
             loadVideos(container, odfnode.body, css);
->>>>>>> 1fceb4c... Whitespace/indent fix.
             fixContainerSize();
         }
         /**
