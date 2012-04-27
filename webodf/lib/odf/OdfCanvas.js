@@ -460,13 +460,15 @@ odf.OdfCanvas = (function () {
             // If we have a cell which spans columns or rows, 
             // then add col-span or row-span attributes.
             if (node.hasAttributeNS(tablens, "number-columns-spanned")) {
-                node.setAttributeNS(tablens, "col-span", node.getAttributeNS(tablens, "number-columns-spanned"));
+                node.setAttribute("colspan",
+                    node.getAttributeNS(tablens, "number-columns-spanned"));
             }
-	    if (node.hasAttributeNS(tablens, "number-rows-spanned")) {
-                node.setAttributeNS(tablens, "row-span", node.getAttributeNS(tablens, "number-rows-spanned"));
+            if (node.hasAttributeNS(tablens, "number-rows-spanned")) {
+                node.setAttribute("rowspan",
+                    node.getAttributeNS(tablens, "number-rows-spanned"));
             }
         }
-        tableCells = odffragment.getElementsByTagNameNS(table, 'table-cell');
+        tableCells = odffragment.getElementsByTagNameNS(tablens, 'table-cell');
         for (i = 0; i < tableCells.length; i += 1) {
             node = /**@type{!Element}*/(tableCells.item(i));
             modifyTableCell(container, node, stylesheet);
@@ -536,7 +538,7 @@ odf.OdfCanvas = (function () {
             loadImage('image' + String(i), container, node, stylesheet);
         }
     }
-	/**
+    /**
      * @param {!string} id
      * @param {!Object} container
      * @param {!Element} plugin
@@ -702,7 +704,7 @@ odf.OdfCanvas = (function () {
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
-	    modifyTables(container, odfnode.body, css);
+            modifyTables(container, odfnode.body, css);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
             fixContainerSize();
