@@ -149,7 +149,8 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border-left', 'border-left' ],
             [ fons, 'border-right', 'border-right' ],
             [ fons, 'border-top', 'border-top' ],
-            [ fons, 'border-bottom', 'border-bottom' ]
+            [ fons, 'border-bottom', 'border-bottom' ],
+            [ fons, 'border', 'border' ]
         ];
 
     // helper functions

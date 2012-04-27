@@ -268,6 +268,7 @@ odf.OdfCanvas = (function () {
         fons    = namespaces.fo,
         officens = namespaces.office,
         svgns   = namespaces.svg,
+        tablens = namespaces.table,
         textns  = namespaces.text,
         xlinkns = namespaces.xlink,
         window = runtime.getWindow(),
@@ -441,6 +442,34 @@ odf.OdfCanvas = (function () {
             if (n.setAttributeNS) {
                 n.setAttributeNS(runtimens, "containsparagraphanchor", true);
             }
+        }
+    }
+    /**
+     * Modify tables to support merged cells (col/row span)
+     * @param {!Object} container
+     * @param {!Element} odffragment
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function modifyTables(container, odffragment, stylesheet) {
+        var i,
+            tableCells,
+            node;
+
+        function modifyTableCell(container, node, stylesheet) {
+            // If we have a cell which spans columns or rows, 
+            // then add col-span or row-span attributes.
+            if (node.hasAttributeNS(tablens, "number-columns-spanned")) {
+                node.setAttributeNS(tablens, "col-span", node.getAttributeNS(tablens, "number-columns-spanned"));
+            }
+	    if (node.hasAttributeNS(tablens, "number-rows-spanned")) {
+                node.setAttributeNS(tablens, "row-span", node.getAttributeNS(tablens, "number-rows-spanned"));
+            }
+        }
+        tableCells = odffragment.getElementsByTagNameNS(table, 'table-cell');
+        for (i = 0; i < tableCells.length; i += 1) {
+            node = /**@type{!Element}*/(tableCells.item(i));
+            modifyTableCell(container, node, stylesheet);
         }
     }
     /**
@@ -673,6 +702,7 @@ odf.OdfCanvas = (function () {
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
+	    modifyTables(container, odfnode.body, css);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
             fixContainerSize();
