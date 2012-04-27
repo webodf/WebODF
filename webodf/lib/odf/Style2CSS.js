@@ -150,6 +150,23 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border-right', 'border-right' ],
             [ fons, 'border-top', 'border-top' ],
             [ fons, 'border-bottom', 'border-bottom' ]
+        ],
+
+        tablecolumnPropertySimpleMapping = [
+            [ stylens, 'column-width', 'width' ]
+        ],
+
+        tablerowPropertySimpleMapping = [
+            [ stylens, 'row-height', 'height' ],
+            [ fons, 'keep-together', null ]
+        ],
+
+        tablePropertySimpleMapping = [
+            [ stylens, 'width', 'width' ],
+            [ fons, 'margin-left', 'margin-left' ],
+            [ fons, 'margin-right', 'margin-right' ],
+            [ fons, 'margin-top', 'margin-top' ],
+            [ fons, 'margin-bottom', 'margin-bottom' ]
         ];
 
     // helper functions
@@ -182,10 +199,10 @@ odf.Style2CSS = function Style2CSS() {
             name = family && node.getAttributeNS &&
                     node.getAttributeNS(stylens, 'name');
             if (name) {
-               if (!stylemap[family]) {
-                   stylemap[family] = {};
-               }
-               stylemap[family][name] = node;
+                if (!stylemap[family]) {
+                    stylemap[family] = {};
+                }
+                stylemap[family][name] = node;
             }
             node = node.nextSibling;
         }
@@ -204,7 +221,8 @@ odf.Style2CSS = function Style2CSS() {
             return stylestree[name];
         }
         var derivedStyles = stylestree.derivedStyles,
-            n, style;
+            n,
+            style;
         for (n in stylestree) {
             if (stylestree.hasOwnProperty(n)) {
                 style = findStyle(stylestree[n].derivedStyles, name);
@@ -279,8 +297,10 @@ odf.Style2CSS = function Style2CSS() {
             prefix = 'draw';
             namepart = '[presentation|style-name="' + name + '"]';
         }
-        return prefix + '|' + familytagnames[family].join(
-                namepart + ',' + prefix + '|') + namepart;
+        selector = prefix + '|' + familytagnames[family].join(
+            namepart + ',' + prefix + '|'
+        ) + namepart;
+        return selector;
     }
     /**
      * @param {!string} family
@@ -406,6 +426,33 @@ odf.Style2CSS = function Style2CSS() {
         return rule;
     }
     /**
+     * @param {!Element} props
+     * @return {!string}
+     */
+    function getTableRowProperties(props) {
+        var rule = '';
+        rule += applySimpleMapping(props, tablerowPropertySimpleMapping);
+        return rule;
+    }
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
+    function getTableColumnProperties(props) {
+        var rule = '';
+        rule += applySimpleMapping(props, tablecolumnPropertySimpleMapping);
+        return rule;
+    }
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
+    function getTableProperties(props) {
+        var rule = '';
+        rule += applySimpleMapping(props, tablePropertySimpleMapping);
+        return rule;
+    }
+    /**
      * @param {!StyleSheet} sheet
      * @param {!string} family
      * @param {!string} name
@@ -431,6 +478,21 @@ odf.Style2CSS = function Style2CSS() {
         properties = getDirectChild(node, stylens, 'table-cell-properties');
         if (properties) {
             rule += getTableCellProperties(properties);
+        }
+        properties = getDirectChild(node, stylens, 'table-row-properties');
+        if (properties) {
+            rule += getTableRowProperties(properties);
+        }
+        properties = getDirectChild(node, stylens, 'table-column-properties');
+        if (properties) {
+            rule += getTableColumnProperties(properties);
+        }
+        properties = getDirectChild(node, stylens, 'table-properties');
+        if (properties) {
+            rule += getTableProperties(properties);
+        }
+        if (family === "table") {
+            runtime.log(rule);
         }
         if (rule.length === 0) {
             return;
