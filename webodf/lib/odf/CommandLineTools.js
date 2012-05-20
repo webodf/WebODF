@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime, odf*/
-runtime.loadClass("odf.OdfContainer");
+runtime.loadClass("odf.OdfCanvas");
 /**
  * @constructor
  */
@@ -57,5 +57,23 @@ odf.CommandLineTools = function CommandLineTools() {
             }
         }
         var odfcontainer = new odf.OdfContainer(inputfilepath, onready);
+    };
+    /**
+     * @param {!string} inputfilepath
+     * @param {!Document} document
+     * @param {!function(string=):undefined} callback
+     * @return {undefined}
+     */
+    this.render = function (inputfilepath, document, callback) {
+        var body = document.getElementsByTagName("body")[0],
+            odfcanvas;
+        while (body.firstChild) {
+            body.removeChild(body.firstChild);
+        }
+        odfcanvas = new odf.OdfCanvas(body);
+        odfcanvas.addListener("statereadychange", function (err) {
+            callback(err);
+        });
+        odfcanvas.load(inputfilepath);
     };
 };

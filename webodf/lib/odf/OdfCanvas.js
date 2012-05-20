@@ -551,12 +551,13 @@ odf.OdfCanvas = (function () {
         url = plugin.getAttributeNS(xlinkns, 'href');
 
         function callback(url, mimetype) {
+            var ns = doc.documentElement.namespaceURI;
             // test for video mimetypes
             if (mimetype.substr(0, 6) === 'video/') {
-                video = doc.createElementNS(doc.documentElement.namespaceURI, "video");
+                video = doc.createElementNS(ns, "video");
                 video.setAttribute('controls', 'controls');
 
-                source = doc.createElement('source');
+                source = doc.createElementNS(ns, 'source');
                 source.setAttribute('src', url);
                 source.setAttribute('type', mimetype);
 
@@ -622,29 +623,23 @@ odf.OdfCanvas = (function () {
      * @param {Document} document Put and ODF Canvas inside this element.
      */
     function addStyleSheet(document) {
-        var styles = document.getElementsByTagName("style"),
-            head = document.getElementsByTagName('head')[0],
+        var head = document.getElementsByTagName('head')[0],
+            style = document.createElementNS(head.namespaceURI, 'style'),
             text = '',
             prefix,
             a = "",
             b;
-        // use cloneNode on an exisiting HTMLStyleElement, because in
-        // Chromium 12, document.createElement('style') does not give a
-        // HTMLStyleElement
-        if (styles && styles.length > 0) {
-            styles = styles[0].cloneNode(false);
-        } else {
-            styles = document.createElement('style');
-        }
+        style.setAttribute('type', 'text/css');
+        style.setAttribute('media', 'screen, print, handheld, projection');
         for (prefix in namespaces) {
             if (namespaces.hasOwnProperty(prefix) && prefix) {
                 text += "@namespace " + prefix + " url(" + namespaces[prefix] +
                         ");\n";
             }
         }
-        styles.appendChild(document.createTextNode(text));
-        head.appendChild(styles);
-        return styles;
+        style.appendChild(document.createTextNode(text));
+        head.appendChild(style);
+        return style;
     }
     /**
      * @constructor
@@ -699,7 +694,7 @@ odf.OdfCanvas = (function () {
 
             // only append the content at the end
             clear(element);
-            sizer = document.createElement('div');
+            sizer = document.createElementNS(element.namespaceURI, 'div');
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
@@ -812,7 +807,9 @@ odf.OdfCanvas = (function () {
                 startContainer = range && range.startContainer,
                 startOffset = range && range.startOffset,
                 endContainer = range && range.endContainer,
-                endOffset = range && range.endOffset;
+                endOffset = range && range.endOffset,
+                doc,
+                ns;
 
             while (e && !((e.localName === "p" || e.localName === "h") &&
                     e.namespaceURI === textns)) {
@@ -825,15 +822,11 @@ odf.OdfCanvas = (function () {
             if (!e || e.parentNode === editparagraph) {
                 return;
             }
+            doc = e.ownerDocument;
+            ns = doc.documentElement.namespaceURI;
 
             if (!editparagraph) {
-                editparagraph = e.ownerDocument.createElement("p");
-                if (!editparagraph.style) {
-                    editparagraph = e.ownerDocument.createElementNS(
-                        "http://www.w3.org/1999/xhtml",
-                        "p"
-                    );
-                }
+                editparagraph = doc.createElementNS(ns, "p");
                 editparagraph.style.margin = "0px";
                 editparagraph.style.padding = "0px";
                 editparagraph.style.border = "0px";

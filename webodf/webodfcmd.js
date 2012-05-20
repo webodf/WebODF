@@ -30,19 +30,22 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, odf: true*/
+/*global document, runtime: true, core: true, odf: true*/
 runtime.loadClass("odf.CommandLineTools");
 
 function main(args) {
     "use strict";
+    var tools = new odf.CommandLineTools();
+    function errHandler(err) {
+        if (err) {
+            runtime.log(err);
+            runtime.exit(1);
+        }
+    }
     if (args.length === 4 && args[1] === "-roundtrip") {
-        (new odf.CommandLineTools()).roundTrip(args["2"], args["3"],
-            function (err) {
-                if (err) {
-                    runtime.log(err);
-                    runtime.exit(1);
-                }
-            });
+        tools.roundTrip(args["2"], args["3"], errHandler);
+    } else if (args.length === 3 && args[1] === "-render") {
+        tools.render(args["2"], document, errHandler);
     } else {
         runtime.log("Usage:");
     }
