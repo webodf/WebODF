@@ -613,10 +613,11 @@ odf.OdfContainer = (function () {
             return new OdfPart(partname, self, zip);
         };
         /**
+         * @param {!string} newurl
          * @param {function(?string):undefined} callback
          * @return {undefined}
          */
-        this.save = function (callback) {
+        function saveAs(newurl, callback) {
             // the assumption so far is that all ODF parts are serialized
             // already, but meta, settings, styles and content should be
             // refreshed
@@ -630,9 +631,17 @@ odf.OdfContainer = (function () {
             zip.save("styles.xml", data, true, new Date());
             data = runtime.byteArrayFromString(serializeContentXml(), "utf8");
             zip.save("content.xml", data, true, new Date());
-            zip.write(function (err) {
+            zip.writeAs(newurl, function (err) {
                 callback(err);
             });
+        }
+        this.saveAs = saveAs;
+        /**
+         * @param {function(?string):undefined} callback
+         * @return {undefined}
+         */
+        this.save = function (callback) {
+            saveAs(url, callback);
         };
 
         // initialize public variables

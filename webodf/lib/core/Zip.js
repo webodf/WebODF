@@ -527,10 +527,11 @@ core.Zip = function Zip(url, entriesReadCallback) {
     }
     /**
      * Write the zipfile to the given path.
+     * @param {!string} newurl
      * @param {!function(?string):undefined} callback receiving possible err
      * @return {undefined}
      */
-    function write(callback) {
+    function writeAs(newurl, callback) {
         // make sure all data is in memory, for each entry that has data
         // undefined, try to load the entry
         loadAllEntries(0, function (err) {
@@ -559,13 +560,22 @@ core.Zip = function Zip(url, entriesReadCallback) {
             data.appendUInt32LE(codsize);
             data.appendUInt32LE(codoffset);
             data.appendArray([0, 0]);
-            runtime.writeFile(url, data.getByteArray(), callback);
+            runtime.writeFile(newurl, data.getByteArray(), callback);
         });
+    }
+    /**
+     * Write the zipfile to the given path.
+     * @param {!function(?string):undefined} callback receiving possible err
+     * @return {undefined}
+     */
+    function write(callback) {
+        writeAs(url, callback);
     }
 
     this.load = load;
     this.save = save;
     this.write = write;
+    this.writeAs = writeAs;
     // a special function that makes faster odf loading possible
     this.loadContentXmlAsFragments = loadContentXmlAsFragments;
     this.loadAsString = loadAsString;
