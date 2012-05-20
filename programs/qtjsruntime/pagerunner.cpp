@@ -81,7 +81,7 @@ PageRunner::PageRunner(const QStringList& args)
             html += ",'" + arguments[i].toUtf8().replace('\'', "\\'") + "'";
         }
         html = "<html>"
-                "<head><base href=\".\"></base><title></title>"
+                "<head><title></title>"
                 "<script>var arguments=[" + html + "];</script>"
                 "<script src=\"" + arguments[0].toUtf8() + "\"></script>";
         if (arguments[0].endsWith("runtime.js")) {
