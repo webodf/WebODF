@@ -13,7 +13,7 @@
 
 QByteArray getRuntimeBindings() {
     return
-    "if (typeof(runtime) !== 'undefined') {"
+    "if (typeof(runtime) !== 'undefined' && typeof(nativeio) !== 'undefined') {"
     "    runtime.readFileSync = function (path, encoding) {"
     "        return nativeio.readFileSync(path, encoding);"
     "    };"
@@ -84,17 +84,16 @@ PageRunner::PageRunner(const QStringList& args)
                 "<head><title></title>"
                 "<script>var arguments=[" + html + "];</script>"
                 "<script src=\"" + arguments[0].toUtf8() + "\"></script>";
-        if (arguments[0].endsWith("runtime.js")) {
-            // add runtime modification
-            html += "<script>" + getRuntimeBindings() +
-                        "    runtime.libraryPaths = function () {"
-                        "        /* convert to javascript array */"
-                        "        var p = nativeio.libraryPaths(),"
-                        "            a = [], i;"
-                        "        for (i in p) { a[i] = p[i]; }"
-                        "        return a;"
-                        "    };</script>";
-        }
+        // add runtime modification
+        html += "<script>//<![CDATA[\n" + getRuntimeBindings() +
+             "if (typeof(runtime) !== 'undefined' && typeof(nativeio) !== 'undefined') {\n"
+             "    runtime.libraryPaths = function () {"
+             "        /* convert to javascript array */"
+             "        var p = nativeio.libraryPaths(),"
+             "            a = [], i;"
+             "        for (i in p) { a[i] = p[i]; }"
+             "        return a;"
+             "    };}//]]></script>";
         html += "</head><body></body></html>\n";
         QTemporaryFile tmp("XXXXXX.html");
         tmp.setAutoRemove(true);
