@@ -25,6 +25,13 @@ add_custom_target(jslintcheck ALL
     SOURCES ${LIBJSFILES} ${TESTJSFILES}
 )
 
+add_custom_target(webodf.css.js ALL
+    COMMAND ${NODE} lib/runtime.js tools/css2js.js webodf.css webodf.css.js
+    DEPENDS NodeJS
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    SOURCES webodf.css
+)
+
 if (Java_JAVA_EXECUTABLE)
   # nonStandardJsDocs is not used because we use @licstart @licend and @source
   set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --jscomp_off nonStandardJsDocs --summary_detail_level 3)
@@ -73,7 +80,8 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js webodf.css
+         tools/css2js.js
   )
   add_custom_target(webodf.js
       SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.js

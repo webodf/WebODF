@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint sub: true*/
-/*global runtime, odf, xmldom */
+/*global runtime, odf, xmldom, webodf_css */
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
@@ -611,13 +611,27 @@ odf.OdfCanvas = (function () {
         }
         // embedded video is stored in a draw:plugin element
         plugins = odffragment.getElementsByTagNameNS(drawns, 'plugin');
-        runtime.log('Loading Videos:');
         
         for (i = 0; i < plugins.length; i += 1) {
-            runtime.log('...Found a video.');
             node = /**@type{!Element}*/(plugins.item(i));
             loadVideo('video' + String(i), container, node, stylesheet);
         }
+    }
+    function addWebODFStyleSheet(document) {
+        var head = document.getElementsByTagName('head')[0],
+            style;
+        if (typeof (webodf_css) !== 'undefined') {
+            style = document.createElementNS(head.namespaceURI, 'style');
+            style.setAttribute('media', 'screen, print, handheld, projection');
+            style.appendChild(document.createTextNode(webodf_css));
+        } else {
+            style = document.createElementNS(head.namespaceURI, 'link');
+            style.setAttribute('href', 'webodf.css');
+            style.setAttribute('rel', 'stylesheet');
+        }
+        style.setAttribute('type', 'text/css');
+        head.appendChild(style);
+        return style;
     }
     /**
      * @param {Document} document Put and ODF Canvas inside this element.
@@ -626,9 +640,7 @@ odf.OdfCanvas = (function () {
         var head = document.getElementsByTagName('head')[0],
             style = document.createElementNS(head.namespaceURI, 'style'),
             text = '',
-            prefix,
-            a = "",
-            b;
+            prefix;
         style.setAttribute('type', 'text/css');
         style.setAttribute('media', 'screen, print, handheld, projection');
         for (prefix in namespaces) {
@@ -652,11 +664,15 @@ odf.OdfCanvas = (function () {
             /**@type{!odf.Formatting}*/ formatting = new odf.Formatting(),
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
-            pageSwitcher = new PageSwitcher(addStyleSheet(document)),
-            stylesxmlcss = addStyleSheet(document),
-            positioncss = addStyleSheet(document),
+            pageSwitcher,
+            stylesxmlcss,
+            positioncss,
             editable = false,
             zoomLevel = 1;
+        addWebODFStyleSheet(document);
+        pageSwitcher = new PageSwitcher(addStyleSheet(document));
+        stylesxmlcss = addStyleSheet(document);
+        positioncss = addStyleSheet(document);
 
         function fixContainerSize() {
             var sizer = element.firstChild,

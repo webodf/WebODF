@@ -93,9 +93,9 @@ if (NOT ANT)
   find_file(ANT NAMES ant ant.exe /usr/bin /usr/local/bin)
 endif(NOT ANT)
 
-
-
 set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
+    webodf.css.js
+
     lib/core/RawDeflate.js lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js lib/core/RawInflate.js
     lib/core/Cursor.js lib/core/UnitTester.js
