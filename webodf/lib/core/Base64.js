@@ -71,6 +71,7 @@ core.Base64 = (function () {
         }(b64chars)),
         convertUTF16StringToBase64,
         convertBase64ToUTF16String,
+        /**@type{Window|null}*/window = runtime.getWindow(),
         btoa, atob;
 
     /**
@@ -290,8 +291,10 @@ core.Base64 = (function () {
                  convertUTF16ArrayToUTF8Array(stringToArray(uni)));
     }
 
-    btoa = runtime.getWindow() && runtime.getWindow().btoa;
-    if (btoa) {
+    if (window && window.btoa) {
+        btoa = function (b) {
+            return window.btoa(b);
+        };
         convertUTF16StringToBase64 = function (uni) {
             return btoa(convertUTF16StringToUTF8String(uni));
         };
@@ -301,8 +304,10 @@ core.Base64 = (function () {
             return convertUTF8ArrayToBase64(convertUTF16StringToUTF8Array(uni));
         };
     }
-    atob = runtime.getWindow() && runtime.getWindow().atob;
-    if (atob) {
+    if (window && window.atob) {
+        atob = function (a) {
+            return window.atob(a);
+        };
         convertBase64ToUTF16String = function (b64) {
             var b = atob(b64);
             return convertUTF8StringToUTF16String_internal(b, 0, b.length);

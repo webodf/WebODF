@@ -30,31 +30,31 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global Packages HTMLStyleElement window XMLHttpRequest HTMLStyleElement Document*/
+/*global Packages, HTMLStyleElement, window, XMLHttpRequest, HTMLStyleElement, Document*/
 /*jslint nomen: false */
 /**
  * @constructor
  */
-function NodeJSObject() {}
+function NodeJSObject() {"use strict"; }
 /**
  * @param {!string} path
  * @param {function(...)} callback
  * @return {undefined}
  */
-NodeJSObject.prototype.stat = function (path, callback) {};
+NodeJSObject.prototype.stat = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {?string} encoding
  * @param {function(...)} callback
  * @return {?string}
  */
-NodeJSObject.prototype.readFile = function (path, encoding, callback) {};
+NodeJSObject.prototype.readFile = function (path, encoding, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {?string} encoding
  * @return {?string}
  */
-NodeJSObject.prototype.readFileSync = function (path, encoding) {};
+NodeJSObject.prototype.readFileSync = function (path, encoding) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!string} flags
@@ -62,7 +62,7 @@ NodeJSObject.prototype.readFileSync = function (path, encoding) {};
  * @param {!function(string, !number):undefined} callback
  * @return {undefined}
  */
-NodeJSObject.prototype.open = function (path, flags, mode, callback) {};
+NodeJSObject.prototype.open = function (path, flags, mode, callback) {"use strict"; };
 /**
  * @param {!number} fd
  * @param {!Buffer} buffer
@@ -73,7 +73,7 @@ NodeJSObject.prototype.open = function (path, flags, mode, callback) {};
  * @return {undefined}
  */
 NodeJSObject.prototype.read = function (fd, buffer, offset, length, position,
-        callback) {};
+        callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!string} data
@@ -81,33 +81,33 @@ NodeJSObject.prototype.read = function (fd, buffer, offset, length, position,
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-NodeJSObject.prototype.writeFile = function (path, data, encoding, callback) {};
+NodeJSObject.prototype.writeFile = function (path, data, encoding, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
-NodeJSObject.prototype.unlink = function (path, callback) {};
+NodeJSObject.prototype.unlink = function (path, callback) {"use strict"; };
 /**
  * @param {!number} fd
  * @param {function(!string)} callback
  * @return {undefined}
  */
-NodeJSObject.prototype.close = function (fd, callback) {};
+NodeJSObject.prototype.close = function (fd, callback) {"use strict"; };
 /**
  * @param {!string} className
  * @return {!NodeJSObject}
  */
-function require(className) {}
+function require(className) {"use strict"; }
 /**
  * @constructor
  */
-function NodeJSConsole() {}
+function NodeJSConsole() {"use strict"; }
 /**
  * @param {!string} msg
  * @return {undefined}
  */
-NodeJSConsole.prototype.log = function (msg) {};
+NodeJSConsole.prototype.log = function (msg) {"use strict"; };
 /**
  * @type {!NodeJSConsole}
  */
@@ -115,12 +115,12 @@ var console;
 /**
  * @constructor
  */
-function NodeJSProcess() {}
+function NodeJSProcess() {"use strict"; }
 /**
  * @param {!number} exitCode
  * @return {undefined}
  */
-NodeJSProcess.prototype.exit = function (exitCode) {};
+NodeJSProcess.prototype.exit = function (exitCode) {"use strict"; };
 /**
  * @type {!Array}
  */
@@ -142,23 +142,23 @@ var __dirname;
  * @param {!number|!Array.<!number>|!string} arg1
  * @param {!string=} encoding
  */
-function Buffer(arg1, encoding) {}
+function Buffer(arg1, encoding) {"use strict"; }
 /**
  * @param {!string} msg
  * @return {undefined}
  */
-function print(msg) {}
+function print(msg) {"use strict"; }
 /**
  * @param {!string} path
  * @param {!string=} encoding
  * @return {?string}
  */
-function readFile(path, encoding) {}
+function readFile(path, encoding) {"use strict"; }
 /**
  * @param {!number} exitCode
  * @return {undefined}
  */
-function quit(exitCode) {}
+function quit(exitCode) {"use strict"; }
 /**
  * @namespace
  */
@@ -174,7 +174,7 @@ Packages.javax.xml.validation = {};
 /**
  * @constructor
  */
-Packages.javax.xml.validation.Schema = function () {};
+Packages.javax.xml.validation.Schema = function () {"use strict"; };
 /**
  * @namespace
  */
@@ -182,57 +182,57 @@ Packages.javax.xml.parsers = {};
 /**
  * @constructor
  */
-Packages.javax.xml.parsers.DocumentBuilder = function () {};
+Packages.javax.xml.parsers.DocumentBuilder = function () {"use strict"; };
 /**
  * @param {!Object} entityresolver
  * @return {undefined}
  */
 Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver =
-    function (entityresolver) {};
+    function (entityresolver) {"use strict"; };
 /**
  * @param {!Packages.org.xml.sax.InputSource} source 
  * @return {Document}
  */
 Packages.javax.xml.parsers.DocumentBuilder.prototype.parse =
-    function (source) {};
+    function (source) {"use strict"; };
 /**
  * @return {DOMImplementation}
  */
 Packages.javax.xml.parsers.DocumentBuilder.prototype.getDOMImplementation =
-    function () {};
+    function () {"use strict"; };
 /**
  * @constructor
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory = function () {};
+Packages.javax.xml.parsers.DocumentBuilderFactory = function () {"use strict"; };
 /**
  * @return {!Packages.javax.xml.parsers.DocumentBuilderFactory}
  */
-Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance = function () {};
+Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance = function () {"use strict"; };
 /**
  * @param {!boolean} value
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setValidating =
-    function (value) {};
+    function (value) {"use strict"; };
 /**
  * @param {!boolean} value
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setNamespaceAware =
-    function (value) {};
+    function (value) {"use strict"; };
 /**
  * @param {!boolean} value
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory.prototype
-    .setExpandEntityReferences = function (value) {};
+    .setExpandEntityReferences = function (value) {"use strict"; };
 /**
  * @param {?Packages.javax.xml.validation.Schema} schema
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.setSchema =
-    function (schema) {};
+    function (schema) {"use strict"; };
 /**
  * @return {!Packages.javax.xml.parsers.DocumentBuilder}
  */
 Packages.javax.xml.parsers.DocumentBuilderFactory.prototype.newDocumentBuilder =
-    function () {};
+    function () {"use strict"; };
 /**
  * @namespace
  */
@@ -245,7 +245,7 @@ Packages.org.xml.sax = {};
  * @param {!Object} definition
  * @return {!Object}
  */
-Packages.org.xml.sax.EntityResolver = function (definition) {};
+Packages.org.xml.sax.EntityResolver = function (definition) {"use strict"; };
 /**
  * @namespace
  */
@@ -254,42 +254,42 @@ Packages.java.io = {};
  * @constructor
  * @param {!string} path
  */
-Packages.java.io.FileReader = function (path) {};
+Packages.java.io.FileReader = function (path) {"use strict"; };
 /**
  * @constructor
  * @param {!string} path
  */
-Packages.java.io.FileOutputStream = function (path) {};
+Packages.java.io.FileOutputStream = function (path) {"use strict"; };
 /**
  * @param {!number} b
  * @return {undefined}
  */
-Packages.java.io.FileOutputStream.prototype.write = function (b) {};
+Packages.java.io.FileOutputStream.prototype.write = function (b) {"use strict"; };
 /**
  * @return {undefined}
  */
-Packages.java.io.FileOutputStream.prototype.close = function () {};
+Packages.java.io.FileOutputStream.prototype.close = function () {"use strict"; };
 /**
  * @constructor
  * @param {!Packages.java.io.FileReader} reader
  */
-Packages.org.xml.sax.InputSource = function (reader) {};
+Packages.org.xml.sax.InputSource = function (reader) {"use strict"; };
 /**
  * @type {!StyleSheet}
  */
 HTMLStyleElement.prototype.sheet;
-XMLHttpRequest.prototype.sendAsBinary = function (data) {};
+XMLHttpRequest.prototype.sendAsBinary = function (data) {"use strict"; };
 /**
  * @const@type{!string}
  */
 XMLHttpRequest.prototype.responseBody;
 window.nativeio = {};
 var VBArray = {};
-VBArray.prototype.toArray = function () {};
+VBArray.prototype.toArray = function () {"use strict"; };
 /**
  * @interface
  */
-function TreeWalker() {}
+function TreeWalker() {"use strict"; }
 /**
  * @const@type{!Node}
  */
@@ -313,31 +313,31 @@ TreeWalker.prototype.currentNode;
 /**
  * @return {Node}
  */
-TreeWalker.prototype.parentNode = function () {};
+TreeWalker.prototype.parentNode = function () {"use strict"; };
 /**
  * @return {Node}
  */
-TreeWalker.prototype.firstChild = function () {};
+TreeWalker.prototype.firstChild = function () {"use strict"; };
 /**
  * @return {Node}
  */
-TreeWalker.prototype.lastChild = function () {};
+TreeWalker.prototype.lastChild = function () {"use strict"; };
 /**
  * @return {Node}
  */
-TreeWalker.prototype.previousSibling = function () {};
+TreeWalker.prototype.previousSibling = function () {"use strict"; };
 /**
  * @return {Node}
  */
-TreeWalker.prototype.nextSibling = function () {};
+TreeWalker.prototype.nextSibling = function () {"use strict"; };
 /**
  * @return {Node}
  */
-TreeWalker.prototype.previousNode = function () {};
+TreeWalker.prototype.previousNode = function () {"use strict"; };
 /**
  * @return {Node}
  */
-TreeWalker.prototype.nextNode = function () {};
+TreeWalker.prototype.nextNode = function () {"use strict"; };
 /**
  * @param {!Node} root
  * @param {!number} whatToShow
@@ -345,4 +345,4 @@ TreeWalker.prototype.nextNode = function () {};
  * @param {boolean=} entityReferenceExpansion
  * @return {!TreeWalker}
  */
-Document.prototype.createTreeWalker = function (root, whatToShow, filter, entityReferenceExpansion) {};
+Document.prototype.createTreeWalker = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };

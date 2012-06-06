@@ -29,8 +29,8 @@ if(Java_JAVA_EXECUTABLE)
     # Closure Compiler
     ExternalProject_Add(
         ClosureCompiler
-        URL "http://closure-compiler.googlecode.com/files/compiler-20120305.tar.gz"
-        URL_MD5 513344df6f18bfa00b17f034cabf897d
+        URL "http://closure-compiler.googlecode.com/files/compiler-20120430.tar.gz"
+        URL_MD5 5300f0ffa3673057f6c367e96c88876c
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
@@ -65,8 +65,8 @@ set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 # Node.JS
 ExternalProject_Add(
     NodeJS
-    URL "http://nodejs.org/dist/v0.6.15/node-v0.6.15.tar.gz"
-    URL_MD5 852cfb1ed8125a4cdba456446d869d19
+    URL "http://nodejs.org/dist/v0.6.18/node-v0.6.18.tar.gz"
+    URL_MD5 4a3d3123ccc7b9b21c1990fe074e3d14
     CONFIGURE_COMMAND "./configure"
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""

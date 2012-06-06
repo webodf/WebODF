@@ -132,6 +132,8 @@ http.createServer(function (request, response) {
                 } else if (filename.substr(-4) === ".odp" ||
                         filename.substr(-5) === ".fodp") {
                     head["Content-Type"] = "application/vnd.oasis.opendocument.spreadsheet";
+                } else if (filename.substr(-4) === ".txt") {
+                    head["Content-Type"] = "text/plain; charset=utf-8";
                 }
                 response.writeHead(200, head);
                 if (request.method !== "HEAD") {
