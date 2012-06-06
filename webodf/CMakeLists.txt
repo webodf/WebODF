@@ -20,16 +20,21 @@ set(TESTJSFILES tests/core/ZipTests.js
 add_custom_target(jslintcheck ALL
     COMMAND ${NODE} lib/runtime.js tools/runjslint.js
         ${LIBJSFILES} ${TESTJSFILES}
-    DEPENDS NodeJS
+    DEPENDS NodeJS webodf.css.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     SOURCES ${LIBJSFILES} ${TESTJSFILES}
 )
 
-add_custom_target(webodf.css.js ALL
-    COMMAND ${NODE} lib/runtime.js tools/css2js.js webodf.css webodf.css.js
-    DEPENDS NodeJS
+add_custom_command(
+    OUTPUT webodf.css.js
+    COMMAND ${NODE}
+    ARGS lib/runtime.js tools/css2js.js webodf.css webodf.css.js
+    DEPENDS NodeJS lib/runtime.js tools/css2js.js webodf.css
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    SOURCES webodf.css
+)
+
+add_custom_target(webodf.css.js ALL
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
 )
 
 if (Java_JAVA_EXECUTABLE)
