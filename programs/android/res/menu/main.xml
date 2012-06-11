@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/report_bug"
+        android:id="@+id/report_issue"
         android:enabled="true"
-        android:title="@string/report_bug">
+        android:title="@string/report_issue">
     </item>
     <item
         android:id="@+id/visit_website"

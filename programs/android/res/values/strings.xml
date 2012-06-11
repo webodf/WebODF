@@ -3,7 +3,7 @@
 
     <string name="hello">Hello World, WebODFActivity!</string>
     <string name="app_name">WebODF</string>
-    <string name="report_bug">Report bug</string>
+    <string name="report_issue">Report issue</string>
     <string name="visit_website">Visit website</string>
     <string name="about">About</string>
 
