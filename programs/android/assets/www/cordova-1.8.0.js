@@ -710,7 +710,7 @@ channel.create('onDestroy');
 // Channels that must fire before "deviceready" is fired.
 channel.waitForInitialization('onCordovaReady');
 channel.waitForInitialization('onCordovaInfoReady');
-channel.waitForInitialization('onCordovaConnectionReady');
+//channel.waitForInitialization('onCordovaConnectionReady');
 
 module.exports = channel;
 
