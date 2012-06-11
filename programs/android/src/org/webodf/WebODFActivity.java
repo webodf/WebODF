@@ -1,8 +1,13 @@
 package org.webodf;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import android.content.Context;
 import android.content.Intent;
@@ -82,8 +87,7 @@ public class WebODFActivity extends DroidGap {
 		startActivity(i);
 	}
 
-	private Uri takeScreenShot() {
-		Uri screenshoturi = null;
+	private File takeScreenShot() {
 		Picture screenshot = appView.capturePicture();
 		Bitmap bitmap = Bitmap.createBitmap(screenshot.getWidth(),
 				screenshot.getHeight(), Bitmap.Config.ARGB_8888);
@@ -97,17 +101,65 @@ public class WebODFActivity extends DroidGap {
 			bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
 			out.flush();
 			out.close();
-			// start path from /mnt/sdcard to make gmail mail client work
-			screenshoturi = Uri.fromFile(new File("/mnt/sdcard/../.."
-					+ getFilesDir() + "/" + filename));
-
 		} catch (IOException e) {
+			return null;
 		}
-		return screenshoturi;
+		return new File(getFilesDir(), filename);
+	}
+
+	Uri getApplicationFileUri(String filename) {
+		// start path from /mnt/sdcard to make gmail mail client work
+		return Uri.fromFile(new File("/mnt/sdcard/../.." + getFilesDir() + "/"
+				+ filename));
+	}
+
+	File createZip(File files[]) {
+		final int buffersize = 2048;
+		String zipfile = "issuereport.zip";
+		try {
+			BufferedInputStream origin = null;
+			FileOutputStream dest = openFileOutput(zipfile,
+					Context.MODE_WORLD_READABLE);
+			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(
+					dest));
+			byte data[] = new byte[buffersize];
+			for (int i = 0; i < files.length; i++) {
+				FileInputStream fi = new FileInputStream(files[i]);
+				origin = new BufferedInputStream(fi, buffersize);
+				ZipEntry entry = new ZipEntry(files[i].getName());
+				out.putNextEntry(entry);
+				int count;
+				while ((count = origin.read(data, 0, buffersize)) != -1) {
+					out.write(data, 0, count);
+				}
+				origin.close();
+			}
+			out.close();
+			dest.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return new File(getFilesDir(), zipfile);
 	}
 
 	private void reportIssue() {
-		Uri screenshoturi = takeScreenShot();
+		File screenshotfile = takeScreenShot();
+		File odffile = null;
+		File attachmentfile = null;
+		String type = "text/plain";
+		if (screenshotfile != null) {
+			if (odffile != null) {
+				type = "application/zip";
+				attachmentfile = createZip(new File[] { screenshotfile });
+			} else {
+				type = "image/png";
+				attachmentfile = screenshotfile;
+			}
+		} else if (odffile != null) {
+			attachmentfile = odffile;
+			type = "application/vnd.oasis.opendocument.text";
+		}
 
 		Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 		String aEmailList[] = { "WebODF <kogmbh-android@kogmbh.com>",
@@ -115,8 +167,14 @@ public class WebODFActivity extends DroidGap {
 		emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);
 		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
 				"Issue report");
-		emailIntent.setType("image/png");
-		emailIntent.putExtra(Intent.EXTRA_STREAM, screenshoturi);
+
+		if (attachmentfile != null) {
+			// start path from /mnt/sdcard to make gmail mail client work
+			Uri uri = Uri.fromFile(new File("/mnt/sdcard/../.."
+					+ attachmentfile.getAbsolutePath()));
+			emailIntent.putExtra(Intent.EXTRA_STREAM, uri);
+		}
+		emailIntent.setType(type);
 		emailIntent.putExtra(Intent.EXTRA_TEXT, "My message body.");
 		startActivity(emailIntent);
 	}
