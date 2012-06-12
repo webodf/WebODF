@@ -379,7 +379,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function loadContentXmlAsFragments(filename, handler) {
         // the javascript implementation simply reads the file
-        loadAsString(filename, function (err, data) {
+        zip.loadAsString(filename, function (err, data) {
             if (err) {
                 return handler.rootElementReady(err);
             }
@@ -419,7 +419,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         });
     }
     function loadAsDOM(filename, callback) {
-        loadAsString(filename, function (err, xmldata) {
+        zip.loadAsString(filename, function (err, xmldata) {
             if (err) {
                 callback(err, null);
                 return;
