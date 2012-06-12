@@ -25,7 +25,8 @@ import com.phonegap.DroidGap;
 public class WebODFActivity extends DroidGap {
 
 	private String path;
-
+    private ZipReader zipreader;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,8 @@ public class WebODFActivity extends DroidGap {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		zipreader = new ZipReader(appView);
+		appView.addJavascriptInterface(zipreader, "zipreader");
 		if (path == null) {
 			return;
 		}
