@@ -10,7 +10,7 @@ COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/res
     drawable-hdpi/ic_launcher.png drawable-ldpi/ic_launcher.png
     drawable/icon.png drawable-mdpi/ic_launcher.png values/strings.xml
     xml/phonegap.xml xml/plugins.xml layout/selector.xml
-    layout/main.xml layout/listitem.xml)
+    layout/main.xml layout/listitem.xml menu/main.xml)
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     src/org/webodf/WebODFActivity.java libs/phonegap-1.4.1.jar
     AndroidManifest.xml)
