@@ -1,15 +1,5 @@
-/*global PhoneGap, core, XMLHttpRequest*/
+/*global runtime, core, XMLHttpRequest*/
 
-var ZipPlugin = {
-    loadAsString: function (zippath, entrypath, success, fail) {
-        "use strict";
-        return PhoneGap.exec(success, fail, "ZipClass", "loadAsString", [zippath, entrypath]);
-    },
-    loadAsDataURL: function (zippath, entrypath, mimetype, success, fail) {
-        "use strict";
-        return PhoneGap.exec(success, fail, "ZipClass", "loadAsDataURL", [zippath, entrypath, mimetype]);
-    }
-};
 core.Zip = function (url, entriesReadCallback) {
     "use strict";
     // remove 'odf:' prefix
@@ -26,20 +16,20 @@ core.Zip = function (url, entriesReadCallback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
             var xml;
-            console.log("loading " + filename + " status " + xhr.status + " readyState " + xhr.readyState);
+            runtime.log("loading " + filename + " status " + xhr.status + " readyState " + xhr.readyState);
             if (xhr.readyState === 4) {
                 xml = xhr.responseXML;
-                console.log("done accessing responseXML " + xml + " " + (xhr.responseText && xhr.responseText.length)
+                runtime.log("done accessing responseXML " + xml + " " + (xhr.responseText && xhr.responseText.length)
                     + " " + xhr.statusText);
-                console.log("statusText " + xhr.statusText);
+                runtime.log("statusText " + xhr.statusText);
                 if (xhr.status === 0 && !xml) {
                     // empty files are considered as errors
-                    callback("File " + path + " is not valid XML.");
+                    callback("File " + filename + " is not valid XML.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     try {
                         callback(null, xml);
                     } catch (e) {
-                        console.log(e);
+                        runtime.log(e);
                     }
                 } else {
                     // report error
@@ -53,14 +43,6 @@ core.Zip = function (url, entriesReadCallback) {
     };
     this.loadAsDataURL = function (filename, mimetype, callback) {
         callback(null, "http://zipserver" + url + "?" + filename);
-        /*
-        ZipPlugin.loadAsDataURL(url, filename, mimetype,
-            function (content) {
-                callback(null, content);
-            },
-            function (err) { callback(err, null); }
-            );
-            */
     };
     this.getEntries = function () {
         alert("getEntries");
