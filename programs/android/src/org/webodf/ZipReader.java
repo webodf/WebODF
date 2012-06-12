@@ -2,9 +2,9 @@ package org.webodf;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import android.webkit.WebView;
@@ -19,44 +19,61 @@ public class ZipReader {
 		this.view = view;
 	}
 
-	public void loadAsString(String url, String filename, String callbackname) {
-		String err = null;
-		if (this.url != url) {
-			try {
-				zip = new ZipFile(new File(url), ZipFile.OPEN_READ);
-			} catch (IOException e) {
-				// TODO: escape the filename
-				err = "Could not open zip file " + filename + ".";
-			}
+	private InputStream openZipEntry(String url, String filename)
+			throws IOException {
+		if (zip == null || this.url != url) {
+			zip = new ZipFile(new File(url), ZipFile.OPEN_READ);
+			this.url = url;
 		}
+		return zip.getInputStream(zip.getEntry(filename));
+	}
+
+	public void loadAsString(String url, String filename, String callbackname) {
 		StringWriter sw = new StringWriter();
-		if (err == null) {
-			ZipEntry e = zip.getEntry(filename);
-			try {
-				InputStreamReader reader = new InputStreamReader(
-						zip.getInputStream(e));
-				int c;
-				while ((c = reader.read()) != -1) {
-					if (c == '"') {
-						sw.append("\\\"");
-					} else if (c != '\r' && c != '\n') {
-						sw.append((char) c);
-					}
+		String err = null;
+		try {
+			InputStreamReader reader = new InputStreamReader(openZipEntry(url,
+					filename));
+			int c;
+			while ((c = reader.read()) != -1) {
+				if (c == '"') {
+					sw.append("\\\"");
+				} else if (c != '\r' && c != '\n') {
+					sw.append((char) c);
 				}
-				reader.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				// TODO: escape the filename
-				err = "Could not read zip file " + filename + ".";
 			}
+			reader.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			// TODO: escape the filename
+			err = "Could not read file " + filename + " from " + url;
 		}
 		call(callbackname, err, sw.toString());
 	}
 
 	public void loadAsDataURL(String url, String filename, String mimetype,
 			String callbackname) {
-		StringWriter sw = new StringWriter();
 		String err = null;
+		StringWriter sw = new StringWriter();
+		sw.write("data:");
+		if (mimetype != null) {
+			sw.write(mimetype);
+		}
+		sw.write(";base64,");
+		Base64OutputStream base64 = new Base64OutputStream(sw);
+		InputStream fi;
+		try {
+			fi = openZipEntry(url, filename);
+			int c;
+			while ((c = fi.read()) != -1) {
+				base64.write(c);
+			}
+			fi.close();
+			base64.close();
+			sw.close();
+		} catch (IOException e) {
+			err = "Could not read file " + filename + " from " + url;
+		}
 		call(callbackname, err, sw.toString());
 	}
 
