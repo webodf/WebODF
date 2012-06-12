@@ -4,7 +4,7 @@ COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES})
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/assets/www
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www
-    index.html icon.png phonegap-1.4.1.js)
+    index.html icon.png phonegap-1.4.1.js nativezip.js)
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/res
     ${CMAKE_CURRENT_BINARY_DIR}/res
     drawable-hdpi/ic_launcher.png drawable-ldpi/ic_launcher.png

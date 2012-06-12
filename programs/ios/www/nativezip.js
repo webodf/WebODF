@@ -1,4 +1,4 @@
-/*global PhoneGap, core*/
+/*global PhoneGap, core, XMLHttpRequest*/
 
 var ZipPlugin = {
     loadAsString: function (zippath, entrypath, success, fail) {
