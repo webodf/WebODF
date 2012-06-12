@@ -21,9 +21,9 @@
     <plugin name="App" value="org.apache.cordova.App"/>
     <plugin name="Device" value="org.apache.cordova.Device"/>
     <plugin name="File" value="org.apache.cordova.FileUtils"/>
-    <plugin name="FileTransfer" value="org.apache.cordova.FileTransfer"/>
-<!--
     <plugin name="Accelerometer" value="org.apache.cordova.AccelListener"/>
+<!--
+    <plugin name="FileTransfer" value="org.apache.cordova.FileTransfer"/>
     <plugin name="Geolocation" value="org.apache.cordova.GeoBroker"/>
     <plugin name="Compass" value="org.apache.cordova.CompassListener"/>
     <plugin name="Media" value="org.apache.cordova.AudioHandler"/>
