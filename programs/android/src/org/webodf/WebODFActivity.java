@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.cordova.DroidGap;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,8 +21,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
-import com.phonegap.DroidGap;
 
 public class WebODFActivity extends DroidGap {
 
