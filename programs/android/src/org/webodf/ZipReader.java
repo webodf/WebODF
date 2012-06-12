@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
 
 import android.webkit.WebView;
 
@@ -20,7 +21,7 @@ public class ZipReader {
 	}
 
 	private InputStream openZipEntry(String url, String filename)
-			throws IOException {
+			throws IOException, NullPointerException {
 		if (zip == null || this.url != url) {
 			zip = new ZipFile(new File(url), ZipFile.OPEN_READ);
 			this.url = url;
@@ -43,8 +44,7 @@ public class ZipReader {
 				}
 			}
 			reader.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (Exception e) {
 			// TODO: escape the filename
 			err = "Could not read file " + filename + " from " + url;
 		}
@@ -71,7 +71,7 @@ public class ZipReader {
 			fi.close();
 			base64.close();
 			sw.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			err = "Could not read file " + filename + " from " + url;
 		}
 		call(callbackname, err, sw.toString());

@@ -12,7 +12,10 @@ COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/res
     xml/phonegap.xml xml/plugins.xml layout/selector.xml
     layout/main.xml layout/listitem.xml menu/main.xml)
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-    src/org/webodf/WebODFActivity.java libs/phonegap-1.4.1.jar
+    src/org/webodf/WebODFActivity.java
+    src/org/webodf/ZipReader.java
+    src/org/webodf/Base64OutputStream.java
+    libs/phonegap-1.4.1.jar
     AndroidManifest.xml)
 COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www webodf.css)

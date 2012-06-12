@@ -2,7 +2,6 @@
 
 core.Zip = function (url, entriesReadCallback) {
     "use strict";
-console.log("core.Zip");
     // remove 'odf:' prefix
     url = url.substr(4);
     var zip = this,
@@ -11,7 +10,6 @@ console.log("core.Zip");
         alert("load");
     };
     this.loadAsString = function (filename, callback) {
-console.log("this.loadAsString");
         var callbackname = 'callback' + String(Math.random()).substring(2);
         window[callbackname] = function (err, string) {
             window[callbackname] = undefined;
@@ -20,7 +18,6 @@ console.log("this.loadAsString");
         window.zipreader.loadAsString(url, filename, callbackname);
     };
     this.loadAsDataURL = function (filename, mimetype, callback) {
-console.log("this.loadAsDataURL");
         var callbackname = 'callback' + String(Math.random()).substring(2);
         window[callbackname] = function (err, dataurl) {
             window[callbackname] = undefined;
@@ -52,5 +49,4 @@ console.log("this.loadAsDataURL");
         alert("write");
     };
     entriesReadCallback(null, zip);
-console.log("did core.Zip");
 };
