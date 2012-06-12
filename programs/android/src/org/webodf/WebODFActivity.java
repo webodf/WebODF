@@ -148,7 +148,7 @@ public class WebODFActivity extends DroidGap {
 
 	private void reportIssue() {
 		File screenshotfile = takeScreenShot();
-		File odffile = null;
+		File odffile = (path == null) ?null :new File(path);
 		File attachmentfile = null;
 		String type = "text/plain";
 		if (screenshotfile != null) {

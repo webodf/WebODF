@@ -22,7 +22,7 @@ public class ZipReader {
 	private InputStream openZipEntry(String url, String filename)
 			throws IOException, NullPointerException {
 		if (zip == null || this.url != url) {
-			zip = new ZipFile(new File(url), ZipFile.OPEN_READ);
+			zip = new ZipFile(new File(url.substring(7)), ZipFile.OPEN_READ);
 			this.url = url;
 		}
 		return zip.getInputStream(zip.getEntry(filename));
