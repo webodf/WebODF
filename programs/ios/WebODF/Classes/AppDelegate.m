@@ -35,7 +35,7 @@
     #import "CDVPlugin.h"
     #import "CDVURLProtocol.h"
 #endif
-
+#import "WebViewCache.h"
 
 @implementation AppDelegate
 
@@ -110,7 +110,15 @@
     
     [self.window addSubview:self.viewController.view];
     [self.window makeKeyAndVisible];
-    
+
+    NSString *path = @"./cache";
+    NSUInteger diskCapacity = 1*1024*1024;
+    NSUInteger memoryCapacity = 0*1024*1024;
+
+    WebViewCache *cache = [[WebViewCache alloc] initWithMemoryCapacity: memoryCapacity
+                           diskCapacity: diskCapacity diskPath: path];
+    [NSURLCache setSharedURLCache:cache];
+
     return YES;
 }
 
