@@ -39,7 +39,7 @@
 
 @implementation AppDelegate
 
-@synthesize window, viewController;
+@synthesize window, viewController, cache;
 
 - (id) init
 {	
@@ -115,7 +115,7 @@
     NSUInteger diskCapacity = 1*1024*1024;
     NSUInteger memoryCapacity = 0*1024*1024;
 
-    WebViewCache *cache = [[WebViewCache alloc] initWithMemoryCapacity: memoryCapacity
+    cache = [[WebViewCache alloc] initWithMemoryCapacity: memoryCapacity
                            diskCapacity: diskCapacity diskPath: path];
     [NSURLCache setSharedURLCache:cache];
 

@@ -23,6 +23,8 @@
                       textEncodingName:nil];
         NSCachedURLResponse *cachedResponse = [[NSCachedURLResponse alloc] 
             initWithResponse:response data:somedata];
+        [response autorelease];
+        [cachedResponse autorelease];
         return cachedResponse;
     }
     return [super cachedResponseForRequest:request];

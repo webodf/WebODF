@@ -21,31 +21,37 @@
     BOOL error = TRUE;
     if (!unzipFile) {
 		jsString = [[NSString alloc] initWithString: @"cannot open file"];
+        [jsString autorelease];
     } else {
         path = [ entryPath cStringUsingEncoding:NSUTF8StringEncoding ];
         int r = unzLocateFile(unzipFile, path, 2);
         if (r != UNZ_OK) {
 		    jsString = [[NSString alloc] initWithString: @"cannot find entry"];
+        [jsString autorelease];
         } else {
             unz_file_info info;
             r = unzGetCurrentFileInfo(unzipFile, &info, 0, 0, 0, 0, 0, 0);
             if (r != UNZ_OK) {
 		        jsString = [[NSString alloc] initWithString: @"cannot determine size"];
+        [jsString autorelease];
             } else {
                 r = unzOpenCurrentFile(unzipFile);
                 if (r != UNZ_OK) {
 		            jsString = [[NSString alloc] initWithString: @"cannot open entry"];
+        [jsString autorelease];
                 } else {
                     char* contents = malloc(info.uncompressed_size);
                     r = unzReadCurrentFile(unzipFile, contents, info.uncompressed_size);
                     if (r != info.uncompressed_size) {
                         jsString = [[NSString alloc] initWithString: @"cannot uncompress file"];
+        [jsString autorelease];
                     } else {
                         if (base64) {
                             NSData* readData = [NSData dataWithBytes:(const void *)contents length:sizeof(unsigned char)*info.uncompressed_size];
                             jsString = [NSString stringWithFormat:@"data:%@;base64,%@", mimetype, [readData base64EncodedString]];
                         } else {                    
                             jsString = [[NSString alloc] initWithUTF8String: contents];
+        [jsString autorelease];
                         }
                     }
                     unzCloseCurrentFile(unzipFile);
@@ -56,6 +62,7 @@
         }
         unzClose(unzipFile);
     }
+    
     CDVPluginResult* pluginResult = [CDVPluginResult
                                   resultWithStatus:CDVCommandStatus_OK
                                   messageAsString: jsString
@@ -65,6 +72,7 @@
     } else {
         [self writeJavascript: [pluginResult toErrorCallbackString:self.callbackID]];
     }
+    //free(jsString);    [jsString release];
 }
 
 -(void)loadAsString:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options  

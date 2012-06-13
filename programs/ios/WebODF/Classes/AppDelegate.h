@@ -32,6 +32,7 @@
 #else
     #import "CDVViewController.h"
 #endif
+#import "WebViewCache.h"
 
 
 @interface AppDelegate : NSObject < UIApplicationDelegate > {
@@ -45,6 +46,7 @@
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet CDVViewController* viewController;
+@property (nonatomic, retain) IBOutlet WebViewCache* cache;
 
 @end
 
