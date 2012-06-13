@@ -119,6 +119,21 @@
                            diskCapacity: diskCapacity diskPath: path];
     [NSURLCache setSharedURLCache:cache];
 
+    // copy welcome.odt to the Documents folder
+    
+
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error;
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+
+    NSString *txtPath = [documentsDirectory stringByAppendingPathComponent:@"welcome.odt"];
+
+    if ([fileManager fileExistsAtPath:txtPath] == NO) {
+        NSString *resourcePath = [[NSBundle mainBundle] pathForResource:@"welcome" ofType:@"odt"];
+        [fileManager copyItemAtPath:resourcePath toPath:txtPath error:&error];
+    }
+
     return YES;
 }
 

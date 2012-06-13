@@ -39,6 +39,7 @@
 		CB533DD114DABDA600C733F6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CB533DD014DABDA600C733F6 /* AppDelegate.m */; };
 		CB533DD414DABDA600C733F6 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB533DD314DABDA600C733F6 /* MainViewController.m */; };
 		CB533DD614DABDA600C733F6 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB533DD514DABDA600C733F6 /* MainViewController.xib */; };
+		CB588C8B1588F70900D9CC12 /* welcome.odt in Resources */ = {isa = PBXBuildFile; fileRef = CB588C8A1588F70900D9CC12 /* welcome.odt */; };
 		CBD2B77314FF8E9700FC3A44 /* NativeZip.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD2B77214FF8E9700FC3A44 /* NativeZip.m */; };
 		CBDCA69D1504EAEB00C706C7 /* WebViewCache.m in Sources */ = {isa = PBXBuildFile; fileRef = CBDCA69C1504EAEB00C706C7 /* WebViewCache.m */; };
 		CBE61BDB1588AC0900970DD8 /* Cordova.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBE61BDA1588AC0900970DD8 /* Cordova.framework */; };
@@ -82,6 +83,7 @@
 		CB533DD214DABDA600C733F6 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainViewController.h; path = Classes/MainViewController.h; sourceTree = "<group>"; };
 		CB533DD314DABDA600C733F6 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MainViewController.m; path = Classes/MainViewController.m; sourceTree = "<group>"; };
 		CB533DD514DABDA600C733F6 /* MainViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainViewController.xib; path = Classes/MainViewController.xib; sourceTree = "<group>"; };
+		CB588C8A1588F70900D9CC12 /* welcome.odt */ = {isa = PBXFileReference; lastKnownFileType = file; path = welcome.odt; sourceTree = "<group>"; };
 		CBD2B77114FF8E9700FC3A44 /* NativeZip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeZip.h; path = Classes/NativeZip.h; sourceTree = "<group>"; };
 		CBD2B77214FF8E9700FC3A44 /* NativeZip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NativeZip.m; path = Classes/NativeZip.m; sourceTree = "<group>"; };
 		CBDCA69B1504EAEB00C706C7 /* WebViewCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebViewCache.h; path = Classes/WebViewCache.h; sourceTree = "<group>"; };
@@ -125,6 +127,7 @@
 		CB533D7E14DABDA500C733F6 = {
 			isa = PBXGroup;
 			children = (
+				CB588C8A1588F70900D9CC12 /* welcome.odt */,
 				CBE61BDA1588AC0900970DD8 /* Cordova.framework */,
 				CB29ECC214FFBC5500CEAEE3 /* libz.dylib */,
 				CB29ECC014FFBC1B00CEAEE3 /* mztools.c */,
@@ -296,6 +299,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB588C8B1588F70900D9CC12 /* welcome.odt in Resources */,
 				CB533DAF14DABDA600C733F6 /* InfoPlist.strings in Resources */,
 				CB533DB914DABDA600C733F6 /* Localizable.strings in Resources */,
 				CB533DC014DABDA600C733F6 /* icon.png in Resources */,
