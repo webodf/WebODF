@@ -1,6 +1,6 @@
-#import <PhoneGap/PGPlugin.h>
+#import <Cordova/CDVPlugin.h>
 
-@interface NativeZip : PGPlugin {
+@interface NativeZip : CDVPlugin {
      NSString* callbackID;
 }
 

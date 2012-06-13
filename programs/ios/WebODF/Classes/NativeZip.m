@@ -56,8 +56,8 @@
         }
         unzClose(unzipFile);
     }
-    PluginResult* pluginResult = [PluginResult
-                                  resultWithStatus:PGCommandStatus_OK
+    CDVPluginResult* pluginResult = [CDVPluginResult
+                                  resultWithStatus:CDVCommandStatus_OK
                                   messageAsString: jsString
                                   ];
     if (!error) {
