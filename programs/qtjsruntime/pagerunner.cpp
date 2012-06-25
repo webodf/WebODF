@@ -57,7 +57,8 @@ PageRunner::PageRunner(const QStringList& args)
     nativeio = new NativeIO(this, QFileInfo(arguments[0]).dir(),
                             QDir::current());
     if (url.scheme() == "file" || url.isRelative()) {
-        QFileInfo info(url.toLocalFile());
+        QFileInfo info(arguments[0]);
+        url = QUrl::fromLocalFile(info.absoluteFilePath());
         if (!info.isReadable() || !info.isFile()) {
             QTextStream err(stderr);
             err << "Cannot read file '" + url.toString() + "'.\n";
@@ -100,7 +101,8 @@ PageRunner::PageRunner(const QStringList& args)
         tmp.open();
         tmp.write(html);
         tmp.close();
-        mainFrame()->load(tmp.fileName());
+        QFileInfo info(tmp.fileName());
+        mainFrame()->load(QUrl::fromLocalFile(info.absoluteFilePath()));
     } else {
         // Make the url absolute. If it is not done here, QWebFrame will do
         // it, and it will lose the query and fragment part.
