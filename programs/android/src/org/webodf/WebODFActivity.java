@@ -159,7 +159,7 @@ public class WebODFActivity extends DroidGap {
 		if (screenshotfile != null) {
 			if (odffile != null) {
 				type = "application/zip";
-				attachmentfile = createZip(new File[] { screenshotfile });
+				attachmentfile = createZip(new File[] { screenshotfile, odffile });
 			} else {
 				type = "image/png";
 				attachmentfile = screenshotfile;
