@@ -54,7 +54,13 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         currentPath = path;
         overridePath = overridePathPrefix + path;
         data = null;
-        window.resolveLocalFileSystemURI("file://" + path, function (file) {
+        // the url of a file can start with file:// or not depending on the
+        // operating system, notably this is different between iOS and android
+        var filepath = path;
+        if (filepath.substr(0, 7) !== "file://") {
+            filepath = "file://" + filepath;
+        }
+        window.resolveLocalFileSystemURI(filepath, function (file) {
             var reader = new FileReader();
             // so far phonegap is very limited, ideally it would implement
             // readAsArrayBuffer and slice() on the File object
