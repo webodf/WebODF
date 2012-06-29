@@ -3,7 +3,6 @@
  <head>
   <title>WebODF</title>
   <link href="sencha-touch.css" rel="stylesheet" type="text/css" />
-  <link href="webodf.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="cordova-1.8.0.js"></script>
   <script type="text/javascript" src="sencha-touch.js"></script>
   <script type="text/javascript" src="webodf.js"></script>
@@ -19,7 +18,8 @@
   <script type="text/javascript">
 var applicationReady = false,
     deviceReady = false,
-    startScanningDirectories;
+    startScanningDirectories,
+    application;
 document.addEventListener("deviceready", function () {
     deviceReady = true;
     if (applicationReady) {
@@ -31,6 +31,7 @@ document.addEventListener("deviceready", function () {
  */
 onApplicationLaunch = function (app) {
     "use strict";
+    application = app;
     applicationReady = true;
     startScanningDirectories = function () {
         if (typeof invokeString !== "undefined" && invokeString) {
@@ -42,6 +43,9 @@ onApplicationLaunch = function (app) {
         startScanningDirectories();
     }
 };
+function handleOpenURL(url) {
+    application.openUrl(url);
+}
   </script>
  </head><body></body>
 </html>
