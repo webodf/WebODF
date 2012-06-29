@@ -16,7 +16,8 @@ COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     src/org/webodf/ZipReader.java
     src/org/webodf/Base64OutputStream.java
     libs/cordova-1.8.0.jar
-    AndroidManifest.xml)
+    AndroidManifest.xml
+    .classpath .project)
 COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www webodf.css)
 COPY_FILES(APKDEPS ${CMAKE_BINARY_DIR}/webodf
