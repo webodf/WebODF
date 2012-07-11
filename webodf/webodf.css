@@ -153,26 +153,20 @@ draw|image {
 draw|frame > draw|image:nth-of-type(n+2) {
   display: none;
 }
+text|list:before {
+    display: none;
+    content:"";
+}
 text|list {
-    display: block;
-    padding-left: 1.5em;
     counter-reset: list;
 }
 text|list-item {
     display: block;
 }
-text|list-item:before {
-    display: inline-block;
-    content: '•';
-    counter-increment: list;
-    width: 0.5em;
-    margin-left: -0.5em;
-    padding: 0px;
-    border: 0px;
+text|number {
+    display:none;
 }
-text|list-item > *:first-child {
-    display: inline-block;
-}
+
 text|a {
     color: blue;
     text-decoration: underline;

@@ -46,6 +46,7 @@ odf.Style2CSS = function Style2CSS() {
         svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        xmlns = "http://www.w3.org/XML/1998/namespace",
         namespaces = {
             "draw": drawns,
             "fo": fons,
@@ -55,7 +56,8 @@ odf.Style2CSS = function Style2CSS() {
             "svg": svgns,
             "table": tablens,
             "text": textns,
-            "xlink": xlinkns
+            "xlink": xlinkns,
+            "xml": xmlns
         },
 
         familynamespaceprefixes = {
@@ -517,7 +519,9 @@ odf.Style2CSS = function Style2CSS() {
             stylemap = {'1': 'decimal', 'a': 'lower-latin', 'A': 'upper-latin',
                 'i': 'lower-roman', 'I': 'upper-roman'},
             content = "";
+
         content = prefix || "";
+
         if (stylemap.hasOwnProperty(style)) {
             content += " counter(list, " + stylemap[style] + ")";
         } else if (style) {
@@ -555,19 +559,61 @@ odf.Style2CSS = function Style2CSS() {
      * @return {undefined}
      */
     function addListStyleRule(sheet, name, node, itemrule) {
-        var selector = 'text|list[text|style-name="' + name +
-                '"]',
+        var selector = 'text|list[text|style-name="' + name + '"]',
             level = node.getAttributeNS(textns, "level"),
+            itemSelector,
+            listItemRule,
+            listLevelProps = node.firstChild, // {Element}
+            listLevelLabelAlign = listLevelProps.firstChild, // {Element}
+            labelAlignAttr,
+            bulletIndent,
+            listIndent,
+            bulletWidth,
             rule = "";
+
+
+
+
+        if (listLevelLabelAlign) {
+            labelAlignAttr = listLevelLabelAlign.attributes;
+            bulletIndent = labelAlignAttr["fo:text-indent"].value;
+            listIndent = labelAlignAttr["fo:margin-left"].value;
+        }
+
+        // If no values are specified, use default values
+        if (!bulletIndent) {
+            bulletIndent = "-0.6cm";
+        }
+
+        // bulletWidth is the negative of bulletIndent
+        // Obtain this my stripping the fist character
+        if(bulletIndent.charAt(0)==='-') {
+            bulletWidth = bulletIndent.substring(1);
+        }
+        else {
+            bulletWidth = "-" + bulletIndent;
+        }
+
         level = level && parseInt(level, 10);
         while (level > 1) {
-            selector += " > text|list-item > text|list";
+            selector += ' > text|list-item > text|list';
             level -= 1;
         }
-        selector += " > list-item:before";
+        itemSelector = selector;
+        itemSelector += ' > text|list-item > *:not(text|list):first-child';
+        listItemRule = itemSelector + '{margin-left:' + listIndent + ';}';
+        // insert a block before every immediate child of the list-item, except for lists
+        selector += ' > text|list-item > *:not(text|list):first-child:before';
         rule = itemrule;
-        rule = selector + '{' + rule + '}';
+        rule = selector + '{' + rule + ';';
+
+        rule += 'counter-increment:list;';
+        rule += 'margin-left:' + bulletIndent +';';
+        rule += 'width:' + bulletWidth + ';';
+        rule += 'display:inline-block}';
+
         try {
+            sheet.insertRule(listItemRule, sheet.cssRules.length);
             sheet.insertRule(rule, sheet.cssRules.length);
         } catch (e) {
             throw e;

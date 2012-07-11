@@ -50,6 +50,7 @@ odf.StyleInfo = function StyleInfo() {
         svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        xmlns = "http://www.w3.org/XML/1998/namespace",
         elementstyles = {
             "text": [
                 { ens: stylens, en: 'tab-stop', ans: stylens, a: 'leader-text-style'},

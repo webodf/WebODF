@@ -267,10 +267,12 @@ odf.OdfCanvas = (function () {
         drawns  = namespaces.draw,
         fons    = namespaces.fo,
         officens = namespaces.office,
+        stylens = namespaces.style,
         svgns   = namespaces.svg,
         tablens = namespaces.table,
         textns  = namespaces.text,
         xlinkns = namespaces.xlink,
+        xmlns = namespaces.xml,
         window = runtime.getWindow(),
         xpath = new xmldom.XPath(),
         /**@const@type{!Object.<!string,!Array.<!Function>>}*/
@@ -617,6 +619,156 @@ odf.OdfCanvas = (function () {
             loadVideo('video' + String(i), container, node, stylesheet);
         }
     }
+
+    /**
+     * @param {!Element} node
+     * @return {!string}
+     */
+    function getNumberRule(node) {
+        var style = node.getAttributeNS(stylens, "num-format"),
+                 suffix = node.getAttributeNS(stylens, "num-suffix"),
+                 prefix = node.getAttributeNS(stylens, "num-prefix"),
+                 rule = "",
+                 stylemap = {'1': 'decimal', 'a': 'lower-latin', 'A': 'upper-latin',
+                 'i': 'lower-roman', 'I': 'upper-roman'},
+                 content = "";
+
+                 content = prefix || "";
+
+                 if (stylemap.hasOwnProperty(style)) {
+                     content += " counter(list, " + stylemap[style] + ")";
+                 } else if (style) {
+                     content += "'" + style + "';";
+                 } else {
+                     content += " ''";
+                 }
+                 if (suffix) {
+                     content += " '" + suffix + "'";
+                 }
+                 rule = "content: " + content + ";";
+                 return rule;
+    }
+    /**
+     * @param {!Element} node
+     * @return {!string}
+     */
+    function getImageRule(node) {
+        var rule = "content: none;";
+        return rule;
+    }
+    /**
+     * @param {!Element} node
+     * @return {!string}
+     */
+    function getBulletRule(node) {
+        var rule = "",
+        bulletChar = node.getAttributeNS(textns, "bullet-char");
+        return "content: '" + bulletChar + "';";
+    }
+
+    function getBulletsRule(node) {
+        var itemrule;
+
+        if (node.localName === "list-level-style-number") {
+            itemrule = getNumberRule(node);
+        } else if (node.localName === "list-level-style-image") {
+            itemrule = getImageRule(node);
+        } else if (node.localName === "list-level-style-bullet") {
+            itemrule = getBulletRule(node);
+        }
+
+        return itemrule;
+    }
+    /**
+     * Load all the lists that are inside an odf element, and correct numbering.
+     * @param {!Object} container
+     * @param {!Element} odffragment
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function loadLists(container, odffragment, stylesheet) {
+        var i,
+        lists,
+        svgns   = namespaces.svg,
+        node,
+        id,
+        continueList,
+        styleName,
+        rule,
+        listMap = {},
+        parentList,
+        listStyles,
+        listStyle,
+        listStyleMap = {},
+        bulletRule;
+
+        listStyles = window.document.getElementsByTagNameNS(textns, "list-style");
+        for(i=0; i< listStyles.length; i += 1) {
+            node = /**@type{!Element}*/(listStyles.item(i));
+            styleName = node.getAttributeNS(stylens, "name");
+
+            if (styleName) {
+                listStyleMap[styleName] = node;
+            }
+        }
+
+        lists = odffragment.getElementsByTagNameNS(textns, 'list');
+
+        for (i = 0; i < lists.length; i += 1) {
+            node = /**@type{!Element}*/(lists.item(i));
+
+            id = node.getAttributeNS(xmlns, "id");
+
+            if(id) {
+                continueList = node.getAttributeNS(textns,"continue-list");
+                node.setAttribute("id", id);
+                rule = 'text|list#' + id + ' > text|list-item > *:first-child:before {';
+
+                styleName = node.getAttributeNS(textns, 'style-name');
+                if (styleName) {
+                    node = listStyleMap[styleName];
+                    bulletRule = getBulletsRule(node.firstChild);
+                }
+
+                if(continueList) {
+                    parentList = listMap[continueList];
+                    while(parentList) {
+                        continueList = parentList;
+                        parentList = listMap[continueList];
+                    }
+                    rule += 'counter-increment:' + continueList + ';';
+
+                    if (bulletRule) {
+                        bulletRule = bulletRule.replace('list', continueList);
+                        rule += bulletRule;
+                    }
+                    else {
+                        rule += 'content:counter(' + continueList + ');';
+                    }
+                } else {
+                    continueList = "";
+                    if (bulletRule) {
+                        bulletRule = bulletRule.replace('list', id);
+                        rule += bulletRule;
+                    }
+                    else {
+                        rule += 'content: counter(' + id + ');';
+                    }
+                    rule += 'counter-increment:' + id + ';';
+                    stylesheet.insertRule('text|list#' + id + ' {counter-reset:'+ id +'}', stylesheet.cssRules.length);
+                }
+                rule += '}';
+
+                listMap[id] = continueList;
+
+                if (rule) {
+                    // Add this stylesheet
+                    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+                }
+            }
+        }
+    }
+
     function addWebODFStyleSheet(document) {
         var head = document.getElementsByTagName('head')[0],
             style;
@@ -718,6 +870,7 @@ odf.OdfCanvas = (function () {
             modifyTables(container, odfnode.body, css);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
+            loadLists(container, odfnode.body, css);
             fixContainerSize();
         }
         /**
