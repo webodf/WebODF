@@ -61,7 +61,7 @@ odf.CommandLineTools = function CommandLineTools() {
     /**
      * @param {!string} inputfilepath
      * @param {!Document} document
-     * @param {!function(string=):undefined} callback
+     * @param {!function(*):undefined} callback
      * @return {undefined}
      */
     this.render = function (inputfilepath, document, callback) {

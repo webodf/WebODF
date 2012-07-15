@@ -37,7 +37,7 @@ function checkWithJSLINT(file) {
     "use strict";
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
-            anon:       false, // true, if the space may be omitted in anonymous function declarations
+            anon:       false, // if the space may be omitted in anonymous function declarations
             bitwise:    false, // if bitwise operators should be allowed
             browser:    false, // if the standard browser globals should be predefined
             cap:        false, // if upper case HTML should be allowed
@@ -50,28 +50,27 @@ function checkWithJSLINT(file) {
             evil:       false, // if eval should be allowed
             forin:      false, // if for in statements need not filter
             fragment:   false, // if HTML fragments should be allowed
-            indent:     4, // the indentation factor
-            maxerr:     10, // the maximum number of errors to allow
-            //maxlen:     300, // the maximum length of a source line
+            indent:     4, //the indentation factor
+            maxerr:     10, //the maximum number of errors to allow
+            //maxlen:   300  the maximum length of a source line
             newcap:     false, // if constructor names capitalization is ignored
             node:       false, // if Node.js globals should be predefined
             nomen:      false, // if names may have dangling _
             on:         false, // if HTML event handlers should be allowed
-            passfail:   true,  // if the scan should stop on first error
+            passfail:   false, // if the scan should stop on first error
             plusplus:   false, // if increment/decrement should be allowed
             properties: false, // if all property names must be declared with /*properties*/
             regexp:     false, // if the . should be allowed in regexp literals
             rhino:      false, // if the Rhino environment globals should be predefined
             undef:      false, // if variables can be declared out of order
             unparam:    false, // if unused parameters should be tolerated
-            safe:       false, // if use of some browser features should be restricted
             sloppy:     false, // if the 'use strict'; pragma is optional
-            stupid:     true,  // true if stupid practices are tolerated
+            stupid:     true, // if really stupid practices are tolerated
             sub:        false, // if all forms of subscript notation are tolerated
+            todo:       true, // if TODO comments are tolerated
             vars:       false, // if multiple var statements per function should be allowed
-            white:      true,  // if sloppy whitespace is tolerated
-            widget:     false, // if the Yahoo Widgets globals should be predefined
-            windows:    false  // if MS Windows-specific globals should be predefined
+            white:      true, // if sloppy whitespace is tolerated
+            windows:    false // if MS Windows-specific globals should be predefined
         },
         data, result, err;
 

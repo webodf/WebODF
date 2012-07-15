@@ -47,12 +47,12 @@ core.PointWalker = function PointWalker(node) {
         pos = 0;
 
     /**
-     * @param {!Node} node
+     * @param {Node} node
      * @return {!number}
      */
     function getPosition(node) {
         var /**@type{!number}*/ p = -1,
-            /**@type{Node}*/ n = node;
+         /**@type{Node}*/ n = node;
         while (n) {
             n = n.previousSibling;
             p += 1;
@@ -132,6 +132,7 @@ core.PointWalker = function PointWalker(node) {
      * @return {!boolean}
      */
     this.stepBackward = function () {
+        var length;
         // if this is a text node, move to the next position in the text
         if (currentNode.nodeType === 3) { // TEXT_NODE
             if (pos > 0) {
@@ -149,10 +150,11 @@ core.PointWalker = function PointWalker(node) {
                 currentNode = before;
                 before = null;
                 after = null;
-                if (typeof currentNode.nodeValue.length === "number") {
-                    pos = currentNode.nodeValue.length;
-                } else {
-                    pos = currentNode.nodeValue.length();
+                pos = currentNode.nodeValue.length;
+                if (typeof pos !== "number") {
+                    // length can be a function
+                    length = /**@type{!function():number}*/(pos);
+                    pos = length();
                 }
             } else {
                 after = before;

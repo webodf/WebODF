@@ -74,7 +74,9 @@ core.ZipTests = function ZipTests(runner) {
             zip.load("hello", function (err, data) {
                 t.err = err;
                 r.shouldBeNull(t, "t.err");
-                t.data = runtime.byteArrayToString(data, "utf8");
+                if (data) {
+                    t.data = runtime.byteArrayToString(data, "utf8");
+                }
                 r.shouldBe(t, "t.data.length", "16");
                 r.shouldBe(t, "t.data", "'bonjour\\nbonjour\\n'");
                 callback();

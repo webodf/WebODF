@@ -172,7 +172,7 @@ odf.OdfContainer = (function () {
      * @constructor
      * @param {!string} name
      * @param {!odf.OdfContainer} container
-     * @param {!core.Zip} zip
+     * @param {core.Zip} zip
      */
     function OdfPart(name, container, zip) {
         var self = this,
@@ -196,6 +196,9 @@ odf.OdfContainer = (function () {
         // private functions
         // public functions
         this.load = function () {
+            if (zip === null) {
+                return;
+            }
             var mimetype = partMimetypes[name];
             this.mimetype = mimetype;
             zip.loadAsDataURL(name, mimetype, function (err, url) {
@@ -276,7 +279,7 @@ odf.OdfContainer = (function () {
          * Import the document elementnode into the DOM of OdfContainer.
          * Any processing instructions are removed, since importing them
          * gives an exception.
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {!Node}
          */
         function importRootNode(xmldoc) {
@@ -303,7 +306,7 @@ odf.OdfContainer = (function () {
             }
         }
         /**
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {undefined}
          */
         function handleFlatXml(xmldoc) {
@@ -324,7 +327,7 @@ odf.OdfContainer = (function () {
             setState(OdfContainer.DONE);
         }
         /**
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {undefined}
          */
         function handleStylesXml(xmldoc) {
@@ -349,7 +352,7 @@ odf.OdfContainer = (function () {
             fontLoader.loadFonts(root.fontFaceDecls, zip, null);
         }
         /**
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {undefined}
          */
         function handleContentXml(xmldoc) {
@@ -390,7 +393,7 @@ odf.OdfContainer = (function () {
             setChild(root, root.body);
         }
         /**
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {undefined}
          */
         function handleMetaXml(xmldoc) {
@@ -405,7 +408,7 @@ odf.OdfContainer = (function () {
             setChild(root, root.meta);
         }
         /**
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {undefined}
          */
         function handleSettingsXml(xmldoc) {
@@ -420,7 +423,7 @@ odf.OdfContainer = (function () {
             setChild(root, root.settings);
         }
         /**
-         * @param {!Document} xmldoc
+         * @param {Document} xmldoc
          * @return {undefined}
          */
         function handleManifestXml(xmldoc) {
@@ -438,7 +441,7 @@ odf.OdfContainer = (function () {
                 if (n.nodeType === 1 && n.localName === "file-entry" &&
                         n.namespaceURI === manifestns) {
                     partMimetypes[n.getAttributeNS(manifestns, "full-path")] =
-                            n.getAttributeNS(manifestns, "media-type");
+                        n.getAttributeNS(manifestns, "media-type");
                 }
                 n = n.nextSibling;
             }

@@ -48,7 +48,6 @@ function Runtime() {"use strict"; }
 /**
  * Abstraction of byte arrays.
  * @constructor
- * @extends {Array}
  * @param {!number} size
  */
 Runtime.ByteArray = function (size) {"use strict"; };
@@ -1082,7 +1081,8 @@ var runtime = (function () {
         var script = argv[0];
         runtime.readFile(script, "utf8", function (err, code) {
             var path = "",
-                paths = runtime.libraryPaths();
+                paths = runtime.libraryPaths(),
+                codestring = /**@type{string}*/code;
             if (script.indexOf("/") !== -1) {
                 path = script.substring(0, script.indexOf("/"));
             }
@@ -1090,13 +1090,13 @@ var runtime = (function () {
             function run() {
                 var script, path, paths, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
-                result = eval(code);
+                result = eval(codestring);
                 if (result) {
                     runtime.exit(result);
                 }
                 return;
             }
-            if (err) {
+            if (err || codestring === null) {
                 runtime.log(err);
                 runtime.exit(1);
             } else {
