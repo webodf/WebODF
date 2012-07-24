@@ -31,7 +31,9 @@
     }
   </style>
   <script type="text/javascript">
+////<![CDATA[
 @WEBODF_JS@
+//]]>
   </script>
   <script type="text/javascript">
 var FirefoxCom = (function FirefoxComClosure() {
@@ -129,11 +131,11 @@ function init() {
     });
     addSpacer(toolbar);
     addButton(toolbar, "about WebODF", function onclick() {
-        document.location = "http://webodf.org/about/";
+        document.location.href = "http://webodf.org/about/";
     });
     addSpacer(toolbar);
     addButton(toolbar, "get the source code", function onclick() {
-        document.location = "http://gitorious.org/webodf/";
+        document.location.href = "http://gitorious.org/webodf/";
     });
     loadODF();
 }

@@ -27,7 +27,6 @@ add_custom_command(
     COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js packextension.js
         ${WEBODFXPI}
         ${FIREFOXEXTENSIONFILES}
-        content/webodf.js
         install.rdf
     DEPENDS NodeJS
         packextension.js ${FIREFOXEXTENSIONFILES}
