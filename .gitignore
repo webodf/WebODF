@@ -1,8 +1,7 @@
 #android/bin
 #android/gen
 nativeQtClient/nativeQtClient.pro.user
-programs/firefoxextension/content/webodf.js
-programs/firefoxextension/content/webodf.css
+programs/firefoxextension/content/web/viewer.html
 programs/firefoxextension/install.rdf
 programs/ios/WebODF.xcodeproj/project.xcworkspace
 programs/ios/WebODF.xcodeproj/xcuserdata

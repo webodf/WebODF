@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+  <style type="text/css" media="screen, print">
+    body, html, div {
+      padding: 0px;
+      margin: 0px;
+      border: 0px;
+    }
+    body, html {
+      height: 100%;
+      text-align: center;
+    }
+    html > body {
+      background: black;
+    }
+    div#toolbar {
+      background: white;
+      padding: 7px;
+      border-bottom: 1px solid black;
+    }
+    div#toolbar > span.button {
+      border: 1px solid black;
+      padding: 2px;
+      cursor: default;
+    }
+    div#toolbar > span.button:hover {
+      background: #CCCCCC;
+    }
+  </style>
+  <script type="text/javascript">
+@WEBODF_JS@
+  </script>
+  <script type="text/javascript">
+var FirefoxCom = (function FirefoxComClosure() {
+  return {
+    /**
+     * Creates an event that the extension is listening for and will
+     * synchronously respond to.
+     * NOTE: It is reccomended to use request() instead since one day we may not
+     * be able to synchronously reply.
+     * @param {String} action The action to trigger.
+     * @param {String} data Optional data to send.
+     * @return {*} The response.
+     */
+    requestSync: function(action, data) {
+      var request = document.createTextNode('');
+      request.setUserData('action', action, null);
+      request.setUserData('data', data, null);
+      request.setUserData('sync', true, null);
+      document.documentElement.appendChild(request);
+
+      var sender = document.createEvent('Events');
+      sender.initEvent('webodf.js.message', true, false);
+      request.dispatchEvent(sender);
+      var response = request.getUserData('response');
+      document.documentElement.removeChild(request);
+      return response;
+    },
+    /**
+     * Creates an event that the extension is listening for and will
+     * asynchronously respond by calling the callback.
+     * @param {String} action The action to trigger.
+     * @param {String} data Optional data to send.
+     * @param {Function} callback Optional response callback that will be called
+     * with one data argument.
+     */
+    request: function(action, data, callback) {
+      var request = document.createTextNode('');
+      request.setUserData('action', action, null);
+      request.setUserData('data', data, null);
+      request.setUserData('sync', false, null);
+      if (callback) {
+        request.setUserData('callback', callback, null);
+
+        document.addEventListener('webodf.js.response', function listener(event) {
+          var node = event.target,
+              callback = node.getUserData('callback'),
+              response = node.getUserData('response');
+
+          document.documentElement.removeChild(node);
+
+          document.removeEventListener('webodf.js.response', listener, false);
+          return callback(response);
+        }, false);
+      }
+      document.documentElement.appendChild(request);
+
+      var sender = document.createEvent('HTMLEvents');
+      sender.initEvent('webodf.js.message', true, false);
+      return request.dispatchEvent(sender);
+    }
+  };
+})();
+var webodffirefox = {
+    url: undefined,
+    data: undefined,
+    odfcanvas: undefined
+};
+function loadODF() {
+    runtime.loadClass("odf.OdfCanvas");
+    var wf = webodffirefox,
+        odfelement = document.getElementById("odf");
+    wf.url = document.location.href,
+    wf.odfcanvas = new odf.OdfCanvas(odfelement);
+    wf.odfcanvas.load(wf.url);
+}
+function addButton(parent, label, onclick) {
+    var doc = parent.ownerDocument,
+        button = doc.createElement("span");
+    button.className = "button";
+    button.appendChild(doc.createTextNode(label));
+    button.onclick = onclick;
+    parent.appendChild(button);
+}
+function addSpacer(parent) {
+    var doc = parent.ownerDocument,
+        spacer = doc.createElement("span");
+    spacer.appendChild(doc.createTextNode(" "));
+    parent.appendChild(spacer);
+}
+function init() {
+    runtime.loadClass("core.Base64");
+    var toolbar = document.getElementById("toolbar");
+    addButton(toolbar, "download this document", function onclick() {
+        FirefoxCom.request('download', { originalUrl: webodffirefox.url });
+    });
+    addSpacer(toolbar);
+    addButton(toolbar, "about WebODF", function onclick() {
+        document.location = "http://webodf.org/about/";
+    });
+    addSpacer(toolbar);
+    addButton(toolbar, "get the source code", function onclick() {
+        document.location = "http://gitorious.org/webodf/";
+    });
+    loadODF();
+}
+window.setTimeout(function () {
+    init();
+}, 1);
+//--></script>
+  <title></title>
+</head>
+<body>
+  <div id="toolbar">
+  </div>
+  <div id="odf"/>
+</body>
+</html>

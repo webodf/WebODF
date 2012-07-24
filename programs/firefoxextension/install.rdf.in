@@ -5,30 +5,41 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>uriloader@webodf.js</em:id>
-    <em:name>WebODF</em:name>
+    <em:name>OpenDocument Format Viewer</em:name>
     <em:type>2</em:type>
     <em:version>@WEBODF_VERSION@</em:version>
     <em:iconURL>chrome://webodf.js/skin/icon.png</em:iconURL>
+
+    <!-- Firefox -->
     <em:targetApplication>
-      <!-- Firefox -->
       <Description>
        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-       <em:minVersion>3.6</em:minVersion>
-       <em:maxVersion>9.*</em:maxVersion>
+       <em:minVersion>6.0</em:minVersion>
+       <em:maxVersion>15.0a1</em:maxVersion>
      </Description>
     </em:targetApplication>
+
+    <!-- SeaMonkey -->
     <em:targetApplication>
-      <!-- Fennec -->
       <Description>
-       <em:id>{a23983c0-fd0e-11dc-95ff-0800200c9a66}</em:id>
-       <em:minVersion>4.0</em:minVersion>
-       <em:maxVersion>9.*</em:maxVersion>
-      </Description>
+       <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+       <em:minVersion>2.1.*</em:minVersion>
+       <em:maxVersion>2.12a1</em:maxVersion>
+     </Description>
     </em:targetApplication>
+
+    <!-- Android -->
+    <em:targetApplication>
+      <Description>
+       <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
+       <em:minVersion>11.0</em:minVersion>
+       <em:maxVersion>16.0a1</em:maxVersion>
+     </Description>
+    </em:targetApplication>
+
     <em:bootstrap>true</em:bootstrap>
-    <em:unpack>true</em:unpack>
     <em:creator>Jos van den Oever</em:creator>
-    <em:description>OpenDocument Viewer</em:description>
+    <em:description>Uses HTML5 to display ODF files directly in Firefox.</em:description>
     <em:homepageURL>http://webodf.org/</em:homepageURL>
   </Description>
 </RDF>
