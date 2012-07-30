@@ -12,6 +12,7 @@
         "core/RawInflate.js",
         "core/UnitTester.js",
         "core/Zip.js",
+        "gui/Avatar.js",
         "gui/Caret.js",
         "gui/PresenterUI.js",
         "gui/SelectionMover.js",
