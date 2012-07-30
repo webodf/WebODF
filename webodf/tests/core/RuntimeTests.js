@@ -43,13 +43,13 @@ core.RuntimeTests = function RuntimeTests(runner) {
     var t, r = runner;
 
     function testRead(callback) {
-        runtime.read("tests.js", 2, 6, function (err, data) {
+        runtime.read("tests.html", 27, 6, function (err, data) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             if (data) {
                 t.data = runtime.byteArrayToString(data, "utf8");
             }
-            r.shouldBe(t, "t.data", "'global'");
+            r.shouldBe(t, "t.data", "'WebODF'");
             callback();
         });
     }
