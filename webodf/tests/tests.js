@@ -32,16 +32,18 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
+runtime.loadClass("core.Base64Tests");
+runtime.loadClass("core.CursorTests");
+runtime.loadClass("core.PointWalkerTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
-runtime.loadClass("core.PointWalkerTests");
-runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.ZipTests");
-runtime.loadClass("core.Base64Tests");
+runtime.loadClass("gui.AvatarTests");
+runtime.loadClass("gui.CaretTests");
+runtime.loadClass("gui.SelectionMoverTests");
+runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
-runtime.loadClass("gui.CaretTests");
-runtime.loadClass("gui.XMLEditTests");
 
 var tests = [
     core.RuntimeTests, // temporarily disabled, enable at next commit!
@@ -53,10 +55,11 @@ if (runtime.type() !== "NodeJSRuntime") {
 }
 if (runtime.type() === "BrowserRuntime") {
     tests.push(core.PointWalkerTests);
-//    tests.push(core.CursorTests);
-    tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(gui.CaretTests);
+    tests.push(gui.AvatarTests);
+    tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
+//    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
 var tester = new core.UnitTester();

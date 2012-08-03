@@ -9,6 +9,7 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/core/CursorTests.js
     tests/core/PointWalkerTests.js
     tests/core/RuntimeTests.js
+    tests/gui/AvatarTests.js
     tests/gui/CaretTests.js
     tests/gui/SelectionMoverTests.js
     tests/gui/XMLEditTests.js
