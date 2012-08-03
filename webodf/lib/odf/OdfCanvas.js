@@ -476,6 +476,36 @@ odf.OdfCanvas = (function () {
             modifyTableCell(container, node, stylesheet);
         }
     }
+    
+    /**
+     * Modify ODF links to work like HTML links.
+     * @param {!Object} container
+     * @param {!Element} odffragment
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function modifyLinks(container, odffragment, stylesheet) {
+        var i,
+            links,
+            node;
+
+        function modifyLink(container, node, stylesheet) {
+            if (node.hasAttributeNS(xlinkns, "href")) {
+                // Ask the browser to open the link in a new window.
+                node.onclick = function() {
+                    window.open(node.getAttributeNS(xlinkns, "href"));
+                }
+            }
+        }
+        
+        // All links are of name text:a.
+        links = odffragment.getElementsByTagNameNS(textns, 'a');
+        for (i = 0; i < links.length; i += 1) {
+            node = /**@type{!Element}*/(links.item(i));
+            modifyLink(container, node, stylesheet);
+        }
+    }
+
     /**
      * @param {!Object} container
      * @param {!Element} odfbody
@@ -868,6 +898,7 @@ odf.OdfCanvas = (function () {
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
             modifyTables(container, odfnode.body, css);
+            modifyLinks(container, odfnode.body, css);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
             loadLists(container, odfnode.body, css);

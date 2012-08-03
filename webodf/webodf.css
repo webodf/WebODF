@@ -170,6 +170,7 @@ text|number {
 text|a {
     color: blue;
     text-decoration: underline;
+    cursor: pointer;
 }
 text|note-citation {
     vertical-align: super;
