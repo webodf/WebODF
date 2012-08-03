@@ -685,6 +685,9 @@ function NodeJSRuntime() {
         });
     }
     function readFile(path, encoding, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         if (encoding !== "binary") {
             fs.readFile(path, encoding, callback);
         } else {
@@ -711,11 +714,14 @@ function NodeJSRuntime() {
                 return callback(err);
             }
             var dom = parser.parseFromString(data, "text/xml");
-            callback(err, dom);
+            callback(null, dom);
         });
     }
     this.loadXML = loadXML;
     this.writeFile = function (path, data, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         fs.writeFile(path, data, "binary", function (err) {
             callback(err || null);
         });

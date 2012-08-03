@@ -99,6 +99,16 @@ core.RuntimeTests = function RuntimeTests(runner) {
         });
     }
 
+    function testLoadXML(callback) {
+        runtime.loadXML("tests.html", function (err, xml) {
+            t.err = err || null;
+            t.xml = xml || null;
+            r.shouldBeNull(t, "t.err");
+            r.shouldBeNonNull(t, "t.xml");
+            callback();
+        });
+    }
+
     this.setUp = function () {
         t = {};
     };
@@ -112,7 +122,8 @@ core.RuntimeTests = function RuntimeTests(runner) {
     this.asyncTests = function () {
         return [
             testRead,
-            testWrite
+            testWrite,
+            testLoadXML
         ];
     };
     this.description = function () {
