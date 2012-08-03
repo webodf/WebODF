@@ -494,7 +494,7 @@ odf.OdfCanvas = (function () {
                 // Ask the browser to open the link in a new window.
                 node.onclick = function() {
                     window.open(node.getAttributeNS(xlinkns, "href"));
-                }
+                };
             }
         }
         
