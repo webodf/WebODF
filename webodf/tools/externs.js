@@ -95,8 +95,17 @@ NodeJSObject.prototype.unlink = function (path, callback) {"use strict"; };
  */
 NodeJSObject.prototype.close = function (fd, callback) {"use strict"; };
 /**
+ * @constructor
+ */
+function XmlDom() {"use strict"; }
+/**
+ * @constructor
+ * @extends DOMParser
+ */
+XmlDom.prototype.DOMParser = function () {"use strict"; };
+/**
  * @param {!string} className
- * @return {!NodeJSObject}
+ * @return {!NodeJSObject|!XmlDom}
  */
 function require(className) {"use strict"; }
 /**
