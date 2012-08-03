@@ -170,7 +170,10 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'margin-right', 'margin-right' ],
             [ fons, 'margin-top', 'margin-top' ],
             [ fons, 'margin-bottom', 'margin-bottom' ]
-        ];
+        ],
+
+        // A font-face declaration map, to be populated once style2css is called.
+        fontFaceDeclsMap = {};
 
     // helper functions
     /**
@@ -364,12 +367,42 @@ odf.Style2CSS = function Style2CSS() {
         }
         return rule;
     }
+
+    /**
+     * @param {!Document} doc
+     * @param {!Element} fontFaceDeclsNode
+     * @return {!Object}
+     */
+    function makeFontFaceDeclsMap(doc, fontFaceDeclsNode) {
+        // put all style elements in a hash map by family and name
+        var fontFaceDeclsMap = {}, node, name, family, map;
+        if (!fontFaceDeclsNode) {
+            return fontFaceDeclsNode;
+        }
+        node = fontFaceDeclsNode.firstChild;
+        while (node) {
+            family = node.getAttributeNS(svgns, 'font-family');
+            name = family && node.getAttributeNS &&
+                    node.getAttributeNS(stylens, 'name');
+            if (name) {
+                if (!fontFaceDeclsMap[name]) {
+                    fontFaceDeclsMap[name] = {};
+                }
+                fontFaceDeclsMap[name] = family;
+            }
+            node = node.nextSibling;
+        }
+        return fontFaceDeclsMap;
+    }
+
     /**
      * @param {!string} name
      * @return {!string}
      */
     function getFontDeclaration(name) {
-        return '"' + name + '"';
+        // TODO: Add font-family resolution from the style:font-face declaration here.
+//        console.log(fontFaceDeclsMap[name]);
+        return fontFaceDeclsMap[name];
     }
     /**
      * @param {!Element} props
@@ -686,11 +719,12 @@ odf.Style2CSS = function Style2CSS() {
 
     /**
      * @param {!StyleSheet} stylesheet
+     * @param {!Element} fontFaceDecls
      * @param {!Element} styles
      * @param {!Element} autostyles
      * @return {undefined}
      */
-    this.style2css = function (stylesheet, styles, autostyles) {
+    this.style2css = function (stylesheet, fontFaceDecls, styles, autostyles) {
         var doc, prefix, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
         // make stylesheet empty
@@ -719,7 +753,9 @@ odf.Style2CSS = function Style2CSS() {
                 }
             }
         }
-
+        
+        // Populate the font face declarations map
+        fontFaceDeclsMap = makeFontFaceDeclsMap(doc, fontFaceDecls);
         // add the various styles
         stylenodes = getStyleMap(doc, styles);
         styleautonodes = getStyleMap(doc, autostyles);
