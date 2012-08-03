@@ -400,8 +400,6 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getFontDeclaration(name) {
-        // TODO: Add font-family resolution from the style:font-face declaration here.
-//        console.log(fontFaceDeclsMap[name]);
         return fontFaceDeclsMap[name];
     }
     /**
