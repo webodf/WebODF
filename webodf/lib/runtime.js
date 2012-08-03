@@ -684,10 +684,7 @@ function NodeJSRuntime() {
             callback(!err && stats.isFile());
         });
     }
-    function loadXML(path, callback) {
-        throw "Not implemented.";
-    }
-    this.readFile = function (path, encoding, callback) {
+    function readFile(path, encoding, callback) {
         if (encoding !== "binary") {
             fs.readFile(path, encoding, callback);
         } else {
@@ -704,7 +701,20 @@ function NodeJSRuntime() {
             });
 */
         }
-    };
+    }
+    this.readFile = readFile;
+    function loadXML(path, callback) {
+        var DOMParser = require('xmldom').DOMParser,
+            parser = new DOMParser();
+        readFile(path, "utf-8", function (err, data) {
+            if (err) {
+                return callback(err);
+            }
+            var dom = parser.parseFromString(data, "text/xml");
+            callback(err, dom);
+        });
+    }
+    this.loadXML = loadXML;
     this.writeFile = function (path, data, callback) {
         fs.writeFile(path, data, "binary", function (err) {
             callback(err || null);
@@ -733,7 +743,6 @@ function NodeJSRuntime() {
         }
         return fs.readFileSync(path, encoding);
     };
-    this.loadXML = loadXML;
     this.isFile = isFile;
     this.getFileSize = function (path, callback) {
         if (currentDirectory) {

@@ -206,7 +206,8 @@ endif (QT4_FOUND)
 add_custom_command(
     OUTPUT instrumented/index.html
     COMMAND ${JSCOVERAGE}
-    ARGS --exclude=extjs --exclude=extjs/.git ${CMAKE_CURRENT_SOURCE_DIR}
+    ARGS --exclude=extjs --exclude=node_modules --exclude=extjs/.git
+         ${CMAKE_CURRENT_SOURCE_DIR}
          ${CMAKE_CURRENT_BINARY_DIR}/instrumented
     DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
 )
