@@ -328,8 +328,11 @@ odf.OdfCanvas = (function () {
     function handleStyles(odfelement, stylesxmlcss) {
         // update the css translation of the styles
         var style2css = new odf.Style2CSS();
-        style2css.style2css(stylesxmlcss.sheet, odfelement.styles,
-                    odfelement.automaticStyles);
+        style2css.style2css(
+            stylesxmlcss.sheet, 
+            odfelement.fontFaceDecls, 
+            odfelement.styles,
+            odfelement.automaticStyles);
     }
     /**
      * @param {!string} id
