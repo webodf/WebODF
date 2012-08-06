@@ -112,6 +112,7 @@ office|spreadsheet table|table-row:before {
   border: 1px solid black;
   text-align: center;
   content: counter(row);
+  display: table-cell;
 }
 office|spreadsheet table|table-cell {
   border: 1px solid #cccccc;
@@ -134,6 +135,7 @@ table|table-column {
   display: table-column;
 }
 table|table-cell {
+  width: 0.889in;
   display: table-cell;
 }
 draw|frame {
