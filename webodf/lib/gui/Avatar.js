@@ -59,7 +59,22 @@ gui.Avatar = function Avatar(memberid, session) {
     }
     var self = this,
         rootNode = findTextRoot(session),
-        caret = new gui.Caret(rootNode);
+        caret;
+    /**
+     * @param {!number} charCode
+     * @return {!boolean}
+     */
+    function keyHandler(charCode) {
+        var handled = false;
+        if (charCode === 37) { // left
+            session.moveMemberCaret(memberid, -1);
+            handled = true;
+        } else if (charCode === 39) { // right
+            session.moveMemberCaret(memberid, 1);
+            handled = true;
+        }
+        return handled;
+    }
     this.removeFromSession = function () {
     };
     this.moveCaret = function (number) {
@@ -68,4 +83,8 @@ gui.Avatar = function Avatar(memberid, session) {
     this.focus = function () {
         caret.focus();
     };
+    function init() {
+        caret = new gui.Caret(rootNode, keyHandler);
+    }
+    init();
 };

@@ -37,15 +37,36 @@
  * element representing the caret is used.
  * @constructor
  * @param {!Element} rootNode
+ * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Caret = function Caret(rootNode) {
+gui.Caret = function Caret(rootNode, keyHandler) {
     "use strict";
+    function listenEvent(eventTarget, eventType, eventHandler) {
+        if (eventTarget.addEventListener) {
+            eventTarget.addEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.attachEvent) {
+            eventType = "on" + eventType;
+            eventTarget.attachEvent(eventType, eventHandler);
+        } else {
+            eventTarget["on" + eventType] = eventHandler;
+        }
+    }
+    function cancelEvent(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    }
     var document = rootNode.ownerDocument,
-        cursorns,
+        htmlns = document.documentElement.namespaceURI,
+        span = document.createElementNS(htmlns, "span"),
+        cursorns = 'urn:webodf:names:cursor',
         cursorNode;
-    cursorns = 'urn:webodf:names:cursor';
     cursorNode = document.createElementNS(cursorns, 'cursor');
     cursorNode.setAttribute("color", "white");
+    span.setAttribute("contenteditable", true);
+    cursorNode.appendChild(span);
     function blink() {
         if (!cursorNode.parentNode) {
             // stop blinking when removed from the document
@@ -56,13 +77,27 @@ gui.Caret = function Caret(rootNode) {
         } else {
             cursorNode.setAttribute("color", "white");
         }
+        span.focus();
         runtime.setTimeout(blink, 1000);
     }
     this.focus = function () {
     };
     this.move = function (number) {
     };
+    function handleKeyDown(e) {
+        if (keyHandler) {
+            keyHandler(e.keyCode);
+        }
+        cancelEvent(e);
+    }
+    function handleKeyPress(e) {
+    }
+    function initElement(element) {
+        listenEvent(element, "keydown", handleKeyDown);
+        listenEvent(element, "keypress", handleKeyPress);
+    }
     function init() {
+        initElement(cursorNode);
         // for now, just put it at the start of the rootNode 
         rootNode.insertBefore(cursorNode, rootNode.firstChild);
         blink();

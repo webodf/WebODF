@@ -201,10 +201,16 @@ video {
 }
 cursor|cursor {
     display: inline;
-    border: 1px solid black;
+    width: 0px;
+    height: 0px;
+}
+cursor|cursor span {
+    display: block;
+    position: absolute;
     width: 0px;
     height: 1.5ex;
+    border-left: 1px solid black;
 }
-cursor|cursor[color=white] {
+cursor|cursor[color=white] span {
     border-color: white;
 }
