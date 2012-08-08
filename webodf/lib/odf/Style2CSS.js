@@ -381,14 +381,15 @@ odf.Style2CSS = function Style2CSS() {
         }
         node = fontFaceDeclsNode.firstChild;
         while (node) {
-            family = node.getAttributeNS(svgns, 'font-family');
-            name = family && node.getAttributeNS &&
-                    node.getAttributeNS(stylens, 'name');
-            if (name) {
-                if (!fontFaceDeclsMap[name]) {
-                    fontFaceDeclsMap[name] = {};
+            if (node.nodeType === 1) {
+                family = node.getAttributeNS(svgns, 'font-family');
+                name = family && node.getAttributeNS(stylens, 'name');
+                if (name) {
+                    if (!fontFaceDeclsMap[name]) {
+                        fontFaceDeclsMap[name] = {};
+                    }
+                    fontFaceDeclsMap[name] = family;
                 }
-                fontFaceDeclsMap[name] = family;
             }
             node = node.nextSibling;
         }
