@@ -25,6 +25,7 @@
         "odf/Style2CSS.js",
         "odf/StyleInfo.js",
         "ops/Session.js",
+        "ops/SessionImplementation.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",
         "xmldom/OperationalTransformDOM.js",

@@ -30,11 +30,42 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core, gui*/
+/*global runtime, core, gui*/
+runtime.loadClass("gui.Caret");
 
 /**
+ * The avatar is at the same time visualization of the caret and receiver of
+ * input events.
+ * The avatar does not change it's position of its own accord. The position is
+ * changed by the session to which the avatar forwards the keystrokes that it
+ * receives.
  * @constructor
+ * @param {!string} memberid
+ * @param {!ops.SessionImplementation} session
  */
-gui.Avatar = function Avatar() {
+gui.Avatar = function Avatar(memberid, session) {
     "use strict";
+    function findTextRoot(session) {
+        // set the root node to be the text node
+        var root = session.getOdfContainer().rootElement.firstChild;
+        while (root && root.localName !== "body") {
+            root = root.nextSibling;
+        }
+        root = root && root.firstChild;
+        while (root && root.localName !== "text") {
+            root = root.nextSibling;
+        }
+        return root;
+    }
+    var self = this,
+        rootNode = findTextRoot(session),
+        caret = new gui.Caret(rootNode);
+    this.removeFromSession = function () {
+    };
+    this.moveCaret = function (number) {
+        caret.move(number);
+    };
+    this.focus = function () {
+        caret.focus();
+    };
 };

@@ -30,36 +30,42 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global gui*/
+/*global gui, runtime*/
 /**
  * Class that represents a caret in a document. In text nodes, a native caret is
  * used via the HTML attribute contentEditable. Outside of text nodes, an empty
  * element representing the caret is used.
  * @constructor
+ * @param {!Element} rootNode
  */
-gui.Caret = function Caret(selection, rootNode) {
+gui.Caret = function Caret(rootNode) {
     "use strict";
     var document = rootNode.ownerDocument,
         cursorns,
         cursorNode;
     cursorns = 'urn:webodf:names:cursor';
     cursorNode = document.createElementNS(cursorns, 'cursor');
-    /**
-     * Synchronize the cursor with the current selection.
-     * If there is a single collapsed selection range, the cursor will be placed
-     * there. If not, the cursor will be removed from the document tree.
-     * @return {undefined}
-     */
-    this.updateToSelection = function () {
-        var range;
-//        removeCursor();
-        if (selection.rangeCount === 1) {
-            range = selection.getRangeAt(0);
-/*
-            if (range.collapsed) {
-                putCursor(range.startContainer, range.startOffset);
-            }
-*/
+    cursorNode.setAttribute("color", "white");
+    function blink() {
+        if (!cursorNode.parentNode) {
+            // stop blinking when removed from the document
+            return;
         }
+        if (cursorNode.getAttribute("color") === "white") {
+            cursorNode.setAttribute("color", "black");
+        } else {
+            cursorNode.setAttribute("color", "white");
+        }
+        runtime.setTimeout(blink, 1000);
+    }
+    this.focus = function () {
     };
+    this.move = function (number) {
+    };
+    function init() {
+        // for now, just put it at the start of the rootNode 
+        rootNode.insertBefore(cursorNode, rootNode.firstChild);
+        blink();
+    }
+    init();
 };

@@ -33,15 +33,22 @@
 /*global ops*/
 /**
  * An operation that can be performed on a document.
- * @constructor
+ * @interface
  */
-ops.Session = function Session() {
-    "use strict";
-    var self = this;
-    this.addMemberToSession = function (memberid) {
-    };
-    this.removeMemberFromSession = function (memberid) {
-    };
-    this.moveMemberCaret = function (memberid, number) {
-    };
-};
+ops.Session = function Session() {"use strict"; };
+/**
+ * @param {!string} memberid
+ * @return {undefined}
+ */
+ops.Session.prototype.addMemberToSession = function (memberid) {"use strict"; };
+/**
+ * @param {!string} memberid
+ * @return {undefined}
+ */
+ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict"; };
+/**
+ * @param {!string} memberid
+ * @param {!number} number
+ * @return {undefined}
+ */
+ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };

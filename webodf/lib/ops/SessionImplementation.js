@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,53 +30,39 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
-runtime.loadClass("gui.Caret");
-
+/*global ops, gui*/
 /**
+ * An operation that can be performed on a document.
  * @constructor
- * @param {core.UnitTestRunner} runner
- * @implements {core.UnitTest}
+ * @implements ops.Session
+ * @param {!odf.OdfContainer} odfcontainer
  */
-gui.CaretTests = function CaretTests(runner) {
+ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
-    var r = runner,
-        t;
+    var self = this,
+        members = {};
 
-    function setupEmptyDoc() {
-        var selection = runtime.getWindow().getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            caret = new gui.Caret(doc.documentElement);
-        t = { selection: selection, doc: doc }; //, cursor: cursor };
-        runner.shouldBeNonNull(t, "t.selection");
-    }
-    function setupSimpleTextDoc() {
-        setupEmptyDoc();
-        t.textnode = t.doc.createTextNode("abc");
-        t.doc.documentElement.appendChild(t.textnode);
-    }
-    function testOnUpDownTraversal() {
-    }
+    /* SESSION OPERATIONS */
 
-    this.setUp = function () {
-        t = {};
+    this.addMemberToSession = function (memberid) {
+        var avatar = new gui.Avatar(memberid, self);
+        members[memberid] = avatar;
     };
-    this.tearDown = function () {
-        t = {};
+    this.removeMemberFromSession = function (memberid) {
+        var avatar = members[memberid];
+        avatar.removeFromSession();
+        delete members[memberid];
     };
-    this.tests = function () {
-        return [];
+    this.moveMemberCaret = function (memberid, number) {
+        var avatar = members[memberid];
+        avatar.moveCaret(number);
     };
-    this.asyncTests = function () {
-        return [
-        ];
+
+    /* SESSION INTROSPECTION */
+    this.getOdfContainer = function () {
+        return odfcontainer;
+    };
+    this.getAvatar = function (memberid) {
+        return members[memberid];
     };
 };
-gui.CaretTests.prototype.description = function () {
-    "use strict";
-    return "Test the Caret class.";
-};
-(function () {
-    "use strict";
-    return gui.CaretTests;
-}());

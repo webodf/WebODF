@@ -19,7 +19,6 @@
   <argument name="styleName" type="string"/>
  </operation>
  -->
-
  <operation name="addMemberToSession">
   <argument name="memberid" type="string"/>
  </operation>
