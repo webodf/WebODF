@@ -28,3 +28,4 @@ add_subdirectory(firefoxextension)
 
 add_subdirectory(touchui)
 add_subdirectory(playbook)
+add_subdirectory(editor)
