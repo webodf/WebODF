@@ -30,45 +30,26 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core: true, Node: true*/
+/*global core*/
 /**
- * A walker that allows finegrained stepping through the DOM.
- * TODO: write a position walker that uses a treewalker
  * @interface
  */
-core.PointWalker = function PointWalker() {"use strict"; };
+core.PointFilter = function PointFilter() {"use strict"; };
 /**
- * Move the walker to the point given by @p node and @p position.
- * @param {!Element} node must be the root of this walker or part of the
- *                   tree of this walker.
- * @param {!number} position must be a valid position in @node.
- **/
-core.PointWalker.prototype.setPoint = function (node, position) {"use strict"; };
-/**
- * @return {!boolean}
+ * @enum {number}
  */
-core.PointWalker.prototype.stepForward = function () {"use strict"; };
+core.PointFilter.FilterResult = {
+    FILTER_ACCEPT: 1,
+    FILTER_REJECT: 2,
+    FILTER_SKIP:   3
+};
 /**
- * @return {!boolean}
+ * @param {!Element} element
+ * @param {!number} offset
+ * @return {core.PointFilter.FilterResult}
  */
-core.PointWalker.prototype.stepBackward = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.node = function () {"use strict"; };
-/**
- * @return {!number}
- */
-core.PointWalker.prototype.position = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.precedingSibling = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.followingSibling = function () {"use strict"; };
+core.PointFilter.prototype.acceptPoint = function (element, offset) {"use strict"; };
 (function () {
     "use strict";
-    return core.PointWalker;
+    return core.PointFilter;
 }());

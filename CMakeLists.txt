@@ -99,8 +99,9 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/RawDeflate.js lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js lib/core/RawInflate.js
     lib/core/Selection.js lib/core/Cursor.js lib/core/UnitTester.js
-    lib/core/PointWalker.js lib/core/Async.js
-    lib/core/Zip.js
+    lib/core/PointWalker.js lib/core/SimplePointWalker.js
+    lib/core/PointFilter.js lib/core/FilteredPointWalker.js
+    lib/core/Async.js lib/core/Zip.js
 
     lib/xmldom/LSSerializerFilter.js lib/xmldom/LSSerializer.js
     lib/xmldom/RelaxNGParser.js lib/xmldom/RelaxNG.js
@@ -117,6 +118,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/Caret.js lib/gui/Avatar.js
     lib/gui/PresenterUI.js lib/gui/XMLEdit.js
 
+    lib/ops/SessionPointFilter.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
 

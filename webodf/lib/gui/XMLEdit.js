@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime: true, core: true, gui: true*/
-runtime.loadClass("core.PointWalker");
+runtime.loadClass("core.SimplePointWalker");
 runtime.loadClass("core.Cursor");
 //runtime.loadClass("gui.Caret");
 /**
@@ -319,7 +319,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
 
         updateCSS();
 
-        walker = new core.PointWalker(node);
+        walker = new core.SimplePointWalker(node);
     }
 
     initElement(element);

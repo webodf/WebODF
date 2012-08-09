@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -32,43 +32,73 @@
  */
 /*global core: true, Node: true*/
 /**
- * A walker that allows finegrained stepping through the DOM.
+ * A simple walker that allows finegrained stepping through the DOM.
+ * It does not support node filtering.
  * TODO: write a position walker that uses a treewalker
- * @interface
+ * @constructor
+ * @implements core.PointWalker
+ * @param {!Node} node
+ * @param {!core.PointFilter} filter
  */
-core.PointWalker = function PointWalker() {"use strict"; };
-/**
- * Move the walker to the point given by @p node and @p position.
- * @param {!Element} node must be the root of this walker or part of the
- *                   tree of this walker.
- * @param {!number} position must be a valid position in @node.
- **/
-core.PointWalker.prototype.setPoint = function (node, position) {"use strict"; };
-/**
- * @return {!boolean}
- */
-core.PointWalker.prototype.stepForward = function () {"use strict"; };
-/**
- * @return {!boolean}
- */
-core.PointWalker.prototype.stepBackward = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.node = function () {"use strict"; };
-/**
- * @return {!number}
- */
-core.PointWalker.prototype.position = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.precedingSibling = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.followingSibling = function () {"use strict"; };
-(function () {
+core.FilteredPointWalker = function FilteredPointWalker(node, filter) {
     "use strict";
-    return core.PointWalker;
-}());
+    var currentNode = node,
+        before = null, // node before the point
+        after = node && node.firstChild, // node after the point
+        root = node,
+        pos = 0;
+    /**
+     * @param {Node} node
+     * @return {!number}
+     */
+    function getPosition(node) {
+        var /**@type{!number}*/ p = -1,
+            /**@type{Node}*/ n = node;
+        return p;
+    }
+    /**
+     * Move the walker to the point given by @p node and @p position.
+     * @param {!Element} node must be the root of this walker or part of the
+     *                   tree of this walker.
+     * @param {!number} position must be a valid position in @node.
+     * @return {undefined}
+     **/
+    this.setPoint = function (node, position) {
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.stepForward = function () {
+        return false;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.stepBackward = function () {
+        return false;
+    };
+    /**
+     * @return {?Node}
+     */
+    this.node = function () {
+        return currentNode;
+    };
+    /**
+     * @return {!number}
+     */
+    this.position = function () {
+        return pos;
+    };
+    /**
+     * @return {?Node}
+     */
+    this.precedingSibling = function () {
+        return before;
+    };
+    /**
+     * @return {?Node}
+     */
+    this.followingSibling = function () {
+        return after;
+    };
+};

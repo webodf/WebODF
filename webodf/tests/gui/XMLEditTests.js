@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global document: true, core: true, gui: true, runtime: true*/
-runtime.loadClass("core.PointWalker");
+runtime.loadClass("core.SimplePointWalker");
 runtime.loadClass("gui.XMLEdit");
 
 /**
@@ -46,7 +46,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
     function checkWalker(node, count, endpos) {
         t = {};
         t.node = node;
-        t.walker = new core.PointWalker(node);
+        t.walker = new core.SimplePointWalker(node);
         t.count = count;
         t.countForward = 0;
         t.countBackward = 0;
@@ -87,7 +87,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
 
         t = {};
         t.doc = doc;
-        t.walker = new core.PointWalker(t.doc);
+        t.walker = new core.SimplePointWalker(t.doc);
         r.shouldBe("t.walker.position()", "0");
         r.shouldBe("t.walker.stepForward()", "true");
         r.shouldBe("t.walker.position()", "0");

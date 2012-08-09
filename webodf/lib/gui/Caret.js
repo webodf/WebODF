@@ -33,6 +33,7 @@
 /*global core, gui, runtime*/
 
 runtime.loadClass("gui.SelectionMover");
+runtime.loadClass("core.SimplePointWalker");
 
 /**
  * Class that represents a caret in a document. In text nodes, a native caret is
@@ -63,7 +64,7 @@ gui.Caret = function Caret(rootNode, keyHandler) {
     }
     var document = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(document),
-        pointWalker = new core.PointWalker(rootNode),
+        pointWalker = new core.SimplePointWalker(rootNode),
         selectionMover = new gui.SelectionMover(selection, pointWalker),
         cursor = selectionMover.getCursor(),
         htmlns = document.documentElement.namespaceURI,

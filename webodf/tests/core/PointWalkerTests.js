@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global core: true, runtime: true*/
-runtime.loadClass("core.PointWalker");
+runtime.loadClass("core.SimplePointWalker");
 
 /**
  * @constructor
@@ -45,7 +45,7 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
     function checkWalker(node, count, endpos) {
         t = {};
         t.node = node;
-        t.walker = new core.PointWalker(node);
+        t.walker = new core.SimplePointWalker(node);
         t.count = count;
         t.countForward = 0;
         t.countBackward = 0;
@@ -83,7 +83,7 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
 
         t = {};
         t.doc = doc;
-        t.walker = new core.PointWalker(t.doc);
+        t.walker = new core.SimplePointWalker(t.doc);
         r.shouldBe(t, "t.walker.position()", "0");
         r.shouldBe(t, "t.walker.stepForward()", "true");
         r.shouldBe(t, "t.walker.position()", "0");
@@ -130,6 +130,6 @@ core.PointWalkerTests = function PointWalkerTests(runner) {
         return [];
     };
     this.description = function () {
-        return "Test the PointWalker class.";
+        return "Test the SimplePointWalker class.";
     };
 };
