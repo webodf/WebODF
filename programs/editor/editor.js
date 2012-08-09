@@ -1,4 +1,5 @@
 function init() {
+
     runtime.loadClass('odf.OdfCanvas');
     // If the URL has a fragment (#...), try to load the file it represents
     var location = String(document.location),
