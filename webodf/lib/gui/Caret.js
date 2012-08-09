@@ -79,6 +79,10 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         caretLineVisible = !caretLineVisible;
         runtime.setTimeout(blink, 1000);
     }
+    function updateHandlePosition() {
+        handle.style.top = (span.offsetTop + span.scrollHeight) + "px";
+        handle.style.left = span.offsetLeft + "px";
+    }
     this.focus = function () {
         span.focus();
     };
@@ -95,6 +99,7 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         return handle;
     };
     this.showHandle = function () {
+        updateHandlePosition();
         handle.style.display = "block";
     };
     this.hideHandle = function () {
