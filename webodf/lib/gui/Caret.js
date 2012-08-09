@@ -61,11 +61,11 @@ gui.Caret = function Caret(rootNode, keyHandler) {
             event.returnValue = false;
         }
     }
-    var document = rootNode.ownerDocument,
-        selection = new core.Selection(),
-        cursor = new core.Cursor(selection, document),
+    var document = /**@type{!Document}*/(rootNode.ownerDocument),
+        selection = new core.Selection(document),
         pointWalker = new core.PointWalker(rootNode),
         selectionMover = new gui.SelectionMover(selection, pointWalker),
+        cursor = selectionMover.getCursor(),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
         handle = document.createElementNS(htmlns, "div"),
@@ -128,16 +128,8 @@ gui.Caret = function Caret(rootNode, keyHandler) {
             cancelEvent(e);
         }
     }
-    function handleKeyPress(e) {
-    }
-    function initElement(element) {
-        listenEvent(element, "keydown", handleKeyDown);
-        listenEvent(element, "keypress", handleKeyPress);
-    }
     function init() {
-        cursorNode = cursor.getNode();
         span.setAttribute("contenteditable", true);
-        //span.style.borderColor = "black";
         span.onfocus = function () {
             focussed = true;
             blink();
@@ -146,12 +138,13 @@ gui.Caret = function Caret(rootNode, keyHandler) {
             focussed = false;
             span.style.borderLeftWidth = "1px";
         };
+        cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
         cursorNode.appendChild(handle);
-        initElement(cursorNode);
-        // for now, just put it at the start of the rootNode 
-        rootNode.insertBefore(cursorNode, rootNode.firstChild);
-        blink();
+        listenEvent(cursorNode, "keydown", handleKeyDown);
+        // put the cursor at the start of the rootNode
+        selection.collapse(rootNode, 0);
+        cursor.updateToSelection();
     }
     init();
 };

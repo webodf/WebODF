@@ -86,6 +86,7 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
         pointWalker.setPoint(element, range.startOffset);
         move();
         setStart(pointWalker.node(), pointWalker.position());
+        cursor.updateToSelection();
     }
     function doMoveForward(extend, move) {
         if (selection.rangeCount === 0) {
@@ -213,6 +214,9 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             doMove(extend, function () {
             });
         }
+    };
+    this.getCursor = function () {
+        return cursor;
     };
     return this;
 };

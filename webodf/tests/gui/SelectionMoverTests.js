@@ -40,12 +40,12 @@ runtime.loadClass("gui.SelectionMover");
  */
 gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     "use strict";
-    var r = runner,
-        t, testarea = runtime.getWindow().document.getElementById("testarea");
+    var r = runner, maindoc = runtime.getWindow().document,
+        t, testarea = maindoc.getElementById("testarea");
 
     function setupDoc() {
         var doc = testarea.ownerDocument,
-            selection = new core.Selection(),
+            selection = new core.Selection(maindoc),
             p = doc.createElement("p"),
             walker = new core.PointWalker(p),
             mover = new gui.SelectionMover(selection, walker);

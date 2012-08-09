@@ -69,7 +69,7 @@ core.CursorTests = function CursorTests(runner) {
     }
 
     function setupEmptyRootNode() {
-        var selection = new core.Selection(),
+        var selection = new core.Selection(maindoc),
             root = maindoc.createElementNS("", "p"),
             cursor = new core.Cursor(selection, maindoc);
         testarea.appendChild(root);

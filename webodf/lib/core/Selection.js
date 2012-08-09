@@ -33,8 +33,9 @@
 /*global core*/
 /**
  * @constructor
+ * @param {!Document} document
  */
-core.Selection = function Selection() {
+core.Selection = function Selection(document) {
     "use strict";
     var self = this,
         ranges = [];
@@ -50,6 +51,10 @@ core.Selection = function Selection() {
      * @return {undefined}
      */
     this.addRange = function (range) {
+        if (ranges.length === 0) {
+            self.focusNode = range.startContainer;
+            self.focusOffset = range.startOffset;
+        }
         ranges.push(range);
         self.rangeCount += 1;
     };
@@ -59,6 +64,8 @@ core.Selection = function Selection() {
     this.removeAllRanges = function () {
         ranges = [];
         self.rangeCount = 0;
+        self.focusNode = null;
+        self.focusOffset = 0;
     };
     /**
      * @param {!Node} node
@@ -66,6 +73,15 @@ core.Selection = function Selection() {
      * @return {undefined}
      */
     this.collapse = function (node, offset) {
+        ranges.length = self.rangeCount = 1;
+        var range = ranges[0];
+        if (!range) {
+            ranges[0] = range = document.createRange();
+        }
+        range.setStart(node, offset);
+        range.collapse(true);
+        self.focusNode = node;
+        self.focusOffset = offset;
     };
     /**
      * @param {!Node} node
@@ -78,6 +94,10 @@ core.Selection = function Selection() {
      * @type {!number}
      */
     this.rangeCount = 0;
+    /**
+     * @type {Node}
+     */
+    this.focusNode = null;
     /**
      * @type {!number}
      */
