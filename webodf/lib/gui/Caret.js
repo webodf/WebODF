@@ -30,7 +30,12 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global gui, runtime*/
+/*global core, gui, runtime*/
+
+runtime.loadClass("core.PointWalker");
+runtime.loadClass("core.Cursor");
+runtime.loadClass("gui.SelectionMover");
+
 /**
  * Class that represents a caret in a document. In text nodes, a native caret is
  * used via the HTML attribute contentEditable. Outside of text nodes, an empty

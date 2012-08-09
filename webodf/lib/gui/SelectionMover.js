@@ -32,10 +32,11 @@
  */
 /*global runtime: true, core: true, gui: true*/
 runtime.loadClass("core.Cursor");
+runtime.loadClass("core.Selection");
 /**
  * This class modifies the selection in different ways.
  * @constructor
- * @param {Selection} selection
+ * @param {!core.Selection} selection
  * @param {!core.PointWalker} pointWalker
  * @return {!gui.SelectionMover}
  */

@@ -30,7 +30,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core: true, Node: true*/
+/*global core, runtime*/
+runtime.loadClass("core.Selection");
+
 /**
  * @class
  * A cursor is a dom node that visually represents a cursor in a DOM tree.
@@ -53,7 +55,7 @@
  * the cursor by not letting it be part of the DOM.
  *
  * @constructor
- * @param {Selection} selection The selection to which the cursor corresponds
+ * @param {core.Selection} selection The selection to which the cursor corresponds
  * @param {Document} document The document in which the cursor is placed
  */
 core.Cursor = function Cursor(selection, document) {

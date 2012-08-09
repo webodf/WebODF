@@ -98,7 +98,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/core/RawDeflate.js lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js lib/core/RawInflate.js
-    lib/core/Cursor.js lib/core/UnitTester.js
+    lib/core/Selection.js lib/core/Cursor.js lib/core/UnitTester.js
     lib/core/PointWalker.js lib/core/Async.js
     lib/core/Zip.js
 
@@ -113,9 +113,9 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/Formatting.js lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
 
+    lib/gui/SelectionMover.js
     lib/gui/Caret.js lib/gui/Avatar.js
-    lib/gui/PresenterUI.js
-    lib/gui/SelectionMover.js lib/gui/XMLEdit.js
+    lib/gui/PresenterUI.js lib/gui/XMLEdit.js
 
     lib/ops/Session.js
     lib/ops/SessionImplementation.js

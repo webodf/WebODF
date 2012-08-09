@@ -30,53 +30,56 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global ops, gui*/
+/*global core*/
 /**
- * An operation that can be performed on a document.
  * @constructor
- * @implements ops.Session
- * @param {!odf.OdfContainer} odfcontainer
  */
-ops.SessionImplementation = function SessionImplementation(odfcontainer) {
+core.Selection = function Selection() {
     "use strict";
     var self = this,
-        members = {};
-
-    /* SESSION OPERATIONS */
-
-    this.addMemberToSession = function (memberid) {
-        var avatar = new gui.Avatar(memberid, self);
-        members[memberid] = avatar;
+        ranges = [];
+    /**
+     * @param {!number} i
+     * @return {Range}
+     */
+    this.getRangeAt = function (i) {
+        return ranges[i];
     };
-    this.removeMemberFromSession = function (memberid) {
-        var avatar = members[memberid];
-        avatar.removeFromSession();
-        delete members[memberid];
+    /**
+     * @param {!Range} range
+     * @return {undefined}
+     */
+    this.addRange = function (range) {
+        ranges.push(range);
+        self.rangeCount += 1;
     };
-    this.moveMemberCaret = function (memberid, number) {
-        var avatar = members[memberid];
-        avatar.moveCaret(number);
+    /**
+     * @return {undefined}
+     */
+    this.removeAllRanges = function () {
+        ranges = [];
+        self.rangeCount = 0;
     };
-
-    /* RELAYING OF SESSION OPERATIONS */
-    this.addSessionListener = function (session) {
+    /**
+     * @param {!Node} node
+     * @param {!number} offset
+     * @return {undefined}
+     */
+    this.collapse = function (node, offset) {
     };
-
-    /* SESSION INTROSPECTION */
-
-    this.getOdfContainer = function () {
-        return odfcontainer;
+    /**
+     * @param {!Node} node
+     * @param {!number} offset
+     * @return {undefined}
+     */
+    this.extend = function (node, offset) {
     };
-    this.getAvatar = function (memberid) {
-        return members[memberid];
-    };
-    this.getAvatars = function () {
-        var list = [], i;
-        for (i in members) {
-            if (members.hasOwnProperty(i)) {
-                list.push(members[i]);
-            }
-        }
-        return list;
-    };
+    /**
+     * @type {!number}
+     */
+    this.rangeCount = 0;
+    /**
+     * @type {!number}
+     */
+    this.focusOffset = 0;
 };

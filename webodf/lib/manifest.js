@@ -10,6 +10,7 @@
         "core/PointWalker.js",
         "core/RawDeflate.js",
         "core/RawInflate.js",
+        "core/Selection.js",
         "core/UnitTester.js",
         "core/Zip.js",
         "gui/Avatar.js",

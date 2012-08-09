@@ -45,7 +45,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
 
     function setupDoc() {
         var doc = testarea.ownerDocument,
-            selection = runtime.getWindow().getSelection(),
+            selection = new core.Selection(),
             p = doc.createElement("p"),
             walker = new core.PointWalker(p),
             mover = new gui.SelectionMover(selection, walker);
