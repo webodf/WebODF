@@ -196,9 +196,9 @@ odf.OdfCanvas = (function () {
                 return true;
             }
             return rangeA.startContainer !== rangeB.startContainer ||
-                   rangeA.startOffset !== rangeB.startOffset ||
-                   rangeA.endContainer !== rangeB.endContainer ||
-                   rangeA.endOffset !== rangeB.endOffset;
+                rangeA.startOffset !== rangeB.startOffset ||
+                rangeA.endContainer !== rangeB.endContainer ||
+                rangeA.endOffset !== rangeB.endOffset;
         }
         /**
          * @return {undefined}
@@ -332,7 +332,8 @@ odf.OdfCanvas = (function () {
             stylesxmlcss.sheet, 
             odfelement.fontFaceDecls, 
             odfelement.styles,
-            odfelement.automaticStyles);
+            odfelement.automaticStyles
+        );
     }
     /**
      * @param {!string} id
@@ -495,7 +496,7 @@ odf.OdfCanvas = (function () {
         function modifyLink(container, node, stylesheet) {
             if (node.hasAttributeNS(xlinkns, "href")) {
                 // Ask the browser to open the link in a new window.
-                node.onclick = function() {
+                node.onclick = function () {
                     window.open(node.getAttributeNS(xlinkns, "href"));
                 };
             }
@@ -659,27 +660,27 @@ odf.OdfCanvas = (function () {
      */
     function getNumberRule(node) {
         var style = node.getAttributeNS(stylens, "num-format"),
-                 suffix = node.getAttributeNS(stylens, "num-suffix"),
-                 prefix = node.getAttributeNS(stylens, "num-prefix"),
-                 rule = "",
-                 stylemap = {'1': 'decimal', 'a': 'lower-latin', 'A': 'upper-latin',
+            suffix = node.getAttributeNS(stylens, "num-suffix"),
+            prefix = node.getAttributeNS(stylens, "num-prefix"),
+            rule = "",
+            stylemap = {'1': 'decimal', 'a': 'lower-latin', 'A': 'upper-latin',
                  'i': 'lower-roman', 'I': 'upper-roman'},
-                 content = "";
+            content;
 
-                 content = prefix || "";
+        content = prefix || "";
 
-                 if (stylemap.hasOwnProperty(style)) {
-                     content += " counter(list, " + stylemap[style] + ")";
-                 } else if (style) {
-                     content += "'" + style + "';";
-                 } else {
-                     content += " ''";
-                 }
-                 if (suffix) {
-                     content += " '" + suffix + "'";
-                 }
-                 rule = "content: " + content + ";";
-                 return rule;
+        if (stylemap.hasOwnProperty(style)) {
+            content += " counter(list, " + stylemap[style] + ")";
+        } else if (style) {
+            content += "'" + style + "';";
+        } else {
+            content += " ''";
+        }
+        if (suffix) {
+            content += " '" + suffix + "'";
+        }
+        rule = "content: " + content + ";";
+        return rule;
     }
     /**
      * @param {!Element} node
@@ -695,7 +696,7 @@ odf.OdfCanvas = (function () {
      */
     function getBulletRule(node) {
         var rule = "",
-        bulletChar = node.getAttributeNS(textns, "bullet-char");
+            bulletChar = node.getAttributeNS(textns, "bullet-char");
         return "content: '" + bulletChar + "';";
     }
 
@@ -721,22 +722,22 @@ odf.OdfCanvas = (function () {
      */
     function loadLists(container, odffragment, stylesheet) {
         var i,
-        lists,
-        svgns   = namespaces.svg,
-        node,
-        id,
-        continueList,
-        styleName,
-        rule,
-        listMap = {},
-        parentList,
-        listStyles,
-        listStyle,
-        listStyleMap = {},
-        bulletRule;
+            lists,
+            svgns   = namespaces.svg,
+            node,
+            id,
+            continueList,
+            styleName,
+            rule,
+            listMap = {},
+            parentList,
+            listStyles,
+            listStyle,
+            listStyleMap = {},
+            bulletRule;
 
         listStyles = window.document.getElementsByTagNameNS(textns, "list-style");
-        for(i=0; i< listStyles.length; i += 1) {
+        for (i = 0; i < listStyles.length; i += 1) {
             node = /**@type{!Element}*/(listStyles.item(i));
             styleName = node.getAttributeNS(stylens, "name");
 
@@ -752,8 +753,8 @@ odf.OdfCanvas = (function () {
 
             id = node.getAttributeNS(xmlns, "id");
 
-            if(id) {
-                continueList = node.getAttributeNS(textns,"continue-list");
+            if (id) {
+                continueList = node.getAttributeNS(textns, "continue-list");
                 node.setAttribute("id", id);
                 rule = 'text|list#' + id + ' > text|list-item > *:first-child:before {';
 
@@ -763,9 +764,9 @@ odf.OdfCanvas = (function () {
                     bulletRule = getBulletsRule(node.firstChild);
                 }
 
-                if(continueList) {
+                if (continueList) {
                     parentList = listMap[continueList];
-                    while(parentList) {
+                    while (parentList) {
                         continueList = parentList;
                         parentList = listMap[continueList];
                     }
@@ -774,8 +775,7 @@ odf.OdfCanvas = (function () {
                     if (bulletRule) {
                         bulletRule = bulletRule.replace('list', continueList);
                         rule += bulletRule;
-                    }
-                    else {
+                    } else {
                         rule += 'content:counter(' + continueList + ');';
                     }
                 } else {
@@ -783,12 +783,11 @@ odf.OdfCanvas = (function () {
                     if (bulletRule) {
                         bulletRule = bulletRule.replace('list', id);
                         rule += bulletRule;
-                    }
-                    else {
+                    } else {
                         rule += 'content: counter(' + id + ');';
                     }
                     rule += 'counter-increment:' + id + ';';
-                    stylesheet.insertRule('text|list#' + id + ' {counter-reset:'+ id +'}', stylesheet.cssRules.length);
+                    stylesheet.insertRule('text|list#' + id + ' {counter-reset:' + id + '}', stylesheet.cssRules.length);
                 }
                 rule += '}';
 
@@ -830,8 +829,8 @@ odf.OdfCanvas = (function () {
         style.setAttribute('media', 'screen, print, handheld, projection');
         for (prefix in namespaces) {
             if (namespaces.hasOwnProperty(prefix) && prefix) {
-                text += "@namespace " + prefix + " url(" + namespaces[prefix] +
-                        ");\n";
+                text += "@namespace " + prefix + " url(" + namespaces[prefix]
+                    + ");\n";
             }
         }
         style.appendChild(document.createTextNode(text));
