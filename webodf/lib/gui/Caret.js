@@ -32,8 +32,6 @@
  */
 /*global core, gui, runtime*/
 
-runtime.loadClass("core.PointWalker");
-runtime.loadClass("core.Cursor");
 runtime.loadClass("gui.SelectionMover");
 
 /**
@@ -64,10 +62,13 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         }
     }
     var document = rootNode.ownerDocument,
+        selection = new core.Selection(),
+        cursor = new core.Cursor(selection, document),
+        pointWalker = new core.PointWalker(rootNode),
+        selectionMover = new gui.SelectionMover(selection, pointWalker),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
         handle = document.createElementNS(htmlns, "div"),
-        cursorns = 'urn:webodf:names:cursor',
         cursorNode,
         focussed = false,
         caretLineVisible;
@@ -92,6 +93,14 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         span.focus();
     };
     this.move = function (number) {
+        while (number > 0) {
+            selectionMover.movePointForward();
+            number -= 1;
+        }
+        while (number < 0) {
+            selectionMover.movePointBackward();
+            number += 1;
+        }
     };
     this.setColor = function (color) {
         span.style.borderColor = color;
@@ -126,7 +135,7 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         listenEvent(element, "keypress", handleKeyPress);
     }
     function init() {
-        cursorNode = document.createElementNS(cursorns, 'cursor');
+        cursorNode = cursor.getNode();
         span.setAttribute("contenteditable", true);
         //span.style.borderColor = "black";
         span.onfocus = function () {

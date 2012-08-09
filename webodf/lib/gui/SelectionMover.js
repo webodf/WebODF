@@ -31,8 +31,8 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime: true, core: true, gui: true*/
+runtime.loadClass("core.PointWalker");
 runtime.loadClass("core.Cursor");
-runtime.loadClass("core.Selection");
 /**
  * This class modifies the selection in different ways.
  * @constructor

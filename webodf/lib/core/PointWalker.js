@@ -45,7 +45,6 @@ core.PointWalker = function PointWalker(node) {
         after = node && node.firstChild, // node after the point
         root = node,
         pos = 0;
-
     /**
      * @param {Node} node
      * @return {!number}
