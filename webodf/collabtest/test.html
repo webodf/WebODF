@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+  <script src="../lib/runtime.js" type="text/javascript" charset="utf-8"></script>
+  <script src="test.js" type="text/javascript" charset="utf-8"></script>
+<style>
+div#session1 {
+   position:absolute;
+   top: 0;
+   left: 0%;
+   width: 90%;
+   height: 50%;
+   overflow: auto;
+}
+div#avatars1 {
+   position:absolute;
+   top: 0;
+   left: 90%;
+   width: 10%;
+   height: 50%;
+   background: gray;
+}
+div#session2 {
+   position:absolute;
+   top: 50%;
+   left: 0;
+   width: 90%;
+   height: 50%;
+   overflow: auto;
+}
+div#avatars2 {
+   position:absolute;
+   top: 50%;
+   left: 90%;
+   width: 10%;
+   height: 50%;
+   background: #dddddd;
+}
+</style>
+ </head>
+ <body>
+  <script type="text/javascript" charset="utf-8">
+window.setTimeout(init, 0);
+  </script>
+  <div id="session1">
+    <div id="odf1"></div>
+  </div>
+  <div id="avatars1"></div>
+  <div id="session2">
+    <div id="odf2"></div>
+  </div>
+  <div id="avatars2"></div>
+ </body>
+</html>

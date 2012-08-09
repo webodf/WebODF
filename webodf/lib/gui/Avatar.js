@@ -59,7 +59,8 @@ gui.Avatar = function Avatar(memberid, session) {
     }
     var self = this,
         rootNode = findTextRoot(session),
-        caret;
+        caret,
+        image;
     /**
      * @param {!number} charCode
      * @return {!boolean}
@@ -83,8 +84,29 @@ gui.Avatar = function Avatar(memberid, session) {
     this.focus = function () {
         caret.focus();
     };
+    this.getMemberId = function () {
+        return memberid;
+    };
+    this.showHandle = function () {
+        caret.showHandle();
+    };
+    this.hideHandle = function () {
+        caret.hideHandle();
+    };
+    this.setImageUrl = function (url) {
+        image.src = url;
+    };
+    this.setColor = function (color) {
+        caret.setColor(color);
+    };
+    this.getColor = function () {
+        return caret.getColor();
+    };
     function init() {
         caret = new gui.Caret(rootNode, keyHandler);
+        var handle = caret.getHandleElement();
+        image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
+        handle.appendChild(image);
     }
     init();
 };

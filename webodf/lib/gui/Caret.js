@@ -61,34 +61,53 @@ gui.Caret = function Caret(rootNode, keyHandler) {
     var document = rootNode.ownerDocument,
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
+        handle = document.createElementNS(htmlns, "div"),
         cursorns = 'urn:webodf:names:cursor',
-        cursorNode;
-    cursorNode = document.createElementNS(cursorns, 'cursor');
-    cursorNode.setAttribute("color", "white");
-    span.setAttribute("contenteditable", true);
-    cursorNode.appendChild(span);
+        cursorNode,
+        focussed = false,
+        caretLineVisible;
     function blink() {
-        if (!cursorNode.parentNode) {
+        if (!focussed || !cursorNode.parentNode) {
             // stop blinking when removed from the document
             return;
         }
-        if (cursorNode.getAttribute("color") === "white") {
-            cursorNode.setAttribute("color", "black");
+        if (caretLineVisible) {
+            span.style.borderLeftWidth = "0px";
         } else {
-            cursorNode.setAttribute("color", "white");
+            span.style.borderLeftWidth = "1px";
         }
-        span.focus();
+        caretLineVisible = !caretLineVisible;
         runtime.setTimeout(blink, 1000);
     }
     this.focus = function () {
+        span.focus();
     };
     this.move = function (number) {
+    };
+    this.setColor = function (color) {
+        span.style.borderColor = color;
+        handle.style.background = color;
+    };
+    this.getColor = function () {
+        return span.style.borderColor;
+    };
+    this.getHandleElement = function () {
+        return handle;
+    };
+    this.showHandle = function () {
+        handle.style.display = "block";
+    };
+    this.hideHandle = function () {
+        handle.style.display = "none";
     };
     function handleKeyDown(e) {
         if (keyHandler) {
             keyHandler(e.keyCode);
         }
-        cancelEvent(e);
+        // still allow ctrl-r in ui, must be improved later
+        if (!e.ctrlKey) {
+            cancelEvent(e);
+        }
     }
     function handleKeyPress(e) {
     }
@@ -97,6 +116,19 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         listenEvent(element, "keypress", handleKeyPress);
     }
     function init() {
+        cursorNode = document.createElementNS(cursorns, 'cursor');
+        span.setAttribute("contenteditable", true);
+        //span.style.borderColor = "black";
+        span.onfocus = function () {
+            focussed = true;
+            blink();
+        };
+        span.onblur = function () {
+            focussed = false;
+            span.style.borderLeftWidth = "1px";
+        };
+        cursorNode.appendChild(span);
+        cursorNode.appendChild(handle);
         initElement(cursorNode);
         // for now, just put it at the start of the rootNode 
         rootNode.insertBefore(cursorNode, rootNode.firstChild);

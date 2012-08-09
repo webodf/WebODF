@@ -65,4 +65,13 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.getAvatar = function (memberid) {
         return members[memberid];
     };
+    this.getAvatars = function () {
+        var list = [], i;
+        for (i in members) {
+            if (members.hasOwnProperty(i)) {
+                list.push(members[i]);
+            }
+        }
+        return list;
+    };
 };

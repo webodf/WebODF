@@ -204,13 +204,16 @@ cursor|cursor {
     width: 0px;
     height: 0px;
 }
-cursor|cursor span {
+cursor|cursor > span {
     display: block;
     position: absolute;
     width: 0px;
     height: 1.5ex;
     border-left: 1px solid black;
 }
-cursor|cursor[color=white] span {
-    border-color: white;
+cursor|cursor > div {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+/*    top: 2ex; */
 }
