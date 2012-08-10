@@ -38,11 +38,11 @@
 ops.SessionPointFilter = function SessionPointFilter() {
     "use strict";
     /**
-     * @param {!Element} element
+     * @param {!Node} node
      * @param {!number} offset
      * @return {core.PointFilter.FilterResult}
      */
-    this.acceptPoint = function (element, offset) {
+    this.acceptPoint = function (node, offset) {
         var result = core.PointFilter.FilterResult.FILTER_ACCEPT;
         return result;
     };

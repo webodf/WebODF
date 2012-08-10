@@ -30,75 +30,77 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core: true, Node: true*/
+/*global core, runtime*/
+runtime.loadClass("core.SimplePointWalker");
 /**
  * A simple walker that allows finegrained stepping through the DOM.
  * It does not support node filtering.
  * TODO: write a position walker that uses a treewalker
  * @constructor
  * @implements core.PointWalker
- * @param {!Node} node
+ * @param {!Node} root
  * @param {!core.PointFilter} filter
  */
-core.FilteredPointWalker = function FilteredPointWalker(node, filter) {
+core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
     "use strict";
-    var currentNode = node,
+    var simple = new core.SimplePointWalker(root),
         before = null, // node before the point
-        after = node && node.firstChild, // node after the point
-        root = node,
+        after = null, // node after the point
         pos = 0;
     /**
-     * @param {Node} node
-     * @return {!number}
-     */
-    function getPosition(node) {
-        var /**@type{!number}*/ p = -1,
-            /**@type{Node}*/ n = node;
-        return p;
-    }
-    /**
      * Move the walker to the point given by @p node and @p position.
-     * @param {!Element} node must be the root of this walker or part of the
+     * @param {!Node} node must be the root of this walker or part of the
      *                   tree of this walker.
      * @param {!number} position must be a valid position in @node.
      * @return {undefined}
      **/
     this.setPoint = function (node, position) {
+        simple.setPoint(node, position);
     };
     /**
      * @return {!boolean}
      */
     this.stepForward = function () {
-        return false;
+        var r = simple.stepForward();
+        while (r && filter.acceptPoint(simple.node(), simple.position())
+                        !== core.PointFilter.FilterResult.FILTER_ACCEPT) {
+            r = simple.stepForward();
+        }
+        return r;
     };
     /**
      * @return {!boolean}
      */
     this.stepBackward = function () {
-        return false;
+        var r = simple.stepBackward();
+        while (r && filter.acceptPoint(simple.node(), simple.position())
+                        !== core.PointFilter.FilterResult.FILTER_ACCEPT) {
+            r = simple.stepBackward();
+        }
+        return r;
     };
     /**
      * @return {?Node}
      */
     this.node = function () {
-        return currentNode;
+        return simple.node();
     };
     /**
      * @return {!number}
      */
     this.position = function () {
-        return pos;
+        return simple.position();
     };
     /**
      * @return {?Node}
      */
     this.precedingSibling = function () {
-        return before;
+        return before; // TODO
     };
     /**
      * @return {?Node}
      */
     this.followingSibling = function () {
-        return after;
+        return after; // TODO
     };
 };

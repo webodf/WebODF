@@ -44,11 +44,11 @@ core.PointFilter.FilterResult = {
     FILTER_SKIP:   3
 };
 /**
- * @param {!Element} element
+ * @param {!Node} node
  * @param {!number} offset
  * @return {core.PointFilter.FilterResult}
  */
-core.PointFilter.prototype.acceptPoint = function (element, offset) {"use strict"; };
+core.PointFilter.prototype.acceptPoint = function (node, offset) {"use strict"; };
 (function () {
     "use strict";
     return core.PointFilter;

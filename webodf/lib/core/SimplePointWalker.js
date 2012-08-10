@@ -61,7 +61,7 @@ core.SimplePointWalker = function SimplePointWalker(node) {
     }
     /**
      * Move the walker to the point given by @p node and @p position.
-     * @param {!Element} node must be the root of this walker or part of the
+     * @param {!Node} node must be the root of this walker or part of the
      *                   tree of this walker.
      * @param {!number} position must be a valid position in @node.
      **/

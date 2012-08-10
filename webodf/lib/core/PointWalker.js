@@ -33,13 +33,15 @@
 /*global core: true, Node: true*/
 /**
  * A walker that allows finegrained stepping through the DOM.
- * TODO: write a position walker that uses a treewalker
+ * A PointWalker goes from point to point. Each point points to positions
+ * between elements of the dom tree. So each point has a node and a position.
+ * In that regard, a point is the same as a start and end of Range.
  * @interface
  */
 core.PointWalker = function PointWalker() {"use strict"; };
 /**
  * Move the walker to the point given by @p node and @p position.
- * @param {!Element} node must be the root of this walker or part of the
+ * @param {!Node} node must be the root of this walker or part of the
  *                   tree of this walker.
  * @param {!number} position must be a valid position in @node.
  **/
