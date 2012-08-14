@@ -30,15 +30,15 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global odf: true, runtime: true*/
+/*global odf: true, runtime: true, console: true*/
 /**
  * @constructor
  */
 odf.Formatting = function Formatting() {
     "use strict";
     var /**@type{odf.OdfContainer}*/ odfContainer,
-        /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo();
-
+        /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
+        /**@type{Object}*/ namespaces = new odf.Style2CSS().namespaces;
     /**
      * Class that iterates over all elements that are part of the range.
      * @constructor
@@ -142,6 +142,34 @@ odf.Formatting = function Formatting() {
         }
         return styles;
     };
+
+    /**
+     *@return {!Array}
+     */
+    this.getAvailableParagraphStyles = function() {
+        var stylesNodeList, styles, i, doc, name, displayName, paragraphStyles = [];
+
+        doc = odfContainer.rootElement.ownerDocument;
+        stylesNodeList = doc.getElementsByTagNameNS(namespaces.office, 'styles');
+
+        // FIXME: stylesNodeList[0] should return the <office:styles> element.
+        // Logging this array shows the element within
+        console.log(stylesNodeList);
+        // But accessing the element does not work
+        console.log(stylesNodeList[0]);
+        
+        styles = stylesNodeList[0].getElementsByTagNameNS(namespaces.style, 'style');
+
+        for (i = 0; i < styles.length; i+=1) {
+            if(styles[i].getAttributeNS(namespaces.style, 'family') === 'paragraph') {
+                name = styles[i].getAttributeNS(namespaces.style, 'name');
+                displayName = styles[i].getAttributeNS(namespaces.style, 'display-name') || name;
+                paragraphStyles[name] = displayName;
+            }
+        }
+        return paragraphStyles;
+    };
+
     /**
      * Get the list of text styles that are covered by the current selection.
      * @param {!Array.<!Range>} selection

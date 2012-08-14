@@ -4,18 +4,24 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
   
   <title>Editor</title>
-    
-  <link rel="stylesheet" type="text/css" href="editor.css"/>
 
-  <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
-  <script src="editor.js" type="text/javascript" charset="utf-8"></script>
+  <!-- Dojo stuff -->
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/claro.css"/>
+  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js" data-dojo-config="async: true"></script>
+
+  <!-- App stuff -->
+  <script src="lib/runtime.js" type="text/javascript" charset="utf-8"/></script>
+  <link rel="stylesheet" type="text/css" href="editor.css"/>
+  <script src="editor.js" type="text/javascript" charset="utf-8"/></script>
+
   <script type="text/javascript">//<![CDATA[
 runtime.libraryPaths = function () {
     return ["lib"];
 };
   //]]></script>
+
  </head>
- <body>
+ <body class = "claro">
     <div id = "title"></div>
     <div id = "container">
         <div id="canvas"></div>

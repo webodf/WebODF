@@ -1,6 +1,7 @@
 function init() {
 
     runtime.loadClass('odf.OdfCanvas');
+
     // If the URL has a fragment (#...), try to load the file it represents
     var location = String(document.location),
         pos = location.indexOf('#'),
@@ -13,6 +14,9 @@ function init() {
 
     location = location.substr(pos + 1);
     document.odfCanvas.load(location);
+    document.odfCanvas.setEditable(true);
+
+    require(["widgets/paragraphStyles.js"]);
 }
 
 window.setTimeout(init, 1);
