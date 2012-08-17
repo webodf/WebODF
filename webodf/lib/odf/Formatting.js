@@ -147,24 +147,19 @@ odf.Formatting = function Formatting() {
      *@return {!Array}
      */
     this.getAvailableParagraphStyles = function() {
-        var stylesNodeList, styles, i, doc, name, displayName, paragraphStyles = [];
+        var styles = [], i, p_name, p_displayName, paragraphStyles = [];
 
-        doc = odfContainer.rootElement.ownerDocument;
-        stylesNodeList = doc.getElementsByTagNameNS(namespaces.office, 'styles');
-
-        // FIXME: stylesNodeList[0] should return the <office:styles> element.
-        // Logging this array shows the element within
-        console.log(stylesNodeList);
-        // But accessing the element does not work
-        console.log(stylesNodeList[0]);
-        
-        styles = stylesNodeList[0].getElementsByTagNameNS(namespaces.style, 'style');
+        styles = odfContainer.rootElement.getElementsByTagNameNS(namespaces.office, 'styles')[0]
+                                         .getElementsByTagNameNS(namespaces.style, 'style');
 
         for (i = 0; i < styles.length; i+=1) {
             if(styles[i].getAttributeNS(namespaces.style, 'family') === 'paragraph') {
-                name = styles[i].getAttributeNS(namespaces.style, 'name');
-                displayName = styles[i].getAttributeNS(namespaces.style, 'display-name') || name;
-                paragraphStyles[name] = displayName;
+                p_name = styles[i].getAttributeNS(namespaces.style, 'name');
+                p_displayName = styles[i].getAttributeNS(namespaces.style, 'display-name') || p_name;
+                paragraphStyles.push({
+                    name: p_name,
+                    displayName: p_displayName
+                });
             }
         }
         return paragraphStyles;
