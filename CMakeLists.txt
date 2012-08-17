@@ -94,7 +94,7 @@ if (NOT ANT)
 endif(NOT ANT)
 
 set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
-    webodf.css.js
+    tools/webodf.css.js
 
     lib/core/RawDeflate.js lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js lib/core/RawInflate.js
