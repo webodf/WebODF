@@ -1,12 +1,33 @@
-runtime.loadClass('odf.Formatting');
+widgets.ParagraphStyles = (function () {
 
-var formatting = new odf.Formatting();
-formatting.setOdfContainer(document.odfCanvas.odfContainer());
-console.log(formatting.getAvailableParagraphStyles());
+    function makeWidget(documentObject, callback) {
+        require(["dijit/form/Select"], function(Select) {
+            var i,
+                widget,
+                selectionList = [];
+                availableStyles = documentObject.formatting.getAvailableParagraphStyles();
 
-require(["dijit/form/Select"], function() {
-	new dijit.form.Select({
-		name: 'paragraphStyles',
-		options: []
-	}).placeAt(dojo.body());
-})
+            for (i = 0; i < availableStyles.length; i += 1) {
+                selectionList.push({
+                    label: availableStyles[i].displayName,
+                    value: availableStyles[i].name
+                });
+            }
+
+            widget = new Select({
+                name: 'ParagraphStyles',
+                options: selectionList
+            });
+
+            return callback(widget);
+        });
+    }
+
+    widgets.ParagraphStyles = function ParagraphStyles(documentObject, callback) {
+        makeWidget(documentObject, function(widget) {
+            return callback(widget);
+        });
+    }
+
+    return widgets.ParagraphStyles;
+}());
