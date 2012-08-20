@@ -1,10 +1,10 @@
 widgets.ParagraphStyles = (function () {
 
     function makeWidget(documentObject, callback) {
-        require(["dijit/form/Select"], function(Select) {
+        require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
-                selectionList = [];
+                selectionList = [],
                 availableStyles = documentObject.formatting.getAvailableParagraphStyles();
 
             for (i = 0; i < availableStyles.length; i += 1) {
@@ -24,10 +24,10 @@ widgets.ParagraphStyles = (function () {
     }
 
     widgets.ParagraphStyles = function ParagraphStyles(documentObject, callback) {
-        makeWidget(documentObject, function(widget) {
+        makeWidget(documentObject, function (widget) {
             return callback(widget);
         });
-    }
+    };
 
     return widgets.ParagraphStyles;
 }());
