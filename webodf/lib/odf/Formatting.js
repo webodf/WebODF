@@ -144,23 +144,34 @@ odf.Formatting = function Formatting() {
     };
 
     /**
-     *@return {!Array}
+     * Loop over the <style:style> elements and place the attributes
+     * style:name and style:display-name in an array.
+     * @return {!Array}
      */
-    this.getAvailableParagraphStyles = function() {
-        var styles = [], i, p_name, p_displayName, paragraphStyles = [];
-
-        styles = odfContainer.rootElement.getElementsByTagNameNS(namespaces.office, 'styles')[0]
-                                         .getElementsByTagNameNS(namespaces.style, 'style');
-
-        for (i = 0; i < styles.length; i+=1) {
-            if(styles[i].getAttributeNS(namespaces.style, 'family') === 'paragraph') {
-                p_name = styles[i].getAttributeNS(namespaces.style, 'name');
-                p_displayName = styles[i].getAttributeNS(namespaces.style, 'display-name') || p_name;
-                paragraphStyles.push({
-                    name: p_name,
-                    displayName: p_displayName
-                });
+    this.getAvailableParagraphStyles = function () {
+        var node = odfContainer.styles && odfContainer.styles.firstChild,
+            p_family,
+            p_name,
+            p_displayName,
+            paragraphStyles = [],
+            style;
+        while (node) {
+            if (node.nodeType === 1 && node.localName === "styles"
+                    && node.namespaceURI === namespaces.style) {
+                style = node;
+                p_family = style.getAttributeNS(namespaces.style, 'family');
+                if (p_family === "paragraph") {
+                    p_name = style.getAttributeNS(namespaces.style, 'name');
+                    p_displayName = style.getAttributeNS(namespaces.style, 'display-name');
+                    if (p_name && p_displayName) {
+                        paragraphStyles.push({
+                            name: p_name,
+                            displayName: p_displayName
+                        });
+                    }
+                }
             }
+            node = node.nextSibling;
         }
         return paragraphStyles;
     };
