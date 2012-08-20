@@ -76,7 +76,7 @@ function runNextTest(tests) {
     var test = tests[0];
     if (typeof test !== "function") {
         runtime.log("Tests contain a non-function object of type " +
-                typeof(test) + ".");
+                typeof test + ".");
         runtime.exit(1);
         return;
     }
