@@ -1,3 +1,10 @@
+runtime.currentDirectory = function () {
+    return "../../webodf/lib";
+};
+runtime.libraryPaths = function () {
+    return [ runtime.currentDirectory() ];
+};
+
 function init() {
     runtime.loadClass('odf.OdfCanvas');
     runtime.loadClass('odf.Formatting');
@@ -9,8 +16,8 @@ function init() {
     document.odfCanvas = new odf.OdfCanvas(odfElement);
     document.formatting = new odf.Formatting();
 
-    if(pos === -1 || !window) {
-        return
+    if (pos === -1 || !window) {
+        return;
     }
 
     location = location.substr(pos + 1);
@@ -18,7 +25,7 @@ function init() {
     document.odfCanvas.setEditable(true);
     document.formatting.setOdfContainer(document.odfCanvas.odfContainer());
 
-    require(['widgets.js'], function() {
+    require(['widgets.js'], function () {
         document.odfCanvas.addListener("statereadychange", loadWidgets(document));
     });
 }
