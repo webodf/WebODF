@@ -55,11 +55,11 @@ core.RuntimeTests = function RuntimeTests(runner) {
     }
 
     /**
-     * Test writing a binary file and reading it back.
+     * Test writing a binary file, reading it back and deleting it.
      */
     function testWrite(callback) {
-        var content = new core.ByteArrayWriter("utf8"),
-            i, max = 1024, filename, clean;
+        var i, max = 1024, filename, clean,
+            content = new core.ByteArrayWriter("utf8");
         for (i = 0; i < max; i += 1) {
             content.appendArray([i]);
         }
@@ -93,7 +93,15 @@ core.RuntimeTests = function RuntimeTests(runner) {
                 r.shouldBe(t, "t.i", "t.max");
                 // cleanup
                 runtime.deleteFile(filename, function (err) {
-                    callback();
+                    t.err = err;
+                    r.shouldBeNull(t, "t.err");
+                    runtime.readFile(filename, "binary", function (err, data) {
+                        t.err = err;
+                        t.data = data || null;
+                        r.shouldBeNonNull(t, "t.err");
+                        r.shouldBeNull(t, "t.data");
+                        callback();
+                    });
                 });
             });
         });
