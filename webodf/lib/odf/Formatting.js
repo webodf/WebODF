@@ -149,16 +149,16 @@ odf.Formatting = function Formatting() {
      * @return {!Array}
      */
     this.getAvailableParagraphStyles = function () {
-        var node = odfContainer.styles && odfContainer.styles.firstChild,
+        var node = odfContainer.rootElement.styles && odfContainer.rootElement.styles.firstChild,
             p_family,
             p_name,
             p_displayName,
             paragraphStyles = [],
             style;
         while (node) {
-            if (node.nodeType === 1 && node.localName === "styles"
+            console.log(node.localName)
+            if (node.nodeType === 1 && node.localName === "style"
                     && node.namespaceURI === namespaces.style) {
-                style = node;
                 p_family = style.getAttributeNS(namespaces.style, 'family');
                 if (p_family === "paragraph") {
                     p_name = style.getAttributeNS(namespaces.style, 'name');
