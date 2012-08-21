@@ -66,29 +66,20 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
     }
     this.removeFromSession = function () {
     };
-    this.moveCaret = function (number) {
-        caret.move(number);
-    };
-    this.focus = function () {
-        caret.focus();
-    };
     this.getMemberId = function () {
         return memberid;
-    };
-    this.showHandle = function () {
-        caret.showHandle();
-    };
-    this.hideHandle = function () {
-        caret.hideHandle();
     };
     this.setImageUrl = function (url) {
         image.src = url;
     };
+    this.getColor = function () {
+        return caret.getColor();
+    };
     this.setColor = function (color) {
         caret.setColor(color);
     };
-    this.getColor = function () {
-        return caret.getColor();
+    this.getCaret = function () {
+        return caret;
     };
     function init() {
         caret = new gui.Caret(rootNode, keyHandler);

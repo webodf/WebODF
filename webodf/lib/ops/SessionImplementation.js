@@ -53,7 +53,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return root;
     }
     var self = this,
-        rootNode = findTextRoot(self),
+        rootNode,
         members = {};
 
     /* SESSION OPERATIONS */
@@ -71,7 +71,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     };
     this.moveMemberCaret = function (memberid, number) {
         var avatar = members[memberid];
-        avatar.moveCaret(number);
+        avatar.getCaret().move(number);
     };
 
     /* RELAYING OF SESSION OPERATIONS */
@@ -95,4 +95,5 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
+    rootNode = findTextRoot(self);
 };

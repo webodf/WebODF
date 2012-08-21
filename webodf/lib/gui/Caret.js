@@ -120,6 +120,9 @@ gui.Caret = function Caret(rootNode, keyHandler) {
     this.hideHandle = function () {
         handle.style.display = "none";
     };
+    this.getSelection = function () {
+        return selection;
+    };
     function handleKeyDown(e) {
         if (keyHandler) {
             keyHandler(e.keyCode);

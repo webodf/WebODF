@@ -48,30 +48,46 @@ gui.AvatarTests = function AvatarTests(runner) {
     this.tearDown = function () {
         t = {};
     };
-    function createEmptyDocument() {
+    function createAvatar(xml) {
         var parser = new DOMParser();
-        t.doc = parser.parseFromString("<a/>", "text/xml");
-    }
-    function createSimpleDocument() {
-        var parser = new DOMParser();
-        t.doc = parser.parseFromString("<a>hello</a>", "text/xml");
-    }
-    function createAvatar(callback) {
-        createEmptyDocument();
+        t.doc = parser.parseFromString(xml, "text/xml");
         function mover(n) {
             t.avatar.moveCaret(n);
         }
         t.avatar = new gui.Avatar("id", t.doc.documentElement, mover);
+    }
+    function create() {
+        createAvatar("<a/>");
         r.shouldBeNonNull(t, "t.avatar");
         r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
-        callback();
+        var c = t.avatar.getCaret(),
+            s = c.getSelection();
+        t.rangeCount = s.rangeCount;
+        r.shouldBe(t, "t.rangeCount", "1");
+        t.focusOffset = s.focusOffset;
+        r.shouldBe(t, "t.focusOffset", "0");
+        t.focusNode = s.focusNode;
+        r.shouldBeNonNull(t, "t.focusNode");
+    }
+    function moveInEmptyDoc() {
+        createAvatar("<a/>");
+        var c = t.avatar.getCaret(),
+            s = c.getSelection();
+        t.startNode = s.focusNode;
+        // c.move(1); // this fails atm
+        t.focusOffset = s.focusOffset;
+        t.focusNode = s.focusNode;
+        r.shouldBe(t, "t.focusOffset", "0");
+        r.shouldBe(t, "t.startNode", "t.focusNode");
     }
     this.tests = function () {
-        return [  ];
+        return [
+            create,
+            moveInEmptyDoc
+        ];
     };
     this.asyncTests = function () {
         return [
-            createAvatar
         ];
     };
 };
