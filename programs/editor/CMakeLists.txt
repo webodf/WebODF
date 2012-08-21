@@ -4,7 +4,8 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     editor.js 
     editor.css
     widgets.js
-    widgets/paragraphStyles.js )
+    widgets/paragraphStyles.js
+    widgets/simpleStyles.js )
 COPY_FILES(EDITORDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR} webodf.css ${LIBJSFILES})
 add_custom_target(editorDepencencies ALL DEPENDS ${EDITORDEPS})
