@@ -728,6 +728,9 @@ function NodeJSRuntime() {
         });
     };
     this.deleteFile = function (path, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         fs.unlink(path, callback);
     };
     this.read = function (path, offset, length, callback) {
