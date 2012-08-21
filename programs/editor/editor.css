@@ -36,18 +36,10 @@
 }
 
 #toolbar {
-    background: rgb(191, 196, 198);
-    background: -moz-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
-    background: -webkit-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
-    background: -o-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
-    background: -ms-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
-    background: linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
-
     -moz-border-radius-topleft: 5px;
     -webkit-border-top-left-radius: 5px;
      border-top-left-radius: 5px;
     -moz-border-radius-topright: 5px;
     -webkit-border-top-right-radius: 5px;
     border-top-right-radius: 5px;
-
 }
