@@ -15,17 +15,18 @@
   <script src="editor.js" type="text/javascript" charset="utf-8"/></script>
 
   <script type="text/javascript">//<![CDATA[
-runtime.libraryPaths = function () {
-    return ["lib"];
-};
+
 window["widgets"] = {};
   //]]></script>
 
  </head>
  <body class = "claro">
     <div id = "title"></div>
-    <div id = "container">
+    <div id = "editor">
+      <span id = "toolbar"></span>
+      <div id = "container">
         <div id="canvas"></div>
+      </div>
     </div>
  </body>
 </html>

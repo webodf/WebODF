@@ -1,14 +1,19 @@
 function loadWidgets(documentObject) {
-	// Load a Paragraph Style Selector widget.
-	var dojoWin;
+	var dojoWin, toolbar;
 	require(["dojo/_base/window"], function (win) {
 		dojoWin = win;
 	});
 
-    require(["widgets/paragraphStyles.js"], function () {
-        var styles = new widgets.ParagraphStyles(documentObject, function (widget) {
-            widget.placeAt(dojoWin.body());
-            widget.startup();
+    // Toolbar
+    require(["dijit/Toolbar"], function(Toolbar) {
+        toolbar = new Toolbar({}, "toolbar");
+
+        // Paragraph Style Selector
+        require(["widgets/paragraphStyles.js"], function () {
+            var styles = new widgets.ParagraphStyles(documentObject, function (widget) {
+                widget.placeAt(toolbar);
+                widget.startup();
+            });
         });
     });
 }
