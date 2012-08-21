@@ -158,6 +158,7 @@ odf.Formatting = function Formatting() {
         while (node) {
             if (node.nodeType === 1 && node.localName === "style"
                     && node.namespaceURI === namespaces.style) {
+                style = node;
                 p_family = style.getAttributeNS(namespaces.style, 'family');
                 if (p_family === "paragraph") {
                     p_name = style.getAttributeNS(namespaces.style, 'name');
