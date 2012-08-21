@@ -82,8 +82,10 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
         return caret;
     };
     function init() {
-        caret = new gui.Caret(rootNode, keyHandler);
-        var handle = caret.getHandleElement();
+        var pointWalker = new core.SimplePointWalker(rootNode),
+            handle;
+        caret = new gui.Caret(rootNode, pointWalker, keyHandler);
+        handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);
     }

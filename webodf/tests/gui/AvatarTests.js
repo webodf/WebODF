@@ -52,7 +52,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         var parser = new DOMParser();
         t.doc = parser.parseFromString(xml, "text/xml");
         function mover(n) {
-            t.avatar.moveCaret(n);
+            t.avatar.getCaret().move(n);
         }
         t.avatar = new gui.Avatar("id", t.doc.documentElement, mover);
     }
