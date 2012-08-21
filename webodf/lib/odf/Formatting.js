@@ -162,7 +162,7 @@ odf.Formatting = function Formatting() {
                 p_family = style.getAttributeNS(namespaces.style, 'family');
                 if (p_family === "paragraph") {
                     p_name = style.getAttributeNS(namespaces.style, 'name');
-                    p_displayName = style.getAttributeNS(namespaces.style, 'display-name');
+                    p_displayName = style.getAttributeNS(namespaces.style, 'display-name') || p_name;
                     if (p_name && p_displayName) {
                         paragraphStyles.push({
                             name: p_name,
