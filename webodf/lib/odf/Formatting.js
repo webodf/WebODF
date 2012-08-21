@@ -156,7 +156,6 @@ odf.Formatting = function Formatting() {
             paragraphStyles = [],
             style;
         while (node) {
-            console.log(node.localName)
             if (node.nodeType === 1 && node.localName === "style"
                     && node.namespaceURI === namespaces.style) {
                 p_family = style.getAttributeNS(namespaces.style, 'family');
