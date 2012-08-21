@@ -154,7 +154,7 @@ core.PointWalker = function PointWalker(node) {
                 if (typeof pos !== "number") {
                     // length can be a function
                     length = /**@type{!function():number}*/(pos);
-                    pos = length();
+                    pos = length.call(currentNode.nodeValue);
                 }
             } else {
                 after = before;
