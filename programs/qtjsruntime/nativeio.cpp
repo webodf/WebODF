@@ -16,6 +16,9 @@ NativeIO::readFileSync(const QString& path, const QString& encoding) {
     QByteArray data;
     if (file.open(QIODevice::ReadOnly)) {
         data = file.readAll();
+    } else {
+        errstr = "Could not read file.";
+        return QString();
     }
     QString out;
     if (encoding != "binary") {
@@ -77,8 +80,13 @@ void
 NativeIO::unlink(const QString& path) {
     errstr = QString();
     QFile file(cwd.absoluteFilePath(path));
-    if (!file.remove()) {
+    if (!file.exists()) {
+        errstr = "File does not exist.";
+    } else if (!file.remove()) {
         errstr = "Could not delete file";
+    }
+    if (QFile(cwd.absoluteFilePath(path)).exists()) {
+        errstr = "File still exists.";
     }
 }
 int

@@ -518,6 +518,7 @@ function BrowserRuntime(logoutput) {
         }
     }
     function deleteFile(path, callback) {
+        delete cache[path];
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', path, true);
         xhr.onreadystatechange = function () {
@@ -726,7 +727,9 @@ function NodeJSRuntime() {
             callback(err || null);
         });
     };
-    this.deleteFile = fs.unlink;
+    this.deleteFile = function (path, callback) {
+        fs.unlink(path, callback);
+    };
     this.read = function (path, offset, length, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
