@@ -1,14 +1,15 @@
 #editor {
-
     position: absolute;
 
     top: 100px;
     margin-left: 30px;
-    width: 70%;
     bottom: 20px;
     box-shadow: 0px 0px 1px black;
-
     overflow: hidden;
+
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 
 #container { 
@@ -26,20 +27,27 @@
 
 #canvas {
     
-    zoom: 80%;
-    -moz-transform: scale(0.8);
-    -webkit-transform: scale(0.8);
-    -o-transform: scale(0.8);
-    -ms-transform: scale(0.8);
-    
-    transform-origin: top left;
-    -moz-transform-origin: top left;
-    -webkit-transform-origin: top left;
-    -o-transform-origin: top left;
-    -ms-transform-origin: top left;
-
     box-shadow: 0px 0px 15px #ccc;
 
     margin-top: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
     margin-bottom: 30px;
+}
+
+#toolbar {
+    background: rgb(191, 196, 198);
+    background: -moz-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
+    background: -webkit-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
+    background: -o-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
+    background: -ms-linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
+    background: linear-gradient(270deg, rgb(191, 196, 198) 0%, rgb(161, 163, 166) 75%);
+
+    -moz-border-radius-topleft: 5px;
+    -webkit-border-top-left-radius: 5px;
+     border-top-left-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-top-right-radius: 5px;
+    border-top-right-radius: 5px;
+
 }
