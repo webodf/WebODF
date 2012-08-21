@@ -30,8 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
-runtime.loadClass("gui.Avatar");
+/*global runtime, core, gui, ops, DOMParser*/
+runtime.loadClass("ops.SessionImplementation");
 
 /**
  * @constructor
@@ -40,26 +40,38 @@ runtime.loadClass("gui.Avatar");
  */
 gui.AvatarTests = function AvatarTests(runner) {
     "use strict";
-    var r = runner, t,
-        testarea = runtime.getWindow().document.getElementById("testarea");
+    var r = runner, t;
 
     this.setUp = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
     };
     this.tearDown = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
     };
+    function createEmptyDocument() {
+        var parser = new DOMParser();
+        t.doc = parser.parseFromString("<a/>", "text/xml");
+    }
+    function createSimpleDocument() {
+        var parser = new DOMParser();
+        t.doc = parser.parseFromString("<a>hello</a>", "text/xml");
+    }
+    function createAvatar(callback) {
+        createEmptyDocument();
+        function mover(n) {
+            t.avatar.moveCaret(n);
+        }
+        t.avatar = new gui.Avatar("id", t.doc.documentElement, mover);
+        r.shouldBeNonNull(t, "t.avatar");
+        r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
+        callback();
+    }
     this.tests = function () {
         return [  ];
     };
     this.asyncTests = function () {
         return [
+            createAvatar
         ];
     };
 };

@@ -41,24 +41,12 @@ runtime.loadClass("gui.Caret");
  * receives.
  * @constructor
  * @param {!string} memberid
- * @param {!ops.SessionImplementation} session
+ * @param {!Element} rootNode
+ * @param {!function(!number):undefined} caretMover
  */
-gui.Avatar = function Avatar(memberid, session) {
+gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
     "use strict";
-    function findTextRoot(session) {
-        // set the root node to be the text node
-        var root = session.getOdfContainer().rootElement.firstChild;
-        while (root && root.localName !== "body") {
-            root = root.nextSibling;
-        }
-        root = root && root.firstChild;
-        while (root && root.localName !== "text") {
-            root = root.nextSibling;
-        }
-        return root;
-    }
     var self = this,
-        rootNode = findTextRoot(session),
         caret,
         image;
     /**
@@ -68,10 +56,10 @@ gui.Avatar = function Avatar(memberid, session) {
     function keyHandler(charCode) {
         var handled = false;
         if (charCode === 37) { // left
-            session.moveMemberCaret(memberid, -1);
+            caretMover(-1);
             handled = true;
         } else if (charCode === 39) { // right
-            session.moveMemberCaret(memberid, 1);
+            caretMover(1);
             handled = true;
         }
         return handled;

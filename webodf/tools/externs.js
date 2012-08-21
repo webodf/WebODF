@@ -104,6 +104,11 @@ function XmlDom() {"use strict"; }
  */
 XmlDom.prototype.DOMParser = function () {"use strict"; };
 /**
+ * @constructor
+ * @extends DOMImplementation
+ */
+XmlDom.prototype.DOMImplementation = function () {"use strict"; };
+/**
  * @param {!string} className
  * @return {!NodeJSObject|!XmlDom}
  */

@@ -50,7 +50,7 @@ var tests = [
     core.ZipTests,
     core.Base64Tests
 ];
-if (runtime.type() !== "NodeJSRuntime") {
+if (runtime.getDOMImplementation()) {
     tests.push(core.PointWalkerTests);
 }
 if (runtime.type() === "BrowserRuntime") {
