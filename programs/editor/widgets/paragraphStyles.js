@@ -16,7 +16,11 @@ widgets.ParagraphStyles = (function () {
 
             widget = new Select({
                 name: 'ParagraphStyles',
-                options: selectionList
+                options: selectionList,
+                maxHeight: 200,
+                style: { 
+                    width: '100px'
+                }
             });
 
             return callback(widget);
