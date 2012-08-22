@@ -132,7 +132,7 @@ odf.Formatting = function Formatting() {
      */
     this.getParagraphStyles = function (selection) {
         var i, j, s, styles = [];
-        for (i = 0; i < selection.length; i += 0) {
+        for (i = 0; i < selection.length; i += 1) {
             s = getParagraphStyles(selection[i]);
             for (j = 0; j < s.length; j += 1) {
                 if (styles.indexOf(s[j]) === -1) {
