@@ -641,7 +641,9 @@ function NodeJSRuntime() {
     "use strict";
     var self = this,
         fs = require('fs'),
-        currentDirectory = "";
+        currentDirectory = "",
+        parser,
+        domImplementation;
 
     /**
      * @constructor
@@ -789,12 +791,18 @@ function NodeJSRuntime() {
         return "NodeJSRuntime";
     };
     this.getDOMImplementation = function () {
-        return null;
+        return domImplementation;
     };
     this.exit = process.exit;
     this.getWindow = function () {
         return null;
     };
+    function init() {
+        var DOMParser = require('xmldom').DOMParser;
+        parser = new DOMParser();
+        domImplementation = parser.parseFromString("<a/>", "text/xml").implementation;
+    }
+    init();
 }
 
 /**

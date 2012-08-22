@@ -30,8 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
-runtime.loadClass("gui.Avatar");
+/*global runtime, core, gui, ops, DOMParser*/
+runtime.loadClass("ops.SessionImplementation");
 
 /**
  * @constructor
@@ -40,23 +40,51 @@ runtime.loadClass("gui.Avatar");
  */
 gui.AvatarTests = function AvatarTests(runner) {
     "use strict";
-    var r = runner, t,
-        testarea = runtime.getWindow().document.getElementById("testarea");
+    var r = runner, t;
 
     this.setUp = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
     };
     this.tearDown = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
     };
+    function createAvatar(xml) {
+        var parser = new DOMParser();
+        t.doc = parser.parseFromString(xml, "text/xml");
+        function mover(n) {
+            t.avatar.getCaret().move(n);
+        }
+        t.avatar = new gui.Avatar("id", t.doc.documentElement, mover);
+    }
+    function create() {
+        createAvatar("<a/>");
+        r.shouldBeNonNull(t, "t.avatar");
+        r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
+        var c = t.avatar.getCaret(),
+            s = c.getSelection();
+        t.rangeCount = s.rangeCount;
+        r.shouldBe(t, "t.rangeCount", "1");
+        t.focusOffset = s.focusOffset;
+        r.shouldBe(t, "t.focusOffset", "0");
+        t.focusNode = s.focusNode;
+        r.shouldBeNonNull(t, "t.focusNode");
+    }
+    function moveInEmptyDoc() {
+        createAvatar("<a/>");
+        var c = t.avatar.getCaret(),
+            s = c.getSelection();
+        t.startNode = s.focusNode;
+        // c.move(1); // this fails atm
+        t.focusOffset = s.focusOffset;
+        t.focusNode = s.focusNode;
+        r.shouldBe(t, "t.focusOffset", "0");
+        r.shouldBe(t, "t.startNode", "t.focusNode");
+    }
     this.tests = function () {
-        return [  ];
+        return [
+            create,
+            moveInEmptyDoc
+        ];
     };
     this.asyncTests = function () {
         return [

@@ -11,14 +11,15 @@ runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.Avatar");
 
 function setupAvatarButton(avatarButtonElement, avatar) {
+    "use strict";
     var doc = avatarButtonElement.ownerDocument,
         memberid = avatar.getMemberId();
     avatarButtonElement.appendChild(doc.createTextNode(memberid));
     avatarButtonElement.onmouseover = function () {
-        avatar.showHandle();
+        avatar.getCaret().showHandle();
     };
     avatarButtonElement.onmouseout = function () {
-        avatar.hideHandle();
+        avatar.getCaret().hideHandle();
     };
     avatarButtonElement.onclick = function () {
         avatar.focus();
@@ -41,6 +42,7 @@ function setupAvatarView(session, avatarlistdiv) {
 }
 
 function addMember(session, member) {
+    "use strict";
     session.addMemberToSession(member.id);
     var avatar = session.getAvatar(member.id);
     avatar.setImageUrl(member.imageurl);

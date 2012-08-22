@@ -30,7 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global ops, gui*/
+/*global runtime, gui, ops*/
+runtime.loadClass("gui.Avatar");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -39,13 +40,28 @@
  */
 ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
+    function findTextRoot(session) {
+        // set the root node to be the text node
+        var root = session.getOdfContainer().rootElement.firstChild;
+        while (root && root.localName !== "body") {
+            root = root.nextSibling;
+        }
+        root = root && root.firstChild;
+        while (root && root.localName !== "text") {
+            root = root.nextSibling;
+        }
+        return root;
+    }
     var self = this,
+        rootNode,
         members = {};
 
     /* SESSION OPERATIONS */
 
     this.addMemberToSession = function (memberid) {
-        var avatar = new gui.Avatar(memberid, self);
+        var avatar = new gui.Avatar(memberid, rootNode, function (n) {
+            self.moveMemberCaret(memberid, n);
+        });
         members[memberid] = avatar;
     };
     this.removeMemberFromSession = function (memberid) {
@@ -55,7 +71,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     };
     this.moveMemberCaret = function (memberid, number) {
         var avatar = members[memberid];
-        avatar.moveCaret(number);
+        avatar.getCaret().move(number);
     };
 
     /* RELAYING OF SESSION OPERATIONS */
@@ -79,4 +95,5 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
+    rootNode = findTextRoot(self);
 };
