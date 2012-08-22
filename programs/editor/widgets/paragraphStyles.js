@@ -5,7 +5,7 @@ widgets.ParagraphStyles = (function () {
             var i,
                 widget,
                 selectionList = [],
-                availableStyles = documentObject.formatting.getAvailableParagraphStyles();
+                availableStyles = documentObject.odfCanvas.getFormatting().getAvailableParagraphStyles();
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
