@@ -23,6 +23,10 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
+            documentObject.odfCanvas.addListener("selectionchange", function (element, selection) {
+                console.log(documentObject.odfCanvas.getFormatting().getParagraphStyles(selection));
+            });
+
             return callback(widget);
         });
     }
