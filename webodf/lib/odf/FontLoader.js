@@ -49,9 +49,7 @@ odf.FontLoader = (function () {
      * @return {!Object.<string,Object>}
      */
     function getEmbeddedFontDeclarations(fontFaceDecls) {
-        var decls = {},
-            fonts,
-            i, font, name, uris, href;
+        var decls = {}, fonts, i, font, name, uris, href;
         if (!fontFaceDecls) {
             return decls;
         }
@@ -127,7 +125,8 @@ odf.FontLoader = (function () {
          */
         this.loadFonts = function (fontFaceDecls, zip, stylesheet) {
             var embeddedFontDeclarations = getEmbeddedFontDeclarations(
-                    fontFaceDecls);
+                    fontFaceDecls
+                );
             loadFontsIntoCSS(embeddedFontDeclarations, zip, stylesheet);
         };
     };
