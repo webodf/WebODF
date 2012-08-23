@@ -37,14 +37,13 @@
  * TODO: write a position walker that uses a treewalker
  * @constructor
  * @implements core.PointWalker
- * @param {!Node} node
+ * @param {!Node} root
  */
-core.SimplePointWalker = function SimplePointWalker(node) {
+core.SimplePointWalker = function SimplePointWalker(root) {
     "use strict";
-    var /**@type{!Node}*/currentNode = node,
-        before = null, // node before the point
-        after = node && node.firstChild, // node after the point
-        root = node,
+    var /**@type{!Node}*/currentNode = root,
+        after = root && root.firstChild, // node after the point
+        before = (after !== null && after.nodeType === 3) ? after : null, // node before the point
         pos = 0,
         posInText = 0;
     /**
@@ -139,6 +138,7 @@ core.SimplePointWalker = function SimplePointWalker(node) {
         if (before === after && posInText + 1 < after.length) {
             // advance with the current text node
             posInText += 1;
+            pos += 1;
         } else {
             if (after.nodeType === 1) {
                 // move into the next element
@@ -150,11 +150,11 @@ core.SimplePointWalker = function SimplePointWalker(node) {
                 // move to the next node
                 before = after;
                 after = after.nextSibling;
-                if (after.nodeType !== 3) {
+                if (after === null || after.nodeType !== 3) {
                     pos += 1;
                 }
             }
-            if (after.nodeType === 3) {
+            if (after !== null && after.nodeType === 3) {
                 before = after;
                 posInText = 0;
             }
@@ -165,7 +165,9 @@ core.SimplePointWalker = function SimplePointWalker(node) {
      * @return {!boolean}
      */
     this.stepBackward = function () {
-        if (before === null) {
+        if (before === null || (before.nodeType === 3
+                                && before.previousSibling === null
+                                && posInText === 0)) {
             if (currentNode !== root) {
                 after = currentNode;
                 before = after.previousSibling;
@@ -175,8 +177,9 @@ core.SimplePointWalker = function SimplePointWalker(node) {
             }
             return false;
         }
-        if (before === after && posInText > 0) {
+        if (before.nodeType === 3 && posInText > 0) {
             posInText -= 1;
+            pos -= 1;
         } else {
             if (before.nodeType === 1) {
                 // move into the previous element
@@ -188,11 +191,11 @@ core.SimplePointWalker = function SimplePointWalker(node) {
                 // move to the previous node
                 after = before;
                 before = before.previousSibling;
-                if (before.nodeType !== 3) {
+                if (before === null || before.nodeType !== 3) {
                     pos -= 1;
                 }
             }
-            if (before.nodeType === 3) {
+            if (before !== null && before.nodeType === 3) {
                 after = before;
                 posInText = after.length - 1;
             }
