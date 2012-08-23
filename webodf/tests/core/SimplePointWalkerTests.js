@@ -106,13 +106,52 @@ core.SimplePointWalkerTests = function SimplePointWalkerTests(runner) {
         r.shouldBe(t, "t.walker.stepBackward()", "false");
         r.shouldBe(t, "t.walker.position()", "0");
     }
+    function forwardInDoc() {
+        createWalker("<a>abc<a>abc</a>abc</a>");
+        var i;
+        for (i = 1; i <= 3; i += 1) {
+            r.shouldBe(t, "t.walker.stepForward()", "true");
+            r.shouldBe(t, "t.walker.position()", i.toString());
+        }
+        for (i = 0; i <= 3; i += 1) {
+            r.shouldBe(t, "t.walker.stepForward()", "true");
+            r.shouldBe(t, "t.walker.position()", i.toString());
+        }
+        for (i = 4; i <= 7; i += 1) {
+            r.shouldBe(t, "t.walker.stepForward()", "true");
+            r.shouldBe(t, "t.walker.position()", i.toString());
+        }
+        r.shouldBe(t, "t.walker.stepForward()", "false");
+        r.shouldBe(t, "t.walker.position()", "7");
+    }
+    function backwardInDoc() {
+        createWalker("<a>abc<a>abc</a>abc</a>");
+        t.walker.setPoint(t.walker.node(), 7);
+        var i;
+        for (i = 6; i >= 4; i -= 1) {
+            r.shouldBe(t, "t.walker.stepBackward()", "true");
+            r.shouldBe(t, "t.walker.position()", i.toString());
+        }
+        for (i = 3; i >= 0; i -= 1) {
+            r.shouldBe(t, "t.walker.stepBackward()", "true");
+            r.shouldBe(t, "t.walker.position()", i.toString());
+        }
+        for (i = 3; i >= 0; i -= 1) {
+            r.shouldBe(t, "t.walker.stepBackward()", "true");
+            r.shouldBe(t, "t.walker.position()", i.toString());
+        }
+        r.shouldBe(t, "t.walker.stepBackward()", "false");
+        r.shouldBe(t, "t.walker.position()", "0");
+    }
     this.tests = function () {
         return [
             create,
             forwardInEmptyDoc,
             backwardInEmptyDoc,
             forwardInSimpleDoc,
-            backwardInSimpleDoc
+            backwardInSimpleDoc,
+            forwardInDoc,
+            backwardInDoc
         ];
     };
     this.asyncTests = function () {

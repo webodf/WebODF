@@ -77,7 +77,7 @@ core.SimplePointWalker = function SimplePointWalker(root) {
             } else {
                 p += 1;
             }
-            c = node.nextSibling;
+            c = c.nextSibling;
         }
         return p;
     }
@@ -131,6 +131,10 @@ core.SimplePointWalker = function SimplePointWalker(root) {
                 after = before.nextSibling;
                 currentNode = /**@type{!Node}*/currentNode.parentNode;
                 pos = getPosition(before) + 1;
+                if (after !== null && after.nodeType === 3) {
+                    before = after;
+                    posInText = 0;
+                }
                 return true;
             }
             return false;
@@ -173,6 +177,9 @@ core.SimplePointWalker = function SimplePointWalker(root) {
                 before = after.previousSibling;
                 currentNode = /**@type{!Node}*/currentNode.parentNode;
                 pos = getPosition(after);
+                if (before !== null && before.nodeType === 3) {
+                    posInText = before.length;
+                }
                 return true;
             }
             return false;
@@ -186,18 +193,21 @@ core.SimplePointWalker = function SimplePointWalker(root) {
                 currentNode = before;
                 after = null;
                 before = currentNode.lastChild;
-                pos = countPositions(currentNode);
+                pos = countPositions(currentNode) - 1;
+            } else if (before.nodeType === 3 && before.previousSibling !== null
+                    && before.previousSibling.nodeType === 1
+                    && posInText === 0) {
+                currentNode = before.previousSibling;
+                after = null;
+                before = currentNode.lastChild;
+                pos = countPositions(currentNode) - 1;
             } else {
                 // move to the previous node
                 after = before;
                 before = before.previousSibling;
-                if (before === null || before.nodeType !== 3) {
-                    pos -= 1;
-                }
             }
             if (before !== null && before.nodeType === 3) {
-                after = before;
-                posInText = after.length - 1;
+                posInText = before.length;
             }
         }
         return true;
