@@ -28,6 +28,8 @@ function init() {
     // Layouts
     require(["dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojox/layout/ExpandoPane"], function(BorderContainer, ContentPane, ExpandoPane) {
         var mainContainer = new BorderContainer({}, 'mainContainer');
+        var collabContainer = new BorderContainer({}, 'collabContainer');
+
         var topPane = new ContentPane({
             region: 'top'
         }, 'topPane');
@@ -38,15 +40,23 @@ function init() {
             region: 'trailing',
             splitter: 'true'
         }, 'collaboration');
+        var peoplePane = new ContentPane({
+            region: 'top',
+            splitter: 'true'
+        }, 'people');
+        var chatPane = new ContentPane({
+            region: 'center'
+        }, 'chat');
 
         mainContainer.addChild(topPane);
         mainContainer.addChild(editorPane);
         mainContainer.addChild(collabPane);
+        collabContainer.addChild(peoplePane);
+        collabContainer.addChild(chatPane);
+        collabPane.addChild(collabContainer);
 
         mainContainer.startup();
-        
-        collabPane.resize();
-        collabPane.startup();
+        collabContainer.startup();
     });
 
     // Widgets
