@@ -55,13 +55,18 @@ core.PointWalker.prototype.stepForward = function () {"use strict"; };
  */
 core.PointWalker.prototype.stepBackward = function () {"use strict"; };
 /**
- * @return {?Node}
+ * @return {!Node}
  */
 core.PointWalker.prototype.node = function () {"use strict"; };
 /**
  * @return {!number}
  */
 core.PointWalker.prototype.position = function () {"use strict"; };
+/**
+ * @param {!Node} node
+ * @return {!number}
+ */
+core.PointWalker.prototype.countPositions = function (node) {"use strict"; };
 /**
  * @return {?Node}
  */

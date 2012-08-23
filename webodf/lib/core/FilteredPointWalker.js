@@ -82,7 +82,7 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
         return r;
     };
     /**
-     * @return {?Node}
+     * @return {!Node}
      */
     this.node = function () {
         return simple.node();
@@ -92,6 +92,14 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
      */
     this.position = function () {
         return simple.position();
+    };
+    /**
+     * @param {!Node} node
+     * @return {!number}
+     */
+    this.countPositions = function (node) {
+        runtime.log("NOT IMPLEMENTED");
+        return 0;
     };
     /**
      * @return {?Node}

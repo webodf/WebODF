@@ -31,10 +31,10 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*jslint nomen: true, evil: true, bitwise: true */
-/*global window: true, XMLHttpRequest: true, require: true, console: true,
-  process: true, __dirname: true, setTimeout: true, Packages: true, print: true,
-  readFile: true, quit: true, Buffer: true, ArrayBuffer: true, Uint8Array: true,
-  navigator: true, VBArray: true */
+/*global window, XMLHttpRequest, require, console, DOMParser,
+  process, __dirname, setTimeout, Packages, print,
+  readFile, quit, Buffer, ArrayBuffer, Uint8Array,
+  navigator, VBArray */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -159,6 +159,11 @@ Runtime.prototype.type = function () {"use strict"; };
  * @return {?DOMImplementation}
  */
 Runtime.prototype.getDOMImplementation = function () {"use strict"; };
+/**
+ * @param {!string} xml
+ * @return {?Document}
+ */
+Runtime.prototype.parseXML = function (xml) {"use strict"; };
 /**
  * @return {?Window}
  */
@@ -624,6 +629,10 @@ function BrowserRuntime(logoutput) {
     this.getDOMImplementation = function () {
         return window.document.implementation;
     };
+    this.parseXML = function (xml) {
+        var parser = new DOMParser();
+        return parser.parseFromString(xml, "text/xml");
+    };
     this.exit = function (exitCode) {
         log("Calling exit with code " + String(exitCode) +
                 ", but exit() is not implemented.");
@@ -710,14 +719,11 @@ function NodeJSRuntime() {
     }
     this.readFile = readFile;
     function loadXML(path, callback) {
-        var DOMParser = require('xmldom').DOMParser,
-            parser = new DOMParser();
         readFile(path, "utf-8", function (err, data) {
             if (err) {
                 return callback(err);
             }
-            var dom = parser.parseFromString(data, "text/xml");
-            callback(null, dom);
+            callback(null, self.parseXML(data));
         });
     }
     this.loadXML = loadXML;
@@ -793,6 +799,9 @@ function NodeJSRuntime() {
     this.getDOMImplementation = function () {
         return domImplementation;
     };
+    this.parseXML = function (xml) {
+        return parser.parseFromString(xml, "text/xml");
+    };
     this.exit = process.exit;
     this.getWindow = function () {
         return null;
@@ -800,7 +809,7 @@ function NodeJSRuntime() {
     function init() {
         var DOMParser = require('xmldom').DOMParser;
         parser = new DOMParser();
-        domImplementation = parser.parseFromString("<a/>", "text/xml").implementation;
+        domImplementation = self.parseXML("<a/>").implementation;
     }
     init();
 }
@@ -984,6 +993,9 @@ function RhinoRuntime() {
     };
     this.getDOMImplementation = function () {
         return builder.getDOMImplementation();
+    };
+    this.parseXML = function (xml) {
+        return builder.parse(xml);
     };
     this.exit = quit;
     this.getWindow = function () {
