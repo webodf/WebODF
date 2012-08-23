@@ -7,6 +7,7 @@
 
   <!-- Dojo stuff -->
   <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/claro.css"/>
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/layout/resources/ExpandoPane.css"/>
   <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js" data-dojo-config="async: true"></script>
 
   <!-- App stuff -->
@@ -25,7 +26,7 @@ window["widgets"] = {};
     <div id = "topPane">
       <h1> Doc </h1>
     </div>
-    <div id = "editor">
+    <div id = "editor" style = "margin: 0;">
       <span id = "toolbar"></span>
       <div id = "container">
         <div id="canvas"></div>
@@ -33,10 +34,8 @@ window["widgets"] = {};
     </div>
     <div id = "collaboration">
       <div id = "people">
-        <p> People List </p>
       </div>
       <div id = "chat">
-        <p> Chat box </p>
       </div>
     </div>
   </div>

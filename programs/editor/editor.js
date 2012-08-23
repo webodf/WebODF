@@ -36,14 +36,17 @@ function init() {
         }, 'editor');
         var collabPane = new ExpandoPane({
             region: 'trailing',
+            splitter: 'true'
         }, 'collaboration');
-
 
         mainContainer.addChild(topPane);
         mainContainer.addChild(editorPane);
         mainContainer.addChild(collabPane);
 
         mainContainer.startup();
+        
+        collabPane.resize();
+        collabPane.startup();
     });
 
     // Widgets
