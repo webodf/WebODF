@@ -22,6 +22,31 @@ function init() {
     document.odfCanvas.load(location);
     document.odfCanvas.setEditable(true);
 
+    var filename = location.replace(/^.*[\\\/]/, '');
+    document.getElementById('topPane').innerHTML = "<h1> <a href = '" + location + "''>" + filename + "</a></h1>";
+
+    // Layouts
+    require(["dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojox/layout/ExpandoPane"], function(BorderContainer, ContentPane, ExpandoPane) {
+        var mainContainer = new BorderContainer({}, 'mainContainer');
+        var topPane = new ContentPane({
+            region: 'top'
+        }, 'topPane');
+        var editorPane = new ContentPane({
+            region: 'center'
+        }, 'editor');
+        var collabPane = new ExpandoPane({
+            region: 'trailing',
+        }, 'collaboration');
+
+
+        mainContainer.addChild(topPane);
+        mainContainer.addChild(editorPane);
+        mainContainer.addChild(collabPane);
+
+        mainContainer.startup();
+    });
+
+    // Widgets
     require(['widgets.js'], function () {
         document.odfCanvas.addListener("statereadychange", loadWidgets(document));
     });
