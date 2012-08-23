@@ -79,30 +79,42 @@ core.SimplePointWalkerTests = function SimplePointWalkerTests(runner) {
     }
     function forwardInSimpleDoc() {
         createWalker("<a>hello</a>");
+        t.textNode = t.doc.documentElement.firstChild;
         r.shouldBe(t, "t.walker.position()", "0");
         var i;
-        for (i = 1; i <= 5; i += 1) {
+        for (i = 1; i <= 4; i += 1) {
             r.shouldBe(t, "t.walker.stepForward()", "true");
-            r.shouldBeNull(t, "t.walker.precedingSibling()");
-            r.shouldBeNull(t, "t.walker.followingSibling()");
-            r.shouldBe(t, "t.doc.documentElement", "t.walker.node()");
+            r.shouldBe(t, "t.walker.precedingSibling()", "t.textNode");
+            r.shouldBe(t, "t.walker.followingSibling()", "t.textNode");
+            r.shouldBe(t, "t.walker.node()", "t.doc.documentElement");
             r.shouldBe(t, "t.walker.position()", i.toString());
         }
+        r.shouldBe(t, "t.walker.stepForward()", "true");
+        r.shouldBe(t, "t.walker.precedingSibling()", "t.textNode");
+        r.shouldBeNull(t, "t.walker.followingSibling()");
+        r.shouldBe(t, "t.walker.node()", "t.doc.documentElement");
+        r.shouldBe(t, "t.walker.position()", "5");
         r.shouldBe(t, "t.walker.stepForward()", "false");
         r.shouldBe(t, "t.walker.position()", "5");
     }
     function backwardInSimpleDoc() {
         createWalker("<a>hello</a>");
+        t.textNode = t.doc.documentElement.firstChild;
         t.walker.setPoint(t.walker.node(), 5);
         r.shouldBe(t, "t.walker.position()", "5");
         var i;
-        for (i = 4; i >= 0; i -= 1) {
+        for (i = 4; i > 0; i -= 1) {
             r.shouldBe(t, "t.walker.stepBackward()", "true");
-            r.shouldBeNull(t, "t.walker.precedingSibling()");
-            r.shouldBeNull(t, "t.walker.followingSibling()");
+            r.shouldBe(t, "t.walker.precedingSibling()", "t.textNode");
+            r.shouldBe(t, "t.walker.followingSibling()", "t.textNode");
             r.shouldBe(t, "t.doc.documentElement", "t.walker.node()");
             r.shouldBe(t, "t.walker.position()", i.toString());
         }
+        r.shouldBe(t, "t.walker.stepBackward()", "true");
+        r.shouldBeNull(t, "t.walker.precedingSibling()");
+        r.shouldBe(t, "t.walker.followingSibling()", "t.textNode");
+        r.shouldBe(t, "t.doc.documentElement", "t.walker.node()");
+        r.shouldBe(t, "t.walker.position()", "0");
         r.shouldBe(t, "t.walker.stepBackward()", "false");
         r.shouldBe(t, "t.walker.position()", "0");
     }

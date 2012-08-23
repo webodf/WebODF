@@ -63,6 +63,7 @@ if (runtime.type() === "BrowserRuntime") {
 //    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
+// tests = [ core.SimplePointWalkerTests ];
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests

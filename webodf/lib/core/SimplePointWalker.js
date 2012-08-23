@@ -34,7 +34,6 @@
 /**
  * A simple walker that allows finegrained stepping through the DOM.
  * It does not support node filtering.
- * TODO: write a position walker that uses a treewalker
  * @constructor
  * @implements core.PointWalker
  * @param {!Node} root
@@ -42,15 +41,15 @@
 core.SimplePointWalker = function SimplePointWalker(root) {
     "use strict";
     var /**@type{!Node}*/currentNode = root,
-        after = root && root.firstChild, // node after the point
-        before = (after !== null && after.nodeType === 3) ? after : null, // node before the point
+        after = root.firstChild, // node after the point
+        before = null, // node before the point
         pos = 0,
         posInText = 0;
     /**
      * @param {Node} node
      * @return {!number}
      */
-    function getPosition(node) {
+    function getPositionBefore(node) {
         var /**@type{!number}*/ p = 0,
             /**@type{Node}*/ n = node;
         n = n.previousSibling;
@@ -89,10 +88,18 @@ core.SimplePointWalker = function SimplePointWalker(root) {
      **/
     this.setPoint = function (node, position) {
         if (node.nodeType === 3) {
-            pos = position + getPosition(node);
+            pos = position + getPositionBefore(node);
             currentNode = /**@type{!Node}*/node.parentNode;
-            posInText = position;
-            before = after = node;
+            if (position <= 0) {
+                before = node.previousSibling;
+                after = node;
+            } else if (position >= node.length) {
+                before = node;
+                after = node.nextSibling;
+            } else {
+                posInText = position;
+                before = after = node;
+            }
         } else {
             currentNode = node;
             pos = position;
@@ -130,7 +137,7 @@ core.SimplePointWalker = function SimplePointWalker(root) {
                 before = currentNode;
                 after = before.nextSibling;
                 currentNode = /**@type{!Node}*/currentNode.parentNode;
-                pos = getPosition(before) + 1;
+                pos = getPositionBefore(before) + 1;
                 if (after !== null && after.nodeType === 3) {
                     before = after;
                     posInText = 0;
@@ -139,29 +146,27 @@ core.SimplePointWalker = function SimplePointWalker(root) {
             }
             return false;
         }
-        if (before === after && posInText + 1 < after.length) {
-            // advance with the current text node
-            posInText += 1;
-            pos += 1;
-        } else {
-            if (after.nodeType === 1) {
-                // move into the next element
-                currentNode = after;
-                before = null;
-                after = currentNode.firstChild;
-                pos = 0;
-            } else {
-                // move to the next node
+        if (after.nodeType === 1) {
+            // move into the next element
+            currentNode = after;
+            before = null;
+            after = currentNode.firstChild;
+            pos = 0;
+        } else if (after.nodeType === 3 && after.length > 1) {
+            if (before !== after) {
                 before = after;
-                after = after.nextSibling;
-                if (after === null || after.nodeType !== 3) {
-                    pos += 1;
+                posInText = 1;
+            } else {
+                posInText += 1;
+                if (posInText === after.length) {
+                    after = after.nextSibling;
                 }
             }
-            if (after !== null && after.nodeType === 3) {
-                before = after;
-                posInText = 0;
-            }
+            pos += 1;
+        } else {
+            before = after;
+            after = after.nextSibling;
+            pos += 1;
         }
         return true;
     };
@@ -169,46 +174,37 @@ core.SimplePointWalker = function SimplePointWalker(root) {
      * @return {!boolean}
      */
     this.stepBackward = function () {
-        if (before === null || (before.nodeType === 3
-                                && before.previousSibling === null
-                                && posInText === 0)) {
+        if (before === null) {
             if (currentNode !== root) {
                 after = currentNode;
                 before = after.previousSibling;
                 currentNode = /**@type{!Node}*/currentNode.parentNode;
-                pos = getPosition(after);
-                if (before !== null && before.nodeType === 3) {
-                    posInText = before.length;
-                }
+                pos = getPositionBefore(after);
                 return true;
             }
             return false;
         }
-        if (before.nodeType === 3 && posInText > 0) {
-            posInText -= 1;
+        if (before.nodeType === 1) {
+            // move into the previous element
+            currentNode = before;
+            before = currentNode.lastChild;
+            after = null;
+            pos = countPositions(currentNode) - 1;
+        } else if (before.nodeType === 3 && before.length > 1) {
+            if (before !== after) {
+                after = before;
+                posInText = after.length - 1;
+            } else {
+                posInText -= 1;
+                if (posInText === 0) {
+                    before = before.previousSibling;
+                }
+            }
             pos -= 1;
         } else {
-            if (before.nodeType === 1) {
-                // move into the previous element
-                currentNode = before;
-                after = null;
-                before = currentNode.lastChild;
-                pos = countPositions(currentNode) - 1;
-            } else if (before.nodeType === 3 && before.previousSibling !== null
-                    && before.previousSibling.nodeType === 1
-                    && posInText === 0) {
-                currentNode = before.previousSibling;
-                after = null;
-                before = currentNode.lastChild;
-                pos = countPositions(currentNode) - 1;
-            } else {
-                // move to the previous node
-                after = before;
-                before = before.previousSibling;
-            }
-            if (before !== null && before.nodeType === 3) {
-                posInText = before.length;
-            }
+            after = before;
+            before = before.previousSibling;
+            pos -= 1;
         }
         return true;
     };
@@ -233,12 +229,12 @@ core.SimplePointWalker = function SimplePointWalker(root) {
      * @return {?Node}
      */
     this.precedingSibling = function () {
-        return (before !== null && before.nodeType === 3) ? null : before;
+        return before;
     };
     /**
      * @return {?Node}
      */
     this.followingSibling = function () {
-        return (after !== null && after.nodeType === 3) ? null : after;
+        return after;
     };
 };
