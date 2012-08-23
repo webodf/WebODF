@@ -4,6 +4,7 @@
         "core/Base64Tests.js",
         "core/CursorTests.js",
         "core/PointWalkerTests.js",
+        "core/SimplePointWalkerTests.js",
         "core/RuntimeTests.js",
         "core/ZipTests.js",
         "gui/AvatarTests.js",

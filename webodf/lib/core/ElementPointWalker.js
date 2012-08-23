@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core: true, Node: true*/
+/*global runtime, core*/
 /**
  * An implementation of PointWalker that pretends that there are no
  * TextNodes. Any character in a TextNode is considered a direct child of the
@@ -70,7 +70,7 @@ core.ElementPointWalker = function ElementPointWalker(root) {
         return false;
     };
     /**
-     * @return {?Node}
+     * @return {!Node}
      */
     this.node = function () {
         return currentNode;
@@ -80,6 +80,14 @@ core.ElementPointWalker = function ElementPointWalker(root) {
      */
     this.position = function () {
         return pos;
+    };
+    /**
+     * @param {!Node} node
+     * @return {!number}
+     */
+    this.countPositions = function (node) {
+        runtime.log("NOT IMPLEMENTED");
+        return 0;
     };
     /**
      * @return {?Node}

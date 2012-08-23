@@ -35,6 +35,7 @@
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.PointWalkerTests");
+runtime.loadClass("core.SimplePointWalkerTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
@@ -51,10 +52,10 @@ var tests = [
     core.Base64Tests
 ];
 if (runtime.getDOMImplementation()) {
-    tests.push(core.PointWalkerTests);
+//    tests.push(core.PointWalkerTests);
+    tests.push(core.SimplePointWalkerTests);
 }
 if (runtime.type() === "BrowserRuntime") {
-    tests.push(core.PointWalkerTests);
     tests.push(gui.CaretTests);
     tests.push(gui.AvatarTests);
     tests.push(xmldom.OperationalTransformDOMTests);
