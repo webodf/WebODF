@@ -31,6 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime, core, gui*/
+runtime.loadClass("core.FilteredPointWalker");
 runtime.loadClass("gui.Caret");
 
 /**
@@ -81,10 +82,23 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
     this.getCaret = function () {
         return caret;
     };
+    /**
+     * @constructor
+     * @implements core.PointFilter
+     */
+    function CursorFilter() {
+        this.acceptPoint = function (node, offset) {
+            if ("urn:webodf:names:cursor" === node.namespaceURI) {
+                return core.PointFilter.FilterResult.FILTER_REJECT;
+            }
+            return core.PointFilter.FilterResult.FILTER_ACCEPT;
+        };
+    }
     function init() {
-        var pointWalker = new core.SimplePointWalker(rootNode),
+        var filter = new CursorFilter(),
+            walker = new core.FilteredPointWalker(rootNode, filter),
             handle;
-        caret = new gui.Caret(rootNode, pointWalker, keyHandler);
+        caret = new gui.Caret(rootNode, walker, keyHandler);
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);

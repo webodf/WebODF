@@ -31,6 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global core, runtime*/
+runtime.loadClass("core.PointFilter");
 runtime.loadClass("core.SimplePointWalker");
 /**
  * A simple walker that allows finegrained stepping through the DOM.
@@ -61,8 +62,9 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
      * @return {!boolean}
      */
     this.stepForward = function () {
-        var r = simple.stepForward();
-        while (r && filter.acceptPoint(simple.node(), simple.position())
+        var r = simple.stepForward(),
+            node = simple.node();
+        while (r && filter.acceptPoint(node, simple.position())
                         !== core.PointFilter.FilterResult.FILTER_ACCEPT) {
             r = simple.stepForward();
         }
@@ -95,12 +97,14 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
      * @return {?Node}
      */
     this.precedingSibling = function () {
+        runtime.log("UNIMPLEMENTED");
         return before; // TODO
     };
     /**
      * @return {?Node}
      */
     this.followingSibling = function () {
+        runtime.log("UNIMPLEMENTED");
         return after; // TODO
     };
 };

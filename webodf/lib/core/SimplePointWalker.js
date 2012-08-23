@@ -73,6 +73,7 @@ core.SimplePointWalker = function SimplePointWalker(node) {
             before = null;
         } else {
             after = currentNode.firstChild;
+            // TODO take into account text nodes children
             while (position) {
                 position -= 1;
                 after = after.nextSibling;
