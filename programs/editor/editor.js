@@ -25,7 +25,7 @@ function init() {
     var filename = location.replace(/^.*[\\\/]/, '');
     document.getElementById('topPane').innerHTML = "<h1> <a href = '" + location + "''>" + filename + "</a></h1>";
 
-    // Layouts
+    // App Widgets
     require(["dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojox/layout/ExpandoPane"], function(BorderContainer, ContentPane, ExpandoPane) {
         var mainContainer = new BorderContainer({}, 'mainContainer');
         var collabContainer = new BorderContainer({}, 'collabContainer');
@@ -38,14 +38,17 @@ function init() {
         }, 'editor');
         var collabPane = new ExpandoPane({
             region: 'trailing',
-            splitter: 'true'
+            splitter: 'true',
+            title: 'Collaboration Pane'
         }, 'collaboration');
         var peoplePane = new ContentPane({
             region: 'top',
-            splitter: 'true'
+            splitter: 'true',
+            title: 'People'
         }, 'people');
         var chatPane = new ContentPane({
-            region: 'center'
+            region: 'center',
+            title: 'Chat'
         }, 'chat');
 
         mainContainer.addChild(topPane);
@@ -57,9 +60,25 @@ function init() {
 
         mainContainer.startup();
         collabContainer.startup();
+
+        require(["dijit/form/TextBox", "dijit/form/Button"], function(TextBox, Button) {
+            // People Box
+
+            // User's Editable Name
+            var nameBox = new TextBox({
+                value: '',
+                placeHolder: '<type in your name>',
+                style: 'text-align: center;'
+            }, 'nameEdit');
+            
+            var inviteButton = new Button({
+                label: 'Invite People',
+            }, 'inviteButton');
+        });
+
     });
 
-    // Widgets
+    // Editor Widgets
     require(['widgets.js'], function () {
         document.odfCanvas.addListener("statereadychange", loadWidgets(document));
     });

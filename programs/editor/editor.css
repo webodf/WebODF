@@ -57,8 +57,18 @@ html, body, #mainContainer {
 
 #people {
     height: 30%;
+    padding: 0px;
+    text-align: center;
+}
+
+#people > #nameInfo {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    width: 100%;
+    background-color: #eef;
 }
 
 #chat {
-
+    padding: 0px;
+    text-align: center;
 }
