@@ -41,7 +41,7 @@ html, body, #mainContainer {
     margin-left: 10px;
     margin-right: 10px;
     margin-bottom: 30px;
-    height: 100%
+    height: 100%;
 }
 
 #collaboration {
@@ -71,4 +71,14 @@ html, body, #mainContainer {
 #chat {
     padding: 0px;
     text-align: center;
+    position: relative;
+}
+
+#chat > #inputArea {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    width: 100%;
+    background-color: #eef;
+    position: absolute;
+    bottom: 0px;
 }

@@ -67,13 +67,22 @@ function init() {
             // User's Editable Name
             var nameBox = new TextBox({
                 value: '',
-                placeHolder: '<type in your name>',
+                placeHolder: 'Type your name...',
                 style: 'text-align: center;'
             }, 'nameEdit');
             
             var inviteButton = new Button({
                 label: 'Invite People',
             }, 'inviteButton');
+
+            // Chat Box
+
+            // Chat Input
+            var chatInput = new TextBox({
+                value: '',
+                placeHolder: 'Start typing to chat...',
+                style: 'text-align: center;'
+            }, 'chatInput');
         });
 
     });
