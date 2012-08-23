@@ -42,7 +42,6 @@ runtime.readFile("content/web/viewer.html.in", "utf-8", function (err, vdata) {
         return;
     }
     runtime.readFile(webodfjsFilename, "utf-8", function (err, wdata) {
-        runtime.log("HI " + err + " " + wdata.length);
         if (err) {
             runtime.log(err);
             return;

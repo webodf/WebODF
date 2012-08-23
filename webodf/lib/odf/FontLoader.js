@@ -49,9 +49,7 @@ odf.FontLoader = (function () {
      * @return {!Object.<string,Object>}
      */
     function getEmbeddedFontDeclarations(fontFaceDecls) {
-        var decls = {},
-            fonts,
-            i, font, name, uris, href;
+        var decls = {}, fonts, i, font, name, uris, href, family;
         if (!fontFaceDecls) {
             return decls;
         }
@@ -60,14 +58,15 @@ odf.FontLoader = (function () {
                     style2CSS.namespaceResolver);
         for (i = 0; i < fonts.length; i += 1) {
             font = fonts[i];
-            name = font.getAttributeNS(style2CSS.namespaces["style"], "name");
+            name = font.getAttributeNS(style2CSS.namespaces.style, "name");
+            family = font.getAttributeNS(style2CSS.namespaces.svg, "font-family");
             uris = xpath.getODFElementsWithXPath(font,
                 "svg:font-face-src/svg:font-face-uri",
                 style2CSS.namespaceResolver);
             if (uris.length > 0) {
                 href = uris[0].getAttributeNS(style2CSS.namespaces["xlink"],
                         "href");
-                decls[name] = {href: href};
+                decls[name] = {href: href, family: family};
             }
         }
         return decls;
@@ -75,7 +74,7 @@ odf.FontLoader = (function () {
     function addFontToCSS(name, font, fontdata, stylesheet) {
         // hack: get the first stylesheet
         stylesheet = document.styleSheets[0];
-        var rule = "@font-face { font-family: \"" + name + "\"; src: " +
+        var rule = "@font-face { font-family: " + font.family + "; src: " +
             "url(data:application/x-font-ttf;charset=binary;base64," +
             base64.convertUTF8ArrayToBase64(fontdata) +
             ") format(\"truetype\"); }";
@@ -127,7 +126,8 @@ odf.FontLoader = (function () {
          */
         this.loadFonts = function (fontFaceDecls, zip, stylesheet) {
             var embeddedFontDeclarations = getEmbeddedFontDeclarations(
-                    fontFaceDecls);
+                    fontFaceDecls
+                );
             loadFontsIntoCSS(embeddedFontDeclarations, zip, stylesheet);
         };
     };

@@ -74,16 +74,32 @@ gui.AvatarTests = function AvatarTests(runner) {
         var c = t.avatar.getCaret(),
             s = c.getSelection();
         t.startNode = s.focusNode;
-        // c.move(1); // this fails atm
+        c.move(1); // this fails atm
         t.focusOffset = s.focusOffset;
         t.focusNode = s.focusNode;
         r.shouldBe(t, "t.focusOffset", "0");
         r.shouldBe(t, "t.startNode", "t.focusNode");
     }
+    function moveInSimpleDoc() {
+        createAvatar("<a>hello</a>");
+        var c = t.avatar.getCaret(),
+            s = c.getSelection(),
+            i;
+        t.startNode = s.focusNode;
+        for (i = 1; i <= 5; i += 1) {
+console.log("HAAAAAAAI");
+            c.move(1); // this fails atm
+            t.focusOffset = s.focusOffset;
+            t.focusNode = s.focusNode;
+            r.shouldBe(t, "t.focusOffset", i);
+            r.shouldBe(t, "t.startNode", "t.focusNode");
+        }
+    }
     this.tests = function () {
         return [
             create,
-            moveInEmptyDoc
+            moveInEmptyDoc,
+            moveInSimpleDoc
         ];
     };
     this.asyncTests = function () {

@@ -872,6 +872,9 @@ function RhinoRuntime() {
         callback(null, document);
     }
     function runtimeReadFile(path, encoding, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         var file = new Packages.java.io.File(path),
             data,
             // read binary, seems hacky but works
@@ -911,6 +914,9 @@ function RhinoRuntime() {
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
     this.writeFile = function (path, data, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         var out = new Packages.java.io.FileOutputStream(path),
             i,
             l = data.length;
@@ -921,6 +927,9 @@ function RhinoRuntime() {
         callback(null);
     };
     this.deleteFile = function (path, callback) {
+        if (currentDirectory) {
+            path = currentDirectory + "/" + path;
+        }
         var file = new Packages.java.io.File(path);
         if (file['delete']()) {
             callback(null);

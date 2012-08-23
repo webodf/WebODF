@@ -203,7 +203,7 @@ odf.Style2CSS = function Style2CSS() {
                 family = "list";
             }
             name = family && node.getAttributeNS &&
-                    node.getAttributeNS(stylens, 'name');
+                node.getAttributeNS(stylens, 'name');
             if (name) {
                 if (!stylemap[family]) {
                     stylemap[family] = {};
