@@ -204,6 +204,25 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         }
         return n;
     }
+    function testPositions(xml, count) {
+        createWalker(xml);
+        var n = 0, i, it = t.iterator, ok = true;
+        while (it.nextPosition()) {
+            it.setPosition(it.container(), it.offset());
+            for (i = 0; i <= n; i += 1) {
+                ok = ok && it.previousPosition();
+            }
+            for (i = 1; i < count; i += 1) {
+                ok = ok && it.nextPosition();
+            }
+            for (i = n + 2; i < count; i += 1) {
+                ok = ok && it.previousPosition();
+            }
+            n += 1;
+        }
+        r.shouldBe(t, ok.toString(), "true");
+        r.shouldBe(t, (n + 1).toString(), count.toString());
+    }
     function rejectedNodes() {
         var tests = [
                 { x: "<a/>", n: 1 },
@@ -221,6 +240,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             r.shouldBe(t, "t.positions", tests[i].n.toString());
             t.positions = countPositionsBackwards(tests[i].x);
             r.shouldBe(t, "t.positions", tests[i].n.toString());
+            testPositions(tests[i].x, tests[i].n);
         }
     }
     this.tests = function () {
@@ -232,7 +252,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             backwardInSimpleDoc,
             forwardInDoc,
             backwardInDoc,
-            rejectedNodes
+            rejectedNodes/*,
+            testSetPosition*/
         ];
     };
     this.asyncTests = function () {

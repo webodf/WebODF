@@ -43,7 +43,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         expandEntityReferences) {
     "use strict";
     whatToShow = whatToShow || 0xFFFFFFFF;
-    var walker = root.ownerDocument.createTreeWalker(root, whatToShow, filter,
+    var self = this,
+        walker = root.ownerDocument.createTreeWalker(root, whatToShow, filter,
             expandEntityReferences),
         currentPos = 0;
     if (walker.firstChild() === null) {
@@ -163,7 +164,14 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             walker.currentNode = n;
             currentPos = 0;
         }
-        return false;
+        // jiggle the position to make sure it is at an allowed offset
+        if (self.nextPosition()) {
+            self.previousPosition();
+        }
+        if (self.previousPosition()) {
+            self.nextPosition();
+        }
+        return true;
     };
     /**
      * @return {undefined}

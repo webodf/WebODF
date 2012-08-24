@@ -52,6 +52,7 @@ var tests = [
 ];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(core.PositionIteratorTests);
+    tests.push(gui.AvatarTests);
 }
 if (runtime.type() === "BrowserRuntime") {
     tests.push(gui.CaretTests);
@@ -61,11 +62,12 @@ if (runtime.type() === "BrowserRuntime") {
 //    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
+/*
 tests = [  ];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(core.PositionIteratorTests);
-//    tests.push(gui.AvatarTests);
 }
+*/
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests

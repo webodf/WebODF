@@ -87,20 +87,8 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
      * @extends NodeFilter
      */
     function CursorFilter() {
-        function accept(node) {
-            if (!node) {
-                return false;
-            }
-            if ("urn:webodf:names:cursor" === node.namespaceURI
-                    || node.localName === "span"
-                    || node.localName === "div"
-                    || node.localName === "img") {
-                return false;
-            }
-            return true;
-        }
         this.acceptNode = function (node) {
-            if (!accept(node)) {
+            if (node.namespaceURI === "urn:webodf:names:cursor") {
                 return 2;
             }
             return 1;

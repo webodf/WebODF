@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
+/*global runtime, core, gui, XMLSerializer*/
 runtime.loadClass("core.Cursor");
 /**
  * This class modifies the selection in different ways.
