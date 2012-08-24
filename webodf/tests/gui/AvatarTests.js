@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime, core, gui, ops, DOMParser*/
+/*global runtime, core, gui, ops*/
 runtime.loadClass("ops.SessionImplementation");
 
 /**
@@ -49,8 +49,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         t = {};
     };
     function createAvatar(xml) {
-        var parser = new DOMParser();
-        t.doc = parser.parseFromString(xml, "text/xml");
+        t.doc = runtime.parseXML(xml);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
@@ -74,7 +73,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         var c = t.avatar.getCaret(),
             s = c.getSelection();
         t.startNode = s.focusNode;
-        c.move(1); // this fails atm
+        c.move(1);
         t.focusOffset = s.focusOffset;
         t.focusNode = s.focusNode;
         r.shouldBe(t, "t.focusOffset", "0");
@@ -87,17 +86,17 @@ gui.AvatarTests = function AvatarTests(runner) {
             i;
         t.startNode = s.focusNode;
         for (i = 1; i <= 5; i += 1) {
-            c.move(1); // this fails atm
+            c.move(1);
             t.focusOffset = s.focusOffset;
             t.focusNode = s.focusNode;
-            r.shouldBe(t, "t.focusOffset", i);
+            r.shouldBe(t, "t.focusOffset", i.toString());
             r.shouldBe(t, "t.startNode", "t.focusNode");
         }
     }
     this.tests = function () {
         return [
-            create/*,
-            moveInEmptyDoc,
+            create,
+            moveInEmptyDoc/*,
             moveInSimpleDoc*/
         ];
     };
