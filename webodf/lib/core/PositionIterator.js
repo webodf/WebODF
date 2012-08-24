@@ -44,36 +44,102 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     "use strict";
     whatToShow = whatToShow || 0xFFFFFFFF;
     var walker = root.ownerDocument.createTreeWalker(root, whatToShow, filter,
-            expandEntityReferences);
+            expandEntityReferences),
+        currentPos = 0;
+    if (walker.firstChild() === null) {
+        currentPos = 1;
+    }
     /**
      * @return {!boolean}
      */
     this.nextPosition = function () {
-        return false;
+        if (walker.currentNode === root) {
+            return false;
+        }
+        if (currentPos === 0 && walker.currentNode.nodeType === 1) {
+            // step inside an element
+            if (walker.firstChild() === null) {
+                currentPos = 1;
+            }
+        } else if (walker.currentNode.nodeType === 3
+                && currentPos + 1 < walker.currentNode.length) {
+            // advance inside a text node
+            currentPos += 1;
+        } else {
+            if (walker.nextSibling() !== null) {
+                currentPos = 0;
+            } else {
+                walker.parentNode();
+                currentPos = 1;
+            }
+        }
+        return true;
     };
+    function setAtEnd() {
+        var type = walker.currentNode.nodeType;
+        if (type === 3) {
+            currentPos = walker.currentNode.length - 1;
+        } else {
+            currentPos = (type === 1) ? 1 : 0;
+        }
+    }
     /**
      * @return {!boolean}
      */
     this.previousPosition = function () {
-        return false;
+        var moved = true;
+        if (currentPos === 0) {
+            if (walker.previousSibling() === null) {
+                walker.parentNode();
+                if (walker.currentNode === root) {
+                    walker.firstChild();
+                    return false;
+                }
+                currentPos = 0;
+            } else {
+                setAtEnd();
+            }
+        } else if (walker.currentNode.nodeType === 3) {
+            currentPos -= 1;
+        } else if (walker.lastChild() !== null) {
+            setAtEnd();
+        } else if (walker.currentNode === root) {
+            moved = false;
+        } else {
+            currentPos = 0;
+        }
+        return moved;
     };
     /**
      * @return {!Node}
      */
     this.container = function () {
-        return root;
+        var n = walker.currentNode,
+            t = n.nodeType;
+        if (currentPos === 0 && t !== 3) {
+            return /**@type{!Node}*/n.parentNode;
+        }
+        return n;
     };
     /**
      * @return {!number}
      */
     this.offset = function () {
-        return 0;
-    };
-    /**
-     * @return {!number}
-     */
-    this.unfilteredOffset = function () {
-        return 0;
+        if (walker.currentNode.nodeType === 3) {
+            return currentPos;
+        }
+        var c = 0,
+            n = walker.currentNode;
+        if (currentPos === 1) {
+            n = n.lastChild;
+        } else {
+            n = n.previousSibling;
+        }
+        while (n) {
+            c += 1;
+            n = n.previousSibling;
+        }
+        return c;
     };
     /**
      * @param {!Node} container
@@ -81,14 +147,22 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!boolean}
      */
     this.setPosition = function (container, offset) {
-        return false;
-    };
-    /**
-     * @param {!Node} container
-     * @param {!number} unfilteredOffset
-     * @return {!boolean}
-     */
-    this.setUnfilteredPosition = function (container, unfilteredOffset) {
+        if (container.nodeType === 3) {
+            walker.currentNode = container;
+            currentPos = offset;
+            return true;
+        }
+        var n = container.firstChild;
+        while (offset && n) {
+            n = n.nextSibling;
+        }
+        if (n === null) {
+            walker.currentNode = container;
+            currentPos = 1;
+        } else {
+            walker.currentNode = n;
+            currentPos = 0;
+        }
         return false;
     };
 };

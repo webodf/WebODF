@@ -82,10 +82,10 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
             return;
         }
         element = /**@type{!Element}*/(range.startContainer);
-        positionIterator.setUnfilteredPosition(element, range.startOffset);
+        positionIterator.setPosition(element, range.startOffset);
         move();
         setStart(positionIterator.container(),
-            positionIterator.unfilteredOffset());
+            positionIterator.offset());
         cursor.updateToSelection();
     }
     function doMoveForward(extend, move) {
@@ -99,7 +99,7 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
             return;
         }
         element = /**@type{!Element}*/(range.startContainer);
-        positionIterator.setUnfilteredPosition(element, range.startOffset);
+        positionIterator.setPosition(element, range.startOffset);
     }
 /*
     function fallbackMoveLineUp() {
@@ -140,10 +140,10 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
             return;
         }
         element = /**@type{!Element}*/(selection.focusNode);
-        positionIterator.setUnfilteredPosition(element, selection.focusOffset);
+        positionIterator.setPosition(element, selection.focusOffset);
         positionIterator.nextPosition();
         moveCursor(positionIterator.container,
-            positionIterator.unfilteredOffset(), false);
+            positionIterator.offset(), false);
     }
     function moveCursorRight() {
         cursor.remove();
@@ -152,10 +152,10 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
             return;
         }
         element = /**@type{!Element}*/(selection.focusNode);
-        positionIterator.setUnfilteredPosition(element, selection.focusOffset);
+        positionIterator.setPosition(element, selection.focusOffset);
         positionIterator.previousPosition();
         moveCursor(positionIterator.container,
-            positionIterator.unfilteredOffset(), false);
+            positionIterator.offset(), false);
 
     }
     function moveCursorUp() {

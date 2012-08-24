@@ -55,89 +55,120 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     function create() {
         createWalker("<a/>");
         r.shouldBeNonNull(t, "t.iterator");
-        r.shouldBe(t, "t.doc.documentElement", "t.iterator.container()");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
         r.shouldBe(t, "t.iterator.offset()", "0");
     }
     function forwardInEmptyDoc() {
         createWalker("<a/>");
         r.shouldBe(t, "t.iterator.nextPosition()", "false");
-        r.shouldBe(t, "t.doc.documentElement", "t.iterator.container()");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
         r.shouldBe(t, "t.iterator.offset()", "0");
     }
     function backwardInEmptyDoc() {
         createWalker("<a/>");
         r.shouldBe(t, "t.iterator.previousPosition()", "false");
-        r.shouldBe(t, "t.doc.documentElement", "t.iterator.container()");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
         r.shouldBe(t, "t.iterator.offset()", "0");
     }
     function forwardInSimpleDoc() {
+        var i;
         createWalker("<a>hello</a>");
         t.textNode = t.doc.documentElement.firstChild;
+        r.shouldBe(t, "t.iterator.container()", "t.textNode");
         r.shouldBe(t, "t.iterator.offset()", "0");
-        var i;
         for (i = 1; i <= 4; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
-            r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+            r.shouldBe(t, "t.iterator.container()", "t.textNode");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.nextPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "5");
+        r.shouldBe(t, "t.iterator.offset()", "1");
         r.shouldBe(t, "t.iterator.nextPosition()", "false");
-        r.shouldBe(t, "t.iterator.offset()", "5");
+        r.shouldBe(t, "t.iterator.offset()", "1");
     }
     function backwardInSimpleDoc() {
-        createWalker("<a>hello</a>");
-        t.textNode = t.doc.documentElement.firstChild;
-        t.iterator.setPosition(t.iterator.container(), 5);
-        r.shouldBe(t, "t.iterator.offset()", "5");
         var i;
-        for (i = 4; i > 0; i -= 1) {
+        createWalker("<a>hello</a>");
+        t.iterator.setPosition(t.doc.documentElement, 1);
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.offset()", "1");
+        t.textNode = t.doc.documentElement.firstChild;
+        for (i = 4; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
-            r.shouldBe(t, "t.doc.documentElement", "t.iterator.container()");
+            r.shouldBe(t, "t.iterator.container()", "t.textNode");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
-        r.shouldBe(t, "t.iterator.previousPosition()", "true");
-        r.shouldBe(t, "t.doc.documentElement", "t.iterator.container()");
-        r.shouldBe(t, "t.iterator.offset()", "0");
         r.shouldBe(t, "t.iterator.previousPosition()", "false");
         r.shouldBe(t, "t.iterator.offset()", "0");
     }
     function forwardInDoc() {
-        createWalker("<a>abc<a>abc</a>abc</a>");
         var i;
-        for (i = 1; i <= 3; i += 1) {
+        createWalker("<a>abc<a>abc</a>abc</a>");
+        t.node = t.doc.documentElement.firstChild;
+        for (i = 1; i < 3; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
+            r.shouldBe(t, "t.iterator.container()", "t.node");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
-        for (i = 0; i <= 3; i += 1) {
+        r.shouldBe(t, "t.iterator.nextPosition()", "true");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.offset()", "1");
+        t.node = t.node.nextSibling;
+        t.node = t.node.firstChild;
+        for (i = 0; i < 3; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
+            r.shouldBe(t, "t.iterator.container()", "t.node");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
-        for (i = 4; i <= 7; i += 1) {
+        t.node = t.node.parentNode;
+        r.shouldBe(t, "t.iterator.nextPosition()", "true");
+        r.shouldBe(t, "t.iterator.container()", "t.node");
+        r.shouldBe(t, "t.iterator.offset()", "1");
+        t.node = t.node.nextSibling;
+        for (i = 0; i < 3; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
+            r.shouldBe(t, "t.iterator.container()", "t.node");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
+        r.shouldBe(t, "t.iterator.nextPosition()", "true");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.offset()", "3");
         r.shouldBe(t, "t.iterator.nextPosition()", "false");
-        r.shouldBe(t, "t.iterator.offset()", "7");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.offset()", "3");
     }
     function backwardInDoc() {
-        createWalker("<a>abc<a>abc</a>abc</a>");
-        t.iterator.setPosition(t.iterator.container(), 7);
+        createWalker("<a>abc<a>abc</a>1bc</a>");
+        t.iterator.setPosition(t.doc.documentElement, 1);
+        t.node = t.doc.documentElement.lastChild;
         var i;
-        for (i = 6; i >= 4; i -= 1) {
+        for (i = 2; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
+            r.shouldBe(t, "t.iterator.container()", "t.node");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
-        for (i = 3; i >= 0; i -= 1) {
+        t.node = t.node.previousSibling;
+        r.shouldBe(t, "t.iterator.previousPosition()", "true");
+        r.shouldBe(t, "t.iterator.container()", "t.node");
+        r.shouldBe(t, "t.iterator.offset()", "1");
+        t.node = t.node.firstChild;
+        for (i = 2; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
+            r.shouldBe(t, "t.iterator.container()", "t.node");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
-        for (i = 3; i >= 0; i -= 1) {
+        r.shouldBe(t, "t.iterator.previousPosition()", "true");
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.offset()", "1");
+        t.node = t.doc.documentElement.firstChild;
+        for (i = 2; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
+            r.shouldBe(t, "t.iterator.container()", "t.node");
             r.shouldBe(t, "t.iterator.offset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.previousPosition()", "false");
+        r.shouldBe(t, "t.iterator.container()", "t.node");
         r.shouldBe(t, "t.iterator.offset()", "0");
     }
     this.tests = function () {
@@ -145,10 +176,10 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             create,
             forwardInEmptyDoc,
             backwardInEmptyDoc,
-            forwardInSimpleDoc/*,
+            forwardInSimpleDoc,
             backwardInSimpleDoc,
             forwardInDoc,
-            backwardInDoc*/
+            backwardInDoc
         ];
     };
     this.asyncTests = function () {
