@@ -25,5 +25,14 @@ function loadWidgets(documentObject) {
                 widget.startup();
             });
         });
+
+        // Zoom Level Selector
+        require(["widgets/zoomSlider.js"], function () {
+            var styles = new widgets.ZoomSlider(documentObject, function (widget) {
+                widget.placeAt(toolbar);
+                widget.startup();
+            });
+        });
+
     });
 }
