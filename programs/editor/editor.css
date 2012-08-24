@@ -2,15 +2,25 @@ html, body, #mainContainer {
     width: 100%;
     height: 100%;
     margin: 0;
+    font-family: sans-serif;
+    font-size: 10pt;
+
+    padding-top: 0px;
 }
 
 #topPane {
+    border: none;
+    box-shadow: 0px 0px 3px #888;
+
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
-#topPane > h1 {
+#topPane > h1 > a {
     font-size: 25px;
     font-family: sans-serif;
     font-weight: normal;
+    color: gray;
 }
 
 #editor {
@@ -19,21 +29,13 @@ html, body, #mainContainer {
     overflow: hidden;
     padding: 0px !important;
 
-    -moz-border-radius-topleft: 5px;
-    -webkit-border-top-left-radius: 5px;
-     border-top-left-radius: 5px;
-    -moz-border-radius-topright: 5px;
-    -webkit-border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 
 }
 
 #toolbar {
-    -moz-border-radius-topleft: 5px;
-    -webkit-border-top-left-radius: 5px;
-     border-top-left-radius: 5px;
-    -moz-border-radius-topright: 5px;
-    -webkit-border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
 
@@ -50,27 +52,27 @@ html, body, #mainContainer {
     margin-left: 10px;
     margin-right: 10px;
     margin-bottom: 30px;
+
+    transform-origin: top center;
+    -webkit-transform-origin: top center;
+    -moz-transform-origin: top center;
+    -o-transform-origin: top center;
+
     height: 100%;
 }
 
 #collaboration {
     width: 20%;
-    -moz-border-radius-topleft: 5px;
-    -webkit-border-top-left-radius: 5px;
-     border-top-left-radius: 5px;
-    -moz-border-radius-topright: 5px;
-    -webkit-border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+
+    box-shadow: 0 0 3px #888;
+
     border: none;
-    box-shadow: 0px 0px 3px #888;
 }
 
 #collaboration > .dojoxExpandoTitle {
-    -moz-border-radius-topleft: 5px;
-    -webkit-border-top-left-radius: 5px;
-     border-top-left-radius: 5px;
-    -moz-border-radius-topright: 5px;
-    -webkit-border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     border: none;
 }
@@ -106,7 +108,14 @@ html, body, #mainContainer {
     padding-top: 3px;
     padding-bottom: 3px;
     width: 100%;
-    background-color: #eef;
+    background-color: #eee;
     position: absolute;
     bottom: 0px;
+}
+
+#inputArea > #widget_chatInput {
+    width: 95%;
+    border-radius: 10px;
+    padding: 3px;
+    box-shadow: inset 0 0 1px #888;
 }
