@@ -34,8 +34,7 @@
  */
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.CursorTests");
-runtime.loadClass("core.PointWalkerTests");
-runtime.loadClass("core.SimplePointWalkerTests");
+runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
@@ -52,8 +51,7 @@ var tests = [
     core.Base64Tests
 ];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-//    tests.push(core.PointWalkerTests);
-    tests.push(core.SimplePointWalkerTests);
+    tests.push(core.PositionIteratorTests);
 }
 if (runtime.type() === "BrowserRuntime") {
     tests.push(gui.CaretTests);
@@ -63,13 +61,11 @@ if (runtime.type() === "BrowserRuntime") {
 //    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
-/*
 tests = [  ];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-    tests.push(core.SimplePointWalkerTests);
-    tests.push(gui.AvatarTests);
+    tests.push(core.PositionIteratorTests);
+//    tests.push(gui.AvatarTests);
 }
-*/
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests

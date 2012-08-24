@@ -40,10 +40,10 @@ runtime.loadClass("gui.SelectionMover");
  * element representing the caret is used.
  * @constructor
  * @param {!Element} rootNode
- * @param {!core.PointWalker} pointWalker
+ * @param {!core.PositionIterator} positionIterator
  * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Caret = function Caret(rootNode, pointWalker, keyHandler) {
+gui.Caret = function Caret(rootNode, positionIterator, keyHandler) {
     "use strict";
     function listenEvent(eventTarget, eventType, eventHandler) {
         if (eventTarget.addEventListener) {
@@ -64,7 +64,7 @@ gui.Caret = function Caret(rootNode, pointWalker, keyHandler) {
     }
     var document = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(document),
-        selectionMover = new gui.SelectionMover(selection, pointWalker),
+        selectionMover = new gui.SelectionMover(selection, positionIterator),
         cursor = selectionMover.getCursor(),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),

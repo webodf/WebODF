@@ -33,16 +33,15 @@
 /*global core, ops*/
 /**
  * @constructor
- * @implements core.PointFilter
+ * @extends NodeFilter 
  */
 ops.SessionPointFilter = function SessionPointFilter() {
     "use strict";
     /**
-     * @param {!core.PointWalker} point
-     * @return {core.PointFilter.FilterResult}
+     * @param {!Node} node
+     * @return {!number}
      */
-    this.acceptPoint = function (point) {
-        var result = core.PointFilter.FilterResult.FILTER_ACCEPT;
-        return result;
+    this.acceptNode = function (node) {
+        return 1;
     };
 };

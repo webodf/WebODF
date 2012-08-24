@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime, core, gui*/
-runtime.loadClass("core.FilteredPointWalker");
+runtime.loadClass("core.PositionIterator");
 runtime.loadClass("gui.Caret");
 
 /**
@@ -84,7 +84,7 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
     };
     /**
      * @constructor
-     * @implements core.PointFilter
+     * @extends NodeFilter
      */
     function CursorFilter() {
         function accept(node) {
@@ -99,17 +99,16 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
             }
             return true;
         }
-        this.acceptPoint = function (point) {
-            var node = point.node();
-            if (!accept(node) || !accept(point.followingSibling())) {
-                return core.PointFilter.FilterResult.FILTER_REJECT;
+        this.acceptNode = function (node) {
+            if (!accept(node)) {
+                return 2;
             }
-            return core.PointFilter.FilterResult.FILTER_ACCEPT;
+            return 1;
         };
     }
     function init() {
         var filter = new CursorFilter(),
-            walker = new core.FilteredPointWalker(rootNode, filter),
+            walker = new core.PositionIterator(rootNode, 5, filter, false),
             handle;
         caret = new gui.Caret(rootNode, walker, keyHandler);
         handle = caret.getHandleElement();

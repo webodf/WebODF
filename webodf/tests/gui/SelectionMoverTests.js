@@ -31,7 +31,6 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime: true, core: true, gui: true*/
-runtime.loadClass("core.SimplePointWalker");
 runtime.loadClass("gui.SelectionMover");
 
 /**
@@ -48,8 +47,8 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         var doc = testarea.ownerDocument,
             selection = new core.Selection(maindoc),
             p = doc.createElement("p"),
-            walker = new core.SimplePointWalker(p),
-            mover = new gui.SelectionMover(selection, walker);
+            iterator = new core.PositionIterator(p),
+            mover = new gui.SelectionMover(selection, iterator);
         testarea.appendChild(p);
         p.appendChild(doc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"));
         p.style.width = "5em";// break line after each 'MMMMM'

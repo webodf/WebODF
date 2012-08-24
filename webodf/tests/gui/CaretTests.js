@@ -46,8 +46,8 @@ gui.CaretTests = function CaretTests(runner) {
     function setupEmptyDoc() {
         var selection = runtime.getWindow().getSelection(),
             doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            pointWalker = new core.SimplePointWalker(doc.documentElement),
-            caret = new gui.Caret(doc.documentElement, pointWalker);
+            iterator = new core.PositionIterator(doc.documentElement),
+            caret = new gui.Caret(doc.documentElement, iterator);
         t = { selection: selection, doc: doc }; //, cursor: cursor };
         runner.shouldBeNonNull(t, "t.selection");
     }

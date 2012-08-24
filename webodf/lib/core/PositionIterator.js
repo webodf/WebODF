@@ -30,60 +30,65 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core: true, Node: true*/
+/*global runtime, core*/
 /**
- * A walker that allows finegrained stepping through the DOM.
- * A PointWalker goes from point to point. Each point points to positions
- * between elements of the dom tree. So each point has a node and a position.
- * In that regard, a point is the same as a start and end of Range.
- * @interface
+ * An iterator that iterators through positions in a DOM tree.
+ * @constructor
+ * @param {!Node} root
+ * @param {!number=} whatToShow
+ * @param {!NodeFilter=} filter
+ * @param {!boolean=} expandEntityReferences
  */
-core.PointWalker = function PointWalker() {"use strict"; };
-/**
- * Move the walker to the point given by @p node and @p position.
- * @param {!Node} node must be the root of this walker or part of the
- *                   tree of this walker.
- * @param {!number} position must be a valid position in @node.
- **/
-core.PointWalker.prototype.setPoint = function (node, position) {"use strict"; };
-/**
- * @return {!boolean}
- */
-core.PointWalker.prototype.stepForward = function () {"use strict"; };
-/**
- * @return {!boolean}
- */
-core.PointWalker.prototype.stepBackward = function () {"use strict"; };
-/**
- * @return {!boolean}
- */
-core.PointWalker.prototype.nextPosition = function () {"use strict"; };
-/**
- * @return {!boolean}
- */
-core.PointWalker.prototype.previousPosition = function () {"use strict"; };
-/**
- * @return {!Node}
- */
-core.PointWalker.prototype.node = function () {"use strict"; };
-/**
- * @return {!number}
- */
-core.PointWalker.prototype.position = function () {"use strict"; };
-/**
- * @param {!Node} node
- * @return {!number}
- */
-core.PointWalker.prototype.countPositions = function (node) {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.precedingSibling = function () {"use strict"; };
-/**
- * @return {?Node}
- */
-core.PointWalker.prototype.followingSibling = function () {"use strict"; };
-(function () {
+core.PositionIterator = function PositionIterator(root, whatToShow, filter,
+        expandEntityReferences) {
     "use strict";
-    return core.PointWalker;
-}());
+    whatToShow = whatToShow || 0xFFFFFFFF;
+    var walker = root.ownerDocument.createTreeWalker(root, whatToShow, filter,
+            expandEntityReferences);
+    /**
+     * @return {!boolean}
+     */
+    this.nextPosition = function () {
+        return false;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.previousPosition = function () {
+        return false;
+    };
+    /**
+     * @return {!Node}
+     */
+    this.container = function () {
+        return root;
+    };
+    /**
+     * @return {!number}
+     */
+    this.offset = function () {
+        return 0;
+    };
+    /**
+     * @return {!number}
+     */
+    this.unfilteredOffset = function () {
+        return 0;
+    };
+    /**
+     * @param {!Node} container
+     * @param {!number} offset
+     * @return {!boolean}
+     */
+    this.setPosition = function (container, offset) {
+        return false;
+    };
+    /**
+     * @param {!Node} container
+     * @param {!number} unfilteredOffset
+     * @return {!boolean}
+     */
+    this.setUnfilteredPosition = function (container, unfilteredOffset) {
+        return false;
+    };
+};

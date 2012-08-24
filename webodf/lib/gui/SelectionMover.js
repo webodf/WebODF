@@ -31,18 +31,17 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime: true, core: true, gui: true*/
-runtime.loadClass("core.PointWalker");
 runtime.loadClass("core.Cursor");
 /**
  * This class modifies the selection in different ways.
  * @constructor
  * @param {!core.Selection} selection
- * @param {!core.PointWalker} pointWalker
+ * @param {!core.PositionIterator} positionIterator
  * @return {!gui.SelectionMover}
  */
-gui.SelectionMover = function SelectionMover(selection, pointWalker) {
+gui.SelectionMover = function SelectionMover(selection, positionIterator) {
     "use strict";
-    var doc = pointWalker.node().ownerDocument,
+    var doc = positionIterator.container().ownerDocument,
         cursor = new core.Cursor(selection, doc);
     /**
      * Return the last range in the selection. Create one if the selection is
@@ -67,8 +66,8 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
         if (ranges.length === 0) {
             ranges[0] = node.ownerDocument.createRange();
         }
-        ranges[ranges.length - 1].setStart(pointWalker.node(),
-                pointWalker.position());
+        ranges[ranges.length - 1].setStart(positionIterator.container(),
+                positionIterator.offset());
         for (i = 0; i < ranges.length; i += 1) {
             selection.addRange(ranges[i]);
         }
@@ -83,9 +82,10 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             return;
         }
         element = /**@type{!Element}*/(range.startContainer);
-        pointWalker.setPoint(element, range.startOffset);
+        positionIterator.setUnfilteredPosition(element, range.startOffset);
         move();
-        setStart(pointWalker.node(), pointWalker.position());
+        setStart(positionIterator.container(),
+            positionIterator.unfilteredOffset());
         cursor.updateToSelection();
     }
     function doMoveForward(extend, move) {
@@ -99,7 +99,7 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             return;
         }
         element = /**@type{!Element}*/(range.startContainer);
-        pointWalker.setPoint(element, range.startOffset);
+        positionIterator.setUnfilteredPosition(element, range.startOffset);
     }
 /*
     function fallbackMoveLineUp() {
@@ -140,9 +140,10 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             return;
         }
         element = /**@type{!Element}*/(selection.focusNode);
-        pointWalker.setPoint(element, selection.focusOffset);
-        pointWalker.stepBackward();
-        moveCursor(pointWalker.node(), pointWalker.position(), false);
+        positionIterator.setUnfilteredPosition(element, selection.focusOffset);
+        positionIterator.nextPosition();
+        moveCursor(positionIterator.container,
+            positionIterator.unfilteredOffset(), false);
     }
     function moveCursorRight() {
         cursor.remove();
@@ -151,9 +152,11 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             return;
         }
         element = /**@type{!Element}*/(selection.focusNode);
-        pointWalker.setPoint(element, selection.focusOffset);
-        pointWalker.stepForward();
-        moveCursor(pointWalker.node(), pointWalker.position(), false);
+        positionIterator.setUnfilteredPosition(element, selection.focusOffset);
+        positionIterator.previousPosition();
+        moveCursor(positionIterator.container,
+            positionIterator.unfilteredOffset(), false);
+
     }
     function moveCursorUp() {
         // retrieve cursor x and y position, then move selection/cursor left
@@ -194,10 +197,10 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
      * @return {undefined}
      **/
     this.movePointForward = function (extend) {
-        doMove(extend, pointWalker.stepForward);
+        doMove(extend, positionIterator.nextPosition);
     };
     this.movePointBackward = function (extend) {
-        doMove(extend, pointWalker.stepBackward);
+        doMove(extend, positionIterator.previousPosition);
     };
     this.moveLineForward = function (extend) {
         if (selection.modify) {
