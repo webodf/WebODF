@@ -22,7 +22,7 @@ function setupAvatarButton(avatarButtonElement, avatar) {
         avatar.getCaret().hideHandle();
     };
     avatarButtonElement.onclick = function () {
-        avatar.focus();
+        avatar.getCaret().focus();
     };
     avatarButtonElement.style.background = avatar.getColor();
 }

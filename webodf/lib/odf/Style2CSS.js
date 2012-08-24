@@ -603,9 +603,6 @@ odf.Style2CSS = function Style2CSS() {
             bulletWidth,
             rule = "";
 
-
-
-
         if (listLevelLabelAlign) {
             labelAlignAttr = listLevelLabelAlign.attributes;
             bulletIndent = labelAlignAttr["fo:text-indent"].value;
@@ -619,10 +616,9 @@ odf.Style2CSS = function Style2CSS() {
 
         // bulletWidth is the negative of bulletIndent
         // Obtain this my stripping the fist character
-        if(bulletIndent.charAt(0)==='-') {
+        if (bulletIndent.charAt(0) === '-') {
             bulletWidth = bulletIndent.substring(1);
-        }
-        else {
+        } else {
             bulletWidth = "-" + bulletIndent;
         }
 
@@ -633,19 +629,21 @@ odf.Style2CSS = function Style2CSS() {
         }
         itemSelector = selector;
         itemSelector += ' > text|list-item > *:not(text|list):first-child';
-        listItemRule = itemSelector + '{margin-left:' + listIndent + ';}';
+        if (listIndent !== undefined) {
+            listItemRule = itemSelector + '{margin-left:' + listIndent + ';}';
+            sheet.insertRule(listItemRule, sheet.cssRules.length);
+        }
         // insert a block before every immediate child of the list-item, except for lists
         selector += ' > text|list-item > *:not(text|list):first-child:before';
         rule = itemrule;
         rule = selector + '{' + rule + ';';
 
         rule += 'counter-increment:list;';
-        rule += 'margin-left:' + bulletIndent +';';
+        rule += 'margin-left:' + bulletIndent + ';';
         rule += 'width:' + bulletWidth + ';';
         rule += 'display:inline-block}';
 
         try {
-            sheet.insertRule(listItemRule, sheet.cssRules.length);
             sheet.insertRule(rule, sheet.cssRules.length);
         } catch (e) {
             throw e;
