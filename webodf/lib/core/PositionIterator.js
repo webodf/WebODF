@@ -165,4 +165,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         return false;
     };
+    /**
+     * @return {undefined}
+     */
+    this.moveToEnd = function () {
+        walker.currentNode = root;
+        currentPos = 1;
+    };
 };

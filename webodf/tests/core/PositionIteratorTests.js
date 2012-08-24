@@ -40,7 +40,22 @@ runtime.loadClass("core.PositionIterator");
  */
 core.PositionIteratorTests = function PositionIteratorTests(runner) {
     "use strict";
-    var r = runner, t;
+    /**
+     * @constructor
+     * @extends NodeFilter
+     */
+    function TestFilter() {
+        this.acceptNode = function (node) {
+            if (node.localName === "b") {
+                return 2;
+            }
+            if (node.localName === "c") {
+                return 3;
+            }
+            return 1;
+        };
+    }
+    var r = runner, t, filter = new TestFilter();
 
     this.setUp = function () {
         t = {};
@@ -50,7 +65,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     };
     function createWalker(xml) {
         t.doc = runtime.parseXML(xml);
-        t.iterator = new core.PositionIterator(t.doc.documentElement);
+        t.iterator = new core.PositionIterator(t.doc.documentElement, 0,
+            filter);
     }
     function create() {
         createWalker("<a/>");
@@ -90,7 +106,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     function backwardInSimpleDoc() {
         var i;
         createWalker("<a>hello</a>");
-        t.iterator.setPosition(t.doc.documentElement, 1);
+        t.iterator.moveToEnd();
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
         r.shouldBe(t, "t.iterator.offset()", "1");
         t.textNode = t.doc.documentElement.firstChild;
@@ -140,7 +156,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     }
     function backwardInDoc() {
         createWalker("<a>abc<a>abc</a>1bc</a>");
-        t.iterator.setPosition(t.doc.documentElement, 1);
+        t.iterator.moveToEnd();
         t.node = t.doc.documentElement.lastChild;
         var i;
         for (i = 2; i >= 0; i -= 1) {
@@ -171,6 +187,42 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         r.shouldBe(t, "t.iterator.container()", "t.node");
         r.shouldBe(t, "t.iterator.offset()", "0");
     }
+    function countPositions(xml) {
+        var n = 1;
+        createWalker(xml);
+        while (t.iterator.nextPosition()) {
+            n += 1;
+        }
+        return n;
+    }
+    function countPositionsBackwards(xml) {
+        var n = 1;
+        createWalker(xml);
+        t.iterator.moveToEnd();
+        while (t.iterator.previousPosition()) {
+            n += 1;
+        }
+        return n;
+    }
+    function rejectedNodes() {
+        var tests = [
+                { x: "<a/>", n: 1 },
+                { x: "<a><b/></a>", n: 1 },
+                { x: "<a>a</a>", n: 2 },
+                { x: "<a>a<b/></a>", n: 2 },
+                { x: "<a><b/>a</a>", n: 2 },
+                { x: "<a>hello</a>", n: 6 },
+                { x: "<a>hel<b/>lo</a>", n: 6 },
+                { x: "<a><c><b>a</b>a</c></a>", n: 2 }
+            ],
+            i;
+        for (i = 0; i < tests.length; i += 1) {
+            t.positions = countPositions(tests[i].x);
+            r.shouldBe(t, "t.positions", tests[i].n.toString());
+            t.positions = countPositionsBackwards(tests[i].x);
+            r.shouldBe(t, "t.positions", tests[i].n.toString());
+        }
+    }
     this.tests = function () {
         return [
             create,
@@ -179,7 +231,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             forwardInSimpleDoc,
             backwardInSimpleDoc,
             forwardInDoc,
-            backwardInDoc
+            backwardInDoc,
+            rejectedNodes
         ];
     };
     this.asyncTests = function () {

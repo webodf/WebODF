@@ -83,10 +83,11 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
         }
         element = /**@type{!Element}*/(range.startContainer);
         positionIterator.setPosition(element, range.startOffset);
-        move();
-        setStart(positionIterator.container(),
-            positionIterator.offset());
-        cursor.updateToSelection();
+        if (move()) {
+            setStart(positionIterator.container(),
+                positionIterator.offset());
+            cursor.updateToSelection();
+        }
     }
     function doMoveForward(extend, move) {
         if (selection.rangeCount === 0) {
@@ -142,7 +143,7 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
         element = /**@type{!Element}*/(selection.focusNode);
         positionIterator.setPosition(element, selection.focusOffset);
         positionIterator.nextPosition();
-        moveCursor(positionIterator.container,
+        moveCursor(positionIterator.container(),
             positionIterator.offset(), false);
     }
     function moveCursorRight() {
@@ -154,7 +155,7 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
         element = /**@type{!Element}*/(selection.focusNode);
         positionIterator.setPosition(element, selection.focusOffset);
         positionIterator.previousPosition();
-        moveCursor(positionIterator.container,
+        moveCursor(positionIterator.container(),
             positionIterator.offset(), false);
 
     }
