@@ -70,6 +70,18 @@ core.ElementPointWalker = function ElementPointWalker(root) {
         return false;
     };
     /**
+     * @return {!boolean}
+     */
+    this.nextPosition = function () {
+        return false;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.previousPosition = function () {
+        return false;
+    };
+    /**
      * @return {!Node}
      */
     this.node = function () {

@@ -87,8 +87,21 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
      * @implements core.PointFilter
      */
     function CursorFilter() {
-        this.acceptPoint = function (node, offset) {
-            if ("urn:webodf:names:cursor" === node.namespaceURI) {
+        function accept(node) {
+            if (!node) {
+                return false;
+            }
+            if ("urn:webodf:names:cursor" === node.namespaceURI
+                    || node.localName === "span"
+                    || node.localName === "div"
+                    || node.localName === "img") {
+                return false;
+            }
+            return true;
+        }
+        this.acceptPoint = function (point) {
+            var node = point.node();
+            if (!accept(node) || !accept(point.followingSibling())) {
                 return core.PointFilter.FilterResult.FILTER_REJECT;
             }
             return core.PointFilter.FilterResult.FILTER_ACCEPT;

@@ -30,7 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global core*/
+/*global runtime, core*/
+runtime.loadClass("core.PointWalker");
 /**
  * @interface
  */
@@ -44,11 +45,10 @@ core.PointFilter.FilterResult = {
     FILTER_SKIP:   3
 };
 /**
- * @param {!Node} node
- * @param {!number} offset
+ * @param {!core.PointWalker} point
  * @return {core.PointFilter.FilterResult}
  */
-core.PointFilter.prototype.acceptPoint = function (node, offset) {"use strict"; };
+core.PointFilter.prototype.acceptPoint = function (point) {"use strict"; };
 (function () {
     "use strict";
     return core.PointFilter;

@@ -44,7 +44,8 @@ runtime.loadClass("core.SimplePointWalker");
  */
 core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
     "use strict";
-    var simple = new core.SimplePointWalker(root),
+    var self = this,
+        simple = new core.SimplePointWalker(root),
         before = null, // node before the point
         after = null, // node after the point
         pos = 0;
@@ -56,17 +57,39 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
      * @return {undefined}
      **/
     this.setPoint = function (node, position) {
-        simple.setPoint(node, position);
+        pos = position;
+        simple.setPoint(node, 0);
+        var r = true;
+        while (r && position > 0) {
+            r = self.stepForward();
+            position -= 1;
+        }
     };
     /**
      * @return {!boolean}
      */
     this.stepForward = function () {
-        var r = simple.stepForward(),
-            node = simple.node();
-        while (r && filter.acceptPoint(node, simple.position())
-                        !== core.PointFilter.FilterResult.FILTER_ACCEPT) {
-            r = simple.stepForward();
+        var ni = simple.node(),
+            pi = simple.position(),
+            nt = ni,
+            pt = pi,
+            r = simple.stepForward(),
+            a = r && filter.acceptPoint(simple);
+        while (r && a !== core.PointFilter.FilterResult.FILTER_ACCEPT) {
+            if (a === core.PointFilter.FilterResult.FILTER_REJECT) {
+                simple.setPoint(nt, pt);
+                r = simple.nextPosition();
+                nt = simple.node();
+                pt = simple.position();
+            } else {
+                r = simple.stepForward();
+            }
+            a = r && filter.acceptPoint(simple);
+        }
+        if (r) {
+            pos += 1;
+        } else {
+            simple.setPoint(ni, pi);
         }
         return r;
     };
@@ -75,11 +98,26 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
      */
     this.stepBackward = function () {
         var r = simple.stepBackward();
-        while (r && filter.acceptPoint(simple.node(), simple.position())
+        while (r && filter.acceptPoint(simple)
                         !== core.PointFilter.FilterResult.FILTER_ACCEPT) {
             r = simple.stepBackward();
         }
+        if (r) {
+            pos -= 1;
+        }
         return r;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.nextPosition = function () {
+        return false;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.previousPosition = function () {
+        return false;
     };
     /**
      * @return {!Node}
@@ -91,7 +129,7 @@ core.FilteredPointWalker = function FilteredPointWalker(root, filter) {
      * @return {!number}
      */
     this.position = function () {
-        return simple.position();
+        return pos;
     };
     /**
      * @param {!Node} node

@@ -209,6 +209,56 @@ core.SimplePointWalker = function SimplePointWalker(root) {
         return true;
     };
     /**
+     * @return {!boolean}
+     */
+    this.nextPosition = function () {
+        if (after === null) {
+            return false;
+        }
+        if (after.nodeType === 3 && after.length > 1) {
+            if (before !== after) {
+                before = after;
+                posInText = 1;
+            } else {
+                posInText += 1;
+                if (posInText === after.length) {
+                    after = after.nextSibling;
+                }
+            }
+            pos += 1;
+        } else {
+            before = after;
+            after = after.nextSibling;
+            pos += 1;
+        }
+        return true;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.previousPosition = function () {
+        if (before === null) {
+            return false;
+        }
+        if (before.nodeType === 3 && before.length > 1) {
+            if (before !== after) {
+                after = before;
+                posInText = after.length - 1;
+            } else {
+                posInText -= 1;
+                if (posInText === 0) {
+                    before = before.previousSibling;
+                }
+            }
+            pos -= 1;
+        } else {
+            after = before;
+            before = before.previousSibling;
+            pos -= 1;
+        }
+        return true;
+    };
+    /**
      * @return {!Node}
      */
     this.node = function () {

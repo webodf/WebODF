@@ -51,7 +51,7 @@ var tests = [
     core.ZipTests,
     core.Base64Tests
 ];
-if (runtime.getDOMImplementation()) {
+if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 //    tests.push(core.PointWalkerTests);
     tests.push(core.SimplePointWalkerTests);
 }
@@ -63,7 +63,13 @@ if (runtime.type() === "BrowserRuntime") {
 //    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
-// tests = [ core.SimplePointWalkerTests ];
+/*
+tests = [  ];
+if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
+    tests.push(core.SimplePointWalkerTests);
+    tests.push(gui.AvatarTests);
+}
+*/
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests

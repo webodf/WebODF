@@ -55,6 +55,14 @@ core.PointWalker.prototype.stepForward = function () {"use strict"; };
  */
 core.PointWalker.prototype.stepBackward = function () {"use strict"; };
 /**
+ * @return {!boolean}
+ */
+core.PointWalker.prototype.nextPosition = function () {"use strict"; };
+/**
+ * @return {!boolean}
+ */
+core.PointWalker.prototype.previousPosition = function () {"use strict"; };
+/**
  * @return {!Node}
  */
 core.PointWalker.prototype.node = function () {"use strict"; };
