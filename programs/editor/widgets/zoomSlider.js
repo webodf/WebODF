@@ -13,7 +13,7 @@ widgets.ZoomSlider = (function () {
                     intermediateChanges: true,
                     style: {
                         width: '150px',
-                        height: '27px',
+                        height: '25px',
                         float: 'right'
                     }
                 });
