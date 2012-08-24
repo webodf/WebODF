@@ -37,6 +37,7 @@ html, body, #mainContainer {
 #toolbar {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    overflow: hidden;
 }
 
 #container {
