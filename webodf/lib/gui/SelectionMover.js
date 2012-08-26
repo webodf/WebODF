@@ -32,164 +32,51 @@
  */
 /*global runtime, core, gui, XMLSerializer*/
 runtime.loadClass("core.Cursor");
+runtime.loadClass("core.PositionIterator");
 /**
  * This class modifies the selection in different ways.
  * @constructor
- * @param {!core.Selection} selection
- * @param {!core.PositionIterator} positionIterator
- * @return {!gui.SelectionMover}
+ * @param {!Node} rootNode
+ * @param {NodeFilter=} nodeFilter
  */
-gui.SelectionMover = function SelectionMover(selection, positionIterator) {
+gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
     "use strict";
-    var doc = positionIterator.container().ownerDocument,
-        cursor = new core.Cursor(selection, doc);
     /**
-     * Return the last range in the selection. Create one if the selection is
-     * empty.
+     * @constructor
+     * @extends NodeFilter
      */
-    function getActiveRange(node) {
-        var range;
-        if (selection.rangeCount === 0) {
-            selection.addRange(node.ownerDocument.createRange());
-        }
-        return selection.getRangeAt(selection.rangeCount - 1);
+    function CursorFilter() {
+        this.acceptNode = function (node) {
+            if (node.namespaceURI === "urn:webodf:names:cursor") {
+                return 2;
+            }
+            return 1;
+        };
     }
-    function setStart(node, offset) {
-        // selection interface is cumbersome and in Chrome it is buggy
-        // as a workaround all ranges are removed. The last one is updated and
-        // all ranges are placed back
-        var ranges = [], i, range;
-        for (i = 0; i < selection.rangeCount; i += 1) {
-            ranges[i] = selection.getRangeAt(i);
-        }
-        selection.removeAllRanges();
-        if (ranges.length === 0) {
-            ranges[0] = node.ownerDocument.createRange();
-        }
-        ranges[ranges.length - 1].setStart(positionIterator.container(),
-                positionIterator.offset());
-        for (i = 0; i < ranges.length; i += 1) {
-            selection.addRange(ranges[i]);
-        }
+    /**
+     * @constructor
+     * @extends NodeFilter
+     * @param {!NodeFilter} filter
+     */
+    function FilteredCursorFilter(filter) {
+        this.acceptNode = function (node) {
+            if (node.namespaceURI === "urn:webodf:names:cursor") {
+                return 2;
+            }
+            return filter.acceptNode(filter);
+        };
     }
+    var doc = /**@type{!Document}*/(rootNode.ownerDocument),
+        selection = new core.Selection(doc),
+        positionIterator,
+        cursor = new core.Cursor(selection, doc);
     function doMove(extend, move) {
-        if (selection.rangeCount === 0) {
-            return;
-        }
-        var range = selection.getRangeAt(0),
-            /**@type{Element}*/ element;
-        if (!range.startContainer || range.startContainer.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(range.startContainer);
-        positionIterator.setPosition(element, range.startOffset);
-        if (move()) {
-            setStart(positionIterator.container(),
-                positionIterator.offset());
-            cursor.updateToSelection();
-        }
-    }
-    function doMoveForward(extend, move) {
-        if (selection.rangeCount === 0) {
-            return;
-        }
+        var r = selection.getRangeAt(0);
+        // assume positionIterator reflects current state
         move();
-        var range = selection.getRangeAt(0),
-            /**@type{Element}*/ element;
-        if (!range.startContainer || range.startContainer.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(range.startContainer);
-        positionIterator.setPosition(element, range.startOffset);
-    }
-/*
-    function fallbackMoveLineUp() {
-        // put an element at the current position and call
-        // pointWalker.stepForward until the y position increases and x position
-        // is comparable to the previous one
+        selection.collapse(positionIterator.container(),
+                positionIterator.offset());
         cursor.updateToSelection();
-        // retrieve cursor x and y position, then move selection/cursor left
-        // until, y offset is less and x offset about equal
-        var rect = cursor.getNode().getBoundingClientRect(),
-            x = rect.left,
-            y = rect.top,
-            arrived = false,
-            allowedSteps = 200;
-        while (!arrived && allowedSteps) {
-            allowedSteps -= 1;
-            cursor.remove();
-            pointWalker.setPoint(selection.focusNode, selection.focusOffset);
-            pointWalker.stepForward();
-        moveCursor(walker.node(), walker.position());
-            moveCursorLeft();
-            rect = cursor.getNode().getBoundingClientRect();
-            arrived = rect.top !== y && rect.left < x;
-        }
-    }
-*/
-    function moveCursor(node, offset, selectMode) {
-        if (selectMode) {
-            selection.extend(node, offset);
-        } else {
-            selection.collapse(node, offset);
-        }
-        cursor.updateToSelection();
-    }
-    function moveCursorLeft() {
-        var /**@type{Element}*/ element;
-        if (!selection.focusNode || selection.focusNode.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(selection.focusNode);
-        positionIterator.setPosition(element, selection.focusOffset);
-        positionIterator.nextPosition();
-        moveCursor(positionIterator.container(),
-            positionIterator.offset(), false);
-    }
-    function moveCursorRight() {
-        cursor.remove();
-        var /**@type{Element}*/ element;
-        if (!selection.focusNode || selection.focusNode.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(selection.focusNode);
-        positionIterator.setPosition(element, selection.focusOffset);
-        positionIterator.previousPosition();
-        moveCursor(positionIterator.container(),
-            positionIterator.offset(), false);
-
-    }
-    function moveCursorUp() {
-        // retrieve cursor x and y position, then move selection/cursor left
-        // until, y offset is less and x offset about equal
-        var rect = cursor.getNode().getBoundingClientRect(),
-            x = rect.left,
-            y = rect.top,
-            arrived = false,
-            left = 200;
-        while (!arrived && left) {
-            left -= 1;
-            moveCursorLeft();
-            rect = cursor.getNode().getBoundingClientRect();
-            arrived = rect.top !== y && rect.left < x;
-        }
-    }
-    function moveCursorDown() {
-        // retrieve cursor x and y position, then move selection/cursor right
-        // until, x offset is less
-        cursor.updateToSelection();
-        var rect = cursor.getNode().getBoundingClientRect(),
-            x = rect.left,
-            y = rect.top,
-            arrived = false,
-            left = 200;
-        while (!arrived) {
-            left -= 1;
-            moveCursorRight();
-            rect = cursor.getNode().getBoundingClientRect();
-            arrived = rect.top !== y && rect.left > x;
-        }
-//alert(left + " " + y + " " + x + " " + rect.top + " " + rect.left);
     }
     /**
      * Move selection forward one point.
@@ -203,6 +90,7 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
     this.movePointBackward = function (extend) {
         doMove(extend, positionIterator.previousPosition);
     };
+/*
     this.moveLineForward = function (extend) {
         if (selection.modify) {
             // TODO add a way to 
@@ -219,8 +107,29 @@ gui.SelectionMover = function SelectionMover(selection, positionIterator) {
             });
         }
     };
+*/
     this.getCursor = function () {
         return cursor;
     };
-    return this;
+    this.getSelection = function () {
+        return selection;
+    };
+    function init() {
+        var filter;
+        if (nodeFilter) {
+            if (nodeFilter.acceptNode(cursor.getNode()) === 2) {
+                filter = nodeFilter;
+            } else {
+                filter = new FilteredCursorFilter(nodeFilter);
+            }
+        } else {
+            filter = new CursorFilter();
+        }
+        positionIterator = new core.PositionIterator(rootNode, 5,
+                filter, false);
+        // put the cursor at the start of the rootNode
+        selection.collapse(rootNode, 0);
+        cursor.updateToSelection();
+    }
+    init();
 };

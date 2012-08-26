@@ -40,10 +40,10 @@ runtime.loadClass("gui.SelectionMover");
  * element representing the caret is used.
  * @constructor
  * @param {!Element} rootNode
- * @param {!core.PositionIterator} positionIterator
+ * @param {?NodeFilter=} nodeFilter
  * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Caret = function Caret(rootNode, positionIterator, keyHandler) {
+gui.Caret = function Caret(rootNode, nodeFilter, keyHandler) {
     "use strict";
     function listenEvent(eventTarget, eventType, eventHandler) {
         if (eventTarget.addEventListener) {
@@ -63,9 +63,7 @@ gui.Caret = function Caret(rootNode, positionIterator, keyHandler) {
         }
     }
     var document = /**@type{!Document}*/(rootNode.ownerDocument),
-        selection = new core.Selection(document),
-        selectionMover = new gui.SelectionMover(selection, positionIterator),
-        cursor = selectionMover.getCursor(),
+        selectionMover = new gui.SelectionMover(rootNode, nodeFilter),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
         handle = document.createElementNS(htmlns, "div"),
@@ -109,6 +107,9 @@ gui.Caret = function Caret(rootNode, positionIterator, keyHandler) {
     this.getColor = function () {
         return span.style.borderColor;
     };
+    this.getSelection = function () {
+        return selectionMover.getSelection();
+    };
     this.getHandleElement = function () {
         return handle;
     };
@@ -118,9 +119,6 @@ gui.Caret = function Caret(rootNode, positionIterator, keyHandler) {
     };
     this.hideHandle = function () {
         handle.style.display = "none";
-    };
-    this.getSelection = function () {
-        return selection;
     };
     function handleKeyDown(e) {
         if (keyHandler) {
@@ -141,13 +139,10 @@ gui.Caret = function Caret(rootNode, positionIterator, keyHandler) {
             focussed = false;
             span.style.borderLeftWidth = "1px";
         };
-        cursorNode = cursor.getNode();
+        cursorNode = selectionMover.getCursor().getNode();
         cursorNode.appendChild(span);
         cursorNode.appendChild(handle);
         listenEvent(cursorNode, "keydown", handleKeyDown);
-        // put the cursor at the start of the rootNode
-        selection.collapse(rootNode, 0);
-        cursor.updateToSelection();
     }
     init();
 };

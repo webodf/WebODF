@@ -66,25 +66,20 @@ core.Cursor = function Cursor(selection, document) {
     cursorNode = document.createElementNS(cursorns, 'cursor');
 
     function putCursorIntoTextNode(container, offset) {
-        var len, ref, textnode, parent;
+        var textnode, parent;
         parent = container.parentNode;
+runtime.log("howdy " + container + " " + parent + " " + offset);
         if (offset === 0) {
             parent.insertBefore(cursorNode, container);
         } else if (offset === container.length) {
             parent.appendChild(cursorNode);
         } else {
-            len = container.length;
-            ref = container.nextSibling;
             textnode = document.createTextNode(
-                container.substringData(offset, len)
+                container.substringData(0, offset)
             );
-            container.deleteData(offset, len);
-            if (ref) {
-                parent.insertBefore(textnode, ref);
-            } else {
-                parent.appendChild(textnode);
-            }
-            parent.insertBefore(cursorNode, textnode);
+            container.deleteData(0, offset);
+            parent.insertBefore(textnode, container);
+            parent.insertBefore(cursorNode, container);
         }
     }
     function putCursorIntoContainer(container, offset) {
@@ -144,6 +139,7 @@ core.Cursor = function Cursor(selection, document) {
         if (!cursorNode.parentNode) {
             return;
         }
+        /*
         // find the position of the cursor in its parent
         cursorpos = 0;
         node = cursorNode.parentNode.firstChild;
@@ -175,6 +171,7 @@ core.Cursor = function Cursor(selection, document) {
             }
             textnodetoremove.parentNode.removeChild(textnodetoremove);
         }
+*/
         cursorNode.parentNode.removeChild(cursorNode);
     }
     // put the cursor at a particular position

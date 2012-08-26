@@ -31,7 +31,6 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime, core, gui*/
-runtime.loadClass("core.PositionIterator");
 runtime.loadClass("gui.Caret");
 
 /**
@@ -60,7 +59,9 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
             caretMover(-1);
             handled = true;
         } else if (charCode === 39) { // right
+runtime.log("right");
             caretMover(1);
+            caret.focus();
             handled = true;
         }
         return handled;
@@ -82,23 +83,9 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
     this.getCaret = function () {
         return caret;
     };
-    /**
-     * @constructor
-     * @extends NodeFilter
-     */
-    function CursorFilter() {
-        this.acceptNode = function (node) {
-            if (node.namespaceURI === "urn:webodf:names:cursor") {
-                return 2;
-            }
-            return 1;
-        };
-    }
     function init() {
-        var filter = new CursorFilter(),
-            walker = new core.PositionIterator(rootNode, 5, filter, false),
-            handle;
-        caret = new gui.Caret(rootNode, walker, keyHandler);
+        var handle;
+        caret = new gui.Caret(rootNode, null, keyHandler);
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);
