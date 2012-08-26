@@ -42,14 +42,34 @@
 core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         expandEntityReferences) {
     "use strict";
-    whatToShow = whatToShow || 0xFFFFFFFF;
-    var self = this,
-        walker = root.ownerDocument.createTreeWalker(root, whatToShow, filter,
-            expandEntityReferences),
-        currentPos = 0;
-    if (walker.firstChild() === null) {
-        currentPos = 1;
+    /**
+     * @constructor
+     * @extends NodeFilter
+     */
+    function EmptyTextNodeFilter() {
+        this.acceptNode = function (node) {
+            if (node.nodeType === 3 && node.length === 0) {
+                return 2;
+            }
+            return 1;
+        };
     }
+    /**
+     * @constructor
+     * @extends NodeFilter
+     * @param {!NodeFilter} filter
+     */
+    function FilteredEmptyTextNodeFilter(filter) {
+        this.acceptNode = function (node) {
+            if (node.nodeType === 3 && node.length === 0) {
+                return 2;
+            }
+            return filter.acceptNode(node);
+        };
+    }
+    var self = this,
+        walker,
+        currentPos;
     /**
      * @return {!boolean}
      */
@@ -180,4 +200,22 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = root;
         currentPos = 1;
     };
+    function init() {
+        var f;
+        // a position can never be near an empty TextNode. A NodeFilter is the
+        // easiest way of filtering out these nodes.
+        if (filter) {
+            f = new FilteredEmptyTextNodeFilter(filter);
+        } else {
+            f = new EmptyTextNodeFilter();
+        }
+        whatToShow = whatToShow || 0xFFFFFFFF;
+        walker = root.ownerDocument.createTreeWalker(root, whatToShow, f,
+                expandEntityReferences);
+        currentPos = 0;
+        if (walker.firstChild() === null) {
+            currentPos = 1;
+        }
+    }
+    init();
 };

@@ -360,3 +360,11 @@ TreeWalker.prototype.nextNode = function () {"use strict"; };
  * @return {!TreeWalker}
  */
 Document.prototype.createTreeWalker = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };
+/**
+ * @param {!Node} root
+ * @param {!number} whatToShow
+ * @param {NodeFilter=} filter
+ * @param {boolean=} entityReferenceExpansion
+ * @return {!TreeWalker}
+ */
+Document.prototype.createNodeIterator = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };
