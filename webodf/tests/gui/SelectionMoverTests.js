@@ -41,33 +41,56 @@ runtime.loadClass("gui.SelectionMover");
 gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     "use strict";
     var r = runner, maindoc = runtime.getWindow().document,
-        t, testarea = maindoc.getElementById("testarea");
+        t, testarea,
+        testXMLs = [
+            { x: "<a/>", n: 1 },
+            { x: "<a><b/></a>", n: 3 },
+            { x: "<a>a</a>", n: 2 },
+            { x: "<a>a<b/></a>", n: 4 },
+            { x: "<a><b/>a</a>", n: 4 },
+            { x: "<a>hello</a>", n: 6 },
+            { x: "<a>hel<b/>lo</a>", n: 8 },
+            { x: "<a><c><b>a</b>a</c></a>", n: 7 }
+        ];
 
     function setupDoc() {
         var doc = testarea.ownerDocument,
             p = doc.createElement("p"),
-            mover = new gui.SelectionMover(p),
-            selection = mover.getSelection();
+            text = doc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
+            mover,
+            selection;
         testarea.appendChild(p);
-        p.appendChild(doc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"));
+        p.appendChild(text);
         p.style.width = "5em";// break line after each 'MMMMM'
-        t = { doc: doc, p: p, selection: selection, mover: mover };
+        mover = new gui.SelectionMover(p);
+        selection = mover.getSelection();
+        t = { doc: doc, p: p, text: text, selection: selection, mover: mover };
+    }
+    function createDoc(xml) {
+        var doc = runtime.parseXML(xml),
+            mover,
+            selection,
+            node = testarea.ownerDocument.importNode(doc.documentElement, true);
+        testarea.appendChild(node);
+        mover = new gui.SelectionMover(node);
+        selection = mover.getSelection();
+        t = { doc: doc, root: node, selection: selection, mover: mover };
     }
     function testUpDownTraversal() {
         setupDoc();
         r.shouldBe(t, "t.selection.rangeCount", "1");
         t.r = t.selection.getRangeAt(0);
         r.shouldBeNonNull(t, "t.r");
-        t.r.setStart(t.p.firstChild, 0);
-        r.shouldBe(t, "t.r.startContainer", "t.p.firstChild");
+        t.r.setStart(t.text, 0);
+        r.shouldBe(t, "t.r.startContainer", "t.text");
         r.shouldBe(t, "t.r.startOffset", "0");
         t.mover.movePointForward();
         t.r = t.selection.getRangeAt(0);
-        r.shouldBe(t, "t.r.startContainer", "t.p.firstChild");
-        r.shouldBe(t, "t.r.startOffset", "1");
+        r.shouldBe(t, "t.r.startContainer", "t.text");
+        r.shouldBe(t, "t.r.startOffset", "0");
         t.mover.movePointBackward();
         t.r = t.selection.getRangeAt(0);
-        r.shouldBe(t, "t.r.startContainer", "t.p.firstChild");
+        r.shouldBe(t, "t.r.startContainer", "t.text");
         r.shouldBe(t, "t.r.startOffset", "0");
 /*
         t.mover.moveLineForward();
@@ -77,9 +100,56 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         r.shouldBe(t, "t.r.startOffset", "6");
 */
     }
+    function testForthBack() {
+        setupDoc();
+        var n = 1;
+        t.textValue = t.text.data;
+        while (t.mover.movePointForward()) {
+            n += 1;
+        }
+        r.shouldBe(t, n.toString(), "30");
+        r.shouldBe(t, "t.text.data", "t.textValue");
+        n = 1;
+        while (t.mover.movePointBackward()) {
+            n += 1;
+        }
+        r.shouldBe(t, n.toString(), "30");
+        r.shouldBe(t, "t.text.data", "t.textValue");
+    }
+    function testXMLForthBack(xml, positions) {
+        createDoc(xml);
+        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        var n = 1;
+        while (t.mover.movePointForward()) {
+            r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
+            n += 1;
+        }
+        r.shouldBe(t, n.toString(), positions.toString());
+        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        n = 1;
+        while (t.mover.movePointBackward()) {
+            r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
+            n += 1;
+        }
+        r.shouldBe(t, n.toString(), positions.toString());
+        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        runtime.log("end " + t.mover.getCursor().getNode().parentNode);
+    }
+    function testXMLsForthBack() {
+        var i, xml;
+        for (i = 0; i < 0; i += 1) {//testXMLs.length; i += 1) {
+            xml = testXMLs[i];
+            testXMLForthBack(xml.x, xml.n);
+        }
+    }
 
     this.setUp = function () {
         t = {};
+        testarea = maindoc.getElementById("testarea");
+        if (!testarea) {
+            testarea = maindoc.createElement("div");
+            maindoc.body.appendChild(testarea);
+        }
         while (testarea.firstChild) {
             testarea.removeChild(testarea.firstChild);
         }
@@ -91,7 +161,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         }
     };
     this.tests = function () {
-        return [ testUpDownTraversal ];
+        return [ testUpDownTraversal, testForthBack, testXMLsForthBack ];
     };
     this.asyncTests = function () {
         return [

@@ -66,29 +66,41 @@ gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
             return filter.acceptNode(filter);
         };
     }
-    var doc = /**@type{!Document}*/(rootNode.ownerDocument),
+    var self = this,
+        doc = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(doc),
         positionIterator,
         cursor = new core.Cursor(selection, doc);
     function doMove(extend, move) {
-        var r = selection.getRangeAt(0);
+        var moved;
         // assume positionIterator reflects current state
-        move();
-        selection.collapse(positionIterator.container(),
-                positionIterator.offset());
-        cursor.updateToSelection();
+        // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
+        cursor.remove();
+        moved = move();
+        if (moved) {
+            selection.collapse(positionIterator.container(),
+                    positionIterator.offset());
+            cursor.updateToSelection();
+        }
+        return moved;
     }
     /**
-     * Move selection forward one point.
+     * Move selection forward one position.
      * @param {boolean} extend true if range is to be expanded from the current
      *                         point
-     * @return {undefined}
+     * @return {!boolean}
      **/
     this.movePointForward = function (extend) {
-        doMove(extend, positionIterator.nextPosition);
+        return doMove(extend, positionIterator.nextPosition);
     };
+    /**
+     * Move selection forward one position.
+     * @param {boolean} extend true if range is to be expanded from the current
+     *                         point
+     * @return {!boolean}
+     **/
     this.movePointBackward = function (extend) {
-        doMove(extend, positionIterator.previousPosition);
+        return doMove(extend, positionIterator.previousPosition);
     };
 /*
     this.moveLineForward = function (extend) {
@@ -115,7 +127,7 @@ gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
         return selection;
     };
     function init() {
-        var filter;
+        var filter, n;
         if (nodeFilter) {
             if (nodeFilter.acceptNode(cursor.getNode()) === 2) {
                 filter = nodeFilter;
@@ -128,8 +140,21 @@ gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
         positionIterator = new core.PositionIterator(rootNode, 5,
                 filter, false);
         // put the cursor at the start of the rootNode
-        selection.collapse(rootNode, 0);
+        selection.collapse(positionIterator.container(),
+                positionIterator.offset());
         cursor.updateToSelection();
+/*
+        n = 1;
+        while (self.movePointForward()) {
+            n += 1;
+        }
+ runtime.log("YO " + n);
+        n = 1;
+        while (self.movePointBackward()) {
+            n += 1;
+        }
+ runtime.log("YO " + n);
+*/
     }
     init();
 };
