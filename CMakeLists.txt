@@ -99,7 +99,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/RawDeflate.js lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js lib/core/RawInflate.js
     lib/core/Selection.js lib/core/Cursor.js lib/core/UnitTester.js
-    lib/core/PositionIterator.js
+    lib/core/PositionIterator.js lib/core/PositionFilter.js
     lib/core/Async.js lib/core/Zip.js
 
     lib/xmldom/LSSerializerFilter.js lib/xmldom/LSSerializer.js

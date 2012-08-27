@@ -33,13 +33,13 @@
 /*global runtime, core, gui, XMLSerializer*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
+
 /**
  * This class modifies the selection in different ways.
  * @constructor
  * @param {!Node} rootNode
- * @param {NodeFilter=} nodeFilter
  */
-gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
+gui.SelectionMover = function SelectionMover(rootNode) {
     "use strict";
     /**
      * @constructor
@@ -53,54 +53,48 @@ gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
             return 1;
         };
     }
-    /**
-     * @constructor
-     * @extends NodeFilter
-     * @param {!NodeFilter} filter
-     */
-    function FilteredCursorFilter(filter) {
-        this.acceptNode = function (node) {
-            if (node.namespaceURI === "urn:webodf:names:cursor") {
-                return 2;
-            }
-            return filter.acceptNode(filter);
-        };
-    }
     var self = this,
         doc = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(doc),
         positionIterator,
-        cursor = new core.Cursor(selection, doc);
-    function doMove(extend, move) {
-        var moved;
+        cursor = new core.Cursor(selection, doc),
+        filter = new CursorFilter();
+    function doMove(steps, extend, move) {
+        var left = steps;
         // assume positionIterator reflects current state
         // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
         cursor.remove();
-        moved = move();
-        if (moved) {
+        while (left > 0) {
+            if (!move()) {
+                break;
+            }
+            left -= 1;
+        }
+        if (steps - left > 0) {
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
         }
         cursor.updateToSelection();
-        return moved;
+        return steps - left;
     }
     /**
      * Move selection forward one position.
+     * @param {!number} steps
      * @param {boolean} extend true if range is to be expanded from the current
      *                         point
-     * @return {!boolean}
+     * @return {!number}
      **/
-    this.movePointForward = function (extend) {
-        return doMove(extend, positionIterator.nextPosition);
+    this.movePointForward = function (steps, extend) {
+        return doMove(steps, extend, positionIterator.nextPosition);
     };
     /**
      * Move selection forward one position.
      * @param {boolean} extend true if range is to be expanded from the current
      *                         point
-     * @return {!boolean}
+     * @return {!number}
      **/
-    this.movePointBackward = function (extend) {
-        return doMove(extend, positionIterator.previousPosition);
+    this.movePointBackward = function (steps, extend) {
+        return doMove(steps, extend, positionIterator.previousPosition);
     };
 /*
     this.moveLineForward = function (extend) {
@@ -126,19 +120,11 @@ gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
     this.getSelection = function () {
         return selection;
     };
+    this.createIterator = function () {
+        return new core.PositionIterator(rootNode, 5, filter, false);
+    };
     function init() {
-        var filter, n;
-        if (nodeFilter) {
-            if (nodeFilter.acceptNode(cursor.getNode()) === 2) {
-                filter = nodeFilter;
-            } else {
-                filter = new FilteredCursorFilter(nodeFilter);
-            }
-        } else {
-            filter = new CursorFilter();
-        }
-        positionIterator = new core.PositionIterator(rootNode, 5,
-                filter, false);
+        positionIterator = self.createIterator();
         // put the cursor at the start of the rootNode
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());

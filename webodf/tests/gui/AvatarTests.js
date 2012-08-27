@@ -53,7 +53,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
-        t.avatar = new gui.Avatar("id", t.doc.documentElement, mover);
+        t.avatar = new gui.Avatar("id", t.doc.documentElement, null, mover);
     }
     function create() {
         createAvatar("<a/>");

@@ -42,9 +42,10 @@ runtime.loadClass("gui.Caret");
  * @constructor
  * @param {!string} memberid
  * @param {!Element} rootNode
+ * @param {?core.PositionFilter} positionFilter
  * @param {!function(!number):undefined} caretMover
  */
-gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
+gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     "use strict";
     var self = this,
         caret,
@@ -59,7 +60,6 @@ gui.Avatar = function Avatar(memberid, rootNode, caretMover) {
             caretMover(-1);
             handled = true;
         } else if (charCode === 39) { // right
-runtime.log("right");
             caretMover(1);
             caret.focus();
             handled = true;
@@ -85,7 +85,7 @@ runtime.log("right");
     };
     function init() {
         var handle;
-        caret = new gui.Caret(rootNode, null, keyHandler);
+        caret = new gui.Caret(rootNode, keyHandler);
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);

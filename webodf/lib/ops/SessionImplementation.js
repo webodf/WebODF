@@ -40,6 +40,23 @@ runtime.loadClass("gui.Avatar");
  */
 ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
+    /**
+     * @constructor
+     * @implements {core.PositionFilter}
+     */
+    function TextPositionFilter() {
+        this.acceptPosition = function (iterator) {
+            var n = iterator.container(), p;
+            if (n.nodeType !== 3) {
+                return 2;
+            }
+            p = n.parentNode;
+            if (p === null || p.localName !== "p") {
+                return 2;
+            }
+            return 1;
+        };
+    }
     function findTextRoot(session) {
         // set the root node to be the text node
         var root = session.getOdfContainer().rootElement.firstChild;
@@ -59,9 +76,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     /* SESSION OPERATIONS */
 
     this.addMemberToSession = function (memberid) {
-        var avatar = new gui.Avatar(memberid, rootNode, function (n) {
-            self.moveMemberCaret(memberid, n);
-        });
+        var filter = new TextPositionFilter(),
+            avatar = new gui.Avatar(memberid, rootNode, filter, function (n) {
+                self.moveMemberCaret(memberid, n);
+            });
         members[memberid] = avatar;
     };
     this.removeMemberFromSession = function (memberid) {

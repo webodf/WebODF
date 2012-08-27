@@ -7,6 +7,7 @@
         "core/ByteArrayWriter.js",
         "core/Cursor.js",
         "core/JSLint.js",
+        "core/PositionFilter.js",
         "core/PositionIterator.js",
         "core/RawDeflate.js",
         "core/RawInflate.js",

@@ -84,11 +84,11 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         t.r.setStart(t.text, 0);
         r.shouldBe(t, "t.r.startContainer", "t.text");
         r.shouldBe(t, "t.r.startOffset", "0");
-        t.mover.movePointForward();
+        t.mover.movePointForward(1);
         t.r = t.selection.getRangeAt(0);
         r.shouldBe(t, "t.r.startContainer", "t.text");
         r.shouldBe(t, "t.r.startOffset", "0");
-        t.mover.movePointBackward();
+        t.mover.movePointBackward(1);
         t.r = t.selection.getRangeAt(0);
         r.shouldBe(t, "t.r.startContainer", "t.text");
         r.shouldBe(t, "t.r.startOffset", "0");
@@ -104,13 +104,13 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         setupDoc();
         var n = 1;
         t.textValue = t.text.data;
-        while (t.mover.movePointForward()) {
+        while (t.mover.movePointForward(1)) {
             n += 1;
         }
         r.shouldBe(t, n.toString(), "30");
         r.shouldBe(t, "t.text.data", "t.textValue");
         n = 1;
-        while (t.mover.movePointBackward()) {
+        while (t.mover.movePointBackward(1)) {
             n += 1;
         }
         r.shouldBe(t, n.toString(), "30");
@@ -120,14 +120,14 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         createDoc(xml);
         r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
         var n = 1;
-        while (t.mover.movePointForward()) {
+        while (t.mover.movePointForward(1)) {
             r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
             n += 1;
         }
         r.shouldBe(t, n.toString(), positions.toString());
         r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
         n = 1;
-        while (t.mover.movePointBackward()) {
+        while (t.mover.movePointBackward(1)) {
             r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
             n += 1;
         }

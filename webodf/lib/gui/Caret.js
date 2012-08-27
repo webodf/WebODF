@@ -40,10 +40,9 @@ runtime.loadClass("gui.SelectionMover");
  * element representing the caret is used.
  * @constructor
  * @param {!Element} rootNode
- * @param {?NodeFilter=} nodeFilter
  * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Caret = function Caret(rootNode, nodeFilter, keyHandler) {
+gui.Caret = function Caret(rootNode, keyHandler) {
     "use strict";
     function listenEvent(eventTarget, eventType, eventHandler) {
         if (eventTarget.addEventListener) {
@@ -63,7 +62,8 @@ gui.Caret = function Caret(rootNode, nodeFilter, keyHandler) {
         }
     }
     var document = /**@type{!Document}*/(rootNode.ownerDocument),
-        selectionMover = new gui.SelectionMover(rootNode, nodeFilter),
+        selectionMover = new gui.SelectionMover(rootNode),
+        iterator = selectionMover.createIterator(),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
         handle = document.createElementNS(htmlns, "div"),
@@ -91,13 +91,10 @@ gui.Caret = function Caret(rootNode, nodeFilter, keyHandler) {
         span.focus();
     };
     this.move = function (number) {
-        while (number > 0) {
-            selectionMover.movePointForward();
-            number -= 1;
-        }
-        while (number < 0) {
-            selectionMover.movePointBackward();
-            number += 1;
+        if (number > 0) {
+            selectionMover.movePointForward(number);
+        } else if (number < 0) {
+            selectionMover.movePointBackward(number);
         }
     };
     this.setColor = function (color) {
