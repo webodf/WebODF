@@ -148,7 +148,7 @@ xmldom.XPath = (function () {
      * @augments XPathIterator
      * @implements {XPathIterator}
      */
-    function NodeIterator() {
+    function XPathNodeIterator() {
         var node, done = false;
         this.setNode = function setNode(n) {
             node = n;
@@ -276,7 +276,7 @@ xmldom.XPath = (function () {
      * @return {!ConditionIterator}
      */
     function createPredicateFilteredIterator(it, p, namespaceResolver) {
-        var nit = new NodeIterator(),
+        var nit = new XPathNodeIterator(),
             pit = createXPathPathIterator(nit, p, namespaceResolver),
             value = p.value;
         if (value === undefined) {
@@ -331,7 +331,7 @@ xmldom.XPath = (function () {
      * @return {!Array.<Element>}
      */
     function fallback(node, xpath, namespaceResolver) {
-        var it = new NodeIterator(),
+        var it = new XPathNodeIterator(),
             i,
             nodelist,
             parsedXPath,

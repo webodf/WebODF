@@ -353,9 +353,25 @@ TreeWalker.prototype.previousNode = function () {"use strict"; };
  */
 TreeWalker.prototype.nextNode = function () {"use strict"; };
 /**
+ * @interface
+ */
+function NodeIterator() {"use strict"; }
+/**
+ * @return {Node}
+ */
+NodeIterator.prototype.previousNode = function () {"use strict"; };
+/**
+ * @return {Node}
+ */
+NodeIterator.prototype.nextNode = function () {"use strict"; };
+/**
+ * @return {undefined}
+ */
+NodeIterator.prototype.detach = function () {"use strict"; };
+/**
  * @param {!Node} root
  * @param {!number} whatToShow
- * @param {NodeFilter=} filter
+ * @param {function(!Node):boolean=} filter
  * @param {boolean=} entityReferenceExpansion
  * @return {!TreeWalker}
  */
@@ -363,8 +379,8 @@ Document.prototype.createTreeWalker = function (root, whatToShow, filter, entity
 /**
  * @param {!Node} root
  * @param {!number} whatToShow
- * @param {NodeFilter=} filter
+ * @param {function(!Node):boolean=} filter
  * @param {boolean=} entityReferenceExpansion
- * @return {!TreeWalker}
+ * @return {!NodeIterator}
  */
 Document.prototype.createNodeIterator = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };
