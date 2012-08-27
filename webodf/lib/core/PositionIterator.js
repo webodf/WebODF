@@ -201,7 +201,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         currentPos = 1;
     };
     function init() {
-        var f;
+        var f, acceptNode;
         // a position can never be near an empty TextNode. A NodeFilter is the
         // easiest way of filtering out these nodes.
         if (filter) {
@@ -209,9 +209,13 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         } else {
             f = new EmptyTextNodeFilter();
         }
+        // workaround for versions of createTreeWalker that need a function
+        // instead of an object with a function such as IE 9 and older webkits
+        acceptNode = f.acceptNode;
+        acceptNode.acceptNode = acceptNode;
         whatToShow = whatToShow || 0xFFFFFFFF;
-        walker = root.ownerDocument.createTreeWalker(root, whatToShow, f,
-                expandEntityReferences);
+        walker = root.ownerDocument.createTreeWalker(root, whatToShow,
+                acceptNode, expandEntityReferences);
         currentPos = 0;
         if (walker.firstChild() === null) {
             currentPos = 1;
