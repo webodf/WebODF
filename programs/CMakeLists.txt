@@ -2,13 +2,18 @@ macro(COPY_FILES _varname _srcdir _tgtdir)
   foreach(_file ${ARGN})
     GET_FILENAME_COMPONENT(_subdir ${_file} PATH)
     FILE(MAKE_DIRECTORY ${_tgtdir}/${_subdir})
+    if (IS_ABSOLUTE ${_file})
+      SET(_srcfile ${_file})
+    else (IS_ABSOLUTE ${_file})
+      SET(_srcfile ${_srcdir}/${_file})
+    endif (IS_ABSOLUTE ${_file})
     add_custom_command(
       OUTPUT ${_tgtdir}/${_file}
       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-        ${_srcdir}/${_file}
+        ${_srcfile}
         ${_tgtdir}/${_file}
       DEPENDS
-        ${_srcdir}/${_file}
+        ${_srcfile}
     )
     set(${_varname} ${${_varname}} ${_tgtdir}/${_file})
   endforeach(_file)
