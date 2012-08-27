@@ -27,9 +27,10 @@ add_custom_target(jslintcheck ALL
 )
 
 add_custom_command(
-    OUTPUT webodf.css.js
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
     COMMAND ${NODE}
-    ARGS lib/runtime.js tools/css2js.js webodf.css webodf.css.js
+    ARGS lib/runtime.js tools/css2js.js webodf.css
+        ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
     DEPENDS NodeJS lib/runtime.js tools/css2js.js webodf.css
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -43,8 +44,13 @@ if (Java_JAVA_EXECUTABLE)
   set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --jscomp_off nonStandardJsDocs --summary_detail_level 3)
 
   foreach(JSFILE ${LIBJSFILES})
-    set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
-        --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+    if (IS_ABSOLUTE ${JSFILE})
+      set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
+          --js ${JSFILE})
+    else (IS_ABSOLUTE ${JSFILE})
+      set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
+          --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+    endif (IS_ABSOLUTE ${JSFILE})
   endforeach(JSFILE ${LIBJSFILES})
 
   foreach(JSFILE ${TESTJSFILES})

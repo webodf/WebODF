@@ -728,7 +728,7 @@ function NodeJSRuntime() {
     }
     this.loadXML = loadXML;
     this.writeFile = function (path, data, callback) {
-        if (currentDirectory) {
+        if (currentDirectory && !path[0] === '/') {
             path = currentDirectory + "/" + path;
         }
         fs.writeFile(path, data, "binary", function (err) {
