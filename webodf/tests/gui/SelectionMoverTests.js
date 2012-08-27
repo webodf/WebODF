@@ -137,7 +137,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     }
     function testXMLsForthBack() {
         var i, xml;
-        for (i = 0; i < 0; i += 1) {//testXMLs.length; i += 1) {
+        for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
             testXMLForthBack(xml.x, xml.n);
         }

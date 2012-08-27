@@ -80,8 +80,8 @@ gui.SelectionMover = function SelectionMover(rootNode, nodeFilter) {
         if (moved) {
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
-            cursor.updateToSelection();
         }
+        cursor.updateToSelection();
         return moved;
     }
     /**
