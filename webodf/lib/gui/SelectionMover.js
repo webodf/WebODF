@@ -63,13 +63,12 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         var left = steps;
         // assume positionIterator reflects current state
         // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
+runtime.log("b " + left + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         cursor.remove();
-        while (left > 0) {
-            if (!move()) {
-                break;
-            }
+        while (left > 0 && move()) {
             left -= 1;
         }
+runtime.log("l " + left + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         if (steps - left > 0) {
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
@@ -114,6 +113,53 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         }
     };
 */
+    /**
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countForwardSteps(steps, filter) {
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            stepCount = 0,
+            count = 0;
+runtime.log("> " + count + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
+        while (steps > 0 && positionIterator.nextPosition()) {
+            stepCount += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                count += stepCount;
+                stepCount = 0;
+                steps -= 1;
+            }
+        }
+runtime.log("< " + count + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
+        positionIterator.setPosition(c, o);
+runtime.log("| " + count + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
+        return count;
+    }
+    /**
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countBackwardSteps(steps, filter) {
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            count = 1;
+        while (steps > 0 && positionIterator.previousPosition()) {
+            if (filter.acceptPosition(positionIterator) === 1) {
+                steps -= 1;
+            }
+            count += 1;
+        }
+        return count;
+    }
+    this.getStepCounter = function () {
+        return {
+            countForwardSteps: countForwardSteps,
+            countBackwardSteps: countBackwardSteps
+        };
+    };
     this.getCursor = function () {
         return cursor;
     };

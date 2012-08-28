@@ -69,7 +69,8 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         handle = document.createElementNS(htmlns, "div"),
         cursorNode,
         focussed = false,
-        caretLineVisible;
+        caretLineVisible,
+        blinking = false;
     function blink() {
         if (!focussed || !cursorNode.parentNode) {
             // stop blinking when removed from the document
@@ -81,7 +82,13 @@ gui.Caret = function Caret(rootNode, keyHandler) {
             span.style.borderLeftWidth = "1px";
         }
         caretLineVisible = !caretLineVisible;
-        runtime.setTimeout(blink, 1000);
+        if (!blinking) {
+            blinking = true;
+            runtime.setTimeout(function () {
+                blinking = false;
+                blink();
+            }, 1000);
+        }
     }
     function updateHandlePosition() {
         handle.style.top = (span.offsetTop + span.scrollHeight) + "px";
@@ -96,6 +103,7 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         } else if (number < 0) {
             selectionMover.movePointBackward(number);
         }
+        updateHandlePosition();
     };
     this.setColor = function (color) {
         span.style.borderColor = color;
@@ -116,6 +124,9 @@ gui.Caret = function Caret(rootNode, keyHandler) {
     };
     this.hideHandle = function () {
         handle.style.display = "none";
+    };
+    this.getStepCounter = function () {
+        return selectionMover.getStepCounter();
     };
     function handleKeyDown(e) {
         if (keyHandler) {

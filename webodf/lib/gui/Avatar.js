@@ -50,6 +50,17 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     var self = this,
         caret,
         image;
+    function moveForward() {
+        // determine number of steps needed
+        var count = caret.getStepCounter().countForwardSteps,
+            steps = count(1, positionFilter);
+        caretMover(steps);
+    }
+    function moveBackward() {
+        var count = caret.getStepCounter().countBackwardSteps,
+            steps = count(1, positionFilter);
+        caretMover(-steps);
+    }
     /**
      * @param {!number} charCode
      * @return {!boolean}
@@ -57,10 +68,10 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     function keyHandler(charCode) {
         var handled = false;
         if (charCode === 37) { // left
-            caretMover(-1);
+            moveBackward();
             handled = true;
         } else if (charCode === 39) { // right
-            caretMover(1);
+            moveForward();
             caret.focus();
             handled = true;
         }

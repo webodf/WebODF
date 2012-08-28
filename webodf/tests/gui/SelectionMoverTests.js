@@ -43,14 +43,14 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     var r = runner, maindoc = runtime.getWindow().document,
         t, testarea,
         testXMLs = [
-            { x: "<a/>", n: 1 },
-            { x: "<a><b/></a>", n: 3 },
-            { x: "<a>a</a>", n: 2 },
-            { x: "<a>a<b/></a>", n: 4 },
-            { x: "<a><b/>a</a>", n: 4 },
-            { x: "<a>hello</a>", n: 6 },
-            { x: "<a>hel<b/>lo</a>", n: 8 },
-            { x: "<a><c><b>a</b>a</c></a>", n: 7 }
+            { x: "<a/>", n: 1, t: 0 },
+            { x: "<a><b/></a>", n: 3, t: 0 },
+            { x: "<a>a</a>", n: 2, t: 1 },
+            { x: "<a>a<b/></a>", n: 4, t: 1 },
+            { x: "<a><b/>a</a>", n: 4, t: 1 },
+            { x: "<a>hello</a>", n: 6, t: 5 },
+            { x: "<a>hel<b/>lo</a>", n: 8, t: 5 },
+            { x: "<a><c><b>a</b>a</c></a>", n: 7, t: 2 }
         ];
 
     function setupDoc() {
@@ -135,11 +135,52 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
         runtime.log("end " + t.mover.getCursor().getNode().parentNode);
     }
+    /**
+     * @constructor
+     * @implements core.PositionFilter
+     */
+    function AcceptAllPositionFilter() {
+        this.acceptPosition = function (iterator) {
+            return 1;
+        };
+    }
+    /**
+     * @constructor
+     * @implements core.PositionFilter
+     */
+    function TextNodePositionFilter() {
+        this.acceptPosition = function (iterator) {
+            return 1;
+        };
+    }
     function testXMLsForthBack() {
         var i, xml;
         for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
             testXMLForthBack(xml.x, xml.n);
+        }
+    }
+    function countAndConfirm(xml, n, availableSteps, filter) {
+        createDoc(xml);
+runtime.log(xml);
+        var counter = t.mover.getStepCounter(),
+            steps = counter.countForwardSteps(1, filter),
+            sum = 0,
+            stepped = 0;
+        while (steps > 0) {
+            stepped += t.mover.movePointForward(steps);
+            sum += steps;
+            steps = counter.countForwardSteps(1, filter);
+        }
+        r.shouldBe(t, stepped.toString(), (n - 1).toString());
+        r.shouldBe(t, sum.toString(), (n - 1).toString());
+    }
+    function testCountAndConfirm() {
+        var i, xml, filter1 = new TextNodePositionFilter(),
+            filter2 = new AcceptAllPositionFilter();
+        for (i = 0; i < testXMLs.length; i += 1) {
+            xml = testXMLs[i];
+            countAndConfirm(xml.x, xml.n, xml.n - 1, filter2);
         }
     }
 
@@ -161,7 +202,12 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         }
     };
     this.tests = function () {
-        return [ testUpDownTraversal, testForthBack, testXMLsForthBack ];
+        return [
+            testUpDownTraversal,
+            testForthBack,
+            testXMLsForthBack,
+            testCountAndConfirm
+        ];
     };
     this.asyncTests = function () {
         return [

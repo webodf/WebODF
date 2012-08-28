@@ -46,12 +46,20 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     function TextPositionFilter() {
         this.acceptPosition = function (iterator) {
-            var n = iterator.container(), p;
+            var n = iterator.container(), p, o, d;
+            // only stop in text nodes
             if (n.nodeType !== 3) {
                 return 2;
             }
+            // only stop in text nodes in 'p' elements
             p = n.parentNode;
             if (p === null || p.localName !== "p") {
+                return 2;
+            }
+            // do not stop between spaces
+            o = iterator.offset();
+            d = n.data;
+            if (o > 0 && d[o - 1] === ' ' && d[o] === ' ') {
                 return 2;
             }
             return 1;

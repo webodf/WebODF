@@ -202,18 +202,16 @@ video {
 cursor|cursor {
     display: inline;
     width: 0px;
-    height: 0px;
+    height: 1em;
 }
 cursor|cursor > span {
-    display: block;
+    display: inline;
     position: absolute;
-    width: 0px;
-    height: 1.5ex;
+    height: 1em;
     border-left: 1px solid black;
 }
 cursor|cursor > div {
     display: none;
     position: absolute;
     border: 1px solid black;
-/*    top: 2ex; */
 }

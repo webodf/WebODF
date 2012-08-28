@@ -217,7 +217,13 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     function testPositions(count) {
         var n = 0, i, it = t.iterator, ok = true;
         while (it.nextPosition()) {
-            it.setPosition(it.container(), it.offset());
+            t.c1 = it.container();
+            t.o1 = it.offset();
+            it.setPosition(t.c1, t.o1);
+            t.c2 = it.container();
+            t.o2 = it.offset();
+            r.shouldBe(t, "t.c1", "t.c2");
+            r.shouldBe(t, "t.o1", "t.o2");
             for (i = 0; i <= n; i += 1) {
                 ok = ok && it.previousPosition();
             }
@@ -227,6 +233,10 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             for (i = n + 2; i < count; i += 1) {
                 ok = ok && it.previousPosition();
             }
+            t.c2 = it.container();
+            t.o2 = it.offset();
+            r.shouldBe(t, "t.c1", "t.c2");
+            r.shouldBe(t, "t.o1", "t.o2");
             n += 1;
         }
         r.shouldBe(t, ok.toString(), "true");

@@ -174,7 +174,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             return true;
         }
         var n = container.firstChild;
-        while (offset && n) {
+        while (offset > 0 && n) {
+            offset -= 1;
             n = n.nextSibling;
         }
         if (n === null) {
