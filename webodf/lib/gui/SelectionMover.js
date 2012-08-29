@@ -176,8 +176,8 @@ gui.SelectionMover = function SelectionMover(rootNode) {
                 steps = 0;
             }
         }
-        runtime.log(steps);
-        runtime.log(element.getBoundingClientRect());
+        runtime.log(" " + steps);
+        runtime.log(" " + element.getBoundingClientRect());
         return steps;
     }
     this.getStepCounter = function () {
