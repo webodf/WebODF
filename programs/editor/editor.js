@@ -93,4 +93,4 @@ function init() {
     });
 }
 
-window.setTimeout(init, 1);
+window.onload = init;

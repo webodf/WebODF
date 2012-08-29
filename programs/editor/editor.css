@@ -34,10 +34,23 @@ html, body, #mainContainer {
 
 }
 
-#toolbar {
+#menubar {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    border: none;
     overflow: hidden;
+    background-image: url("http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/images/standardGradient.png");
+    background-color: #E6E6E7;
+}
+
+#toolbar {
+    background: none;
+    overflow: hidden;
+    background-color: #E6E6E7;
+}
+
+.claro .dijitToolbar .dijitButton .dijitButtonNode, .claro .dijitToolbar .dijitDropDownButton .dijitButtonNode, .claro .dijitToolbar .dijitComboButton .dijitButtonNode, .claro .dijitToolbar .dijitToggleButton .dijitButtonNode, .claro .dijitToolbar .dijitComboBox .dijitButtonNode {
+    background: none;
 }
 
 #container {

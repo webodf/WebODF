@@ -6,6 +6,28 @@ function loadWidgets(documentObject) {
 		dojoWin = win;
 	});
 
+    // Menubar
+    require(["dojo/ready", "dijit/MenuBar", "dijit/PopupMenuBarItem", "dijit/Menu", "dijit/MenuItem", "dijit/DropDownMenu"], function(ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
+        ready(function() {
+            var menuBar = new MenuBar({}, "menubar");
+            menuBar.addChild(new PopupMenuBarItem({
+                label: "File"
+            }));
+            menuBar.addChild(new PopupMenuBarItem({
+                label: "Edit"
+            }));
+            menuBar.addChild(new PopupMenuBarItem({
+                label: "View"
+            }));
+            menuBar.addChild(new PopupMenuBarItem({
+                label: "Insert"
+            }));
+            menuBar.addChild(new PopupMenuBarItem({
+                label: "Format"
+            }));
+        });
+    });
+
     // Toolbar
     require(["dijit/Toolbar"], function(Toolbar) {
         toolbar = new Toolbar({}, "toolbar");
