@@ -133,7 +133,6 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         }
         r.shouldBe(t, n.toString(), positions.toString());
         r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
-        runtime.log("end " + t.mover.getCursor().getNode().parentNode);
     }
     /**
      * @constructor
@@ -162,7 +161,6 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     }
     function countAndConfirm(xml, n, availableSteps, filter) {
         createDoc(xml);
-runtime.log(xml);
         var counter = t.mover.getStepCounter(),
             steps = counter.countForwardSteps(1, filter),
             sum = 0,

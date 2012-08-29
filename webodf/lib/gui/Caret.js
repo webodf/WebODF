@@ -91,8 +91,10 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         }
     }
     function updateHandlePosition() {
-        handle.style.top = (span.offsetTop + span.scrollHeight) + "px";
-        handle.style.left = span.offsetLeft + "px";
+        if (handle.style) {
+            handle.style.top = (span.offsetTop + span.scrollHeight) + "px";
+            handle.style.left = span.offsetLeft + "px";
+        }
     }
     this.focus = function () {
         span.focus();

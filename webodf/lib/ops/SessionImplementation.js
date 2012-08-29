@@ -121,5 +121,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
-    rootNode = findTextRoot(self);
+    function init() {
+        rootNode = findTextRoot(self);
+    }
+    init();
 };

@@ -47,18 +47,27 @@ runtime.loadClass("gui.Caret");
  */
 gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     "use strict";
+    function listenEvent(eventTarget, eventType, eventHandler) {
+        if (eventTarget.addEventListener) {
+            eventTarget.addEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.attachEvent) {
+            eventType = "on" + eventType;
+            eventTarget.attachEvent(eventType, eventHandler);
+        } else {
+            eventTarget["on" + eventType] = eventHandler;
+        }
+    }
     var self = this,
         caret,
-        image;
+        image,
+        stepCounter;
     function moveForward() {
         // determine number of steps needed
-        var count = caret.getStepCounter().countForwardSteps,
-            steps = count(1, positionFilter);
+        var steps = stepCounter.countForwardSteps(1, positionFilter);
         caretMover(steps);
     }
     function moveBackward() {
-        var count = caret.getStepCounter().countBackwardSteps,
-            steps = count(1, positionFilter);
+        var steps = stepCounter.countBackwardSteps(1, positionFilter);
         caretMover(-steps);
     }
     /**
@@ -76,6 +85,13 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
             handled = true;
         }
         return handled;
+    }
+    function handleDocumentClick(e) {
+        // figure out how many steps to move to the position
+        var steps = stepCounter.countStepsToPosition(e.target, e.x, e.y);
+        caretMover(steps);
+        runtime.log(steps);
+        runtime.log(e.target.getBoundingClientRect());
     }
     this.removeFromSession = function () {
     };
@@ -97,9 +113,11 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     function init() {
         var handle;
         caret = new gui.Caret(rootNode, keyHandler);
+        stepCounter = caret.getStepCounter();
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);
+        listenEvent(rootNode, "click", handleDocumentClick);
     }
     init();
 };
