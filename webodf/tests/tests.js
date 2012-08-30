@@ -57,7 +57,6 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 }
 if (runtime.type() === "BrowserRuntime") {
     tests.push(gui.CaretTests);
-    tests.push(gui.AvatarTests);
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
 //    tests.push(core.CursorTests);
