@@ -78,6 +78,7 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
         var handled = false;
         if (charCode === 37) { // left
             moveBackward();
+            caret.focus();
             handled = true;
         } else if (charCode === 39) { // right
             moveForward();
@@ -88,7 +89,8 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     }
     function handleDocumentClick(e) {
         // figure out how many steps to move to the position
-        var steps = stepCounter.countStepsToPosition(e.target, e.x, e.y);
+        var steps = stepCounter.countStepsToPosition(e.target, e.x, e.y,
+                positionFilter);
         caretMover(steps);
         runtime.log(steps);
         runtime.log(e.target.getBoundingClientRect());

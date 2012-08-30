@@ -57,8 +57,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         doc = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(doc),
         positionIterator,
-        cursor = new core.Cursor(selection, doc),
-        filter = new CursorFilter();
+        cursor = new core.Cursor(selection, doc);
     function doMove(steps, extend, move) {
         var left = steps;
         // assume positionIterator reflects current state
@@ -140,13 +139,18 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     function countBackwardSteps(steps, filter) {
         var c = positionIterator.container(),
             o = positionIterator.offset(),
-            count = 1;
+            stepCount = 0,
+            count = 0;
         while (steps > 0 && positionIterator.previousPosition()) {
+            stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
+                count += stepCount;
+                stepCount = 0;
                 steps -= 1;
             }
             count += 1;
         }
+        positionIterator.setPosition(c, o);
         return count;
     }
     /**
@@ -155,7 +159,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
      * @param {!number} y
      * @return {!number}
      */
-    function countStepsToPosition(element, x, y) {
+    function countStepsToPosition(element, x, y, filter) {
         // first figure out how to get to the element
         // really dumb/inefficient implementation
         var c = positionIterator.container(),
@@ -163,19 +167,24 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             steps = 0;
         while (positionIterator.container() !== element
                 && positionIterator.nextPosition()) {
-            steps += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                steps += 1;
+            }
         }
         if (positionIterator.container() !== element) {
             steps = 0;
             positionIterator.setPosition(c, o);
             while (positionIterator.container() !== element
                     && positionIterator.previousPosition()) {
-                steps -= 1;
+                if (filter.acceptPosition(positionIterator) === 1) {
+                    steps -= 1;
+                }
             }
             if (positionIterator.container() !== element) {
                 steps = 0;
             }
         }
+        positionIterator.setPosition(c, o);
         runtime.log(" " + steps);
         runtime.log(" " + element.getBoundingClientRect());
         return steps;
@@ -193,11 +202,9 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     this.getSelection = function () {
         return selection;
     };
-    this.createIterator = function () {
-        return new core.PositionIterator(rootNode, 5, filter, false);
-    };
     function init() {
-        positionIterator = self.createIterator();
+        var filter = new CursorFilter();
+        positionIterator = new core.PositionIterator(rootNode, 5, filter, false);
         // put the cursor at the start of the rootNode
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
@@ -207,12 +214,10 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         while (self.movePointForward()) {
             n += 1;
         }
- runtime.log("YO " + n);
         n = 1;
         while (self.movePointBackward()) {
             n += 1;
         }
- runtime.log("YO " + n);
 */
     }
     init();

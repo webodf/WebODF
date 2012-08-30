@@ -63,7 +63,6 @@ gui.Caret = function Caret(rootNode, keyHandler) {
     }
     var document = /**@type{!Document}*/(rootNode.ownerDocument),
         selectionMover = new gui.SelectionMover(rootNode),
-        iterator = selectionMover.createIterator(),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
         handle = document.createElementNS(htmlns, "div"),
@@ -103,7 +102,7 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         if (number > 0) {
             selectionMover.movePointForward(number);
         } else if (number < 0) {
-            selectionMover.movePointBackward(number);
+            selectionMover.movePointBackward(-number);
         }
         updateHandlePosition();
     };
