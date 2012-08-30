@@ -85,19 +85,37 @@ gui.AvatarTests = function AvatarTests(runner) {
             s = c.getSelection(),
             i;
         t.startNode = s.focusNode;
-        for (i = 1; i <= 5; i += 1) {
+        for (i = 1; i <= 4; i += 1) {
             c.move(1);
             t.focusOffset = s.focusOffset;
             t.focusNode = s.focusNode;
             r.shouldBe(t, "t.focusOffset", i.toString());
-            r.shouldBe(t, "t.startNode", "t.focusNode");
+            r.shouldBe(t, "t.focusNode", "t.startNode");
         }
+        c.move(1);
+        t.focusOffset = s.focusOffset;
+        t.focusNode = s.focusNode;
+        r.shouldBe(t, "t.focusOffset", "1");
+        r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
+        c.move(1);
+        r.shouldBe(t, "t.focusOffset", "1");
+        r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
+        for (i = 4; i >= 0; i -= 1) {
+            c.move(-1);
+            t.focusOffset = s.focusOffset;
+            t.focusNode = s.focusNode;
+            r.shouldBe(t, "t.focusOffset", i.toString());
+            r.shouldBe(t, "t.focusNode", "t.startNode");
+        }
+        c.move(1);
+        r.shouldBe(t, "t.focusOffset", "0");
+        r.shouldBe(t, "t.focusNode", "t.startNode");
     }
     this.tests = function () {
         return [
             create,
-            moveInEmptyDoc/*,
-            moveInSimpleDoc*/
+            moveInEmptyDoc,
+            moveInSimpleDoc
         ];
     };
     this.asyncTests = function () {

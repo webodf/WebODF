@@ -57,18 +57,15 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         doc = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(doc),
         positionIterator,
-        cursor = new core.Cursor(selection, doc),
-        filter = new CursorFilter();
+        cursor = new core.Cursor(selection, doc);
     function doMove(steps, extend, move) {
         var left = steps;
         // assume positionIterator reflects current state
         // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
-runtime.log("b " + left + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         cursor.remove();
         while (left > 0 && move()) {
             left -= 1;
         }
-runtime.log("l " + left + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         if (steps - left > 0) {
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
@@ -98,7 +95,7 @@ runtime.log("l " + left + " " + positionIterator.container().nodeType + " " + po
 /*
     this.moveLineForward = function (extend) {
         if (selection.modify) {
-            // TODO add a way to 
+            // TODO add a way to
             selection.modify(extend ? "extend" : "move", "forward", "line");
         } else {
             doMove(extend, moveCursorDown);
@@ -123,7 +120,6 @@ runtime.log("l " + left + " " + positionIterator.container().nodeType + " " + po
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
-runtime.log("> " + count + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         while (steps > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -132,9 +128,7 @@ runtime.log("> " + count + " " + positionIterator.container().nodeType + " " + p
                 steps -= 1;
             }
         }
-runtime.log("< " + count + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         positionIterator.setPosition(c, o);
-runtime.log("| " + count + " " + positionIterator.container().nodeType + " " + positionIterator.offset() + " '" + positionIterator.container().data + "' " + positionIterator.container().localName);
         return count;
     }
     /**
@@ -145,19 +139,61 @@ runtime.log("| " + count + " " + positionIterator.container().nodeType + " " + p
     function countBackwardSteps(steps, filter) {
         var c = positionIterator.container(),
             o = positionIterator.offset(),
-            count = 1;
+            stepCount = 0,
+            count = 0;
         while (steps > 0 && positionIterator.previousPosition()) {
+            stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
+                count += stepCount;
+                stepCount = 0;
                 steps -= 1;
             }
             count += 1;
         }
+        positionIterator.setPosition(c, o);
         return count;
+    }
+    /**
+     * @param {!Element} element
+     * @param {!number} x
+     * @param {!number} y
+     * @return {!number}
+     */
+    function countStepsToPosition(element, x, y, filter) {
+        // first figure out how to get to the element
+        // really dumb/inefficient implementation
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            steps = 0;
+        while (positionIterator.container() !== element
+                && positionIterator.nextPosition()) {
+            if (filter.acceptPosition(positionIterator) === 1) {
+                steps += 1;
+            }
+        }
+        if (positionIterator.container() !== element) {
+            steps = 0;
+            positionIterator.setPosition(c, o);
+            while (positionIterator.container() !== element
+                    && positionIterator.previousPosition()) {
+                if (filter.acceptPosition(positionIterator) === 1) {
+                    steps -= 1;
+                }
+            }
+            if (positionIterator.container() !== element) {
+                steps = 0;
+            }
+        }
+        positionIterator.setPosition(c, o);
+        runtime.log(" " + steps);
+        runtime.log(" " + element.getBoundingClientRect());
+        return steps;
     }
     this.getStepCounter = function () {
         return {
             countForwardSteps: countForwardSteps,
-            countBackwardSteps: countBackwardSteps
+            countBackwardSteps: countBackwardSteps,
+            countStepsToPosition: countStepsToPosition
         };
     };
     this.getCursor = function () {
@@ -166,11 +202,9 @@ runtime.log("| " + count + " " + positionIterator.container().nodeType + " " + p
     this.getSelection = function () {
         return selection;
     };
-    this.createIterator = function () {
-        return new core.PositionIterator(rootNode, 5, filter, false);
-    };
     function init() {
-        positionIterator = self.createIterator();
+        var filter = new CursorFilter();
+        positionIterator = new core.PositionIterator(rootNode, 5, filter, false);
         // put the cursor at the start of the rootNode
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
@@ -180,12 +214,10 @@ runtime.log("| " + count + " " + positionIterator.container().nodeType + " " + p
         while (self.movePointForward()) {
             n += 1;
         }
- runtime.log("YO " + n);
         n = 1;
         while (self.movePointBackward()) {
             n += 1;
         }
- runtime.log("YO " + n);
 */
     }
     init();
