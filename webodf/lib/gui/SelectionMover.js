@@ -120,6 +120,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
+//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         while (steps > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -127,7 +128,9 @@ gui.SelectionMover = function SelectionMover(rootNode) {
                 stepCount = 0;
                 steps -= 1;
             }
+//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         }
+//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         positionIterator.setPosition(c, o);
         return count;
     }
@@ -141,6 +144,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
+//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         while (steps > 0 && positionIterator.previousPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -148,8 +152,9 @@ gui.SelectionMover = function SelectionMover(rootNode) {
                 stepCount = 0;
                 steps -= 1;
             }
-            count += 1;
+//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         }
+//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         positionIterator.setPosition(c, o);
         return count;
     }
@@ -157,6 +162,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
      * @param {!Element} element
      * @param {!number} x
      * @param {!number} y
+     * @param {!core.PositionFilter} filter
      * @return {!number}
      */
     function countStepsToPosition(element, x, y, filter) {

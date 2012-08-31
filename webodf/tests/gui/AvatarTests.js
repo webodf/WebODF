@@ -48,15 +48,15 @@ gui.AvatarTests = function AvatarTests(runner) {
     this.tearDown = function () {
         t = {};
     };
-    function createAvatar(xml) {
+    function createAvatar(xml, filter) {
         t.doc = runtime.parseXML(xml);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
-        t.avatar = new gui.Avatar("id", t.doc.documentElement, null, mover);
+        t.avatar = new gui.Avatar("id", t.doc.documentElement, filter, mover);
     }
     function create() {
-        createAvatar("<a/>");
+        createAvatar("<a/>", null);
         r.shouldBeNonNull(t, "t.avatar");
         r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
         var c = t.avatar.getCaret(),
@@ -69,7 +69,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBeNonNull(t, "t.focusNode");
     }
     function moveInEmptyDoc() {
-        createAvatar("<a/>");
+        createAvatar("<a/>", null);
         var c = t.avatar.getCaret(),
             s = c.getSelection();
         t.startNode = s.focusNode;
@@ -80,7 +80,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.startNode", "t.focusNode");
     }
     function moveInSimpleDoc() {
-        createAvatar("<a>hello</a>");
+        createAvatar("<a>hello</a>", null);
         var c = t.avatar.getCaret(),
             s = c.getSelection(),
             i;
@@ -111,11 +111,73 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.focusOffset", "0");
         r.shouldBe(t, "t.focusNode", "t.startNode");
     }
+    function backAndForth(xml, n) {
+        var i,
+            counter,
+            filter = function acceptPosition(p) {
+                t.pos.push({
+                    c: p.container(),
+                    o: p.offset()
+                });
+                return 1;
+            };
+        t.pos = [];
+        filter.acceptPosition = filter;
+        createAvatar(xml, filter);
+        t.caret = t.avatar.getCaret();
+        counter = t.caret.getStepCounter();
+        t.stepsSum = 0;
+        t.moveSum = 0;
+        for (i = 1; i <= n; i += 1) {
+            t.stepsSum += Math.abs(counter.countForwardSteps(1, filter));
+            t.moveSum += Math.abs(t.caret.move(1));
+        }
+        r.shouldBe(t, "t.caret.move(1)", "0");
+        r.shouldBe(t, "t.pos.length", n.toString());
+        r.shouldBe(t, "t.stepsSum", n.toString());
+        r.shouldBe(t, "t.moveSum", n.toString());
+        t.prevPos = t.pos.reverse();
+        t.pos = [];
+        t.stepsSum = 0;
+        t.moveSum = 0;
+        for (i = 1; i <= n; i += 1) {
+            t.stepsSum += Math.abs(counter.countBackwardSteps(1, filter));
+            t.moveSum += Math.abs(t.caret.move(-1));
+        }
+        r.shouldBe(t, "t.caret.move(-1)", "-0");
+        r.shouldBe(t, "t.pos.length", n.toString());
+        r.shouldBe(t, "t.stepsSum", n.toString());
+        r.shouldBe(t, "t.moveSum", n.toString());
+    }
+    function backAndForth1() {
+        var xml = '<a>ab</a>\n';
+        backAndForth(xml, 2);
+    }
+    function backAndForth2() {
+        var xml = '<office:text text:use-soft-page-breaks="true" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
+                + '      <text:sequence-decls>\n'
+                + '        <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>\n'
+                + '        <text:sequence-decl text:display-outline-level="0" text:name="Table"/>\n'
+                + '        <text:sequence-decl text:display-outline-level="0" text:name="Text"/>\n'
+                + '        <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>\n'
+                + '      </text:sequence-decls>\n'
+                + '      <text:section text:style-name="Sect1" text:name="Section1">\n'
+                + '        <text:p text:style-name="P3">\n'
+                + '          <text:s/>\n'
+                + '        </text:p>\n'
+                + '        <text:p text:style-name="P6"/>\n'
+                + '        <text:p text:style-name="P5">WebODF is an exiting new technology</text:p>\n'
+                + '      </text:section>\n'
+                + '</office:text>\n';
+        backAndForth(xml, 167);
+    }
     this.tests = function () {
         return [
             create,
             moveInEmptyDoc,
-            moveInSimpleDoc
+            moveInSimpleDoc,
+            backAndForth1,
+            backAndForth2
         ];
     };
     this.asyncTests = function () {

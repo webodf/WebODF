@@ -99,12 +99,14 @@ gui.Caret = function Caret(rootNode, keyHandler) {
         span.focus();
     };
     this.move = function (number) {
+        var moved = 0;
         if (number > 0) {
-            selectionMover.movePointForward(number);
+            moved = selectionMover.movePointForward(number);
         } else if (number < 0) {
-            selectionMover.movePointBackward(-number);
+            moved = -selectionMover.movePointBackward(-number);
         }
         updateHandlePosition();
+        return moved;
     };
     this.setColor = function (color) {
         span.style.borderColor = color;

@@ -92,6 +92,7 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
         var steps = stepCounter.countStepsToPosition(e.target, e.x, e.y,
                 positionFilter);
         caretMover(steps);
+        caret.focus();
         runtime.log(steps);
         runtime.log(e.target.getBoundingClientRect());
     }
