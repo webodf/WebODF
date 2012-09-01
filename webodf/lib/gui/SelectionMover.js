@@ -70,7 +70,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
         }
-        cursor.updateToSelection();
+        cursor.updateToSelection(positionIterator);
         return steps - left;
     }
     /**

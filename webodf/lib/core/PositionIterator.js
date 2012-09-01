@@ -163,6 +163,50 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return c;
     };
     /**
+     * Return the offset as it would be if all neighboring text nodes were one
+     * text node.
+     * @return {!number}
+     */
+    this.textOffset = function () {
+        if (walker.currentNode.nodeType !== 3) {
+            return 0;
+        }
+        var offset = currentPos,
+            n = walker.currentNode;
+        // add lengths of preceding textnodes
+        while (walker.previousSibling() && walker.currentNode.nodeType === 3) {
+            offset += walker.currentNode.length;
+        }
+        walker.currentNode = n;
+        return offset;
+    };
+    /**
+     * The substring of the current text node as if all neighboring text nodes
+     * were one text node.
+     * @param {!number} start
+     * @param {!number} length
+     * @return {!string}
+     */
+    this.substr = function (start, length) {
+        var n = walker.currentNode,
+            t,
+            data = "";
+        if (n.nodeType !== 3) {
+            return data;
+        }
+        while (walker.previousSibling()) {
+            if (walker.currentNode.nodeType !== 3) {
+                walker.nextSibling();
+                break;
+            }
+        }
+        do {
+            data += walker.currentNode.data;
+        } while (walker.nextSibling() && walker.currentNode.nodeType === 3);
+        walker.currentNode = n;
+        return data.substr(start, length);
+    };
+    /**
      * @param {!Node} container
      * @param {!number} offset
      * @return {!boolean}

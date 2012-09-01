@@ -115,9 +115,10 @@ core.Cursor = function Cursor(selection, document) {
      * Synchronize the cursor with the current selection.
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
+     * @param {!core.PositionIterator=} positionIterator
      * @return {undefined}
      */
-    this.updateToSelection = function () {
+    this.updateToSelection = function (positionIterator) {
         var range;
         removeCursor();
         if (selection.focusNode) {
