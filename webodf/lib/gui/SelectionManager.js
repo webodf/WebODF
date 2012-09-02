@@ -38,11 +38,26 @@ runtime.loadClass("gui.SelectionMover");
  */
 gui.SelectionManager = function SelectionManager(rootNode) {
     "use strict";
+    var movers = [];
+    function onCursorRemove(cursorNode) {
+        var i;
+        for (i = 0; i < movers.length; i += 1) {
+            movers[i].adaptToInsertedCursor(cursorNode);
+        }
+    }
+    function onCursorAdd(cursorNode) {
+        var i;
+        for (i = 0; i < movers.length; i += 1) {
+            movers[i].adaptToCursorRemoval(cursorNode);
+        }
+    }
     /**
      * @return {!gui.SelectionMover}
      */
     this.createSelectionMover = function () {
-        var selectionMover = new gui.SelectionMover(rootNode);
+        var selectionMover = new gui.SelectionMover(rootNode, onCursorAdd,
+                onCursorRemove);
+        movers.push(selectionMover);
         return selectionMover;
     };
 };

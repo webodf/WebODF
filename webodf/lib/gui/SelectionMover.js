@@ -38,8 +38,10 @@ runtime.loadClass("core.PositionIterator");
  * This class modifies the selection in different ways.
  * @constructor
  * @param {!Node} rootNode
+ * @param {!Function=} onCursorAdd
+ * @param {!Function=} onCursorRemove
  */
-gui.SelectionMover = function SelectionMover(rootNode) {
+gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
     /**
      * @constructor
@@ -62,6 +64,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         var left = steps;
         // assume positionIterator reflects current state
         // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
+        onCursorRemove(cursor.getNode());
         cursor.remove();
         while (left > 0 && move()) {
             left -= 1;
@@ -71,6 +74,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
                     positionIterator.offset());
         }
         cursor.updateToSelection(positionIterator);
+        onCursorAdd(cursor.getNode());
         return steps - left;
     }
     /**
@@ -211,6 +215,38 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     this.getSelection = function () {
         return selection;
     };
+    /**
+     * @param {!Element} cursorNode
+     * @return {undefined}
+     */
+    this.adaptToCursorRemoval = function (cursorNode) {
+        var c = positionIterator.container(), t;
+        if (c.nodeType !== 3) {
+            return;
+        }
+        if (c.previousSibling === cursorNode) {
+            t = cursorNode.previousSibling && cursorNode.previousSibling.length;
+            if (t > 0) {
+                positionIterator.setPosition(c, positionIterator.offset() + t);
+            }
+        }
+    };
+    /**
+     * @param {!Element} cursorNode
+     * @return {undefined}
+     */
+    this.adaptToInsertedCursor = function (cursorNode) {
+        var c = positionIterator.container(), t;
+        if (c.nodeType !== 3) {
+            return;
+        }
+        if (c.previousSibling === cursorNode) {
+            t = cursorNode.previousSibling && cursorNode.previousSibling.length;
+            if (t > 0) {
+                positionIterator.setPosition(c, positionIterator.offset() - t);
+            }
+        }
+    };
     function init() {
         var filter = new CursorFilter();
         positionIterator = new core.PositionIterator(rootNode, 5, filter, false);
@@ -218,16 +254,13 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
         cursor.updateToSelection();
-/*
-        n = 1;
-        while (self.movePointForward()) {
-            n += 1;
+
+        if (!onCursorRemove) {
+            onCursorRemove = self.adaptToCursorRemoval;
         }
-        n = 1;
-        while (self.movePointBackward()) {
-            n += 1;
+        if (!onCursorAdd) {
+            onCursorAdd = self.adaptToInsertedCursor;
         }
-*/
     }
     init();
 };
