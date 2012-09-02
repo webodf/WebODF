@@ -32,6 +32,7 @@
  */
 /*global runtime, gui, ops*/
 runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.SelectionManager");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -90,17 +91,18 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     var self = this,
         rootNode,
-        selectionMover,
+        selectionManager,
         members = {},
         filter = new TextPositionFilter();
 
     /* SESSION OPERATIONS */
 
     this.addMemberToSession = function (memberid) {
-        var avatar = new gui.Avatar(memberid, selectionMover, filter,
-            function (n) {
-                self.moveMemberCaret(memberid, n);
-            });
+        var selectionMover = selectionManager.createSelectionMover(),
+            avatar = new gui.Avatar(memberid, selectionMover, filter,
+                function (n) {
+                    self.moveMemberCaret(memberid, n);
+                });
         members[memberid] = avatar;
     };
     this.removeMemberFromSession = function (memberid) {
@@ -155,7 +157,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     function init() {
         rootNode = findTextRoot(self);
-        selectionMover = new gui.SelectionMover(rootNode);
+        selectionManager = new gui.SelectionManager(rootNode);
         listenEvent(rootNode, "click", handleDocumentClick);
     }
     init();
