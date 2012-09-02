@@ -112,7 +112,8 @@ runtime.log("ACCEPT " + o);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
-        t.avatar = new gui.Avatar("id", t.doc.documentElement, filter, mover);
+        var selectionMover = new gui.SelectionMover(t.doc.documentElement);
+        t.avatar = new gui.Avatar("id", selectionMover, filter, mover);
     }
     function create() {
         createAvatar("<a/>", null);

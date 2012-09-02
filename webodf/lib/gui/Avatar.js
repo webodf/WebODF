@@ -41,11 +41,11 @@ runtime.loadClass("gui.Caret");
  * receives.
  * @constructor
  * @param {!string} memberid
- * @param {!Element} rootNode
+ * @param {!gui.SelectionMover} selectionMover
  * @param {?core.PositionFilter} positionFilter
  * @param {!function(!number):undefined} caretMover
  */
-gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
+gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMover) {
     "use strict";
     var self = this,
         caret,
@@ -109,12 +109,12 @@ gui.Avatar = function Avatar(memberid, rootNode, positionFilter, caretMover) {
     };
     function init() {
         var handle;
-        caret = new gui.Caret(rootNode, keyHandler);
+        caret = new gui.Caret(selectionMover, keyHandler);
         stepCounter = caret.getStepCounter();
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);
-        text = getText(rootNode);
+        text = getText(selectionMover.getRootNode());
     }
     init();
 };

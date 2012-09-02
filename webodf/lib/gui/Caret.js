@@ -39,10 +39,10 @@ runtime.loadClass("gui.SelectionMover");
  * used via the HTML attribute contentEditable. Outside of text nodes, an empty
  * element representing the caret is used.
  * @constructor
- * @param {!Element} rootNode
+ * @param {!gui.SelectionMover} selectionMover
  * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Caret = function Caret(rootNode, keyHandler) {
+gui.Caret = function Caret(selectionMover, keyHandler) {
     "use strict";
     function listenEvent(eventTarget, eventType, eventHandler) {
         if (eventTarget.addEventListener) {
@@ -61,8 +61,8 @@ gui.Caret = function Caret(rootNode, keyHandler) {
             event.returnValue = false;
         }
     }
-    var document = /**@type{!Document}*/(rootNode.ownerDocument),
-        selectionMover = new gui.SelectionMover(rootNode),
+    var rootNode = selectionMover.getRootNode(),
+        document = /**@type{!Document}*/(rootNode.ownerDocument),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
         handle = document.createElementNS(htmlns, "div"),

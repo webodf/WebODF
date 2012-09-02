@@ -76,7 +76,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     /**
      * Move selection forward one position.
      * @param {!number} steps
-     * @param {boolean} extend true if range is to be expanded from the current
+     * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
      * @return {!number}
      **/
@@ -85,7 +85,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     };
     /**
      * Move selection forward one position.
-     * @param {boolean} extend true if range is to be expanded from the current
+     * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
      * @return {!number}
      **/
@@ -204,6 +204,9 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     };
     this.getCursor = function () {
         return cursor;
+    };
+    this.getRootNode = function () {
+        return rootNode;
     };
     this.getSelection = function () {
         return selection;

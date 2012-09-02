@@ -90,13 +90,15 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     var self = this,
         rootNode,
+        selectionMover,
         members = {},
         filter = new TextPositionFilter();
 
     /* SESSION OPERATIONS */
 
     this.addMemberToSession = function (memberid) {
-        var avatar = new gui.Avatar(memberid, rootNode, filter, function (n) {
+        var avatar = new gui.Avatar(memberid, selectionMover, filter,
+            function (n) {
                 self.moveMemberCaret(memberid, n);
             });
         members[memberid] = avatar;
@@ -153,6 +155,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     function init() {
         rootNode = findTextRoot(self);
+        selectionMover = new gui.SelectionMover(rootNode);
         listenEvent(rootNode, "click", handleDocumentClick);
     }
     init();
