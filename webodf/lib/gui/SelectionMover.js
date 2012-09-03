@@ -38,8 +38,10 @@ runtime.loadClass("core.PositionIterator");
  * This class modifies the selection in different ways.
  * @constructor
  * @param {!Node} rootNode
+ * @param {!Function=} onCursorAdd
+ * @param {!Function=} onCursorRemove
  */
-gui.SelectionMover = function SelectionMover(rootNode) {
+gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
     /**
      * @constructor
@@ -62,6 +64,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         var left = steps;
         // assume positionIterator reflects current state
         // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
+        onCursorRemove(cursor.getNode());
         cursor.remove();
         while (left > 0 && move()) {
             left -= 1;
@@ -70,13 +73,14 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
         }
-        cursor.updateToSelection();
+        cursor.updateToSelection(positionIterator);
+        onCursorAdd(cursor.getNode());
         return steps - left;
     }
     /**
      * Move selection forward one position.
      * @param {!number} steps
-     * @param {boolean} extend true if range is to be expanded from the current
+     * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
      * @return {!number}
      **/
@@ -85,7 +89,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     };
     /**
      * Move selection forward one position.
-     * @param {boolean} extend true if range is to be expanded from the current
+     * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
      * @return {!number}
      **/
@@ -120,6 +124,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
+//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         while (steps > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -127,7 +132,9 @@ gui.SelectionMover = function SelectionMover(rootNode) {
                 stepCount = 0;
                 steps -= 1;
             }
+//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         }
+//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         positionIterator.setPosition(c, o);
         return count;
     }
@@ -141,6 +148,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
+//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         while (steps > 0 && positionIterator.previousPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -148,8 +156,9 @@ gui.SelectionMover = function SelectionMover(rootNode) {
                 stepCount = 0;
                 steps -= 1;
             }
-            count += 1;
+//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         }
+//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         positionIterator.setPosition(c, o);
         return count;
     }
@@ -157,6 +166,7 @@ gui.SelectionMover = function SelectionMover(rootNode) {
      * @param {!Element} element
      * @param {!number} x
      * @param {!number} y
+     * @param {!core.PositionFilter} filter
      * @return {!number}
      */
     function countStepsToPosition(element, x, y, filter) {
@@ -199,8 +209,43 @@ gui.SelectionMover = function SelectionMover(rootNode) {
     this.getCursor = function () {
         return cursor;
     };
+    this.getRootNode = function () {
+        return rootNode;
+    };
     this.getSelection = function () {
         return selection;
+    };
+    /**
+     * @param {!Element} cursorNode
+     * @return {undefined}
+     */
+    this.adaptToCursorRemoval = function (cursorNode) {
+        var c = positionIterator.container(), t;
+        if (c.nodeType !== 3) {
+            return;
+        }
+        if (c.previousSibling === cursorNode) {
+            t = cursorNode.previousSibling && cursorNode.previousSibling.length;
+            if (t > 0) {
+                positionIterator.setPosition(c, positionIterator.offset() + t);
+            }
+        }
+    };
+    /**
+     * @param {!Element} cursorNode
+     * @return {undefined}
+     */
+    this.adaptToInsertedCursor = function (cursorNode) {
+        var c = positionIterator.container(), t;
+        if (c.nodeType !== 3) {
+            return;
+        }
+        if (c.previousSibling === cursorNode) {
+            t = cursorNode.previousSibling && cursorNode.previousSibling.length;
+            if (t > 0) {
+                positionIterator.setPosition(c, positionIterator.offset() - t);
+            }
+        }
     };
     function init() {
         var filter = new CursorFilter();
@@ -209,16 +254,13 @@ gui.SelectionMover = function SelectionMover(rootNode) {
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
         cursor.updateToSelection();
-/*
-        n = 1;
-        while (self.movePointForward()) {
-            n += 1;
+
+        if (!onCursorRemove) {
+            onCursorRemove = self.adaptToCursorRemoval;
         }
-        n = 1;
-        while (self.movePointBackward()) {
-            n += 1;
+        if (!onCursorAdd) {
+            onCursorAdd = self.adaptToInsertedCursor;
         }
-*/
     }
     init();
 };

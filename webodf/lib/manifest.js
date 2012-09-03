@@ -17,6 +17,7 @@
         "gui/Avatar.js",
         "gui/Caret.js",
         "gui/PresenterUI.js",
+        "gui/SelectionManager.js",
         "gui/SelectionMover.js",
         "gui/XMLEdit.js",
         "odf/CommandLineTools.js",

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,54 +30,34 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
-runtime.loadClass("gui.Caret");
-
+/*global runtime, gui*/
+runtime.loadClass("gui.SelectionMover");
 /**
  * @constructor
- * @param {core.UnitTestRunner} runner
- * @implements {core.UnitTest}
+ * @param {!Node} rootNode
  */
-gui.CaretTests = function CaretTests(runner) {
+gui.SelectionManager = function SelectionManager(rootNode) {
     "use strict";
-    var r = runner,
-        t;
-
-    function setupEmptyDoc() {
-        var selection = runtime.getWindow().getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            selectionMover = new gui.SelectionMover(doc.documentElement),
-            caret = new gui.Caret(selectionMover);
-        t = { selection: selection, doc: doc }; //, cursor: cursor };
-        runner.shouldBeNonNull(t, "t.selection");
+    var movers = [];
+    function onCursorRemove(cursorNode) {
+        var i;
+        for (i = 0; i < movers.length; i += 1) {
+            movers[i].adaptToInsertedCursor(cursorNode);
+        }
     }
-    function setupSimpleTextDoc() {
-        setupEmptyDoc();
-        t.textnode = t.doc.createTextNode("abc");
-        t.doc.documentElement.appendChild(t.textnode);
+    function onCursorAdd(cursorNode) {
+        var i;
+        for (i = 0; i < movers.length; i += 1) {
+            movers[i].adaptToCursorRemoval(cursorNode);
+        }
     }
-    function testOnUpDownTraversal() {
-    }
-
-    this.setUp = function () {
-        t = {};
-    };
-    this.tearDown = function () {
-        t = {};
-    };
-    this.tests = function () {
-        return [];
-    };
-    this.asyncTests = function () {
-        return [
-        ];
+    /**
+     * @return {!gui.SelectionMover}
+     */
+    this.createSelectionMover = function () {
+        var selectionMover = new gui.SelectionMover(rootNode, onCursorAdd,
+                onCursorRemove);
+        movers.push(selectionMover);
+        return selectionMover;
     };
 };
-gui.CaretTests.prototype.description = function () {
-    "use strict";
-    return "Test the Caret class.";
-};
-(function () {
-    "use strict";
-    return gui.CaretTests;
-}());

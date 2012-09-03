@@ -65,8 +65,8 @@ if (runtime.type() === "BrowserRuntime") {
 /*
 tests = [  ];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-    tests.push(core.PositionIteratorTests);
-    tests.push(gui.SelectionMoverTests);
+//    tests.push(core.PositionIteratorTests);
+//    tests.push(gui.SelectionMoverTests);
     tests.push(gui.AvatarTests);
 }
 */

@@ -40,7 +40,66 @@ runtime.loadClass("ops.SessionImplementation");
  */
 gui.AvatarTests = function AvatarTests(runner) {
     "use strict";
-    var r = runner, t;
+    var r = runner, t,
+        odfxml = '<office:text text:use-soft-page-breaks="true" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
+        + '      <text:sequence-decls>\n'
+        + '        <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>\n'
+        + '        <text:sequence-decl text:display-outline-level="0" text:name="Table"/>\n'
+        + '        <text:sequence-decl text:display-outline-level="0" text:name="Text"/>\n'
+        + '        <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>\n'
+        + '      </text:sequence-decls>\n'
+        + '      <text:section text:style-name="Sect1" text:name="Section1">\n'
+        + '        <text:p text:style-name="P3">\n'
+        + '          <text:s/>\n'
+        + '        </text:p>\n'
+        + '        <text:p text:style-name="P6"/>\n'
+        + '        <text:p text:style-name="P5">WebODF is an exiting new technology that you can find in on <text:span text:style-name="Emphasis">mobile phones</text:span> and <text:span text:style-name="Emphasis">tablets</text:span>, embedded in <text:span text:style-name="Emphasis">wiki’s, intranet solutions</text:span> and <text:span text:style-name="Emphasis">webmail</text:span> and even in browsers. </text:p>\n'
+        + '      </text:section>\n'
+        + '</office:text>\n',
+        odfxml2 = '<office:text text:use-soft-page-breaks="true" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
+        + '        <text:p text:style-name="P3">\n'
+        + '          <text:s/>\n'
+        + '        </text:p>\n'
+        + '</office:text>\n',
+        odfxml3 = '<p>  a  b</p>',
+        dummyfilter = function acceptPosition(p) {
+            t.pos.push({
+                c: p.container(),
+                o: p.offset()
+            });
+            return 1;
+        },
+        textfilter = function acceptPosition(iterator) {
+            var n = iterator.container(), p, o, d;
+            // only stop in text nodes
+            if (n.nodeType !== 3) {
+                return 2;
+            }
+            // only stop in text nodes in 'p', 'h' or 'span' elements
+            p = n.parentNode;
+            o = p && p.localName;
+            if (o !== "p" && o !== "span" && o !== "h") {
+                return 2;
+            }
+            // do not stop between spaces
+            o = iterator.textOffset();
+runtime.log("'" + iterator.substr(0, 100) + "' " + o);
+if (o > 0) {
+  runtime.log("'" + iterator.substr(o - 1, 2) + "' " + o);
+}
+            if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
+runtime.log("REJECT " + o + " ");
+                return 2;
+            }
+            t.pos.push({
+                c: iterator.container(),
+                o: iterator.offset()
+            });
+runtime.log("ACCEPT " + o);
+            return 1;
+        };
+    dummyfilter.acceptPosition = dummyfilter;
+    textfilter.acceptPosition = textfilter;
 
     this.setUp = function () {
         t = {};
@@ -48,15 +107,16 @@ gui.AvatarTests = function AvatarTests(runner) {
     this.tearDown = function () {
         t = {};
     };
-    function createAvatar(xml) {
+    function createAvatar(xml, filter) {
         t.doc = runtime.parseXML(xml);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
-        t.avatar = new gui.Avatar("id", t.doc.documentElement, null, mover);
+        var selectionMover = new gui.SelectionMover(t.doc.documentElement);
+        t.avatar = new gui.Avatar("id", selectionMover, filter, mover);
     }
     function create() {
-        createAvatar("<a/>");
+        createAvatar("<a/>", null);
         r.shouldBeNonNull(t, "t.avatar");
         r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
         var c = t.avatar.getCaret(),
@@ -69,7 +129,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBeNonNull(t, "t.focusNode");
     }
     function moveInEmptyDoc() {
-        createAvatar("<a/>");
+        createAvatar("<a/>", null);
         var c = t.avatar.getCaret(),
             s = c.getSelection();
         t.startNode = s.focusNode;
@@ -80,7 +140,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.startNode", "t.focusNode");
     }
     function moveInSimpleDoc() {
-        createAvatar("<a>hello</a>");
+        createAvatar("<a>hello</a>", null);
         var c = t.avatar.getCaret(),
             s = c.getSelection(),
             i;
@@ -111,11 +171,65 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.focusOffset", "0");
         r.shouldBe(t, "t.focusNode", "t.startNode");
     }
+    function backAndForth(xml, n, m, filter) {
+        var i, steps;
+        t.pos = [];
+        t.filter = filter;
+        createAvatar(xml, filter);
+        t.caret = t.avatar.getCaret();
+        t.counter = t.caret.getStepCounter();
+        t.stepsSum = 0;
+        t.moveSum = 0;
+        for (i = 1; i <= m; i += 1) {
+            steps = t.counter.countForwardSteps(1, filter);
+runtime.log("i " + i + " steps " + steps);
+            t.stepsSum += Math.abs(steps);
+            t.moveSum += Math.abs(t.caret.move(steps));
+        }
+        r.shouldBe(t, "t.counter.countForwardSteps(1, t.filter)", "0");
+        r.shouldBe(t, "t.pos.length", m.toString());
+        r.shouldBe(t, "t.stepsSum", n.toString());
+        r.shouldBe(t, "t.moveSum", n.toString());
+        t.prevPos = t.pos.reverse();
+        t.pos = [];
+        t.stepsSum = 0;
+        t.moveSum = 0;
+        for (i = 1; i <= m; i += 1) {
+            steps = t.counter.countBackwardSteps(1, filter);
+runtime.log("i " + i + " steps " + steps);
+            t.stepsSum += Math.abs(steps);
+            t.moveSum += Math.abs(t.caret.move(-steps));
+        }
+        r.shouldBe(t, "t.counter.countBackwardSteps(1, t.filter)", "0");
+        r.shouldBe(t, "t.pos.length", m.toString());
+        r.shouldBe(t, "t.stepsSum", n.toString());
+        r.shouldBe(t, "t.moveSum", n.toString());
+    }
+    function backAndForth1() {
+        backAndForth('<a>ab</a>\n', 2, 2, dummyfilter);
+    }
+    function backAndForth2() {
+        backAndForth(odfxml, 300, 300, dummyfilter);
+    }
+    function backAndForth3() {
+        backAndForth('<a>ab</a>', 0, 0, textfilter);
+    }
+    function backAndForth4() {
+        backAndForth(odfxml2, 24, 5, textfilter);
+    }
+    function backAndForth5() {
+        backAndForth(odfxml3, 3, 5, textfilter);
+    }
     this.tests = function () {
         return [
             create,
             moveInEmptyDoc,
-            moveInSimpleDoc
+            moveInSimpleDoc,
+            backAndForth1,
+            backAndForth2,
+            backAndForth3/*,
+            backAndForth4
+            backAndForth5*/
         ];
     };
     this.asyncTests = function () {

@@ -32,6 +32,7 @@
  */
 /*global runtime, gui, ops*/
 runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.SelectionManager");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -40,6 +41,16 @@ runtime.loadClass("gui.Avatar");
  */
 ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
+    function listenEvent(eventTarget, eventType, eventHandler) {
+        if (eventTarget.addEventListener) {
+            eventTarget.addEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.attachEvent) {
+            eventType = "on" + eventType;
+            eventTarget.attachEvent(eventType, eventHandler);
+        } else {
+            eventTarget["on" + eventType] = eventHandler;
+        }
+    }
     /**
      * @constructor
      * @implements {core.PositionFilter}
@@ -51,9 +62,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             if (n.nodeType !== 3) {
                 return 2;
             }
-            // only stop in text nodes in 'p' elements
+            // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
-            if (p === null || p.localName !== "p") {
+            o = p && p.localName;
+            if (o !== "p" && o !== "span" && o !== "h") {
                 return 2;
             }
             // do not stop between spaces
@@ -79,15 +91,18 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     var self = this,
         rootNode,
-        members = {};
+        selectionManager,
+        members = {},
+        filter = new TextPositionFilter();
 
     /* SESSION OPERATIONS */
 
     this.addMemberToSession = function (memberid) {
-        var filter = new TextPositionFilter(),
-            avatar = new gui.Avatar(memberid, rootNode, filter, function (n) {
-                self.moveMemberCaret(memberid, n);
-            });
+        var selectionMover = selectionManager.createSelectionMover(),
+            avatar = new gui.Avatar(memberid, selectionMover, filter,
+                function (n) {
+                    self.moveMemberCaret(memberid, n);
+                });
         members[memberid] = avatar;
     };
     this.removeMemberFromSession = function (memberid) {
@@ -121,8 +136,29 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
+    function getFocussedAvatar() {
+        return self.getAvatars()[0];
+    }
+    function handleDocumentClick(e) {
+        var avatar = getFocussedAvatar(),
+            caret,
+            counter,
+            steps;
+        if (!avatar) {
+            return;
+        }
+        caret = avatar.getCaret();
+        counter = caret.getStepCounter().countStepsToPosition;
+        steps = counter(e.target, e.x, e.y, filter);
+        caret.move(steps);
+        caret.focus();
+        //runtime.log(steps);
+        //runtime.log(e.target.getBoundingClientRect());
+    }
     function init() {
         rootNode = findTextRoot(self);
+        selectionManager = new gui.SelectionManager(rootNode);
+        listenEvent(rootNode, "click", handleDocumentClick);
     }
     init();
 };

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,54 +30,26 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
-runtime.loadClass("gui.Caret");
-
+/*global runtime, core*/
+runtime.loadClass("core.PositionIterator");
 /**
- * @constructor
- * @param {core.UnitTestRunner} runner
- * @implements {core.UnitTest}
+ * @interface
  */
-gui.CaretTests = function CaretTests(runner) {
-    "use strict";
-    var r = runner,
-        t;
-
-    function setupEmptyDoc() {
-        var selection = runtime.getWindow().getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            selectionMover = new gui.SelectionMover(doc.documentElement),
-            caret = new gui.Caret(selectionMover);
-        t = { selection: selection, doc: doc }; //, cursor: cursor };
-        runner.shouldBeNonNull(t, "t.selection");
-    }
-    function setupSimpleTextDoc() {
-        setupEmptyDoc();
-        t.textnode = t.doc.createTextNode("abc");
-        t.doc.documentElement.appendChild(t.textnode);
-    }
-    function testOnUpDownTraversal() {
-    }
-
-    this.setUp = function () {
-        t = {};
-    };
-    this.tearDown = function () {
-        t = {};
-    };
-    this.tests = function () {
-        return [];
-    };
-    this.asyncTests = function () {
-        return [
-        ];
-    };
+core.PositionFilter = function PositionFilter() {"use strict"; };
+/**
+ * @enum {number}
+ */
+core.PositionFilter.FilterResult = {
+    FILTER_ACCEPT: 1,
+    FILTER_REJECT: 2,
+    FILTER_SKIP:   3
 };
-gui.CaretTests.prototype.description = function () {
-    "use strict";
-    return "Test the Caret class.";
-};
+/**
+ * @param {!core.PositionIterator} point
+ * @return {core.PositionFilter.FilterResult}
+ */
+core.PositionFilter.prototype.acceptPosition = function (point) {"use strict"; };
 (function () {
     "use strict";
-    return gui.CaretTests;
+    return core.PositionFilter;
 }());
