@@ -10,6 +10,13 @@ function loadWidgets(documentObject) {
     require(["dojo/ready", "dijit/MenuBar", "dijit/PopupMenuBarItem", "dijit/Menu", "dijit/MenuItem", "dijit/DropDownMenu"], function(ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
         ready(function() {
             var menuBar = new MenuBar({}, "menubar");
+
+            var formatSubmenu = new DropDownMenu({});
+            var paragraphStylesMenuItem = new MenuItem({
+                label: 'Paragraph...'
+            });
+            formatSubmenu.addChild(paragraphStylesMenuItem);
+
             menuBar.addChild(new PopupMenuBarItem({
                 label: "File"
             }));
@@ -23,8 +30,17 @@ function loadWidgets(documentObject) {
                 label: "Insert"
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: "Format"
+                label: "Format",
+                popup: formatSubmenu
             }));
+
+            require(["widgets/paragraphStylesDialog.js"], function() {
+                var dialogBox = new widgets.ParagraphStylesDialog(documentObject, function(dialog) {
+                    paragraphStylesMenuItem.onClick = function() {
+                        dialog.show();
+                    }
+                });
+            });
         });
     });
 
@@ -50,7 +66,7 @@ function loadWidgets(documentObject) {
 
         // Zoom Level Selector
         require(["widgets/zoomSlider.js"], function () {
-            var styles = new widgets.ZoomSlider(documentObject, function (widget) {
+            var zoomSlider = new widgets.ZoomSlider(documentObject, function (widget) {
                 widget.placeAt(toolbar);
                 widget.startup();
             });
