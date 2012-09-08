@@ -56,11 +56,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         + '        <text:p text:style-name="P5">WebODF is an exiting new technology that you can find in on <text:span text:style-name="Emphasis">mobile phones</text:span> and <text:span text:style-name="Emphasis">tablets</text:span>, embedded in <text:span text:style-name="Emphasis">wiki’s, intranet solutions</text:span> and <text:span text:style-name="Emphasis">webmail</text:span> and even in browsers. </text:p>\n'
         + '      </text:section>\n'
         + '</office:text>\n',
-        odfxml2 = '<office:text text:use-soft-page-breaks="true" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
-        + '        <text:p text:style-name="P3">\n'
-        + '          <text:s/>\n'
-        + '        </text:p>\n'
-        + '</office:text>\n',
+        odfxml2 = '<text><p>a </p></text>',
         odfxml3 = '<p>  a  b</p>',
         dummyfilter = function acceptPosition(p) {
             t.pos.push({
@@ -73,12 +69,14 @@ gui.AvatarTests = function AvatarTests(runner) {
             var n = iterator.container(), p, o, d;
             // only stop in text nodes
             if (n.nodeType !== 3) {
+runtime.log("REJECT! " + n.localName + " " + iterator.offset());
                 return 2;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
             o = p && p.localName;
             if (o !== "p" && o !== "span" && o !== "h") {
+runtime.log("REJECT!! " + o + " ");
                 return 2;
             }
             // do not stop between spaces
@@ -178,6 +176,14 @@ runtime.log("ACCEPT " + o);
         createAvatar(xml, filter);
         t.caret = t.avatar.getCaret();
         t.counter = t.caret.getStepCounter();
+
+        // move to a valid position
+        steps = t.counter.countForwardSteps(1, filter);
+        t.caret.move(steps);
+        steps = t.counter.countBackwardSteps(1, filter);
+        t.caret.move(steps);
+runtime.log("++++");
+
         t.stepsSum = 0;
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
@@ -215,10 +221,10 @@ runtime.log("i " + i + " steps " + steps);
         backAndForth('<a>ab</a>', 0, 0, textfilter);
     }
     function backAndForth4() {
-        backAndForth(odfxml2, 24, 5, textfilter);
+        backAndForth(odfxml2, 1, 1, textfilter);
     }
     function backAndForth5() {
-        backAndForth(odfxml3, 3, 5, textfilter);
+        backAndForth(odfxml3, 5, 3, textfilter);
     }
     this.tests = function () {
         return [
@@ -227,8 +233,8 @@ runtime.log("i " + i + " steps " + steps);
             moveInSimpleDoc,
             backAndForth1,
             backAndForth2,
-            backAndForth3/*,
-            backAndForth4
+            backAndForth3,
+            backAndForth4/*,
             backAndForth5*/
         ];
     };
