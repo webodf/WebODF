@@ -233,8 +233,8 @@ runtime.log("i " + i + " steps " + steps);
             moveInSimpleDoc,
             backAndForth1,
             backAndForth2,
-            backAndForth3,
-            backAndForth4/*,
+            backAndForth3/*,
+            backAndForth4,
             backAndForth5*/
         ];
     };
