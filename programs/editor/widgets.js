@@ -37,6 +37,7 @@ function loadWidgets(documentObject) {
             require(["widgets/paragraphStylesDialog.js"], function() {
                 var dialogBox = new widgets.ParagraphStylesDialog(documentObject, function(dialog) {
                     paragraphStylesMenuItem.onClick = function() {
+                        dialog.startup();
                         dialog.show();
                     }
                 });
