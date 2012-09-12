@@ -15,7 +15,11 @@ function loadWidgets(documentObject) {
             var paragraphStylesMenuItem = new MenuItem({
                 label: 'Paragraph...'
             });
+            var characterStylesMenuItem = new MenuItem({
+                label: 'Character...'
+            });
             formatSubmenu.addChild(paragraphStylesMenuItem);
+            formatSubmenu.addChild(characterStylesMenuItem);
 
             menuBar.addChild(new PopupMenuBarItem({
                 label: "File"
@@ -37,6 +41,15 @@ function loadWidgets(documentObject) {
             require(["widgets/paragraphStylesDialog.js"], function() {
                 var dialogBox = new widgets.ParagraphStylesDialog(documentObject, function(dialog) {
                     paragraphStylesMenuItem.onClick = function() {
+                        dialog.startup();
+                        dialog.show();
+                    }
+                });
+            });
+            
+            require(["widgets/characterStylesDialog.js"], function() {
+                var dialogBox = new widgets.CharacterStylesDialog(documentObject, function(dialog) {
+                    characterStylesMenuItem.onClick = function() {
                         dialog.startup();
                         dialog.show();
                     }
