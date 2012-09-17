@@ -134,7 +134,7 @@ core.UnitTestRunner = function UnitTestRunner() {
                     exception);
         } else if (isResultCorrect(av, bv)) {
             testPassed(a + " is " + b);
-        } else if (typeof av === typeof bv) {
+        } else if (String(typeof av) === String(typeof bv)) {
             testFailed(a + " should be " + bv + ". Was " + stringify(av) + ".");
         } else {
             testFailed(a + " should be " + bv + " (of type " + typeof bv +

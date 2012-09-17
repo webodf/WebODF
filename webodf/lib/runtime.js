@@ -388,7 +388,7 @@ function BrowserRuntime(logoutput) {
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        if (typeof VBArray !== "undefined") { // IE9
+                        if (String(typeof VBArray) !== "undefined") { // IE9
                             data = new VBArray(xhr.responseBody).toArray();
                         } else {
                             data = self.byteArrayFromString(xhr.responseText,
@@ -435,7 +435,7 @@ function BrowserRuntime(logoutput) {
                     callback("File " + path + " is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
-                    if (typeof VBArray !== "undefined") {
+                    if (String(typeof VBArray) !== "undefined") {
                         data = new VBArray(xhr.responseBody).toArray();
                     } else {
                         data = self.byteArrayFromString(xhr.responseText, "binary");
@@ -1010,9 +1010,9 @@ function RhinoRuntime() {
 var runtime = (function () {
     "use strict";
     var result;
-    if (typeof window !== "undefined") {
+    if (String(typeof window) !== "undefined") {
         result = new BrowserRuntime(window.document.getElementById("logoutput"));
-    } else if (typeof require !== "undefined") {
+    } else if (String(typeof require) !== "undefined") {
         result = new NodeJSRuntime();
     } else {
         result = new RhinoRuntime();
@@ -1163,5 +1163,5 @@ var runtime = (function () {
     } else {
         run(args.slice(1));
     }
-}(typeof arguments !== "undefined" && arguments));
+}(String(typeof arguments) !== "undefined" && arguments));
 

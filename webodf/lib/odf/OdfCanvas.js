@@ -804,7 +804,7 @@ odf.OdfCanvas = (function () {
     function addWebODFStyleSheet(document) {
         var head = document.getElementsByTagName('head')[0],
             style;
-        if (typeof (webodf_css) !== 'undefined') {
+        if (String(typeof webodf_css) !== "undefined") {
             style = document.createElementNS(head.namespaceURI, 'style');
             style.setAttribute('media', 'screen, print, handheld, projection');
             style.appendChild(document.createTextNode(webodf_css));

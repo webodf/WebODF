@@ -1810,7 +1810,7 @@ core.RawDeflate = function () {
 
         zip_deflate_data = str;
         zip_deflate_pos = 0;
-        if (typeof level === "undefined") {
+        if (String(typeof level) === "undefined") {
             level = zip_DEFAULT_LEVEL;
         }
         zip_deflate_start(level);
