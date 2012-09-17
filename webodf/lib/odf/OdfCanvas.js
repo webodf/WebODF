@@ -864,8 +864,14 @@ odf.OdfCanvas = (function () {
             if (!odfdoc) {
                 return;
             }
+            element.style.zoom = zoomLevel;
             element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
             element.style.WebkitTransformOrigin = 'left top';
+            element.style.MozTransform = 'scale(' + zoomLevel + ')';
+            element.style.MozTransformOrigin = 'left top';
+            element.style.OTransform = 'scale(' + zoomLevel + ')';
+            element.style.OTransformOrigin = 'left top';
+
             element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
                 + "px";
             element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)
