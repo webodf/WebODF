@@ -1,4 +1,4 @@
-widgets.ParagraphStylesDialog = (function () {
+widgets.CharacterStylesDialog = (function () {
 
     function makeWidget(documentObject, callback) {
         require(["dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
@@ -8,7 +8,7 @@ widgets.ParagraphStylesDialog = (function () {
 
             // Dialog
             dialog = new Dialog({
-            	title: "Paragraph Styles",
+            	title: "Character",
         	});
 
             // Tab Container
@@ -30,21 +30,11 @@ widgets.ParagraphStylesDialog = (function () {
 
 
             require([
-                "widgets/dialogWidgets/alignmentPane.js",
-                "widgets/dialogWidgets/textFlowPane.js",                
-                "widgets/dialogWidgets/numberingPane.js", 
+                "widgets/dialogWidgets/fontEffectsPane.js" 
                 ], function() {
-                new widgets.AlignmentPane(documentObject, function(alignmentPane) {
-                    alignmentPane.startup();
-                    tabContainer.addChild(alignmentPane);
-                });
-                new widgets.TextFlowPane(documentObject, function(textFlowPane) {
-                    textFlowPane.startup();
-                    tabContainer.addChild(textFlowPane);
-                });
-                new widgets.NumberingPane(documentObject, function(numberingPane) {
-                    numberingPane.startup();
-                    tabContainer.addChild(numberingPane);
+                new widgets.FontEffectsPane(documentObject, function(fontEffectsPane) {
+                    fontEffectsPane.startup();
+                    tabContainer.addChild(fontEffectsPane);
                 });
             });
 
@@ -54,11 +44,11 @@ widgets.ParagraphStylesDialog = (function () {
         });
     }
 
-    widgets.ParagraphStylesDialog = function ParagraphStylesDialog(documentObject, callback) {
+    widgets.CharacterStylesDialog = function CharacterStylesDialog(documentObject, callback) {
         makeWidget(documentObject, function (dialog) {
             return callback(dialog);
         });
     };
 
-    return widgets.ParagraphStylesDialog;
+    return widgets.CharacterStylesDialog;
 }());

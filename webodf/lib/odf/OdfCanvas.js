@@ -805,7 +805,7 @@ odf.OdfCanvas = (function () {
         var head = document.getElementsByTagName('head')[0],
             style,
             href;
-        if (typeof (webodf_css) !== 'undefined') {
+        if (String(typeof webodf_css) !== "undefined") {
             style = document.createElementNS(head.namespaceURI, 'style');
             style.setAttribute('media', 'screen, print, handheld, projection');
             style.appendChild(document.createTextNode(webodf_css));
@@ -869,8 +869,14 @@ odf.OdfCanvas = (function () {
             if (!odfdoc) {
                 return;
             }
+            element.style.zoom = zoomLevel;
             element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
             element.style.WebkitTransformOrigin = 'left top';
+            element.style.MozTransform = 'scale(' + zoomLevel + ')';
+            element.style.MozTransformOrigin = 'left top';
+            element.style.OTransform = 'scale(' + zoomLevel + ')';
+            element.style.OTransformOrigin = 'left top';
+
             element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
                 + "px";
             element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)

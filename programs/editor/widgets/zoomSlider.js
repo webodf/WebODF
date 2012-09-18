@@ -20,10 +20,13 @@ widgets.ZoomSlider = (function () {
 
             var canvas = dojo.byId('canvas');
             widget.onChange = function (value) {
+                documentObject.odfCanvas.setZoomLevel(value/100.0);
+                /*
                 var zoomlevel = value / 100.0;
                 canvas.style.zoom = zoomlevel;
                 canvas.style.MozTransform = 'scale(' + zoomlevel + ')';
-                canvas.style.OTransform = 'scale(' + zoomlevel + ')'
+                canvas.style.OTransform = 'scale(' + zoomlevel + ')';
+                */
             }
 
             return callback(widget);
