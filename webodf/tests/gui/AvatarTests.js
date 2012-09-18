@@ -59,6 +59,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         odfxml2 = '<text><p>a </p></text>',
         odfxml3 = '<p>  a  b</p>',
         dummyfilter = function acceptPosition(p) {
+//runtime.log("DUMMY SAYS HI ");
             t.pos.push({
                 c: p.container(),
                 o: p.offset()
@@ -169,6 +170,64 @@ runtime.log("ACCEPT " + o);
         r.shouldBe(t, "t.focusOffset", "0");
         r.shouldBe(t, "t.focusNode", "t.startNode");
     }
+    /**
+     * Start at a valid position and count how many filtered steps are needed.
+     * The amount should be m. Then check that the avatar is still at the
+     * starting position.
+     */
+    function stepCounter(xml, n, m, filter) {
+        var steps, s, e;
+        t.pos = [];
+        createAvatar(xml, filter);
+        t.caret = t.avatar.getCaret();
+        s = t.caret.getSelection();
+        t.counter = t.caret.getStepCounter();
+
+        // move to a valid position
+        t.startFocusOffset = s.focusOffset;
+        t.startFocusNode = s.focusNode;
+        t.startText = s.focusNode.data;
+        t.focusOffset = s.focusOffset;
+        t.focusNode = s.focusNode;
+        t.text = s.focusNode.data;
+        steps = t.counter.countForwardSteps(n, filter);
+        r.shouldBe(t, steps.toString(), m.toString());
+        t.focusOffset2 = s.focusOffset;
+        t.focusNode2 = s.focusNode;
+        t.text2 = s.focusNode.data;
+        r.shouldBe(t, "t.focusOffset", "t.focusOffset2");
+        r.shouldBe(t, "t.focusNode", "t.focusNode2");
+        r.shouldBe(t, "t.text", "t.text2");
+
+        t.caret.move(steps);
+
+        t.focusOffset = s.focusOffset;
+        t.focusNode = s.focusNode;
+        t.text = s.focusNode.data;
+        steps = t.counter.countBackwardSteps(n, filter);
+        r.shouldBe(t, steps.toString(), m.toString());
+        t.focusOffset2 = s.focusOffset;
+        t.focusNode2 = s.focusNode;
+        t.text2 = s.focusNode.data;
+        r.shouldBe(t, "t.focusOffset", "t.focusOffset2");
+        r.shouldBe(t, "t.focusNode", "t.focusNode2");
+        r.shouldBe(t, "t.text", "t.text2");
+
+        t.caret.move(-steps);
+
+        t.focusOffset = s.focusOffset;
+        t.focusNode = s.focusNode;
+        t.text = s.focusNode.data;
+        r.shouldBe(t, "t.focusOffset", "t.startFocusOffset");
+        r.shouldBe(t, "t.focusNode", "t.startFocusNode");
+        r.shouldBe(t, "t.text", "t.startText");
+    }
+    function stepCounter1() {
+        stepCounter("<p>ab</p>", 1, 1, dummyfilter);
+    }
+    function stepCounter2() {
+        stepCounter("<p>ab</p>", 2, 2, dummyfilter);
+    }
     function backAndForth(xml, n, m, filter) {
         var i, steps;
         t.pos = [];
@@ -179,8 +238,10 @@ runtime.log("ACCEPT " + o);
 
         // move to a valid position
         steps = t.counter.countForwardSteps(1, filter);
+runtime.log("+ " + steps);
         t.caret.move(steps);
         steps = t.counter.countBackwardSteps(1, filter);
+runtime.log("- " + steps);
         t.caret.move(steps);
 runtime.log("++++");
 
@@ -212,13 +273,13 @@ runtime.log("i " + i + " steps " + steps);
         r.shouldBe(t, "t.moveSum", n.toString());
     }
     function backAndForth1() {
-        backAndForth('<a>ab</a>\n', 2, 2, dummyfilter);
+        backAndForth('<p>ab</p>\n', 2, 2, dummyfilter);
     }
     function backAndForth2() {
         backAndForth(odfxml, 300, 300, dummyfilter);
     }
     function backAndForth3() {
-        backAndForth('<a>ab</a>', 0, 0, textfilter);
+        backAndForth('<p>ab</p>', 2, 2, textfilter);
     }
     function backAndForth4() {
         backAndForth(odfxml2, 1, 1, textfilter);
@@ -231,9 +292,11 @@ runtime.log("i " + i + " steps " + steps);
             create,
             moveInEmptyDoc,
             moveInSimpleDoc,
+            stepCounter1,
+            stepCounter2/*,
             backAndForth1,
             backAndForth2,
-            backAndForth3/*,
+            backAndForth3,
             backAndForth4,
             backAndForth5*/
         ];
