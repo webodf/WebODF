@@ -107,6 +107,11 @@ html[dir='rtl'] .dropdownToolbarButton {
     content: url(images/toolbarButton-fullscreen.png);
 }
 
+.toolbarButton.download::before {
+    display: inline-block;
+    content: url(images/toolbarButton-download.png);
+}
+
 #canvasContainer {
     overflow: auto;
     padding-top: 30px;
