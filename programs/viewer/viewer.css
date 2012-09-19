@@ -3,20 +3,108 @@
     margin: 0;
 }
 
-#toolbar {
-    position: relative;
+#toolbarContainer {
+    position: absolute;
+    z-index: 2; 
     top: 0px;
     left: 0px;
     height: 32px;
     width: 100%;
     
-    background-image: linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
-    background-image: -webkit-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
-    background-image: -moz-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
-    background-image: -ms-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
-    background-image: -o-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    -webkit-box-shadow: 0px 1px 3px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    0px 1px 3px rgba(50, 50, 50, 0.75);
+    box-shadow:         0px 1px 3px rgba(50, 50, 50, 0.75);
     
-    box-shadow: inset 1px 0 0 rgba(255, 255, 255, .08), inset 0 1px 1px rgba(0, 0, 0, .15), inset 0 -1px 0 rgba(255, 255, 255, .05), 0 1px 0 rgba(0, 0, 0, .15), 0 1px 1px rgba(0, 0, 0, .1);
+    background-image: url(images/texture.png), linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: url(images/texture.png), -webkit-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: url(images/texture.png), -moz-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: url(images/texture.png), -ms-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: url(images/texture.png), -o-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+}
+
+#toolbar {
+    position: relative;
+}
+
+html[dir='ltr'] #toolbarLeft {
+    margin-left: -1px;
+}
+html[dir='rtl'] #toolbarRight {
+    margin-left: -1px;
+}
+html[dir='ltr'] #toolbarLeft,
+html[dir='rtl'] #toolbarRight {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+html[dir='ltr'] #toolbarRight,
+html[dir='rtl'] #toolbarLeft {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+html[dir='ltr'] #toolbarLeft > *,
+html[dir='ltr'] #toolbarMiddle > *,
+html[dir='ltr'] #toolbarRight > * {
+    float: left;
+}
+html[dir='rtl'] #toolbarLeft > *,
+html[dir='rtl'] #toolbarMiddle > *,
+html[dir='rtl'] #toolbarRight > * {
+    float: right;
+}
+
+
+.toolbarButton {
+    border: 0 none;
+    background-color: rgba(0, 0, 0, 0);
+    width: 32px;
+    height: 25px;
+    border-radius: 2px;
+}
+
+html[dir='ltr'] .toolbarButton,
+html[dir='ltr'] .dropdownToolbarButton {
+      margin: 3px 2px 4px 0;
+}
+html[dir='rtl'] .toolbarButton,
+html[dir='rtl'] .dropdownToolbarButton {
+      margin: 3px 0 4px 2px;
+}
+
+.toolbarButton:hover,
+.toolbarButton:focus {
+    background-color: hsla(0,0%,0%,.12);
+    background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-clip: padding-box;
+    border: 1px solid hsla(0,0%,0%,.35);
+    border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
+    box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
+                0 0 1px hsla(0,0%,100%,.15) inset,
+                0 1px 0 hsla(0,0%,100%,.05);
+}
+
+.toolbarButton:hover:active {
+    background-color: hsla(0,0%,0%,.2);
+    background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    border-color: hsla(0,0%,0%,.35) hsla(0,0%,0%,.4) hsla(0,0%,0%,.45);
+    box-shadow: 0 1px 1px hsla(0,0%,0%,.1) inset,
+                0 0 1px hsla(0,0%,0%,.2) inset,
+                0 1px 0 hsla(0,0%,100%,.05);
+}
+
+.toolbarButton.fullscreen::before {
+    display: inline-block;
+    content: url(images/toolbarButton-fullscreen.png);
 }
 
 #canvasContainer {
