@@ -59,6 +59,22 @@ var Viewer = {
                 document.webkitCancelFullScreen();
             }
         }
+    },
+    
+    zoomLevel: function() {
+        return this.odfCanvas.getZoomLevel();
+    },
+
+    zoomOut: function() {
+        // 10 % decrement
+        var newLevel = this.zoomLevel() * 0.9;
+        this.odfCanvas.setZoomLevel(newLevel);
+    },
+
+    zoomIn: function() {
+        // 10 % increment
+        var newLevel = this.zoomLevel() * 1.1;
+        this.odfCanvas.setZoomLevel(newLevel);
     }
 };
 
@@ -70,5 +86,11 @@ window.onload = function() {
     });
     document.getElementById('download').addEventListener('click', function() {
         Viewer.download();
+    });
+    document.getElementById('zoomOut').addEventListener('click', function() {
+        Viewer.zoomOut();
+    });
+    document.getElementById('zoomIn').addEventListener('click', function() {
+        Viewer.zoomIn();
     });
 };
