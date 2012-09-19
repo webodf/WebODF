@@ -30,7 +30,7 @@ var Viewer = {
         window.title = this.filename;
 
         if(! (document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen) )
-            document.getElementById('fullscreen').parentNode.removeChild(document.getElementById('fullscreen'));
+            document.getElementById('fullscreen').style.visibility = 'hidden';
     },
 
     download: function() {
