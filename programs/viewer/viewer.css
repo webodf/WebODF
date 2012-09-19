@@ -1,0 +1,42 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+#toolbar {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    height: 32px;
+    width: 100%;
+    
+    background-image: linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: -webkit-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: -moz-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: -ms-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    background-image: -o-linear-gradient(rgba(82, 82, 82, .99), rgba(69, 69, 69, .95));
+    
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, .08), inset 0 1px 1px rgba(0, 0, 0, .15), inset 0 -1px 0 rgba(255, 255, 255, .05), 0 1px 0 rgba(0, 0, 0, .15), 0 1px 1px rgba(0, 0, 0, .1);
+}
+
+#canvasContainer {
+    overflow: auto;
+    padding-top: 30px;
+    position: absolute;
+    top: 32px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    text-align: center;
+    
+    background-color: #888;
+}
+
+#canvas {
+    box-shadow:         0px 0px 7px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow:    0px 0px 7px rgba(0, 0, 0, 0.75);
+    -ms-box-shadow:    0px 0px 7px rgba(0, 0, 0, 0.75);
+    -o-box-shadow:    0px 0px 7px rgba(0, 0, 0, 0.75);
+}
