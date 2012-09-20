@@ -56,7 +56,11 @@ var Viewer = {
         if(! (document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen) )
             document.getElementById('fullscreen').style.visibility = 'hidden';
 
-        this.initialized = true;
+        var self = this;
+        this.odfCanvas.addListener('statereadychange', function () {
+            self.parseScale(kDefaultScale);
+            self.initialized = true;
+        });
     },
 
     download: function() {
@@ -96,45 +100,37 @@ var Viewer = {
           return;
 
         this.odfCanvas.setZoomLevel(val);
-        /*var event = document.createEvent('UIEvents');
+        
+        var event = document.createEvent('UIEvents');
         event.initUIEvent('scalechange', false, false, window, 0);
         event.scale = val;
         event.resetAutoSettings = resetAutoSettings;
-        window.dispatchEvent(event);*/
+        window.dispatchEvent(event);
     },
 
     parseScale: function (value, resetAutoSettings, noScroll) {
+        var scale;
         if ('custom' == value)
-          return;
+            scale = parseFloat(document.getElementById('customScaleOption').textContent) / 100;
+        else
+            scale = parseFloat(value);
 
-        var scale = parseFloat(value);
         if (scale) {
             this.setScale(scale, true, noScroll);
             return;
         }
 
-        var container = this.element.parentNode;
-
-        var pageWidthScale = (container.clientWidth - kScrollbarPadding) /
-                              this.element.clientWidth * this.zoomLevel() / kCssUnits;
-        /*console.log('value ' + value);
-        console.log('zoomlevel ' + this.zoomLevel());
-        console.log('clientWidth ' + this.element.clientWidth);
-        console.log('pageWidthScale ' + pageWidthScale);*/
         switch (value) {
-          case 'page-actual':
-            scale = 1;
-            break;
-          case 'page-width':
-            scale = pageWidthScale;
-            this.odfCanvas.fitToWidth(document.body.clientWidth - kScrollbarPadding);
-            break;
-          case 'auto':
-            scale = Math.min(1.0, pageWidthScale);
-            break;
+            case 'page-actual':
+                this.setScale(1, resetAutoSettings, noScroll);
+                break;
+            case 'page-width':
+                this.odfCanvas.fitToWidth(document.body.clientWidth - kScrollbarPadding);
+                break;
+            case 'auto':
+                this.odfCanvas.fitSmart(document.body.clientWidth - kScrollbarPadding);
+                break;
         }
-        //console.log('scale ' + scale);
-        //this.setScale(scale, resetAutoSettings, noScroll);
 
         selectScaleOption(value);
     },
@@ -160,20 +156,39 @@ window.onload = function() {
     document.getElementById('fullscreen').addEventListener('click', function() {
         Viewer.toggleFullScreen();
     });
+
     document.getElementById('download').addEventListener('click', function() {
         Viewer.download();
     });
+
     document.getElementById('zoomOut').addEventListener('click', function() {
         Viewer.zoomOut();
     });
+
     document.getElementById('zoomIn').addEventListener('click', function() {
         Viewer.zoomIn();
     });
+
+    document.getElementById('scaleSelect').addEventListener('change',
+    function() {
+        Viewer.parseScale(this.value);
+    });
+
+    window.addEventListener('scalechange', function scalechange(evt) {
+        var customScaleOption = document.getElementById('customScaleOption');
+        customScaleOption.selected = false;
+
+        var predefinedValueFound = selectScaleOption('' + evt.scale);
+        if (!predefinedValueFound) {
+            customScaleOption.textContent = Math.round(evt.scale * 10000) / 100 + '%';
+            customScaleOption.selected = true;
+        }
+    }, true);
+
     window.addEventListener('resize', function webViewerResize(evt) {
         if (Viewer.initialized &&
           (document.getElementById('pageWidthOption').selected ||
           document.getElementById('pageAutoOption').selected))
           Viewer.parseScale(document.getElementById('scaleSelect').value);
     });
-
 };

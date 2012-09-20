@@ -371,10 +371,6 @@ html[dir='rtl'] .splitToolbarButtonSeparator {
       background: hsl(0,0%,24%);
 }
 
-#customScaleOption {
-    display: none;
-}
-
 #pageWidthOption {
   border-bottom: 1px rgba(255, 255, 255, .5) solid;
 }
