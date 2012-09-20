@@ -1130,6 +1130,17 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         };
         /**
+         * @param {!number} width
+         * @return {undefined}
+         */
+        this.fitSmart = function (width) {
+            var realWidth = element.offsetWidth / zoomLevel;
+            var newScale = width / realWidth;
+            zoomLevel = Math.min(1.0, newScale);
+
+            fixContainerSize();
+        };
+        /**
          * @param {!number} height
          * @return {undefined}
          */
