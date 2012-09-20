@@ -110,7 +110,7 @@ var Viewer = {
 
     parseScale: function (value, resetAutoSettings, noScroll) {
         var scale;
-        if ('custom' == value)
+        if (value == 'custom')
             scale = parseFloat(document.getElementById('customScaleOption').textContent) / 100;
         else
             scale = parseFloat(value);
