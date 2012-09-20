@@ -864,18 +864,38 @@ odf.OdfCanvas = (function () {
             if (!odfdoc) {
                 return;
             }
-            element.style.zoom = zoomLevel;
-            element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
-            element.style.WebkitTransformOrigin = 'left top';
-            element.style.MozTransform = 'scale(' + zoomLevel + ')';
-            element.style.MozTransformOrigin = 'left top';
-            element.style.OTransform = 'scale(' + zoomLevel + ')';
-            element.style.OTransformOrigin = 'left top';
 
-            element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
-                + "px";
-            element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)
-                + "px";
+            sizer.style.zoom = zoomLevel;
+            sizer.style.WebkitTransform = 'scale(' + zoomLevel + ')';
+            sizer.style.MozTransform = 'scale(' + zoomLevel + ')';
+            sizer.style.OTransform = 'scale(' + zoomLevel + ')';
+
+            /*
+                When zoom > 1,
+                - origin needs to be 'center top'
+                When zoom < 1
+                - origin needs to be 'left top'
+            */
+            if (zoomLevel > 1) {
+                sizer.style.MozTransformOrigin = 'center top';
+                sizer.style.WebkitTransformOrigin = 'center top';
+                sizer.style.OTransformOrigin = 'center top';
+            }
+            else {
+                sizer.style.MozTransformOrigin = 'left top';
+                sizer.style.WebkitTransformOrigin = 'left top';
+                sizer.style.OTransformOrigin = 'left top';
+            }
+
+            // For whatever reason, webkit has quadratic length scaling (!)
+            if (document.body.style.WebkitTransform !== undefined) {
+                element.style.width = Math.round( zoomLevel * zoomLevel * sizer.offsetWidth) + "px";
+                element.style.height = Math.round( zoomLevel * zoomLevel * sizer.offsetHeight) + "px";
+            }
+            else {
+                element.style.width = Math.round(   zoomLevel * sizer.offsetWidth) + "px";
+                element.style.height = Math.round(  zoomLevel * sizer.offsetHeight) + "px";
+            }            
         }
         /**
          * A new content.xml has been loaded. Update the live document with it.
