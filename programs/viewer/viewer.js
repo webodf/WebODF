@@ -27,7 +27,7 @@ var Viewer = {
         var odfElement = document.getElementById('canvas');
         this.odfCanvas = new odf.OdfCanvas(odfElement);
         this.odfCanvas.load(location);
-        window.title = this.filename;
+        document.title = this.filename;
 
         if(! (document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen) )
             document.getElementById('fullscreen').style.visibility = 'hidden';
