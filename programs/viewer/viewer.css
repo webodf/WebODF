@@ -151,33 +151,33 @@ html[dir='rtl'] .dropdownToolbarButton {
 .splitToolbarButton:focus > .toolbarButton,
 .splitToolbarButton.toggled > .toolbarButton,
 .toolbarButton.textButton {
-      background-color: hsla(0,0%,0%,.12);
-        background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-          background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-            background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-              background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-                background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-                  background-clip: padding-box;
-                    border: 1px solid hsla(0,0%,0%,.35);
-                      border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
-                        box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
-                                      0 0 1px hsla(0,0%,100%,.15) inset,
-                                                    0 1px 0 hsla(0,0%,100%,.05);
-                                                      -webkit-transition-property: background-color, border-color, box-shadow;
-                                                        -webkit-transition-duration: 150ms;
-                                                          -webkit-transition-timing-function: ease;
-                                                            -moz-transition-property: background-color, border-color, box-shadow;
-                                                              -moz-transition-duration: 150ms;
-                                                                -moz-transition-timing-function: ease;
-                                                                  -ms-transition-property: background-color, border-color, box-shadow;
-                                                                    -ms-transition-duration: 150ms;
-                                                                      -ms-transition-timing-function: ease;
-                                                                        -o-transition-property: background-color, border-color, box-shadow;
-                                                                          -o-transition-duration: 150ms;
-                                                                            -o-transition-timing-function: ease;
-                                                                              transition-property: background-color, border-color, box-shadow;
-                                                                                transition-duration: 150ms;
-                                                                                  transition-timing-function: ease;
+    background-color: hsla(0,0%,0%,.12);
+    background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-clip: padding-box;
+    border: 1px solid hsla(0,0%,0%,.35);
+    border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
+    box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
+    0 0 1px hsla(0,0%,100%,.15) inset,
+    0 1px 0 hsla(0,0%,100%,.05);
+    -webkit-transition-property: background-color, border-color, box-shadow;
+    -webkit-transition-duration: 150ms;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-property: background-color, border-color, box-shadow;
+    -moz-transition-duration: 150ms;
+    -moz-transition-timing-function: ease;
+    -ms-transition-property: background-color, border-color, box-shadow;
+    -ms-transition-duration: 150ms;
+    -ms-transition-timing-function: ease;
+    -o-transition-property: background-color, border-color, box-shadow;
+    -o-transition-duration: 150ms;
+    -o-transition-timing-function: ease;
+    transition-property: background-color, border-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
 
 }
 .splitToolbarButton > .toolbarButton:hover,
@@ -187,9 +187,9 @@ html[dir='rtl'] .dropdownToolbarButton {
 .toolbarButton.textButton:focus {
       background-color: hsla(0,0%,0%,.2);
         box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
-                      0 0 1px hsla(0,0%,100%,.15) inset,
-                                    0 0 1px hsla(0,0%,0%,.05);
-                                      z-index: 199;
+                    0 0 1px hsla(0,0%,100%,.15) inset,
+                    0 0 1px hsla(0,0%,0%,.05);
+                    z-index: 199;
 }
 
 
@@ -197,33 +197,33 @@ html[dir='rtl'] .dropdownToolbarButton {
 .splitToolbarButton:focus > .toolbarButton,
 .splitToolbarButton.toggled > .toolbarButton,
 .toolbarButton.textButton {
-      background-color: hsla(0,0%,0%,.12);
-        background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-          background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-            background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-              background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-                background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
-                  background-clip: padding-box;
-                    border: 1px solid hsla(0,0%,0%,.35);
-                      border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
-                        box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
-                                      0 0 1px hsla(0,0%,100%,.15) inset,
-                                                    0 1px 0 hsla(0,0%,100%,.05);
-                                                      -webkit-transition-property: background-color, border-color, box-shadow;
-                                                        -webkit-transition-duration: 150ms;
-                                                          -webkit-transition-timing-function: ease;
-                                                            -moz-transition-property: background-color, border-color, box-shadow;
-                                                              -moz-transition-duration: 150ms;
-                                                                -moz-transition-timing-function: ease;
-                                                                  -ms-transition-property: background-color, border-color, box-shadow;
-                                                                    -ms-transition-duration: 150ms;
-                                                                      -ms-transition-timing-function: ease;
-                                                                        -o-transition-property: background-color, border-color, box-shadow;
-                                                                          -o-transition-duration: 150ms;
-                                                                            -o-transition-timing-function: ease;
-                                                                              transition-property: background-color, border-color, box-shadow;
-                                                                                transition-duration: 150ms;
-                                                                                  transition-timing-function: ease;
+    background-color: hsla(0,0%,0%,.12);
+    background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+    background-clip: padding-box;
+    border: 1px solid hsla(0,0%,0%,.35);
+    border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
+    box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
+    0 0 1px hsla(0,0%,100%,.15) inset,
+    0 1px 0 hsla(0,0%,100%,.05);
+    -webkit-transition-property: background-color, border-color, box-shadow;
+    -webkit-transition-duration: 150ms;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-property: background-color, border-color, box-shadow;
+    -moz-transition-duration: 150ms;
+    -moz-transition-timing-function: ease;
+    -ms-transition-property: background-color, border-color, box-shadow;
+    -ms-transition-duration: 150ms;
+    -ms-transition-timing-function: ease;
+    -o-transition-property: background-color, border-color, box-shadow;
+    -o-transition-duration: 150ms;
+    -o-transition-timing-function: ease;
+    transition-property: background-color, border-color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
 
 }
 .splitToolbarButton > .toolbarButton:hover,
@@ -231,11 +231,11 @@ html[dir='rtl'] .dropdownToolbarButton {
 .dropdownToolbarButton:hover,
 .toolbarButton.textButton:hover,
 .toolbarButton.textButton:focus {
-      background-color: hsla(0,0%,0%,.2);
-        box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
-                      0 0 1px hsla(0,0%,100%,.15) inset,
-                                    0 0 1px hsla(0,0%,0%,.05);
-                                      z-index: 199;
+    background-color: hsla(0,0%,0%,.2);
+    box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
+                0 0 1px hsla(0,0%,100%,.15) inset,
+                 0 0 1px hsla(0,0%,0%,.05);
+    z-index: 199;
 }
 
 .dropdownToolbarButton {
