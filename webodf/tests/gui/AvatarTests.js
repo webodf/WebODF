@@ -68,10 +68,13 @@ gui.AvatarTests = function AvatarTests(runner) {
         },
         textfilter = function acceptPosition(iterator) {
             var n = iterator.container(), p, o, d;
-            // only stop in text nodes
+            // only stop in text nodes or at end of <p> or <h>
             if (n.nodeType !== 3) {
+                if (n.localName !== "p" && n.localName !== "h") {
+                    return 2;
+                }
 runtime.log("REJECT! " + n.localName + " " + iterator.offset());
-                return 2;
+                return 1;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
@@ -238,18 +241,15 @@ runtime.log("ACCEPT " + o);
 
         // move to a valid position
         steps = t.counter.countForwardSteps(1, filter);
-runtime.log("+ " + steps);
         t.caret.move(steps);
         steps = t.counter.countBackwardSteps(1, filter);
-runtime.log("- " + steps);
-        t.caret.move(steps);
-runtime.log("++++");
+        t.caret.move(-steps);
+        t.pos = [];
 
         t.stepsSum = 0;
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
             steps = t.counter.countForwardSteps(1, filter);
-runtime.log("i " + i + " steps " + steps);
             t.stepsSum += Math.abs(steps);
             t.moveSum += Math.abs(t.caret.move(steps));
         }
@@ -263,7 +263,6 @@ runtime.log("i " + i + " steps " + steps);
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
             steps = t.counter.countBackwardSteps(1, filter);
-runtime.log("i " + i + " steps " + steps);
             t.stepsSum += Math.abs(steps);
             t.moveSum += Math.abs(t.caret.move(-steps));
         }
@@ -293,9 +292,9 @@ runtime.log("i " + i + " steps " + steps);
             moveInEmptyDoc,
             moveInSimpleDoc,
             stepCounter1,
-            stepCounter2/*,
+            stepCounter2,
             backAndForth1,
-            backAndForth2,
+            backAndForth2/*,
             backAndForth3,
             backAndForth4,
             backAndForth5*/

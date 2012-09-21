@@ -124,7 +124,7 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
-//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         while (steps > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -132,9 +132,10 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
                 stepCount = 0;
                 steps -= 1;
             }
-//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         }
-//runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("> " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("OY " + count);
         positionIterator.setPosition(c, o);
         return count;
     }
@@ -148,7 +149,7 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
             o = positionIterator.offset(),
             stepCount = 0,
             count = 0;
-//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         while (steps > 0 && positionIterator.previousPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
@@ -156,9 +157,9 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
                 stepCount = 0;
                 steps -= 1;
             }
-//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         }
-//runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
+runtime.log("< " + (positionIterator.container().localName || 't ' + positionIterator.container().length) + " " + positionIterator.offset());
         positionIterator.setPosition(c, o);
         return count;
     }
