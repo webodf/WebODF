@@ -103,6 +103,10 @@ odf.OdfCanvas = (function () {
             sheet.insertRule("office|presentation draw|page:nth-child(" +
                 position + ") {display:block;}", 1);
         }
+        this.showFirstPage = function() {
+            position = 1;
+            updateCSS();
+        }
         /**
          * @return {undefined}
          */
@@ -1123,21 +1127,34 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.fitToWidth = function (width) {
-            var realWidth = element.offsetWidth / zoomLevel,
-                newScale = width / realWidth;
-            zoomLevel = newScale;
-
+            var realWidth = element.offsetWidth / zoomLevel;
+            zoomLevel = width / realWidth;
             fixContainerSize();
         };
         /**
          * @param {!number} width
+         * @param {!number} height
          * @return {undefined}
          */
-        this.fitSmart = function (width) {
-            var realWidth = element.offsetWidth / zoomLevel,
-                newScale = width / realWidth;
+        this.fitSmart = function (width, height) {
+            var realWidth, realHeight, newScale;
+
+            console.log('width: ' + width);
+            realWidth = element.offsetWidth / zoomLevel;
+            newScale = width / realWidth;
+            console.log('width-newScale: ' + newScale);
+            if(height !== undefined) {
+                console.log('height: ' + height);
+                realHeight = element.offsetHeight / newScale;
+                if (height / realHeight < newScale) {
+                    newScale = height / realHeight;
+                    console.log('height-newScale: ' + newScale);
+                }
+            }
+
             zoomLevel = Math.min(1.0, newScale);
 
+            console.log('zoomLevel: ' + zoomLevel);
             fixContainerSize();
         };
         /**
@@ -1149,6 +1166,9 @@ odf.OdfCanvas = (function () {
             zoomLevel = height / realHeight;
             fixContainerSize();
         };
+        this.showFirstPage = function() {
+            pageSwitcher.showFirstPage();
+        }
         /**
          * @return {undefined}
          */
