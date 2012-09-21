@@ -1139,22 +1139,18 @@ odf.OdfCanvas = (function () {
         this.fitSmart = function (width, height) {
             var realWidth, realHeight, newScale;
 
-            console.log('width: ' + width);
             realWidth = element.offsetWidth / zoomLevel;
+            realHeight = element.offsetHeight / zoomLevel;
+
             newScale = width / realWidth;
-            console.log('width-newScale: ' + newScale);
             if(height !== undefined) {
-                console.log('height: ' + height);
-                realHeight = element.offsetHeight / newScale;
                 if (height / realHeight < newScale) {
                     newScale = height / realHeight;
-                    console.log('height-newScale: ' + newScale);
                 }
             }
 
             zoomLevel = Math.min(1.0, newScale);
 
-            console.log('zoomLevel: ' + zoomLevel);
             fixContainerSize();
         };
         /**
