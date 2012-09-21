@@ -19,6 +19,22 @@ function selectScaleOption(value) {
   return predefinedValueFound;
 }
 
+// that should probably be provided by webodf
+function nsResolver(prefix) {  
+    var ns = {  
+        'draw' : "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+        'presentation' : "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
+        'text' : "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        'office' : "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    };  
+    return ns[prefix] || alert('prefix ['+prefix+'] unknown.');
+}
+
+function getDocumentType(root) {
+    if (root.getElementsByTagNameNS(nsResolver('office'), 'text').length > 0) return 'text';
+    else if (root.getElementsByTagNameNS(nsResolver('office'), 'presentation').length > 0) return 'presentation';
+    else return null;
+}
 
 var kCssUnits = 96.0 / 72.0;
 var kScrollbarPadding = 40;
@@ -26,13 +42,18 @@ var kMinScale = 0.25;
 var kMaxScale = 4.0;
 var kDefaultScaleDelta = 1.1;
 var kDefaultScale = 'auto';
+var slide_mode;
 
 var Viewer = {
     url: null,
     filename: null,
     odfCanvas: null,
     element: null,
+    odfElement: null,
     initialized: false,
+    root: null,
+    documentType: null,
+    pages: [],
 
     initialize: function() {
         // If the URL has a fragment (#...), try to load the file it represents
@@ -43,13 +64,13 @@ var Viewer = {
             console.log('Could not parse file path argument.');
             return;
         }
-        
+
         this.element = document.getElementById('viewer');
         this.url = location;
         this.filename = this.url.replace(/^.*[\\\/]/, '');
         
-        var odfElement = document.getElementById('canvas');
-        this.odfCanvas = new odf.OdfCanvas(odfElement);
+        this.odfElement = document.getElementById('canvas');
+        this.odfCanvas = new odf.OdfCanvas(this.odfElement);
         this.odfCanvas.load(location);
         document.title = this.filename;
 
@@ -58,8 +79,19 @@ var Viewer = {
 
         var self = this;
         this.odfCanvas.addListener('statereadychange', function () {
-            self.parseScale(kDefaultScale);
+            self.root = self.odfCanvas.odfContainer().rootElement;
             self.initialized = true;
+            self.documentType = getDocumentType(self.root);
+            
+            if(self.documentType == 'presentation') {
+                self.odfElement.parentNode.style.padding = 0;
+                self.pages = self.getPages();
+                self.odfCanvas.showFirstPage();
+            }
+
+            self.parseScale(kDefaultScale);
+            self.parseScale(kDefaultScale);
+            self.parseScale(kDefaultScale);
         });
     },
 
@@ -120,15 +152,27 @@ var Viewer = {
             return;
         }
 
+        var width = this.odfElement.parentNode.clientWidth - kScrollbarPadding;
+        var height = this.odfElement.parentNode.clientHeight - kScrollbarPadding;
+
         switch (value) {
             case 'page-actual':
                 this.setScale(1, resetAutoSettings, noScroll);
                 break;
             case 'page-width':
-                this.odfCanvas.fitToWidth(document.body.clientWidth - kScrollbarPadding);
+                this.odfCanvas.fitToWidth(width);
+                break;
+            case 'page-height':
+                this.odfCanvas.fitToHeight(height);
+                break;
+            case 'page-fit':
+                this.odfCanvas.fitToContainingElement(width, height);
                 break;
             case 'auto':
-                this.odfCanvas.fitSmart(document.body.clientWidth - kScrollbarPadding);
+                if(this.documentType == 'presentation')
+                    this.odfCanvas.fitToContainingElement(width + kScrollbarPadding, height + kScrollbarPadding);
+                else
+                    this.odfCanvas.fitSmart(width);
                 break;
         }
 
@@ -147,6 +191,20 @@ var Viewer = {
         var newScale = (this.zoomLevel() * kDefaultScaleDelta).toFixed(2);
         newScale = Math.min(kMaxScale, newScale);
         this.parseScale(newScale, true);
+    },
+
+    // return a list of tuples (pagename, pagenode)
+    getPages: function() {
+        var pageNodes = this.root.getElementsByTagNameNS(nsResolver('draw'), 'page');
+        var pages  = [];
+        for (i=0 ; i < pageNodes.length ; i += 1) {
+            var tuple = [
+                pageNodes[i].getAttribute('draw:name'),
+                pageNodes[i]
+            ];
+            pages.push(tuple);
+        }
+        return pages;
     }
 };
 

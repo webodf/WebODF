@@ -418,6 +418,7 @@ html[dir='rtl'] .dropdownToolbarButton {
     text-align: center;
     
     background-color: #888;
+    background-image: url(images/texture.png);
 }
 
 #canvas {
