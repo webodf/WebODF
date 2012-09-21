@@ -1123,8 +1123,8 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.fitToWidth = function (width) {
-            var realWidth = element.offsetWidth / zoomLevel;
-            var newScale = width / realWidth;
+            var realWidth = element.offsetWidth / zoomLevel,
+                newScale = width / realWidth;
             zoomLevel = newScale;
 
             fixContainerSize();
@@ -1134,8 +1134,8 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.fitSmart = function (width) {
-            var realWidth = element.offsetWidth / zoomLevel;
-            var newScale = width / realWidth;
+            var realWidth = element.offsetWidth / zoomLevel,
+                newScale = width / realWidth;
             zoomLevel = Math.min(1.0, newScale);
 
             fixContainerSize();
