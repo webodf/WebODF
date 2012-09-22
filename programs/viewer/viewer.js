@@ -87,14 +87,23 @@ var Viewer = {
             self.documentType = getDocumentType(self.root);
             
             if(self.documentType == 'presentation') {
+                // temporary hack: remove zoom buttons to make way for the navigation controls
+                document.getElementById('toolbarMiddle').style.visibility = 'hidden';
+
                 // no padding for presentations
                 self.odfElement.parentNode.style.padding = 0;
                 // get a list of pages
                 self.pages = self.getPages();
+                document.getElementById('numPages').innerHTML = 'of ' + self.pages.length;
+
                 // start with the first page
                 self.showPage(1);
             }
+            else {
+                document.getElementById('toolbarLeft').style.visibility = 'hidden';
+            }
 
+            // WTF, but I need to call it thrice to render presentations properly. Need to investigate.
             self.parseScale(kDefaultScale);
             self.parseScale(kDefaultScale);
             self.parseScale(kDefaultScale);
@@ -214,11 +223,14 @@ var Viewer = {
     },
 
     showPage: function(n) {
-        if(n <= 0 || n > this.pages.length)
-            return;
+        if (n <= 0)
+            n = 1;
+        else if (n > this.pages.length)
+            n = this.pages.length;
         
         this.odfCanvas.showPage(n);
         this.currentPage = n;
+        document.getElementById('pageNumber').value = this.currentPage;
     },
 
     showNextPage: function() {
@@ -248,6 +260,18 @@ window.onload = function() {
     document.getElementById('zoomIn').addEventListener('click', function() {
         Viewer.zoomIn();
     });
+
+    document.getElementById('previous').addEventListener('click', function() {
+        Viewer.showPreviousPage();
+    });
+
+    document.getElementById('next').addEventListener('click', function() {
+        Viewer.showNextPage();
+    });
+
+    document.getElementById('pageNumber').addEventListener('change', function() {
+        Viewer.showPage(this.value);
+    })
 
     document.getElementById('scaleSelect').addEventListener('change', function() {
         Viewer.parseScale(this.value);

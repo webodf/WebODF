@@ -3,6 +3,18 @@
     margin: 0;
 }
 
+body {
+  font-family: sans-serif;
+}
+
+.titlebar > span,
+.toolbarLabel,
+input,
+button,
+select {
+  font: message-box;
+}
+
 #titlebar {
     position: absolute;
     z-index: 2; 
@@ -346,6 +358,7 @@ html[dir='ltr'] .splitToolbarButton > .toolbarButton:first-child,
 html[dir='rtl'] .splitToolbarButton > .toolbarButton:last-child {
       position: relative;
         margin: 0;
+        margin-left: 4px;
           margin-right: -1px;
             border-top-left-radius: 2px;
               border-bottom-left-radius: 2px;
@@ -433,6 +446,73 @@ html[dir='rtl'] .dropdownToolbarButton {
     content: url(images/toolbarButton-zoomIn.png);
 }
 
+.toolbarButton.pageUp::before {
+  display: inline-block;
+  content: url(images/toolbarButton-pageUp.png);
+}
+
+.toolbarButton.pageDown::before {
+  display: inline-block;
+  content: url(images/toolbarButton-pageDown.png);
+}
+
+.toolbarField.pageNumber {
+  min-width: 16px;
+  text-align: right;
+  width: 40px;
+}
+
+.toolbarField {
+  padding: 3px 6px;
+  margin: 4px 0 4px 0;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background-color: hsla(0,0%,100%,.09);
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-clip: padding-box;
+  border: 1px solid hsla(0,0%,0%,.35);
+  border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
+  box-shadow: 0 1px 0 hsla(0,0%,0%,.05) inset,
+              0 1px 0 hsla(0,0%,100%,.05);
+  color: hsl(0,0%,95%);
+  font-size: 12px;
+  line-height: 14px;
+  outline-style: none;
+  -moz-transition-property: background-color, border-color, box-shadow;
+  -moz-transition-duration: 150ms;
+  -moz-transition-timing-function: ease;
+}
+
+.toolbarField.pageNumber::-webkit-inner-spin-button,
+.toolbarField.pageNumber::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.toolbarField:hover {
+  background-color: hsla(0,0%,100%,.11);
+  border-color: hsla(0,0%,0%,.4) hsla(0,0%,0%,.43) hsla(0,0%,0%,.45);
+}
+
+.toolbarField:focus {
+  background-color: hsla(0,0%,100%,.15);
+  border-color: hsla(204,100%,65%,.8) hsla(204,100%,65%,.85) hsla(204,100%,65%,.9);
+}
+
+.toolbarLabel {
+  min-width: 16px;
+  padding: 3px 6px 3px 2px;
+  margin: 4px 2px 4px 0;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: hsl(0,0%,85%);
+  font-size: 12px;
+  line-height: 14px;
+  text-align: left;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  cursor: default;
+}
 
 #canvasContainer {
     overflow: auto;
@@ -457,4 +537,8 @@ html[dir='rtl'] .dropdownToolbarButton {
     -moz-box-shadow:    0px 0px 7px rgba(0, 0, 0, 0.75);
     -ms-box-shadow:    0px 0px 7px rgba(0, 0, 0, 0.75);
     -o-box-shadow:    0px 0px 7px rgba(0, 0, 0, 0.75);
+}
+
+#sliderContainer {
+    visibility: hidden;
 }
