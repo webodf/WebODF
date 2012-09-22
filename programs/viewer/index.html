@@ -7,11 +7,14 @@
 
     <body>
         <div id = "viewer">
+            <div id = "titlebar">
+                <div id = "documentName"></div>
+            </div>
             <div id = "toolbarContainer">
                 <div id = "toolbar">
                     <div class = "outerCenter">
                         <div id = "toolbarMiddle" class = "innerCenter">
-                            <div class = "splitToolbarButton">
+                            <div id = 'zoomButtons' class = "splitToolbarButton">
                                 <button id = "zoomOut" class = "toolbarButton zoomOut" title = "Zoom Out"></button>
                                 <div class="splitToolbarButtonSeparator"></div>
                                 <button id = "zoomIn" class = "toolbarButton zoomIn" title = "Zoom In"></button>
@@ -30,6 +33,9 @@
                                     <option value="2">200%</option>
                                 </select>
                             </span>
+                            <div id = "sliderContainer">
+                                <div id = "slider"></div>
+                            </div>
                         </div>
                     </div>
                     <div id = "toolbarRight">

@@ -54,6 +54,7 @@ var Viewer = {
     root: null,
     documentType: null,
     pages: [],
+    currentPage: null,
 
     initialize: function() {
         // If the URL has a fragment (#...), try to load the file it represents
@@ -74,6 +75,8 @@ var Viewer = {
         this.odfCanvas.load(location);
         document.title = this.filename;
 
+        document.getElementById('documentName').innerHTML = document.title;
+
         if(! (document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen) )
             document.getElementById('fullscreen').style.visibility = 'hidden';
 
@@ -84,9 +87,12 @@ var Viewer = {
             self.documentType = getDocumentType(self.root);
             
             if(self.documentType == 'presentation') {
+                // no padding for presentations
                 self.odfElement.parentNode.style.padding = 0;
+                // get a list of pages
                 self.pages = self.getPages();
-                self.odfCanvas.showFirstPage();
+                // start with the first page
+                self.showPage(1);
             }
 
             self.parseScale(kDefaultScale);
@@ -205,6 +211,22 @@ var Viewer = {
             pages.push(tuple);
         }
         return pages;
+    },
+
+    showPage: function(n) {
+        if(n <= 0 || n > this.pages.length)
+            return;
+        
+        this.odfCanvas.showPage(n);
+        this.currentPage = n;
+    },
+
+    showNextPage: function() {
+        this.showPage(this.currentPage + 1);
+    },
+
+    showPreviousPage: function() {
+        this.showPage(this.currentPage - 1);
     }
 };
 
@@ -227,8 +249,7 @@ window.onload = function() {
         Viewer.zoomIn();
     });
 
-    document.getElementById('scaleSelect').addEventListener('change',
-    function() {
+    document.getElementById('scaleSelect').addEventListener('change', function() {
         Viewer.parseScale(this.value);
     });
 
@@ -248,5 +269,21 @@ window.onload = function() {
           (document.getElementById('pageWidthOption').selected ||
           document.getElementById('pageAutoOption').selected))
           Viewer.parseScale(document.getElementById('scaleSelect').value);
+    });
+
+    window.addEventListener('keydown', function(evt) {
+        var code = evt.keyCode;
+        if (evt.charCode && code == 0)
+            code = evt.charCode;
+        switch(code) {
+            case 38: // up
+            case 37: // left
+                Viewer.showPreviousPage();
+                break;
+            case 40: // down
+            case 39: // right
+                Viewer.showNextPage();
+                break;
+        }
     });
 };

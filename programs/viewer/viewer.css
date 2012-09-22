@@ -3,6 +3,35 @@
     margin: 0;
 }
 
+#titlebar {
+    position: absolute;
+    z-index: 2; 
+    top: 0px;
+    left: 0px;
+    height: 32px;
+    width: 100%;
+    overflow: hidden;
+
+    -webkit-box-shadow: 0px 1px 3px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    0px 1px 3px rgba(50, 50, 50, 0.75);
+    box-shadow:         0px 1px 3px rgba(50, 50, 50, 0.75);
+    
+    background-image: url(images/texture.png), linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99));
+    background-image: url(images/texture.png), -webkit-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99));
+    background-image: url(images/texture.png), -moz-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99));
+    background-image: url(images/texture.png), -ms-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99));
+    background-image: url(images/texture.png), -o-linear-gradient(rgba(69, 69, 69, .95), rgba(82, 82, 82, .99));
+}
+
+#documentName {
+    margin-left: 10px;
+    margin-top: 8px;
+    color: #F2F2F2;
+    font-size: 14px;
+    line-height: 14px;
+    font-family: sans-serif; 
+}
+
 #toolbarContainer {
     position: absolute;
     z-index: 2; 
@@ -407,10 +436,10 @@ html[dir='rtl'] .dropdownToolbarButton {
 
 #canvasContainer {
     overflow: auto;
-    padding-top: 30px;
-    padding-bottom: 30px;
+    padding-top: 6px;
+    padding-bottom: 6px;
     position: absolute;
-    top: 0px;
+    top: 32px;
     right: 0;
     bottom: 32px;
     left: 0;
