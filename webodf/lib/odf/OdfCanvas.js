@@ -106,7 +106,7 @@ odf.OdfCanvas = (function () {
         this.showFirstPage = function() {
             position = 1;
             updateCSS();
-        }
+        };
         /**
          * @return {undefined}
          */
@@ -123,6 +123,14 @@ odf.OdfCanvas = (function () {
                 updateCSS();
             }
         };
+
+        this.showPage = function(n) {
+            if(n > 0) {
+                position = n;
+                updateCSS();
+            }
+        };
+
         this.css = css;
     }
     /**
@@ -1164,7 +1172,7 @@ odf.OdfCanvas = (function () {
         };
         this.showFirstPage = function() {
             pageSwitcher.showFirstPage();
-        }
+        };
         /**
          * @return {undefined}
          */
@@ -1176,6 +1184,12 @@ odf.OdfCanvas = (function () {
          */
         this.showPreviousPage = function () {
             pageSwitcher.showPreviousPage();
+        };
+        /**
+         * @return {undefined}
+         */
+        this.showPage = function (n) {
+            pageSwitcher.showPage(n);
         };
         /**
          * @return {undefined}
