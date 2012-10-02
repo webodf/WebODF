@@ -282,7 +282,10 @@ gui.AvatarTests = function AvatarTests(runner) {
         backAndForth(odfxml2, 2, 2, textfilter);
     }
     function backAndForth5() {
-        backAndForth(odfxml3, 5, 3, textfilter);
+        backAndForth(odfxml3, 6, 6, dummyfilter);
+    }
+    function backAndForth6() {
+        backAndForth(odfxml3, 6, 4, textfilter);
     }
     this.tests = function () {
         return [
@@ -291,11 +294,12 @@ gui.AvatarTests = function AvatarTests(runner) {
             moveInSimpleDoc,
             stepCounter1,
             stepCounter2,
-            backAndForth1/*,
+            backAndForth1,
             backAndForth2,
             backAndForth3,
             backAndForth4,
-            backAndForth5*/
+            backAndForth5,
+            backAndForth6
         ];
     };
     this.asyncTests = function () {
