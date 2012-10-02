@@ -59,7 +59,6 @@ gui.AvatarTests = function AvatarTests(runner) {
         odfxml2 = '<text><p>a </p></text>',
         odfxml3 = '<p>  a  b</p>',
         dummyfilter = function acceptPosition(p) {
-//runtime.log("DUMMY SAYS HI ");
             t.pos.push({
                 c: p.container(),
                 o: p.offset()
@@ -73,31 +72,30 @@ gui.AvatarTests = function AvatarTests(runner) {
                 if (n.localName !== "p" && n.localName !== "h") {
                     return 2;
                 }
-runtime.log("REJECT! " + n.localName + " " + iterator.offset());
+                t.pos.push({
+                    c: iterator.container(),
+                    o: iterator.offset()
+                });
+                return 1;
+            }
+            if (n.length === 0) {
                 return 1;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
             o = p && p.localName;
             if (o !== "p" && o !== "span" && o !== "h") {
-runtime.log("REJECT!! " + o + " ");
                 return 2;
             }
             // do not stop between spaces
             o = iterator.textOffset();
-runtime.log("'" + iterator.substr(0, 100) + "' " + o);
-if (o > 0) {
-  runtime.log("'" + iterator.substr(o - 1, 2) + "' " + o);
-}
             if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
-runtime.log("REJECT " + o + " ");
                 return 2;
             }
             t.pos.push({
                 c: iterator.container(),
                 o: iterator.offset()
             });
-runtime.log("ACCEPT " + o);
             return 1;
         };
     dummyfilter.acceptPosition = dummyfilter;
@@ -114,8 +112,8 @@ runtime.log("ACCEPT " + o);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
-        var selectionMover = new gui.SelectionMover(t.doc.documentElement);
-        t.avatar = new gui.Avatar("id", selectionMover, filter, mover);
+        t.selectionMover = new gui.SelectionMover(t.doc.documentElement);
+        t.avatar = new gui.Avatar("id", t.selectionMover, filter, mover);
     }
     function create() {
         createAvatar("<a/>", null);
@@ -281,7 +279,7 @@ runtime.log("ACCEPT " + o);
         backAndForth('<p>ab</p>', 2, 2, textfilter);
     }
     function backAndForth4() {
-        backAndForth(odfxml2, 1, 1, textfilter);
+        backAndForth(odfxml2, 2, 2, textfilter);
     }
     function backAndForth5() {
         backAndForth(odfxml3, 5, 3, textfilter);
@@ -293,8 +291,8 @@ runtime.log("ACCEPT " + o);
             moveInSimpleDoc,
             stepCounter1,
             stepCounter2,
-            backAndForth1,
-            backAndForth2/*,
+            backAndForth1/*,
+            backAndForth2,
             backAndForth3,
             backAndForth4,
             backAndForth5*/

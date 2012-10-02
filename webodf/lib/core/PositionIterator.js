@@ -150,16 +150,24 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             return currentPos;
         }
         var c = 0,
-            n = walker.currentNode;
+            startNode = walker.currentNode,
+            n,
+            text,
+            prevText = false;
         if (currentPos === 1) {
-            n = n.lastChild;
+            n = walker.lastChild();
         } else {
-            n = n.previousSibling;
+            n = walker.previousSibling();
         }
         while (n) {
-            c += 1;
-            n = n.previousSibling;
+            text = n.nodeType === 3;
+            if (!text || !prevText) { // neighboring texts count as 1 position
+                c += 1;
+            }
+            prevText = text;
+            n = walker.previousSibling();
         }
+        walker.currentNode = startNode;
         return c;
     };
     /**
@@ -212,21 +220,20 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!boolean}
      */
     this.setPosition = function (container, offset) {
+        walker.currentNode = container;
         if (container.nodeType === 3) {
-            walker.currentNode = container;
             currentPos = offset;
             return true;
         }
-        var n = container.firstChild;
+        var n = walker.firstChild();
         while (offset > 0 && n) {
             offset -= 1;
-            n = n.nextSibling;
+            n = walker.nextSibling();
         }
         if (n === null) {
             walker.currentNode = container;
             currentPos = 1;
         } else {
-            walker.currentNode = n;
             currentPos = 0;
         }
         // jiggle the position to make sure it is at an allowed offset
