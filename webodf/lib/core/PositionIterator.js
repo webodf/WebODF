@@ -43,6 +43,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         expandEntityReferences) {
     "use strict";
     /**
+     * Empty text nodes are not considered to be a valid position for the
+     * positioniterator. They should be filtered out in all cases.
      * @constructor
      * @extends NodeFilter
      */
@@ -141,6 +143,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             return /**@type{!Node}*/n.parentNode;
         }
         return n;
+    };
+    /**
+     * @return {!number}
+     */
+    this.containerLength = function () {
     };
     /**
      * @return {!number}

@@ -76,6 +76,31 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             }
             return 1;
         };
+        this.acceptPosition = function acceptPosition(iterator) {
+            var n = iterator.container(), p, o, d;
+            // only stop in text nodes or at end of <p>, <h> o <span/>
+            if (n.nodeType !== 3) {
+                if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
+                    return 2;
+                }
+                return 1;
+            }
+            if (n.length === 0) {
+                return 2;
+            }
+            // only stop in text nodes in 'p', 'h' or 'span' elements
+            p = n.parentNode;
+            o = p && p.localName;
+            if (o !== "p" && o !== "span" && o !== "h") {
+                return 2;
+            }
+            // do not stop between spaces
+            o = iterator.textOffset();
+            if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
+                return 2;
+            }
+            return 1;
+        };
     }
     function findTextRoot(session) {
         // set the root node to be the text node

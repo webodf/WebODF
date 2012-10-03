@@ -58,6 +58,11 @@ gui.AvatarTests = function AvatarTests(runner) {
         + '</office:text>\n',
         odfxml2 = '<text><p>a </p></text>',
         odfxml3 = '<p>  a  b</p>',
+        odfxml4 = '<office:text xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
+        + '      <text:section>\n'
+        + '        <text:p/>\n'
+        + '      </text:section>\n'
+        + '</office:text>\n',
         dummyfilter = function acceptPosition(p) {
             t.pos.push({
                 c: p.container(),
@@ -79,7 +84,7 @@ gui.AvatarTests = function AvatarTests(runner) {
                 return 1;
             }
             if (n.length === 0) {
-                return 1;
+                return 2;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
@@ -233,7 +238,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         var i, steps;
         t.pos = [];
         t.filter = filter;
-        createAvatar(xml, filter);
+        createAvatar(xml, null);
         t.caret = t.avatar.getCaret();
         t.counter = t.caret.getStepCounter();
 
@@ -287,6 +292,18 @@ gui.AvatarTests = function AvatarTests(runner) {
     function backAndForth6() {
         backAndForth(odfxml3, 6, 4, textfilter);
     }
+    function backAndForth7() {
+        backAndForth(odfxml, 300, 300, dummyfilter);
+    }
+    function backAndForth8() {
+        backAndForth(odfxml, 212, 171, textfilter);
+    }
+    function backAndForth9() {
+        backAndForth(odfxml4, 0, 0, textfilter);
+    }
+    function backAndForth10() {
+        backAndForth(odfxml4, 28, 28, dummyfilter);
+    }
     this.tests = function () {
         return [
             create,
@@ -299,7 +316,11 @@ gui.AvatarTests = function AvatarTests(runner) {
             backAndForth3,
             backAndForth4,
             backAndForth5,
-            backAndForth6
+            backAndForth6,
+            backAndForth7,
+            backAndForth8,
+            backAndForth9,
+            backAndForth10
         ];
     };
     this.asyncTests = function () {
