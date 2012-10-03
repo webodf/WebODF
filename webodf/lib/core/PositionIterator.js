@@ -159,8 +159,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         var c = 0,
             startNode = walker.currentNode,
             n,
-            text,
-            nextText = false;
+            nextNode;
         if (currentPos === 1) {
             n = walker.lastChild();
         } else {
@@ -168,11 +167,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         while (n) {
             // neighboring texts count as 1 position
-            text = (n.nodeType === 3) ? n : null;
-            if (text === null || text.nextSibling !== nextText) {
+            if (n.nodeType !== 3 || n.nextSibling !== nextNode
+                    || nextNode.nodeType !== 3) {
                 c += 1;
             }
-            nextText = text;
+            nextNode = n;
             n = walker.previousSibling();
         }
         walker.currentNode = startNode;
