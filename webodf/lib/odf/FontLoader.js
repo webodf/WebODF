@@ -73,7 +73,9 @@ odf.FontLoader = (function () {
     }
     function addFontToCSS(name, font, fontdata, stylesheet) {
         // hack: get the first stylesheet
-        stylesheet = document.styleSheets[0];
+        if (!stylesheet) {
+            stylesheet = document.styleSheets[0];
+        }
         var rule = "@font-face { font-family: " + font.family + "; src: " +
             "url(data:application/x-font-ttf;charset=binary;base64," +
             base64.convertUTF8ArrayToBase64(fontdata) +
@@ -121,7 +123,7 @@ odf.FontLoader = (function () {
         /**
          * @param {!Element} fontFaceDecls
          * @param {!core.Zip} zip
-         * @param {!StyleSheet} stylesheet
+         * @param {?StyleSheet} stylesheet
          * @return {undefined}
          */
         this.loadFonts = function (fontFaceDecls, zip, stylesheet) {

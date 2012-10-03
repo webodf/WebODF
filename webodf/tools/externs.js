@@ -90,7 +90,7 @@ NodeJSObject.prototype.writeFile = function (path, data, encoding, callback) {"u
 NodeJSObject.prototype.unlink = function (path, callback) {"use strict"; };
 /**
  * @param {!number} fd
- * @param {function(!string)} callback
+ * @param {function(!string)=} callback
  * @return {undefined}
  */
 NodeJSObject.prototype.close = function (fd, callback) {"use strict"; };
