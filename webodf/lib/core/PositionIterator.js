@@ -160,18 +160,19 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             startNode = walker.currentNode,
             n,
             text,
-            prevText = false;
+            nextText = false;
         if (currentPos === 1) {
             n = walker.lastChild();
         } else {
             n = walker.previousSibling();
         }
         while (n) {
-            text = n.nodeType === 3;
-            if (!text || !prevText) { // neighboring texts count as 1 position
+            // neighboring texts count as 1 position
+            text = (n.nodeType === 3) ? n : null;
+            if (text === null || text.nextSibling !== nextText) {
                 c += 1;
             }
-            prevText = text;
+            nextText = text;
             n = walker.previousSibling();
         }
         walker.currentNode = startNode;
@@ -242,13 +243,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             currentPos = 1;
         } else {
             currentPos = 0;
-        }
-        // jiggle the position to make sure it is at an allowed offset
-        if (self.nextPosition()) {
-            self.previousPosition();
-        }
-        if (self.previousPosition()) {
-            self.nextPosition();
         }
         return true;
     };
