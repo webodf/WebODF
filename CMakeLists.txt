@@ -136,8 +136,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/SessionPointFilter.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
-
-    lib/manifest.js
 )
 
 set(HTML5UIFILES
