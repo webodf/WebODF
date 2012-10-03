@@ -103,6 +103,10 @@ odf.OdfCanvas = (function () {
             sheet.insertRule("office|presentation draw|page:nth-child(" +
                 position + ") {display:block;}", 1);
         }
+        this.showFirstPage = function() {
+            position = 1;
+            updateCSS();
+        };
         /**
          * @return {undefined}
          */
@@ -119,6 +123,14 @@ odf.OdfCanvas = (function () {
                 updateCSS();
             }
         };
+
+        this.showPage = function(n) {
+            if(n > 0) {
+                position = n;
+                updateCSS();
+            }
+        };
+
         this.css = css;
     }
     /**
@@ -869,18 +881,32 @@ odf.OdfCanvas = (function () {
             if (!odfdoc) {
                 return;
             }
-            element.style.zoom = zoomLevel;
-            element.style.WebkitTransform = 'scale(' + zoomLevel + ')';
-            element.style.WebkitTransformOrigin = 'left top';
-            element.style.MozTransform = 'scale(' + zoomLevel + ')';
-            element.style.MozTransformOrigin = 'left top';
-            element.style.OTransform = 'scale(' + zoomLevel + ')';
-            element.style.OTransformOrigin = 'left top';
 
-            element.style.width = Math.round(zoomLevel * odfdoc.offsetWidth)
-                + "px";
-            element.style.height = Math.round(zoomLevel * odfdoc.offsetHeight)
-                + "px";
+            /*
+                When zoom > 1,
+                - origin needs to be 'center top'
+                When zoom < 1
+                - origin needs to be 'left top'
+            */
+            if (zoomLevel > 1) {
+                sizer.style.MozTransformOrigin = 'center top';
+                sizer.style.WebkitTransformOrigin = 'center top';
+                sizer.style.OTransformOrigin = 'center top';
+                sizer.style.msTransformOrigin = 'center top';
+            } else {
+                sizer.style.MozTransformOrigin = 'left top';
+                sizer.style.WebkitTransformOrigin = 'left top';
+                sizer.style.OTransformOrigin = 'left top';
+                sizer.style.msTransformOrigin = 'left top';
+            }
+            
+            sizer.style.WebkitTransform = 'scale(' + zoomLevel + ')';
+            sizer.style.MozTransform = 'scale(' + zoomLevel + ')';
+            sizer.style.OTransform = 'scale(' + zoomLevel + ')';
+            sizer.style.msTransform = 'scale(' + zoomLevel + ')';
+
+            element.style.width = Math.round(zoomLevel * sizer.offsetWidth) + "px";
+            element.style.height = Math.round(zoomLevel * sizer.offsetHeight) + "px";  
         }
         /**
          * A new content.xml has been loaded. Update the live document with it.
@@ -1118,6 +1144,28 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         };
         /**
+         * @param {!number} width
+         * @param {!number} height
+         * @return {undefined}
+         */
+        this.fitSmart = function (width, height) {
+            var realWidth, realHeight, newScale;
+
+            realWidth = element.offsetWidth / zoomLevel;
+            realHeight = element.offsetHeight / zoomLevel;
+
+            newScale = width / realWidth;
+            if(height !== undefined) {
+                if (height / realHeight < newScale) {
+                    newScale = height / realHeight;
+                }
+            }
+
+            zoomLevel = Math.min(1.0, newScale);
+
+            fixContainerSize();
+        };
+        /**
          * @param {!number} height
          * @return {undefined}
          */
@@ -1125,6 +1173,9 @@ odf.OdfCanvas = (function () {
             var realHeight = element.offsetHeight / zoomLevel;
             zoomLevel = height / realHeight;
             fixContainerSize();
+        };
+        this.showFirstPage = function() {
+            pageSwitcher.showFirstPage();
         };
         /**
          * @return {undefined}
@@ -1137,6 +1188,12 @@ odf.OdfCanvas = (function () {
          */
         this.showPreviousPage = function () {
             pageSwitcher.showPreviousPage();
+        };
+        /**
+         * @return {undefined}
+         */
+        this.showPage = function (n) {
+            pageSwitcher.showPage(n);
         };
         /**
          * @return {undefined}
