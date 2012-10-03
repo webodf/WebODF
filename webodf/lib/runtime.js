@@ -58,6 +58,10 @@ Runtime.ByteArray = function (size) {"use strict"; };
  */
 Runtime.ByteArray.prototype.slice = function (start, end) {"use strict"; };
 /**
+ * @type {!number}
+ */
+Runtime.ByteArray.prototype.length = 0;
+/**
  * @param {!Array.<number>} array
  * @return {!Runtime.ByteArray}
  */

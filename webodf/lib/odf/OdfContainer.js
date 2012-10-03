@@ -61,13 +61,13 @@ odf.OdfContainer = (function () {
      * @param {?Node} node
      * @param {!string} ns
      * @param {!string} name
-     * @return {?Node}
+     * @return {?Element}
      */
     function getDirectChild(node, ns, name) {
         node = (node) ? node.firstChild : null;
         while (node) {
             if (node.localName === name && node.namespaceURI === ns) {
-                return node;
+                return /**@type{!Element}*/node;
             }
             node = node.nextSibling;
         }
@@ -241,7 +241,7 @@ odf.OdfContainer = (function () {
      */
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
-            zip = null,
+            zip,
             contentXmlCompletelyLoaded = false;
 
         // NOTE each instance of OdfContainer has a copy of the private functions
@@ -349,7 +349,9 @@ odf.OdfContainer = (function () {
             setChild(root, root.masterStyles);
             //removeUnusedAutomaticStyles(root.automaticStyles,
             //        root.masterStyles);
-            fontLoader.loadFonts(root.fontFaceDecls, zip, null);
+            if (root.fontFaceDecls) {
+                fontLoader.loadFonts(root.fontFaceDecls, zip, null);
+            }
         }
         /**
          * @param {Document} xmldoc

@@ -58,8 +58,12 @@ gui.AvatarTests = function AvatarTests(runner) {
         + '</office:text>\n',
         odfxml2 = '<text><p>a </p></text>',
         odfxml3 = '<p>  a  b</p>',
+        odfxml4 = '<office:text xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
+        + '      <text:section>\n'
+        + '        <text:p/>\n'
+        + '      </text:section>\n'
+        + '</office:text>\n',
         dummyfilter = function acceptPosition(p) {
-//runtime.log("DUMMY SAYS HI ");
             t.pos.push({
                 c: p.container(),
                 o: p.offset()
@@ -68,33 +72,35 @@ gui.AvatarTests = function AvatarTests(runner) {
         },
         textfilter = function acceptPosition(iterator) {
             var n = iterator.container(), p, o, d;
-            // only stop in text nodes
+            // only stop in text nodes or at end of <p> or <h>
             if (n.nodeType !== 3) {
-runtime.log("REJECT! " + n.localName + " " + iterator.offset());
+                if (n.localName !== "p" && n.localName !== "h") {
+                    return 2;
+                }
+                t.pos.push({
+                    c: iterator.container(),
+                    o: iterator.offset()
+                });
+                return 1;
+            }
+            if (n.length === 0) {
                 return 2;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
             o = p && p.localName;
             if (o !== "p" && o !== "span" && o !== "h") {
-runtime.log("REJECT!! " + o + " ");
                 return 2;
             }
             // do not stop between spaces
             o = iterator.textOffset();
-runtime.log("'" + iterator.substr(0, 100) + "' " + o);
-if (o > 0) {
-  runtime.log("'" + iterator.substr(o - 1, 2) + "' " + o);
-}
             if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
-runtime.log("REJECT " + o + " ");
                 return 2;
             }
             t.pos.push({
                 c: iterator.container(),
                 o: iterator.offset()
             });
-runtime.log("ACCEPT " + o);
             return 1;
         };
     dummyfilter.acceptPosition = dummyfilter;
@@ -111,8 +117,8 @@ runtime.log("ACCEPT " + o);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
-        var selectionMover = new gui.SelectionMover(t.doc.documentElement);
-        t.avatar = new gui.Avatar("id", selectionMover, filter, mover);
+        t.selectionMover = new gui.SelectionMover(t.doc.documentElement);
+        t.avatar = new gui.Avatar("id", t.selectionMover, filter, mover);
     }
     function create() {
         createAvatar("<a/>", null);
@@ -232,24 +238,21 @@ runtime.log("ACCEPT " + o);
         var i, steps;
         t.pos = [];
         t.filter = filter;
-        createAvatar(xml, filter);
+        createAvatar(xml, null);
         t.caret = t.avatar.getCaret();
         t.counter = t.caret.getStepCounter();
 
         // move to a valid position
         steps = t.counter.countForwardSteps(1, filter);
-runtime.log("+ " + steps);
         t.caret.move(steps);
         steps = t.counter.countBackwardSteps(1, filter);
-runtime.log("- " + steps);
-        t.caret.move(steps);
-runtime.log("++++");
+        t.caret.move(-steps);
+        t.pos = [];
 
         t.stepsSum = 0;
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
             steps = t.counter.countForwardSteps(1, filter);
-runtime.log("i " + i + " steps " + steps);
             t.stepsSum += Math.abs(steps);
             t.moveSum += Math.abs(t.caret.move(steps));
         }
@@ -263,7 +266,6 @@ runtime.log("i " + i + " steps " + steps);
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
             steps = t.counter.countBackwardSteps(1, filter);
-runtime.log("i " + i + " steps " + steps);
             t.stepsSum += Math.abs(steps);
             t.moveSum += Math.abs(t.caret.move(-steps));
         }
@@ -282,10 +284,25 @@ runtime.log("i " + i + " steps " + steps);
         backAndForth('<p>ab</p>', 2, 2, textfilter);
     }
     function backAndForth4() {
-        backAndForth(odfxml2, 1, 1, textfilter);
+        backAndForth(odfxml2, 2, 2, textfilter);
     }
     function backAndForth5() {
-        backAndForth(odfxml3, 5, 3, textfilter);
+        backAndForth(odfxml3, 6, 6, dummyfilter);
+    }
+    function backAndForth6() {
+        backAndForth(odfxml3, 6, 4, textfilter);
+    }
+    function backAndForth7() {
+        backAndForth(odfxml, 300, 300, dummyfilter);
+    }
+    function backAndForth8() {
+        backAndForth(odfxml, 212, 171, textfilter);
+    }
+    function backAndForth9() {
+        backAndForth(odfxml4, 0, 0, textfilter);
+    }
+    function backAndForth10() {
+        backAndForth(odfxml4, 28, 28, dummyfilter);
     }
     this.tests = function () {
         return [
@@ -293,12 +310,17 @@ runtime.log("i " + i + " steps " + steps);
             moveInEmptyDoc,
             moveInSimpleDoc,
             stepCounter1,
-            stepCounter2/*,
+            stepCounter2,
             backAndForth1,
             backAndForth2,
             backAndForth3,
             backAndForth4,
-            backAndForth5*/
+            backAndForth5,
+            backAndForth6,
+            backAndForth7,
+            backAndForth8,
+            backAndForth9,
+            backAndForth10
         ];
     };
     this.asyncTests = function () {

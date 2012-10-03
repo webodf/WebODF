@@ -25,12 +25,24 @@ endif (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 # Tools must be obtained to work with:
 include (ExternalProject)
 
+# allow specification of a directory with pre-downloaded
+# requirements by evaluating environment variable
+# $WEBODF_DOWNLOAD_DIR
+# defaults to ./downloads in the build directory.
+if ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
+    SET ( EXTERNALS_DOWNLOAD_DIR $ENV{WEBODF_DOWNLOAD_DIR} )
+else ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
+    SET ( EXTERNALS_DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/downloads )
+endif ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
+MESSAGE ( STATUS "external downloads will be stored/expected in: ${EXTERNALS_DOWNLOAD_DIR}" )
+
 if(Java_JAVA_EXECUTABLE)
     # Closure Compiler
     ExternalProject_Add(
         ClosureCompiler
-        URL "http://closure-compiler.googlecode.com/files/compiler-20120710.tar.gz"
-        URL_MD5 66b6b942439119813b73103fd0086d9e
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL "http://closure-compiler.googlecode.com/files/compiler-20120917.tar.gz"
+        URL_MD5 5291efbad1af66583750370cf8605e72
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
@@ -42,6 +54,7 @@ endif(Java_JAVA_EXECUTABLE)
 if(Java_JAVA_EXECUTABLE)
     ExternalProject_Add(
         Rhino
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
         URL "http://ftp.mozilla.org/pub/js/rhino1_7R3.zip"
         URL_MD5 99d94103662a8d0b571e247a77432ac5
         CONFIGURE_COMMAND ""
@@ -54,6 +67,7 @@ endif(Java_JAVA_EXECUTABLE)
 # JSDoc
 ExternalProject_Add(
     JsDoc
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
     URL "http://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.4.0.zip"
     URL_MD5 a8f78f5ecd24b54501147b2af341a231
     CONFIGURE_COMMAND ""
@@ -65,8 +79,9 @@ set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 # Node.JS
 ExternalProject_Add(
     NodeJS
-    URL "http://nodejs.org/dist/v0.8.8/node-v0.8.8.tar.gz"
-    URL_MD5 f4dae84e96a94b768404c14633bccd49
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    URL "http://nodejs.org/dist/v0.8.11/node-v0.8.11.tar.gz"
+    URL_MD5 23cb6d6a5c3949ac73df3c6b330e834d
     CONFIGURE_COMMAND "./configure"
     BUILD_IN_SOURCE 1
     INSTALL_COMMAND ""
@@ -76,6 +91,7 @@ set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/src/NodeJS/out/Release/node)
 # JSCoverage
 ExternalProject_Add(
     JSCoverage
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
     URL "http://siliconforks.com/jscoverage/download/jscoverage-0.5.1.tar.bz2"
     URL_MD5 a70d79a6759367fbcc0bcc18d6866ff3
     PATCH_COMMAND patch -p0 < ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch
@@ -120,8 +136,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/SessionPointFilter.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
-
-    lib/manifest.js
 )
 
 set(HTML5UIFILES

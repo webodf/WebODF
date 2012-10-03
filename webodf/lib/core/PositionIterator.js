@@ -43,6 +43,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         expandEntityReferences) {
     "use strict";
     /**
+     * Empty text nodes are not considered to be a valid position for the
+     * positioniterator. They should be filtered out in all cases.
      * @constructor
      * @extends NodeFilter
      */
@@ -145,21 +147,34 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     /**
      * @return {!number}
      */
+    this.containerLength = function () {
+    };
+    /**
+     * @return {!number}
+     */
     this.offset = function () {
         if (walker.currentNode.nodeType === 3) {
             return currentPos;
         }
         var c = 0,
-            n = walker.currentNode;
+            startNode = walker.currentNode,
+            n,
+            nextNode;
         if (currentPos === 1) {
-            n = n.lastChild;
+            n = walker.lastChild();
         } else {
-            n = n.previousSibling;
+            n = walker.previousSibling();
         }
         while (n) {
-            c += 1;
-            n = n.previousSibling;
+            // neighboring texts count as 1 position
+            if (n.nodeType !== 3 || n.nextSibling !== nextNode
+                    || nextNode.nodeType !== 3) {
+                c += 1;
+            }
+            nextNode = n;
+            n = walker.previousSibling();
         }
+        walker.currentNode = startNode;
         return c;
     };
     /**
@@ -212,29 +227,21 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!boolean}
      */
     this.setPosition = function (container, offset) {
+        walker.currentNode = container;
         if (container.nodeType === 3) {
-            walker.currentNode = container;
             currentPos = offset;
             return true;
         }
-        var n = container.firstChild;
+        var n = walker.firstChild();
         while (offset > 0 && n) {
             offset -= 1;
-            n = n.nextSibling;
+            n = walker.nextSibling();
         }
         if (n === null) {
             walker.currentNode = container;
             currentPos = 1;
         } else {
-            walker.currentNode = n;
             currentPos = 0;
-        }
-        // jiggle the position to make sure it is at an allowed offset
-        if (self.nextPosition()) {
-            self.previousPosition();
-        }
-        if (self.previousPosition()) {
-            self.nextPosition();
         }
         return true;
     };

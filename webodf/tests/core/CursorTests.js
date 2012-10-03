@@ -126,7 +126,7 @@ core.CursorTests = function CursorTests(runner) {
             // put the cursor at the end of the text node
             setSelection(t.selection, t.textnode, 3);
             t.cursor.updateToSelection();
-            r.shouldBeNonNull("t.cursor.getNode().parentNode");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             r.shouldBe(t, "t.cursor.getNode().previousSibling.nodeValue", "'abc'");
             r.shouldBeNull(t, "t.cursor.getNode().nextSibling");
         },

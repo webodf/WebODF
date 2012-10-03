@@ -216,7 +216,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     }
     function testPositions(count) {
         var n = 0, i, it = t.iterator, ok = true;
-        while (it.nextPosition()) {
+        while (it.nextPosition() && n <= count) {
             t.c1 = it.container();
             t.o1 = it.offset();
             it.setPosition(t.c1, t.o1);

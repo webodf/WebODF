@@ -99,10 +99,11 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         span.focus();
     };
     this.move = function (number) {
+//runtime.log("moving " + number);
         var moved = 0;
         if (number > 0) {
             moved = selectionMover.movePointForward(number);
-        } else if (number < 0) {
+        } else if (number <= 0) {
             moved = -selectionMover.movePointBackward(-number);
         }
         updateHandlePosition();
