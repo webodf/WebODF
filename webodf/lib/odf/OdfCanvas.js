@@ -1094,12 +1094,16 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.addListener = function (eventName, handler) {
-            if (eventName === "selectionchange") {
-                selectionWatcher.addListener(eventName, handler);
-            } else {
-                listenEvent(element, eventName, handler);
+            switch(eventName) {
+                case: "selectionchange":
+                    selectionWatcher.addListener(eventName, handler); break;
+                case: "click":
+                    listenEvent(element, eventName, handler); break;
+                default:
+                    addEventListener(eventName, handler); break;
             }
         };
+        
         /**
          * @return {!odf.Formatting}
          */
