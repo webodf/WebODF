@@ -91,8 +91,8 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
     }
     function updateHandlePosition() {
         if (handle.style) {
-            handle.style.top = (span.offsetTop + span.scrollHeight) + "px";
-            handle.style.left = span.offsetLeft + "px";
+            handle.style.top = (span.offsetTop - handle.offsetHeight - 10) + "px";
+            handle.style.left = (span.offsetLeft - handle.offsetWidth/2 )+ "px";
         }
     }
     this.focus = function () {
@@ -145,10 +145,12 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         span.setAttribute("contenteditable", true);
         span.onfocus = function () {
             focussed = true;
+            handle.className = "active";
             blink();
         };
         span.onblur = function () {
             focussed = false;
+            handle.className = "";
             span.style.borderLeftWidth = "1px";
         };
         cursorNode = selectionMover.getCursor().getNode();
