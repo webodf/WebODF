@@ -20,7 +20,7 @@ function init() {
 
     location = location.substr(pos + 1);
     document.odfCanvas.load(location);
-    document.odfCanvas.setEditable(true);
+    document.odfCanvas.setEditable(false);
 
     var filename = location.replace(/^.*[\\\/]/, '');
     document.getElementById('topPane').innerHTML = "<h1> <a href = '" + location + "''>" + filename + "</a></h1>";
