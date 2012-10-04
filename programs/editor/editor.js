@@ -19,6 +19,15 @@ function init() {
     }
 
     location = location.substr(pos + 1);
+
+    // Editor Widgets and Avatars
+    document.odfCanvas.addListener("statereadychange", function() {
+            runtime.setTimeout(function() {
+                loadWidgets(document);
+                loadAvatars(document, document.getElementById('peopleList'));
+            }, 100);
+    });
+
     document.odfCanvas.load(location);
     document.odfCanvas.setEditable(false);
 
@@ -85,17 +94,6 @@ function init() {
             }, 'chatInput');
         });
 
-    });
-
-    // Editor Widgets and Avatars
-    require(['widgets.js', 'avatars.js'], function () {
-        document.odfCanvas.addListener("statereadychange", function() {
-            // This timeout is a workaround for the fact that statereadychange fires too early sometimes
-            runtime.setTimeout(function() {
-                loadWidgets(document);
-                loadAvatars(document, document.getElementById('peopleList'));
-            }, 1000);
-        });
     });
 }
 
