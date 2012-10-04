@@ -112,6 +112,11 @@ html, body, #mainContainer {
     background-color: #eef;
 }
 
+#peopleList > div {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
 #chat {
     padding: 0px;
     text-align: center;

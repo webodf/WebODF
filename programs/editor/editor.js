@@ -87,9 +87,14 @@ function init() {
 
     });
 
-    // Editor Widgets
-    require(['widgets.js'], function () {
-        document.odfCanvas.addListener("statereadychange", loadWidgets(document));
+    // Editor Widgets and Avatars
+    require(['widgets.js', 'avatars.js'], function () {
+        document.odfCanvas.addListener("statereadychange", function() {
+            runtime.setTimeout(function() {
+                loadWidgets(document);
+                loadAvatars(document, document.getElementById('peopleList'));
+            }, 1000);
+        });
     });
 }
 
