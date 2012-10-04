@@ -15,7 +15,6 @@ widgets.ParagraphStyles = (function () {
                     label: availableStyles[i].displayName,
                     value: availableStyles[i].name
                 });
-                console.log(availableStyles[i].name);
             }
 
             widget = new Select({
