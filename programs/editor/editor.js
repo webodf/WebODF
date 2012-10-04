@@ -90,6 +90,7 @@ function init() {
     // Editor Widgets and Avatars
     require(['widgets.js', 'avatars.js'], function () {
         document.odfCanvas.addListener("statereadychange", function() {
+            // This timeout is a workaround for the fact that statereadychange fires too early sometimes
             runtime.setTimeout(function() {
                 loadWidgets(document);
                 loadAvatars(document, document.getElementById('peopleList'));
