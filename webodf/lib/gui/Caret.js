@@ -70,6 +70,10 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         focussed = false,
         caretLineVisible,
         blinking = false;
+
+        handle.style.width = '64px';
+        handle.style.height = '70px';
+
     function blink() {
         if (!focussed || !cursorNode.parentNode) {
             // stop blinking when removed from the document
@@ -124,8 +128,6 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
     };
     this.showHandle = function () {
         handle.style.display = "block";
-        handle.style.width = '64px';
-        handle.style.height = '70px';
         updateHandlePosition();
     };
     this.hideHandle = function () {
