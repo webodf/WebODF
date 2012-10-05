@@ -71,8 +71,10 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         caretLineVisible,
         blinking = false;
 
+    if (handle.style) {
         handle.style.width = '64px';
         handle.style.height = '70px';
+    }
 
     function blink() {
         if (!focussed || !cursorNode.parentNode) {
@@ -96,7 +98,7 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
     function updateHandlePosition() {
         if (handle.style) {
             handle.style.top = (span.offsetTop - handle.offsetHeight - 10) + "px";
-            handle.style.left = (span.offsetLeft - handle.offsetWidth/2 )+ "px";
+            handle.style.left = (span.offsetLeft - handle.offsetWidth / 2) + "px";
         }
     }
 
