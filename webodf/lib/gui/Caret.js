@@ -123,8 +123,10 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         return handle;
     };
     this.showHandle = function () {
-        updateHandlePosition();
         handle.style.display = "block";
+        handle.style.width = '64px';
+        handle.style.height = '70px';
+        updateHandlePosition();
     };
     this.hideHandle = function () {
         handle.style.display = "none";
