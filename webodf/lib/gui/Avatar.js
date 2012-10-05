@@ -61,6 +61,14 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
         var steps = stepCounter.countBackwardSteps(1, positionFilter);
         caretMover(-steps);
     }
+    function moveLineUp() {
+        var steps = stepCounter.countLineUpSteps(1, positionFilter);
+        caretMover(-steps);
+    }
+    function moveLineDown() {
+        var steps = stepCounter.countLineDownSteps(1, positionFilter);
+        caretMover(steps);
+    }
     /**
      * @param {!number} charCode
      * @return {!boolean}
@@ -73,6 +81,14 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
             handled = true;
         } else if (charCode === 39) { // right
             moveForward();
+            caret.focus();
+            handled = true;
+        } else if (charCode === 38) { // up
+            moveLineUp();
+            caret.focus();
+            handled = true;
+        } else if (charCode === 40) { // down
+            moveLineDown();
             caret.focus();
             handled = true;
         }

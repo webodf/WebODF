@@ -157,6 +157,22 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
         return count;
     }
     /**
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countLineUpSteps(steps, filter) {
+        return 1;
+    }
+    /**
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countLineDownSteps(steps, filter) {
+        return 1;
+    }
+    /**
      * @param {!Element} element
      * @param {!number} x
      * @param {!number} y
@@ -195,6 +211,8 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
         return {
             countForwardSteps: countForwardSteps,
             countBackwardSteps: countBackwardSteps,
+            countLineDownSteps: countLineDownSteps,
+            countLineUpSteps: countLineUpSteps,
             countStepsToPosition: countStepsToPosition
         };
     };
