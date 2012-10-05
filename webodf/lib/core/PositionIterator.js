@@ -230,12 +230,20 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = container;
         if (container.nodeType === 3) {
             currentPos = offset;
+            if (offset >= container.length) {
+                throw "Error in setPosition: " + offset + " >= "
+                    + container.length;
+            }
             return true;
         }
-        var n = walker.firstChild();
+        var o = offset,
+            n = walker.firstChild();
         while (offset > 0 && n) {
             offset -= 1;
             n = walker.nextSibling();
+        }
+        if (offset !== 0) {
+            throw "Error in setPosition: offset " + o + " is out of range.";
         }
         if (n === null) {
             walker.currentNode = container;

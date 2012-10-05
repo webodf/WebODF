@@ -39,16 +39,21 @@ runtime.loadClass("gui.SelectionMover");
 gui.SelectionManager = function SelectionManager(rootNode) {
     "use strict";
     var movers = [];
-    function onCursorRemove(cursorNode) {
+    /**
+     * @param {?Element} nodeAfterCursor
+     * @param {!number} textNodeIncrease
+     * @return {undefined}
+     */
+    function onCursorRemove(nodeAfterCursor, textNodeIncrease) {
         var i;
         for (i = 0; i < movers.length; i += 1) {
-            movers[i].adaptToInsertedCursor(cursorNode);
+            movers[i].adaptToCursorRemoval(nodeAfterCursor, textNodeIncrease);
         }
     }
     function onCursorAdd(cursorNode) {
         var i;
         for (i = 0; i < movers.length; i += 1) {
-            movers[i].adaptToCursorRemoval(cursorNode);
+            movers[i].adaptToInsertedCursor(cursorNode);
         }
     }
     /**

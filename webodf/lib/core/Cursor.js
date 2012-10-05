@@ -84,14 +84,17 @@ core.Cursor = function Cursor(selection, document) {
         }
         container.insertBefore(cursorNode, node);
     }
-    function removeCursor() {
-        var t = cursorNode.nextSibling;
+    function removeCursor(onCursorRemove) {
+        var t = cursorNode.nextSibling,
+            textNodeIncrease = 0;
         if (cursorTextNode.parentNode) {
             cursorTextNode.parentNode.removeChild(cursorTextNode);
             if (t && t.nodeType === 3) {
                 t.insertData(0, cursorTextNode.nodeValue);
+                textNodeIncrease = cursorTextNode.length;
             }
         }
+        onCursorRemove(t, textNodeIncrease);
         if (cursorNode.parentNode) {
             cursorNode.parentNode.removeChild(cursorNode);
         }
@@ -115,21 +118,22 @@ core.Cursor = function Cursor(selection, document) {
      * Synchronize the cursor with the current selection.
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
-     * @param {!core.PositionIterator=} positionIterator
+     * @param {!function(?Element,!number):undefined} onCursorRemove
      * @return {undefined}
      */
-    this.updateToSelection = function (positionIterator) {
+    this.updateToSelection = function (onCursorRemove) {
         var range;
-        removeCursor();
+        removeCursor(onCursorRemove);
         if (selection.focusNode) {
             putCursor(selection.focusNode, selection.focusOffset);
         }
     };
     /**
      * Remove the cursor from the document tree.
+     * @param {!function(?Element,!number):undefined} onCursorRemove
      * @return {undefined}
      */
-    this.remove = function () {
-        removeCursor();
+    this.remove = function (onCursorRemove) {
+        removeCursor(onCursorRemove);
     };
 };
