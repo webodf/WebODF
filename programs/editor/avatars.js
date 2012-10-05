@@ -25,6 +25,12 @@ function setupAvatarView(session, avatarlistdiv) {
         setupAvatarButton(e, avatars[i]);
         avatars[i].getCaret().showHandle();
     }
+    
+    avatars.forEach(function(avatar) {
+        document.addEventListener('changed', function() {
+            avatar.getCaret().focus();
+        });
+    });
 }
 
 function addMember(session, member) {

@@ -99,8 +99,10 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
             handle.style.left = (span.offsetLeft - handle.offsetWidth/2 )+ "px";
         }
     }
+
     this.focus = function () {
         span.focus();
+        updateHandlePosition();
     };
     this.move = function (number) {
 //runtime.log("moving " + number);
