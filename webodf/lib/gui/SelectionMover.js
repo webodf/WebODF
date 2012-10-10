@@ -166,15 +166,38 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
         return { top: y, left: x };
     }
     /**
-     * @param {!number} steps
+     * @param {!number} lines
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countLineUpSteps(steps, filter) {
+    function countLineUpSteps(lines, filter) {
         var c = positionIterator.container(),
             o = positionIterator.offset(),
-            count = 0;
+            span = cursor.getNode().firstChild,
+            stepCount = 0,
+            count = 0,
+            offset = span.offsetTop,
+            i;
+        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        while (lines > 0 && positionIterator.previousPosition()) {
+            stepCount += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                offset = span.offsetTop;
+                selection.collapse(positionIterator.container(),
+                        positionIterator.offset());
+                cursor.updateToSelection(onCursorRemove);
+                offset = span.offsetTop; // for now, always accept
+                if (offset !== span.offsetTop) {
+                    count += stepCount;
+                    stepCount = 0;
+                    lines -= 1;
+                }
+            }
+        }
         positionIterator.setPosition(c, o);
+        selection.collapse(positionIterator.container(),
+                positionIterator.offset());
+        cursor.updateToSelection(onCursorRemove);
         return count;
     }
     /**
@@ -188,28 +211,18 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
             span = cursor.getNode().firstChild,
             stepCount = 0,
             count = 0,
-            startOffset = getOffset(span),
             offset = span.offsetTop,
             i;
-/*
-for (i in span) {
-    if (typeof span[i] === "number") {
-//        runtime.log(i + " " + span[i]);
-    }
-}
-*/
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         while (lines > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
-//                offset = getOffset(span);
+                offset = span.offsetTop;
                 selection.collapse(positionIterator.container(),
                         positionIterator.offset());
                 cursor.updateToSelection(onCursorRemove);
-//runtime.log(JSON.stringify(offset));
-                if (offset !== span.offsetTop) {//startOffset.top) {
-//runtime.log(offset + " " + span.offsetTop);
-                    startOffset = offset;
+                offset = span.offsetTop; // for now, always accept
+                if (offset !== span.offsetTop) {
                     count += stepCount;
                     stepCount = 0;
                     lines -= 1;
