@@ -39,7 +39,7 @@ runtime.loadClass("ops.SessionImplementation");
  */
 ops.SessionImplementationTests = function SessionImplementationTests(runner) {
     "use strict";
-    var t;
+    var t, r = runner;
     this.setUp = function () {
         t = {};
         t.odf = new odf.OdfContainer("", null);
@@ -47,12 +47,18 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
     this.tearDown = function () {
         t = {};
     };
+    function newSession(callback) {
+        t.odf = new odf.OdfContainer("", null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        callback();
+    }
     this.tests = function () {
         return [
         ];
     };
     this.asyncTests = function () {
         return [
+            newSession
         ];
     };
 };

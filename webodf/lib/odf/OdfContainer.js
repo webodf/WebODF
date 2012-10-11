@@ -643,6 +643,7 @@ odf.OdfContainer = (function () {
             zip.save("mimetype", data, false, new Date());
             root.body = document.createElementNS(officens, 'body');
             root.body.appendChild(text);
+            setState(OdfContainer.DONE);
             return zip;
         }
         /**
