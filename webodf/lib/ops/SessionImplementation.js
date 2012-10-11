@@ -129,19 +129,30 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                     self.moveMemberCaret(memberid, n);
                 });
         members[memberid] = avatar;
+        return true;
     };
     this.removeMemberFromSession = function (memberid) {
         var avatar = members[memberid];
         avatar.removeFromSession();
         delete members[memberid];
+        return true;
     };
     this.moveMemberCaret = function (memberid, number) {
         var avatar = members[memberid];
         avatar.getCaret().move(number);
+        return true;
     };
     this.insertText = function (position, text) {
+        return true;
     };
-    this.removeCharacters = function (position, amount) {
+    this.removeText = function (position, characterCount) {
+        return true;
+    };
+    this.insertParagraph = function (position) {
+        return true;
+    };
+    this.removeParagraph = function (position) {
+        return true;
     };
     /* RELAYING OF SESSION OPERATIONS */
     this.addSessionListener = function (session) {

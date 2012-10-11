@@ -38,29 +38,39 @@
 ops.Session = function Session() {"use strict"; };
 /**
  * @param {!string} memberid
- * @return {undefined}
+ * @return {!boolean}
  */
 ops.Session.prototype.addMemberToSession = function (memberid) {"use strict"; };
 /**
  * @param {!string} memberid
- * @return {undefined}
+ * @return {!boolean}
  */
 ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict"; };
 /**
  * @param {!string} memberid
  * @param {!number} number
- * @return {undefined}
+ * @return {!boolean}
  */
 ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
 /**
  * @param {!number} position
  * @param {!string} text
- * @return {undefined}
+ * @return {!boolean}
  */
 ops.Session.prototype.insertText = function (position, text) {"use strict"; };
 /**
  * @param {!number} position
- * @param {!number} amount
- * @return {undefined}
+ * @param {!number} characterCount
+ * @return {!boolean}
  */
-ops.Session.prototype.removeCharacters = function (position, amount) {"use strict"; };
+ops.Session.prototype.removeText = function (position, characterCount) {"use strict"; };
+/**
+ * @param {!number} position
+ * @return {!boolean}
+ */
+ops.Session.prototype.insertParagraph = function (position) {"use strict"; };
+/**
+ * @param {!number} position
+ * @return {!boolean}
+ */
+ops.Session.prototype.removeParagraph = function (position) {"use strict"; };
