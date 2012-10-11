@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/odfkit/webodf/
  */
 /*global runtime, core, gui, ops*/
-runtime.loadClass("ops.SessionImplementation");
+runtime.loadClass("gui.Avatar");
 
 /**
  * @constructor

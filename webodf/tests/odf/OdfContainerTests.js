@@ -30,37 +30,50 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global ops*/
+/*global runtime, core, odf*/
+runtime.loadClass("odf.OdfContainer");
 /**
- * An operation that can be performed on a document.
- * @interface
+ * @constructor
+ * @param {core.UnitTestRunner} runner
+ * @implements {core.UnitTest}
  */
-ops.Session = function Session() {"use strict"; };
-/**
- * @param {!string} memberid
- * @return {undefined}
- */
-ops.Session.prototype.addMemberToSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @return {undefined}
- */
-ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @param {!number} number
- * @return {undefined}
- */
-ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
-/**
- * @param {!number} position
- * @param {!string} text
- * @return {undefined}
- */
-ops.Session.prototype.insertText = function (position, text) {"use strict"; };
-/**
- * @param {!number} position
- * @param {!number} amount
- * @return {undefined}
- */
-ops.Session.prototype.removeCharacters = function (position, amount) {"use strict"; };
+odf.OdfContainerTests = function OdfContainerTests(runner) {
+    "use strict";
+    var t, r = runner;
+    this.setUp = function () {
+        t = {};
+    };
+    this.tearDown = function () {
+        t = {};
+    };
+    function createNew() {
+        t.odf = new odf.OdfContainer("", null);
+    }
+    function createNewSaveAsAndLoad(callback) {
+        t.odf = new odf.OdfContainer("", null);
+        t.odf.saveAs("test.odt", function (err) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            callback();
+        });
+        //callback();
+    }
+    this.tests = function () {
+        return [
+            createNew
+        ];
+    };
+    this.asyncTests = function () {
+        return [
+            createNewSaveAsAndLoad
+        ];
+    };
+};
+odf.OdfContainerTests.prototype.description = function () {
+    "use strict";
+    return "Test the OdfContainer class.";
+};
+(function () {
+    "use strict";
+    return odf.OdfContainerTests;
+}());

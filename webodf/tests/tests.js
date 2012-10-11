@@ -32,6 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
+/*global odf, ops*/
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.PositionIteratorTests");
@@ -42,6 +43,8 @@ runtime.loadClass("gui.AvatarTests");
 runtime.loadClass("gui.CaretTests");
 runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
+runtime.loadClass("ops.SessionImplementationTests");
+runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
 
@@ -54,20 +57,21 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(core.PositionIteratorTests);
     tests.push(gui.SelectionMoverTests);
     tests.push(gui.AvatarTests);
+    tests.push(odf.OdfContainerTests);
 }
 if (runtime.type() === "BrowserRuntime") {
     tests.push(gui.CaretTests);
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
+    tests.push(ops.SessionImplementationTests);
 //    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
 /*
 tests = [];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-    tests.push(core.PositionIteratorTests);
-    tests.push(gui.SelectionMoverTests);
-    tests.push(gui.AvatarTests);
+    tests.push(ops.SessionImplementationTests);
+    tests.push(odf.OdfContainerTests);
 }
 */
 var tester = new core.UnitTester();

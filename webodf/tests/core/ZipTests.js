@@ -96,7 +96,9 @@ core.ZipTests = function ZipTests(runner) {
         var filename = "writetest.zip",
             zip = new core.Zip(filename, null),
             data = runtime.byteArrayFromString(
-                    "application/vnd.oasis.opendocument.text", "utf8");
+                "application/vnd.oasis.opendocument.text",
+                "utf8"
+            );
         zip.save("mimetype", data, false, new Date());
         zip.load("mimetype", function (err, newdata) {
             t.err = err;

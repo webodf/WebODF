@@ -13,6 +13,8 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/gui/CaretTests.js
     tests/gui/SelectionMoverTests.js
     tests/gui/XMLEditTests.js
+    tests/odf/OdfContainerTests.js
+    tests/ops/SessionImplementationTests.js
     tests/xmldom/OperationalTransformDOMTests.js
     tests/xmldom/XPathTests.js
     tests/tests.js

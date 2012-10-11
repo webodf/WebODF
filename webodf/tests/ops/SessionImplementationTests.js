@@ -30,37 +30,37 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global ops*/
+/*global runtime, core, odf, ops*/
+runtime.loadClass("ops.SessionImplementation");
 /**
- * An operation that can be performed on a document.
- * @interface
+ * @constructor
+ * @param {core.UnitTestRunner} runner
+ * @implements {core.UnitTest}
  */
-ops.Session = function Session() {"use strict"; };
-/**
- * @param {!string} memberid
- * @return {undefined}
- */
-ops.Session.prototype.addMemberToSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @return {undefined}
- */
-ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @param {!number} number
- * @return {undefined}
- */
-ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
-/**
- * @param {!number} position
- * @param {!string} text
- * @return {undefined}
- */
-ops.Session.prototype.insertText = function (position, text) {"use strict"; };
-/**
- * @param {!number} position
- * @param {!number} amount
- * @return {undefined}
- */
-ops.Session.prototype.removeCharacters = function (position, amount) {"use strict"; };
+ops.SessionImplementationTests = function SessionImplementationTests(runner) {
+    "use strict";
+    var t;
+    this.setUp = function () {
+        t = {};
+        t.odf = new odf.OdfContainer("", null);
+    };
+    this.tearDown = function () {
+        t = {};
+    };
+    this.tests = function () {
+        return [
+        ];
+    };
+    this.asyncTests = function () {
+        return [
+        ];
+    };
+};
+ops.SessionImplementationTests.prototype.description = function () {
+    "use strict";
+    return "Test the SessionImplementation class.";
+};
+(function () {
+    "use strict";
+    return ops.SessionImplementationTests;
+}());

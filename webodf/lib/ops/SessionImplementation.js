@@ -139,7 +139,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         var avatar = members[memberid];
         avatar.getCaret().move(number);
     };
-
+    this.insertText = function (position, text) {
+    };
+    this.removeCharacters = function (position, amount) {
+    };
     /* RELAYING OF SESSION OPERATIONS */
     this.addSessionListener = function (session) {
     };

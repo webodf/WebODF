@@ -10,6 +10,8 @@
         "gui/CaretTests.js",
         "gui/SelectionMoverTests.js",
         "gui/XMLEditTests.js",
+        "odf/OdfContainerTests.js",
+        "ops/SessionImplementationTests.js",
         "tests.js",
         "xmldom/OperationalTransformDOMTests.js",
         "xmldom/XPathTests.js"
