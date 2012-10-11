@@ -46,21 +46,21 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     this.tearDown = function () {
         t = {};
     };
-    function createNew() {
-        t.odf = new odf.OdfContainer("", null);
-    }
     function createNewSaveAsAndLoad(callback) {
         t.odf = new odf.OdfContainer("", null);
         t.odf.saveAs("test.odt", function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
-            callback();
+            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+                t.odf = odf;
+                r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+                callback();
+            });
         });
         //callback();
     }
     this.tests = function () {
         return [
-            createNew
         ];
     };
     this.asyncTests = function () {
