@@ -49,6 +49,8 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     function createNew() {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        r.shouldBeNonNull(t, "t.odf.rootElement");
+        r.shouldBeNonNull(t, "t.odf.rootElement.firstChild");
     }
     function createNewSaveAsAndLoad(callback) {
         t.odf = new odf.OdfContainer("", null);

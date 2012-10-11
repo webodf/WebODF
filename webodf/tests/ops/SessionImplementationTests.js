@@ -47,18 +47,19 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
     this.tearDown = function () {
         t = {};
     };
-    function newSession(callback) {
+    function newSession() {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-        callback();
+        t.session = new ops.SessionImplementation(t.odf);
+        r.shouldBe(t, "t.session.getAvatars().length", "0");
     }
     this.tests = function () {
         return [
+            newSession
         ];
     };
     this.asyncTests = function () {
         return [
-            newSession
         ];
     };
 };
