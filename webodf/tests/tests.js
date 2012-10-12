@@ -30,7 +30,7 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/odfkit/webodf/
+ * @source: http://gitorious.org/webodf/webodf/
  */
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
