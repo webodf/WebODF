@@ -127,6 +127,9 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             avatar = new gui.Avatar(memberid, selectionMover, filter,
                 function (n) {
                     self.moveMemberCaret(memberid, n);
+                },
+                function (charCode) {
+                    // key handler
                 });
         members[memberid] = avatar;
         return true;

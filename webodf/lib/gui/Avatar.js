@@ -44,8 +44,9 @@ runtime.loadClass("gui.Caret");
  * @param {!gui.SelectionMover} selectionMover
  * @param {?core.PositionFilter} positionFilter
  * @param {!function(!number):undefined} caretMover
+ * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMover) {
+gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMover, keyHandler) {
     "use strict";
     var self = this,
         caret,
@@ -73,7 +74,7 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
      * @param {!number} charCode
      * @return {!boolean}
      */
-    function keyHandler(charCode) {
+    function avatarKeyHandler(charCode) {
         var handled = false;
         if (charCode === 37) { // left
             moveBackward();
@@ -91,10 +92,11 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
             moveLineDown();
             caret.focus();
             handled = true;
+        } else if (keyHandler) {
+            handled = keyHandler(charCode);
         }
         return handled;
     }
-
     function getText(node) {
         var t = "";
         node = node.firstChild;
@@ -125,7 +127,7 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
     };
     function init() {
         var handle;
-        caret = new gui.Caret(selectionMover, keyHandler);
+        caret = new gui.Caret(selectionMover, avatarKeyHandler);
         stepCounter = caret.getStepCounter();
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
