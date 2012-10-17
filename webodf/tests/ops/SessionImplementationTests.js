@@ -53,9 +53,21 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
         t.session = new ops.SessionImplementation(t.odf);
         r.shouldBe(t, "t.session.getAvatars().length", "0");
     }
+    function addMember() {
+        newSession();
+        t.session.addMemberToSession("member1");
+        r.shouldBe(t, "t.session.getAvatars().length", "1");
+        t.session.addMemberToSession("member2");
+        r.shouldBe(t, "t.session.getAvatars().length", "2");
+        t.session.removeMemberFromSession("member2");
+        r.shouldBe(t, "t.session.getAvatars().length", "1");
+        t.session.removeMemberFromSession("member1");
+        r.shouldBe(t, "t.session.getAvatars().length", "0");
+    }
     this.tests = function () {
         return [
-            newSession
+            newSession,
+            addMember
         ];
     };
     this.asyncTests = function () {
