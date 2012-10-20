@@ -60,10 +60,10 @@ ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict
 ops.Session.prototype.insertText = function (position, text) {"use strict"; };
 /**
  * @param {!number} position
- * @param {!number} characterCount
+ * @param {!string} text
  * @return {!boolean}
  */
-ops.Session.prototype.removeText = function (position, characterCount) {"use strict"; };
+ops.Session.prototype.removeText = function (position, text) {"use strict"; };
 /**
  * @param {!number} position
  * @return {!boolean}
