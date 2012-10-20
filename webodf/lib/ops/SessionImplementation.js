@@ -122,6 +122,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     /* SESSION OPERATIONS */
 
+    /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
     this.addMemberToSession = function (memberid) {
         var selectionMover = selectionManager.createSelectionMover(),
             avatar = new gui.Avatar(memberid, selectionMover, filter,
@@ -134,26 +138,53 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         members[memberid] = avatar;
         return true;
     };
+    /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
     this.removeMemberFromSession = function (memberid) {
         var avatar = members[memberid];
         avatar.removeFromSession();
         delete members[memberid];
         return true;
     };
+    /**
+     * @param {!string} memberid
+     * @param {!number} number
+     * @return {!boolean}
+     */
     this.moveMemberCaret = function (memberid, number) {
         var avatar = members[memberid];
         avatar.getCaret().move(number);
         return true;
     };
+    /**
+     * @param {!number} position
+     * @param {!string} text
+     * @return {!boolean}
+     */
     this.insertText = function (position, text) {
         return true;
     };
-    this.removeText = function (position, characterCount) {
+    /**
+     * @param {!number} position
+     * @param {!string} text
+     * @return {!boolean}
+     */
+    this.removeText = function (position, text) {
         return true;
     };
+    /**
+     * @param {!number} position
+     * @return {!boolean}
+     */
     this.insertParagraph = function (position) {
         return true;
     };
+    /**
+     * @param {!number} position
+     * @return {!boolean}
+     */
     this.removeParagraph = function (position) {
         return true;
     };
