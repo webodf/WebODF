@@ -56,6 +56,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @implements {core.PositionFilter}
      */
     function TextPositionFilter() {
+        var /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+            /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
         /**
          * @param {!core.PositionIterator} iterator
          * @return {core.PositionFilter.FilterResult}
@@ -65,25 +67,25 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
-                    return core.PositionFilter.FilterResult.FILTER_REJECT;
+                    return reject;
                 }
-                return core.PositionFilter.FilterResult.FILTER_ACCEPT;
+                return accept;
             }
             if (n.length === 0) {
-                return core.PositionFilter.FilterResult.FILTER_REJECT;
+                return reject;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
             o = p && p.localName;
             if (o !== "p" && o !== "span" && o !== "h") {
-                return core.PositionFilter.FilterResult.FILTER_REJECT;
+                return reject;
             }
             // do not stop between spaces
             o = iterator.textOffset();
             if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
-                return core.PositionFilter.FilterResult.FILTER_REJECT;
+                return reject;
             }
-            return core.PositionFilter.FilterResult.FILTER_ACCEPT;
+            return accept;
         };
     }
     function findTextRoot(session) {

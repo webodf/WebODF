@@ -46,7 +46,7 @@ core.PositionFilter.FilterResult = {
 };
 /**
  * @param {!core.PositionIterator} point
- * @return {core.PositionFilter.FilterResult}
+ * @return {!core.PositionFilter.FilterResult}
  */
 core.PositionFilter.prototype.acceptPosition = function (point) {"use strict"; };
 (function () {

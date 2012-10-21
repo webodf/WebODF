@@ -33,6 +33,7 @@
 /*global runtime, core, gui, XMLSerializer*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
+runtime.loadClass("core.PositionFilter");
 
 /**
  * This class modifies the selection in different ways.
