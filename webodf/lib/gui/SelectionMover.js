@@ -44,18 +44,6 @@ runtime.loadClass("core.PositionFilter");
  */
 gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
-    /**
-     * @constructor
-     * @extends NodeFilter
-     */
-    function CursorFilter() {
-        this.acceptNode = function (node) {
-            if (node.namespaceURI === "urn:webodf:names:cursor") {
-                return 2;
-            }
-            return 1;
-        };
-    }
     var self = this,
         doc = /**@type{!Document}*/(rootNode.ownerDocument),
         selection = new core.Selection(doc),
@@ -336,8 +324,7 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
         }
     };
     function init() {
-        var filter = new CursorFilter();
-        positionIterator = new core.PositionIterator(rootNode, 5, filter, false);
+        positionIterator = gui.SelectionMover.createPositionIterator(rootNode);
         // put the cursor at the start of the rootNode
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
@@ -349,3 +336,32 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
     }
     init();
 };
+/**
+ * @param {!Node} rootNode
+ * @return {!core.PositionIterator}
+ */
+gui.SelectionMover.createPositionIterator = function (rootNode) {
+    "use strict";
+    /**
+     * @constructor
+     * @extends NodeFilter
+      */
+    function CursorFilter() {
+        /**
+         * @param {!Node} node
+         * @return {!number}
+         */
+        this.acceptNode = function (node) {
+            if (node.namespaceURI === "urn:webodf:names:cursor") {
+                return 2;
+            }
+            return 1;
+        };
+    }
+    var filter = new CursorFilter();
+    return new core.PositionIterator(rootNode, 5, filter, false);
+};
+(function () {
+    "use strict";
+    return gui.SelectionMover;
+}());
