@@ -28,9 +28,9 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/odfkit/webodf/
+ * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, gui, ops, window*/
+/*global runtime, gui, ops, odf, window*/
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("gui.SelectionManager");
 /**
@@ -94,43 +94,144 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return root;
     }
+    /**
+     * Find the position of the avatar in the text.
+     * The position contains the paragraph number (starting from 0 and
+     * including text:p and text:h and the offset.
+     * @param {!gui.Avatar} avatar
+     * @return {{paragraph: !number, offset: !number}}
+     */
+    function getAvatarPosition(avatar) {
+        var paragraph = 0,
+            offset = 0;
+        return { paragraph: paragraph, offset: offset };
+    }
+    /**
+     * This function will iterate through positions allowed by the position
+     * iterator and count only the text positions. When the amount defined by
+     * offset has been counted, the Text node that that position is returned
+     * as well as the offset in that text node.
+     * @param {!Element} paragraph
+     * @param {!number} offset
+     * @return {?{textNode: !Text, offset: !number}}
+     */
+    function getPositionInTextNode(paragraph, offset) {
+        return null;
+    }
     var self = this,
         rootNode,
         selectionManager,
         members = {},
-        filter = new TextPositionFilter();
+        filter = new TextPositionFilter(),
+        style2CSS = new odf.Style2CSS(),
+        namespaces = style2CSS.namespaces;
+    /**
+     * @param {!number} paragraph
+     * @return {?Element}
+     */
+    function findParagraph(paragraph) {
+        function acceptNode(node) {
+            if ((node.localName !== "p" && node.localName !== "h")
+                    || node.namespaceURI !== namespaces.text) {
+                return 3; // skip, but inspect children
+            }
+            return 1; // accept
+        }
+        var walker,
+            count = 0,
+            node;
+        acceptNode.acceptNode = acceptNode;
+        // create a walker that just shows elements
+        walker = rootNode.ownerDocument.createTreeWalker(rootNode,
+                0x00000001, acceptNode, false);
+        node = walker.nextNode();
+        while (node !== null) {
+            if (count === paragraph) {
+                return node;
+            }
+            count += 1;
+        }
+        return null;
+    }
 
     /* SESSION OPERATIONS */
 
+    /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
     this.addMemberToSession = function (memberid) {
         var selectionMover = selectionManager.createSelectionMover(),
             avatar = new gui.Avatar(memberid, selectionMover, filter,
                 function (n) {
                     self.moveMemberCaret(memberid, n);
+                },
+                function (charCode) {
+                    // key handler
+                    runtime.log("type the key: " + charCode);
+                    var position = getAvatarPosition(avatar),
+                        text = String.fromCharCode(charCode);
+                    this.insertText(position.paragraph, position.offset, text);
+                    return true;
                 });
         members[memberid] = avatar;
         return true;
     };
+    /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
     this.removeMemberFromSession = function (memberid) {
         var avatar = members[memberid];
         avatar.removeFromSession();
         delete members[memberid];
         return true;
     };
+    /**
+     * @param {!string} memberid
+     * @param {!number} number
+     * @return {!boolean}
+     */
     this.moveMemberCaret = function (memberid, number) {
         var avatar = members[memberid];
         avatar.getCaret().move(number);
         return true;
     };
-    this.insertText = function (position, text) {
+    /**
+     * @param {!number} paragraph
+     * @param {!number} position
+     * @param {!string} text
+     * @return {!boolean}
+     */
+    this.insertText = function (paragraph, position, text) {
+        var p = findParagraph(paragraph),
+            pos = p && getPositionInTextNode(p, position);
+        if (!pos) {
+            return false;
+        }
+        pos.textNode.insertData(pos.offset, text);
         return true;
     };
-    this.removeText = function (position, characterCount) {
+    /**
+     * @param {!number} paragraph
+     * @param {!number} position
+     * @param {!string} text
+     * @return {!boolean}
+     */
+    this.removeText = function (paragraph, position, text) {
         return true;
     };
+    /**
+     * @param {!number} position
+     * @return {!boolean}
+     */
     this.insertParagraph = function (position) {
         return true;
     };
+    /**
+     * @param {!number} position
+     * @return {!boolean}
+     */
     this.removeParagraph = function (position) {
         return true;
     };

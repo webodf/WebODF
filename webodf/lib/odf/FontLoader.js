@@ -28,7 +28,7 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/odfkit/webodf/
+ * @source: http://gitorious.org/webodf/webodf/
  */
 /*jslint sub: true*/
 /*global runtime, odf, core, document, xmldom*/

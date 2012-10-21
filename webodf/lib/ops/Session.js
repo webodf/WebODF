@@ -28,7 +28,7 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/odfkit/webodf/
+ * @source: http://gitorious.org/webodf/webodf/
  */
 /*global ops*/
 /**
@@ -53,17 +53,19 @@ ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict
  */
 ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
 /**
+ * @param {!number} paragraph
  * @param {!number} position
  * @param {!string} text
  * @return {!boolean}
  */
-ops.Session.prototype.insertText = function (position, text) {"use strict"; };
+ops.Session.prototype.insertText = function (paragraph, position, text) {"use strict"; };
 /**
+ * @param {!number} paragraph
  * @param {!number} position
- * @param {!number} characterCount
+ * @param {!string} text
  * @return {!boolean}
  */
-ops.Session.prototype.removeText = function (position, characterCount) {"use strict"; };
+ops.Session.prototype.removeText = function (paragraph, position, text) {"use strict"; };
 /**
  * @param {!number} position
  * @return {!boolean}
