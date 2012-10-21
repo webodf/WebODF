@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 KO GmbH - Tobias Hintze
+ * Copyright (C) 2012 KO GmbH - Tobias Hintze
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License

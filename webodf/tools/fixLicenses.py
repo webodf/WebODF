@@ -3,7 +3,7 @@
 #
 # This script checks if all files have licenses and fixes them if needed.
 # The script should be run from the root directory of the webodf project.
-import os, os.path
+import os, os.path, re
 
 # read the license text from the source file
 # the license starts at the line ' * @licstart' and ends at ' */'
@@ -64,18 +64,36 @@ def fixLicense(path, license, defaultcopyright):
 # get list of *.js files
 jsfiles = []
 for root, directories, files in os.walk("."):
-	while "extjs" in directories:
-		directories.remove("extjs")
 	for f in files:
 		if f[-3:] == ".js":
 			jsfiles.append(os.path.abspath(os.path.join(root, f)))
 
-# remove webodf/lib/packackages.js since it is the source for the licenses
-sourcefilepath = os.path.join(os.getcwd(), "webodf/lib/packages.js")
-jsfiles.remove(sourcefilepath)
+lic_ignores = []
 
+# don't touch .git
+lic_ignores.append("\\.git/")
+
+# third party
+lic_ignores.append("node_modules/xmldom/")
+lic_ignores.append("programs/.*/cordova-[0-9.]*\\.js$")
+lic_ignores.append(".*/sencha-touch\\.js$")
+lic_ignores.append(".*/JSLint\\.js$")
+
+common_base = os.getcwd()+"/"
+removees = []
+for lignore in lic_ignores:
+	r = re.compile(lignore)
+	for jsfile in jsfiles:
+		if r.match(jsfile[len(common_base):]):
+			removees.append(jsfile)
+			print "skipping:",jsfile
+
+for removee in removees:
+	jsfiles.remove(removee)
+
+sourcefilepath = os.path.join(os.getcwd(), "LICENSE")
 licensetext = readLicense(sourcefilepath)
-defaultcopyright = " * Copyright (C) 2011 KO GmbH <jos.van.den.oever@kogmbh.com>\n"
+defaultcopyright = " * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>\n\n"
 
 for f in jsfiles:
 	fixLicense(f, licensetext, defaultcopyright)
