@@ -88,6 +88,13 @@ ExternalProject_Add(
 )
 set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/src/NodeJS/out/Release/node)
 
+# copy node_modules directory from source to build
+# (this is needed if a module is required in there)
+add_custom_target(copy_node_modules ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules ${CMAKE_BINARY_DIR}/node_modules
+    COMMENT copying node_modules from source to build
+)
+
 # JSCoverage
 ExternalProject_Add(
     JSCoverage
