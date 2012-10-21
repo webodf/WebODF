@@ -164,7 +164,8 @@ set(HTML5UIFILES
   app/views/FilesList.js
   app/views/OdfView.js
   app/views/Viewport.js
-  sencha-touch.css sencha-touch.js
+  sencha-touch.css
+  sencha-touch.js
   app/store/FileStore.js
   ZoomOut.png
   ZoomIn.png
