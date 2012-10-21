@@ -246,11 +246,14 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
         // really dumb/inefficient implementation
         var c = positionIterator.container(),
             o = positionIterator.offset(),
-            steps = 0,
-            posOffset;
+            steps = 0;
 
+        // the iterator may interpret the positions as given by the range
+        // differently than the dom positions, so we normalize them by calling
+        // setPosition with these values
         positionIterator.setPosition(element, offset);
-        posOffset = positionIterator.offset();
+        element = positionIterator.container();
+        offset = positionIterator.offset();
         positionIterator.setPosition(c, o);
 
         while (positionIterator.nextPosition()) {
@@ -258,7 +261,7 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
                 steps += 1;
             }
             if (positionIterator.container() === element) {
-                if(positionIterator.offset() === posOffset) {
+                if (positionIterator.offset() === offset) {
                     positionIterator.setPosition(c, o);
                     return steps;
                 }
@@ -271,7 +274,7 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
                 steps -= 1;
             }
             if (positionIterator.container() === element) {
-                if(positionIterator.offset() === posOffset) {
+                if (positionIterator.offset() === offset) {
                     positionIterator.setPosition(c, o);
                     return steps;
                 }
