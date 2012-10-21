@@ -79,14 +79,16 @@ set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 # Node.JS
 ExternalProject_Add(
     NodeJS
+    PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
     DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
     URL "http://nodejs.org/dist/v0.8.11/node-v0.8.11.tar.gz"
     URL_MD5 23cb6d6a5c3949ac73df3c6b330e834d
-    CONFIGURE_COMMAND "./configure"
+    CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
+    INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
     BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ""
 )
-set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/src/NodeJS/out/Release/node)
+set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node)
+set(NODE_NPM ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/npm)
 
 # copy node_modules directory from source to build
 # (this is needed if a module is required in there)
