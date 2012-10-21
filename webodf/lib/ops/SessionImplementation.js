@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/odfkit/webodf/
  */
-/*global runtime, gui, ops*/
+/*global runtime, gui, ops, window*/
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("gui.SelectionManager");
 /**
@@ -57,26 +57,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     function TextPositionFilter() {
         this.acceptPosition = function (iterator) {
-            var n = iterator.container(), p, o, d;
-            // only stop in text nodes
-            if (n.nodeType !== 3) {
-                return 2;
-            }
-            // only stop in text nodes in 'p', 'h' or 'span' elements
-            p = n.parentNode;
-            o = p && p.localName;
-            if (o !== "p" && o !== "span" && o !== "h") {
-                return 2;
-            }
-            // do not stop between spaces
-            o = iterator.offset();
-            d = n.data;
-            if (o > 0 && d[o - 1] === ' ' && d[o] === ' ') {
-                return 2;
-            }
-            return 1;
-        };
-        this.acceptPosition = function acceptPosition(iterator) {
             var n = iterator.container(), p, o, d;
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
@@ -182,13 +162,16 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         var avatar = getFocussedAvatar(),
             caret,
             counter,
-            steps;
+            steps,
+            selection;
+
         if (!avatar) {
             return;
         }
         caret = avatar.getCaret();
         counter = caret.getStepCounter().countStepsToPosition;
-        steps = counter(e.target, e.x, e.y, filter);
+        selection = window.getSelection();
+        steps = counter(selection.focusNode, selection.focusOffset, filter);
         caret.move(steps);
         caret.focus();
         //runtime.log(steps);

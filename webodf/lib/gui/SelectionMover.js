@@ -237,39 +237,50 @@ gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemo
     }
     /**
      * @param {!Element} element
-     * @param {!number} x
-     * @param {!number} y
+     * @param {!number} offset
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countStepsToPosition(element, x, y, filter) {
+    function countStepsToPosition(element, offset, filter) {
         // first figure out how to get to the element
         // really dumb/inefficient implementation
         var c = positionIterator.container(),
             o = positionIterator.offset(),
-            steps = 0;
-        while (positionIterator.container() !== element
-                && positionIterator.nextPosition()) {
+            steps = 0,
+            posOffset;
+
+        positionIterator.setPosition(element, offset);
+        posOffset = positionIterator.offset();
+        positionIterator.setPosition(c, o);
+
+        while (positionIterator.nextPosition()) {
             if (filter.acceptPosition(positionIterator) === 1) {
                 steps += 1;
             }
-        }
-        if (positionIterator.container() !== element) {
-            steps = 0;
-            positionIterator.setPosition(c, o);
-            while (positionIterator.container() !== element
-                    && positionIterator.previousPosition()) {
-                if (filter.acceptPosition(positionIterator) === 1) {
-                    steps -= 1;
+            if (positionIterator.container() === element) {
+                if(positionIterator.offset() === posOffset) {
+                    positionIterator.setPosition(c, o);
+                    return steps;
                 }
             }
-            if (positionIterator.container() !== element) {
-                steps = 0;
+        }
+        steps = 0;
+        positionIterator.setPosition(c, o);
+        while (positionIterator.previousPosition()) {
+            if (filter.acceptPosition(positionIterator) === 1) {
+                steps -= 1;
+            }
+            if (positionIterator.container() === element) {
+                if(positionIterator.offset() === posOffset) {
+                    positionIterator.setPosition(c, o);
+                    return steps;
+                }
             }
         }
         positionIterator.setPosition(c, o);
         return steps;
     }
+
     this.getStepCounter = function () {
         return {
             countForwardSteps: countForwardSteps,
