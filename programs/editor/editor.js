@@ -31,103 +31,126 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+/*global runtime,document,odf,require */
+
 runtime.currentDirectory = function () {
+    "use strict";
     return "../../webodf/lib";
 };
 runtime.libraryPaths = function () {
+    "use strict";
     return [ runtime.currentDirectory() ];
 };
 
-function init() {
+function editor_init(docurl) {
+    "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
-    // If the URL has a fragment (#...), try to load the file it represents
-    var location = String(document.location),
-        pos = location.indexOf('#'),
-        odfElement = document.getElementById("canvas");
-    document.odfCanvas = new odf.OdfCanvas(odfElement);
+    var doclocation, pos, odfElement, odfCanvas, filename;
 
-    if (pos === -1 || !window) {
-        return;
+    odfElement = document.getElementById("canvas");
+    odfCanvas = new odf.OdfCanvas(odfElement);
+
+    // this needs to be available for the widgets
+    document.odfCanvas = odfCanvas;
+
+    if (docurl === undefined) {
+        // If the URL has a fragment (#...), try to load the file it represents
+        doclocation = String(document.location);
+        pos = doclocation.indexOf('#');
+        if (pos === -1) { return; }
+        doclocation = doclocation.substr(pos + 1);
+    } else {
+        doclocation = docurl;
     }
 
-    location = location.substr(pos + 1);
-
     // Editor Widgets and Avatars
-    document.odfCanvas.addListener("statereadychange", function() {
+    require(['widgets.js', 'avatars.js'], function () {
+        odfCanvas.addListener("statereadychange", function() {
             runtime.setTimeout(function() {
                 loadWidgets(document);
                 loadAvatars(document, document.getElementById('peopleList'));
-            }, 100);
+            }, 1);
+        });
     });
 
-    document.odfCanvas.load(location);
-    document.odfCanvas.setEditable(false);
+    odfCanvas.load(doclocation);
+    odfCanvas.setEditable(false);
 
-    var filename = location.replace(/^.*[\\\/]/, '');
-    document.getElementById('topPane').innerHTML = "<h1> <a href = '" + location + "''>" + filename + "</a></h1>";
+    filename = doclocation.replace(/^.*[\\\/]/, '');
+    document.getElementById('topPane').innerHTML = "<h1> <a href = '" +
+        doclocation + "''>" + filename + "</a></h1>";
 
     // App Widgets
-    require(["dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojox/layout/ExpandoPane"], function(BorderContainer, ContentPane, ExpandoPane) {
-        var mainContainer = new BorderContainer({}, 'mainContainer');
-        var collabContainer = new BorderContainer({}, 'collabContainer');
+    require([
+        "dijit/layout/BorderContainer",
+        "dijit/layout/ContentPane",
+        "dojox/layout/ExpandoPane"],
+        function(BorderContainer, ContentPane, ExpandoPane) {
+            var mainContainer = new BorderContainer({}, 'mainContainer');
+            var collabContainer = new BorderContainer({}, 'collabContainer');
 
-        var topPane = new ContentPane({
-            region: 'top'
-        }, 'topPane');
-        var editorPane = new ContentPane({
-            region: 'center'
-        }, 'editor');
-        var collabPane = new ExpandoPane({
-            region: 'trailing',
-            splitter: 'true',
-            title: 'Collaboration Pane'
-        }, 'collaboration');
-        var peoplePane = new ContentPane({
-            region: 'top',
-            splitter: 'true',
-            title: 'People'
-        }, 'people');
-        var chatPane = new ContentPane({
-            region: 'center',
-            title: 'Chat'
-        }, 'chat');
+            var topPane = new ContentPane({
+                region: 'top'
+            }, 'topPane');
+            var editorPane = new ContentPane({
+                region: 'center'
+            }, 'editor');
+            var collabPane = new ExpandoPane({
+                region: 'trailing',
+                splitter: 'true',
+                title: 'Collaboration Pane'
+            }, 'collaboration');
+            var peoplePane = new ContentPane({
+                region: 'top',
+                splitter: 'true',
+                title: 'People'
+            }, 'people');
+            var chatPane = new ContentPane({
+                region: 'center',
+                title: 'Chat'
+            }, 'chat');
 
-        mainContainer.addChild(topPane);
-        mainContainer.addChild(editorPane);
-        mainContainer.addChild(collabPane);
-        collabContainer.addChild(peoplePane);
-        collabContainer.addChild(chatPane);
-        collabPane.addChild(collabContainer);
+            mainContainer.addChild(topPane);
+            mainContainer.addChild(editorPane);
+            mainContainer.addChild(collabPane);
+            collabContainer.addChild(peoplePane);
+            collabContainer.addChild(chatPane);
+            collabPane.addChild(collabContainer);
 
-        mainContainer.startup();
-        collabContainer.startup();
+            mainContainer.startup();
+            collabContainer.startup();
 
-        require(["dijit/form/TextBox", "dijit/form/Button"], function(TextBox, Button) {
-            // People Box
+            require([
+                "dijit/form/TextBox",
+                "dijit/form/Button"],
+                function(TextBox, Button) {
+                    // People Box
 
-            // User's Editable Name
-            var nameBox = new TextBox({
-                value: '',
-                placeHolder: 'Type your name...',
-                style: 'text-align: center;'
-            }, 'nameEdit');
-            
-            var inviteButton = new Button({
-                label: 'Invite People',
-            }, 'inviteButton');
+                    // User's Editable Name
+                    var nameBox = new TextBox({
+                        value: '',
+                        placeHolder: 'Type your name...',
+                        style: 'text-align: center;'
+                    }, 'nameEdit');
 
-            // Chat Box
+                    var inviteButton = new Button({
+                        label: 'Invite People',
+                    }, 'inviteButton');
 
-            // Chat Input
-            var chatInput = new TextBox({
-                value: '',
-                placeHolder: 'Start typing to chat...',
-                style: 'text-align: center;'
-            }, 'chatInput');
-        });
+                    // Chat Box
 
-    });
+                    // Chat Input
+                    var chatInput = new TextBox({
+                        value: '',
+                        placeHolder: 'Start typing to chat...',
+                        style: 'text-align: center;'
+                    }, 'chatInput');
+                }
+            );
+        }
+    );
 }
 
-window.onload = init;
+window.onload = function() { editor_init(); };
+// vim:expandtab
