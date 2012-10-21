@@ -30,7 +30,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core: true, Node: true*/
+/*global core, runtime*/
+runtime.loadClass("core.Selection");
+
 /**
  * @class
  * A cursor is a dom node that visually represents a cursor in a DOM tree.
@@ -53,133 +55,55 @@
  * the cursor by not letting it be part of the DOM.
  *
  * @constructor
- * @param {Selection} selection The selection to which the cursor corresponds
+ * @param {core.Selection} selection The selection to which the cursor corresponds
  * @param {Document} document The document in which the cursor is placed
  */
 core.Cursor = function Cursor(selection, document) {
     "use strict";
     var cursorns,
-        cursorNode;
+        cursorNode,
+        cursorTextNode;
     cursorns = 'urn:webodf:names:cursor';
     cursorNode = document.createElementNS(cursorns, 'cursor');
+    cursorTextNode = document.createTextNode("");
 
     function putCursorIntoTextNode(container, offset) {
-        var len, ref, textnode, parent;
-        parent = container.parentNode;
-        if (offset === 0) {
-            parent.insertBefore(cursorNode, container);
-        } else if (offset === container.length) {
-            parent.appendChild(cursorNode);
-        } else {
-            len = container.length;
-            ref = container.nextSibling;
-            textnode = document.createTextNode(
-                container.substringData(offset, len)
-            );
-            container.deleteData(offset, len);
-            if (ref) {
-                parent.insertBefore(textnode, ref);
-            } else {
-                parent.appendChild(textnode);
-            }
-            parent.insertBefore(cursorNode, textnode);
+        var parent = container.parentNode;
+        if (offset > 0) {
+            cursorTextNode.data = container.substringData(0, offset);
+            container.deleteData(0, offset);
+            parent.insertBefore(cursorTextNode, container);
         }
+        parent.insertBefore(cursorNode, container);
     }
     function putCursorIntoContainer(container, offset) {
-        var node;
-        node = container.firstChild;
-        while (node && offset) {
+        var node = container.firstChild;
+        while (node !== null && offset > 0) {
             node = node.nextSibling;
             offset -= 1;
         }
         container.insertBefore(cursorNode, node);
     }
-    function getPotentialParentOrNode(parent, node) {
-        var n = node;
-        while (n && n !== parent) {
-            n = n.parentNode;
-        }
-        return n || node;
-    }
-    function removeCursorFromSelectionRange(range, cursorpos) {
-        var cursorParent, start, end;
-        cursorParent = cursorNode.parentNode;
-        start = getPotentialParentOrNode(cursorNode, range.startContainer);
-        end = getPotentialParentOrNode(cursorNode, range.endContainer);
-        if (start === cursorNode) {
-            range.setStart(cursorParent, cursorpos);
-        } else if (start === cursorParent &&
-                range.startOffset > cursorpos) {
-            range.setStart(cursorParent, range.startOffset - 1);
-        }
-        if (range.endContainer === cursorNode) {
-            range.setEnd(cursorParent, cursorpos);
-        } else if (range.endContainer === cursorParent &&
-                range.endOffset > cursorpos) {
-            range.setEnd(cursorParent, range.endOffset - 1);
-        }
-    }
-    function adaptRangeToMergedText(range, prev, textnodetomerge, cursorpos) {
-        var diff = prev.length - textnodetomerge.length;
-        if (range.startContainer === textnodetomerge) {
-            range.setStart(prev, diff + range.startOffset);
-        } else if (range.startContainer === prev.parentNode &&
-                range.startOffset === cursorpos) {
-            range.setStart(prev, diff);
-        }
-        if (range.endContainer === textnodetomerge) {
-            range.setEnd(prev, diff + range.endOffset);
-        } else if (range.endContainer === prev.parentNode &&
-                range.endOffset === cursorpos) {
-            range.setEnd(prev, diff);
-        }
-    }
-    function removeCursor() {
-        // if the cursor is part of a selection, the selection must be adapted
-        var i, cursorpos, node, textnodetoremove, range;
-        // if the cursor has no parent, it is already not part of the document
-        // tree
-        if (!cursorNode.parentNode) {
-            return;
-        }
-        // find the position of the cursor in its parent
-        cursorpos = 0;
-        node = cursorNode.parentNode.firstChild;
-        while (node && node !== cursorNode) {
-            cursorpos += 1;
-            node = node.nextSibling;
-        }
-        // Check if removing the node will result in a merge of texts.
-        // This will happen if the cursor is between two text nodes.
-        // The text of the text node after the cursor is put in the text node
-        // before the cursor. The latter node is removed after the selection
-        // has been adapted.
-        if (cursorNode.previousSibling &&
-                cursorNode.previousSibling.nodeType === 3 && // TEXT_NODE
-                cursorNode.nextSibling &&
-                cursorNode.nextSibling.nodeType === 3) { // TEXT_NODE
-            textnodetoremove = cursorNode.nextSibling;
-            cursorNode.previousSibling.appendData(textnodetoremove.nodeValue);
-        }
-        // remove the node from the selections
-        for (i = 0; i < selection.rangeCount; i += 1) {
-            removeCursorFromSelectionRange(selection.getRangeAt(i), cursorpos);
-        }
-        // merge the texts that surround the cursor
-        if (textnodetoremove) {
-            for (i = 0; i < selection.rangeCount; i += 1) {
-                adaptRangeToMergedText(selection.getRangeAt(i),
-                       cursorNode.previousSibling, textnodetoremove, cursorpos);
+    function removeCursor(onCursorRemove) {
+        var t = cursorNode.nextSibling,
+            textNodeIncrease = 0;
+        if (cursorTextNode.parentNode) {
+            cursorTextNode.parentNode.removeChild(cursorTextNode);
+            if (t && t.nodeType === 3) {
+                t.insertData(0, cursorTextNode.nodeValue);
+                textNodeIncrease = cursorTextNode.length;
             }
-            textnodetoremove.parentNode.removeChild(textnodetoremove);
         }
-        cursorNode.parentNode.removeChild(cursorNode);
+        onCursorRemove(t, textNodeIncrease);
+        if (cursorNode.parentNode) {
+            cursorNode.parentNode.removeChild(cursorNode);
+        }
     }
     // put the cursor at a particular position
     function putCursor(container, offset) {
         if (container.nodeType === 3) { // TEXT_NODE
             putCursorIntoTextNode(container, offset);
-        } else if (container.nodeType !== 9) { // DOCUMENT_NODE
+        } else if (container.nodeType === 1) { // ELEMENT_NODE
             putCursorIntoContainer(container, offset);
         }
     }
@@ -194,20 +118,22 @@ core.Cursor = function Cursor(selection, document) {
      * Synchronize the cursor with the current selection.
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
+     * @param {!function(?Element,!number):undefined} onCursorRemove
      * @return {undefined}
      */
-    this.updateToSelection = function () {
+    this.updateToSelection = function (onCursorRemove) {
         var range;
-        removeCursor();
+        removeCursor(onCursorRemove);
         if (selection.focusNode) {
             putCursor(selection.focusNode, selection.focusOffset);
         }
     };
     /**
      * Remove the cursor from the document tree.
+     * @param {!function(?Element,!number):undefined} onCursorRemove
      * @return {undefined}
      */
-    this.remove = function () {
-        removeCursor();
+    this.remove = function (onCursorRemove) {
+        removeCursor(onCursorRemove);
     };
 };

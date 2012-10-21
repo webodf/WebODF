@@ -125,9 +125,11 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js
     lib/core/RawInflate.js
+    lib/core/Selection.js
     lib/core/Cursor.js
     lib/core/UnitTester.js
-    lib/core/PointWalker.js
+    lib/core/PositionIterator.js
+    lib/core/PositionFilter.js
     lib/core/Async.js
     lib/core/Zip.js
 
@@ -148,12 +150,16 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
 
-    lib/gui/PresenterUI.js
-    lib/gui/Caret.js
     lib/gui/SelectionMover.js
+    lib/gui/SelectionManager.js
+    lib/gui/Caret.js
+    lib/gui/Avatar.js
+    lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
 
-    lib/manifest.js
+    lib/ops/SessionPointFilter.js
+    lib/ops/Session.js
+    lib/ops/SessionImplementation.js
 )
 
 set(HTML5UIFILES

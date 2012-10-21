@@ -30,176 +30,65 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
+/*global runtime, core, gui, XMLSerializer*/
 runtime.loadClass("core.Cursor");
+runtime.loadClass("core.PositionIterator");
+runtime.loadClass("core.PositionFilter");
+
 /**
  * This class modifies the selection in different ways.
  * @constructor
- * @param {Selection} selection
- * @param {!core.PointWalker} pointWalker
- * @return {!gui.SelectionMover}
+ * @param {!Node} rootNode
+ * @param {!Function=} onCursorAdd
+ * @param {!function(?Element,!number):undefined=} onCursorRemove
  */
-gui.SelectionMover = function SelectionMover(selection, pointWalker) {
+gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
-    var doc = pointWalker.node().ownerDocument,
+    var self = this,
+        doc = /**@type{!Document}*/(rootNode.ownerDocument),
+        selection = new core.Selection(doc),
+        positionIterator,
         cursor = new core.Cursor(selection, doc);
-    /**
-     * Return the last range in the selection. Create one if the selection is
-     * empty.
-     */
-    function getActiveRange(node) {
-        var range;
-        if (selection.rangeCount === 0) {
-            selection.addRange(node.ownerDocument.createRange());
-        }
-        return selection.getRangeAt(selection.rangeCount - 1);
-    }
-    function setStart(node, offset) {
-        // selection interface is cumbersome and in Chrome it is buggy
-        // as a workaround all ranges are removed. The last one is updated and
-        // all ranges are placed back
-        var ranges = [], i, range;
-        for (i = 0; i < selection.rangeCount; i += 1) {
-            ranges[i] = selection.getRangeAt(i);
-        }
-        selection.removeAllRanges();
-        if (ranges.length === 0) {
-            ranges[0] = node.ownerDocument.createRange();
-        }
-        ranges[ranges.length - 1].setStart(pointWalker.node(),
-                pointWalker.position());
-        for (i = 0; i < ranges.length; i += 1) {
-            selection.addRange(ranges[i]);
-        }
-    }
-    function doMove(extend, move) {
-        if (selection.rangeCount === 0) {
-            return;
-        }
-        var range = selection.getRangeAt(0),
-            /**@type{Element}*/ element;
-        if (!range.startContainer || range.startContainer.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(range.startContainer);
-        pointWalker.setPoint(element, range.startOffset);
-        move();
-        setStart(pointWalker.node(), pointWalker.position());
-    }
-    function doMoveForward(extend, move) {
-        if (selection.rangeCount === 0) {
-            return;
-        }
-        move();
-        var range = selection.getRangeAt(0),
-            /**@type{Element}*/ element;
-        if (!range.startContainer || range.startContainer.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(range.startContainer);
-        pointWalker.setPoint(element, range.startOffset);
-    }
-/*
-    function fallbackMoveLineUp() {
-        // put an element at the current position and call
-        // pointWalker.stepForward until the y position increases and x position
-        // is comparable to the previous one
-        cursor.updateToSelection();
-        // retrieve cursor x and y position, then move selection/cursor left
-        // until, y offset is less and x offset about equal
-        var rect = cursor.getNode().getBoundingClientRect(),
-            x = rect.left,
-            y = rect.top,
-            arrived = false,
-            allowedSteps = 200;
-        while (!arrived && allowedSteps) {
-            allowedSteps -= 1;
-            cursor.remove();
-            pointWalker.setPoint(selection.focusNode, selection.focusOffset);
-            pointWalker.stepForward();
-        moveCursor(walker.node(), walker.position());
-            moveCursorLeft();
-            rect = cursor.getNode().getBoundingClientRect();
-            arrived = rect.top !== y && rect.left < x;
-        }
-    }
-*/
-    function moveCursor(node, offset, selectMode) {
-        if (selectMode) {
-            selection.extend(node, offset);
-        } else {
-            selection.collapse(node, offset);
-        }
-        cursor.updateToSelection();
-    }
-    function moveCursorLeft() {
-        var /**@type{Element}*/ element;
-        if (!selection.focusNode || selection.focusNode.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(selection.focusNode);
-        pointWalker.setPoint(element, selection.focusOffset);
-        pointWalker.stepBackward();
-        moveCursor(pointWalker.node(), pointWalker.position(), false);
-    }
-    function moveCursorRight() {
-        cursor.remove();
-        var /**@type{Element}*/ element;
-        if (!selection.focusNode || selection.focusNode.nodeType !== 1) {
-            return;
-        }
-        element = /**@type{!Element}*/(selection.focusNode);
-        pointWalker.setPoint(element, selection.focusOffset);
-        pointWalker.stepForward();
-        moveCursor(pointWalker.node(), pointWalker.position(), false);
-    }
-    function moveCursorUp() {
-        // retrieve cursor x and y position, then move selection/cursor left
-        // until, y offset is less and x offset about equal
-        var rect = cursor.getNode().getBoundingClientRect(),
-            x = rect.left,
-            y = rect.top,
-            arrived = false,
-            left = 200;
-        while (!arrived && left) {
+    function doMove(steps, extend, move) {
+        var left = steps;
+        // assume positionIterator reflects current state
+        // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
+        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        cursor.remove(onCursorRemove);
+        while (left > 0 && move()) {
             left -= 1;
-            moveCursorLeft();
-            rect = cursor.getNode().getBoundingClientRect();
-            arrived = rect.top !== y && rect.left < x;
         }
-    }
-    function moveCursorDown() {
-        // retrieve cursor x and y position, then move selection/cursor right
-        // until, x offset is less
-        cursor.updateToSelection();
-        var rect = cursor.getNode().getBoundingClientRect(),
-            x = rect.left,
-            y = rect.top,
-            arrived = false,
-            left = 200;
-        while (!arrived) {
-            left -= 1;
-            moveCursorRight();
-            rect = cursor.getNode().getBoundingClientRect();
-            arrived = rect.top !== y && rect.left > x;
+        if (steps - left > 0) {
+            selection.collapse(positionIterator.container(),
+                    positionIterator.offset());
         }
-//alert(left + " " + y + " " + x + " " + rect.top + " " + rect.left);
+        cursor.updateToSelection(onCursorRemove);
+        onCursorAdd(cursor.getNode());
+        return steps - left;
     }
     /**
-     * Move selection forward one point.
-     * @param {boolean} extend true if range is to be expanded from the current
+     * Move selection forward one position.
+     * @param {!number} steps
+     * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
-     * @return {undefined}
+     * @return {!number}
      **/
-    this.movePointForward = function (extend) {
-        doMove(extend, pointWalker.stepForward);
+    this.movePointForward = function (steps, extend) {
+        return doMove(steps, extend, positionIterator.nextPosition);
     };
-    this.movePointBackward = function (extend) {
-        doMove(extend, pointWalker.stepBackward);
+    /**
+     * Move selection forward one position.
+     * @param {boolean=} extend true if range is to be expanded from the current
+     *                         point
+     * @return {!number}
+     **/
+    this.movePointBackward = function (steps, extend) {
+        return doMove(steps, extend, positionIterator.previousPosition);
     };
+/*
     this.moveLineForward = function (extend) {
         if (selection.modify) {
-            // TODO add a way to 
+            // TODO add a way to
             selection.modify(extend ? "extend" : "move", "forward", "line");
         } else {
             doMove(extend, moveCursorDown);
@@ -213,5 +102,266 @@ gui.SelectionMover = function SelectionMover(selection, pointWalker) {
             });
         }
     };
-    return this;
+*/
+    /**
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countForwardSteps(steps, filter) {
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            stepCount = 0,
+            count = 0;
+        while (steps > 0 && positionIterator.nextPosition()) {
+            stepCount += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                count += stepCount;
+                stepCount = 0;
+                steps -= 1;
+            }
+        }
+        positionIterator.setPosition(c, o);
+        return count;
+    }
+    /**
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countBackwardSteps(steps, filter) {
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            stepCount = 0,
+            count = 0;
+        while (steps > 0 && positionIterator.previousPosition()) {
+            stepCount += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                count += stepCount;
+                stepCount = 0;
+                steps -= 1;
+            }
+        }
+        positionIterator.setPosition(c, o);
+        return count;
+    }
+    function getOffset(el) {
+        var x = 0, y = 0;
+        while (el && el.nodeType === 1) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+            x += el.offsetLeft - el.scrollLeft;
+            y += el.offsetTop - el.scrollTop;
+            el = el.parentNode;//offsetParent;
+        }
+        return { top: y, left: x };
+    }
+    /**
+     * @param {!number} lines
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countLineUpSteps(lines, filter) {
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            span = cursor.getNode().firstChild,
+            stepCount = 0,
+            count = 0,
+            offset = span.offsetTop,
+            i;
+        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        while (lines > 0 && positionIterator.previousPosition()) {
+            stepCount += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                offset = span.offsetTop;
+                selection.collapse(positionIterator.container(),
+                        positionIterator.offset());
+                cursor.updateToSelection(onCursorRemove);
+                offset = span.offsetTop; // for now, always accept
+                if (offset !== span.offsetTop) {
+                    count += stepCount;
+                    stepCount = 0;
+                    lines -= 1;
+                }
+            }
+        }
+        positionIterator.setPosition(c, o);
+        selection.collapse(positionIterator.container(),
+                positionIterator.offset());
+        cursor.updateToSelection(onCursorRemove);
+        return count;
+    }
+    /**
+     * @param {!number} lines
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countLineDownSteps(lines, filter) {
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            span = cursor.getNode().firstChild,
+            stepCount = 0,
+            count = 0,
+            offset = span.offsetTop,
+            i;
+        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        while (lines > 0 && positionIterator.nextPosition()) {
+            stepCount += 1;
+            if (filter.acceptPosition(positionIterator) === 1) {
+                offset = span.offsetTop;
+                selection.collapse(positionIterator.container(),
+                        positionIterator.offset());
+                cursor.updateToSelection(onCursorRemove);
+                offset = span.offsetTop; // for now, always accept
+                if (offset !== span.offsetTop) {
+                    count += stepCount;
+                    stepCount = 0;
+                    lines -= 1;
+                }
+            }
+        }
+        positionIterator.setPosition(c, o);
+        selection.collapse(positionIterator.container(),
+                positionIterator.offset());
+        cursor.updateToSelection(onCursorRemove);
+        return count;
+    }
+    /**
+     * @param {!Element} element
+     * @param {!number} offset
+     * @param {!core.PositionFilter} filter
+     * @return {!number}
+     */
+    function countStepsToPosition(element, offset, filter) {
+        // first figure out how to get to the element
+        // really dumb/inefficient implementation
+        var c = positionIterator.container(),
+            o = positionIterator.offset(),
+            steps = 0;
+
+        // the iterator may interpret the positions as given by the range
+        // differently than the dom positions, so we normalize them by calling
+        // setPosition with these values
+        positionIterator.setPosition(element, offset);
+        element = positionIterator.container();
+        offset = positionIterator.offset();
+        positionIterator.setPosition(c, o);
+
+        while (positionIterator.nextPosition()) {
+            if (filter.acceptPosition(positionIterator) === 1) {
+                steps += 1;
+            }
+            if (positionIterator.container() === element) {
+                if (positionIterator.offset() === offset) {
+                    positionIterator.setPosition(c, o);
+                    return steps;
+                }
+            }
+        }
+        steps = 0;
+        positionIterator.setPosition(c, o);
+        while (positionIterator.previousPosition()) {
+            if (filter.acceptPosition(positionIterator) === 1) {
+                steps -= 1;
+            }
+            if (positionIterator.container() === element) {
+                if (positionIterator.offset() === offset) {
+                    positionIterator.setPosition(c, o);
+                    return steps;
+                }
+            }
+        }
+        positionIterator.setPosition(c, o);
+        return steps;
+    }
+
+    this.getStepCounter = function () {
+        return {
+            countForwardSteps: countForwardSteps,
+            countBackwardSteps: countBackwardSteps,
+            countLineDownSteps: countLineDownSteps,
+            countLineUpSteps: countLineUpSteps,
+            countStepsToPosition: countStepsToPosition
+        };
+    };
+    this.getCursor = function () {
+        return cursor;
+    };
+    this.getRootNode = function () {
+        return rootNode;
+    };
+    this.getSelection = function () {
+        return selection;
+    };
+    /**
+     * @param {?Element} nodeAfterCursor
+     * @param {!number} textNodeIncrease
+     * @return {undefined}
+     */
+    this.adaptToCursorRemoval = function (nodeAfterCursor, textNodeIncrease) {
+        if (textNodeIncrease === 0 || nodeAfterCursor === null
+                || nodeAfterCursor.nodeType !== 3) {
+            return;
+        }
+        var c = positionIterator.container();
+        if (c === nodeAfterCursor) {
+            positionIterator.setPosition(c,
+                    positionIterator.offset() + textNodeIncrease);
+        }
+    };
+    /**
+     * @param {!Element} cursorNode
+     * @return {undefined}
+     */
+    this.adaptToInsertedCursor = function (cursorNode) {
+        var c = positionIterator.container(), t;
+        if (c.nodeType !== 3) {
+            return;
+        }
+        if (c.previousSibling === cursorNode) {
+            t = cursorNode.previousSibling && cursorNode.previousSibling.length;
+            if (t > 0) {
+                positionIterator.setPosition(c, positionIterator.offset() - t);
+            }
+        }
+    };
+    function init() {
+        positionIterator = gui.SelectionMover.createPositionIterator(rootNode);
+        // put the cursor at the start of the rootNode
+        selection.collapse(positionIterator.container(),
+                positionIterator.offset());
+
+        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
+
+        cursor.updateToSelection(onCursorRemove);
+    }
+    init();
 };
+/**
+ * @param {!Node} rootNode
+ * @return {!core.PositionIterator}
+ */
+gui.SelectionMover.createPositionIterator = function (rootNode) {
+    "use strict";
+    /**
+     * @constructor
+     * @extends NodeFilter
+      */
+    function CursorFilter() {
+        /**
+         * @param {!Node} node
+         * @return {!number}
+         */
+        this.acceptNode = function (node) {
+            if (node.namespaceURI === "urn:webodf:names:cursor") {
+                return 2;
+            }
+            return 1;
+        };
+    }
+    var filter = new CursorFilter();
+    return new core.PositionIterator(rootNode, 5, filter, false);
+};
+(function () {
+    "use strict";
+    return gui.SelectionMover;
+}());

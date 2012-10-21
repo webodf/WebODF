@@ -46,3 +46,7 @@ var xmldom = {};
  * @namespace The ODF package.
  */
 var odf = {};
+/**
+ * @namespace The editing operations
+ */
+var ops = {};

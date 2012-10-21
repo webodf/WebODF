@@ -7,6 +7,7 @@
 @namespace table url(urn:oasis:names:tc:opendocument:xmlns:table:1.0);
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
 @namespace runtimens url(urn:webodf); /* namespace for runtime only */
+@namespace cursor url(urn:webodf:names:cursor);
 
 office|document > *, office|document-content > * {
   display: none;
@@ -195,6 +196,22 @@ svg|title, svg|desc {
     display: none;
 }
 video {
-  width:100%;
-  height:100%
+    width: 100%;
+    height: 100%
+}
+cursor|cursor {
+    display: inline;
+    width: 0px;
+    height: 1em;
+}
+cursor|cursor > span {
+    display: inline;
+    position: absolute;
+    height: 1em;
+    border-left: 1px solid black;
+}
+cursor|cursor > div {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
 }

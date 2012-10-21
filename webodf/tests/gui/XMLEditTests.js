@@ -31,7 +31,6 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global document: true, core: true, gui: true, runtime: true*/
-runtime.loadClass("core.PointWalker");
 runtime.loadClass("gui.XMLEdit");
 
 /**
@@ -46,13 +45,13 @@ gui.XMLEditTests = function XMLEditTests(runner) {
     function checkWalker(node, count, endpos) {
         t = {};
         t.node = node;
-        t.walker = new core.PointWalker(node);
+        t.walker = new core.PositionIterator(node);
         t.count = count;
         t.countForward = 0;
         t.countBackward = 0;
         t.endpos = endpos;
-        t.walker.setPoint(t.node, 0);
-        while (t.walker.stepForward()) {
+        t.walker.setPosition(t.node, 0);
+        while (t.walker.nextPosition()) {
             t.countForward += 1;
         }
         r.shouldBe("t.countForward", "t.count");
@@ -61,8 +60,8 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         if (endpos !== null) {
             r.shouldBe("t.walker.position()", "t.endpos");
         }
-        t.walker.setPoint(t.node, endpos);
-        while (t.walker.stepBackward()) {
+        t.walker.setPosition(t.node, endpos);
+        while (t.walker.previousPosition()) {
             t.countBackward += 1;
         }
         r.shouldBe("t.countBackward", "t.count");
@@ -87,7 +86,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
 
         t = {};
         t.doc = doc;
-        t.walker = new core.PointWalker(t.doc);
+        t.walker = new core.PositionIterator(t.doc);
         r.shouldBe("t.walker.position()", "0");
         r.shouldBe("t.walker.stepForward()", "true");
         r.shouldBe("t.walker.position()", "0");

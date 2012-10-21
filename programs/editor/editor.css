@@ -1,3 +1,232 @@
+html, body, #mainContainer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 10pt;
+
+    padding-top: 0px;
+}
+
+#topPane {
+    border: none;
+    box-shadow: 0px 0px 3px #888;
+
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#topPane > h1 > a {
+    font-size: 25px;
+    font-family: sans-serif;
+    font-weight: normal;
+    color: gray;
+}
+
+#editor {
+    border: none;
+    box-shadow: 0px 0px 3px #888;
+    overflow: hidden;
+    padding: 0px !important;
+
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+
+}
+
+#menubar {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border: none;
+    overflow: hidden;
+    background-image: url("http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/images/standardGradient.png");
+    background-color: #E6E6E7;
+}
+
+#toolbar {
+    background: none;
+    overflow: hidden;
+    background-color: #E6E6E7;
+}
+
+.claro .dijitToolbar .dijitButton .dijitButtonNode, .claro .dijitToolbar .dijitDropDownButton .dijitButtonNode, .claro .dijitToolbar .dijitComboButton .dijitButtonNode, .claro .dijitToolbar .dijitToggleButton .dijitButtonNode, .claro .dijitToolbar .dijitComboBox .dijitButtonNode {
+    background: none;
+}
+
+#container {
+    text-align: center;
+    background-color: #FAFAFA;
+    height: 95%;
+    overflow: auto;
+}
+
 #canvas {
-    border: 1px solid black;
+    box-shadow: 0px 0px 20px #aaa;
+    margin-top: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 30px;
+
+    transform-origin: top center;
+    -webkit-transform-origin: top center;
+    -moz-transform-origin: top center;
+    -o-transform-origin: top center;
+
+    height: 100%;
+}
+
+#collaboration {
+    width: 20%;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+
+    box-shadow: 0 0 3px #888;
+
+    border: none;
+}
+
+#collaboration > .dojoxExpandoTitle {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border: none;
+}
+
+#collaboration > .dojoxExpandoWrapper {
+    width: 100%;
+    background-color: #E6E6E7;
+    border: 1px solid #769DC0;
+    border: none;
+
+}
+
+#people {
+    height: 30%;
+    padding: 0px;
+    text-align: center;
+}
+
+#people > #nameInfo {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    width: 100%;
+    background-color: #eef;
+}
+
+#peopleList > div {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+#chat {
+    padding: 0px;
+    text-align: center;
+    position: relative;
+}
+
+#chat > #inputArea {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    width: 100%;
+    background-color: #eee;
+    position: absolute;
+    bottom: 0px;
+}
+
+#inputArea > #widget_chatInput {
+    width: 95%;
+    border-radius: 10px;
+    padding: 3px;
+    box-shadow: inset 0 0 1px #888;
+}
+
+.dijitDialog {
+    border: none !important;
+    box-shadow: 0 1px 50px rgba(0, 0, 0, 0.25) !important;
+    -moz-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.25) !important;
+    -o-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.25) !important;
+    -webkit-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.25) !important;
+    -ms-box-shadow: 0 1px 50px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dijitDialogTitle {
+    color: #333 !important;
+    font-size: 14pt !important;
+}
+
+.dijitDialogPaneContent {
+    width: 450px !important;
+    height: 500px !important;
+    border: none !important;
+}
+
+.dijitDialogPaneContent h3 {
+    font-weight: normal;
+    color: #333;
+    font-size: 12pt;
+    padding: 0px;
+    width: 80%;
+    border-bottom: 1px solid #eee;
+}
+
+.dijitTabPaneWrapper {
+    border: none !important;
+}
+.dijitDialogTitleBar {
+    border: none !important;
+    background-color: #fff !important;
+}
+
+.dijitDialogPaneActionBar {
+    margin: 0 !important;
+}
+
+.dijitDialogUnderlay {
+    background: radial-gradient(center, transparent, #333) !important;
+    background: -webkit-radial-gradient(center, transparent , #333) !important;
+    background: -moz-radial-gradient(center, transparent , #333) !important;
+    background: -o-radial-gradient(center, transparent , #333) !important;
+    background: -ms-radial-gradient(center, transparent , #333) !important;
+}
+
+.labeledSelect > table {
+    margin-left: 10px;
+}
+
+.dijitSpinner {
+    width: 35px !important;
+}
+
+.dijitRadio {
+    margin-top: 3px !important;
+    margin-bottom: 3px !important;
+}
+
+cursor > div {
+    padding: 3px;
+    box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.75);
+    border: none !important;
+    background-color: black !important;
+    border-radius: 5px;
+    opacity: 0.3;
+}
+
+cursor > div > img {
+    border-radius: 5px;
+}
+
+cursor > div.active {
+    opacity: 0.8;
+}
+
+cursor > div:after {
+    content: ' ';
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 8.7px 5px 0 5px;
+    border-color: black transparent transparent transparent;
+
+    top: 100%;
+    left: 43%;
 }

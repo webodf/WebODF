@@ -32,33 +32,48 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+/*global odf, ops*/
+runtime.loadClass("core.Base64Tests");
+runtime.loadClass("core.CursorTests");
+runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
-runtime.loadClass("core.PointWalkerTests");
-runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.ZipTests");
-runtime.loadClass("core.Base64Tests");
+runtime.loadClass("gui.AvatarTests");
+runtime.loadClass("gui.CaretTests");
+runtime.loadClass("gui.SelectionMoverTests");
+runtime.loadClass("gui.XMLEditTests");
+runtime.loadClass("ops.SessionImplementationTests");
+runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
-runtime.loadClass("gui.CaretTests");
-runtime.loadClass("gui.XMLEditTests");
 
 var tests = [
     core.RuntimeTests, // temporarily disabled, enable at next commit!
     core.ZipTests,
     core.Base64Tests
 ];
-if (runtime.type() !== "NodeJSRuntime") {
-    tests.push(core.PointWalkerTests);
+if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
+    tests.push(core.PositionIteratorTests);
+    tests.push(gui.SelectionMoverTests);
+    tests.push(gui.AvatarTests);
+    tests.push(odf.OdfContainerTests);
 }
 if (runtime.type() === "BrowserRuntime") {
-    tests.push(core.PointWalkerTests);
-//    tests.push(core.CursorTests);
-    tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(gui.CaretTests);
+    tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
+    tests.push(ops.SessionImplementationTests);
+//    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
+/*
+tests = [];
+if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
+    tests.push(ops.SessionImplementationTests);
+    tests.push(odf.OdfContainerTests);
+}
+*/
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests

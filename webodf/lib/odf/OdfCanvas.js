@@ -815,14 +815,19 @@ odf.OdfCanvas = (function () {
 
     function addWebODFStyleSheet(document) {
         var head = document.getElementsByTagName('head')[0],
-            style;
+            style,
+            href;
         if (String(typeof webodf_css) !== "undefined") {
             style = document.createElementNS(head.namespaceURI, 'style');
             style.setAttribute('media', 'screen, print, handheld, projection');
             style.appendChild(document.createTextNode(webodf_css));
         } else {
             style = document.createElementNS(head.namespaceURI, 'link');
-            style.setAttribute('href', 'webodf.css');
+            href = "webodf.css";
+            if (runtime.currentDirectory) {
+                href = runtime.currentDirectory() + "/../" + href;
+            }
+            style.setAttribute('href', href);
             style.setAttribute('rel', 'stylesheet');
         }
         style.setAttribute('type', 'text/css');
@@ -888,8 +893,7 @@ odf.OdfCanvas = (function () {
                 sizer.style.WebkitTransformOrigin = 'center top';
                 sizer.style.OTransformOrigin = 'center top';
                 sizer.style.msTransformOrigin = 'center top';
-            }
-            else {
+            } else {
                 sizer.style.MozTransformOrigin = 'left top';
                 sizer.style.WebkitTransformOrigin = 'left top';
                 sizer.style.OTransformOrigin = 'left top';
@@ -1090,12 +1094,16 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.addListener = function (eventName, handler) {
-            if (eventName === "selectionchange") {
-                selectionWatcher.addListener(eventName, handler);
-            } else {
-                addEventListener(eventName, handler);
+            switch(eventName) {
+                case "selectionchange":
+                    selectionWatcher.addListener(eventName, handler); break;
+                case "click":
+                    listenEvent(element, eventName, handler); break;
+                default:
+                    addEventListener(eventName, handler); break;
             }
         };
+
         /**
          * @return {!odf.Formatting}
          */

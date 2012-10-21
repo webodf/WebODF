@@ -30,36 +30,141 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global gui*/
+/*global core, gui, runtime*/
+
+runtime.loadClass("gui.SelectionMover");
+
 /**
  * Class that represents a caret in a document. In text nodes, a native caret is
  * used via the HTML attribute contentEditable. Outside of text nodes, an empty
  * element representing the caret is used.
  * @constructor
+ * @param {!gui.SelectionMover} selectionMover
+ * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Caret = function Caret(selection, rootNode) {
+gui.Caret = function Caret(selectionMover, keyHandler) {
     "use strict";
-    var document = rootNode.ownerDocument,
-        cursorns,
-        cursorNode;
-    cursorns = 'urn:webodf:names:cursor';
-    cursorNode = document.createElementNS(cursorns, 'cursor');
-    /**
-     * Synchronize the cursor with the current selection.
-     * If there is a single collapsed selection range, the cursor will be placed
-     * there. If not, the cursor will be removed from the document tree.
-     * @return {undefined}
-     */
-    this.updateToSelection = function () {
-        var range;
-//        removeCursor();
-        if (selection.rangeCount === 1) {
-            range = selection.getRangeAt(0);
-/*
-            if (range.collapsed) {
-                putCursor(range.startContainer, range.startOffset);
-            }
-*/
+    function listenEvent(eventTarget, eventType, eventHandler) {
+        if (eventTarget.addEventListener) {
+            eventTarget.addEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.attachEvent) {
+            eventType = "on" + eventType;
+            eventTarget.attachEvent(eventType, eventHandler);
+        } else {
+            eventTarget["on" + eventType] = eventHandler;
         }
+    }
+    function cancelEvent(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    }
+    var rootNode = selectionMover.getRootNode(),
+        document = /**@type{!Document}*/(rootNode.ownerDocument),
+        htmlns = document.documentElement.namespaceURI,
+        span = document.createElementNS(htmlns, "span"),
+        handle = document.createElementNS(htmlns, "div"),
+        cursorNode,
+        focussed = false,
+        caretLineVisible,
+        blinking = false;
+
+    if (handle.style) {
+        handle.style.width = '64px';
+        handle.style.height = '70px';
+    }
+
+    function blink() {
+        if (!focussed || !cursorNode.parentNode) {
+            // stop blinking when removed from the document
+            return;
+        }
+        if (caretLineVisible) {
+            span.style.borderLeftWidth = "0px";
+        } else {
+            span.style.borderLeftWidth = "1px";
+        }
+        caretLineVisible = !caretLineVisible;
+        if (!blinking) {
+            blinking = true;
+            runtime.setTimeout(function () {
+                blinking = false;
+                blink();
+            }, 1000);
+        }
+    }
+    function updateHandlePosition() {
+        if (handle.style) {
+            handle.style.top = (span.offsetTop - handle.offsetHeight - 10) + "px";
+            handle.style.left = (span.offsetLeft - handle.offsetWidth / 2) + "px";
+        }
+    }
+
+    this.focus = function () {
+        span.focus();
+        updateHandlePosition();
     };
+    this.move = function (number) {
+//runtime.log("moving " + number);
+        var moved = 0;
+        if (number > 0) {
+            moved = selectionMover.movePointForward(number);
+        } else if (number <= 0) {
+            moved = -selectionMover.movePointBackward(-number);
+        }
+        updateHandlePosition();
+        return moved;
+    };
+    this.setColor = function (color) {
+        span.style.borderColor = color;
+        handle.style.background = color;
+    };
+    this.getColor = function () {
+        return span.style.borderColor;
+    };
+    this.getSelection = function () {
+        return selectionMover.getSelection();
+    };
+    this.getHandleElement = function () {
+        return handle;
+    };
+    this.showHandle = function () {
+        handle.style.display = "block";
+        updateHandlePosition();
+    };
+    this.hideHandle = function () {
+        handle.style.display = "none";
+    };
+    this.getStepCounter = function () {
+        return selectionMover.getStepCounter();
+    };
+    function handleKeyDown(e) {
+        if (keyHandler) {
+            keyHandler(e.keyCode);
+        }
+        // still allow ctrl-r in ui, must be improved later
+        if (!e.ctrlKey) {
+            cancelEvent(e);
+        }
+    }
+    function init() {
+        span.setAttribute("contenteditable", true);
+        span.onfocus = function () {
+            focussed = true;
+            handle.className = "active";
+            blink();
+        };
+        span.onblur = function () {
+            focussed = false;
+            handle.className = "";
+            span.style.borderLeftWidth = "1px";
+        };
+        cursorNode = selectionMover.getCursor().getNode();
+        cursorNode.appendChild(span);
+        cursorNode.appendChild(handle);
+        listenEvent(cursorNode, "keydown", handleKeyDown);
+    }
+    init();
 };

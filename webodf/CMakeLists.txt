@@ -7,11 +7,14 @@ endif(WRONGCMAKEDIR)
 set(TESTJSFILES tests/core/ZipTests.js
     tests/core/Base64Tests.js
     tests/core/CursorTests.js
-    tests/core/PointWalkerTests.js
+    tests/core/PositionIteratorTests.js
     tests/core/RuntimeTests.js
+    tests/gui/AvatarTests.js
     tests/gui/CaretTests.js
     tests/gui/SelectionMoverTests.js
     tests/gui/XMLEditTests.js
+    tests/odf/OdfContainerTests.js
+    tests/ops/SessionImplementationTests.js
     tests/xmldom/OperationalTransformDOMTests.js
     tests/xmldom/XPathTests.js
     tests/tests.js

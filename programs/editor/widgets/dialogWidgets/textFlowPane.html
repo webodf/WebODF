@@ -1,0 +1,126 @@
+<html> 
+	<head>
+	</head> 
+		<body>
+			<form id="textFlowPaneForm">
+
+				<h3>Hyphenation</h3>
+					<div>
+						<input id="automaticHyphenation" name="automaticHyphenation" data-dojo-type="dijit/form/CheckBox" value="true" checked/> 
+						<label for="automaticHyphenation">Automatically</label>
+					</div>
+					<br/>
+					<div style = "margin-left: 30px;">
+						<input data-dojo-type="dijit/form/NumberSpinner" id="lineEnd"
+					    value="2"
+					    data-dojo-props="smallDelta:1, constraints:{min:2,max:9}"
+					    name="lineEnd"
+					    />
+					    <label for="lineEnd">Characters at line end</label>
+					    <br/>
+					    <br/>
+						<input data-dojo-type="dijit/form/NumberSpinner" id="lineBegin"
+					    value="2"
+					    data-dojo-props="smallDelta:1, constraints:{min:2,max:9}"
+					    name="lineBegin"
+					    />
+					    <label for="lineBegin">Characters at line begin</label>
+					    <br/>
+					    <br/>					    
+					    <input data-dojo-type="dijit/form/NumberSpinner" id="maxHyphens"
+					    value="0"
+					    data-dojo-props="smallDelta:1, constraints:{min:0,max:99}"
+					    name="maxHyphens"
+					    />
+					    <label for="maxHyphens">Maximum number of consecutive hyphens</label>
+					</div>
+					<br/>
+			    <h3>Breaks</h3>
+			    	<div style = "float: left;">
+			    		<input id="insertBreaks" name="insertBreaks" data-dojo-type="dijit/form/CheckBox" value="false"/> 
+						<label for="insertBreaks">Insert</label>
+					</div>
+					<div style = "float: left; margin-left: 30px;">
+						<div style = "float: left;" class = "labeledSelect">
+						    <span>Type:</span>
+						    <select name="breakType" data-dojo-type="dijit/form/Select">
+							    <option value="page" selected="selected">Page</option>
+							    <option value="column">Column</option>
+							</select>
+						</div>
+						<div style = "float: left; margin-left: 30px;" class = "labeledSelect">
+						    <span>Position:</span>
+						    <select name="breakPosition" data-dojo-type="dijit/form/Select">
+							    <option value="before" selected="selected">Before</option>
+							    <option value="after">After</option>
+							</select>
+						</div>
+					</div>
+					<br/>
+					<br/>
+					<div style = "float: left; margin-left: 30px;">
+			    		<input id="breakPageStyle" name="breakPageStyle" data-dojo-type="dijit/form/CheckBox" value="false"/> 
+						<label for="breakPageStyle">With Page Style</label>
+					</div>
+					<div style = "float: left; margin-left: 30px;">
+						<div style = "float: left;" class = "labeledSelect">
+						    <select name="pageStyle" data-dojo-type="dijit/form/Select">
+							    <option value="default" selected="selected">Default</option>
+							    <option value="endnote">Endnote</option>
+							    <option value="envelope">Envelope</option>
+							    <option value="firstpage">First Page</option>
+							    <option value="footnote">Footnote</option>
+							    <option value="html">HTML</option>
+							    <option value="index">Index</option>
+							    <option value="landscape">Landscape</option>
+							    <option value="leftpage">Left Page</option>
+							    <option value="rightpage">Right Page</option>
+							</select>
+						</div>
+						<div style = "float: left; margin-left: 30px;">
+							<label for="pageNumber">Page number:</label>
+							<input data-dojo-type="dijit/form/NumberSpinner" id="pageNumber"
+						    value="0"
+						    data-dojo-props="smallDelta:1, constraints:{min:0,max:9999}"
+						    name="pageNumber"
+						    />
+						</div>
+					</div>
+					<br/>
+			    <h3>Options</h3>
+					<div>
+						<input id="noSplitParagraph" name="noSplitParagraph" data-dojo-type="dijit/form/CheckBox" value="false"/> 
+						<label for="noSplitParagraph">Do not split paragraph</label>
+						<br /> <br />
+						<input id="keepWithNextParagraph" name="keepWithNextParagraph" data-dojo-type="dijit/form/CheckBox" value="false"/> 
+						<label for="keepWithNextParagraph">Keep with next paragraph</label>
+						<br /> <br />
+						<div style = "float: left;">
+							<input id="orphanControl" name="orphanControl" data-dojo-type="dijit/form/CheckBox" value="false"/> 
+							<label for="orphanControl">Orphan control</label>
+						</div>
+						<div style = "float: left; margin-left: 30px;">
+							<input data-dojo-type="dijit/form/NumberSpinner" id="orphanControlLines"
+						    value="2"
+						    data-dojo-props="smallDelta:1, constraints:{min:2,max:9}"
+						    name="orphanControlLines"
+						    />
+						    <label for="orphanControlLines">Lines</label>
+						</div>
+						<br /> <br />
+						<div style = "float: left;">
+							<input id="windowControl" name="windowControl" data-dojo-type="dijit/form/CheckBox" value="false"/> 
+							<label for="windowControl">Window control</label>
+						</div>
+						<div style = "float: left; margin-left: 30px;">
+							<input data-dojo-type="dijit/form/NumberSpinner" id="windowControlLines"
+						    value="2"
+						    data-dojo-props="smallDelta:1, constraints:{min:2,max:9}"
+						    name="windowControlLines"
+						    />
+						    <label for="windowControlLines">Lines</label>
+						</div>
+					</div>
+			</form>
+		</body> 
+</html> 

@@ -44,7 +44,7 @@ core.CursorTests = function CursorTests(runner) {
         maindoc = runtime.getWindow().document,
         testarea = maindoc.getElementById("testarea");
     /**
-     * @param {Selection} selection
+     * @param {core.Selection} selection
      * @param {Node} startnode
      * @param {number} startoffset
      * @param {Node=} endnode
@@ -69,7 +69,7 @@ core.CursorTests = function CursorTests(runner) {
     }
 
     function setupEmptyRootNode() {
-        var selection = runtime.getWindow().getSelection(),
+        var selection = new core.Selection(maindoc),
             root = maindoc.createElementNS("", "p"),
             cursor = new core.Cursor(selection, maindoc);
         testarea.appendChild(root);

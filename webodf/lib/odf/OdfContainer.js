@@ -540,6 +540,21 @@ odf.OdfContainer = (function () {
         /**
          * @return {!string}
          */
+        function serializeManifestXml() {
+            var xml = "<manifest:manifest xmlns:manifest='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0' manifest:version='1.2'><manifest:file-entry manifest:media-type='application/vnd.oasis.opendocument.text' manifest:full-path='/'/>"
+                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='content.xml'/>"
+                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='styles.xml'/>"
+                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='meta.xml'/>"
+                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='settings.xml'/>"
+                + "</manifest:manifest>",
+                manifest = /**@type{!Document}*/(runtime.parseXML(xml)),
+                serializer = new xmldom.LSSerializer();
+            serializer.filter = new OdfNodeFilter(self.rootElement);
+            return serializer.writeToString(manifest, style2CSS.namespaces);
+        }
+        /**
+         * @return {!string}
+         */
         function serializeSettingsXml() {
             var nsmap = style2CSS.namespaces,
                 serializer = new xmldom.LSSerializer(),
@@ -617,6 +632,21 @@ odf.OdfContainer = (function () {
         this.getPart = function (partname) {
             return new OdfPart(partname, self, zip);
         };
+        function createEmptyTextDocument() {
+            var zip = new core.Zip("", null),
+                data = runtime.byteArrayFromString(
+                    "application/vnd.oasis.opendocument.text",
+                    "utf8"
+                ),
+                root = self.rootElement,
+                text = document.createElementNS(officens, 'text');
+            zip.save("mimetype", data, false, new Date());
+            root.body = document.createElementNS(officens, 'body');
+            root.body.appendChild(text);
+            root.appendChild(root.body);
+            setState(OdfContainer.DONE);
+            return zip;
+        }
         /**
          * @param {!string} newurl
          * @param {function(?string):undefined} callback
@@ -627,15 +657,18 @@ odf.OdfContainer = (function () {
             // already, but meta, settings, styles and content should be
             // refreshed
             // update the zip entries with the data from the live ODF DOM
-            var data;
+            var data,
+                date = new Date();
             data = runtime.byteArrayFromString(serializeSettingsXml(), "utf8");
-            zip.save("settings.xml", data, true, new Date());
+            zip.save("settings.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeMetaXml(), "utf8");
-            zip.save("meta.xml", data, true, new Date());
+            zip.save("meta.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeStylesXml(), "utf8");
-            zip.save("styles.xml", data, true, new Date());
+            zip.save("styles.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeContentXml(), "utf8");
-            zip.save("content.xml", data, true, new Date());
+            zip.save("content.xml", data, true, date);
+            data = runtime.byteArrayFromString(serializeManifestXml(), "utf8");
+            zip.save("META-INF/manifest.xml", data, true, date);
             zip.writeAs(newurl, function (err) {
                 callback(err);
             });
@@ -655,19 +688,23 @@ odf.OdfContainer = (function () {
         this.parts = new OdfPartList(this);
 
         // initialize private variables
-        zip = new core.Zip(url, function (err, zipobject) {
-            zip = zipobject;
-            if (err) {
-                loadFromXML(url, function (xmlerr) {
-                    if (err) {
-                        zip.error = err + "\n" + xmlerr;
-                        setState(OdfContainer.INVALID);
-                    }
-                });
-            } else {
-                loadComponents();
-            }
-        });
+        if (url) {
+            zip = new core.Zip(url, function (err, zipobject) {
+                zip = zipobject;
+                if (err) {
+                    loadFromXML(url, function (xmlerr) {
+                        if (err) {
+                            zip.error = err + "\n" + xmlerr;
+                            setState(OdfContainer.INVALID);
+                        }
+                    });
+                } else {
+                    loadComponents();
+                }
+            });
+        } else {
+            zip = createEmptyTextDocument();
+        }
     };
     odf.OdfContainer.EMPTY = 0;
     odf.OdfContainer.LOADING = 1;

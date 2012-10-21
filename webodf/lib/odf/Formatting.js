@@ -30,15 +30,15 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf: true, runtime: true*/
+/*global odf: true, runtime: true, console: true*/
 /**
  * @constructor
  */
 odf.Formatting = function Formatting() {
     "use strict";
     var /**@type{odf.OdfContainer}*/ odfContainer,
-        /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo();
-
+        /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
+        /**@type{Object}*/ namespaces = new odf.Style2CSS().namespaces;
     /**
      * Class that iterates over all elements that are part of the range.
      * @constructor
@@ -132,7 +132,7 @@ odf.Formatting = function Formatting() {
      */
     this.getParagraphStyles = function (selection) {
         var i, j, s, styles = [];
-        for (i = 0; i < selection.length; i += 0) {
+        for (i = 0; i < selection.length; i += 1) {
             s = getParagraphStyles(selection[i]);
             for (j = 0; j < s.length; j += 1) {
                 if (styles.indexOf(s[j]) === -1) {
@@ -142,6 +142,40 @@ odf.Formatting = function Formatting() {
         }
         return styles;
     };
+
+    /**
+     * Loop over the <style:style> elements and place the attributes
+     * style:name and style:display-name in an array.
+     * @return {!Array}
+     */
+    this.getAvailableParagraphStyles = function () {
+        var node = odfContainer.rootElement.styles && odfContainer.rootElement.styles.firstChild,
+            p_family,
+            p_name,
+            p_displayName,
+            paragraphStyles = [],
+            style;
+        while (node) {
+            if (node.nodeType === 1 && node.localName === "style"
+                    && node.namespaceURI === namespaces.style) {
+                style = node;
+                p_family = style.getAttributeNS(namespaces.style, 'family');
+                if (p_family === "paragraph") {
+                    p_name = style.getAttributeNS(namespaces.style, 'name');
+                    p_displayName = style.getAttributeNS(namespaces.style, 'display-name') || p_name;
+                    if (p_name && p_displayName) {
+                        paragraphStyles.push({
+                            name: p_name,
+                            displayName: p_displayName
+                        });
+                    }
+                }
+            }
+            node = node.nextSibling;
+        }
+        return paragraphStyles;
+    };
+
     /**
      * Get the list of text styles that are covered by the current selection.
      * @param {!Array.<!Range>} selection

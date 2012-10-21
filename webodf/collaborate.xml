@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This document lists all operations that can be performed on odf documents. This api can be implemented by any application and is independent of programming language.
+  Parts of the document are addressed by a simplified form of xpath that is called OP (opendocument pointer) in this document.
+ -->
+<operations xmlns="urn:realtimeodf">
+ <!-- paragraphs -->
+ <!-- With paragraphs, only text:p elements are meant. Paragraphs can be
+      addressed by an xml:id attribute. -->
+ <!-- commented out for now until we start implementing this 
+ <operation name="addParagraph">
+  <argument name="paragraph" type="string"/>
+ </operation>
+ <operation name="deleteParagraph">
+  <argument name="paragraphPointer" type="string"/>
+ </operation>
+ <operation name="setParagraphStyle">
+  <argument name="paragraphPointer" type="string"/>
+  <argument name="styleName" type="string"/>
+ </operation>
+ -->
+ <operation name="addMemberToSession">
+  <argument name="memberid" type="string"/>
+ </operation>
+ <operation name="removeMemberFromSession">
+  <argument name="memberid" type="string"/>
+ </operation>
+ <operation name="moveMemberCaret">
+  <argument name="memberid" type="string"/>
+  <argument name="number" type="steps"/>
+ </operation>
+</operations>

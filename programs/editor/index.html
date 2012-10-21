@@ -4,18 +4,56 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
   
   <title>Editor</title>
-    
-  <link rel="stylesheet" type="text/css" href="editor.css"/>
 
-  <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
-  <script src="editor.js" type="text/javascript" charset="utf-8"></script>
+  <!-- Dojo stuff -->
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/claro.css"/>
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/layout/resources/ExpandoPane.css"/>
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/widget/ColorPicker/ColorPicker.css" />
+  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js" data-dojo-config="async: true"></script>
+
+  <!-- App stuff -->
+  <script src="../../webodf/lib/runtime.js" type="text/javascript" charset="utf-8"/></script>
+  <link rel="stylesheet" type="text/css" href="editor.css"/>
+  <script src="editor.js" type="text/javascript" charset="utf-8"/></script>
+  <script src="widgets.js" type="text/javascript" charset="utf-8"/></script>
+  <script src="avatars.js" type="text/javascript" charset="utf-8"/></script>
+
   <script type="text/javascript">//<![CDATA[
-runtime.libraryPaths = function () {
-    return ["lib"];
-};
+
+window["widgets"] = {};
+var documentChangedEvent = document.createEvent('Event');
+documentChangedEvent.initEvent('changed', true, true);
+
   //]]></script>
+
  </head>
- <body>
-    <div id="canvas"></div>
+ <body class = "claro">
+  <div id = "mainContainer">
+    <div id = "topPane">
+      <h1> Doc </h1>
+    </div>
+    <div id = "editor">
+      <span id = "menubar"></span>
+      <span id = "toolbar"></span>
+      <div id = "container">
+        <div id="canvas"></div>
+      </div>
+    </div>
+    <div id = "collaboration">
+      <div id = "collabContainer">
+        <div id = "people">
+          <div id = "nameInfo">
+            <div id = "nameEdit"></div>
+          </div>
+          <div id = "peopleList"></div>
+          <div id = "inviteButton"></div>
+        </div>
+        <div id = "chat">
+          <div id = "inputArea">
+            <div id = "chatInput"></div>
+        </div>
+      </div>
+    </div>
+  </div>
  </body>
 </html>
