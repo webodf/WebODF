@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, gui, ops, odf, window*/
+/*global runtime, core, gui, ops, odf, window*/
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("gui.SelectionManager");
 /**
@@ -56,30 +56,34 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @implements {core.PositionFilter}
      */
     function TextPositionFilter() {
+        /**
+         * @param {!core.PositionIterator} iterator
+         * @return {core.PositionFilter.FilterResult}
+         */
         this.acceptPosition = function (iterator) {
             var n = iterator.container(), p, o, d;
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
-                    return 2;
+                    return core.PositionFilter.FilterResult.FILTER_REJECT;
                 }
-                return 1;
+                return core.PositionFilter.FilterResult.FILTER_ACCEPT;
             }
             if (n.length === 0) {
-                return 2;
+                return core.PositionFilter.FilterResult.FILTER_REJECT;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
             p = n.parentNode;
             o = p && p.localName;
             if (o !== "p" && o !== "span" && o !== "h") {
-                return 2;
+                return core.PositionFilter.FilterResult.FILTER_REJECT;
             }
             // do not stop between spaces
             o = iterator.textOffset();
             if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
-                return 2;
+                return core.PositionFilter.FilterResult.FILTER_REJECT;
             }
-            return 1;
+            return core.PositionFilter.FilterResult.FILTER_ACCEPT;
         };
     }
     function findTextRoot(session) {
