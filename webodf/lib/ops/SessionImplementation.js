@@ -201,6 +201,15 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.moveMemberCaret = function (memberid, number) {
         var avatar = members[memberid];
         avatar.getCaret().move(number);
+        
+        var moveEvent = new CustomEvent("avatarMoved", {
+          detail: {
+            avatar: avatar
+          }
+        });
+
+        rootNode.ownerDocument.dispatchEvent(moveEvent);
+
         return true;
     };
     /**
@@ -279,7 +288,11 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         counter = caret.getStepCounter().countStepsToPosition;
         selection = window.getSelection();
         steps = counter(selection.focusNode, selection.focusOffset, filter);
-        caret.move(steps);
+        // We're only moving the first member on click now
+        for (var member in members) {
+            self.moveMemberCaret(member, steps);
+            break;
+        }
         caret.focus();
         //runtime.log(steps);
         //runtime.log(e.target.getBoundingClientRect());
