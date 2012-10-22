@@ -82,9 +82,9 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
             return;
         }
         if (caretLineVisible) {
-            span.style.borderLeftWidth = "0px";
+            span.style.outlineWidth = "0px";
         } else {
-            span.style.borderLeftWidth = "1px";
+            span.style.outlineWidth = "1px";
         }
         caretLineVisible = !caretLineVisible;
         if (!blinking) {

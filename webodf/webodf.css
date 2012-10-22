@@ -209,6 +209,7 @@ cursor|cursor > span {
     position: absolute;
     height: 1em;
     border-left: 1px solid black;
+    outline: none;
 }
 cursor|cursor > div {
     display: none;
