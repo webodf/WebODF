@@ -71,7 +71,7 @@ widgets.ParagraphStyles = (function () {
             widget.onChange = function(value) {
                 if(currentParagraph) {
                     currentParagraph.setAttributeNS(textns, 'style-name', value);
-                    document.dispatchEvent(documentChangedEvent);
+                    document.dispatchEvent(document.documentChangedEvent);
                 }
             }
 
