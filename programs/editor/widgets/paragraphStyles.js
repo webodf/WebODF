@@ -64,6 +64,8 @@ widgets.ParagraphStyles = (function () {
                 while (e && !((e.localName === "p" || e.localName === "h") && e.namespaceURI === textns)) {
                     e = e.parentNode;
                 }
+                if(!e)
+                    return;
                 currentParagraph = e;
                 widget.set("value", e.getAttributeNS(textns, 'style-name'));
             });
