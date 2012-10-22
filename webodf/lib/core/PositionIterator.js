@@ -147,11 +147,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     /**
      * @return {!number}
      */
-    this.containerLength = function () {
-    };
-    /**
-     * @return {!number}
-     */
     this.offset = function () {
         if (walker.currentNode.nodeType === 3) {
             return currentPos;

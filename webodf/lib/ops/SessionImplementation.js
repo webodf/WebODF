@@ -112,6 +112,13 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             offset = 0;
         return { paragraph: paragraph, offset: offset };
     }
+    var self = this,
+        rootNode,
+        selectionManager,
+        members = {},
+        filter = new TextPositionFilter(),
+        style2CSS = new odf.Style2CSS(),
+        namespaces = style2CSS.namespaces;
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -122,15 +129,44 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {?{textNode: !Text, offset: !number}}
      */
     function getPositionInTextNode(paragraph, offset) {
-        return null;
+        var iterator = gui.SelectionMover.createPositionIterator(rootNode),
+            lastTextNode = null,
+            node,
+            nodeOffset = 0;
+        iterator.setPosition(paragraph, 0);
+        node = iterator.container();
+        if (node.nodeType === 3) {
+            lastTextNode = /**@type{!Text}*/(node);
+            nodeOffset = 0;
+        }
+        while (offset > 0 || lastTextNode === null) {
+            if (!iterator.nextPosition()) {
+                // the desired position cannot be found
+                return null;
+            }
+            node = iterator.container();
+            if (node.nodeType === 3) {
+                offset -= 1;
+                if (node !== lastTextNode) {
+                    lastTextNode = /**@type{!Text}*/(node);
+                    nodeOffset = 0;
+                } else {
+                    nodeOffset += 1;
+                }
+            } else if (lastTextNode !== null) {
+                offset -= 1;
+                if (offset === 0) {
+                    nodeOffset = lastTextNode.length;
+                    break;
+                }
+                lastTextNode = null;
+            }
+        }
+        if (lastTextNode === null) {
+            return null;
+        }
+        return {textNode: lastTextNode, offset: nodeOffset };
     }
-    var self = this,
-        rootNode,
-        selectionManager,
-        members = {},
-        filter = new TextPositionFilter(),
-        style2CSS = new odf.Style2CSS(),
-        namespaces = style2CSS.namespaces;
     /**
      * @param {!number} paragraph
      * @return {?Element}
