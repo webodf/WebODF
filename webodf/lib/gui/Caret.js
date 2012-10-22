@@ -106,6 +106,9 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         span.focus();
         updateHandlePosition();
     };
+    this.updateHandlePosition = function () {
+        updateHandlePosition();
+    };
     this.move = function (number) {
 //runtime.log("moving " + number);
         var moved = 0;

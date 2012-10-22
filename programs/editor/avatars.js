@@ -61,7 +61,7 @@ function setupAvatarView(session, avatarlistdiv) {
     
     avatars.forEach(function(avatar) {
         document.addEventListener('changed', function() {
-            avatar.getCaret().focus();
+            avatar.getCaret().updateHandlePosition();
         });
     });
 }
