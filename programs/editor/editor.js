@@ -48,6 +48,10 @@ function editor_init(docurl) {
 
     var doclocation, pos, odfElement, odfCanvas, filename;
 
+    // documentChangedEvent
+    document.documentChangedEvent = document.createEvent('Event');
+    document.documentChangedEvent.initEvent('changed', true, true);
+
     odfElement = document.getElementById("canvas");
     odfCanvas = new odf.OdfCanvas(odfElement);
 
