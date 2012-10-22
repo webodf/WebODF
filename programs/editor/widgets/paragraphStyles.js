@@ -59,15 +59,15 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
-            documentObject.odfCanvas.addListener("click", function (event) {
-                var e = event.target;
-                while (e && !((e.localName === "p" || e.localName === "h") && e.namespaceURI === textns)) {
-                    e = e.parentNode;
+            documentObject.addEventListener("avatarMoved", function (event) {
+                var node = event.detail.avatar.getCaret().getSelection().focusNode;
+                while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
+                    node = node.parentNode;
                 }
-                if(!e)
+                if(!node)
                     return;
-                currentParagraph = e;
-                widget.set("value", e.getAttributeNS(textns, 'style-name'));
+                currentParagraph = node;
+                widget.set("value", currentParagraph.getAttributeNS(textns, 'style-name'));
             });
 
             widget.onChange = function(value) {
