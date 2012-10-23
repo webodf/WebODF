@@ -346,7 +346,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     this.getActiveAvatar = function() {
         return activeAvatar;
-    }
+    };
     /**
      * @param {!Event} e
      * @return {undefined}
