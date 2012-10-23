@@ -61,8 +61,8 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
-            documentObject.addEventListener("avatarMoved", function (event) {
-                var node = event.detail.avatar.getCaret().getSelection().focusNode;
+            function trackCursor(avatar) {
+                var node = avatar.getCaret().getSelection().focusNode;
                 while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
                     node = node.parentNode;
                 }
@@ -71,7 +71,16 @@ widgets.ParagraphStyles = (function () {
                 currentParagraph = node;
                 currentStyle = currentParagraph.getAttributeNS(textns, 'style-name');
                 widget.set("value", currentStyle);
+            }
+
+            documentObject.addEventListener("avatarMoved", function (event) {
+                trackCursor(event.detail.avatar);
             });
+            documentObject.addEventListener("avatarActivated", function (event) {
+                console.log('here')
+                trackCursor(event.detail.avatar);
+            });
+
 
             widget.onChange = function(value) {
                 currentStyle = value;

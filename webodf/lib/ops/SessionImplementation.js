@@ -313,9 +313,18 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {!boolean}
      */
     this.setActiveAvatar = function (memberid) {
+        var avatarActivated;
         if (members.hasOwnProperty(memberid)) {
             activeAvatar = members[memberid];
             activeAvatar.getCaret().focus();
+
+            avatarActivated = new window.CustomEvent("avatarActivated", {
+                detail: {
+                    avatar: activeAvatar
+                }
+            });
+
+            rootNode.ownerDocument.dispatchEvent(avatarActivated);
             return true;
         }
         return false;
