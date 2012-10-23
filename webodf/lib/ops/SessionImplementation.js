@@ -119,7 +119,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
-        activeAvatar;
+        activeAvatar = null;
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -217,6 +217,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                     this.insertText(position.paragraph, position.offset, text);
                     return true;
                 });
+        activeAvatar = activeAvatar || avatar;
         members[memberid] = avatar;
         return true;
     };
@@ -332,17 +333,17 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return list;
     };
     /**
-     * @return {gui.Avatar}
+     * @return {?gui.Avatar}
      */
-    function getFocussedAvatar() {
-        return self.getAvatars()[0];
+    function getActiveAvatar() {
+        return activeAvatar;
     }
     /**
      * @param {!Event} e
      * @return {undefined}
      */
     function handleDocumentClick(e) {
-        var avatar = getFocussedAvatar(),
+        var avatar = getActiveAvatar(),
             caret,
             counter,
             steps,
