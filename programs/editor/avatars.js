@@ -106,8 +106,8 @@ function Session(odfcanvas, avatarlistdiv) {
     // in this test we start a session from scratch: it is not loaded from
     // a serialized document
     // each avatar is added at the starting position
-    addMember(session, {id: "Bob", imageurl: "avatar-pigeon.png", color: "#fee"});
-    addMember(session, {id: "Alice", imageurl: "avatar-flower.png", color: "#efe"});
+    addMember(session, {id: "Bob", imageurl: "avatar-pigeon.png", color: "#fcc"});
+    addMember(session, {id: "Alice", imageurl: "avatar-flower.png", color: "#cfc"});
     setupAvatarView(session, avatarlistdiv);
 
     return session;
