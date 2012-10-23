@@ -13,4 +13,5 @@ programs/ios/www/sencha-touch.js
 programs/ios/www/webodf.js
 .DS_Store
 webodf/webodf.css.js
-*.swp
+build
+*.sw?
