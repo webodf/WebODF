@@ -139,6 +139,11 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         if (node.nodeType === 3) {
             lastTextNode = /**@type{!Text}*/(node);
             nodeOffset = 0;
+        } else if (offset === 0) {
+            // create a new text node at the start of the paragraph
+            lastTextNode = paragraph.ownerDocument.createTextNode('');
+            node.insertBefore(lastTextNode, null);
+            nodeOffset = 0;
         }
         while (offset > 0 || lastTextNode === null) {
             if (!iterator.nextPosition()) {
