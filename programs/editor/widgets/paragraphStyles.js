@@ -77,7 +77,6 @@ widgets.ParagraphStyles = (function () {
                 trackCursor(event.detail.avatar);
             });
             documentObject.addEventListener("avatarActivated", function (event) {
-                console.log('here')
                 trackCursor(event.detail.avatar);
             });
 
