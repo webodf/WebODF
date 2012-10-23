@@ -74,7 +74,7 @@ function addMember(session, member) {
     avatar.setColor(member.color);
 }
 
-function TestSession(odfcanvas, avatarlistdiv) {
+function Session(odfcanvas, avatarlistdiv) {
     "use strict";
     var odfcontainer = odfcanvas.odfContainer(),
         session = new ops.SessionImplementation(odfcontainer),
@@ -93,5 +93,5 @@ function TestSession(odfcanvas, avatarlistdiv) {
 
 function loadAvatars(documentObject, avatarList) {
 	"use strict";
-    var testsession = new TestSession(documentObject.odfCanvas, avatarList);
+    document.session = new Session(documentObject.odfCanvas, avatarList);
 }
