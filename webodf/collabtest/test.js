@@ -129,23 +129,19 @@ function initSession(odfid, avatarlistid, callback) {
     odfcanvas.load("text.odt");
 }
 function setHeight(id, top, height) {
+	"use strict";
     var div = document.getElementById(id);
     div.style.top = top + "%";
     div.style.height = height + "%";
 }
 function init() {
     "use strict";
-    var height = 100;
+    var height = 50;
     setHeight("session1", 0, height);
     setHeight("avatars1", 0, height);
     setHeight("session2", height, 100 - height);
     setHeight("avatars2", height, 100 - height);
-    initSession("odf1", "avatars1", function () {
-        // workaround for fact that onreadychange signal is somehow too soon
-        runtime.setTimeout(function () {
-            if (height !== 100) {
-                initSession("odf2", "avatars2");
-            }
-        }, 1);
-    });
+
+    initSession("odf1", "avatars1");
+    initSession("odf2", "avatars2");
 }
