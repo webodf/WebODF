@@ -116,10 +116,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         rootNode,
         selectionManager,
         members = {},
-        activeMemeber,
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
-        namespaces = style2CSS.namespaces;
+        namespaces = style2CSS.namespaces,
+        activeAvatar = null;
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -217,6 +217,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                     this.insertText(position.paragraph, position.offset, text);
                     return true;
                 });
+        activeAvatar = activeAvatar || avatar;
         members[memberid] = avatar;
         return true;
     };
@@ -236,13 +237,14 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {!boolean}
      */
     this.moveMemberCaret = function (memberid, number) {
-        var avatar = members[memberid];
+        var avatar = members[memberid],
+            moveEvent;
         avatar.getCaret().move(number);
         
-        var moveEvent = new CustomEvent("avatarMoved", {
-          detail: {
-            avatar: avatar
-          }
+        moveEvent = new window.CustomEvent("avatarMoved", {
+            detail: {
+                avatar: avatar
+            }
         });
 
         rootNode.ownerDocument.dispatchEvent(moveEvent);
@@ -293,12 +295,34 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     /* SESSION INTROSPECTION */
 
+    /**
+     * @return {!odf.OdfContainer}
+     */
     this.getOdfContainer = function () {
         return odfcontainer;
     };
+    /**
+     * @param {!string} memberid
+     * @return {gui.Avatar}
+     */
     this.getAvatar = function (memberid) {
         return members[memberid];
     };
+    /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
+    this.setActiveAvatar = function (memberid) {
+        if (members.hasOwnProperty(memberid)) {
+            activeAvatar = members[memberid];
+            activeAvatar.getCaret().focus();
+            return true;
+        }
+        return false;
+    };
+    /**
+     * @return {!Array.<!gui.Avatar>}
+     */
     this.getAvatars = function () {
         var list = [], i;
         for (i in members) {
@@ -308,20 +332,23 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
-    this.setActiveAvatar = function(memberid) {
-        activeMemeber = self.getAvatar(memberid);
-        activeMemeber.getCaret().focus();
-    };
+    /**
+     * @return {?gui.Avatar}
+     */
     this.getActiveAvatar = function() {
-        return activeMemeber;
-    };
-
+        return activeAvatar;
+    }
+    /**
+     * @param {!Event} e
+     * @return {undefined}
+     */
     function handleDocumentClick(e) {
         var avatar = self.getActiveAvatar(),
             caret,
             counter,
             steps,
-            selection;
+            selection,
+            member;
 
         if (!avatar) {
             return;
@@ -335,6 +362,9 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         //runtime.log(steps);
         //runtime.log(e.target.getBoundingClientRect());
     }
+    /**
+     * @return {undefined}
+     */
     function init() {
         rootNode = findTextRoot(self);
         selectionManager = new gui.SelectionManager(rootNode);

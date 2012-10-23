@@ -33,17 +33,17 @@
  */
 /*global document, runtime, odf, ops, gui*/
 
-runtime.currentDirectory = function () {
-    return "../lib";
-};
-runtime.libraryPaths = function () {
-    return [ runtime.currentDirectory() ];
-};
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.Avatar");
 
-function setupAvatarButton(avatarButtonElement, avatar) {
+/**
+ * @param {!Element} avatarButtonElement
+ * @param {!ops.SessionImplementation} session
+ * @param {!gui.Avatar} avatar
+ * @return {undefined}
+ */
+function setupAvatarButton(avatarButtonElement, session, avatar) {
     "use strict";
     var doc = avatarButtonElement.ownerDocument,
         memberid = avatar.getMemberId();
@@ -55,11 +55,16 @@ function setupAvatarButton(avatarButtonElement, avatar) {
         avatar.getCaret().hideHandle();
     };
     avatarButtonElement.onclick = function () {
-        avatar.getCaret().focus();
+        session.setActiveAvatar(avatar.getMemberId());
     };
     avatarButtonElement.style.background = avatar.getColor();
 }
 
+/**
+ * @param {!ops.SessionImplementation} session
+ * @param {!Array.<!gui.Avatar>} avatar
+ * @return {undefined}
+ */
 function setupAvatarView(session, avatarlistdiv) {
     "use strict";
     var doc = avatarlistdiv.ownerDocument,
@@ -70,10 +75,15 @@ function setupAvatarView(session, avatarlistdiv) {
     for (i = 0; i < avatars.length; i += 1) {
         e = doc.createElementNS(htmlns, "div");
         avatarlistdiv.appendChild(e);
-        setupAvatarButton(e, avatars[i]);
+        setupAvatarButton(e, session, avatars[i]);
     }
 }
 
+/**
+ * @param {!ops.SessionImplementation} session
+ * @param {!{id:!string,imageurl:!string,color:!string}}
+ * @return {undefined}
+ */
 function addMember(session, member) {
     "use strict";
     session.addMemberToSession(member.id);
