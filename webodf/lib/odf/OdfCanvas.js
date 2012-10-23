@@ -875,7 +875,7 @@ odf.OdfCanvas = (function () {
             }
             var handlers = eventHandlers[eventType], i;
             for (i = 0; i < handlers.length; i += 1) {
-                handlers[i](args);
+                handlers[i].apply(args);
             }
         }
         function fixContainerSize() {
@@ -947,7 +947,6 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         }
         /**
-         * @param {!odf.OdfContainer} container
          * @return {undefined}
          **/
         function refreshOdf() {
@@ -964,7 +963,7 @@ odf.OdfCanvas = (function () {
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(odfcontainer, odfnode);
-                fireEvent("statereadychange", odfcontainer);
+                fireEvent("statereadychange", [odfcontainer]);
             }
 
             if (odfcontainer.state === odf.OdfContainer.DONE) {
@@ -974,8 +973,8 @@ odf.OdfCanvas = (function () {
                 // do the work once it is done:
 
                 // FIXME: use callback registry instead of replacing the onchange
-                console.log("WARNING: refreshOdf called but ODF was not DONE.");
-                odfcontainer.onchange = function() {
+                runtime.log("WARNING: refreshOdf called but ODF was not DONE.");
+                odfcontainer.onchange = function () {
                     if (odfcontainer.state === odf.OdfContainer.DONE) {
                         odfcontainer.onchange = null;
                         callback();
