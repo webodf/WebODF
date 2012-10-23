@@ -118,7 +118,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         members = {},
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
-        namespaces = style2CSS.namespaces;
+        namespaces = style2CSS.namespaces,
+        activeAvatar;
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -235,13 +236,14 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {!boolean}
      */
     this.moveMemberCaret = function (memberid, number) {
-        var avatar = members[memberid];
+        var avatar = members[memberid],
+            moveEvent;
         avatar.getCaret().move(number);
         
-        var moveEvent = new CustomEvent("avatarMoved", {
-          detail: {
-            avatar: avatar
-          }
+        moveEvent = new window.CustomEvent("avatarMoved", {
+            detail: {
+                avatar: avatar
+            }
         });
 
         rootNode.ownerDocument.dispatchEvent(moveEvent);
@@ -292,12 +294,34 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     /* SESSION INTROSPECTION */
 
+    /**
+     * @return {!odf.OdfContainer}
+     */
     this.getOdfContainer = function () {
         return odfcontainer;
     };
+    /**
+     * @param {!string} memberid
+     * @return {gui.Avatar}
+     */
     this.getAvatar = function (memberid) {
         return members[memberid];
     };
+    /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
+    this.setActiveAvatar = function (memberid) {
+        if (members.hasOwnProperty(memberid)) {
+            activeAvatar = members[memberid];
+            activeAvatar.getCaret().focus();
+            return true;
+        }
+        return false;
+    };
+    /**
+     * @return {!Array.<!gui.Avatar>}
+     */
     this.getAvatars = function () {
         var list = [], i;
         for (i in members) {
@@ -307,15 +331,23 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
+    /**
+     * @return {gui.Avatar}
+     */
     function getFocussedAvatar() {
         return self.getAvatars()[0];
     }
+    /**
+     * @param {!Event} e
+     * @return {undefined}
+     */
     function handleDocumentClick(e) {
         var avatar = getFocussedAvatar(),
             caret,
             counter,
             steps,
-            selection;
+            selection,
+            member;
 
         if (!avatar) {
             return;
@@ -325,14 +357,19 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         selection = window.getSelection();
         steps = counter(selection.focusNode, selection.focusOffset, filter);
         // We're only moving the first member on click now
-        for (var member in members) {
-            self.moveMemberCaret(member, steps);
-            break;
+        for (member in members) {
+            if (members.hasOwnProperty(member)) {
+                self.moveMemberCaret(member, steps);
+                break;
+            }
         }
         caret.focus();
         //runtime.log(steps);
         //runtime.log(e.target.getBoundingClientRect());
     }
+    /**
+     * @return {undefined}
+     */
     function init() {
         rootNode = findTextRoot(self);
         selectionManager = new gui.SelectionManager(rootNode);

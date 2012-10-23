@@ -6,6 +6,12 @@
   <script type="text/javascript" charset="utf-8">
 var core = {};
 var gui = {};
+runtime.currentDirectory = function () {
+    return "../lib";
+};
+runtime.libraryPaths = function () {
+    return [ runtime.currentDirectory() ];
+};
 </script>
   <script src="../lib/core/Selection.js" type="text/javascript" charset="utf-8"></script>
   <script src="../lib/core/Cursor.js" type="text/javascript" charset="utf-8"></script>
