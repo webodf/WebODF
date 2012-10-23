@@ -214,7 +214,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                     runtime.log("type the key: " + charCode);
                     var position = getAvatarPosition(avatar),
                         text = String.fromCharCode(charCode);
-                    this.insertText(position.paragraph, position.offset, text);
+                    self.insertText(position.paragraph, position.offset, text);
                     return true;
                 });
         activeAvatar = activeAvatar || avatar;
