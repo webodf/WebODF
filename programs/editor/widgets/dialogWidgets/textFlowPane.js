@@ -36,8 +36,9 @@ widgets.TextFlowPane = (function () {
     function makeWidget(documentObject, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane" ], function (ready, domConstruct, ContentPane) {
             ready(function() {
+	      console.log(document.translator.textFlow);
             	var contentPane = new ContentPane({
-            		title: "Text Flow",
+            		title: document.translator.textFlow,
                     href: "widgets/dialogWidgets/textFlowPane.html"
             	});
 

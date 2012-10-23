@@ -41,7 +41,7 @@ widgets.CharacterStylesDialog = (function () {
 
             // Dialog
             dialog = new Dialog({
-            	title: "Character",
+            	title: document.translator.character
         	});
 
             // Tab Container
@@ -54,10 +54,10 @@ widgets.CharacterStylesDialog = (function () {
                 "class": "dijitDialogPaneActionBar"
             });
             new dijit.form.Button({
-                "label": "Ok"
+                label: document.translator.ok
             }).placeAt(actionBar);
             new dijit.form.Button({
-                "label": "Cancel"
+                label: document.translator.cancel
             }).placeAt(actionBar);
             dialog.domNode.appendChild(actionBar);
 

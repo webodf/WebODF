@@ -41,7 +41,7 @@ widgets.ParagraphStylesDialog = (function () {
 
             // Dialog
             dialog = new Dialog({
-            	title: "Paragraph Styles",
+            	title: document.translator.paragraphStyles
         	});
 
             // Tab Container
@@ -54,10 +54,10 @@ widgets.ParagraphStylesDialog = (function () {
                 "class": "dijitDialogPaneActionBar"
             });
             new dijit.form.Button({
-                "label": "Ok"
+                label: document.translator.ok
             }).placeAt(actionBar);
             new dijit.form.Button({
-                "label": "Cancel"
+                label: document.translator.cancel
             }).placeAt(actionBar);
             dialog.domNode.appendChild(actionBar);
 

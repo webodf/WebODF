@@ -108,16 +108,16 @@ function editor_init(docurl) {
             var collabPane = new ExpandoPane({
                 region: 'trailing',
                 splitter: 'true',
-                title: 'Collaboration Pane'
+                title: document.translator.collaborationPane
             }, 'collaboration');
             var peoplePane = new ContentPane({
                 region: 'top',
                 splitter: 'true',
-                title: 'People'
+                title: document.translator.people
             }, 'people');
             var chatPane = new ContentPane({
                 region: 'center',
-                title: 'Chat'
+                title: document.translator.chat
             }, 'chat');
 
             mainContainer.addChild(topPane);
@@ -139,12 +139,12 @@ function editor_init(docurl) {
                     // User's Editable Name
                     var nameBox = new TextBox({
                         value: '',
-                        placeHolder: 'Type your name...',
+                        placeHolder: document.translator.typeYourName_DDD,
                         style: 'text-align: center;'
                     }, 'nameEdit');
 
                     var inviteButton = new Button({
-                        label: 'Invite People',
+                        label: document.translator.invitePeople,
                     }, 'inviteButton');
 
                     // Chat Box
@@ -152,7 +152,7 @@ function editor_init(docurl) {
                     // Chat Input
                     var chatInput = new TextBox({
                         value: '',
-                        placeHolder: 'Start typing to chat...',
+                        placeHolder: document.translator.startTypingToChat_DDD,
                         style: 'text-align: center;'
                     }, 'chatInput');
                 }

@@ -37,7 +37,7 @@ widgets.NumberingPane = (function () {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane" ], function (ready, domConstruct, ContentPane) {
             ready(function() {
             	var contentPane = new ContentPane({
-            		title: "Outline & Numbering",
+            		title: document.translator.outlineAndNumbering,
                     href: "widgets/dialogWidgets/numberingPane.html"
             	});
 

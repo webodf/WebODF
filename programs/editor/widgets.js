@@ -53,10 +53,10 @@ function loadWidgets(documentObject) {
 
             var formatSubmenu = new DropDownMenu({});
             var paragraphStylesMenuItem = new MenuItem({
-                label: 'Paragraph...'
+                label: document.translator.paragraph_DDD
             });
             var characterStylesMenuItem = new MenuItem({
-                label: 'Character...'
+                label: document.translator.character_DDD
             });
             formatSubmenu.addChild(paragraphStylesMenuItem);
             formatSubmenu.addChild(characterStylesMenuItem);
@@ -65,16 +65,16 @@ function loadWidgets(documentObject) {
                 label: document.translator.file
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: "Edit"
+                label: document.translator.edit
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: "View"
+                label: document.translator.view
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: "Insert"
+                label: document.translator.insert
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: "Format",
+                label: document.translator.format,
                 popup: formatSubmenu
             }));
 
