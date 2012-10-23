@@ -1097,13 +1097,13 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.addListener = function (eventName, handler) {
-            switch(eventName) {
-                case "selectionchange":
-                    selectionWatcher.addListener(eventName, handler); break;
-                case "click":
-                    listenEvent(element, eventName, handler); break;
-                default:
-                    addEventListener(eventName, handler); break;
+            switch (eventName) {
+            case "selectionchange":
+                selectionWatcher.addListener(eventName, handler); break;
+            case "click":
+                listenEvent(element, eventName, handler); break;
+            default:
+                addEventListener(eventName, handler); break;
             }
         };
 
@@ -1162,7 +1162,7 @@ odf.OdfCanvas = (function () {
             realHeight = element.offsetHeight / zoomLevel;
 
             newScale = width / realWidth;
-            if(height !== undefined) {
+            if (height !== undefined) {
                 if (height / realHeight < newScale) {
                     newScale = height / realHeight;
                 }
@@ -1181,7 +1181,7 @@ odf.OdfCanvas = (function () {
             zoomLevel = height / realHeight;
             fixContainerSize();
         };
-        this.showFirstPage = function() {
+        this.showFirstPage = function () {
             pageSwitcher.showFirstPage();
         };
         /**
