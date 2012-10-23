@@ -34,6 +34,7 @@
 widgets.ParagraphStyles = (function () {
 
     var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+    var htmlns = "http://www.w3.org/1999/xhtml";
 
     function makeWidget(documentObject, callback) {
         require(["dijit/form/Select"], function (Select) {
@@ -41,7 +42,8 @@ widgets.ParagraphStyles = (function () {
                 widget,
                 selectionList = [],
                 availableStyles = documentObject.odfCanvas.getFormatting().getAvailableParagraphStyles(),
-                currentParagraph = null;
+                currentParagraph = null,
+                currentStyle = null;
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -67,13 +69,28 @@ widgets.ParagraphStyles = (function () {
                 if(!node)
                     return;
                 currentParagraph = node;
-                widget.set("value", currentParagraph.getAttributeNS(textns, 'style-name'));
+                currentStyle = currentParagraph.getAttributeNS(textns, 'style-name');
+                widget.set("value", currentStyle);
             });
 
             widget.onChange = function(value) {
+                currentStyle = value;
                 if(currentParagraph) {
-                    currentParagraph.setAttributeNS(textns, 'style-name', value);
-                    document.dispatchEvent(document.documentChangedEvent);
+                    var avatar = document.session.getActiveAvatar();
+                    if(currentStyle != currentParagraph.getAttributeNS(textns, 'style-name')) {
+                        currentParagraph.setAttributeNS(textns, 'style-name', value);
+                        document.dispatchEvent(document.documentChangedEvent);
+
+                        currentParagraph.removeAttribute('user');
+                        currentParagraph.removeAttribute('class');
+                        currentParagraph.removeAttribute('usercolor');
+
+                        runtime.setTimeout(function() {
+                            currentParagraph.setAttribute('user', avatar.getMemberId());
+                            currentParagraph.setAttribute('class', 'edited');
+                            currentParagraph.setAttribute('usercolor', avatar.getColor());
+                        }, 1);
+                    }
                 }
             }
 

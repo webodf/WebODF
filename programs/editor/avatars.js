@@ -34,28 +34,51 @@
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("gui.Avatar");
 
-function setupAvatarButton(avatarButtonElement, avatar) {
+var avatarStyles = null;
+
+function setupAvatar(avatarButtonElement, avatar) {
     "use strict";
     var doc = avatarButtonElement.ownerDocument,
-        memberid = avatar.getMemberId();
+        memberid = avatar.getMemberId(),
+        style, head;
     avatarButtonElement.appendChild(doc.createTextNode(memberid));
     avatarButtonElement.onclick = function () {
         document.session.setActiveAvatar(memberid);
     };
     avatarButtonElement.style.background = avatar.getColor();
+    
+    // Add per-avatar edited styling
+    avatarStyles.sheet.insertRule('text|p[class=edited][user='+avatar.getMemberId()+'] { background-color: '+avatar.getColor()+';'
+                                                                 +  '-webkit-animation-name: fade;'
+                                                                 +  '-webkit-animation-duration: 10s;'
+                                                                 +  '-webkit-animation-fill-mode: forwards;'
+                                                                 +  'border-radius: 10px;}',
+                        0);
 }
 
 function setupAvatarView(session, avatarlistdiv) {
     "use strict";
+
     var doc = avatarlistdiv.ownerDocument,
         htmlns = doc.documentElement.namespaceURI,
         avatars = session.getAvatars(),
+        head, style,
         i,
         e;
+
+    // Add a css sheet for avatar-edited styling
+    head = document.getElementsByTagName('head')[0],
+    style = document.createElementNS(head.namespaceURI, 'style');
+    style.setAttribute('type', 'text/css');
+    style.setAttribute('media', 'screen, print, handheld, projection');
+    style.appendChild(document.createTextNode('@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);'));
+    head.appendChild(style);
+    avatarStyles = style;
+
     for (i = 0; i < avatars.length; i += 1) {
         e = doc.createElementNS(htmlns, "div");
         avatarlistdiv.appendChild(e);
-        setupAvatarButton(e, avatars[i]);
+        setupAvatar(e, avatars[i]);
         avatars[i].getCaret().showHandle();
     }
     
@@ -86,9 +109,7 @@ function Session(odfcanvas, avatarlistdiv) {
     addMember(session, {id: "Bob", imageurl: "avatar-pigeon.png", color: "#fee"});
     addMember(session, {id: "Alice", imageurl: "avatar-flower.png", color: "#efe"});
     setupAvatarView(session, avatarlistdiv);
-    //avatar.focus();
 
-    console.log("READY.");
     return session;
 }
 

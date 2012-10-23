@@ -1,3 +1,5 @@
+@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
+
 html, body, #mainContainer {
     width: 100%;
     height: 100%;
@@ -229,4 +231,10 @@ cursor > div:after {
 
     top: 100%;
     left: 43%;
+}
+
+@-webkit-keyframes fade {
+    100% {
+        background-color: transparent;
+    }
 }
