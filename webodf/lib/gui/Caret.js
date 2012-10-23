@@ -61,6 +61,11 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
             event.returnValue = false;
         }
     }
+    function clearNode(node) {
+        while (node.firstChild !== null) {
+            node.removeNode(node.firstChild);
+        }
+    }
     var rootNode = selectionMover.getRootNode(),
         document = /**@type{!Document}*/(rootNode.ownerDocument),
         htmlns = document.documentElement.namespaceURI,
@@ -152,6 +157,9 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
             cancelEvent(e);
         }
     }
+    function dummyHandler(e) {
+        cancelEvent(e);
+    }
     function init() {
         span.setAttribute("contenteditable", true);
         span.onfocus = function () {
@@ -167,7 +175,11 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         cursorNode = selectionMover.getCursor().getNode();
         cursorNode.appendChild(span);
         cursorNode.appendChild(handle);
-        listenEvent(cursorNode, "keydown", handleKeyDown);
+        listenEvent(span, "keydown", handleKeyDown);
+        listenEvent(span, "keyup", dummyHandler);
+        listenEvent(span, "copy", dummyHandler);
+        listenEvent(span, "cut", dummyHandler);
+        listenEvent(span, "paste", dummyHandler);
     }
     init();
 };

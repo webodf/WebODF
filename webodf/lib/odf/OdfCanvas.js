@@ -103,7 +103,7 @@ odf.OdfCanvas = (function () {
             sheet.insertRule("office|presentation draw|page:nth-child(" +
                 position + ") {display:block;}", 1);
         }
-        this.showFirstPage = function() {
+        this.showFirstPage = function () {
             position = 1;
             updateCSS();
         };
@@ -124,8 +124,8 @@ odf.OdfCanvas = (function () {
             }
         };
 
-        this.showPage = function(n) {
-            if(n > 0) {
+        this.showPage = function (n) {
+            if (n > 0) {
                 position = n;
                 updateCSS();
             }
@@ -286,42 +286,8 @@ odf.OdfCanvas = (function () {
         xlinkns = namespaces.xlink,
         xmlns = namespaces.xml,
         window = runtime.getWindow(),
-        xpath = new xmldom.XPath(),
-        /**@const@type{!Object.<!string,!Array.<!Function>>}*/
-        eventHandlers = {},
-        editparagraph,
-        loadingQueue = new LoadingQueue();
+        xpath = new xmldom.XPath();
 
-    /**
-     * Register an event handler
-     * @param {!string} eventType
-     * @param {!Function} eventHandler
-     * @return {undefined}
-     */
-    function addEventListener(eventType, eventHandler) {
-        var handlers = eventHandlers[eventType];
-        if (handlers === undefined) {
-            handlers = eventHandlers[eventType] = [];
-        }
-        if (eventHandler && handlers.indexOf(eventHandler) === -1) {
-            handlers.push(eventHandler);
-        }
-    }
-    /**
-     * Fire an event
-     * @param {!string} eventType
-     * @param {Array.<Object>=} args
-     * @return {undefined}
-     */
-    function fireEvent(eventType, args) {
-        if (!eventHandlers.hasOwnProperty(eventType)) {
-            return;
-        }
-        var handlers = eventHandlers[eventType], i;
-        for (i = 0; i < handlers.length; i += 1) {
-            handlers[i](args);
-        }
-    }
     /**
      * @param {!Element} element
      * @return {undefined}
@@ -562,31 +528,6 @@ odf.OdfCanvas = (function () {
         formatParagraphAnchors(odfbody);
     }
     /**
-     * Load all the images that are inside an odf element.
-     * @param {!Object} container
-     * @param {!Element} odffragment
-     * @param {!StyleSheet} stylesheet
-     * @return {undefined}
-     */
-    function loadImages(container, odffragment, stylesheet) {
-        var i,
-            images,
-            node;
-        // do delayed loading for all the images
-        function loadImage(name, container, node, stylesheet) {
-            // load image with a small delay to give the html ui a chance to
-            // update
-            loadingQueue.addToQueue(function () {
-                setImage(name, container, node, stylesheet);
-            });
-        }
-        images = odffragment.getElementsByTagNameNS(drawns, 'image');
-        for (i = 0; i < images.length; i += 1) {
-            node = /**@type{!Element}*/(images.item(i));
-            loadImage('image' + String(i), container, node, stylesheet);
-        }
-    }
-    /**
      * @param {!string} id
      * @param {!Object} container
      * @param {!Element} plugin
@@ -636,33 +577,6 @@ odf.OdfCanvas = (function () {
             runtime.log('using MP4 data fallback');
             url = getUrlFromBinaryDataElement(plugin);
             callback(url, 'video/mp4');
-        }
-    }
-    /**
-     * Load all the video that are inside an odf element.
-     * @param {!Object} container
-     * @param {!Element} odffragment
-     * @param {!StyleSheet} stylesheet
-     * @return {undefined}
-     */
-    function loadVideos(container, odffragment, stylesheet) {
-        var i,
-            plugins,
-            node;
-        // do delayed loading for all the videos
-        function loadVideo(name, container, node, stylesheet) {
-            // load video with a small delay to give the html ui a chance to
-            // update
-            loadingQueue.addToQueue(function () {
-                setVideo(name, container, node, stylesheet);
-            });
-        }
-        // embedded video is stored in a draw:plugin element
-        plugins = odffragment.getElementsByTagNameNS(drawns, 'plugin');
-        
-        for (i = 0; i < plugins.length; i += 1) {
-            node = /**@type{!Element}*/(plugins.item(i));
-            loadVideo('video' + String(i), container, node, stylesheet);
         }
     }
 
@@ -861,20 +775,109 @@ odf.OdfCanvas = (function () {
     odf.OdfCanvas = function OdfCanvas(element) {
         var self = this,
             document = element.ownerDocument,
-            /**@type{odf.OdfContainer}*/ odfcontainer,
-            /**@type{!odf.Formatting}*/ formatting = new odf.Formatting(),
+            /**@type{odf.OdfContainer}*/
+            odfcontainer,
+            /**@type{!odf.Formatting}*/
+            formatting = new odf.Formatting(),
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
             pageSwitcher,
             stylesxmlcss,
             positioncss,
             editable = false,
-            zoomLevel = 1;
+            zoomLevel = 1,
+            /**@const@type{!Object.<!string,!Array.<!Function>>}*/
+            eventHandlers = {},
+            editparagraph,
+            loadingQueue = new LoadingQueue();
+
         addWebODFStyleSheet(document);
         pageSwitcher = new PageSwitcher(addStyleSheet(document));
         stylesxmlcss = addStyleSheet(document);
         positioncss = addStyleSheet(document);
 
+        /**
+         * Load all the images that are inside an odf element.
+         * @param {!Object} container
+         * @param {!Element} odffragment
+         * @param {!StyleSheet} stylesheet
+         * @return {undefined}
+         */
+        function loadImages(container, odffragment, stylesheet) {
+            var i,
+                images,
+                node;
+            // do delayed loading for all the images
+            function loadImage(name, container, node, stylesheet) {
+                // load image with a small delay to give the html ui a chance to
+                // update
+                loadingQueue.addToQueue(function () {
+                    setImage(name, container, node, stylesheet);
+                });
+            }
+            images = odffragment.getElementsByTagNameNS(drawns, 'image');
+            for (i = 0; i < images.length; i += 1) {
+                node = /**@type{!Element}*/(images.item(i));
+                loadImage('image' + String(i), container, node, stylesheet);
+            }
+        }
+        /**
+         * Load all the video that are inside an odf element.
+         * @param {!Object} container
+         * @param {!Element} odffragment
+         * @param {!StyleSheet} stylesheet
+         * @return {undefined}
+         */
+        function loadVideos(container, odffragment, stylesheet) {
+            var i,
+                plugins,
+                node;
+            // do delayed loading for all the videos
+            function loadVideo(name, container, node, stylesheet) {
+                // load video with a small delay to give the html ui a chance to
+                // update
+                loadingQueue.addToQueue(function () {
+                    setVideo(name, container, node, stylesheet);
+                });
+            }
+            // embedded video is stored in a draw:plugin element
+            plugins = odffragment.getElementsByTagNameNS(drawns, 'plugin');
+            for (i = 0; i < plugins.length; i += 1) {
+                node = /**@type{!Element}*/(plugins.item(i));
+                loadVideo('video' + String(i), container, node, stylesheet);
+            }
+        }
+
+        /**
+         * Register an event handler
+         * @param {!string} eventType
+         * @param {!Function} eventHandler
+         * @return {undefined}
+         */
+        function addEventListener(eventType, eventHandler) {
+            var handlers = eventHandlers[eventType];
+            if (handlers === undefined) {
+                handlers = eventHandlers[eventType] = [];
+            }
+            if (eventHandler && handlers.indexOf(eventHandler) === -1) {
+                handlers.push(eventHandler);
+            }
+        }
+        /**
+         * Fire an event
+         * @param {!string} eventType
+         * @param {Array.<Object>=} args
+         * @return {undefined}
+         */
+        function fireEvent(eventType, args) {
+            if (!eventHandlers.hasOwnProperty(eventType)) {
+                return;
+            }
+            var handlers = eventHandlers[eventType], i;
+            for (i = 0; i < handlers.length; i += 1) {
+                handlers[i](args);
+            }
+        }
         function fixContainerSize() {
             var sizer = element.firstChild,
                 odfdoc = sizer.firstChild;
