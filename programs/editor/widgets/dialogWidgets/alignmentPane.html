@@ -14,20 +14,45 @@
 			    <label for="radioRight">Right</label> <br/>
 			    <input type="radio" data-dojo-type="dijit/form/RadioButton" name="alignmentPaneRadio" id="radioJustified" value="justified"/>
 			    <label for="radioJustified">Justified</label> <br/>
-
-			    <h3>Text-to-text</h3>
-
-			    <div class = "labeledSelect">
-				    <span>Alignment:</span>
-				    <select name="alignment" data-dojo-type="dijit/form/Select">
-					    <option value="automatic" selected="selected">Automatic</option>
-					    <option value="baseline">Base Line</option>
-					    <option value="top">Top</option>
-					    <option value="middle">Middle</option>
-					    <option value="bottom">Bottom</option>
-					</select>
-				</div>
 				
+				<h3>Spacing <small>(millimetres)</small></h3>
+
+				<div>
+					<div style = "margin-left: 150px;">
+						<label for="topMargin">Top</label>
+						<input data-dojo-type="dijit/form/NumberSpinner" id="topMargin"
+					    value="0"
+					    data-dojo-props="smallDelta:1, constraints:{min:0,max:100}"
+					    name="topMargin"
+					    />
+					</div>
+					<div style = "float: left;">
+						<label for="leftMargin">Left</label>
+						<input data-dojo-type="dijit/form/NumberSpinner" id="leftMargin"
+					    value="0"
+					    data-dojo-props="smallDelta:1, constraints:{min:0,max:100}"
+					    name="leftMargin"
+					    />
+					</div>
+					<div style = "float: left; margin-left: 200px;">
+					    <label for="rightMargin">Right</label>
+						<input data-dojo-type="dijit/form/NumberSpinner" id="rightMargin"
+					    value="0"
+					    data-dojo-props="smallDelta:1, constraints:{min:0,max:100}"
+					    name="rightMargin"
+					    />
+					</div>
+					<br/><br>
+					<div style = "margin-left: 130px;">
+						<label for="bottomMargin">Bottom</label>
+						<input data-dojo-type="dijit/form/NumberSpinner" id="bottomMargin"
+					    value="0"
+					    data-dojo-props="smallDelta:1, constraints:{min:0,max:100}"
+					    name="bottomMargin"
+					    />
+					</div>
+				</div>
+
 			</form>
 		</body> 
 </html> 

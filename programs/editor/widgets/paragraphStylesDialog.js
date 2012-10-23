@@ -63,21 +63,11 @@ widgets.ParagraphStylesDialog = (function () {
 
 
             require([
-                "widgets/dialogWidgets/alignmentPane.js",
-                "widgets/dialogWidgets/textFlowPane.js",                
-                "widgets/dialogWidgets/numberingPane.js", 
+                "widgets/dialogWidgets/alignmentPane.js"
                 ], function() {
                 new widgets.AlignmentPane(documentObject, function(alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
-                });
-                new widgets.TextFlowPane(documentObject, function(textFlowPane) {
-                    textFlowPane.startup();
-                    tabContainer.addChild(textFlowPane);
-                });
-                new widgets.NumberingPane(documentObject, function(numberingPane) {
-                    numberingPane.startup();
-                    tabContainer.addChild(numberingPane);
                 });
             });
 
