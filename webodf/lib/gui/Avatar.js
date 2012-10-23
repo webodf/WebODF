@@ -51,8 +51,7 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
     var self = this,
         caret,
         image,
-        stepCounter,
-        text;
+        stepCounter;
     function moveForward() {
         // determine number of steps needed
         var steps = stepCounter.countForwardSteps(1, positionFilter);
@@ -97,17 +96,6 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
         }
         return handled;
     }
-    function getText(node) {
-        var t = "";
-        node = node.firstChild;
-        while (node !== null) {
-            if (node.localName !== "cursor") {
-                t += getText(node) ||  node.data || "";
-            }
-            node = node.nextSibling;
-        }
-        return t;
-    }
     this.removeFromSession = function () {
     };
     this.getMemberId = function () {
@@ -132,7 +120,6 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         handle.appendChild(image);
-        text = getText(selectionMover.getRootNode());
     }
     init();
 };
