@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global document, runtime, odf, ops, gui*/
+/*global document, runtime, odf, ops, gui, alert */
 
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("odf.OdfCanvas");
@@ -115,8 +115,12 @@ function initSession(odfid, avatarlistid, callback) {
         avatarlistdiv = document.getElementById(avatarlistid),
         odfcanvas = new odf.OdfCanvas(odfelement),
         ready = false;
-    odfcanvas.addListener("statereadychange", function (o) {
+    odfcanvas.addListener("statereadychange", function (container) {
+        if (container.state !== odf.OdfContainer.DONE) {
+            alert("statereadychange fired but state not DONE");
+        }
         if (ready) {
+            alert("ASSERT: statereadychange fired twice! (should not happen)");
             return;
         }
         ready = true;
@@ -129,7 +133,7 @@ function initSession(odfid, avatarlistid, callback) {
     odfcanvas.load("text.odt");
 }
 function setHeight(id, top, height) {
-	"use strict";
+    "use strict";
     var div = document.getElementById(id);
     div.style.top = top + "%";
     div.style.height = height + "%";
@@ -145,3 +149,4 @@ function init() {
     initSession("odf1", "avatars1");
     initSession("odf2", "avatars2");
 }
+// vim:expandtab
