@@ -10,7 +10,7 @@ define({
     // dialogs
     ok: "Ok",
     cancel: "Abbrechen",
-    alignement: "Ausrichtung",
+    alignment: "Ausrichtung",
     fontEffects: "Schrifteffekte",
     outlineAndNumbering: "Gliederung & Aufzählung",
     textFlow: "Textfluß",

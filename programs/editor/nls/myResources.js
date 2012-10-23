@@ -11,7 +11,7 @@ define({
 	// dialogs
         ok: "Ok",
         cancel: "Cancel",
-        alignement: "Alignment",
+        alignment: "Alignment",
         fontEffects: "Font Effects",
         outlineAndNumbering: "Outline & Numbering",
         textFlow: "Text Flow",
