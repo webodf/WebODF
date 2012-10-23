@@ -106,7 +106,7 @@ function TestSession(odfcanvas, odfid, avatarlistdiv) {
     setupAvatarView(session, avatarlistdiv);
     //avatar.focus();
 
-    console.log("READY " + odfid);
+    runtime.log("READY " + odfid);
 }
 
 function initSession(odfid, avatarlistid, callback) {

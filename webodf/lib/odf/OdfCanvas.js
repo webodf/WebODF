@@ -875,7 +875,7 @@ odf.OdfCanvas = (function () {
             }
             var handlers = eventHandlers[eventType], i;
             for (i = 0; i < handlers.length; i += 1) {
-                handlers[i].apply(args);
+                handlers[i].apply(null, args);
             }
         }
         function fixContainerSize() {
