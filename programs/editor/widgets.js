@@ -41,14 +41,13 @@ function loadWidgets(documentObject) {
 
     // Menubar
     require([
-                "dojo/i18n!nls/myResources.js", 
                 "dojo/ready", 
                 "dijit/MenuBar", 
                 "dijit/PopupMenuBarItem", 
                 "dijit/Menu", 
                 "dijit/MenuItem", 
                 "dijit/DropDownMenu"
-    ], function(translator, ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
+    ], function(ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
         ready(function() {
             var menuBar = new MenuBar({}, "menubar");
 
@@ -63,7 +62,7 @@ function loadWidgets(documentObject) {
             formatSubmenu.addChild(characterStylesMenuItem);
 
             menuBar.addChild(new PopupMenuBarItem({
-                label: translator.file
+                label: document.translator.file
             }));
             menuBar.addChild(new PopupMenuBarItem({
                 label: "Edit"

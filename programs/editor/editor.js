@@ -68,8 +68,13 @@ function editor_init(docurl) {
         doclocation = docurl;
     }
 
-    // Editor Widgets and Avatars
-    require(['widgets.js', 'avatars.js'], function () {
+    // Editor Translations, Widgets and Avatars
+    require([ 
+        'dojo/i18n!nls/myResources.js', 
+        'widgets.js',
+        'avatars.js'
+    ], function (translator) {
+        document.translator = translator;
         odfCanvas.addListener("statereadychange", function() {
             runtime.setTimeout(function() {
                 loadWidgets(document);
