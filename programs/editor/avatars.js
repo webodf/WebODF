@@ -40,7 +40,7 @@ function setupAvatarButton(avatarButtonElement, avatar) {
         memberid = avatar.getMemberId();
     avatarButtonElement.appendChild(doc.createTextNode(memberid));
     avatarButtonElement.onclick = function () {
-        avatar.getCaret().focus();
+        document.session.setActiveAvatar(memberid);
     };
     avatarButtonElement.style.background = avatar.getColor();
 }
@@ -89,6 +89,7 @@ function Session(odfcanvas, avatarlistdiv) {
     //avatar.focus();
 
     console.log("READY.");
+    return session;
 }
 
 function loadAvatars(documentObject, avatarList) {

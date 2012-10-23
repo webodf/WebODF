@@ -116,6 +116,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         rootNode,
         selectionManager,
         members = {},
+        activeMemeber,
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces;
@@ -307,11 +308,16 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return list;
     };
-    function getFocussedAvatar() {
-        return self.getAvatars()[0];
-    }
+    this.setActiveAvatar = function(memberid) {
+        activeMemeber = self.getAvatar(memberid);
+        activeMemeber.getCaret().focus();
+    };
+    this.getActiveAvatar = function() {
+        return activeMemeber;
+    };
+
     function handleDocumentClick(e) {
-        var avatar = getFocussedAvatar(),
+        var avatar = self.getActiveAvatar(),
             caret,
             counter,
             steps,
@@ -324,11 +330,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         counter = caret.getStepCounter().countStepsToPosition;
         selection = window.getSelection();
         steps = counter(selection.focusNode, selection.focusOffset, filter);
-        // We're only moving the first member on click now
-        for (var member in members) {
-            self.moveMemberCaret(member, steps);
-            break;
-        }
+        self.moveMemberCaret(avatar.getMemberId(), steps);
         caret.focus();
         //runtime.log(steps);
         //runtime.log(e.target.getBoundingClientRect());
