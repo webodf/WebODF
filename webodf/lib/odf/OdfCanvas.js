@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*jslint sub: true*/
-/*global runtime, odf, xmldom, webodf_css */
+/*global runtime, odf, xmldom, webodf_css, alert */
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
@@ -950,30 +950,37 @@ odf.OdfCanvas = (function () {
          * @param {!odf.OdfContainer} container
          * @return {undefined}
          **/
-        function refreshOdf(container) {
-            if (odfcontainer !== container) {
-                return;
-            }
+        function refreshOdf() {
 
             // synchronize the object a window.odfcontainer with the view
             function callback() {
                 clear(element);
                 element.style.display = "inline-block";
-                var odfnode = container.rootElement;
+                var odfnode = odfcontainer.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
 
-                formatting.setOdfContainer(container);
+                formatting.setOdfContainer(odfcontainer);
                 handleStyles(odfnode, stylesxmlcss);
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
-                handleContent(container, odfnode);
-                fireEvent("statereadychange");
+                handleContent(odfcontainer, odfnode);
+                fireEvent("statereadychange", odfcontainer);
             }
 
             if (odfcontainer.state === odf.OdfContainer.DONE) {
                 callback();
             } else {
-                odfcontainer.onchange = callback;
+                // so the ODF is not done yet. take care that we'll
+                // do the work once it is done:
+
+                // FIXME: use callback registry instead of replacing the onchange
+                console.log("WARNING: refreshOdf called but ODF was not DONE.");
+                odfcontainer.onchange = function() {
+                    if (odfcontainer.state === odf.OdfContainer.DONE) {
+                        odfcontainer.onchange = null;
+                        callback();
+                    }
+                };
             }
         }
 
@@ -992,10 +999,11 @@ odf.OdfCanvas = (function () {
             element.innerHTML = 'loading ' + url;
             // open the odf container
             odfcontainer = new odf.OdfContainer(url, function (container) {
+                // assignment might be necessary if the callback
+                // fires before the assignment above happens.
                 odfcontainer = container;
-                refreshOdf(container);
+                refreshOdf();
             });
-            odfcontainer.onstatereadychange = refreshOdf;
         };
 
         function stopEditing() {
