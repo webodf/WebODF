@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -32,3 +31,65 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+/*global runtime: true, core: true*/
+
+/**
+ * tool used in build process.
+ *
+ * this tool reads argv[1] and writes it to argv[2]
+ * after replacing every occurance of argv[2n+1] with
+ * the contents of the file argv[2n+2]
+ * (for n>0)
+ *
+ */
+
+var i, input_file, output_file, keywords=[];
+i = 1;
+input_file = arguments[i]; i+=1;
+output_file = arguments[i]; i+=1;
+
+for (; i+1<arguments.length; i += 2) {
+	keywords.push({
+		from:arguments[i],
+		to:arguments[i+1]
+	});
+}
+runtime.log("filtering ["+input_file+"] to ["+output_file+"]");
+
+runtime.readFile(input_file, "utf-8", function (err, inp_data) {
+	"use strict";
+	var repl_done;
+	if (err) {
+		runtime.log("failed to read input_file \""+input_file+"\":");
+		runtime.log(err);
+		return;
+	}
+
+	repl_done = [];
+	keywords.forEach(function(trans) {
+		if ((trans.from && trans.to)) {
+			runtime.log("replacing \""+trans.from+"\" with contents of ["+trans.to+"].");
+			runtime.readFile(trans.to, "utf-8", function (err, repl_data) {
+				if (err) {
+					runtime.log(err);
+					return;
+				}
+				inp_data = inp_data.replace(new RegExp(trans.from, "g"), repl_data);
+
+				repl_done.push(trans);
+				if (repl_done.length === keywords.length) {
+					runtime.writeFile(output_file, inp_data, function (err) {
+						if (err) {
+							runtime.log(err);
+							return;
+						}
+					});
+				}
+			});
+		} else {
+			runtime.log("skipping replacement: ["+trans.from+"] / ["+trans.to+"]");
+		}
+
+	});
+});
+

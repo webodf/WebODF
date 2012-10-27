@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -32,3 +31,54 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
+/**
+ * tool used in build process.
+ *
+ * this tool creates a zip archive argv[1]
+ * of all entries argv[n].
+ * (n>1)
+ *
+ */
+
+
+/*global runtime: true, core: true*/
+runtime.loadClass("core.Zip");
+
+function addFiles(zip, pos, files, callback) {
+    "use strict";
+    if (pos >= files.length) {
+        zip.write(function (err) {
+            return callback(err);
+        });
+        return;
+    }
+    var entry = {};
+    entry.path = files[pos];
+    entry.date = new Date();
+    runtime.readFile(entry.path, "binary", function (err, data) {
+        if (err) {
+            return callback(err);
+        }
+        runtime.log("["+zip.filename+"] << \""+entry.path+"\"");
+        zip.save(entry.path, data, false, entry.date);
+        addFiles(zip, pos + 1, files, callback);
+    });
+}
+
+var args = arguments,
+    filename = args[1],
+    zipmembers = [],
+    i,
+    zip = new core.Zip(filename, null);
+    zip.filename = filename;
+for (i = 2; i < arguments.length; i += 1) {
+    zipmembers.push(arguments[i]);
+}
+
+addFiles(zip, 0, zipmembers, function (err) {
+    "use strict";
+    if (err) {
+        runtime.log(err);
+    }
+});
