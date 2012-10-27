@@ -708,17 +708,6 @@ function NodeJSRuntime() {
             fs.readFile(path, encoding, callback);
         } else {
             fs.readFile(path, null, callback);
-/*
-            // we have to encode the returned buffer to a string
-            // it would be nice if we would have a blob or buffer object
-            fs.readFile(path, null, function (err, data) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                callback(null, data.toString("binary"));
-            });
-*/
         }
     }
     this.readFile = readFile;
@@ -763,7 +752,12 @@ function NodeJSRuntime() {
     };
     this.readFileSync = function (path, encoding) {
         if (!encoding) {
+            // FIXME - this feels wrong
             return "";
+        }
+        if (encoding === "binary") {
+            // this will return a Buffer
+            return fs.readFileSync(path, null);
         }
         return fs.readFileSync(path, encoding);
     };
