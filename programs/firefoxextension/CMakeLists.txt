@@ -16,7 +16,7 @@ add_custom_command(
     COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js makeViewerHtml.js
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
     DEPENDS NodeJS
-        ${CMAKE_BINARY_DIR}/webodf/webodf.js
+        webodf.js
         ${CMAKE_CURRENT_SOURCE_DIR}/content/web/viewer.html.in
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -35,4 +35,6 @@ add_custom_command(
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-add_custom_target(firefoxextension ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/content/web/viewer.html ${WEBODFXPI})
+add_custom_target(programs_firefoxextension ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/content/web/viewer.html ${WEBODFXPI})
+# alias target:
+add_custom_target(firefoxextension DEPENDS programs_firefoxextension)

@@ -119,7 +119,6 @@ if (NOT ANT)
 endif(NOT ANT)
 
 set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
-    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodf.css.js
 
     lib/core/RawDeflate.js
     lib/core/ByteArray.js
@@ -181,6 +180,29 @@ set(HTML5UIFILES
   zoom-fit-best.png
   zoom-fit-height.png
 )
+
+set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
+
+macro(COPY_FILES _varname _srcdir _tgtdir)
+  foreach(_file ${ARGN})
+    GET_FILENAME_COMPONENT(_subdir ${_file} PATH)
+    FILE(MAKE_DIRECTORY ${_tgtdir}/${_subdir})
+    if (IS_ABSOLUTE ${_file})
+      SET(_srcfile ${_file})
+    else (IS_ABSOLUTE ${_file})
+      SET(_srcfile ${_srcdir}/${_file})
+    endif (IS_ABSOLUTE ${_file})
+    add_custom_command(
+      OUTPUT ${_tgtdir}/${_file}
+      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+        ${_srcfile}
+        ${_tgtdir}/${_file}
+      DEPENDS
+        ${_srcfile}
+    )
+    set(${_varname} ${${_varname}} ${_tgtdir}/${_file})
+  endforeach(_file)
+endmacro(COPY_FILES _directory _files)
 
 add_subdirectory(webodf)
 add_subdirectory(programs)

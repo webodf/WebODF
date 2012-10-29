@@ -42,10 +42,13 @@ add_custom_command(
 		${TOOLS}/replaceByFileContents.js
 		${CMAKE_CURRENT_SOURCE_DIR}/readme.txt
 		${CMAKE_CURRENT_SOURCE_DIR}/webodf-viewer.php
-		${VIEWER/index.html}
-		${VIEWER/viewer.css}
-		${VIEWER/viewer.js}
-		${VIEWER/webodf.js}
+		# ${VIEWER/index.html}
+		# ${VIEWER/viewer.css}
+		# ${VIEWER/viewer.js}
+		# ${VIEWER/webodf.js}
+		programs_viewer
 )
-add_custom_target(wordpresspluginzip ALL DEPENDS ${WP_ZIP})
+add_custom_target(programs_wordpressplugin ALL DEPENDS ${WP_ZIP})
+# alias target:
+add_custom_target(wordpressplugin DEPENDS programs_wordpressplugin)
 

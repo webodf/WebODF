@@ -10,7 +10,6 @@ set(VIEWER_IMAGES
 	images/toolbarButton-zoomOut.png
 )
 
-set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/lib/runtime.js)
 set (TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
 
 # amalgamation:
@@ -24,7 +23,7 @@ add_custom_command(
 		@VIEWER_JS@ ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
 		@WEBODF_JS@ ${CMAKE_BINARY_DIR}/webodf/webodf.js
     DEPENDS NodeJS ${TOOLS}/replaceByFileContents.js
-        ${CMAKE_BINARY_DIR}/webodf/webodf.js
+        webodf.js
         ${CMAKE_CURRENT_SOURCE_DIR}/index-amalgamation-template.html
 )
 
@@ -60,7 +59,7 @@ add_custom_command(
 		${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
 		${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js
 )
-add_custom_target(viewerzip ALL DEPENDS ${VIEWER_MERGED_HTML} ${VIEWER_ZIP})
+add_custom_target(programs_viewer ALL DEPENDS ${VIEWER_MERGED_HTML} ${VIEWER_ZIP})
 
 # minimize js code
 add_custom_command(

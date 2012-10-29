@@ -23,6 +23,7 @@ set(TESTJSFILES tests/core/ZipTests.js
 add_custom_target(jslintcheck ALL
     COMMAND ${NODE} lib/runtime.js tools/runjslint.js
         ${LIBJSFILES} ${TESTJSFILES}
+        ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
     DEPENDS NodeJS webodf.css.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     SOURCES ${LIBJSFILES} ${TESTJSFILES}
@@ -60,6 +61,9 @@ if (Java_JAVA_EXECUTABLE)
         --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
   endforeach(JSFILE ${TESTJSFILES})
 
+  set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
+      --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js)
+
   add_custom_command(
       OUTPUT simplecompiled.js
       COMMAND ${Java_JAVA_EXECUTABLE}
@@ -69,6 +73,7 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js
       DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES}
+        ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
   )
 
   add_custom_command(
@@ -81,7 +86,7 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file compiled.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES} tools/externs.js webodf.css.js
   )
 
   add_custom_command(
@@ -94,7 +99,7 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js webodf.css
+      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js webodf.css.js
          tools/css2js.js
   )
   add_custom_target(webodf.js
@@ -113,7 +118,7 @@ if (Java_JAVA_EXECUTABLE)
   #        --formatting PRINT_INPUT_DELIMITER
   #        --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
   #        --js_output_file webodf-experimental.js
-  #     DEPENDS ClosureCompiler ${LIBJSFILES} lib/export.js tools/externs.js
+  #     DEPENDS ClosureCompiler ${LIBJSFILES} lib/export.js tools/externs.js webodf.css.js
   # )
 
   add_custom_command(
@@ -126,7 +131,7 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js webodf.css.js
   )
   add_custom_target(webodf-debug.js
      SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
@@ -144,7 +149,8 @@ if (Java_JAVA_EXECUTABLE)
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file odfedit.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js odfedit.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES}
+          tools/externs.js tools/extjsexterns.js odfedit.js webodf.css.js
   )
 
   add_custom_command(
@@ -160,7 +166,9 @@ if (Java_JAVA_EXECUTABLE)
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file gui.js
-    DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES} tools/externs.js tools/extjsexterns.js filelister.js gui.js
+    DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES}
+        tools/externs.js tools/extjsexterns.js webodf.css.js
+        filelister.js gui.js
   )
 
   add_custom_target(syntaxcheck ALL
@@ -198,20 +206,6 @@ if (Java_JAVA_EXECUTABLE)
 
 endif (Java_JAVA_EXECUTABLE)
 
-add_custom_target(nodetest ALL
-    COMMAND ${NODE} lib/runtime.js tests/tests.js
-    DEPENDS NodeJS
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    SOURCES ${LIBJSFILES}
-)
-if (QT4_FOUND)
-  add_custom_target(qtjsruntimetest ALL
-      COMMAND ${CMAKE_BINARY_DIR}/programs/qtjsruntime/qtjsruntime ../lib/runtime.js tests.js
-      DEPENDS qtjsruntime jslintcheck
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
-      SOURCES ${LIBJSFILES}
-  )
-endif (QT4_FOUND)
 add_custom_command(
     OUTPUT instrumented/index.html
     COMMAND ${JSCOVERAGE}
@@ -221,4 +215,7 @@ add_custom_command(
     DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
 )
 add_custom_target(instrumented ALL DEPENDS instrumented/index.html)
+
+add_subdirectory(tests)
+
 # vim:expandtab
