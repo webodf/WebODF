@@ -119,6 +119,8 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
         stepCounter = caret.getStepCounter();
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
+        image.width = 64;
+        image.height = 64;
         handle.appendChild(image);
     }
     init();
