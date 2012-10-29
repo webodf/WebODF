@@ -204,6 +204,30 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     /* SESSION OPERATIONS */
 
+    this.createAvatar = function(memberid) {
+        // TODO: let the controller pass a factory to SessionImplementation
+        // for creating editor-owned-avatar
+        var mover,handler,
+            selectionMover = selectionManager.createSelectionMover(),
+            avatar;
+
+        mover = function (n) {
+            self.moveMemberCaret(memberid, n);
+        };
+
+        avatar = new gui.Avatar(memberid, selectionMover, filter, mover, handler);
+
+        handler = function (charCode) {
+            runtime.log("got keycode: " + charCode);
+            var position = getAvatarPosition(avatar),
+                text = String.fromCharCode(charCode);
+            self.insertText(position.paragraph, position.offset, text);
+            return true;
+        };
+        return avatar;
+    };
+
+
     /**
      * @param {!string} memberid
      * @return {!boolean}
@@ -211,6 +235,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.addMemberToSession = function (memberid) {
         var selectionMover = selectionManager.createSelectionMover(),
             avatar = new gui.Avatar(memberid, selectionMover, filter,
+                // TODO this code needs to die! it shall call a factory
+                // given from Controller (see createAvatar() above)
                 function (n) {
                     self.moveMemberCaret(memberid, n);
                 },

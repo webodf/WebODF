@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,46 +31,27 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-(function () {
-    "use strict";
-    return [
-        "core/Async.js",
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/Cursor.js",
-        "core/JSLint.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/RawDeflate.js",
-        "core/RawInflate.js",
-        "core/Selection.js",
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "gui/Avatar.js",
-        "gui/Caret.js",
-        "gui/PresenterUI.js",
-        "gui/SessionController.js",
-        "gui/SelectionManager.js",
-        "gui/SelectionMover.js",
-        "gui/XMLEdit.js",
-        "odf/CommandLineTools.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "odf/Style2CSS.js",
-        "odf/StyleInfo.js",
-        "ops/Session.js",
-        "ops/SessionImplementation.js",
-        "ops/SessionNodeFilter.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
-        "xmldom/RelaxNG.js",
-        "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js",
-        "xmldom/XPath.js"
-    ];
-}());
+/*global runtime, core, gui, ops, odf */
+
+gui.SessionController = (function () {
+	"use strict";
+
+	/**
+	 * @constructor
+	 */
+	gui.SessionController = function SessionController() {
+		var self = this,
+			m_session;
+
+		this.setSessionImplementation = function(impl) {
+			m_session = impl;
+		};
+
+		this.test = function() {
+			m_session.createAvatar("th");
+		};
+	};
+
+	return gui.SessionController;
+} ());
+

@@ -38,7 +38,7 @@ runtime.loadClass("gui.Caret");
  * input events.
  * The avatar does not change it's position of its own accord. The position is
  * changed by the session to which the avatar forwards the keystrokes that it
- * receives.
+ * receives. That is a not true right now.
  * @constructor
  * @param {!string} memberid
  * @param {!gui.SelectionMover} selectionMover

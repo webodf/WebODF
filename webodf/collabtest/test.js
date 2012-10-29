@@ -36,6 +36,7 @@
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.SessionController");
 
 /**
  * @param {!Element} avatarButtonElement
@@ -96,7 +97,10 @@ function TestSession(odfcanvas, odfid, avatarlistdiv) {
     "use strict";
     var odfcontainer = odfcanvas.odfContainer(),
         session = new ops.SessionImplementation(odfcontainer),
+        controller = new gui.SessionController(),
         avatar;
+
+    controller.setSessionImplementation(session);
 
     // in this test we start a session from scratch: it is not loaded from
     // a serialized document
@@ -143,10 +147,9 @@ function init() {
     var height = 50;
     setHeight("session1", 0, height);
     setHeight("avatars1", 0, height);
-    setHeight("session2", height, 100 - height);
-    setHeight("avatars2", height, 100 - height);
 
-    initSession("odf1", "avatars1");
-    initSession("odf2", "avatars2");
+    initSession("odf1", "avatars1", function() {
+        runtime.log("odf1 session initialized.");
+    });
 }
 // vim:expandtab
