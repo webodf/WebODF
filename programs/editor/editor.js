@@ -75,12 +75,13 @@ function editor_init(docurl) {
         'avatars.js'
     ], function (translator) {
         document.translator = translator;
+
         odfCanvas.addListener("statereadychange", function() {
-            runtime.setTimeout(function() {
-                loadWidgets(document);
-                loadAvatars(document, document.getElementById('peopleList'));
-            }, 1);
+            loadWidgets(document);
+            loadAvatars(document, document.getElementById('peopleList'));
         });
+        odfCanvas.load(doclocation);
+        odfCanvas.setEditable(false);
 
         // App Widgets
         require([
@@ -154,9 +155,6 @@ function editor_init(docurl) {
             }
         );
     });
-
-    odfCanvas.load(doclocation);
-    odfCanvas.setEditable(false);
 }
 
 window.onload = function() { editor_init(); };
