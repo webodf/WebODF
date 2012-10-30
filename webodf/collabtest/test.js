@@ -93,26 +93,6 @@ function addMember(session, member) {
     avatar.setColor(member.color);
 }
 
-function TestSession(odfcanvas, odfid, avatarlistdiv) {
-    "use strict";
-    var odfcontainer = odfcanvas.odfContainer(),
-        session = new ops.SessionImplementation(odfcontainer),
-        controller = new gui.SessionController(),
-        avatar;
-
-    controller.setSessionImplementation(session);
-
-    // in this test we start a session from scratch: it is not loaded from
-    // a serialized document
-    // each avatar is added at the starting position
-    addMember(session, {id: "Bob", imageurl: "avatar-pigeon.png", color: "red"});
-    addMember(session, {id: "Alice", imageurl: "avatar-flower.png", color: "green"});
-    setupAvatarView(session, avatarlistdiv);
-    //avatar.focus();
-
-    runtime.log("READY " + odfid);
-}
-
 function initSession(odfid, avatarlistid, callback) {
     "use strict";
     var odfelement = document.getElementById(odfid),
@@ -128,9 +108,13 @@ function initSession(odfid, avatarlistid, callback) {
             return;
         }
         ready = true;
-        var testsession = new TestSession(odfcanvas, odfid, avatarlistdiv);
+        var testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
+        addMember(testsession, {id: "Bob", imageurl: "avatar-pigeon.png", color: "red"});
+        addMember(testsession, {id: "Alice", imageurl: "avatar-flower.png", color: "green"});
+        setupAvatarView(testsession, avatarlistdiv);
+
         if (callback) {
-            callback();
+            callback(testsession);
             callback = null;
         }
     });
@@ -144,12 +128,15 @@ function setHeight(id, top, height) {
 }
 function init() {
     "use strict";
-    var height = 50;
+    var height = 50, controller;
     setHeight("session1", 0, height);
     setHeight("avatars1", 0, height);
 
-    initSession("odf1", "avatars1", function() {
+    initSession("odf1", "avatars1", function(session) {
         runtime.log("odf1 session initialized.");
+
+        controller = new gui.SessionController();
+        controller.setSessionImplementation(session);
     });
 }
 // vim:expandtab
