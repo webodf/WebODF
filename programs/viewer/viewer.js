@@ -122,7 +122,7 @@ var Viewer = {
             
             if(self.documentType == 'presentation') {
                 // temporary hack: remove zoom buttons to make way for the navigation controls
-                document.getElementById('toolbarMiddle').style.visibility = 'hidden';
+                document.getElementById('toolbarMiddleContainer').style.visibility = 'hidden';
 
                 // no padding for presentations
                 self.odfElement.parentNode.style.padding = 0;
