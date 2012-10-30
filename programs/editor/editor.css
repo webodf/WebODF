@@ -238,3 +238,9 @@ cursor > div:after {
         background-color: transparent;
     }
 }
+
+@-moz-keyframes fade {
+    100% {
+        background-color: transparent;
+    }
+}

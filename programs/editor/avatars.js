@@ -40,20 +40,26 @@ function setupAvatar(avatarButtonElement, avatar) {
     "use strict";
     var doc = avatarButtonElement.ownerDocument,
         memberid = avatar.getMemberId(),
-        style, head;
+        rulesCStr;
     avatarButtonElement.appendChild(doc.createTextNode(memberid));
     avatarButtonElement.onclick = function () {
         document.session.setActiveAvatar(memberid);
     };
     avatarButtonElement.style.background = avatar.getColor();
-    
+
     // Add per-avatar edited styling
-    avatarStyles.sheet.insertRule('text|p[class=edited][user='+avatar.getMemberId()+'] { background-color: '+avatar.getColor()+';'
+    rulesCStr = 'text|p[class=edited][user='+avatar.getMemberId()+'] { background-color: '+avatar.getColor()+';'
                                                                  +  '-webkit-animation-name: fade;'
                                                                  +  '-webkit-animation-duration: 10s;'
                                                                  +  '-webkit-animation-fill-mode: forwards;'
-                                                                 +  'border-radius: 10px;}',
-                        0);
+                                                                 +  '-moz-animation-name: fade;'
+                                                                 +  '-moz-animation-duration: 10s;'
+                                                                 +  '-moz-animation-fill-mode: forwards;'
+                                                                 +  'border-radius: 10px;}';
+    // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
+    // avatarStyles.sheet.insertRule(rulesCStr, 0);
+    // Workaround for now
+    avatarStyles.appendChild(document.createTextNode(rulesCStr));
 }
 
 function setupAvatarView(session, avatarlistdiv) {
