@@ -119,7 +119,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
-        activeAvatar = null;
+        activeAvatar = null,
+        guiAvatarFactory = null;
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -227,6 +228,19 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return avatar;
     };
 
+    // this is an operation. the user decided that
+    // he wants to take part in the editing session,
+    // and wants to change its state from observer to
+    // editor. the operation will insert an avatar in
+    // the document, which is also broadcasted to the
+    // other session members.
+    this.addEditingAvatar = function () {
+       guiAvatarFactory("you", filter);
+    };
+
+    this.setGuiAvatarFactory = function(factory) {
+       guiAvatarFactory = factory;
+    };
 
     /**
      * @param {!string} memberid

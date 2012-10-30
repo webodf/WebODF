@@ -45,10 +45,16 @@ gui.SessionController = (function () {
 
 		this.setSessionImplementation = function(impl) {
 			m_session = impl;
+			m_session.setGuiAvatarFactory(function(memberid, filter) {
+				var new_avatar = new gui.Avatar(memberid, filter);
+
+				runtime.log("controller created a gui.avatar.");
+				return new_avatar;
+			});
 		};
 
-		this.test = function() {
-			m_session.createAvatar("th");
+		this.startEditing = function() {
+			m_session.addEditingAvatar();
 		};
 	};
 
