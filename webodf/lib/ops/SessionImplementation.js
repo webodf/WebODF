@@ -125,6 +125,11 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         m_event_listener = {},
         m_incoming_ops = [],
         m_ready_ops = [];
+
+    /* declare events */
+    m_event_listener["avatar/added"] = [];
+    m_event_listener["avatar/moved"] = [];
+
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -210,14 +215,14 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.emit = function (eventid, args) {
         var i;
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
-            "unknown event fired");
+            "unknown event fired \""+eventid+"\"");
         for (i=0; i<m_event_listener.length; i+=1) {
             m_event_listener[eventid][i](args);
         }
     };
     this.subscribe = function(eventid, cb) {
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
-            "tried to subscribe to unknown event");
+            "tried to subscribe to unknown event \""+eventid+"\"");
         m_event_listener[eventid].push(cb);
     };
 
