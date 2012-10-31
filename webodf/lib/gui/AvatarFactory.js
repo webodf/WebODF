@@ -70,5 +70,5 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
         avatar = new gui.Avatar(memberid, selectionMover, filter, mover, handler);
 
         return avatar;
-    }
+    };
 };

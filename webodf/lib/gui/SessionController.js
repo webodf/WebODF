@@ -35,6 +35,9 @@
 
 runtime.loadClass("ops.OpAddMember");
 
+/**
+ * @constructor
+ */
 gui.SessionController = (function () {
     "use strict";
 
