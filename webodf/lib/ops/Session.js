@@ -38,16 +38,6 @@
 ops.Session = function Session() {"use strict"; };
 /**
  * @param {!string} memberid
- * @return {!boolean}
- */
-ops.Session.prototype.addMemberToSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @return {!boolean}
- */
-ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
  * @param {!number} number
  * @return {!boolean}
  */

@@ -51,11 +51,10 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
      * @param {!string} memberid
      * @return {!gui.Avatar}
      */
-    this.createAvatar = function (memberid) {
-        var mover, handler, filter, selectionMover, avatar;
+    this.createAvatar = function (memberid, selectionMover) {
+        var mover, handler, filter, avatar;
 
         filter = session.getFilter();
-        selectionMover = session.getSelectionManager().createSelectionMover();
         mover = function (n) {
             session.moveMemberCaret(memberid, n);
         };

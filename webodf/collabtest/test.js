@@ -42,11 +42,10 @@ runtime.loadClass("gui.SessionView");
 
 /**
  * @param {!Element} avatarButtonElement
- * @param {!ops.SessionImplementation} session
  * @param {!gui.Avatar} avatar
  * @return {undefined}
  */
-function setupAvatarButton(avatarButtonElement, session, avatar) {
+function setupAvatarButton(avatarButtonElement, avatar) {
     "use strict";
     var doc = avatarButtonElement.ownerDocument,
         memberid = avatar.getMemberId();
@@ -57,28 +56,25 @@ function setupAvatarButton(avatarButtonElement, session, avatar) {
     avatarButtonElement.onmouseout = function () {
         avatar.getCaret().hideHandle();
     };
-    avatarButtonElement.onclick = function () {
-        session.setActiveAvatar(avatar.getMemberId());
-    };
     avatarButtonElement.style.background = avatar.getColor();
 }
 
 /**
- * @param {!ops.SessionImplementation} session
+ * @param {!ops.SessionView} sessionView
  * @param {!Array.<!gui.Avatar>} avatar
  * @return {undefined}
  */
-function setupAvatarView(session, avatarlistdiv) {
+function setupAvatarView(sessionView, avatarlistdiv) {
     "use strict";
     var doc = avatarlistdiv.ownerDocument,
         htmlns = doc.documentElement.namespaceURI,
-        avatars = session.getAvatars(),
+        avatars = sessionView.getAvatars(),
         i,
         e;
     for (i = 0; i < avatars.length; i += 1) {
         e = doc.createElementNS(htmlns, "div");
         avatarlistdiv.appendChild(e);
-        setupAvatarButton(e, session, avatars[i]);
+        setupAvatarButton(e, avatars[i]);
     }
 }
 
@@ -117,16 +113,16 @@ function initSession(odfid, avatarlistid, callback) {
         sessionView = new gui.SessionView(testsession);
         sessionController = new gui.SessionController();
         sessionController.setSessionImplementation(testsession);
-        // TODO: this should be set to session view
-        testsession.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
+        sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
 
-        addMember(testsession, {id: "Bob", imageurl: "avatar-pigeon.png", color: "red"});
-        addMember(testsession, {id: "Alice", imageurl: "avatar-flower.png", color: "green"});
-        setupAvatarView(testsession, avatarlistdiv);
+        // add our two friends
+        sessionController.startEditing("bob");
+        sessionController.startEditing("alice");
+        setupAvatarView(sessionView, avatarlistdiv);
 
         // start editing: let the controller send the OpAddMember
-        runtime.assert(testsession.userModel(), "lacking user model");
-        sessionController.startEditing(testsession.userModel().myMemberId());
+        runtime.assert(testsession.getUserModel(), "lacking user model");
+        sessionController.startEditing(testsession.getUserModel().myMemberId());
 
         if (callback) {
             callback(testsession);

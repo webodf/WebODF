@@ -31,8 +31,6 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, gui, ops, odf, window*/
-runtime.loadClass("gui.Avatar");
-runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("ops.TrivialUserModel");
 /**
  * An operation that can be performed on a document.
@@ -42,16 +40,16 @@ runtime.loadClass("ops.TrivialUserModel");
  */
 ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
-    function listenEvent(eventTarget, eventType, eventHandler) {
-        if (eventTarget.addEventListener) {
-            eventTarget.addEventListener(eventType, eventHandler, false);
-        } else if (eventTarget.attachEvent) {
-            eventType = "on" + eventType;
-            eventTarget.attachEvent(eventType, eventHandler);
-        } else {
-            eventTarget["on" + eventType] = eventHandler;
-        }
-    }
+//     function listenEvent(eventTarget, eventType, eventHandler) {
+//         if (eventTarget.addEventListener) {
+//             eventTarget.addEventListener(eventType, eventHandler, false);
+//         } else if (eventTarget.attachEvent) {
+//             eventType = "on" + eventType;
+//             eventTarget.attachEvent(eventType, eventHandler);
+//         } else {
+//             eventTarget["on" + eventType] = eventHandler;
+//         }
+//     }
     /**
      * @constructor
      * @implements {core.PositionFilter}
@@ -101,28 +99,12 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return root;
     }
-    /**
-     * Find the position of the avatar in the text.
-     * The position contains the paragraph number (starting from 0 and
-     * including text:p and text:h and the offset.
-     * @param {!gui.Avatar} avatar
-     * @return {{paragraph: !number, offset: !number}}
-     */
-    function getAvatarPosition(avatar) {
-        var paragraph = 0,
-            offset = 0;
-        return { paragraph: paragraph, offset: offset };
-    }
     var self = this,
         localMemberid = 'Bob', // TODO: get from somewhere, and perhaps store/keep somewhere else?
         rootNode,
-        selectionManager,
-        members = {},
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
-        activeAvatar = null,
-        guiAvatarFactory = null,
         m_user_model = null,
         m_event_listener = {},
         m_incoming_ops = [],
@@ -219,16 +201,16 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     this.setUserModel = setUserModel;
 
-    function userModel() {
+    function getUserModel() {
         return m_user_model;
     }
-    this.userModel = userModel;
+    this.getUserModel = getUserModel;
 
     this.emit = function (eventid, args) {
         var i;
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
             "unknown event fired \""+eventid+"\"");
-        for (i=0; i<m_event_listener.length; i+=1) {
+        for (i=0; i<m_event_listener[eventid].length; i+=1) {
             m_event_listener[eventid][i](args);
         }
     };
@@ -268,11 +250,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         op.execute(rootNode);
     };
 
-    // TODO: this needs to move to the upcoming view class
-    this.setGuiAvatarFactory = function(factory) {
-       guiAvatarFactory = factory;
-    };
-
     this.getLocalMemberid = function() {
         return localMemberid;
     };
@@ -280,41 +257,23 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @param {!string} memberid
      * @return {!boolean}
      */
-    this.addMemberToSession = function (memberid) {
-        var selectionMover = selectionManager.createSelectionMover(),
-            avatar = guiAvatarFactory.createAvatar(memberid, self);
-
-        activeAvatar = activeAvatar || avatar;
-        members[memberid] = avatar;
-        return true;
-    };
-    /**
-     * @param {!string} memberid
-     * @return {!boolean}
-     */
-    this.removeMemberFromSession = function (memberid) {
-        var avatar = members[memberid];
-        avatar.removeFromSession();
-        delete members[memberid];
-        return true;
-    };
+//     TODO: port to operations
+//     this.removeMemberFromSession = function (memberid) {
+//         var avatar = members[memberid];
+//         avatar.removeFromSession();
+//         delete members[memberid];
+//         return true;
+//     };
     /**
      * @param {!string} memberid
      * @param {!number} number
      * @return {!boolean}
      */
     this.moveMemberCaret = function (memberid, number) {
-        var avatar = members[memberid],
-            moveEvent;
-        avatar.getCaret().move(number);
-
         this.emit("avatar/moved", {
-            detail: {
-                avatar: avatar
-            }
+            memberid: memberid,
+            number: number
         });
-
-        rootNode.ownerDocument.dispatchEvent(moveEvent);
 
         return true;
     };
@@ -369,95 +328,49 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return odfcontainer;
     };
     /**
-     * @return {!gui.SelectionManager}
-     */
-    this.getSelectionManager = function () {
-        return selectionManager;
-    };
-    /**
      * @return {!core.PositionFilter}
      */
     this.getFilter = function () {
         return filter;
     };
     /**
-     * @param {!string} memberid
-     * @return {gui.Avatar}
+     * @return {!core.PositionFilter}
      */
-    this.getAvatar = function (memberid) {
-        return members[memberid];
-    };
-    /**
-     * @param {!string} memberid
-     * @return {!boolean}
-     */
-    this.setActiveAvatar = function (memberid) {
-        var avatarActivated;
-        if (members.hasOwnProperty(memberid)) {
-            activeAvatar = members[memberid];
-            activeAvatar.getCaret().focus();
-
-            avatarActivated = new window.CustomEvent("avatarActivated", {
-                detail: {
-                    avatar: activeAvatar
-                }
-            });
-
-            rootNode.ownerDocument.dispatchEvent(avatarActivated);
-            return true;
-        }
-        return false;
-    };
-    /**
-     * @return {!Array.<!gui.Avatar>}
-     */
-    this.getAvatars = function () {
-        var list = [], i;
-        for (i in members) {
-            if (members.hasOwnProperty(i)) {
-                list.push(members[i]);
-            }
-        }
-        return list;
-    };
-    /**
-     * @return {?gui.Avatar}
-     */
-    this.getActiveAvatar = function() {
-        return activeAvatar;
+    this.getRootNode = function () {
+        return rootNode;
     };
     /**
      * @param {!Event} e
      * @return {undefined}
      */
-    function handleDocumentClick(e) {
-        var avatar = self.getActiveAvatar(),
-            caret,
-            counter,
-            steps,
-            selection,
-            member;
-
-        if (!avatar) {
-            return;
-        }
-        caret = avatar.getCaret();
-        counter = caret.getStepCounter().countStepsToPosition;
-        selection = window.getSelection();
-        steps = counter(selection.focusNode, selection.focusOffset, filter);
-        self.moveMemberCaret(avatar.getMemberId(), steps);
-        caret.focus();
-        //runtime.log(steps);
-        //runtime.log(e.target.getBoundingClientRect());
-    }
+    // TODO: move into DOMInputControllerForwarder
+//     function handleDocumentClick(e) {
+//         var avatar = self.getActiveAvatar(),
+//             caret,
+//             counter,
+//             steps,
+//             selection,
+//             member;
+// 
+//         if (!avatar) {
+//             return;
+//         }
+//         caret = avatar.getCaret();
+//         counter = caret.getStepCounter().countStepsToPosition;
+//         selection = window.getSelection();
+//         steps = counter(selection.focusNode, selection.focusOffset, filter);
+//         self.moveMemberCaret(avatar.getMemberId(), steps);
+//         caret.focus();
+//         //runtime.log(steps);
+//         //runtime.log(e.target.getBoundingClientRect());
+//     }
     /**
      * @return {undefined}
      */
     function init() {
         setUserModel(new ops.TrivialUserModel());
         rootNode = findTextRoot(self);
-        selectionManager = new gui.SelectionManager(rootNode);
-        listenEvent(rootNode, "click", handleDocumentClick);
+//         listenEvent(rootNode, "click", handleDocumentClick);
     }
     init();
 };

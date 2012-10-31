@@ -45,7 +45,7 @@ ops.TrivialUserModel = function TrivialUserModel () {
 	var users = {};
 	users.bob = {memberid:"bob", fullname:"Bob Pigeon", color: "red", imageurl: "avatar-pigeon.png"};
 	users.alice = {memberid:"alice", fullname:"Alice Bee", color: "green", imageurl: "avatar-flower.png"};
-	users.alice = {memberid:"you", fullname:"Average Joe", color: "blue", imageurl: "avatar-joe.png"};
+	users.you = {memberid:"you", fullname:"Average Joe", color: "blue", imageurl: "avatar-joe.png"};
 
 	this.myMemberId = function () {
 		return "you";

@@ -33,23 +33,69 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, gui */
+runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.SelectionManager");
+runtime.loadClass("ops.TrivialUserModel");
 
 gui.SessionView = (function () {
-	"use strict";
+    "use strict";
 
-	/**
-	 * @constructor
-	 */
-	function SessionView(session) {
+    /**
+        * @constructor
+        */
+    function SessionView(session) {
+        var guiAvatarFactory = null,
+            selectionManager = new gui.SelectionManager(session.getRootNode()),
+            members = {};
 
-		function onAvatarAdded(memberid) {
-			runtime.log("+++ View here +++ eager to create an Avatar! +++");
-		}
+        /**
+        * @param {!string} memberid
+        * @return {gui.Avatar}
+        */
+        this.getAvatar = function (memberid) {
+            return members[memberid];
+        };
+        /**
+        * @return {!Array.<!gui.Avatar>}
+        */
+        this.getAvatars = function () {
+            var list = [], i;
+            for (i in members) {
+                if (members.hasOwnProperty(i)) {
+                    list.push(members[i]);
+                }
+            }
+            return list;
+        };
 
-		session.subscribe("avatar/added", onAvatarAdded);
+        this.setGuiAvatarFactory = function(factory) {
+            guiAvatarFactory = factory;
+        };
 
-	}
+        function onAvatarAdded(memberid) {
+            var selectionMover = selectionManager.createSelectionMover(),
+                avatar = guiAvatarFactory.createAvatar(memberid, selectionMover),
+                userData = session.getUserModel().getUserDetails(memberid);
+            // TODO: check if all data is set, here or in usermodel
+            avatar.setImageUrl(userData.imageurl);
+            avatar.setColor(userData.color);
 
-	return SessionView;
+            runtime.log("+++ View here +++ eagerly created an Avatar! +++");
+
+            members[memberid] = avatar;
+        }
+
+        function onAvatarMoved(moveData) {
+            var avatar = members[moveData.memberid],
+                moveEvent;
+            avatar.getCaret().move(moveData.number);
+        }
+
+        session.subscribe("avatar/added", onAvatarAdded);
+        session.subscribe("avatar/moved", onAvatarMoved);
+
+    }
+
+    return SessionView;
 } ());
 
