@@ -49,6 +49,12 @@ gui.SessionView = (function () {
             members = {};
 
         /**
+        * @return {ops.Session}
+        */
+        this.getSession = function () {
+            return session;
+        };
+        /**
         * @param {!string} memberid
         * @return {gui.Avatar}
         */

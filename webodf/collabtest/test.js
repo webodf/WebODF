@@ -69,29 +69,21 @@ function setupAvatarButton(avatarButtonElement, avatar) {
  */
 function setupAvatarView(sessionView, avatarlistdiv) {
     "use strict";
-    var doc = avatarlistdiv.ownerDocument,
-        htmlns = doc.documentElement.namespaceURI,
-        avatars = sessionView.getAvatars(),
-        i,
-        e;
-    for (i = 0; i < avatars.length; i += 1) {
-        e = doc.createElementNS(htmlns, "div");
-        avatarlistdiv.appendChild(e);
-        setupAvatarButton(e, avatars[i]);
-    }
-}
+    sessionView.getSession().subscribe("avatar/added", function(memberid) {
+        var doc = avatarlistdiv.ownerDocument,
+            htmlns = doc.documentElement.namespaceURI,
+            avatars = sessionView.getAvatars(),
+            i,
+            e = doc.createElementNS(htmlns, "div");
 
-/**
- * @param {!ops.SessionImplementation} session
- * @param {!{id:!string,imageurl:!string,color:!string}}
- * @return {undefined}
- */
-function addMember(session, member) {
-    "use strict";
-    session.addMemberToSession(member.id);
-    var avatar = session.getAvatar(member.id);
-    avatar.setImageUrl(member.imageurl);
-    avatar.setColor(member.color);
+        avatarlistdiv.appendChild(e);
+        for (i = 0; i < avatars.length; i += 1) {
+            if (avatars[i].getMemberId() === memberid) {
+                setupAvatarButton(e, avatars[i]);
+                break;
+            }
+        }
+    });
 }
 
 function initSession(odfid, avatarlistid, callback) {
@@ -117,11 +109,11 @@ function initSession(odfid, avatarlistid, callback) {
         sessionController = new gui.SessionController();
         sessionController.setSessionImplementation(testsession);
         sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
+        setupAvatarView(sessionView, avatarlistdiv);
 
         // add our two friends
         sessionController.startEditing("bob");
         sessionController.startEditing("alice");
-        setupAvatarView(sessionView, avatarlistdiv);
 
         // start editing: let the controller send the OpAddMember
         runtime.assert(testsession.getUserModel(), "lacking user model");
