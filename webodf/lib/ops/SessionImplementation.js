@@ -121,7 +121,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
         activeAvatar = null,
-        guiAvatarFactory = null;
+        guiAvatarFactory = null,
+        m_event_listener = {},
+        m_incoming_ops = [],
+        m_ready_ops = [];
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -204,11 +207,48 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return null;
     }
 
+    this.emit = function (eventid, args) {
+        var i;
+        runtime.assert(m_event_listener.hasOwnProperty(eventid),
+            "unknown event fired");
+        for (i=0; i<m_event_listener.length; i+=1) {
+            m_event_listener[eventid][i](args);
+        }
+    };
+    this.subscribe = function(eventid, cb) {
+        runtime.assert(m_event_listener.hasOwnProperty(eventid),
+            "tried to subscribe to unknown event");
+        m_event_listener[eventid].push(cb);
+    };
+
     /* SESSION OPERATIONS */
 
+    // controller sends operations to this method
+    this.enqueue = function(operation) {
+        m_incoming_ops.push(operation);
+        this.handleOperation();
+    };
 
+    /* reference implementation is the trivial implementation
+     * immediately replaying the operation onto the DOM
+     */
+    this.handleOperation = function() {
+        var op;
 
+        // get next operation from queue
+        op = m_incoming_ops.shift();
 
+        // immediately enqueue the operation for playing it on the DOM
+        m_ready_ops.push(op);
+
+        // and execute the operation
+        this.playOperation();
+    };
+
+    this.playOperation = function() {
+        var op;
+        op = m_ready_ops.shift();
+        op.execute(rootNode);
     };
 
     // this is an operation. the user decided that
@@ -260,8 +300,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         var avatar = members[memberid],
             moveEvent;
         avatar.getCaret().move(number);
-        
-        moveEvent = new window.CustomEvent("avatarMoved", {
+
+        this.emit("avatar/moved", {
             detail: {
                 avatar: avatar
             }
@@ -413,3 +453,4 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     init();
 };
+// vim:expandtab
