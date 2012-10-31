@@ -256,16 +256,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         op.execute(rootNode);
     };
 
-    // this is an operation. the user decided that
-    // he wants to take part in the editing session,
-    // and wants to change its state from observer to
-    // editor. the operation will insert an avatar in
-    // the document, which is also broadcasted to the
-    // other session members.
-    this.addEditingAvatar = function () {
-       self.addMemberToSession(localMemberid);
-    };
-
     // TODO: this needs to move to the upcoming view class
     this.setGuiAvatarFactory = function(factory) {
        guiAvatarFactory = factory;
