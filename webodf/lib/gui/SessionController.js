@@ -33,6 +33,8 @@
  */
 /*global runtime, core, gui, ops, odf */
 
+runtime.loadClass("ops.OpAddMember");
+
 gui.SessionController = (function () {
     "use strict";
 
@@ -49,6 +51,7 @@ gui.SessionController = (function () {
 
         this.startEditing = function(ourself) {
             var op = new ops.OpAddMember(m_session);
+            runtime.assert(op.init, "no init in op");
             op.init({memberid:ourself});
             m_session.enqueue(op);
         };

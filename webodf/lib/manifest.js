@@ -65,6 +65,7 @@
         "ops/Session.js",
         "ops/SessionImplementation.js",
         "ops/SessionNodeFilter.js",
+        "ops/OpAddMember.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",
         "xmldom/OperationalTransformDOM.js",
