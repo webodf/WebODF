@@ -51,10 +51,13 @@ function setupAvatarButton(avatarButtonElement, avatar) {
         memberid = avatar.getMemberId();
     avatarButtonElement.appendChild(doc.createTextNode(memberid));
     avatarButtonElement.onmouseover = function () {
-        avatar.getCaret().showHandle();
+        //avatar.getCaret().showHandle();
     };
     avatarButtonElement.onmouseout = function () {
-        avatar.getCaret().hideHandle();
+        //avatar.getCaret().hideHandle();
+    };
+    avatarButtonElement.onclick = function () {
+        avatar.getCaret().showHandle();
     };
     avatarButtonElement.style.background = avatar.getColor();
 }
