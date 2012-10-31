@@ -34,6 +34,9 @@
  */
 /*global ops*/
 
+/**
+ * @constructor
+ */
 ops.OpAddMember = function OpAddMember(session) {
     "use strict";
 

@@ -149,6 +149,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
 
+    lib/gui/SessionView.js
     lib/gui/SelectionMover.js
     lib/gui/SelectionManager.js
     lib/gui/Caret.js
@@ -156,9 +157,13 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
 
+    lib/ops/TrivialUserModel.js
+    lib/ops/OpAddMember.js
     lib/ops/SessionPointFilter.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
+
+    lib/gui/SessionController.js
 )
 
 set(HTML5UIFILES

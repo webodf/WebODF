@@ -39,6 +39,9 @@
  * called "collab" or "users" or "editing" than here in "ops".
  */
 
+/**
+ * @constructor
+ */
 ops.TrivialUserModel = function TrivialUserModel () {
 	"use strict";
 
