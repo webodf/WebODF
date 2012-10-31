@@ -34,7 +34,7 @@
 /*global window, XMLHttpRequest, require, console, DOMParser,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
-  navigator, VBArray */
+  navigator, VBArray, alert */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -172,6 +172,14 @@ Runtime.prototype.parseXML = function (xml) {"use strict"; };
  * @return {?Window}
  */
 Runtime.prototype.getWindow = function () {"use strict"; };
+
+/**
+ * @param {!boolean} condition
+ * @param {!string} message
+ * @param {!function():undefined=} callback
+ * @return {undefined}
+ */
+Runtime.prototype.assert = function (condition, message, callback) { "use strict"; };
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -376,6 +384,22 @@ function BrowserRuntime(logoutput) {
             console.log(msg);
         }
     }
+
+    /**
+    * @param {!boolean} condition
+    * @param {!string} message
+    * @param {!function():undefined=} callback
+    * @return {undefined}
+    */
+    function assert(condition, message, callback) {
+        if (!condition) {
+            alert("ASSERTION FAILED:\n"+message);
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
     function readFile(path, encoding, callback) {
         if (cache.hasOwnProperty(path)) {
             callback(null, cache[path]);
@@ -616,6 +640,7 @@ function BrowserRuntime(logoutput) {
     this.isFile = isFile;
     this.getFileSize = getFileSize;
     this.log = log;
+    this.assert = assert;
     this.setTimeout = function (f, msec) {
         setTimeout(function () {
             f();
@@ -777,6 +802,23 @@ function NodeJSRuntime() {
     this.log = function (msg) {
         process.stderr.write(msg + '\n');
     };
+
+    /**
+    * @param {!boolean} condition
+    * @param {!string} message
+    * @param {!function():undefined=} callback
+    * @return {undefined}
+    */
+    function assert(condition, message, callback) {
+        if (!condition) {
+            process.stderr.write("ASSERTION FAILED: "+message);
+            if (callback) {
+                callback();
+            }
+        }
+    }
+    this.assert = assert;
+
     this.setTimeout = function (f, msec) {
         setTimeout(function () {
             f();
@@ -974,6 +1016,21 @@ function RhinoRuntime() {
         callback(file.length());
     };
     this.log = print;
+    /**
+    * @param {!boolean} condition
+    * @param {!string} message
+    * @param {!function():undefined=} callback
+    * @return {undefined}
+    */
+    function assert(condition, message, callback) {
+        if (!condition) {
+            print("ASSERTION FAILED: "+message);
+            if (callback) {
+                callback();
+            }
+        }
+    }
+    this.assert = assert;
     this.setTimeout = function (f, msec) {
         f();
     };
