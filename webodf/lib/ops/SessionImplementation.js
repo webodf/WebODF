@@ -207,17 +207,21 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.getUserModel = getUserModel;
 
     this.emit = function (eventid, args) {
-        var i;
+        var i, subscribers;
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
             "unknown event fired \""+eventid+"\"");
-        for (i=0; i<m_event_listener[eventid].length; i+=1) {
-            m_event_listener[eventid][i](args);
+        subscribers = m_event_listener[eventid];
+        runtime.log("firing event \""+eventid+"\" to "+subscribers.length+" subscribers.");
+        for (i=0; i<subscribers.length; i+=1) {
+            subscribers[i](args);
+            runtime.log("event \""+eventid+"\" fired to receiver "+i);
         }
     };
     this.subscribe = function(eventid, cb) {
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
             "tried to subscribe to unknown event \""+eventid+"\"");
         m_event_listener[eventid].push(cb);
+        runtime.log("event \""+eventid+"\" subscribed.");
     };
 
     /* SESSION OPERATIONS */
