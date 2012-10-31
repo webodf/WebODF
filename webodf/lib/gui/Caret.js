@@ -76,11 +76,6 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         caretLineVisible,
         blinking = false;
 
-    if (handle.style) {
-        handle.style.width = '64px';
-        handle.style.height = '70px';
-    }
-
     function blink() {
         if (!focussed || !cursorNode.parentNode) {
             // stop blinking when removed from the document
@@ -115,7 +110,7 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         updateHandlePosition();
     };
     this.move = function (number) {
-//runtime.log("moving " + number);
+        //runtime.log("moving " + number);
         var moved = 0;
         if (number > 0) {
             moved = selectionMover.movePointForward(number);
@@ -161,6 +156,11 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         cancelEvent(e);
     }
     function init() {
+        if (handle.style) {
+            handle.style.width = '64px';
+            handle.style.height = '70px';
+        }
+
         span.setAttribute("contenteditable", true);
         span.onfocus = function () {
             focussed = true;
