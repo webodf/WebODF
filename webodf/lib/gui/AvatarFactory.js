@@ -1,6 +1,7 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,50 +32,44 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-(function () {
+/*global runtime, core, gui*/
+
+runtime.loadClass("gui.Avatar");
+
+/**
+ * The avatar factory creates an avatar as UI representation of a users's cursor.
+ * If the avatar is for the local user, then a handler is passed to the avatar
+ * to redirect the keystrokes received for the avatar to the session controller.
+ * @constructor
+ * @param {!ops.Session} session
+ * @param {!gui.SessionController} sessionController
+ */
+gui.AvatarFactory = function AvatarFactory(session, sessionController) {
     "use strict";
-    return [
-        "core/Async.js",
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/Cursor.js",
-        "core/JSLint.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/RawDeflate.js",
-        "core/RawInflate.js",
-        "core/Selection.js",
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "gui/Avatar.js",
-        "gui/AvatarFactory.js",
-        "gui/Caret.js",
-        "gui/PresenterUI.js",
-        "gui/SessionController.js",
-        "gui/SessionView.js",
-        "gui/SelectionManager.js",
-        "gui/SelectionMover.js",
-        "gui/XMLEdit.js",
-        "odf/CommandLineTools.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "odf/Style2CSS.js",
-        "odf/StyleInfo.js",
-        "ops/Session.js",
-        "ops/SessionImplementation.js",
-        "ops/SessionNodeFilter.js",
-        "ops/OpAddMember.js",
-        "ops/TrivialUserModel.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
-        "xmldom/RelaxNG.js",
-        "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js",
-        "xmldom/XPath.js"
-    ];
-}());
+
+    /**
+     * @param {!string} memberid
+     * @return {!gui.Avatar}
+     */
+    this.createAvatar = function (memberid) {
+        var mover, handler, filter, selectionMover, avatar;
+
+        filter = session.getFilter();
+        selectionMover = session.getSelectionManager().createSelectionMover();
+        mover = function (n) {
+            session.moveMemberCaret(memberid, n);
+        };
+        // if local user, then install input handler
+        if (memberid === session.getLocalMemberid()) {
+            handler = function (charCode) {
+                runtime.log("got keycode: " + charCode);
+                // TODO: here take sessionController object and forward input
+                return true;
+            };
+        }
+
+        avatar = new gui.Avatar(memberid, selectionMover, filter, mover, handler);
+
+        return avatar;
+    }
+};

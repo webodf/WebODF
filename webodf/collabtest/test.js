@@ -35,6 +35,7 @@
 
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("odf.OdfCanvas");
+runtime.loadClass("gui.AvatarFactory");
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("gui.SessionController");
 runtime.loadClass("gui.SessionView");
@@ -117,27 +118,7 @@ function initSession(odfid, avatarlistid, callback) {
         sessionController = new gui.SessionController();
         sessionController.setSessionImplementation(testsession);
         // TODO: this should be set to session view
-        testsession.setGuiAvatarFactory(function (memberid, session) {
-            var mover, handler, filter, selectionMover, avatar;
-
-            filter = session.getFilter();
-            selectionMover = session.getSelectionManager().createSelectionMover();
-            mover = function (n) {
-                session.moveMemberCaret(memberid, n);
-            };
-            // if local user, then install input handler
-            if (memberid === session.getLocalMemberid()) {
-                handler = function (charCode) {
-                    runtime.log("got keycode: " + charCode);
-                    // TODO: here take sessionController object and forward input
-                    return true;
-                };
-            }
-
-            avatar = new gui.Avatar(memberid, selectionMover, filter, mover, handler);
-
-            return avatar;
-        });
+        testsession.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
 
         addMember(testsession, {id: "Bob", imageurl: "avatar-pigeon.png", color: "red"});
         addMember(testsession, {id: "Alice", imageurl: "avatar-flower.png", color: "green"});

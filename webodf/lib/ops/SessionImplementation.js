@@ -282,7 +282,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     this.addMemberToSession = function (memberid) {
         var selectionMover = selectionManager.createSelectionMover(),
-            avatar = guiAvatarFactory(memberid, self);
+            avatar = guiAvatarFactory.createAvatar(memberid, self);
 
         activeAvatar = activeAvatar || avatar;
         members[memberid] = avatar;
