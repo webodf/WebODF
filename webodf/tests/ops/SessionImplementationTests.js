@@ -51,23 +51,12 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.session = new ops.SessionImplementation(t.odf);
-        r.shouldBe(t, "t.session.getAvatars().length", "0");
-    }
-    function addMember() {
-        newSession();
-        t.session.addMemberToSession("member1");
-        r.shouldBe(t, "t.session.getAvatars().length", "1");
-        t.session.addMemberToSession("member2");
-        r.shouldBe(t, "t.session.getAvatars().length", "2");
-        t.session.removeMemberFromSession("member2");
-        r.shouldBe(t, "t.session.getAvatars().length", "1");
-        t.session.removeMemberFromSession("member1");
-        r.shouldBe(t, "t.session.getAvatars().length", "0");
+        // TODO: test number of cursors
+//         r.shouldBe(t, "t.session.getCursors().length", "0");
     }
     this.tests = function () {
         return [
-            newSession,
-            addMember
+            newSession
         ];
     };
     this.asyncTests = function () {
