@@ -33,6 +33,7 @@
 /*global runtime, core, gui, ops, odf, window*/
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("gui.SelectionManager");
+runtime.loadClass("ops.TrivialUserModel");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -122,6 +123,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         namespaces = style2CSS.namespaces,
         activeAvatar = null,
         guiAvatarFactory = null,
+        m_user_model = null,
         m_event_listener = {},
         m_incoming_ops = [],
         m_ready_ops = [];
@@ -211,6 +213,16 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return null;
     }
+
+    function setUserModel (userModel) {
+        m_user_model = userModel;
+    }
+    this.setUserModel = setUserModel;
+
+    function userModel() {
+        return m_user_model;
+    }
+    this.userModel = userModel;
 
     this.emit = function (eventid, args) {
         var i;
@@ -442,6 +454,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {undefined}
      */
     function init() {
+        setUserModel(new ops.TrivialUserModel());
         rootNode = findTextRoot(self);
         selectionManager = new gui.SelectionManager(rootNode);
         listenEvent(rootNode, "click", handleDocumentClick);

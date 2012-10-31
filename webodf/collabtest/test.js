@@ -144,7 +144,8 @@ function initSession(odfid, avatarlistid, callback) {
         setupAvatarView(testsession, avatarlistdiv);
 
         // start editing: let the controller send the OpAddMember
-        sessionController.startEditing("You");
+        runtime.assert(testsession.userModel(), "lacking user model");
+        sessionController.startEditing(testsession.userModel().myMemberId());
 
         if (callback) {
             callback(testsession);
@@ -153,12 +154,14 @@ function initSession(odfid, avatarlistid, callback) {
     });
     odfcanvas.load("text.odt");
 }
+
 function setHeight(id, top, height) {
     "use strict";
     var div = document.getElementById(id);
     div.style.top = top + "%";
     div.style.height = height + "%";
 }
+
 function init() {
     "use strict";
     var height = 50;

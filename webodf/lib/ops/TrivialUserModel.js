@@ -1,6 +1,7 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,49 +32,26 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-(function () {
-    "use strict";
-    return [
-        "core/Async.js",
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/Cursor.js",
-        "core/JSLint.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/RawDeflate.js",
-        "core/RawInflate.js",
-        "core/Selection.js",
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "gui/Avatar.js",
-        "gui/Caret.js",
-        "gui/PresenterUI.js",
-        "gui/SessionController.js",
-        "gui/SessionView.js",
-        "gui/SelectionManager.js",
-        "gui/SelectionMover.js",
-        "gui/XMLEdit.js",
-        "odf/CommandLineTools.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "odf/Style2CSS.js",
-        "odf/StyleInfo.js",
-        "ops/Session.js",
-        "ops/SessionImplementation.js",
-        "ops/SessionNodeFilter.js",
-        "ops/OpAddMember.js",
-        "ops/TrivialUserModel.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
-        "xmldom/RelaxNG.js",
-        "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js",
-        "xmldom/XPath.js"
-    ];
-}());
+/*global ops*/
+
+/*
+ * this thing might feel a bit more at home in a namespaces
+ * called "collab" or "users" or "editing" than here in "ops".
+ */
+
+ops.TrivialUserModel = function TrivialUserModel () {
+	"use strict";
+
+	var users = {};
+	users.bob = {memberid:"bob", fullname:"Bob Pigeon", color: "red", imageurl: "avatar-pigeon.png"};
+	users.alice = {memberid:"alice", fullname:"Alice Bee", color: "green", imageurl: "avatar-flower.png"};
+	users.alice = {memberid:"you", fullname:"Average Joe", color: "blue", imageurl: "avatar-joe.png"};
+
+	this.myMemberId = function () {
+		return "you";
+	};
+
+	this.getUserDetails = function (memberid) {
+		return users[memberid];
+	};
+};
