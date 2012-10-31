@@ -113,6 +113,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return { paragraph: paragraph, offset: offset };
     }
     var self = this,
+        localMemberid = 'Bob', // TODO: get from somewhere, and perhaps store/keep somewhere else?
         rootNode,
         selectionManager,
         members = {},
@@ -235,33 +236,25 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     // the document, which is also broadcasted to the
     // other session members.
     this.addEditingAvatar = function () {
-       guiAvatarFactory("you", filter);
+       self.addMemberToSession(localMemberid);
     };
 
+    // TODO: this needs to move to the upcoming view class
     this.setGuiAvatarFactory = function(factory) {
        guiAvatarFactory = factory;
     };
 
+    this.getLocalMemberid = function() {
+        return localMemberid;
+    };
     /**
      * @param {!string} memberid
      * @return {!boolean}
      */
     this.addMemberToSession = function (memberid) {
         var selectionMover = selectionManager.createSelectionMover(),
-            avatar = new gui.Avatar(memberid, selectionMover, filter,
-                // TODO this code needs to die! it shall call a factory
-                // given from Controller (see createAvatar() above)
-                function (n) {
-                    self.moveMemberCaret(memberid, n);
-                },
-                function (charCode) {
-                    // key handler
-                    runtime.log("type the key: " + charCode);
-                    var position = getAvatarPosition(avatar),
-                        text = String.fromCharCode(charCode);
-                    self.insertText(position.paragraph, position.offset, text);
-                    return true;
-                });
+            avatar = guiAvatarFactory(memberid, self);
+
         activeAvatar = activeAvatar || avatar;
         members[memberid] = avatar;
         return true;
@@ -345,6 +338,18 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     this.getOdfContainer = function () {
         return odfcontainer;
+    };
+    /**
+     * @return {!gui.SelectionManager}
+     */
+    this.getSelectionManager = function () {
+        return selectionManager;
+    };
+    /**
+     * @return {!core.PositionFilter}
+     */
+    this.getFilter = function () {
+        return filter;
     };
     /**
      * @param {!string} memberid

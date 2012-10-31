@@ -39,25 +39,19 @@ gui.SessionController = (function () {
 	/**
 	 * @constructor
 	 */
-	gui.SessionController = function SessionController() {
+	function SessionController() {
 		var self = this,
 			m_session;
 
 		this.setSessionImplementation = function(impl) {
 			m_session = impl;
-			m_session.setGuiAvatarFactory(function(memberid, filter) {
-				var new_avatar = new gui.Avatar(memberid, filter);
-
-				runtime.log("controller created a gui.avatar.");
-				return new_avatar;
-			});
 		};
 
 		this.startEditing = function() {
 			m_session.addEditingAvatar();
 		};
-	};
+	}
 
-	return gui.SessionController;
+	return SessionController;
 } ());
 

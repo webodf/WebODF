@@ -98,6 +98,8 @@ function initSession(odfid, avatarlistid, callback) {
     var odfelement = document.getElementById(odfid),
         avatarlistdiv = document.getElementById(avatarlistid),
         odfcanvas = new odf.OdfCanvas(odfelement),
+        testsession,
+        sessionController,
         ready = false;
     odfcanvas.addListener("statereadychange", function (container) {
         if (container.state !== odf.OdfContainer.DONE) {
@@ -108,7 +110,33 @@ function initSession(odfid, avatarlistid, callback) {
             return;
         }
         ready = true;
-        var testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
+
+        testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
+        sessionController = new gui.SessionController();
+        sessionController.setSessionImplementation(testsession);
+        // TODO: this should be set to session view
+        testsession.setGuiAvatarFactory(function (memberid, session) {
+            var mover, handler, filter, selectionMover, avatar;
+
+            filter = session.getFilter();
+            selectionMover = session.getSelectionManager().createSelectionMover();
+            mover = function (n) {
+                session.moveMemberCaret(memberid, n);
+            };
+            // if local user, then install input handler
+            if (memberid === session.getLocalMemberid()) {
+                handler = function (charCode) {
+                    runtime.log("got keycode: " + charCode);
+                    // TODO: here take sessionController object and forward input
+                    return true;
+                };
+            }
+
+            avatar = new gui.Avatar(memberid, selectionMover, filter, mover, handler);
+
+            return avatar;
+        });
+
         addMember(testsession, {id: "Bob", imageurl: "avatar-pigeon.png", color: "red"});
         addMember(testsession, {id: "Alice", imageurl: "avatar-flower.png", color: "green"});
         setupAvatarView(testsession, avatarlistdiv);
@@ -128,15 +156,12 @@ function setHeight(id, top, height) {
 }
 function init() {
     "use strict";
-    var height = 50, controller;
+    var height = 50;
     setHeight("session1", 0, height);
     setHeight("avatars1", 0, height);
 
     initSession("odf1", "avatars1", function(session) {
         runtime.log("odf1 session initialized.");
-
-        controller = new gui.SessionController();
-        controller.setSessionImplementation(session);
     });
 }
 // vim:expandtab
