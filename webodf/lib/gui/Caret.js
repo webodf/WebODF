@@ -133,6 +133,13 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
     this.getHandleElement = function () {
         return handle;
     };
+    this.toggleHandleVisibility = function () {
+        if (handle.style.display === "block") {
+            this.hideHandle();
+        } else {
+            this.showHandle();
+        }
+    };
     this.showHandle = function () {
         handle.style.display = "block";
         updateHandlePosition();

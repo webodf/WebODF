@@ -57,7 +57,7 @@ function setupAvatarButton(avatarButtonElement, avatar) {
         //avatar.getCaret().hideHandle();
     };
     avatarButtonElement.onclick = function () {
-        avatar.getCaret().showHandle();
+        avatar.getCaret().toggleHandleVisibility();
     };
     avatarButtonElement.style.background = avatar.getColor();
 }
