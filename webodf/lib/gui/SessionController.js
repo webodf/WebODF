@@ -34,26 +34,26 @@
 /*global runtime, core, gui, ops, odf */
 
 gui.SessionController = (function () {
-	"use strict";
+    "use strict";
 
-	/**
-	 * @constructor
-	 */
-	function SessionController() {
-		var self = this,
-			m_session;
+    /**
+     * @constructor
+     */
+    function SessionController() {
+        var self = this,
+            m_session;
 
-		this.setSessionImplementation = function(impl) {
-			m_session = impl;
-		};
+        this.setSessionImplementation = function(impl) {
+            m_session = impl;
+        };
 
-		this.startEditing = function(ourself) {
-			var op = new ops.OpAddMember(m_session);
-			op.init({memberid:ourself});
-			m_session.enqueue(op);
-		};
-	}
+        this.startEditing = function(ourself) {
+            var op = new ops.OpAddMember(m_session);
+            op.init({memberid:ourself});
+            m_session.enqueue(op);
+        };
+    }
 
-	return SessionController;
+    return SessionController;
 } ());
-
+// vim:expandtab
