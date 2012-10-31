@@ -48,7 +48,8 @@ gui.SessionController = (function () {
 		};
 
 		this.startEditing = function() {
-			m_session.addEditingAvatar();
+			var op = new ops.OpAddMember(m_session);
+			m_session.enqueue(op);
 		};
 	}
 

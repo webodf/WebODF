@@ -37,6 +37,7 @@ runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("gui.SessionController");
+runtime.loadClass("gui.SessionView");
 
 /**
  * @param {!Element} avatarButtonElement
@@ -100,6 +101,7 @@ function initSession(odfid, avatarlistid, callback) {
         odfcanvas = new odf.OdfCanvas(odfelement),
         testsession,
         sessionController,
+        sessionView,
         ready = false;
     odfcanvas.addListener("statereadychange", function (container) {
         if (container.state !== odf.OdfContainer.DONE) {
@@ -110,8 +112,8 @@ function initSession(odfid, avatarlistid, callback) {
             return;
         }
         ready = true;
-
         testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
+        sessionView = new gui.SessionView(testsession);
         sessionController = new gui.SessionController();
         sessionController.setSessionImplementation(testsession);
         // TODO: this should be set to session view
@@ -140,6 +142,9 @@ function initSession(odfid, avatarlistid, callback) {
         addMember(testsession, {id: "Bob", imageurl: "avatar-pigeon.png", color: "red"});
         addMember(testsession, {id: "Alice", imageurl: "avatar-flower.png", color: "green"});
         setupAvatarView(testsession, avatarlistdiv);
+
+        // start editing: let the controller send the OpAddMember
+        sessionController.startEditing();
 
         if (callback) {
             callback(testsession);
