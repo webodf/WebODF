@@ -100,7 +100,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return root;
     }
     var self = this,
-        localMemberid = 'Bob', // TODO: get from somewhere, and perhaps store/keep somewhere else?
         rootNode,
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
@@ -255,7 +254,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     };
 
     this.getLocalMemberid = function() {
-        return localMemberid;
+        return m_user_model.getLocalMemberId();
     };
     /**
      * @param {!string} memberid

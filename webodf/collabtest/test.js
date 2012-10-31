@@ -117,7 +117,7 @@ function initSession(odfid, avatarlistid, callback) {
 
         // start editing: let the controller send the OpAddMember
         runtime.assert(testsession.getUserModel(), "lacking user model");
-        sessionController.startEditing(testsession.getUserModel().myMemberId());
+        sessionController.startEditing(testsession.getUserModel().getLocalMemberId());
 
         if (callback) {
             callback(testsession);
