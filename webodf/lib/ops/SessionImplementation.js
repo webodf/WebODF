@@ -213,7 +213,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         runtime.log("firing event \""+eventid+"\" to "+subscribers.length+" subscribers.");
         for (i=0; i<subscribers.length; i+=1) {
             subscribers[i](args);
-            runtime.log("event \""+eventid+"\" fired to receiver "+i);
         }
     };
     this.subscribe = function(eventid, cb) {
