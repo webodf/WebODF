@@ -47,8 +47,9 @@ gui.SessionController = (function () {
 			m_session = impl;
 		};
 
-		this.startEditing = function() {
+		this.startEditing = function(ourself) {
 			var op = new ops.OpAddMember(m_session);
+			op.init({memberid:ourself});
 			m_session.enqueue(op);
 		};
 	}

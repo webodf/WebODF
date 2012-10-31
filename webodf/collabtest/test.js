@@ -144,7 +144,7 @@ function initSession(odfid, avatarlistid, callback) {
         setupAvatarView(testsession, avatarlistdiv);
 
         // start editing: let the controller send the OpAddMember
-        sessionController.startEditing();
+        sessionController.startEditing("You");
 
         if (callback) {
             callback(testsession);
