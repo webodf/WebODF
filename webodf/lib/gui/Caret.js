@@ -74,7 +74,8 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         cursorNode,
         focussed = false,
         caretLineVisible,
-        blinking = false;
+        blinking = false,
+        color = "";
 
     if (handle.style) {
         handle.style.width = '64px';
@@ -125,12 +126,22 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         updateHandlePosition();
         return moved;
     };
-    this.setColor = function (color) {
-        span.style.borderColor = color;
-        handle.style.background = color;
+    /**
+     * @param {!string} newcolor
+     * @return {undefined}
+     */
+    this.setColor = function (newcolor) {
+        color = newcolor;
+        if (handle.style) {
+            span.style.borderColor = color;
+            handle.style.background = color;
+        }
     };
+    /**
+     * @return {!string}
+     */
     this.getColor = function () {
-        return span.style.borderColor;
+        return color;
     };
     this.getSelection = function () {
         return selectionMover.getSelection();

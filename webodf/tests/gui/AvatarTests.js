@@ -142,6 +142,12 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
         r.shouldBe(t, "t.avatar2.getMemberId()", "'id2'");
     }
+    function testColor() {
+        createAvatar("<a/>", null, "id");
+        r.shouldBeNonNull(t, "t.avatar.setColor");
+        t.avatar.setColor("yellow");
+        r.shouldBe(t, "t.avatar.getColor()", "'yellow'");
+    }
     function moveInEmptyDoc() {
         createAvatar("<a/>", null, "id");
         var c = t.avatar.getCaret(),
@@ -317,6 +323,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         return [
             create,
             create2,
+            testColor,
             moveInEmptyDoc,
             moveInSimpleDoc,
             stepCounter1,
