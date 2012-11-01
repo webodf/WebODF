@@ -41,6 +41,7 @@ runtime.loadClass("core.Cursor");
 core.CursorTests = function CursorTests(runner) {
     "use strict";
     var r = runner, tests, t = {},
+        memberId = "testuser",
         maindoc = runtime.getWindow().document,
         testarea = maindoc.getElementById("testarea");
     /**
@@ -71,9 +72,10 @@ core.CursorTests = function CursorTests(runner) {
     function setupEmptyRootNode() {
         var selection = new core.Selection(maindoc),
             root = maindoc.createElementNS("", "p"),
-            cursor = new core.Cursor(selection, maindoc);
+            cursor = new core.Cursor(memberId, selection, maindoc);
         testarea.appendChild(root);
         t = { selection: selection, root: root, cursor: cursor };
+        runner.shouldBe(t, "t.cursor.getMemberId()", memberId);
         runner.shouldBeNonNull(t, "t.selection");
     }
 

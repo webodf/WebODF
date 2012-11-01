@@ -38,17 +38,16 @@ runtime.loadClass("core.PositionFilter");
 /**
  * This class modifies the selection in different ways.
  * @constructor
+ * @param {core.Cursor} cursor
  * @param {!Node} rootNode
  * @param {!Function=} onCursorAdd
  * @param {!function(?Element,!number):undefined=} onCursorRemove
  */
-gui.SelectionMover = function SelectionMover(rootNode, onCursorAdd, onCursorRemove) {
+gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
     var self = this,
-        doc = /**@type{!Document}*/(rootNode.ownerDocument),
-        selection = new core.Selection(doc),
-        positionIterator,
-        cursor = new core.Cursor(selection, doc);
+        selection = cursor.getSelection(),
+        positionIterator;
     function doMove(steps, extend, move) {
         var left = steps;
         // assume positionIterator reflects current state

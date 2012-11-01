@@ -57,10 +57,11 @@ gui.SelectionManager = function SelectionManager(rootNode) {
         }
     }
     /**
+     * @param {core.Cursor} cursor
      * @return {!gui.SelectionMover}
      */
-    this.createSelectionMover = function () {
-        var selectionMover = new gui.SelectionMover(rootNode, onCursorAdd,
+    this.createSelectionMover = function (cursor) {
+        var selectionMover = new gui.SelectionMover(cursor, rootNode, onCursorAdd,
                 onCursorRemove);
         movers.push(selectionMover);
         return selectionMover;

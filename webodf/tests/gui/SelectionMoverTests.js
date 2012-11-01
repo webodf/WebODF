@@ -58,22 +58,26 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             p = doc.createElement("p"),
             text = doc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
             mover,
+            cursor,
             selection;
         testarea.appendChild(p);
         p.appendChild(text);
         p.style.width = "5em";// break line after each 'MMMMM'
-        mover = new gui.SelectionMover(p);
-        selection = mover.getSelection();
+        selection = new core.Selection(doc);
+        cursor = new core.Cursor("id", selection, doc);
+        mover = new gui.SelectionMover(cursor, p);
         t = { doc: doc, p: p, text: text, selection: selection, mover: mover };
     }
     function createDoc(xml) {
         var doc = runtime.parseXML(xml),
             mover,
+            cursor,
             selection,
             node = testarea.ownerDocument.importNode(doc.documentElement, true);
         testarea.appendChild(node);
-        mover = new gui.SelectionMover(node);
-        selection = mover.getSelection();
+        selection = new core.Selection(testarea.ownerDocument);
+        cursor = new core.Cursor("id", selection, testarea.ownerDocument);
+        mover = new gui.SelectionMover(cursor, node);
         t = { doc: doc, root: node, selection: selection, mover: mover };
     }
     function testUpDownTraversal() {

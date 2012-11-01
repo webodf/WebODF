@@ -45,8 +45,10 @@ gui.CaretTests = function CaretTests(runner) {
 
     function setupEmptyDoc() {
         var selection = runtime.getWindow().getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            selectionMover = new gui.SelectionMover(doc.documentElement),
+            doc = /**@type{!Document}*/(runtime.getDOMImplementation().createDocument("", "p", null)),
+            cursorSelection = new core.Selection(doc),
+            cursor = new core.Cursor("id", cursorSelection, doc),
+            selectionMover = new gui.SelectionMover(cursor, doc.documentElement),
             caret = new gui.Caret(selectionMover);
         t = { selection: selection, doc: doc }; //, cursor: cursor };
         runner.shouldBeNonNull(t, "t.selection");

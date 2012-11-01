@@ -46,10 +46,8 @@ ops.OpRemoveMember = function OpRemoveMember(session) {
         memberid = data.memberid;
     };
 
-    // remove our <cursor/> representation into the dom
-    //  ... later ...
     this.execute = function(domroot) {
-        // find_and_removeElement("cursor");
+        session.removeCursor(memberid);
         session.emit("avatar/removed", memberid);
     };
 

@@ -100,6 +100,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
         localMemberCursorStepCounter = null, ///< TEMPORARY, until cursors are split from avatars
+        cursors = {},
         m_user_model = null,
         m_operation_router = null,
         m_event_listener = {};
@@ -330,6 +331,26 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.getRootNode = function () {
         return rootNode;
     };
+    /**
+    * @param {!string} memberid
+    * @return {core.Cursor}
+    */
+    this.getCursor = function (memberid) {
+        return cursors[memberid];
+    };
+    /**
+    * @param {!core.Cursor} cursor
+    */
+    this.addCursor = function (cursor) {
+        cursors[cursor.getMemberId()] = cursor;
+    };
+    /**
+    * @param {!string} memberid
+    */
+    this.removeCursor = function (memberid) {
+        delete cursors[memberid];
+    };
+
     /// TEMPORARY, until cursor is split out of avatars
     this.setLocalMemberCursorStepCounter = function (stepCounter) {
         localMemberCursorStepCounter = stepCounter;

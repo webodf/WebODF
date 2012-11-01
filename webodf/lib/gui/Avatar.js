@@ -40,13 +40,13 @@ runtime.loadClass("gui.Caret");
  * changed by the session to which the avatar forwards the keystrokes that it
  * receives. That is a not true right now.
  * @constructor
- * @param {!string} memberid
  * @param {!gui.SelectionMover} selectionMover
  * @param {!function(!Element):!undefined=} registerInputListener
  */
-gui.Avatar = function Avatar(memberid, selectionMover, registerInputListener) {
+gui.Avatar = function Avatar(selectionMover, registerInputListener) {
     "use strict";
     var self = this,
+        memberid = selectionMover.getCursor().getMemberId(),
         caret,
         image;
 // TODO: move to controller & co.

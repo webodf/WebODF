@@ -113,9 +113,12 @@ gui.AvatarTests = function AvatarTests(runner) {
         t = {};
     };
     function createAvatar(xml) {
-        t.doc = runtime.parseXML(xml);
-        t.selectionMover = new gui.SelectionMover(t.doc.documentElement);
-        t.avatar = new gui.Avatar("id", t.selectionMover);
+        var selection, cursor;
+        t.doc = /**@type{!Document}*/(runtime.parseXML(xml));
+        selection = new core.Selection(t.doc);
+        cursor = new core.Cursor("id", selection, t.doc);
+        t.selectionMover = new gui.SelectionMover(cursor, t.doc.documentElement);
+        t.avatar = new gui.Avatar(t.selectionMover);
     }
     function create() {
         createAvatar("<a/>");

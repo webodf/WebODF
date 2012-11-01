@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global ops*/
+/*global core, ops*/
 
 /**
  * @constructor
@@ -40,17 +40,18 @@
 ops.OpAddMember = function OpAddMember(session) {
     "use strict";
 
-    var memberid, cursorns = 'urn:webodf:names:cursor';
+    var memberid;
 
     this.init = function(data) {
         memberid = data.memberid;
     };
 
-    // insert our <cursor/> representation into the dom
-    //  ... later ...
-    this.execute = function(domroot) {
-        // cursor_element = createElement("cursor");
-        session.emit("avatar/added", memberid);
+    this.execute = function(rootNode) {
+        var doc = /**@type{!Document}*/(rootNode.ownerDocument),
+            selection = new core.Selection(doc),
+            cursor = new core.Cursor(memberid, selection, doc);
+        session.addCursor(cursor);
+        session.emit("avatar/added", cursor);
     };
 
     this.spec = function() {

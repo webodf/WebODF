@@ -48,11 +48,11 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
     "use strict";
 
     /**
-     * @param {!string} memberid
      * @return {!gui.Avatar}
      */
-    this.createAvatar = function (memberid, selectionMover) {
+    this.createAvatar = function (selectionMover) {
         var registerInputListener = null,
+            memberid = selectionMover.getCursor().getMemberId(),
             localMemberId = session.getUserModel().getLocalMemberId(),
             avatar,
             caret;
@@ -62,7 +62,7 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
             registerInputListener = sessionController.registerInputListener;
         }
 
-        avatar = new gui.Avatar(memberid, selectionMover, registerInputListener);
+        avatar = new gui.Avatar(selectionMover, registerInputListener);
 
         if (memberid === localMemberId) {
             caret = avatar.getCaret();

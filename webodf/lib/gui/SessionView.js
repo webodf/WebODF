@@ -79,19 +79,19 @@ gui.SessionView = (function () {
         };
 
         /**
-        * @param {!string} memberid
+        * @param {core.Cursor} cursor
         */
-        function onAvatarAdded(memberid) {
-            var selectionMover = selectionManager.createSelectionMover(),
-                avatar = guiAvatarFactory.createAvatar(memberid, selectionMover),
-                userData = session.getUserModel().getUserDetails(memberid);
+        function onAvatarAdded(cursor) {
+            var selectionMover = selectionManager.createSelectionMover(cursor),
+                avatar = guiAvatarFactory.createAvatar(selectionMover),
+                userData = session.getUserModel().getUserDetails(cursor.getMemberId());
             // TODO: check if all data is set, here or in usermodel
             avatar.setImageUrl(userData.imageurl);
             avatar.setColor(userData.color);
 
-            runtime.log("+++ View here +++ eagerly created an Avatar! +++");
+            runtime.log("+++ View here +++ eagerly created an Avatar for '"+cursor.getMemberId()+"'! +++");
 
-            members[memberid] = avatar;
+            members[cursor.getMemberId()] = avatar;
         }
 
         /**

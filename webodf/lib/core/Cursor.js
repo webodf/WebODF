@@ -55,16 +55,18 @@ runtime.loadClass("core.Selection");
  * the cursor by not letting it be part of the DOM.
  *
  * @constructor
+ * @param {string} memberid The memberid this cursor is assigned to
  * @param {core.Selection} selection The selection to which the cursor corresponds
  * @param {Document} document The document in which the cursor is placed
  */
-core.Cursor = function Cursor(selection, document) {
+core.Cursor = function Cursor(memberid, selection, document) {
     "use strict";
     var cursorns,
         cursorNode,
         cursorTextNode;
     cursorns = 'urn:webodf:names:cursor';
     cursorNode = document.createElementNS(cursorns, 'cursor');
+    cursorNode.setAttributeNS(cursorns, "memberid", memberid);
     cursorTextNode = document.createTextNode("");
 
     function putCursorIntoTextNode(container, offset) {
@@ -108,11 +110,25 @@ core.Cursor = function Cursor(selection, document) {
         }
     }
     /**
+     * Obtain the memberid the cursor is assigned to.
+     * @return {string}
+     */
+    this.getMemberId = function () {
+        return memberid;
+    };
+    /**
      * Obtain the node representing the cursor.
      * @return {Element}
      */
     this.getNode = function () {
         return cursorNode;
+    };
+    /**
+     * Obtain the selection to which the cursor corresponds.
+     * @return {core.Selection}
+     */
+    this.getSelection = function () {
+        return selection;
     };
     /**
      * Synchronize the cursor with the current selection.
