@@ -112,16 +112,16 @@ gui.AvatarTests = function AvatarTests(runner) {
     this.tearDown = function () {
         t = {};
     };
-    function createAvatar(xml, filter) {
+    function createAvatar(xml, filter, id) {
         t.doc = runtime.parseXML(xml);
         function mover(n) {
             t.avatar.getCaret().move(n);
         }
         t.selectionMover = new gui.SelectionMover(t.doc.documentElement);
-        t.avatar = new gui.Avatar("id", t.selectionMover, filter, mover);
+        t.avatar = new gui.Avatar(id, t.selectionMover, filter, mover);
     }
     function create() {
-        createAvatar("<a/>", null);
+        createAvatar("<a/>", null, "id");
         r.shouldBeNonNull(t, "t.avatar");
         r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
         var c = t.avatar.getCaret(),
@@ -133,8 +133,17 @@ gui.AvatarTests = function AvatarTests(runner) {
         t.focusNode = s.focusNode;
         r.shouldBeNonNull(t, "t.focusNode");
     }
+    function create2() {
+        createAvatar("<a/>", null, "id2");
+        t.avatar2 = t.avatar;
+        createAvatar("<a/>", null, "id");
+        r.shouldBeNonNull(t, "t.avatar");
+        r.shouldBeNonNull(t, "t.avatar2");
+        r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
+        r.shouldBe(t, "t.avatar2.getMemberId()", "'id2'");
+    }
     function moveInEmptyDoc() {
-        createAvatar("<a/>", null);
+        createAvatar("<a/>", null, "id");
         var c = t.avatar.getCaret(),
             s = c.getSelection();
         t.startNode = s.focusNode;
@@ -145,7 +154,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.startNode", "t.focusNode");
     }
     function moveInSimpleDoc() {
-        createAvatar("<a>hello</a>", null);
+        createAvatar("<a>hello</a>", null, "id");
         var c = t.avatar.getCaret(),
             s = c.getSelection(),
             i;
@@ -184,7 +193,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     function stepCounter(xml, n, m, filter) {
         var steps, s, e;
         t.pos = [];
-        createAvatar(xml, filter);
+        createAvatar(xml, filter, "id");
         t.caret = t.avatar.getCaret();
         s = t.caret.getSelection();
         t.counter = t.caret.getStepCounter();
@@ -238,7 +247,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         var i, steps;
         t.pos = [];
         t.filter = filter;
-        createAvatar(xml, null);
+        createAvatar(xml, null, "id");
         t.caret = t.avatar.getCaret();
         t.counter = t.caret.getStepCounter();
 
@@ -307,6 +316,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     this.tests = function () {
         return [
             create,
+            create2,
             moveInEmptyDoc,
             moveInSimpleDoc,
             stepCounter1,
