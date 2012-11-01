@@ -106,8 +106,7 @@ function initSession(odfid, avatarlistid, callback) {
         ready = true;
         testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
         sessionView = new gui.SessionView(testsession);
-        sessionController = new gui.SessionController();
-        sessionController.setSessionImplementation(testsession);
+        sessionController = new gui.SessionController(testsession);
         sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
         setupAvatarView(sessionView, avatarlistdiv);
 

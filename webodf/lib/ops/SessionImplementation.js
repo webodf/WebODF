@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf, window*/
+/*global runtime, core, gui, ops, odf*/
 runtime.loadClass("ops.TrivialUserModel");
 /**
  * An operation that can be performed on a document.
@@ -40,16 +40,6 @@ runtime.loadClass("ops.TrivialUserModel");
  */
 ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
-//     function listenEvent(eventTarget, eventType, eventHandler) {
-//         if (eventTarget.addEventListener) {
-//             eventTarget.addEventListener(eventType, eventHandler, false);
-//         } else if (eventTarget.attachEvent) {
-//             eventType = "on" + eventType;
-//             eventTarget.attachEvent(eventType, eventHandler);
-//         } else {
-//             eventTarget["on" + eventType] = eventHandler;
-//         }
-//     }
     /**
      * @constructor
      * @implements {core.PositionFilter}
@@ -104,6 +94,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
+        localMemberCursorStepCounter = null, ///< TEMPORARY, until cursors are split from avatars
         m_user_model = null,
         m_event_listener = {},
         m_incoming_ops = [],
@@ -255,6 +246,23 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.getLocalMemberid = function() {
         return m_user_model.getLocalMemberId();
     };
+
+    /**
+     * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.
+     * @param {!string} memberid
+     * @param {!Node} node
+     * @param {!number} offset
+     * @return {!number}
+     */
+    this.getDistanceFromCursor = function(memberid, node, offset) {
+        var counter,
+            steps = 0;
+        if (localMemberCursorStepCounter) {
+            counter = localMemberCursorStepCounter.countStepsToPosition;
+            steps = counter(node, offset, filter);
+        }
+        return steps;
+    };
     /**
      * @param {!string} memberid
      * @return {!boolean}
@@ -341,38 +349,16 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.getRootNode = function () {
         return rootNode;
     };
-    /**
-     * @param {!Event} e
-     * @return {undefined}
-     */
-    // TODO: move into DOMInputControllerForwarder
-//     function handleDocumentClick(e) {
-//         var avatar = self.getActiveAvatar(),
-//             caret,
-//             counter,
-//             steps,
-//             selection,
-//             member;
-// 
-//         if (!avatar) {
-//             return;
-//         }
-//         caret = avatar.getCaret();
-//         counter = caret.getStepCounter().countStepsToPosition;
-//         selection = window.getSelection();
-//         steps = counter(selection.focusNode, selection.focusOffset, filter);
-//         self.moveMemberCaret(avatar.getMemberId(), steps);
-//         caret.focus();
-//         //runtime.log(steps);
-//         //runtime.log(e.target.getBoundingClientRect());
-//     }
+    /// TEMPORARY, until cursor is split out of avatars
+    this.setLocalMemberCursorStepCounter = function (stepCounter) {
+        localMemberCursorStepCounter = stepCounter;
+    };
     /**
      * @return {undefined}
      */
     function init() {
         setUserModel(new ops.TrivialUserModel());
         rootNode = findTextRoot(self);
-//         listenEvent(rootNode, "click", handleDocumentClick);
     }
     init();
 };

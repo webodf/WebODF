@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf */
+/*global runtime, core, gui, ops, odf, window */
 
 runtime.loadClass("ops.OpAddMember");
 runtime.loadClass("ops.OpMoveMemberCursor");
@@ -45,19 +45,25 @@ gui.SessionController = (function () {
     /**
      * @constructor
      */
-    function SessionController() {
-        var self = this,
-            m_session;
+    function SessionController(session) {
+        var self = this;
 
-        this.setSessionImplementation = function(impl) {
-            m_session = impl;
-        };
+        function listenEvent(eventTarget, eventType, eventHandler) {
+            if (eventTarget.addEventListener) {
+                eventTarget.addEventListener(eventType, eventHandler, false);
+            } else if (eventTarget.attachEvent) {
+                eventType = "on" + eventType;
+                eventTarget.attachEvent(eventType, eventHandler);
+            } else {
+                eventTarget["on" + eventType] = eventHandler;
+            }
+        }
 
         this.startEditing = function(ourself) {
-            var op = new ops.OpAddMember(m_session);
+            var op = new ops.OpAddMember(session);
             runtime.assert(op.hasOwnProperty("init"), "no init in op");
             op.init({memberid:ourself});
-            m_session.enqueue(op);
+            session.enqueue(op);
         };
         /**
         * @param {!number} charCode
@@ -67,32 +73,46 @@ gui.SessionController = (function () {
             var op = null,
                 handled = false;
             if (charCode === 37) { // left
-                op = new ops.OpMoveMemberCursor(m_session);
-                op.init({memberid:m_session.getLocalMemberid(), number:-1});
+                op = new ops.OpMoveMemberCursor(session);
+                op.init({memberid:session.getLocalMemberid(), number:-1});
                 handled = true;
             } else if (charCode === 39) { // right
-                op = new ops.OpMoveMemberCursor(m_session);
-                op.init({memberid:m_session.getLocalMemberid(), number:1});
+                op = new ops.OpMoveMemberCursor(session);
+                op.init({memberid:session.getLocalMemberid(), number:1});
                 handled = true;
             } else if (charCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = new ops.OpMoveMemberCursor(m_session);
-                op.init({memberid:m_session.getLocalMemberid(), number:-10});
+                op = new ops.OpMoveMemberCursor(session);
+                op.init({memberid:session.getLocalMemberid(), number:-10});
                 handled = true;
             } else if (charCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = new ops.OpMoveMemberCursor(m_session);
-                op.init({memberid:m_session.getLocalMemberid(), number:10});
+                op = new ops.OpMoveMemberCursor(session);
+                op.init({memberid:session.getLocalMemberid(), number:10});
                 handled = true;
             } else {
                 runtime.log("got keycode: " + charCode);
                 handled = true;
             }
             if (op) {
-                m_session.enqueue(op);
+                session.enqueue(op);
             }
             return handled;
         };
+
+        listenEvent(session.getRootNode(), "click", function(e) {
+            var selection = window.getSelection(),
+                steps,
+                op;
+
+            steps = session.getDistanceFromCursor(session.getLocalMemberid(), selection.focusNode, selection.focusOffset);
+
+            if (steps !== 0) {
+                op = new ops.OpMoveMemberCursor(session);
+                op.init({memberid:session.getLocalMemberid(), number:steps});
+                session.enqueue(op);
+            }
+        });
     }
 
     return SessionController;

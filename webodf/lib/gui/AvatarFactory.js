@@ -61,6 +61,10 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
 
         avatar = new gui.Avatar(memberid, selectionMover, handler);
 
+        if (memberid === session.getLocalMemberid()) {
+            session.setLocalMemberCursorStepCounter(avatar.getCaret().getStepCounter());
+        }
+
         return avatar;
     };
 };
