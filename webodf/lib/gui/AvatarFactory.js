@@ -52,22 +52,14 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
      * @return {!gui.Avatar}
      */
     this.createAvatar = function (memberid, selectionMover) {
-        var mover, handler, filter, avatar;
+        var handler = null, avatar;
 
-        filter = session.getFilter();
-        mover = function (n) {
-            session.moveMemberCaret(memberid, n);
-        };
         // if local user, then install input handler
         if (memberid === session.getLocalMemberid()) {
-            handler = function (charCode) {
-                runtime.log("got keycode: " + charCode);
-                // TODO: here take sessionController object and forward input
-                return true;
-            };
+            handler = sessionController.avatarKeyHandler;
         }
 
-        avatar = new gui.Avatar(memberid, selectionMover, filter, mover, handler);
+        avatar = new gui.Avatar(memberid, selectionMover, handler);
 
         return avatar;
     };

@@ -150,6 +150,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/CommandLineTools.js
 
     lib/ops/OpAddMember.js
+    lib/ops/OpMoveMemberCursor.js
     lib/gui/SelectionMover.js
     lib/gui/Caret.js
     lib/gui/Avatar.js

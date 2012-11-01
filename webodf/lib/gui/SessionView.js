@@ -93,8 +93,25 @@ gui.SessionView = (function () {
 
         function onAvatarMoved(moveData) {
             var avatar = members[moveData.memberid],
-                moveEvent;
-            avatar.getCaret().move(moveData.number);
+                caret = avatar.getCaret(),
+                stepCounter = caret.getStepCounter(),
+                positionFilter = session.getFilter(),
+                steps;
+
+            if (moveData.number > 0) {
+                steps = stepCounter.countForwardSteps(moveData.number, positionFilter);
+            } else if (moveData.number < 0) {
+                steps = -stepCounter.countBackwardSteps(-moveData.number, positionFilter);
+            } else {
+                // nothing to do
+                return;
+            }
+            runtime.log("Moving. moving, moving... walkableSteps "+steps);
+            caret.move(steps);
+            // TODO: who should/needs to care for that?
+            if (avatar.getMemberId() === session.getLocalMemberid()) {
+                caret.focus();
+            }
         }
 
         session.subscribe("avatar/added", onAvatarAdded);

@@ -42,60 +42,22 @@ runtime.loadClass("gui.Caret");
  * @constructor
  * @param {!string} memberid
  * @param {!gui.SelectionMover} selectionMover
- * @param {?core.PositionFilter} positionFilter
- * @param {!function(!number):undefined} caretMover
  * @param {!function(!number):!boolean=} keyHandler
  */
-gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMover, keyHandler) {
+gui.Avatar = function Avatar(memberid, selectionMover, keyHandler) {
     "use strict";
     var self = this,
         caret,
-        image,
-        stepCounter;
-    function moveForward() {
-        // determine number of steps needed
-        var steps = stepCounter.countForwardSteps(1, positionFilter);
-        caretMover(steps);
-    }
-    function moveBackward() {
-        var steps = stepCounter.countBackwardSteps(1, positionFilter);
-        caretMover(-steps);
-    }
-    function moveLineUp() {
-        var steps = stepCounter.countLineUpSteps(1, positionFilter);
-        caretMover(-steps);
-    }
-    function moveLineDown() {
-        var steps = stepCounter.countLineDownSteps(1, positionFilter);
-        caretMover(steps);
-    }
-    /**
-     * @param {!number} charCode
-     * @return {!boolean}
-     */
-    function avatarKeyHandler(charCode) {
-        var handled = false;
-        if (charCode === 37) { // left
-            moveBackward();
-            caret.focus();
-            handled = true;
-        } else if (charCode === 39) { // right
-            moveForward();
-            caret.focus();
-            handled = true;
-        } else if (charCode === 38) { // up
-            moveLineUp();
-            caret.focus();
-            handled = true;
-        } else if (charCode === 40) { // down
-            moveLineDown();
-            caret.focus();
-            handled = true;
-        } else if (keyHandler) {
-            handled = keyHandler(charCode);
-        }
-        return handled;
-    }
+        image;
+// TODO: move to controller & co.
+//     function moveLineUp() {
+//         var steps = stepCounter.countLineUpSteps(1, positionFilter);
+//         caretMover(-steps);
+//     }
+//     function moveLineDown() {
+//         var steps = stepCounter.countLineDownSteps(1, positionFilter);
+//         caretMover(steps);
+//     }
     this.removeFromSession = function () {
     };
     this.getMemberId = function () {
@@ -115,8 +77,7 @@ gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMove
     };
     function init() {
         var handle;
-        caret = new gui.Caret(selectionMover, avatarKeyHandler);
-        stepCounter = caret.getStepCounter();
+        caret = new gui.Caret(selectionMover, keyHandler);
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         image.width = 64;

@@ -34,6 +34,7 @@
 /*global runtime, core, gui, ops, odf */
 
 runtime.loadClass("ops.OpAddMember");
+runtime.loadClass("ops.OpMoveMemberCursor");
 
 /**
  * @constructor
@@ -57,6 +58,40 @@ gui.SessionController = (function () {
             runtime.assert(op.hasOwnProperty("init"), "no init in op");
             op.init({memberid:ourself});
             m_session.enqueue(op);
+        };
+        /**
+        * @param {!number} charCode
+        * @return {!boolean}
+        */
+        this.avatarKeyHandler = function(charCode) {
+            var op = null,
+                handled = false;
+            if (charCode === 37) { // left
+                op = new ops.OpMoveMemberCursor(m_session);
+                op.init({memberid:m_session.getLocalMemberid(), number:-1});
+                handled = true;
+            } else if (charCode === 39) { // right
+                op = new ops.OpMoveMemberCursor(m_session);
+                op.init({memberid:m_session.getLocalMemberid(), number:1});
+                handled = true;
+            } else if (charCode === 38) { // up
+                // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
+                op = new ops.OpMoveMemberCursor(m_session);
+                op.init({memberid:m_session.getLocalMemberid(), number:-10});
+                handled = true;
+            } else if (charCode === 40) { // down
+                // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
+                op = new ops.OpMoveMemberCursor(m_session);
+                op.init({memberid:m_session.getLocalMemberid(), number:10});
+                handled = true;
+            } else {
+                runtime.log("got keycode: " + charCode);
+                handled = true;
+            }
+            if (op) {
+                m_session.enqueue(op);
+            }
+            return handled;
         };
     }
 
