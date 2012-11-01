@@ -43,12 +43,12 @@ ops.Session = function Session() {"use strict"; };
  */
 ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
 /**
- * @param {!number} paragraph
+ * @param {!string} memberid
  * @param {!number} position
  * @param {!string} text
  * @return {!boolean}
  */
-ops.Session.prototype.insertText = function (paragraph, position, text) {"use strict"; };
+ops.Session.prototype.insertText = function (memberid, position, text) {"use strict"; };
 /**
  * @param {!number} paragraph
  * @param {!number} position

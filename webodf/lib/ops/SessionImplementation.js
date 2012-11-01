@@ -218,7 +218,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     // controller sends operations to this method
     this.enqueue = function(operation) {
         m_incoming_ops.push(operation);
-        this.handleOperation();
+        self.handleOperation();
     };
 
     /* reference implementation is the trivial implementation
@@ -234,7 +234,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         m_ready_ops.push(op);
 
         // and execute the operation
-        this.playOperation();
+        self.playOperation();
     };
 
     this.playOperation = function() {
@@ -257,12 +257,23 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     this.getDistanceFromCursor = function(memberid, node, offset) {
         var counter,
             steps = 0;
+        // TEMPORARY solution until cursors are split from avatars, so currently only works for local user
         if (localMemberCursorStepCounter) {
             counter = localMemberCursorStepCounter.countStepsToPosition;
             steps = counter(node, offset, filter);
         }
         return steps;
     };
+
+    /**
+     * This function returns the position in ODF world of the cursor of the member.
+     * @param {!string} memberid
+     * @return {!number}
+     */
+    this.getCursorPosition = function(memberid) {
+        return -self.getDistanceFromCursor(memberid, rootNode, 0);
+    };
+
     /**
      * @param {!string} memberid
      * @return {!boolean}
@@ -280,7 +291,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {!boolean}
      */
     this.moveMemberCaret = function (memberid, number) {
-        this.emit("avatar/moved", {
+        self.emit("avatar/moved", {
             memberid: memberid,
             number: number
         });
@@ -288,19 +299,24 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return true;
     };
     /**
-     * @param {!number} paragraph
+     * @param {!string} memberid
      * @param {!number} position
      * @param {!string} text
      * @return {!boolean}
      */
-    this.insertText = function (paragraph, position, text) {
-        var p = findParagraph(paragraph),
-            pos = p && getPositionInTextNode(p, position);
-        if (!pos) {
-            return false;
+    this.insertText = function (memberid, position, text) {
+        var paragraph, positionInParagraph;
+
+        // TODO: translate odf position in paragraph number and offset
+        paragraph = findParagraph(0);
+        if (paragraph) {
+            positionInParagraph = getPositionInTextNode(paragraph, 0);
+            if (positionInParagraph) {
+                positionInParagraph.textNode.insertData(positionInParagraph.offset, text);
+                return true;
+            }
         }
-        pos.textNode.insertData(pos.offset, text);
-        return true;
+        return false;
     };
     /**
      * @param {!number} paragraph

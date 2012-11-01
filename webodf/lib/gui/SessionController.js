@@ -35,6 +35,7 @@
 
 runtime.loadClass("ops.OpAddMember");
 runtime.loadClass("ops.OpMoveMemberCursor");
+runtime.loadClass("ops.OpInsertText");
 
 /**
  * @constructor
@@ -71,27 +72,36 @@ gui.SessionController = (function () {
         */
         this.avatarKeyHandler = function(charCode) {
             var op = null,
+                memberid = session.getLocalMemberid(),
                 handled = false;
+
             if (charCode === 37) { // left
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:session.getLocalMemberid(), number:-1});
+                op.init({memberid:memberid, number:-1});
                 handled = true;
             } else if (charCode === 39) { // right
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:session.getLocalMemberid(), number:1});
+                op.init({memberid:memberid, number:1});
                 handled = true;
             } else if (charCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:session.getLocalMemberid(), number:-10});
+                op.init({memberid:memberid, number:-10});
                 handled = true;
             } else if (charCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:session.getLocalMemberid(), number:10});
+                op.init({memberid:memberid, number:10});
                 handled = true;
             } else {
                 runtime.log("got keycode: " + charCode);
+                // TODO: only accept text-like charCodes
+                op = new ops.OpInsertText(session);
+                op.init({
+                    memberid: memberid,
+                    position: session.getCursorPosition(memberid),
+                    text: String.fromCharCode(charCode)
+                });
                 handled = true;
             }
             if (op) {
