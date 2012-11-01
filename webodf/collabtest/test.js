@@ -45,11 +45,23 @@ runtime.loadClass("gui.SessionView");
  * @param {!gui.Avatar} avatar
  * @return {undefined}
  */
-function setupAvatarButton(avatarButtonElement, avatar) {
+function setupAvatarButton(avatarButtonElement, avatar, userDetails) {
     "use strict";
     var doc = avatarButtonElement.ownerDocument,
-        memberid = avatar.getMemberId();
-    avatarButtonElement.appendChild(doc.createTextNode(memberid));
+        image = doc.createElement("img");
+
+    image.src = userDetails.imageurl;
+    image.width = 22;
+    image.height = 22;
+    image.hspace = 3;
+    image.align = "baseline";
+    image.style['margin-top'] = "3px";
+    avatarButtonElement.appendChild(image);
+
+    avatarButtonElement.appendChild(doc.createTextNode(userDetails.fullname));
+
+    avatarButtonElement.style.background = userDetails.color;
+
     avatarButtonElement.onmouseover = function () {
         //avatar.getCaret().showHandle();
     };
@@ -59,7 +71,6 @@ function setupAvatarButton(avatarButtonElement, avatar) {
     avatarButtonElement.onclick = function () {
         avatar.getCaret().toggleHandleVisibility();
     };
-    avatarButtonElement.style.background = avatar.getColor();
 }
 
 /**
@@ -69,7 +80,9 @@ function setupAvatarButton(avatarButtonElement, avatar) {
  */
 function setupAvatarView(sessionView, avatarlistdiv) {
     "use strict";
-    sessionView.getSession().subscribe("avatar/added", function(memberid) {
+    var session = sessionView.getSession();
+
+    session.subscribe("avatar/added", function(memberid) {
         var doc = avatarlistdiv.ownerDocument,
             htmlns = doc.documentElement.namespaceURI,
             avatars = sessionView.getAvatars(),
@@ -79,7 +92,7 @@ function setupAvatarView(sessionView, avatarlistdiv) {
         avatarlistdiv.appendChild(e);
         for (i = 0; i < avatars.length; i += 1) {
             if (avatars[i].getMemberId() === memberid) {
-                setupAvatarButton(e, avatars[i]);
+                setupAvatarButton(e, avatars[i], session.getUserModel().getUserDetails(memberid));
                 break;
             }
         }
