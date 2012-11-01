@@ -38,12 +38,6 @@
 ops.Session = function Session() {"use strict"; };
 /**
  * @param {!string} memberid
- * @param {!number} number
- * @return {!boolean}
- */
-ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
-/**
- * @param {!string} memberid
  * @param {!number} position
  * @param {!string} text
  * @return {!boolean}

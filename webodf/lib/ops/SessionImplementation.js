@@ -276,19 +276,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     /**
      * @param {!string} memberid
-     * @param {!number} number
-     * @return {!boolean}
-     */
-    this.moveMemberCaret = function (memberid, number) {
-        self.emit("avatar/moved", {
-            memberid: memberid,
-            number: number
-        });
-
-        return true;
-    };
-    /**
-     * @param {!string} memberid
      * @param {!number} position
      * @param {!string} text
      * @return {!boolean}

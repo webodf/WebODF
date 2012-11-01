@@ -48,7 +48,10 @@ ops.OpMoveMemberCursor = function OpMoveMemberCursor(session) {
     };
 
     this.execute = function(domroot) {
-        session.moveMemberCaret(memberid, number);
+        session.emit("avatar/moved", {
+            memberid: memberid,
+            number: number
+        });
     };
 
 };
