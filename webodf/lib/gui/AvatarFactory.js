@@ -52,7 +52,9 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
      * @return {!gui.Avatar}
      */
     this.createAvatar = function (memberid, selectionMover) {
-        var handler = null, avatar;
+        var handler = null,
+            avatar,
+            caret;
 
         // if local user, then install input handler
         if (memberid === session.getLocalMemberid()) {
@@ -62,7 +64,9 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
         avatar = new gui.Avatar(memberid, selectionMover, handler);
 
         if (memberid === session.getLocalMemberid()) {
-            session.setLocalMemberCursorStepCounter(avatar.getCaret().getStepCounter());
+            caret = avatar.getCaret();
+            session.setLocalMemberCursorStepCounter(caret.getStepCounter());
+            caret.focus();
         }
 
         return avatar;
