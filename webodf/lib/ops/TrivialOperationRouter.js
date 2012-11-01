@@ -1,6 +1,7 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,54 +32,29 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-(function () {
-    "use strict";
-    return [
-        "core/Async.js",
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/Cursor.js",
-        "core/JSLint.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/RawDeflate.js",
-        "core/RawInflate.js",
-        "core/Selection.js",
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "gui/Avatar.js",
-        "gui/Caret.js",
-        "gui/PresenterUI.js",
-        "gui/SessionController.js",
-        "gui/AvatarFactory.js",
-        "gui/SessionView.js",
-        "gui/SelectionManager.js",
-        "gui/SelectionMover.js",
-        "gui/XMLEdit.js",
-        "odf/CommandLineTools.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "odf/Style2CSS.js",
-        "odf/StyleInfo.js",
-        "ops/TrivialUserModel.js",
-        "ops/TrivialOperationRouter.js",
-        "ops/Session.js",
-        "ops/SessionImplementation.js",
-        "ops/SessionNodeFilter.js",
-        "ops/OpAddMember.js",
-        "ops/OpRemoveMember.js",
-        "ops/OpMoveMemberCursor.js",
-        "ops/OpInsertText.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
-        "xmldom/RelaxNG.js",
-        "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js",
-        "xmldom/XPath.js"
-    ];
-}());
+/*global ops*/
+
+/*
+ * route the operations.
+ * this implementation immediately passes them to the
+ * playback function.
+ * other implementations might want to send them to a
+ * server and wait for foreign ops.
+ */
+
+/**
+ * @constructor
+ */
+ops.TrivialOperationRouter = function TrivialOperationRouter () {
+	"use strict";
+
+	var self=this;
+
+	this.setPlaybackFunction = function (playback_func) {
+		self.playback_func = playback_func;
+	};
+
+	this.push = function (op) {
+		self.playback_func(op);
+	};
+};

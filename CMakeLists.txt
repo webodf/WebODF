@@ -159,6 +159,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/SessionController.js
     lib/gui/SelectionManager.js
     lib/ops/TrivialUserModel.js
+    lib/ops/TrivialOperationRouter.js
     lib/gui/SessionView.js
     lib/gui/AvatarFactory.js
     lib/gui/PresenterUI.js

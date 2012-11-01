@@ -32,6 +32,7 @@
  */
 /*global runtime, core, gui, ops, odf*/
 runtime.loadClass("ops.TrivialUserModel");
+runtime.loadClass("ops.TrivialOperationRouter");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -99,9 +100,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         namespaces = style2CSS.namespaces,
         localMemberCursorStepCounter = null, ///< TEMPORARY, until cursors are split from avatars
         m_user_model = null,
-        m_event_listener = {},
-        m_incoming_ops = [],
-        m_ready_ops = [];
+        m_operation_router = null,
+        m_event_listener = {};
 
     /* declare events */
     m_event_listener["avatar/added"] = [];
@@ -195,6 +195,12 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     this.setUserModel = setUserModel;
 
+    function setOperationRouter (router) {
+        m_operation_router = router;
+        router.setPlaybackFunction(self.playOperation);
+    }
+    this.setOperationRouter = setOperationRouter;
+
     function getUserModel() {
         return m_user_model;
     }
@@ -221,29 +227,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     // controller sends operations to this method
     this.enqueue = function(operation) {
-        m_incoming_ops.push(operation);
-        self.handleOperation();
+        m_operation_router.push(operation);
     };
 
-    /* reference implementation is the trivial implementation
-     * immediately replaying the operation onto the DOM
-     */
-    this.handleOperation = function() {
-        var op;
-
-        // get next operation from queue
-        op = m_incoming_ops.shift();
-
-        // immediately enqueue the operation for playing it on the DOM
-        m_ready_ops.push(op);
-
-        // and execute the operation
-        self.playOperation();
-    };
-
-    this.playOperation = function() {
-        var op;
-        op = m_ready_ops.shift();
+    this.playOperation = function(op) {
         op.execute(rootNode);
     };
 
@@ -350,6 +337,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     function init() {
         setUserModel(new ops.TrivialUserModel());
+        setOperationRouter(new ops.TrivialOperationRouter());
         rootNode = findTextRoot(self);
     }
     init();
