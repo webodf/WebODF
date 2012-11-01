@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf, window */
+/*global runtime, core, gui, ops, odf */
 
 runtime.loadClass("ops.OpAddMember");
 runtime.loadClass("ops.OpMoveMemberCursor");
@@ -111,7 +111,7 @@ gui.SessionController = (function () {
         };
 
         listenEvent(session.getRootNode(), "click", function(e) {
-            var selection = window.getSelection(),
+            var selection = runtime.getWindow().getSelection(),
                 steps,
                 op;
 
