@@ -91,6 +91,16 @@ gui.SessionView = (function () {
             members[memberid] = avatar;
         }
 
+        /**
+        * @param {!string} memberid
+        */
+        function onAvatarRemoved(memberid) {
+            var avatar = members[memberid];
+
+            avatar.removeFromSession();
+            delete members[memberid];
+        }
+
         function onAvatarMoved(moveData) {
             var avatar = members[moveData.memberid],
                 caret = avatar.getCaret(),
@@ -115,6 +125,7 @@ gui.SessionView = (function () {
         }
 
         session.subscribe("avatar/added", onAvatarAdded);
+        session.subscribe("avatar/removed", onAvatarRemoved);
         session.subscribe("avatar/moved", onAvatarMoved);
 
     }

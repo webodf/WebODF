@@ -102,6 +102,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
 
     /* declare events */
     m_event_listener["avatar/added"] = [];
+    m_event_listener["avatar/removed"] = [];
     m_event_listener["avatar/moved"] = [];
 
     /**
@@ -274,17 +275,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return -self.getDistanceFromCursor(memberid, rootNode, 0);
     };
 
-    /**
-     * @param {!string} memberid
-     * @return {!boolean}
-     */
-//     TODO: port to operations
-//     this.removeMemberFromSession = function (memberid) {
-//         var avatar = members[memberid];
-//         avatar.removeFromSession();
-//         delete members[memberid];
-//         return true;
-//     };
     /**
      * @param {!string} memberid
      * @param {!number} number

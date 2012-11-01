@@ -34,6 +34,7 @@
 /*global runtime, core, gui, ops, odf */
 
 runtime.loadClass("ops.OpAddMember");
+runtime.loadClass("ops.OpRemoveMember");
 runtime.loadClass("ops.OpMoveMemberCursor");
 runtime.loadClass("ops.OpInsertText");
 
@@ -62,10 +63,19 @@ gui.SessionController = (function () {
 
         this.startEditing = function(ourself) {
             var op = new ops.OpAddMember(session);
-            runtime.assert(op.hasOwnProperty("init"), "no init in op");
             op.init({memberid:ourself});
             session.enqueue(op);
         };
+
+        /**
+        * @param {!string} ourself
+        */
+        this.endEditing = function(ourself) {
+            var op = new ops.OpRemoveMember(session);
+            op.init({memberid:ourself});
+            session.enqueue(op);
+        };
+
         /**
         * @param {!number} charCode
         * @return {!boolean}
