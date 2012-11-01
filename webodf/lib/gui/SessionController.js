@@ -61,6 +61,9 @@ gui.SessionController = (function () {
             }
         }
 
+       /**
+        * @param {!string} ourself
+        */
         this.startEditing = function(ourself) {
             var op = new ops.OpAddMember(session);
             op.init({memberid:ourself});
@@ -82,7 +85,7 @@ gui.SessionController = (function () {
         */
         this.avatarKeyHandler = function(charCode) {
             var op = null,
-                memberid = session.getLocalMemberid(),
+                memberid = session.getUserModel().getLocalMemberId(),
                 handled = false;
 
             if (charCode === 37) { // left
@@ -122,14 +125,15 @@ gui.SessionController = (function () {
 
         listenEvent(session.getRootNode(), "click", function(e) {
             var selection = runtime.getWindow().getSelection(),
+                localMemberId = session.getUserModel().getLocalMemberId(),
                 steps,
                 op;
 
-            steps = session.getDistanceFromCursor(session.getLocalMemberid(), selection.focusNode, selection.focusOffset);
+            steps = session.getDistanceFromCursor(localMemberId, selection.focusNode, selection.focusOffset);
 
             if (steps !== 0) {
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:session.getLocalMemberid(), number:steps});
+                op.init({memberid:localMemberId, number:steps});
                 session.enqueue(op);
             }
         });

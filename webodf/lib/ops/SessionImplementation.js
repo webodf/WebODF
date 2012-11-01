@@ -77,6 +77,9 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             return accept;
         };
     }
+    /**
+     * @param {!ops.Session} session
+     */
     function findTextRoot(session) {
         // set the root node to be the text node
         var root = session.getOdfContainer().rootElement.firstChild;
@@ -244,10 +247,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         op.execute(rootNode);
     };
 
-    this.getLocalMemberid = function() {
-        return m_user_model.getLocalMemberId();
-    };
-
     /**
      * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.
      * @param {!string} memberid
@@ -350,7 +349,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return filter;
     };
     /**
-     * @return {!core.PositionFilter}
+     * @return {!Node}
      */
     this.getRootNode = function () {
         return rootNode;

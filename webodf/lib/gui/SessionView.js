@@ -78,6 +78,9 @@ gui.SessionView = (function () {
             guiAvatarFactory = factory;
         };
 
+        /**
+        * @param {!string} memberid
+        */
         function onAvatarAdded(memberid) {
             var selectionMover = selectionManager.createSelectionMover(),
                 avatar = guiAvatarFactory.createAvatar(memberid, selectionMover),
@@ -101,6 +104,9 @@ gui.SessionView = (function () {
             delete members[memberid];
         }
 
+        /**
+        * @param {!Object} moveData
+        */
         function onAvatarMoved(moveData) {
             var avatar = members[moveData.memberid],
                 caret = avatar.getCaret(),
@@ -119,7 +125,7 @@ gui.SessionView = (function () {
             runtime.log("Moving. moving, moving... walkableSteps "+steps);
             caret.move(steps);
             // TODO: who should/needs to care for that?
-            if (avatar.getMemberId() === session.getLocalMemberid()) {
+            if (avatar.getMemberId() === session.getUserModel().getLocalMemberId()) {
                 caret.focus();
             }
         }
