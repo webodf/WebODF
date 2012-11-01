@@ -40,27 +40,10 @@ runtime.loadClass("gui.SelectionMover");
  * element representing the caret is used.
  * @constructor
  * @param {!gui.SelectionMover} selectionMover
- * @param {!function(!number):!boolean=} keyHandler
+ * @param {!function(!Element):!undefined=} registerInputListener
  */
-gui.Caret = function Caret(selectionMover, keyHandler) {
+gui.Caret = function Caret(selectionMover, registerInputListener) {
     "use strict";
-    function listenEvent(eventTarget, eventType, eventHandler) {
-        if (eventTarget.addEventListener) {
-            eventTarget.addEventListener(eventType, eventHandler, false);
-        } else if (eventTarget.attachEvent) {
-            eventType = "on" + eventType;
-            eventTarget.attachEvent(eventType, eventHandler);
-        } else {
-            eventTarget["on" + eventType] = eventHandler;
-        }
-    }
-    function cancelEvent(event) {
-        if (event.preventDefault) {
-            event.preventDefault();
-        } else {
-            event.returnValue = false;
-        }
-    }
     function clearNode(node) {
         while (node.firstChild !== null) {
             node.removeNode(node.firstChild);
@@ -150,18 +133,6 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
     this.getStepCounter = function () {
         return selectionMover.getStepCounter();
     };
-    function handleKeyDown(e) {
-        if (keyHandler) {
-            keyHandler(e.keyCode);
-        }
-        // still allow ctrl-r in ui, must be improved later
-        if (!e.ctrlKey) {
-            cancelEvent(e);
-        }
-    }
-    function dummyHandler(e) {
-        cancelEvent(e);
-    }
     function init() {
         if (handle.style) {
             handle.style.width = '64px';
@@ -182,11 +153,10 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
         cursorNode = selectionMover.getCursor().getNode();
         cursorNode.appendChild(span);
         cursorNode.appendChild(handle);
-        listenEvent(span, "keydown", handleKeyDown);
-        listenEvent(span, "keyup", dummyHandler);
-        listenEvent(span, "copy", dummyHandler);
-        listenEvent(span, "cut", dummyHandler);
-        listenEvent(span, "paste", dummyHandler);
+
+        if (registerInputListener) {
+            registerInputListener(span);
+        }
     }
     init();
 };

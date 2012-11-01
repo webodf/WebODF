@@ -52,17 +52,17 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
      * @return {!gui.Avatar}
      */
     this.createAvatar = function (memberid, selectionMover) {
-        var handler = null,
+        var registerInputListener = null,
             localMemberId = session.getUserModel().getLocalMemberId(),
             avatar,
             caret;
 
-        // if local user, then install input handler
+        // if local user, then pass inputlistener registerer
         if (memberid === localMemberId) {
-            handler = sessionController.avatarKeyHandler;
+            registerInputListener = sessionController.registerInputListener;
         }
 
-        avatar = new gui.Avatar(memberid, selectionMover, handler);
+        avatar = new gui.Avatar(memberid, selectionMover, registerInputListener);
 
         if (memberid === localMemberId) {
             caret = avatar.getCaret();

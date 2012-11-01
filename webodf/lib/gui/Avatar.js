@@ -42,9 +42,9 @@ runtime.loadClass("gui.Caret");
  * @constructor
  * @param {!string} memberid
  * @param {!gui.SelectionMover} selectionMover
- * @param {!function(!number):!boolean=} keyHandler
+ * @param {!function(!Element):!undefined=} registerInputListener
  */
-gui.Avatar = function Avatar(memberid, selectionMover, keyHandler) {
+gui.Avatar = function Avatar(memberid, selectionMover, registerInputListener) {
     "use strict";
     var self = this,
         caret,
@@ -77,7 +77,7 @@ gui.Avatar = function Avatar(memberid, selectionMover, keyHandler) {
     };
     function init() {
         var handle;
-        caret = new gui.Caret(selectionMover, keyHandler);
+        caret = new gui.Caret(selectionMover, registerInputListener);
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         image.width = 64;

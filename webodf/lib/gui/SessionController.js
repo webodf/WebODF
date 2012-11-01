@@ -61,30 +61,23 @@ gui.SessionController = (function () {
             }
         }
 
-       /**
-        * @param {!string} ourself
-        */
-        this.startEditing = function(ourself) {
-            var op = new ops.OpAddMember(session);
-            op.init({memberid:ourself});
-            session.enqueue(op);
-        };
+        function cancelEvent(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                event.returnValue = false;
+            }
+        }
+        function dummyHandler(e) {
+            cancelEvent(e);
+        }
 
         /**
-        * @param {!string} ourself
+        * @param {!Event} e
         */
-        this.endEditing = function(ourself) {
-            var op = new ops.OpRemoveMember(session);
-            op.init({memberid:ourself});
-            session.enqueue(op);
-        };
-
-        /**
-        * @param {!number} charCode
-        * @return {!boolean}
-        */
-        this.avatarKeyHandler = function(charCode) {
-            var op = null,
+        function handleKeyDown(e) {
+            var charCode = e.keyCode,
+                op = null,
                 memberid = session.getUserModel().getLocalMemberId(),
                 handled = false;
 
@@ -120,7 +113,39 @@ gui.SessionController = (function () {
             if (op) {
                 session.enqueue(op);
             }
-            return handled;
+            // still allow ctrl-r in ui, must be improved later
+            if (!e.ctrlKey) {
+                cancelEvent(e);
+            }
+        }
+
+       /**
+        * @param {!Element} element
+        */
+        this.registerInputListener = function(element) {
+            listenEvent(element, "keydown", handleKeyDown);
+            listenEvent(element, "keyup", dummyHandler);
+            listenEvent(element, "copy", dummyHandler);
+            listenEvent(element, "cut", dummyHandler);
+            listenEvent(element, "paste", dummyHandler);
+        };
+
+       /**
+        * @param {!string} ourself
+        */
+        this.startEditing = function(ourself) {
+            var op = new ops.OpAddMember(session);
+            op.init({memberid:ourself});
+            session.enqueue(op);
+        };
+
+        /**
+        * @param {!string} ourself
+        */
+        this.endEditing = function(ourself) {
+            var op = new ops.OpRemoveMember(session);
+            op.init({memberid:ourself});
+            session.enqueue(op);
         };
 
         listenEvent(session.getRootNode(), "click", function(e) {
