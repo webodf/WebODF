@@ -65,6 +65,9 @@ gui.SessionController = (function () {
             }
         }
 
+        /**
+         * @param {!Event} event
+         */
         function cancelEvent(event) {
             if (event.preventDefault) {
                 event.preventDefault();
@@ -72,6 +75,9 @@ gui.SessionController = (function () {
                 event.returnValue = false;
             }
         }
+        /**
+         * @param {!Event} e
+         */
         function dummyHandler(e) {
             cancelEvent(e);
         }
@@ -97,44 +103,53 @@ gui.SessionController = (function () {
          * @param {!Event} e
          */
         function handleKeyDown(e) {
-            var charCode = e.keyCode,
+            var keyCode = e.keyCode,
                 op = null,
                 handled = false;
 
-            if (charCode === 37) { // left
+            if (keyCode === 37) { // left
                 op = new ops.OpMoveMemberCursor(session);
                 op.init({memberid:inputMemberId, number:-1});
                 handled = true;
-            } else if (charCode === 39) { // right
+            } else if (keyCode === 39) { // right
                 op = new ops.OpMoveMemberCursor(session);
                 op.init({memberid:inputMemberId, number:1});
                 handled = true;
-            } else if (charCode === 38) { // up
+            } else if (keyCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = new ops.OpMoveMemberCursor(session);
                 op.init({memberid:inputMemberId, number:-10});
                 handled = true;
-            } else if (charCode === 40) { // down
+            } else if (keyCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = new ops.OpMoveMemberCursor(session);
                 op.init({memberid:inputMemberId, number:10});
                 handled = true;
             } else {
-                runtime.log("got keycode: " + charCode);
-                // TODO: only accept text-like charCodes
-                op = new ops.OpInsertText(session);
-                op.init({
-                    memberid: inputMemberId,
-                    position: session.getCursorPosition(inputMemberId),
-                    text: String.fromCharCode(charCode)
-                });
-                handled = true;
+                runtime.log("got keycode: " + keyCode);
             }
             if (op) {
                 session.enqueue(op);
             }
-            // still allow ctrl-r in ui, must be improved later
-            if (!e.ctrlKey) {
+            if (handled) {
+                cancelEvent(e);
+            }
+        }
+
+        /**
+         * @param {!Event} e
+         */
+        function handleKeyPress(e) {
+            var op;
+
+            if (! (e.altKey || e.ctrlKey || e.metaKey)) {
+                op = new ops.OpInsertText(session);
+                op.init({
+                    memberid: inputMemberId,
+                    position: session.getCursorPosition(inputMemberId),
+                    text: String.fromCharCode(e.keyCode || e.charCode)
+                });
+                session.enqueue(op);
                 cancelEvent(e);
             }
         }
@@ -144,6 +159,7 @@ gui.SessionController = (function () {
          */
         this.setFocusElement = function(element) {
             listenEvent(element, "keydown", handleKeyDown);
+            listenEvent(element, "keypress", handleKeyPress);
             listenEvent(element, "keyup", dummyHandler);
             listenEvent(element, "copy", dummyHandler);
             listenEvent(element, "cut", dummyHandler);
