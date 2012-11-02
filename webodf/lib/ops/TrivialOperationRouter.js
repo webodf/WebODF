@@ -50,6 +50,8 @@ ops.TrivialOperationRouter = function TrivialOperationRouter () {
 
 	var self=this;
 
+	this.setOperationFactory = function (f) {};
+
 	this.setPlaybackFunction = function (playback_func) {
 		self.playback_func = playback_func;
 	};

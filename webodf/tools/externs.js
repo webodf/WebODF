@@ -143,6 +143,15 @@ NodeJSProcess.prototype.argv = [];
  * @type {!Object}
  */
 NodeJSProcess.prototype.stderr = {};
+
+/**
+ * @namespace
+ */
+var now;
+/**
+ * @type {function(!Array):Object}
+ */
+now.deliverOp = function(spec) { "use strict"; };
 /**
  * @type {!NodeJSProcess}
  */

@@ -53,4 +53,11 @@ ops.OpAddMember = function OpAddMember(session) {
         session.emit("avatar/added", memberid);
     };
 
+    this.spec = function() {
+        return {
+            optype: "AddMember",
+            memberid: memberid
+        };
+    };
+
 };

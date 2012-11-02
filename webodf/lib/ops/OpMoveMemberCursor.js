@@ -54,4 +54,12 @@ ops.OpMoveMemberCursor = function OpMoveMemberCursor(session) {
         });
     };
 
+    this.spec = function() {
+        return {
+            optype: "MoveMemberCursor",
+            memberid: memberid,
+            number: number
+        };
+    };
+
 };

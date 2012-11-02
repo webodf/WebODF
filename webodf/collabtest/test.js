@@ -34,6 +34,7 @@
 /*global document, runtime, odf, ops, gui, alert */
 
 runtime.loadClass("ops.SessionImplementation");
+runtime.loadClass("ops.NowjsOperationRouter");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.AvatarFactory");
 runtime.loadClass("gui.Avatar");
@@ -118,6 +119,7 @@ function initSession(odfid, avatarlistid, callback) {
         }
         ready = true;
         testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
+        testsession.setOperationRouter(new ops.NowjsOperationRouter());
         sessionView = new gui.SessionView(testsession);
         sessionController = new gui.SessionController(testsession);
         sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
@@ -148,7 +150,7 @@ function setHeight(id, top, height) {
 
 function init() {
     "use strict";
-    var height = 50;
+    var height = 100;
     setHeight("session1", 0, height);
     setHeight("avatars1", 0, height);
 

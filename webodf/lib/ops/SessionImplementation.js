@@ -33,6 +33,7 @@
 /*global runtime, core, gui, ops, odf*/
 runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
+runtime.loadClass("ops.OperationFactory");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -195,9 +196,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     this.setUserModel = setUserModel;
 
-    function setOperationRouter (router) {
-        m_operation_router = router;
-        router.setPlaybackFunction(self.playOperation);
+    function setOperationRouter (opRouter) {
+        m_operation_router = opRouter;
+        opRouter.setPlaybackFunction(self.playOperation);
+        opRouter.setOperationFactory(new ops.OperationFactory(self));
     }
     this.setOperationRouter = setOperationRouter;
 

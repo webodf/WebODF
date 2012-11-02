@@ -52,4 +52,13 @@ ops.OpInsertText = function OpInsertText(session) {
         session.insertText(memberid, position, text);
     };
 
+    this.spec = function() {
+        return {
+            optype: "InsertText",
+            memberid: memberid,
+            position: position,
+            text: text
+        };
+    };
+
 };

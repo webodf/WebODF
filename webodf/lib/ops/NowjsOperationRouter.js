@@ -1,7 +1,6 @@
 /**
- * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
- *
+
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -32,32 +31,49 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global ops*/
+
+/*global runtime, ops, now */
+
+/*
+ * route the operations.
+ * this implementation immediately passes them to the
+ * playback function.
+ * other implementations might want to send them to a
+ * server and wait for foreign ops.
+ */
 
 /**
  * @constructor
  */
-ops.OpRemoveMember = function OpRemoveMember(session) {
-    "use strict";
+ops.NowjsOperationRouter = function NowjsOperationRouter () {
+	"use strict";
 
-    var memberid, cursorns = 'urn:webodf:names:cursor';
+	var self=this;
 
-    this.init = function(data) {
-        memberid = data.memberid;
-    };
+	this.setOperationFactory = function (f) {
+		self.op_factory = f;
+	};
 
-    // remove our <cursor/> representation into the dom
-    //  ... later ...
-    this.execute = function(domroot) {
-        // find_and_removeElement("cursor");
-        session.emit("avatar/removed", memberid);
-    };
+	this.setPlaybackFunction = function (playback_func) {
+		self.playback_func = playback_func;
+	};
 
-    this.spec = function() {
-        return {
-            optype: "RemoveMember",
-            memberid: memberid
-        };
-    };
+	function receiveOpFromNetwork(op_dict) {
+		// use factory to create an instance, and playback!
+		var op = self.op_factory.create(op_dict);
+		if (op !== null) {
+			self.playback_func(op);
+		} else {
+			runtime.log("ignoring invalid incoming opspec: "+op_dict);
+		}
+	}
+	now.receiveOp = receiveOpFromNetwork;
+	now.memberid = "router"; // TODO work with a UserModel
 
+	this.push = function (op) {
+		// playback locally
+		// self.playback_func(op);
+		// and deliver to network
+		now.deliverOp(op.spec());
+	};
 };

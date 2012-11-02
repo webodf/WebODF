@@ -1,7 +1,6 @@
 /**
- * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
- *
+
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -32,32 +31,40 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global ops*/
+
+/*global runtime,ops */
+
+/*
+ * crete specific operation instances.
+ */
+
+runtime.loadClass("ops.OpAddMember");
 
 /**
  * @constructor
  */
-ops.OpRemoveMember = function OpRemoveMember(session) {
-    "use strict";
+ops.OperationFactory = function OperationFactory (session) {
+	"use strict";
 
-    var memberid, cursorns = 'urn:webodf:names:cursor';
+	var self=this;
 
-    this.init = function(data) {
-        memberid = data.memberid;
-    };
-
-    // remove our <cursor/> representation into the dom
-    //  ... later ...
-    this.execute = function(domroot) {
-        // find_and_removeElement("cursor");
-        session.emit("avatar/removed", memberid);
-    };
-
-    this.spec = function() {
-        return {
-            optype: "RemoveMember",
-            memberid: memberid
-        };
-    };
-
+	this.create = function (spec) {
+		var op = null;
+		// TODO: of course the following code can use some better
+		// js language and make it more generic.
+		if (spec.optype === "AddMember") {
+			op = new ops.OpAddMember(session);
+			op.init(spec);
+		} else if (spec.optype === "InsertText") {
+			op = new ops.OpInsertText(session);
+			op.init(spec);
+		} else if (spec.optype === "MoveMemberCursor") {
+			op = new ops.OpMoveMemberCursor(session);
+			op.init(spec);
+		} else if (spec.optype === "RemoveMember") {
+			op = new ops.OpRemoveMember(session);
+			op.init(spec);
+		}
+		return op;
+	};
 };
