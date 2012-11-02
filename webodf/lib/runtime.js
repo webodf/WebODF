@@ -51,12 +51,20 @@ function Runtime() {"use strict"; }
  * @param {!number} size
  */
 Runtime.ByteArray = function (size) {"use strict"; };
+
+/**
+ * @param {!string} name
+ * @return {*}
+ */
+Runtime.prototype.getVariable = function (name) { "use strict"; };
+
 /**
  * @param {!number} start
  * @param {!number} end
  * @return {!Runtime.ByteArray}
  */
 Runtime.ByteArray.prototype.slice = function (start, end) {"use strict"; };
+
 /**
  * @type {!number}
  */
@@ -232,6 +240,16 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     }
     return result;
 };
+
+/**
+ * @param {!string} name
+ * @return {*}
+ */
+Runtime.getVariable = function (name) {
+    "use strict";
+    return eval(name);
+};
+
 Runtime.getFunctionName = function getFunctionName(f) {
     "use strict";
     var m;
@@ -354,6 +372,12 @@ function BrowserRuntime(logoutput) {
         return result;
     };
     this.byteArrayToString = Runtime.byteArrayToString;
+
+    /**
+    * @param {!string} name
+    * @return {*}
+    */
+    this.getVariable = Runtime.getVariable;
 
     /**
      * @param {!string} msgOrCategory
@@ -670,11 +694,11 @@ function BrowserRuntime(logoutput) {
         return window;
     };
     this.getNetwork = function () {
-        try {
-            return now;
-        } catch (e) {
+        var now = this.getVariable("now");
+        if (now === undefined) {
             return {networkStatus:"unavailable"};
         }
+        return now;
     };
 }
 
@@ -723,6 +747,12 @@ function NodeJSRuntime() {
     this.byteArrayToString = function (bytearray, encoding) {
         return bytearray.toString(encoding);
     };
+
+    /**
+    * @param {!string} name
+    * @return {*}
+    */
+    this.getVariable = Runtime.getVariable;
 
     function isFile(path, callback) {
         if (currentDirectory) {
@@ -914,6 +944,13 @@ function RhinoRuntime() {
         return a;
     };
     this.byteArrayToString = Runtime.byteArrayToString;
+
+    /**
+    * @param {!string} name
+    * @return {*}
+    */
+    this.getVariable = Runtime.getVariable;
+
     this.concatByteArrays = function (bytearray1, bytearray2) {
         return bytearray1.concat(bytearray2);
     };
