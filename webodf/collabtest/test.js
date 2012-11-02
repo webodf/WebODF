@@ -83,7 +83,7 @@ function setupAvatarView(sessionView, avatarlistdiv) {
     "use strict";
     var session = sessionView.getSession();
 
-    session.subscribe("avatar/added", function(cursor) {
+    session.subscribe("cursor/added", function(cursor) {
         var doc = avatarlistdiv.ownerDocument,
             htmlns = doc.documentElement.namespaceURI,
             avatars = sessionView.getAvatars(),

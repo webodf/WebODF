@@ -52,7 +52,7 @@ ops.OpAddMember = function OpAddMember(session) {
             selection = new core.Selection(doc),
             cursor = new core.Cursor(memberid, selection, doc);
         session.addCursor(cursor);
-        session.emit("avatar/added", cursor);
+        session.emit("cursor/added", cursor);
     };
 
     this.spec = function() {

@@ -106,9 +106,9 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         m_event_listener = {};
 
     /* declare events */
-    m_event_listener["avatar/added"] = [];
-    m_event_listener["avatar/removed"] = [];
-    m_event_listener["avatar/moved"] = [];
+    m_event_listener["cursor/added"] = [];
+    m_event_listener["cursor/removed"] = [];
+    m_event_listener["cursor/moved"] = [];
 
     /**
      * This function will iterate through positions allowed by the position

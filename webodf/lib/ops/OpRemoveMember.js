@@ -49,7 +49,7 @@ ops.OpRemoveMember = function OpRemoveMember(session) {
 
     this.execute = function(domroot) {
         session.removeCursor(memberid);
-        session.emit("avatar/removed", memberid);
+        session.emit("cursor/removed", memberid);
     };
 
     this.spec = function() {

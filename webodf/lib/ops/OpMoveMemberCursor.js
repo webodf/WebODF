@@ -49,7 +49,7 @@ ops.OpMoveMemberCursor = function OpMoveMemberCursor(session) {
     };
 
     this.execute = function(domroot) {
-        session.emit("avatar/moved", {
+        session.emit("cursor/moved", {
             memberid: memberid,
             number: number
         });

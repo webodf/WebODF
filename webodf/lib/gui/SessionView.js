@@ -81,7 +81,7 @@ gui.SessionView = (function () {
         /**
         * @param {core.Cursor} cursor
         */
-        function onAvatarAdded(cursor) {
+        function onCursorAdded(cursor) {
             var selectionMover = selectionManager.createSelectionMover(cursor),
                 avatar = guiAvatarFactory.createAvatar(selectionMover),
                 userData = session.getUserModel().getUserDetails(cursor.getMemberId());
@@ -97,7 +97,7 @@ gui.SessionView = (function () {
         /**
         * @param {!string} memberid
         */
-        function onAvatarRemoved(memberid) {
+        function onCursorRemoved(memberid) {
             var avatar = members[memberid];
 
             avatar.removeFromSession();
@@ -107,7 +107,7 @@ gui.SessionView = (function () {
         /**
         * @param {!Object} moveData
         */
-        function onAvatarMoved(moveData) {
+        function onCursorMoved(moveData) {
             var avatar = members[moveData.memberid],
                 caret = avatar.getCaret(),
                 stepCounter = caret.getStepCounter(),
@@ -126,9 +126,9 @@ gui.SessionView = (function () {
             caret.move(steps);
         }
 
-        session.subscribe("avatar/added", onAvatarAdded);
-        session.subscribe("avatar/removed", onAvatarRemoved);
-        session.subscribe("avatar/moved", onAvatarMoved);
+        session.subscribe("cursor/added", onCursorAdded);
+        session.subscribe("cursor/removed", onCursorRemoved);
+        session.subscribe("cursor/moved", onCursorMoved);
 
     }
 
