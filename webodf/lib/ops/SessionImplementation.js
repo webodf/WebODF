@@ -123,6 +123,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             lastTextNode = null,
             node,
             nodeOffset = 0;
+        position += 1; // add one because we check for position === 0
         // iterator should be at the start of rootNode
         if (filter.acceptPosition(iterator) === 1) {
             node = iterator.container();
@@ -142,9 +143,9 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                 return null;
             }
             if (filter.acceptPosition(iterator) === 1) {
+                position -= 1;
                 node = iterator.container();
                 if (node.nodeType === 3) {
-                    position -= 1;
                     if (node !== lastTextNode) {
                         lastTextNode = /**@type{!Text}*/(node);
                         nodeOffset = 0;
@@ -152,12 +153,16 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                         nodeOffset += 1;
                     }
                 } else if (lastTextNode !== null) {
-                    position -= 1;
                     if (position === 0) {
                         nodeOffset = lastTextNode.length;
                         break;
                     }
                     lastTextNode = null;
+                } else if (position === 0) {
+                    lastTextNode = node.ownerDocument.createTextNode('');
+                    node.appendChild(lastTextNode);
+                    nodeOffset = 0;
+                    break;
                 }
             }
         }
