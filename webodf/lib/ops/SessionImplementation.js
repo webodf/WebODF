@@ -124,7 +124,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             node,
             nodeOffset = 0;
         // iterator should be at the start of rootNode
-        if (filter.acceptPosition(iterator)) {
+        if (filter.acceptPosition(iterator) === 1) {
             node = iterator.container();
             if (node.nodeType === 3) {
                 lastTextNode = /**@type{!Text}*/(node);
@@ -141,7 +141,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
                 // the desired position cannot be found
                 return null;
             }
-            if (filter.acceptPosition(iterator)) {
+            if (filter.acceptPosition(iterator) === 1) {
                 node = iterator.container();
                 if (node.nodeType === 3) {
                     position -= 1;
