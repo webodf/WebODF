@@ -137,17 +137,31 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {!Event} event
+         */
+        function stringFromKeyPress(event) {
+            if (event.which == null) {
+                return String.fromCharCode(event.keyCode) // IE
+            } else if (event.which != 0 && event.charCode != 0) {
+                return String.fromCharCode(event.which)   // the rest
+            } else {
+                return null; // special key
+            }
+        }
+
+        /**
          * @param {!Event} e
          */
         function handleKeyPress(e) {
-            var op;
+            var op,
+                text = stringFromKeyPress(e);
 
-            if (! (e.altKey || e.ctrlKey || e.metaKey)) {
+            if (text && ! (e.altKey || e.ctrlKey || e.metaKey)) {
                 op = new ops.OpInsertText(session);
                 op.init({
                     memberid: inputMemberId,
                     position: session.getCursorPosition(inputMemberId),
-                    text: String.fromCharCode(e.keyCode || e.charCode)
+                    text: text
                 });
                 session.enqueue(op);
                 cancelEvent(e);
