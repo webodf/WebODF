@@ -166,34 +166,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         return {textNode: lastTextNode, offset: nodeOffset };
     }
-    /**
-     * @param {!number} paragraph
-     * @return {?Element}
-     */
-    function findParagraph(paragraph) {
-        function acceptNode(node) {
-            if ((node.localName !== "p" && node.localName !== "h")
-                    || node.namespaceURI !== namespaces.text) {
-                return 3; // skip, but inspect children
-            }
-            return 1; // accept
-        }
-        var walker,
-            count = 0,
-            node;
-        acceptNode.acceptNode = acceptNode;
-        // create a walker that just shows elements
-        walker = rootNode.ownerDocument.createTreeWalker(rootNode,
-                0x00000001, acceptNode, false);
-        node = walker.nextNode();
-        while (node !== null) {
-            if (count === paragraph) {
-                return node;
-            }
-            count += 1;
-        }
-        return null;
-    }
 
     function setUserModel (userModel) {
         m_user_model = userModel;
