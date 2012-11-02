@@ -174,7 +174,8 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
             }
             if (node === null) {
                 node = rootNode.ownerDocument.createTextNode('');
-                lastTextNode.parentNode.insertBefore(node, null);
+                lastTextNode.parentNode.insertBefore(node,
+                        lastTextNode.parentNode.firstChild);
             }
             lastTextNode = /**@type{!Text}*/(node);
             nodeOffset = lastTextNode.length;
