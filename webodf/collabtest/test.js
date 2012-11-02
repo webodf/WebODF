@@ -120,7 +120,11 @@ function initSession(odfid, avatarlistid, callback) {
         }
         ready = true;
         testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
-        testsession.setOperationRouter(new ops.NowjsOperationRouter());
+        // if we have network
+        if (runtime.getNetwork().networkStatus !== "unavailable") {
+            // use the nowjs op-router
+            testsession.setOperationRouter(new ops.NowjsOperationRouter());
+        }
         sessionView = new gui.SessionView(testsession);
         sessionController = new gui.SessionController(testsession);
         sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));

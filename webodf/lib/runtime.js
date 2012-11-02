@@ -34,7 +34,7 @@
 /*global window, XMLHttpRequest, require, console, DOMParser,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
-  navigator, VBArray, alert */
+  navigator, VBArray, alert, now */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -669,6 +669,13 @@ function BrowserRuntime(logoutput) {
     this.getWindow = function () {
         return window;
     };
+    this.getNetwork = function () {
+        try {
+            return now;
+        } catch (e) {
+            return {networkStatus:"unavailable"};
+        }
+    };
 }
 
 /**
@@ -845,6 +852,9 @@ function NodeJSRuntime() {
     this.exit = process.exit;
     this.getWindow = function () {
         return null;
+    };
+    this.getNetwork = function () {
+        return {networkStatus:"unavailable"};
     };
     function init() {
         var DOMParser = require('xmldom').DOMParser;
@@ -1055,6 +1065,9 @@ function RhinoRuntime() {
     this.exit = quit;
     this.getWindow = function () {
         return null;
+    };
+    this.getNetwork = function () {
+        return {networkStatus:"unavailable"};
     };
 }
 

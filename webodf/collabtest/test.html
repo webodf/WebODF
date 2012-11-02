@@ -2,8 +2,8 @@
 <html>
  <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
-  <script src="../lib/runtime.js" type="text/javascript" charset="utf-8"></script>
   <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../lib/runtime.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
 var core = {};
 var gui = {};
@@ -16,23 +16,24 @@ runtime.libraryPaths = function () {
 function html_init() {
 	var accumulated_waiting_time = 0;
 	function later_cb() {
-		if (!this.hasOwnProperty("now")) {
-			console.log("no server connection available. starting disconnected.");
+		var net = runtime.getNetwork();
+		if (net.networkStatus === "unavailable") {
+			runtime.log("no server connection available. starting disconnected.");
 			init();
 			return;
 		}
-		if (now.serverStatus !== "ready") {
+		if (net.networkStatus !== "ready") {
 			if (accumulated_waiting_time > 3000) {
-				console.log("connection to server timed out. starting disconnected.");
+				runtime.log("connection to server timed out. starting disconnected.");
 				init();
 			}
-			console.log("waiting...");
+			runtime.log("waiting...");
 			accumulated_waiting_time += 100;
 			window.setTimeout(later_cb, 100);
 			return;
 		}	
-		console.log("connected to server: "+now.serverName);
-		now.ping();
+		runtime.log("connected to server: "+net.serverName);
+		runtime.getNetwork().ping();
 		// collabtest init
 		init();
 	}
