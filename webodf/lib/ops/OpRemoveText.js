@@ -36,6 +36,7 @@
 
 /**
  * @constructor
+ * @implements ops.Operation
  */
 ops.OpRemoveText = function OpRemoveText(session) {
     "use strict";

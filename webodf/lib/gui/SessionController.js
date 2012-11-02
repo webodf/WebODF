@@ -163,7 +163,7 @@ gui.SessionController = (function () {
 
         /**
          * @param {!Event} event
-         * @return {?String}
+         * @return {?string}
          */
         function stringFromKeyPress(event) {
             if (event.which === null) {

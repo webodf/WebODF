@@ -64,6 +64,7 @@
         "odf/Style2CSS.js",
         "odf/StyleInfo.js",
         "ops/TrivialUserModel.js",
+        "ops/Operation.js",
         "ops/TrivialOperationRouter.js",
         "ops/NowjsOperationRouter.js",
         "ops/Session.js",

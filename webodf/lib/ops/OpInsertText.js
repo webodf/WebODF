@@ -36,6 +36,7 @@
 
 /**
  * @constructor
+ * @implements ops.Operation
  */
 ops.OpInsertText = function OpInsertText(session) {
     "use strict";

@@ -44,12 +44,12 @@ ops.Session = function Session() {"use strict"; };
  */
 ops.Session.prototype.insertText = function (memberid, position, text) {"use strict"; };
 /**
- * @param {!number} paragraph
+ * @param {!string} memberid
  * @param {!number} position
- * @param {!string} text
+ * @param {!number} length
  * @return {!boolean}
  */
-ops.Session.prototype.removeText = function (paragraph, position, text) {"use strict"; };
+ops.Session.prototype.removeText = function (memberid, position, length) {"use strict"; };
 /**
  * @param {!number} position
  * @return {!boolean}

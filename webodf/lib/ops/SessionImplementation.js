@@ -263,7 +263,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     /**
      * This function will return the Text node as well as the offset in that text node
      * of the cursor.
-     * @param {!string} memberid
+     * @param {!number} position
      * @return {?{textNode: !Text, offset: !number}}
      */
     this.getPositionInTextNode = getPositionInTextNode;

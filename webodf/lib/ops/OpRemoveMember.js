@@ -36,6 +36,7 @@
 
 /**
  * @constructor
+ * @implements ops.Operation
  */
 ops.OpRemoveMember = function OpRemoveMember(session) {
     "use strict";
