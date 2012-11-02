@@ -40,9 +40,8 @@ runtime.loadClass("gui.SelectionMover");
  * element representing the caret is used.
  * @constructor
  * @param {!gui.SelectionMover} selectionMover
- * @param {!function(!Element):!undefined=} registerInputListener
  */
-gui.Caret = function Caret(selectionMover, registerInputListener) {
+gui.Caret = function Caret(selectionMover) {
     "use strict";
     function clearNode(node) {
         while (node.firstChild !== null) {
@@ -113,6 +112,12 @@ gui.Caret = function Caret(selectionMover, registerInputListener) {
     this.getSelection = function () {
         return selectionMover.getSelection();
     };
+    /**
+     * @return {Element}
+     */
+    this.getFocusElement = function () {
+        return span;
+    };
     this.getHandleElement = function () {
         return handle;
     };
@@ -153,10 +158,6 @@ gui.Caret = function Caret(selectionMover, registerInputListener) {
         cursorNode = selectionMover.getCursor().getNode();
         cursorNode.appendChild(span);
         cursorNode.appendChild(handle);
-
-        if (registerInputListener) {
-            registerInputListener(span);
-        }
     }
     init();
 };

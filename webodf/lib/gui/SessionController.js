@@ -40,14 +40,16 @@ runtime.loadClass("ops.OpInsertText");
 
 /**
  * @constructor
+ * @param {!ops.Session} session
  */
 gui.SessionController = (function () {
     "use strict";
 
     /**
      * @constructor
+     * @param {!ops.Session} session
      */
-    function SessionController(session) {
+    gui.SessionController = function SessionController(session) {
         var self = this;
 
         function listenEvent(eventTarget, eventType, eventHandler) {
@@ -73,8 +75,26 @@ gui.SessionController = (function () {
         }
 
         /**
-        * @param {!Event} e
-        */
+         * @param {!Event} e
+         */
+        function handleMouseClick(e) {
+            var selection = runtime.getWindow().getSelection(),
+                localMemberId = session.getUserModel().getLocalMemberId(),
+                steps,
+                op;
+
+            steps = session.getDistanceFromCursor(localMemberId, selection.focusNode, selection.focusOffset);
+
+            if (steps !== 0) {
+                op = new ops.OpMoveMemberCursor(session);
+                op.init({memberid:localMemberId, number:steps});
+                session.enqueue(op);
+            }
+        }
+
+        /**
+         * @param {!Event} e
+         */
         function handleKeyDown(e) {
             var charCode = e.keyCode,
                 op = null,
@@ -119,15 +139,18 @@ gui.SessionController = (function () {
             }
         }
 
-       /**
-        * @param {!Element} element
-        */
-        this.registerInputListener = function(element) {
+        /**
+         * @param {!Element} element
+         */
+        this.setFocusElement = function(element) {
             listenEvent(element, "keydown", handleKeyDown);
             listenEvent(element, "keyup", dummyHandler);
             listenEvent(element, "copy", dummyHandler);
             listenEvent(element, "cut", dummyHandler);
             listenEvent(element, "paste", dummyHandler);
+
+            // start to listen for mouse clicks as well, but on the whole document
+            listenEvent(session.getRootNode(), "click", handleMouseClick);
         };
 
        /**
@@ -147,23 +170,8 @@ gui.SessionController = (function () {
             op.init({memberid:ourself});
             session.enqueue(op);
         };
+    };
 
-        listenEvent(session.getRootNode(), "click", function(e) {
-            var selection = runtime.getWindow().getSelection(),
-                localMemberId = session.getUserModel().getLocalMemberId(),
-                steps,
-                op;
-
-            steps = session.getDistanceFromCursor(localMemberId, selection.focusNode, selection.focusOffset);
-
-            if (steps !== 0) {
-                op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:localMemberId, number:steps});
-                session.enqueue(op);
-            }
-        });
-    }
-
-    return SessionController;
+    return gui.SessionController;
 } ());
 // vim:expandtab

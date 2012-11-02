@@ -51,21 +51,18 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
      * @return {!gui.Avatar}
      */
     this.createAvatar = function (selectionMover) {
-        var registerInputListener = null,
-            memberid = selectionMover.getCursor().getMemberId(),
+        var memberid = selectionMover.getCursor().getMemberId(),
             localMemberId = session.getUserModel().getLocalMemberId(),
             avatar,
             caret;
 
-        // if local user, then pass inputlistener registerer
-        if (memberid === localMemberId) {
-            registerInputListener = sessionController.registerInputListener;
-        }
+        avatar = new gui.Avatar(selectionMover);
 
-        avatar = new gui.Avatar(selectionMover, registerInputListener);
-
+        // if local user, then let controller listen on avatar/caret span
         if (memberid === localMemberId) {
             caret = avatar.getCaret();
+            sessionController.setFocusElement(caret.getFocusElement());
+            // TEMPORARY hack until counters are part of cursors
             session.setLocalMemberCursorStepCounter(caret.getStepCounter());
             caret.focus();
         }

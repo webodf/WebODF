@@ -41,9 +41,8 @@ runtime.loadClass("gui.Caret");
  * receives. That is a not true right now.
  * @constructor
  * @param {!gui.SelectionMover} selectionMover
- * @param {!function(!Element):!undefined=} registerInputListener
  */
-gui.Avatar = function Avatar(selectionMover, registerInputListener) {
+gui.Avatar = function Avatar(selectionMover) {
     "use strict";
     var self = this,
         memberid = selectionMover.getCursor().getMemberId(),
@@ -77,7 +76,7 @@ gui.Avatar = function Avatar(selectionMover, registerInputListener) {
     };
     function init() {
         var handle;
-        caret = new gui.Caret(selectionMover, registerInputListener);
+        caret = new gui.Caret(selectionMover);
         handle = caret.getHandleElement();
         image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
         image.width = 64;
