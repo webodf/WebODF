@@ -101,6 +101,16 @@ function setupAvatarView(sessionView, avatarlistdiv) {
     });
 }
 
+/**
+ * Utility method for testing
+ * @param {?string} memberId
+ */
+function addMemberToSession(session, memberId) {
+    var op = new ops.OpAddMember(session);
+    op.init({memberid:memberId});
+    session.enqueue(op);
+};
+
 function initSession(odfid, avatarlistid, callback) {
     "use strict";
     var odfelement = document.getElementById(odfid),
@@ -126,17 +136,17 @@ function initSession(odfid, avatarlistid, callback) {
             testsession.setOperationRouter(new ops.NowjsOperationRouter());
         }
         sessionView = new gui.SessionView(testsession);
-        sessionController = new gui.SessionController(testsession);
+        sessionController = new gui.SessionController(testsession, "you");
         sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
         setupAvatarView(sessionView, avatarlistdiv);
 
         // add our two friends
-        sessionController.startEditing("bob");
-        sessionController.startEditing("alice");
+        addMemberToSession(testsession, "bob");
+        addMemberToSession(testsession, "alice");
 
         // start editing: let the controller send the OpAddMember
         runtime.assert(testsession.getUserModel(), "lacking user model");
-        sessionController.startEditing(testsession.getUserModel().getLocalMemberId());
+        sessionController.startEditing();
 
         if (callback) {
             callback(testsession);

@@ -124,10 +124,6 @@ gui.SessionView = (function () {
             }
             runtime.log("Moving. moving, moving... walkableSteps "+steps);
             caret.move(steps);
-            // TODO: who should/needs to care for that?
-            if (avatar.getMemberId() === session.getUserModel().getLocalMemberId()) {
-                caret.focus();
-            }
         }
 
         session.subscribe("avatar/added", onAvatarAdded);

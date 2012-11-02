@@ -48,7 +48,8 @@ gui.Caret = function Caret(selectionMover) {
             node.removeNode(node.firstChild);
         }
     }
-    var rootNode = selectionMover.getRootNode(),
+    var self = this,
+        rootNode = selectionMover.getRootNode(),
         document = /**@type{!Document}*/(rootNode.ownerDocument),
         htmlns = document.documentElement.namespaceURI,
         span = document.createElementNS(htmlns, "span"),
@@ -84,11 +85,11 @@ gui.Caret = function Caret(selectionMover) {
         }
     }
 
-    this.focus = function () {
+    this.updatePositionAndFocus = function () {
         span.focus();
         updateHandlePosition();
     };
-    this.updateHandlePosition = function () {
+    this.updatePosition = function () {
         updateHandlePosition();
     };
     this.move = function (number) {
@@ -99,7 +100,7 @@ gui.Caret = function Caret(selectionMover) {
         } else if (number <= 0) {
             moved = -selectionMover.movePointBackward(-number);
         }
-        updateHandlePosition();
+        self.updatePosition();
         return moved;
     };
     this.setColor = function (color) {

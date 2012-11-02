@@ -41,6 +41,7 @@ runtime.loadClass("ops.OpInsertText");
 /**
  * @constructor
  * @param {!ops.Session} session
+ * @param {!string} inputMemberId
  */
 gui.SessionController = (function () {
     "use strict";
@@ -48,8 +49,9 @@ gui.SessionController = (function () {
     /**
      * @constructor
      * @param {!ops.Session} session
+     * @param {!string} inputMemberId
      */
-    gui.SessionController = function SessionController(session) {
+    gui.SessionController = function SessionController(session, inputMemberId) {
         var self = this;
 
         function listenEvent(eventTarget, eventType, eventHandler) {
@@ -79,15 +81,14 @@ gui.SessionController = (function () {
          */
         function handleMouseClick(e) {
             var selection = runtime.getWindow().getSelection(),
-                localMemberId = session.getUserModel().getLocalMemberId(),
                 steps,
                 op;
 
-            steps = session.getDistanceFromCursor(localMemberId, selection.focusNode, selection.focusOffset);
+            steps = session.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
 
             if (steps !== 0) {
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:localMemberId, number:steps});
+                op.init({memberid:inputMemberId, number:steps});
                 session.enqueue(op);
             }
         }
@@ -98,34 +99,33 @@ gui.SessionController = (function () {
         function handleKeyDown(e) {
             var charCode = e.keyCode,
                 op = null,
-                memberid = session.getUserModel().getLocalMemberId(),
                 handled = false;
 
             if (charCode === 37) { // left
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:memberid, number:-1});
+                op.init({memberid:inputMemberId, number:-1});
                 handled = true;
             } else if (charCode === 39) { // right
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:memberid, number:1});
+                op.init({memberid:inputMemberId, number:1});
                 handled = true;
             } else if (charCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:memberid, number:-10});
+                op.init({memberid:inputMemberId, number:-10});
                 handled = true;
             } else if (charCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:memberid, number:10});
+                op.init({memberid:inputMemberId, number:10});
                 handled = true;
             } else {
                 runtime.log("got keycode: " + charCode);
                 // TODO: only accept text-like charCodes
                 op = new ops.OpInsertText(session);
                 op.init({
-                    memberid: memberid,
-                    position: session.getCursorPosition(memberid),
+                    memberid: inputMemberId,
+                    position: session.getCursorPosition(inputMemberId),
                     text: String.fromCharCode(charCode)
                 });
                 handled = true;
@@ -154,21 +154,26 @@ gui.SessionController = (function () {
         };
 
        /**
-        * @param {!string} ourself
         */
-        this.startEditing = function(ourself) {
+        this.startEditing = function() {
             var op = new ops.OpAddMember(session);
-            op.init({memberid:ourself});
+            op.init({memberid: inputMemberId});
             session.enqueue(op);
         };
 
         /**
-        * @param {!string} ourself
-        */
-        this.endEditing = function(ourself) {
+         */
+        this.endEditing = function() {
             var op = new ops.OpRemoveMember(session);
-            op.init({memberid:ourself});
+            op.init({memberid: inputMemberId});
             session.enqueue(op);
+        };
+
+        /**
+         * @return {string}
+         */
+        this.getInputMemberId = function () {
+                return inputMemberId;
         };
     };
 

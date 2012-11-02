@@ -52,19 +52,24 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
      */
     this.createAvatar = function (selectionMover) {
         var memberid = selectionMover.getCursor().getMemberId(),
-            localMemberId = session.getUserModel().getLocalMemberId(),
             avatar,
             caret;
 
         avatar = new gui.Avatar(selectionMover);
 
-        // if local user, then let controller listen on avatar/caret span
-        if (memberid === localMemberId) {
+//             // TODO: who should/needs to care for that?
+//             if (avatar.getMemberId() === session.getUserModel().getLocalMemberId()) {
+//                 caret.focus();
+//             }
+        // if local input user, then let controller listen on avatar/caret span
+        if (memberid === sessionController.getInputMemberId()) {
+            runtime.log("Starting to track input for avatar of "+memberid);
             caret = avatar.getCaret();
+            caret.updatePosition = caret.updatePositionAndFocus;
             sessionController.setFocusElement(caret.getFocusElement());
             // TEMPORARY hack until counters are part of cursors
             session.setLocalMemberCursorStepCounter(caret.getStepCounter());
-            caret.focus();
+            caret.getFocusElement().focus();
         }
 
         return avatar;
