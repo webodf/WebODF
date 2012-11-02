@@ -37,6 +37,7 @@ runtime.loadClass("ops.OpAddMember");
 runtime.loadClass("ops.OpRemoveMember");
 runtime.loadClass("ops.OpMoveMemberCursor");
 runtime.loadClass("ops.OpInsertText");
+runtime.loadClass("ops.OpRemoveText");
 
 /**
  * @constructor
@@ -100,6 +101,31 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @return {!ops.Operation}
+         */
+        function createOpMoveMemberCursor(number) {
+            var op = new ops.OpMoveMemberCursor(session);
+
+            op.init({memberid:inputMemberId, number:number});
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function createOpRemoveTextByBackspace() {
+            var position = session.getCursorPosition(inputMemberId),
+                domPosition = session.getPositionInTextNode(position),
+                op = null;
+
+            if (domPosition && domPosition.offset > 0) {
+                op = new ops.OpRemoveText(session);
+                op.init({memberid:inputMemberId, position: position-1, length: 1, text:domPosition.textNode.substringData(domPosition.offset-1, 1)});
+            }
+
+            return op;
+        }
+        /**
          * @param {!Event} e
          */
         function handleKeyDown(e) {
@@ -108,23 +134,22 @@ gui.SessionController = (function () {
                 handled = false;
 
             if (keyCode === 37) { // left
-                op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:inputMemberId, number:-1});
+                op = createOpMoveMemberCursor(-1);
                 handled = true;
             } else if (keyCode === 39) { // right
-                op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:inputMemberId, number:1});
+                op = createOpMoveMemberCursor(1);
                 handled = true;
             } else if (keyCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:inputMemberId, number:-10});
+                op = createOpMoveMemberCursor(-10);
                 handled = true;
             } else if (keyCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = new ops.OpMoveMemberCursor(session);
-                op.init({memberid:inputMemberId, number:10});
+                op = createOpMoveMemberCursor(10);
                 handled = true;
+            } else if (keyCode === 8) { // Backspace
+                op = createOpRemoveTextByBackspace();
+                handled = (op !== null);
             } else {
                 runtime.log("got keycode: " + keyCode);
             }
@@ -138,15 +163,16 @@ gui.SessionController = (function () {
 
         /**
          * @param {!Event} event
+         * @return {?String}
          */
         function stringFromKeyPress(event) {
-            if (event.which == null) {
-                return String.fromCharCode(event.keyCode) // IE
-            } else if (event.which != 0 && event.charCode != 0) {
-                return String.fromCharCode(event.which)   // the rest
-            } else {
-                return null; // special key
+            if (event.which === null) {
+                return String.fromCharCode(event.keyCode); // IE
             }
+            if (event.which !== 0 && event.charCode !== 0) {
+                return String.fromCharCode(event.which);   // the rest
+            }
+            return null; // special key
         }
 
         /**

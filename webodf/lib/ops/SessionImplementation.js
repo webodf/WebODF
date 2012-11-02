@@ -261,6 +261,14 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     };
 
     /**
+     * This function will return the Text node as well as the offset in that text node
+     * of the cursor.
+     * @param {!string} memberid
+     * @return {?{textNode: !Text, offset: !number}}
+     */
+    this.getPositionInTextNode = getPositionInTextNode;
+
+    /**
      * @param {!string} memberid
      * @param {!number} position
      * @param {!string} text
@@ -277,13 +285,20 @@ runtime.log(domPosition + " -- " + text + " " + position);
         return false;
     };
     /**
-     * @param {!number} paragraph
+     * @param {!string} memberid
      * @param {!number} position
-     * @param {!string} text
+     * @param {!number} length
      * @return {!boolean}
      */
-    this.removeText = function (paragraph, position, text) {
-        return true;
+    this.removeText = function (memberid, position, length) {
+        var domPosition;
+        domPosition = getPositionInTextNode(position);
+runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length);
+        if (domPosition) {
+            domPosition.textNode.deleteData(domPosition.offset, length);
+            return true;
+        }
+        return false;
     };
     /**
      * @param {!number} position

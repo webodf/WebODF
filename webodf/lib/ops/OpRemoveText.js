@@ -32,42 +32,35 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime,ops */
-
-/*
- * crete specific operation instances.
- */
-
-runtime.loadClass("ops.OpAddMember");
+/*global ops*/
 
 /**
  * @constructor
  */
-ops.OperationFactory = function OperationFactory (session) {
-	"use strict";
+ops.OpRemoveText = function OpRemoveText(session) {
+    "use strict";
 
-	var self=this;
+    var memberid, position, length, text;
 
-	this.create = function (spec) {
-		var op = null;
-		// TODO: of course the following code can use some better
-		// js language and make it more generic.
-		if (spec.optype === "AddMember") {
-			op = new ops.OpAddMember(session);
-			op.init(spec);
-		} else if (spec.optype === "InsertText") {
-			op = new ops.OpInsertText(session);
-			op.init(spec);
-        } else if (spec.optype === "RemoveText") {
-            op = new ops.OpRemoveText(session);
-            op.init(spec);
-		} else if (spec.optype === "MoveMemberCursor") {
-			op = new ops.OpMoveMemberCursor(session);
-			op.init(spec);
-		} else if (spec.optype === "RemoveMember") {
-			op = new ops.OpRemoveMember(session);
-			op.init(spec);
-		}
-		return op;
-	};
+    this.init = function(data) {
+        memberid = data.memberid;
+        position = data.position;
+        length = data.length;
+        text = data.text;
+    };
+
+    this.execute = function(domroot) {
+        session.removeText(memberid, position, length);
+    };
+
+    this.spec = function() {
+        return {
+            optype: "RemoveText",
+            memberid: memberid,
+            position: position,
+            length: length,
+            text: text
+        };
+    };
+
 };

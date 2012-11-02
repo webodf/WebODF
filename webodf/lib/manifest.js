@@ -73,6 +73,7 @@
         "ops/OpRemoveMember.js",
         "ops/OpMoveMemberCursor.js",
         "ops/OpInsertText.js",
+        "ops/OpRemoveText.js",
         "ops/OperationFactory.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",
