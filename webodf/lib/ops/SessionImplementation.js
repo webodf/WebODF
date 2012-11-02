@@ -166,7 +166,7 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         }
         // if the position is just after a cursor, then move in front of that
         // cursor
-        while (lastTextNode.previousSibling &&
+        while (nodeOffset === 0 && lastTextNode.previousSibling &&
                 lastTextNode.previousSibling.localName === "cursor") {
             node = lastTextNode.previousSibling.previousSibling;
             while (node && node.nodeType !== 3) {
