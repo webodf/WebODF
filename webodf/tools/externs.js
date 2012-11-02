@@ -147,6 +147,10 @@ NodeJSProcess.prototype.stderr = {};
 /**
  * @namespace
  */
+var JSON;
+/**
+ * @namespace
+ */
 var now;
 /**
  * @type {function(!Array):Object}

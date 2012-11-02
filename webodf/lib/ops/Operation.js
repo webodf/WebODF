@@ -33,7 +33,7 @@
 /*global ops*/
 /**
  * An operation that can be performed on a document.
- * @constructor
+ * @interface
  */
 ops.Operation = function Operation(session) {
     "use strict";

@@ -59,6 +59,18 @@ Runtime.ByteArray = function (size) {"use strict"; };
 Runtime.prototype.getVariable = function (name) { "use strict"; };
 
 /**
+ * @param {*} anything
+ * @return {!string}
+ */
+Runtime.prototype.toJson = function (anything) { "use strict"; };
+
+/**
+ * @param {!string} jsonstr
+ * @return {*}
+ */
+Runtime.prototype.fromJson = function (jsonstr) { "use strict"; };
+
+/**
  * @param {!number} start
  * @param {!number} end
  * @return {!Runtime.ByteArray}
@@ -250,6 +262,24 @@ Runtime.getVariable = function (name) {
     return eval(name);
 };
 
+/**
+ * @param {*} anything
+ * @return {!string}
+ */
+Runtime.toJson = function (anything) {
+    "use strict";
+    return JSON.stringify(anything);
+};
+
+/**
+ * @param {!string} jsonstr
+ * @return {*}
+ */
+Runtime.fromJson = function (jsonstr) {
+    "use strict";
+    return JSON.parse(jsonstr);
+};
+
 Runtime.getFunctionName = function getFunctionName(f) {
     "use strict";
     var m;
@@ -378,6 +408,18 @@ function BrowserRuntime(logoutput) {
     * @return {*}
     */
     this.getVariable = Runtime.getVariable;
+
+
+    /**
+    * @param {!string} jsonstr
+    * @return {*}
+    */
+    this.fromJson = Runtime.fromJson;
+    /**
+    * @param {*} anything
+    * @return {!string}
+    */
+    this.toJson = Runtime.toJson;
 
     /**
      * @param {!string} msgOrCategory
@@ -754,6 +796,17 @@ function NodeJSRuntime() {
     */
     this.getVariable = Runtime.getVariable;
 
+    /**
+    * @param {!string} jsonstr
+    * @return {*}
+    */
+    this.fromJson = Runtime.fromJson;
+    /**
+    * @param {*} anything
+    * @return {!string}
+    */
+    this.toJson = Runtime.toJson;
+
     function isFile(path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -950,6 +1003,17 @@ function RhinoRuntime() {
     * @return {*}
     */
     this.getVariable = Runtime.getVariable;
+
+    /**
+    * @param {!string} jsonstr
+    * @return {*}
+    */
+    this.fromJson = Runtime.fromJson;
+    /**
+    * @param {*} anything
+    * @return {!string}
+    */
+    this.toJson = Runtime.toJson;
 
     this.concatByteArrays = function (bytearray1, bytearray2) {
         return bytearray1.concat(bytearray2);
