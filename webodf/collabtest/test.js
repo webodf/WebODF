@@ -106,10 +106,11 @@ function setupAvatarView(sessionView, avatarlistdiv) {
  * @param {?string} memberId
  */
 function addMemberToSession(session, memberId) {
+    "use strict";
     var op = new ops.OpAddMember(session);
     op.init({memberid:memberId});
     session.enqueue(op);
-};
+}
 
 function initSession(odfid, avatarlistid, callback) {
     "use strict";
@@ -119,7 +120,13 @@ function initSession(odfid, avatarlistid, callback) {
         testsession,
         sessionController,
         sessionView,
+        opRouter = null,
+        is_connected = false,
         ready = false;
+
+    if (runtime.getNetwork().networkStatus !== "unavailable") {
+        is_connected = true;
+    }
     odfcanvas.addListener("statereadychange", function (container) {
         if (container.state !== odf.OdfContainer.DONE) {
             alert("statereadychange fired but state not DONE");
@@ -129,11 +136,12 @@ function initSession(odfid, avatarlistid, callback) {
             return;
         }
         ready = true;
+
         testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
-        // if we have network
-        if (runtime.getNetwork().networkStatus !== "unavailable") {
-            // use the nowjs op-router
-            testsession.setOperationRouter(new ops.NowjsOperationRouter());
+
+        if (is_connected) {
+            // use the nowjs op-router when connected
+            testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
         }
         sessionView = new gui.SessionView(testsession);
         sessionController = new gui.SessionController(testsession, "you");
@@ -141,11 +149,13 @@ function initSession(odfid, avatarlistid, callback) {
         setupAvatarView(sessionView, avatarlistdiv);
 
         // add our two friends
-        addMemberToSession(testsession, "bob");
-        addMemberToSession(testsession, "alice");
+        // addMemberToSession(testsession, "bob");
+        // addMemberToSession(testsession, "bob");
 
         // start editing: let the controller send the OpAddMember
-        runtime.assert(testsession.getUserModel(), "lacking user model");
+        if (is_connected) {
+            opRouter.requestReplay();
+        }
         sessionController.startEditing();
 
         if (callback) {

@@ -77,4 +77,15 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 		// and deliver to network
 		net.deliverOp(op.spec());
 	};
+
+	this.requestReplay = function() {
+		net.requestReplay(
+			function(opspec) {
+				runtime.log("replaying: "+JSON.stringify(opspec));
+				},
+			function() {
+				runtime.log("replay done.");
+				}
+		);
+	};
 };
