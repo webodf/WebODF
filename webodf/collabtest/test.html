@@ -23,13 +23,14 @@ function html_init() {
 			return;
 		}
 		if (net.networkStatus !== "ready") {
-			if (accumulated_waiting_time > 3000) {
+			if (accumulated_waiting_time > 5000) {
 				runtime.log("connection to server timed out. starting disconnected.");
 				init();
+				return;
 			}
 			runtime.log("waiting...");
 			accumulated_waiting_time += 100;
-			window.setTimeout(later_cb, 100);
+			runtime.getWindow().setTimeout(later_cb, 100);
 			return;
 		}	
 		runtime.log("connected to server: "+net.serverName);
