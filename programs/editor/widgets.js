@@ -55,11 +55,7 @@ function loadWidgets(documentObject) {
             var paragraphStylesMenuItem = new MenuItem({
                 label: document.translator.paragraph_DDD
             });
-            var characterStylesMenuItem = new MenuItem({
-                label: document.translator.character_DDD
-            });
             formatSubmenu.addChild(paragraphStylesMenuItem);
-            formatSubmenu.addChild(characterStylesMenuItem);
 
             menuBar.addChild(new PopupMenuBarItem({
                 label: document.translator.file
@@ -81,15 +77,6 @@ function loadWidgets(documentObject) {
             require(["widgets/paragraphStylesDialog.js"], function() {
                 var dialogBox = new widgets.ParagraphStylesDialog(documentObject, function(dialog) {
                     paragraphStylesMenuItem.onClick = function() {
-                        dialog.startup();
-                        dialog.show();
-                    }
-                });
-            });
-            
-            require(["widgets/characterStylesDialog.js"], function() {
-                var dialogBox = new widgets.CharacterStylesDialog(documentObject, function(dialog) {
-                    characterStylesMenuItem.onClick = function() {
                         dialog.startup();
                         dialog.show();
                     }

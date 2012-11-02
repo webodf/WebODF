@@ -63,11 +63,16 @@ widgets.ParagraphStylesDialog = (function () {
 
 
             require([
-                "widgets/dialogWidgets/alignmentPane.js"
+                "widgets/dialogWidgets/alignmentPane.js",
+                "widgets/dialogWidgets/fontEffectsPane.js"
                 ], function() {
                 new widgets.AlignmentPane(documentObject, function(alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
+                });
+                new widgets.FontEffectsPane(documentObject, function(fontEffectsPane) {
+                    fontEffectsPane.startup();
+                    tabContainer.addChild(fontEffectsPane);
                 });
             });
 
