@@ -164,6 +164,21 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         if (lastTextNode === null) {
             return null;
         }
+        // if the position is just after a cursor, then move in front of that
+        // cursor
+        while (lastTextNode.previousSibling &&
+                lastTextNode.previousSibling.localName === "cursor") {
+            node = lastTextNode.previousSibling.previousSibling;
+            while (node && node.nodeType !== 3) {
+                node = node.previousSibling;
+            }
+            if (node === null) {
+                node = rootNode.ownerDocument.createTextNode('');
+                lastTextNode.parentNode.insertBefore(node, null);
+            }
+            lastTextNode = /**@type{!Text}*/(node);
+            nodeOffset = lastTextNode.length;
+        }
         return {textNode: lastTextNode, offset: nodeOffset };
     }
 
