@@ -115,47 +115,50 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * iterator and count only the text positions. When the amount defined by
      * offset has been counted, the Text node that that position is returned
      * as well as the offset in that text node.
-     * @param {!Element} paragraph
-     * @param {!number} offset
+     * @param {!number} position
      * @return {?{textNode: !Text, offset: !number}}
      */
-    function getPositionInTextNode(paragraph, offset) {
+    function getPositionInTextNode(position) {
         var iterator = gui.SelectionMover.createPositionIterator(rootNode),
             lastTextNode = null,
             node,
             nodeOffset = 0;
-        iterator.setPosition(paragraph, 0);
-        node = iterator.container();
-        if (node.nodeType === 3) {
-            lastTextNode = /**@type{!Text}*/(node);
-            nodeOffset = 0;
-        } else if (offset === 0) {
-            // create a new text node at the start of the paragraph
-            lastTextNode = paragraph.ownerDocument.createTextNode('');
-            node.insertBefore(lastTextNode, null);
-            nodeOffset = 0;
+        // iterator should be at the start of rootNode
+        if (filter.acceptPosition(iterator)) {
+            node = iterator.container();
+            if (node.nodeType === 3) {
+                lastTextNode = /**@type{!Text}*/(node);
+                nodeOffset = 0;
+            } else if (position === 0) {
+                // create a new text node at the start of the paragraph
+                lastTextNode = rootNode.ownerDocument.createTextNode('');
+                node.insertBefore(lastTextNode, null);
+                nodeOffset = 0;
+            }
         }
-        while (offset > 0 || lastTextNode === null) {
+        while (position > 0 || lastTextNode === null) {
             if (!iterator.nextPosition()) {
                 // the desired position cannot be found
                 return null;
             }
-            node = iterator.container();
-            if (node.nodeType === 3) {
-                offset -= 1;
-                if (node !== lastTextNode) {
-                    lastTextNode = /**@type{!Text}*/(node);
-                    nodeOffset = 0;
-                } else {
-                    nodeOffset += 1;
+            if (filter.acceptPosition(iterator)) {
+                node = iterator.container();
+                if (node.nodeType === 3) {
+                    position -= 1;
+                    if (node !== lastTextNode) {
+                        lastTextNode = /**@type{!Text}*/(node);
+                        nodeOffset = 0;
+                    } else {
+                        nodeOffset += 1;
+                    }
+                } else if (lastTextNode !== null) {
+                    position -= 1;
+                    if (position === 0) {
+                        nodeOffset = lastTextNode.length;
+                        break;
+                    }
+                    lastTextNode = null;
                 }
-            } else if (lastTextNode !== null) {
-                offset -= 1;
-                if (offset === 0) {
-                    nodeOffset = lastTextNode.length;
-                    break;
-                }
-                lastTextNode = null;
             }
         }
         if (lastTextNode === null) {
@@ -271,16 +274,12 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      * @return {!boolean}
      */
     this.insertText = function (memberid, position, text) {
-        var paragraph, positionInParagraph;
-
-        // TODO: translate odf position in paragraph number and offset
-        paragraph = findParagraph(0);
-        if (paragraph) {
-            positionInParagraph = getPositionInTextNode(paragraph, 0);
-            if (positionInParagraph) {
-                positionInParagraph.textNode.insertData(positionInParagraph.offset, text);
-                return true;
-            }
+        var domPosition;
+        domPosition = getPositionInTextNode(position);
+runtime.log(domPosition + " -- " + text + " " + position);
+        if (domPosition) {
+            domPosition.textNode.insertData(domPosition.offset, text);
+            return true;
         }
         return false;
     };
