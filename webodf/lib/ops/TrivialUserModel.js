@@ -50,11 +50,8 @@ ops.TrivialUserModel = function TrivialUserModel () {
 	users.alice = {memberid:"alice", fullname:"Alice Bee", color: "green", imageurl: "avatar-flower.png"};
 	users.you = {memberid:"you", fullname:"I, Robot", color: "blue", imageurl: "avatar-joe.png"};
 
-	this.getLocalMemberId = function () {
-		return "you";
-	};
-
 	this.getUserDetails = function (memberid) {
-		return users[memberid];
+		var userid = memberid.split(":")[0];
+		return users[userid];
 	};
 };

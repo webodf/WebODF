@@ -143,7 +143,7 @@ function initSession(odfid, avatarlistid, callback) {
             // use the nowjs op-router when connected
             testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
         }
-        sessionController = new gui.SessionController(testsession, "you");
+        sessionController = new gui.SessionController(testsession, "you:"+Date.now());
         sessionView = new gui.SessionView(testsession, new gui.CaretFactory(sessionController));
 
         setupAvatarView(sessionView, avatarlistdiv);
