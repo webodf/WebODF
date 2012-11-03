@@ -113,10 +113,10 @@ gui.Caret = function Caret(cursor) {
         avatar.hide();
     };
     function init() {
-        var document = cursor.getDocument(),
-            htmlns = document.documentElement.namespaceURI;
+        var dom = cursor.getOdfDocument().getDOM(),
+            htmlns = dom.documentElement.namespaceURI;
 
-        span = document.createElementNS(htmlns, "span");
+        span = dom.createElementNS(htmlns, "span");
         span.setAttribute("contenteditable", true);
         // making the position relative enables the avatar to use
         // the span as reference for its absolute position

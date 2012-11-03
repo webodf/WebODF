@@ -91,7 +91,7 @@ gui.SessionController = (function () {
                 steps,
                 op;
 
-            steps = session.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
+            steps = session.getOdfDocument().getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
 
             if (steps !== 0) {
                 op = new ops.OpMoveMemberCursor(session);
@@ -114,8 +114,9 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpRemoveTextByBackspace() {
-            var position = session.getCursorPosition(inputMemberId),
-                domPosition = session.getPositionInTextNode(position),
+            var odfDocument = session.getOdfDocument(),
+                position = odfDocument.getCursorPosition(inputMemberId),
+                domPosition = odfDocument.getPositionInTextNode(position),
                 op = null;
 
             if (domPosition && domPosition.offset > 0) {
@@ -186,7 +187,7 @@ gui.SessionController = (function () {
                 op = new ops.OpInsertText(session);
                 op.init({
                     memberid: inputMemberId,
-                    position: session.getCursorPosition(inputMemberId),
+                    position: session.getOdfDocument().getCursorPosition(inputMemberId),
                     text: text
                 });
                 session.enqueue(op);
@@ -206,7 +207,7 @@ gui.SessionController = (function () {
             listenEvent(element, "paste", dummyHandler);
 
             // start to listen for mouse clicks as well, but on the whole document
-            listenEvent(session.getRootNode(), "click", handleMouseClick);
+            listenEvent(session.getOdfDocument().getRootNode(), "click", handleMouseClick);
         };
 
        /**

@@ -35,6 +35,7 @@ runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
 runtime.loadClass("gui.SelectionManager");
+runtime.loadClass("ops.Document");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -43,65 +44,11 @@ runtime.loadClass("gui.SelectionManager");
  */
 ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     "use strict";
-    /**
-     * @constructor
-     * @implements {core.PositionFilter}
-     */
-    function TextPositionFilter() {
-        var /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-            /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
-        /**
-         * @param {!core.PositionIterator} iterator
-         * @return {core.PositionFilter.FilterResult}
-         */
-        this.acceptPosition = function (iterator) {
-            var n = iterator.container(), p, o, d;
-            // only stop in text nodes or at end of <p>, <h> o <span/>
-            if (n.nodeType !== 3) {
-                if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
-                    return reject;
-                }
-                return accept;
-            }
-            if (n.length === 0) {
-                return reject;
-            }
-            // only stop in text nodes in 'p', 'h' or 'span' elements
-            p = n.parentNode;
-            o = p && p.localName;
-            if (o !== "p" && o !== "span" && o !== "h") {
-                return reject;
-            }
-            // do not stop between spaces
-            o = iterator.textOffset();
-            if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
-                return reject;
-            }
-            return accept;
-        };
-    }
-    /**
-     * @param {!odf.OdfContainer} odfcontainer
-     */
-    function findTextRoot(odfcontainer) {
-        // set the root node to be the text node
-        var root = odfcontainer.rootElement.firstChild;
-        while (root && root.localName !== "body") {
-            root = root.nextSibling;
-        }
-        root = root && root.firstChild;
-        while (root && root.localName !== "text") {
-            root = root.nextSibling;
-        }
-        return root;
-    }
+
     var self = this,
-        rootNode,
-        selectionManager,
-        filter = new TextPositionFilter(),
+        odfDocument = new ops.Document(odfcontainer),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
-        cursors = {},
         m_user_model = null,
         m_operation_router = null,
         m_event_listener = {};
@@ -110,83 +57,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     m_event_listener["cursor/added"] = [];
     m_event_listener["cursor/removed"] = [];
 
-    /**
-     * This function will iterate through positions allowed by the position
-     * iterator and count only the text positions. When the amount defined by
-     * offset has been counted, the Text node that that position is returned
-     * as well as the offset in that text node.
-     * @param {!number} position
-     * @return {?{textNode: !Text, offset: !number}}
-     */
-    function getPositionInTextNode(position) {
-        var iterator = gui.SelectionMover.createPositionIterator(rootNode),
-            lastTextNode = null,
-            node,
-            nodeOffset = 0;
-        position += 1; // add one because we check for position === 0
-        // iterator should be at the start of rootNode
-        if (filter.acceptPosition(iterator) === 1) {
-            node = iterator.container();
-            if (node.nodeType === 3) {
-                lastTextNode = /**@type{!Text}*/(node);
-                nodeOffset = 0;
-            } else if (position === 0) {
-                // create a new text node at the start of the paragraph
-                lastTextNode = rootNode.ownerDocument.createTextNode('');
-                node.insertBefore(lastTextNode, null);
-                nodeOffset = 0;
-            }
-        }
-        while (position > 0 || lastTextNode === null) {
-            if (!iterator.nextPosition()) {
-                // the desired position cannot be found
-                return null;
-            }
-            if (filter.acceptPosition(iterator) === 1) {
-                position -= 1;
-                node = iterator.container();
-                if (node.nodeType === 3) {
-                    if (node !== lastTextNode) {
-                        lastTextNode = /**@type{!Text}*/(node);
-                        nodeOffset = 0;
-                    } else {
-                        nodeOffset += 1;
-                    }
-                } else if (lastTextNode !== null) {
-                    if (position === 0) {
-                        nodeOffset = lastTextNode.length;
-                        break;
-                    }
-                    lastTextNode = null;
-                } else if (position === 0) {
-                    lastTextNode = node.ownerDocument.createTextNode('');
-                    node.appendChild(lastTextNode);
-                    nodeOffset = 0;
-                    break;
-                }
-            }
-        }
-        if (lastTextNode === null) {
-            return null;
-        }
-        // if the position is just after a cursor, then move in front of that
-        // cursor
-        while (nodeOffset === 0 && lastTextNode.previousSibling &&
-                lastTextNode.previousSibling.localName === "cursor") {
-            node = lastTextNode.previousSibling.previousSibling;
-            while (node && node.nodeType !== 3) {
-                node = node.previousSibling;
-            }
-            if (node === null) {
-                node = rootNode.ownerDocument.createTextNode('');
-                lastTextNode.parentNode.insertBefore(node,
-                        lastTextNode.parentNode.firstChild);
-            }
-            lastTextNode = /**@type{!Text}*/(node);
-            nodeOffset = lastTextNode.length;
-        }
-        return {textNode: lastTextNode, offset: nodeOffset };
-    }
 
     function setUserModel (userModel) {
         m_user_model = userModel;
@@ -204,6 +74,13 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         return m_user_model;
     }
     this.getUserModel = getUserModel;
+
+    /**
+     * @return {!ops.Document}
+     */
+    this.getOdfDocument = function () {
+        return odfDocument;
+    };
 
     this.emit = function (eventid, args) {
         var i, subscribers;
@@ -230,76 +107,9 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     };
 
     this.playOperation = function(op) {
-        op.execute(rootNode);
+        op.execute(odfDocument.getRootNode());
     };
 
-    /**
-     * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.
-     * @param {!string} memberid
-     * @param {!Node} node
-     * @param {!number} offset
-     * @return {!number}
-     */
-    this.getDistanceFromCursor = function(memberid, node, offset) {
-        var counter,
-            cursor = cursors[memberid],
-            steps = 0;
-        if (cursor) {
-            counter = cursor.getStepCounter().countStepsToPosition;
-            steps = counter(node, offset, filter);
-        }
-        return steps;
-    };
-
-    /**
-     * This function returns the position in ODF world of the cursor of the member.
-     * @param {!string} memberid
-     * @return {!number}
-     */
-    this.getCursorPosition = function(memberid) {
-        return -self.getDistanceFromCursor(memberid, rootNode, 0);
-    };
-
-    /**
-     * This function will return the Text node as well as the offset in that text node
-     * of the cursor.
-     * @param {!number} position
-     * @return {?{textNode: !Text, offset: !number}}
-     */
-    this.getPositionInTextNode = getPositionInTextNode;
-
-    /**
-     * @param {!string} memberid
-     * @param {!number} position
-     * @param {!string} text
-     * @return {!boolean}
-     */
-    this.insertText = function (memberid, position, text) {
-        var domPosition;
-        domPosition = getPositionInTextNode(position);
-runtime.log(domPosition + " -- " + text + " " + position);
-        if (domPosition) {
-            domPosition.textNode.insertData(domPosition.offset, text);
-            return true;
-        }
-        return false;
-    };
-    /**
-     * @param {!string} memberid
-     * @param {!number} position
-     * @param {!number} length
-     * @return {!boolean}
-     */
-    this.removeText = function (memberid, position, length) {
-        var domPosition;
-        domPosition = getPositionInTextNode(position);
-runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length);
-        if (domPosition) {
-            domPosition.textNode.deleteData(domPosition.offset, length);
-            return true;
-        }
-        return false;
-    };
     /**
      * @param {!number} position
      * @return {!boolean}
@@ -314,49 +124,6 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
     this.removeParagraph = function (position) {
         return true;
     };
-    /* RELAYING OF SESSION OPERATIONS */
-    this.addSessionListener = function (session) {
-    };
-
-    /* SESSION INTROSPECTION */
-
-    /**
-     * @return {!core.PositionFilter}
-     */
-    this.getFilter = function () {
-        return filter;
-    };
-    /**
-     * @return {!Node}
-     */
-    this.getRootNode = function () {
-        return rootNode;
-    };
-    /**
-    * @param {!string} memberid
-    * @return {core.Cursor}
-    */
-    this.getCursor = function (memberid) {
-        return cursors[memberid];
-    };
-    /**
-    * @param {!core.Cursor} cursor
-    */
-    this.addCursor = function (cursor) {
-        cursors[cursor.getMemberId()] = cursor;
-    };
-    /**
-    * @param {!string} memberid
-    */
-    this.removeCursor = function (memberid) {
-        delete cursors[memberid];
-    };
-    /**
-    * @return {gui.SelectionManager}
-    */
-    this.getSelectionManager = function () {
-        return selectionManager;
-    };
 
     /**
      * @return {undefined}
@@ -364,8 +131,6 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
     function init() {
         setUserModel(new ops.TrivialUserModel());
         setOperationRouter(new ops.TrivialOperationRouter());
-        rootNode = findTextRoot(odfcontainer);
-        selectionManager = new gui.SelectionManager(rootNode);
     }
     init();
 };

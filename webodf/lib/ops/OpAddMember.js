@@ -48,9 +48,9 @@ ops.OpAddMember = function OpAddMember(session) {
     };
 
     this.execute = function(rootNode) {
-        var doc = /**@type{!Document}*/(rootNode.ownerDocument),
-            cursor = new core.Cursor(memberid, doc, session.getSelectionManager());
-        session.addCursor(cursor);
+        var odfDocument = session.getOdfDocument(),
+            cursor = new core.Cursor(memberid, odfDocument);
+        odfDocument.addCursor(cursor);
         session.emit("cursor/added", cursor);
     };
 

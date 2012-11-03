@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, runtime*/
+/*global core, ops, runtime*/
 runtime.loadClass("core.Selection");
 
 /**
@@ -55,11 +55,10 @@ runtime.loadClass("core.Selection");
  * the cursor by not letting it be part of the DOM.
  *
  * @constructor
- * @param {string} memberid The memberid this cursor is assigned to
- * @param {Document} document The document in which the cursor is placed
- * @param {gui.SelectionManager} selectionManager
+ * @param {!string} memberid The memberid this cursor is assigned to
+//  * @param {!ops.Document} odfDocument The document in which the cursor is placed
  */
-core.Cursor = function Cursor(memberid, document, selectionManager) {
+core.Cursor = function Cursor(memberid, odfDocument) {
     "use strict";
     var self = this,
         cursorNode,
@@ -150,8 +149,12 @@ core.Cursor = function Cursor(memberid, document, selectionManager) {
     this.getSelection = function () {
         return selection;
     };
-    this.getDocument = function () {
-        return document;
+    /**
+     * Obtain the odfDocument to which the cursor corresponds.
+     * @return {!ops.Document}
+     */
+    this.getOdfDocument = function () {
+        return odfDocument;
     };
     /**
      * Synchronize the cursor with the current selection.
@@ -177,13 +180,14 @@ core.Cursor = function Cursor(memberid, document, selectionManager) {
     };
 
     function init() {
-        var cursorns = 'urn:webodf:names:cursor';
+        var cursorns = 'urn:webodf:names:cursor',
+            dom = odfDocument.getDOM();
 
-        cursorNode = document.createElementNS(cursorns, 'cursor');
+        cursorNode = dom.createElementNS(cursorns, 'cursor');
         cursorNode.setAttributeNS(cursorns, "memberId", memberid);
-        cursorTextNode = document.createTextNode("");
-        selection = new core.Selection(document);
-        selectionMover = selectionManager.createSelectionMover(self);
+        cursorTextNode = dom.createTextNode("");
+        selection = new core.Selection(odfDocument);
+        selectionMover = odfDocument.getSelectionManager().createSelectionMover(self);
     }
 
     init();

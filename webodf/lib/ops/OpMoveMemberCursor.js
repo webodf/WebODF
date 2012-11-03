@@ -49,9 +49,10 @@ ops.OpMoveMemberCursor = function OpMoveMemberCursor(session) {
     };
 
     this.execute = function(domroot) {
-        var cursor = session.getCursor(memberid),
+        var odfDocument = session.getOdfDocument(),
+            cursor = odfDocument.getCursor(memberid),
             stepCounter = cursor.getStepCounter(),
-            positionFilter = session.getFilter(),
+            positionFilter = odfDocument.getPositionFilter(),
             steps;
 
         if (number > 0) {

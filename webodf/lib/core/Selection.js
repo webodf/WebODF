@@ -30,10 +30,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core*/
+/*global core, ops*/
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!ops.Document} document
  */
 core.Selection = function Selection(document) {
     "use strict";
@@ -76,7 +76,7 @@ core.Selection = function Selection(document) {
         ranges.length = self.rangeCount = 1;
         var range = ranges[0];
         if (!range) {
-            ranges[0] = range = document.createRange();
+            ranges[0] = range = document.getDOM().createRange();
         }
         range.setStart(node, offset);
         range.collapse(true);

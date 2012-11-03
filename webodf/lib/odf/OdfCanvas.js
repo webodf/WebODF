@@ -993,6 +993,14 @@ odf.OdfCanvas = (function () {
             return pageSwitcher.css;
         };
         /**
+         * Set a odfcontainer manually.
+         * @param {!odf.OdfContainer} container
+         */
+        this.setOdfContainer = function (container) {
+            odfcontainer = container;
+            refreshOdf();
+        };
+        /**
          * @param {!string} url
          * @return {undefined}
          */

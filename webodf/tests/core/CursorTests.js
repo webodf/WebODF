@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core: true, runtime: true*/
+/*global core: true, runtime: true, ops, odf*/
 runtime.loadClass("core.Cursor");
 
 /**
@@ -43,7 +43,9 @@ core.CursorTests = function CursorTests(runner) {
     var r = runner, tests, t = {},
         memberId = "testuser",
         maindoc = runtime.getWindow().document,
-        testarea = maindoc.getElementById("testarea");
+        testarea = /**@type{!Element}*/(maindoc.getElementById("testarea")),
+        odfcanvas = new odf.OdfCanvas(testarea),
+        odfContainer = odfcanvas.odfContainer();
     /**
      * @param {core.Selection} selection
      * @param {Node} startnode
@@ -70,11 +72,11 @@ core.CursorTests = function CursorTests(runner) {
     }
 
     function setupEmptyRootNode() {
-        var selection = new core.Selection(maindoc),
-            root = maindoc.createElementNS("", "p"),
-            cursor = new core.Cursor(memberId, selection, maindoc);
+        var root = maindoc.createElementNS("", "p"),
+            document = new ops.Document(odfContainer),
+            cursor = new core.Cursor(memberId, document);
         testarea.appendChild(root);
-        t = { selection: selection, root: root, cursor: cursor };
+        t = { selection: cursor.getSelection(), root: root, cursor: cursor };
         runner.shouldBe(t, "t.cursor.getMemberId()", memberId);
         runner.shouldBeNonNull(t, "t.selection");
     }

@@ -51,7 +51,7 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.session = new ops.SessionImplementation(t.odf);
-        r.shouldBe(t, "t.session.getCursors().length", "0");
+        r.shouldBe(t, "t.session.getOdfDocument().getCursors().length", "0");
     }
     this.tests = function () {
         return [

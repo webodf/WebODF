@@ -50,7 +50,7 @@ ops.OpInsertText = function OpInsertText(session) {
     };
 
     this.execute = function(domroot) {
-        session.insertText(memberid, position, text);
+        session.getOdfDocument().insertText(memberid, position, text);
     };
 
     this.spec = function() {

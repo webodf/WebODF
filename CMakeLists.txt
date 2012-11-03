@@ -170,6 +170,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/XMLEdit.js
 
     lib/ops/SessionPointFilter.js
+    lib/ops/Document.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
 

@@ -37,20 +37,6 @@
  */
 ops.Session = function Session() {"use strict"; };
 /**
- * @param {!string} memberid
- * @param {!number} position
- * @param {!string} text
- * @return {!boolean}
- */
-ops.Session.prototype.insertText = function (memberid, position, text) {"use strict"; };
-/**
- * @param {!string} memberid
- * @param {!number} position
- * @param {!number} length
- * @return {!boolean}
- */
-ops.Session.prototype.removeText = function (memberid, position, length) {"use strict"; };
-/**
  * @param {!number} position
  * @return {!boolean}
  */

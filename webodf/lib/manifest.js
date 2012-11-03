@@ -67,6 +67,7 @@
         "ops/Operation.js",
         "ops/TrivialOperationRouter.js",
         "ops/NowjsOperationRouter.js",
+        "ops/Document.js",
         "ops/Session.js",
         "ops/SessionImplementation.js",
         "ops/SessionNodeFilter.js",
