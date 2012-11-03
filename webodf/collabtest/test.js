@@ -148,6 +148,9 @@ function initSession(odfid, avatarlistid, callback) {
 
         setupAvatarView(sessionView, avatarlistdiv);
 
+        // set window title
+        document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
+
         // add our two friends
         // addMemberToSession(testsession, "bob");
         // addMemberToSession(testsession, "bob");

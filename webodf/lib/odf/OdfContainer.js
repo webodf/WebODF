@@ -682,6 +682,11 @@ odf.OdfContainer = (function () {
             saveAs(url, callback);
         };
 
+        this.getUrl = function () {
+            // TODO: saveAs seems to not update the url, is that wanted?
+            return url;
+        };
+
         // initialize public variables
         this.state = OdfContainer.LOADING;
         this.rootElement = createElement(ODFDocumentElement);

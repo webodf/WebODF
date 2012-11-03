@@ -302,6 +302,25 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
     this.removeCursor = function (memberid) {
         delete cursors[memberid];
     };
+    /**
+     * @param {!string} metadataId
+     * @return {?string}
+     */
+    this.getMetaData = function (metadataId) {
+        var node = odfcontainer.rootElement.firstChild;
+        while (node && node.localName !== "meta") {
+            node = node.nextSibling;
+        }
+        node = node && node.firstChild;
+        while (node && node.localName !== metadataId) {
+            node = node.nextSibling;
+        }
+        node = node && node.firstChild;
+        while (node && node.nodeType !== 3) {
+            node = node.nextSibling;
+        }
+        return node ? node.data : null;
+    };
 
     /**
      * @return {undefined}
