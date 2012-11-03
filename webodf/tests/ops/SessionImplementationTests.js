@@ -51,8 +51,7 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.session = new ops.SessionImplementation(t.odf);
-        // TODO: test number of cursors
-//         r.shouldBe(t, "t.session.getCursors().length", "0");
+        r.shouldBe(t, "t.session.getCursors().length", "0");
     }
     this.tests = function () {
         return [

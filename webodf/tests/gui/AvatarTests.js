@@ -113,18 +113,18 @@ gui.AvatarTests = function AvatarTests(runner) {
         t = {};
     };
     function createAvatar(xml) {
-        var selection, cursor;
+        var selection;
         t.doc = /**@type{!Document}*/(runtime.parseXML(xml));
         selection = new core.Selection(t.doc);
-        cursor = new core.Cursor("id", selection, t.doc);
-        t.selectionMover = new gui.SelectionMover(cursor, t.doc.documentElement);
+        t.cursor = new core.Cursor("id", selection, t.doc);
+        t.selectionMover = new gui.SelectionMover(t.cursor, t.doc.documentElement);
         t.caret = new gui.Caret(t.selectionMover);
     }
     function create() {
         createAvatar("<a/>");
         r.shouldBeNonNull(t, "t.caret");
         r.shouldBe(t, "t.caret.getCursor().getMemberId()", "'id'");
-        var s = t.caret.getSelection();
+        var s = t.cursor.getSelection();
         t.rangeCount = s.rangeCount;
         r.shouldBe(t, "t.rangeCount", "1");
         t.focusOffset = s.focusOffset;
@@ -134,7 +134,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     }
     function moveInEmptyDoc() {
         createAvatar("<a/>");
-        var s = t.caret.getSelection();
+        var s = t.cursor.getSelection();
         t.startNode = s.focusNode;
         t.caret.move(1);
         t.focusOffset = s.focusOffset;
@@ -144,7 +144,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     }
     function moveInSimpleDoc() {
         createAvatar("<a>hello</a>");
-        var s = t.caret.getSelection(),
+        var s = t.cursor.getSelection(),
             i;
         t.startNode = s.focusNode;
         for (i = 1; i <= 4; i += 1) {
@@ -182,8 +182,8 @@ gui.AvatarTests = function AvatarTests(runner) {
         var steps, s, e;
         t.pos = [];
         createAvatar(xml);
-        s = t.caret.getSelection();
-        t.counter = t.caret.getStepCounter();
+        s = t.cursor.getSelection();
+        t.counter = t.cursor.getStepCounter();
 
         // move to a valid position
         t.startFocusOffset = s.focusOffset;
@@ -235,7 +235,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         t.pos = [];
         t.filter = filter;
         createAvatar(xml);
-        t.counter = t.caret.getStepCounter();
+        t.counter = t.cursor.getStepCounter();
 
         // move to a valid position
         steps = t.counter.countForwardSteps(1, filter);

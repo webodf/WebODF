@@ -281,15 +281,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             countStepsToPosition: countStepsToPosition
         };
     };
-    this.getCursor = function () {
-        return cursor;
-    };
-    this.getRootNode = function () {
-        return rootNode;
-    };
-    this.getSelection = function () {
-        return selection;
-    };
     /**
      * @param {?Element} nodeAfterCursor
      * @param {!number} textNodeIncrease

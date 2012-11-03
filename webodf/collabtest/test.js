@@ -144,7 +144,7 @@ function initSession(odfid, avatarlistid, callback) {
             testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
         }
         sessionController = new gui.SessionController(testsession, "you");
-        sessionView = new gui.SessionView(testsession, new gui.CaretFactory(testsession, sessionController));
+        sessionView = new gui.SessionView(testsession, new gui.CaretFactory(sessionController));
 
         setupAvatarView(sessionView, avatarlistdiv);
 

@@ -41,27 +41,26 @@ runtime.loadClass("gui.Caret");
  * If the caret is for the local user, then a handler is passed to the caret
  * to redirect the keystrokes received for the caret to the session controller.
  * @constructor
- * @param {!ops.Session} session
  * @param {!gui.SessionController} sessionController
  */
-gui.CaretFactory = function CaretFactory(session, sessionController) {
+gui.CaretFactory = function CaretFactory(sessionController) {
     "use strict";
 
     /**
+     * @param {core.Cursor} cursor
      * @return {!gui.Caret}
      */
-    this.createCaret = function (selectionMover) {
-        var memberid = selectionMover.getCursor().getMemberId(),
-            caret = new gui.Caret(selectionMover);
+    this.createCaret = function (cursor) {
+        var memberid = cursor.getMemberId(),
+            caret = new gui.Caret(cursor);
 
         // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
             runtime.log("Starting to track input for caret of "+memberid);
-            caret.updatePosition = caret.updatePositionAndFocus;
+            // here wire up the cursor update to caret focus update
+            cursor.handleUpdate = caret.setFocus;
             sessionController.setFocusElement(caret.getFocusElement());
-            // TEMPORARY hack until counters are part of cursors
-            session.setLocalMemberCursorStepCounter(caret.getStepCounter());
-            caret.getFocusElement().focus();
+            caret.setFocus();
         }
 
         return caret;

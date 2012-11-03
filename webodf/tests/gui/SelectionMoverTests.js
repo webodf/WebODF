@@ -58,27 +58,23 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             p = doc.createElement("p"),
             text = doc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
             mover,
-            cursor,
-            selection;
+            cursor;
         testarea.appendChild(p);
         p.appendChild(text);
         p.style.width = "5em";// break line after each 'MMMMM'
-        selection = new core.Selection(doc);
-        cursor = new core.Cursor("id", selection, doc);
+        cursor = new core.Cursor("id", doc);
         mover = new gui.SelectionMover(cursor, p);
-        t = { doc: doc, p: p, text: text, selection: selection, mover: mover };
+        t = { doc: doc, p: p, text: text, selection: cursor.getSelection(), mover: mover };
     }
     function createDoc(xml) {
         var doc = runtime.parseXML(xml),
             mover,
             cursor,
-            selection,
             node = testarea.ownerDocument.importNode(doc.documentElement, true);
         testarea.appendChild(node);
-        selection = new core.Selection(testarea.ownerDocument);
-        cursor = new core.Cursor("id", selection, testarea.ownerDocument);
+        cursor = new core.Cursor("id", testarea.ownerDocument);
         mover = new gui.SelectionMover(cursor, node);
-        t = { doc: doc, root: node, selection: selection, mover: mover };
+        t = { doc: doc, root: node, selection: cursor.getSelection(), mover: mover, cursor: cursor };
     }
     function testUpDownTraversal() {
         setupDoc();
@@ -122,21 +118,21 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     }
     function testXMLForthBack(xml, positions) {
         createDoc(xml);
-        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        r.shouldBe(t, "t.cursor.getNode().parentNode", "t.root");
         var n = 1;
         while (t.mover.movePointForward(1)) {
-            r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             n += 1;
         }
         r.shouldBe(t, n.toString(), positions.toString());
-        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        r.shouldBe(t, "t.cursor.getNode().parentNode", "t.root");
         n = 1;
         while (t.mover.movePointBackward(1)) {
-            r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             n += 1;
         }
         r.shouldBe(t, n.toString(), positions.toString());
-        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        r.shouldBe(t, "t.cursor.getNode().parentNode", "t.root");
     }
     /**
      * @constructor

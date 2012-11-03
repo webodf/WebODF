@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global ops*/
+/*global runtime, ops*/
 
 /**
  * @constructor
@@ -49,10 +49,21 @@ ops.OpMoveMemberCursor = function OpMoveMemberCursor(session) {
     };
 
     this.execute = function(domroot) {
-        session.emit("cursor/moved", {
-            memberid: memberid,
-            number: number
-        });
+        var cursor = session.getCursor(memberid),
+            stepCounter = cursor.getStepCounter(),
+            positionFilter = session.getFilter(),
+            steps;
+
+        if (number > 0) {
+            steps = stepCounter.countForwardSteps(number, positionFilter);
+        } else if (number < 0) {
+            steps = -stepCounter.countBackwardSteps(-number, positionFilter);
+        } else {
+            // nothing to do
+            return;
+        }
+        runtime.log("Moving. moving, moving... walkableSteps "+steps);
+        cursor.move(steps);
     };
 
     this.spec = function() {

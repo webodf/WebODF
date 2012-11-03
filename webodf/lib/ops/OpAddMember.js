@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, ops*/
+/*global core, ops, runtime*/
 
 /**
  * @constructor
@@ -49,8 +49,7 @@ ops.OpAddMember = function OpAddMember(session) {
 
     this.execute = function(rootNode) {
         var doc = /**@type{!Document}*/(rootNode.ownerDocument),
-            selection = new core.Selection(doc),
-            cursor = new core.Cursor(memberid, selection, doc);
+            cursor = new core.Cursor(memberid, doc, session.getSelectionManager());
         session.addCursor(cursor);
         session.emit("cursor/added", cursor);
     };

@@ -34,6 +34,7 @@
 runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
+runtime.loadClass("gui.SelectionManager");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -80,11 +81,11 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
         };
     }
     /**
-     * @param {!ops.Session} session
+     * @param {!odf.OdfContainer} odfcontainer
      */
-    function findTextRoot(session) {
+    function findTextRoot(odfcontainer) {
         // set the root node to be the text node
-        var root = session.getOdfContainer().rootElement.firstChild;
+        var root = odfcontainer.rootElement.firstChild;
         while (root && root.localName !== "body") {
             root = root.nextSibling;
         }
@@ -96,10 +97,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     var self = this,
         rootNode,
+        selectionManager,
         filter = new TextPositionFilter(),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
-        localMemberCursorStepCounter = null, ///< TEMPORARY, until cursors are split from avatars
         cursors = {},
         m_user_model = null,
         m_operation_router = null,
@@ -108,7 +109,6 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     /* declare events */
     m_event_listener["cursor/added"] = [];
     m_event_listener["cursor/removed"] = [];
-    m_event_listener["cursor/moved"] = [];
 
     /**
      * This function will iterate through positions allowed by the position
@@ -242,10 +242,10 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
      */
     this.getDistanceFromCursor = function(memberid, node, offset) {
         var counter,
+            cursor = cursors[memberid],
             steps = 0;
-        // TEMPORARY solution until cursors are split from avatars, so currently only works for local user
-        if (localMemberCursorStepCounter) {
-            counter = localMemberCursorStepCounter.countStepsToPosition;
+        if (cursor) {
+            counter = cursor.getStepCounter().countStepsToPosition;
             steps = counter(node, offset, filter);
         }
         return steps;
@@ -321,12 +321,6 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
     /* SESSION INTROSPECTION */
 
     /**
-     * @return {!odf.OdfContainer}
-     */
-    this.getOdfContainer = function () {
-        return odfcontainer;
-    };
-    /**
      * @return {!core.PositionFilter}
      */
     this.getFilter = function () {
@@ -357,18 +351,21 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
     this.removeCursor = function (memberid) {
         delete cursors[memberid];
     };
-
-    /// TEMPORARY, until cursor is split out of avatars
-    this.setLocalMemberCursorStepCounter = function (stepCounter) {
-        localMemberCursorStepCounter = stepCounter;
+    /**
+    * @return {gui.SelectionManager}
+    */
+    this.getSelectionManager = function () {
+        return selectionManager;
     };
+
     /**
      * @return {undefined}
      */
     function init() {
         setUserModel(new ops.TrivialUserModel());
         setOperationRouter(new ops.TrivialOperationRouter());
-        rootNode = findTextRoot(self);
+        rootNode = findTextRoot(odfcontainer);
+        selectionManager = new gui.SelectionManager(rootNode);
     }
     init();
 };

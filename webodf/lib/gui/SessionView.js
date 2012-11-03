@@ -34,7 +34,6 @@
  */
 /*global runtime, gui */
 runtime.loadClass("gui.Caret");
-runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("ops.TrivialUserModel");
 
 gui.SessionView = (function () {
@@ -44,8 +43,7 @@ gui.SessionView = (function () {
       * @constructor
       */
     function SessionView(session, caretFactory) {
-        var selectionManager = new gui.SelectionManager(session.getRootNode()),
-            carets = {};
+        var carets = {};
 
         /**
          * @return {ops.Session}
@@ -65,8 +63,7 @@ gui.SessionView = (function () {
          * @param {core.Cursor} cursor
          */
         function onCursorAdded(cursor) {
-            var selectionMover = selectionManager.createSelectionMover(cursor),
-                caret = caretFactory.createCaret(selectionMover),
+            var caret = caretFactory.createCaret(cursor),
                 userData = session.getUserModel().getUserDetails(cursor.getMemberId());
 
             caret.setAvatarImageUrl(userData.imageurl);
@@ -84,30 +81,8 @@ gui.SessionView = (function () {
             delete carets[memberid];
         }
 
-        /**
-         * @param {!Object} moveData
-         */
-        function onCursorMoved(moveData) {
-            var caret = carets[moveData.memberid],
-                stepCounter = caret.getStepCounter(),
-                positionFilter = session.getFilter(),
-                steps;
-
-            if (moveData.number > 0) {
-                steps = stepCounter.countForwardSteps(moveData.number, positionFilter);
-            } else if (moveData.number < 0) {
-                steps = -stepCounter.countBackwardSteps(-moveData.number, positionFilter);
-            } else {
-                // nothing to do
-                return;
-            }
-            runtime.log("Moving. moving, moving... walkableSteps "+steps);
-            caret.move(steps);
-        }
-
         session.subscribe("cursor/added", onCursorAdded);
         session.subscribe("cursor/removed", onCursorRemoved);
-        session.subscribe("cursor/moved", onCursorMoved);
 
     }
 

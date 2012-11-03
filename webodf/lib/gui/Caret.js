@@ -32,7 +32,7 @@
  */
 /*global core, gui, runtime*/
 
-runtime.loadClass("gui.SelectionMover");
+runtime.loadClass("core.Cursor");
 runtime.loadClass("gui.Avatar");
 
 /**
@@ -40,9 +40,9 @@ runtime.loadClass("gui.Avatar");
  * used via the HTML attribute contentEditable. Outside of text nodes, an empty
  * element representing the caret is used.
  * @constructor
- * @param {!gui.SelectionMover} selectionMover
+ * @param {!core.Cursor} cursor
  */
-gui.Caret = function Caret(selectionMover) {
+gui.Caret = function Caret(cursor) {
     "use strict";
     function clearNode(node) {
         while (node.firstChild !== null) {
@@ -77,21 +77,8 @@ gui.Caret = function Caret(selectionMover) {
         }
     }
 
-    this.updatePositionAndFocus = function () {
+    this.setFocus = function () {
         span.focus();
-    };
-    this.updatePosition = function () {
-    };
-    this.move = function (number) {
-        //runtime.log("moving " + number);
-        var moved = 0;
-        if (number > 0) {
-            moved = selectionMover.movePointForward(number);
-        } else if (number <= 0) {
-            moved = -selectionMover.movePointBackward(-number);
-        }
-        self.updatePosition();
-        return moved;
     };
     this.setAvatarImageUrl = function (url) {
         avatar.setImageUrl(url);
@@ -104,10 +91,7 @@ gui.Caret = function Caret(selectionMover) {
         return span.style.borderColor;
     };
     this.getCursor = function () {
-        return selectionMover.getCursor();
-    };
-    this.getSelection = function () {
-        return selectionMover.getSelection();
+        return cursor;
     };
     /**
      * @return {!Element}
@@ -128,12 +112,8 @@ gui.Caret = function Caret(selectionMover) {
     this.hideHandle = function () {
         avatar.hide();
     };
-    this.getStepCounter = function () {
-        return selectionMover.getStepCounter();
-    };
     function init() {
-        var rootNode = selectionMover.getRootNode(),
-            document = /**@type{!Document}*/(rootNode.ownerDocument),
+        var document = cursor.getDocument(),
             htmlns = document.documentElement.namespaceURI;
 
         span = document.createElementNS(htmlns, "span");
@@ -153,7 +133,7 @@ gui.Caret = function Caret(selectionMover) {
             span.style.borderLeftWidth = "1px";
         };
 
-        cursorNode = selectionMover.getCursor().getNode();
+        cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
         avatar = new gui.Avatar(span);
     }
