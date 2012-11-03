@@ -42,47 +42,49 @@ runtime.loadClass("gui.SessionController");
 runtime.loadClass("gui.SessionView");
 
 /**
- * @param {!Element} avatarButtonElement
+ * @param {!Element} avatarListDiv
  * @param {!gui.Caret} caret
  * @return {undefined}
  */
-function setupAvatarButton(avatarButtonElement, sessionView, memberid, userDetails) {
+function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
     "use strict";
-    var doc = avatarButtonElement.ownerDocument,
-        image = doc.createElement("img");
+    var doc = avatarListDiv.ownerDocument,
+        htmlns = doc.documentElement.namespaceURI,
+        avatarDiv = doc.createElementNS(htmlns, "div"),
+        imageElement = doc.createElement("img"),
+        fullnameTextNode = doc.createTextNode(userDetails.fullname);
 
-    image.src = userDetails.imageurl;
-    image.width = 22;
-    image.height = 22;
-    image.hspace = 3;
-    image.align = "baseline";
-    image.style['margin-top'] = "3px";
-    avatarButtonElement.appendChild(image);
+    imageElement.src = userDetails.imageurl;
+    imageElement.width = 22;
+    imageElement.height = 22;
+    imageElement.hspace = 3;
+    imageElement.align = "baseline";
+    imageElement.style['margin-top'] = "3px";
 
-    avatarButtonElement.appendChild(doc.createTextNode(userDetails.fullname));
-
-    avatarButtonElement.style.background = userDetails.color;
-
-    avatarButtonElement.onmouseover = function () {
+    avatarDiv.appendChild(imageElement);
+    avatarDiv.appendChild(fullnameTextNode);
+    avatarDiv.style.background = userDetails.color;
+    avatarDiv.onmouseover = function () {
         //avatar.getCaret().showHandle();
     };
-    avatarButtonElement.onmouseout = function () {
+    avatarDiv.onmouseout = function () {
         //avatar.getCaret().hideHandle();
     };
-    avatarButtonElement.onclick = function () {
+    avatarDiv.onclick = function () {
         var caret = sessionView.getCaret(memberid);
         if (caret) {
             caret.toggleHandleVisibility();
         }
     };
+    avatarListDiv.appendChild(avatarDiv);
 }
 
 /**
  * @param {!ops.SessionView} sessionView
- * @param {!Element} avatarlistdiv
+ * @param {!Element} avatarListDiv
  * @return {undefined}
  */
-function setupAvatarView(sessionView, avatarlistdiv) {
+function setupAvatarView(sessionView, avatarListDiv) {
     "use strict";
     var session = sessionView.getSession();
 
@@ -90,14 +92,9 @@ function setupAvatarView(sessionView, avatarlistdiv) {
     // on this signal creates the caret, so trying to get the caret
     // at this point is not good to do. So fetch it dynamically in the avatarbutton.
     session.subscribe("cursor/added", function(cursor) {
-        var doc = avatarlistdiv.ownerDocument,
-            htmlns = doc.documentElement.namespaceURI,
-            memberid = cursor.getMemberId(),
-            i,
-            e = doc.createElementNS(htmlns, "div");
+        var memberid = cursor.getMemberId();
 
-        avatarlistdiv.appendChild(e);
-        setupAvatarButton(e, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
+        createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
     });
 }
 
@@ -115,7 +112,7 @@ function addMemberToSession(session, memberId) {
 function initSession(odfid, avatarlistid, callback) {
     "use strict";
     var odfelement = document.getElementById(odfid),
-        avatarlistdiv = document.getElementById(avatarlistid),
+        avatarListDiv = document.getElementById(avatarlistid),
         odfcanvas = new odf.OdfCanvas(odfelement),
         testsession,
         sessionController,
@@ -146,7 +143,7 @@ function initSession(odfid, avatarlistid, callback) {
         sessionController = new gui.SessionController(testsession, "you:"+Date.now());
         sessionView = new gui.SessionView(testsession, new gui.CaretFactory(sessionController));
 
-        setupAvatarView(sessionView, avatarlistdiv);
+        setupAvatarView(sessionView, avatarListDiv);
 
         // set window title
         document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";

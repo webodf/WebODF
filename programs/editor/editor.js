@@ -46,7 +46,9 @@ function editor_init(docurl) {
     "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
-    var doclocation, pos, odfElement, odfCanvas;
+    var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
+
+    isConnectedWithNetwork = (runtime.getNetwork().networkStatus !== "unavailable");
 
     // documentChangedEvent
     document.documentChangedEvent = document.createEvent('Event');
@@ -78,7 +80,7 @@ function editor_init(docurl) {
 
         odfCanvas.addListener("statereadychange", function() {
             loadWidgets(document);
-            loadAvatars(document, document.getElementById('peopleList'));
+            loadWebOdfEditor(document, document.getElementById('peopleList'), isConnectedWithNetwork);
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);

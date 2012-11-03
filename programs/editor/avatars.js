@@ -32,94 +32,120 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 runtime.loadClass("ops.SessionImplementation");
-runtime.loadClass("gui.Avatar");
+runtime.loadClass("ops.NowjsOperationRouter");
+runtime.loadClass("odf.OdfCanvas");
+runtime.loadClass("gui.CaretFactory");
+runtime.loadClass("gui.Caret");
+runtime.loadClass("gui.SessionController");
+runtime.loadClass("gui.SessionView");
 
 var avatarStyles = null;
 
-function setupAvatar(avatarButtonElement, avatar) {
+function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
     "use strict";
-    var doc = avatarButtonElement.ownerDocument,
-        memberid = avatar.getMemberId(),
-        rulesCStr;
-    avatarButtonElement.appendChild(doc.createTextNode(memberid));
-    avatarButtonElement.onclick = function () {
-        document.session.setActiveAvatar(memberid);
+    var doc = avatarListDiv.ownerDocument,
+        htmlns = doc.documentElement.namespaceURI,
+        avatarDiv = doc.createElementNS(htmlns, "div"),
+        imageElement = doc.createElement("img"),
+        fullnameTextNode = doc.createTextNode(userDetails.fullname);
+
+    imageElement.src = userDetails.imageurl;
+    imageElement.width = 22;
+    imageElement.height = 22;
+    imageElement.hspace = 3;
+    imageElement.align = "baseline";
+    imageElement.style['margin-top'] = "3px";
+
+    avatarDiv.appendChild(imageElement);
+    avatarDiv.appendChild(fullnameTextNode);
+    avatarDiv.style.background = userDetails.color;
+    avatarDiv.onmouseover = function () {
+        //avatar.getCaret().showHandle();
     };
-    avatarButtonElement.style.background = avatar.getColor();
+    avatarDiv.onmouseout = function () {
+        //avatar.getCaret().hideHandle();
+    };
+    avatarDiv.onclick = function () {
+        var caret = sessionView.getCaret(memberid);
+        if (caret) {
+            caret.toggleHandleVisibility();
+        }
+    };
+    avatarListDiv.appendChild(avatarDiv);
 
     // Add per-avatar edited styling
-    rulesCStr = 'text|p[class=edited][user='+avatar.getMemberId()+'] { background-color: '+avatar.getColor()+';'
+    avatarStyles.sheet.insertRule('text|p[class=edited][user='+memberid+'] { background-color: '+userDetails.color+';'
                                                                  +  '-webkit-animation-name: fade;'
                                                                  +  '-webkit-animation-duration: 10s;'
                                                                  +  '-webkit-animation-fill-mode: forwards;'
-                                                                 +  '-moz-animation-name: fade;'
-                                                                 +  '-moz-animation-duration: 10s;'
-                                                                 +  '-moz-animation-fill-mode: forwards;'
-                                                                 +  'border-radius: 10px;}';
-    // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
-    // avatarStyles.sheet.insertRule(rulesCStr, 0);
-    // Workaround for now
-    avatarStyles.appendChild(document.createTextNode(rulesCStr));
+                                                                 +  'border-radius: 10px;}',
+                        0);
 }
 
-function setupAvatarView(session, avatarlistdiv) {
+function setupAvatarView(sessionView, avatarListDiv) {
     "use strict";
 
-    var doc = avatarlistdiv.ownerDocument,
-        htmlns = doc.documentElement.namespaceURI,
-        avatars = session.getAvatars(),
-        head, style,
-        i,
-        e;
+    var session = sessionView.getSession(),
+        head = document.getElementsByTagName('head')[0],
+        style = document.createElementNS(head.namespaceURI, 'style');
 
     // Add a css sheet for avatar-edited styling
-    head = document.getElementsByTagName('head')[0],
-    style = document.createElementNS(head.namespaceURI, 'style');
-    style.setAttribute('type', 'text/css');
-    style.setAttribute('media', 'screen, print, handheld, projection');
+    style.type = 'text/css';
+    style.media = 'screen, print, handheld, projection';
     style.appendChild(document.createTextNode('@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);'));
     head.appendChild(style);
     avatarStyles = style;
 
-    for (i = 0; i < avatars.length; i += 1) {
-        e = doc.createElementNS(htmlns, "div");
-        avatarlistdiv.appendChild(e);
-        setupAvatar(e, avatars[i]);
-        avatars[i].getCaret().showHandle();
-    }
-    
-    avatars.forEach(function(avatar) {
-        document.addEventListener('changed', function() {
-            avatar.getCaret().updateHandlePosition();
-        });
+    // attention: there is a race condition, sessionView also only
+    // on this signal creates the caret, so trying to get the caret
+    // at this point is not good to do. So fetch it dynamically in the avatarbutton.
+    session.subscribe("cursor/added", function(cursor) {
+        var memberid = cursor.getMemberId();
+
+        createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
     });
 }
 
-function addMember(session, member) {
+
+/**
+ * Utility method for testing
+ * @param {?string} memberId
+ */
+function addMemberToSession(session, memberId) {
     "use strict";
-    session.addMemberToSession(member.id);
-    var avatar = session.getAvatar(member.id);
-    avatar.setImageUrl(member.imageurl);
-    avatar.setColor(member.color);
+    var op = new ops.OpAddMember(session);
+    op.init({memberid:memberId});
+    session.enqueue(op);
 }
 
-function createSession(odfcanvas, avatarlistdiv) {
-    "use strict";
-    var odfcontainer = odfcanvas.odfContainer(),
-        session = new ops.SessionImplementation(odfcontainer),
-        avatar;
 
+
+function loadWebOdfEditor(document, avatarListDiv, isConnectedWithNetwork) {
+    "use strict";
+    var odfcontainer = document.odfCanvas.odfContainer(),
+        session, sessionController, sessionView,
+        opRouter = null;
+
+    session = new ops.SessionImplementation(odfcontainer);
+    if (isConnectedWithNetwork) {
+        // use the nowjs op-router when connected
+        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
+    }
+    sessionController = new gui.SessionController(session, "you");
+    sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
+
+    setupAvatarView(sessionView, avatarListDiv);
+
+    // start editing: let the controller send the OpAddMember
+    if (isConnectedWithNetwork) {
+        opRouter.requestReplay();
+    }
     // in this test we start a session from scratch: it is not loaded from
     // a serialized document
     // each avatar is added at the starting position
-    addMember(session, {id: "Bob", imageurl: "avatar-pigeon.png", color: "#fcc"});
-    addMember(session, {id: "Alice", imageurl: "avatar-flower.png", color: "#cfc"});
-    setupAvatarView(session, avatarlistdiv);
+    // add our two friends
+    addMemberToSession(session, "bob"); //"http://bogus/src=avatar/thkogmbh/avatar.png"
+    addMemberToSession(session, "alice");
 
-    return session;
-}
-
-function loadAvatars(documentObject, avatarList) {
-	"use strict";
-    document.session = createSession(documentObject.odfCanvas, avatarList);
+    sessionController.startEditing();
 }
