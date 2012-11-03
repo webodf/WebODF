@@ -36,17 +36,17 @@
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("ops.NowjsOperationRouter");
 runtime.loadClass("odf.OdfCanvas");
-runtime.loadClass("gui.AvatarFactory");
-runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.CaretFactory");
+runtime.loadClass("gui.Caret");
 runtime.loadClass("gui.SessionController");
 runtime.loadClass("gui.SessionView");
 
 /**
  * @param {!Element} avatarButtonElement
- * @param {!gui.Avatar} avatar
+ * @param {!gui.Caret} caret
  * @return {undefined}
  */
-function setupAvatarButton(avatarButtonElement, avatar, userDetails) {
+function setupAvatarButton(avatarButtonElement, sessionView, memberid, userDetails) {
     "use strict";
     var doc = avatarButtonElement.ownerDocument,
         image = doc.createElement("img");
@@ -70,34 +70,34 @@ function setupAvatarButton(avatarButtonElement, avatar, userDetails) {
         //avatar.getCaret().hideHandle();
     };
     avatarButtonElement.onclick = function () {
-        avatar.getCaret().toggleHandleVisibility();
+        var caret = sessionView.getCaret(memberid);
+        if (caret) {
+            caret.toggleHandleVisibility();
+        }
     };
 }
 
 /**
  * @param {!ops.SessionView} sessionView
- * @param {!Array.<!gui.Avatar>} avatar
+ * @param {!Element} avatarlistdiv
  * @return {undefined}
  */
 function setupAvatarView(sessionView, avatarlistdiv) {
     "use strict";
     var session = sessionView.getSession();
 
+    // attention: there is a race condition, sessionView also only
+    // on this signal creates the caret, so trying to get the caret
+    // at this point is not good to do. So fetch it dynamically in the avatarbutton.
     session.subscribe("cursor/added", function(cursor) {
         var doc = avatarlistdiv.ownerDocument,
             htmlns = doc.documentElement.namespaceURI,
-            avatars = sessionView.getAvatars(),
             memberid = cursor.getMemberId(),
             i,
             e = doc.createElementNS(htmlns, "div");
 
         avatarlistdiv.appendChild(e);
-        for (i = 0; i < avatars.length; i += 1) {
-            if (avatars[i].getMemberId() === memberid) {
-                setupAvatarButton(e, avatars[i], session.getUserModel().getUserDetails(memberid));
-                break;
-            }
-        }
+        setupAvatarButton(e, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
     });
 }
 
@@ -143,9 +143,9 @@ function initSession(odfid, avatarlistid, callback) {
             // use the nowjs op-router when connected
             testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
         }
-        sessionView = new gui.SessionView(testsession);
         sessionController = new gui.SessionController(testsession, "you");
-        sessionView.setGuiAvatarFactory(new gui.AvatarFactory(testsession, sessionController));
+        sessionView = new gui.SessionView(testsession, new gui.CaretFactory(testsession, sessionController));
+
         setupAvatarView(sessionView, avatarlistdiv);
 
         // add our two friends

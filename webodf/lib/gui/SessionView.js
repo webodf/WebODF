@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, gui */
-runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.Caret");
 runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("ops.TrivialUserModel");
 
@@ -41,75 +41,54 @@ gui.SessionView = (function () {
     "use strict";
 
     /**
-        * @constructor
-        */
-    function SessionView(session) {
-        var guiAvatarFactory = null,
-            selectionManager = new gui.SelectionManager(session.getRootNode()),
-            members = {};
+      * @constructor
+      */
+    function SessionView(session, caretFactory) {
+        var selectionManager = new gui.SelectionManager(session.getRootNode()),
+            carets = {};
 
         /**
-        * @return {ops.Session}
-        */
+         * @return {ops.Session}
+         */
         this.getSession = function () {
             return session;
         };
         /**
-        * @param {!string} memberid
-        * @return {gui.Avatar}
-        */
-        this.getAvatar = function (memberid) {
-            return members[memberid];
-        };
-        /**
-        * @return {!Array.<!gui.Avatar>}
-        */
-        this.getAvatars = function () {
-            var list = [], i;
-            for (i in members) {
-                if (members.hasOwnProperty(i)) {
-                    list.push(members[i]);
-                }
-            }
-            return list;
-        };
-
-        this.setGuiAvatarFactory = function(factory) {
-            guiAvatarFactory = factory;
+         * @param {!string} memberid
+         * @return {gui.Caret}
+         */
+        this.getCaret = function (memberid) {
+            return carets[memberid];
         };
 
         /**
-        * @param {core.Cursor} cursor
-        */
+         * @param {core.Cursor} cursor
+         */
         function onCursorAdded(cursor) {
             var selectionMover = selectionManager.createSelectionMover(cursor),
-                avatar = guiAvatarFactory.createAvatar(selectionMover),
+                caret = caretFactory.createCaret(selectionMover),
                 userData = session.getUserModel().getUserDetails(cursor.getMemberId());
-            // TODO: check if all data is set, here or in usermodel
-            avatar.setImageUrl(userData.imageurl);
-            avatar.setColor(userData.color);
 
-            runtime.log("+++ View here +++ eagerly created an Avatar for '"+cursor.getMemberId()+"'! +++");
+            caret.setAvatarImageUrl(userData.imageurl);
+            caret.setColor(userData.color);
 
-            members[cursor.getMemberId()] = avatar;
+            runtime.log("+++ View here +++ eagerly created an Caret for '"+cursor.getMemberId()+"'! +++");
+
+            carets[cursor.getMemberId()] = caret;
         }
 
         /**
-        * @param {!string} memberid
-        */
+         * @param {!string} memberid
+         */
         function onCursorRemoved(memberid) {
-            var avatar = members[memberid];
-
-            avatar.removeFromSession();
-            delete members[memberid];
+            delete carets[memberid];
         }
 
         /**
-        * @param {!Object} moveData
-        */
+         * @param {!Object} moveData
+         */
         function onCursorMoved(moveData) {
-            var avatar = members[moveData.memberid],
-                caret = avatar.getCaret(),
+            var caret = carets[moveData.memberid],
                 stepCounter = caret.getStepCounter(),
                 positionFilter = session.getFilter(),
                 steps;

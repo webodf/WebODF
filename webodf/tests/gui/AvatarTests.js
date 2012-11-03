@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, gui, ops*/
-runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.Caret");
 
 /**
  * @constructor
@@ -118,14 +118,13 @@ gui.AvatarTests = function AvatarTests(runner) {
         selection = new core.Selection(t.doc);
         cursor = new core.Cursor("id", selection, t.doc);
         t.selectionMover = new gui.SelectionMover(cursor, t.doc.documentElement);
-        t.avatar = new gui.Avatar(t.selectionMover);
+        t.caret = new gui.Caret(t.selectionMover);
     }
     function create() {
         createAvatar("<a/>");
-        r.shouldBeNonNull(t, "t.avatar");
-        r.shouldBe(t, "t.avatar.getMemberId()", "'id'");
-        var c = t.avatar.getCaret(),
-            s = c.getSelection();
+        r.shouldBeNonNull(t, "t.caret");
+        r.shouldBe(t, "t.caret.getCursor().getMemberId()", "'id'");
+        var s = t.caret.getSelection();
         t.rangeCount = s.rangeCount;
         r.shouldBe(t, "t.rangeCount", "1");
         t.focusOffset = s.focusOffset;
@@ -135,10 +134,9 @@ gui.AvatarTests = function AvatarTests(runner) {
     }
     function moveInEmptyDoc() {
         createAvatar("<a/>");
-        var c = t.avatar.getCaret(),
-            s = c.getSelection();
+        var s = t.caret.getSelection();
         t.startNode = s.focusNode;
-        c.move(1);
+        t.caret.move(1);
         t.focusOffset = s.focusOffset;
         t.focusNode = s.focusNode;
         r.shouldBe(t, "t.focusOffset", "0");
@@ -146,33 +144,32 @@ gui.AvatarTests = function AvatarTests(runner) {
     }
     function moveInSimpleDoc() {
         createAvatar("<a>hello</a>");
-        var c = t.avatar.getCaret(),
-            s = c.getSelection(),
+        var s = t.caret.getSelection(),
             i;
         t.startNode = s.focusNode;
         for (i = 1; i <= 4; i += 1) {
-            c.move(1);
+            t.caret.move(1);
             t.focusOffset = s.focusOffset;
             t.focusNode = s.focusNode;
             r.shouldBe(t, "t.focusOffset", i.toString());
             r.shouldBe(t, "t.focusNode", "t.startNode");
         }
-        c.move(1);
+        t.caret.move(1);
         t.focusOffset = s.focusOffset;
         t.focusNode = s.focusNode;
         r.shouldBe(t, "t.focusOffset", "1");
         r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
-        c.move(1);
+        t.caret.move(1);
         r.shouldBe(t, "t.focusOffset", "1");
         r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
         for (i = 4; i >= 0; i -= 1) {
-            c.move(-1);
+            t.caret.move(-1);
             t.focusOffset = s.focusOffset;
             t.focusNode = s.focusNode;
             r.shouldBe(t, "t.focusOffset", i.toString());
             r.shouldBe(t, "t.focusNode", "t.startNode");
         }
-        c.move(1);
+        t.caret.move(1);
         r.shouldBe(t, "t.focusOffset", "0");
         r.shouldBe(t, "t.focusNode", "t.startNode");
     }
@@ -185,7 +182,6 @@ gui.AvatarTests = function AvatarTests(runner) {
         var steps, s, e;
         t.pos = [];
         createAvatar(xml);
-        t.caret = t.avatar.getCaret();
         s = t.caret.getSelection();
         t.counter = t.caret.getStepCounter();
 
@@ -239,7 +235,6 @@ gui.AvatarTests = function AvatarTests(runner) {
         t.pos = [];
         t.filter = filter;
         createAvatar(xml);
-        t.caret = t.avatar.getCaret();
         t.counter = t.caret.getStepCounter();
 
         // move to a valid position

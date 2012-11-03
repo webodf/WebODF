@@ -30,58 +30,58 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui*/
-runtime.loadClass("gui.Caret");
+/*global gui*/
 
 /**
- * The avatar is at the same time visualization of the caret and receiver of
- * input events.
- * The avatar does not change it's position of its own accord. The position is
- * changed by the session to which the avatar forwards the keystrokes that it
- * receives. That is a not true right now.
+ * The avatar is a passive element that can be displayed above an element.
+ * It will always keep a relative distance to that element, so automatically
+ * move around with the parent element.
  * @constructor
- * @param {!gui.SelectionMover} selectionMover
+ * @param {!Element} parentElement
  */
-gui.Avatar = function Avatar(selectionMover) {
+gui.Avatar = function Avatar(parentElement) {
     "use strict";
-    var self = this,
-        memberid = selectionMover.getCursor().getMemberId(),
-        caret,
-        image;
-// TODO: move to controller & co.
-//     function moveLineUp() {
-//         var steps = stepCounter.countLineUpSteps(1, positionFilter);
-//         caretMover(-steps);
-//     }
-//     function moveLineDown() {
-//         var steps = stepCounter.countLineDownSteps(1, positionFilter);
-//         caretMover(steps);
-//     }
-    this.removeFromSession = function () {
-    };
-    this.getMemberId = function () {
-        return memberid;
+    var handle,
+        image,
+        displayShown = "block",
+        displayHidden = "none";
+
+    this.setColor = function (color) {
+        handle.style.background = color;
     };
     this.setImageUrl = function (url) {
         image.src = url;
     };
-    this.getColor = function () {
-        return caret.getColor();
+    this.isVisible = function () {
+        return (handle.style.display === displayShown);
     };
-    this.setColor = function (color) {
-        caret.setColor(color);
+    this.show = function () {
+        handle.style.display = displayShown;
     };
-    this.getCaret = function () {
-        return caret;
+    this.hide = function () {
+        handle.style.display = displayHidden;
     };
+    this.markAsFocussed = function (isFocussed) {
+        handle.className = (isFocussed ? "active" : "");
+    };
+
     function init() {
-        var handle;
-        caret = new gui.Caret(selectionMover);
-        handle = caret.getHandleElement();
-        image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
+        var document = /**@type{!Document}*/(parentElement.ownerDocument),
+            htmlns = document.documentElement.namespaceURI;
+
+        handle = document.createElementNS(htmlns, "div");
+        image = document.createElementNS(htmlns, "img");
         image.width = 64;
         image.height = 64;
         handle.appendChild(image);
+        handle.style.width = '64px';
+        handle.style.height = '70px';
+        handle.style.position = "absolute";
+        handle.style.top = '-80px';
+        handle.style.left = '-32px';
+        handle.style.display = displayShown;
+        parentElement.appendChild(handle);
     }
+
     init();
 };

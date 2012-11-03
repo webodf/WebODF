@@ -34,37 +34,29 @@
  */
 /*global runtime, core, gui*/
 
-runtime.loadClass("gui.Avatar");
+runtime.loadClass("gui.Caret");
 
 /**
- * The avatar factory creates an avatar as UI representation of a users's cursor.
- * If the avatar is for the local user, then a handler is passed to the avatar
- * to redirect the keystrokes received for the avatar to the session controller.
+ * The caret factory creates an caret as UI representation of a users's cursor.
+ * If the caret is for the local user, then a handler is passed to the caret
+ * to redirect the keystrokes received for the caret to the session controller.
  * @constructor
  * @param {!ops.Session} session
  * @param {!gui.SessionController} sessionController
  */
-gui.AvatarFactory = function AvatarFactory(session, sessionController) {
+gui.CaretFactory = function CaretFactory(session, sessionController) {
     "use strict";
 
     /**
-     * @return {!gui.Avatar}
+     * @return {!gui.Caret}
      */
-    this.createAvatar = function (selectionMover) {
+    this.createCaret = function (selectionMover) {
         var memberid = selectionMover.getCursor().getMemberId(),
-            avatar,
-            caret;
+            caret = new gui.Caret(selectionMover);
 
-        avatar = new gui.Avatar(selectionMover);
-
-//             // TODO: who should/needs to care for that?
-//             if (avatar.getMemberId() === session.getUserModel().getLocalMemberId()) {
-//                 caret.focus();
-//             }
-        // if local input user, then let controller listen on avatar/caret span
+        // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
-            runtime.log("Starting to track input for avatar of "+memberid);
-            caret = avatar.getCaret();
+            runtime.log("Starting to track input for caret of "+memberid);
             caret.updatePosition = caret.updatePositionAndFocus;
             sessionController.setFocusElement(caret.getFocusElement());
             // TEMPORARY hack until counters are part of cursors
@@ -72,6 +64,6 @@ gui.AvatarFactory = function AvatarFactory(session, sessionController) {
             caret.getFocusElement().focus();
         }
 
-        return avatar;
+        return caret;
     };
 };

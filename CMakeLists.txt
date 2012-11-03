@@ -157,15 +157,15 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpRemoveText.js
     lib/ops/OperationFactory.js
     lib/gui/SelectionMover.js
-    lib/gui/Caret.js
     lib/gui/Avatar.js
+    lib/gui/Caret.js
     lib/gui/SessionController.js
     lib/gui/SelectionManager.js
     lib/ops/TrivialUserModel.js
     lib/ops/TrivialOperationRouter.js
     lib/ops/NowjsOperationRouter.js
     lib/gui/SessionView.js
-    lib/gui/AvatarFactory.js
+    lib/gui/CaretFactory.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
 

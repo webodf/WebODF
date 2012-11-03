@@ -51,7 +51,7 @@
         "gui/Caret.js",
         "gui/PresenterUI.js",
         "gui/SessionController.js",
-        "gui/AvatarFactory.js",
+        "gui/CaretFactory.js",
         "gui/SessionView.js",
         "gui/SelectionManager.js",
         "gui/SelectionMover.js",

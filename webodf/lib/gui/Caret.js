@@ -33,6 +33,7 @@
 /*global core, gui, runtime*/
 
 runtime.loadClass("gui.SelectionMover");
+runtime.loadClass("gui.Avatar");
 
 /**
  * Class that represents a caret in a document. In text nodes, a native caret is
@@ -49,11 +50,8 @@ gui.Caret = function Caret(selectionMover) {
         }
     }
     var self = this,
-        rootNode = selectionMover.getRootNode(),
-        document = /**@type{!Document}*/(rootNode.ownerDocument),
-        htmlns = document.documentElement.namespaceURI,
-        span = document.createElementNS(htmlns, "span"),
-        handle = document.createElementNS(htmlns, "div"),
+        span,
+        avatar,
         cursorNode,
         focussed = false,
         caretLineVisible,
@@ -78,19 +76,11 @@ gui.Caret = function Caret(selectionMover) {
             }, 1000);
         }
     }
-    function updateHandlePosition() {
-        if (handle.style) {
-            handle.style.top = (span.offsetTop - handle.offsetHeight - 10) + "px";
-            handle.style.left = (span.offsetLeft - handle.offsetWidth / 2) + "px";
-        }
-    }
 
     this.updatePositionAndFocus = function () {
         span.focus();
-        updateHandlePosition();
     };
     this.updatePosition = function () {
-        updateHandlePosition();
     };
     this.move = function (number) {
         //runtime.log("moving " + number);
@@ -103,62 +93,69 @@ gui.Caret = function Caret(selectionMover) {
         self.updatePosition();
         return moved;
     };
+    this.setAvatarImageUrl = function (url) {
+        avatar.setImageUrl(url);
+    };
     this.setColor = function (color) {
         span.style.borderColor = color;
-        handle.style.background = color;
+        avatar.setColor(color);
     };
     this.getColor = function () {
         return span.style.borderColor;
+    };
+    this.getCursor = function () {
+        return selectionMover.getCursor();
     };
     this.getSelection = function () {
         return selectionMover.getSelection();
     };
     /**
-     * @return {Element}
+     * @return {!Element}
      */
     this.getFocusElement = function () {
         return span;
     };
-    this.getHandleElement = function () {
-        return handle;
-    };
     this.toggleHandleVisibility = function () {
-        if (handle.style.display === "block") {
-            this.hideHandle();
+        if (avatar.isVisible()) {
+            avatar.hide();
         } else {
-            this.showHandle();
+            avatar.show();
         }
     };
     this.showHandle = function () {
-        handle.style.display = "block";
-        updateHandlePosition();
+        avatar.show();
     };
     this.hideHandle = function () {
-        handle.style.display = "none";
+        avatar.hide();
     };
     this.getStepCounter = function () {
         return selectionMover.getStepCounter();
     };
     function init() {
-        if (handle.style) {
-            handle.style.width = '64px';
-            handle.style.height = '70px';
-        }
+        var rootNode = selectionMover.getRootNode(),
+            document = /**@type{!Document}*/(rootNode.ownerDocument),
+            htmlns = document.documentElement.namespaceURI;
 
+        span = document.createElementNS(htmlns, "span");
         span.setAttribute("contenteditable", true);
+        // making the position relative enables the avatar to use
+        // the span as reference for its absolute position
+        span.style.position = "relative";
+
         span.onfocus = function () {
             focussed = true;
-            handle.className = "active";
+            avatar.markAsFocussed(true);
             blink();
         };
         span.onblur = function () {
             focussed = false;
-            handle.className = "";
+            avatar.markAsFocussed(false);
             span.style.borderLeftWidth = "1px";
         };
+
         cursorNode = selectionMover.getCursor().getNode();
         cursorNode.appendChild(span);
-        cursorNode.appendChild(handle);
+        avatar = new gui.Avatar(span);
     }
     init();
 };
