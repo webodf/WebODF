@@ -49,6 +49,7 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 	"use strict";
 
 	var self=this,
+	memberid = null,
 	net = runtime.getNetwork();
 
 	this.setOperationFactory = function (f) {
@@ -57,6 +58,10 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 
 	this.setPlaybackFunction = function (playback_func) {
 		self.playback_func = playback_func;
+	};
+
+	this.setMemberid = function (mid) {
+		memberid = mid;
 	};
 
 	function receiveOpFromNetwork(op_dict) {
@@ -68,6 +73,11 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 			runtime.log("ignoring invalid incoming opspec: "+op_dict);
 		}
 	}
+	net.ping = function(pong) {
+		if (memberid !== null) {
+			pong(memberid);
+		}
+	};
 	net.receiveOp = receiveOpFromNetwork;
 	net.memberid = "router"; // TODO work with a UserModel
 

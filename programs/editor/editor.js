@@ -92,14 +92,16 @@ function editor_init(docurl) {
 
         odfCanvas.addListener("statereadychange", function() {
             var session, sessionController, sessionView,
+                memberid = "you:"+Date.now(),
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
                 session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
+                opRouter.setMemberid(memberid);
             }
-            sessionController = new gui.SessionController(session, "you");
+            sessionController = new gui.SessionController(session, memberid);
             sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
 
             if (isConnectedWithNetwork) {
