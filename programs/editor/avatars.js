@@ -41,13 +41,14 @@ runtime.loadClass("gui.SessionView");
 
 var avatarStyles = null;
 
-function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
+function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
     "use strict";
     var doc = avatarListDiv.ownerDocument,
         htmlns = doc.documentElement.namespaceURI,
         avatarDiv = doc.createElementNS(htmlns, "div"),
         imageElement = doc.createElement("img"),
-        fullnameTextNode = doc.createTextNode(userDetails.fullname);
+        fullnameTextNode = doc.createTextNode(userDetails.fullname),
+        rulesCStr;
 
     imageElement.src = userDetails.imageurl;
     imageElement.width = 22;
@@ -58,6 +59,7 @@ function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
 
     avatarDiv.appendChild(imageElement);
     avatarDiv.appendChild(fullnameTextNode);
+    avatarDiv.memberId = memberId; // TODO: namespace?
     avatarDiv.style.background = userDetails.color;
     avatarDiv.onmouseover = function () {
         //avatar.getCaret().showHandle();
@@ -66,7 +68,7 @@ function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
         //avatar.getCaret().hideHandle();
     };
     avatarDiv.onclick = function () {
-        var caret = sessionView.getCaret(memberid);
+        var caret = sessionView.getCaret(memberId);
         if (caret) {
             caret.toggleHandleVisibility();
         }
@@ -74,12 +76,34 @@ function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
     avatarListDiv.appendChild(avatarDiv);
 
     // Add per-avatar edited styling
-    avatarStyles.sheet.insertRule('text|p[class=edited][user='+memberid+'] { background-color: '+userDetails.color+';'
+    rulesCStr = 'text|p[class=edited][user='+memberId+'] { background-color: '+userDetails.color+';'
                                                                  +  '-webkit-animation-name: fade;'
                                                                  +  '-webkit-animation-duration: 10s;'
                                                                  +  '-webkit-animation-fill-mode: forwards;'
-                                                                 +  'border-radius: 10px;}',
-                        0);
+                                                                 +  '-moz-animation-name: fade;'
+                                                                 +  '-moz-animation-duration: 10s;'
+                                                                 +  '-moz-animation-fill-mode: forwards;'
+                                                                 +  'border-radius: 10px;}';
+    // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
+    // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
+    // avatarStyles.sheet.insertRule(rulesCStr, 0);
+    // Workaround for now
+    avatarStyles.appendChild(document.createTextNode(rulesCStr));
+}
+
+/**
+ * @param {!Element} avatarListDiv
+ * @param {!string} memberId
+ */
+function removeAvatarButton(avatarListDiv, memberId) {
+    var node = avatarListDiv.firstChild;
+    while (node) {
+        if (node.memberId === memberId) {
+            avatarListDiv.removeChild(node);
+            return;
+        }
+        node = node.nextSibling;
+    }
 }
 
 function loadAvatarPane(sessionView, avatarListDiv) {
@@ -100,8 +124,11 @@ function loadAvatarPane(sessionView, avatarListDiv) {
     // on this signal creates the caret, so trying to get the caret
     // at this point is not good to do. So fetch it dynamically in the avatarbutton.
     session.subscribe("cursor/added", function(cursor) {
-        var memberid = cursor.getMemberId();
+        var memberId = cursor.getMemberId();
 
-        createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
+        createAvatarButton(avatarListDiv, sessionView, memberId, session.getUserModel().getUserDetails(memberId));
+    });
+    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberid) {
+        removeAvatarButton(avatarListDiv, memberid);
     });
 }

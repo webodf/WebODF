@@ -44,9 +44,8 @@ runtime.loadClass("gui.SessionView");
 /**
  * @param {!Element} avatarListDiv
  * @param {!gui.Caret} caret
- * @return {undefined}
  */
-function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
+function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
     "use strict";
     var doc = avatarListDiv.ownerDocument,
         htmlns = doc.documentElement.namespaceURI,
@@ -63,6 +62,7 @@ function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
 
     avatarDiv.appendChild(imageElement);
     avatarDiv.appendChild(fullnameTextNode);
+    avatarDiv.memberId = memberId; // TODO: namespace?
     avatarDiv.style.background = userDetails.color;
     avatarDiv.onmouseover = function () {
         //avatar.getCaret().showHandle();
@@ -71,12 +71,27 @@ function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
         //avatar.getCaret().hideHandle();
     };
     avatarDiv.onclick = function () {
-        var caret = sessionView.getCaret(memberid);
+        var caret = sessionView.getCaret(memberId);
         if (caret) {
             caret.toggleHandleVisibility();
         }
     };
     avatarListDiv.appendChild(avatarDiv);
+}
+
+/**
+ * @param {!Element} avatarListDiv
+ * @param {!string} memberId
+ */
+function removeAvatarButton(avatarListDiv, memberId) {
+    var node = avatarListDiv.firstChild;
+    while (node) {
+        if (node.memberId === memberId) {
+            avatarListDiv.removeChild(node);
+            return;
+        }
+        node = node.nextSibling;
+    }
 }
 
 /**
@@ -96,6 +111,9 @@ function setupAvatarView(sessionView, avatarListDiv) {
 
         createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
     });
+    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberid) {
+        removeAvatarButton(avatarListDiv, memberid);
+    });
 }
 
 /**
@@ -107,6 +125,16 @@ function addCursorToDoc(session, memberId) {
     var op = new ops.OpAddCursor(session);
     op.init({memberid:memberId});
     session.enqueue(op);
+}
+
+function removeCursorWithDelay(session, memberId, delay) {
+    "use strict";
+    runtime.setTimeout(function() {
+        runtime.log("Removing cursor for "+memberId);
+        var op = new ops.OpRemoveCursor(session);
+        op.init({memberid:memberId});
+        session.enqueue(op);
+    }, delay*1000);
 }
 
 function initSession(odfid, avatarlistid, callback) {
@@ -158,8 +186,10 @@ function initSession(odfid, avatarlistid, callback) {
         document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
 
         // add our two friends
-        // addCursorToDoc(testsession, "bob");
-        // addCursorToDoc(testsession, "bob");
+        addCursorToDoc(testsession, "bob");
+        addCursorToDoc(testsession, "alice");
+        removeCursorWithDelay(testsession, "bob", 2);
+        removeCursorWithDelay(testsession, "alice", 4);
 
         // start editing: let the controller send the OpAddCursor
         if (is_connected) {

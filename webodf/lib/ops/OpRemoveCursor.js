@@ -48,7 +48,7 @@ ops.OpRemoveCursor = function OpRemoveCursor(session) {
     };
 
     this.execute = function(domroot) {
-        session.removeCursor(memberid);
+        session.getOdfDocument().removeCursor(memberid);
         session.emit(ops.SessionImplementation.signalCursorRemoved, memberid);
     };
 

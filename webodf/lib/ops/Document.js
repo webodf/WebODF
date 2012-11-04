@@ -300,7 +300,13 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
     * @param {!string} memberid
     */
     this.removeCursor = function (memberid) {
-        delete cursors[memberid];
+        var cursor = cursors[memberid],
+            cursorNode;
+        if (cursor) {
+            cursorNode = cursor.getNode();
+            cursorNode.parentNode.removeChild(cursorNode);
+            delete cursors[memberid];
+        }
     };
     /**
      * @param {!string} metadataId
