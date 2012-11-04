@@ -197,5 +197,7 @@ function editor_init(docurl) {
     });
 }
 
-window.onload = function() { editor_init(); };
+window.onload = function() {
+    editor_init( "/webodf/collabtest/text.odt");
+};
 // vim:expandtab
