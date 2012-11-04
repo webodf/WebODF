@@ -124,7 +124,9 @@ function initSession(odfid, avatarlistid, callback) {
     if (runtime.getNetwork().networkStatus !== "unavailable") {
         is_connected = true;
     }
+
     odfcanvas.addListener("statereadychange", function (container) {
+        var memberid = "you:"+Date.now();
         if (container.state !== odf.OdfContainer.DONE) {
             alert("statereadychange fired but state not DONE");
         }
@@ -140,7 +142,14 @@ function initSession(odfid, avatarlistid, callback) {
             // use the nowjs op-router when connected
             testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
         }
-        sessionController = new gui.SessionController(testsession, "you:"+Date.now());
+
+        // place the pong here for now
+        if (is_connected) {
+            runtime.getNetwork().ping = function(pong) {
+                pong(memberid);
+            };
+        }
+        sessionController = new gui.SessionController(testsession, memberid);
         sessionView = new gui.SessionView(testsession, new gui.CaretFactory(sessionController));
 
         setupAvatarView(sessionView, avatarListDiv);
