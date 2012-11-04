@@ -82,10 +82,11 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 		net.requestReplay(
 			function(opspec) {
 				runtime.log("replaying: "+runtime.toJson(opspec));
-				},
-			function() {
-				runtime.log("replay done.");
-				}
+				receiveOpFromNetwork(opspec);
+			},
+			function(count) {
+				runtime.log("replay done ("+count+" ops).");
+			}
 		);
 	};
 };
