@@ -102,9 +102,9 @@ function setupAvatarView(sessionView, avatarListDiv) {
  * Utility method for testing
  * @param {?string} memberId
  */
-function addMemberToSession(session, memberId) {
+function addCursorToDoc(session, memberId) {
     "use strict";
-    var op = new ops.OpAddMember(session);
+    var op = new ops.OpAddCursor(session);
     op.init({memberid:memberId});
     session.enqueue(op);
 }
@@ -149,10 +149,10 @@ function initSession(odfid, avatarlistid, callback) {
         document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
 
         // add our two friends
-        // addMemberToSession(testsession, "bob");
-        // addMemberToSession(testsession, "bob");
+        // addCursorToDoc(testsession, "bob");
+        // addCursorToDoc(testsession, "bob");
 
-        // start editing: let the controller send the OpAddMember
+        // start editing: let the controller send the OpAddCursor
         if (is_connected) {
             opRouter.requestReplay();
         }

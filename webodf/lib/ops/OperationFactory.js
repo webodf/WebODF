@@ -35,10 +35,10 @@
 /*global runtime,ops */
 
 /*
- * crete specific operation instances.
+ * create specific operation instances.
  */
 
-runtime.loadClass("ops.OpAddMember");
+runtime.loadClass("ops.OpAddCursor");
 
 /**
  * @constructor
@@ -52,8 +52,8 @@ ops.OperationFactory = function OperationFactory (session) {
 		var op = null;
 		// TODO: of course the following code can use some better
 		// js language and make it more generic.
-		if (spec.optype === "AddMember") {
-			op = new ops.OpAddMember(session);
+		if (spec.optype === "AddCursor") {
+			op = new ops.OpAddCursor(session);
 			op.init(spec);
 		} else if (spec.optype === "InsertText") {
 			op = new ops.OpInsertText(session);
@@ -61,11 +61,11 @@ ops.OperationFactory = function OperationFactory (session) {
         } else if (spec.optype === "RemoveText") {
             op = new ops.OpRemoveText(session);
             op.init(spec);
-		} else if (spec.optype === "MoveMemberCursor") {
-			op = new ops.OpMoveMemberCursor(session);
+		} else if (spec.optype === "MoveCursor") {
+			op = new ops.OpMoveCursor(session);
 			op.init(spec);
-		} else if (spec.optype === "RemoveMember") {
-			op = new ops.OpRemoveMember(session);
+		} else if (spec.optype === "RemoveCursor") {
+			op = new ops.OpRemoveCursor(session);
 			op.init(spec);
 		}
 		return op;

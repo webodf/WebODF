@@ -111,9 +111,9 @@ function setupAvatarView(sessionView, avatarListDiv) {
  * Utility method for testing
  * @param {?string} memberId
  */
-function addMemberToSession(session, memberId) {
+function addCursorToDoc(session, memberId) {
     "use strict";
-    var op = new ops.OpAddMember(session);
+    var op = new ops.OpAddCursor(session);
     op.init({memberid:memberId});
     session.enqueue(op);
 }
@@ -136,16 +136,16 @@ function loadWebOdfEditor(document, avatarListDiv, isConnectedWithNetwork) {
 
     setupAvatarView(sessionView, avatarListDiv);
 
-    // start editing: let the controller send the OpAddMember
     if (isConnectedWithNetwork) {
         opRouter.requestReplay();
     }
     // in this test we start a session from scratch: it is not loaded from
     // a serialized document
-    // each avatar is added at the starting position
+    // each cursor is added at the starting position
     // add our two friends
-    addMemberToSession(session, "bob"); //"http://bogus/src=avatar/thkogmbh/avatar.png"
-    addMemberToSession(session, "alice");
+    addCursorToDoc(session, "bob"); //"http://bogus/src=avatar/thkogmbh/avatar.png"
+    addCursorToDoc(session, "alice");
 
+    // start editing: let the controller send the OpAddCursor
     sessionController.startEditing();
 }

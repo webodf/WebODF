@@ -32,30 +32,46 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global ops*/
+/*global runtime, ops*/
 
 /**
  * @constructor
  * @implements ops.Operation
  */
-ops.OpRemoveMember = function OpRemoveMember(session) {
+ops.OpMoveCursor = function OpMoveCursor(session) {
     "use strict";
 
-    var memberid, cursorns = 'urn:webodf:names:cursor';
+    var memberid, number;
 
     this.init = function(data) {
         memberid = data.memberid;
+        number = data.number;
     };
 
     this.execute = function(domroot) {
-        session.removeCursor(memberid);
-        session.emit("cursor/removed", memberid);
+        var odfDocument = session.getOdfDocument(),
+            cursor = odfDocument.getCursor(memberid),
+            stepCounter = cursor.getStepCounter(),
+            positionFilter = odfDocument.getPositionFilter(),
+            steps;
+
+        if (number > 0) {
+            steps = stepCounter.countForwardSteps(number, positionFilter);
+        } else if (number < 0) {
+            steps = -stepCounter.countBackwardSteps(-number, positionFilter);
+        } else {
+            // nothing to do
+            return;
+        }
+        runtime.log("Moving. moving, moving... walkableSteps "+steps);
+        cursor.move(steps);
     };
 
     this.spec = function() {
         return {
-            optype: "RemoveMember",
-            memberid: memberid
+            optype: "MoveCursor",
+            memberid: memberid,
+            number: number
         };
     };
 

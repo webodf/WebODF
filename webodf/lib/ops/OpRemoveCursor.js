@@ -32,31 +32,29 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, ops, runtime*/
+/*global ops*/
 
 /**
  * @constructor
  * @implements ops.Operation
  */
-ops.OpAddMember = function OpAddMember(session) {
+ops.OpRemoveCursor = function OpRemoveCursor(session) {
     "use strict";
 
-    var memberid;
+    var memberid, cursorns = 'urn:webodf:names:cursor';
 
     this.init = function(data) {
         memberid = data.memberid;
     };
 
-    this.execute = function(rootNode) {
-        var odfDocument = session.getOdfDocument(),
-            cursor = new core.Cursor(memberid, odfDocument);
-        odfDocument.addCursor(cursor);
-        session.emit("cursor/added", cursor);
+    this.execute = function(domroot) {
+        session.removeCursor(memberid);
+        session.emit("cursor/removed", memberid);
     };
 
     this.spec = function() {
         return {
-            optype: "AddMember",
+            optype: "RemoveCursor",
             memberid: memberid
         };
     };

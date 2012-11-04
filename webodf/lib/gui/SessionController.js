@@ -33,9 +33,9 @@
  */
 /*global runtime, core, gui, ops, odf */
 
-runtime.loadClass("ops.OpAddMember");
-runtime.loadClass("ops.OpRemoveMember");
-runtime.loadClass("ops.OpMoveMemberCursor");
+runtime.loadClass("ops.OpAddCursor");
+runtime.loadClass("ops.OpRemoveCursor");
+runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
 
@@ -94,7 +94,7 @@ gui.SessionController = (function () {
             steps = session.getOdfDocument().getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
 
             if (steps !== 0) {
-                op = new ops.OpMoveMemberCursor(session);
+                op = new ops.OpMoveCursor(session);
                 op.init({memberid:inputMemberId, number:steps});
                 session.enqueue(op);
             }
@@ -103,8 +103,8 @@ gui.SessionController = (function () {
         /**
          * @return {!ops.Operation}
          */
-        function createOpMoveMemberCursor(number) {
-            var op = new ops.OpMoveMemberCursor(session);
+        function createOpMoveCursor(number) {
+            var op = new ops.OpMoveCursor(session);
 
             op.init({memberid:inputMemberId, number:number});
             return op;
@@ -113,7 +113,7 @@ gui.SessionController = (function () {
         /**
          * @return {?ops.Operation}
          */
-        function createOpRemoveTextByBackspace() {
+        function createOpRemoveTextByBackspaceKey() {
             var odfDocument = session.getOdfDocument(),
                 position = odfDocument.getCursorPosition(inputMemberId),
                 domPosition = odfDocument.getPositionInTextNode(position),
@@ -135,21 +135,21 @@ gui.SessionController = (function () {
                 handled = false;
 
             if (keyCode === 37) { // left
-                op = createOpMoveMemberCursor(-1);
+                op = createOpMoveCursor(-1);
                 handled = true;
             } else if (keyCode === 39) { // right
-                op = createOpMoveMemberCursor(1);
+                op = createOpMoveCursor(1);
                 handled = true;
             } else if (keyCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = createOpMoveMemberCursor(-10);
+                op = createOpMoveCursor(-10);
                 handled = true;
             } else if (keyCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = createOpMoveMemberCursor(10);
+                op = createOpMoveCursor(10);
                 handled = true;
             } else if (keyCode === 8) { // Backspace
-                op = createOpRemoveTextByBackspace();
+                op = createOpRemoveTextByBackspaceKey();
                 handled = (op !== null);
             } else {
                 runtime.log("got keycode: " + keyCode);
@@ -213,7 +213,7 @@ gui.SessionController = (function () {
        /**
         */
         this.startEditing = function() {
-            var op = new ops.OpAddMember(session);
+            var op = new ops.OpAddCursor(session);
             op.init({memberid: inputMemberId});
             session.enqueue(op);
         };
@@ -221,7 +221,7 @@ gui.SessionController = (function () {
         /**
          */
         this.endEditing = function() {
-            var op = new ops.OpRemoveMember(session);
+            var op = new ops.OpRemoveCursor(session);
             op.init({memberid: inputMemberId});
             session.enqueue(op);
         };
