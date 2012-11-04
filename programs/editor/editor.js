@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime,document,odf,require */
+/*global runtime,document,odf,require,ops,gui */
 
 runtime.currentDirectory = function () {
     "use strict";
