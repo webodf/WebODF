@@ -83,8 +83,8 @@ function editor_init(docurl) {
     }
 
     // Editor Translations, Widgets and Avatars
-    require([ 
-        'dojo/i18n!nls/myResources.js', 
+    require([
+        'dojo/i18n!nls/myResources.js',
         'widgets.js',
         'avatars.js'
     ], function (translator) {
