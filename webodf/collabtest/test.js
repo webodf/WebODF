@@ -121,11 +121,12 @@ function setupAvatarView(sessionView, avatarListDiv) {
  * Utility method for testing
  * @param {?string} memberId
  */
-function addCursorToDoc(session, memberId) {
+function addCursorToDocTemporarily(session, memberId, timeperiod) {
     "use strict";
     var op = new ops.OpAddCursor(session);
     op.init({memberid:memberId});
     session.enqueue(op);
+    removeCursorWithDelay(session, memberId, timeperiod);
 }
 
 function removeCursorWithDelay(session, memberId, delay) {
@@ -181,16 +182,15 @@ function initSession(odfid, avatarlistid, callback) {
         // set window title
         document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
 
-        // add our two friends
-        addCursorToDoc(testsession, "bob");
-        addCursorToDoc(testsession, "alice");
-        removeCursorWithDelay(testsession, "bob", 2);
-        removeCursorWithDelay(testsession, "alice", 4);
-
-        // start editing: let the controller send the OpAddCursor
         if (is_connected) {
             opRouter.requestReplay();
         }
+
+        // add our two friends
+        addCursorToDocTemporarily(testsession, "bob:"+Date.now(), 6);
+        addCursorToDocTemporarily(testsession, "alice:"+Date.now(), 12);
+
+        // start editing: let the controller send the OpAddCursor
         sessionController.startEditing();
 
         if (callback) {
