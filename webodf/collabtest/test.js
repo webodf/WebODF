@@ -84,6 +84,7 @@ function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
  * @param {!string} memberId
  */
 function removeAvatarButton(avatarListDiv, memberId) {
+    "use strict";
     var node = avatarListDiv.firstChild;
     while (node) {
         if (node.memberId === memberId) {
