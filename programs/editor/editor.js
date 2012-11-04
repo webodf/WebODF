@@ -42,6 +42,18 @@ runtime.libraryPaths = function () {
     return [ runtime.currentDirectory() ];
 };
 
+
+/**
+ * Utility method for testing
+ * @param {?string} memberId
+ */
+function addCursorToDoc(session, memberId) {
+    "use strict";
+    var op = new ops.OpAddCursor(session);
+    op.init({memberid:memberId});
+    session.enqueue(op);
+}
+
 function editor_init(docurl) {
     "use strict";
     runtime.loadClass('odf.OdfCanvas');
@@ -79,8 +91,32 @@ function editor_init(docurl) {
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
-            loadWidgets(document);
-            loadWebOdfEditor(document, document.getElementById('peopleList'), isConnectedWithNetwork);
+            var session, sessionController, sessionView,
+                opRouter = null;
+
+            session = new ops.SessionImplementation(odfCanvas);
+            if (isConnectedWithNetwork) {
+                // use the nowjs op-router when connected
+                session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
+            }
+            sessionController = new gui.SessionController(session, "you");
+            sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
+
+            if (isConnectedWithNetwork) {
+                opRouter.requestReplay();
+            }
+
+            loadWidgets(session, sessionController.getInputMemberId());
+            loadAvatarPane(sessionView, document.getElementById('peopleList'));
+            // in this test we start a session from scratch: it is not loaded from
+            // a serialized document
+            // each cursor is added at the starting position
+            // add our two friends
+//             addCursorToDoc(session, "bob"); //"http://bogus/src=avatar/thkogmbh/avatar.png"
+//             addCursorToDoc(session, "alice");
+
+            // start editing: let the controller send the OpAddCursor
+            sessionController.startEditing();
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);

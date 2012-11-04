@@ -32,7 +32,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, gui */
+/*global runtime, gui, ops */
+
 runtime.loadClass("gui.Caret");
 runtime.loadClass("ops.TrivialUserModel");
 
@@ -81,8 +82,8 @@ gui.SessionView = (function () {
             delete carets[memberid];
         }
 
-        session.subscribe("cursor/added", onCursorAdded);
-        session.subscribe("cursor/removed", onCursorRemoved);
+        session.subscribe(ops.SessionImplementation.signalCursorAdded, onCursorAdded);
+        session.subscribe(ops.SessionImplementation.signalCursorRemoved, onCursorRemoved);
 
     }
 

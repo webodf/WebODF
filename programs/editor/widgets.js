@@ -31,8 +31,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-function loadWidgets(documentObject) {
-	var dojoWin, toolbar,
+function loadWidgets(session, inputMemberId) {
+    var documentObject = session.getOdfDocument().getDOM(),
+        dojoWin, toolbar,
         ToolbarSeparator;
 
 	require(["dojo/_base/window"], function (win) {
@@ -99,7 +100,7 @@ function loadWidgets(documentObject) {
 
         // Paragraph Style Selector
         require(["widgets/paragraphStyles.js"], function () {
-            var styles = new widgets.ParagraphStyles(documentObject, function (widget) {
+            var styles = new widgets.ParagraphStyles(session, inputMemberId, function (widget) {
                 widget.placeAt(toolbar);
                 widget.startup();
             });

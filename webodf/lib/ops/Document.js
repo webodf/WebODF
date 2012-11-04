@@ -40,9 +40,9 @@ runtime.loadClass("gui.SelectionManager");
 /**
  * A document that keeps all data related to the mapped document.
  * @constructor
- * @param {!odf.OdfContainer} odfcontainer
+ * @param {!odf.OdfCanvas} odfCanvas
  */
-ops.Document = function Document(odfcontainer) {
+ops.Document = function Document(odfCanvas) {
     "use strict";
 
     var self = this,
@@ -307,7 +307,7 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
      * @return {?string}
      */
     this.getMetaData = function (metadataId) {
-        var node = odfcontainer.rootElement.firstChild;
+        var node = odfCanvas.odfContainer().rootElement.firstChild;
         while (node && node.localName !== "meta") {
             node = node.nextSibling;
         }
@@ -321,13 +321,19 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
         }
         return node ? node.data : null;
     };
+    /**
+      * @return {!odf.Formatting}
+      */
+    this.getFormatting = function () {
+        return odfCanvas.getFormatting();
+    };
 
     /**
      * @return {undefined}
      */
     function init() {
         filter = new TextPositionFilter();
-        rootNode = findTextRoot(odfcontainer);
+        rootNode = findTextRoot(odfCanvas.odfContainer());
         selectionManager = new gui.SelectionManager(rootNode);
     }
     init();

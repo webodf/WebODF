@@ -91,7 +91,7 @@ function setupAvatarView(sessionView, avatarListDiv) {
     // attention: there is a race condition, sessionView also only
     // on this signal creates the caret, so trying to get the caret
     // at this point is not good to do. So fetch it dynamically in the avatarbutton.
-    session.subscribe("cursor/added", function(cursor) {
+    session.subscribe(ops.SessionImplementation.signalCursorAdded, function(cursor) {
         var memberid = cursor.getMemberId();
 
         createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
@@ -134,7 +134,7 @@ function initSession(odfid, avatarlistid, callback) {
         }
         ready = true;
 
-        testsession = new ops.SessionImplementation(odfcanvas.odfContainer());
+        testsession = new ops.SessionImplementation(odfcanvas);
 
         if (is_connected) {
             // use the nowjs op-router when connected

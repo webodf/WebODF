@@ -40,22 +40,29 @@ runtime.loadClass("ops.Document");
  * An operation that can be performed on a document.
  * @constructor
  * @implements ops.Session
- * @param {!odf.OdfContainer} odfcontainer
+ * @param {!odf.OdfCanvas} odfCanvas
  */
-ops.SessionImplementation = function SessionImplementation(odfcontainer) {
+ops.SessionImplementation = (function () {
     "use strict";
-
+    /**
+     * @constructor
+     * @implements ops.Session
+     * @param {!odf.OdfCanvas} odfCanvas
+     */
+ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     var self = this,
-        odfDocument = new ops.Document(odfcontainer),
+        odfDocument = new ops.Document(odfCanvas),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
         m_user_model = null,
         m_operation_router = null,
         m_event_listener = {};
 
+
     /* declare events */
-    m_event_listener["cursor/added"] = [];
-    m_event_listener["cursor/removed"] = [];
+    m_event_listener[ops.SessionImplementation.signalCursorAdded] = [];
+    m_event_listener[ops.SessionImplementation.signalCursorRemoved] = [];
+    m_event_listener[ops.SessionImplementation.signalCursorMoved] = [];
 
 
     function setUserModel (userModel) {
@@ -134,4 +141,13 @@ ops.SessionImplementation = function SessionImplementation(odfcontainer) {
     }
     init();
 };
+
+    // TODO: find out how this can be moved to ops.Session
+    ops.SessionImplementation.signalCursorAdded =   "cursor/added";
+    ops.SessionImplementation.signalCursorRemoved = "cursor/removed";
+    ops.SessionImplementation.signalCursorMoved =   "cursor/moved";
+
+    return ops.SessionImplementation;
+}());
+
 // vim:expandtab

@@ -82,7 +82,7 @@ function createAvatarButton(avatarListDiv, sessionView, memberid, userDetails) {
                         0);
 }
 
-function setupAvatarView(sessionView, avatarListDiv) {
+function loadAvatarPane(sessionView, avatarListDiv) {
     "use strict";
 
     var session = sessionView.getSession(),
@@ -104,48 +104,4 @@ function setupAvatarView(sessionView, avatarListDiv) {
 
         createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
     });
-}
-
-
-/**
- * Utility method for testing
- * @param {?string} memberId
- */
-function addCursorToDoc(session, memberId) {
-    "use strict";
-    var op = new ops.OpAddCursor(session);
-    op.init({memberid:memberId});
-    session.enqueue(op);
-}
-
-
-
-function loadWebOdfEditor(document, avatarListDiv, isConnectedWithNetwork) {
-    "use strict";
-    var odfcontainer = document.odfCanvas.odfContainer(),
-        session, sessionController, sessionView,
-        opRouter = null;
-
-    session = new ops.SessionImplementation(odfcontainer);
-    if (isConnectedWithNetwork) {
-        // use the nowjs op-router when connected
-        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
-    }
-    sessionController = new gui.SessionController(session, "you");
-    sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
-
-    setupAvatarView(sessionView, avatarListDiv);
-
-    if (isConnectedWithNetwork) {
-        opRouter.requestReplay();
-    }
-    // in this test we start a session from scratch: it is not loaded from
-    // a serialized document
-    // each cursor is added at the starting position
-    // add our two friends
-    addCursorToDoc(session, "bob"); //"http://bogus/src=avatar/thkogmbh/avatar.png"
-    addCursorToDoc(session, "alice");
-
-    // start editing: let the controller send the OpAddCursor
-    sessionController.startEditing();
 }

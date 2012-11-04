@@ -51,7 +51,7 @@ ops.OpAddCursor = function OpAddCursor(session) {
         var odfDocument = session.getOdfDocument(),
             cursor = new core.Cursor(memberid, odfDocument);
         odfDocument.addCursor(cursor);
-        session.emit("cursor/added", cursor);
+        session.emit(ops.SessionImplementation.signalCursorAdded, cursor);
     };
 
     this.spec = function() {

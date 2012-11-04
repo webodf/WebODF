@@ -184,8 +184,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     }
 
     this.setUp = function () {
-        var odfContainer = new odf.OdfContainer("", null),
-            odfcanvas;
+        var odfcanvas;
         t = {};
         testarea = maindoc.getElementById("testarea");
         if (!testarea) {
@@ -197,8 +196,8 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             testarea.removeChild(testarea.firstChild);
         }
         odfcanvas = new odf.OdfCanvas(testarea);
-        odfcanvas.setOdfContainer(odfContainer);
-        odfDocument = new ops.Document(odfContainer);
+        odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
+        odfDocument = new ops.Document(odfcanvas);
     };
     this.tearDown = function () {
         t = {};

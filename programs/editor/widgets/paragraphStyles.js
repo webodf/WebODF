@@ -36,12 +36,12 @@ widgets.ParagraphStyles = (function () {
     var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
     var htmlns = "http://www.w3.org/1999/xhtml";
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(session, inputMemberId, callback) {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
                 selectionList = [],
-                availableStyles = documentObject.odfCanvas.getFormatting().getAvailableParagraphStyles(),
+                availableStyles = session.getOdfDocument().getFormatting().getAvailableParagraphStyles(),
                 currentParagraph = null,
                 currentStyle = null;
 
@@ -61,8 +61,14 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
-            function trackCursor(avatar) {
-                var node = avatar.getCaret().getSelection().focusNode;
+            function trackCursor(cursor) {
+                var node;
+
+                if (cursor.getMemberId() != inputMemberId) {
+                    return;
+                }
+
+                node = cursor.getSelection().focusNode;
                 while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
                     node = node.parentNode;
                 }
@@ -73,18 +79,12 @@ widgets.ParagraphStyles = (function () {
                 widget.set("value", currentStyle);
             }
 
-            documentObject.addEventListener("avatarMoved", function (event) {
-                trackCursor(event.detail.avatar);
-            });
-            documentObject.addEventListener("avatarActivated", function (event) {
-                trackCursor(event.detail.avatar);
-            });
-
+            session.subscribe(ops.SessionImplementation.signalCursorAdded, trackCursor);
+            session.subscribe(ops.SessionImplementation.signalCursorMoved, trackCursor);
 
             widget.onChange = function(value) {
                 currentStyle = value;
                 if(currentParagraph) {
-                    var avatar = document.session.getActiveAvatar();
                     if(currentStyle != currentParagraph.getAttributeNS(textns, 'style-name')) {
                         currentParagraph.setAttributeNS(textns, 'style-name', value);
                         document.dispatchEvent(document.documentChangedEvent);
@@ -94,9 +94,9 @@ widgets.ParagraphStyles = (function () {
                         currentParagraph.removeAttribute('usercolor');
 
                         runtime.setTimeout(function() {
-                            currentParagraph.setAttribute('user', avatar.getMemberId());
+                            currentParagraph.setAttribute('user', inputMemberId);
                             currentParagraph.setAttribute('class', 'edited');
-                            currentParagraph.setAttribute('usercolor', avatar.getColor());
+                            currentParagraph.setAttribute('usercolor', session.getUserModel().getUserDetails(inputMemberId).color);
                         }, 1);
                     }
                 }
@@ -106,8 +106,8 @@ widgets.ParagraphStyles = (function () {
         });
     }
 
-    widgets.ParagraphStyles = function ParagraphStyles(documentObject, callback) {
-        makeWidget(documentObject, function (widget) {
+    widgets.ParagraphStyles = function ParagraphStyles(session, inputMemberId, callback) {
+        makeWidget(session, inputMemberId, function (widget) {
             return callback(widget);
         });
     };

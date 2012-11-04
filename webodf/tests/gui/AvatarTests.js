@@ -123,7 +123,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         }
         odfcanvas = new odf.OdfCanvas(testarea);
         odfcanvas.setOdfContainer(odfContainer);
-        odfDocument = new ops.Document(odfContainer);
+        odfDocument = new ops.Document(odfcanvas);
     };
     this.tearDown = function () {
         t = {};

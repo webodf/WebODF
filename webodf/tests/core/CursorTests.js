@@ -44,8 +44,7 @@ core.CursorTests = function CursorTests(runner) {
         memberId = "testuser",
         maindoc = runtime.getWindow().document,
         testarea = /**@type{!Element}*/(maindoc.getElementById("testarea")),
-        odfcanvas = new odf.OdfCanvas(testarea),
-        odfContainer = odfcanvas.odfContainer();
+        odfcanvas = new odf.OdfCanvas(testarea);
     /**
      * @param {core.Selection} selection
      * @param {Node} startnode
@@ -73,7 +72,7 @@ core.CursorTests = function CursorTests(runner) {
 
     function setupEmptyRootNode() {
         var root = maindoc.createElementNS("", "p"),
-            document = new ops.Document(odfContainer),
+            document = new ops.Document(odfcanvas),
             cursor = new core.Cursor(memberId, document);
         testarea.appendChild(root);
         t = { selection: cursor.getSelection(), root: root, cursor: cursor };
