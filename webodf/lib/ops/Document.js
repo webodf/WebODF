@@ -46,6 +46,7 @@ ops.Document = function Document(odfCanvas) {
     "use strict";
 
     var self = this,
+        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         rootNode,
         selectionManager,
         filter,
@@ -181,6 +182,26 @@ ops.Document = function Document(odfCanvas) {
         return {textNode: lastTextNode, offset: nodeOffset };
     }
 
+    function highlightEdit(element, memberId) {
+        element.removeAttribute('user');
+        element.removeAttribute('class');
+
+        runtime.setTimeout(function() {
+            element.setAttribute('user', memberId);
+            element.setAttribute('class', 'edited');
+        }, 1);
+    }
+    /**
+     * @param {?Node} node
+     * @return {?Node}
+     */
+    function getParagraphElement(node) {
+        while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
+            node = node.parentNode;
+        }
+        return node;
+    }
+    this.getParagraphElement = getParagraphElement;
     /**
      * This function will return the Text node as well as the offset in that text node
      * of the cursor.
@@ -251,6 +272,7 @@ ops.Document = function Document(odfCanvas) {
 runtime.log(domPosition + " -- " + text + " " + position);
         if (domPosition) {
             domPosition.textNode.insertData(domPosition.offset, text);
+            highlightEdit(getParagraphElement(domPosition.textNode), memberid);
             return true;
         }
         return false;
@@ -267,6 +289,7 @@ runtime.log(domPosition + " -- " + text + " " + position);
 runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length);
         if (domPosition) {
             domPosition.textNode.deleteData(domPosition.offset, length);
+            highlightEdit(getParagraphElement(domPosition.textNode), memberid);
             return true;
         }
         return false;
