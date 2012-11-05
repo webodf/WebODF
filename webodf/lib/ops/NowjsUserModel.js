@@ -91,10 +91,11 @@ ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
     addUser("alice", "Alice Bee", "avatar-flower.png");
     addUser("bob", "Bob Pigeon", "avatar-pigeon.png");
 
+    runtime.assert(net.networkStatus === "ready", "network not ready");
     // query server for user data
     // TODO we should start considering security at some point
     net.getAllKnownUserData(function(udata) {
-        addUser(udata.uid, udata.full_name,
+        addUser(udata.uid, udata.fullname,
             "http://bogus/src=avatar/"+udata.uid+"/avatar.png");
         runtime.log("user ["+udata.uid+"] added.");
     }, function done(count) {
@@ -103,4 +104,5 @@ ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
             loaded_cb();
         }
     });
+    runtime.log("NowjsUserModel created. User-data requested.");
 };
