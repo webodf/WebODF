@@ -54,7 +54,8 @@ function addCursorToDoc(session, memberId) {
     session.enqueue(op);
 }
 
-function editor_init(docurl) {
+
+function init_gui_and_doc(docurl) {
     "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
@@ -191,6 +192,32 @@ function editor_init(docurl) {
             }
         );
     });
+}
+
+function editor_init(docurl) {
+    "use strict";
+    var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+
+    function later_cb() {
+        if (net.networkStatus === "unavailable") {
+            runtime.log("connection to server unavailable.");
+            return;
+        }
+        if (net.networkStatus !== "ready") {
+            if (accumulated_waiting_time > 8000) {
+                // game over
+                runtime.log("connection to server timed out.");
+                return;
+            }
+            accumulated_waiting_time += 100;
+            runtime.getWindow().setTimeout(later_cb, 100);
+            return;
+        } else {
+            runtime.log("connection to collaboration server established.");
+            init_gui_and_doc(docurl);
+        }
+    }
+    later_cb();
 }
 
 window.onload = function() {
