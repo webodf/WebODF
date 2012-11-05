@@ -92,7 +92,7 @@ function editor_init(docurl) {
 
         odfCanvas.addListener("statereadychange", function() {
             var session, sessionController, sessionView,
-                memberid = "you:"+Date.now(),
+                memberid = "you___"+Date.now(),
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);

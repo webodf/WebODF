@@ -176,6 +176,56 @@ odf.Formatting = function Formatting() {
         return paragraphStyles;
     };
 
+    function getStyleElement(styleListElement, styleName, family) {
+        var node = styleListElement.firstChild;
+
+        while (node) {
+            if (node.nodeType === 1
+                    && node.namespaceURI === namespaces.style
+                    && node.localName === "style"
+                    && node.getAttributeNS(namespaces.style, 'family') === family
+                    && node.getAttributeNS(namespaces.style, 'name') === styleName) {
+                return node;
+            }
+            node = node.nextSibling;
+        }
+        return null;
+    }
+
+    // workaround for not normally named elements, e.g. with a dash TODO: how is this properly done?
+    function getNotNormallyNamedChildElement(element, name) {
+        var node = element.firstChild;
+        while (node) {
+            if (node.nodeType === 1 && node.localName === name) {
+                break;
+            }
+            node = node.nextSibling;
+        }
+        return node;
+    }
+    /**
+     * Get the name of the first named style in the parent style chain.
+     * If none is found, null is returned and you should assume the Default style.
+     * @param {!string} searchedStyleName
+     * @return {!string|null}
+     */
+    this.getFirstNamedParentStyleNameOrSelf = function (searchedStyleName) {
+        var automaticStyleElementList = getNotNormallyNamedChildElement(odfContainer.rootElement, "automatic-styles"),
+            styleElementList = odfContainer.rootElement.styles,
+            styleElement,
+            styleName = searchedStyleName;
+        // first look for automatic style with the name
+        while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
+            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+        }
+        // then see if that style is in named styles
+        styleElement = getStyleElement(odfContainer.rootElement.styles, styleName, "paragraph");
+        if (!styleElement) {
+            styleName = null;
+        }
+        return styleName;
+    };
+
     /**
      * Get the list of text styles that are covered by the current selection.
      * @param {!Array.<!Range>} selection

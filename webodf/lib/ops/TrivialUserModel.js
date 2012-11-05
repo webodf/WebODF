@@ -51,7 +51,7 @@ ops.TrivialUserModel = function TrivialUserModel () {
 	users.you = {memberid:"you", fullname:"I, Robot", color: "blue", imageurl: "avatar-joe.png"};
 
 	this.getUserDetails = function (memberid) {
-		var userid = memberid.split(":")[0];
+		var userid = memberid.split("___")[0];
 		return users[userid];
 	};
 };

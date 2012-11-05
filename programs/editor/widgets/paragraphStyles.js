@@ -40,10 +40,13 @@ widgets.ParagraphStyles = (function () {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
+                formatting = session.getOdfDocument().getFormatting(),
+                forma
                 selectionList = [],
-                availableStyles = session.getOdfDocument().getFormatting().getAvailableParagraphStyles(),
+                availableStyles = formatting.getAvailableParagraphStyles(),
                 currentParagraph = null,
-                currentStyle = null;
+                currentNamedStyleName = null,
+                currentStyleName = null;
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -62,9 +65,11 @@ widgets.ParagraphStyles = (function () {
             });
 
             function trackCursor(cursor) {
-                var node;
+                var node,
+                    newStyleName,
+                    newNamedStyleName;
 
-                if (cursor.getMemberId() != inputMemberId) {
+                if (cursor.getMemberId() !== inputMemberId) {
                     return;
                 }
 
@@ -72,20 +77,34 @@ widgets.ParagraphStyles = (function () {
                 while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
                     node = node.parentNode;
                 }
-                if(!node)
+                if (!node) {
                     return;
+                }
                 currentParagraph = node;
-                currentStyle = currentParagraph.getAttributeNS(textns, 'style-name');
-                widget.set("value", currentStyle);
+                newStyleName = currentParagraph.getAttributeNS(textns, 'style-name');
+                if (newStyleName !== currentStyleName) {
+                    currentStyleName = newStyleName;
+                    // check if named style is still the same
+                    newNamedStyleName = formatting.getFirstNamedParentStyleNameOrSelf(newStyleName);
+                    if (!newNamedStyleName) {
+                        // TODO: how to handle default styles?
+                        return;
+                    }
+                    // a named style
+                    if (newNamedStyleName !== currentNamedStyleName) {
+                        currentNamedStyleName = newNamedStyleName;
+                        widget.set("value", currentNamedStyleName);
+                    }
+                }
             }
 
             session.subscribe(ops.SessionImplementation.signalCursorAdded, trackCursor);
             session.subscribe(ops.SessionImplementation.signalCursorMoved, trackCursor);
 
             widget.onChange = function(value) {
-                currentStyle = value;
-                if(currentParagraph) {
-                    if(currentStyle != currentParagraph.getAttributeNS(textns, 'style-name')) {
+                if(currentNamedStyleName !== value) {
+                    if(currentParagraph) {
+                        currentNamedStyleName = value;
                         currentParagraph.setAttributeNS(textns, 'style-name', value);
                         document.dispatchEvent(document.documentChangedEvent);
 

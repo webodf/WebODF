@@ -156,7 +156,7 @@ function initSession(odfid, avatarlistid, callback) {
     }
 
     odfcanvas.addListener("statereadychange", function (container) {
-        var memberid = "you:"+Date.now();
+        var memberid = "you___"+Date.now();
         if (container.state !== odf.OdfContainer.DONE) {
             alert("statereadychange fired but state not DONE");
         }
@@ -187,8 +187,8 @@ function initSession(odfid, avatarlistid, callback) {
         }
 
         // add our two friends
-        addCursorToDocTemporarily(testsession, "bob:"+Date.now(), 6);
-        addCursorToDocTemporarily(testsession, "alice:"+Date.now(), 12);
+        addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
+        addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
 
         // start editing: let the controller send the OpAddCursor
         sessionController.startEditing();

@@ -127,6 +127,22 @@ gui.SessionController = (function () {
             return op;
         }
         /**
+         * @return {?ops.Operation}
+         */
+        function createOpRemoveTextByDeleteKey() {
+            var odfDocument = session.getOdfDocument(),
+                position = odfDocument.getCursorPosition(inputMemberId),
+                domPosition = odfDocument.getPositionInTextNode(position),
+                op = null;
+
+            if (domPosition && domPosition.offset < domPosition.textNode.length-1) {
+                op = new ops.OpRemoveText(session);
+                op.init({memberid:inputMemberId, position: position, length: 1, text:domPosition.textNode.substringData(domPosition.offset, 1)});
+            }
+
+            return op;
+        }
+        /**
          * @param {!Event} e
          */
         function handleKeyDown(e) {
@@ -150,6 +166,9 @@ gui.SessionController = (function () {
                 handled = true;
             } else if (keyCode === 8) { // Backspace
                 op = createOpRemoveTextByBackspaceKey();
+                handled = (op !== null);
+            } else if (keyCode === 46) { // Delete
+                op = createOpRemoveTextByDeleteKey();
                 handled = (op !== null);
             } else {
                 runtime.log("got keycode: " + keyCode);
