@@ -55,11 +55,15 @@ function addCursorToDoc(session, memberId) {
 }
 
 
-function init_gui_and_doc(docurl) {
+function init_gui_and_doc(docurl, userid) {
     "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
     var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
+
+    if (userid === undefined) {
+        userid = "undefined";
+    }
 
     isConnectedWithNetwork = (runtime.getNetwork().networkStatus !== "unavailable");
 
@@ -89,7 +93,7 @@ function init_gui_and_doc(docurl) {
 
         odfCanvas.addListener("statereadychange", function() {
             var session, sessionController, sessionView,
-                memberid = "you___"+Date.now(),
+                memberid = userid+"___"+Date.now(),
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
@@ -198,7 +202,7 @@ function init_gui_and_doc(docurl) {
     });
 }
 
-function editor_init(docurl) {
+function editor_init(docurl, userid) {
     "use strict";
     var net = runtime.getNetwork(), accumulated_waiting_time = 0;
 
@@ -218,13 +222,13 @@ function editor_init(docurl) {
             return;
         } else {
             runtime.log("connection to collaboration server established.");
-            init_gui_and_doc(docurl);
+            init_gui_and_doc(docurl, userid);
         }
     }
     later_cb();
 }
 
 window.onload = function() {
-    editor_init( "/webodf/collabtest/text.odt");
+    editor_init( "/webodf/collabtest/text.odt", "you");
 };
 // vim:expandtab
