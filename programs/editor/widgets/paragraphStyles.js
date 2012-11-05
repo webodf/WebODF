@@ -110,12 +110,10 @@ widgets.ParagraphStyles = (function () {
 
                         currentParagraph.removeAttribute('user');
                         currentParagraph.removeAttribute('class');
-                        currentParagraph.removeAttribute('usercolor');
 
                         runtime.setTimeout(function() {
                             currentParagraph.setAttribute('user', inputMemberId);
                             currentParagraph.setAttribute('class', 'edited');
-                            currentParagraph.setAttribute('usercolor', session.getUserModel().getUserDetails(inputMemberId).color);
                         }, 1);
                     }
                 }
