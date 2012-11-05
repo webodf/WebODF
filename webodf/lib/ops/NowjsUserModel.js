@@ -32,7 +32,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops*/
+/*global ops, runtime */
 
 /*
  * this thing might feel a bit more at home in a namespaces
@@ -43,12 +43,13 @@
  * @constructor
  * @implements ops.UserModel
  */
-ops.NowjsUserModel = function NowjsUserModel () {
+ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
     "use strict";
 
     var users = {},
         colorIndex = 0,
-        colors;
+        colors,
+        net = runtime.getNetwork();
 
     colors = [
         "blue",
@@ -89,4 +90,17 @@ ops.NowjsUserModel = function NowjsUserModel () {
     addUser("you", "I, Robot", "avatar-joe.png");
     addUser("alice", "Alice Bee", "avatar-flower.png");
     addUser("bob", "Bob Pigeon", "avatar-pigeon.png");
+
+    // query server for user data
+    // TODO we should start considering security at some point
+    net.getAllKnownUserData(function(udata) {
+        addUser(udata.uid, udata.full_name,
+            "http://bogus/src=avatar/"+udata.uid+"/avatar.png");
+        runtime.log("user ["+udata.uid+"] added.");
+    }, function done(count) {
+        runtime.log("done with fetching all ("+count+") user data...");
+        if (loaded_cb) {
+            loaded_cb();
+        }
+    });
 };

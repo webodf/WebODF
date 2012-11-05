@@ -156,6 +156,13 @@ var now;
  * @type {function(!Array):Object}
  */
 now.deliverOp = function(spec) { "use strict"; };
+
+/**
+ * @type {function(!function(!Array), !function(!number)):Object}
+ */
+now.getAllKnownUserData = function(data_cb, done_cb) { "use strict"; };
+
+
 /**
  * @type {!NodeJSProcess}
  */
