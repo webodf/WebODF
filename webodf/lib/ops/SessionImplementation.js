@@ -63,6 +63,7 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     m_event_listener[ops.SessionImplementation.signalCursorAdded] = [];
     m_event_listener[ops.SessionImplementation.signalCursorRemoved] = [];
     m_event_listener[ops.SessionImplementation.signalCursorMoved] = [];
+    m_event_listener[ops.SessionImplementation.signalParagraphChanged] = [];
 
 
     function setUserModel (userModel) {
@@ -146,6 +147,7 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     ops.SessionImplementation.signalCursorAdded =   "cursor/added";
     ops.SessionImplementation.signalCursorRemoved = "cursor/removed";
     ops.SessionImplementation.signalCursorMoved =   "cursor/moved";
+    ops.SessionImplementation.signalParagraphChanged = "paragraph/changed";
 
     return ops.SessionImplementation;
 }());

@@ -295,6 +295,28 @@ runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length)
         return false;
     };
     /**
+     * @param {!string} memberid
+     * @param {!number} position
+     * @param {!string} styleNameBefore
+     * @param {!string} styleNameAfter
+     * @return {!boolean}
+     */
+    this.setParagraphStyle = function (memberid, position, styleNameBefore, styleNameAfter) {
+        var domPosition, paragraphNode;
+        // TODO: reusing getPositionInTextNode and getParagraphElement, not an optimized solution
+        domPosition = getPositionInTextNode(position);
+runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " + styleNameBefore + "->" + styleNameAfter);
+        if (domPosition) {
+            paragraphNode = getParagraphElement(domPosition.textNode);
+            if (paragraphNode) {
+                paragraphNode.setAttributeNS(textns, 'style-name', styleNameAfter);
+                highlightEdit(getParagraphElement(paragraphNode), memberid);
+                return true;
+            }
+        }
+        return false;
+    };
+    /**
     * @param {!string} memberid
     * @return {core.Cursor}
     */

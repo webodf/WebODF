@@ -62,10 +62,6 @@ function editor_init(docurl) {
 
     isConnectedWithNetwork = (runtime.getNetwork().networkStatus !== "unavailable");
 
-    // documentChangedEvent
-    document.documentChangedEvent = document.createEvent('Event');
-    document.documentChangedEvent.initEvent('changed', true, true);
-
     odfElement = document.getElementById("canvas");
     odfCanvas = new odf.OdfCanvas(odfElement);
 

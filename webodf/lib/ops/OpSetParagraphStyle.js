@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,60 +31,47 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-(function () {
+
+/*global ops*/
+
+/**
+ * @constructor
+ * @implements ops.Operation
+ */
+ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
     "use strict";
-    return [
-        "core/Async.js",
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/Cursor.js",
-        "core/JSLint.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/RawDeflate.js",
-        "core/RawInflate.js",
-        "core/Selection.js",
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "gui/Avatar.js",
-        "gui/Caret.js",
-        "gui/PresenterUI.js",
-        "gui/SessionController.js",
-        "gui/CaretFactory.js",
-        "gui/SessionView.js",
-        "gui/SelectionManager.js",
-        "gui/SelectionMover.js",
-        "gui/XMLEdit.js",
-        "odf/CommandLineTools.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "odf/Style2CSS.js",
-        "odf/StyleInfo.js",
-        "ops/TrivialUserModel.js",
-        "ops/Operation.js",
-        "ops/TrivialOperationRouter.js",
-        "ops/NowjsOperationRouter.js",
-        "ops/Document.js",
-        "ops/Session.js",
-        "ops/SessionImplementation.js",
-        "ops/SessionNodeFilter.js",
-        "ops/OpAddCursor.js",
-        "ops/OpRemoveCursor.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpInsertText.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSetParagraphStyle.js",
-        "ops/OperationFactory.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
-        "xmldom/RelaxNG.js",
-        "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js",
-        "xmldom/XPath.js"
-    ];
-}());
+
+    var memberid, position, styleNameBefore, styleNameAfter;
+
+    this.init = function(data) {
+        memberid = data.memberid;
+        position = data.position;
+        styleNameBefore = data.styleNameBefore;
+        styleNameAfter = data.styleNameAfter;
+    };
+
+    this.execute = function(domroot) {
+        var domPosition, paragraphNode,
+            odfDocument = session.getOdfDocument();
+
+        odfDocument.setParagraphStyle(memberid, position, styleNameBefore, styleNameAfter);
+
+        // TODO: hack, reusing getPositionInTextNode and getParagraphElement, not an optimized solution
+        domPosition = odfDocument.getPositionInTextNode(position);
+        if (domPosition) {
+            paragraphNode = odfDocument.getParagraphElement(domPosition.textNode);
+            session.emit(ops.SessionImplementation.signalParagraphChanged, paragraphNode);
+        }
+    };
+
+    this.spec = function() {
+        return {
+            optype: "SetParagraphStyle",
+            memberid: memberid,
+            position: position,
+            styleNameBefore: styleNameBefore,
+            styleNameAfter: styleNameAfter
+        };
+    };
+
+};

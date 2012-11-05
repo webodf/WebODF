@@ -39,6 +39,11 @@
  */
 
 runtime.loadClass("ops.OpAddCursor");
+runtime.loadClass("ops.OpRemoveCursor");
+runtime.loadClass("ops.OpMoveCursor");
+runtime.loadClass("ops.OpInsertText");
+runtime.loadClass("ops.OpRemoveText");
+runtime.loadClass("ops.OpSetParagraphStyle");
 
 /**
  * @constructor
@@ -60,6 +65,9 @@ ops.OperationFactory = function OperationFactory (session) {
 			op.init(spec);
         } else if (spec.optype === "RemoveText") {
             op = new ops.OpRemoveText(session);
+            op.init(spec);
+        } else if (spec.optype === "SetParagraphStyle") {
+            op = new ops.OpSetParagraphStyle(session);
             op.init(spec);
 		} else if (spec.optype === "MoveCursor") {
 			op = new ops.OpMoveCursor(session);
