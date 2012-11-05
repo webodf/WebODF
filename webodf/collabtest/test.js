@@ -35,6 +35,7 @@
 
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("ops.NowjsOperationRouter");
+runtime.loadClass("ops.NowjsUserModel");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.CaretFactory");
 runtime.loadClass("gui.Caret");
@@ -172,6 +173,7 @@ function initSession(odfid, avatarlistid, callback) {
             // use the nowjs op-router when connected
             testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
             opRouter.setMemberid(memberid);
+            testsession.setUserModel(new ops.NowjsUserModel())
         }
 
         sessionController = new gui.SessionController(testsession, memberid);
@@ -187,8 +189,10 @@ function initSession(odfid, avatarlistid, callback) {
         }
 
         // add our two friends
-        addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
-        addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
+//         if (!is_connected) {
+            addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
+            addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
+//         }
 
         // start editing: let the controller send the OpAddCursor
         sessionController.startEditing();

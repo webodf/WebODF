@@ -33,6 +33,7 @@
  */
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("ops.NowjsOperationRouter");
+runtime.loadClass("ops.NowjsUserModel");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("gui.CaretFactory");
 runtime.loadClass("gui.Caret");

@@ -97,6 +97,7 @@ function init_gui_and_doc(docurl) {
                 // use the nowjs op-router when connected
                 session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
                 opRouter.setMemberid(memberid);
+                session.setUserModel(new ops.NowjsUserModel())
             }
             sessionController = new gui.SessionController(session, memberid);
             sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));

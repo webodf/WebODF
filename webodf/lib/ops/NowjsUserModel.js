@@ -31,62 +31,62 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-(function () {
+
+/*global ops*/
+
+/*
+ * this thing might feel a bit more at home in a namespaces
+ * called "collab" or "users" or "editing" than here in "ops".
+ */
+
+/**
+ * @constructor
+ * @implements ops.UserModel
+ */
+ops.NowjsUserModel = function NowjsUserModel () {
     "use strict";
-    return [
-        "core/Async.js",
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/Cursor.js",
-        "core/JSLint.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/RawDeflate.js",
-        "core/RawInflate.js",
-        "core/Selection.js",
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "gui/Avatar.js",
-        "gui/Caret.js",
-        "gui/PresenterUI.js",
-        "gui/SessionController.js",
-        "gui/CaretFactory.js",
-        "gui/SessionView.js",
-        "gui/SelectionManager.js",
-        "gui/SelectionMover.js",
-        "gui/XMLEdit.js",
-        "odf/CommandLineTools.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "odf/Style2CSS.js",
-        "odf/StyleInfo.js",
-        "ops/UserModel.js",
-        "ops/TrivialUserModel.js",
-        "ops/NowjsUserModel.js",
-        "ops/Operation.js",
-        "ops/TrivialOperationRouter.js",
-        "ops/NowjsOperationRouter.js",
-        "ops/Document.js",
-        "ops/Session.js",
-        "ops/SessionImplementation.js",
-        "ops/SessionNodeFilter.js",
-        "ops/OpAddCursor.js",
-        "ops/OpRemoveCursor.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpInsertText.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSetParagraphStyle.js",
-        "ops/OperationFactory.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
-        "xmldom/RelaxNG.js",
-        "xmldom/RelaxNG2.js",
-        "xmldom/RelaxNGParser.js",
-        "xmldom/XPath.js"
+
+    var users = {},
+        colorIndex = 0,
+        colors;
+
+    colors = [
+        "blue",
+        "red",
+        "green",
+        "yellow",
+        "brown"
     ];
-}());
+
+    function selectColor() {
+        var color = colors[colorIndex];
+ 
+        colorIndex += 1;
+        if (colorIndex >= colors.length) {
+            colorIndex = 0;
+        }
+        return color;
+    }
+
+    // use this method to add new users as they join the session
+    function addUser(memberId, fullName, imageUrl) {
+        users[memberId] = {
+            memberid:memberId,
+            fullname:fullName,
+            imageurl: imageUrl,
+            color: selectColor()
+        };
+    }
+
+    this.getUserDetails = function (memberid) {
+        // remove tje ___ split.
+        // and perhaps create a default "Unknown" user details set if userid is not present
+        var userid = memberid.split("___")[0];
+        return users[userid];
+    };
+
+    // add our current friends for now
+    addUser("you", "I, Robot", "avatar-joe.png");
+    addUser("alice", "Alice Bee", "avatar-flower.png");
+    addUser("bob", "Bob Pigeon", "avatar-pigeon.png");
+};
