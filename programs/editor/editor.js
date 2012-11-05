@@ -97,13 +97,17 @@ function init_gui_and_doc(docurl) {
                 // use the nowjs op-router when connected
                 session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
                 opRouter.setMemberid(memberid);
-                session.setUserModel(new ops.NowjsUserModel())
             }
             sessionController = new gui.SessionController(session, memberid);
             sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
 
             if (isConnectedWithNetwork) {
-                opRouter.requestReplay();
+                runtime.log("editor: setting UserModel and requesting replay");
+                session.setUserModel(new ops.NowjsUserModel(function done() {
+                    opRouter.requestReplay(function done() {
+                        sessionController.startEditing();
+                    });
+                }));
             }
 
             loadWidgets(session, sessionController.getInputMemberId());
@@ -116,7 +120,6 @@ function init_gui_and_doc(docurl) {
 //             addCursorToDoc(session, "alice");
 
             // start editing: let the controller send the OpAddCursor
-            sessionController.startEditing();
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);

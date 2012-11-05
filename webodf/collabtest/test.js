@@ -173,7 +173,6 @@ function initSession(odfid, avatarlistid, callback) {
             // use the nowjs op-router when connected
             testsession.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
             opRouter.setMemberid(memberid);
-            testsession.setUserModel(new ops.NowjsUserModel())
         }
 
         sessionController = new gui.SessionController(testsession, memberid);
@@ -185,7 +184,12 @@ function initSession(odfid, avatarlistid, callback) {
         document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
 
         if (is_connected) {
-            opRouter.requestReplay();
+            testsession.setUserModel(new ops.NowjsUserModel(function done() {
+                opRouter.requestReplay(function done() {
+                    // start editing: let the controller send the OpAddCursor
+                    sessionController.startEditing();
+                });
+            }));
         }
 
         // add our two friends
@@ -194,9 +198,7 @@ function initSession(odfid, avatarlistid, callback) {
             addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
 //         }
 
-        // start editing: let the controller send the OpAddCursor
-        sessionController.startEditing();
-
+        // TODO callback too early?
         if (callback) {
             callback(testsession);
             callback = null;

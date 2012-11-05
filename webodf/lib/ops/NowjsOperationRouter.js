@@ -88,7 +88,7 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 		net.deliverOp(op.spec());
 	};
 
-	this.requestReplay = function() {
+	this.requestReplay = function(done_cb) {
 		net.requestReplay(
 			function(opspec) {
 				runtime.log("replaying: "+runtime.toJson(opspec));
@@ -96,6 +96,9 @@ ops.NowjsOperationRouter = function NowjsOperationRouter () {
 			},
 			function(count) {
 				runtime.log("replay done ("+count+" ops).");
+				if (done_cb) {
+					done_cb();
+				}
 			}
 		);
 	};
