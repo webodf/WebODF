@@ -61,7 +61,7 @@ ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
 
     function selectColor() {
         var color = colors[colorIndex];
- 
+
         colorIndex += 1;
         if (colorIndex >= colors.length) {
             colorIndex = 0;
@@ -96,7 +96,7 @@ ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
     // TODO we should start considering security at some point
     net.getAllKnownUserData(function(udata) {
         addUser(udata.uid, udata.fullname,
-            "http://bogus/src=avatar/"+udata.uid+"/avatar.png");
+            "/user/"+udata.uid+"/avatar.png");
         runtime.log("user ["+udata.uid+"] added.");
     }, function done(count) {
         runtime.log("done with fetching all ("+count+") user data...");
