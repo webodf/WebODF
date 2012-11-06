@@ -188,16 +188,12 @@ function initSession(odfid, avatarlistid, callback) {
                 opRouter.requestReplay(function done() {
                     // start editing: let the controller send the OpAddCursor
                     sessionController.startEditing();
+                    // add our two friends
+                    addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
+                    addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
                 });
             }));
         }
-
-        // add our two friends
-//         if (!is_connected) {
-            addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
-            addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
-//         }
-
         // TODO callback too early?
         if (callback) {
             callback(testsession);
