@@ -78,7 +78,7 @@ gui.Avatar = function Avatar(parentElement) {
         handle.style.height = '70px';
         handle.style.position = "absolute";
         handle.style.top = '-80px';
-        handle.style.left = '-32px';
+        handle.style.left = '-34px'; // TODO: see to automatically calculate this, depending on the style
         handle.style.display = displayShown;
         parentElement.appendChild(handle);
     }
