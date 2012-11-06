@@ -78,7 +78,7 @@ gui.SessionView = (function () {
             carets[memberId] = caret;
 
             // Add per-avatar edited styling
-            rulesCStr = 'text|p[class=edited][user='+memberId+'] { background-color: '+userData.color+';'
+            rulesCStr = 'text|p[class=edited][user="'+memberId+'"] { background-color: '+userData.color+';'
                         +  '-webkit-animation-name: fade;'
                         +  '-webkit-animation-duration: 10s;'
                         +  '-webkit-animation-fill-mode: forwards;'
