@@ -113,6 +113,25 @@ gui.SessionController = (function () {
         /**
          * @return {?ops.Operation}
          */
+        function createOpMoveCursorByHomeKey() {
+            var odfDocument = session.getOdfDocument(),
+                steps,
+                paragraphNode,
+                op = null;
+
+            // TODO: instead of going to begin of paragraph go to begin of line
+            paragraphNode = odfDocument.getParagraphElement(odfDocument.getCursor(inputMemberId).getNode());
+            steps = odfDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
+            if (steps !== 0) {
+                op = new ops.OpMoveCursor(session);
+                op.init({memberid:inputMemberId, number:steps});
+            }
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
         function createOpRemoveTextByBackspaceKey() {
             var odfDocument = session.getOdfDocument(),
                 position = odfDocument.getCursorPosition(inputMemberId),
@@ -163,6 +182,9 @@ gui.SessionController = (function () {
             } else if (keyCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
                 op = createOpMoveCursor(10);
+                handled = true;
+            } else if (keyCode === 36) { // home
+                op = createOpMoveCursorByHomeKey();
                 handled = true;
             } else if (keyCode === 8) { // Backspace
                 op = createOpRemoveTextByBackspaceKey();
