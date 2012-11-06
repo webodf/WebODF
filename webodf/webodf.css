@@ -199,10 +199,15 @@ video {
     width: 100%;
     height: 100%
 }
+
+/* below set up the cursor */
 cursor|cursor {
     display: inline;
     width: 0px;
     height: 1em;
+    /* making the position relative enables the avatar to use
+       the cursor as reference for its absolute position */
+    position: relative;
 }
 cursor|cursor > span {
     display: inline;
@@ -211,8 +216,45 @@ cursor|cursor > span {
     border-left: 1px solid black;
     outline: none;
 }
+
 cursor|cursor > div {
-    display: none;
+    padding: 3px;
+    box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.75);
+    border: none !important;
+    background-color: black !important;
+    border-radius: 5px;
+    opacity: 0.3;
+}
+
+cursor|cursor > div > img {
+    border-radius: 5px;
+}
+
+cursor|cursor > div.active {
+    opacity: 0.8;
+}
+
+cursor|cursor > div:after {
+    content: ' ';
     position: absolute;
-    border: 1px solid black;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 8.7px 5px 0 5px;
+    border-color: black transparent transparent transparent;
+
+    top: 100%;
+    left: 43%;
+}
+
+@-webkit-keyframes fade {
+    100% {
+        background-color: transparent;
+    }
+}
+
+@-moz-keyframes fade {
+    100% {
+        background-color: transparent;
+    }
 }

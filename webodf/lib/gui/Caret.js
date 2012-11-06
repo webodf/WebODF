@@ -118,9 +118,6 @@ gui.Caret = function Caret(cursor) {
 
         span = dom.createElementNS(htmlns, "span");
         span.setAttribute("contenteditable", true);
-        // making the position relative enables the avatar to use
-        // the span as reference for its absolute position
-        span.style.position = "relative";
 
         span.onfocus = function () {
             focussed = true;
@@ -135,7 +132,7 @@ gui.Caret = function Caret(cursor) {
 
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
-        avatar = new gui.Avatar(span);
+        avatar = new gui.Avatar(cursorNode);
     }
     init();
 };
