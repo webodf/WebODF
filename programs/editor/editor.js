@@ -109,21 +109,18 @@ function init_gui_and_doc(docurl, userid) {
                 runtime.log("editor: setting UserModel and requesting replay");
                 session.setUserModel(new ops.NowjsUserModel(function done() {
                     opRouter.requestReplay(function done() {
+                        // start editing: let the controller send the OpAddCursor
                         sessionController.startEditing();
+                        // add our two friends
+                        // addCursorToDoc(session, "bob");
+                        // addCursorToDoc(session, "alice");
                     });
                 }));
             }
 
             loadWidgets(session, sessionController.getInputMemberId());
             loadAvatarPane(sessionView, document.getElementById('peopleList'));
-            // in this test we start a session from scratch: it is not loaded from
-            // a serialized document
-            // each cursor is added at the starting position
-            // add our two friends
-//             addCursorToDoc(session, "bob"); //"http://bogus/src=avatar/thkogmbh/avatar.png"
-//             addCursorToDoc(session, "alice");
 
-            // start editing: let the controller send the OpAddCursor
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);
