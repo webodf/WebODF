@@ -68,7 +68,7 @@ gui.SessionView = (function () {
             var caret = caretFactory.createCaret(cursor),
                 memberId = cursor.getMemberId(),
                 userData = session.getUserModel().getUserDetails(memberId),
-                rulesCStr;
+                styleRuleRudimentCStr;
 
             caret.setAvatarImageUrl(userData.imageurl);
             caret.setColor(userData.color);
@@ -78,7 +78,7 @@ gui.SessionView = (function () {
             carets[memberId] = caret;
 
             // Add per-avatar edited styling
-            rulesCStr = 'text|p[class=edited][user="'+memberId+'"] { background-color: '+userData.color+';'
+            styleRuleRudimentCStr = '[class=edited][user="'+memberId+'"] { background-color: '+userData.color+';'
                         +  '-webkit-animation-name: fade;'
                         +  '-webkit-animation-duration: 10s;'
                         +  '-webkit-animation-fill-mode: forwards;'
@@ -88,9 +88,10 @@ gui.SessionView = (function () {
                         +  'border-radius: 10px;}';
             // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
             // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
-            // avatarEditedStyles.sheet.insertRule(rulesCStr, 0);
+            // avatarEditedStyles.sheet.insertRule('text|p'+styleRuleRudimentCStr, 0);
             // Workaround for now
-            avatarEditedStyles.appendChild(document.createTextNode(rulesCStr));
+            avatarEditedStyles.appendChild(document.createTextNode('text|h'+styleRuleRudimentCStr));
+            avatarEditedStyles.appendChild(document.createTextNode('text|p'+styleRuleRudimentCStr));
         }
 
         /**
