@@ -40,16 +40,13 @@ runtime.loadClass("gui.Caret");
 runtime.loadClass("gui.SessionController");
 runtime.loadClass("gui.SessionView");
 
-var avatarStyles = null;
-
 function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
     "use strict";
     var doc = avatarListDiv.ownerDocument,
         htmlns = doc.documentElement.namespaceURI,
         avatarDiv = doc.createElementNS(htmlns, "div"),
         imageElement = doc.createElement("img"),
-        fullnameTextNode = doc.createTextNode(userDetails.fullname),
-        rulesCStr;
+        fullnameTextNode = doc.createTextNode(userDetails.fullname);
 
     imageElement.src = userDetails.imageurl;
     imageElement.width = 22;
@@ -75,21 +72,6 @@ function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
         }
     };
     avatarListDiv.appendChild(avatarDiv);
-
-    // Add per-avatar edited styling
-    rulesCStr = 'text|p[class=edited][user='+memberId+'] { background-color: '+userDetails.color+';'
-                                                                 +  '-webkit-animation-name: fade;'
-                                                                 +  '-webkit-animation-duration: 10s;'
-                                                                 +  '-webkit-animation-fill-mode: forwards;'
-                                                                 +  '-moz-animation-name: fade;'
-                                                                 +  '-moz-animation-duration: 10s;'
-                                                                 +  '-moz-animation-fill-mode: forwards;'
-                                                                 +  'border-radius: 10px;}';
-    // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
-    // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
-    // avatarStyles.sheet.insertRule(rulesCStr, 0);
-    // Workaround for now
-    avatarStyles.appendChild(document.createTextNode(rulesCStr));
 }
 
 /**
@@ -110,16 +92,7 @@ function removeAvatarButton(avatarListDiv, memberId) {
 function loadAvatarPane(sessionView, avatarListDiv) {
     "use strict";
 
-    var session = sessionView.getSession(),
-        head = document.getElementsByTagName('head')[0],
-        style = document.createElementNS(head.namespaceURI, 'style');
-
-    // Add a css sheet for avatar-edited styling
-    style.type = 'text/css';
-    style.media = 'screen, print, handheld, projection';
-    style.appendChild(document.createTextNode('@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);'));
-    head.appendChild(style);
-    avatarStyles = style;
+    var session = sessionView.getSession();
 
     // attention: there is a race condition, sessionView also only
     // on this signal creates the caret, so trying to get the caret

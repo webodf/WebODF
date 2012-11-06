@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, gui, ops */
+/*global document, runtime, gui, ops */
 
 runtime.loadClass("gui.Caret");
 runtime.loadClass("ops.TrivialUserModel");
@@ -44,7 +44,8 @@ gui.SessionView = (function () {
       * @constructor
       */
     function SessionView(session, caretFactory) {
-        var carets = {};
+        var carets = {},
+            avatarEditedStyles;
 
         /**
          * @return {ops.Session}
@@ -65,26 +66,55 @@ gui.SessionView = (function () {
          */
         function onCursorAdded(cursor) {
             var caret = caretFactory.createCaret(cursor),
-                userData = session.getUserModel().getUserDetails(cursor.getMemberId());
+                memberId = cursor.getMemberId(),
+                userData = session.getUserModel().getUserDetails(memberId),
+                rulesCStr;
 
             caret.setAvatarImageUrl(userData.imageurl);
             caret.setColor(userData.color);
 
-            runtime.log("+++ View here +++ eagerly created an Caret for '"+cursor.getMemberId()+"'! +++");
+            runtime.log("+++ View here +++ eagerly created an Caret for '"+memberId+"'! +++");
 
-            carets[cursor.getMemberId()] = caret;
+            carets[memberId] = caret;
+
+            // Add per-avatar edited styling
+            rulesCStr = 'text|p[class=edited][user='+memberId+'] { background-color: '+userData.color+';'
+                        +  '-webkit-animation-name: fade;'
+                        +  '-webkit-animation-duration: 10s;'
+                        +  '-webkit-animation-fill-mode: forwards;'
+                        +  '-moz-animation-name: fade;'
+                        +  '-moz-animation-duration: 10s;'
+                        +  '-moz-animation-fill-mode: forwards;'
+                        +  'border-radius: 10px;}';
+            // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
+            // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
+            // avatarEditedStyles.sheet.insertRule(rulesCStr, 0);
+            // Workaround for now
+            avatarEditedStyles.appendChild(document.createTextNode(rulesCStr));
         }
 
         /**
          * @param {!string} memberid
          */
         function onCursorRemoved(memberid) {
+            // TODO: remove style rule for avatar again from avatarEditedStyles
             delete carets[memberid];
         }
 
-        session.subscribe(ops.SessionImplementation.signalCursorAdded, onCursorAdded);
-        session.subscribe(ops.SessionImplementation.signalCursorRemoved, onCursorRemoved);
+        function init() {
+            var head = document.getElementsByTagName('head')[0];
 
+            session.subscribe(ops.SessionImplementation.signalCursorAdded, onCursorAdded);
+            session.subscribe(ops.SessionImplementation.signalCursorRemoved, onCursorRemoved);
+
+            // Add a css sheet for avatar-edited styling
+            avatarEditedStyles = document.createElementNS(head.namespaceURI, 'style');
+            avatarEditedStyles.type = 'text/css';
+            avatarEditedStyles.media = 'screen, print, handheld, projection';
+            avatarEditedStyles.appendChild(document.createTextNode('@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);'));
+            head.appendChild(avatarEditedStyles);
+        }
+        init();
     }
 
     return SessionView;
