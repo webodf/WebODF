@@ -348,8 +348,8 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         var cursor = cursors[memberid],
             cursorNode;
         if (cursor) {
-            cursorNode = cursor.getNode();
-            cursorNode.parentNode.removeChild(cursorNode);
+            // TODO: find out if nodeAfterCursor, textNodeIncrease need to be dealt with in any way
+            cursor.remove(function(nodeAfterCursor, textNodeIncrease){});
             delete cursors[memberid];
         }
     };
