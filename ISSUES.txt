@@ -1,3 +1,14 @@
+== walking over a split text node ==
+walking over a split text node lets the avatar disappear.
+the textnode split happened when removing an avatar. a fix for
+that split is incoming...
+but the walking should be more robust and able to cope with such
+situations.
+
+cloud: e6c7df91fa203ed99094c5ac030d03bd7af4a230
+webodf: 6bea12a3dc4f3e5ce407e2ad3d7d16f35df2ec73
+
+
 == 2nd avatar jumps= ==
 === reproduction steps ===
 browser: google chrome
@@ -39,3 +50,4 @@ counting mechanism
 
 
 [1] perhaps not 100% fine, but it's out of scope of this issue-report
+
