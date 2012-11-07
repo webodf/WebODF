@@ -5,6 +5,11 @@ that split is incoming...
 but the walking should be more robust and able to cope with such
 situations.
 
+additional info:
+when the avatar disappears the console outputs a:
+Uncaught Error: INDEX_SIZE_ERR: DOM Exception 1 
+in Selection.js :81
+
 cloud: e6c7df91fa203ed99094c5ac030d03bd7af4a230
 webodf: 6bea12a3dc4f3e5ce407e2ad3d7d16f35df2ec73
 
