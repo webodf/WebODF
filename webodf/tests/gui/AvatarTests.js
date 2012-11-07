@@ -43,28 +43,26 @@ runtime.loadClass("ops.Document");
 gui.AvatarTests = function AvatarTests(runner) {
     "use strict";
     var r = runner, t, maindoc = runtime.getWindow().document, odfDocument, testarea,
-        odfxml = '<office:text text:use-soft-page-breaks="true" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
-        + '      <text:sequence-decls>\n'
-        + '        <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>\n'
-        + '        <text:sequence-decl text:display-outline-level="0" text:name="Table"/>\n'
-        + '        <text:sequence-decl text:display-outline-level="0" text:name="Text"/>\n'
-        + '        <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>\n'
-        + '      </text:sequence-decls>\n'
-        + '      <text:section text:style-name="Sect1" text:name="Section1">\n'
-        + '        <text:p text:style-name="P3">\n'
-        + '          <text:s/>\n'
-        + '        </text:p>\n'
-        + '        <text:p text:style-name="P6"/>\n'
-        + '        <text:p text:style-name="P5">WebODF is an exiting new technology that you can find in on <text:span text:style-name="Emphasis">mobile phones</text:span> and <text:span text:style-name="Emphasis">tablets</text:span>, embedded in <text:span text:style-name="Emphasis">wiki’s, intranet solutions</text:span> and <text:span text:style-name="Emphasis">webmail</text:span> and even in browsers. </text:p>\n'
-        + '      </text:section>\n'
-        + '</office:text>\n',
-        odfxml2 = '<text><p>a </p></text>',
+        odfxml =
+          '<text:sequence-decls>\n'
+        + '  <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>\n'
+        + '  <text:sequence-decl text:display-outline-level="0" text:name="Table"/>\n'
+        + '  <text:sequence-decl text:display-outline-level="0" text:name="Text"/>\n'
+        + '  <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>\n'
+        + '</text:sequence-decls>\n'
+        + '<text:section text:style-name="Sect1" text:name="Section1">\n'
+        + '  <text:p text:style-name="P3">\n'
+        + '    <text:s/>\n'
+        + '  </text:p>\n'
+        + '  <text:p text:style-name="P6"/>\n'
+        + '  <text:p text:style-name="P5">WebODF is an exiting new technology that you can find in on <text:span text:style-name="Emphasis">mobile phones</text:span> and <text:span text:style-name="Emphasis">tablets</text:span>, embedded in <text:span text:style-name="Emphasis">wiki’s, intranet solutions</text:span> and <text:span text:style-name="Emphasis">webmail</text:span> and even in browsers. </text:p>\n'
+        + '</text:section>',
+        odfxml2 = '<p>a </p>',
         odfxml3 = '<p>  a  b</p>',
-        odfxml4 = '<office:text xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">\n'
-        + '      <text:section>\n'
-        + '        <text:p/>\n'
-        + '      </text:section>\n'
-        + '</office:text>\n',
+        odfxml4 =
+          '<text:section>\n'
+        + '  <text:p/>\n'
+        + '</text:section>',
         dummyfilter = function acceptPosition(p) {
             t.pos.push({
                 c: p.container(),
@@ -135,19 +133,27 @@ gui.AvatarTests = function AvatarTests(runner) {
      * @param {string=} xml
      */
     function createAvatar(xml) {
-        var doc, node;
+        var doc, node,
+            i,
+            odfRootNode = odfDocument.getRootNode();
 
         if (xml) {
-            doc = /**@type{!Document}*/(runtime.parseXML(xml));
-            node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement, true));
-            odfDocument.getRootNode().appendChild(node);
+            // odfRootNode already provides a <office;text> element, to which
+            // the content should be added here. So create the nodes in a
+            // Document with a temporary <help> root element and then import
+            // all its childs, which is the content
+            xml = '<helper xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">'+xml+'</helper>';
+            doc = /**@type{!XMLDocument}*/(runtime.parseXML(xml));
+            for (i = 0; i < doc.documentElement.childNodes.length; i += 1) {
+                node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement.childNodes[i], true));
+                odfRootNode.appendChild(node);
+            }
         }
         t.cursor = new core.Cursor("id", odfDocument);
         t.caret = new gui.Caret(t.cursor);
-runtime.log(maindoc.documentElement.innerHTML);
     }
     function create() {
-        createAvatar("<a/>");
+        createAvatar();
         r.shouldBeNonNull(t, "t.caret");
         r.shouldBe(t, "t.caret.getCursor().getMemberId()", "'id'");
         var s = t.cursor.getSelection();
@@ -169,47 +175,34 @@ runtime.log(maindoc.documentElement.innerHTML);
         r.shouldBe(t, "t.startNode", "t.focusNode");
     }
     function moveInSimpleDoc() {
-        createAvatar("<a>hello</a>");
+        createAvatar("hello");
         var s = t.cursor.getSelection(),
             i;
-        // step behind <a>
-        t.cursor.move(1);
         t.startNode = s.focusNode;
         for (i = 1; i <= 4; i += 1) {
             t.cursor.move(1);
-runtime.log(i+":"+testarea.innerHTML);
             t.focusOffset = s.focusOffset;
             t.focusNode = s.focusNode;
             r.shouldBe(t, "t.focusOffset", i.toString());
             r.shouldBe(t, "t.focusNode", "t.startNode");
         }
-        // step before </a>
         t.cursor.move(1);
-runtime.log(testarea.innerHTML);
         t.focusOffset = s.focusOffset;
         t.focusNode = s.focusNode;
         r.shouldBe(t, "t.focusOffset", "1");
         r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
-        // step after </a>, at end of document
+        // try to go behind the last char
         t.cursor.move(1);
-runtime.log(testarea.innerHTML);
-        r.shouldBe(t, "t.focusOffset", "1");
-        r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
-        // step before </a>
-        t.cursor.move(-11);
-runtime.log(testarea.innerHTML);
         r.shouldBe(t, "t.focusOffset", "1");
         r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
         for (i = 4; i >= 0; i -= 1) {
             t.cursor.move(-1);
-runtime.log(i+":"+testarea.innerHTML);
             t.focusOffset = s.focusOffset;
             t.focusNode = s.focusNode;
             r.shouldBe(t, "t.focusOffset", i.toString());
             r.shouldBe(t, "t.focusNode", "t.startNode");
         }
         t.cursor.move(1);
-runtime.log(testarea.innerHTML);
         r.shouldBe(t, "t.focusOffset", "0");
         r.shouldBe(t, "t.focusNode", "t.startNode");
     }
@@ -265,10 +258,10 @@ runtime.log(testarea.innerHTML);
         r.shouldBe(t, "t.text", "t.startText");
     }
     function stepCounter1() {
-        stepCounter("<p>ab</p>", 1, 1, dummyfilter);
+        stepCounter("ab", 1, 1, dummyfilter);
     }
     function stepCounter2() {
-        stepCounter("<p>ab</p>", 2, 2, dummyfilter);
+        stepCounter("ab", 2, 2, dummyfilter);
     }
     function backAndForth(xml, n, m, filter) {
         var i, steps;
@@ -310,52 +303,48 @@ runtime.log(testarea.innerHTML);
         r.shouldBe(t, "t.moveSum", n.toString());
     }
     function backAndForth1() {
-        backAndForth('<p>ab</p>\n', 2, 2, dummyfilter);
+        backAndForth('ab', 2, 2, dummyfilter);
     }
     function backAndForth2() {
-        backAndForth(odfxml, 300, 300, dummyfilter);
+        backAndForth(odfxml, 220, 220, dummyfilter);
     }
     function backAndForth3() {
-        backAndForth('<p>ab</p>', 2, 2, textfilter);
+        backAndForth(odfxml, 188, 171, textfilter);
     }
     function backAndForth4() {
-        backAndForth(odfxml2, 2, 2, textfilter);
+        backAndForth('<p>ab</p>', 2, 2, textfilter);
     }
     function backAndForth5() {
-        backAndForth(odfxml3, 6, 6, dummyfilter);
+        backAndForth(odfxml2, 2, 2, textfilter);
     }
     function backAndForth6() {
-        backAndForth(odfxml3, 6, 4, textfilter);
+        backAndForth('  a  b', 6, 6, dummyfilter);
     }
     function backAndForth7() {
-        backAndForth(odfxml, 300, 300, dummyfilter);
+        backAndForth(odfxml3, 6, 4, textfilter);
     }
     function backAndForth8() {
-        backAndForth(odfxml, 212, 171, textfilter);
-    }
-    function backAndForth9() {
         backAndForth(odfxml4, 0, 0, textfilter);
     }
-    function backAndForth10() {
-        backAndForth(odfxml4, 28, 28, dummyfilter);
+    function backAndForth9() {
+        backAndForth(odfxml4, 8, 8, dummyfilter);
     }
     this.tests = function () {
         return [
             create,
-            moveInEmptyDoc
-//             moveInSimpleDoc
-//             stepCounter1,
-//             stepCounter2,
-//             backAndForth1,
-//             backAndForth2,
-//             backAndForth3,
-//             backAndForth4,
-//             backAndForth5,
-//             backAndForth6,
-//             backAndForth7,
-//             backAndForth8,
-//             backAndForth9,
-//             backAndForth10
+            moveInEmptyDoc,
+            moveInSimpleDoc,
+            stepCounter1,
+            stepCounter2,
+            backAndForth1,
+            backAndForth2,
+            backAndForth3,
+            backAndForth4,
+            backAndForth5,
+            backAndForth6,
+            backAndForth7,
+            backAndForth8,
+            backAndForth9
         ];
     };
     this.asyncTests = function () {
