@@ -259,7 +259,11 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
  */
 Runtime.getVariable = function (name) {
     "use strict";
+    try {
     return eval(name);
+    } catch (e) {
+        return undefined;
+    }
 };
 
 /**
