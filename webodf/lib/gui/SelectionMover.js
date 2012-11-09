@@ -234,7 +234,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         var offset = 0,
             n;
         while (node.parentNode !== container) {
-            node = node.parentNode;
+            node = /**@type{!Node}*/node.parentNode;
         }
         n = container.firstChild;
         while (n !== node) {
