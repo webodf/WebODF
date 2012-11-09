@@ -110,8 +110,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!boolean}
      */
     this.previousPosition = function () {
-        var moved = true,
-            currentNode = walker.currentNode;
+        var moved = true;
         if (currentPos === 0) {
             if (walker.previousSibling() === null) {
                 walker.parentNode();
