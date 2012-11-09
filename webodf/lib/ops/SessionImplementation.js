@@ -42,14 +42,8 @@ runtime.loadClass("ops.Document");
  * @implements ops.Session
  * @param {!odf.OdfCanvas} odfCanvas
  */
-ops.SessionImplementation = (function () {
-    "use strict";
-    /**
-     * @constructor
-     * @implements ops.Session
-     * @param {!odf.OdfCanvas} odfCanvas
-     */
 ops.SessionImplementation = function SessionImplementation(odfCanvas) {
+    "use strict";
     var self = this,
         odfDocument = new ops.Document(odfCanvas),
         style2CSS = new odf.Style2CSS(),
@@ -65,13 +59,12 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     m_event_listener[ops.SessionImplementation.signalCursorMoved] = [];
     m_event_listener[ops.SessionImplementation.signalParagraphChanged] = [];
 
-
-    function setUserModel (userModel) {
+    function setUserModel(userModel) {
         m_user_model = userModel;
     }
     this.setUserModel = setUserModel;
 
-    function setOperationRouter (opRouter) {
+    function setOperationRouter(opRouter) {
         m_operation_router = opRouter;
         opRouter.setPlaybackFunction(self.playOperation);
         opRouter.setOperationFactory(new ops.OperationFactory(self));
@@ -93,28 +86,28 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     this.emit = function (eventid, args) {
         var i, subscribers;
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
-            "unknown event fired \""+eventid+"\"");
+            "unknown event fired \"" + eventid + "\"");
         subscribers = m_event_listener[eventid];
-        runtime.log("firing event \""+eventid+"\" to "+subscribers.length+" subscribers.");
-        for (i=0; i<subscribers.length; i+=1) {
+        runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
+        for (i = 0; i < subscribers.length; i += 1) {
             subscribers[i](args);
         }
     };
-    this.subscribe = function(eventid, cb) {
+    this.subscribe = function (eventid, cb) {
         runtime.assert(m_event_listener.hasOwnProperty(eventid),
-            "tried to subscribe to unknown event \""+eventid+"\"");
+            "tried to subscribe to unknown event \"" + eventid + "\"");
         m_event_listener[eventid].push(cb);
-        runtime.log("event \""+eventid+"\" subscribed.");
+        runtime.log("event \"" + eventid + "\" subscribed.");
     };
 
     /* SESSION OPERATIONS */
 
     // controller sends operations to this method
-    this.enqueue = function(operation) {
+    this.enqueue = function (operation) {
         m_operation_router.push(operation);
     };
 
-    this.playOperation = function(op) {
+    this.playOperation = function (op) {
         op.execute(odfDocument.getRootNode());
     };
 
@@ -143,12 +136,13 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     init();
 };
 
-    // TODO: find out how this can be moved to ops.Session
-    ops.SessionImplementation.signalCursorAdded =   "cursor/added";
-    ops.SessionImplementation.signalCursorRemoved = "cursor/removed";
-    ops.SessionImplementation.signalCursorMoved =   "cursor/moved";
-    ops.SessionImplementation.signalParagraphChanged = "paragraph/changed";
-
+// TODO: find out how this can be moved to ops.Session
+ops.SessionImplementation.signalCursorAdded =   "cursor/added";
+ops.SessionImplementation.signalCursorRemoved = "cursor/removed";
+ops.SessionImplementation.signalCursorMoved =   "cursor/moved";
+ops.SessionImplementation.signalParagraphChanged = "paragraph/changed";
+(function () {
+    "use strict";
     return ops.SessionImplementation;
 }());
 
