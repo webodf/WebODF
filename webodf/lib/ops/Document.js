@@ -186,7 +186,7 @@ ops.Document = function Document(odfCanvas) {
         element.removeAttribute('user');
         element.removeAttribute('class');
 
-        runtime.setTimeout(function() {
+        runtime.setTimeout(function () {
             element.setAttribute('user', memberId);
             element.setAttribute('class', 'edited');
         }, 1);
@@ -217,7 +217,7 @@ ops.Document = function Document(odfCanvas) {
      * @param {!number} offset
      * @return {!number}
      */
-    this.getDistanceFromCursor = function(memberid, node, offset) {
+    this.getDistanceFromCursor = function (memberid, node, offset) {
         var counter,
             cursor = cursors[memberid],
             steps = 0;
@@ -232,7 +232,7 @@ ops.Document = function Document(odfCanvas) {
      * @param {!string} memberid
      * @return {!number}
      */
-    this.getCursorPosition = function(memberid) {
+    this.getCursorPosition = function (memberid) {
         return -self.getDistanceFromCursor(memberid, rootNode, 0);
     };
 
@@ -349,7 +349,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             cursorNode;
         if (cursor) {
             // TODO: find out if nodeAfterCursor, textNodeIncrease need to be dealt with in any way
-            cursor.remove(function(nodeAfterCursor, textNodeIncrease){});
+            cursor.remove(function (nodeAfterCursor, textNodeIncrease) {});
             delete cursors[memberid];
         }
     };
