@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,10 +33,21 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global ops*/
-/**
- * An operation that can be performed on a document.
- * @constructor
- */
-ops.Operation = function Operation(session) {
+
+ops.OpAddMember = function OpAddMember(session) {
     "use strict";
+
+    var memberid, cursorns = 'urn:webodf:names:cursor';
+
+    this.init = function(data) {
+        memberid = data.memberid;
+    };
+
+    // insert our <cursor/> representation into the dom
+    //  ... later ...
+    this.execute = function(domroot) {
+        // cursor_element = createElement("cursor");
+        session.emit("avatar/added", memberid);
+    };
+
 };
