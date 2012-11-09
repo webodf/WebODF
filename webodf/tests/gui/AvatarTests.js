@@ -143,7 +143,7 @@ gui.AvatarTests = function AvatarTests(runner) {
             // Document with a temporary <help> root element and then import
             // all its childs, which is the content
             xml = '<helper xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">'+xml+'</helper>';
-            doc = /**@type{!XMLDocument}*/(runtime.parseXML(xml));
+            doc = /**@type{!Document}*/(runtime.parseXML(xml));
             for (i = 0; i < doc.documentElement.childNodes.length; i += 1) {
                 node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement.childNodes[i], true));
                 odfRootNode.appendChild(node);
