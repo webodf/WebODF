@@ -272,7 +272,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
             n = iterator.nextNode();
         while (n !== null) {
-            if (n.nodeType === 3 && n.data.length > 2) {
+            if (n.nodeType === 3 && n.data.length > 1) {
                 n.splitText(1);
             }
             n = iterator.nextNode();
