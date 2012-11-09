@@ -116,6 +116,9 @@ function init_gui_and_doc(docurl, userid) {
                         // addCursorToDoc(session, "alice");
                     });
                 }));
+            } else {
+                // offline
+                sessionController.startEditing();
             }
 
             loadWidgets(session, sessionController.getInputMemberId());
@@ -206,12 +209,14 @@ function editor_init(docurl, userid) {
     function later_cb() {
         if (net.networkStatus === "unavailable") {
             runtime.log("connection to server unavailable.");
+            init_gui_and_doc(docurl, userid);
             return;
         }
         if (net.networkStatus !== "ready") {
             if (accumulated_waiting_time > 8000) {
                 // game over
                 runtime.log("connection to server timed out.");
+                init_gui_and_doc(docurl, userid);
                 return;
             }
             accumulated_waiting_time += 100;
