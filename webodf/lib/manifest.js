@@ -41,6 +41,7 @@
         "core/Cursor.js",
         "core/JSLint.js",
         "core/PositionFilter.js",
+        "core/LoopWatchDog.js",
         "core/PositionIterator.js",
         "core/RawDeflate.js",
         "core/RawInflate.js",
