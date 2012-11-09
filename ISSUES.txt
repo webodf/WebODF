@@ -12,8 +12,11 @@ browser: google chrome
 
 6a) further Right-Arrows will not move the Avatar
 6b) further Left-Arrows will make Avatar disappear
+	[6b will trigger 'INDEX_SIZE_ERR: DOM Exception 1']
 
 7) Click somewhere and Avatar will re-appear.
+
+
 
 == walking over a split text node ==
 walking over a split text node lets the avatar disappear.
