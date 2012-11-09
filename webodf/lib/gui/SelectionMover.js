@@ -225,6 +225,53 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         return count;
     }
     /**
+     * Calculate node offset.
+     * @param {!Node} node
+     * @param {!Node} container
+     * @return {!number}
+     */
+    function getPositionInContainingNode(node, container) {
+        var offset = 0,
+            n;
+        while (node.parentNode !== container) {
+            node = node.parentNode;
+        }
+        n = container.firstChild;
+        while (n !== node) {
+            offset += 1;
+            n = n.nextSibling;
+        }
+        return offset;
+    }
+    /**
+     * Return a number > 0 when point 1 precedes point 2. Return 0 if the points
+     * are equal. Return < 0 when point 2 precedes point 1.
+     * @param {!Node} c1
+     * @param {!number} o1
+     * @param {!Node} c2
+     * @param {!number} o2
+     * @return {!number}
+     */
+    function comparePoints(c1, o1, c2, o2) {
+        if (c1 === c2) {
+            return o2 - o1;
+        }
+        var comparison = c1.compareDocumentPosition(c2);
+        if (comparison === 2) { // DOCUMENT_POSITION_PRECEDING
+            comparison = -1;
+        } else if (comparison === 4) { // DOCUMENT_POSITION_FOLLOWING
+            comparison = 1;
+        } else if (comparison === 10) { // DOCUMENT_POSITION_CONTAINS
+            // c0 contains c2
+            o1 = getPositionInContainingNode(c1, c2);
+            comparison = (o1 < o2) ? 1 : -1;
+        } else { // DOCUMENT_POSITION_CONTAINED_BY
+            o2 = getPositionInContainingNode(c2, c1);
+            comparison = (o2 < o1) ? -1 : 1;
+        }
+        return comparison;
+    }
+    /**
      * @param {!Element} element
      * @param {!number} offset
      * @param {!core.PositionFilter} filter
@@ -236,7 +283,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         var c = positionIterator.container(),
             o = positionIterator.offset(),
             steps = 0,
-            watch = new core.LoopWatchDog(1000);
+            watch = new core.LoopWatchDog(1000),
+            comparison;
 
         // the iterator may interpret the positions as given by the range
         // differently than the dom positions, so we normalize them by calling
@@ -246,33 +294,36 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         offset = positionIterator.offset();
         positionIterator.setPosition(c, o);
 
-        while (positionIterator.nextPosition()) {
-            watch.check();
-            if (filter.acceptPosition(positionIterator) === 1) {
-                steps += 1;
-            }
-            if (positionIterator.container() === element) {
-                if (positionIterator.offset() === offset) {
-                    positionIterator.setPosition(c, o);
-                    return steps;
+        comparison = comparePoints(element, offset, c, o);
+        if (comparison < 0) {
+            while (positionIterator.nextPosition()) {
+                watch.check();
+                if (filter.acceptPosition(positionIterator) === 1) {
+                    steps += 1;
+                }
+                if (positionIterator.container() === element) {
+                    if (positionIterator.offset() === offset) {
+                        positionIterator.setPosition(c, o);
+                        return steps;
+                    }
                 }
             }
-        }
-        steps = 0;
-        positionIterator.setPosition(c, o);
-        while (positionIterator.previousPosition()) {
-            watch.check();
-            if (filter.acceptPosition(positionIterator) === 1) {
-                steps -= 1;
-            }
-            if (positionIterator.container() === element) {
-                if (positionIterator.offset() === offset) {
-                    positionIterator.setPosition(c, o);
-                    return steps;
+            positionIterator.setPosition(c, o);
+        } else if (comparison > 0) {
+            while (positionIterator.previousPosition()) {
+                watch.check();
+                if (filter.acceptPosition(positionIterator) === 1) {
+                    steps -= 1;
+                }
+                if (positionIterator.container() === element) {
+                    if (positionIterator.offset() === offset) {
+                        positionIterator.setPosition(c, o);
+                        return steps;
+                    }
                 }
             }
+            positionIterator.setPosition(c, o);
         }
-        positionIterator.setPosition(c, o);
         return steps;
     }
 
