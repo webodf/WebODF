@@ -1,3 +1,20 @@
+== single offline avatar getting lost ==
+
+webodf: 871aaf5f609281f1bc59ba0ba273d3a0ce4abb
+browser: google chrome
+
+0) run ./simplerevisionserver/webdavserver.py
+1) load http://localhost:8080/webodf/collabtest/test.html
+2) click on first word "WebODF"; press Home-Key
+3) press 3x Left-Arrow [Avatar is left of image now]
+4) Insert 4x "x"
+5) press 3x Right-Arrow
+
+6a) further Right-Arrows will not move the Avatar
+6b) further Left-Arrows will make Avatar disappear
+
+7) Click somewhere and Avatar will re-appear.
+
 == walking over a split text node ==
 walking over a split text node lets the avatar disappear.
 the textnode split happened when removing an avatar. a fix for
