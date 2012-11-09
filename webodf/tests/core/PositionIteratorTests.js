@@ -30,8 +30,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops*/
+/*global runtime, core, gui, xmldom, ops*/
 runtime.loadClass("core.PositionIterator");
+runtime.loadClass("xmldom.LSSerializer");
 
 /**
  * @constructor
@@ -64,7 +65,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             { x: "<a><b/>a</a>", n: 2 },
             { x: "<a>hello</a>", n: 6 },
             { x: "<a>hel<b/>lo</a>", n: 6 },
-            { x: "<a><c><b>a</b>a</c></a>", n: 2 }
+            { x: "<a><c><b>a</b>a</c></a>", n: 2 },
+            { x: "<a><c/>abc<b/>de</a>", n: 6 }
         ];
 
     this.setUp = function () {
@@ -222,8 +224,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             it.setPosition(t.c1, t.o1);
             t.c2 = it.container();
             t.o2 = it.offset();
-            r.shouldBe(t, "t.c1", "t.c2");
-            r.shouldBe(t, "t.o1", "t.o2");
+            r.shouldBe(t, "t.c2", "t.c1");
+            r.shouldBe(t, "t.o2", "t.o1");
             for (i = 0; i <= n; i += 1) {
                 ok = ok && it.previousPosition();
             }
@@ -235,8 +237,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             }
             t.c2 = it.container();
             t.o2 = it.offset();
-            r.shouldBe(t, "t.c1", "t.c2");
-            r.shouldBe(t, "t.o1", "t.o2");
+            r.shouldBe(t, "t.c2", "t.c1");
+            r.shouldBe(t, "t.o2", "t.o1");
             n += 1;
         }
         r.shouldBe(t, ok.toString(), "true");
@@ -265,12 +267,44 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             n = iterator.nextNode();
         }
     }
+    function splitTextNodes(doc) {
+        var root = doc.documentElement,
+            iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
+            n = iterator.nextNode();
+        while (n !== null) {
+            if (n.nodeType === 3 && n.data.length > 2) {
+                n.splitText(1);
+            }
+            n = iterator.nextNode();
+        }
+    }
     function emptyTextNodes() {
         var i, xml, n;
         for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
             t.doc = runtime.parseXML(xml.x);
             insertEmptyTextNodes(t.doc);
+            t.iterator = new core.PositionIterator(t.doc.documentElement, 0,
+                    filter);
+            n = 1;
+            while (t.iterator.nextPosition()) {
+                n += 1;
+            }
+            r.shouldBe(t, n.toString(), xml.n.toString());
+            n = 1;
+            while (t.iterator.previousPosition()) {
+                n += 1;
+            }
+            r.shouldBe(t, n.toString(), xml.n.toString());
+            testPositions(xml.n);
+        }
+    }
+    function testSplitTextNodes() {
+        var i, xml, n, s = new xmldom.LSSerializer();
+        for (i = 0; i < testXMLs.length; i += 1) {
+            xml = testXMLs[i];
+            t.doc = runtime.parseXML(xml.x);
+            splitTextNodes(t.doc);
             t.iterator = new core.PositionIterator(t.doc.documentElement, 0,
                     filter);
             n = 1;
@@ -296,7 +330,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             forwardInDoc,
             backwardInDoc,
             rejectedNodes,
-            emptyTextNodes
+            emptyTextNodes,
+            testSplitTextNodes
         ];
     };
     this.asyncTests = function () {
