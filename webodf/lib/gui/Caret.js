@@ -117,7 +117,7 @@ gui.Caret = function Caret(cursor) {
             htmlns = dom.documentElement.namespaceURI;
 
         span = dom.createElementNS(htmlns, "span");
-        span.setAttribute("contenteditable", true);
+        span.setAttribute("tabindex", 0); // enable span to have focus
 
         span.onfocus = function () {
             focussed = true;
