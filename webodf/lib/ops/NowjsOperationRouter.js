@@ -35,11 +35,12 @@
 /*global runtime, ops, now */
 
 /*
- * route the operations.
- * this implementation immediately passes them to the
- * playback function.
- * other implementations might want to send them to a
- * server and wait for foreign ops.
+ * route operations in a networked collaborative manner.
+ *
+ * incoming operations (from controller) are sent to a server,
+ * who will distribute them.
+ *
+ * incoming operations (from the server are played on the DOM.
  */
 
 /**
