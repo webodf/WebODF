@@ -34,6 +34,7 @@
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.PositionFilter");
+runtime.loadClass("core.LoopWatchDog");
 
 /**
  * This class modifies the selection in different ways.
@@ -234,7 +235,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         // really dumb/inefficient implementation
         var c = positionIterator.container(),
             o = positionIterator.offset(),
-            steps = 0;
+            steps = 0,
+            watch = new core.LoopWatchDog(1000);
 
         // the iterator may interpret the positions as given by the range
         // differently than the dom positions, so we normalize them by calling
@@ -245,6 +247,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator.setPosition(c, o);
 
         while (positionIterator.nextPosition()) {
+            watch.check();
             if (filter.acceptPosition(positionIterator) === 1) {
                 steps += 1;
             }
@@ -258,6 +261,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         steps = 0;
         positionIterator.setPosition(c, o);
         while (positionIterator.previousPosition()) {
+            watch.check();
             if (filter.acceptPosition(positionIterator) === 1) {
                 steps -= 1;
             }
