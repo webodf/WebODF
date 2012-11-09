@@ -13,33 +13,6 @@ runtime.currentDirectory = function () {
 runtime.libraryPaths = function () {
     return [ runtime.currentDirectory() ];
 };
-function html_init() {
-	var accumulated_waiting_time = 0;
-	function later_cb() {
-		var net = runtime.getNetwork();
-		if (net.networkStatus === "unavailable") {
-			runtime.log("no server connection available. starting disconnected.");
-			init();
-			return;
-		}
-		if (net.networkStatus !== "ready") {
-			if (accumulated_waiting_time > 5000) {
-				runtime.log("connection to server timed out. starting disconnected.");
-				init();
-				return;
-			}
-			runtime.log("waiting...");
-			accumulated_waiting_time += 100;
-			runtime.getWindow().setTimeout(later_cb, 100);
-			return;
-		}	
-		runtime.log("connected to server: "+net.serverName);
-		runtime.getNetwork().ping();
-		// collabtest init
-		init();
-	}
-	later_cb();
-}
 </script>
   <script src="../lib/core/Selection.js" type="text/javascript" charset="utf-8"></script>
   <script src="../lib/core/Cursor.js" type="text/javascript" charset="utf-8"></script>
@@ -77,7 +50,7 @@ div#avatars2 {
  </head>
  <body>
   <script type="text/javascript" charset="utf-8">
-window.setTimeout(html_init, 0);
+window.setTimeout(collab_init, 0);
   </script>
   <div id="session1">
     <div id="odf1"></div>

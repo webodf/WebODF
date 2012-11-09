@@ -140,7 +140,7 @@ function removeCursorWithDelay(session, memberId, delay) {
     }, delay*1000);
 }
 
-function initSession(odfid, avatarlistid, callback) {
+function initSession(odfid, avatarlistid, done_cb) {
     "use strict";
     var odfelement = document.getElementById(odfid),
         avatarListDiv = document.getElementById(avatarlistid),
@@ -152,8 +152,10 @@ function initSession(odfid, avatarlistid, callback) {
         is_connected = false,
         ready = false;
 
-    if (runtime.getNetwork().networkStatus !== "unavailable") {
+    if (runtime.getNetwork().networkStatus === "ready") {
         is_connected = true;
+    } else {
+        runtime.log("running in disconnected/offline mode.");
     }
 
     odfcanvas.addListener("statereadychange", function (container) {
@@ -191,13 +193,17 @@ function initSession(odfid, avatarlistid, callback) {
                     // add our two friends
                     addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
                     addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
+                    if (done_cb) {
+                        done_cb();
+                    }
                 });
             }));
-        }
-        // TODO callback too early?
-        if (callback) {
-            callback(testsession);
-            callback = null;
+        } else {
+            // start editing: let the controller send the OpAddCursor
+            sessionController.startEditing();
+            if (done_cb) {
+                done_cb();
+            }
         }
     });
     odfcanvas.load("text.odt");
@@ -210,14 +216,44 @@ function setHeight(id, top, height) {
     div.style.height = height + "%";
 }
 
-function init() {
+/*
+ * on the network, fire callback when it is unavailable or ready.
+ */
+function network_wait(timeout, done_cb, timeout_cb) {
+    "use strict";
+    var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+
+    function later_cb() {
+        if ((net.networkStatus === "ready") ||
+                (net.networkStatus === "unavailable")) {
+            done_cb();
+            return;
+        }
+        if (accumulated_waiting_time > timeout) {
+            // timeout
+            if (timeout_cb) {
+                timeout_cb();
+            }
+            done_cb();
+            return;
+        }
+        accumulated_waiting_time += 100;
+        runtime.getWindow().setTimeout(later_cb, 100);
+        return;
+    }
+    later_cb();
+}
+
+function collab_init() {
     "use strict";
     var height = 100;
     setHeight("session1", 0, height);
     setHeight("avatars1", 0, height);
 
-    initSession("odf1", "avatars1", function(session) {
-        runtime.log("odf1 session initialized.");
+    network_wait(5000, function() {
+        initSession("odf1", "avatars1", function(session) {
+            runtime.log("odf1 session initialized.");
+        });
     });
 }
 // vim:expandtab
