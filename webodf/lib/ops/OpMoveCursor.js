@@ -51,9 +51,15 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
     this.execute = function (domroot) {
         var odfDocument = session.getOdfDocument(),
             cursor = odfDocument.getCursor(memberid),
-            stepCounter = cursor.getStepCounter(),
             positionFilter = odfDocument.getPositionFilter(),
+            stepCounter,
             steps;
+
+        runtime.assert(cursor !== undefined,
+            "cursor for ["+memberid+"] not found (MoveCursor).");
+
+        stepCounter = cursor.getStepCounter();
+
 
         if (number > 0) {
             steps = stepCounter.countForwardSteps(number, positionFilter);
