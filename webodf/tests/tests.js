@@ -70,8 +70,9 @@ if (runtime.type() === "BrowserRuntime") {
 /*
 tests = [];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-    tests.push(ops.SessionImplementationTests);
-    tests.push(odf.OdfContainerTests);
+    tests.push(core.CursorTests);
+    //tests.push(ops.SessionImplementationTests);
+    //tests.push(odf.OdfContainerTests);
 }
 */
 var tester = new core.UnitTester();

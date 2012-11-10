@@ -269,7 +269,6 @@ ops.Document = function Document(odfCanvas) {
     this.insertText = function (memberid, position, text) {
         var domPosition;
         domPosition = getPositionInTextNode(position);
-runtime.log(domPosition + " -- " + text + " " + position);
         if (domPosition) {
             domPosition.textNode.insertData(domPosition.offset, text);
             highlightEdit(getParagraphElement(domPosition.textNode), memberid);
@@ -286,7 +285,6 @@ runtime.log(domPosition + " -- " + text + " " + position);
     this.removeText = function (memberid, position, length) {
         var domPosition;
         domPosition = getPositionInTextNode(position);
-runtime.log("Vaporizing text:" + domPosition + " -- " + position + " " + length);
         if (domPosition) {
             domPosition.textNode.deleteData(domPosition.offset, length);
             highlightEdit(getParagraphElement(domPosition.textNode), memberid);

@@ -43,16 +43,16 @@ ops.OpRemoveCursor = function OpRemoveCursor(session) {
 
     var memberid, cursorns = 'urn:webodf:names:cursor';
 
-    this.init = function(data) {
+    this.init = function (data) {
         memberid = data.memberid;
     };
 
-    this.execute = function(domroot) {
+    this.execute = function (domroot) {
         session.getOdfDocument().removeCursor(memberid);
         session.emit(ops.SessionImplementation.signalCursorRemoved, memberid);
     };
 
-    this.spec = function() {
+    this.spec = function () {
         return {
             optype: "RemoveCursor",
             memberid: memberid

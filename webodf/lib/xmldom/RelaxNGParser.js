@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, xmldom: true*/
+/*global runtime, xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -90,7 +90,8 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
      */
     function splitQName(name) {
         var r = name.split(":", 2),
-            prefix = "", i;
+            prefix = "",
+            i;
         if (r.length === 1) {
             r = ["", r[0]];
         } else {
@@ -121,7 +122,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
      */
     function trim(str) {
         str = str.replace(/^\s\s*/, '');
-		var ws = /\s/,
+        var ws = /\s/,
             i = str.length - 1;
         while (ws.test(str.charAt(i))) {
             i -= 1;
@@ -202,7 +203,10 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         var e = [],
             /**@type{Object}*/a,
             ce,
-            i, text, name = element.localName, names = [];
+            i,
+            text,
+            name = element.localName,
+            names = [];
         a = copyAttributes(element.attributes, name, names);
         a.combine = a.combine || undefined;
         text = parseChildren(element.firstChild, e, elements, names);
@@ -223,9 +227,9 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         // 4.8 name attribute of element and attribute elements
         if ((name === "attribute" || name === "element") &&
                 a.name !== undefined) {
-           i = splitQName(a.name);
-           e = [{name: "name", text: i[1], a: {ns: i[0]}}].concat(e);
-           delete a.name;
+            i = splitQName(a.name);
+            e = [{name: "name", text: i[1], a: {ns: i[0]}}].concat(e);
+            delete a.name;
         }
         // 4.9 ns attribute
         if (name === "name" || name === "nsName" || name === "value") {
@@ -249,9 +253,13 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             e = [{name: "group", e: splitToDuos({name: "group", e: e}).e}];
         }
         if (e.length > 2 && name === "element") {
-            e = [e[0]].concat(
-                {name: "group", e: splitToDuos(
-                    {name: "group", e: e.slice(1)}).e});
+            e = [e[0]].concat({
+                name: "group",
+                e: splitToDuos({
+                    name: "group",
+                    e: e.slice(1)
+                }).e
+            });
         }
         if (e.length === 1 && name === "attribute") {
             e.push({name: "text", text: text});
@@ -408,7 +416,9 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     function main(dom, callback) {
         var elements = [],
             grammar = parse(dom && dom.documentElement, elements, undefined),
-            i, e, defines = {};
+            i,
+            e,
+            defines = {};
 
         for (i = 0; i < grammar.e.length; i += 1) {
             e = grammar.e[i];
@@ -420,7 +430,8 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         }
         if (!start) {
             return [new RelaxNGParseError(
-                    "No Relax NG start element was found.")];
+                "No Relax NG start element was found."
+            )];
         }
         resolveDefines(start, defines);
         for (i in defines) {

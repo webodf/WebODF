@@ -43,14 +43,14 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
 
     var memberid, position, styleNameBefore, styleNameAfter;
 
-    this.init = function(data) {
+    this.init = function (data) {
         memberid = data.memberid;
         position = data.position;
         styleNameBefore = data.styleNameBefore;
         styleNameAfter = data.styleNameAfter;
     };
 
-    this.execute = function(domroot) {
+    this.execute = function (domroot) {
         var domPosition, paragraphNode,
             odfDocument = session.getOdfDocument();
 
@@ -64,7 +64,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
         }
     };
 
-    this.spec = function() {
+    this.spec = function () {
         return {
             optype: "SetParagraphStyle",
             memberid: memberid,

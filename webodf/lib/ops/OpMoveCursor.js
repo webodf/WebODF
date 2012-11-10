@@ -43,12 +43,12 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
 
     var memberid, number;
 
-    this.init = function(data) {
+    this.init = function (data) {
         memberid = data.memberid;
         number = data.number;
     };
 
-    this.execute = function(domroot) {
+    this.execute = function (domroot) {
         var odfDocument = session.getOdfDocument(),
             cursor = odfDocument.getCursor(memberid),
             stepCounter = cursor.getStepCounter(),
@@ -63,12 +63,12 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
             // nothing to do
             return;
         }
-        runtime.log("Moving. moving, moving... walkableSteps "+steps);
+        runtime.log("Moving. moving, moving... walkableSteps " + steps);
         cursor.move(steps);
         session.emit(ops.SessionImplementation.signalCursorMoved, cursor);
     };
 
-    this.spec = function() {
+    this.spec = function () {
         return {
             optype: "MoveCursor",
             memberid: memberid,

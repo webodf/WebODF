@@ -43,7 +43,7 @@
  * @constructor
  * @implements ops.UserModel
  */
-ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
+ops.NowjsUserModel = function NowjsUserModel(loaded_cb) {
     "use strict";
 
     var users = {},
@@ -72,8 +72,8 @@ ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
     // use this method to add new users as they join the session
     function addUser(memberId, fullName, imageUrl) {
         users[memberId] = {
-            memberid:memberId,
-            fullname:fullName,
+            memberid: memberId,
+            fullname: fullName,
             imageurl: imageUrl,
             color: selectColor()
         };
@@ -94,12 +94,12 @@ ops.NowjsUserModel = function NowjsUserModel (loaded_cb) {
     runtime.assert(net.networkStatus === "ready", "network not ready");
     // query server for user data
     // TODO we should start considering security at some point
-    net.getAllKnownUserData(function(udata) {
+    net.getAllKnownUserData(function (udata) {
         addUser(udata.uid, udata.fullname,
-            "/user/"+udata.uid+"/avatar.png");
-        runtime.log("user ["+udata.uid+"] added.");
+            "/user/" + udata.uid + "/avatar.png");
+        runtime.log("user [" + udata.uid + "] added.");
     }, function done(count) {
-        runtime.log("done with fetching all ("+count+") user data...");
+        runtime.log("done with fetching all (" + count + ") user data...");
         if (loaded_cb) {
             loaded_cb();
         }

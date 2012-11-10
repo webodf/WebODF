@@ -43,17 +43,17 @@ ops.OpInsertText = function OpInsertText(session) {
 
     var memberid, position, text;
 
-    this.init = function(data) {
+    this.init = function (data) {
         memberid = data.memberid;
         position = data.position;
         text = data.text;
     };
 
-    this.execute = function(domroot) {
+    this.execute = function (domroot) {
         session.getOdfDocument().insertText(memberid, position, text);
     };
 
-    this.spec = function() {
+    this.spec = function () {
         return {
             optype: "InsertText",
             memberid: memberid,

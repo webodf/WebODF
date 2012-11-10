@@ -43,18 +43,18 @@ ops.OpAddCursor = function OpAddCursor(session) {
 
     var memberid;
 
-    this.init = function(data) {
+    this.init = function (data) {
         memberid = data.memberid;
     };
 
-    this.execute = function(rootNode) {
+    this.execute = function (rootNode) {
         var odfDocument = session.getOdfDocument(),
             cursor = new core.Cursor(memberid, odfDocument);
         odfDocument.addCursor(cursor);
         session.emit(ops.SessionImplementation.signalCursorAdded, cursor);
     };
 
-    this.spec = function() {
+    this.spec = function () {
         return {
             optype: "AddCursor",
             memberid: memberid

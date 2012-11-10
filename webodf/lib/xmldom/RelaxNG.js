@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, xmldom: true*/
+/*global runtime, xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -149,7 +149,9 @@ xmldom.RelaxNG = function RelaxNG() {
             var cache = {}, cachecount = 0;
             return function (a, b) {
                 var v = fastfunc && fastfunc(a, b),
-                    ahash, bhash, m;
+                    ahash,
+                    bhash,
+                    m;
                 if (v !== undefined) { return v; }
                 ahash = a.hash || a.toString();
                 bhash = b.hash || b.toString();
@@ -176,7 +178,9 @@ xmldom.RelaxNG = function RelaxNG() {
             var cache = {}, cachecount = 0;
             return function (a, b) {
                 var v = fastfunc && fastfunc(a, b),
-                    ahash, bhash, m;
+                    ahash,
+                    bhash,
+                    m;
                 if (v !== undefined) { return v; }
                 ahash = a.hash || a.toString();
                 bhash = b.hash || b.toString();
@@ -282,12 +286,14 @@ xmldom.RelaxNG = function RelaxNG() {
                     applyAfter(function (p) { return createInterleave(p, p2); },
                                p1.startTagOpenDeriv(node)),
                     applyAfter(function (p) { return createInterleave(p1, p); },
-                               p2.startTagOpenDeriv(node)));
+                               p2.startTagOpenDeriv(node))
+                );
             }),
             attDeriv: function (context, attribute) {
                 return createChoice(
                     createInterleave(p1.attDeriv(context, attribute), p2),
-                    createInterleave(p1, p2.attDeriv(context, attribute)));
+                    createInterleave(p1, p2.attDeriv(context, attribute))
+                );
             },
             startTagCloseDeriv: memoize0arg(function () {
                 return createInterleave(p1.startTagCloseDeriv(),
@@ -323,7 +329,8 @@ xmldom.RelaxNG = function RelaxNG() {
             attDeriv: function (context, attribute) {
                 return createChoice(
                     createGroup(p1.attDeriv(context, attribute), p2),
-                    createGroup(p1, p2.attDeriv(context, attribute)));
+                    createGroup(p1, p2.attDeriv(context, attribute))
+                );
             },
             startTagCloseDeriv: memoize0arg(function () {
                 return createGroup(p1.startTagCloseDeriv(),
@@ -401,7 +408,7 @@ xmldom.RelaxNG = function RelaxNG() {
     }
     function valueMatch(context, pattern, text) {
         return (pattern.nullable && /^\s+$/.test(text)) ||
-                pattern.textDeriv(context, text).nullable;
+            pattern.textDeriv(context, text).nullable;
     }
     createAttribute = memoize2arg("attribute", undefined, function (nc, p) {
         return {
@@ -496,7 +503,9 @@ xmldom.RelaxNG = function RelaxNG() {
         var element = walker.currentNode,
             childNode = walker.firstChild(),
             numberOfTextNodes = 0,
-            childNodes = [], i, p;
+            childNodes = [],
+            i,
+            p;
         // simple incomplete implementation: only use non-empty text nodes
         while (childNode) {
             if (childNode.nodeType === 1) {
@@ -571,7 +580,7 @@ xmldom.RelaxNG = function RelaxNG() {
             addNames(name, ns, pattern);
             hash = "";
             for (i = 0; i < name.length; i += 1) {
-                 hash += "{" + ns[i] + "}" + name[i] + ",";
+                hash += "{" + ns[i] + "}" + name[i] + ",";
             }
             result = {
                 hash: hash,
@@ -621,40 +630,40 @@ xmldom.RelaxNG = function RelaxNG() {
             return pattern;
         }
         switch (pattern.name) {
-            case 'empty':
-                return empty;
-            case 'notAllowed':
-                return notAllowed;
-            case 'text':
-                return text;
-            case 'choice':
-                return createChoice(makePattern(pattern.e[0], elements),
+        case 'empty':
+            return empty;
+        case 'notAllowed':
+            return notAllowed;
+        case 'text':
+            return text;
+        case 'choice':
+            return createChoice(makePattern(pattern.e[0], elements),
+                 makePattern(pattern.e[1], elements));
+        case 'interleave':
+            p = makePattern(pattern.e[0], elements);
+            for (i = 1; i < pattern.e.length; i += 1) {
+                p = createInterleave(p, makePattern(pattern.e[i],
+                        elements));
+            }
+            return p;
+        case 'group':
+            return createGroup(makePattern(pattern.e[0], elements),
                     makePattern(pattern.e[1], elements));
-            case 'interleave':
-                p = makePattern(pattern.e[0], elements);
-                for (i = 1; i < pattern.e.length; i += 1) {
-                    p = createInterleave(p, makePattern(pattern.e[i],
-                            elements));
-                }
-                return p;
-            case 'group':
-                return createGroup(makePattern(pattern.e[0], elements),
-                    makePattern(pattern.e[1], elements));
-            case 'oneOrMore':
-                return createOneOrMore(makePattern(pattern.e[0], elements));
-            case 'attribute':
-                return createAttribute(createNameClass(pattern.e[0]),
-                    makePattern(pattern.e[1], elements));
-            case 'value':
-                return createValue(pattern.text);
-            case 'data':
-                p = pattern.a && pattern.a.type;
-                if (p === undefined) {
-                    p = "";
-                }
-                return createData(p);
-            case 'list':
-                return createList();
+        case 'oneOrMore':
+            return createOneOrMore(makePattern(pattern.e[0], elements));
+        case 'attribute':
+            return createAttribute(createNameClass(pattern.e[0]),
+                makePattern(pattern.e[1], elements));
+        case 'value':
+            return createValue(pattern.text);
+        case 'data':
+            p = pattern.a && pattern.a.type;
+            if (p === undefined) {
+                p = "";
+            }
+            return createData(p);
+        case 'list':
+            return createList();
         }
         throw "No support for " + pattern.name;
     };

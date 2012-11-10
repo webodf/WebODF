@@ -73,25 +73,25 @@ gui.SessionView = (function () {
             caret.setAvatarImageUrl(userData.imageurl);
             caret.setColor(userData.color);
 
-            runtime.log("+++ View here +++ eagerly created an Caret for '"+memberId+"'! +++");
+            runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
 
             carets[memberId] = caret;
 
             // Add per-avatar edited styling
-            styleRuleRudimentCStr = '[class=edited][user="'+memberId+'"] { background-color: '+userData.color+';'
-                        +  '-webkit-animation-name: fade;'
-                        +  '-webkit-animation-duration: 10s;'
-                        +  '-webkit-animation-fill-mode: forwards;'
-                        +  '-moz-animation-name: fade;'
-                        +  '-moz-animation-duration: 10s;'
-                        +  '-moz-animation-fill-mode: forwards;'
-                        +  'border-radius: 10px;}';
+            styleRuleRudimentCStr = '[class=edited][user="' + memberId + '"] { background-color: ' + userData.color + ';'
+                + '-webkit-animation-name: fade;'
+                + '-webkit-animation-duration: 10s;'
+                + '-webkit-animation-fill-mode: forwards;'
+                + '-moz-animation-name: fade;'
+                + '-moz-animation-duration: 10s;'
+                + '-moz-animation-fill-mode: forwards;'
+                + 'border-radius: 10px;}';
             // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
             // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
             // avatarEditedStyles.sheet.insertRule('text|p'+styleRuleRudimentCStr, 0);
             // Workaround for now
-            avatarEditedStyles.appendChild(document.createTextNode('text|h'+styleRuleRudimentCStr));
-            avatarEditedStyles.appendChild(document.createTextNode('text|p'+styleRuleRudimentCStr));
+            avatarEditedStyles.appendChild(document.createTextNode('text|h' + styleRuleRudimentCStr));
+            avatarEditedStyles.appendChild(document.createTextNode('text|p' + styleRuleRudimentCStr));
         }
 
         /**
@@ -119,5 +119,4 @@ gui.SessionView = (function () {
     }
 
     return SessionView;
-} ());
-
+}());

@@ -43,16 +43,16 @@
  * @constructor
  * @implements ops.UserModel
  */
-ops.TrivialUserModel = function TrivialUserModel () {
-	"use strict";
+ops.TrivialUserModel = function TrivialUserModel() {
+    "use strict";
 
-	var users = {};
-	users.bob = {memberid:"bob", fullname:"Bob Pigeon", color: "red", imageurl: "avatar-pigeon.png"};
-	users.alice = {memberid:"alice", fullname:"Alice Bee", color: "green", imageurl: "avatar-flower.png"};
-	users.you = {memberid:"you", fullname:"I, Robot", color: "blue", imageurl: "avatar-joe.png"};
+    var users = {};
+    users.bob = {memberid: "bob", fullname: "Bob Pigeon", color: "red", imageurl: "avatar-pigeon.png"};
+    users.alice = {memberid: "alice", fullname: "Alice Bee", color: "green", imageurl: "avatar-flower.png"};
+    users.you = {memberid: "you", fullname: "I, Robot", color: "blue", imageurl: "avatar-joe.png"};
 
-	this.getUserDetails = function (memberid) {
-		var userid = memberid.split("___")[0];
-		return users[userid];
-	};
+    this.getUserDetails = function (memberid) {
+        var userid = memberid.split("___")[0];
+        return users[userid];
+    };
 };

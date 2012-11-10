@@ -95,7 +95,7 @@ gui.SessionController = (function () {
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor(session);
-                op.init({memberid:inputMemberId, number:steps});
+                op.init({memberid: inputMemberId, number: steps});
                 session.enqueue(op);
             }
         }
@@ -106,7 +106,7 @@ gui.SessionController = (function () {
         function createOpMoveCursor(number) {
             var op = new ops.OpMoveCursor(session);
 
-            op.init({memberid:inputMemberId, number:number});
+            op.init({memberid: inputMemberId, number: number});
             return op;
         }
 
@@ -124,7 +124,7 @@ gui.SessionController = (function () {
             steps = odfDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             if (steps !== 0) {
                 op = new ops.OpMoveCursor(session);
-                op.init({memberid:inputMemberId, number:steps});
+                op.init({memberid: inputMemberId, number: steps});
             }
             return op;
         }
@@ -140,7 +140,12 @@ gui.SessionController = (function () {
 
             if (domPosition && domPosition.offset > 0) {
                 op = new ops.OpRemoveText(session);
-                op.init({memberid:inputMemberId, position: position-1, length: 1, text:domPosition.textNode.substringData(domPosition.offset-1, 1)});
+                op.init({
+                    memberid: inputMemberId,
+                    position: position - 1,
+                    length: 1,
+                    text: domPosition.textNode.substringData(domPosition.offset - 1, 1)
+                });
             }
 
             return op;
@@ -154,9 +159,14 @@ gui.SessionController = (function () {
                 domPosition = odfDocument.getPositionInTextNode(position),
                 op = null;
 
-            if (domPosition && domPosition.offset < domPosition.textNode.length-1) {
+            if (domPosition && domPosition.offset < domPosition.textNode.length - 1) {
                 op = new ops.OpRemoveText(session);
-                op.init({memberid:inputMemberId, position: position, length: 1, text:domPosition.textNode.substringData(domPosition.offset, 1)});
+                op.init({
+                    memberid: inputMemberId,
+                    position: position,
+                    length: 1,
+                    text: domPosition.textNode.substringData(domPosition.offset, 1)
+                });
             }
 
             return op;
@@ -224,7 +234,7 @@ gui.SessionController = (function () {
             var op,
                 text = stringFromKeyPress(e);
 
-            if (text && ! (e.altKey || e.ctrlKey || e.metaKey)) {
+            if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
                 op = new ops.OpInsertText(session);
                 op.init({
                     memberid: inputMemberId,
@@ -239,7 +249,7 @@ gui.SessionController = (function () {
         /**
          * @param {!Element} element
          */
-        this.setFocusElement = function(element) {
+        this.setFocusElement = function (element) {
             listenEvent(element, "keydown", handleKeyDown);
             listenEvent(element, "keypress", handleKeyPress);
             listenEvent(element, "keyup", dummyHandler);
@@ -253,7 +263,7 @@ gui.SessionController = (function () {
 
        /**
         */
-        this.startEditing = function() {
+        this.startEditing = function () {
             var op = new ops.OpAddCursor(session);
             op.init({memberid: inputMemberId});
             session.enqueue(op);
@@ -261,7 +271,7 @@ gui.SessionController = (function () {
 
         /**
          */
-        this.endEditing = function() {
+        this.endEditing = function () {
             var op = new ops.OpRemoveCursor(session);
             op.init({memberid: inputMemberId});
             session.enqueue(op);
@@ -271,10 +281,10 @@ gui.SessionController = (function () {
          * @return {string}
          */
         this.getInputMemberId = function () {
-                return inputMemberId;
+            return inputMemberId;
         };
     };
 
     return gui.SessionController;
-} ());
+}());
 // vim:expandtab

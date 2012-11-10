@@ -30,32 +30,32 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, Runtime: true, core: true*/
+/*global runtime, Runtime, core*/
 /*jslint evil: true*/
 /**
  * @interface
  */
-core.UnitTest = function UnitTest() {"use strict";};
+core.UnitTest = function UnitTest() {"use strict"; };
 /**
  * @return {undefined}
  */
-core.UnitTest.prototype.setUp = function () {"use strict";};
+core.UnitTest.prototype.setUp = function () {"use strict"; };
 /**
  * @return {undefined}
  */
-core.UnitTest.prototype.tearDown = function () {"use strict";};
+core.UnitTest.prototype.tearDown = function () {"use strict"; };
 /**
  * @return {!string}
  */
-core.UnitTest.prototype.description = function () {"use strict";};
+core.UnitTest.prototype.description = function () {"use strict"; };
 /**
  * @return {Array.<!function():undefined>}
  */
-core.UnitTest.prototype.tests = function () {"use strict";};
+core.UnitTest.prototype.tests = function () {"use strict"; };
 /**
  * @return {Array.<!function(!function():undefined):undefined>}
  */
-core.UnitTest.prototype.asyncTests = function () {"use strict";};
+core.UnitTest.prototype.asyncTests = function () {"use strict"; };
 
 /**
  * @constructor

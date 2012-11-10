@@ -32,7 +32,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime,ops */
+/*global runtime, ops */
 
 /*
  * create specific operation instances.
@@ -48,34 +48,34 @@ runtime.loadClass("ops.OpSetParagraphStyle");
 /**
  * @constructor
  */
-ops.OperationFactory = function OperationFactory (session) {
-	"use strict";
+ops.OperationFactory = function OperationFactory(session) {
+    "use strict";
 
-	var self=this;
+    var self = this;
 
-	this.create = function (spec) {
-		var op = null;
-		// TODO: of course the following code can use some better
-		// js language and make it more generic.
-		if (spec.optype === "AddCursor") {
-			op = new ops.OpAddCursor(session);
-			op.init(spec);
-		} else if (spec.optype === "InsertText") {
-			op = new ops.OpInsertText(session);
-			op.init(spec);
+    this.create = function (spec) {
+        var op = null;
+        // TODO: of course the following code can use some better
+        // js language and make it more generic.
+        if (spec.optype === "AddCursor") {
+            op = new ops.OpAddCursor(session);
+            op.init(spec);
+        } else if (spec.optype === "InsertText") {
+            op = new ops.OpInsertText(session);
+            op.init(spec);
         } else if (spec.optype === "RemoveText") {
             op = new ops.OpRemoveText(session);
             op.init(spec);
         } else if (spec.optype === "SetParagraphStyle") {
             op = new ops.OpSetParagraphStyle(session);
             op.init(spec);
-		} else if (spec.optype === "MoveCursor") {
-			op = new ops.OpMoveCursor(session);
-			op.init(spec);
-		} else if (spec.optype === "RemoveCursor") {
-			op = new ops.OpRemoveCursor(session);
-			op.init(spec);
-		}
-		return op;
-	};
+        } else if (spec.optype === "MoveCursor") {
+            op = new ops.OpMoveCursor(session);
+            op.init(spec);
+        } else if (spec.optype === "RemoveCursor") {
+            op = new ops.OpRemoveCursor(session);
+            op.init(spec);
+        }
+        return op;
+    };
 };

@@ -43,18 +43,18 @@ ops.OpRemoveText = function OpRemoveText(session) {
 
     var memberid, position, length, text;
 
-    this.init = function(data) {
+    this.init = function (data) {
         memberid = data.memberid;
         position = data.position;
         length = data.length;
         text = data.text;
     };
 
-    this.execute = function(domroot) {
+    this.execute = function (domroot) {
         session.getOdfDocument().removeText(memberid, position, length);
     };
 
-    this.spec = function() {
+    this.spec = function () {
         return {
             optype: "RemoveText",
             memberid: memberid,

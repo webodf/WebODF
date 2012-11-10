@@ -250,7 +250,9 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
      */
     function generateUniquePrefixes(prefixes) {
         var taken = {},
-            ns, p, n = 0;
+            ns,
+            p,
+            n = 0;
         for (ns in prefixes) {
             if (prefixes.hasOwnProperty(ns) && ns) {
                 p = prefixes[ns];
@@ -271,7 +273,11 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         // collect all prefixes and elements
         var prefixes = {},    // namespace prefixes as they occur in the XML
             css = "@namespace customns url(customns);\n",
-            name, pre, ns, names, csssel;
+            name,
+            pre,
+            ns,
+            names,
+            csssel;
         getNamespacePrefixes(node, prefixes);
         generateUniquePrefixes(prefixes);
 /*

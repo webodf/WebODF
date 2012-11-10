@@ -45,18 +45,18 @@
 /**
  * @constructor
  */
-ops.TrivialOperationRouter = function TrivialOperationRouter () {
-	"use strict";
+ops.TrivialOperationRouter = function TrivialOperationRouter() {
+    "use strict";
 
-	var self=this;
+    var self = this;
 
-	this.setOperationFactory = function (f) {};
+    this.setOperationFactory = function (f) {};
 
-	this.setPlaybackFunction = function (playback_func) {
-		self.playback_func = playback_func;
-	};
+    this.setPlaybackFunction = function (playback_func) {
+        self.playback_func = playback_func;
+    };
 
-	this.push = function (op) {
-		self.playback_func(op);
-	};
+    this.push = function (op) {
+        self.playback_func(op);
+    };
 };

@@ -46,61 +46,61 @@
 /**
  * @constructor
  */
-ops.NowjsOperationRouter = function NowjsOperationRouter () {
-	"use strict";
+ops.NowjsOperationRouter = function NowjsOperationRouter() {
+    "use strict";
 
-	var self=this,
-	memberid = null,
-	net = runtime.getNetwork();
+    var self = this,
+        memberid = null,
+        net = runtime.getNetwork();
 
-	this.setOperationFactory = function (f) {
-		self.op_factory = f;
-	};
+    this.setOperationFactory = function (f) {
+        self.op_factory = f;
+    };
 
-	this.setPlaybackFunction = function (playback_func) {
-		self.playback_func = playback_func;
-	};
+    this.setPlaybackFunction = function (playback_func) {
+        self.playback_func = playback_func;
+    };
 
-	this.setMemberid = function (mid) {
-		memberid = mid;
-	};
+    this.setMemberid = function (mid) {
+        memberid = mid;
+    };
 
-	function receiveOpFromNetwork(op_dict) {
-		// use factory to create an instance, and playback!
-		var op = self.op_factory.create(op_dict);
-		if (op !== null) {
-			self.playback_func(op);
-		} else {
-			runtime.log("ignoring invalid incoming opspec: "+op_dict);
-		}
-	}
-	net.ping = function(pong) {
-		if (memberid !== null) {
-			pong(memberid);
-		}
-	};
-	net.receiveOp = receiveOpFromNetwork;
-	net.memberid = "router"; // TODO work with a UserModel
+    function receiveOpFromNetwork(op_dict) {
+        // use factory to create an instance, and playback!
+        var op = self.op_factory.create(op_dict);
+        if (op !== null) {
+            self.playback_func(op);
+        } else {
+            runtime.log("ignoring invalid incoming opspec: " + op_dict);
+        }
+    }
+    net.ping = function (pong) {
+        if (memberid !== null) {
+            pong(memberid);
+        }
+    };
+    net.receiveOp = receiveOpFromNetwork;
+    net.memberid = "router"; // TODO work with a UserModel
 
-	this.push = function (op) {
-		// playback locally
-		// self.playback_func(op);
-		// and deliver to network
-		net.deliverOp(op.spec());
-	};
+    this.push = function (op) {
+        // playback locally
+        // self.playback_func(op);
+        // and deliver to network
+        net.deliverOp(op.spec());
+    };
 
-	this.requestReplay = function(done_cb) {
-		net.requestReplay(
-			function(opspec) {
-				runtime.log("replaying: "+runtime.toJson(opspec));
-				receiveOpFromNetwork(opspec);
-			},
-			function(count) {
-				runtime.log("replay done ("+count+" ops).");
-				if (done_cb) {
-					done_cb();
-				}
-			}
-		);
-	};
+    this.requestReplay = function (done_cb) {
+        net.requestReplay(
+            function (opspec) {
+                runtime.log("replaying: " + runtime.toJson(opspec));
+                receiveOpFromNetwork(opspec);
+            },
+            function (count) {
+                runtime.log("replay done (" + count + " ops).");
+                if (done_cb) {
+                    done_cb();
+                }
+            }
+        );
+    };
 };

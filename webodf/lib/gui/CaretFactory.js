@@ -56,7 +56,7 @@ gui.CaretFactory = function CaretFactory(sessionController) {
 
         // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
-            runtime.log("Starting to track input for caret of "+memberid);
+            runtime.log("Starting to track input for caret of " + memberid);
             // here wire up the cursor update to caret focus update
             cursor.handleUpdate = caret.setFocus;
             sessionController.setFocusElement(caret.getFocusElement());
