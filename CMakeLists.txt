@@ -81,8 +81,8 @@ ExternalProject_Add(
     NodeJS
     PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
     DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-    URL "http://nodejs.org/dist/v0.8.11/node-v0.8.11.tar.gz"
-    URL_MD5 23cb6d6a5c3949ac73df3c6b330e834d
+    URL "http://nodejs.org/dist/v0.8.14/node-v0.8.14.tar.gz"
+    URL_MD5 284fd2c7578064c339d9cf6a3a475ac7
     CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
     INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
     BUILD_IN_SOURCE 1
