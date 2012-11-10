@@ -191,8 +191,10 @@ function initSession(odfid, avatarlistid, done_cb) {
                     // start editing: let the controller send the OpAddCursor
                     sessionController.startEditing();
                     // add our two friends
-                    addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
-                    addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
+                    // addCursorToDocTemporarily(testsession, "bob___"+Date.now(), 6);
+                    // addCursorToDocTemporarily(testsession, "alice___"+Date.now(), 12);
+                    // perhaps we should make a button "Invite Bob and Alice" instead
+                    // of having them always in from the start.
                     if (done_cb) {
                         done_cb();
                     }
