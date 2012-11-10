@@ -1,5 +1,5 @@
 // jslint.js
-// 2012-10-01
+// 2012-10-18
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -1735,7 +1735,7 @@ klass:              do {
                         if (i === 0) {
                             break;
                         } else if (i > 0) {
-                            character += 1;
+                            character += i;
                             source_row = source_row.slice(i);
                             break;
                         } else {
@@ -3609,6 +3609,8 @@ klass:              do {
         if (typeof left === 'object') {
             if (left.string === 'parseInt' && p.length === 1) {
                 warn('radix', left);
+            } else if (left.string === 'String' && p.length >= 1 && p[0].id === '(string)') {
+                warn('unexpected_a', left);
             }
             if (!option.evil) {
                 if (left.string === 'eval' || left.string === 'Function' ||
@@ -3625,13 +3627,20 @@ klass:              do {
                     left.id !== '?') {
                 warn('bad_invocation', left);
             }
-            if (left.id === '.' && p.length > 0 &&
-                    left.first && left.first.first &&
-                    are_similar(p[0], left.first.first)) {
-                if (left.second.string === 'call' ||
-                        (left.second.string === 'apply' && (p.length === 1 ||
-                        (p[1].arity === 'prefix' && p[1].id === '[')))) {
-                    warn('unexpected_a', left.second);
+            if (left.id === '.') {
+                if (p.length > 0 &&
+                        left.first && left.first.first &&
+                        are_similar(p[0], left.first.first)) {
+                    if (left.second.string === 'call' ||
+                            (left.second.string === 'apply' && (p.length === 1 ||
+                            (p[1].arity === 'prefix' && p[1].id === '[')))) {
+                        warn('unexpected_a', left.second);
+                    }
+                }
+                if (left.second.string === 'toString') {
+                    if (left.first.id === '(string)' || left.first.id === '(number)') {
+                        warn('unexpected_a', left.second);
+                    }
                 }
             }
         }
@@ -4549,7 +4558,10 @@ klass:              do {
             if (next_token.id === '/' || next_token.id === '(regexp)') {
                 warn('wrap_regexp');
             }
-            this.first = expression(20);
+            this.first = expression(0);
+            if (this.first.assign) {
+                warn('unexpected_a', this.first);
+            }
         }
         if (peek(0).id === '}' && peek(1).id === 'else') {
             warn('unexpected_else', this);
@@ -6448,10 +6460,10 @@ klass:              do {
 
     itself.jslint = itself;
 
-    itself.edition = '2012-10-01';
+    itself.edition = '2012-10-18';
 
     return itself;
 }());
 core.JSLint = function JSLint() {
-  this.JSLINT = JSLINT;
+    this.JSLINT = JSLINT;
 };
