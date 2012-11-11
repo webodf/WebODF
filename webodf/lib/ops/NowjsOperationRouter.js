@@ -51,7 +51,17 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
 
     var self = this,
         memberid = null,
-        net = runtime.getNetwork();
+        net = runtime.getNetwork(),
+        last_server_seq = -1, // first seq will be 0
+        reorder_queue = {},
+        sends_since_server_op = 0,
+        router_sequence = 1000;
+
+    function nextNonce() {
+        runtime.assert(memberid !== null, "Router sequence N/A without memberid");
+        router_sequence += 1;
+        return "C:"+memberid+":"+router_sequence;
+    }
 
     this.setOperationFactory = function (f) {
         self.op_factory = f;
@@ -65,13 +75,36 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
         memberid = mid;
     };
 
-    function receiveOpFromNetwork(op_dict) {
+    function receiveOpFromNetwork(opspec) {
         // use factory to create an instance, and playback!
-        var op = self.op_factory.create(op_dict);
+        var idx, seq, op = self.op_factory.create(opspec);
+        runtime.log(" op in: "+runtime.toJson(opspec));
         if (op !== null) {
-            self.playback_func(op);
+            seq = Number(opspec.server_seq);
+            runtime.assert(!isNaN(seq), "server seq is not a number");
+            if (seq === (last_server_seq + 1)) {
+                self.playback_func(op);
+                last_server_seq = seq;
+                sends_since_server_op = 0;
+                for (idx = (last_server_seq + 1);
+                        reorder_queue.hasOwnProperty(idx);
+                        idx += 1) {
+                    self.playback_func(reorder_queue[idx]);
+                    delete reorder_queue[idx];
+                    runtime.log("op with server seq "+seq+" taken from hold (reordered)");
+                }
+            } else {
+                // i'm not sure if now.js actually prevents receiving incorrectly ordered ops
+                runtime.assert(seq !== (last_server_seq + 1), "received incorrect order from server");
+                // but if now.js does not prevent it, we have code to re-order
+
+                // re-order incoming ops from server (hold and un-hold)
+                runtime.assert(!reorder_queue.hasOwnProperty(seq), "reorder_queue has incoming op");
+                runtime.log("op with server seq "+seq+" put on hold");
+                reorder_queue[seq] = op;
+            }
         } else {
-            runtime.log("ignoring invalid incoming opspec: " + op_dict);
+            runtime.log("ignoring invalid incoming opspec: " + opspec);
         }
     }
     net.ping = function (pong) {
@@ -83,10 +116,14 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
     net.memberid = "router"; // TODO work with a UserModel
 
     this.push = function (op) {
-        // playback locally
-        // self.playback_func(op);
-        // and deliver to network
-        net.deliverOp(op.spec());
+        // add client nonce and reference to server-side-op-sequence
+        var opspec = op.spec();
+        opspec.client_nonce = nextNonce();
+        opspec.parent_op = last_server_seq+"+"+sends_since_server_op;
+        sends_since_server_op += 1;
+
+        runtime.log("op out: "+runtime.toJson(opspec));
+        net.deliverOp(opspec);
     };
 
     this.requestReplay = function (done_cb) {
