@@ -284,7 +284,36 @@ ops.Document = function Document(odfCanvas) {
      */
     this.removeText = function (memberid, position, length) {
         var domPosition;
-        domPosition = getPositionInTextNode(position);
+        if (length < 0) {
+            length = -length;
+            position -= length;
+            domPosition = getPositionInTextNode(position);
+        } else {
+            // get avatars next textnode sibling
+            domPosition = getPositionInTextNode(position+1);
+            // FIXME: this is dirty and assumes the cursor in place.
+            // actually it will only work correctly with a `length` of 1
+            // or with a `length` > 1 iff no avatar or other XML element
+            // is within the deletion range.
+            // a real implementation of this method should work
+            // independently of the cursor or other XML elements.
+            // (right now getPositionInTextNode will always return an
+            // offset==textnode.length if the (or any) cursor is right
+            // before the deletion position; that is because the
+            // avatar splits the textnode)
+            // the real implementation needs to delete all characters
+            // between (walkable) position and position+length with no
+            // (but preserving) other XML elements. by definition of
+            // walkability, the amount of deleted characters will be
+            // exactly `length` (but the actual deleted characters can
+            // have arbitrary XML tags between them)
+            //
+            if (domPosition.offset !== 1) {
+                runtime.log("unexpected!");
+                return false;
+            }
+            domPosition.offset -=1;
+        }
         if (domPosition) {
             domPosition.textNode.deleteData(domPosition.offset, length);
             highlightEdit(getParagraphElement(domPosition.textNode), memberid);

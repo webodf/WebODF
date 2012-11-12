@@ -135,16 +135,16 @@ gui.SessionController = (function () {
         function createOpRemoveTextByBackspaceKey() {
             var odfDocument = session.getOdfDocument(),
                 position = odfDocument.getCursorPosition(inputMemberId),
-                domPosition = odfDocument.getPositionInTextNode(position),
+                // position-1 must exist for backspace to be valid
+                domPosition = odfDocument.getPositionInTextNode(position-1),
                 op = null;
 
-            if (domPosition && domPosition.offset > 0) {
+            if (domPosition) {
                 op = new ops.OpRemoveText(session);
                 op.init({
                     memberid: inputMemberId,
-                    position: position - 1,
-                    length: 1,
-                    text: domPosition.textNode.substringData(domPosition.offset - 1, 1)
+                    position: position,
+                    length: -1
                 });
             }
 
@@ -156,16 +156,16 @@ gui.SessionController = (function () {
         function createOpRemoveTextByDeleteKey() {
             var odfDocument = session.getOdfDocument(),
                 position = odfDocument.getCursorPosition(inputMemberId),
-                domPosition = odfDocument.getPositionInTextNode(position),
+                // position+1 must exist for delete to be valid
+                domPosition = odfDocument.getPositionInTextNode(position+1),
                 op = null;
 
-            if (domPosition && domPosition.offset < domPosition.textNode.length - 1) {
+            if (domPosition) {
                 op = new ops.OpRemoveText(session);
                 op.init({
                     memberid: inputMemberId,
                     position: position,
-                    length: 1,
-                    text: domPosition.textNode.substringData(domPosition.offset, 1)
+                    length: 1
                 });
             }
 
