@@ -75,6 +75,9 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
         memberid = mid;
     };
 
+    /**
+    * @param {{server_seq: number}} opspec
+    */
     function receiveOpFromNetwork(opspec) {
         // use factory to create an instance, and playback!
         var idx, seq, op = self.op_factory.create(opspec);
