@@ -271,6 +271,14 @@ ops.Document = function Document(odfCanvas) {
         domPosition = getPositionInTextNode(position);
         if (domPosition) {
             domPosition.textNode.insertData(domPosition.offset, text);
+            // FIXME care must be taken regarding the cursor positions
+            // the new text must appear in front of the (own) cursor.
+            // if there are/were other cursors at the same address,
+            // those must not move along.
+            // conclusion: insert text BEHIND ALL CURSORS, then move
+            // the `memberid`-cursor behind new text; alternatively
+            // move `memberid`-cursor behind all cursors at the same
+            // position. then insert text before `memberid`-cursor.
             highlightEdit(getParagraphElement(domPosition.textNode), memberid);
             return true;
         }
