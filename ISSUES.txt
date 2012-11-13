@@ -1,3 +1,11 @@
+== cursor-move with company ==
+
+somewhere down in core.Cursor the cursor keeps a reference
+of the textnode the cursor is currently in.
+i suspect that textnode can get out of sync with reality
+(the DOM) if text nodes next to the cursor are split and
+joined because of another cursor passing along.
+
 == single offline avatar getting lost ==
 
 webodf: 871aaf5f609281f1bc59ba0ba273d3a0ce4abb
