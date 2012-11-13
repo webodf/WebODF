@@ -30,98 +30,58 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui*/
-runtime.loadClass("gui.Caret");
+/*global gui*/
 
 /**
- * The avatar is at the same time visualization of the caret and receiver of
- * input events.
- * The avatar does not change it's position of its own accord. The position is
- * changed by the session to which the avatar forwards the keystrokes that it
- * receives.
+ * The avatar is a passive element that can be displayed above an element.
+ * It will always keep a relative distance to that element, so automatically
+ * move around with the parent element.
  * @constructor
- * @param {!string} memberid
- * @param {!gui.SelectionMover} selectionMover
- * @param {?core.PositionFilter} positionFilter
- * @param {!function(!number):undefined} caretMover
- * @param {!function(!number):!boolean=} keyHandler
+ * @param {!Element} parentElement
  */
-gui.Avatar = function Avatar(memberid, selectionMover, positionFilter, caretMover, keyHandler) {
+gui.Avatar = function Avatar(parentElement) {
     "use strict";
-    var self = this,
-        caret,
+    var handle,
         image,
-        stepCounter;
-    function moveForward() {
-        // determine number of steps needed
-        var steps = stepCounter.countForwardSteps(1, positionFilter);
-        caretMover(steps);
-    }
-    function moveBackward() {
-        var steps = stepCounter.countBackwardSteps(1, positionFilter);
-        caretMover(-steps);
-    }
-    function moveLineUp() {
-        var steps = stepCounter.countLineUpSteps(1, positionFilter);
-        caretMover(-steps);
-    }
-    function moveLineDown() {
-        var steps = stepCounter.countLineDownSteps(1, positionFilter);
-        caretMover(steps);
-    }
-    /**
-     * @param {!number} charCode
-     * @return {!boolean}
-     */
-    function avatarKeyHandler(charCode) {
-        var handled = false;
-        if (charCode === 37) { // left
-            moveBackward();
-            caret.focus();
-            handled = true;
-        } else if (charCode === 39) { // right
-            moveForward();
-            caret.focus();
-            handled = true;
-        } else if (charCode === 38) { // up
-            moveLineUp();
-            caret.focus();
-            handled = true;
-        } else if (charCode === 40) { // down
-            moveLineDown();
-            caret.focus();
-            handled = true;
-        } else if (keyHandler) {
-            handled = keyHandler(charCode);
-        }
-        return handled;
-    }
-    this.removeFromSession = function () {
-    };
-    this.getMemberId = function () {
-        return memberid;
+        displayShown = "block",
+        displayHidden = "none";
+
+    this.setColor = function (color) {
+        handle.style.background = color;
     };
     this.setImageUrl = function (url) {
         image.src = url;
     };
-    this.getColor = function () {
-        return caret.getColor();
+    this.isVisible = function () {
+        return (handle.style.display === displayShown);
     };
-    this.setColor = function (color) {
-        caret.setColor(color);
+    this.show = function () {
+        handle.style.display = displayShown;
     };
-    this.getCaret = function () {
-        return caret;
+    this.hide = function () {
+        handle.style.display = displayHidden;
     };
+    this.markAsFocussed = function (isFocussed) {
+        handle.className = (isFocussed ? "active" : "");
+    };
+
     function init() {
-        var handle;
-        caret = new gui.Caret(selectionMover, avatarKeyHandler);
-        stepCounter = caret.getStepCounter();
-        handle = caret.getHandleElement();
-        image = handle.ownerDocument.createElementNS(handle.namespaceURI, "img");
+        var document = /**@type{!Document}*/(parentElement.ownerDocument),
+            htmlns = document.documentElement.namespaceURI;
+
+        handle = document.createElementNS(htmlns, "div");
+        image = document.createElementNS(htmlns, "img");
         image.width = 64;
         image.height = 64;
         handle.appendChild(image);
+        handle.style.width = '64px';
+        handle.style.height = '70px';
+        handle.style.position = "absolute";
+        handle.style.top = '-80px';
+        handle.style.left = '-34px'; // TODO: see to automatically calculate this, depending on the style
+        handle.style.display = displayShown;
+        parentElement.appendChild(handle);
     }
+
     init();
 };

@@ -93,7 +93,7 @@ xmldom.LSSerializer = function LSSerializer() {
             /**@type{!number}*/ accept,
             /**@type{!string}*/ prefix;
         if (atts) { // ELEMENT
-            if (nsmap[node.namespaceURI] !== node.prefix) {
+            if (node.namespaceURI && nsmap[node.namespaceURI] !== node.prefix) {
                 nsmap[node.namespaceURI] = node.prefix;
             }
             s += "<" + node.nodeName;
@@ -105,10 +105,10 @@ xmldom.LSSerializer = function LSSerializer() {
                     if (accept === 1) {
                         // xml attributes always need a prefix for a namespace
                         if (attr.namespaceURI) {
-                           prefix = attributePrefix(nsmap, attr.prefix,
+                            prefix = attributePrefix(nsmap, attr.prefix,
                                    attr.namespaceURI);
                         } else {
-                           prefix = "";
+                            prefix = "";
                         }
                         attstr += " " + serializeAttribute(prefix, attr);
                     }

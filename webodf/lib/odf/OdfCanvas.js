@@ -974,12 +974,15 @@ odf.OdfCanvas = (function () {
 
                 // FIXME: use callback registry instead of replacing the onchange
                 runtime.log("WARNING: refreshOdf called but ODF was not DONE.");
-                odfcontainer.onchange = function () {
+
+                runtime.setTimeout(function later_cb() {
                     if (odfcontainer.state === odf.OdfContainer.DONE) {
-                        odfcontainer.onchange = null;
                         callback();
+                    } else {
+                        runtime.log("will be back later...");
+                        runtime.setTimeout(later_cb, 500);
                     }
-                };
+                }, 100);
             }
         }
 
@@ -988,6 +991,14 @@ odf.OdfCanvas = (function () {
         };
         this.slidevisibilitycss = function () {
             return pageSwitcher.css;
+        };
+        /**
+         * Set a odfcontainer manually.
+         * @param {!odf.OdfContainer} container
+         */
+        this.setOdfContainer = function (container) {
+            odfcontainer = container;
+            refreshOdf();
         };
         /**
          * @param {!string} url

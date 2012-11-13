@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, runtime*/
+/*global core, ops, runtime*/
 runtime.loadClass("core.Selection");
 
 /**
@@ -55,17 +55,16 @@ runtime.loadClass("core.Selection");
  * the cursor by not letting it be part of the DOM.
  *
  * @constructor
- * @param {core.Selection} selection The selection to which the cursor corresponds
- * @param {Document} document The document in which the cursor is placed
+ * @param {!string} memberid The memberid this cursor is assigned to
+//  * @param {!ops.Document} odfDocument The document in which the cursor is placed
  */
-core.Cursor = function Cursor(selection, document) {
+core.Cursor = function Cursor(memberid, odfDocument) {
     "use strict";
-    var cursorns,
+    var self = this,
         cursorNode,
-        cursorTextNode;
-    cursorns = 'urn:webodf:names:cursor';
-    cursorNode = document.createElementNS(cursorns, 'cursor');
-    cursorTextNode = document.createTextNode("");
+        cursorTextNode,
+        selection,
+        selectionMover;
 
     function putCursorIntoTextNode(container, offset) {
         var parent = container.parentNode;
@@ -107,12 +106,55 @@ core.Cursor = function Cursor(selection, document) {
             putCursorIntoContainer(container, offset);
         }
     }
+    this.move = function (number) {
+        //runtime.log("moving " + number);
+        var moved = 0;
+        if (number > 0) {
+            moved = selectionMover.movePointForward(number);
+        } else if (number <= 0) {
+            moved = -selectionMover.movePointBackward(-number);
+        }
+        self.handleUpdate();
+        return moved;
+    };
+    /**
+     * Is called whenever the cursor is moved around manually.
+     * Set this property to another function that should be called,
+     * e.g. the UI avatar/caret to reset focus.
+     * Ideally would be a signal, but this works for now.
+     */
+    this.handleUpdate = function () {
+    };
+    this.getStepCounter = function () {
+        return selectionMover.getStepCounter();
+    };
+    /**
+     * Obtain the memberid the cursor is assigned to.
+     * @return {string}
+     */
+    this.getMemberId = function () {
+        return memberid;
+    };
     /**
      * Obtain the node representing the cursor.
      * @return {Element}
      */
     this.getNode = function () {
         return cursorNode;
+    };
+    /**
+     * Obtain the selection to which the cursor corresponds.
+     * @return {core.Selection}
+     */
+    this.getSelection = function () {
+        return selection;
+    };
+    /**
+     * Obtain the odfDocument to which the cursor corresponds.
+     * @return {!ops.Document}
+     */
+    this.getOdfDocument = function () {
+        return odfDocument;
     };
     /**
      * Synchronize the cursor with the current selection.
@@ -136,4 +178,17 @@ core.Cursor = function Cursor(selection, document) {
     this.remove = function (onCursorRemove) {
         removeCursor(onCursorRemove);
     };
+
+    function init() {
+        var cursorns = 'urn:webodf:names:cursor',
+            dom = odfDocument.getDOM();
+
+        cursorNode = dom.createElementNS(cursorns, 'cursor');
+        cursorNode.setAttributeNS(cursorns, "memberId", memberid);
+        cursorTextNode = dom.createTextNode("");
+        selection = new core.Selection(odfDocument);
+        selectionMover = odfDocument.getSelectionManager().createSelectionMover(self);
+    }
+
+    init();
 };

@@ -241,10 +241,18 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             return true;
         }
         var o = offset,
-            n = walker.firstChild();
+            n = walker.firstChild(),
+            prevNode;
         while (offset > 0 && n) {
             offset -= 1;
+            prevNode = n;
             n = walker.nextSibling();
+            // neighboring texts count as 1 position
+            while (n && n.nodeType === 3 && prevNode.nodeType === 3
+                    && n.previousSibling === prevNode) {
+                prevNode = n;
+                n = walker.nextSibling();
+            }
         }
         if (offset !== 0) {
             throw "Error in setPosition: offset " + o + " is out of range.";

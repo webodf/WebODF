@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
+/*global runtime: true, core: true, gui: true, odf, ops*/
 runtime.loadClass("gui.Caret");
 
 /**
@@ -43,18 +43,31 @@ gui.CaretTests = function CaretTests(runner) {
     var r = runner,
         t;
 
+    function createEmptyDoc() {
+        var document = /**@type{!Document}*/(runtime.getDOMImplementation().createDocument("", "html", null)),
+            body = document.createElement('body'),
+            div = document.createElement('div');
+        div.setAttribute('id', 'testarea');
+        document.documentElement.appendChild(body);
+        body.appendChild(div);
+        return document;
+    }
     function setupEmptyDoc() {
         var selection = runtime.getWindow().getSelection(),
-            doc = runtime.getDOMImplementation().createDocument("", "p", null),
-            selectionMover = new gui.SelectionMover(doc.documentElement),
-            caret = new gui.Caret(selectionMover);
-        t = { selection: selection, doc: doc }; //, cursor: cursor };
+            doc = createEmptyDoc(),
+            testarea = /**@type{!Element}*/(doc.getElementById("testarea")),
+            odfcanvas = new odf.OdfCanvas(testarea),
+            odfContainer = odfcanvas.odfContainer(),
+            document = new ops.Document(odfContainer),
+            cursor = new core.Cursor("id", document),
+            caret = new gui.Caret(cursor);
+        t = { selection: selection, doc: doc, document: document }; //, cursor: cursor };
         runner.shouldBeNonNull(t, "t.selection");
     }
     function setupSimpleTextDoc() {
         setupEmptyDoc();
         t.textnode = t.doc.createTextNode("abc");
-        t.doc.documentElement.appendChild(t.textnode);
+        t.document.getRootNode().appendChild(t.textnode);
     }
     function testOnUpDownTraversal() {
     }

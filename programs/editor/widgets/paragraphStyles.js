@@ -36,14 +36,17 @@ widgets.ParagraphStyles = (function () {
     var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
     var htmlns = "http://www.w3.org/1999/xhtml";
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(session, inputMemberId, callback) {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
+                odfDocument = session.getOdfDocument(),
+                formatting = odfDocument.getFormatting(),
                 selectionList = [],
-                availableStyles = documentObject.odfCanvas.getFormatting().getAvailableParagraphStyles(),
-                currentParagraph = null,
-                currentStyle = null;
+                availableStyles = formatting.getAvailableParagraphStyles(),
+                currentParagraphNode = null,
+                currentNamedStyleName = null,
+                currentStyleName = null;
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -51,6 +54,7 @@ widgets.ParagraphStyles = (function () {
                     value: availableStyles[i].name
                 });
             }
+            // TODO: get informed about change of list of named styles
 
             widget = new Select({
                 name: 'ParagraphStyles',
@@ -61,44 +65,65 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
-            function trackCursor(avatar) {
-                var node = avatar.getCaret().getSelection().focusNode;
-                while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
-                    node = node.parentNode;
+            function checkParagraphStyleName() {
+                var newStyleName,
+                    newNamedStyleName;
+
+                newStyleName = currentParagraphNode.getAttributeNS(textns, 'style-name');
+                if (newStyleName !== currentStyleName) {
+                    currentStyleName = newStyleName;
+                    // check if named style is still the same
+                    newNamedStyleName = formatting.getFirstNamedParentStyleNameOrSelf(newStyleName);
+                    if (!newNamedStyleName) {
+                        // TODO: how to handle default styles?
+                        return;
+                    }
+                    // a named style
+                    if (newNamedStyleName !== currentNamedStyleName) {
+                        currentNamedStyleName = newNamedStyleName;
+                        widget.set("value", currentNamedStyleName);
+                    }
                 }
-                if(!node)
+            }
+            function trackCursor(cursor) {
+                var node,
+                    newStyleName,
+                    newNamedStyleName;
+
+                if (cursor.getMemberId() !== inputMemberId) {
                     return;
-                currentParagraph = node;
-                currentStyle = currentParagraph.getAttributeNS(textns, 'style-name');
-                widget.set("value", currentStyle);
+                }
+
+                node = odfDocument.getParagraphElement(cursor.getSelection().focusNode);
+                if (!node) {
+                    return;
+                }
+                currentParagraphNode = node;
+                checkParagraphStyleName();
+            }
+            function trackCursorParagraph(paragraphNode) {
+                if (paragraphNode !== currentParagraphNode) {
+                    return;
+                }
+                checkParagraphStyleName();
             }
 
-            documentObject.addEventListener("avatarMoved", function (event) {
-                trackCursor(event.detail.avatar);
-            });
-            documentObject.addEventListener("avatarActivated", function (event) {
-                trackCursor(event.detail.avatar);
-            });
-
+            session.subscribe(ops.SessionImplementation.signalCursorAdded, trackCursor);
+            session.subscribe(ops.SessionImplementation.signalCursorMoved, trackCursor);
+            session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCursorParagraph);
 
             widget.onChange = function(value) {
-                currentStyle = value;
-                if(currentParagraph) {
-                    var avatar = document.session.getActiveAvatar();
-                    if(currentStyle != currentParagraph.getAttributeNS(textns, 'style-name')) {
-                        currentParagraph.setAttributeNS(textns, 'style-name', value);
-                        document.dispatchEvent(document.documentChangedEvent);
+                var op;
 
-                        currentParagraph.removeAttribute('user');
-                        currentParagraph.removeAttribute('class');
-                        currentParagraph.removeAttribute('usercolor');
-
-                        runtime.setTimeout(function() {
-                            currentParagraph.setAttribute('user', avatar.getMemberId());
-                            currentParagraph.setAttribute('class', 'edited');
-                            currentParagraph.setAttribute('usercolor', avatar.getColor());
-                        }, 1);
-                    }
+                if(currentNamedStyleName !== value) {
+                    op = new ops.OpSetParagraphStyle(session);
+                    op.init({
+                        memberid: inputMemberId,
+                        position: odfDocument.getCursorPosition(inputMemberId),
+                        styleNameBefore: currentNamedStyleName,
+                        styleNameAfter: value
+                    });
+                    session.enqueue(op);
                 }
             }
 
@@ -106,8 +131,8 @@ widgets.ParagraphStyles = (function () {
         });
     }
 
-    widgets.ParagraphStyles = function ParagraphStyles(documentObject, callback) {
-        makeWidget(documentObject, function (widget) {
+    widgets.ParagraphStyles = function ParagraphStyles(session, inputMemberId, callback) {
+        makeWidget(session, inputMemberId, function (widget) {
             return callback(widget);
         });
     };

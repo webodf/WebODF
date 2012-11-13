@@ -32,55 +32,31 @@
  */
 /*global core, gui, runtime*/
 
-runtime.loadClass("gui.SelectionMover");
+runtime.loadClass("core.Cursor");
+runtime.loadClass("gui.Avatar");
 
 /**
  * Class that represents a caret in a document. In text nodes, a native caret is
  * used via the HTML attribute contentEditable. Outside of text nodes, an empty
  * element representing the caret is used.
  * @constructor
- * @param {!gui.SelectionMover} selectionMover
- * @param {!function(!number):!boolean=} keyHandler
+ * @param {!core.Cursor} cursor
  */
-gui.Caret = function Caret(selectionMover, keyHandler) {
+gui.Caret = function Caret(cursor) {
     "use strict";
-    function listenEvent(eventTarget, eventType, eventHandler) {
-        if (eventTarget.addEventListener) {
-            eventTarget.addEventListener(eventType, eventHandler, false);
-        } else if (eventTarget.attachEvent) {
-            eventType = "on" + eventType;
-            eventTarget.attachEvent(eventType, eventHandler);
-        } else {
-            eventTarget["on" + eventType] = eventHandler;
-        }
-    }
-    function cancelEvent(event) {
-        if (event.preventDefault) {
-            event.preventDefault();
-        } else {
-            event.returnValue = false;
-        }
-    }
     function clearNode(node) {
         while (node.firstChild !== null) {
             node.removeNode(node.firstChild);
         }
     }
-    var rootNode = selectionMover.getRootNode(),
-        document = /**@type{!Document}*/(rootNode.ownerDocument),
-        htmlns = document.documentElement.namespaceURI,
-        span = document.createElementNS(htmlns, "span"),
-        handle = document.createElementNS(htmlns, "div"),
+    var self = this,
+        span,
+        avatar,
         cursorNode,
         focussed = false,
         caretLineVisible,
         blinking = false,
         color = "";
-
-    if (handle.style) {
-        handle.style.width = '64px';
-        handle.style.height = '70px';
-    }
 
     function blink() {
         if (!focussed || !cursorNode.parentNode) {
@@ -101,41 +77,16 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
             }, 1000);
         }
     }
-    function updateHandlePosition() {
-        if (handle.style) {
-            handle.style.top = (span.offsetTop - handle.offsetHeight - 10) + "px";
-            handle.style.left = (span.offsetLeft - handle.offsetWidth / 2) + "px";
-        }
-    }
 
-    this.focus = function () {
+    this.setFocus = function () {
         span.focus();
-        updateHandlePosition();
     };
-    this.updateHandlePosition = function () {
-        updateHandlePosition();
+    this.setAvatarImageUrl = function (url) {
+        avatar.setImageUrl(url);
     };
-    this.move = function (number) {
-//runtime.log("moving " + number);
-        var moved = 0;
-        if (number > 0) {
-            moved = selectionMover.movePointForward(number);
-        } else if (number <= 0) {
-            moved = -selectionMover.movePointBackward(-number);
-        }
-        updateHandlePosition();
-        return moved;
-    };
-    /**
-     * @param {!string} newcolor
-     * @return {undefined}
-     */
-    this.setColor = function (newcolor) {
-        color = newcolor;
-        if (handle.style) {
-            span.style.borderColor = color;
-            handle.style.background = color;
-        }
+    this.setColor = function (color) {
+        span.style.borderColor = color;
+        avatar.setColor(color);
     };
     /**
      * @return {!string}
@@ -143,54 +94,49 @@ gui.Caret = function Caret(selectionMover, keyHandler) {
     this.getColor = function () {
         return color;
     };
-    this.getSelection = function () {
-        return selectionMover.getSelection();
+    this.getCursor = function () {
+        return cursor;
     };
-    this.getHandleElement = function () {
-        return handle;
+    /**
+     * @return {!Element}
+     */
+    this.getFocusElement = function () {
+        return span;
+    };
+    this.toggleHandleVisibility = function () {
+        if (avatar.isVisible()) {
+            avatar.hide();
+        } else {
+            avatar.show();
+        }
     };
     this.showHandle = function () {
-        handle.style.display = "block";
-        updateHandlePosition();
+        avatar.show();
     };
     this.hideHandle = function () {
-        handle.style.display = "none";
+        avatar.hide();
     };
-    this.getStepCounter = function () {
-        return selectionMover.getStepCounter();
-    };
-    function handleKeyDown(e) {
-        if (keyHandler) {
-            keyHandler(e.keyCode);
-        }
-        // still allow ctrl-r in ui, must be improved later
-        if (!e.ctrlKey) {
-            cancelEvent(e);
-        }
-    }
-    function dummyHandler(e) {
-        cancelEvent(e);
-    }
     function init() {
-        span.setAttribute("contenteditable", true);
+        var dom = cursor.getOdfDocument().getDOM(),
+            htmlns = dom.documentElement.namespaceURI;
+
+        span = dom.createElementNS(htmlns, "span");
+        span.setAttribute("tabindex", 0); // enable span to have focus
+
         span.onfocus = function () {
             focussed = true;
-            handle.className = "active";
+            avatar.markAsFocussed(true);
             blink();
         };
         span.onblur = function () {
             focussed = false;
-            handle.className = "";
+            avatar.markAsFocussed(false);
             span.style.borderLeftWidth = "1px";
         };
-        cursorNode = selectionMover.getCursor().getNode();
+
+        cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
-        cursorNode.appendChild(handle);
-        listenEvent(span, "keydown", handleKeyDown);
-        listenEvent(span, "keyup", dummyHandler);
-        listenEvent(span, "copy", dummyHandler);
-        listenEvent(span, "cut", dummyHandler);
-        listenEvent(span, "paste", dummyHandler);
+        avatar = new gui.Avatar(cursorNode);
     }
     init();
 };

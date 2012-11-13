@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,6 +32,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global odf: true, runtime: true, console: true*/
+
 /**
  * @constructor
  */
@@ -174,6 +176,56 @@ odf.Formatting = function Formatting() {
             node = node.nextSibling;
         }
         return paragraphStyles;
+    };
+
+    function getStyleElement(styleListElement, styleName, family) {
+        var node = styleListElement.firstChild;
+
+        while (node) {
+            if (node.nodeType === 1
+                    && node.namespaceURI === namespaces.style
+                    && node.localName === "style"
+                    && node.getAttributeNS(namespaces.style, 'family') === family
+                    && node.getAttributeNS(namespaces.style, 'name') === styleName) {
+                return node;
+            }
+            node = node.nextSibling;
+        }
+        return null;
+    }
+
+    // workaround for not normally named elements, e.g. with a dash TODO: how is this properly done?
+    function getNotNormallyNamedChildElement(element, name) {
+        var node = element.firstChild;
+        while (node) {
+            if (node.nodeType === 1 && node.localName === name) {
+                break;
+            }
+            node = node.nextSibling;
+        }
+        return node;
+    }
+    /**
+     * Get the name of the first named style in the parent style chain.
+     * If none is found, null is returned and you should assume the Default style.
+     * @param {!string} searchedStyleName
+     * @return {!string|null}
+     */
+    this.getFirstNamedParentStyleNameOrSelf = function (searchedStyleName) {
+        var automaticStyleElementList = getNotNormallyNamedChildElement(odfContainer.rootElement, "automatic-styles"),
+            styleElementList = odfContainer.rootElement.styles,
+            styleElement,
+            styleName = searchedStyleName;
+        // first look for automatic style with the name
+        while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
+            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+        }
+        // then see if that style is in named styles
+        styleElement = getStyleElement(odfContainer.rootElement.styles, styleName, "paragraph");
+        if (!styleElement) {
+            styleName = null;
+        }
+        return styleName;
     };
 
     /**

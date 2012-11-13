@@ -37,36 +37,6 @@
  */
 ops.Session = function Session() {"use strict"; };
 /**
- * @param {!string} memberid
- * @return {!boolean}
- */
-ops.Session.prototype.addMemberToSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @return {!boolean}
- */
-ops.Session.prototype.removeMemberFromSession = function (memberid) {"use strict"; };
-/**
- * @param {!string} memberid
- * @param {!number} number
- * @return {!boolean}
- */
-ops.Session.prototype.moveMemberCaret = function (memberid, number) {"use strict"; };
-/**
- * @param {!number} paragraph
- * @param {!number} position
- * @param {!string} text
- * @return {!boolean}
- */
-ops.Session.prototype.insertText = function (paragraph, position, text) {"use strict"; };
-/**
- * @param {!number} paragraph
- * @param {!number} position
- * @param {!string} text
- * @return {!boolean}
- */
-ops.Session.prototype.removeText = function (paragraph, position, text) {"use strict"; };
-/**
  * @param {!number} position
  * @return {!boolean}
  */

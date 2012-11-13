@@ -30,9 +30,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, gui: true*/
+/*global runtime: true, core: true, gui: true, odf, ops*/
 runtime.loadClass("gui.SelectionMover");
-
+runtime.loadClass("odf.OdfCanvas");
+runtime.loadClass("ops.Document");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
@@ -41,6 +42,7 @@ runtime.loadClass("gui.SelectionMover");
 gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     "use strict";
     var r = runner, maindoc = runtime.getWindow().document,
+        odfDocument,
         t, testarea,
         testXMLs = [
             { x: "<a/>", n: 1, t: 0 },
@@ -54,27 +56,26 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         ];
 
     function setupDoc() {
-        var doc = testarea.ownerDocument,
-            p = doc.createElement("p"),
-            text = doc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
+        var p = maindoc.createElement("p"),
+            text = maindoc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
             mover,
-            selection;
-        testarea.appendChild(p);
+            cursor;
+        odfDocument.getRootNode().appendChild(p);
         p.appendChild(text);
         p.style.width = "5em";// break line after each 'MMMMM'
-        mover = new gui.SelectionMover(p);
-        selection = mover.getSelection();
-        t = { doc: doc, p: p, text: text, selection: selection, mover: mover };
+        cursor = new core.Cursor("id", odfDocument);
+        mover = new gui.SelectionMover(cursor, p);
+        t = { doc: maindoc, p: p, text: text, selection: cursor.getSelection(), mover: mover };
     }
     function createDoc(xml) {
         var doc = runtime.parseXML(xml),
             mover,
-            selection,
-            node = testarea.ownerDocument.importNode(doc.documentElement, true);
-        testarea.appendChild(node);
-        mover = new gui.SelectionMover(node);
-        selection = mover.getSelection();
-        t = { doc: doc, root: node, selection: selection, mover: mover };
+            cursor,
+            node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement, true));
+        odfDocument.getRootNode().appendChild(node);
+        cursor = new core.Cursor("id", odfDocument);
+        mover = new gui.SelectionMover(cursor, node);
+        t = { doc: doc, root: node, selection: cursor.getSelection(), mover: mover, cursor: cursor };
     }
     function testUpDownTraversal() {
         setupDoc();
@@ -118,21 +119,21 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     }
     function testXMLForthBack(xml, positions) {
         createDoc(xml);
-        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        r.shouldBe(t, "t.cursor.getNode().parentNode", "t.root");
         var n = 1;
         while (t.mover.movePointForward(1)) {
-            r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             n += 1;
         }
         r.shouldBe(t, n.toString(), positions.toString());
-        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        r.shouldBe(t, "t.cursor.getNode().parentNode", "t.root");
         n = 1;
         while (t.mover.movePointBackward(1)) {
-            r.shouldBeNonNull(t, "t.mover.getCursor().getNode().parentNode");
+            r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             n += 1;
         }
         r.shouldBe(t, n.toString(), positions.toString());
-        r.shouldBe(t, "t.mover.getCursor().getNode().parentNode", "t.root");
+        r.shouldBe(t, "t.cursor.getNode().parentNode", "t.root");
     }
     /**
      * @constructor
@@ -183,15 +184,20 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     }
 
     this.setUp = function () {
+        var odfcanvas;
         t = {};
         testarea = maindoc.getElementById("testarea");
         if (!testarea) {
             testarea = maindoc.createElement("div");
+            testarea.setAttribute('id', 'testarea');
             maindoc.body.appendChild(testarea);
         }
         while (testarea.firstChild) {
             testarea.removeChild(testarea.firstChild);
         }
+        odfcanvas = new odf.OdfCanvas(testarea);
+        odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
+        odfDocument = new ops.Document(odfcanvas);
     };
     this.tearDown = function () {
         t = {};

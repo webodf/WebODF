@@ -39,35 +39,27 @@ runtime.loadClass("ops.SessionImplementation");
  */
 ops.SessionImplementationTests = function SessionImplementationTests(runner) {
     "use strict";
-    var t, r = runner;
+    var t, r = runner,
+        maindoc = runtime.getWindow().document,
+        testarea = /**@type{!Element}*/(maindoc.getElementById("testarea")),
+        odfcanvas = new odf.OdfCanvas(testarea);
+    odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
+
     this.setUp = function () {
         t = {};
-        t.odf = new odf.OdfContainer("", null);
+        t.odf = odfcanvas.odfContainer();
     };
     this.tearDown = function () {
         t = {};
     };
     function newSession() {
-        t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-        t.session = new ops.SessionImplementation(t.odf);
-        r.shouldBe(t, "t.session.getAvatars().length", "0");
-    }
-    function addMember() {
-        newSession();
-        t.session.addMemberToSession("member1");
-        r.shouldBe(t, "t.session.getAvatars().length", "1");
-        t.session.addMemberToSession("member2");
-        r.shouldBe(t, "t.session.getAvatars().length", "2");
-        t.session.removeMemberFromSession("member2");
-        r.shouldBe(t, "t.session.getAvatars().length", "1");
-        t.session.removeMemberFromSession("member1");
-        r.shouldBe(t, "t.session.getAvatars().length", "0");
+        t.session = new ops.SessionImplementation(odfcanvas);
+        r.shouldBe(t, "t.session.getOdfDocument().getCursors().length", "0");
     }
     this.tests = function () {
         return [
-            newSession,
-            addMember
+            newSession
         ];
     };
     this.asyncTests = function () {

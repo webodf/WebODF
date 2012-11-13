@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -31,29 +32,31 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-define({
-    // menus
-    file: "Datei",
-    edit: "Bearbeiten",
-    view: "Ansicht",
-    insert: "Einfügen",
-    format: "Formatieren",
-    character_DDD: "Zeichen...",
-    paragraph_DDD: "Absatz...",
-    // dialogs
-    ok: "Ok",
-    cancel: "Abbrechen",
-    alignment: "Ausrichtung",
-    fontEffects: "Schrifteffekte",
-    outlineAndNumbering: "Gliederung & Aufzählung",
-    textFlow: "Textfluß",
-    character: "Zeichen",
-    paragraphStyles: "Absatzstile",
-    // Collaboration pane
-    collaborationPane: "Zusammenarbeitsfeld",
-    people: "Leute",
-    chat: "Chat",
-    typeYourName_DDD: "Geben Sie Ihren Namen ein...",
-    invitePeople: "Leute einladen",
-    startTypingToChat_DDD: "Eingabe beginnen für Chat..."
-});
+/*global ops*/
+
+/**
+ * @constructor
+ * @implements ops.Operation
+ */
+ops.OpRemoveCursor = function OpRemoveCursor(session) {
+    "use strict";
+
+    var memberid, cursorns = 'urn:webodf:names:cursor';
+
+    this.init = function (data) {
+        memberid = data.memberid;
+    };
+
+    this.execute = function (domroot) {
+        session.getOdfDocument().removeCursor(memberid);
+        session.emit(ops.SessionImplementation.signalCursorRemoved, memberid);
+    };
+
+    this.spec = function () {
+        return {
+            optype: "RemoveCursor",
+            memberid: memberid
+        };
+    };
+
+};

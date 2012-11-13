@@ -203,6 +203,22 @@ html, body, #mainContainer {
     margin-bottom: 3px !important;
 }
 
+.dijitCheckBox {
+    margin-top: 3px !important;
+    margin-bottom: 7px !important;
+}
+.dojoxColorPicker {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.dialogPreviewBox {
+    height: 100px;
+    width: 100%;
+    border: 1px solid gray;
+    background-color: white;
+    text-align: center;
+}
 cursor > div {
     padding: 3px;
     box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.75);

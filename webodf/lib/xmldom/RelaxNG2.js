@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, xmldom: true*/
+/*global runtime, xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -294,7 +294,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
                             e.name === "oneOrMore" ||
                             (e.name === "choice" &&
                             (e.e[0].name === "oneOrMore" ||
-                             e.e[1].name === "oneOrMore"))) {
+                                    e.e[1].name === "oneOrMore"))) {
                         donethisround += 1;
                         n[i] = subnode; // no error and try this one again later
                     } else {
@@ -310,7 +310,8 @@ xmldom.RelaxNG2 = function RelaxNG2() {
                 for (i = 0; i < l; i += 1) {
                     if (n[i] === false) {
                         return [new RelaxNGParseError(
-                                "Interleave does not match.", element)];
+                                "Interleave does not match.", element
+                        )];
                     }
                 }
                 return null;
@@ -336,7 +337,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
         }
         //runtime.log(elementdef.e[0].name + " " + elementdef.e[1].name);
         return validateNonEmptyPattern(elementdef.e[0], walker, element) ||
-                validateNonEmptyPattern(elementdef.e[1], walker, element);
+            validateNonEmptyPattern(elementdef.e[1], walker, element);
     }
     /**
      * @param elementdef
@@ -352,7 +353,8 @@ xmldom.RelaxNG2 = function RelaxNG2() {
         while (node !== element && type !== 3) {
             if (type === 1) {
                 return [new RelaxNGParseError(
-                        "Element not allowed here.", node)];
+                        "Element not allowed here.", node
+                )];
             }
             node = walker.nextSibling();
             type = node ? node.nodeType : 0;

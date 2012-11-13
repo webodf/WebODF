@@ -1,0 +1,86 @@
+== cursor-move with company ==
+
+somewhere down in core.Cursor the cursor keeps a reference
+of the textnode the cursor is currently in.
+i suspect that textnode can get out of sync with reality
+(the DOM) if text nodes next to the cursor are split and
+joined because of another cursor passing along.
+
+== single offline avatar getting lost ==
+
+webodf: 871aaf5f609281f1bc59ba0ba273d3a0ce4abb
+browser: google chrome
+
+0) run ./simplerevisionserver/webdavserver.py
+1) load http://localhost:8080/webodf/collabtest/test.html
+2) click on first word "WebODF"; press Home-Key
+3) press 3x Left-Arrow [Avatar is left of image now]
+4) Insert 4x "x"
+5) press 3x Right-Arrow
+
+6a) further Right-Arrows will not move the Avatar
+6b) further Left-Arrows will make Avatar disappear
+	[6b will trigger 'INDEX_SIZE_ERR: DOM Exception 1']
+
+7) Click somewhere and Avatar will re-appear.
+
+
+
+== walking over a split text node ==
+walking over a split text node lets the avatar disappear.
+the textnode split happened when removing an avatar. a fix for
+that split is incoming...
+but the walking should be more robust and able to cope with such
+situations.
+
+additional info:
+when the avatar disappears the console outputs a:
+Uncaught Error: INDEX_SIZE_ERR: DOM Exception 1 
+in Selection.js :81
+
+cloud: e6c7df91fa203ed99094c5ac030d03bd7af4a230
+webodf: 6bea12a3dc4f3e5ce407e2ad3d7d16f35df2ec73
+
+
+== 2nd avatar jumps= ==
+=== reproduction steps ===
+browser: google chrome
+cloud revision: 12d5c1db7320b06d0d5fdfef0e1a1991153998ea
+webodf revision: 7430c508c16757096d0021f74d8fb91197e11c7a
+
+1) start cloudoffice/server
+2) connect with browser window A) to
+   http://localhost:12345/webodf/collabtest/test.html
+3) wait at least 1 second and connect browser window B) to same URL
+   [A) will show 2 avatars, B) will show one]
+
+4) in B) click on second line on first word ("embedded")
+5) in A) click on word "and"
+6) still in A) use right-arrow to move the cursor into next word "webmail"
+
+observation: entering "webmail" will take one additional step because of
+the text:span element. that is fine[1], but: depending on the position
+of the other avatar you will see the webmail-entering-avatar to jump
+to a different/incorrect position (end of previous span)
+
+	case A-avatar in word "embedded" [according to step 4)]:
+		B-avatar jumps
+	case A-avatar in word "intranet" in another span
+		B-avatar does not jump when entering "webmail"
+	case A-avatar is behind B-avatar (e.g. same line word "browsers")
+		B-avatar does not jump
+
+	conclusion:
+		when A-avatar is in a text-node on the same level and before
+		B-avatar, B-avatar will show strange walking-positions on 
+		left-sides of spans.
+		when A-avatar is inside a span, the strange behaviour happens
+		when B-avatar enters that span from the right side.
+
+guess for reason:
+A-avatar splits a text node before B-avatar into two. that confuses the
+counting mechanism
+
+
+[1] perhaps not 100% fine, but it's out of scope of this issue-report
+

@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -31,29 +32,54 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-define({
-    // menus
-    file: "Datei",
-    edit: "Bearbeiten",
-    view: "Ansicht",
-    insert: "Einfügen",
-    format: "Formatieren",
-    character_DDD: "Zeichen...",
-    paragraph_DDD: "Absatz...",
-    // dialogs
-    ok: "Ok",
-    cancel: "Abbrechen",
-    alignment: "Ausrichtung",
-    fontEffects: "Schrifteffekte",
-    outlineAndNumbering: "Gliederung & Aufzählung",
-    textFlow: "Textfluß",
-    character: "Zeichen",
-    paragraphStyles: "Absatzstile",
-    // Collaboration pane
-    collaborationPane: "Zusammenarbeitsfeld",
-    people: "Leute",
-    chat: "Chat",
-    typeYourName_DDD: "Geben Sie Ihren Namen ein...",
-    invitePeople: "Leute einladen",
-    startTypingToChat_DDD: "Eingabe beginnen für Chat..."
-});
+/*global runtime, ops*/
+
+/**
+ * @constructor
+ * @implements ops.Operation
+ */
+ops.OpMoveCursor = function OpMoveCursor(session) {
+    "use strict";
+
+    var memberid, number;
+
+    this.init = function (data) {
+        memberid = data.memberid;
+        number = data.number;
+    };
+
+    this.execute = function (domroot) {
+        var odfDocument = session.getOdfDocument(),
+            cursor = odfDocument.getCursor(memberid),
+            positionFilter = odfDocument.getPositionFilter(),
+            stepCounter,
+            steps;
+
+        runtime.assert(cursor !== undefined,
+            "cursor for ["+memberid+"] not found (MoveCursor).");
+
+        stepCounter = cursor.getStepCounter();
+
+
+        if (number > 0) {
+            steps = stepCounter.countForwardSteps(number, positionFilter);
+        } else if (number < 0) {
+            steps = -stepCounter.countBackwardSteps(-number, positionFilter);
+        } else {
+            // nothing to do
+            return;
+        }
+        runtime.log("Moving. moving, moving... walkableSteps " + steps);
+        cursor.move(steps);
+        session.emit(ops.SessionImplementation.signalCursorMoved, cursor);
+    };
+
+    this.spec = function () {
+        return {
+            optype: "MoveCursor",
+            memberid: memberid,
+            number: number
+        };
+    };
+
+};

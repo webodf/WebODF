@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime,document,odf,require */
+/*global runtime,document,odf,require,ops,gui */
 
 runtime.currentDirectory = function () {
     "use strict";
@@ -42,15 +42,30 @@ runtime.libraryPaths = function () {
     return [ runtime.currentDirectory() ];
 };
 
-function editor_init(docurl) {
+
+/**
+ * Utility method for testing
+ * @param {?string} memberId
+ */
+function addCursorToDoc(session, memberId) {
+    "use strict";
+    var op = new ops.OpAddCursor(session);
+    op.init({memberid:memberId});
+    session.enqueue(op);
+}
+
+
+function init_gui_and_doc(docurl, userid) {
     "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
-    var doclocation, pos, odfElement, odfCanvas;
+    var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
 
-    // documentChangedEvent
-    document.documentChangedEvent = document.createEvent('Event');
-    document.documentChangedEvent.initEvent('changed', true, true);
+    if (userid === undefined) {
+        userid = "undefined";
+    }
+
+    isConnectedWithNetwork = (runtime.getNetwork().networkStatus !== "unavailable");
 
     odfElement = document.getElementById("canvas");
     odfCanvas = new odf.OdfCanvas(odfElement);
@@ -69,16 +84,46 @@ function editor_init(docurl) {
     }
 
     // Editor Translations, Widgets and Avatars
-    require([ 
-        'dojo/i18n!nls/myResources.js', 
+    require([
+        'dojo/i18n!nls/myResources.js',
         'widgets.js',
         'avatars.js'
     ], function (translator) {
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
-            loadWidgets(document);
-            loadAvatars(document, document.getElementById('peopleList'));
+            var session, sessionController, sessionView,
+                memberid = userid+"___"+Date.now(),
+                opRouter = null;
+
+            session = new ops.SessionImplementation(odfCanvas);
+            if (isConnectedWithNetwork) {
+                // use the nowjs op-router when connected
+                session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
+                opRouter.setMemberid(memberid);
+            }
+            sessionController = new gui.SessionController(session, memberid);
+            sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
+
+            if (isConnectedWithNetwork) {
+                runtime.log("editor: setting UserModel and requesting replay");
+                session.setUserModel(new ops.NowjsUserModel(function done() {
+                    opRouter.requestReplay(function done() {
+                        // start editing: let the controller send the OpAddCursor
+                        sessionController.startEditing();
+                        // add our two friends
+                        // addCursorToDoc(session, "bob");
+                        // addCursorToDoc(session, "alice");
+                    });
+                }));
+            } else {
+                // offline
+                sessionController.startEditing();
+            }
+
+            loadWidgets(session, sessionController.getInputMemberId());
+            loadAvatarPane(sessionView, document.getElementById('peopleList'));
+
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);
@@ -157,5 +202,35 @@ function editor_init(docurl) {
     });
 }
 
-window.onload = function() { editor_init(); };
+function editor_init(docurl, userid) {
+    "use strict";
+    var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+
+    function later_cb() {
+        if (net.networkStatus === "unavailable") {
+            runtime.log("connection to server unavailable.");
+            init_gui_and_doc(docurl, userid);
+            return;
+        }
+        if (net.networkStatus !== "ready") {
+            if (accumulated_waiting_time > 8000) {
+                // game over
+                runtime.log("connection to server timed out.");
+                init_gui_and_doc(docurl, userid);
+                return;
+            }
+            accumulated_waiting_time += 100;
+            runtime.getWindow().setTimeout(later_cb, 100);
+            return;
+        } else {
+            runtime.log("connection to collaboration server established.");
+            init_gui_and_doc(docurl, userid);
+        }
+    }
+    later_cb();
+}
+
+window.onload = function() {
+    editor_init( "/webodf/collabtest/text.odt", "you");
+};
 // vim:expandtab

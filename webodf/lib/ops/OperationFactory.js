@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
- *
+
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,29 +31,51 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-define({
-    // menus
-    file: "Datei",
-    edit: "Bearbeiten",
-    view: "Ansicht",
-    insert: "Einfügen",
-    format: "Formatieren",
-    character_DDD: "Zeichen...",
-    paragraph_DDD: "Absatz...",
-    // dialogs
-    ok: "Ok",
-    cancel: "Abbrechen",
-    alignment: "Ausrichtung",
-    fontEffects: "Schrifteffekte",
-    outlineAndNumbering: "Gliederung & Aufzählung",
-    textFlow: "Textfluß",
-    character: "Zeichen",
-    paragraphStyles: "Absatzstile",
-    // Collaboration pane
-    collaborationPane: "Zusammenarbeitsfeld",
-    people: "Leute",
-    chat: "Chat",
-    typeYourName_DDD: "Geben Sie Ihren Namen ein...",
-    invitePeople: "Leute einladen",
-    startTypingToChat_DDD: "Eingabe beginnen für Chat..."
-});
+
+/*global runtime, ops */
+
+/*
+ * create specific operation instances.
+ */
+
+runtime.loadClass("ops.OpAddCursor");
+runtime.loadClass("ops.OpRemoveCursor");
+runtime.loadClass("ops.OpMoveCursor");
+runtime.loadClass("ops.OpInsertText");
+runtime.loadClass("ops.OpRemoveText");
+runtime.loadClass("ops.OpSetParagraphStyle");
+
+/**
+ * @constructor
+ */
+ops.OperationFactory = function OperationFactory(session) {
+    "use strict";
+
+    var self = this;
+
+    this.create = function (spec) {
+        var op = null;
+        // TODO: of course the following code can use some better
+        // js language and make it more generic.
+        if (spec.optype === "AddCursor") {
+            op = new ops.OpAddCursor(session);
+            op.init(spec);
+        } else if (spec.optype === "InsertText") {
+            op = new ops.OpInsertText(session);
+            op.init(spec);
+        } else if (spec.optype === "RemoveText") {
+            op = new ops.OpRemoveText(session);
+            op.init(spec);
+        } else if (spec.optype === "SetParagraphStyle") {
+            op = new ops.OpSetParagraphStyle(session);
+            op.init(spec);
+        } else if (spec.optype === "MoveCursor") {
+            op = new ops.OpMoveCursor(session);
+            op.init(spec);
+        } else if (spec.optype === "RemoveCursor") {
+            op = new ops.OpRemoveCursor(session);
+            op.init(spec);
+        }
+        return op;
+    };
+};

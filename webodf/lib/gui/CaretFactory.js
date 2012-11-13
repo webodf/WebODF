@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -31,29 +32,37 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-define({
-    // menus
-    file: "Datei",
-    edit: "Bearbeiten",
-    view: "Ansicht",
-    insert: "Einfügen",
-    format: "Formatieren",
-    character_DDD: "Zeichen...",
-    paragraph_DDD: "Absatz...",
-    // dialogs
-    ok: "Ok",
-    cancel: "Abbrechen",
-    alignment: "Ausrichtung",
-    fontEffects: "Schrifteffekte",
-    outlineAndNumbering: "Gliederung & Aufzählung",
-    textFlow: "Textfluß",
-    character: "Zeichen",
-    paragraphStyles: "Absatzstile",
-    // Collaboration pane
-    collaborationPane: "Zusammenarbeitsfeld",
-    people: "Leute",
-    chat: "Chat",
-    typeYourName_DDD: "Geben Sie Ihren Namen ein...",
-    invitePeople: "Leute einladen",
-    startTypingToChat_DDD: "Eingabe beginnen für Chat..."
-});
+/*global runtime, core, gui*/
+
+runtime.loadClass("gui.Caret");
+
+/**
+ * The caret factory creates an caret as UI representation of a users's cursor.
+ * If the caret is for the local user, then a handler is passed to the caret
+ * to redirect the keystrokes received for the caret to the session controller.
+ * @constructor
+ * @param {!gui.SessionController} sessionController
+ */
+gui.CaretFactory = function CaretFactory(sessionController) {
+    "use strict";
+
+    /**
+     * @param {core.Cursor} cursor
+     * @return {!gui.Caret}
+     */
+    this.createCaret = function (cursor) {
+        var memberid = cursor.getMemberId(),
+            caret = new gui.Caret(cursor);
+
+        // if local input user, then let controller listen on caret span
+        if (memberid === sessionController.getInputMemberId()) {
+            runtime.log("Starting to track input for caret of " + memberid);
+            // here wire up the cursor update to caret focus update
+            cursor.handleUpdate = caret.setFocus;
+            sessionController.setFocusElement(caret.getFocusElement());
+            caret.setFocus();
+        }
+
+        return caret;
+    };
+};

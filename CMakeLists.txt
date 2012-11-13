@@ -81,8 +81,8 @@ ExternalProject_Add(
     NodeJS
     PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
     DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-    URL "http://nodejs.org/dist/v0.8.11/node-v0.8.11.tar.gz"
-    URL_MD5 23cb6d6a5c3949ac73df3c6b330e834d
+    URL "http://nodejs.org/dist/v0.8.14/node-v0.8.14.tar.gz"
+    URL_MD5 284fd2c7578064c339d9cf6a3a475ac7
     CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
     INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
     BUILD_IN_SOURCE 1
@@ -125,6 +125,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/ByteArrayWriter.js
     lib/core/RawInflate.js
     lib/core/Selection.js
+    lib/core/LoopWatchDog.js
     lib/core/Cursor.js
     lib/core/UnitTester.js
     lib/core/PositionIterator.js
@@ -149,16 +150,34 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
 
+    lib/ops/Operation.js
+    lib/ops/OpAddCursor.js
+    lib/ops/OpRemoveCursor.js
+    lib/ops/OpMoveCursor.js
+    lib/ops/OpInsertText.js
+    lib/ops/OpRemoveText.js
+    lib/ops/OpSetParagraphStyle.js
+    lib/ops/OperationFactory.js
     lib/gui/SelectionMover.js
-    lib/gui/SelectionManager.js
-    lib/gui/Caret.js
     lib/gui/Avatar.js
+    lib/gui/Caret.js
+    lib/gui/SessionController.js
+    lib/gui/SelectionManager.js
+    lib/ops/UserModel.js
+    lib/ops/TrivialUserModel.js
+    lib/ops/NowjsUserModel.js
+    lib/ops/TrivialOperationRouter.js
+    lib/ops/NowjsOperationRouter.js
+    lib/gui/SessionView.js
+    lib/gui/CaretFactory.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
 
     lib/ops/SessionPointFilter.js
+    lib/ops/Document.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
+
 )
 
 set(HTML5UIFILES

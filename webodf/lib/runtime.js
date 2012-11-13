@@ -34,7 +34,7 @@
 /*global window, XMLHttpRequest, require, console, DOMParser,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
-  navigator, VBArray */
+  navigator, VBArray, alert, now */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -51,12 +51,32 @@ function Runtime() {"use strict"; }
  * @param {!number} size
  */
 Runtime.ByteArray = function (size) {"use strict"; };
+
+/**
+ * @param {!string} name
+ * @return {*}
+ */
+Runtime.prototype.getVariable = function (name) { "use strict"; };
+
+/**
+ * @param {*} anything
+ * @return {!string}
+ */
+Runtime.prototype.toJson = function (anything) { "use strict"; };
+
+/**
+ * @param {!string} jsonstr
+ * @return {*}
+ */
+Runtime.prototype.fromJson = function (jsonstr) { "use strict"; };
+
 /**
  * @param {!number} start
  * @param {!number} end
  * @return {!Runtime.ByteArray}
  */
 Runtime.ByteArray.prototype.slice = function (start, end) {"use strict"; };
+
 /**
  * @type {!number}
  */
@@ -173,6 +193,14 @@ Runtime.prototype.parseXML = function (xml) {"use strict"; };
  */
 Runtime.prototype.getWindow = function () {"use strict"; };
 
+/**
+ * @param {!boolean} condition
+ * @param {!string} message
+ * @param {!function():undefined=} callback
+ * @return {undefined}
+ */
+Runtime.prototype.assert = function (condition, message, callback) { "use strict"; };
+
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
 
@@ -224,6 +252,38 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     }
     return result;
 };
+
+/**
+ * @param {!string} name
+ * @return {*}
+ */
+Runtime.getVariable = function (name) {
+    "use strict";
+    try {
+    return eval(name);
+    } catch (e) {
+        return undefined;
+    }
+};
+
+/**
+ * @param {*} anything
+ * @return {!string}
+ */
+Runtime.toJson = function (anything) {
+    "use strict";
+    return JSON.stringify(anything);
+};
+
+/**
+ * @param {!string} jsonstr
+ * @return {*}
+ */
+Runtime.fromJson = function (jsonstr) {
+    "use strict";
+    return JSON.parse(jsonstr);
+};
+
 Runtime.getFunctionName = function getFunctionName(f) {
     "use strict";
     var m;
@@ -348,6 +408,24 @@ function BrowserRuntime(logoutput) {
     this.byteArrayToString = Runtime.byteArrayToString;
 
     /**
+    * @param {!string} name
+    * @return {*}
+    */
+    this.getVariable = Runtime.getVariable;
+
+
+    /**
+    * @param {!string} jsonstr
+    * @return {*}
+    */
+    this.fromJson = Runtime.fromJson;
+    /**
+    * @param {*} anything
+    * @return {!string}
+    */
+    this.toJson = Runtime.toJson;
+
+    /**
      * @param {!string} msgOrCategory
      * @param {string=} msg
      * @return {undefined}
@@ -376,6 +454,22 @@ function BrowserRuntime(logoutput) {
             console.log(msg);
         }
     }
+
+    /**
+    * @param {!boolean} condition
+    * @param {!string} message
+    * @param {!function():undefined=} callback
+    * @return {undefined}
+    */
+    function assert(condition, message, callback) {
+        if (!condition) {
+            alert("ASSERTION FAILED:\n"+message);
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
     function readFile(path, encoding, callback) {
         if (cache.hasOwnProperty(path)) {
             callback(null, cache[path]);
@@ -616,6 +710,7 @@ function BrowserRuntime(logoutput) {
     this.isFile = isFile;
     this.getFileSize = getFileSize;
     this.log = log;
+    this.assert = assert;
     this.setTimeout = function (f, msec) {
         setTimeout(function () {
             f();
@@ -643,6 +738,13 @@ function BrowserRuntime(logoutput) {
     };
     this.getWindow = function () {
         return window;
+    };
+    this.getNetwork = function () {
+        var now = this.getVariable("now");
+        if (now === undefined) {
+            return {networkStatus:"unavailable"};
+        }
+        return now;
     };
 }
 
@@ -691,6 +793,23 @@ function NodeJSRuntime() {
     this.byteArrayToString = function (bytearray, encoding) {
         return bytearray.toString(encoding);
     };
+
+    /**
+    * @param {!string} name
+    * @return {*}
+    */
+    this.getVariable = Runtime.getVariable;
+
+    /**
+    * @param {!string} jsonstr
+    * @return {*}
+    */
+    this.fromJson = Runtime.fromJson;
+    /**
+    * @param {*} anything
+    * @return {!string}
+    */
+    this.toJson = Runtime.toJson;
 
     function isFile(path, callback) {
         if (currentDirectory) {
@@ -777,6 +896,23 @@ function NodeJSRuntime() {
     this.log = function (msg) {
         process.stderr.write(msg + '\n');
     };
+
+    /**
+    * @param {!boolean} condition
+    * @param {!string} message
+    * @param {!function():undefined=} callback
+    * @return {undefined}
+    */
+    function assert(condition, message, callback) {
+        if (!condition) {
+            process.stderr.write("ASSERTION FAILED: "+message);
+            if (callback) {
+                callback();
+            }
+        }
+    }
+    this.assert = assert;
+
     this.setTimeout = function (f, msec) {
         setTimeout(function () {
             f();
@@ -803,6 +939,9 @@ function NodeJSRuntime() {
     this.exit = process.exit;
     this.getWindow = function () {
         return null;
+    };
+    this.getNetwork = function () {
+        return {networkStatus:"unavailable"};
     };
     function init() {
         var DOMParser = require('xmldom').DOMParser;
@@ -862,6 +1001,24 @@ function RhinoRuntime() {
         return a;
     };
     this.byteArrayToString = Runtime.byteArrayToString;
+
+    /**
+    * @param {!string} name
+    * @return {*}
+    */
+    this.getVariable = Runtime.getVariable;
+
+    /**
+    * @param {!string} jsonstr
+    * @return {*}
+    */
+    this.fromJson = Runtime.fromJson;
+    /**
+    * @param {*} anything
+    * @return {!string}
+    */
+    this.toJson = Runtime.toJson;
+
     this.concatByteArrays = function (bytearray1, bytearray2) {
         return bytearray1.concat(bytearray2);
     };
@@ -974,6 +1131,21 @@ function RhinoRuntime() {
         callback(file.length());
     };
     this.log = print;
+    /**
+    * @param {!boolean} condition
+    * @param {!string} message
+    * @param {!function():undefined=} callback
+    * @return {undefined}
+    */
+    function assert(condition, message, callback) {
+        if (!condition) {
+            print("ASSERTION FAILED: "+message);
+            if (callback) {
+                callback();
+            }
+        }
+    }
+    this.assert = assert;
     this.setTimeout = function (f, msec) {
         f();
     };
@@ -998,6 +1170,9 @@ function RhinoRuntime() {
     this.exit = quit;
     this.getWindow = function () {
         return null;
+    };
+    this.getNetwork = function () {
+        return {networkStatus:"unavailable"};
     };
 }
 
