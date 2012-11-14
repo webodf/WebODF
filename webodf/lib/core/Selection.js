@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, ops*/
+/*global core,ops,runtime */
 /**
  * @constructor
  * @param {!ops.Document} document
@@ -78,6 +78,7 @@ core.Selection = function Selection(document) {
         if (!range) {
             ranges[0] = range = document.getDOM().createRange();
         }
+        runtime.assert(offset >= 0, "invalid offset in Selection.collapse");
         range.setStart(node, offset);
         range.collapse(true);
         self.focusNode = node;
