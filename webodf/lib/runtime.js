@@ -453,6 +453,9 @@ function BrowserRuntime(logoutput) {
         } else if (console) {
             console.log(msg);
         }
+        if (category === "alert") {
+            alert(msg);
+        }
     }
 
     /**
