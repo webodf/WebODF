@@ -1007,6 +1007,7 @@ odf.OdfCanvas = (function () {
         this["load"] = this.load = function (url) {
             loadingQueue.clearQueue();
             element.innerHTML = 'loading ' + url;
+            element.removeAttribute('style');
             // open the odf container
             odfcontainer = new odf.OdfContainer(url, function (container) {
                 // assignment might be necessary if the callback
