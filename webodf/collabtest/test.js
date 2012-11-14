@@ -163,10 +163,7 @@ function initSession(odfid, avatarlistid, done_cb) {
         if (container.state !== odf.OdfContainer.DONE) {
             alert("statereadychange fired but state not DONE");
         }
-        if (ready) {
-            alert("ASSERT: statereadychange fired twice! (should not happen)");
-            return;
-        }
+        runtime.assert(!ready, "statereadychange fired twice!");
         ready = true;
 
         testsession = new ops.SessionImplementation(odfcanvas);
