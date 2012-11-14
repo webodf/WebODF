@@ -432,7 +432,7 @@ function BrowserRuntime(logoutput) {
      */
     function log(msgOrCategory, msg) {
         var node, doc, category;
-        if (msg) {
+        if (msg !== undefined) {
             category = msgOrCategory;
         } else {
             msg = msgOrCategory;
@@ -466,7 +466,7 @@ function BrowserRuntime(logoutput) {
     */
     function assert(condition, message, callback) {
         if (!condition) {
-            alert("ASSERTION FAILED:\n"+message);
+            log("alert", "ASSERTION FAILED:\n"+message);
             if (callback) {
                 callback();
             }
@@ -896,9 +896,28 @@ function NodeJSRuntime() {
             }
         });
     };
-    this.log = function (msg) {
+
+    /**
+     * @param {!string} msgOrCategory
+     * @param {string=} msg
+     * @return {undefined}
+     */
+    function log (msgOrCategory, msg) {
+        var category;
+        if (msg !== undefined) {
+            category = msgOrCategory;
+        } else {
+            msg = msgOrCategory;
+        }
+        if (category === "alert") {
+            process.stderr.write("\n!!!!! ALERT !!!!!" + '\n');
+        }
         process.stderr.write(msg + '\n');
-    };
+        if (category === "alert") {
+            process.stderr.write("!!!!! ALERT !!!!!" + '\n');
+        }
+    }
+    this.log = log;
 
     /**
     * @param {!boolean} condition
@@ -1133,7 +1152,29 @@ function RhinoRuntime() {
         var file = new Packages.java.io.File(path);
         callback(file.length());
     };
-    this.log = print;
+
+    /**
+     * @param {!string} msgOrCategory
+     * @param {string=} msg
+     * @return {undefined}
+     */
+    function log (msgOrCategory, msg) {
+        var category;
+        if (msg !== undefined) {
+            category = msgOrCategory;
+        } else {
+            msg = msgOrCategory;
+        }
+        if (category === "alert") {
+            print("\n!!!!! ALERT !!!!!");
+        }
+        print(msg);
+        if (category === "alert") {
+            print("!!!!! ALERT !!!!!");
+        }
+    }
+    this.log = log;
+
     /**
     * @param {!boolean} condition
     * @param {!string} message
@@ -1142,7 +1183,7 @@ function RhinoRuntime() {
     */
     function assert(condition, message, callback) {
         if (!condition) {
-            print("ASSERTION FAILED: "+message);
+            log("alert", "ASSERTION FAILED: "+message);
             if (callback) {
                 callback();
             }
