@@ -4,7 +4,7 @@
 1) navigate a browser to http://localhost:12345/webodf/collabtest/test.html  --> user A
 2) navigate a browser to http://localhost:12345/webodf/collabtest/test.html  --> user B
 3) A) click on "What" in the first heading
-4) B) click on "about" in the second heading
+4) B) click on "about" in the first heading
 5) A) press left-arrow
 
 webodf: 258d829dbed6e8b56149284e201775e8756c5acc
