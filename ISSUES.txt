@@ -11,6 +11,8 @@ webodf: 258d829dbed6e8b56149284e201775e8756c5acc
 server: f89c0d7b0984bbed964ce9efb73ad9c9e0804f5c
 browser: google chrome
 
+fixed in webodf: 7ca5395e077aff27dc82f08faa05a24dc6686719
+
 == cursor-move with company ==
 
 somewhere down in core.Cursor the cursor keeps a reference
