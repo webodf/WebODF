@@ -364,9 +364,10 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         if (c.previousSibling === cursorNode) {
             oldOffset = positionIterator.offset();
             t = cursorNode.previousSibling && cursorNode.previousSibling.length;
+runtime.log(oldOffset + " ---- " + t);
             if (t <= oldOffset) {
                 positionIterator.setPosition(c, oldOffset - t);
-            } else {
+            } else if (t !== undefined) {
                 positionIterator.setPosition(cursorNode.previousSibling,
                     oldOffset);
             }
