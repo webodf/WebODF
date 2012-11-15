@@ -73,12 +73,13 @@ core.Selection = function Selection(document) {
      * @return {undefined}
      */
     this.collapse = function (node, offset) {
+        runtime.assert(offset >= 0, "invalid offset " + offset
+            + " in Selection.collapse");
         ranges.length = self.rangeCount = 1;
         var range = ranges[0];
         if (!range) {
             ranges[0] = range = document.getDOM().createRange();
         }
-        runtime.assert(offset >= 0, "invalid offset in Selection.collapse");
         range.setStart(node, offset);
         range.collapse(true);
         self.focusNode = node;

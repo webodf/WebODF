@@ -228,6 +228,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             if (offset > container.length) {
                 throw "Error in setPosition: " + offset + " > "
                     + container.length;
+            } else if (offset < 0) {
+                throw "Error in setPosition: " + offset + " < 0";
             }
             if (offset === container.length) {
                 if (walker.nextSibling()) {

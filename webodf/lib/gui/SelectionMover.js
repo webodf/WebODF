@@ -357,14 +357,18 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {undefined}
      */
     this.adaptToInsertedCursor = function (cursorNode) {
-        var c = positionIterator.container(), t;
+        var c = positionIterator.container(), t, oldOffset;
         if (c.nodeType !== 3) {
             return;
         }
         if (c.previousSibling === cursorNode) {
+            oldOffset = positionIterator.offset();
             t = cursorNode.previousSibling && cursorNode.previousSibling.length;
-            if (t > 0) {
-                positionIterator.setPosition(c, positionIterator.offset() - t);
+            if (t <= oldOffset) {
+                positionIterator.setPosition(c, oldOffset - t);
+            } else {
+                positionIterator.setPosition(cursorNode.previousSibling,
+                    oldOffset);
             }
         }
     };

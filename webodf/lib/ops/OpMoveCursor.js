@@ -56,10 +56,9 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
             steps;
 
         runtime.assert(cursor !== undefined,
-            "cursor for ["+memberid+"] not found (MoveCursor).");
+            "cursor for [" + memberid + "] not found (MoveCursor).");
 
         stepCounter = cursor.getStepCounter();
-
 
         if (number > 0) {
             steps = stepCounter.countForwardSteps(number, positionFilter);
