@@ -466,10 +466,11 @@ function BrowserRuntime(logoutput) {
     */
     function assert(condition, message, callback) {
         if (!condition) {
-            log("alert", "ASSERTION FAILED:\n"+message);
+            log("alert", "ASSERTION FAILED:\n" + message);
             if (callback) {
                 callback();
             }
+			throw message; // interrupt execution and provide a backtrace
         }
     }
 
