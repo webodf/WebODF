@@ -41,7 +41,7 @@ runtime.loadClass("core.LoopWatchDog");
  * @constructor
  * @param {core.Cursor} cursor
  * @param {!Node} rootNode
- * @param {!Function=} onCursorAdd
+ * @param {!function(?Element,!number):undefined=} onCursorAdd
  * @param {!function(?Element,!number):undefined=} onCursorRemove
  */
 gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCursorRemove) {
@@ -54,6 +54,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         // assume positionIterator reflects current state
         // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         cursor.remove(onCursorRemove);
         while (left > 0 && move()) {
             left -= 1;
@@ -62,8 +63,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             selection.collapse(positionIterator.container(),
                     positionIterator.offset());
         }
-        cursor.updateToSelection(onCursorRemove);
-        onCursorAdd(cursor.getNode());
+        cursor.updateToSelection(onCursorRemove, onCursorAdd);
         return steps - left;
     }
     /**
@@ -168,13 +168,14 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             offset = span.offsetTop,
             i;
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         while (lines > 0 && positionIterator.previousPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
                 offset = span.offsetTop;
                 selection.collapse(positionIterator.container(),
                         positionIterator.offset());
-                cursor.updateToSelection(onCursorRemove);
+                cursor.updateToSelection(onCursorRemove, onCursorAdd);
                 offset = span.offsetTop; // for now, always accept
                 if (offset !== span.offsetTop) {
                     count += stepCount;
@@ -186,7 +187,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator.setPosition(c, o);
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
-        cursor.updateToSelection(onCursorRemove);
+        cursor.updateToSelection(onCursorRemove, onCursorAdd);
         return count;
     }
     /**
@@ -203,13 +204,14 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             offset = span.offsetTop,
             i;
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
+        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         while (lines > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
                 offset = span.offsetTop;
                 selection.collapse(positionIterator.container(),
                         positionIterator.offset());
-                cursor.updateToSelection(onCursorRemove);
+                cursor.updateToSelection(onCursorRemove, onCursorAdd);
                 offset = span.offsetTop; // for now, always accept
                 if (offset !== span.offsetTop) {
                     count += stepCount;
@@ -221,7 +223,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator.setPosition(c, o);
         selection.collapse(positionIterator.container(),
                 positionIterator.offset());
-        cursor.updateToSelection(onCursorRemove);
+        cursor.updateToSelection(onCursorRemove, onCursorAdd);
         return count;
     }
     /**
@@ -353,24 +355,19 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         }
     };
     /**
-     * @param {!Element} cursorNode
+     * @param {?Element} nodeAfterCursor
+     * @param {!number} textNodeDecrease
      * @return {undefined}
      */
-    this.adaptToInsertedCursor = function (cursorNode) {
-        var c = positionIterator.container(), t, oldOffset;
-        if (c.nodeType !== 3) {
+    this.adaptToInsertedCursor = function (nodeAfterCursor, textNodeDecrease) {
+        if (textNodeDecrease === 0 || nodeAfterCursor === null
+                || nodeAfterCursor.nodeType !== 3) {
             return;
         }
-        if (c.previousSibling === cursorNode) {
-            oldOffset = positionIterator.offset();
-            t = cursorNode.previousSibling && cursorNode.previousSibling.length;
-runtime.log(oldOffset + " ---- " + t);
-            if (t <= oldOffset) {
-                positionIterator.setPosition(c, oldOffset - t);
-            } else if (t !== undefined) {
-                positionIterator.setPosition(cursorNode.previousSibling,
-                    oldOffset);
-            }
+        var c = positionIterator.container();
+        if (c === nodeAfterCursor) {
+            positionIterator.setPosition(c,
+                   positionIterator.offset() - textNodeDecrease);
         }
     };
     function init() {
@@ -382,7 +379,7 @@ runtime.log(oldOffset + " ---- " + t);
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
 
-        cursor.updateToSelection(onCursorRemove);
+        cursor.updateToSelection(onCursorRemove, onCursorAdd);
     }
     init();
 };
