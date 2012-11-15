@@ -129,10 +129,23 @@ gui.AvatarTests = function AvatarTests(runner) {
             testarea.removeChild(testarea.firstChild);
         }
     };
+    function splitTextNodes(doc) {
+        var root = doc.documentElement,
+            iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
+            n = iterator.nextNode();
+        while (n !== null) {
+            if (n.nodeType === 3 && n.data.length > 1) {
+                n.splitText(1);
+            }
+            n = iterator.nextNode();
+        }
+    }
     /**
      * @param {string=} xml
+     * @param {!boolean=} splitTexts
+     * @return {undefined}
      */
-    function createAvatar(xml) {
+    function createAvatar(xml, splitTexts) {
         var doc, node,
             i,
             odfRootNode = odfDocument.getRootNode();
@@ -142,12 +155,15 @@ gui.AvatarTests = function AvatarTests(runner) {
             // the content should be added here. So create the nodes in a
             // Document with a temporary <help> root element and then import
             // all its childs, which is the content
-            xml = '<helper xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">'+xml+'</helper>';
+            xml = '<helper xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' + xml + '</helper>';
             doc = /**@type{!Document}*/(runtime.parseXML(xml));
             for (i = 0; i < doc.documentElement.childNodes.length; i += 1) {
                 node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement.childNodes[i], true));
                 odfRootNode.appendChild(node);
             }
+        }
+        if (splitTexts) {
+            splitTextNodes(odfRootNode.ownerDocument);
         }
         t.cursor = new core.Cursor("id", odfDocument);
         t.caret = new gui.Caret(t.cursor);
@@ -214,7 +230,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     function stepCounter(xml, n, m, filter) {
         var steps, s, e;
         t.pos = [];
-        createAvatar(xml);
+        createAvatar(xml, true);
         s = t.cursor.getSelection();
         t.counter = t.cursor.getStepCounter();
 
