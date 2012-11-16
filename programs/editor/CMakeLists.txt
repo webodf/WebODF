@@ -1,25 +1,38 @@
 COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR} 
+    ${CMAKE_CURRENT_BINARY_DIR}
     index.html
-    editor.js 
+    editor.js
     editor.css
     widgets.js
     avatar-joe.png
-    EditorSession.js )
-
+    EditorSession.js
+ 
+    dojo-deps/build.sh
+    dojo-deps/src/app/run.js
+ 
+)
+ 
 COPY_FILES(EDITORDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR} webodf.css ${LIBJSFILES})
-
-file(COPY nls/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/nls)
-file(COPY widgets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/widgets)
-file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../../webodf/webodf.js DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-file(COPY dojo-deps/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps)
-file(COPY ${DOJO}/dojo DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/src/)
-file(COPY ${DOJO}/dijit DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/src/)
-file(COPY ${DOJO}/dojox DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/src/)
-file(COPY ${DOJO}/util DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/src/)
-
-add_custom_target(editorDepencencies ALL DEPENDS ${EDITORDEPS})
-
-execute_process(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/build.sh)
+ 
+ 
+add_custom_command(
+    OUTPUT editor-compiled.js
+ 
+ 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/nls/ nls/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/dojo-deps/ dojo-deps/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/dojo/ dojo-deps/src/dojo/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/dijit/ dojo-deps/src/dijit/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/dojox/ dojo-deps/src/dojox/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/util/ dojo-deps/src/util/
+ 
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js .
+ 
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/build.sh
+ 
+    DEPENDS ${EDITORDEPS} Dojo webodf.js
+)
+ 
+add_custom_target(programs_editor ALL DEPENDS editor-compiled.js webodf.js)
