@@ -227,7 +227,7 @@ function editor_init(docurl, userid) {
 }
 
 window.onload = function() {
-    editor_init( "/webodf/collabtest/text.odt", "you");
+    editor_init( undefined, "you");
 };
 
 window.onunload = function() {
