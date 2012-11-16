@@ -86,8 +86,8 @@ function init_gui_and_doc(docurl, userid) {
     // Editor Translations, Widgets and Avatars
     require([
         'dojo/i18n!nls/myResources.js',
+        'EditorSession.js',
         'widgets.js',
-        'avatars.js'
     ], function (translator) {
         document.translator = translator;
 
@@ -97,6 +97,8 @@ function init_gui_and_doc(docurl, userid) {
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
+            document.editorSession = new editor.EditorSession(session);
+
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
                 session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
@@ -122,7 +124,7 @@ function init_gui_and_doc(docurl, userid) {
             }
 
             loadWidgets(session, sessionController.getInputMemberId());
-            loadAvatarPane(sessionView, document.getElementById('peopleList'));
+            document.editorSession.loadAvatarPane(sessionView, document.getElementById('peopleList'));
 
         });
         odfCanvas.load(doclocation);
