@@ -129,9 +129,12 @@ gui.AvatarTests = function AvatarTests(runner) {
             testarea.removeChild(testarea.firstChild);
         }
     };
-    function splitTextNodes(doc) {
-        var root = doc.documentElement,
-            iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
+    /**
+     * @param {!Element} root
+     * @return {undefined}
+     */
+    function splitTextNodes(root) {
+        var iterator = root.ownerDocument.createNodeIterator(root, 0xFFFFFFFF),
             n = iterator.nextNode();
         while (n !== null) {
             if (n.nodeType === 3 && n.data.length > 1) {
@@ -141,14 +144,34 @@ gui.AvatarTests = function AvatarTests(runner) {
         }
     }
     /**
-     * @param {string=} xml
-     * @param {!boolean=} splitTexts
+     * @param {!Element} root
      * @return {undefined}
      */
-    function createAvatar(xml, splitTexts) {
+    function insertEmptyTextNodes(root) {
+        var doc = root.ownerDocument,
+            iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
+            n = iterator.nextNode(),
+            count = 0;
+        while (n !== null) {
+            if (n !== root) {
+                n.parentNode.insertBefore(doc.createTextNode(''), n);
+            }
+            n = iterator.nextNode();
+        }
+    }
+    /**
+     * @param {string=} xml
+     * @param {!boolean=} splitTexts
+     * @param {!boolean=} emptyNodes
+     * @return {undefined}
+     */
+    function createAvatar(xml, splitTexts, emptyNodes) {
         var doc, node,
             i,
             odfRootNode = odfDocument.getRootNode();
+        while (odfRootNode.firstChild) {
+            odfRootNode.removeChild(odfRootNode.firstChild);
+        }
 
         if (xml) {
             // odfRootNode already provides a <office;text> element, to which
@@ -163,7 +186,10 @@ gui.AvatarTests = function AvatarTests(runner) {
             }
         }
         if (splitTexts) {
-            splitTextNodes(odfRootNode.ownerDocument);
+            splitTextNodes(odfRootNode);
+        }
+        if (emptyNodes) {
+            insertEmptyTextNodes(odfRootNode);
         }
         t.cursor = new core.Cursor("id", odfDocument);
         t.caret = new gui.Caret(t.cursor);
@@ -181,7 +207,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBeNonNull(t, "t.focusNode");
     }
     function moveInEmptyDoc() {
-        createAvatar();
+        createAvatar("");
         var s = t.cursor.getSelection();
         t.startNode = s.focusNode;
         t.cursor.move(1);
@@ -230,7 +256,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     function stepCounter(xml, n, m, filter) {
         var steps, s, e;
         t.pos = [];
-        createAvatar(xml, true);
+        createAvatar(xml, true, true);
         s = t.cursor.getSelection();
         t.counter = t.cursor.getStepCounter();
 
@@ -279,11 +305,20 @@ gui.AvatarTests = function AvatarTests(runner) {
     function stepCounter2() {
         stepCounter("ab", 2, 2, dummyfilter);
     }
-    function backAndForth(xml, n, m, filter) {
+    /**
+     * @param {!string} xml
+     * @param {!number} n
+     * @param {!number} m
+     * @param {!Function} filter
+     * @param {!boolean=} splitTexts
+     * @param {!boolean=} emptyNodes
+     * @return {undefined}
+     */
+    function backAndForthIntern(xml, n, m, filter, splitTexts, emptyNodes) {
         var i, steps;
         t.pos = [];
         t.filter = filter;
-        createAvatar(xml);
+        createAvatar(xml, splitTexts, emptyNodes);
         t.counter = t.cursor.getStepCounter();
 
         // move to a valid position
@@ -317,6 +352,19 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.pos.length", m.toString());
         r.shouldBe(t, "t.stepsSum", n.toString());
         r.shouldBe(t, "t.moveSum", n.toString());
+    }
+    /**
+     * @param {!string} xml
+     * @param {!number} n
+     * @param {!number} m
+     * @param {!Function} filter
+     * @return {undefined}
+     */
+    function backAndForth(xml, n, m, filter) {
+        backAndForthIntern(xml, n, m, filter, false, false);
+        backAndForthIntern(xml, n, m, filter, false, true);
+        backAndForthIntern(xml, n, m, filter, true, false);
+        backAndForthIntern(xml, n, m, filter, true, true);
     }
     function backAndForth1() {
         backAndForth('ab', 2, 2, dummyfilter);
