@@ -66,7 +66,6 @@ var profile = {
 			include: [ 
 				'dojo/i18n', 
 				'dojo/main',
-				'dojo/nls',
 				'dojo/ready',
 				'dojo/domReady', 
 				"dojo/dom-construct",
