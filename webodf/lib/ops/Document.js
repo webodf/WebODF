@@ -335,10 +335,26 @@ ops.Document = function Document(odfCanvas) {
      * @return {undefined}
      */
     this.splitParagraph = function (memberid, position) {
-        var domPosition;
+        var domPosition, n, p, newp;
         domPosition = getPositionInTextNode(position);
-        if (domPosition) {
-            domPosition = null;
+        p = domPosition && domPosition.textNode;
+        while (p && p.namespaceURI !== textns
+                && (p.localName !== "p" || p.localName !== "h")) {
+            p = p.parentNode;
+        }
+        if (p) {
+            n = domPosition.textNode;
+            if (domPosition.offset > 0) {
+                domPosition.textNode = domPosition.textNode.splitText(
+                    domPosition.offset
+                );
+            }
+            newp = p.ownerDocument.createElementNS(textns, p.localName);
+            p.parentNode.insertBefore(newp, p.nextSibling);
+            newp.appendChild(domPosition.textNode);
+            while (n.nextSibling) {
+                newp.appendChild(n.nextSibling);
+            }
         }
     };
     /**

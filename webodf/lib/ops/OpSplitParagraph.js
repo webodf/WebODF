@@ -53,7 +53,7 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
 
     this.spec = function () {
         return {
-            optype: "AddSplitParagraph",
+            optype: "SplitParagraph",
             memberid: memberid,
             position: position
         };

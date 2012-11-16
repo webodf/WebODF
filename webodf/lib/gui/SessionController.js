@@ -234,8 +234,15 @@ gui.SessionController = (function () {
         function handleKeyPress(e) {
             var op,
                 text = stringFromKeyPress(e);
-
-            if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
+            if (e.keyCode === 13) { // enter
+                op = new ops.OpSplitParagraph(session);
+                op.init({
+                    memberid: inputMemberId,
+                    position: session.getOdfDocument().getCursorPosition(inputMemberId)
+                });
+                session.enqueue(op);
+                cancelEvent(e);
+            } else if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
                 op = new ops.OpInsertText(session);
                 op.init({
                     memberid: inputMemberId,
