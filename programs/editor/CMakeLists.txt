@@ -33,11 +33,17 @@ add_custom_command(
 
     COMMAND ${CMAKE_COMMAND} -E make_directory digest
     COMMAND ${CMAKE_COMMAND} -E make_directory digest/dojo/
+
     COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/dojo/dojo.js digest/dojo/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojo/nls/ digest/dojo/nls/
-    COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/app/resources/app.css digest/dojo/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojo/resources/ digest/dojo/resources/
+
+    COMMAND ${CMAKE_COMMAND} -E make_directory digest/app/resources/
+    COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/app/resources/app.css digest/app/resources/
+
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dijit/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ digest/dijit/themes/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ digest/dijit/icons/
 
     DEPENDS ${EDITORDEPS} Dojo webodf.js
 )
