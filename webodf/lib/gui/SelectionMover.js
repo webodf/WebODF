@@ -364,10 +364,20 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
                 || nodeAfterCursor.nodeType !== 3) {
             return;
         }
-        var c = positionIterator.container();
+        var c = positionIterator.container(),
+            oldOffset = positionIterator.offset();
         if (c === nodeAfterCursor) {
-            positionIterator.setPosition(c,
-                   positionIterator.offset() - textNodeDecrease);
+            if (oldOffset < textNodeDecrease) {
+                do {
+                    c = c.previousSibling;
+                } while (c && c.nodeType !== 3);
+                if (c) {
+                    positionIterator.setPosition(c, oldOffset);
+                }
+            } else {
+                positionIterator.setPosition(c,
+                       positionIterator.offset() - textNodeDecrease);
+            }
         }
     };
     function init() {
