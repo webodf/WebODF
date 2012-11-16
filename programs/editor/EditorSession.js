@@ -59,28 +59,32 @@ editor.EditorSession = (function () {
 	    }
 	}
 
-	function loadAvatarPane(sessionView, avatarListDiv) {
-	    "use strict";
+	editor.EditorSession = function EditorSession(session, memberid) {
+		var self = this,
+			avatarListDiv = document.getElementById('peopleList');
+		
+		this.sessionController = new gui.SessionController(session, memberid);
+		this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
 
-	    var session = sessionView.getSession();
-
-	    // attention: there is a race condition, sessionView also only
+		// attention: there is a race condition, sessionView also only
 	    // on this signal creates the caret, so trying to get the caret
 	    // at this point is not good to do. So fetch it dynamically in the avatarbutton.
-	    session.subscribe("cursor/added", function(cursor) {
+	    session.subscribe(ops.SessionImplementation.signalCursorAdded, function(cursor) {
 	        var memberId = cursor.getMemberId();
-
-	        createAvatarButton(avatarListDiv, sessionView, memberId, session.getUserModel().getUserDetails(memberId));
+	        createAvatarButton(avatarListDiv, self.sessionView, memberId, session.getUserModel().getUserDetails(memberId));
 	    });
-	    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberid) {
-	        removeAvatarButton(avatarListDiv, memberid);
+
+	    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberId) {
+	        removeAvatarButton(avatarListDiv, memberId);
 	    });
-	}
 
-	editor.EditorSession = function EditorSession(session) {
-		var self = this;
+	    this.startEditing = function () {
+	    	self.sessionController.startEditing();
+	    }
 
-		this.loadAvatarPane = loadAvatarPane;
+	    this.endEditing = function () {
+	    	self.sessionController.endEditing();
+	    }
 	};
 
 	return editor.EditorSession;
