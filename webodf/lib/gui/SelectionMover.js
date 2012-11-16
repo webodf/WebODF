@@ -61,7 +61,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         }
         if (steps - left > 0) {
             selection.collapse(positionIterator.container(),
-                    positionIterator.offset());
+                    positionIterator.domOffset());
         }
         cursor.updateToSelection(onCursorRemove, onCursorAdd);
         return steps - left;

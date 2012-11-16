@@ -173,6 +173,31 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return c;
     };
     /**
+     * The same as offset(), except that adjecent text nodes are counted
+     * separately.
+     * @return {!number}
+     */
+    this.domOffset = function () {
+        if (walker.currentNode.nodeType === 3) {
+            return currentPos;
+        }
+        var c = 0,
+            startNode = walker.currentNode,
+            n,
+            nextNode;
+        if (currentPos === 1) {
+            n = walker.lastChild();
+        } else {
+            n = walker.previousSibling();
+        }
+        while (n) {
+            c += 1;
+            n = walker.previousSibling();
+        }
+        walker.currentNode = startNode;
+        return c;
+    };
+    /**
      * Return the offset as it would be if all neighboring text nodes were one
      * text node.
      * @return {!number}
