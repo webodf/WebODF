@@ -97,7 +97,7 @@ function init_gui_and_doc(docurl, userid) {
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
-            editorSession = document.editorSession = new editor.EditorSession(session, memberid);
+            editorSession = editor.editorSession = new editor.EditorSession(session, memberid);
 
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
@@ -229,4 +229,8 @@ function editor_init(docurl, userid) {
 window.onload = function() {
     editor_init( "/webodf/collabtest/text.odt", "you");
 };
+
+window.onunload = function() {
+    editor.editorSession.endEditing();
+}
 // vim:expandtab
