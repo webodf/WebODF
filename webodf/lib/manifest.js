@@ -79,6 +79,7 @@
         "ops/OpMoveCursor.js",
         "ops/OpInsertText.js",
         "ops/OpRemoveText.js",
+        "ops/OpSplitParagraph.js",
         "ops/OpSetParagraphStyle.js",
         "ops/OperationFactory.js",
         "xmldom/LSSerializer.js",

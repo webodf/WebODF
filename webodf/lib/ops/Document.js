@@ -298,7 +298,7 @@ ops.Document = function Document(odfCanvas) {
             domPosition = getPositionInTextNode(position);
         } else {
             // get avatars next textnode sibling
-            domPosition = getPositionInTextNode(position+1);
+            domPosition = getPositionInTextNode(position + 1);
             // FIXME: this is dirty and assumes the cursor in place.
             // actually it will only work correctly with a `length` of 1
             // or with a `length` > 1 iff no avatar or other XML element
@@ -320,7 +320,7 @@ ops.Document = function Document(odfCanvas) {
                 runtime.log("unexpected!");
                 return false;
             }
-            domPosition.offset -=1;
+            domPosition.offset -= 1;
         }
         if (domPosition) {
             domPosition.textNode.deleteData(domPosition.offset, length);
@@ -328,6 +328,18 @@ ops.Document = function Document(odfCanvas) {
             return true;
         }
         return false;
+    };
+    /**
+     * @param {!string} memberid
+     * @param {!number} position
+     * @return {undefined}
+     */
+    this.splitParagraph = function (memberid, position) {
+        var domPosition;
+        domPosition = getPositionInTextNode(position);
+        if (domPosition) {
+            domPosition = null;
+        }
     };
     /**
      * @param {!string} memberid

@@ -38,6 +38,7 @@ runtime.loadClass("ops.OpRemoveCursor");
 runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
+runtime.loadClass("ops.OpSplitParagraph");
 
 /**
  * @constructor
@@ -136,7 +137,7 @@ gui.SessionController = (function () {
             var odfDocument = session.getOdfDocument(),
                 position = odfDocument.getCursorPosition(inputMemberId),
                 // position-1 must exist for backspace to be valid
-                domPosition = odfDocument.getPositionInTextNode(position-1),
+                domPosition = odfDocument.getPositionInTextNode(position - 1),
                 op = null;
 
             if (domPosition) {
@@ -157,7 +158,7 @@ gui.SessionController = (function () {
             var odfDocument = session.getOdfDocument(),
                 position = odfDocument.getCursorPosition(inputMemberId),
                 // position+1 must exist for delete to be valid
-                domPosition = odfDocument.getPositionInTextNode(position+1),
+                domPosition = odfDocument.getPositionInTextNode(position + 1),
                 op = null;
 
             if (domPosition) {
