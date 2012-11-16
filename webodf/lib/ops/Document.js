@@ -349,7 +349,7 @@ ops.Document = function Document(odfCanvas) {
                     domPosition.offset
                 );
             }
-            newp = p.ownerDocument.createElementNS(textns, p.localName);
+            newp = p.cloneNode(false);
             p.parentNode.insertBefore(newp, p.nextSibling);
             newp.appendChild(domPosition.textNode);
             while (n.nextSibling) {
