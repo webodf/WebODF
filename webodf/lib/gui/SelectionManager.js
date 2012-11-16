@@ -50,10 +50,15 @@ gui.SelectionManager = function SelectionManager(rootNode) {
             movers[i].adaptToCursorRemoval(nodeAfterCursor, textNodeIncrease);
         }
     }
-    function onCursorAdd(cursorNode) {
+    /**
+     * @param {?Element} nodeAfterCursor
+     * @param {!number} textNodeIncrease
+     * @return {undefined}
+     */
+    function onCursorAdd(nodeAfterCursor, textNodeIncrease) {
         var i;
         for (i = 0; i < movers.length; i += 1) {
-            movers[i].adaptToInsertedCursor(cursorNode);
+            movers[i].adaptToInsertedCursor(nodeAfterCursor, textNodeIncrease);
         }
     }
     /**

@@ -99,15 +99,16 @@ core.Cursor = function Cursor(memberid, odfDocument) {
         }
     }
     // put the cursor at a particular position
-    function putCursor(container, offset) {
+    function putCursor(container, offset, onCursorAdd) {
         if (container.nodeType === 3) { // TEXT_NODE
             putCursorIntoTextNode(container, offset);
+            onCursorAdd(cursorNode.nextSibling, offset);
         } else if (container.nodeType === 1) { // ELEMENT_NODE
             putCursorIntoContainer(container, offset);
+            onCursorAdd(cursorNode.nextSibling, 0);
         }
     }
     this.move = function (number) {
-        //runtime.log("moving " + number);
         var moved = 0;
         if (number > 0) {
             moved = selectionMover.movePointForward(number);
@@ -161,13 +162,14 @@ core.Cursor = function Cursor(memberid, odfDocument) {
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
      * @param {!function(?Element,!number):undefined} onCursorRemove
+     * @param {!function(?Element,!number):undefined} onCursorAdd
      * @return {undefined}
      */
-    this.updateToSelection = function (onCursorRemove) {
+    this.updateToSelection = function (onCursorRemove, onCursorAdd) {
         var range;
         removeCursor(onCursorRemove);
         if (selection.focusNode) {
-            putCursor(selection.focusNode, selection.focusOffset);
+            putCursor(selection.focusNode, selection.focusOffset, onCursorAdd);
         }
     };
     /**
