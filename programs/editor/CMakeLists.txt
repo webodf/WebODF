@@ -44,6 +44,9 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dijit/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ digest/dijit/themes/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ digest/dijit/icons/
+    
+    # cleanup
+    COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
     DEPENDS ${EDITORDEPS} Dojo webodf.js
 )
