@@ -110,6 +110,18 @@ ExternalProject_Add(
 )
 set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
 
+# Dojo
+ExternalProject_Add(
+    Dojo
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    URL "http://download.dojotoolkit.org/release-1.8.1/dojo-release-1.8.1-src.tar.gz"
+    URL_MD5 9b80b9a736b81c336accd832f3c3aea2
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+)
+set(DOJO ${CMAKE_BINARY_DIR}/Dojo-prefix/src/Dojo/)
+
 # Android
 if (NOT ANDROID_SDK_DIR)
   find_path(ANDROID_SDK_DIR platform-tools/aapt)

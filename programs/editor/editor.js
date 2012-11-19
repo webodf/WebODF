@@ -86,31 +86,29 @@ function init_gui_and_doc(docurl, userid) {
     // Editor Translations, Widgets and Avatars
     require([
         'dojo/i18n!nls/myResources.js',
+        'EditorSession.js',
         'widgets.js',
-        'avatars.js'
     ], function (translator) {
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
-            var session, sessionController, sessionView,
+            var session, editorSession,
                 memberid = userid+"___"+Date.now(),
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
+            editorSession = editor.editorSession = new editor.EditorSession(session, memberid);
+
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
                 session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
                 opRouter.setMemberid(memberid);
-            }
-            sessionController = new gui.SessionController(session, memberid);
-            sessionView = new gui.SessionView(session, new gui.CaretFactory(sessionController));
 
-            if (isConnectedWithNetwork) {
                 runtime.log("editor: setting UserModel and requesting replay");
                 session.setUserModel(new ops.NowjsUserModel(function done() {
                     opRouter.requestReplay(function done() {
                         // start editing: let the controller send the OpAddCursor
-                        sessionController.startEditing();
+                        editorSession.startEditing();
                         // add our two friends
                         // addCursorToDoc(session, "bob");
                         // addCursorToDoc(session, "alice");
@@ -118,12 +116,10 @@ function init_gui_and_doc(docurl, userid) {
                 }));
             } else {
                 // offline
-                sessionController.startEditing();
+                editorSession.startEditing();
             }
 
-            loadWidgets(session, sessionController.getInputMemberId());
-            loadAvatarPane(sessionView, document.getElementById('peopleList'));
-
+            loadWidgets(session, editorSession.sessionController.getInputMemberId());
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);
@@ -231,6 +227,10 @@ function editor_init(docurl, userid) {
 }
 
 window.onload = function() {
-    editor_init( "/webodf/collabtest/text.odt", "you");
+    editor_init( undefined, "you");
 };
+
+window.onunload = function() {
+    editor.editorSession.endEditing();
+}
 // vim:expandtab

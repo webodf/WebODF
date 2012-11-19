@@ -33,13 +33,8 @@
  */
 function loadWidgets(session, inputMemberId) {
     var documentObject = session.getOdfDocument().getDOM(),
-        dojoWin, toolbar,
+        toolbar,
         ToolbarSeparator;
-
-	require(["dojo/_base/window"], function (win) {
-		dojoWin = win;
-	});
-
     // Menubar
     require([
                 "dojo/ready", 
