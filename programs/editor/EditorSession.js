@@ -80,11 +80,11 @@ editor.EditorSession = (function () {
 
 	    this.startEditing = function () {
 	    	self.sessionController.startEditing();
-	    }
+	    };
 
 	    this.endEditing = function () {
 	    	self.sessionController.endEditing();
-	    }
+	    };
 	};
 
 	return editor.EditorSession;
