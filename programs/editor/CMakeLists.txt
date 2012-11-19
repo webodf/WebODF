@@ -45,6 +45,8 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ digest/dijit/themes/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ digest/dijit/icons/
     
+    COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dojox/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ digest/dojox/layout/resources/
     # cleanup
     COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
