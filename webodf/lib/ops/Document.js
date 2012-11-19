@@ -345,8 +345,9 @@ ops.Document = function Document(odfCanvas) {
         if (p) {
             n = domPosition.textNode;
             if (domPosition.offset > 0) {
-                domPosition.textNode = domPosition.textNode.splitText(
-                    domPosition.offset
+                // splitText always returns {!Text} here
+                domPosition.textNode = /**@type{!Text}*/(
+                    domPosition.textNode.splitText(domPosition.offset)
                 );
             }
             newp = p.cloneNode(false);
