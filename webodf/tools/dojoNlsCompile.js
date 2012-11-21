@@ -35,6 +35,14 @@
  */
 /*global require,process */
 
+/*
+ * usage: node .../webodf/tools/dojoNlsCompile.js $start l1 l2 l3 [...]
+ *
+ * $start must be the last argument containing a '/' character
+ *   and shall point to the start of directory traversal.
+ *
+ * lx (l1, l2, l3) are locale-abbreviations for the languages of interest.
+ */
 (function() {
 	"use strict";
 	var fs = require("fs"),
@@ -43,22 +51,33 @@
 		process.stderr.write("\n");
 	},
 	output_file,
-	start='/home/th/x/programs/editor/dojo-deps/dist',
+	stat,
+	start=process.argv[1],
 	langs = process.argv;
 	langs.shift(); // node interpreter
 	// skip all arguments containing a /
 	while (langs[0] && langs[0].match(/\//)) {
-		langs.shift();
+		start = langs.shift();
 	}
 
 	if (langs.length === 0) {
 		log("usage: give languages as arguments!");
 		return 0;
 	}
+
+	stat = fs.statSync(start);
+	if (!(stat && stat.isDirectory())) {
+		log("start of traversal is no directory: "+start);
+		return 1;
+	}
+	log("start of traversal: "+start);
 	log("filtering langs: "+langs.join(","));
 
 	function lang_filter(nlsdir) {
 		var langmatch = langs.join("|");
+		if (nlsdir.match(/(uncompressed|consoleStripped)\.js$/)) {
+			return false;
+		}
 		if (nlsdir.match(new RegExp("/nls/("+langmatch+")(/|$)"))) {
 			return true;
 		}

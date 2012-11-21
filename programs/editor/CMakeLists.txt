@@ -35,7 +35,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory digest/dojo/
 
     COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/dojo/dojo.js digest/dojo/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojo/nls/ digest/dojo/nls/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojo/resources/ digest/dojo/resources/
 
     COMMAND ${CMAKE_COMMAND} -E make_directory digest/app/resources/
@@ -48,10 +47,12 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dojox/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ digest/dojox/layout/resources/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ digest/dojox/widget/ColorPicker/
-    # cleanup
-    COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
-    DEPENDS ${EDITORDEPS} Dojo webodf.js
+	COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > digest/custom-nls.js
+    # cleanup
+    # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
+
+	DEPENDS NodeJS ${EDITORDEPS} Dojo webodf.js
 )
 
 add_custom_target(programs_editor ALL DEPENDS editor-compiled.js webodf.js)
