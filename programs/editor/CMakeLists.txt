@@ -6,6 +6,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     widgets.js
     avatar-joe.png
     EditorSession.js
+    UserList.js
 )
 
 COPY_FILES(EDITORDEPS ${CMAKE_SOURCE_DIR}/webodf
