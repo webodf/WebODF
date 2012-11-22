@@ -40,13 +40,8 @@ widgets.ParagraphStyles = (function () {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
-                odfDocument = session.getOdfDocument(),
-                formatting = odfDocument.getFormatting(),
                 selectionList = [],
-                availableStyles = formatting.getAvailableParagraphStyles(),
-                currentParagraphNode = null,
-                currentNamedStyleName = null,
-                currentStyleName = null;
+                availableStyles = editor.editorSession.getAvailableParagraphStyles();
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -65,66 +60,15 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
-            function checkParagraphStyleName() {
-                var newStyleName,
-                    newNamedStyleName;
-
-                newStyleName = currentParagraphNode.getAttributeNS(textns, 'style-name');
-                if (newStyleName !== currentStyleName) {
-                    currentStyleName = newStyleName;
-                    // check if named style is still the same
-                    newNamedStyleName = formatting.getFirstNamedParentStyleNameOrSelf(newStyleName);
-                    if (!newNamedStyleName) {
-                        // TODO: how to handle default styles?
-                        return;
-                    }
-                    // a named style
-                    if (newNamedStyleName !== currentNamedStyleName) {
-                        currentNamedStyleName = newNamedStyleName;
-                        widget.set("value", currentNamedStyleName);
-                    }
+            // if the current paragraph style changes, update the widget 
+            editor.editorSession.subscribe('paragraphChanged', function(info) {
+                if(info.type === 'style') {
+                    widget.set("value", info.styleName);
                 }
-            }
-            function trackCursor(cursor) {
-                var node,
-                    newStyleName,
-                    newNamedStyleName;
-
-                if (cursor.getMemberId() !== inputMemberId) {
-                    return;
-                }
-
-                node = odfDocument.getParagraphElement(cursor.getSelection().focusNode);
-                if (!node) {
-                    return;
-                }
-                currentParagraphNode = node;
-                checkParagraphStyleName();
-            }
-            function trackCursorParagraph(paragraphNode) {
-                if (paragraphNode !== currentParagraphNode) {
-                    return;
-                }
-                checkParagraphStyleName();
-            }
-
-            session.subscribe(ops.SessionImplementation.signalCursorAdded, trackCursor);
-            session.subscribe(ops.SessionImplementation.signalCursorMoved, trackCursor);
-            session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCursorParagraph);
-
+            });
+            
             widget.onChange = function(value) {
-                var op;
-
-                if(currentNamedStyleName !== value) {
-                    op = new ops.OpSetParagraphStyle(session);
-                    op.init({
-                        memberid: inputMemberId,
-                        position: odfDocument.getCursorPosition(inputMemberId),
-                        styleNameBefore: currentNamedStyleName,
-                        styleNameAfter: value
-                    });
-                    session.enqueue(op);
-                }
+                editor.editorSession.setCurrentParagraphStyle(value);
             }
 
             return callback(widget);
