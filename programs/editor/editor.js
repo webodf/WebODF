@@ -87,6 +87,7 @@ function init_gui_and_doc(docurl, userid) {
     require([
         'dojo/i18n!nls/myResources.js',
         'EditorSession.js',
+        'UserList.js',
         'widgets.js',
     ], function (myResources, EditorSession, Widgets) {
         var translator = function(key, context) {
@@ -98,12 +99,15 @@ function init_gui_and_doc(docurl, userid) {
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
-            var session, editorSession,
+            var session, 
+                editorSession,
                 memberid = userid+"___"+Date.now(),
+                userList,
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
             editorSession = editor.editorSession = new editor.EditorSession(session, memberid);
+            userList = new editor.UserList(document.getElementById('peopleList'));
 
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
