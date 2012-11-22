@@ -10,73 +10,83 @@ runtime.loadClass("gui.SessionView");
 editor.EditorSession = (function () {
 	"use strict";
 
-	function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
-	    "use strict";
-	    var doc = avatarListDiv.ownerDocument,
-	        htmlns = doc.documentElement.namespaceURI,
-	        avatarDiv = doc.createElementNS(htmlns, "div"),
-	        imageElement = doc.createElement("img"),
-	        fullnameTextNode = doc.createTextNode(userDetails.fullname);
-
-	    imageElement.src = userDetails.imageurl;
-	    imageElement.width = 22;
-	    imageElement.height = 22;
-	    imageElement.hspace = 3;
-	    imageElement.align = "baseline";
-	    imageElement.style['margin-top'] = "3px";
-
-	    avatarDiv.appendChild(imageElement);
-	    avatarDiv.appendChild(fullnameTextNode);
-	    avatarDiv.memberId = memberId; // TODO: namespace?
-	    avatarDiv.style.background = userDetails.color;
-	    avatarDiv.onmouseover = function () {
-	        //avatar.getCaret().showHandle();
-	    };
-	    avatarDiv.onmouseout = function () {
-	        //avatar.getCaret().hideHandle();
-	    };
-	    avatarDiv.onclick = function () {
-	        var caret = sessionView.getCaret(memberId);
-	        if (caret) {
-	            caret.toggleHandleVisibility();
-	        }
-	    };
-	    avatarListDiv.appendChild(avatarDiv);
-	}
-
-	/**
-	 * @param {!Element} avatarListDiv
-	 * @param {!string} memberId
-	 */
-	function removeAvatarButton(avatarListDiv, memberId) {
-	    var node = avatarListDiv.firstChild;
-	    while (node) {
-	        if (node.memberId === memberId) {
-	            avatarListDiv.removeChild(node);
-	            return;
-	        }
-	        node = node.nextSibling;
-	    }
-	}
-
 	editor.EditorSession = function EditorSession(session, memberid) {
 		var self = this,
-			avatarListDiv = document.getElementById('peopleList');
-		
-		this.sessionController = new gui.SessionController(session, memberid);
+            currentParagraphNode = null,
+            currentNamedStyleName = null,
+            currentStyleName = null,
+            odfDocument = session.getOdfDocument(),
+            textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            formatting = odfDocument.getFormatting(),
+            eventListener = {};
+        	
+        this.sessionController = new gui.SessionController(session, memberid);
 		this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
 
-		// attention: there is a race condition, sessionView also only
-	    // on this signal creates the caret, so trying to get the caret
-	    // at this point is not good to do. So fetch it dynamically in the avatarbutton.
-	    session.subscribe(ops.SessionImplementation.signalCursorAdded, function(cursor) {
-	        var memberId = cursor.getMemberId();
-	        createAvatarButton(avatarListDiv, self.sessionView, memberId, session.getUserModel().getUserDetails(memberId));
-	    });
+        eventListener['userAdded'] = [];
+        eventListener['userRemoved'] = [];
+        eventListener['cursorMoved'] = [];
+        eventListener['paragraphChanged'] = [];
 
-	    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberId) {
-	        removeAvatarButton(avatarListDiv, memberId);
+        // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
+	    session.subscribe(ops.SessionImplementation.signalCursorAdded, function(cursor) {
+            self.emit('userAdded', cursor.getMemberId());
 	    });
+        
+	    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberId) {
+	        self.emit('userRemoved', memberId);
+        });
+        
+        session.subscribe(ops.SessionImplementation.signalCursorMoved, function(cursor) {
+            // Emit 'cursorMoved' only when *I* am moving the cursor, not the other users
+            if (cursor.getMemberId() == memberid)
+                self.emit('cursorMoved', cursor);
+        });
+        
+        session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);
+
+        function checkParagraphStyleName() {
+            var newStyleName,
+                newNamedStyleName;
+
+            newStyleName = currentParagraphNode.getAttributeNS(textns, 'style-name');
+            if (newStyleName !== currentStyleName) {
+                currentStyleName = newStyleName;
+                // check if named style is still the same
+                newNamedStyleName = formatting.getFirstNamedParentStyleNameOrSelf(newStyleName);
+                if (!newNamedStyleName) {
+                    // TODO: how to handle default styles?
+                    return;
+                }
+                // a named style
+                if (newNamedStyleName !== currentNamedStyleName) {
+                    currentNamedStyleName = newNamedStyleName;
+                    self.emit('paragraphChanged', {
+                        type: 'style',
+                        node: currentParagraphNode,
+                        styleName: currentNamedStyleName
+                    });
+                }
+            }
+        }
+        
+        function trackCursor(cursor) {
+            var node;
+
+            node = odfDocument.getParagraphElement(cursor.getSelection().focusNode);
+            if (!node) {
+                return;
+            }
+            currentParagraphNode = node;
+            checkParagraphStyleName();
+        }
+
+        function trackCurrentParagraph(paragraphNode) {
+            if (paragraphNode !== currentParagraphNode) {
+                return;
+            }
+            checkParagraphStyleName();
+        }
 
 	    this.startEditing = function () {
 	    	self.sessionController.startEditing();
@@ -85,6 +95,60 @@ editor.EditorSession = (function () {
 	    this.endEditing = function () {
 	    	self.sessionController.endEditing();
 	    };
+
+        this.emit = function (eventid, args) {
+            var i, subscribers;
+            runtime.assert(eventListener.hasOwnProperty(eventid),
+                "unknown event fired \"" + eventid + "\"");
+            subscribers = eventListener[eventid];
+            runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
+            for (i = 0; i < subscribers.length; i += 1) {
+                subscribers[i](args);
+            }
+        };
+
+        this.subscribe = function (eventid, cb) {
+            runtime.assert(eventListener.hasOwnProperty(eventid),
+                "tried to subscribe to unknown event \"" + eventid + "\"");
+            eventListener[eventid].push(cb);
+            runtime.log("event \"" + eventid + "\" subscribed.");
+        };
+
+        this.getUserDetails = function(memberId) {
+            return session.getUserModel().getUserDetails(memberId);
+        };
+
+        this.getCursorPosition = function() {
+            return odfDocument.getCursorPosition(memberid);
+        }
+
+        this.getCurrentParagraph = function() {
+            return currentParagraphNode;
+        };
+
+        this.getAvailableParagraphStyles = function() {
+            return formatting.getAvailableParagraphStyles();
+        };
+
+        this.getCurrentParagraphStyle = function() {
+            return currentNamedStyleName;
+        };
+        
+        this.setCurrentParagraphStyle = function(value) {
+            var op;
+            if (currentNamedStyleName !== value) {
+                op = new ops.OpSetParagraphStyle(session);
+                op.init({
+                    memberid: memberid,
+                    position: self.getCursorPosition(),
+                    styleNameBefore: currentNamedStyleName,
+                    styleNameAfter: value
+                });
+                session.enqueue(op);
+            }
+        };
+
+        this.subscribe('cursorMoved', trackCursor);
 	};
 
 	return editor.EditorSession;
