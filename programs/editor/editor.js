@@ -129,7 +129,7 @@ function init_gui_and_doc(docurl, userid) {
                 editorSession.startEditing();
             }
 
-            loadWidgets(session, editorSession.sessionController.getInputMemberId());
+            loadWidgets();
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);

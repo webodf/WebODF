@@ -32,11 +32,8 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 widgets.ParagraphStyles = (function () {
-
-    var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-    var htmlns = "http://www.w3.org/1999/xhtml";
-
-    function makeWidget(session, inputMemberId, callback) {
+    
+    function makeWidget(callback) {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
@@ -75,8 +72,8 @@ widgets.ParagraphStyles = (function () {
         });
     }
 
-    widgets.ParagraphStyles = function ParagraphStyles(session, inputMemberId, callback) {
-        makeWidget(session, inputMemberId, function (widget) {
+    widgets.ParagraphStyles = function ParagraphStyles(callback) {
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };

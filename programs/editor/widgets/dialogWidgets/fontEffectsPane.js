@@ -33,7 +33,7 @@
  */
 widgets.FontEffectsPane = (function () {
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
             ready(function() {
                 var contentPane = new ContentPane({
@@ -46,8 +46,8 @@ widgets.FontEffectsPane = (function () {
         });
     }
 
-    widgets.FontEffectsPane = function FontEffectsPane(documentObject, callback) {
-        makeWidget(documentObject, function (pane) {
+    widgets.FontEffectsPane = function FontEffectsPane(callback) {
+        makeWidget(function (pane) {
             return callback(pane);
         });
     };

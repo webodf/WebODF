@@ -31,11 +31,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global document */
-function loadWidgets(session, inputMemberId) {
-    "use strict";
-    var documentObject = session.getOdfDocument().getDOM(),
-        toolbar,
+function loadWidgets() {
+    var toolbar,
         translator=document.translator,
         ToolbarSeparator;
     // Menubar
@@ -74,7 +71,7 @@ function loadWidgets(session, inputMemberId) {
             }));
 
             require(["widgets/paragraphStylesDialog.js"], function() {
-                var dialogBox = new widgets.ParagraphStylesDialog(documentObject, function(dialog) {
+                var dialogBox = new widgets.ParagraphStylesDialog(function(dialog) {
                     paragraphStylesMenuItem.onClick = function() {
                         dialog.startup();
                         dialog.show();
@@ -90,7 +87,7 @@ function loadWidgets(session, inputMemberId) {
 
         // Simple Style Selector [B, I, U, S]
         require(["widgets/simpleStyles.js"], function () {
-            var styles = new widgets.SimpleStyles(documentObject, function (widget) {
+            var styles = new widgets.SimpleStyles(function (widget) {
                 widget.placeAt(toolbar);
                 widget.startup();
             });
@@ -98,7 +95,7 @@ function loadWidgets(session, inputMemberId) {
 
         // Paragraph Style Selector
         require(["widgets/paragraphStyles.js"], function () {
-            var styles = new widgets.ParagraphStyles(session, inputMemberId, function (widget) {
+            var styles = new widgets.ParagraphStyles(function (widget) {
                 widget.placeAt(toolbar);
                 widget.startup();
             });
@@ -106,7 +103,7 @@ function loadWidgets(session, inputMemberId) {
 
         // Zoom Level Selector
         require(["widgets/zoomSlider.js"], function () {
-            var zoomSlider = new widgets.ZoomSlider(documentObject, function (widget) {
+            var zoomSlider = new widgets.ZoomSlider(function (widget) {
                 widget.placeAt(toolbar);
                 widget.startup();
             });

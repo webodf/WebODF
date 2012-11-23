@@ -33,7 +33,7 @@
  */
 widgets.ParagraphStylesDialog = (function () {
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(callback) {
         require(["dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
             var i,
                 dialog,
@@ -67,11 +67,11 @@ widgets.ParagraphStylesDialog = (function () {
                 "widgets/dialogWidgets/alignmentPane.js",
                 "widgets/dialogWidgets/fontEffectsPane.js"
                 ], function() {
-                new widgets.AlignmentPane(documentObject, function(alignmentPane) {
+                new widgets.AlignmentPane(function (alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
                 });
-                new widgets.FontEffectsPane(documentObject, function(fontEffectsPane) {
+                new widgets.FontEffectsPane(function (fontEffectsPane) {
                     fontEffectsPane.startup();
                     tabContainer.addChild(fontEffectsPane);
                 });
@@ -83,8 +83,8 @@ widgets.ParagraphStylesDialog = (function () {
         });
     }
 
-    widgets.ParagraphStylesDialog = function ParagraphStylesDialog(documentObject, callback) {
-        makeWidget(documentObject, function (dialog) {
+    widgets.ParagraphStylesDialog = function ParagraphStylesDialog(callback) {
+        makeWidget(function (dialog) {
             return callback(dialog);
         });
     };

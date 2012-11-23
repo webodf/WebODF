@@ -33,7 +33,7 @@
  */
 widgets.ZoomSlider = (function () {
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(callback) {
         require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
             var widget = {};
 
@@ -53,7 +53,7 @@ widgets.ZoomSlider = (function () {
 
             var canvas = dojo.byId('canvas');
             widget.onChange = function (value) {
-                documentObject.odfCanvas.setZoomLevel(value/100.0);
+                editor.editorSession.getDocument().odfCanvas.setZoomLevel(value/100.0);
                 /*
                 var zoomlevel = value / 100.0;
                 canvas.style.zoom = zoomlevel;
@@ -66,8 +66,8 @@ widgets.ZoomSlider = (function () {
         });
     }
 
-    widgets.ZoomSlider = function ZoomSlider(documentObject, callback) {
-        makeWidget(documentObject, function (widget) {
+    widgets.ZoomSlider = function ZoomSlider(callback) {
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };

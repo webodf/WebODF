@@ -33,7 +33,7 @@
  */
 widgets.SimpleStyles = (function () {
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(callback) {
         require(["dijit/form/ToggleButton"], function (ToggleButton) {
             var i,
                 widget = {};
@@ -78,8 +78,8 @@ widgets.SimpleStyles = (function () {
         });
     }
 
-    widgets.SimpleStyles = function SimpleStyles(documentObject, callback) {
-        makeWidget(documentObject, function (widget) {
+    widgets.SimpleStyles = function SimpleStyles(callback) {
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };

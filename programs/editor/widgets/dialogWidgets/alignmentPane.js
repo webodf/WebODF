@@ -33,7 +33,7 @@
  */
 widgets.AlignmentPane = (function () {
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
             ready(function() {
                 var contentPane = new ContentPane({
@@ -46,8 +46,8 @@ widgets.AlignmentPane = (function () {
         });
     }
 
-    widgets.AlignmentPane = function AlignmentPane(documentObject, callback) {
-        makeWidget(documentObject, function (pane) {
+    widgets.AlignmentPane = function AlignmentPane(callback) {
+        makeWidget(function (pane) {
             return callback(pane);
         });
     };
