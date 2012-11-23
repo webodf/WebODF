@@ -117,10 +117,14 @@ editor.EditorSession = (function () {
         this.getUserDetails = function(memberId) {
             return session.getUserModel().getUserDetails(memberId);
         };
-
+        
         this.getCursorPosition = function() {
             return odfDocument.getCursorPosition(memberid);
-        }
+        };
+        
+        this.getDocument = function() {
+            return odfDocument;
+        };
 
         this.getCurrentParagraph = function() {
             return currentParagraphNode;
