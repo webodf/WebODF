@@ -31,9 +31,12 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+/*global document */
 function loadWidgets(session, inputMemberId) {
+    "use strict";
     var documentObject = session.getOdfDocument().getDOM(),
         toolbar,
+        translator=document.translator,
         ToolbarSeparator;
     // Menubar
     require([
@@ -49,24 +52,24 @@ function loadWidgets(session, inputMemberId) {
 
             var formatSubmenu = new DropDownMenu({});
             var paragraphStylesMenuItem = new MenuItem({
-                label: document.translator.paragraph_DDD
+                label: translator("paragraph_DDD")
             });
             formatSubmenu.addChild(paragraphStylesMenuItem);
 
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.file
+                label: translator("file")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.edit
+                label: translator("edit")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.view
+                label: translator("view")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.insert
+                label: translator("insert")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.format,
+                label: translator("format"),
                 popup: formatSubmenu
             }));
 

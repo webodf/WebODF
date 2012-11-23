@@ -36,8 +36,8 @@ widgets.AlignmentPane = (function () {
     function makeWidget(documentObject, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
             ready(function() {
-            	var contentPane = new ContentPane({
-            		title: document.translator.alignment,
+                var contentPane = new ContentPane({
+                    title: document.translator("alignment"),
                     href: "widgets/dialogWidgets/alignmentPane.html"
             	});
 

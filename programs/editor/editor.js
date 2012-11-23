@@ -88,7 +88,13 @@ function init_gui_and_doc(docurl, userid) {
         'dojo/i18n!nls/myResources.js',
         'EditorSession.js',
         'widgets.js',
-    ], function (translator) {
+    ], function (myResources, EditorSession, Widgets) {
+        var translator = function(key, context) {
+            if (undefined === myResources[key]) {
+                return "translation missing: "+key;
+            }
+            return myResources[key];
+        };
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
@@ -144,16 +150,16 @@ function init_gui_and_doc(docurl, userid) {
                 var collabPane = new ExpandoPane({
                     region: 'trailing',
                     splitter: 'true',
-                    title: document.translator.collaborationPane
+                    title: translator("collaborationPane")
                 }, 'collaboration');
                 var peoplePane = new ContentPane({
                     region: 'top',
                     splitter: 'true',
-                    title: document.translator.people
+                    title: translator("people")
                 }, 'people');
                 var chatPane = new ContentPane({
                     region: 'center',
-                    title: document.translator.chat
+                    title: translator("chat")
                 }, 'chat');
 
                 mainContainer.addChild(topPane);
@@ -175,12 +181,12 @@ function init_gui_and_doc(docurl, userid) {
                         // User's Editable Name
                         var nameBox = new TextBox({
                             value: '',
-                            placeHolder: document.translator.typeYourName_DDD,
+                            placeHolder: translator("typeYourName_DDD"),
                             style: 'text-align: center;'
                         }, 'nameEdit');
 
                         var inviteButton = new Button({
-                            label: document.translator.invitePeople,
+                            label: translator("invitePeople"),
                         }, 'inviteButton');
 
                         // Chat Box
@@ -188,7 +194,7 @@ function init_gui_and_doc(docurl, userid) {
                         // Chat Input
                         var chatInput = new TextBox({
                             value: '',
-                            placeHolder: document.translator.startTypingToChat_DDD,
+                            placeHolder: translator("startTypingToChat_DDD"),
                             style: 'text-align: center;'
                         }, 'chatInput');
                     }

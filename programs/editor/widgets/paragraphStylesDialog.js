@@ -37,11 +37,12 @@ widgets.ParagraphStylesDialog = (function () {
         require(["dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
             var i,
                 dialog,
+                translator = document.translator,
                 tabContainer, alignmentPane, flowPane, numberingPane, tabsPane, capsPane, bordersPane, backgroundPane, indentsPane;
 
             // Dialog
             dialog = new Dialog({
-            	title: document.translator.paragraphStyles
+                title: translator("paragraphStyles")
         	});
 
             // Tab Container
@@ -54,10 +55,10 @@ widgets.ParagraphStylesDialog = (function () {
                 "class": "dijitDialogPaneActionBar"
             });
             new dijit.form.Button({
-                label: document.translator.ok
+                label: translator("ok")
             }).placeAt(actionBar);
             new dijit.form.Button({
-                label: document.translator.cancel
+                label: translator("cancel")
             }).placeAt(actionBar);
             dialog.domNode.appendChild(actionBar);
 

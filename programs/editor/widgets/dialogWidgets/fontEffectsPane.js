@@ -36,8 +36,8 @@ widgets.FontEffectsPane = (function () {
     function makeWidget(documentObject, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
             ready(function() {
-            	var contentPane = new ContentPane({
-            		title: document.translator.fontEffects,
+                var contentPane = new ContentPane({
+                    title: document.translator("fontEffects"),
                     href: "widgets/dialogWidgets/fontEffectsPane.html"
             	});
 
