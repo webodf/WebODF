@@ -63,11 +63,11 @@ var profile = {
 			// the main application `app/main` and the `dojo/i18n` and `dojo/domReady` modules because, while they are
 			// all conditional dependencies in `app/main`, we do not want to have to make extra HTTP requests for such
 			// tiny files.
-			include: [ 
-				'dojo/i18n', 
+			include: [
+				'dojo/i18n',
 				'dojo/main',
 				'dojo/ready',
-				'dojo/domReady', 
+				'dojo/domReady',
 				"dojo/dom-construct",
 				"dojo/_base/NodeList",
 				"dojo/_base/browser",
@@ -76,24 +76,24 @@ var profile = {
 				'dojox/layout/ExpandoPane',
 				'dijit/form/TextBox',
 				'dijit/form/Button',
-				"dijit/MenuBar", 
-                "dijit/PopupMenuBarItem", 
-                "dijit/Menu", 
-                "dijit/MenuItem", 
-                "dijit/DropDownMenu",
-                "dijit/Toolbar",
-                "dijit/Dialog",
-                "dijit/layout/TabContainer",
-                "dijit/form/RadioButton",
-                "dijit/form/ToggleButton",
-                "dijit/form/Select",
-                "dijit/form/HorizontalSlider", 
-                "dijit/form/NumberTextBox",
-                "dijit/form/NumberSpinner",
-                "dijit/form/CheckBox",
-                "dojox/widget/ColorPicker",
-                "dijit/form/DropDownButton",
-                "dijit/TooltipDialog"
+				"dijit/MenuBar",
+				"dijit/PopupMenuBarItem",
+				"dijit/Menu",
+				"dijit/MenuItem",
+				"dijit/DropDownMenu",
+				"dijit/Toolbar",
+				"dijit/Dialog",
+				"dijit/layout/TabContainer",
+				"dijit/form/RadioButton",
+				"dijit/form/ToggleButton",
+				"dijit/form/Select",
+				"dijit/form/HorizontalSlider",
+				"dijit/form/NumberTextBox",
+				"dijit/form/NumberSpinner",
+				"dijit/form/CheckBox",
+				"dojox/widget/ColorPicker",
+				"dijit/form/DropDownButton",
+				"dijit/TooltipDialog"
 			],
 
 			// By default, the build system will try to include `dojo/main` in the built `dojo/dojo` layer, which adds
