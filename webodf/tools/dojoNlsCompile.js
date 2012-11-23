@@ -51,6 +51,7 @@
 		process.stderr.write("\n");
 	},
 	output_file,
+	file_list = [],
 	stat,
 	start=process.argv[1],
 	langs = process.argv;
@@ -81,19 +82,27 @@
 		if (nlsdir.match(new RegExp("/nls/("+langmatch+")(/|$)"))) {
 			return true;
 		}
-		if (nlsdir.match(new RegExp("/nls/dojo_("+langmatch+").js$"))) {
+		if (nlsdir.match(new RegExp("/nls/[^/]*\\.js$"))) {
+			// accept all files directly below a /nls/
+			// (includes dojo_XX.js)
 			return true;
 		}
-		if (nlsdir.match(/\/nls\//)) {
+		if (nlsdir.match(new RegExp("/nls/.*/"))) {
 			return false;
 		}
 		return true;
 	}
 
-	function traverse(dir, entry_action, nlsflag) {
+	function traverse(dir, cb, nlsflag) {
 		fs.readdir(dir, function (err, list) {
 			if (err) {
 				log("error causing early return from ["+dir+"].");
+				cb.done(err);
+				return;
+			}
+			var todo = list.length;
+			if (todo === 0) {
+				cb.done(null); // no error
 				return;
 			}
 			list.forEach(function (entry) {
@@ -101,34 +110,60 @@
 				fs.stat(path, function(err, stat) {
 					if (err) {
 						log("stat error ["+path+"].");
-						return;
-					}
-					if (stat && stat.isDirectory()) {
+						cb.done(err);
+					} else if (stat && stat.isDirectory()) {
 						if (lang_filter(path)) {
-							traverse(path, entry_action, nlsflag||(entry==='nls'));
+							traverse(path, {
+								entry: cb.entry,
+								done: function(res) {
+									todo-=1;
+									if (res !== null) {
+										cb.done(res); // error downwards
+									} else if (todo === 0) {
+										cb.done(null); // no error
+									}
+								}
+							}, nlsflag||(entry==='nls'));
 						}
 					} else {
 						if (nlsflag && lang_filter(path)) {
 							if (path.match(/\.js$/)) {
-								entry_action(path);
+								cb.entry(path);
 							}
 						}
+						todo-=1;
+						if (todo === 0) {
+							cb.done(null); // no error
+						}
 					}
-
 				});
 			});
 		});
 	}
 
-	traverse(start, function(x) {
-		fs.readFile(x, function(err, data) {
-			if (err) {
-				log("failed to read ["+x+"].");
-				return;
-			}
-			process.stdout.write(data);
-		});
-		log(x);
+	traverse(start, {
+		entry: function(x) {
+			file_list.push(x);
+			log("adding to nls bundle: "+file_list.length+": "+x);
+		},
+		done: function() {
+			log("finished nls traversal.");
+			file_list.sort();
+			file_list.forEach(
+				function(x) {
+					var data = fs.readFileSync(x);
+					if (!data) {
+						log("failed to read ["+x+"].");
+						process.stdout.write("/* FAILED TO READ NLS BUNDLE ENTRY ["+x+"] */\n");
+					} else {
+						log("writing: "+x);
+						process.stdout.write("/* START OF NLS BUNDLE ENTRY ["+x+"] */\n");
+						process.stdout.write(data);
+						process.stdout.write("\n/* END OF NLS BUNDLE ENTRY ["+x+"] */\n");
+					}
+				}
+			);
+		}
 	});
 
 }());
