@@ -14,10 +14,10 @@
 			    <label for="radioUnderline">Underline</label> <br/>
 
 			    <h3>Font</h3>
-
+                <br>
 			    <div class="labeledSelect" style = "float: left;">
-			    	<label for="fontStyle">Family:</label>
-                    <div name="fontStyle" style = "width: 100px;" data-dojo-type="dijit/form/Select" size="4">
+			    	<label for="fontFamily">Family:</label>
+                    <div name="fontFamily" style = "width: 100px;" data-dojo-type="dijit/form/Select" size="4">
                         <span value="serif" selected="selected"><span style="font-family:serif">Serif</span></span>
                         <span value="sans-serif"><span style="font-family:sans-serif">Sans</span></span>
                         <span value="cursive" ><span style="font-family:cursive">Cursive</span></span>
@@ -37,7 +37,7 @@
 				<br /><br />
 
 				<h3>Color</h3>
-
+                <br>
                 <div data-dojo-type="dijit/form/DropDownButton">
 				    <span id = "textColor">
 				    	Text
@@ -52,14 +52,15 @@
 				    	Background
 				    </span>
 				    <div data-dojo-type="dijit/TooltipDialog">
+                    <input data-dojo-type="dijit/form/TextBox" name = "backgroundColor" id = "backgroundColorTB" style="display: none;"/>
 				    	<div data-dojo-type="dojox.widget.ColorPicker" id="backgroundColorPicker"></div>
 					</div>
 				</div>
 
 				<br /> <br />
 
-				<div class="dialogPreviewBox">
-					<p id="previewText">This is some Text.</p>
+				<div class="dialogPreviewBox" style="overflow: hidden;">
+					<p id="previewText" style="margin: 0;">This is some Text.</p>
 				</div>
 
 			</form>

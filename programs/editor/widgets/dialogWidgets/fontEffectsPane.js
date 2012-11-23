@@ -33,21 +33,52 @@
  */
 widgets.FontEffectsPane = (function () {
 
-    function makeWidget(callback) {
+    function makeWidget(dialog, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
+            var translator = document.translator;
             ready(function() {
                 var contentPane = new ContentPane({
-                    title: document.translator("fontEffects"),
-                    href: "widgets/dialogWidgets/fontEffectsPane.html"
+                    title: translator("fontEffects"),
+                    href: "widgets/dialogWidgets/fontEffectsPane.html",
+                    onLoad: bindToPreview
             	});
+                 
+                // Hackish
+                function bindToPreview() {
+                    // ColorPicker
+                    dijit.byId('backgroundColorPicker').onChange = function (newColor) {
+                        dijit.byId('backgroundColorTB').set('value', newColor);
+                    };
+
+                    var preview = document.getElementById('previewText');
+                    dialog.watch('value', function () {
+                        console.log(dialog.value.backgroundColor);
+                            if(dialog.value.textStyleRadio.indexOf('bold') != -1) 
+                                preview.style.fontWeight = 'bold';
+                            else
+                                preview.style.fontWeight = 'normal';
+                            if(dialog.value.textStyleRadio.indexOf('italic') != -1) 
+                                preview.style.fontStyle = 'italic';
+                            else
+                                preview.style.fontStyle = 'normal';
+                            if(dialog.value.textStyleRadio.indexOf('underline') != -1) 
+                                preview.style.textDecoration = 'underline';
+                            else
+                                preview.style.textDecoration = 'none';
+
+                            preview.style.fontSize = dialog.value.fontSize + 'pt';
+                            preview.style.fontFamily = dialog.value.fontFamily;
+                            preview.style.backgroundColor = dialog.value.backgroundColor;
+                    });
+                }
 
             	return callback(contentPane);
             });
         });
     }
 
-    widgets.FontEffectsPane = function FontEffectsPane(callback) {
-        makeWidget(function (pane) {
+    widgets.FontEffectsPane = function FontEffectsPane(dialog, callback) {
+        makeWidget(dialog, function (pane) {
             return callback(pane);
         });
     };

@@ -71,7 +71,8 @@ widgets.ParagraphStylesDialog = (function () {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
                 });
-                new widgets.FontEffectsPane(function (fontEffectsPane) {
+                // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
+                new widgets.FontEffectsPane(dialog, function (fontEffectsPane) {
                     fontEffectsPane.startup();
                     tabContainer.addChild(fontEffectsPane);
                 });
