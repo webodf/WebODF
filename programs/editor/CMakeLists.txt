@@ -11,6 +11,8 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
 COPY_FILES(EDITORDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR} webodf.css ${LIBJSFILES})
 
+SET(DOJO_DEPS ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps)
+
 add_custom_command(
     OUTPUT editor-compiled.js # still phony
 
@@ -29,7 +31,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js .
 
     # now do the dojo magic...
-    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps/build.sh
+	COMMAND ${NODE} ${DOJO_DEPS}/src/dojo/dojo.js load=build
+		--require ${DOJO_DEPS}/src/app/run.js
+		--profile ${DOJO_DEPS}/profiles/app.profile.js
+		--releaseDir ${DOJO_DEPS}/dist
 
     COMMAND ${CMAKE_COMMAND} -E make_directory digest
     COMMAND ${CMAKE_COMMAND} -E make_directory digest/dojo/
@@ -48,7 +53,8 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ digest/dojox/layout/resources/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ digest/dojox/widget/ColorPicker/
 
-	COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > digest/custom-nls.js
+    COMMAND ${CMAKE_COMMAND} -E make_directory digest/nls/
+	COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > digest/nls/dojobundle.js
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
