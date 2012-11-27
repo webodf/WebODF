@@ -161,6 +161,10 @@ now.deliverOp = function(spec) { "use strict"; };
  * @type {function(!function(...), !function(!number)):Object}
  */
 now.getAllKnownUserData = function(data_cb, done_cb) { "use strict"; };
+/**
+ * @type {function(!string, !function(!boolean)):Object}
+ */
+now.joinSession = function(sessionId, done_cb) { "use strict"; };
 
 
 /**
