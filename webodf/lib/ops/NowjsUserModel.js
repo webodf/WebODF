@@ -91,6 +91,12 @@ ops.NowjsUserModel = function NowjsUserModel(loaded_cb) {
     addUser("alice", "Alice Bee", "avatar-flower.png");
     addUser("bob", "Bob Pigeon", "avatar-pigeon.png");
 
+    net.receiveNewUserData = function(udata) {
+        addUser(udata.uid, udata.fullname,
+            "/user/" + udata.uid + "/avatar.png");
+        runtime.log("user [" + udata.uid + "] added.");
+    };
+
     runtime.assert(net.networkStatus === "ready", "network not ready");
     // query server for user data
     // TODO we should start considering security at some point

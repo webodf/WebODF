@@ -46,11 +46,10 @@
 /**
  * @constructor
  */
-ops.NowjsOperationRouter = function NowjsOperationRouter() {
+ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
     "use strict";
 
     var self = this,
-        memberid = null,
         net = runtime.getNetwork(),
         last_server_seq = -1, // first seq will be 0
         reorder_queue = {},
@@ -69,10 +68,6 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
 
     this.setPlaybackFunction = function (playback_func) {
         self.playback_func = playback_func;
-    };
-
-    this.setMemberid = function (mid) {
-        memberid = mid;
     };
 
     /**
@@ -115,8 +110,11 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
             pong(memberid);
         }
     };
-    net.receiveOp = receiveOpFromNetwork;
-    net.memberid = "router"; // TODO work with a UserModel
+    net.receiveOp = function(op_session_id, opspec) {
+        if (op_session_id === sessionId) {
+            receiveOpFromNetwork(opspec);
+        }
+    };
 
     this.push = function (op) {
         // add client nonce and reference to server-side-op-sequence
@@ -126,11 +124,12 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
         sends_since_server_op += 1;
 
         runtime.log("op out: "+runtime.toJson(opspec));
-        net.deliverOp(opspec);
+        net.deliverOp(sessionId, opspec);
     };
 
     this.requestReplay = function (done_cb) {
         net.requestReplay(
+            sessionId,
             function (opspec) {
                 runtime.log("replaying: " + runtime.toJson(opspec));
                 receiveOpFromNetwork(opspec);
@@ -143,4 +142,16 @@ ops.NowjsOperationRouter = function NowjsOperationRouter() {
             }
         );
     };
+
+    function init() {
+        var sessionJoinSuccess;
+
+        net.memberid = memberid;
+
+        sessionJoinSuccess = net.joinSession(sessionId, function(sessionJoinSuccess) {
+            runtime.assert(sessionJoinSuccess, "Trying to join a session which does not exists or where we are already in");
+        });
+    }
+
+    init();
 };
