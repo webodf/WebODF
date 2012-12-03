@@ -774,7 +774,7 @@ odf.OdfCanvas = (function () {
      */
     odf.OdfCanvas = function OdfCanvas(element) {
         var self = this,
-            document = element.ownerDocument,
+            doc = element.ownerDocument,
             /**@type{odf.OdfContainer}*/
             odfcontainer,
             /**@type{!odf.Formatting}*/
@@ -791,10 +791,10 @@ odf.OdfCanvas = (function () {
             editparagraph,
             loadingQueue = new LoadingQueue();
 
-        addWebODFStyleSheet(document);
-        pageSwitcher = new PageSwitcher(addStyleSheet(document));
-        stylesxmlcss = addStyleSheet(document);
-        positioncss = addStyleSheet(document);
+        addWebODFStyleSheet(doc);
+        pageSwitcher = new PageSwitcher(addStyleSheet(doc));
+        stylesxmlcss = addStyleSheet(doc);
+        positioncss = addStyleSheet(doc);
 
         /**
          * Load all the images that are inside an odf element.
@@ -909,7 +909,7 @@ odf.OdfCanvas = (function () {
             sizer.style.msTransform = 'scale(' + zoomLevel + ')';
 
             element.style.width = Math.round(zoomLevel * sizer.offsetWidth) + "px";
-            element.style.height = Math.round(zoomLevel * sizer.offsetHeight) + "px";  
+            element.style.height = Math.round(zoomLevel * sizer.offsetHeight) + "px";
         }
         /**
          * A new content.xml has been loaded. Update the live document with it.
@@ -934,7 +934,7 @@ odf.OdfCanvas = (function () {
 
             // only append the content at the end
             clear(element);
-            sizer = document.createElementNS(element.namespaceURI, 'div');
+            sizer = doc.createElementNS(element.namespaceURI, 'div');
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
