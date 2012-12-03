@@ -31,7 +31,14 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime,document,odf,require,ops,gui */
+/*global runtime,define,document,odf,require,ops,gui */
+
+define("webodf/editor",
+    ["webodf/editor/UserList",
+     "webodf/editor/widgets"],
+     function(UserList, loadWidgets) {
+    "use strict";
+    var self={};
 
 runtime.currentDirectory = function () {
     "use strict";
@@ -42,13 +49,11 @@ runtime.libraryPaths = function () {
     return [ runtime.currentDirectory() ];
 };
 
-
 /**
  * Utility method for testing
  * @param {?string} memberId
  */
 function addCursorToDoc(session, memberId) {
-    "use strict";
     var op = new ops.OpAddCursor(session);
     op.init({memberid:memberId});
     session.enqueue(op);
@@ -56,7 +61,6 @@ function addCursorToDoc(session, memberId) {
 
 
 function init_gui_and_doc(docurl, userid) {
-    "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
     var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
@@ -68,6 +72,7 @@ function init_gui_and_doc(docurl, userid) {
     isConnectedWithNetwork = (runtime.getNetwork().networkStatus !== "unavailable");
 
     odfElement = document.getElementById("canvas");
+    runtime.assert(odfElement, "init_gui_and_doc failed to get odf canvas from html");
     odfCanvas = new odf.OdfCanvas(odfElement);
 
     // this needs to be available for the widgets
@@ -84,12 +89,16 @@ function init_gui_and_doc(docurl, userid) {
     }
 
     // Editor Translations, Widgets and Avatars
-    require([
-        'dojo/i18n!nls/myResources.js',
-        'EditorSession.js',
-        'UserList.js',
-        'widgets.js',
-    ], function (myResources, EditorSession, Widgets) {
+    require({
+        paths:{
+            "webodf":"/webodf",
+            "webodf/editor":"/programs/editor"
+        }
+    },[
+        'dojo/i18n!webodf/editor/nls/myResources',
+        'webodf/editor/EditorSession',
+        'webodf/editor/UserList'
+    ], function (myResources, EditorSession, UserList) {
         var translator = function(key, context) {
             if (undefined === myResources[key]) {
                 return "translation missing: "+key;
@@ -99,15 +108,15 @@ function init_gui_and_doc(docurl, userid) {
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
-            var session, 
+            var session,
                 editorSession,
                 memberid = userid+"___"+Date.now(),
                 userList,
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
-            editorSession = editor.editorSession = new editor.EditorSession(session, memberid);
-            userList = new editor.UserList(document.getElementById('peopleList'));
+            editorSession = new EditorSession(session, memberid);
+            userList = new UserList(editorSession, document.getElementById('peopleList'));
 
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
@@ -129,7 +138,7 @@ function init_gui_and_doc(docurl, userid) {
                 editorSession.startEditing();
             }
 
-            loadWidgets();
+            loadWidgets(editorSession);
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);
@@ -208,9 +217,13 @@ function init_gui_and_doc(docurl, userid) {
     });
 }
 
-function editor_init(docurl, userid) {
+self.boot = function (docurl, userid) {
     "use strict";
     var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+
+    //alert("booting: ["+docurl+"] userlist: "+UserList);
+
+    userid = userid||"you";
 
     function later_cb() {
         if (net.networkStatus === "unavailable") {
@@ -235,12 +248,13 @@ function editor_init(docurl, userid) {
     }
     later_cb();
 }
+return self;
+});
 
-window.onload = function() {
-    editor_init( undefined, "you");
-};
-
+/*
+ TODO:
 window.onunload = function() {
     editor.editorSession.endEditing();
 }
+*/
 // vim:expandtab

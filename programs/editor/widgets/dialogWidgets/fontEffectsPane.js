@@ -31,8 +31,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.FontEffectsPane = (function () {
-
+/*global define,require */
+define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
+    "use strict";
     function makeWidget(dialog, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
             var translator = document.translator;
@@ -77,11 +78,10 @@ widgets.FontEffectsPane = (function () {
         });
     }
 
-    widgets.FontEffectsPane = function FontEffectsPane(dialog, callback) {
+    return function FontEffectsPane(dialog, callback) {
         makeWidget(dialog, function (pane) {
             return callback(pane);
         });
     };
 
-    return widgets.FontEffectsPane;
-}());
+});

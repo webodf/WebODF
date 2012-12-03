@@ -31,7 +31,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.SimpleStyles = (function () {
+/*global define,require */
+define("webodf/editor/widgets/simpleStyles", [], function () {
+    "use strict";
 
     function makeWidget(callback) {
         require(["dijit/form/ToggleButton"], function (ToggleButton) {
@@ -78,11 +80,9 @@ widgets.SimpleStyles = (function () {
         });
     }
 
-    widgets.SimpleStyles = function SimpleStyles(callback) {
+    return function SimpleStyles(callback) {
         makeWidget(function (widget) {
             return callback(widget);
         });
     };
-
-    return widgets.SimpleStyles;
-}());
+});

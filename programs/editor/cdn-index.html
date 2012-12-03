@@ -15,9 +15,17 @@
 	  }
   </script>
 
-  <!-- Dojo stuff (use src instead of dist for running from the source tree)-->
-  <script src="dojo-amalgamation.js" data-dojo-config="async: true"></script>
-  <link rel="stylesheet" type="text/css" href="app/resources/app.css"/>
+  <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/resources/dojo.css"/>
+  <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/claro.css"/>
+  <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/layout/resources/ExpandoPane.css"/>
+  <link rel="stylesheet"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/widget/ColorPicker/ColorPicker.css"/>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
+    data-dojo-config="async: true"></script>
 
   <!-- App stuff -->
   <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
@@ -28,14 +36,14 @@
   <script src="UserList.js" type="text/javascript" charset="utf-8"></script>
   <script src="EditorSession.js" type="text/javascript" charset="utf-8"></script>
   <script src="widgets.js" type="text/javascript" charset="utf-8"></script>
-  <script src="editor.js" type="text/javascript" charset="utf-8"/></script>
-
+  <script src="editor.js" type="text/javascript" charset="utf-8"></script>
   <script language="javascript" type="text/javascript">
     function on_body_load() {
         require({ }, ["webodf/editor"],
             function(editor) {
-                editor.boot("welcome.odt");
-            });
+                editor.boot("/webodf/collabtest/text.odt");
+            }
+        );
     }
   </script>
  </head>

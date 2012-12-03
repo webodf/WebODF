@@ -1,18 +1,20 @@
-editor.UserList = (function() {
+/*global define,runtime */
+define("webodf/editor/UserList",[], function() {
     "use strict";
     
-    editor.UserList = function UserList(userListDiv) {
+    return function UserList(editorSession, userListDiv) {
         var self = this;
 
-        editor.editorSession.subscribe('userAdded', function(memberId) {
+        editorSession.subscribe('userAdded', function(memberId) {
             self.addUser(memberId);
         });
         
-        editor.editorSession.subscribe('userRemoved', function(memberId) {
+        editorSession.subscribe('userRemoved', function(memberId) {
             self.removeUser(memberId);
         });
 
         function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
+            runtime.assert(avatarListDiv, "avatarListDiv unavailable");
             var doc = avatarListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
                 avatarDiv = doc.createElementNS(htmlns, "div"),
@@ -61,13 +63,11 @@ editor.UserList = (function() {
         }
 
         this.addUser = function (memberId) {
-            createAvatarButton(userListDiv, editor.editorSession.sessionView, memberId, editor.editorSession.getUserDetails(memberId));
+            createAvatarButton(userListDiv, editorSession.sessionView, memberId, editorSession.getUserDetails(memberId));
         };
 
         this.removeUser = function (memberId) {
             removeAvatarButton(userListDiv, memberId);
         };
     };
-
-    return editor.UserList;
-}());
+});

@@ -31,8 +31,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.ZoomSlider = (function () {
-
+/*global define,require */
+define("webodf/editor/widgets/zoomSlider", [], function () {
+    "use strict";
     function makeWidget(callback) {
         require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
             var widget = {};
@@ -60,17 +61,15 @@ widgets.ZoomSlider = (function () {
                 canvas.style.MozTransform = 'scale(' + zoomlevel + ')';
                 canvas.style.OTransform = 'scale(' + zoomlevel + ')';
                 */
-            }
+            };
 
             return callback(widget);
         });
     }
 
-    widgets.ZoomSlider = function ZoomSlider(callback) {
+    return function ZoomSlider(callback) {
         makeWidget(function (widget) {
             return callback(widget);
         });
     };
-
-    return widgets.ZoomSlider;
-}());
+});

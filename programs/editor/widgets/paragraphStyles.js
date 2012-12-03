@@ -31,14 +31,15 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.ParagraphStyles = (function () {
-    
-    function makeWidget(callback) {
+/*global define,require */
+define("webodf/editor/widgets/paragraphStyles", [], function () {
+    "use strict";
+    function makeWidget(editorSession, callback) {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
                 selectionList = [],
-                availableStyles = editor.editorSession.getAvailableParagraphStyles();
+                availableStyles = editorSession.getAvailableParagraphStyles();
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -58,25 +59,24 @@ widgets.ParagraphStyles = (function () {
             });
 
             // if the current paragraph style changes, update the widget 
-            editor.editorSession.subscribe('paragraphChanged', function(info) {
+            editorSession.subscribe('paragraphChanged', function(info) {
                 if(info.type === 'style') {
                     widget.set("value", info.styleName);
                 }
             });
             
             widget.onChange = function(value) {
-                editor.editorSession.setCurrentParagraphStyle(value);
+                editorSession.setCurrentParagraphStyle(value);
             }
 
             return callback(widget);
         });
     }
 
-    widgets.ParagraphStyles = function ParagraphStyles(callback) {
-        makeWidget(function (widget) {
+    return function ParagraphStyles(editorSession, callback) {
+        makeWidget(editorSession, function (widget) {
             return callback(widget);
         });
     };
 
-    return widgets.ParagraphStyles;
-}());
+});

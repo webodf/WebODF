@@ -31,8 +31,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.ParagraphStylesDialog = (function () {
-
+/*global define,require */
+define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
+    "use strict";
     function makeWidget(callback) {
         require(["dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
             var i,
@@ -53,26 +54,27 @@ widgets.ParagraphStylesDialog = (function () {
 
             var actionBar = dojo.create("div", {
                 "class": "dijitDialogPaneActionBar"
-            });
-            new dijit.form.Button({
+            }),
+            okButton = new dijit.form.Button({
                 label: translator("ok")
-            }).placeAt(actionBar);
-            new dijit.form.Button({
+            }).placeAt(actionBar),
+            formButton = new dijit.form.Button({
                 label: translator("cancel")
             }).placeAt(actionBar);
             dialog.domNode.appendChild(actionBar);
 
 
             require([
-                "widgets/dialogWidgets/alignmentPane.js",
-                "widgets/dialogWidgets/fontEffectsPane.js"
-                ], function() {
-                new widgets.AlignmentPane(function (alignmentPane) {
+                "webodf/editor/widgets/dialogWidgets/alignmentPane",
+                "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
+                ], function(AlignmentPane, FontEffectsPane) {
+                var a, f;
+                a = new AlignmentPane(function (alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
                 });
                 // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
-                new widgets.FontEffectsPane(dialog, function (fontEffectsPane) {
+                f = new FontEffectsPane(dialog, function (fontEffectsPane) {
                     fontEffectsPane.startup();
                     tabContainer.addChild(fontEffectsPane);
                 });
@@ -84,11 +86,10 @@ widgets.ParagraphStylesDialog = (function () {
         });
     }
 
-    widgets.ParagraphStylesDialog = function ParagraphStylesDialog(callback) {
+    return function ParagraphStylesDialog(callback) {
         makeWidget(function (dialog) {
             return callback(dialog);
         });
     };
 
-    return widgets.ParagraphStylesDialog;
-}());
+});

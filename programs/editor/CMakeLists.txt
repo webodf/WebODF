@@ -37,25 +37,27 @@ add_custom_command(
 		--profile ${DOJO_DEPS}/profiles/app.profile.js
 		--releaseDir ${DOJO_DEPS}/dist
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory digest
-    COMMAND ${CMAKE_COMMAND} -E make_directory digest/dojo/
+    COMMAND ${CMAKE_COMMAND} -E make_directory dojo/
 
-    COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/dojo/dojo.js digest/dojo/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojo/resources/ digest/dojo/resources/
+    COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/dojo/dojo.js dojo/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojo/resources/ dojo/resources/
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory digest/app/resources/
-    COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/app/resources/app.css digest/app/resources/
+    COMMAND ${CMAKE_COMMAND} -E make_directory app/resources/
+    COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/app/resources/app.css app/resources/
 
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dijit/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ digest/dijit/themes/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ digest/dijit/icons/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ dijit/themes/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ dijit/icons/
     
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dojox/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ digest/dojox/layout/resources/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ digest/dojox/widget/ColorPicker/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ dojox/layout/resources/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ dojox/widget/ColorPicker/
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory digest/nls/
-	COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > digest/nls/dojobundle.js
+    COMMAND ${CMAKE_COMMAND} -E make_directory nls/
+	COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > nls/dojobundle.js
+
+	COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/libexec/mergeIntoDojo.js dojobuild=${DOJO_DEPS}/dist/dojo/dojo.js nls/dojobundle.js > dojo-amalgamation.js
+
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 

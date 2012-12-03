@@ -1,3 +1,6 @@
+define("webodf/editor/EditorSession", [], function () {
+	"use strict";
+
 runtime.loadClass("ops.SessionImplementation");
 runtime.loadClass("ops.NowjsOperationRouter");
 runtime.loadClass("ops.NowjsUserModel");
@@ -7,10 +10,7 @@ runtime.loadClass("gui.Caret");
 runtime.loadClass("gui.SessionController");
 runtime.loadClass("gui.SessionView");
 
-editor.EditorSession = (function () {
-	"use strict";
-
-	editor.EditorSession = function EditorSession(session, memberid) {
+	var EditorSession = function EditorSession(session, memberid) {
 		var self = this,
             currentParagraphNode = null,
             currentNamedStyleName = null,
@@ -155,5 +155,5 @@ editor.EditorSession = (function () {
         this.subscribe('cursorMoved', trackCursor);
 	};
 
-	return editor.EditorSession;
-}());
+	return EditorSession;
+});

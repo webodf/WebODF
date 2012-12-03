@@ -58,6 +58,9 @@ var profile = {
 		// This is the main loader module. It is a little special because it is treated like an AMD module even though
 		// it is actually just plain JavaScript. There is some extra magic in the build system specifically for this
 		// module ID.
+		'app': {
+			include: ['app/DojoBundlePlaceholder']
+		},
 		'dojo/dojo': {
 			// In addition to the loader `dojo/dojo` and the loader configuration file `app/run`, we are also including
 			// the main application `app/main` and the `dojo/i18n` and `dojo/domReady` modules because, while they are
