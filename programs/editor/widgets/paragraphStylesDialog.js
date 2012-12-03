@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -35,7 +35,11 @@
 define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
     "use strict";
     function makeWidget(callback) {
-        require(["dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
+        require([
+            "dijit/Dialog",
+            "dijit/layout/TabContainer",
+            "dijit/layout/ContentPane",
+            "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
             var i,
                 dialog,
                 translator = document.translator,
@@ -44,7 +48,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
             // Dialog
             dialog = new Dialog({
                 title: translator("paragraphStyles")
-        	});
+            });
 
             // Tab Container
             tabContainer = new TabContainer({

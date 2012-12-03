@@ -38,6 +38,11 @@
  * the "compiled dojo application" (given as first argument)
  *
  * it is intended to be used with nodejs from webodf build process
+ *
+ * example:
+ * node mergeIntoDojo.js \
+ *     dojobuild=$BUILD/programs/editor/dojo/dojo.js \
+ *     foo.js bar.js > dojo-amalgamation.js
  */
 
 /*

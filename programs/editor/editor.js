@@ -41,11 +41,9 @@ define("webodf/editor",
     var self={};
 
 runtime.currentDirectory = function () {
-    "use strict";
     return "../../webodf/lib";
 };
 runtime.libraryPaths = function () {
-    "use strict";
     return [ runtime.currentDirectory() ];
 };
 
