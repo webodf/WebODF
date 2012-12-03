@@ -65,6 +65,50 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             });
         });
     }
+    function compareZipEntryList(odf1path, odf2path, callback) {
+        var z1 = new core.Zip(odf1path, function (e, z1) {
+            var z2 = new core.Zip(odf2path, function (e, z2) {
+                t.e1 = z1.getEntries();
+                t.e2 = z2.getEntries();
+                r.shouldBe(t, "t.e1.length", "t.e2.length");
+                var i, j, f1;
+                t.allPresent = true;
+                for (i = 0; t.allPresent && i < t.e1.length; i += 1) {
+                    f1 = t.e1[i].filename;
+                    j = 0;
+                    while (t.e2[j].filename !== f1 && j < t.e2.length) {
+                        j += 1;
+                    }
+                    if (j === t.e2.length) {
+                        runtime.log("Not present: " + f1);
+                    }
+                    t.allPresent = j !== t.e2.length;
+                }
+                r.shouldBe(t, "t.allPresent", "true");
+                callback();
+            });
+        });
+    }
+    function compare(odf1, odf2, odf1path, odf2path, callback) {
+        compareZipEntryList(odf1path, odf2path, callback);
+    }
+    function loadAndSave(callback) {
+        var path = "odf/styletest.odt",
+            newpath = "odf/newstyletest.odt";
+        t.odf = new odf.OdfContainer(path, function (o1) {
+            t.odf = o1;
+            r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+            t.odf.saveAs(newpath, function (err) {
+                t.err = err;
+                r.shouldBeNull(t, "t.err");
+                t.odf2 = new odf.OdfContainer(newpath, function (o2) {
+                    t.odf2 = o2;
+                    r.shouldBe(t, "t.odf2.state", "odf.OdfContainer.DONE");
+                    compare(o1, o2, path, newpath, callback);
+                });
+            });
+        });
+    }
     this.tests = function () {
         return [
             createNew
@@ -72,7 +116,8 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     };
     this.asyncTests = function () {
         return [
-            createNewSaveAsAndLoad
+            createNewSaveAsAndLoad,
+            loadAndSave
         ];
     };
 };
