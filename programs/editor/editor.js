@@ -31,24 +31,27 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime,document,odf,require,ops,gui */
+/*global runtime,define,document,odf,require,ops,gui */
+
+define("webodf/editor",
+    ["webodf/editor/UserList",
+     "webodf/editor/widgets"],
+     function(UserList, loadWidgets) {
+    "use strict";
+    var self={};
 
 runtime.currentDirectory = function () {
-    "use strict";
     return "../../webodf/lib";
 };
 runtime.libraryPaths = function () {
-    "use strict";
     return [ runtime.currentDirectory() ];
 };
-
 
 /**
  * Utility method for testing
  * @param {?string} memberId
  */
 function addCursorToDoc(session, memberId) {
-    "use strict";
     var op = new ops.OpAddCursor(session);
     op.init({memberid:memberId});
     session.enqueue(op);
@@ -56,7 +59,6 @@ function addCursorToDoc(session, memberId) {
 
 
 function init_gui_and_doc(docurl, userid) {
-    "use strict";
     runtime.loadClass('odf.OdfCanvas');
 
     var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
@@ -68,6 +70,7 @@ function init_gui_and_doc(docurl, userid) {
     isConnectedWithNetwork = (runtime.getNetwork().networkStatus !== "unavailable");
 
     odfElement = document.getElementById("canvas");
+    runtime.assert(odfElement, "init_gui_and_doc failed to get odf canvas from html");
     odfCanvas = new odf.OdfCanvas(odfElement);
 
     // this needs to be available for the widgets
@@ -84,20 +87,34 @@ function init_gui_and_doc(docurl, userid) {
     }
 
     // Editor Translations, Widgets and Avatars
-    require([
-        'dojo/i18n!nls/myResources.js',
-        'EditorSession.js',
-        'widgets.js',
-    ], function (translator) {
+    require({
+        paths:{
+            "webodf":"/webodf",
+            "webodf/editor":"/programs/editor"
+        }
+    },[
+        'dojo/i18n!webodf/editor/nls/myResources',
+        'webodf/editor/EditorSession',
+        'webodf/editor/UserList'
+    ], function (myResources, EditorSession, UserList) {
+        var translator = function(key, context) {
+            if (undefined === myResources[key]) {
+                return "translation missing: "+key;
+            }
+            return myResources[key];
+        };
         document.translator = translator;
 
         odfCanvas.addListener("statereadychange", function() {
-            var session, editorSession,
+            var session,
+                editorSession,
                 memberid = userid+"___"+Date.now(),
+                userList,
                 opRouter = null;
 
             session = new ops.SessionImplementation(odfCanvas);
-            editorSession = editor.editorSession = new editor.EditorSession(session, memberid);
+            editorSession = new EditorSession(session, memberid);
+            userList = new UserList(editorSession, document.getElementById('peopleList'));
 
             if (isConnectedWithNetwork) {
                 // use the nowjs op-router when connected
@@ -119,7 +136,7 @@ function init_gui_and_doc(docurl, userid) {
                 editorSession.startEditing();
             }
 
-            loadWidgets(session, editorSession.sessionController.getInputMemberId());
+            loadWidgets(editorSession);
         });
         odfCanvas.load(doclocation);
         odfCanvas.setEditable(false);
@@ -144,16 +161,16 @@ function init_gui_and_doc(docurl, userid) {
                 var collabPane = new ExpandoPane({
                     region: 'trailing',
                     splitter: 'true',
-                    title: document.translator.collaborationPane
+                    title: translator("collaborationPane")
                 }, 'collaboration');
                 var peoplePane = new ContentPane({
                     region: 'top',
                     splitter: 'true',
-                    title: document.translator.people
+                    title: translator("people")
                 }, 'people');
                 var chatPane = new ContentPane({
                     region: 'center',
-                    title: document.translator.chat
+                    title: translator("chat")
                 }, 'chat');
 
                 mainContainer.addChild(topPane);
@@ -175,12 +192,12 @@ function init_gui_and_doc(docurl, userid) {
                         // User's Editable Name
                         var nameBox = new TextBox({
                             value: '',
-                            placeHolder: document.translator.typeYourName_DDD,
+                            placeHolder: translator("typeYourName_DDD"),
                             style: 'text-align: center;'
                         }, 'nameEdit');
 
                         var inviteButton = new Button({
-                            label: document.translator.invitePeople,
+                            label: translator("invitePeople"),
                         }, 'inviteButton');
 
                         // Chat Box
@@ -188,7 +205,7 @@ function init_gui_and_doc(docurl, userid) {
                         // Chat Input
                         var chatInput = new TextBox({
                             value: '',
-                            placeHolder: document.translator.startTypingToChat_DDD,
+                            placeHolder: translator("startTypingToChat_DDD"),
                             style: 'text-align: center;'
                         }, 'chatInput');
                     }
@@ -198,9 +215,13 @@ function init_gui_and_doc(docurl, userid) {
     });
 }
 
-function editor_init(docurl, userid) {
+self.boot = function (docurl, userid) {
     "use strict";
     var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+
+    //alert("booting: ["+docurl+"] userlist: "+UserList);
+
+    userid = userid||"you";
 
     function later_cb() {
         if (net.networkStatus === "unavailable") {
@@ -225,12 +246,13 @@ function editor_init(docurl, userid) {
     }
     later_cb();
 }
+return self;
+});
 
-window.onload = function() {
-    editor_init( undefined, "you");
-};
-
+/*
+ TODO:
 window.onunload = function() {
     editor.editorSession.endEditing();
 }
+*/
 // vim:expandtab

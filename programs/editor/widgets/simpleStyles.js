@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,9 +31,11 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.SimpleStyles = (function () {
+/*global define,require */
+define("webodf/editor/widgets/simpleStyles", [], function () {
+    "use strict";
 
-    function makeWidget(documentObject, callback) {
+    function makeWidget(callback) {
         require(["dijit/form/ToggleButton"], function (ToggleButton) {
             var i,
                 widget = {};
@@ -78,11 +80,9 @@ widgets.SimpleStyles = (function () {
         });
     }
 
-    widgets.SimpleStyles = function SimpleStyles(documentObject, callback) {
-        makeWidget(documentObject, function (widget) {
+    return function SimpleStyles(callback) {
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };
-
-    return widgets.SimpleStyles;
-}());
+});

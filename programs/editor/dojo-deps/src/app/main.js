@@ -17,7 +17,7 @@
  * More information about everything described about the loader throughout this file can be found at
  * <http://dojotoolkit.org/reference-guide/loader/amd.html>.
  */
-define([ 'dojo/has', 'require' ], function (has, require) {
+define([ 'dojo/has', 'require', 'app/DojoBundlePlaceholder' ], function (has, require, nls_dojobundle) {
 	var app = {};
 
 	/**

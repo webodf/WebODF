@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,22 +31,15 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.ParagraphStyles = (function () {
-
-    var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-    var htmlns = "http://www.w3.org/1999/xhtml";
-
-    function makeWidget(session, inputMemberId, callback) {
+/*global define,require */
+define("webodf/editor/widgets/paragraphStyles", [], function () {
+    "use strict";
+    function makeWidget(editorSession, callback) {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
-                odfDocument = session.getOdfDocument(),
-                formatting = odfDocument.getFormatting(),
                 selectionList = [],
-                availableStyles = formatting.getAvailableParagraphStyles(),
-                currentParagraphNode = null,
-                currentNamedStyleName = null,
-                currentStyleName = null;
+                availableStyles = editorSession.getAvailableParagraphStyles();
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -65,77 +58,25 @@ widgets.ParagraphStyles = (function () {
                 }
             });
 
-            function checkParagraphStyleName() {
-                var newStyleName,
-                    newNamedStyleName;
-
-                newStyleName = currentParagraphNode.getAttributeNS(textns, 'style-name');
-                if (newStyleName !== currentStyleName) {
-                    currentStyleName = newStyleName;
-                    // check if named style is still the same
-                    newNamedStyleName = formatting.getFirstNamedParentStyleNameOrSelf(newStyleName);
-                    if (!newNamedStyleName) {
-                        // TODO: how to handle default styles?
-                        return;
-                    }
-                    // a named style
-                    if (newNamedStyleName !== currentNamedStyleName) {
-                        currentNamedStyleName = newNamedStyleName;
-                        widget.set("value", currentNamedStyleName);
-                    }
+            // if the current paragraph style changes, update the widget 
+            editorSession.subscribe('paragraphChanged', function(info) {
+                if(info.type === 'style') {
+                    widget.set("value", info.styleName);
                 }
-            }
-            function trackCursor(cursor) {
-                var node,
-                    newStyleName,
-                    newNamedStyleName;
-
-                if (cursor.getMemberId() !== inputMemberId) {
-                    return;
-                }
-
-                node = odfDocument.getParagraphElement(cursor.getSelection().focusNode);
-                if (!node) {
-                    return;
-                }
-                currentParagraphNode = node;
-                checkParagraphStyleName();
-            }
-            function trackCursorParagraph(paragraphNode) {
-                if (paragraphNode !== currentParagraphNode) {
-                    return;
-                }
-                checkParagraphStyleName();
-            }
-
-            session.subscribe(ops.SessionImplementation.signalCursorAdded, trackCursor);
-            session.subscribe(ops.SessionImplementation.signalCursorMoved, trackCursor);
-            session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCursorParagraph);
-
+            });
+            
             widget.onChange = function(value) {
-                var op;
-
-                if(currentNamedStyleName !== value) {
-                    op = new ops.OpSetParagraphStyle(session);
-                    op.init({
-                        memberid: inputMemberId,
-                        position: odfDocument.getCursorPosition(inputMemberId),
-                        styleNameBefore: currentNamedStyleName,
-                        styleNameAfter: value
-                    });
-                    session.enqueue(op);
-                }
+                editorSession.setCurrentParagraphStyle(value);
             }
 
             return callback(widget);
         });
     }
 
-    widgets.ParagraphStyles = function ParagraphStyles(session, inputMemberId, callback) {
-        makeWidget(session, inputMemberId, function (widget) {
+    return function ParagraphStyles(editorSession, callback) {
+        makeWidget(editorSession, function (widget) {
             return callback(widget);
         });
     };
 
-    return widgets.ParagraphStyles;
-}());
+});

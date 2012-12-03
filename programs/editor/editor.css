@@ -41,7 +41,6 @@ html, body, #mainContainer {
     border-top-right-radius: 5px;
     border: none;
     overflow: hidden;
-    background-image: url("digest/dijit/themes/claro/images/standardGradient.png");
     background-color: #E6E6E7;
 }
 

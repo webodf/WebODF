@@ -31,9 +31,18 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-function loadWidgets(session, inputMemberId) {
-    var documentObject = session.getOdfDocument().getDOM(),
-        toolbar,
+/*global define */
+define("webodf/editor/widgets", [
+	"webodf/editor/widgets/simpleStyles",
+	"webodf/editor/widgets/paragraphStyles",
+	"webodf/editor/widgets/paragraphStylesDialog",
+	"webodf/editor/widgets/zoomSlider"],
+	function(SimpleStyles, ParagraphStyles, ParagraphStylesDialog, ZoomSlider) {
+"use strict";
+
+return function loadWidgets(editorSession) {
+    var toolbar,
+        translator=document.translator,
         ToolbarSeparator;
     // Menubar
     require([
@@ -49,65 +58,59 @@ function loadWidgets(session, inputMemberId) {
 
             var formatSubmenu = new DropDownMenu({});
             var paragraphStylesMenuItem = new MenuItem({
-                label: document.translator.paragraph_DDD
+                label: translator("paragraph_DDD")
             });
             formatSubmenu.addChild(paragraphStylesMenuItem);
 
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.file
+                label: translator("file")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.edit
+                label: translator("edit")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.view
+                label: translator("view")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.insert
+                label: translator("insert")
             }));
             menuBar.addChild(new PopupMenuBarItem({
-                label: document.translator.format,
+                label: translator("format"),
                 popup: formatSubmenu
             }));
 
-            require(["widgets/paragraphStylesDialog.js"], function() {
-                var dialogBox = new widgets.ParagraphStylesDialog(documentObject, function(dialog) {
-                    paragraphStylesMenuItem.onClick = function() {
-                        dialog.startup();
-                        dialog.show();
-                    }
-                });
+            new ParagraphStylesDialog(function(dialog) {
+                paragraphStylesMenuItem.onClick = function() {
+                    dialog.startup();
+                    dialog.show();
+                };
             });
         });
     });
 
-    // Toolbar
-    require(["dijit/Toolbar"], function(Toolbar) {
-        toolbar = new Toolbar({}, "toolbar");
+	// Toolbar
+	require(["dijit/Toolbar"], function(Toolbar) {
+		toolbar = new Toolbar({}, "toolbar");
 
-        // Simple Style Selector [B, I, U, S]
-        require(["widgets/simpleStyles.js"], function () {
-            var styles = new widgets.SimpleStyles(documentObject, function (widget) {
-                widget.placeAt(toolbar);
-                widget.startup();
-            });
-        });
+		// Simple Style Selector [B, I, U, S]
+		new SimpleStyles(function (widget) {
+			widget.placeAt(toolbar);
+			widget.startup();
+		});
 
-        // Paragraph Style Selector
-        require(["widgets/paragraphStyles.js"], function () {
-            var styles = new widgets.ParagraphStyles(session, inputMemberId, function (widget) {
-                widget.placeAt(toolbar);
-                widget.startup();
-            });
-        });
+		// Paragraph Style Selector
+		new ParagraphStyles(editorSession, function (widget) {
+			widget.placeAt(toolbar);
+			widget.startup();
+		});
 
-        // Zoom Level Selector
-        require(["widgets/zoomSlider.js"], function () {
-            var zoomSlider = new widgets.ZoomSlider(documentObject, function (widget) {
-                widget.placeAt(toolbar);
-                widget.startup();
-            });
-        });
+		// Zoom Level Selector
+		new ZoomSlider(function (widget) {
+			widget.placeAt(toolbar);
+			widget.startup();
+		});
 
-    });
+	});
 }
+
+	});

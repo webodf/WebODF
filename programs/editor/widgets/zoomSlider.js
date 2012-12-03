@@ -31,9 +31,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.ZoomSlider = (function () {
-
-    function makeWidget(documentObject, callback) {
+/*global define,require */
+define("webodf/editor/widgets/zoomSlider", [], function () {
+    "use strict";
+    function makeWidget(callback) {
         require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
             var widget = {};
 
@@ -53,24 +54,22 @@ widgets.ZoomSlider = (function () {
 
             var canvas = dojo.byId('canvas');
             widget.onChange = function (value) {
-                documentObject.odfCanvas.setZoomLevel(value/100.0);
+                editor.editorSession.getDocument().odfCanvas.setZoomLevel(value/100.0);
                 /*
                 var zoomlevel = value / 100.0;
                 canvas.style.zoom = zoomlevel;
                 canvas.style.MozTransform = 'scale(' + zoomlevel + ')';
                 canvas.style.OTransform = 'scale(' + zoomlevel + ')';
                 */
-            }
+            };
 
             return callback(widget);
         });
     }
 
-    widgets.ZoomSlider = function ZoomSlider(documentObject, callback) {
-        makeWidget(documentObject, function (widget) {
+    return function ZoomSlider(callback) {
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };
-
-    return widgets.ZoomSlider;
-}());
+});

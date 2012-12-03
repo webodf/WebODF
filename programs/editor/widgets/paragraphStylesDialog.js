@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,18 +31,24 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.ParagraphStylesDialog = (function () {
-
-    function makeWidget(documentObject, callback) {
-        require(["dijit/Dialog", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
+/*global define,require */
+define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
+    "use strict";
+    function makeWidget(callback) {
+        require([
+            "dijit/Dialog",
+            "dijit/layout/TabContainer",
+            "dijit/layout/ContentPane",
+            "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
             var i,
                 dialog,
+                translator = document.translator,
                 tabContainer, alignmentPane, flowPane, numberingPane, tabsPane, capsPane, bordersPane, backgroundPane, indentsPane;
 
             // Dialog
             dialog = new Dialog({
-            	title: document.translator.paragraphStyles
-        	});
+                title: translator("paragraphStyles")
+            });
 
             // Tab Container
             tabContainer = new TabContainer({
@@ -52,25 +58,27 @@ widgets.ParagraphStylesDialog = (function () {
 
             var actionBar = dojo.create("div", {
                 "class": "dijitDialogPaneActionBar"
-            });
-            new dijit.form.Button({
-                label: document.translator.ok
-            }).placeAt(actionBar);
-            new dijit.form.Button({
-                label: document.translator.cancel
+            }),
+            okButton = new dijit.form.Button({
+                label: translator("ok")
+            }).placeAt(actionBar),
+            formButton = new dijit.form.Button({
+                label: translator("cancel")
             }).placeAt(actionBar);
             dialog.domNode.appendChild(actionBar);
 
 
             require([
-                "widgets/dialogWidgets/alignmentPane.js",
-                "widgets/dialogWidgets/fontEffectsPane.js"
-                ], function() {
-                new widgets.AlignmentPane(documentObject, function(alignmentPane) {
+                "webodf/editor/widgets/dialogWidgets/alignmentPane",
+                "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
+                ], function(AlignmentPane, FontEffectsPane) {
+                var a, f;
+                a = new AlignmentPane(function (alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
                 });
-                new widgets.FontEffectsPane(documentObject, function(fontEffectsPane) {
+                // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
+                f = new FontEffectsPane(dialog, function (fontEffectsPane) {
                     fontEffectsPane.startup();
                     tabContainer.addChild(fontEffectsPane);
                 });
@@ -82,11 +90,10 @@ widgets.ParagraphStylesDialog = (function () {
         });
     }
 
-    widgets.ParagraphStylesDialog = function ParagraphStylesDialog(documentObject, callback) {
-        makeWidget(documentObject, function (dialog) {
+    return function ParagraphStylesDialog(callback) {
+        makeWidget(function (dialog) {
             return callback(dialog);
         });
     };
 
-    return widgets.ParagraphStylesDialog;
-}());
+});

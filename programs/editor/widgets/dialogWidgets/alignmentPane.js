@@ -31,13 +31,14 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-widgets.AlignmentPane = (function () {
-
-    function makeWidget(documentObject, callback) {
+/*global define,require */
+define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
+    "use strict";
+    function makeWidget(callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
             ready(function() {
-            	var contentPane = new ContentPane({
-            		title: document.translator.alignment,
+                var contentPane = new ContentPane({
+                    title: document.translator("alignment"),
                     href: "widgets/dialogWidgets/alignmentPane.html"
             	});
 
@@ -46,11 +47,9 @@ widgets.AlignmentPane = (function () {
         });
     }
 
-    widgets.AlignmentPane = function AlignmentPane(documentObject, callback) {
-        makeWidget(documentObject, function (pane) {
+    return function AlignmentPane(callback) {
+        makeWidget(function (pane) {
             return callback(pane);
         });
     };
-
-    return widgets.AlignmentPane;
-}());
+});
