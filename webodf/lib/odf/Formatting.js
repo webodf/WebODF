@@ -194,6 +194,8 @@ odf.Formatting = function Formatting() {
         return null;
     }
 
+    this.getStyleElement = getStyleElement;
+
     // workaround for not normally named elements, e.g. with a dash TODO: how is this properly done?
     function getNotNormallyNamedChildElement(element, name) {
         var node = element.firstChild;

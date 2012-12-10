@@ -201,6 +201,19 @@ ops.Document = function Document(odfCanvas) {
         }
         return node;
     }
+
+    /**
+     * @param {!String} styleName
+     * @return {?Node}
+     */
+    function getParagraphStyleElement(styleName) {
+        var node;
+        node = odfCanvas.getFormatting().getStyleElement(odfCanvas.odfContainer().rootElement.styles, styleName, 'paragraph');
+        return node;
+    }
+
+    this.getParagraphStyleElement = getParagraphStyleElement;
+
     this.getParagraphElement = getParagraphElement;
     /**
      * This function will return the Text node as well as the offset in that text node

@@ -39,7 +39,8 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
             ready(function() {
                 var contentPane = new ContentPane({
                     title: document.translator("alignment"),
-                    href: "widgets/dialogWidgets/alignmentPane.html"
+                    href: "widgets/dialogWidgets/alignmentPane.html",
+                    preload: true
             	});
 
             	return callback(contentPane);

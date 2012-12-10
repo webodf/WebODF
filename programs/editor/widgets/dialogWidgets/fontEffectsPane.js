@@ -41,6 +41,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
                 var contentPane = new ContentPane({
                     title: translator("fontEffects"),
                     href: "widgets/dialogWidgets/fontEffectsPane.html",
+                    preload: true,
                     onLoad: bindToPreview
             	});
                  
