@@ -74,6 +74,7 @@ var profile = {
 				'dijit/layout/BorderContainer',
 				'dijit/layout/ContentPane',
 				'dojox/layout/ExpandoPane',
+                'dijit/form/Form',
 				'dijit/form/TextBox',
 				'dijit/form/Button',
 				"dijit/MenuBar",
