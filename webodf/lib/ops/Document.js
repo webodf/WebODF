@@ -47,6 +47,8 @@ ops.Document = function Document(odfCanvas) {
 
     var self = this,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
         rootNode,
         selectionManager,
         filter,
@@ -393,6 +395,45 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         }
         return false;
     };
+
+    this.updateParagraphStyle = function (styleName, info) {
+        var style, paragraphStyle, textStyle;
+        style = getParagraphStyleElement(styleName);
+
+        if(style) {
+            paragraphStyle = style.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
+            textStyle = style.getElementsByTagNameNS(stylens, 'text-properties')[0];
+            
+            if(paragraphStyle === undefined) {
+                paragraphStyle = document.createElementNS(stylens, 'paragraph-properties');
+                style.appendChild(paragraphStyle);
+            }
+            if(textStyle === undefined) {
+                textStyle = document.createElementNS(stylens, 'text-properties');
+                style.appendChild(textStyle);
+            }
+
+            paragraphStyle.setAttributeNS(fons, 'margin-top', info.paragraphProperties.topMargin + 'in');
+            paragraphStyle.setAttributeNS(fons, 'margin-bottom', info.paragraphProperties.topMargin + 'in');
+            paragraphStyle.setAttributeNS(fons, 'margin-left', info.paragraphProperties.leftMargin + 'in');
+            paragraphStyle.setAttributeNS(fons, 'margin-right', info.paragraphProperties.rightMargin + 'in');
+            paragraphStyle.setAttributeNS(fons, 'text-align', info.paragraphProperties.alignmentPaneRadio);
+            
+            textStyle.setAttributeNS(fons, 'font-size', info.textProperties.fontSize + 'pt');
+            textStyle.setAttributeNS(fons, 'font-family', info.textProperties.fontFamily); 
+            if(info.textProperties.textStyleRadio.indexOf('bold') != -1)
+                textStyle.setAttributeNS(fons, 'font-weight', 'bold');
+            if(info.textProperties.textStyleRadio.indexOf('italic') != -1)
+                textStyle.setAttributeNS(fons, 'font-style', 'italic');
+            if(info.textProperties.textStyleRadio.indexOf('underline') != -1)
+                textStyle.setAttributeNS(fons, 'text-decoration', 'underline');
+
+            return true;
+        }
+
+        return false;
+    };
+
     /**
     * @param {!string} memberid
     * @return {core.Cursor}

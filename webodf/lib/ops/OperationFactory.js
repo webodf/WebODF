@@ -45,6 +45,7 @@ runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
+runtime.loadClass("ops.OpUpdateParagraphStyle");
 
 /**
  * @constructor
@@ -68,6 +69,8 @@ ops.OperationFactory = function OperationFactory(session) {
             op = new ops.OpSplitParagraph(session);
         } else if (spec.optype === "SetParagraphStyle") {
             op = new ops.OpSetParagraphStyle(session);
+        } else if (spec.optype === "UpdateParagraphStyle") {
+            op = new ops.OpUpdateParagraphStyle(session);
         } else if (spec.optype === "MoveCursor") {
             op = new ops.OpMoveCursor(session);
         } else if (spec.optype === "RemoveCursor") {
