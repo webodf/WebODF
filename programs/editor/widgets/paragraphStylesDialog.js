@@ -83,6 +83,22 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
                     tabContainer.addChild(fontEffectsPane);
                 });
             });
+            
+            function accept() {
+                var alignment = dijit.byId('alignmentPaneForm').get('value'),
+                    fontEffects = dijit.byId('fontEffectsPaneForm').get('value');
+                
+                editor.editorSession.updateParagraphStyle(editor.editorSession.getCurrentParagraphStyle(), {
+                    paragraphProperties: alignment,
+                    textProperties: fontEffects
+                });
+
+                dialog.hide();
+            }
+
+            function cancel() {
+                dialog.hide();
+            }
 
             tabContainer.startup();
 

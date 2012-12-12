@@ -42,35 +42,56 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
                     title: translator("fontEffects"),
                     href: "widgets/dialogWidgets/fontEffectsPane.html",
                     preload: true,
-                    onLoad: bindToPreview
             	});
                  
-                // Hackish
-                function bindToPreview() {
-                    // ColorPicker
-                    dijit.byId('backgroundColorPicker').onChange = function (newColor) {
-                        dijit.byId('backgroundColorTB').set('value', newColor);
-                    };
-
+                var fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+                    stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+                    
+                contentPane.onLoad = function () {
+                    var form = dijit.byId('fontEffectsPaneForm');
+                    editor.editorSession.subscribe('paragraphChanged', function() {
+                        var style = editor.editorSession.getParagraphStyleElement(editor.editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'text-properties')[0];
+                        
+                        if(style !== undefined) {
+                             s_bold = style.getAttributeNS(fons, 'font-weight');
+                             s_italic = style.getAttributeNS(fons, 'font-style');
+                             s_underline = style.getAttributeNS(fons, 'text-decoration');
+                             s_fontSize = parseFloat(style.getAttributeNS(fons, 'font-size'));
+                             s_fontName = style.getAttributeNS(fons, 'font-family');
+                            form.attr('value', {
+                                fontFamily: s_fontName.length ? s_fontName : 'sans-serif',
+                                fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
+                                textStyleRadio: [s_bold, s_italic, s_underline]
+                            });
+                        }
+                        else {
+                            // TODO: Use default style here
+                            form.attr('value', {
+                                fontFamily: 'sans-serif',
+                                fontSize: 12,
+                                textStyleRadio: []
+                            });
+                        }
+                    });
+                    
+                    // Automatically update preview when selections change
                     var preview = document.getElementById('previewText');
-                    dialog.watch('value', function () {
-                        console.log(dialog.value.backgroundColor);
-                            if(dialog.value.textStyleRadio.indexOf('bold') != -1) 
+                    form.watch('value', function () {
+                            if(form.value.textStyleRadio.indexOf('bold') != -1) 
                                 preview.style.fontWeight = 'bold';
                             else
                                 preview.style.fontWeight = 'normal';
-                            if(dialog.value.textStyleRadio.indexOf('italic') != -1) 
+                            if(form.value.textStyleRadio.indexOf('italic') != -1) 
                                 preview.style.fontStyle = 'italic';
                             else
                                 preview.style.fontStyle = 'normal';
-                            if(dialog.value.textStyleRadio.indexOf('underline') != -1) 
+                            if(form.value.textStyleRadio.indexOf('underline') != -1) 
                                 preview.style.textDecoration = 'underline';
                             else
                                 preview.style.textDecoration = 'none';
 
-                            preview.style.fontSize = dialog.value.fontSize + 'pt';
-                            preview.style.fontFamily = dialog.value.fontFamily;
-                            preview.style.backgroundColor = dialog.value.backgroundColor;
+                            preview.style.fontSize = form.value.fontSize + 'pt';
+                            preview.style.fontFamily = form.value.fontFamily;
                     });
                 }
 

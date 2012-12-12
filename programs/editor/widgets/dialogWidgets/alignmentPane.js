@@ -43,6 +43,40 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
                     preload: true
             	});
 
+                var fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+                stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+
+                contentPane.onLoad = function() {
+                    editor.editorSession.subscribe('paragraphChanged', function() {
+                        var style = editor.editorSession.getParagraphStyleElement(editor.editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
+                            form = dijit.byId('alignmentPaneForm');
+                        if(style !== undefined) {                        
+                            var s_topMargin = parseFloat(style.getAttributeNS(fons, 'margin-top')),
+                                s_bottomMargin = parseFloat(style.getAttributeNS(fons, 'margin-bottom')),
+                                s_leftMargin = parseFloat(style.getAttributeNS(fons, 'margin-left')),
+                                s_rightMargin = parseFloat(style.getAttributeNS(fons, 'margin-left')),
+                                s_textAlign = style.getAttributeNS(fons, 'text-align');
+                            
+                            form.attr('value', {
+                                topMargin: isNaN(s_topMargin) ? 0 : s_topMargin,
+                                bottomMargin: isNaN(s_bottomMargin) ? 0 : s_bottomMargin,
+                                leftMargin: isNaN(s_leftMargin) ? 0 : s_leftMargin,
+                                rightMargin: isNaN(s_rightMargin) ? 0 : s_rightMargin,
+                                alignmentPaneRadio: s_textAlign.length ? s_textAlign : 'left' 
+                            });
+                        }
+                        else {
+                            form.attr('value', {
+                                topMargin: 0,
+                                bottomMargin: 0,
+                                leftMargin: 0,
+                                rightMargin: 0,
+                                alignmentPaneRadio: 'left'
+                            });
+                        }
+                    });
+                };
+                
             	return callback(contentPane);
             });
         });

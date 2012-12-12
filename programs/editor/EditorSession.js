@@ -189,7 +189,19 @@ define("webodf/editor/EditorSession", [], function () {
 
         this.getParagraphStyleElement = function(styleName) {
             return odfDocument.getParagraphStyleElement(styleName);
-        }
+        };
+
+        this.updateParagraphStyle = function(styleName, info) {
+            var op;
+            op = new ops.OpUpdateParagraphStyle(session);
+            op.init({
+                memberid: memberid,
+                position: self.getCursorPosition(),
+                styleName: styleName,
+                info: info
+            });
+            session.enqueue(op);
+        };
 
         this.subscribe('cursorMoved', trackCursor);
     };
