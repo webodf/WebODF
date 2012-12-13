@@ -395,7 +395,13 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         }
         return false;
     };
-
+    
+    /**
+     * @param {!String} styleName
+     * @param {!Object} info
+     * @return {!boolean}
+     * @notypecheck
+     */
     this.updateParagraphStyle = function (styleName, info) {
         var style, paragraphStyle, textStyle;
         style = getParagraphStyleElement(styleName);
@@ -405,11 +411,11 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             textStyle = style.getElementsByTagNameNS(stylens, 'text-properties')[0];
             
             if(paragraphStyle === undefined) {
-                paragraphStyle = document.createElementNS(stylens, 'paragraph-properties');
+                paragraphStyle = rootNode.ownerDocument.createElementNS(stylens, 'paragraph-properties');
                 style.appendChild(paragraphStyle);
             }
             if(textStyle === undefined) {
-                textStyle = document.createElementNS(stylens, 'text-properties');
+                textStyle = rootNode.ownerDocument.createElementNS(stylens, 'text-properties');
                 style.appendChild(textStyle);
             }
 
@@ -421,12 +427,15 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             
             textStyle.setAttributeNS(fons, 'font-size', info.textProperties.fontSize + 'pt');
             textStyle.setAttributeNS(fons, 'font-family', info.textProperties.fontFamily); 
-            if(info.textProperties.textStyleRadio.indexOf('bold') != -1)
+            if(info.textProperties.textStyleRadio.indexOf('bold') !== -1) {
                 textStyle.setAttributeNS(fons, 'font-weight', 'bold');
-            if(info.textProperties.textStyleRadio.indexOf('italic') != -1)
+            }
+            if(info.textProperties.textStyleRadio.indexOf('italic') !== -1) {
                 textStyle.setAttributeNS(fons, 'font-style', 'italic');
-            if(info.textProperties.textStyleRadio.indexOf('underline') != -1)
+            }
+            if(info.textProperties.textStyleRadio.indexOf('underline') !== -1) {
                 textStyle.setAttributeNS(fons, 'text-decoration', 'underline');
+            }
 
             return true;
         }
