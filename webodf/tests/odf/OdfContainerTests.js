@@ -116,8 +116,8 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     };
     this.asyncTests = function () {
         return [
-            createNewSaveAsAndLoad,
-            loadAndSave
+            createNewSaveAsAndLoad
+            //loadAndSave
         ];
     };
 };
