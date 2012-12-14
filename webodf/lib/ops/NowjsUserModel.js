@@ -47,35 +47,15 @@ ops.NowjsUserModel = function NowjsUserModel(loaded_cb) {
     "use strict";
 
     var users = {},
-        colorIndex = 0,
-        colors,
         net = runtime.getNetwork();
 
-    colors = [
-        "blue",
-        "red",
-        "green",
-        "yellow",
-        "brown"
-    ];
-
-    function selectColor() {
-        var color = colors[colorIndex];
-
-        colorIndex += 1;
-        if (colorIndex >= colors.length) {
-            colorIndex = 0;
-        }
-        return color;
-    }
-
     // use this method to add new users as they join the session
-    function addUser(memberId, fullName, imageUrl) {
+    function addUser(memberId, fullName, imageUrl, color) {
         users[memberId] = {
             memberid: memberId,
             fullname: fullName,
             imageurl: imageUrl,
-            color: selectColor()
+            color: color
         };
     }
 
@@ -86,14 +66,9 @@ ops.NowjsUserModel = function NowjsUserModel(loaded_cb) {
         return users[userid];
     };
 
-    // add our current friends for now
-    addUser("you", "I, Robot", "avatar-joe.png");
-    addUser("alice", "Alice Bee", "avatar-flower.png");
-    addUser("bob", "Bob Pigeon", "avatar-pigeon.png");
-
     net.receiveNewUserData = function(udata) {
         addUser(udata.uid, udata.fullname,
-            "/user/" + udata.uid + "/avatar.png");
+            "/user/" + udata.uid + "/avatar.png", udata.color);
         runtime.log("user [" + udata.uid + "] added.");
     };
 
@@ -102,7 +77,7 @@ ops.NowjsUserModel = function NowjsUserModel(loaded_cb) {
     // TODO we should start considering security at some point
     net.getAllKnownUserData(function (udata) {
         addUser(udata.uid, udata.fullname,
-            "/user/" + udata.uid + "/avatar.png");
+            "/user/" + udata.uid + "/avatar.png", udata.color);
         runtime.log("user [" + udata.uid + "] added.");
     }, function done(count) {
         runtime.log("done with fetching all (" + count + ") user data...");
