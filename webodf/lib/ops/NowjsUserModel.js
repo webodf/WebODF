@@ -43,47 +43,100 @@
  * @constructor
  * @implements ops.UserModel
  */
-ops.NowjsUserModel = function NowjsUserModel(loaded_cb) {
+ops.NowjsUserModel = function NowjsUserModel() {
     "use strict";
 
-    var users = {},
+    var cachedUserData = {},
+        memberDataSubscribers = {},
         net = runtime.getNetwork();
 
-    // use this method to add new users as they join the session
-    function addUser(memberId, fullName, imageUrl, color) {
-        users[memberId] = {
-            memberid: memberId,
-            fullname: fullName,
-            imageurl: imageUrl,
-            color: color
-        };
+
+    function userIdFromMemberId(memberId) {
+        return memberId.split("___")[0];
     }
 
-    this.getUserDetails = function (memberid) {
+    // use this method to cache
+    function cacheUserDatum(userId, fullName, imageUrl, color) {
+        var subscribers,
+            i,
+            userData = {
+                userid:   userId,
+                fullname: fullName,
+                imageurl: imageUrl,
+                color:    color
+            };
+
+        // cache
+        cachedUserData[userId] = userData;
+
+        // notify all subscribers who are interested in this data
+        subscribers = memberDataSubscribers[userId];
+        if (subscribers) {
+            for (i = 0; i < subscribers.length; i += 1) {
+                subscribers[i].subscriber(subscribers[i].memberId, userData);
+            }
+        }
+        runtime.log("data for user [" + userId + "] cached.");
+    }
+
+
+    this.getUserDetails = function (memberId, subscriber) {
         // remove tje ___ split.
         // and perhaps create a default "Unknown" user details set if userid is not present
-        var userid = memberid.split("___")[0];
-        return users[userid];
+        var userId = userIdFromMemberId(memberId),
+            userData = cachedUserData[userId],
+            subscribers;
+
+        if (subscriber) {
+            subscribers = memberDataSubscribers[userId];
+
+            if (subscribers) {
+                subscribers.push({memberId: memberId, subscriber: subscriber});
+            } else {
+                memberDataSubscribers[userId] = [ {memberId: memberId, subscriber: subscriber} ];
+            }
+        }
+
+        if (userData === undefined) {
+            userData = {
+                userid:   userId,
+                fullname: "Unknown",
+                imageurl: "/user/" + userId + "/avatar.png",
+                color:    "#787878"
+            };
+            // query data from server
+            // TODO we should start considering security at some point
+            net.getUserData(userId, function (udata) {
+                cacheUserDatum(
+                    udata.uid,
+                    udata.fullname,
+                    "/user/" + udata.uid + "/avatar.png",
+                    udata.color
+                );
+            });
+        }
+
+        return userData;
     };
 
-    net.receiveNewUserData = function(udata) {
-        addUser(udata.uid, udata.fullname,
-            "/user/" + udata.uid + "/avatar.png", udata.color);
-        runtime.log("user [" + udata.uid + "] added.");
-    };
+    this.unsubscribeForUserDetails = function (memberId, subscriber) {
+        var i,
+            userId = userIdFromMemberId(memberId),
+            subscribers = memberDataSubscribers[userId];
+
+        if (subscribers) {
+            for (i=0; i<subscribers.length; i+=1) {
+                if (subscribers[i].subscriber === subscriber) {
+                    break;
+                }
+            }
+
+            runtime.assert((i < subscribers.length),
+                           "tried to unsubscribe when not subscribed for memberId '" + memberId + "'");
+
+            subscribers.splice(i,1);
+        }
+    }
 
     runtime.assert(net.networkStatus === "ready", "network not ready");
-    // query server for user data
-    // TODO we should start considering security at some point
-    net.getAllKnownUserData(function (udata) {
-        addUser(udata.uid, udata.fullname,
-            "/user/" + udata.uid + "/avatar.png", udata.color);
-        runtime.log("user [" + udata.uid + "] added.");
-    }, function done(count) {
-        runtime.log("done with fetching all (" + count + ") user data...");
-        if (loaded_cb) {
-            loaded_cb();
-        }
-    });
-    runtime.log("NowjsUserModel created. User-data requested.");
 };

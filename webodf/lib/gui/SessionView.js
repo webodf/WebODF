@@ -45,7 +45,8 @@ gui.SessionView = (function () {
       */
     function SessionView(session, caretFactory) {
         var carets = {},
-            avatarEditedStyles;
+            avatarEditedStyles,
+            memberDataChangedHandler;
 
         /**
          * @return {ops.Session}
@@ -62,12 +63,26 @@ gui.SessionView = (function () {
         };
 
         /**
+         * @param {!string} memberId
+         */
+        function onMemberDataChanged(memberId, userData) {
+            var caret = carets[memberId];
+
+            if (caret) {
+                caret.setAvatarImageUrl(userData.imageurl);
+                caret.setColor(userData.color);
+            }
+        }
+        memberDataChangedHandler = onMemberDataChanged;
+
+        /**
          * @param {core.Cursor} cursor
          */
         function onCursorAdded(cursor) {
             var caret = caretFactory.createCaret(cursor),
                 memberId = cursor.getMemberId(),
-                userData = session.getUserModel().getUserDetails(memberId),
+                userModel = session.getUserModel(),
+                userData = userModel.getUserDetails(memberId, memberDataChangedHandler),
                 styleRuleRudimentCStr;
 
             caret.setAvatarImageUrl(userData.imageurl);
@@ -100,6 +115,7 @@ gui.SessionView = (function () {
         function onCursorRemoved(memberid) {
             // TODO: remove style rule for avatar again from avatarEditedStyles
             delete carets[memberid];
+            session.getUserModel().unsubscribeForUserDetails(memberid, memberDataChangedHandler);
         }
 
         function init() {

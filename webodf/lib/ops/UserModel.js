@@ -48,4 +48,5 @@ ops.UserModel = function UserModel() {"use strict"; };
 /**
  * @param {!string} memberid
  */
-ops.UserModel.prototype.getUserDetails = function (memberid) {"use strict"; };
+ops.UserModel.prototype.getUserDetails = function (memberid, subscriber) {"use strict"; };
+ops.UserModel.prototype.unsubscribeForUserDetails = function (memberId, subscriber) {"use strict"; };

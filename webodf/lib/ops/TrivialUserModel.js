@@ -51,8 +51,11 @@ ops.TrivialUserModel = function TrivialUserModel() {
     users.alice = {memberid: "alice", fullname: "Alice Bee", color: "green", imageurl: "avatar-flower.png"};
     users.you = {memberid: "you", fullname: "I, Robot", color: "blue", imageurl: "avatar-joe.png"};
 
-    this.getUserDetails = function (memberid) {
+    this.getUserDetails = function (memberid, subscriber) {
         var userid = memberid.split("___")[0];
         return users[userid];
+    };
+
+    this.unsubscribeForUserDetails = function (memberId, subscriber) {
     };
 };
