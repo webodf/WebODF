@@ -31,37 +31,31 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require */
+/*global define,require,document */
 define("webodf/editor/widgets/zoomSlider", [], function () {
     "use strict";
     function makeWidget(editorSession, callback) {
         require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
-            var widget = {};
+            var widget = {},
+                canvas;
 
             widget = new HorizontalSlider({
-                    name: 'zoomSlider',
-                    value: 100,
-                    minimum: 30,
-                    maximum: 150,
-                    discreteValues: 100,
-                    intermediateChanges: true,
-                    style: {
-                        width: '150px',
-                        height: '25px',
-                        float: 'right'
-                    }
-                });
+                name: 'zoomSlider',
+                value: 100,
+                minimum: 30,
+                maximum: 150,
+                discreteValues: 100,
+                intermediateChanges: true,
+                style: {
+                    width: '150px',
+                    height: '25px',
+                    float: 'right'
+                }
+            });
 
-            var canvas = dojo.byId('canvas');
+            canvas = dojo.byId('canvas');
             widget.onChange = function (value) {
-                console.log(editorSession.getDocument());
-                document.odfCanvas.setZoomLevel(value/100.0);
-                /*
-                var zoomlevel = value / 100.0;
-                canvas.style.zoom = zoomlevel;
-                canvas.style.MozTransform = 'scale(' + zoomlevel + ')';
-                canvas.style.OTransform = 'scale(' + zoomlevel + ')';
-                */
+                document.odfCanvas.setZoomLevel(value / 100.0);
             };
 
             return callback(widget);

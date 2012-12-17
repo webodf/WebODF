@@ -53,21 +53,21 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
                 name: 'ParagraphStyles',
                 options: selectionList,
                 maxHeight: 200,
-                style: { 
+                style: {
                     width: '100px'
                 }
             });
 
             // if the current paragraph style changes, update the widget 
-            editorSession.subscribe('paragraphChanged', function(info) {
-                if(info.type === 'style') {
+            editorSession.subscribe('paragraphChanged', function (info) {
+                if (info.type === 'style') {
                     widget.set("value", info.styleName);
                 }
             });
             
-            widget.onChange = function(value) {
+            widget.onChange = function (value) {
                 editorSession.setCurrentParagraphStyle(value);
-            }
+            };
 
             return callback(widget);
         });

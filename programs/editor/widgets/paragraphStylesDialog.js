@@ -31,8 +31,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require */
-define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
+/*global define,require,document,dojo,dijit */
+define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
     "use strict";
     function makeWidget(editorSession, callback) {
         require([
@@ -43,49 +43,19 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
             var i,
                 dialog,
                 translator = document.translator,
-                tabContainer, alignmentPane, flowPane, numberingPane, tabsPane, capsPane, bordersPane, backgroundPane, indentsPane;
+                tabContainer,
+                alignmentPane,
+                flowPane,
+                numberingPane,
+                tabsPane,
+                capsPane,
+                bordersPane,
+                backgroundPane,
+                indentsPane,
+                actionBar,
+                okButton,
+                cancelButton;
 
-            // Dialog
-            dialog = new Dialog({
-                title: translator("paragraphStyles")
-            });
-
-            // Tab Container
-            tabContainer = new TabContainer({
-                style: "height: 100%; width: 100%;"
-            });
-            dialog.addChild(tabContainer);
-
-            var actionBar = dojo.create("div", {
-                "class": "dijitDialogPaneActionBar"
-            }),
-            okButton = new dijit.form.Button({
-                label: translator("ok"),
-                onClick: accept
-            }).placeAt(actionBar),
-            formButton = new dijit.form.Button({
-                label: translator("cancel"),
-                onClick: cancel
-            }).placeAt(actionBar);
-            dialog.domNode.appendChild(actionBar);
-
-
-            require([
-                "webodf/editor/widgets/dialogWidgets/alignmentPane",
-                "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
-                ], function(AlignmentPane, FontEffectsPane) {
-                var a, f;
-                a = new AlignmentPane(editorSession, function (alignmentPane) {
-                    alignmentPane.startup();
-                    tabContainer.addChild(alignmentPane);
-                });
-                // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
-                f = new FontEffectsPane(editorSession, function (fontEffectsPane) {
-                    fontEffectsPane.startup();
-                    tabContainer.addChild(fontEffectsPane);
-                });
-            });
-            
             function accept() {
                 var alignment = dijit.byId('alignmentPaneForm').get('value'),
                     fontEffects = dijit.byId('fontEffectsPaneForm').get('value');
@@ -102,6 +72,47 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
                 dialog.hide();
             }
 
+            // Dialog
+            dialog = new Dialog({
+                title: translator("paragraphStyles")
+            });
+
+            // Tab Container
+            tabContainer = new TabContainer({
+                style: "height: 100%; width: 100%;"
+            });
+            dialog.addChild(tabContainer);
+
+            actionBar = dojo.create("div", {
+                "class": "dijitDialogPaneActionBar"
+            });
+            okButton = new dijit.form.Button({
+                label: translator("ok"),
+                onClick: accept
+            }).placeAt(actionBar);
+            cancelButton = new dijit.form.Button({
+                label: translator("cancel"),
+                onClick: cancel
+            }).placeAt(actionBar);
+            dialog.domNode.appendChild(actionBar);
+
+
+            require([
+                "webodf/editor/widgets/dialogWidgets/alignmentPane",
+                "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
+            ], function (AlignmentPane, FontEffectsPane) {
+                var a, f;
+                a = new AlignmentPane(editorSession, function (alignmentPane) {
+                    alignmentPane.startup();
+                    tabContainer.addChild(alignmentPane);
+                });
+                // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
+                f = new FontEffectsPane(editorSession, function (fontEffectsPane) {
+                    fontEffectsPane.startup();
+                    tabContainer.addChild(fontEffectsPane);
+                });
+            });
+            
             tabContainer.startup();
 
             return callback(dialog);

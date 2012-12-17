@@ -58,27 +58,10 @@ define("webodf/editor/EditorSession", [], function () {
         this.sessionController = new gui.SessionController(session, memberid);
         this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
 
-        eventListener['userAdded'] = [];
-        eventListener['userRemoved'] = [];
-        eventListener['cursorMoved'] = [];
-        eventListener['paragraphChanged'] = [];
-
-        // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
-        session.subscribe(ops.SessionImplementation.signalCursorAdded, function(cursor) {
-            self.emit('userAdded', cursor.getMemberId());
-        });
-
-        session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberId) {
-            self.emit('userRemoved', memberId);
-        });
-
-        session.subscribe(ops.SessionImplementation.signalCursorMoved, function(cursor) {
-            // Emit 'cursorMoved' only when *I* am moving the cursor, not the other users
-            if (cursor.getMemberId() == memberid)
-                self.emit('cursorMoved', cursor);
-        });
-
-        session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);
+        eventListener.userAdded = [];
+        eventListener.userRemoved = [];
+        eventListener.cursorMoved = [];
+        eventListener.paragraphChanged = [];
 
         function checkParagraphStyleName() {
             var newStyleName,
@@ -123,6 +106,24 @@ define("webodf/editor/EditorSession", [], function () {
             checkParagraphStyleName();
         }
 
+        // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
+        session.subscribe(ops.SessionImplementation.signalCursorAdded, function (cursor) {
+            self.emit('userAdded', cursor.getMemberId());
+        });
+
+        session.subscribe(ops.SessionImplementation.signalCursorRemoved, function (memberId) {
+            self.emit('userRemoved', memberId);
+        });
+
+        session.subscribe(ops.SessionImplementation.signalCursorMoved, function (cursor) {
+            // Emit 'cursorMoved' only when *I* am moving the cursor, not the other users
+            if (cursor.getMemberId() === memberid) {
+                self.emit('cursorMoved', cursor);
+            }
+        });
+
+        session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);
+
         this.startEditing = function () {
             self.sessionController.startEditing();
         };
@@ -149,31 +150,31 @@ define("webodf/editor/EditorSession", [], function () {
             runtime.log("event \"" + eventid + "\" subscribed.");
         };
 
-        this.getUserDetails = function(memberId) {
+        this.getUserDetails = function (memberId) {
             return session.getUserModel().getUserDetails(memberId);
         };
 
-        this.getCursorPosition = function() {
+        this.getCursorPosition = function () {
             return odfDocument.getCursorPosition(memberid);
         };
 
-        this.getDocument = function() {
+        this.getDocument = function () {
             return odfDocument;
         };
 
-        this.getCurrentParagraph = function() {
+        this.getCurrentParagraph = function () {
             return currentParagraphNode;
         };
 
-        this.getAvailableParagraphStyles = function() {
+        this.getAvailableParagraphStyles = function () {
             return formatting.getAvailableParagraphStyles();
         };
 
-        this.getCurrentParagraphStyle = function() {
+        this.getCurrentParagraphStyle = function () {
             return currentNamedStyleName;
         };
 
-        this.setCurrentParagraphStyle = function(value) {
+        this.setCurrentParagraphStyle = function (value) {
             var op;
             if (currentNamedStyleName !== value) {
                 op = new ops.OpSetParagraphStyle(session);
@@ -187,11 +188,11 @@ define("webodf/editor/EditorSession", [], function () {
             }
         };
 
-        this.getParagraphStyleElement = function(styleName) {
+        this.getParagraphStyleElement = function (styleName) {
             return odfDocument.getParagraphStyleElement(styleName);
         };
 
-        this.updateParagraphStyle = function(styleName, info) {
+        this.updateParagraphStyle = function (styleName, info) {
             var op;
             op = new ops.OpUpdateParagraphStyle(session);
             op.init({

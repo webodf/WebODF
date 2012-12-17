@@ -41,26 +41,26 @@ define("webodf/editor/widgets/simpleStyles", [], function () {
                 widget = {};
 
             widget.children = [
-            (new ToggleButton({
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconBold"
-            })),
-            (new ToggleButton({
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconItalic"
-            })),
-            (new ToggleButton({
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconUnderline"
-            })),
-            (new ToggleButton({
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconStrikethrough"
-            }))
+                (new ToggleButton({
+                    showLabel: false,
+                    checked: false,
+                    iconClass: "dijitEditorIcon dijitEditorIconBold"
+                })),
+                (new ToggleButton({
+                    showLabel: false,
+                    checked: false,
+                    iconClass: "dijitEditorIcon dijitEditorIconItalic"
+                })),
+                (new ToggleButton({
+                    showLabel: false,
+                    checked: false,
+                    iconClass: "dijitEditorIcon dijitEditorIconUnderline"
+                })),
+                (new ToggleButton({
+                    showLabel: false,
+                    checked: false,
+                    iconClass: "dijitEditorIcon dijitEditorIconStrikethrough"
+                }))
             ];
 
             widget.startup = function () {

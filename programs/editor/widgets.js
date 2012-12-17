@@ -31,86 +31,91 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define */
+/*global define,document,require */
 define("webodf/editor/widgets", [
 	"webodf/editor/widgets/simpleStyles",
 	"webodf/editor/widgets/paragraphStyles",
 	"webodf/editor/widgets/paragraphStylesDialog",
 	"webodf/editor/widgets/zoomSlider"],
-	function(SimpleStyles, ParagraphStyles, ParagraphStylesDialog, ZoomSlider) {
-"use strict";
+	function (SimpleStyles, ParagraphStyles, ParagraphStylesDialog, ZoomSlider) {
+        "use strict";
 
-return function loadWidgets(editorSession) {
-    var toolbar,
-        translator=document.translator,
-        ToolbarSeparator;
-    // Menubar
-    require([
-                "dojo/ready", 
-                "dijit/MenuBar", 
-                "dijit/PopupMenuBarItem", 
-                "dijit/Menu", 
-                "dijit/MenuItem", 
+        return function loadWidgets(editorSession) {
+            var toolbar,
+                translator = document.translator,
+                ToolbarSeparator;
+            // Menubar
+            require([
+                "dojo/ready",
+                "dijit/MenuBar",
+                "dijit/PopupMenuBarItem",
+                "dijit/Menu",
+                "dijit/MenuItem",
                 "dijit/DropDownMenu"
-    ], function(ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
-        ready(function() {
-            var menuBar = new MenuBar({}, "menubar");
+            ], function (ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
+                ready(function () {
+                    var menuBar, formatSubmenu, paragraphStylesMenuItem, dialog;
+                    
+                    menuBar = new MenuBar({}, "menubar");
+                    
+                    formatSubmenu = new DropDownMenu({});
+                    
+                    paragraphStylesMenuItem = new MenuItem({
+                        label: translator("paragraph_DDD")
+                    });
+                    
+                    formatSubmenu.addChild(paragraphStylesMenuItem);
 
-            var formatSubmenu = new DropDownMenu({});
-            var paragraphStylesMenuItem = new MenuItem({
-                label: translator("paragraph_DDD")
+                    menuBar.addChild(new PopupMenuBarItem({
+                        label: translator("file")
+                    }));
+                    menuBar.addChild(new PopupMenuBarItem({
+                        label: translator("edit")
+                    }));
+                    menuBar.addChild(new PopupMenuBarItem({
+                        label: translator("view")
+                    }));
+                    menuBar.addChild(new PopupMenuBarItem({
+                        label: translator("insert")
+                    }));
+                    menuBar.addChild(new PopupMenuBarItem({
+                        label: translator("format"),
+                        popup: formatSubmenu
+                    }));
+
+                    dialog = new ParagraphStylesDialog(editorSession, function (dialog) {
+                        paragraphStylesMenuItem.onClick = function () {
+                            dialog.startup();
+                            dialog.show();
+                        };
+                    });
+                });
             });
-            formatSubmenu.addChild(paragraphStylesMenuItem);
 
-            menuBar.addChild(new PopupMenuBarItem({
-                label: translator("file")
-            }));
-            menuBar.addChild(new PopupMenuBarItem({
-                label: translator("edit")
-            }));
-            menuBar.addChild(new PopupMenuBarItem({
-                label: translator("view")
-            }));
-            menuBar.addChild(new PopupMenuBarItem({
-                label: translator("insert")
-            }));
-            menuBar.addChild(new PopupMenuBarItem({
-                label: translator("format"),
-                popup: formatSubmenu
-            }));
+            // Toolbar
+            require(["dijit/Toolbar"], function (Toolbar) {
+                toolbar = new Toolbar({}, "toolbar");
+                
+                var simpleStyles, paragraphStyles, zoomSlider;
+                // Simple Style Selector [B, I, U, S]
+                simpleStyles = new SimpleStyles(editorSession, function (widget) {
+                    widget.placeAt(toolbar);
+                    widget.startup();
+                });
 
-            new ParagraphStylesDialog(editorSession, function(dialog) {
-                paragraphStylesMenuItem.onClick = function() {
-                    dialog.startup();
-                    dialog.show();
-                };
+                // Paragraph Style Selector
+                paragraphStyles = new ParagraphStyles(editorSession, function (widget) {
+                    widget.placeAt(toolbar);
+                    widget.startup();
+                });
+
+                // Zoom Level Selector
+                zoomSlider = new ZoomSlider(editorSession, function (widget) {
+                    widget.placeAt(toolbar);
+                    widget.startup();
+                });
+
             });
-        });
+        };
+
     });
-
-	// Toolbar
-	require(["dijit/Toolbar"], function(Toolbar) {
-		toolbar = new Toolbar({}, "toolbar");
-
-		// Simple Style Selector [B, I, U, S]
-		new SimpleStyles(editorSession, function (widget) {
-			widget.placeAt(toolbar);
-			widget.startup();
-		});
-
-		// Paragraph Style Selector
-		new ParagraphStyles(editorSession, function (widget) {
-			widget.placeAt(toolbar);
-			widget.startup();
-		});
-
-		// Zoom Level Selector
-		new ZoomSlider(editorSession, function (widget) {
-			widget.placeAt(toolbar);
-			widget.startup();
-		});
-
-	});
-}
-
-	});
