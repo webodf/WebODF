@@ -136,7 +136,7 @@ ops.NowjsUserModel = function NowjsUserModel() {
 
             subscribers.splice(i,1);
         }
-    }
+    };
 
     runtime.assert(net.networkStatus === "ready", "network not ready");
 };
