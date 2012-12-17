@@ -79,7 +79,6 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             });
                         }
                     });
-                    console.log('sss' + form);
                     // Automatically update preview when selections change
                     form.watch('value', function () {
                         if (form.value.textStyleRadio.indexOf('bold') !== -1) {
