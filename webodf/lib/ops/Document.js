@@ -423,17 +423,17 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             paragraphStyle.setAttributeNS(fons, 'margin-bottom', info.paragraphProperties.topMargin + 'in');
             paragraphStyle.setAttributeNS(fons, 'margin-left', info.paragraphProperties.leftMargin + 'in');
             paragraphStyle.setAttributeNS(fons, 'margin-right', info.paragraphProperties.rightMargin + 'in');
-            paragraphStyle.setAttributeNS(fons, 'text-align', info.paragraphProperties.alignmentPaneRadio);
+            paragraphStyle.setAttributeNS(fons, 'text-align', info.paragraphProperties.alignment);
             
             textStyle.setAttributeNS(fons, 'font-size', info.textProperties.fontSize + 'pt');
             textStyle.setAttributeNS(fons, 'font-family', info.textProperties.fontFamily); 
-            if(info.textProperties.textStyleRadio.indexOf('bold') !== -1) {
+            if(info.textProperties.textStyle.indexOf('bold') !== -1) {
                 textStyle.setAttributeNS(fons, 'font-weight', 'bold');
             }
-            if(info.textProperties.textStyleRadio.indexOf('italic') !== -1) {
+            if(info.textProperties.textStyle.indexOf('italic') !== -1) {
                 textStyle.setAttributeNS(fons, 'font-style', 'italic');
             }
-            if(info.textProperties.textStyleRadio.indexOf('underline') !== -1) {
+            if(info.textProperties.textStyle.indexOf('underline') !== -1) {
                 textStyle.setAttributeNS(fons, 'text-decoration', 'underline');
             }
 

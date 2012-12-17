@@ -68,30 +68,31 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             form.attr('value', {
                                 fontFamily: s_fontName.length ? s_fontName : 'sans-serif',
                                 fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
-                                textStyleRadio: [s_bold, s_italic, s_underline]
+                                textStyle: [s_bold, s_italic, s_underline]
                             });
                         } else {
                             // TODO: Use default style here
                             form.attr('value', {
                                 fontFamily: 'sans-serif',
                                 fontSize: 12,
-                                textStyleRadio: []
+                                textStyle: []
                             });
                         }
                     });
                     // Automatically update preview when selections change
                     form.watch('value', function () {
-                        if (form.value.textStyleRadio.indexOf('bold') !== -1) {
+                        console.log(form.value);
+                        if (form.value.textStyle.indexOf('bold') !== -1) {
                             preview.style.fontWeight = 'bold';
                         } else {
                             preview.style.fontWeight = 'normal';
                         }
-                        if (form.value.textStyleRadio.indexOf('italic') !== -1) {
+                        if (form.value.textStyle.indexOf('italic') !== -1) {
                             preview.style.fontStyle = 'italic';
                         } else {
                             preview.style.fontStyle = 'normal';
                         }
-                        if (form.value.textStyleRadio.indexOf('underline') !== -1) {
+                        if (form.value.textStyle.indexOf('underline') !== -1) {
                             preview.style.textDecoration = 'underline';
                         } else {
                             preview.style.textDecoration = 'none';
