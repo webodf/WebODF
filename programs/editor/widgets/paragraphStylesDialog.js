@@ -60,10 +60,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
                 "class": "dijitDialogPaneActionBar"
             }),
             okButton = new dijit.form.Button({
-                label: translator("ok")
+                label: translator("ok"),
+                onClick: accept
             }).placeAt(actionBar),
             formButton = new dijit.form.Button({
-                label: translator("cancel")
+                label: translator("cancel"),
+                onClick: cancel
             }).placeAt(actionBar);
             dialog.domNode.appendChild(actionBar);
 
