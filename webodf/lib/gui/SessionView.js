@@ -48,7 +48,8 @@ gui.SessionView = (function () {
             avatarEditedStyles,
             memberDataChangedHandler,
             headlineNodeName = 'text|h',
-            paragraphNodeName = 'text|p';
+            paragraphNodeName = 'text|p',
+            editHighlightingEnabled = true;
 
 
         /**
@@ -114,6 +115,58 @@ gui.SessionView = (function () {
         }
 
         /**
+         * @param {string} nodeName
+         * @param {string} memberId
+         */
+        function removeAvatarEditedStyle(nodeName, memberId) {
+            var styleNode = getAvatarEditedStyleNode(nodeName, memberId);
+
+            if (styleNode) {
+                avatarEditedStyles.removeChild(styleNode);
+            }
+        }
+
+        this.enableEditHighlighting = function () {
+            var i, userModel, cursors, memberId, userData;
+
+            // no change?
+            if (editHighlightingEnabled) {
+                return;
+            }
+
+            userModel = session.getUserModel(),
+            cursors = session.getOdfDocument().getCursors();
+
+            for (i=0; i<cursors.length; i+=1) {
+                memberId = cursors[i].getMemberId();
+                userData = userModel.getUserDetails(memberId);
+                setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
+                setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
+            }
+
+            editHighlightingEnabled = true;
+        }
+
+        this.disableEditHighlighting = function () {
+            var i, cursors, memberId;
+
+            // no change?
+            if (! editHighlightingEnabled) {
+                return;
+            }
+
+            cursors = session.getOdfDocument().getCursors();
+
+            for (i=0; i<cursors.length; i+=1) {
+                memberId = cursors[i].getMemberId();
+                removeAvatarEditedStyle(headlineNodeName, memberId);
+                removeAvatarEditedStyle(paragraphNodeName, memberId);
+            }
+
+            editHighlightingEnabled = false;
+       }
+
+        /**
          * @return {ops.Session}
          */
         this.getSession = function () {
@@ -138,8 +191,10 @@ gui.SessionView = (function () {
                 caret.setColor(userData.color);
             }
 
-            setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
-            setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
+            if (editHighlightingEnabled) {
+                setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
+                setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
+            }
         }
         memberDataChangedHandler = onMemberDataChanged;
 
@@ -159,9 +214,11 @@ gui.SessionView = (function () {
 
             carets[memberId] = caret;
 
-            // Add per-avatar edited styling
-            setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
-            setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
+            if (editHighlightingEnabled) {
+                // Add per-avatar edited styling
+                setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
+                setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
+            }
         }
 
         /**
