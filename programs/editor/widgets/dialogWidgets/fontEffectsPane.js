@@ -31,40 +31,46 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require */
-define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
+/*global define,require,document,dijit,console */
+define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
     "use strict";
     function makeWidget(editorSession, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
             var translator = document.translator;
-            ready(function() {
+            ready(function () {
                 var contentPane = new ContentPane({
                     title: translator("fontEffects"),
                     href: "widgets/dialogWidgets/fontEffectsPane.html",
-                    preload: true,
-            	});
-                 
-                var fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+                    preload: true
+                }),
+                    fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
                     stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
                     
                 contentPane.onLoad = function () {
-                    var form = dijit.byId('fontEffectsPaneForm');
-                    editorSession.subscribe('paragraphChanged', function() {
-                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'text-properties')[0];
+                    var form = dijit.byId('fontEffectsPaneForm'),
+                        preview = document.getElementById('previewText');
+
+                    editorSession.subscribe('paragraphChanged', function () {
+                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'text-properties')[0],
+                            s_bold,
+                            s_italic,
+                            s_underline,
+                            s_fontSize,
+                            s_fontName;
                         
-                        if(style !== undefined) {
-                             s_bold = style.getAttributeNS(fons, 'font-weight');
-                             s_italic = style.getAttributeNS(fons, 'font-style');
-                             s_underline = style.getAttributeNS(fons, 'text-decoration');
-                             s_fontSize = parseFloat(style.getAttributeNS(fons, 'font-size'));
-                             s_fontName = style.getAttributeNS(fons, 'font-family');
+                        if (style !== undefined) {
+                            s_bold = style.getAttributeNS(fons, 'font-weight');
+                            s_italic = style.getAttributeNS(fons, 'font-style');
+                            s_underline = style.getAttributeNS(fons, 'text-decoration');
+                            s_fontSize = parseFloat(style.getAttributeNS(fons, 'font-size'));
+                            s_fontName = style.getAttributeNS(fons, 'font-family');
+                            
                             form.attr('value', {
                                 fontFamily: s_fontName.length ? s_fontName : 'sans-serif',
                                 fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
                                 textStyleRadio: [s_bold, s_italic, s_underline]
                             });
-                        }
-                        else {
+                        } else {
                             // TODO: Use default style here
                             form.attr('value', {
                                 fontFamily: 'sans-serif',
@@ -73,29 +79,30 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
                             });
                         }
                     });
-                    
+                    console.log('sss' + form);
                     // Automatically update preview when selections change
-                    var preview = document.getElementById('previewText');
                     form.watch('value', function () {
-                            if(form.value.textStyleRadio.indexOf('bold') != -1) 
-                                preview.style.fontWeight = 'bold';
-                            else
-                                preview.style.fontWeight = 'normal';
-                            if(form.value.textStyleRadio.indexOf('italic') != -1) 
-                                preview.style.fontStyle = 'italic';
-                            else
-                                preview.style.fontStyle = 'normal';
-                            if(form.value.textStyleRadio.indexOf('underline') != -1) 
-                                preview.style.textDecoration = 'underline';
-                            else
-                                preview.style.textDecoration = 'none';
+                        if (form.value.textStyleRadio.indexOf('bold') !== -1) {
+                            preview.style.fontWeight = 'bold';
+                        } else {
+                            preview.style.fontWeight = 'normal';
+                        }
+                        if (form.value.textStyleRadio.indexOf('italic') !== -1) {
+                            preview.style.fontStyle = 'italic';
+                        } else {
+                            preview.style.fontStyle = 'normal';
+                        }
+                        if (form.value.textStyleRadio.indexOf('underline') !== -1) {
+                            preview.style.textDecoration = 'underline';
+                        } else {
+                            preview.style.textDecoration = 'none';
+                        }
 
-                            preview.style.fontSize = form.value.fontSize + 'pt';
-                            preview.style.fontFamily = form.value.fontFamily;
+                        preview.style.fontSize = form.value.fontSize + 'pt';
+                        preview.style.fontFamily = form.value.fontFamily;
                     });
-                }
-
-            	return callback(contentPane);
+                };
+                return callback(contentPane);
             });
         });
     }
