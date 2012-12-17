@@ -403,38 +403,38 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
      * @notypecheck
      */
     this.updateParagraphStyle = function (styleName, info) {
-        var style, paragraphStyle, textStyle;
-        style = getParagraphStyleElement(styleName);
+        var styleNode, paragraphPropertiesNode, textPropertiesNode;
+        styleNode = getParagraphStyleElement(styleName);
 
-        if(style) {
-            paragraphStyle = style.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
-            textStyle = style.getElementsByTagNameNS(stylens, 'text-properties')[0];
+        if (styleNode) {
+            paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
+            textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
             
-            if(paragraphStyle === undefined) {
-                paragraphStyle = rootNode.ownerDocument.createElementNS(stylens, 'paragraph-properties');
-                style.appendChild(paragraphStyle);
+            if (paragraphPropertiesNode === undefined) {
+                paragraphPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'paragraph-properties');
+                styleNode.appendChild(paragraphPropertiesNode);
             }
-            if(textStyle === undefined) {
-                textStyle = rootNode.ownerDocument.createElementNS(stylens, 'text-properties');
-                style.appendChild(textStyle);
+            if (textPropertiesNode === undefined) {
+                textPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'text-properties');
+                styleNode.appendChild(textPropertiesNode);
             }
 
-            paragraphStyle.setAttributeNS(fons, 'margin-top', info.paragraphProperties.topMargin + 'in');
-            paragraphStyle.setAttributeNS(fons, 'margin-bottom', info.paragraphProperties.topMargin + 'in');
-            paragraphStyle.setAttributeNS(fons, 'margin-left', info.paragraphProperties.leftMargin + 'in');
-            paragraphStyle.setAttributeNS(fons, 'margin-right', info.paragraphProperties.rightMargin + 'in');
-            paragraphStyle.setAttributeNS(fons, 'text-align', info.paragraphProperties.alignment);
+            paragraphPropertiesNode.setAttributeNS(fons, 'margin-top', info.paragraphProperties.topMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'margin-bottom', info.paragraphProperties.topMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'margin-left', info.paragraphProperties.leftMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'margin-right', info.paragraphProperties.rightMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'text-align', info.paragraphProperties.alignment);
             
-            textStyle.setAttributeNS(fons, 'font-size', info.textProperties.fontSize + 'pt');
-            textStyle.setAttributeNS(fons, 'font-family', info.textProperties.fontFamily); 
-            if(info.textProperties.textStyle.indexOf('bold') !== -1) {
-                textStyle.setAttributeNS(fons, 'font-weight', 'bold');
+            textPropertiesNode.setAttributeNS(fons, 'font-size', info.textProperties.fontSize + 'pt');
+            textPropertiesNode.setAttributeNS(fons, 'font-family', info.textProperties.fontFamily);
+            if (info.textProperties.textStyle.indexOf('bold') !== -1) {
+                textPropertiesNode.setAttributeNS(fons, 'font-weight', 'bold');
             }
-            if(info.textProperties.textStyle.indexOf('italic') !== -1) {
-                textStyle.setAttributeNS(fons, 'font-style', 'italic');
+            if (info.textProperties.textStyle.indexOf('italic') !== -1) {
+                textPropertiesNode.setAttributeNS(fons, 'font-style', 'italic');
             }
-            if(info.textProperties.textStyle.indexOf('underline') !== -1) {
-                textStyle.setAttributeNS(fons, 'text-decoration', 'underline');
+            if (info.textProperties.textStyle.indexOf('underline') !== -1) {
+                textPropertiesNode.setAttributeNS(fons, 'text-decoration', 'underline');
             }
 
             return true;
