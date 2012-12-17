@@ -34,7 +34,7 @@
 /*global define,require */
 define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
     "use strict";
-    function makeWidget(dialog, callback) {
+    function makeWidget(editorSession, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
             var translator = document.translator;
             ready(function() {
@@ -49,8 +49,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
                     
                 contentPane.onLoad = function () {
                     var form = dijit.byId('fontEffectsPaneForm');
-                    editor.editorSession.subscribe('paragraphChanged', function() {
-                        var style = editor.editorSession.getParagraphStyleElement(editor.editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'text-properties')[0];
+                    editorSession.subscribe('paragraphChanged', function() {
+                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'text-properties')[0];
                         
                         if(style !== undefined) {
                              s_bold = style.getAttributeNS(fons, 'font-weight');
@@ -100,8 +100,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function() {
         });
     }
 
-    return function FontEffectsPane(dialog, callback) {
-        makeWidget(dialog, function (pane) {
+    return function FontEffectsPane(editorSession, callback) {
+        makeWidget(editorSession, function (pane) {
             return callback(pane);
         });
     };

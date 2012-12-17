@@ -34,7 +34,7 @@
 /*global define,require */
 define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
     "use strict";
-    function makeWidget(callback) {
+    function makeWidget(editorSession, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
             ready(function() {
                 var contentPane = new ContentPane({
@@ -47,9 +47,9 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
                 stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
 
                 contentPane.onLoad = function() {
-                    editor.editorSession.subscribe('paragraphChanged', function() {
-                        var style = editor.editorSession.getParagraphStyleElement(editor.editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
-                            form = dijit.byId('alignmentPaneForm');
+                    var form = dijit.byId('alignmentPaneForm');
+                    editorSession.subscribe('paragraphChanged', function() {
+                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
                         if(style !== undefined) {                        
                             var s_topMargin = parseFloat(style.getAttributeNS(fons, 'margin-top')),
                                 s_bottomMargin = parseFloat(style.getAttributeNS(fons, 'margin-bottom')),
@@ -82,8 +82,8 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
         });
     }
 
-    return function AlignmentPane(callback) {
-        makeWidget(function (pane) {
+    return function AlignmentPane(editorSession, callback) {
+        makeWidget(editorSession, function (pane) {
             return callback(pane);
         });
     };

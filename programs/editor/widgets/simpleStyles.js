@@ -35,7 +35,7 @@
 define("webodf/editor/widgets/simpleStyles", [], function () {
     "use strict";
 
-    function makeWidget(callback) {
+    function makeWidget(editorSession, callback) {
         require(["dijit/form/ToggleButton"], function (ToggleButton) {
             var i,
                 widget = {};
@@ -80,8 +80,8 @@ define("webodf/editor/widgets/simpleStyles", [], function () {
         });
     }
 
-    return function SimpleStyles(callback) {
-        makeWidget(function (widget) {
+    return function SimpleStyles(editorSession, callback) {
+        makeWidget(editorSession, function (widget) {
             return callback(widget);
         });
     };

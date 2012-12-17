@@ -34,7 +34,7 @@
 /*global define,require */
 define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
     "use strict";
-    function makeWidget(callback) {
+    function makeWidget(editorSession, callback) {
         require([
             "dijit/Dialog",
             "dijit/layout/TabContainer",
@@ -75,12 +75,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
                 "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
                 ], function(AlignmentPane, FontEffectsPane) {
                 var a, f;
-                a = new AlignmentPane(function (alignmentPane) {
+                a = new AlignmentPane(editorSession, function (alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
                 });
                 // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
-                f = new FontEffectsPane(dialog, function (fontEffectsPane) {
+                f = new FontEffectsPane(editorSession, function (fontEffectsPane) {
                     fontEffectsPane.startup();
                     tabContainer.addChild(fontEffectsPane);
                 });
@@ -90,7 +90,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
                 var alignment = dijit.byId('alignmentPaneForm').get('value'),
                     fontEffects = dijit.byId('fontEffectsPaneForm').get('value');
                 
-                editor.editorSession.updateParagraphStyle(editor.editorSession.getCurrentParagraphStyle(), {
+                editorSession.updateParagraphStyle(editorSession.getCurrentParagraphStyle(), {
                     paragraphProperties: alignment,
                     textProperties: fontEffects
                 });
@@ -108,8 +108,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function() {
         });
     }
 
-    return function ParagraphStylesDialog(callback) {
-        makeWidget(function (dialog) {
+    return function ParagraphStylesDialog(editorSession, callback) {
+        makeWidget(editorSession, function (dialog) {
             return callback(dialog);
         });
     };

@@ -79,7 +79,7 @@ return function loadWidgets(editorSession) {
                 popup: formatSubmenu
             }));
 
-            new ParagraphStylesDialog(function(dialog) {
+            new ParagraphStylesDialog(editorSession, function(dialog) {
                 paragraphStylesMenuItem.onClick = function() {
                     dialog.startup();
                     dialog.show();
@@ -93,7 +93,7 @@ return function loadWidgets(editorSession) {
 		toolbar = new Toolbar({}, "toolbar");
 
 		// Simple Style Selector [B, I, U, S]
-		new SimpleStyles(function (widget) {
+		new SimpleStyles(editorSession, function (widget) {
 			widget.placeAt(toolbar);
 			widget.startup();
 		});
@@ -105,7 +105,7 @@ return function loadWidgets(editorSession) {
 		});
 
 		// Zoom Level Selector
-		new ZoomSlider(function (widget) {
+		new ZoomSlider(editorSession, function (widget) {
 			widget.placeAt(toolbar);
 			widget.startup();
 		});

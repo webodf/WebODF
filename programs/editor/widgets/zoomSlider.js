@@ -34,7 +34,7 @@
 /*global define,require */
 define("webodf/editor/widgets/zoomSlider", [], function () {
     "use strict";
-    function makeWidget(callback) {
+    function makeWidget(editorSession, callback) {
         require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
             var widget = {};
 
@@ -54,7 +54,8 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
 
             var canvas = dojo.byId('canvas');
             widget.onChange = function (value) {
-                editor.editorSession.getDocument().odfCanvas.setZoomLevel(value/100.0);
+                console.log(editorSession.getDocument());
+                document.odfCanvas.setZoomLevel(value/100.0);
                 /*
                 var zoomlevel = value / 100.0;
                 canvas.style.zoom = zoomlevel;
@@ -67,8 +68,8 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
         });
     }
 
-    return function ZoomSlider(callback) {
-        makeWidget(function (widget) {
+    return function ZoomSlider(editorSession, callback) {
+        makeWidget(editorSession, function (widget) {
             return callback(widget);
         });
     };
