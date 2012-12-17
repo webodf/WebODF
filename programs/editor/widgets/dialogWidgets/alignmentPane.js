@@ -31,41 +31,45 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require */
-define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
+/*global define,require,document,dijit */
+define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
     "use strict";
     function makeWidget(editorSession, callback) {
         require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
-            ready(function() {
+            ready(function () {
                 var contentPane = new ContentPane({
                     title: document.translator("alignment"),
                     href: "widgets/dialogWidgets/alignmentPane.html",
                     preload: true
-            	});
+                }),
+                    fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+                    stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
 
-                var fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-                stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-
-                contentPane.onLoad = function() {
+                contentPane.onLoad = function () {
                     var form = dijit.byId('alignmentPaneForm');
-                    editorSession.subscribe('paragraphChanged', function() {
-                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
-                        if(style !== undefined) {                        
-                            var s_topMargin = parseFloat(style.getAttributeNS(fons, 'margin-top')),
-                                s_bottomMargin = parseFloat(style.getAttributeNS(fons, 'margin-bottom')),
-                                s_leftMargin = parseFloat(style.getAttributeNS(fons, 'margin-left')),
-                                s_rightMargin = parseFloat(style.getAttributeNS(fons, 'margin-left')),
-                                s_textAlign = style.getAttributeNS(fons, 'text-align');
+                    editorSession.subscribe('paragraphChanged', function () {
+                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'paragraph-properties')[0],
+                            s_topMargin,
+                            s_bottomMargin,
+                            s_leftMargin,
+                            s_rightMargin,
+                            s_textAlign;
+
+                        if (style !== undefined) {
+                            s_topMargin = parseFloat(style.getAttributeNS(fons, 'margin-top'));
+                            s_bottomMargin = parseFloat(style.getAttributeNS(fons, 'margin-bottom'));
+                            s_leftMargin = parseFloat(style.getAttributeNS(fons, 'margin-left'));
+                            s_rightMargin = parseFloat(style.getAttributeNS(fons, 'margin-left'));
+                            s_textAlign = style.getAttributeNS(fons, 'text-align');
                             
                             form.attr('value', {
                                 topMargin: isNaN(s_topMargin) ? 0 : s_topMargin,
                                 bottomMargin: isNaN(s_bottomMargin) ? 0 : s_bottomMargin,
                                 leftMargin: isNaN(s_leftMargin) ? 0 : s_leftMargin,
                                 rightMargin: isNaN(s_rightMargin) ? 0 : s_rightMargin,
-                                alignmentPaneRadio: s_textAlign.length ? s_textAlign : 'left' 
+                                alignmentPaneRadio: s_textAlign.length ? s_textAlign : 'left'
                             });
-                        }
-                        else {
+                        } else {
                             form.attr('value', {
                                 topMargin: 0,
                                 bottomMargin: 0,
@@ -76,8 +80,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function() {
                         }
                     });
                 };
-                
-            	return callback(contentPane);
+                return callback(contentPane);
             });
         });
     }
