@@ -41,9 +41,8 @@ define("webodf/editor/widgets", [
         "use strict";
 
         return function loadWidgets(editorSession) {
-            var toolbar,
-                translator = document.translator,
-                ToolbarSeparator;
+            var translator = document.translator;
+
             // Menubar
             require([
                 "dojo/ready",
@@ -94,9 +93,10 @@ define("webodf/editor/widgets", [
 
             // Toolbar
             require(["dijit/Toolbar"], function (Toolbar) {
+                var toolbar, simpleStyles, paragraphStyles, zoomSlider;
+                
                 toolbar = new Toolbar({}, "toolbar");
                 
-                var simpleStyles, paragraphStyles, zoomSlider;
                 // Simple Style Selector [B, I, U, S]
                 simpleStyles = new SimpleStyles(editorSession, function (widget) {
                     widget.placeAt(toolbar);
