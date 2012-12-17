@@ -199,6 +199,9 @@ gui.SessionController = (function () {
             } else if (keyCode === 36) { // home
                 op = createOpMoveCursorByHomeKey();
                 handled = true;
+            } else if (keyCode === 35) { // end
+                // TODO: implement an operation! for now just eat the key
+                handled = true;
             } else if (keyCode === 8) { // Backspace
                 op = createOpRemoveTextByBackspaceKey();
                 handled = (op !== null);
