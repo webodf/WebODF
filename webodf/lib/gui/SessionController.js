@@ -237,12 +237,14 @@ gui.SessionController = (function () {
             var op,
                 text = stringFromKeyPress(e);
             if (e.keyCode === 13) { // enter
+                /* TODO: operation execution seems broken at the moment, fix it!
                 op = new ops.OpSplitParagraph(session);
                 op.init({
                     memberid: inputMemberId,
                     position: session.getOdfDocument().getCursorPosition(inputMemberId)
                 });
                 session.enqueue(op);
+                */
                 cancelEvent(e);
             } else if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
                 op = new ops.OpInsertText(session);
