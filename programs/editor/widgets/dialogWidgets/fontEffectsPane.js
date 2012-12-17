@@ -81,7 +81,6 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                     });
                     // Automatically update preview when selections change
                     form.watch('value', function () {
-                        console.log(form.value);
                         if (form.value.textStyle.indexOf('bold') !== -1) {
                             preview.style.fontWeight = 'bold';
                         } else {

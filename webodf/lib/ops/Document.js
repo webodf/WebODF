@@ -411,30 +411,30 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
             
             if (paragraphPropertiesNode === undefined) {
-                paragraphPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'paragraph-properties');
+                paragraphPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:paragraph-properties');
                 styleNode.appendChild(paragraphPropertiesNode);
             }
             if (textPropertiesNode === undefined) {
-                textPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'text-properties');
+                textPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:text-properties');
                 styleNode.appendChild(textPropertiesNode);
             }
 
-            paragraphPropertiesNode.setAttributeNS(fons, 'margin-top', info.paragraphProperties.topMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'margin-bottom', info.paragraphProperties.topMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'margin-left', info.paragraphProperties.leftMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'margin-right', info.paragraphProperties.rightMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'text-align', info.paragraphProperties.alignment);
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-top', info.paragraphProperties.topMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-bottom', info.paragraphProperties.topMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-left', info.paragraphProperties.leftMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-right', info.paragraphProperties.rightMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:text-align', info.paragraphProperties.alignment);
             
-            textPropertiesNode.setAttributeNS(fons, 'font-size', info.textProperties.fontSize + 'pt');
-            textPropertiesNode.setAttributeNS(fons, 'font-family', info.textProperties.fontFamily);
+            textPropertiesNode.setAttributeNS(fons, 'fo:font-size', info.textProperties.fontSize + 'pt');
+            textPropertiesNode.setAttributeNS(fons, 'fo:font-family', info.textProperties.fontFamily);
             if (info.textProperties.textStyle.indexOf('bold') !== -1) {
-                textPropertiesNode.setAttributeNS(fons, 'font-weight', 'bold');
+                textPropertiesNode.setAttributeNS(fons, 'fo:font-weight', 'bold');
             }
             if (info.textProperties.textStyle.indexOf('italic') !== -1) {
-                textPropertiesNode.setAttributeNS(fons, 'font-style', 'italic');
+                textPropertiesNode.setAttributeNS(fons, 'fo:font-style', 'italic');
             }
             if (info.textProperties.textStyle.indexOf('underline') !== -1) {
-                textPropertiesNode.setAttributeNS(fons, 'text-decoration', 'underline');
+                textPropertiesNode.setAttributeNS(fons, 'fo:text-decoration', 'underline');
             }
 
             return true;
