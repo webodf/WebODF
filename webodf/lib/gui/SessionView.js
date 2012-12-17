@@ -46,7 +46,72 @@ gui.SessionView = (function () {
     function SessionView(session, caretFactory) {
         var carets = {},
             avatarEditedStyles,
-            memberDataChangedHandler;
+            memberDataChangedHandler,
+            headlineNodeName = 'text|h',
+            paragraphNodeName = 'text|p';
+
+
+        /**
+         * @param {string} nodeName
+         * @param {string} memberId
+         * @return {string}
+         */
+        function createNodeMatch(nodeName, memberId) {
+            return nodeName + '[class=edited][user="' + memberId + '"]'
+        }
+
+        /**
+         * @param {string} color
+         * @return {string}
+         */
+        function createStyleDefinition(color) {
+            return ' { background-color: ' + color + ';'
+                + '-webkit-animation-name: fade;'
+                + '-webkit-animation-duration: 10s;'
+                + '-webkit-animation-fill-mode: forwards;'
+                + '-moz-animation-name: fade;'
+                + '-moz-animation-duration: 10s;'
+                + '-moz-animation-fill-mode: forwards;'
+                + 'border-radius: 10px;}';
+        }
+
+        /**
+         * @param {string} nodeName
+         * @param {string} memberId
+         * @return {?Node}
+         */
+        function getAvatarEditedStyleNode(nodeName, memberId) {
+            var node = avatarEditedStyles.firstChild,
+                nodeMatch = createNodeMatch(nodeName, memberId);
+
+            while (node) {
+                if ((node.nodeType === 3) && (node.data.indexOf(nodeMatch)==0)) {
+                    return node;
+                }
+                node = node.nextSibling;
+            }
+            return null;
+        }
+
+        /**
+         * @param {string} nodeName
+         * @param {string} memberId
+         * @param {string} color
+         */
+        function setAvatarEditedStyle(nodeName, memberId, color) {
+            var styleRule = createNodeMatch(nodeName, memberId) + createStyleDefinition(color),
+                styleNode = getAvatarEditedStyleNode(nodeName, memberId);
+
+            // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
+            // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
+            // avatarEditedStyles.sheet.insertRule(paragraphStyleName+styleRuleRudimentCStr, 0);
+            // Workaround for now:
+            if (styleNode) {
+                styleNode.data = styleRule;
+            } else {
+                avatarEditedStyles.appendChild(document.createTextNode(styleRule));
+            }
+        }
 
         /**
          * @return {ops.Session}
@@ -72,6 +137,9 @@ gui.SessionView = (function () {
                 caret.setAvatarImageUrl(userData.imageurl);
                 caret.setColor(userData.color);
             }
+
+            setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
+            setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
         }
         memberDataChangedHandler = onMemberDataChanged;
 
@@ -82,8 +150,7 @@ gui.SessionView = (function () {
             var caret = caretFactory.createCaret(cursor),
                 memberId = cursor.getMemberId(),
                 userModel = session.getUserModel(),
-                userData = userModel.getUserDetails(memberId, memberDataChangedHandler),
-                styleRuleRudimentCStr;
+                userData = userModel.getUserDetails(memberId, memberDataChangedHandler);
 
             caret.setAvatarImageUrl(userData.imageurl);
             caret.setColor(userData.color);
@@ -93,27 +160,14 @@ gui.SessionView = (function () {
             carets[memberId] = caret;
 
             // Add per-avatar edited styling
-            styleRuleRudimentCStr = '[class=edited][user="' + memberId + '"] { background-color: ' + userData.color + ';'
-                + '-webkit-animation-name: fade;'
-                + '-webkit-animation-duration: 10s;'
-                + '-webkit-animation-fill-mode: forwards;'
-                + '-moz-animation-name: fade;'
-                + '-moz-animation-duration: 10s;'
-                + '-moz-animation-fill-mode: forwards;'
-                + 'border-radius: 10px;}';
-            // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
-            // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
-            // avatarEditedStyles.sheet.insertRule('text|p'+styleRuleRudimentCStr, 0);
-            // Workaround for now
-            avatarEditedStyles.appendChild(document.createTextNode('text|h' + styleRuleRudimentCStr));
-            avatarEditedStyles.appendChild(document.createTextNode('text|p' + styleRuleRudimentCStr));
+            setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
+            setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
         }
 
         /**
          * @param {!string} memberid
          */
         function onCursorRemoved(memberid) {
-            // TODO: remove style rule for avatar again from avatarEditedStyles
             delete carets[memberid];
             session.getUserModel().unsubscribeForUserDetails(memberid, memberDataChangedHandler);
         }
