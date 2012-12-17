@@ -22,9 +22,6 @@ text|p, text|h {
   padding: 3px 3px 3px 3px;
   margin: 5px 5px 5px 5px;
 }
-text|h {
-  font-weight: bold;
-}
 *[runtimens|containsparagraphanchor] {
   position: relative;
 }
