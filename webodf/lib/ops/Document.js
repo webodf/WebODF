@@ -388,7 +388,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         if (domPosition) {
             paragraphNode = getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
-                paragraphNode.setAttributeNS(textns, 'style-name', styleNameAfter);
+                paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
                 highlightEdit(getParagraphElement(paragraphNode), memberid);
                 return true;
             }
