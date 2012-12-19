@@ -987,7 +987,10 @@ odf.OdfCanvas = (function () {
                 }, 100);
             }
         }
-
+        
+        this.refreshCSS = function () {
+            handleStyles(odfcontainer.rootElement, stylesxmlcss);
+        };
         this.odfContainer = function () {
             return odfcontainer;
         };

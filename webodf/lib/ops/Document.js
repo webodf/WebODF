@@ -436,7 +436,8 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             if (info.textProperties.textStyle.indexOf('underline') !== -1) {
                 textPropertiesNode.setAttributeNS(fons, 'fo:text-decoration', 'underline');
             }
-
+            
+            odfCanvas.refreshCSS();
             return true;
         }
 
