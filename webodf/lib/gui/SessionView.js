@@ -58,7 +58,7 @@ gui.SessionView = (function () {
          * @return {string}
          */
         function createNodeMatch(nodeName, memberId) {
-            return nodeName + '[class=edited][user="' + memberId + '"]'
+            return nodeName + '[class=edited][user="' + memberId + '"]';
         }
 
         /**
@@ -86,7 +86,7 @@ gui.SessionView = (function () {
                 nodeMatch = createNodeMatch(nodeName, memberId);
 
             while (node) {
-                if ((node.nodeType === 3) && (node.data.indexOf(nodeMatch)==0)) {
+                if ((node.nodeType === 3) && (node.data.indexOf(nodeMatch) === 0)) {
                     return node;
                 }
                 node = node.nextSibling;
@@ -134,10 +134,10 @@ gui.SessionView = (function () {
                 return;
             }
 
-            userModel = session.getUserModel(),
+            userModel = session.getUserModel();
             cursors = session.getOdfDocument().getCursors();
 
-            for (i=0; i<cursors.length; i+=1) {
+            for (i = 0; i < cursors.length; i += 1) {
                 memberId = cursors[i].getMemberId();
                 userData = userModel.getUserDetails(memberId);
                 setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
@@ -145,26 +145,26 @@ gui.SessionView = (function () {
             }
 
             editHighlightingEnabled = true;
-        }
+        };
 
         this.disableEditHighlighting = function () {
             var i, cursors, memberId;
 
             // no change?
-            if (! editHighlightingEnabled) {
+            if (!editHighlightingEnabled) {
                 return;
             }
 
             cursors = session.getOdfDocument().getCursors();
 
-            for (i=0; i<cursors.length; i+=1) {
+            for (i = 0; i < cursors.length; i += 1) {
                 memberId = cursors[i].getMemberId();
                 removeAvatarEditedStyle(headlineNodeName, memberId);
                 removeAvatarEditedStyle(paragraphNodeName, memberId);
             }
 
             editHighlightingEnabled = false;
-       }
+        };
 
         /**
          * @return {ops.Session}
