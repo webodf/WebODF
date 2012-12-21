@@ -129,7 +129,7 @@ define("webodf/editor", [
 
                             // start editing: let the controller send the OpAddCursor
                             editorSession.startEditing();
-                        };
+                        });
                     } else {
                         // offline
                         editorSession.startEditing();
