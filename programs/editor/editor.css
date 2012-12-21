@@ -247,15 +247,3 @@ cursor > div:after {
     top: 100%;
     left: 43%;
 }
-
-@-webkit-keyframes fade {
-    100% {
-        background-color: transparent;
-    }
-}
-
-@-moz-keyframes fade {
-    100% {
-        background-color: transparent;
-    }
-}
