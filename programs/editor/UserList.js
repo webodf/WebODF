@@ -37,7 +37,8 @@ define("webodf/editor/UserList", [], function () {
     "use strict";
     
     return function UserList(editorSession, userListDiv) {
-        var self = this;
+        var self = this,
+            memberDataChangedHandler;
 
         editorSession.subscribe('userAdded', function (memberId) {
             self.addUser(memberId);
@@ -47,9 +48,37 @@ define("webodf/editor/UserList", [], function () {
             self.removeUser(memberId);
         });
 
-        function createAvatarButton(avatarListDiv, sessionView, memberId, userDetails) {
-            runtime.assert(avatarListDiv, "avatarListDiv unavailable");
-            var doc = avatarListDiv.ownerDocument,
+        /**
+         * @param {!string} memberId
+         */
+        function updateAvatarButton(memberId, userDetails) {
+            var node = userListDiv.firstChild;
+            while (node) {
+                if (node.memberId === memberId) {
+                    // update background color
+                    node.style.background = userDetails.color;
+                    node = node.firstChild;
+                    while (node) {
+                        if (node.localName === "img") {
+                            // update avatar image
+                            node.src = userDetails.imageurl;
+                        } else if (node.nodeType == 3) {
+                            node.data = userDetails.fullname;
+                        }
+                        node = node.nextSibling;
+                    }
+                    return;
+                }
+                node = node.nextSibling;
+            }
+        }
+
+        /**
+         * @param {!string} memberId
+         */
+        function createAvatarButton(memberId, userDetails) {
+            runtime.assert(userListDiv, "userListDiv unavailable");
+            var doc = userListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
                 avatarDiv = doc.createElementNS(htmlns, "div"),
                 imageElement = doc.createElement("img"),
@@ -73,35 +102,51 @@ define("webodf/editor/UserList", [], function () {
                 //avatar.getCaret().hideHandle();
             };
             avatarDiv.onclick = function () {
-                var caret = sessionView.getCaret(memberId);
+                var caret = editorSession.sessionView.getCaret(memberId);
                 if (caret) {
                     caret.toggleHandleVisibility();
                 }
             };
-            avatarListDiv.appendChild(avatarDiv);
+            userListDiv.appendChild(avatarDiv);
         }
 
         /**
-         * @param {!Element} avatarListDiv
          * @param {!string} memberId
          */
-        function removeAvatarButton(avatarListDiv, memberId) {
-            var node = avatarListDiv.firstChild;
+        function onNewUserDetails(memberId, userDetails) {
+            updateAvatarButton(memberId, userDetails);
+        }
+        memberDataChangedHandler = onNewUserDetails;
+
+        /**
+         * @param {!string} memberId
+         */
+        function removeAvatarButton(memberId) {
+            var node = userListDiv.firstChild;
             while (node) {
                 if (node.memberId === memberId) {
-                    avatarListDiv.removeChild(node);
+                    userListDiv.removeChild(node);
                     return;
                 }
                 node = node.nextSibling;
             }
         }
 
+        /**
+         * @param {!string} memberId
+         */
         this.addUser = function (memberId) {
-            createAvatarButton(userListDiv, editorSession.sessionView, memberId, editorSession.getUserDetails(memberId));
+            var userDetails = editorSession.getUserDetails(memberId, memberDataChangedHandler);
+
+            createAvatarButton(memberId, userDetails);
         };
 
+        /**
+         * @param {!string} memberId
+         */
         this.removeUser = function (memberId) {
-            removeAvatarButton(userListDiv, memberId);
+            editorSession.unsubscribeForUserDetails(memberId, memberDataChangedHandler);
+            removeAvatarButton(memberId);
         };
     };
 });

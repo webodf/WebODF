@@ -150,8 +150,12 @@ define("webodf/editor/EditorSession", [], function () {
             runtime.log("event \"" + eventid + "\" subscribed.");
         };
 
-        this.getUserDetails = function (memberId) {
-            return session.getUserModel().getUserDetails(memberId);
+        this.getUserDetails = function (memberId, subscriber) {
+            return session.getUserModel().getUserDetails(memberId, subscriber);
+        };
+
+        this.unsubscribeForUserDetails = function (memberId, subscriber) {
+            return session.getUserModel().unsubscribeForUserDetails(memberId, subscriber);
         };
 
         this.getCursorPosition = function () {
