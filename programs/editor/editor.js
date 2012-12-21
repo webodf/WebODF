@@ -58,7 +58,7 @@ define("webodf/editor", [
         }
 
 
-        function init_gui_and_doc(docurl, userid) {
+        function init_gui_and_doc(docurl, userid, sessionid) {
             runtime.loadClass('odf.OdfCanvas');
 
             var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
@@ -118,19 +118,18 @@ define("webodf/editor", [
 
                     if (isConnectedWithNetwork) {
                         // use the nowjs op-router when connected
-                        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter());
-                        opRouter.setMemberid(memberid);
+                        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter(sessionid, memberid));
 
                         runtime.log("editor: setting UserModel and requesting replay");
-                        session.setUserModel(new ops.NowjsUserModel(function done() {
-                            opRouter.requestReplay(function done() {
-                                // start editing: let the controller send the OpAddCursor
-                                editorSession.startEditing();
-                                // add our two friends
-                                // addCursorToDoc(session, "bob");
-                                // addCursorToDoc(session, "alice");
-                            });
-                        }));
+                        session.setUserModel(new ops.NowjsUserModel());
+
+                        editorSession.sessionView.disableEditHighlighting();
+                        opRouter.requestReplay(function done() {
+                            editorSession.sessionView.enableEditHighlighting();
+
+                            // start editing: let the controller send the OpAddCursor
+                            editorSession.startEditing();
+                        };
                     } else {
                         // offline
                         editorSession.startEditing();
@@ -219,7 +218,7 @@ define("webodf/editor", [
             });
         }
 
-        self.boot = function (docurl, userid) {
+        self.boot = function (docurl, userid, sessionid) {
             var net = runtime.getNetwork(), accumulated_waiting_time = 0;
 
             //alert("booting: ["+docurl+"] userlist: "+UserList);
@@ -243,7 +242,7 @@ define("webodf/editor", [
                     runtime.getWindow().setTimeout(later_cb, 100);
                 } else {
                     runtime.log("connection to collaboration server established.");
-                    init_gui_and_doc(docurl, userid);
+                    init_gui_and_doc(docurl, userid, sessionid);
                 }
             }
             later_cb();
