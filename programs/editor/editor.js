@@ -149,16 +149,11 @@ define("webodf/editor", [
                         var mainContainer = new BorderContainer({}, 'mainContainer'),
                             collabContainer = new BorderContainer({}, 'collabContainer'),
                             filename = doclocation.replace('/^.*[\\\/]/', ''),
-                            topPane,
                             editorPane,
                             collabPane,
                             peoplePane,
                             chatPane;
 
-                        topPane = new ContentPane({
-                            region: 'top',
-                            content: "<h1><a href='" + doclocation + "''>" + filename + "</a></h1>"
-                        }, 'topPane');
                         editorPane = new ContentPane({
                             region: 'center'
                         }, 'editor');
@@ -177,7 +172,6 @@ define("webodf/editor", [
                             title: translator("chat")
                         }, 'chat');
 
-                        mainContainer.addChild(topPane);
                         mainContainer.addChild(editorPane);
                         mainContainer.addChild(collabPane);
                         collabContainer.addChild(peoplePane);
