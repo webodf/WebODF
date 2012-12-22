@@ -2,11 +2,13 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     index.html
     welcome.odt
+    getin.js
     editor.js
     editor.css
     widgets.js
     avatar-joe.png
     EditorSession.js
+    SessionListView.js
     UserList.js
 )
 
