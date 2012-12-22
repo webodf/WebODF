@@ -135,6 +135,11 @@ define("webodf/editor", [
                         editorSession.startEditing();
                     }
 
+                    // gracefull cursor removal on pag closing
+                    window.onunload = function() {
+                        editorSession.endEditing();
+                    }
+
                     loadWidgets(editorSession);
                 });
                 odfCanvas.load(doclocation);
