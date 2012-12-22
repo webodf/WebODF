@@ -14,18 +14,13 @@ function letIn() {
         );
     }
 
-    function showSessions(sessionList) {
-        var idx,
-            sessionListDiv = document.getElementById("sessionList"),
-            sessionListView = new SessionListView(sessionListDiv, enterSession);
+    function showSessions() {
+        var sessionListDiv = document.getElementById("sessionList"),
+            sessionList = new SessionList(net),
+            sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
 
         // hide login view
         document.getElementById("loginContainer").style.display="none";
-
-        // fill session list
-        for (idx = 0; idx < sessionList.length; idx += 1) {
-            sessionListView.addSession(sessionList[idx]);
-        }
 
         // show session list
         document.getElementById("sessionListContainer").style.display="";
@@ -34,7 +29,8 @@ function letIn() {
     function loginSuccess(userData) {
         runtime.log("connected:"+userData.full_name);
         userId = userData.uid;
-        net.getSessionList(showSessions);
+
+        showSessions();
     }
 
     function loginFail(result) {

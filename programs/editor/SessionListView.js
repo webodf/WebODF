@@ -34,9 +34,14 @@
  */
 /*global define,runtime */
 
-function SessionListView(sessionListDiv, cb) {
+function SessionListView(sessionList, sessionListDiv, cb) {
+        "use strict";
         var self = this,
             memberDataChangedHandler;
+
+        function createSessionDescription(sessionDetails) {
+            return sessionDetails.title + " ("+sessionDetails.cursors.length+" members)";
+        }
 
         /**
          */
@@ -45,7 +50,7 @@ function SessionListView(sessionListDiv, cb) {
             var doc = sessionListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
                 sessionDiv = doc.createElementNS(htmlns, "div"),
-                fullnameTextNode = doc.createTextNode(sessionDetails.title + " ("+sessionDetails.cursors.length+" members)");
+                fullnameTextNode = doc.createTextNode(createSessionDescription(sessionDetails));
 
             sessionDiv.appendChild(fullnameTextNode);
             sessionDiv.sessionId = sessionDetails.id; // TODO: namespace?
@@ -54,6 +59,23 @@ function SessionListView(sessionListDiv, cb) {
             };
 
             sessionListDiv.appendChild(sessionDiv);
+        }
+
+        function updateSessionViewItem(sessionDetails) {
+            var node = sessionListDiv.firstChild;
+            while (node) {
+                if (node.sessionId === sessionDetails.id) {
+                    node = node.firstChild;
+                    while (node) {
+                        if (node.nodeType == 3) {
+                            node.data = createSessionDescription(sessionDetails);
+                        }
+                        node = node.nextSibling;
+                    }
+                    return;
+                }
+                node = node.nextSibling;
+            }
         }
 
         /**
@@ -70,17 +92,16 @@ function SessionListView(sessionListDiv, cb) {
             }
         }
 
-        /**
-         * @param {!string} sessionId
-         */
-        this.addSession = function (sessionDetails) {
-            createSessionViewItem(sessionDetails);
-        };
+        function init() {
+            var idx,
+                subscriber = {onCreated: createSessionViewItem, onUpdated: updateSessionViewItem, onRemoved: removeSessionViewItem},
+                sessions = sessionList.getSessions(subscriber);
 
-        /**
-         * @param {!string} sessionId
-         */
-        this.removeSession = function (sessionId) {
-            removeSessionViewItem(sessionId);
-        };
+            // fill session list
+            for (idx = 0; idx < sessions.length; idx += 1) {
+                createSessionViewItem(sessions[idx]);
+            }
+        }
+
+        init();
 }

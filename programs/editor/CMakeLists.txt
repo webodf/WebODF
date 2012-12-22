@@ -8,6 +8,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     widgets.js
     avatar-joe.png
     EditorSession.js
+    SessionList.js
     SessionListView.js
     UserList.js
 )
