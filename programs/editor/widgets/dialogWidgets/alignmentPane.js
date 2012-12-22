@@ -67,7 +67,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                                 bottomMargin: isNaN(s_bottomMargin) ? 0 : s_bottomMargin,
                                 leftMargin: isNaN(s_leftMargin) ? 0 : s_leftMargin,
                                 rightMargin: isNaN(s_rightMargin) ? 0 : s_rightMargin,
-                                alignment: s_textAlign.length ? s_textAlign : 'left'
+                                alignment: s_textAlign && s_textAlign.length ? s_textAlign : 'left'
                             });
                         } else {
                             form.attr('value', {

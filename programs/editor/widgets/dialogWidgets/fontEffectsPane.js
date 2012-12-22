@@ -66,7 +66,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             s_fontName = style.getAttributeNS(fons, 'font-family');
                             
                             form.attr('value', {
-                                fontFamily: s_fontName.length ? s_fontName : 'sans-serif',
+                                fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',
                                 fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
                                 textStyle: [s_bold, s_italic, s_underline]
                             });
