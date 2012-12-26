@@ -34,6 +34,7 @@
 /**
  * Wrapper for XPath functions
  * @constructor
+ * @return {?}
  */
 xmldom.XPath = (function () {
     "use strict";
@@ -375,6 +376,7 @@ xmldom.XPath = (function () {
     }
     /**
      * @constructor
+     * @return {?}
      */
     xmldom.XPath = function XPath() {
         this.getODFElementsWithXPath = getODFElementsWithXPath;

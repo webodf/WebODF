@@ -1341,7 +1341,9 @@ var runtime = (function () {
     };
 }());
 (function (args) {
-    args = Array.prototype.slice.call(args);
+    if (args !== undefined) {
+        args = Array.prototype.slice.call(args);
+    }
     function run(argv) {
         if (!argv.length) {
             return;
@@ -1350,7 +1352,7 @@ var runtime = (function () {
         runtime.readFile(script, "utf8", function (err, code) {
             var path = "",
                 paths = runtime.libraryPaths(),
-                codestring = /**@type{string}*/code;
+                codestring = /**@type{string}*/(code);
             if (script.indexOf("/") !== -1) {
                 path = script.substring(0, script.indexOf("/"));
             }
@@ -1381,5 +1383,5 @@ var runtime = (function () {
     } else {
         run(args.slice(1));
     }
-}(String(typeof arguments) !== "undefined" && arguments));
+}(arguments));
 

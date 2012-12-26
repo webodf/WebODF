@@ -41,6 +41,7 @@ runtime.loadClass("xmldom.XPath");
  * stylesheets are loaded.
  * @constructor
  * @param {!Element} element Put and ODF Canvas inside this element.
+ * @return {?}
  **/
 odf.OdfCanvas = (function () {
     "use strict";
@@ -771,6 +772,7 @@ odf.OdfCanvas = (function () {
     /**
      * @constructor
      * @param {!Element} element Put and ODF Canvas inside this element.
+     * @return {?}
      */
     odf.OdfCanvas = function OdfCanvas(element) {
         var self = this,

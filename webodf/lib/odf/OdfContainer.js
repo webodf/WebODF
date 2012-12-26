@@ -44,6 +44,7 @@ runtime.loadClass("odf.FontLoader");
  * @constructor
  * @param {!string} url
  * @param {!Function|null} onstatereadychange
+ * @return {?}
  **/
 odf.OdfContainer = (function () {
     "use strict";
@@ -67,7 +68,7 @@ odf.OdfContainer = (function () {
         node = (node) ? node.firstChild : null;
         while (node) {
             if (node.localName === name && node.namespaceURI === ns) {
-                return /**@type{!Element}*/node;
+                return /**@type{!Element}*/(node);
             }
             node = node.nextSibling;
         }
@@ -238,6 +239,7 @@ odf.OdfContainer = (function () {
      * @constructor
      * @param {!string} url
      * @param {!Function|null} onstatereadychange
+     * @return {?}
      */
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,

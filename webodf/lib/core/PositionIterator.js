@@ -140,7 +140,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         var n = walker.currentNode,
             t = n.nodeType;
         if (currentPos === 0 && t !== 3) {
-            return /**@type{!Node}*/n.parentNode;
+            return /**@type{!Node}*/(n.parentNode);
         }
         return n;
     };

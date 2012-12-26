@@ -44,6 +44,7 @@ runtime.loadClass("ops.OpSplitParagraph");
  * @constructor
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
+ * @return {?}
  */
 gui.SessionController = (function () {
     "use strict";
@@ -52,6 +53,7 @@ gui.SessionController = (function () {
      * @constructor
      * @param {!ops.Session} session
      * @param {!string} inputMemberId
+     * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
         var self = this;

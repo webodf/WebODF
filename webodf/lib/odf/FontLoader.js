@@ -38,6 +38,7 @@ runtime.loadClass("odf.Style2CSS");
 /**
  * This class loads embedded fonts into the CSS 
  * @constructor
+ * @return {?}
  **/
 odf.FontLoader = (function () {
     "use strict";
@@ -117,6 +118,7 @@ odf.FontLoader = (function () {
     }
     /**
      * @constructor
+     * @return {?}
      */
     odf.FontLoader = function FontLoader() {
         var self = this;
