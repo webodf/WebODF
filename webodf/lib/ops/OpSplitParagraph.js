@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -48,7 +48,76 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
     };
 
     this.execute = function (rootNode) {
-        session.getOdfDocument().splitParagraph(memberid, position);
+        var document = session.getOdfDocument(),
+            domPosition, paragraphNode, node, splitNode, splitChildNode, keptChildNode;
+
+        domPosition = document.getPositionInTextNode(position);
+        if (domPosition) {
+            paragraphNode = document.getParagraphElement(domPosition.textNode);
+            if (paragraphNode) {
+                // There can be a chain of multiple nodes between the text node
+                // where the split is done and the containing paragraph nodes,
+                // e.g. text:span nodes
+                // So all nodes in this chain need to be split up, i.e. they need
+                // to be cloned, and then the clone and any next siblings have to
+                // be moved to the new paragraph node, which is also cloned from
+                // the current one.
+
+                // start with text node the cursor is in, needs special treatment
+                if (domPosition.offset === 0) {
+                    keptChildNode = domPosition.textNode.previousSibling;
+                    splitChildNode = null;
+                } else if (domPosition.offset >= domPosition.textNode.length) {
+                    keptChildNode = domPosition.textNode;
+                    splitChildNode = null;
+                } else {
+                    keptChildNode = domPosition.textNode;
+                    // splitText always returns {!Text} here
+                    splitChildNode = /**@type{!Text}*/(
+                        domPosition.textNode.splitText(domPosition.offset)
+                    );
+                }
+                // then handle all nodes until (incl.) the paragraph node:
+                // create a clone and add as childs the split node of the node below
+                // and any next siblings of it
+                node = domPosition.textNode;
+                while (node !== paragraphNode) {
+                    node = node.parentNode;
+
+                    // split off the node copy
+                    // TODO: handle unique attributes, e.g. xml:id
+                    splitNode = node.cloneNode(false);
+                    // if the existing node will be completely empty,
+                    // just switch roles and insert the empty clone as old node
+                    if (! keptChildNode) {
+                        node.parentNode.insertBefore(splitNode, node);
+
+                        // prepare next level
+                        keptChildNode = splitNode;
+                        splitChildNode = node;
+                    } else {
+                        // add the split child node
+                        if (splitChildNode) {
+                            splitNode.appendChild(splitChildNode);
+                        }
+                        // and move all child nodes behind the split to the node copy,
+                        // by using n.nextSibling as automatically updated queue head
+                        while (keptChildNode.nextSibling) {
+                            splitNode.appendChild(keptChildNode.nextSibling);
+                        }
+                        node.parentNode.insertBefore(splitNode, node.nextSibling);
+
+                        // prepare next level
+                        keptChildNode = node;
+                        splitChildNode = splitNode;
+                    }
+                }
+
+                // mark both paragraphs as edited
+                document.highlightEdit(paragraphNode, memberid);
+                document.highlightEdit(splitChildNode, memberid);
+            }
+        }
     };
 
     this.spec = function () {

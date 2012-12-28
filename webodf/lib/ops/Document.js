@@ -184,6 +184,9 @@ ops.Document = function Document(odfCanvas) {
         return {textNode: lastTextNode, offset: nodeOffset };
     }
 
+    /**
+     * @param {!string} memberId
+     */
     function highlightEdit(element, memberId) {
         element.removeAttribute('user');
         element.removeAttribute('class');
@@ -193,6 +196,8 @@ ops.Document = function Document(odfCanvas) {
             element.setAttribute('class', 'edited');
         }, 1);
     }
+    this.highlightEdit = highlightEdit;
+
     /**
      * @param {?Node} node
      * @return {?Node}
@@ -344,35 +349,7 @@ ops.Document = function Document(odfCanvas) {
         }
         return false;
     };
-    /**
-     * @param {!string} memberid
-     * @param {!number} position
-     * @return {undefined}
-     */
-    this.splitParagraph = function (memberid, position) {
-        var domPosition, n, p, newp;
-        domPosition = getPositionInTextNode(position);
-        p = domPosition && domPosition.textNode;
-        while (p && p.namespaceURI !== textns
-                && (p.localName !== "p" || p.localName !== "h")) {
-            p = p.parentNode;
-        }
-        if (p) {
-            n = domPosition.textNode;
-            if (domPosition.offset > 0) {
-                // splitText always returns {!Text} here
-                domPosition.textNode = /**@type{!Text}*/(
-                    domPosition.textNode.splitText(domPosition.offset)
-                );
-            }
-            newp = p.cloneNode(false);
-            p.parentNode.insertBefore(newp, p.nextSibling);
-            newp.appendChild(domPosition.textNode);
-            while (n.nextSibling) {
-                newp.appendChild(n.nextSibling);
-            }
-        }
-    };
+
     /**
      * @param {!string} memberid
      * @param {!number} position
