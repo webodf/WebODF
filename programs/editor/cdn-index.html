@@ -34,22 +34,27 @@
   -->
   <link rel="stylesheet" type="text/css" href="editor.css"/>
   <script src="UserList.js" type="text/javascript" charset="utf-8"></script>
+  <script src="SessionList.js" type="text/javascript" charset="utf-8"></script>
+  <script src="SessionListView.js" type="text/javascript" charset="utf-8"></script>
   <script src="EditorSession.js" type="text/javascript" charset="utf-8"></script>
   <script src="widgets.js" type="text/javascript" charset="utf-8"></script>
   <script src="editor.js" type="text/javascript" charset="utf-8"></script>
-  <script language="javascript" type="text/javascript">
-    function on_body_load() {
-        require({ }, ["webodf/editor"],
-            function(editor) {
-                editor.boot("welcome.odt");
-            });
-    }
-  </script>
+  <script src="getin.js" type="text/javascript" charset="utf-8"/></script>
  </head>
+
  <body onload="on_body_load();" class = "claro">
-  <div id = "mainContainer">
-    <div id = "topPane">
-    </div>
+  <div id = "loginContainer" style="display: none; text-align: center">
+   <form name="loginForm">
+    <p>Login:<br><input name="login" type="text" size="30" maxlength="30"></p>
+    <p>Password:<br><input name="password" type="password" size="30" maxlength="40"></p>
+    <input name="Submit"  type="submit" value="Let me!" onclick="letIn(); return false"/>
+   </form>
+  </div>
+  <div id = "sessionListContainer" style="display: none; text-align: center">
+   <h1>Sessions</h1>
+   <div id = "sessionList"></div>
+  </div>
+  <div id = "mainContainer" style="display: none;">
     <div id = "editor">
       <span id = "menubar"></span>
       <span id = "toolbar"></span>
