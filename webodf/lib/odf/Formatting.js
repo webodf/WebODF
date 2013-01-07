@@ -210,24 +210,58 @@ odf.Formatting = function Formatting() {
     /**
      * Get the name of the first named style in the parent style chain.
      * If none is found, null is returned and you should assume the Default style.
-     * @param {!string} searchedStyleName
+     * @param {!string} styleName
      * @return {!string|null}
      */
-    this.getFirstNamedParentStyleNameOrSelf = function (searchedStyleName) {
+    this.getFirstNamedParentStyleNameOrSelf = function (styleName) {
         var automaticStyleElementList = getNotNormallyNamedChildElement(odfContainer.rootElement, "automatic-styles"),
             styleElementList = odfContainer.rootElement.styles,
-            styleElement,
-            styleName = searchedStyleName;
+            styleElement;
+
         // first look for automatic style with the name
         while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
             styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
         }
         // then see if that style is in named styles
-        styleElement = getStyleElement(odfContainer.rootElement.styles, styleName, "paragraph");
+        styleElement = getStyleElement(styleElementList, styleName, "paragraph");
         if (!styleElement) {
-            styleName = null;
+            return null;
         }
         return styleName;
+    };
+
+    /**
+     * Get the value of the attribute with the given name from the style with the given name
+     * or, if not set there, from the first style in the chain of parent styles where it is set.
+     * If the attribute is not found, null is returned.
+     * @param {!string} styleName
+     * @param {!string} attributeNameNS
+     * @param {!string} attributeName
+     * @return {!string|null}
+     */
+    this.getParagraphStyleAttribute = function (styleName, attributeNameNS, attributeName) {
+        var automaticStyleElementList = getNotNormallyNamedChildElement(odfContainer.rootElement, "automatic-styles"),
+            styleElementList = odfContainer.rootElement.styles,
+            styleElement,
+            attributeValue;
+
+        // first look for automatic style with the attribute
+        while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
+            attributeValue = styleElement.getAttributeNS(attributeNameNS, attributeName);
+            if (attributeValue) {
+                return attributeValue;
+            }
+            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+        }
+        // then see if that style is in named styles
+        while ((styleElement = getStyleElement(styleElementList, styleName, "paragraph")) !== null) {
+            attributeValue = styleElement.getAttributeNS(attributeNameNS, attributeName);
+            if (attributeValue) {
+                return attributeValue;
+            }
+            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+        }
+        return null;
     };
 
     /**
