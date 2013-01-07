@@ -63,18 +63,15 @@ gui.Caret = function Caret(cursor) {
             // stop blinking when removed from the document
             return;
         }
-        if (caretLineVisible) {
-            span.style.outlineWidth = "0px";
-        } else {
-            span.style.outlineWidth = "1px";
-        }
         caretLineVisible = !caretLineVisible;
+        span.style.borderLeftWidth = (caretLineVisible ? "1px" : "0px");
+
         if (!blinking) {
             blinking = true;
             runtime.setTimeout(function () {
                 blinking = false;
                 blink();
-            }, 1000);
+            }, 500);
         }
     }
 
@@ -131,6 +128,7 @@ gui.Caret = function Caret(cursor) {
         span.onblur = function () {
             focussed = false;
             avatar.markAsFocussed(false);
+            // restore from blinking
             span.style.borderLeftWidth = "1px";
         };
 
