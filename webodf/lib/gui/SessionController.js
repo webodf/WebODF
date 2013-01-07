@@ -39,6 +39,7 @@ runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
+runtime.loadClass("ops.OpSetParagraphStyle");
 
 /**
  * @constructor
@@ -56,7 +57,8 @@ gui.SessionController = (function () {
      * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
-        var self = this;
+        var self = this,
+        /**@type{Object}*/ namespaces = new odf.Style2CSS().namespaces;
 
         function listenEvent(eventTarget, eventType, eventHandler) {
             if (eventTarget.addEventListener) {
@@ -174,6 +176,41 @@ gui.SessionController = (function () {
 
             return op;
         }
+
+        function enqueueParagraphSplittingOps() {
+            var odfDocument = session.getOdfDocument(),
+                position = odfDocument.getCursorPosition(inputMemberId),
+                isAtEndOfParagraph = false, // TODO: find out if at end
+                paragraphNode, styleName, nextStyleName,
+                op;
+
+            op = new ops.OpSplitParagraph(session);
+            op.init({
+                memberid: inputMemberId,
+                position: position
+            });
+            session.enqueue(op);
+
+            // disabled for now, because nowjs seems to revert the order of the ops, which does not work here TODO: grouping of ops
+            /*
+            if (isAtEndOfParagraph) {
+                paragraphNode = odfDocument.getParagraphElement(odfDocument.getCursor(inputMemberId).getNode());
+                styleName = paragraphNode.getAttributeNS(namespaces.text, 'style-name');
+                nextStyleName = odfDocument.getFormatting().getParagraphStyleAttribute(styleName, namespaces.style, 'next-style-name');
+
+                if (nextStyleName && nextStyleName !== styleName) {
+                    op = new ops.OpSetParagraphStyle(session);
+                    op.init({
+                        memberid: inputMemberId,
+                        position: position + 1, // +1 should be at the start of the new paragraph
+                        styleNameBefore: styleName,
+                        styleNameAfter: nextStyleName
+                    });
+                    session.enqueue(op);
+                }
+            }
+            */
+        }
         /**
          * @param {!Event} e
          */
@@ -239,13 +276,9 @@ gui.SessionController = (function () {
         function handleKeyPress(e) {
             var op,
                 text = stringFromKeyPress(e);
+
             if (e.keyCode === 13) { // enter
-                op = new ops.OpSplitParagraph(session);
-                op.init({
-                    memberid: inputMemberId,
-                    position: session.getOdfDocument().getCursorPosition(inputMemberId)
-                });
-                session.enqueue(op);
+                enqueueParagraphSplittingOps();
                 cancelEvent(e);
             } else if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
                 op = new ops.OpInsertText(session);
