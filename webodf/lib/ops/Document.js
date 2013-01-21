@@ -218,10 +218,27 @@ ops.Document = function Document(odfCanvas) {
         node = odfCanvas.getFormatting().getStyleElement(odfCanvas.odfContainer().rootElement.styles, styleName, 'paragraph');
         return node;
     }
+    
+    /**
+     * @param {!String} styleName
+     * @return {?Object}
+     */
+    function getParagraphStyleAttributes(styleName) {
+        return odfCanvas.getFormatting().getInheritedStyleAttributes(odfCanvas.odfContainer().rootElement.styles, getParagraphStyleElement(styleName));
+    }
 
     this.getParagraphStyleElement = getParagraphStyleElement;
 
     this.getParagraphElement = getParagraphElement;
+
+    /**
+     * This method returns the style attributes for a given stylename, including all properties
+     * inherited from any parent styles, and also the Default style in the family.
+     * @param {!String} styleName
+     * @return {?Object}
+     */
+    this.getParagraphStyleAttributes = getParagraphStyleAttributes;
+
     /**
      * This function will return the Text node as well as the offset in that text node
      * of the cursor.
