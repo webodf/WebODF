@@ -196,7 +196,8 @@ odf.Style2CSS = function Style2CSS() {
         }
         node = stylesnode.firstChild;
         while (node) {
-            if (node.namespaceURI === stylens && node.localName === 'style') {
+            if (node.namespaceURI === stylens &&
+                    ((node.localName === 'style')  || (node.localName === 'default-style'))) {
                 family = node.getAttributeNS(stylens, 'family');
             } else if (node.namespaceURI === textns &&
                     node.localName === 'list-style') {
@@ -204,14 +205,21 @@ odf.Style2CSS = function Style2CSS() {
             }
             name = family && node.getAttributeNS &&
                 node.getAttributeNS(stylens, 'name');
-            if (name) {
-                if (!stylemap[family]) {
-                    stylemap[family] = {};
-                }
-                stylemap[family][name] = node;
+            
+            if (!stylemap[family]) {
+                stylemap[family] = {};
             }
+
+            if (name) {
+                stylemap[family][name] = node;
+            } else {
+                // For a default style, there is no name
+                stylemap[family][''] = node;
+            }
+
             node = node.nextSibling;
         }
+
         return stylemap;
     }
     /**
@@ -298,10 +306,20 @@ odf.Style2CSS = function Style2CSS() {
         if (prefix === null) {
             return null;
         }
-        namepart = '[' + prefix + '|style-name="' + name + '"]';
+
+        // If there is no name, it is a default style, in which case style-name shall be used without a value
+        if (name) {
+            namepart = '[' + prefix + '|style-name="' + name + '"]';
+        } else {
+            namepart = '[' + prefix + '|style-name]';
+        }
         if (prefix === 'presentation') {
             prefix = 'draw';
-            namepart = '[presentation|style-name="' + name + '"]';
+            if (name) {
+                namepart = '[presentation|style-name="' + name + '"]';
+            } else {
+                namepart = '[presentation|style-name]';
+            }
         }
         selector = prefix + '|' + familytagnames[family].join(
             namepart + ',' + prefix + '|'
