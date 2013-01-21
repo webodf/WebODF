@@ -423,12 +423,18 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             textPropertiesNode.setAttributeNS(fons, 'fo:font-family', info.textProperties.fontFamily);
             if (info.textProperties.textStyle.indexOf('bold') !== -1) {
                 textPropertiesNode.setAttributeNS(fons, 'fo:font-weight', 'bold');
+            } else {
+                textPropertiesNode.setAttributeNS(fons, 'fo:font-weight', 'normal');
             }
             if (info.textProperties.textStyle.indexOf('italic') !== -1) {
                 textPropertiesNode.setAttributeNS(fons, 'fo:font-style', 'italic');
+            } else {
+                textPropertiesNode.setAttributeNS(fons, 'fo:font-style', 'normal');
             }
             if (info.textProperties.textStyle.indexOf('underline') !== -1) {
-                textPropertiesNode.setAttributeNS(fons, 'fo:text-decoration', 'underline');
+                textPropertiesNode.setAttributeNS(stylens, 'style:text-underline-style', 'solid');
+            } else {
+                textPropertiesNode.setAttributeNS(stylens, 'style:text-underline-style', 'none');
             }
             
             odfCanvas.refreshCSS();
