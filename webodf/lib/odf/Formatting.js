@@ -77,6 +77,31 @@ odf.Formatting = function Formatting() {
     }
 
     /**
+     * Recursively merge properties of two objects 
+     */
+    function mergeRecursive(obj1, obj2) {
+        var p;
+        for (p in obj2) {
+            try {
+                // Property in destination object set; update its value.
+                if (obj2[p].constructor === Object) {
+                    obj1[p] = mergeRecursive(obj1[p], obj2[p]);
+                    
+                } else {
+                    obj1[p] = obj2[p];
+                    
+                }
+                
+            } catch (e) {
+                // Property in destination object not set; create it and set its value.
+                obj1[p] = obj2[p];
+                
+            }
+        }
+        return obj1;
+    }
+    
+    /**
      * @param {!Element} element
      * @return {Element}
      */
@@ -177,6 +202,21 @@ odf.Formatting = function Formatting() {
         }
         return paragraphStyles;
     };
+    
+    function getDefaultStyleElement(styleListElement, family) {
+        var node = styleListElement.firstChild;
+
+        while (node) {
+            if (node.nodeType === 1
+                    && node.namespaceURI === namespaces.style
+                    && node.localName === "default-style"
+                    && node.getAttributeNS(namespaces.style, 'family') === family) {
+                return node;
+            }
+            node = node.nextSibling;
+        }
+        return null;
+    }
 
     function getStyleElement(styleListElement, styleName, family) {
         var node = styleListElement.firstChild;
@@ -195,6 +235,55 @@ odf.Formatting = function Formatting() {
     }
 
     this.getStyleElement = getStyleElement;
+
+
+    function getStyleAttributes(styleNode) {
+        var i,
+            propertiesMap = {},
+            propertiesNode = styleNode.firstChild;
+
+        while (propertiesNode) {
+            if (propertiesNode.nodeType === 1 && propertiesNode.namespaceURI === namespaces.style) {
+                propertiesMap[propertiesNode.nodeName] = {};
+                for (i = 0; i < propertiesNode.attributes.length; i += 1) {
+                    propertiesMap[propertiesNode.nodeName][propertiesNode.attributes[i].name] = propertiesNode.attributes[i].value;
+                }
+            }
+            propertiesNode = propertiesNode.nextSibling;
+        }
+        return propertiesMap;
+    }
+    
+    this.getStyleAttributes = getStyleAttributes;
+    
+    function getInheritedStyleAttributes(styleListElement, styleNode) {
+        var i,
+            parentStyleName,
+            propertiesMap = {},
+            inheritedPropertiesMap = {},
+            node = styleNode;
+        
+        // Iterate through the style ancestry
+        while (node) {
+            propertiesMap = getStyleAttributes(node);
+            inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
+            
+            parentStyleName = node.getAttributeNS(namespaces.style, 'parent-style-name');
+            if (parentStyleName) {
+                node = getStyleElement(styleListElement, parentStyleName, styleNode.family);
+            } else {
+                node = null;
+            }
+        }
+        
+        // Now incorporate attributes from the default style
+        propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, 'paragraph'));
+        inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
+
+        return inheritedPropertiesMap;
+    }
+    
+    this.getInheritedStyleAttributes = getInheritedStyleAttributes;
 
     // workaround for not normally named elements, e.g. with a dash TODO: how is this properly done?
     function getNotNormallyNamedChildElement(element, name) {
