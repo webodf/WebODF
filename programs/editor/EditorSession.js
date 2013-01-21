@@ -196,6 +196,10 @@ define("webodf/editor/EditorSession", [], function () {
             return odfDocument.getParagraphStyleElement(styleName);
         };
 
+        this.getParagraphStyleAttributes = function (styleName) {
+            return odfDocument.getParagraphStyleAttributes(styleName);
+        };
+
         this.updateParagraphStyle = function (styleName, info) {
             var op;
             op = new ops.OpUpdateParagraphStyle(session);
