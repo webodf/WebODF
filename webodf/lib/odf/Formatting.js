@@ -270,7 +270,7 @@ odf.Formatting = function Formatting() {
             
             parentStyleName = node.getAttributeNS(namespaces.style, 'parent-style-name');
             if (parentStyleName) {
-                node = getStyleElement(styleListElement, parentStyleName, styleNode.family);
+                node = getStyleElement(styleListElement, parentStyleName, styleNode.getAttributeNS(namespaces.style, 'family'));
             } else {
                 node = null;
             }
