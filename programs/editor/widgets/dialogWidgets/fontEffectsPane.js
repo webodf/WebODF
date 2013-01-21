@@ -51,7 +51,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                         preview = document.getElementById('previewText');
 
                     editorSession.subscribe('paragraphChanged', function () {
-                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'text-properties')[0],
+                        var style = editorSession.getParagraphStyleAttributes(editorSession.getCurrentParagraphStyle())['style:text-properties'],
                             s_bold,
                             s_italic,
                             s_underline,
@@ -59,11 +59,11 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             s_fontName;
                         
                         if (style !== undefined) {
-                            s_bold = style.getAttributeNS(fons, 'font-weight');
-                            s_italic = style.getAttributeNS(fons, 'font-style');
-                            s_underline = style.getAttributeNS(fons, 'text-decoration');
-                            s_fontSize = parseFloat(style.getAttributeNS(fons, 'font-size'));
-                            s_fontName = style.getAttributeNS(fons, 'font-family');
+                            s_bold = style['fo:font-weight'];
+                            s_italic = style['fo:font-style'];
+                            s_underline = style['fo:text-decoration'];
+                            s_fontSize = parseFloat(style['fo:font-size']);
+                            s_fontName = style['fo:font-family'];
                             
                             form.attr('value', {
                                 fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',

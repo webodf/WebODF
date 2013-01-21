@@ -48,7 +48,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                 contentPane.onLoad = function () {
                     var form = dijit.byId('alignmentPaneForm');
                     editorSession.subscribe('paragraphChanged', function () {
-                        var style = editorSession.getParagraphStyleElement(editorSession.getCurrentParagraphStyle()).getElementsByTagNameNS(stylens, 'paragraph-properties')[0],
+                        var style = editorSession.getParagraphStyleAttributes(editorSession.getCurrentParagraphStyle())['style:paragraph-properties'],
                             s_topMargin,
                             s_bottomMargin,
                             s_leftMargin,
@@ -56,11 +56,11 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                             s_textAlign;
 
                         if (style !== undefined) {
-                            s_topMargin = parseFloat(style.getAttributeNS(fons, 'margin-top'));
-                            s_bottomMargin = parseFloat(style.getAttributeNS(fons, 'margin-bottom'));
-                            s_leftMargin = parseFloat(style.getAttributeNS(fons, 'margin-left'));
-                            s_rightMargin = parseFloat(style.getAttributeNS(fons, 'margin-left'));
-                            s_textAlign = style.getAttributeNS(fons, 'text-align');
+                            s_topMargin = parseFloat(style['fo:margin-top']);
+                            s_leftMargin = parseFloat(style['fo:margin-left']);
+                            s_rightMargin = parseFloat(style['fo:margin-right']);
+                            s_bottomMargin = parseFloat(style['fo:margin-bottom']);
+                            s_textAlign = style['fo:text-align'];
                             
                             form.attr('value', {
                                 topMargin: isNaN(s_topMargin) ? 0 : s_topMargin,
