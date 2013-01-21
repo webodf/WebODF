@@ -413,10 +413,10 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                 styleNode.appendChild(textPropertiesNode);
             }
 
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-top', info.paragraphProperties.topMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-bottom', info.paragraphProperties.topMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-left', info.paragraphProperties.leftMargin + 'in');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-right', info.paragraphProperties.rightMargin + 'in');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-top', info.paragraphProperties.topMargin + 'mm');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-bottom', info.paragraphProperties.topMargin + 'mm');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-left', info.paragraphProperties.leftMargin + 'mm');
+            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-right', info.paragraphProperties.rightMargin + 'mm');
             paragraphPropertiesNode.setAttributeNS(fons, 'fo:text-align', info.paragraphProperties.alignment);
             
             textPropertiesNode.setAttributeNS(fons, 'fo:font-size', info.textProperties.fontSize + 'pt');
