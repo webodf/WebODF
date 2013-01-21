@@ -277,7 +277,7 @@ odf.Formatting = function Formatting() {
         }
         
         // Now incorporate attributes from the default style
-        propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, 'paragraph'));
+        propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(namespaces.style, 'family')));
         inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
 
         return inheritedPropertiesMap;
