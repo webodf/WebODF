@@ -21,6 +21,7 @@ text|p, text|h {
   display: block;
   padding: 0;
   margin: 0;
+  line-height: normal;
 }
 *[runtimens|containsparagraphanchor] {
   position: relative;
