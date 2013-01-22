@@ -421,6 +421,8 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             
             textPropertiesNode.setAttributeNS(fons, 'fo:font-size', info.textProperties.fontSize + 'pt');
             textPropertiesNode.setAttributeNS(fons, 'fo:font-family', info.textProperties.fontFamily);
+            textPropertiesNode.setAttributeNS(fons, 'fo:color', info.textProperties.color);
+            textPropertiesNode.setAttributeNS(fons, 'fo:background-color', info.textProperties.backgroundColor);
             if (info.textProperties.textStyle.indexOf('bold') !== -1) {
                 textPropertiesNode.setAttributeNS(fons, 'fo:font-weight', 'bold');
             } else {

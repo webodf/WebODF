@@ -48,15 +48,29 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                     
                 contentPane.onLoad = function () {
                     var form = dijit.byId('fontEffectsPaneForm'),
-                        preview = document.getElementById('previewText');
-
+                        preview = document.getElementById('previewText'),
+                        textColorPicker = dijit.byId('textColorPicker'),
+                        backgroundColorPicker = dijit.byId('backgroundColorPicker'),
+                        textColorTB = dijit.byId('textColorTB'),
+                        backgroundColorTB = dijit.byId('backgroundColorTB');
+                    
+                    // Bind dojox widgets' values to invisible form elements, for easy parsing
+                    textColorPicker.onChange = function (value) {
+                        textColorTB.set('value', value);
+                    };
+                    backgroundColorPicker.onChange = function (value) {
+                        backgroundColorTB.set('value', value);
+                    };
+                        
                     editorSession.subscribe('paragraphChanged', function () {
                         var style = editorSession.getParagraphStyleAttributes(editorSession.getCurrentParagraphStyle())['style:text-properties'],
                             s_bold,
                             s_italic,
                             s_underline,
                             s_fontSize,
-                            s_fontName;
+                            s_fontName,
+                            s_color,
+                            s_backgroundColor;
                         
                         if (style !== undefined) {
                             s_bold = style['fo:font-weight'];
@@ -64,12 +78,17 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             s_underline = style['fo:text-decoration'];
                             s_fontSize = parseFloat(style['fo:font-size']);
                             s_fontName = style['fo:font-family'];
+                            s_color = style['fo:color'];
+                            s_backgroundColor = style['fo:background-color'];
                             
                             form.attr('value', {
                                 fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',
                                 fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
                                 textStyle: [s_bold, s_italic, s_underline]
                             });
+                            textColorPicker.set('value', s_color && s_color.length ? s_color : '#000000');
+                            backgroundColorPicker.set('value', s_backgroundColor && s_backgroundColor.length ? s_backgroundColor : '#ffffff');
+
                         } else {
                             // TODO: Use default style here
                             form.attr('value', {
@@ -77,6 +96,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                                 fontSize: 12,
                                 textStyle: []
                             });
+                            textColorPicker.set('value', '#000000');
+                            backgroundColorPicker.set('value', '#ffffff');
                         }
                     });
                     // Automatically update preview when selections change
@@ -99,6 +120,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
 
                         preview.style.fontSize = form.value.fontSize + 'pt';
                         preview.style.fontFamily = form.value.fontFamily;
+                        preview.style.color = form.value.color;
+                        preview.style.backgroundColor = form.value.backgroundColor;
                     });
                 };
                 return callback(contentPane);

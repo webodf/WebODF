@@ -38,6 +38,7 @@
 
 				<h3>Color</h3>
                 <br>
+                <input data-dojo-type="dijit/form/TextBox" name = "color" id = "textColorTB" style="display: none;"/>
                 <div data-dojo-type="dijit/form/DropDownButton">
 				    <span id = "textColor">
 				    	Text
@@ -47,12 +48,12 @@
 				    </div>
 				</div>                
 
+                <input data-dojo-type="dijit/form/TextBox" name = "backgroundColor" id = "backgroundColorTB" style="display: none;"/>
 				<div data-dojo-type="dijit/form/DropDownButton">
 				    <span id = "backgroundColor">
 				    	Background
 				    </span>
 				    <div data-dojo-type="dijit/TooltipDialog">
-                    <input data-dojo-type="dijit/form/TextBox" name = "backgroundColor" id = "backgroundColorTB" style="display: none;"/>
 				    	<div data-dojo-type="dojox.widget.ColorPicker" id="backgroundColorPicker"></div>
 					</div>
 				</div>
