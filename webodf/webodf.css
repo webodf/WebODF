@@ -19,8 +19,8 @@ office|body, office|document {
 
 text|p, text|h {
   display: block;
-  padding: 3px 3px 3px 3px;
-  margin: 5px 5px 5px 5px;
+  padding: 0;
+  margin: 0;
 }
 *[runtimens|containsparagraphanchor] {
   position: relative;
