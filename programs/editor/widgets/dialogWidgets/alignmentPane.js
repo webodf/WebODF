@@ -31,7 +31,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require,document,dijit */
+/*global runtime,core,define,require,document,dijit */
+
+runtime.loadClass("core.CSSUnits");
+
 define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
     "use strict";
     function makeWidget(editorSession, callback) {
@@ -49,6 +52,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                     var form = dijit.byId('alignmentPaneForm');
                     editorSession.subscribe('paragraphChanged', function () {
                         var style = editorSession.getParagraphStyleAttributes(editorSession.getCurrentParagraphStyle())['style:paragraph-properties'],
+                            cssUnits = new core.CSSUnits(),
                             s_topMargin,
                             s_bottomMargin,
                             s_leftMargin,
@@ -56,10 +60,10 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                             s_textAlign;
 
                         if (style !== undefined) {
-                            s_topMargin = parseFloat(style['fo:margin-top']);
-                            s_leftMargin = parseFloat(style['fo:margin-left']);
-                            s_rightMargin = parseFloat(style['fo:margin-right']);
-                            s_bottomMargin = parseFloat(style['fo:margin-bottom']);
+                            s_topMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-top'], 'mm'));
+                            s_leftMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-left'], 'mm'));
+                            s_rightMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-right'], 'mm'));
+                            s_bottomMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-bottom'], 'mm'));
                             s_textAlign = style['fo:text-align'];
                             
                             form.attr('value', {

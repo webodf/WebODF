@@ -1,0 +1,81 @@
+/**
+ * Copyright (C) 2012 KO GmbH <aditya.bhatt@kogmbh.com>
+ * @licstart
+ * The JavaScript code in this page is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public License
+ * (GNU AGPL) as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.  The code is distributed
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU AGPL for more details.
+ *
+ * As additional permission under GNU AGPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * As a special exception to the AGPL, any HTML file which merely makes function
+ * calls to this code, and for that purpose includes it by reference shall be
+ * deemed a separate work for copyright law purposes. In addition, the copyright
+ * holders of this code give you permission to combine this code with free
+ * software libraries that are released under the GNU LGPL. You may copy and
+ * distribute such a system following the terms of the GNU AGPL for this code
+ * and the LGPL for the libraries. If you modify this code, you may extend this
+ * exception to your version of the code, but you are not obligated to do so.
+ * If you do not wish to do so, delete this exception statement from your
+ * version.
+ *
+ * This license applies to this entire compilation.
+ * @licend
+ * @source: http://www.webodf.org/
+ * @source: http://gitorious.org/webodf/webodf/
+ */
+/*global core*/
+/*jslint plusplus: true, bitwise: true */
+
+/**
+ * @constructor
+ */
+core.CSSUnits = function CSSUnits() {
+    "use strict";
+
+    // Unit values relative to 1 inch
+    var sizemap = {
+        "in": 1,
+        "cm": 2.54,
+        "mm": 25.4,
+        "pt": 72,
+        "pc": 12
+    };
+    
+    /**
+     * Takes a number of an oldUnit and returns it's value in newUnit
+     * @param {number} value
+     * @param {!string} oldUnit
+     * @param {!string} newUnit
+     * @return {number}
+     */
+    this.convert = function (value, oldUnit, newUnit) {
+        return (value * sizemap[newUnit] / sizemap[oldUnit]);
+    };
+    
+    /**
+     * Takes a measure such as "2cm" and returns it's measurement in newUnit, e.g. "20mm"
+     * @param {!string} measure
+     * @param {!string} newUnit
+     * @return {string}
+     */
+    this.convertMeasure = function (measure, newUnit) {
+        var value, oldUnit, newMeasure;
+        if (measure && newUnit) {
+            value = parseFloat(measure);
+            oldUnit = measure.replace(value, "");
+        
+            newMeasure = this.convert(value, oldUnit, newUnit);
+        } else {
+            newMeasure = '';
+        }
+
+        return newMeasure;
+    };
+};

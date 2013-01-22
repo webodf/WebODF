@@ -39,6 +39,7 @@
         "core/ByteArray.js",
         "core/ByteArrayWriter.js",
         "core/Cursor.js",
+        "core/CSSUnits.js",
         "core/JSLint.js",
         "core/PositionFilter.js",
         "core/LoopWatchDog.js",
