@@ -8,6 +8,7 @@
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
 @namespace runtimens url(urn:webodf); /* namespace for runtime only */
 @namespace cursor url(urn:webodf:names:cursor);
+@namespace editInfo url(urn:webodf:names:editinfo);
 
 office|document > *, office|document-content > * {
   display: none;
@@ -22,6 +23,7 @@ text|p, text|h {
   padding: 0;
   margin: 0;
   line-height: normal;
+  position: relative;
 }
 *[runtimens|containsparagraphanchor] {
   position: relative;
