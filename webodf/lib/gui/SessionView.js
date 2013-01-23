@@ -32,10 +32,12 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global document, runtime, gui, ops */
+/*global document, runtime, gui, ops, core */
 
 runtime.loadClass("gui.Caret");
 runtime.loadClass("ops.TrivialUserModel");
+runtime.loadClass("core.EditInfo");
+runtime.loadClass("gui.EditInfoMarker");
 
 gui.SessionView = (function () {
     "use strict";
@@ -49,9 +51,41 @@ gui.SessionView = (function () {
             memberDataChangedHandler,
             headlineNodeName = 'text|h',
             paragraphNodeName = 'text|p',
-            editHighlightingEnabled = true;
+            editHighlightingEnabled = true,
+            editInfons = 'urn:webodf:names:editinfo',
+            editInfoMap = {};
 
+        
+        /**
+         * @param {!string} memberId
+         */
+        function highlightEdit(element, memberId) {
+            var userData,
+                editInfo,
+                editInfoMarker,
+                id = '',
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editInfo')[0];
+            if (editInfoNode) {
+                id = editInfoNode.getAttributeNS(editInfons, 'id');
+                editInfoMarker = editInfoMap[id];
+            } else {
+                id = Math.random().toString();
+                editInfo = new core.EditInfo(element, session.getOdfDocument());
+                editInfoMarker = new gui.EditInfoMarker(editInfo);
 
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editInfo')[0];
+                editInfoNode.setAttributeNS(editInfons, 'id', id);
+                editInfoMap[id] = editInfoMarker;
+            }
+
+            userData = session.getUserModel().getUserDetails(memberId);
+            
+            editInfoMarker.addEdit(userData.fullname, new Date(), userData.color);
+        }
+        
+        session.getOdfDocument().subscribe('highlightEdit', function (info) {
+            highlightEdit(info.element, info.memberId);
+        });
         /**
          * @param {string} nodeName
          * @param {string} memberId
