@@ -72,7 +72,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
     };
 
     function init() {
-        var dom = editInfo.getOdfDocument.getDOM(),
+        var dom = editInfo.getOdfDocument().getDOM(),
             htmlns = dom.documentElement.namespaceURI;
 
         marker = dom.createElementNS(htmlns, "div");
