@@ -76,6 +76,14 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
             htmlns = dom.documentElement.namespaceURI;
 
         marker = dom.createElementNS(htmlns, "div");
+        marker.setAttributeNS(htmlns, "class", "marker");
+        
+        marker.style.position = 'absolute';
+        marker.style.width = '10px';
+        marker.style.height = '100%';
+        marker.style.left = '-20px';
+        marker.style.borderRadius = '5px';
+
         marker.onmouseover = function () {
             self.showHandle();
         };
