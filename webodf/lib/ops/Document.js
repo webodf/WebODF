@@ -36,7 +36,6 @@
 
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("gui.SelectionManager");
-
 /**
  * A document that keeps all data related to the mapped document.
  * @constructor
@@ -52,8 +51,10 @@ ops.Document = function Document(odfCanvas) {
         rootNode,
         selectionManager,
         filter,
-        cursors = {};
-
+        cursors = {},
+        eventListener = {};
+    
+    eventListener.highlightEdit = [];
     /**
      * @constructor
      * @implements {core.PositionFilter}
@@ -185,20 +186,6 @@ ops.Document = function Document(odfCanvas) {
     }
 
     /**
-     * @param {!string} memberId
-     */
-    function highlightEdit(element, memberId) {
-        element.removeAttribute('user');
-        element.removeAttribute('class');
-
-        runtime.setTimeout(function () {
-            element.setAttribute('user', memberId);
-            element.setAttribute('class', 'edited');
-        }, 1);
-    }
-    this.highlightEdit = highlightEdit;
-
-    /**
      * @param {?Node} node
      * @return {?Node}
      */
@@ -316,7 +303,10 @@ ops.Document = function Document(odfCanvas) {
             // the `memberid`-cursor behind new text; alternatively
             // move `memberid`-cursor behind all cursors at the same
             // position. then insert text before `memberid`-cursor.
-            highlightEdit(getParagraphElement(domPosition.textNode), memberid);
+            self.emit('highlightEdit', {
+                element: getParagraphElement(domPosition.textNode),
+                memberId: memberid
+            });
             return true;
         }
         return false;
@@ -361,7 +351,10 @@ ops.Document = function Document(odfCanvas) {
         }
         if (domPosition) {
             domPosition.textNode.deleteData(domPosition.offset, length);
-            highlightEdit(getParagraphElement(domPosition.textNode), memberid);
+            self.emit('highlightEdit', {
+                element: getParagraphElement(domPosition.textNode),
+                memberId: memberid
+            });
             return true;
         }
         return false;
@@ -383,7 +376,10 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             paragraphNode = getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
-                highlightEdit(getParagraphElement(paragraphNode), memberid);
+                self.emit('highlightEdit', {
+                    element: getParagraphElement(paragraphNode),
+                    memberId: memberid
+                });
                 return true;
             }
         }
@@ -509,6 +505,23 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         return odfCanvas.getFormatting();
     };
 
+    this.emit = function (eventid, args) {
+        var i, subscribers;
+        runtime.assert(eventListener.hasOwnProperty(eventid),
+            "unknown event fired \"" + eventid + "\"");
+        subscribers = eventListener[eventid];
+        runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
+        for (i = 0; i < subscribers.length; i += 1) {
+            subscribers[i](args);
+        }
+    };
+
+    this.subscribe = function (eventid, cb) {
+        runtime.assert(eventListener.hasOwnProperty(eventid),
+            "tried to subscribe to unknown event \"" + eventid + "\"");
+        eventListener[eventid].push(cb);
+        runtime.log("event \"" + eventid + "\" subscribed.");
+    };
     /**
      * @return {undefined}
      */
