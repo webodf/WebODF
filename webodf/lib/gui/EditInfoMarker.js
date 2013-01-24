@@ -76,26 +76,18 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
             htmlns = dom.documentElement.namespaceURI;
 
         marker = dom.createElementNS(htmlns, "div");
-        marker.setAttributeNS(htmlns, "class", "marker");
+        marker.setAttribute("class", "editInfoMarker");
         
-        marker.style.position = 'absolute';
-        marker.style.width = '10px';
-        marker.style.height = '100%';
-        marker.style.left = '-20px';
-        marker.style.borderRadius = '5px';
-
         marker.onmouseover = function () {
             self.showHandle();
         };
-        marker.onmouseover = function () {
+        marker.onmouseout = function () {
             self.hideHandle();
         };
 
         editInfoNode = editInfo.getNode();
         editInfoNode.appendChild(marker);
         handle = new gui.EditInfoHandle(editInfoNode);
-
-        setColor('rgba(255,255,255,1)');
     }
 
     init();
