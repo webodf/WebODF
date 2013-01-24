@@ -39,6 +39,16 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
         handle;
     
     function renderEdits() {
+        var i;
+        handle.innerHTML = '';
+        for (i = 0; i < edits.length; i += 1) {
+            handle.innerHTML +=
+            '<div class="editInfo">' +
+            '<div class="editInfoColor" style="background-color: ' + edits[i].color + ';">' + '</div>' +
+            '<span class="editInfoAuthor">'+ edits[i].fullname + '</span>' +
+            '<span class="editInfoTime">' + edits[i].time + '</span>' +
+            '</div>';
+        }
     }
 
     this.setEdits = function (editArray) {
@@ -46,12 +56,22 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
         renderEdits();
     };
 
+    this.show = function () {
+        handle.style.display = 'block';
+    };
+
+    this.hide = function () {
+        handle.style.display = 'none';
+    };
+
     function init() {
         var document = /**@type{!Document}*/(parentElement.ownerDocument),
             htmlns = document.documentElement.namespaceURI;
 
         handle = document.createElementNS(htmlns, "div");
-
+        handle.setAttribute('class', 'editInfoHandle');
+        
+        handle.style.display = 'none';
         parentElement.appendChild(handle);
     }
 
