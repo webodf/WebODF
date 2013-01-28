@@ -31,7 +31,9 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global gui*/
-
+/**
+ * @constructor
+ */
 gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     "use strict";
 

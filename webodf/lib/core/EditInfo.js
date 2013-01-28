@@ -32,6 +32,9 @@
  */
 /*global core, ops, runtime*/
 
+/**
+ * @constructor
+ */
 core.EditInfo = function EditInfo(container, odfDocument) {
     "use strict";
     var self = this,

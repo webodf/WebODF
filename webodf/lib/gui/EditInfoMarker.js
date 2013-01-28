@@ -35,6 +35,9 @@
 runtime.loadClass("core.EditInfo");
 runtime.loadClass("gui.EditInfoHandle");
 
+/**
+ * @constructor
+ */
 gui.EditInfoMarker = function EditInfoMarker(editInfo) {
     "use strict";
 
