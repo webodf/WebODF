@@ -64,7 +64,7 @@ gui.SessionView = (function () {
                 editInfo,
                 editInfoMarker,
                 id = '',
-                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editInfo')[0];
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
             if (editInfoNode) {
                 id = editInfoNode.getAttributeNS(editInfons, 'id');
                 editInfoMarker = editInfoMap[id];
@@ -73,7 +73,7 @@ gui.SessionView = (function () {
                 editInfo = new core.EditInfo(element, session.getOdfDocument());
                 editInfoMarker = new gui.EditInfoMarker(editInfo);
 
-                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editInfo')[0];
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
                 editInfoNode.setAttributeNS(editInfons, 'id', id);
                 editInfoMap[id] = editInfoMarker;
             }

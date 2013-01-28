@@ -409,7 +409,8 @@ gui.SelectionMover.createPositionIterator = function (rootNode) {
          * @return {!number}
          */
         this.acceptNode = function (node) {
-            if (node.namespaceURI === "urn:webodf:names:cursor") {
+            if (node.namespaceURI === "urn:webodf:names:cursor" ||
+                    node.namespaceURI === "urn:webodf:names:editinfo") {
                 return 2;
             }
             return 1;

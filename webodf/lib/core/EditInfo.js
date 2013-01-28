@@ -88,7 +88,7 @@ core.EditInfo = function EditInfo(container, odfDocument) {
         var editInfons = 'urn:webodf:names:editinfo',
             dom = odfDocument.getDOM();
 
-        editInfoNode = dom.createElementNS(editInfons, 'editInfo');
+        editInfoNode = dom.createElementNS(editInfons, 'editinfo');
         container.insertBefore(editInfoNode, container.firstChild);
     }
 
