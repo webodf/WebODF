@@ -139,6 +139,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/Selection.js
     lib/core/LoopWatchDog.js
     lib/core/Cursor.js
+    lib/core/EditInfo.js
     lib/core/UnitTester.js
     lib/core/PositionIterator.js
     lib/core/PositionFilter.js
@@ -186,6 +187,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/CaretFactory.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
+    lib/gui/EditInfoMarker.js
+    lib/gui/EditInfoHandle.js
 
     lib/ops/SessionPointFilter.js
     lib/ops/Document.js
