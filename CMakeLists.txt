@@ -145,6 +145,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/PositionFilter.js
     lib/core/Async.js
     lib/core/Zip.js
+    lib/core/CSSUnits.js
 
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/LSSerializer.js
