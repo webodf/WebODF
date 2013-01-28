@@ -69,13 +69,13 @@ core.CSSUnits = function CSSUnits() {
         var value, oldUnit, newMeasure;
         if (measure && newUnit) {
             value = parseFloat(measure);
-            oldUnit = measure.replace(value, "");
+            oldUnit = measure.replace(value.toString(), "");
         
             newMeasure = this.convert(value, oldUnit, newUnit);
         } else {
             newMeasure = '';
         }
 
-        return newMeasure;
+        return newMeasure.toString();
     };
 };
