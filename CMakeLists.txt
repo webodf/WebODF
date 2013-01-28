@@ -183,12 +183,12 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/NowjsUserModel.js
     lib/ops/TrivialOperationRouter.js
     lib/ops/NowjsOperationRouter.js
+    lib/gui/EditInfoHandle.js
+    lib/gui/EditInfoMarker.js
     lib/gui/SessionView.js
     lib/gui/CaretFactory.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
-    lib/gui/EditInfoMarker.js
-    lib/gui/EditInfoHandle.js
 
     lib/ops/SessionPointFilter.js
     lib/ops/Document.js
