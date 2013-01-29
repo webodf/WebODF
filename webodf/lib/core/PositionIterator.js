@@ -173,7 +173,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return c;
     };
     /**
-     * The same as offset(), except that adjecent text nodes are counted
+     * The same as offset(), except that adjacent text nodes are counted
      * separately.
      * @return {!number}
      */
@@ -183,8 +183,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         var c = 0,
             startNode = walker.currentNode,
-            n,
-            nextNode;
+            n;
         if (currentPos === 1) {
             n = walker.lastChild();
         } else {
@@ -195,6 +194,29 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             n = walker.previousSibling();
         }
         walker.currentNode = startNode;
+        return c;
+    };
+    /**
+     * The same as domOffset(), except that all nodes are counted.
+     * This function is useful for communication iterator position with
+     * components that do not use a filter.
+     * @return {!number}
+     */
+    this.unfilteredDomOffset = function () {
+        if (walker.currentNode.nodeType === 3) {
+            return currentPos;
+        }
+        var c = 0,
+            n = walker.currentNode;
+        if (currentPos === 1) {
+            n = n.lastChild;
+        } else {
+            n = n.previousSibling;
+        }
+        while (n) {
+            c += 1;
+            n = n.previousSibling;
+        }
         return c;
     };
     /**
