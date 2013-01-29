@@ -111,10 +111,12 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     function countForwardSteps(steps, filter) {
         var c = positionIterator.container(),
             o = positionIterator.offset(),
+            watch = new core.LoopWatchDog(1000),
             stepCount = 0,
             count = 0;
         while (steps > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
+            watch.check();
             if (filter.acceptPosition(positionIterator) === 1) {
                 count += stepCount;
                 stepCount = 0;
@@ -132,10 +134,12 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     function countBackwardSteps(steps, filter) {
         var c = positionIterator.container(),
             o = positionIterator.offset(),
+            watch = new core.LoopWatchDog(1000),
             stepCount = 0,
             count = 0;
         while (steps > 0 && positionIterator.previousPosition()) {
             stepCount += 1;
+            watch.check();
             if (filter.acceptPosition(positionIterator) === 1) {
                 count += stepCount;
                 stepCount = 0;
@@ -163,6 +167,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         var c = positionIterator.container(),
             o = positionIterator.offset(),
             span = cursor.getNode().firstChild,
+            watch = new core.LoopWatchDog(1000),
             stepCount = 0,
             count = 0,
             offset = span.offsetTop,
@@ -170,6 +175,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         while (lines > 0 && positionIterator.previousPosition()) {
+            watch.check();
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
                 offset = span.offsetTop;
@@ -199,6 +205,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         var c = positionIterator.container(),
             o = positionIterator.offset(),
             span = cursor.getNode().firstChild,
+            watch = new core.LoopWatchDog(1000),
             stepCount = 0,
             count = 0,
             offset = span.offsetTop,
@@ -206,6 +213,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         while (lines > 0 && positionIterator.nextPosition()) {
+            watch.check();
             stepCount += 1;
             if (filter.acceptPosition(positionIterator) === 1) {
                 offset = span.offsetTop;
@@ -236,6 +244,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         var offset = 0,
             n;
         while (node.parentNode !== container) {
+            runtime.assert(node.parentNode !== null, "parent is null");
             node = /**@type{!Node}*/(node.parentNode);
         }
         n = container.firstChild;

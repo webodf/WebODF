@@ -68,6 +68,8 @@ core.Cursor = function Cursor(memberid, odfDocument) {
     function putCursorIntoTextNode(container, offset) {
         var parent = container.parentNode,
             textNodeBehindCursor;
+        
+        runtime.assert(parent !== null, "parent is null here!");
 
         if (offset > 0) {
             textNodeBehindCursor = container.splitText(offset);
@@ -78,6 +80,9 @@ core.Cursor = function Cursor(memberid, odfDocument) {
     }
     function putCursorIntoContainer(container, offset) {
         var node = container.firstChild;
+
+        runtime.assert(node !== null, "parent is null here!");
+        
         while (node !== null && offset > 0) {
             node = node.nextSibling;
             offset -= 1;
@@ -90,7 +95,7 @@ core.Cursor = function Cursor(memberid, odfDocument) {
             textNodeIncrease = 0;
 
         if (textNodeBefore && textNodeBefore.nodeType === 3 &&
-            textNodeAfter && textNodeAfter.nodeType === 3) {
+                textNodeAfter && textNodeAfter.nodeType === 3) {
             textNodeBefore.parentNode.removeChild(textNodeBefore);
             textNodeAfter.insertData(0, textNodeBefore.nodeValue);
             textNodeIncrease = textNodeBefore.length;
