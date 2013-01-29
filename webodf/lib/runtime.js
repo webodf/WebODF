@@ -1341,7 +1341,7 @@ var runtime = (function () {
     };
 }());
 (function (args) {
-    args = (args !== undefined) ? Array.prototype.slice.call(/**@type{Array}*/(args)) : [];
+    args = Array.prototype.slice.call(/**@type{Object}*/(args));
 
     function run(argv) {
         if (!argv.length) {
@@ -1382,5 +1382,4 @@ var runtime = (function () {
     } else {
         run(args.slice(1));
     }
-}(runtime.getVariable("arguments")));
-
+}(String(typeof arguments) !== "undefined" && arguments));

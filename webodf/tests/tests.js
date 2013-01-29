@@ -67,14 +67,14 @@ if (runtime.type() === "BrowserRuntime") {
 //    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
-
+/*
 tests = [];
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-    //tests.push(core.CursorTests);
-    //tests.push(ops.SessionImplementationTests);
+//    tests.push(core.CursorTests);
+//    tests.push(ops.SessionImplementationTests);
     tests.push(odf.OdfContainerTests);
 }
-
+*/
 var tester = new core.UnitTester();
 /**
  * @param {!Array.<Function>} tests
