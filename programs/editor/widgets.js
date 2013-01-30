@@ -34,10 +34,10 @@
 /*global define,document,require */
 define("webodf/editor/widgets", [
 	"webodf/editor/widgets/simpleStyles",
-	"webodf/editor/widgets/paragraphStyles",
+	"webodf/editor/widgets/toolbarWidgets/currentStyle",
 	"webodf/editor/widgets/paragraphStylesDialog",
 	"webodf/editor/widgets/zoomSlider"],
-	function (SimpleStyles, ParagraphStyles, ParagraphStylesDialog, ZoomSlider) {
+	function (SimpleStyles, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
         return function loadWidgets(editorSession) {
@@ -93,7 +93,7 @@ define("webodf/editor/widgets", [
 
             // Toolbar
             require(["dijit/Toolbar"], function (Toolbar) {
-                var toolbar, simpleStyles, paragraphStyles, zoomSlider;
+                var toolbar, simpleStyles, currentStyle, zoomSlider;
                 
                 toolbar = new Toolbar({}, "toolbar");
                 
@@ -104,7 +104,7 @@ define("webodf/editor/widgets", [
                 });
 
                 // Paragraph Style Selector
-                paragraphStyles = new ParagraphStyles(editorSession, function (widget) {
+                currentStyle = new CurrentStyle(editorSession, function (widget) {
                     widget.placeAt(toolbar);
                     widget.startup();
                 });
