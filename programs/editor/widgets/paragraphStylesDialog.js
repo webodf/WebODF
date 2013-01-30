@@ -45,6 +45,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 translator = document.translator,
                 tabContainer,
                 alignmentPane,
+                fontEffectsPane,
+                stylePicker,
                 flowPane,
                 numberingPane,
                 tabsPane,
@@ -57,12 +59,9 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 cancelButton;
 
             function accept() {
-                var alignment = dijit.byId('alignmentPaneForm').get('value'),
-                    fontEffects = dijit.byId('fontEffectsPaneForm').get('value');
-                
-                editorSession.updateParagraphStyle(editorSession.getCurrentParagraphStyle(), {
-                    paragraphProperties: alignment,
-                    textProperties: fontEffects
+                editorSession.updateParagraphStyle(stylePicker.get('value'), {
+                    paragraphProperties: alignmentPane.value(),
+                    textProperties: fontEffectsPane.value()
                 });
 
                 dialog.hide();
@@ -104,16 +103,19 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             ], function (ParagraphStyles, AlignmentPane, FontEffectsPane) {
                 var p, a, f;
                 p = new ParagraphStyles(editorSession, function (paragraphStyles) {
-                    paragraphStyles.startup();
-                    paragraphStyles.domNode.style.width = '100%';
-                    paragraphStyles.domNode.style.marginBottom = '5px';
-                    dialog.addChild(paragraphStyles, 0);
+                    stylePicker = paragraphStyles;
+                    stylePicker.startup();
+                    stylePicker.domNode.style.width = '100%';
+                    stylePicker.domNode.style.marginBottom = '5px';
+                    dialog.addChild(stylePicker, 0);
                 });
-                a = new AlignmentPane(editorSession, function (alignmentPane) {
+                a = new AlignmentPane(editorSession, function (pane) {
+                    alignmentPane = pane;
                     alignmentPane.widget().startup();
                     tabContainer.addChild(alignmentPane.widget());
                 });
-                f = new FontEffectsPane(editorSession, function (fontEffectsPane) {
+                f = new FontEffectsPane(editorSession, function (pane) {
+                    fontEffectsPane = pane;
                     fontEffectsPane.widget().startup();
                     tabContainer.addChild(fontEffectsPane.widget());
                 });
