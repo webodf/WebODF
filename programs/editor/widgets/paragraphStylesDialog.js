@@ -119,6 +119,11 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     fontEffectsPane.widget().startup();
                     tabContainer.addChild(fontEffectsPane.widget());
                 });
+                
+                stylePicker.onChange = function (value) {
+                    alignmentPane.setStyle(value);
+                    fontEffectsPane.setStyle(value);
+                };
             });
             
             tabContainer.startup();
