@@ -110,13 +110,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     dialog.addChild(paragraphStyles, 0);
                 });
                 a = new AlignmentPane(editorSession, function (alignmentPane) {
-                    alignmentPane.startup();
-                    tabContainer.addChild(alignmentPane);
+                    alignmentPane.widget().startup();
+                    tabContainer.addChild(alignmentPane.widget());
                 });
-                // A hack: the best way to get the attributes set in the dialog is to use dialog.value. There doesn't seem to be any other convenient way, so for now we will use that in the pane
                 f = new FontEffectsPane(editorSession, function (fontEffectsPane) {
-                    fontEffectsPane.startup();
-                    tabContainer.addChild(fontEffectsPane);
+                    fontEffectsPane.widget().startup();
+                    tabContainer.addChild(fontEffectsPane.widget());
                 });
             });
             

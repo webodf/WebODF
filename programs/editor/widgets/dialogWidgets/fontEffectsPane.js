@@ -34,103 +34,119 @@
 /*global define,require,document,dijit,console */
 define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
     "use strict";
-    function makeWidget(editorSession, callback) {
-        require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
-            var translator = document.translator;
-            ready(function () {
-                var contentPane = new ContentPane({
-                    title: translator("fontEffects"),
-                    href: "widgets/dialogWidgets/fontEffectsPane.html",
-                    preload: true
+
+    var FontEffectsPane = function (editorSession, callback) {
+        var self = this,
+            contentPane,
+            form,
+            preview,
+            textColorPicker,
+            backgroundColorPicker;
+
+        this.widget = function () {
+            return contentPane;
+        };
+
+        this.setStyle = function (styleName) {
+            var style = editorSession.getParagraphStyleAttributes(styleName)['style:text-properties'],
+                s_bold,
+                s_italic,
+                s_underline,
+                s_fontSize,
+                s_fontName,
+                s_color,
+                s_backgroundColor;
+            
+            if (style !== undefined) {
+                s_bold = style['fo:font-weight'];
+                s_italic = style['fo:font-style'];
+                s_underline = style['fo:text-decoration'];
+                s_fontSize = parseFloat(style['fo:font-size']);
+                s_fontName = style['fo:font-family'];
+                s_color = style['fo:color'];
+                s_backgroundColor = style['fo:background-color'];
+                
+                form.attr('value', {
+                    fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',
+                    fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
+                    textStyle: [s_bold, s_italic, s_underline]
                 });
+                textColorPicker.set('value', s_color && s_color.length ? s_color : '#000000');
+                backgroundColorPicker.set('value', s_backgroundColor && s_backgroundColor.length ? s_backgroundColor : '#ffffff');
 
-                contentPane.onLoad = function () {
-                    var form = dijit.byId('fontEffectsPaneForm'),
-                        preview = document.getElementById('previewText'),
-                        textColorPicker = dijit.byId('textColorPicker'),
-                        backgroundColorPicker = dijit.byId('backgroundColorPicker'),
-                        textColorTB = dijit.byId('textColorTB'),
-                        backgroundColorTB = dijit.byId('backgroundColorTB');
-                    
-                    // Bind dojox widgets' values to invisible form elements, for easy parsing
-                    textColorPicker.onChange = function (value) {
-                        textColorTB.set('value', value);
-                    };
-                    backgroundColorPicker.onChange = function (value) {
-                        backgroundColorTB.set('value', value);
-                    };
+            } else {
+                // TODO: Use default style here
+                form.attr('value', {
+                    fontFamily: 'sans-serif',
+                    fontSize: 12,
+                    textStyle: []
+                });
+                textColorPicker.set('value', '#000000');
+                backgroundColorPicker.set('value', '#ffffff');
+            }
+
+        };
+        
+        function init(cb) {
+            require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
+                var translator = document.translator;
+                ready(function () {
+                    contentPane = new ContentPane({
+                        title: translator("fontEffects"),
+                        href: "widgets/dialogWidgets/fontEffectsPane.html",
+                        preload: true
+                    });
+
+                    contentPane.onLoad = function () {
+                        var textColorTB = dijit.byId('textColorTB'),
+                            backgroundColorTB = dijit.byId('backgroundColorTB');
                         
-                    editorSession.subscribe('paragraphChanged', function () {
-                        var style = editorSession.getParagraphStyleAttributes(editorSession.getCurrentParagraphStyle())['style:text-properties'],
-                            s_bold,
-                            s_italic,
-                            s_underline,
-                            s_fontSize,
-                            s_fontName,
-                            s_color,
-                            s_backgroundColor;
+                        form = dijit.byId('fontEffectsPaneForm');
+                        preview = document.getElementById('previewText');
+                        textColorPicker = dijit.byId('textColorPicker');
+                        backgroundColorPicker = dijit.byId('backgroundColorPicker');
                         
-                        if (style !== undefined) {
-                            s_bold = style['fo:font-weight'];
-                            s_italic = style['fo:font-style'];
-                            s_underline = style['fo:text-decoration'];
-                            s_fontSize = parseFloat(style['fo:font-size']);
-                            s_fontName = style['fo:font-family'];
-                            s_color = style['fo:color'];
-                            s_backgroundColor = style['fo:background-color'];
+                        // Bind dojox widgets' values to invisible form elements, for easy parsing
+                        textColorPicker.onChange = function (value) {
+                            textColorTB.set('value', value);
+                        };
+                        backgroundColorPicker.onChange = function (value) {
+                            backgroundColorTB.set('value', value);
+                        };
                             
-                            form.attr('value', {
-                                fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',
-                                fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
-                                textStyle: [s_bold, s_italic, s_underline]
-                            });
-                            textColorPicker.set('value', s_color && s_color.length ? s_color : '#000000');
-                            backgroundColorPicker.set('value', s_backgroundColor && s_backgroundColor.length ? s_backgroundColor : '#ffffff');
+                        // Automatically update preview when selections change
+                        form.watch('value', function () {
+                            if (form.value.textStyle.indexOf('bold') !== -1) {
+                                preview.style.fontWeight = 'bold';
+                            } else {
+                                preview.style.fontWeight = 'normal';
+                            }
+                            if (form.value.textStyle.indexOf('italic') !== -1) {
+                                preview.style.fontStyle = 'italic';
+                            } else {
+                                preview.style.fontStyle = 'normal';
+                            }
+                            if (form.value.textStyle.indexOf('underline') !== -1) {
+                                preview.style.textDecoration = 'underline';
+                            } else {
+                                preview.style.textDecoration = 'none';
+                            }
 
-                        } else {
-                            // TODO: Use default style here
-                            form.attr('value', {
-                                fontFamily: 'sans-serif',
-                                fontSize: 12,
-                                textStyle: []
-                            });
-                            textColorPicker.set('value', '#000000');
-                            backgroundColorPicker.set('value', '#ffffff');
-                        }
-                    });
-                    // Automatically update preview when selections change
-                    form.watch('value', function () {
-                        if (form.value.textStyle.indexOf('bold') !== -1) {
-                            preview.style.fontWeight = 'bold';
-                        } else {
-                            preview.style.fontWeight = 'normal';
-                        }
-                        if (form.value.textStyle.indexOf('italic') !== -1) {
-                            preview.style.fontStyle = 'italic';
-                        } else {
-                            preview.style.fontStyle = 'normal';
-                        }
-                        if (form.value.textStyle.indexOf('underline') !== -1) {
-                            preview.style.textDecoration = 'underline';
-                        } else {
-                            preview.style.textDecoration = 'none';
-                        }
-
-                        preview.style.fontSize = form.value.fontSize + 'pt';
-                        preview.style.fontFamily = form.value.fontFamily;
-                        preview.style.color = form.value.color;
-                        preview.style.backgroundColor = form.value.backgroundColor;
-                    });
-                };
-                return callback(contentPane);
+                            preview.style.fontSize = form.value.fontSize + 'pt';
+                            preview.style.fontFamily = form.value.fontFamily;
+                            preview.style.color = form.value.color;
+                            preview.style.backgroundColor = form.value.backgroundColor;
+                        });
+                    };
+                    return cb();
+                });
             });
-        });
-    }
-
-    return function FontEffectsPane(editorSession, callback) {
-        makeWidget(editorSession, function (pane) {
-            return callback(pane);
+        }
+        
+        init(function () {
+            return callback(self);
         });
     };
-
+    
+    return FontEffectsPane;
 });

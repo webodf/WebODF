@@ -37,59 +37,69 @@ runtime.loadClass("core.CSSUnits");
 
 define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
     "use strict";
-    function makeWidget(editorSession, callback) {
-        require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
-            ready(function () {
-                var contentPane = new ContentPane({
-                    title: document.translator("alignment"),
-                    href: "widgets/dialogWidgets/alignmentPane.html",
-                    preload: true
+    var AlignmentPane = function (editorSession, callback) {
+        var self = this,
+            contentPane,
+            form;
+        
+        this.widget = function () {
+            return contentPane;
+        };
+        
+        this.setStyle = function (styleName) {
+            var style = editorSession.getParagraphStyleAttributes(styleName)['style:paragraph-properties'],
+                cssUnits = new core.CSSUnits(),
+                s_topMargin,
+                s_bottomMargin,
+                s_leftMargin,
+                s_rightMargin,
+                s_textAlign;
+
+            if (style !== undefined) {
+                s_topMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-top'], 'mm'));
+                s_leftMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-left'], 'mm'));
+                s_rightMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-right'], 'mm'));
+                s_bottomMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-bottom'], 'mm'));
+                s_textAlign = style['fo:text-align'];
+                
+                form.attr('value', {
+                    topMargin: isNaN(s_topMargin) ? 0 : s_topMargin,
+                    bottomMargin: isNaN(s_bottomMargin) ? 0 : s_bottomMargin,
+                    leftMargin: isNaN(s_leftMargin) ? 0 : s_leftMargin,
+                    rightMargin: isNaN(s_rightMargin) ? 0 : s_rightMargin,
+                    alignment: s_textAlign && s_textAlign.length ? s_textAlign : 'left'
                 });
-
-                contentPane.onLoad = function () {
-                    var form = dijit.byId('alignmentPaneForm');
-                    editorSession.subscribe('paragraphChanged', function () {
-                        var style = editorSession.getParagraphStyleAttributes(editorSession.getCurrentParagraphStyle())['style:paragraph-properties'],
-                            cssUnits = new core.CSSUnits(),
-                            s_topMargin,
-                            s_bottomMargin,
-                            s_leftMargin,
-                            s_rightMargin,
-                            s_textAlign;
-
-                        if (style !== undefined) {
-                            s_topMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-top'], 'mm'));
-                            s_leftMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-left'], 'mm'));
-                            s_rightMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-right'], 'mm'));
-                            s_bottomMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-bottom'], 'mm'));
-                            s_textAlign = style['fo:text-align'];
-                            
-                            form.attr('value', {
-                                topMargin: isNaN(s_topMargin) ? 0 : s_topMargin,
-                                bottomMargin: isNaN(s_bottomMargin) ? 0 : s_bottomMargin,
-                                leftMargin: isNaN(s_leftMargin) ? 0 : s_leftMargin,
-                                rightMargin: isNaN(s_rightMargin) ? 0 : s_rightMargin,
-                                alignment: s_textAlign && s_textAlign.length ? s_textAlign : 'left'
-                            });
-                        } else {
-                            form.attr('value', {
-                                topMargin: 0,
-                                bottomMargin: 0,
-                                leftMargin: 0,
-                                rightMargin: 0,
-                                alignment: 'left'
-                            });
-                        }
+            } else {
+                form.attr('value', {
+                    topMargin: 0,
+                    bottomMargin: 0,
+                    leftMargin: 0,
+                    rightMargin: 0,
+                    alignment: 'left'
+                });
+            }
+        };
+        
+        function init(cb) {
+            require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
+                ready(function () {
+                    contentPane = new ContentPane({
+                        title: document.translator("alignment"),
+                        href: "widgets/dialogWidgets/alignmentPane.html",
+                        preload: true
                     });
-                };
-                return callback(contentPane);
+                    contentPane.onLoad = function () {
+                        form = dijit.byId('alignmentPaneForm');
+                    };
+                    return cb();
+                });
             });
-        });
-    }
+        }
 
-    return function AlignmentPane(editorSession, callback) {
-        makeWidget(editorSession, function (pane) {
-            return callback(pane);
+        init(function () {
+            return callback(self);
         });
     };
+    
+    return AlignmentPane;
 });
