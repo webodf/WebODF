@@ -106,6 +106,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 p = new ParagraphStyles(editorSession, function (paragraphStyles) {
                     paragraphStyles.startup();
                     paragraphStyles.domNode.style.width = '100%';
+                    paragraphStyles.domNode.style.marginBottom = '5px';
                     dialog.addChild(paragraphStyles, 0);
                 });
                 a = new AlignmentPane(editorSession, function (alignmentPane) {

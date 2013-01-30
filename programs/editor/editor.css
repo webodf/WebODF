@@ -155,9 +155,10 @@ html, body, #mainContainer {
 }
 
 .dijitDialogPaneContent {
-    width: 450px !important;
-    height: 500px !important;
     border: none !important;
+    overflow: hidden !important;
+    height: 510px !important;
+    width: 450px !important;
 }
 
 .dijitDialogPaneContent h3 {
