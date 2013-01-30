@@ -46,6 +46,10 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
             return contentPane;
         };
         
+        this.value = function () {
+            return dijit.byId('alignmentPaneForm').get('value');
+        };
+
         this.setStyle = function (styleName) {
             var style = editorSession.getParagraphStyleAttributes(styleName)['style:paragraph-properties'],
                 cssUnits = new core.CSSUnits(),
