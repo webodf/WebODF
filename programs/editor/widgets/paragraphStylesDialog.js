@@ -81,7 +81,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             tabContainer = new TabContainer({
                 style: "height: 100%; width: 100%;"
             });
-            dialog.addChild(tabContainer);
+            dialog.addChild(tabContainer, 1);
 
             actionBar = dojo.create("div", {
                 "class": "dijitDialogPaneActionBar"
@@ -98,10 +98,16 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
 
 
             require([
+                "webodf/editor/widgets/paragraphStyles",
                 "webodf/editor/widgets/dialogWidgets/alignmentPane",
                 "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
-            ], function (AlignmentPane, FontEffectsPane) {
-                var a, f;
+            ], function (ParagraphStyles, AlignmentPane, FontEffectsPane) {
+                var p, a, f;
+                p = new ParagraphStyles(editorSession, function (paragraphStyles) {
+                    paragraphStyles.startup();
+                    paragraphStyles.domNode.style.width = '100%';
+                    dialog.addChild(paragraphStyles, 0);
+                });
                 a = new AlignmentPane(editorSession, function (alignmentPane) {
                     alignmentPane.startup();
                     tabContainer.addChild(alignmentPane);
