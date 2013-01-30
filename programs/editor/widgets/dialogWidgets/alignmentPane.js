@@ -47,7 +47,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
         };
         
         this.value = function () {
-            return dijit.byId('alignmentPaneForm').get('value');
+            return form.get('value');
         };
 
         this.setStyle = function (styleName) {
