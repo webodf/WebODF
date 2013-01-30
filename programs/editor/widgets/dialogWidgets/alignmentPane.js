@@ -44,9 +44,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                     title: document.translator("alignment"),
                     href: "widgets/dialogWidgets/alignmentPane.html",
                     preload: true
-                }),
-                    fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-                    stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+                });
 
                 contentPane.onLoad = function () {
                     var form = dijit.byId('alignmentPaneForm');
