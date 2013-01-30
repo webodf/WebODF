@@ -48,7 +48,9 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
         };
         
         this.value = function () {
-            return dijit.byIf('fontEffectsPaneForm').get('value');
+            return dijit.byId('fontEffectsPaneForm').get('value');
+        };
+        
         this.setStyle = function (styleName) {
             var style = editorSession.getParagraphStyleAttributes(styleName)['style:text-properties'],
                 s_bold,
