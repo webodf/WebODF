@@ -62,6 +62,7 @@ define("webodf/editor/EditorSession", [], function () {
         eventListener.userRemoved = [];
         eventListener.cursorMoved = [];
         eventListener.paragraphChanged = [];
+        eventListener.stylesChanged = [];
 
         function checkParagraphStyleName() {
             var newStyleName,
@@ -120,6 +121,10 @@ define("webodf/editor/EditorSession", [], function () {
             if (cursor.getMemberId() === memberid) {
                 self.emit('cursorMoved', cursor);
             }
+        });
+        
+        session.subscribe(ops.SessionImplementation.signalStylesChanged, function () {
+            self.emit('stylesChanged');
         });
 
         session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);
