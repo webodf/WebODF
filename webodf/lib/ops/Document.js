@@ -447,7 +447,10 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         styleNode = getParagraphStyleElement(styleName);
         newStyleNode = styleNode.cloneNode(true);
         newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);
+        newStyleNode.setAttributeNS(stylens, 'style:display-name', newStyleName);
         styleNode.parentNode.appendChild(newStyleNode);
+
+        odfCanvas.refreshCSS();
     };
 
     /**
