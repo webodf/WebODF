@@ -97,7 +97,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
 
 
             require([
-                "webodf/editor/widgets/paragraphStylesModifiable",
+                "webodf/editor/widgets/paragraphStyles",
                 "webodf/editor/widgets/dialogWidgets/alignmentPane",
                 "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
             ], function (ParagraphStyles, AlignmentPane, FontEffectsPane) {
