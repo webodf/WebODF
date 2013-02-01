@@ -38,24 +38,36 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
         require(["dijit/form/Select"], function (Select) {
             var i,
                 widget,
-                selectionList = [],
+                selectionList,
+                availableStyles;
+            
+            function populateStyles() {
+                selectionList = [];
                 availableStyles = editorSession.getAvailableParagraphStyles();
+                
+                for (i = 0; i < availableStyles.length; i += 1) {
+                    selectionList.push({
+                        label: availableStyles[i].displayName,
+                        value: availableStyles[i].name
+                    });
+                }
 
-            for (i = 0; i < availableStyles.length; i += 1) {
-                selectionList.push({
-                    label: availableStyles[i].displayName,
-                    value: availableStyles[i].name
-                });
+                widget.removeOption(widget.getOptions());
+                widget.addOption(selectionList);
             }
-            // TODO: get informed about change of list of named styles
 
             widget = new Select({
                 name: 'ParagraphStyles',
-                options: selectionList,
                 maxHeight: 200,
                 style: {
                     width: '100px'
                 }
+            });
+
+            populateStyles();
+            
+            editorSession.subscribe('stylesChanged', function () {
+                populateStyles();
             });
 
             return callback(widget);
