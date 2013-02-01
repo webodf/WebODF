@@ -67,7 +67,9 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
             populateStyles();
             
             editorSession.subscribe('stylesChanged', function () {
+                var currentValue = widget.get('value');
                 populateStyles();
+                widget.set('value', currentValue);
             });
 
             return callback(widget);
