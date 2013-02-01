@@ -37,9 +37,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
     function makeWidget(editorSession, callback) {
         require([
             "dijit/Dialog",
+            "dijit/TooltipDialog",
             "dijit/layout/TabContainer",
             "dijit/layout/ContentPane",
-            "dijit/form/RadioButton"], function (Dialog, TabContainer, ContentPane, RadioButton) {
+            "dijit/form/Button",
+            "dijit/form/DropDownButton",
+            "dijit/form/RadioButton"], function (Dialog, TooltipDialog, TabContainer, ContentPane, Button, DropDownButton, RadioButton) {
             var i,
                 dialog,
                 translator = document.translator,
@@ -56,7 +59,11 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 indentsPane,
                 actionBar,
                 okButton,
-                cancelButton;
+                cancelButton,
+                cloneButton,
+                deleteButton,
+                cloneTooltip,
+                cloneDropDown;
 
             function accept() {
                 editorSession.updateParagraphStyle(stylePicker.get('value'), {
@@ -66,21 +73,60 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
 
                 dialog.hide();
             }
-
+            
             function cancel() {
                 dialog.hide();
             }
+            
+            function cloneStyle(styleName, newName) {
+            }
 
+            function deleteStyle(styleName) {
+
+            }
             // Dialog
             dialog = new Dialog({
                 title: translator("paragraphStyles")
             });
+            
+            cloneTooltip = new TooltipDialog({
+                content:
+                    '<h2 style="margin: 0;">Clone this style</h2><br/>' +
+                    '<label for="name">New name </label><input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>',
+                style: "width: 300px;"
+            });
+            cloneButton = new Button({
+                label: 'Create',
+                onClick: function () {
+                    cloneStyle(stylePicker.get('value'), cloneTooltip.get('value').name);
+                }
+            });
+            cloneTooltip.addChild(cloneButton);
+            cloneDropDown = new DropDownButton({
+                label: 'Clone',
+                showLabel: false,
+                iconClass: 'dijitEditorIcon dijitEditorIconCopy',
+                dropDown: cloneTooltip,
+                style: "float: right; margin-bottom: 5px;"
+            });
+            dialog.addChild(cloneDropDown, 1);
+
+            deleteButton = new Button({
+                label: 'Delete',
+                showLabel: false,
+                iconClass: 'dijitEditorIcon dijitEditorIconDelete',
+                style: "float: right; margin-bottom: 5px;",
+                onClick: function () {
+                    deleteStyle(stylePicker.get('value'));
+                }
+            });
+            dialog.addChild(deleteButton, 2);
 
             // Tab Container
             tabContainer = new TabContainer({
                 style: "height: 100%; width: 100%;"
             });
-            dialog.addChild(tabContainer, 1);
+            dialog.addChild(tabContainer, 3);
 
             actionBar = dojo.create("div", {
                 "class": "dijitDialogPaneActionBar"
@@ -105,8 +151,9 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 p = new ParagraphStyles(editorSession, function (paragraphStyles) {
                     stylePicker = paragraphStyles;
                     stylePicker.startup();
-                    stylePicker.domNode.style.width = '100%';
-                    stylePicker.domNode.style.marginBottom = '5px';
+                    stylePicker.domNode.style.float = "left";
+                    stylePicker.domNode.style.width = "350px";
+                    stylePicker.domNode.style.marginTop = "5px";
                     dialog.addChild(stylePicker, 0);
                 });
                 a = new AlignmentPane(editorSession, function (pane) {
