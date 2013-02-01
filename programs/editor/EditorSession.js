@@ -212,6 +212,17 @@ define("webodf/editor/EditorSession", [], function () {
             session.enqueue(op);
         };
 
+        this.cloneStyle = function (styleName, newStyleName) {
+            var op;
+            op = new ops.OpCloneStyle(session);
+            op.init({
+                memberid: memberid,
+                styleName: styleName,
+                newStyleName: newStyleName
+            });
+            session.enqueue(op);
+        };
+
         this.subscribe('cursorMoved', trackCursor);
     };
 

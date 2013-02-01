@@ -79,6 +79,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             }
             
             function cloneStyle(styleName, newName) {
+                editorSession.cloneStyle(styleName, newName);
             }
 
             function deleteStyle(styleName) {

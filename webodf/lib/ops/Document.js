@@ -441,6 +441,14 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
 
         return false;
     };
+    
+    this.cloneStyle = function (styleName, newStyleName) {
+        var styleNode, newStyleNode;
+        styleNode = getParagraphStyleElement(styleName);
+        newStyleNode = styleNode.cloneNode(true);
+        newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);
+        styleNode.parentNode.appendChild(newStyleNode);
+    };
 
     /**
     * @param {!string} memberid

@@ -86,6 +86,7 @@
         "ops/OpSplitParagraph.js",
         "ops/OpSetParagraphStyle.js",
         "ops/OpUpdateParagraphStyle.js",
+        "ops/OpCloneStyle.js",
         "ops/OperationFactory.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",

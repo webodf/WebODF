@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -32,56 +32,34 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, ops */
-
-/*
- * create specific operation instances.
- */
-
-runtime.loadClass("ops.OpAddCursor");
-runtime.loadClass("ops.OpRemoveCursor");
-runtime.loadClass("ops.OpMoveCursor");
-runtime.loadClass("ops.OpInsertText");
-runtime.loadClass("ops.OpRemoveText");
-runtime.loadClass("ops.OpSplitParagraph");
-runtime.loadClass("ops.OpSetParagraphStyle");
-runtime.loadClass("ops.OpUpdateParagraphStyle");
-runtime.loadClass("ops.OpCloneStyle");
+/*global ops*/
 
 /**
  * @constructor
+ * @implements ops.Operation
  */
-ops.OperationFactory = function OperationFactory(session) {
+ops.OpCloneStyle = function OpCloneStyle(session) {
     "use strict";
+    
+    var memberid, styleName, newStyleName;
 
-    var self = this;
+    this.init = function (data) {
+        memberid = data.memberid;
+        styleName = data.styleName;
+        newStyleName = data.newStyleName;
+    };
 
-    this.create = function (spec) {
-        var op = null;
-        // TODO: of course the following code can use some better
-        // js language and make it more generic.
-        if (spec.optype === "AddCursor") {
-            op = new ops.OpAddCursor(session);
-        } else if (spec.optype === "InsertText") {
-            op = new ops.OpInsertText(session);
-        } else if (spec.optype === "RemoveText") {
-            op = new ops.OpRemoveText(session);
-        } else if (spec.optype === "SplitParagraph") {
-            op = new ops.OpSplitParagraph(session);
-        } else if (spec.optype === "SetParagraphStyle") {
-            op = new ops.OpSetParagraphStyle(session);
-        } else if (spec.optype === "UpdateParagraphStyle") {
-            op = new ops.OpUpdateParagraphStyle(session);
-        } else if (spec.optype === "CloneStyle") {
-            op = new ops.OpCloneStyle(session);
-        } else if (spec.optype === "MoveCursor") {
-            op = new ops.OpMoveCursor(session);
-        } else if (spec.optype === "RemoveCursor") {
-            op = new ops.OpRemoveCursor(session);
-        }
-        if (op) {
-            op.init(spec);
-        }
-        return op;
+    this.execute = function (domroot) {
+        var odfDocument = session.getOdfDocument();
+        odfDocument.cloneStyle(styleName, newStyleName);
+    };
+    
+    this.spec = function () {
+        return {
+            optype: "CloneStyle",
+            memberid: memberid,
+            styleName: styleName,
+            newStyleName: newStyleName
+        };
     };
 };
