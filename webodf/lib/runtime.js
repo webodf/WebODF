@@ -1341,7 +1341,11 @@ var runtime = (function () {
     };
 }());
 (function (args) {
-    args = Array.prototype.slice.call(/**@type{Object}*/(args));
+    if (args) {
+        args = Array.prototype.slice.call(/**@type{Object}*/(args));
+    } else {
+        args = [];
+    }
 
     function run(argv) {
         if (!argv.length) {
