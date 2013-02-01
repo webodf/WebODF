@@ -38,11 +38,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
         require([
             "dijit/Dialog",
             "dijit/TooltipDialog",
+            "dijit/popup",
             "dijit/layout/TabContainer",
             "dijit/layout/ContentPane",
             "dijit/form/Button",
             "dijit/form/DropDownButton",
-            "dijit/form/RadioButton"], function (Dialog, TooltipDialog, TabContainer, ContentPane, Button, DropDownButton, RadioButton) {
+            "dijit/form/RadioButton"], function (Dialog, TooltipDialog, popup, TabContainer, ContentPane, Button, DropDownButton, RadioButton) {
             var i,
                 dialog,
                 translator = document.translator,
@@ -100,6 +101,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 label: 'Create',
                 onClick: function () {
                     cloneStyle(stylePicker.get('value'), cloneTooltip.get('value').name);
+                    cloneTooltip.reset();
+                    popup.close(cloneTooltip);
                 }
             });
             cloneTooltip.addChild(cloneButton);
