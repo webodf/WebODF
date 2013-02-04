@@ -289,6 +289,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {!number}
      */
     function countStepsToPosition(element, offset, filter) {
+        runtime.assert(element !== null, "SelectionMover.countStepsToPosition called with element===null");
         // first figure out how to get to the element
         // really dumb/inefficient implementation
         var c = positionIterator.container(),
@@ -302,6 +303,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         // setPosition with these values
         positionIterator.setPosition(element, offset);
         element = positionIterator.container();
+        runtime.assert(element !== null, "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
         offset = positionIterator.offset();
         positionIterator.setPosition(c, o);
 

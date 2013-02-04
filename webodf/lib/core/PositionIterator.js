@@ -269,6 +269,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!boolean}
      */
     this.setPosition = function (container, offset) {
+        runtime.assert(container !== null, "PositionIterator.setPosition called with container===null");
         walker.currentNode = container;
         if (container.nodeType === 3) {
             currentPos = offset;

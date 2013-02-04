@@ -245,6 +245,7 @@ ops.Document = function Document(odfCanvas) {
         var counter,
             cursor = cursors[memberid],
             steps = 0;
+        runtime.assert(node !== null, "Document.getDistanceFromCursor called with node===null");
         if (cursor) {
             counter = cursor.getStepCounter().countStepsToPosition;
             steps = counter(node, offset, filter);
