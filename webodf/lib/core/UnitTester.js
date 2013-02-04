@@ -202,7 +202,7 @@ core.UnitTester = function UnitTester() {
             lastFailCount;
 
         // check that this test has not been run or started yet
-        if (testName.hasOwnProperty(results)) {
+        if (results.hasOwnProperty(testName)) {
             runtime.log("Test " + testName + " has already run.");
             return;
         }
