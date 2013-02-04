@@ -62,27 +62,21 @@ core.Cursor = function Cursor(memberid, odfDocument) {
     "use strict";
     var self = this,
         cursorNode,
+        cursorTextNode,
         selection,
         selectionMover;
 
     function putCursorIntoTextNode(container, offset) {
-        var parent = container.parentNode,
-            textNodeBehindCursor;
-        
-        runtime.assert(parent !== null, "parent is null here!");
-
+        var parent = container.parentNode;
         if (offset > 0) {
-            textNodeBehindCursor = container.splitText(offset);
-            parent.insertBefore(cursorNode, textNodeBehindCursor);
-        } else {
-            parent.insertBefore(cursorNode, container);
+            cursorTextNode.data = container.substringData(0, offset);
+            container.deleteData(0, offset);
+            parent.insertBefore(cursorTextNode, container);
         }
+        parent.insertBefore(cursorNode, container);
     }
     function putCursorIntoContainer(container, offset) {
         var node = container.firstChild;
-
-        runtime.assert(node !== null, "parent is null here!");
-        
         while (node !== null && offset > 0) {
             node = node.nextSibling;
             offset -= 1;
@@ -90,17 +84,16 @@ core.Cursor = function Cursor(memberid, odfDocument) {
         container.insertBefore(cursorNode, node);
     }
     function removeCursor(onCursorRemove) {
-        var textNodeBefore = cursorNode.previousSibling,
-            textNodeAfter = cursorNode.nextSibling,
+        var t = cursorNode.nextSibling,
             textNodeIncrease = 0;
-
-        if (textNodeBefore && textNodeBefore.nodeType === 3 &&
-                textNodeAfter && textNodeAfter.nodeType === 3) {
-            textNodeBefore.parentNode.removeChild(textNodeBefore);
-            textNodeAfter.insertData(0, textNodeBefore.nodeValue);
-            textNodeIncrease = textNodeBefore.length;
+        if (cursorTextNode.parentNode) {
+            cursorTextNode.parentNode.removeChild(cursorTextNode);
+            if (t && t.nodeType === 3) {
+                t.insertData(0, cursorTextNode.nodeValue);
+                textNodeIncrease = cursorTextNode.length;
+            }
         }
-        onCursorRemove(textNodeAfter, textNodeIncrease);
+        onCursorRemove(t, textNodeIncrease);
         if (cursorNode.parentNode) {
             cursorNode.parentNode.removeChild(cursorNode);
         }
@@ -194,6 +187,7 @@ core.Cursor = function Cursor(memberid, odfDocument) {
 
         cursorNode = dom.createElementNS(cursorns, 'cursor');
         cursorNode.setAttributeNS(cursorns, "memberId", memberid);
+        cursorTextNode = dom.createTextNode("");
         selection = new core.Selection(odfDocument);
         selectionMover = odfDocument.getSelectionManager().createSelectionMover(self);
     }
