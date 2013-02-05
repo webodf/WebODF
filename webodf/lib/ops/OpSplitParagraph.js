@@ -114,8 +114,14 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
                 }
 
                 // mark both paragraphs as edited
-                document.highlightEdit(paragraphNode, memberid);
-                document.highlightEdit(splitChildNode, memberid);
+                document.emit('highlightEdit', {
+                    element: paragraphNode,
+                    memberId: memberid
+                });
+                document.emit('highlightEdit', {
+                    element: splitChildNode,
+                    memberId: memberid
+                });
             }
         }
     };
