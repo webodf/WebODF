@@ -378,7 +378,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             if (paragraphNode) {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
                 self.emit('highlightEdit', {
-                    element: getParagraphElement(paragraphNode),
+                    element: paragraphNode,
                     memberId: memberid
                 });
                 return true;
