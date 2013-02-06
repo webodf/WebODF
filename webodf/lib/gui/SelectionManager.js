@@ -40,7 +40,7 @@ gui.SelectionManager = function SelectionManager(rootNode) {
     "use strict";
     var movers = [];
     /**
-     * @param {?Element} nodeAfterCursor
+     * @param {?Node} nodeAfterCursor
      * @param {!number} textNodeIncrease
      * @return {undefined}
      */
@@ -51,7 +51,7 @@ gui.SelectionManager = function SelectionManager(rootNode) {
         }
     }
     /**
-     * @param {?Element} nodeAfterCursor
+     * @param {?Node} nodeAfterCursor
      * @param {!number} textNodeIncrease
      * @return {undefined}
      */

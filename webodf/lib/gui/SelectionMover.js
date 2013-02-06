@@ -41,8 +41,8 @@ runtime.loadClass("core.LoopWatchDog");
  * @constructor
  * @param {core.Cursor} cursor
  * @param {!Node} rootNode
- * @param {!function(?Element,!number):undefined=} onCursorAdd
- * @param {!function(?Element,!number):undefined=} onCursorRemove
+ * @param {!function(?Node,!number):undefined=} onCursorAdd
+ * @param {!function(?Node,!number):undefined=} onCursorRemove
  */
 gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
@@ -396,7 +396,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         };
     };
     /**
-     * @param {?Element} nodeAfterCursor
+     * @param {?Node} nodeAfterCursor
      * @param {!number} textNodeIncrease
      * @return {undefined}
      */
@@ -412,7 +412,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         }
     };
     /**
-     * @param {?Element} nodeAfterCursor
+     * @param {?Node} nodeAfterCursor
      * @param {!number} textNodeDecrease
      * @return {undefined}
      */

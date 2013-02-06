@@ -56,16 +56,28 @@ runtime.loadClass("core.Selection");
  *
  * @constructor
  * @param {!string} memberid The memberid this cursor is assigned to
-//  * @param {!ops.Document} odfDocument The document in which the cursor is placed
+ * @param {!ops.Document} odfDocument The document in which the cursor is placed
  */
 core.Cursor = function Cursor(memberid, odfDocument) {
     "use strict";
     var self = this,
+        /**@type{Element}*/
         cursorNode,
+        /**@type{!Text}*/
         cursorTextNode,
         selection,
         selectionMover;
 
+    /**
+     * Split a text node and put the cursor into it.
+     * When a text node is split in two, a second node is required. For this
+     * reason, cursorTextNode exists. The front part of the split text node is
+     * placed in cursorTextNode. Then cursorTextNode is inserted before the
+     * original text node and the cursor is placed between the two text nodes.
+     * @param {!Text} container
+     * @param {!number} offset
+     * @return {undefined}
+     */
     function putCursorIntoTextNode(container, offset) {
         var parent = container.parentNode;
         if (offset > 0) {
@@ -75,6 +87,11 @@ core.Cursor = function Cursor(memberid, odfDocument) {
         }
         parent.insertBefore(cursorNode, container);
     }
+    /**
+     * @param {!Element} container
+     * @param {!number} offset
+     * @return {undefined}
+     */
     function putCursorIntoContainer(container, offset) {
         var node = container.firstChild;
         while (node !== null && offset > 0) {
@@ -83,6 +100,11 @@ core.Cursor = function Cursor(memberid, odfDocument) {
         }
         container.insertBefore(cursorNode, node);
     }
+    /**
+     * Remove the cursor from the tree.
+     * @param {!function(?Node,!number):undefined} onCursorRemove
+     * @return {undefined}
+     */
     function removeCursor(onCursorRemove) {
         var t = cursorNode.nextSibling,
             textNodeIncrease = 0;
@@ -98,16 +120,29 @@ core.Cursor = function Cursor(memberid, odfDocument) {
             cursorNode.parentNode.removeChild(cursorNode);
         }
     }
-    // put the cursor at a particular position
+    /**
+     * Put the cursor at a particular position.
+     * @param {!Node} container
+     * @param {!number} offset
+     * @param {!function(?Node,!number):undefined} onCursorAdd
+     * @return {undefined}
+     */
     function putCursor(container, offset, onCursorAdd) {
+        var text, element;
         if (container.nodeType === 3) { // TEXT_NODE
-            putCursorIntoTextNode(container, offset);
+            text = /**@type{!Text}*/(container);
+            putCursorIntoTextNode(text, offset);
             onCursorAdd(cursorNode.nextSibling, offset);
         } else if (container.nodeType === 1) { // ELEMENT_NODE
-            putCursorIntoContainer(container, offset);
+            element = /**@type{!Element}*/(container);
+            putCursorIntoContainer(element, offset);
             onCursorAdd(cursorNode.nextSibling, 0);
         }
     }
+    /**
+     * @param {!number} number
+     * @return {!number}
+     */
     this.move = function (number) {
         var moved = 0;
         if (number > 0) {
@@ -161,8 +196,8 @@ core.Cursor = function Cursor(memberid, odfDocument) {
      * Synchronize the cursor with the current selection.
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
-     * @param {!function(?Element,!number):undefined} onCursorRemove
-     * @param {!function(?Element,!number):undefined} onCursorAdd
+     * @param {!function(?Node,!number):undefined} onCursorRemove
+     * @param {!function(?Node,!number):undefined} onCursorAdd
      * @return {undefined}
      */
     this.updateToSelection = function (onCursorRemove, onCursorAdd) {
@@ -174,7 +209,7 @@ core.Cursor = function Cursor(memberid, odfDocument) {
     };
     /**
      * Remove the cursor from the document tree.
-     * @param {!function(?Element,!number):undefined} onCursorRemove
+     * @param {!function(?Node,!number):undefined} onCursorRemove
      * @return {undefined}
      */
     this.remove = function (onCursorRemove) {
