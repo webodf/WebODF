@@ -71,16 +71,23 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
                 t.e1 = z1.getEntries();
                 t.e2 = z2.getEntries();
                 r.shouldBe(t, "t.e1.length", "t.e2.length");
-                var i, j, f1;
+                var i, j, f1, date1;
                 t.allPresent = true;
                 for (i = 0; t.allPresent && i < t.e1.length; i += 1) {
                     f1 = t.e1[i].filename;
+                    date1 = t.e1[i].date;
                     j = 0;
                     while (t.e2[j].filename !== f1 && j < t.e2.length) {
                         j += 1;
                     }
                     if (j === t.e2.length) {
                         runtime.log("Not present: " + f1);
+                    } else {
+                        t.date1 = t.e1[i].date;
+                        t.date2 = t.e2[j].date;
+                        // new date should be newer but not more than 3 years
+                        r.shouldBe(t, "t.date2.getTime() - t.date1.getTime() >= 0", "true");
+                        r.shouldBe(t, "t.date2.getTime() - t.date1.getTime() < 100000000000", "true");
                     }
                     t.allPresent = j !== t.e2.length;
                 }
