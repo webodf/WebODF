@@ -37,6 +37,11 @@
  */
 function NodeJSObject() {"use strict"; }
 /**
+ * @param {...} items
+ * @return {string}
+ */
+NodeJSObject.prototype.resolve = function (items) {"use strict"; };
+/**
  * @param {!string} path
  * @param {function(...)} callback
  * @return {undefined}

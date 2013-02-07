@@ -760,6 +760,7 @@ function NodeJSRuntime() {
     "use strict";
     var self = this,
         fs = require('fs'),
+        pathmod = require('path'),
         currentDirectory = "",
         parser,
         domImplementation;
@@ -816,17 +817,13 @@ function NodeJSRuntime() {
     this.toJson = Runtime.toJson;
 
     function isFile(path, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
+        path = pathmod.resolve(currentDirectory, path);
         fs.stat(path, function (err, stats) {
             callback(!err && stats.isFile());
         });
     }
     function readFile(path, encoding, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
+        path = pathmod.resolve(currentDirectory, path);
         if (encoding !== "binary") {
             fs.readFile(path, encoding, callback);
         } else {
@@ -844,23 +841,17 @@ function NodeJSRuntime() {
     }
     this.loadXML = loadXML;
     this.writeFile = function (path, data, callback) {
-        if (currentDirectory && path[0] !== '/') {
-            path = currentDirectory + "/" + path;
-        }
+        path = pathmod.resolve(currentDirectory, path);
         fs.writeFile(path, data, "binary", function (err) {
             callback(err || null);
         });
     };
     this.deleteFile = function (path, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
+        path = pathmod.resolve(currentDirectory, path);
         fs.unlink(path, callback);
     };
     this.read = function (path, offset, length, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
+        path = pathmod.resolve(currentDirectory, path);
         fs.open(path, "r+", 666, function (err, fd) {
             if (err) {
                 callback(err);
@@ -886,9 +877,7 @@ function NodeJSRuntime() {
     };
     this.isFile = isFile;
     this.getFileSize = function (path, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
+        path = pathmod.resolve(currentDirectory, path);
         fs.stat(path, function (err, stats) {
             if (err) {
                 callback(-1);
