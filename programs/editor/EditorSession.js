@@ -232,6 +232,16 @@ define("webodf/editor/EditorSession", [], function () {
             session.enqueue(op);
         };
 
+        this.deleteStyle = function (styleName) {
+            var op;
+            op = new ops.OpDeleteStyle(session);
+            op.init({
+                memberid: memberid,
+                styleName: styleName
+            });
+            session.enqueue(op);
+        };
+
         this.subscribe('cursorMoved', trackCursor);
     };
 
