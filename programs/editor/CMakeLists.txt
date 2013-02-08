@@ -36,10 +36,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js .
 
     # now do the dojo magic...
-	COMMAND ${NODE} ${DOJO_DEPS}/src/dojo/dojo.js load=build
-		--require ${DOJO_DEPS}/src/app/run.js
-		--profile ${DOJO_DEPS}/profiles/app.profile.js
-		--releaseDir ${DOJO_DEPS}/dist
+    COMMAND ${NODE} ${DOJO_DEPS}/src/dojo/dojo.js load=build
+        --require ${DOJO_DEPS}/src/app/run.js
+        --profile ${DOJO_DEPS}/profiles/app.profile.js
+        --releaseDir ${DOJO_DEPS}/dist
 
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo/
 
@@ -52,20 +52,20 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dijit/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ dijit/themes/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ dijit/icons/
-    
+
     COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dojox/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ dojox/layout/resources/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ dojox/widget/ColorPicker/
 
     COMMAND ${CMAKE_COMMAND} -E make_directory nls/
-	COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > nls/dojobundle.js
+    COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > nls/dojobundle.js
 
-	COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/libexec/mergeIntoDojo.js dojobuild=${DOJO_DEPS}/dist/dojo/dojo.js nls/dojobundle.js > dojo-amalgamation.js
+    COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/libexec/mergeIntoDojo.js dojobuild=${DOJO_DEPS}/dist/dojo/dojo.js nls/dojobundle.js > dojo-amalgamation.js
 
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
-	DEPENDS NodeJS ${EDITORDEPS} Dojo webodf.js
+    DEPENDS NodeJS ${EDITORDEPS} Dojo webodf.js
 )
 
 add_custom_target(programs_editor ALL DEPENDS editor-compiled.js webodf.js)

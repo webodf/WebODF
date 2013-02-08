@@ -1,7 +1,12 @@
 # WebODF is mostly a JavaScript project. CMake needs to know about the C++ parts
 project (WebODF C CXX)
 # version 2.8.2 is needed to have support for zip files in external projects
-cmake_minimum_required(VERSION 2.8.2)
+# issues with version 2.8.4 on Windows makes us test for a higher version
+if(WIN32)
+    cmake_minimum_required(VERSION 2.8.6)
+else()
+    cmake_minimum_required(VERSION 2.8.2)
+endif(WIN32)
 
 # At this point, the version number that is used throughout is defined
 set(WEBODF_VERSION 0.4.2)
@@ -19,7 +24,7 @@ endif (NOT QT4_FOUND)
 find_package(Java COMPONENTS Runtime)
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-  message(FATAL_ERROR "Compiling in the source directortory is not supported. Use for example 'mkdir build; cd build; cmake ..'.")
+  message(FATAL_ERROR "Compiling in the source directory is not supported. Use for example 'mkdir build; cd build; cmake ..'.")
 endif (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 
 # Tools must be obtained to work with:
@@ -77,38 +82,74 @@ ExternalProject_Add(
 set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 
 # Node.JS
-ExternalProject_Add(
-    NodeJS
-    PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
-    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-    URL "http://nodejs.org/dist/v0.8.14/node-v0.8.14.tar.gz"
-    URL_MD5 284fd2c7578064c339d9cf6a3a475ac7
-    CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
-    INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
-    BUILD_IN_SOURCE 1
-)
-set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node)
-set(NODE_NPM ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/npm)
+if(WIN32)
+    # On windows, it is significantly faster and more reliable to download
+    # a pre-built 32-bit binary
+    set(NODE_BIN_URL "http://nodejs.org/dist/v0.8.19/node.exe")
+    set(NODE_BIN_MD5 "6f3979fffb38020a1e6c75ccb15c092f")
+    file(DOWNLOAD "${NODE_BIN_URL}" "${EXTERNALS_DOWNLOAD_DIR}/node-download.exe"
+        SHOW_PROGRESS
+        EXPECTED_MD5 ${NODE_BIN_MD5}
+    )
+    set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node.exe)
 
-# copy node_modules directory from source to build
-# (this is needed if a module is required in there)
-add_custom_target(copy_node_modules ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules ${CMAKE_BINARY_DIR}/node_modules
-    COMMENT copying node_modules from source to build
-)
+    add_custom_command(
+        OUTPUT "${NODE}"
+        COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix
+        COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy ${EXTERNALS_DOWNLOAD_DIR}/node-download.exe
+            "${NODE}"
+    )
+    add_custom_target(NodeJS DEPENDS "${NODE}")
+else(WIN32)
+    ExternalProject_Add(
+        NodeJS
+        PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL "http://nodejs.org/dist/v0.8.14/node-v0.8.14.tar.gz"
+        URL_MD5 284fd2c7578064c339d9cf6a3a475ac7
+        CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
+        INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
+        BUILD_IN_SOURCE 1
+    )
+
+    # copy node_modules directory from source to build
+    # (this is needed if a module is required in there)
+    add_custom_target(copy_node_modules ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules ${CMAKE_BINARY_DIR}/node_modules
+        COMMENT copying node_modules from source to build
+    )
+    set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node)
+endif(WIN32)
+
 
 # JSCoverage
-ExternalProject_Add(
-    JSCoverage
-    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-    URL "http://siliconforks.com/jscoverage/download/jscoverage-0.5.1.tar.bz2"
-    URL_MD5 a70d79a6759367fbcc0bcc18d6866ff3
-    PATCH_COMMAND patch -p0 < ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch
-    CONFIGURE_COMMAND "./configure"
-    BUILD_IN_SOURCE 1
-    INSTALL_COMMAND ""
-)
-set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
+if(WIN32)
+    # JSCoverage only builds with Cygwin/MiniGW
+    # Rather than force a dependency on a specific compiler, download binaries
+    ExternalProject_Add(
+        JSCoverage
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL "http://siliconforks.com/jscoverage/download/jscoverage-0.5.1-windows.zip"
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
+else(WIN32)
+    ExternalProject_Add(
+        JSCoverage
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL "http://siliconforks.com/jscoverage/download/jscoverage-0.5.1.tar.bz2"
+        URL_MD5 a70d79a6759367fbcc0bcc18d6866ff3
+        PATCH_COMMAND  cat ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch | patch -p0
+        CONFIGURE_COMMAND "./configure"
+        BUILD_IN_SOURCE 1
+        INSTALL_COMMAND ""
+    )
+    set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
+endif(WIN32)
 
 # Dojo
 ExternalProject_Add(
@@ -120,15 +161,54 @@ ExternalProject_Add(
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
 )
-set(DOJO ${CMAKE_BINARY_DIR}/Dojo-prefix/src/Dojo/)
+set(DOJO ${CMAKE_BINARY_DIR}/Dojo-prefix/src/Dojo)
 
-# Android
-if (NOT ANDROID_SDK_DIR)
-  find_path(ANDROID_SDK_DIR platform-tools/aapt)
-endif(NOT ANDROID_SDK_DIR)
+# Dojo requires a patch on windows
+if(WIN32)
+    set(DOJOPATCH_URL "http://bugs.dojotoolkit.org/raw-attachment/ticket/15413/node-win-1.8.patch")
+    set(DOJOPATCH_MD5 "51eae664ddbe919c28c4e3082748cd19")
+    set(DOJOPATCH ${EXTERNALS_DOWNLOAD_DIR}/dojo-node.patch)
+
+    file(DOWNLOAD "${DOJOPATCH_URL}" "${DOJOPATCH}"
+        SHOW_PROGRESS
+        EXPECTED_MD5 ${DOJOPATCH_MD5}
+    )
+
+
+    ExternalProject_Add_Step(Dojo applyPatch
+        COMMAND cat ${DOJOPATCH} | patch -p0 -d ${CMAKE_BINARY_DIR}/Dojo-prefix/src/Dojo/util/
+        DEPENDEES build
+    )
+endif(WIN32)
+
+
+# Ant
+# Required for building Android applications
+if(WIN32)
+    # Ant is not generally installed on Windows systems
+    ExternalProject_Add(
+        AntBin
+        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+        URL "http://mirrors.enquira.co.uk/apache//ant/binaries/apache-ant-1.8.4-bin.zip"
+        URL_MD5 ca632528c35b8a335edd4e2064f7129e
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+    set(ANT ${CMAKE_BINARY_DIR}/AntBin-prefix/src/AntBin/bin/ant.bat)
+endif()
 if (NOT ANT)
   find_file(ANT NAMES ant ant.exe /usr/bin /usr/local/bin)
 endif(NOT ANT)
+
+# Android
+if (NOT ANDROID_SDK_DIR)
+  if(WIN32)
+    find_path(ANDROID_SDK_DIR platform-tools/aapt.exe)
+  else()
+    find_path(ANDROID_SDK_DIR platform-tools/aapt)
+  endif()
+endif(NOT ANDROID_SDK_DIR)
 
 set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 

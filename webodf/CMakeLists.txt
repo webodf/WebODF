@@ -30,17 +30,14 @@ add_custom_target(jslintcheck ALL
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
-    COMMAND ${NODE}
-    ARGS lib/runtime.js tools/css2js.js webodf.css
-        ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
+    OUTPUT webodf.css.js
+    COMMAND "${NODE}"
+    ARGS lib/runtime.js tools/css2js.js webodf.css ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
     DEPENDS NodeJS lib/runtime.js tools/css2js.js webodf.css
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(webodf.css.js ALL
-    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
-)
+add_custom_target(webodf.css.js ALL    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js)
 
 if (Java_JAVA_EXECUTABLE)
   # nonStandardJsDocs is not used because we use @licstart @licend and @source

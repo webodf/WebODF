@@ -1,5 +1,12 @@
 set(ANDROID_JAR ${ANDROID_SDK_DIR}/platforms/android-8/android.jar)
 
+# Windows requires Ant binary
+if(WIN32)
+    set(APKDEPS AntBin)
+endif()
+
+set(APKDEPS ${APKDEPS} webodf.js)
+
 COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES})
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/assets/www
