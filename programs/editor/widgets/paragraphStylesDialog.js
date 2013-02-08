@@ -177,7 +177,6 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     alignmentPane.setStyle(value);
                     fontEffectsPane.setStyle(value);
                     el = editorSession.getParagraphStyleElement(value);
-                    console.log(editorSession.isStyleUsed(el));
                 };
             });
             

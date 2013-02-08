@@ -203,7 +203,15 @@ odf.Formatting = function Formatting() {
     };
     
     this.isStyleUsed = function (styleElement) {
-        return styleInfo.hasDerivedStyles(odfContainer.rootElement, style2CSS.namespaceResolver, styleElement);
+        var hasDerivedStyles, isUsed;
+        
+        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, style2CSS.namespaceResolver, styleElement);
+
+        isUsed = new styleInfo.UsedKeysList(odfContainer.rootElement.styles).uses(styleElement)
+            || new styleInfo.UsedKeysList(odfContainer.rootElement.automaticStyles).uses(styleElement)
+            || new styleInfo.UsedKeysList(odfContainer.rootElement.body).uses(styleElement);
+
+        return hasDerivedStyles || isUsed;
     };
 
     function getDefaultStyleElement(styleListElement, family) {
