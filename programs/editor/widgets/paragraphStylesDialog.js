@@ -160,12 +160,6 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     stylePicker.domNode.style.width = "350px";
                     stylePicker.domNode.style.marginTop = "5px";
                     dialog.addChild(stylePicker, 0);
-
-                    if (editorSession.isStyleUsed(editorSession.getParagraphStyleElement(stylePicker.get('value')))) {
-                        deleteButton.domNode.style.display = 'none';
-                    } else {
-                        deleteButton.domNode.style.display = 'block';
-                    }
                 });
                 a = new AlignmentPane(editorSession, function (pane) {
                     alignmentPane = pane;
@@ -189,6 +183,9 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 }
 
                 stylePicker.onChange = openStyle;
+                dialog.onShow = function () {
+                    openStyle(stylePicker.get('value'));
+                };
             });
             
             tabContainer.startup();
