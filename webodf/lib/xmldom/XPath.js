@@ -359,7 +359,7 @@ xmldom.XPath = (function () {
             nodes,
             elements = [],
             n = null;
-        if (!doc || !doc.evaluate || !n) {
+        if (!doc || !doc.evaluate) {
             elements = fallback(node, xpath, namespaceResolver);
         } else {
             nodes = doc.evaluate(xpath, node, namespaceResolver,
