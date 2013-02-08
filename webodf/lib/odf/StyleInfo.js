@@ -30,7 +30,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf*/
+/*global odf, runtime, xmldom*/
+
+runtime.loadClass("xmldom.XPath");
 /**
  * @constructor
  */
@@ -300,7 +302,18 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: stylens, en: 'master-page', ans: stylens, a: 'page-layout-name'}
             ]
         },
-        elements;
+        elements,
+        xpath = new xmldom.XPath();
+    
+    function hasDerivedStyles(odfbody, nsResolver, styleElement) {
+        var nodes, xp;
+        xp = "//style:*[@style:parent-style-name='" + styleElement.getAttributeNS(nsResolver('style'), 'name') + "'][@style:family='" + styleElement.getAttributeNS(nsResolver('style'), 'family') + "']";
+        nodes = xpath.getODFElementsWithXPath(odfbody, xp, nsResolver);
+        if (nodes.length) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Return if a particular element can have a style for a particular family.
@@ -420,6 +433,7 @@ odf.StyleInfo = function StyleInfo() {
     };
 
     this.canElementHaveStyle = canElementHaveStyle;
+    this.hasDerivedStyles = hasDerivedStyles;
 
     elements = inverse(elementstyles);
 };

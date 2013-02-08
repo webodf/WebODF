@@ -40,7 +40,8 @@ odf.Formatting = function Formatting() {
     "use strict";
     var /**@type{odf.OdfContainer}*/ odfContainer,
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
-        /**@type{Object}*/ namespaces = new odf.Style2CSS().namespaces;
+        /**@type{odf.Style2CSS}*/ style2CSS = new odf.Style2CSS(),
+        /**@type{Object}*/ namespaces = style2CSS.namespaces;
     /**
      * Class that iterates over all elements that are part of the range.
      * @constructor
@@ -201,6 +202,10 @@ odf.Formatting = function Formatting() {
         return paragraphStyles;
     };
     
+    this.isStyleUsed = function (styleElement) {
+        return styleInfo.hasDerivedStyles(odfContainer.rootElement, style2CSS.namespaceResolver, styleElement);
+    };
+
     function getDefaultStyleElement(styleListElement, family) {
         var node = styleListElement.firstChild;
 

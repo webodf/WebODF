@@ -201,6 +201,10 @@ define("webodf/editor/EditorSession", [], function () {
             return odfDocument.getParagraphStyleElement(styleName);
         };
 
+        this.isStyleUsed = function (styleElement) {
+            return formatting.isStyleUsed(styleElement);
+        };
+
         this.getParagraphStyleAttributes = function (styleName) {
             return odfDocument.getParagraphStyleAttributes(styleName);
         };
