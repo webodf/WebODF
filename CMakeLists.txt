@@ -254,6 +254,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpSetParagraphStyle.js
     lib/ops/OpUpdateParagraphStyle.js
     lib/ops/OpCloneStyle.js
+    lib/ops/OpDeleteStyle.js
     lib/ops/OperationFactory.js
     lib/gui/SelectionMover.js
     lib/gui/Avatar.js
