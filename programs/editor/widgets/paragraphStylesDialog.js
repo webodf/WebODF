@@ -85,7 +85,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             }
 
             function deleteStyle(styleName) {
-
+                editorSession.deleteStyle(styleName);
             }
             // Dialog
             dialog = new Dialog({
@@ -160,6 +160,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     stylePicker.domNode.style.width = "350px";
                     stylePicker.domNode.style.marginTop = "5px";
                     dialog.addChild(stylePicker, 0);
+
+                    if (editorSession.isStyleUsed(editorSession.getParagraphStyleElement(stylePicker.get('value')))) {
+                        deleteButton.domNode.style.display = 'none';
+                    } else {
+                        deleteButton.domNode.style.display = 'block';
+                    }
                 });
                 a = new AlignmentPane(editorSession, function (pane) {
                     alignmentPane = pane;
@@ -172,12 +178,17 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     tabContainer.addChild(fontEffectsPane.widget());
                 });
                 
-                stylePicker.onChange = function (value) {
-                    var el;
+                function openStyle(value) {
                     alignmentPane.setStyle(value);
                     fontEffectsPane.setStyle(value);
-                    el = editorSession.getParagraphStyleElement(value);
-                };
+                    if (editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
+                        deleteButton.domNode.style.display = 'none';
+                    } else {
+                        deleteButton.domNode.style.display = 'block';
+                    }
+                }
+
+                stylePicker.onChange = openStyle;
             });
             
             tabContainer.startup();
