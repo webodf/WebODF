@@ -453,6 +453,13 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
 
         odfCanvas.refreshCSS();
     };
+    
+    this.deleteStyle = function (styleName) {
+        var styleNode = getParagraphStyleElement(styleName);
+        styleNode.parentNode.removeChild(styleNode);
+
+        odfCanvas.refreshCSS();
+    };
 
     /**
     * @param {!string} memberid

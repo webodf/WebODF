@@ -47,6 +47,7 @@ runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("ops.OpUpdateParagraphStyle");
 runtime.loadClass("ops.OpCloneStyle");
+runtime.loadClass("ops.OpDeleteStyle");
 
 /**
  * @constructor
@@ -74,6 +75,8 @@ ops.OperationFactory = function OperationFactory(session) {
             op = new ops.OpUpdateParagraphStyle(session);
         } else if (spec.optype === "CloneStyle") {
             op = new ops.OpCloneStyle(session);
+        } else if (spec.optype === "DeleteStyle") {
+            op = new ops.OpDeleteStyle(session);
         } else if (spec.optype === "MoveCursor") {
             op = new ops.OpMoveCursor(session);
         } else if (spec.optype === "RemoveCursor") {
