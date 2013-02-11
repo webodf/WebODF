@@ -202,6 +202,11 @@ odf.Formatting = function Formatting() {
         return paragraphStyles;
     };
     
+    /**
+     * Returns if the given style is used anywhere in the document.
+     * @param {!Element} styleElement
+     * @return {boolean}
+     */
     this.isStyleUsed = function (styleElement) {
         var hasDerivedStyles, isUsed;
         
@@ -247,7 +252,11 @@ odf.Formatting = function Formatting() {
 
     this.getStyleElement = getStyleElement;
 
-
+    /**
+     * Returns a JSON representation of the style attributes of a given style element
+     * @param {!Element} styleNode
+     * @return {Object}
+     */
     function getStyleAttributes(styleNode) {
         var i,
             propertiesMap = {},
@@ -267,6 +276,13 @@ odf.Formatting = function Formatting() {
     
     this.getStyleAttributes = getStyleAttributes;
     
+    /**
+     * Returns a JSON representation of the style attributes of a given style element, also containing attributes
+     * inherited from it's ancestry - up to and including the default style for the family.
+     * @param {!Element} styleListElement
+     * @param {!Element} styleNode
+     * @return {Object}
+     */
     function getInheritedStyleAttributes(styleListElement, styleNode) {
         var i,
             parentStyleName,
