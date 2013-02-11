@@ -211,7 +211,12 @@ ops.Document = function Document(odfCanvas) {
      * @return {?Object}
      */
     function getParagraphStyleAttributes(styleName) {
-        return odfCanvas.getFormatting().getInheritedStyleAttributes(odfCanvas.odfContainer().rootElement.styles, getParagraphStyleElement(styleName));
+        var node = getParagraphStyleElement(styleName);
+        if (node) {
+            return odfCanvas.getFormatting().getInheritedStyleAttributes(odfCanvas.odfContainer().rootElement.styles, node);
+        }
+
+        return null;
     }
 
     this.getParagraphStyleElement = getParagraphStyleElement;

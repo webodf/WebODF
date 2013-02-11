@@ -254,7 +254,7 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns a JSON representation of the style attributes of a given style element
-     * @param {!Element} styleNode
+     * @param {!Node} styleNode
      * @return {Object}
      */
     function getStyleAttributes(styleNode) {
@@ -280,7 +280,7 @@ odf.Formatting = function Formatting() {
      * Returns a JSON representation of the style attributes of a given style element, also containing attributes
      * inherited from it's ancestry - up to and including the default style for the family.
      * @param {!Element} styleListElement
-     * @param {!Element} styleNode
+     * @param {!Node} styleNode
      * @return {Object}
      */
     function getInheritedStyleAttributes(styleListElement, styleNode) {

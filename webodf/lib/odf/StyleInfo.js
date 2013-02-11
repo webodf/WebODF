@@ -309,7 +309,7 @@ odf.StyleInfo = function StyleInfo() {
      * Return if a particular element is the parent style for any other style of the same family.
      * @param {!Element} odfbody
      * @param {!Function} nsResolver
-     * @param {!Element styleElement}
+     * @param {!Node} styleElement
      * @return {boolean}
      */
     function hasDerivedStyles(odfbody, nsResolver, styleElement) {
