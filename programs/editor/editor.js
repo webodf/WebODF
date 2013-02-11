@@ -108,17 +108,17 @@ define("webodf/editor", [
                 odfCanvas.addListener("statereadychange", function () {
                     var session,
                         editorSession,
-                        memberid = userid + "___" + Date.now(),
+                        localUserMemberId = userid + "___" + Date.now(),
                         userList,
                         opRouter = null;
 
                     session = new ops.SessionImplementation(odfCanvas);
-                    editorSession = new EditorSession(session, memberid);
+                    editorSession = new EditorSession(session, localUserMemberId);
                     userList = new UserList(editorSession, document.getElementById('peopleList'));
 
                     if (isConnectedWithNetwork) {
                         // use the nowjs op-router when connected
-                        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter(sessionid, memberid));
+                        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter(sessionid, localUserMemberId));
 
                         runtime.log("editor: setting UserModel and requesting replay");
                         session.setUserModel(new ops.NowjsUserModel());
