@@ -128,7 +128,7 @@ define("webodf/editor/EditorSession", [], function () {
         });
 
         session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);
-
+        
         this.startEditing = function () {
             self.sessionController.startEditing();
         };
@@ -136,7 +136,12 @@ define("webodf/editor/EditorSession", [], function () {
         this.endEditing = function () {
             self.sessionController.endEditing();
         };
-
+        
+        /**
+         * Call all subscribers for the given event with the specified argument
+         * @param {!string} eventid
+         * @param {Object} args
+         */
         this.emit = function (eventid, args) {
             var i, subscribers;
             runtime.assert(eventListener.hasOwnProperty(eventid),
@@ -147,7 +152,12 @@ define("webodf/editor/EditorSession", [], function () {
                 subscribers[i](args);
             }
         };
-
+        
+        /**
+         * Subscribe to a given event with a callback
+         * @param {!string} eventid
+         * @param {!Function} cb
+         */
         this.subscribe = function (eventid, cb) {
             runtime.assert(eventListener.hasOwnProperty(eventid),
                 "tried to subscribe to unknown event \"" + eventid + "\"");
@@ -200,7 +210,12 @@ define("webodf/editor/EditorSession", [], function () {
         this.getParagraphStyleElement = function (styleName) {
             return odfDocument.getParagraphStyleElement(styleName);
         };
-
+        
+        /**
+         * Returns if the style is used anywhere in the document
+         * @param {!Element} styleElement
+         * @return {boolean}
+         */
         this.isStyleUsed = function (styleElement) {
             return formatting.isStyleUsed(styleElement);
         };
