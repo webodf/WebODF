@@ -306,8 +306,13 @@ odf.StyleInfo = function StyleInfo() {
         xpath = new xmldom.XPath();
     
     function hasDerivedStyles(odfbody, nsResolver, styleElement) {
-        var nodes, xp;
-        xp = "//style:*[@style:parent-style-name='" + styleElement.getAttributeNS(nsResolver('style'), 'name') + "'][@style:family='" + styleElement.getAttributeNS(nsResolver('style'), 'family') + "']";
+        var nodes,
+            xp,
+            stylens = nsResolver('style'),
+            styleName = styleElement.getAttributeNS(stylens, 'name'),
+            styleFamily = styleElement.getAttributeNS(stylens, 'family');
+
+        xp = "//style:*[@style:parent-style-name='" + styleName + "'][@style:family='" + styleFamily + "']";
         nodes = xpath.getODFElementsWithXPath(odfbody, xp, nsResolver);
         if (nodes.length) {
             return true;
