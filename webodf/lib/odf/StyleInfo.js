@@ -305,6 +305,13 @@ odf.StyleInfo = function StyleInfo() {
         elements,
         xpath = new xmldom.XPath();
     
+    /**
+     * Return if a particular element is the parent style for any other style of the same family.
+     * @param {!Element} odfbody
+     * @param {!Function} nsResolver
+     * @param {!Element styleElement}
+     * @return {boolean}
+     */
     function hasDerivedStyles(odfbody, nsResolver, styleElement) {
         var nodes,
             xp,
