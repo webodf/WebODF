@@ -52,15 +52,32 @@ gui.CaretFactory = function CaretFactory(sessionController) {
      */
     this.createCaret = function (cursor) {
         var memberid = cursor.getMemberId(),
+            document = sessionController.getSession().getOdfDocument(),
+            canvasElement = document.getOdfCanvas().getElement(),
             caret = new gui.Caret(cursor);
 
         // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
-            runtime.log("Starting to track input for caret of " + memberid);
-            // here wire up the cursor update to caret focus update
-            cursor.handleUpdate = caret.setFocus;
-            sessionController.setFocusElement(caret.getFocusElement());
-            caret.setFocus();
+            runtime.log("Starting to track input on new cursor of " + memberid);
+
+            // on user edit actions ensure visibility of cursor
+            document.subscribe('paragraphEdited', function (info) {
+                if (info.memberId === memberid) {
+                    caret.ensureVisible();
+                }
+            });
+
+            // wire up the cursor update to caret visibility update
+            cursor.handleUpdate = caret.ensureVisible;
+            // enable canvas to have focus
+            canvasElement.setAttribute("tabindex", 0);
+            // wire up focus on canvas to caret
+            canvasElement.onfocus = caret.setFocus;
+            canvasElement.onblur = caret.removeFocus;
+            canvasElement.focus();
+
+            // everything prepared, so now let's start to deal with any input
+            sessionController.startListening();
         }
 
         return caret;

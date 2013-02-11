@@ -114,11 +114,11 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
                 }
 
                 // mark both paragraphs as edited
-                document.emit('highlightEdit', {
+                document.emit('paragraphEdited', {
                     element: paragraphNode,
                     memberId: memberid
                 });
-                document.emit('highlightEdit', {
+                document.emit('paragraphEdited', {
                     element: splitChildNode,
                     memberId: memberid
                 });

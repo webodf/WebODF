@@ -83,7 +83,7 @@ gui.SessionView = (function () {
             editInfoMarker.addEdit(userData.fullname, new Date(), userData.color);
         }
         
-        session.getOdfDocument().subscribe('highlightEdit', function (info) {
+        session.getOdfDocument().subscribe('paragraphEdited', function (info) {
             highlightEdit(info.element, info.memberId);
         });
         /**

@@ -293,18 +293,17 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!Element} element
          */
-        this.setFocusElement = function (element) {
-            listenEvent(element, "keydown", handleKeyDown);
-            listenEvent(element, "keypress", handleKeyPress);
-            listenEvent(element, "keyup", dummyHandler);
-            listenEvent(element, "copy", dummyHandler);
-            listenEvent(element, "cut", dummyHandler);
-            listenEvent(element, "paste", dummyHandler);
+        this.startListening = function () {
+            var canvasElement = session.getOdfDocument().getOdfCanvas().getElement();
 
-            // start to listen for mouse clicks as well, but on the whole document
-            listenEvent(session.getOdfDocument().getRootNode(), "click", handleMouseClick);
+            listenEvent(canvasElement, "keydown", handleKeyDown);
+            listenEvent(canvasElement, "keypress", handleKeyPress);
+            listenEvent(canvasElement, "keyup", dummyHandler);
+            listenEvent(canvasElement, "copy", dummyHandler);
+            listenEvent(canvasElement, "cut", dummyHandler);
+            listenEvent(canvasElement, "paste", dummyHandler);
+            listenEvent(canvasElement, "click", handleMouseClick);
         };
 
        /**
@@ -328,6 +327,13 @@ gui.SessionController = (function () {
          */
         this.getInputMemberId = function () {
             return inputMemberId;
+        };
+
+        /**
+         * @return {ops.Session}
+         */
+        this.getSession = function () {
+            return session;
         };
     };
 

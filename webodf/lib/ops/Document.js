@@ -54,7 +54,7 @@ ops.Document = function Document(odfCanvas) {
         cursors = {},
         eventListener = {};
     
-    eventListener.highlightEdit = [];
+    eventListener.paragraphEdited = [];
     /**
      * @constructor
      * @implements {core.PositionFilter}
@@ -272,6 +272,11 @@ ops.Document = function Document(odfCanvas) {
     this.getPositionFilter = function () {
         return filter;
     };
+
+    this.getOdfCanvas = function () {
+        return odfCanvas;
+    };
+
     /**
      * @return {!Node}
      */
@@ -309,7 +314,7 @@ ops.Document = function Document(odfCanvas) {
             // the `memberid`-cursor behind new text; alternatively
             // move `memberid`-cursor behind all cursors at the same
             // position. then insert text before `memberid`-cursor.
-            self.emit('highlightEdit', {
+            self.emit('paragraphEdited', {
                 element: getParagraphElement(domPosition.textNode),
                 memberId: memberid
             });
@@ -357,7 +362,7 @@ ops.Document = function Document(odfCanvas) {
         }
         if (domPosition) {
             domPosition.textNode.deleteData(domPosition.offset, length);
-            self.emit('highlightEdit', {
+            self.emit('paragraphEdited', {
                 element: getParagraphElement(domPosition.textNode),
                 memberId: memberid
             });
@@ -382,7 +387,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             paragraphNode = getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
-                self.emit('highlightEdit', {
+                self.emit('paragraphEdited', {
                     element: paragraphNode,
                     memberId: memberid
                 });

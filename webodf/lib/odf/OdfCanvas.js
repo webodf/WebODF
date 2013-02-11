@@ -1232,7 +1232,14 @@ odf.OdfCanvas = (function () {
         this.showAllPages = function () {
         };
 
-        listenEvent(element, "click", processClick);
+        this.getElement = function () {
+            return element;
+        };
+
+// TODO: where are all these event listeners used? this one gets in the way for SessionController
+// perhaps all the event listening in this class currently could be factored out to another class
+// which then can be created and attached for the current use cases with that event listening?
+//         listenEvent(element, "click", processClick);
     };
     return odf.OdfCanvas;
 }());
