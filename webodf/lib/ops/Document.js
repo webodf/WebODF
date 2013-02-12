@@ -302,10 +302,19 @@ ops.Document = function Document(odfCanvas) {
      * @return {!boolean}
      */
     this.insertText = function (memberid, position, text) {
-        var domPosition;
+        var domPosition, textNode, parent, next;
         domPosition = getPositionInTextNode(position);
         if (domPosition) {
-            domPosition.textNode.insertData(domPosition.offset, text);
+            textNode = domPosition.textNode;
+            textNode.insertData(domPosition.offset, text);
+
+            // FIXME This is a workaround for a bug where webkit forgets to relayout
+            // the text when a new character is inserted at the beginning of a line in 
+            // a Text Node. 
+            parent = textNode.parentNode;
+            next = textNode.nextSibling;
+            parent.removeChild(textNode);
+            parent.insertBefore(textNode, next);
             // FIXME care must be taken regarding the cursor positions
             // the new text must appear in front of the (own) cursor.
             // if there are/were other cursors at the same address,
