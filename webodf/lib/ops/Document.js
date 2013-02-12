@@ -295,6 +295,19 @@ ops.Document = function Document(odfCanvas) {
     this.getSelectionManager = function () {
         return selectionManager;
     };
+
+    /* This is a workaround for a bug where webkit forgets to relayout
+     * the text when a new character is inserted at the beginning of a line in 
+     * a Text Node.
+     * @param {Node} textNode
+     */
+    function triggerLayoutInWebkit(textNode) {
+        var parent = textNode.parentNode,
+            next = textNode.nextSibling;
+        parent.removeChild(textNode);
+        parent.insertBefore(textNode, next);
+    }
+        
     /**
      * @param {!string} memberid
      * @param {!number} position
@@ -302,19 +315,15 @@ ops.Document = function Document(odfCanvas) {
      * @return {!boolean}
      */
     this.insertText = function (memberid, position, text) {
-        var domPosition, textNode, parent, next;
+        var domPosition, textNode;
         domPosition = getPositionInTextNode(position);
         if (domPosition) {
             textNode = domPosition.textNode;
             textNode.insertData(domPosition.offset, text);
 
-            // FIXME This is a workaround for a bug where webkit forgets to relayout
-            // the text when a new character is inserted at the beginning of a line in 
-            // a Text Node. 
-            parent = textNode.parentNode;
-            next = textNode.nextSibling;
-            parent.removeChild(textNode);
-            parent.insertBefore(textNode, next);
+            // FIXME A workaround.
+            triggerLayoutInWebkit(textNode);
+
             // FIXME care must be taken regarding the cursor positions
             // the new text must appear in front of the (own) cursor.
             // if there are/were other cursors at the same address,
