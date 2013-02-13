@@ -97,13 +97,35 @@ define("webodf/editor", [
                 'webodf/editor/EditorSession',
                 'webodf/editor/UserList'
             ], function (myResources, EditorSession, UserList) {
-                var translator = function (key, context) {
+                var translator, translateContent;
+                
+                translator = function (key, context) {
                     if (undefined === myResources[key]) {
                         return "translation missing: " + key;
                     }
                     return myResources[key];
                 };
                 document.translator = translator;
+                
+                translateContent = function (node) {
+                    var i,
+                        element,
+                        tag,
+                        placeholder,
+                        translatable = node.querySelectorAll("*[text-i18n]");
+                    
+                    for (i = 0; i < translatable.length; i += 1) {
+                        element = translatable[i];
+                        tag = element.localName;
+                        placeholder = element.getAttribute('text-i18n');
+                        if (tag === "label"
+                                || tag === "span"
+                                || /h\d/i.test(tag)) {
+                            element.textContent = document.translator(placeholder);
+                        }
+                    }
+                };
+                document.translateContent = translateContent;
 
                 odfCanvas.addListener("statereadychange", function () {
                     var session,
