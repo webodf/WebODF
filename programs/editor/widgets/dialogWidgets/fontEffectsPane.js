@@ -106,6 +106,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             backgroundColorTB = dijit.byId('backgroundColorTB');
                         
                         form = dijit.byId('fontEffectsPaneForm');
+                        document.translateContent(form.domNode);
+                        
                         preview = document.getElementById('previewText');
                         textColorPicker = dijit.byId('textColorPicker');
                         backgroundColorPicker = dijit.byId('backgroundColorPicker');

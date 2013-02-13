@@ -4,19 +4,19 @@
 		<body>
             <div data-dojo-type="dijit/form/Form" id="fontEffectsPaneForm" data-dojo-id="fontEffectsPaneForm">
 
-				<h3>Style</h3>
+				<h3 text-i18n="style">Style</h3>
 
 			    <input data-dojo-type="dijit/form/CheckBox" name="textStyle" id="radioBold" value="bold"/>
-			    <label for="radioBold">Bold</label> <br/>
+			    <label text-i18n="bold" for="radioBold">Bold</label> <br/>
 			    <input data-dojo-type="dijit/form/CheckBox" name="textStyle" id="radioItalic" value="italic"/>
-			    <label for="radioItalic">Italic</label> <br/>
+			    <label text-i18n="italic" for="radioItalic">Italic</label> <br/>
 			    <input data-dojo-type="dijit/form/CheckBox" name="textStyle" id="radioUnderline" value="underline"/>
-			    <label for="radioUnderline">Underline</label> <br/>
+			    <label text-i18n="underline" for="radioUnderline">Underline</label> <br/>
 
-			    <h3>Font</h3>
+			    <h3 text-i18n="font">Font</h3>
                 <br>
 			    <div class="labeledSelect" style = "float: left;">
-			    	<label for="fontFamily">Family:</label>
+			    	<label text-i18n="family" for="fontFamily">Family:</label>
                     <div name="fontFamily" style = "width: 100px;" data-dojo-type="dijit/form/Select" size="4">
                         <span value="serif" ><span style="font-family:serif">Serif</span></span>
                         <span value="sans-serif" selected="selected"><span style="font-family:sans-serif">Sans</span></span>
@@ -27,7 +27,7 @@
                 </div>
 
             	<div style = "float: left; margin-left: 30px;">
-					<label for="fontSize">Size (pt): </label>
+					<label for="fontSize"><span text-i18n="size">Size</span> (pt) </label>
 					<input data-dojo-type="dijit/form/NumberSpinner" id="fontSize"
 				    value="12"
 				    data-dojo-props="smallDelta:1, constraints:{min:6,max:96}"
@@ -36,11 +36,11 @@
 				</div>
 				<br /><br />
 
-				<h3>Color</h3>
+				<h3 text-i18n="color">Color</h3>
                 <br>
                 <input data-dojo-type="dijit/form/TextBox" name = "color" id = "textColorTB" style="display: none;"/>
                 <div data-dojo-type="dijit/form/DropDownButton">
-				    <span id = "textColor">
+				    <span text-i18n="text" id = "textColor">
 				    	Text
 				    </span>
 				    <div data-dojo-type="dijit/TooltipDialog">
@@ -50,7 +50,7 @@
 
                 <input data-dojo-type="dijit/form/TextBox" name = "backgroundColor" id = "backgroundColorTB" style="display: none;"/>
 				<div data-dojo-type="dijit/form/DropDownButton">
-				    <span id = "backgroundColor">
+				    <span text-i18n="background" id = "backgroundColor">
 				    	Background
 				    </span>
 				    <div data-dojo-type="dijit/TooltipDialog">

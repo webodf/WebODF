@@ -41,7 +41,7 @@ define({
         format: "Format",
         character_DDD: "Character...",
         paragraph_DDD: "Paragraph...",
-	// dialogs
+	    // dialogs
         ok: "Ok",
         cancel: "Cancel",
         alignment: "Alignment",
@@ -55,8 +55,27 @@ define({
         people: "People",
         chat: "Chat",
         typeYourName_DDD: "Type your name...",
-	invitePeople: "Invite People",
-        startTypingToChat_DDD: "Start typing to chat..."
+	    invitePeople: "Invite People",
+        startTypingToChat_DDD: "Start typing to chat...",
+        // Various
+        left: "Left",
+        right: "Right",
+        top: "Top",
+        bottom: "Bottom",
+        center: "Center",
+        justified: "Justified",
+        spacing: "Spacing",
+        options: "Options",
+        style: "Style",
+        bold: "Bold",
+        italic: "Italic",
+        underline: "Underline",
+        font: "Font",
+        family: "Family",
+        size: "Size",
+        color: "Color",
+        text: "Text",
+        background: "Background"
     },
 
     de: true,
