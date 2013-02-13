@@ -93,7 +93,6 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                         preload: true
                     });
                     contentPane.onLoad = function () {
-                        var translatable;
                         form = dijit.byId('alignmentPaneForm');
                         document.translateContent(form.domNode);
                     };
