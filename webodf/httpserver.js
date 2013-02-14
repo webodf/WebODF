@@ -137,6 +137,8 @@ http.createServer(function (request, response) {
                     head["Content-Type"] = "text/plain; charset=utf-8";
                 } else if (filename.substr(-6) === ".xhtml") {
                     head["Content-Type"] = "application/xhtml+xml; charset=utf-8";
+                } else if (filename.substr(-4) === ".xml") {
+                    head["Content-Type"] = "text/xml; charset=utf-8";
                 }
                 response.writeHead(200, head);
                 if (request.method !== "HEAD") {
