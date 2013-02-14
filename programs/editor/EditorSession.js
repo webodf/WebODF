@@ -110,6 +110,7 @@ define("webodf/editor/EditorSession", [], function () {
         // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
         session.subscribe(ops.SessionImplementation.signalCursorAdded, function (cursor) {
             self.emit('userAdded', cursor.getMemberId());
+            trackCursor(cursor);
         });
 
         session.subscribe(ops.SessionImplementation.signalCursorRemoved, function (memberId) {
