@@ -58,10 +58,10 @@ define("webodf/editor", [
         }
 
 
-        function init_gui_and_doc(docurl, userid, sessionid) {
+        function init_gui_and_doc(doclocation, userid, sessionid) {
             runtime.loadClass('odf.OdfCanvas');
 
-            var doclocation, pos, odfElement, odfCanvas, filename, isConnectedWithNetwork;
+            var odfElement, odfCanvas, filename, isConnectedWithNetwork;
 
             if (userid === undefined) {
                 userid = "undefined";
@@ -75,16 +75,6 @@ define("webodf/editor", [
 
             // this needs to be available for the widgets
             document.odfCanvas = odfCanvas;
-
-            if (docurl === undefined) {
-                // If the URL has a fragment (#...), try to load the file it represents
-                doclocation = String(document.location);
-                pos = doclocation.indexOf('#');
-                if (pos === -1) { return; }
-                doclocation = doclocation.substr(pos + 1);
-            } else {
-                doclocation = docurl;
-            }
 
             // Editor Translations, Widgets and Avatars
             require({

@@ -13,8 +13,20 @@ function on_body_load() {
     }
 
     function bootEditorWithoutNetwork() {
+        var docUrl, pos;
+
         document.getElementById("mainContainer").style.display="";
-        bootEditor("welcome.odt");
+
+        // If the URL has a fragment (#...), try to load the file it represents
+        docUrl = String(document.location);
+        pos = docUrl.indexOf('#');
+        if (pos !== -1) {
+            docUrl = docUrl.substr(pos + 1);
+        } else {
+            // default document
+            docUrl = "welcome.odt";
+        }
+        bootEditor(docUrl);
     }
 
     function enterSession(sessionid) {
