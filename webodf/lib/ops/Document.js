@@ -512,7 +512,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
     * @param {!core.Cursor} cursor
     */
     this.addCursor = function (cursor) {
-        var distanceToFirstTextNode = cursor.getStepCounter().countForwardSteps(1, self.getPositionFilter());
+        var distanceToFirstTextNode = cursor.getStepCounter().countForwardSteps(1, filter);
         cursor.move(distanceToFirstTextNode);
 
         cursors[cursor.getMemberId()] = cursor;
