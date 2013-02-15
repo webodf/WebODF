@@ -39,7 +39,8 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
             var i,
                 widget,
                 selectionList,
-                availableStyles;
+                availableStyles,
+                stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
             
             function populateStyles() {
                 selectionList = [];
@@ -66,10 +67,17 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
 
             populateStyles();
             
-            editorSession.subscribe('stylesChanged', function () {
-                var currentValue = widget.get('value');
-                populateStyles();
-                widget.set('value', currentValue);
+            editorSession.subscribe('styleCreated', function (newStyleName) {
+                var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
+                widget.addOption({
+                    label: newStyleName,
+                    value: newStyleElement.getAttributeNS(stylens, 'display-name')
+                });
+            });
+
+            editorSession.subscribe('styleDeleted', function (styleName) {
+                widget.removeOption(styleName);
+                widget.set('value', widget.getOptions(0));
             });
 
             return callback(widget);

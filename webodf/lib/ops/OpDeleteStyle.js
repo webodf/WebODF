@@ -51,7 +51,7 @@ ops.OpDeleteStyle = function OpDeleteStyle(session) {
     this.execute = function (domroot) {
         var odfDocument = session.getOdfDocument();
         odfDocument.deleteStyle(styleName);
-        session.emit(ops.SessionImplementation.signalStylesChanged);
+        session.emit(ops.SessionImplementation.signalStyleDeleted, styleName);
     };
     
     this.spec = function () {

@@ -58,7 +58,8 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     m_event_listener[ops.SessionImplementation.signalCursorRemoved] = [];
     m_event_listener[ops.SessionImplementation.signalCursorMoved] = [];
     m_event_listener[ops.SessionImplementation.signalParagraphChanged] = [];
-    m_event_listener[ops.SessionImplementation.signalStylesChanged] = [];
+    m_event_listener[ops.SessionImplementation.signalStyleCreated] = [];
+    m_event_listener[ops.SessionImplementation.signalStyleDeleted] = [];
 
     function setUserModel(userModel) {
         m_user_model = userModel;
@@ -142,7 +143,8 @@ ops.SessionImplementation.signalCursorAdded =   "cursor/added";
 ops.SessionImplementation.signalCursorRemoved = "cursor/removed";
 ops.SessionImplementation.signalCursorMoved =   "cursor/moved";
 ops.SessionImplementation.signalParagraphChanged = "paragraph/changed";
-ops.SessionImplementation.signalStylesChanged = "styles/changed";
+ops.SessionImplementation.signalStyleCreated = "style/created";
+ops.SessionImplementation.signalStyleDeleted = "style/deleted";
 
 (function () {
     "use strict";
