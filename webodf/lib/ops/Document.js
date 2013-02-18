@@ -488,6 +488,8 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                     'fo:font-style', info.textProperties.fontStyle);
                 setRealAttributeNS(textPropertiesNode, stylens,
                     'style:text-underline-style', info.textProperties.underline);
+                setRealAttributeNS(textPropertiesNode, stylens,
+                    'style:text-line-through-style', info.textProperties.strikethrough);
             }
 
             odfCanvas.refreshCSS();

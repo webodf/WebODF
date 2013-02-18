@@ -99,9 +99,27 @@ define("webodf/editor/widgets/simpleStyles", [], function () {
                     }
                 }
             });
+            strikethroughButton = new ToggleButton({
+                label: document.translator('strikethrough'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
+                onChange: function (checked) {
+                    var currentStyleName = editorSession.getCurrentParagraphStyle();
+                    if (checked) {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { strikethrough: 'solid' }
+                        });
+                    } else {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { strikethrough: 'none' }
+                        });
+                    }
+                }
+            });
 
             editorSession.subscribe('paragraphChanged', function (info) {
-                var currentStyleName, fontWeight, fontStyle, underline, textProperties;
+                var currentStyleName, fontWeight, fontStyle, underline, strikethrough, textProperties;
                 if (info.type === 'style') {
                     currentStyleName = editorSession.getCurrentParagraphStyle();
                     textProperties = editorSession.getParagraphStyleAttributes(currentStyleName)['style:text-properties'];
@@ -109,14 +127,16 @@ define("webodf/editor/widgets/simpleStyles", [], function () {
                     fontWeight = textProperties['fo:font-weight'];
                     fontStyle = textProperties['fo:font-style'];
                     underline = textProperties['style:text-underline-style'];
+                    strikethrough = textProperties['style:text-line-through-style'];
 
                     boldButton.set('checked', fontWeight === 'bold' ? true : false);
                     italicButton.set('checked', fontStyle === 'italic' ? true : false);
                     underlineButton.set('checked', underline === 'solid' ? true : false);
+                    strikethroughButton.set('checked', strikethrough === 'solid' ? true : false);
                 }
             });
 
-            widget.children = [boldButton, italicButton, underlineButton];
+            widget.children = [boldButton, italicButton, underlineButton, strikethroughButton];
             widget.startup = function () {
                 widget.children.forEach(function (element) {
                     element.startup();

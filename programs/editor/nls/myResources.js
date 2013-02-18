@@ -70,6 +70,7 @@ define({
         bold: "Bold",
         italic: "Italic",
         underline: "Underline",
+        strikethrough: "Strikethrough",
         font: "Font",
         family: "Family",
         size: "Size",

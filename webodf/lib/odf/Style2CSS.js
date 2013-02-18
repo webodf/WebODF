@@ -426,12 +426,20 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getTextProperties(props) {
-        var rule = '', value;
+        var rule = '', value, textDecoration = 'text-decoration:';
         rule += applySimpleMapping(props, textPropertySimpleMapping);
+        
         value = props.getAttributeNS(stylens, 'text-underline-style');
         if (value === 'solid') {
-            rule += 'text-decoration: underline;';
+            textDecoration += ' underline';
         }
+        value = props.getAttributeNS(stylens, 'text-line-through-style');
+        if (value === 'solid') {
+            textDecoration += ' line-through';
+        }
+        textDecoration += ';';
+        rule += textDecoration;
+
         value = props.getAttributeNS(stylens, 'font-name');
         if (value) {
             value = getFontDeclaration(value);
