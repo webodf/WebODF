@@ -426,7 +426,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getTextProperties(props) {
-        var rule = '', value, textDecoration = 'text-decoration:';
+        var rule = '', value, textDecoration = '';
         rule += applySimpleMapping(props, textPropertySimpleMapping);
         
         value = props.getAttributeNS(stylens, 'text-underline-style');
@@ -437,8 +437,11 @@ odf.Style2CSS = function Style2CSS() {
         if (value === 'solid') {
             textDecoration += ' line-through';
         }
-        textDecoration += ';';
-        rule += textDecoration;
+ 
+        if (textDecoration.length) {
+            textDecoration = 'text-decoration:' + textDecoration + ';';
+            rule += textDecoration;
+        }
 
         value = props.getAttributeNS(stylens, 'font-name');
         if (value) {
