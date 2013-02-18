@@ -78,7 +78,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
             if (style !== undefined) {
                 s_bold = style['fo:font-weight'];
                 s_italic = style['fo:font-style'];
-                s_underline = style['fo:text-decoration'];
+                s_underline = style['style:text-underline-style'];
                 s_fontSize = parseFloat(style['fo:font-size']);
                 s_fontName = style['fo:font-family'];
                 s_color = style['fo:color'];
