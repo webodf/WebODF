@@ -31,38 +31,92 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require */
+/*global define,require,document */
 define("webodf/editor/widgets/simpleStyles", [], function () {
     "use strict";
 
     function makeWidget(editorSession, callback) {
         require(["dijit/form/ToggleButton"], function (ToggleButton) {
             var i,
-                widget = {};
+                widget = {},
+                boldButton,
+                italicButton,
+                underlineButton,
+                strikethroughButton;
 
-            widget.children = [
-                (new ToggleButton({
-                    showLabel: false,
-                    checked: false,
-                    iconClass: "dijitEditorIcon dijitEditorIconBold"
-                })),
-                (new ToggleButton({
-                    showLabel: false,
-                    checked: false,
-                    iconClass: "dijitEditorIcon dijitEditorIconItalic"
-                })),
-                (new ToggleButton({
-                    showLabel: false,
-                    checked: false,
-                    iconClass: "dijitEditorIcon dijitEditorIconUnderline"
-                })),
-                (new ToggleButton({
-                    showLabel: false,
-                    checked: false,
-                    iconClass: "dijitEditorIcon dijitEditorIconStrikethrough"
-                }))
-            ];
+            boldButton = new ToggleButton({
+                label: document.translator('bold'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconBold",
+                onChange: function (checked) {
+                    var currentStyleName = editorSession.getCurrentParagraphStyle();
+                    if (checked) {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { fontWeight: 'bold' }
+                        });
+                    } else {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { fontWeight: 'normal' }
+                        });
+                    }
+                }
+            });
 
+            italicButton = new ToggleButton({
+                label: document.translator('italic'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconItalic",
+                onChange: function (checked) {
+                    var currentStyleName = editorSession.getCurrentParagraphStyle();
+                    if (checked) {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { fontStyle: 'italic' }
+                        });
+                    } else {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { fontStyle: 'normal' }
+                        });
+                    }
+                }
+            });
+            underlineButton = new ToggleButton({
+                label: document.translator('underline'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconUnderline",
+                onChange: function (checked) {
+                    var currentStyleName = editorSession.getCurrentParagraphStyle();
+                    if (checked) {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { underline: 'solid' }
+                        });
+                    } else {
+                        editorSession.updateParagraphStyle(currentStyleName, {
+                            textProperties: { underline: 'none' }
+                        });
+                    }
+                }
+            });
+
+            editorSession.subscribe('paragraphChanged', function (info) {
+                var currentStyleName, fontWeight, fontStyle, underline, textProperties;
+                if (info.type === 'style') {
+                    currentStyleName = editorSession.getCurrentParagraphStyle();
+                    textProperties = editorSession.getParagraphStyleAttributes(currentStyleName)['style:text-properties'];
+                    
+                    fontWeight = textProperties['fo:font-weight'];
+                    fontStyle = textProperties['fo:font-style'];
+                    underline = textProperties['style:text-underline-style'];
+
+                    boldButton.set('checked', fontWeight === 'bold' ? true : false);
+                    italicButton.set('checked', fontStyle === 'italic' ? true : false);
+                    underlineButton.set('checked', underline === 'solid' ? true : false);
+                }
+            });
+
+            widget.children = [boldButton, italicButton, underlineButton];
             widget.startup = function () {
                 widget.children.forEach(function (element) {
                     element.startup();
