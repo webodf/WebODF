@@ -48,7 +48,21 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
         };
         
         this.value = function () {
-            return form.get('value');
+            var textProperties = form.get('value'),
+                textStyle = textProperties.textStyle;
+            
+            textProperties.fontWeight = (textStyle.indexOf('bold') !== -1)
+                                            ? 'bold'
+                                            : 'normal';
+            textProperties.fontStyle = (textStyle.indexOf('italic') !== -1)
+                                            ? 'italic'
+                                            : 'normal';
+            textProperties.underline = (textStyle.indexOf('underline') !== -1)
+                                            ? 'solid'
+                                            : 'none';
+
+            delete textProperties.textStyle;
+            return textProperties;
         };
         
         this.setStyle = function (styleName) {
