@@ -87,7 +87,11 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 form.attr('value', {
                     fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',
                     fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
-                    textStyle: [s_bold, s_italic, s_underline]
+                    textStyle: [
+                        s_bold,
+                        s_italic,
+                        s_underline === 'solid' ? 'underline' : undefined
+                    ]
                 });
                 textColorPicker.set('value', s_color && s_color.length ? s_color : '#000000');
                 backgroundColorPicker.set('value', s_backgroundColor && s_backgroundColor.length ? s_backgroundColor : '#ffffff');
