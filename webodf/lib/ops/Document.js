@@ -458,34 +458,38 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                 textPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:text-properties');
                 styleNode.appendChild(textPropertiesNode);
             }
-
-            setRealAttributeNS(paragraphPropertiesNode, fons,
-                'fo:margin-top', info.paragraphProperties.topMargin, 'mm');
-            setRealAttributeNS(paragraphPropertiesNode, fons,
-                'fo:margin-bottom', info.paragraphProperties.bottomMargin, 'mm');
-            setRealAttributeNS(paragraphPropertiesNode, fons,
-                'fo:margin-left', info.paragraphProperties.leftMargin, 'mm');
-            setRealAttributeNS(paragraphPropertiesNode, fons,
-                'fo:margin-right', info.paragraphProperties.rightMargin, 'mm');
-            setRealAttributeNS(paragraphPropertiesNode, fons,
-                'fo:text-align', info.paragraphProperties.textAlign);
             
-            setRealAttributeNS(textPropertiesNode, fons,
-                'fo:font-size', info.textProperties.fontSize, 'pt');
-            setRealAttributeNS(textPropertiesNode, fons,
-                'fo:font-family', info.textProperties.fontFamily);
-            setRealAttributeNS(textPropertiesNode, fons,
-                'fo:color', info.textProperties.color);
-            setRealAttributeNS(textPropertiesNode, fons,
-                'fo:background-color', info.textProperties.backgroundColor);
+            if (info.paragraphProperties) {
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-top', info.paragraphProperties.topMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-bottom', info.paragraphProperties.bottomMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-left', info.paragraphProperties.leftMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-right', info.paragraphProperties.rightMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:text-align', info.paragraphProperties.textAlign);
+            }
 
-            setRealAttributeNS(textPropertiesNode, fons,
-                'fo:font-weight', info.textProperties.fontWeight);
-            setRealAttributeNS(textPropertiesNode, fons,
-                'fo:font-style', info.textProperties.fontStyle);
-            setRealAttributeNS(textPropertiesNode, stylens,
-                'style:text-underline-style', info.textProperties.underline);
-            
+            if (info.textProperties) {
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-size', info.textProperties.fontSize, 'pt');
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-family', info.textProperties.fontFamily);
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:color', info.textProperties.color);
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:background-color', info.textProperties.backgroundColor);
+
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-weight', info.textProperties.fontWeight);
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-style', info.textProperties.fontStyle);
+                setRealAttributeNS(textPropertiesNode, stylens,
+                    'style:text-underline-style', info.textProperties.underline);
+            }
+
             odfCanvas.refreshCSS();
             return true;
         }
