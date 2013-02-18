@@ -117,22 +117,33 @@ define("webodf/editor/widgets/simpleStyles", [], function () {
                     }
                 }
             });
+            
+            function loadStyle(styleName) {
+                var fontWeight, fontStyle, underline, strikethrough, textProperties;
+                textProperties = editorSession.getParagraphStyleAttributes(styleName)['style:text-properties'];
+                
+                fontWeight = textProperties['fo:font-weight'];
+                fontStyle = textProperties['fo:font-style'];
+                underline = textProperties['style:text-underline-style'];
+                strikethrough = textProperties['style:text-line-through-style'];
+
+                boldButton.set('checked', fontWeight === 'bold' ? true : false);
+                italicButton.set('checked', fontStyle === 'italic' ? true : false);
+                underlineButton.set('checked', underline === 'solid' ? true : false);
+                strikethroughButton.set('checked', strikethrough === 'solid' ? true : false);
+            }
 
             editorSession.subscribe('paragraphChanged', function (info) {
-                var currentStyleName, fontWeight, fontStyle, underline, strikethrough, textProperties;
+                var currentStyleName;
                 if (info.type === 'style') {
                     currentStyleName = editorSession.getCurrentParagraphStyle();
-                    textProperties = editorSession.getParagraphStyleAttributes(currentStyleName)['style:text-properties'];
-                    
-                    fontWeight = textProperties['fo:font-weight'];
-                    fontStyle = textProperties['fo:font-style'];
-                    underline = textProperties['style:text-underline-style'];
-                    strikethrough = textProperties['style:text-line-through-style'];
-
-                    boldButton.set('checked', fontWeight === 'bold' ? true : false);
-                    italicButton.set('checked', fontStyle === 'italic' ? true : false);
-                    underlineButton.set('checked', underline === 'solid' ? true : false);
-                    strikethroughButton.set('checked', strikethrough === 'solid' ? true : false);
+                    loadStyle(currentStyleName);
+                }
+            });
+            editorSession.subscribe('paragraphStyleModified', function (styleName) {
+                var currentStyleName = editorSession.getCurrentParagraphStyle();
+                if (currentStyleName === styleName) {
+                    loadStyle(currentStyleName);
                 }
             });
 

@@ -64,6 +64,7 @@ define("webodf/editor/EditorSession", [], function () {
         eventListener.paragraphChanged = [];
         eventListener.styleCreated = [];
         eventListener.styleDeleted = [];
+        eventListener.paragraphStyleModified = [];
 
         function checkParagraphStyleName() {
             var newStyleName,
@@ -131,6 +132,10 @@ define("webodf/editor/EditorSession", [], function () {
 
         session.subscribe(ops.SessionImplementation.signalStyleDeleted, function (styleName) {
             self.emit('styleDeleted', styleName);
+        });
+
+        session.subscribe(ops.SessionImplementation.signalParagraphStyleModified, function (styleName) {
+            self.emit('paragraphStyleModified', styleName);
         });
 
         session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);

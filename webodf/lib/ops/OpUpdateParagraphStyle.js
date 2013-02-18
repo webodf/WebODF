@@ -53,6 +53,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
     this.execute = function (domroot) {
         var odfDocument = session.getOdfDocument();
         odfDocument.updateParagraphStyle(styleName, info);
+        session.emit(ops.SessionImplementation.signalParagraphStyleModified, styleName);
     };
 
     this.spec = function () {
