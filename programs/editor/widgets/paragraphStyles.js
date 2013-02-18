@@ -87,8 +87,8 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
                 editorSession.subscribe('styleCreated', function (newStyleName) {
                     var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
                     select.addOption({
-                        label: newStyleName,
-                        value: newStyleElement.getAttributeNS(stylens, 'display-name')
+                        value: newStyleName,
+                        label: newStyleElement.getAttributeNS(stylens, 'display-name')
                     });
                     
                     if (self.onAdd) {
