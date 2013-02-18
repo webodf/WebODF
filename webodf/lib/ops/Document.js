@@ -416,6 +416,25 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
     };
     
     /**
+     * Sets a value as the attribute of a node, if that value is defined.
+     * If there is a unit specified, it is suffixed to the value.
+     * @param {!Node} node
+     * @param {!string} ns
+     * @param {!string} prefixedAttribute
+     * @param {string} value
+     * @param {string} unit
+     */
+    function setRealAttributeNS(node, ns, prefixedAttribute, value, unit) {
+        if (value !== undefined) {
+            if (unit !== undefined) {
+                node.setAttributeNS(ns, prefixedAttribute, value + unit);
+            } else {
+                node.setAttributeNS(ns, prefixedAttribute, value);
+            }
+        }
+    }
+
+    /**
      * @param {!String} styleName
      * @param {!Object} info
      * @return {!boolean}
@@ -429,40 +448,43 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
             
-            if (paragraphPropertiesNode === undefined) {
+            if (paragraphPropertiesNode === undefined
+                    && info.paragraphProperties) {
                 paragraphPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:paragraph-properties');
                 styleNode.appendChild(paragraphPropertiesNode);
             }
-            if (textPropertiesNode === undefined) {
+            if (textPropertiesNode === undefined
+                    && info.textProperties) {
                 textPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:text-properties');
                 styleNode.appendChild(textPropertiesNode);
             }
 
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-top', info.paragraphProperties.topMargin + 'mm');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-bottom', info.paragraphProperties.bottomMargin + 'mm');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-left', info.paragraphProperties.leftMargin + 'mm');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:margin-right', info.paragraphProperties.rightMargin + 'mm');
-            paragraphPropertiesNode.setAttributeNS(fons, 'fo:text-align', info.paragraphProperties.alignment);
+            setRealAttributeNS(paragraphPropertiesNode, fons,
+                'fo:margin-top', info.paragraphProperties.topMargin, 'mm');
+            setRealAttributeNS(paragraphPropertiesNode, fons,
+                'fo:margin-bottom', info.paragraphProperties.bottomMargin, 'mm');
+            setRealAttributeNS(paragraphPropertiesNode, fons,
+                'fo:margin-left', info.paragraphProperties.leftMargin, 'mm');
+            setRealAttributeNS(paragraphPropertiesNode, fons,
+                'fo:margin-right', info.paragraphProperties.rightMargin, 'mm');
+            setRealAttributeNS(paragraphPropertiesNode, fons,
+                'fo:text-align', info.paragraphProperties.textAlign);
             
-            textPropertiesNode.setAttributeNS(fons, 'fo:font-size', info.textProperties.fontSize + 'pt');
-            textPropertiesNode.setAttributeNS(fons, 'fo:font-family', info.textProperties.fontFamily);
-            textPropertiesNode.setAttributeNS(fons, 'fo:color', info.textProperties.color);
-            textPropertiesNode.setAttributeNS(fons, 'fo:background-color', info.textProperties.backgroundColor);
-            if (info.textProperties.textStyle.indexOf('bold') !== -1) {
-                textPropertiesNode.setAttributeNS(fons, 'fo:font-weight', 'bold');
-            } else {
-                textPropertiesNode.setAttributeNS(fons, 'fo:font-weight', 'normal');
-            }
-            if (info.textProperties.textStyle.indexOf('italic') !== -1) {
-                textPropertiesNode.setAttributeNS(fons, 'fo:font-style', 'italic');
-            } else {
-                textPropertiesNode.setAttributeNS(fons, 'fo:font-style', 'normal');
-            }
-            if (info.textProperties.textStyle.indexOf('underline') !== -1) {
-                textPropertiesNode.setAttributeNS(stylens, 'style:text-underline-style', 'solid');
-            } else {
-                textPropertiesNode.setAttributeNS(stylens, 'style:text-underline-style', 'none');
-            }
+            setRealAttributeNS(textPropertiesNode, fons,
+                'fo:font-size', info.textProperties.fontSize, 'pt');
+            setRealAttributeNS(textPropertiesNode, fons,
+                'fo:font-family', info.textProperties.fontFamily);
+            setRealAttributeNS(textPropertiesNode, fons,
+                'fo:color', info.textProperties.color);
+            setRealAttributeNS(textPropertiesNode, fons,
+                'fo:background-color', info.textProperties.backgroundColor);
+
+            setRealAttributeNS(textPropertiesNode, fons,
+                'fo:font-weight', info.textProperties.fontWeight);
+            setRealAttributeNS(textPropertiesNode, fons,
+                'fo:font-style', info.textProperties.fontStyle);
+            setRealAttributeNS(textPropertiesNode, stylens,
+                'style:text-underline-style', info.textProperties.underline);
             
             odfCanvas.refreshCSS();
             return true;
