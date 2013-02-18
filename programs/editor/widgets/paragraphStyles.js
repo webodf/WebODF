@@ -34,60 +34,68 @@
 /*global define,require */
 define("webodf/editor/widgets/paragraphStyles", [], function () {
     "use strict";
-    function makeWidget(editorSession, callback) {
-        require(["dijit/form/Select"], function (Select) {
-            var i,
-                widget,
-                selectionList,
-                availableStyles,
-                stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-            
-            function populateStyles() {
-                selectionList = [];
-                availableStyles = editorSession.getAvailableParagraphStyles();
-                
-                for (i = 0; i < availableStyles.length; i += 1) {
-                    selectionList.push({
-                        label: availableStyles[i].displayName,
-                        value: availableStyles[i].name
-                    });
-                }
+    var ParagraphStyles = function (editorSession, callback) {
+        var self = this,
+            select;
 
-                widget.removeOption(widget.getOptions());
-                widget.addOption(selectionList);
+        this.widget = function () {
+            return select;
+        };
+
+        this.value = function () {
+            return select.get('value');
+        };
+        
+        function populateStyles() {
+            var i, availableStyles, selectionList;
+            selectionList = [];
+            availableStyles = editorSession.getAvailableParagraphStyles();
+            
+            for (i = 0; i < availableStyles.length; i += 1) {
+                selectionList.push({
+                    label: availableStyles[i].displayName,
+                    value: availableStyles[i].name
+                });
             }
 
-            widget = new Select({
-                name: 'ParagraphStyles',
-                maxHeight: 200,
-                style: {
-                    width: '100px'
-                }
-            });
+            select.removeOption(select.getOptions());
+            select.addOption(selectionList);
+        }
 
-            populateStyles();
-            
-            editorSession.subscribe('styleCreated', function (newStyleName) {
-                var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
-                widget.addOption({
-                    label: newStyleName,
-                    value: newStyleElement.getAttributeNS(stylens, 'display-name')
+        function init(cb) {
+            require(["dijit/form/Select"], function (Select) {
+                var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+                 
+                select = new Select({
+                    name: 'ParagraphStyles',
+                    maxHeight: 200,
+                    style: {
+                        width: '100px'
+                    }
                 });
+
+                populateStyles();
+                
+                editorSession.subscribe('styleCreated', function (newStyleName) {
+                    var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
+                    select.addOption({
+                        label: newStyleName,
+                        value: newStyleElement.getAttributeNS(stylens, 'display-name')
+                    });
+                });
+
+                editorSession.subscribe('styleDeleted', function (styleName) {
+                    select.removeOption(styleName);
+                    select.set('value', select.getOptions(0));
+                });
+                return cb();
             });
-
-            editorSession.subscribe('styleDeleted', function (styleName) {
-                widget.removeOption(styleName);
-                widget.set('value', widget.getOptions(0));
-            });
-
-            return callback(widget);
-        });
-    }
-
-    return function ParagraphStyles(editorSession, callback) {
-        makeWidget(editorSession, function (widget) {
-            return callback(widget);
+        }
+    
+        init(function () {
+            return callback(self);
         });
     };
-
+        
+    return ParagraphStyles;
 });

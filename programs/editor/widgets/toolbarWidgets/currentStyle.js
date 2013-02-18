@@ -38,19 +38,19 @@ define("webodf/editor/widgets/toolbarWidgets/currentStyle", [], function () {
         require(["webodf/editor/widgets/paragraphStyles"], function (ParagraphStyles) {
             var paragraphStyles, widget;
 
-            paragraphStyles = new ParagraphStyles(editorSession, function (widget) {
+            paragraphStyles = new ParagraphStyles(editorSession, function (pStyles) {
                 // if the current paragraph style changes, update the widget 
                 editorSession.subscribe('paragraphChanged', function (info) {
                     if (info.type === 'style') {
-                        widget.set("value", info.styleName);
+                        pStyles.widget().set("value", info.styleName);
                     }
                 });
                 
-                widget.onChange = function (value) {
+                pStyles.widget().onChange = function (value) {
                     editorSession.setCurrentParagraphStyle(value);
                 };
 
-                return callback(widget);
+                return callback(pStyles.widget());
             });
         });
     }
