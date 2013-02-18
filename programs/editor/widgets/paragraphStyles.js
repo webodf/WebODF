@@ -50,6 +50,10 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
             select.set('value', value);
         };
         
+        // events
+        this.onAdd = null;
+        this.onRemove = null;
+        
         function populateStyles() {
             var i, availableStyles, selectionList;
             selectionList = [];
@@ -86,11 +90,18 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
                         label: newStyleName,
                         value: newStyleElement.getAttributeNS(stylens, 'display-name')
                     });
+                    
+                    if (self.onAdd) {
+                        self.onAdd(newStyleName);
+                    }
                 });
 
                 editorSession.subscribe('styleDeleted', function (styleName) {
                     select.removeOption(styleName);
-                    select.set('value', select.getOptions(0));
+                    
+                    if (self.onRemove) {
+                        self.onRemove(styleName);
+                    }
                 });
                 return cb();
             });

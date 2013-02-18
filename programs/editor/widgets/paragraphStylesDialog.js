@@ -64,7 +64,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 cloneButton,
                 deleteButton,
                 cloneTooltip,
-                cloneDropDown;
+                cloneDropDown,
+                newStyleName = null;
 
             function accept() {
                 editorSession.updateParagraphStyle(stylePicker.value(), {
@@ -80,8 +81,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             }
             
             function cloneStyle(styleName, newName) {
+                newStyleName = newName;
                 editorSession.cloneStyle(styleName, newName);
-                stylePicker.setValue(newName);
             }
 
             function deleteStyle(styleName) {
@@ -182,6 +183,18 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     }
                 }
 
+                stylePicker.onAdd = function (name) {
+                    if (newStyleName === name) {
+                        stylePicker.setValue(name);
+                        newStyleName = null; // reset 'flag' name
+                    }
+                };
+                
+                stylePicker.onRemove = function (name) {
+                    // Set the first style name as current
+                    stylePicker.setValue(stylePicker.widget().getOptions(0));
+                };
+                    
                 stylePicker.widget().onChange = openStyle;
                 dialog.onShow = function () {
                     openStyle(stylePicker.value());
