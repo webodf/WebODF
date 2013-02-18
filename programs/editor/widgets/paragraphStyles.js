@@ -45,6 +45,10 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
         this.value = function () {
             return select.get('value');
         };
+
+        this.setValue = function (value) {
+            select.set('value', value);
+        };
         
         function populateStyles() {
             var i, availableStyles, selectionList;

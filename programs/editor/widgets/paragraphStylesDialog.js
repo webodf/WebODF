@@ -67,7 +67,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 cloneDropDown;
 
             function accept() {
-                editorSession.updateParagraphStyle(stylePicker.get('value'), {
+                editorSession.updateParagraphStyle(stylePicker.value(), {
                     paragraphProperties: alignmentPane.value(),
                     textProperties: fontEffectsPane.value()
                 });
@@ -81,7 +81,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             
             function cloneStyle(styleName, newName) {
                 editorSession.cloneStyle(styleName, newName);
-                stylePicker.set('value', newName);
+                stylePicker.setValue(newName);
             }
 
             function deleteStyle(styleName) {
@@ -101,7 +101,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             cloneButton = new Button({
                 label: 'Create',
                 onClick: function () {
-                    cloneStyle(stylePicker.get('value'), cloneTooltip.get('value').name);
+                    cloneStyle(stylePicker.value(), cloneTooltip.get('value').name);
                     cloneTooltip.reset();
                     popup.close(cloneTooltip);
                 }
@@ -122,7 +122,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 iconClass: 'dijitEditorIcon dijitEditorIconDelete',
                 style: "float: right; margin-bottom: 5px;",
                 onClick: function () {
-                    deleteStyle(stylePicker.get('value'));
+                    deleteStyle(stylePicker.value());
                 }
             });
             dialog.addChild(deleteButton, 2);
@@ -155,11 +155,11 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 var p, a, f;
                 p = new ParagraphStyles(editorSession, function (paragraphStyles) {
                     stylePicker = paragraphStyles;
-                    stylePicker.startup();
-                    stylePicker.domNode.style.float = "left";
-                    stylePicker.domNode.style.width = "350px";
-                    stylePicker.domNode.style.marginTop = "5px";
-                    dialog.addChild(stylePicker, 0);
+                    stylePicker.widget().startup();
+                    stylePicker.widget().domNode.style.float = "left";
+                    stylePicker.widget().domNode.style.width = "350px";
+                    stylePicker.widget().domNode.style.marginTop = "5px";
+                    dialog.addChild(stylePicker.widget(), 0);
                 });
                 a = new AlignmentPane(editorSession, function (pane) {
                     alignmentPane = pane;
@@ -182,9 +182,9 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     }
                 }
 
-                stylePicker.onChange = openStyle;
+                stylePicker.widget().onChange = openStyle;
                 dialog.onShow = function () {
-                    openStyle(stylePicker.get('value'));
+                    openStyle(stylePicker.value());
                 };
             });
             
