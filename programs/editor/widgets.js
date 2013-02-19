@@ -46,75 +46,58 @@ define("webodf/editor/widgets", [
             // Menubar
             require([
                 "dojo/ready",
-                "dijit/MenuBar",
-                "dijit/PopupMenuBarItem",
-                "dijit/Menu",
                 "dijit/MenuItem",
-                "dijit/DropDownMenu"
-            ], function (ready, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu) {
+                "dijit/DropDownMenu",
+                "dijit/form/DropDownButton",
+                "dijit/Toolbar"
+            ], function (ready, MenuItem, DropDownMenu, DropDownButton, Toolbar) {
                 ready(function () {
-                    var menuBar, formatSubmenu, paragraphStylesMenuItem, dialog;
+                    var dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider;
                     
-                    menuBar = new MenuBar({}, "menubar");
-                    
-                    formatSubmenu = new DropDownMenu({});
-                    
+                    dropDownMenu = new DropDownMenu({});
                     paragraphStylesMenuItem = new MenuItem({
                         label: translator("paragraph_DDD")
                     });
+                    dropDownMenu.addChild(paragraphStylesMenuItem);
                     
-                    formatSubmenu.addChild(paragraphStylesMenuItem);
-
-                    menuBar.addChild(new PopupMenuBarItem({
-                        label: translator("file")
-                    }));
-                    menuBar.addChild(new PopupMenuBarItem({
-                        label: translator("edit")
-                    }));
-                    menuBar.addChild(new PopupMenuBarItem({
-                        label: translator("view")
-                    }));
-                    menuBar.addChild(new PopupMenuBarItem({
-                        label: translator("insert")
-                    }));
-                    menuBar.addChild(new PopupMenuBarItem({
-                        label: translator("format"),
-                        popup: formatSubmenu
-                    }));
-
                     dialog = new ParagraphStylesDialog(editorSession, function (dialog) {
                         paragraphStylesMenuItem.onClick = function () {
                             dialog.startup();
                             dialog.show();
                         };
                     });
-                });
-            });
 
-            // Toolbar
-            require(["dijit/Toolbar"], function (Toolbar) {
-                var toolbar, simpleStyles, currentStyle, zoomSlider;
-                
-                toolbar = new Toolbar({}, "toolbar");
-                
-                // Simple Style Selector [B, I, U, S]
-                simpleStyles = new SimpleStyles(editorSession, function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
+                    // Toolbar
+                    toolbar = new Toolbar({}, "toolbar");
+                    // Simple Style Selector [B, I, U, S]
+                    simpleStyles = new SimpleStyles(editorSession, function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
 
-                // Paragraph Style Selector
-                currentStyle = new CurrentStyle(editorSession, function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
+                    // Paragraph Style Selector
+                    currentStyle = new CurrentStyle(editorSession, function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
 
-                // Zoom Level Selector
-                zoomSlider = new ZoomSlider(editorSession, function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
+                    // Zoom Level Selector
+                    zoomSlider = new ZoomSlider(editorSession, function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
 
+                    menuButton = new DropDownButton({
+                        dropDown: dropDownMenu,
+                        label: translator('format'),
+                        iconClass: "dijitIconEditTask",
+                        style: {
+                            float: 'left'
+                        }
+                    });
+                    menuButton.placeAt(toolbar);
+
+                });
             });
         };
 
