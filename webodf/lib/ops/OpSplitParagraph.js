@@ -49,7 +49,9 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
 
     this.execute = function (rootNode) {
         var document = session.getOdfDocument(),
-            domPosition, paragraphNode, node, splitNode, splitChildNode, keptChildNode;
+            domPosition, paragraphNode,
+            textNodeCopy,
+            node, splitNode, splitChildNode, keptChildNode;
 
         domPosition = document.getPositionInTextNode(position);
         if (domPosition) {
@@ -64,19 +66,44 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
                 // the current one.
 
                 // start with text node the cursor is in, needs special treatment
+                // if text node is split at the beginning, do not split but simply
+                // move the whole text node
                 if (domPosition.offset === 0) {
                     keptChildNode = domPosition.textNode.previousSibling;
                     splitChildNode = null;
-                } else if (domPosition.offset >= domPosition.textNode.length) {
-                    keptChildNode = domPosition.textNode;
-                    splitChildNode = null;
                 } else {
+                    // Add special treatment for cursor:
+                    // cursors are keeping a pointer to the textnode to their left,
+                    // for some optimization to reduce the number of textNode creations/deletions.
+                    // As it can happen that we split (part of) the textnode before a cursor,
+                    // (actually that should be often the case due to the cursor-oriented input)
+                    // we have to workaround that optimization. This is done by cloning the textnode
+                    // and removing the old textnode from the DOM and cleaning its data.
+                    if (domPosition.textNode.nextSibling &&
+                        domPosition.textNode.nextSibling.namespaceURI === 'urn:webodf:names:cursor' &&
+                        domPosition.textNode.nextSibling.localName === 'cursor') {
+                        // insert copy of current textnode
+                        textNodeCopy = domPosition.textNode.cloneNode(false);
+                        domPosition.textNode.parentNode.insertBefore(textNodeCopy, domPosition.textNode);
+                        // unset old textnode
+                        domPosition.textNode.parentNode.removeChild(domPosition.textNode);
+                        domPosition.textNode = "";
+                        // and continue normally with the copied text node
+                        domPosition.textNode = textNodeCopy;
+                    }
+
                     keptChildNode = domPosition.textNode;
-                    // splitText always returns {!Text} here
-                    splitChildNode = /**@type{!Text}*/(
-                        domPosition.textNode.splitText(domPosition.offset)
-                    );
+                    // if text node is to be split at the end, don't split at all
+                    if (domPosition.offset >= domPosition.textNode.length) {
+                        splitChildNode = null;
+                    } else {
+                        // splitText always returns {!Text} here
+                        splitChildNode = /**@type{!Text}*/(
+                            domPosition.textNode.splitText(domPosition.offset)
+                        );
+                    }
                 }
+
                 // then handle all nodes until (incl.) the paragraph node:
                 // create a clone and add as childs the split node of the node below
                 // and any next siblings of it
