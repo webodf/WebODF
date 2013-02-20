@@ -34,6 +34,9 @@
 /*global define,require */
 define("webodf/editor/widgets/paragraphStyles", [], function () {
     "use strict";
+    /**
+     * @constructor
+     */
     var ParagraphStyles = function (editorSession, callback) {
         var self = this,
             select;
