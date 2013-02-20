@@ -10,7 +10,7 @@ html, body, #mainContainer {
     padding-top: 0px;
 }
 
-*:focus {
+#editor *:focus {
     outline: none;
 }
 
