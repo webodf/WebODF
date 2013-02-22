@@ -197,7 +197,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     
                 stylePicker.widget().onChange = openStyle;
                 dialog.onShow = function () {
-                    openStyle(stylePicker.value());
+                    var currentStyle = editorSession.getCurrentParagraphStyle();
+                    if (stylePicker.value() === currentStyle) {
+                        openStyle(currentStyle);
+                    } else {
+                        stylePicker.setValue(currentStyle);
+                    }
                 };
             });
             
