@@ -198,6 +198,9 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 stylePicker.widget().onChange = openStyle;
                 dialog.onShow = function () {
                     var currentStyle = editorSession.getCurrentParagraphStyle();
+                    // setting the stylepicker value if the style name is the same
+                    // will not trigger onChange, so specifically open the style in
+                    // the panes.
                     if (stylePicker.value() === currentStyle) {
                         openStyle(currentStyle);
                     } else {
