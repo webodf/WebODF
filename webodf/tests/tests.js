@@ -47,40 +47,44 @@ runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
 
+
+/**
+ * Holds the unit tests to run.
+ * @type {!Array.<Function>}
+ */
 var tests = [
-    core.RuntimeTests, // temporarily disabled, enable at next commit!
+    core.RuntimeTests,
     core.ZipTests,
     core.Base64Tests
 ];
+
+// add tests depending on runtime with XML parser
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(core.PositionIteratorTests);
     tests.push(gui.SelectionMoverTests);
     tests.push(gui.AvatarTests);
     tests.push(odf.OdfContainerTests);
 }
+// add tests depending on browser runtime
 if (runtime.type() === "BrowserRuntime") {
+//     tests.push(core.CursorTests);
     tests.push(gui.CaretTests);
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
     tests.push(ops.SessionImplementationTests);
-//    tests.push(core.CursorTests);
 //    tests.push(gui.XMLEditTests);
 }
-/*
-tests = [];
-if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
-//    tests.push(core.CursorTests);
-//    tests.push(ops.SessionImplementationTests);
-    tests.push(odf.OdfContainerTests);
-}
-*/
+
 var tester = new core.UnitTester();
+
 /**
+ * Recursively runs the passed tests.
  * @param {!Array.<Function>} tests
  * @return {undefined}
  */
 function runNextTest(tests) {
     "use strict";
+    // done with all tests?
     if (tests.length === 0) {
         //runtime.log(JSON.stringify(tester.results()));
         runtime.log("Number of failed tests: " +
@@ -88,6 +92,8 @@ function runNextTest(tests) {
         runtime.exit(tester.countFailedTests());
         return;
     }
+
+    // run first of passed tests, on success continue with the left
     var test = tests[0];
     if (typeof test !== "function") {
         runtime.log("Tests contain a non-function object of type " +
