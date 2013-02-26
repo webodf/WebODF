@@ -110,24 +110,14 @@ gui.AvatarTests = function AvatarTests(runner) {
         var odfContainer = new odf.OdfContainer("", null),
             odfcanvas;
         t = {};
-        testarea = maindoc.getElementById("testarea");
-        if (!testarea) {
-            testarea = maindoc.createElement("div");
-            testarea.setAttribute('id', 'testarea');
-            maindoc.body.appendChild(testarea);
-        }
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
+        testarea = core.UnitTest.provideTestAreaDiv();
         odfcanvas = new odf.OdfCanvas(testarea);
         odfcanvas.setOdfContainer(odfContainer);
         odfDocument = new ops.Document(odfcanvas);
     };
     this.tearDown = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
+        core.UnitTest.cleanupTestAreaDiv();
     };
     /**
      * @param {!Element} root

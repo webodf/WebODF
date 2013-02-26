@@ -57,6 +57,29 @@ core.UnitTest.prototype.tests = function () {"use strict"; };
  */
 core.UnitTest.prototype.asyncTests = function () {"use strict"; };
 
+
+core.UnitTest.provideTestAreaDiv = function () {
+    "use strict";
+    var maindoc = runtime.getWindow().document,
+        testarea = maindoc.getElementById('testarea');
+
+    runtime.assert(!testarea, "Unclean test environment, found a div with id \"testarea\".");
+
+    testarea = maindoc.createElement('div');
+    testarea.setAttribute('id', 'testarea');
+    maindoc.body.appendChild(testarea);
+    return testarea;
+};
+
+core.UnitTest.cleanupTestAreaDiv = function () {
+    "use strict";
+    var maindoc = runtime.getWindow().document,
+        testarea = maindoc.getElementById('testarea');
+
+    runtime.assert((!!testarea && (testarea.parentNode === maindoc.body)), "Test environment broken, found no div with id \"testarea\" below body.");
+    maindoc.body.removeChild(testarea);
+};
+
 /**
  * @constructor
  */

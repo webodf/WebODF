@@ -40,17 +40,19 @@ runtime.loadClass("ops.SessionImplementation");
 ops.SessionImplementationTests = function SessionImplementationTests(runner) {
     "use strict";
     var t, r = runner,
-        maindoc = runtime.getWindow().document,
-        testarea = /**@type{!Element}*/(maindoc.getElementById("testarea")),
-        odfcanvas = new odf.OdfCanvas(testarea);
-    odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
+        odfcanvas,
+        testarea;
 
     this.setUp = function () {
         t = {};
+        testarea = core.UnitTest.provideTestAreaDiv();
+        odfcanvas = new odf.OdfCanvas(testarea);
+        odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
         t.odf = odfcanvas.odfContainer();
     };
     this.tearDown = function () {
         t = {};
+        core.UnitTest.cleanupTestAreaDiv();
     };
     function newSession() {
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");

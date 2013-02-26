@@ -214,15 +214,12 @@ core.CursorTests = function CursorTests(runner) {
     ];
     this.setUp = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
+        testarea = core.UnitTest.provideTestAreaDiv();
+        odfcanvas = new odf.OdfCanvas(testarea);
     };
     this.tearDown = function () {
         t = {};
-        while (testarea.firstChild) {
-            testarea.removeChild(testarea.firstChild);
-        }
+        core.UnitTest.cleanupTestAreaDiv();
     };
     this.tests = function () {
         return tests;
@@ -230,15 +227,6 @@ core.CursorTests = function CursorTests(runner) {
     this.asyncTests = function () {
         return [];
     };
-    function init() {
-        testarea = /**@type{!Element}*/(maindoc.getElementById("testarea"));
-        if (!testarea) {
-            testarea = maindoc.createElementNS(ns, "div");
-            maindoc.body.appendChild(testarea);
-        }
-        odfcanvas = new odf.OdfCanvas(testarea);
-    }
-    init();
 };
 core.CursorTests.name = "CursorTests";
 core.CursorTests.prototype.description = function () {
