@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, gui: true, odf, ops*/
+/*global runtime, core, gui, odf, ops*/
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("ops.Document");

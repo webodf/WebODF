@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, odf: true*/
+/*global runtime, core, odf*/
 runtime.loadClass("odf.OdfContainer");
 
 /**

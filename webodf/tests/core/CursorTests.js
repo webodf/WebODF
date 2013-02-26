@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core: true, runtime: true, ops, odf*/
+/*global core, runtime, ops, odf*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("ops.Document");
 

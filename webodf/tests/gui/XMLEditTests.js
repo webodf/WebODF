@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global document: true, core: true, gui: true, runtime: true*/
+/*global document, core, gui, runtime*/
 runtime.loadClass("gui.XMLEdit");
 
 /**

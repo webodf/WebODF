@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global document, runtime: true, core: true, odf: true*/
+/*global document, runtime, core, odf*/
 runtime.loadClass("odf.CommandLineTools");
 
 function main(args) {

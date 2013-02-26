@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, xmldom: true, odf: true, XMLSerializer*/
+/*global runtime, core, xmldom, odf, XMLSerializer*/
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.Style2CSS");
 

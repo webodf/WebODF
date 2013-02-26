@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, document: true, odf: true, window: true, Ext: true*/
+/*global runtime, document, odf, window, Ext*/
 /**
  * @type {odf.OdfCanvas}
  */

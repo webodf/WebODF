@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, xmldom: true*/
+/*global runtime, xmldom*/
 runtime.loadClass("xmldom.RelaxNG");
 runtime.loadClass("xmldom.RelaxNG2");
 

@@ -31,8 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global require: true, console: true, process: true, Buffer: true,
-   unescape: true */
+/*global require, console, process, Buffer, unescape*/
 /* A Node.JS http server*/
 var http = require("http"),
     url = require("url"),

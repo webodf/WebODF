@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf: true, runtime: true, console: true*/
+/*global odf, runtime, console*/
 
 /**
  * @constructor

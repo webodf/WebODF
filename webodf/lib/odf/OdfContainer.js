@@ -30,8 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, xmldom: true, odf: true, DOMParser: true,
-  document: true */
+/*global runtime, core, xmldom, odf, DOMParser, document*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");

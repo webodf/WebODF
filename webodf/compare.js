@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, odf: true*/
+/*global runtime, odf*/
 /*jslint white: false*/
 function getURIParameters(window) {
     "use strict";

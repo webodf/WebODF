@@ -42,7 +42,7 @@
  */
 
 
-/*global runtime: true, core: true*/
+/*global runtime, core*/
 runtime.loadClass("core.Zip");
 
 function addFiles(zip, pos, files, callback) {

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true*/
+/*global runtime*/
 
 function main(args) {
     "use strict";

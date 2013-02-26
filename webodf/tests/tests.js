@@ -1,5 +1,3 @@
-/*global window: true, runtime: true, Runtime: true, core: true, gui: true,
-  xmldom: true, RuntimeTests: true*/
 /**
  * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
@@ -32,7 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf, ops*/
+/*global window, runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops*/
+
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.PositionIteratorTests");

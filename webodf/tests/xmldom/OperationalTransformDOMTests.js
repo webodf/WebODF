@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime: true, core: true, xmldom: true*/
+/*global runtime, core, xmldom*/
 runtime.loadClass("xmldom.OperationalTransformDOM");
 
 /**
