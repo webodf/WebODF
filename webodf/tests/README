@@ -1,0 +1,19 @@
+There are three different ways to do testing:
+
+* two makefile targets: "nodetest" & "qtjsruntimetest"
+* one webserving test: "webodf/tests/tests.html"
+
+All three use the central file "tests.js". This file checks what runtime it is in,
+and depending on that enables different tests.
+
+All tests are written with classes implementing the interface core.UnitTest.
+There can be sync and async tests.
+
+Some tests expect to be run with a DOM document and use an empty div in it.
+They need to get that div in the setUp() method by calling core.UnitTest.provideTestAreaDiv,
+and should release it in the tearDown() method by calling core.UnitTest.cleanupTestAreaDiv.
+
+TODO: each test case should be ideally run in a completely fresh setup, not using a random setup
+by reusing the DOM and the global variables from the previous tests
+(defending that with "but it's fuzzying tests!" is just a nice try ;) )
+
