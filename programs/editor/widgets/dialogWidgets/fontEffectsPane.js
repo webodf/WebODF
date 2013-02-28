@@ -149,7 +149,6 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             picker.widget().startup();
                             document.getElementById('fontPicker').appendChild(picker.widget().domNode);
                             picker.widget().name = 'fontName';
-                            picker.widget().style = "width: 100px;";
                         });
                             
                         // Automatically update preview when selections change
