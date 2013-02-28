@@ -48,6 +48,7 @@ ops.Document = function Document(odfCanvas) {
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+        svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         rootNode,
         selectionManager,
         filter,
@@ -441,6 +442,20 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         }
         return false;
     }
+
+    function declareFont(name, family) {
+        var declaration;
+        
+        if (!name || !family) {
+            return;
+        }
+
+        declaration = rootNode.ownerDocument.createElementNS(stylens, 'style:font-face');
+        declaration.setAttributeNS(stylens, 'style:name', name);
+        declaration.setAttributeNS(svgns, 'svg:font-family', family);
+        odfCanvas.odfContainer().rootElement.fontFaceDecls.appendChild(declaration);
+    }
+
     /**
      * @param {!String} styleName
      * @param {!Object} info
@@ -482,6 +497,10 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             if (info.textProperties) {
                 setRealAttributeNS(textPropertiesNode, fons,
                     'fo:font-size', info.textProperties.fontSize, 'pt');
+
+                if (!isFontUsed(info.textProperties.fontName)) {
+                    declareFont(info.textProperties.fontName, info.textProperties.fontName);
+                }
                 setRealAttributeNS(textPropertiesNode, stylens,
                     'style:font-name', info.textProperties.fontName);
                 setRealAttributeNS(textPropertiesNode, fons,
