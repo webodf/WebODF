@@ -134,6 +134,17 @@ odf.Formatting = function Formatting() {
     this.setOdfContainer = function (odfcontainer) {
         odfContainer = odfcontainer;
     };
+    
+    /**
+     * Returns a font face declarations map, where the key is the style:name and 
+     * the value is the svg:font-family.
+     * @return {Object}
+     */
+    this.getFontMap = function () {
+        var doc = odfContainer.rootElement.ownerDocument,
+            fontFaceDecls = odfContainer.rootElement.fontFaceDecls;
+        return style2CSS.makeFontFaceDeclsMap(doc, fontFaceDecls);
+    };
     /**
      * Return true if all parts of the selection are bold.
      * @param {!Array.<!Range>} selection

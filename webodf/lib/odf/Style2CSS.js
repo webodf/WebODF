@@ -742,6 +742,9 @@ odf.Style2CSS = function Style2CSS() {
     this.namespaces = namespaces;
     this.namespaceResolver = namespaceResolver;
     this.namespaceResolver.lookupNamespaceURI = this.namespaceResolver;
+    
+    // Font face declarations map
+    this.makeFontFaceDeclsMap = makeFontFaceDeclsMap;
 
     /**
      * @param {!StyleSheet} stylesheet

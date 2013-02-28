@@ -268,6 +268,34 @@ define("webodf/editor/EditorSession", [], function () {
             session.enqueue(op);
         };
 
+        this.getUsedFonts = function () {
+            var fontMap = formatting.getFontMap(),
+                reducedMap = {},
+                array = [],
+                key,
+                reducedKey,
+                value;
+            
+            for (key in fontMap) {
+                if (fontMap.hasOwnProperty(key)) {
+                    // FIXME?: Here, we're shaving off the number appended to a font name and
+                    // using that as the only font name for that family to be used.
+                    reducedKey = key.replace(/\d+$/, '');
+                    if (!reducedMap[reducedKey]) {
+                        value = fontMap[reducedKey];
+                        reducedMap[reducedKey] = value;
+                        
+                        array.push({
+                            name: reducedKey,
+                            family: value
+                        });
+                    }
+                }
+            }
+            
+            return array;
+        };
+
         this.subscribe('cursorMoved', trackCursor);
     };
 
