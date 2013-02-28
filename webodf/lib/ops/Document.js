@@ -433,7 +433,14 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             }
         }
     }
-
+    
+    function isFontUsed(fontName) {
+        var fontMap = odfCanvas.getFormatting().getFontMap();
+        if (fontMap.hasOwnProperty(fontName)) {
+            return true;
+        }
+        return false;
+    }
     /**
      * @param {!String} styleName
      * @param {!Object} info
