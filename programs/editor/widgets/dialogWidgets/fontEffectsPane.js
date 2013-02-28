@@ -80,12 +80,12 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 s_italic = style['fo:font-style'];
                 s_underline = style['style:text-underline-style'];
                 s_fontSize = parseFloat(style['fo:font-size']);
-                s_fontName = style['fo:font-family'];
+                s_fontName = style['style:font-name'];
                 s_color = style['fo:color'];
                 s_backgroundColor = style['fo:background-color'];
                 
                 form.attr('value', {
-                    fontFamily: s_fontName && s_fontName.length ? s_fontName : 'sans-serif',
+                    fontName: s_fontName && s_fontName.length ? s_fontName : 'Arial',
                     fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
                     textStyle: [
                         s_bold,
@@ -110,7 +110,13 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
         };
         
         function init(cb) {
-            require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane", "dojox/widget/ColorPicker" ], function (ready, domConstruct, ContentPane) {
+            require([
+                "dojo/ready",
+                "dojo/dom-construct",
+                "dijit/layout/ContentPane",
+                "dojox/widget/ColorPicker",
+                "webodf/editor/widgets/fontPicker"
+            ], function (ready, domConstruct, ContentPane, ColorPicker, FontPicker) {
                 var translator = document.translator;
                 ready(function () {
                     contentPane = new ContentPane({
@@ -121,7 +127,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
 
                     contentPane.onLoad = function () {
                         var textColorTB = dijit.byId('textColorTB'),
-                            backgroundColorTB = dijit.byId('backgroundColorTB');
+                            backgroundColorTB = dijit.byId('backgroundColorTB'),
+                            fontPicker;
                         
                         form = dijit.byId('fontEffectsPaneForm');
                         document.translateContent(form.domNode);
@@ -137,6 +144,13 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                         backgroundColorPicker.onChange = function (value) {
                             backgroundColorTB.set('value', value);
                         };
+
+                        fontPicker = new FontPicker(editorSession, function (picker) {
+                            picker.widget().startup();
+                            document.getElementById('fontPicker').appendChild(picker.widget().domNode);
+                            picker.widget().name = 'fontName';
+                            picker.widget().style = "width: 100px;";
+                        });
                             
                         // Automatically update preview when selections change
                         form.watch('value', function () {
@@ -157,7 +171,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             }
 
                             preview.style.fontSize = form.value.fontSize + 'pt';
-                            preview.style.fontFamily = form.value.fontFamily;
+                            preview.style.fontFamily = form.value.fontName;
                             preview.style.color = form.value.color;
                             preview.style.backgroundColor = form.value.backgroundColor;
                         });
