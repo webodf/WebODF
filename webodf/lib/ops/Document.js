@@ -475,8 +475,8 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             if (info.textProperties) {
                 setRealAttributeNS(textPropertiesNode, fons,
                     'fo:font-size', info.textProperties.fontSize, 'pt');
-                setRealAttributeNS(textPropertiesNode, fons,
-                    'fo:font-family', info.textProperties.fontFamily);
+                setRealAttributeNS(textPropertiesNode, stylens,
+                    'style:font-name', info.textProperties.fontName);
                 setRealAttributeNS(textPropertiesNode, fons,
                     'fo:color', info.textProperties.color);
                 setRealAttributeNS(textPropertiesNode, fons,
