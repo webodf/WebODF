@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime,define,document,odf,require,ops,gui */
+/*global runtime,define,document,odf,require,ops,gui,XMLHttpRequest*/
 
 define("webodf/editor", [
     "webodf/editor/UserList",
@@ -114,6 +114,23 @@ define("webodf/editor", [
                     }
                 }
                 document.translateContent = translateContent;
+                
+                var fontsXHR = new XMLHttpRequest();
+                fontsXHR.open("GET", "./fonts/fonts.css", true);
+                fontsXHR.onreadystatechange = function () {
+                    var availableFonts, i;
+                    if (this.readyState === 4 && this.status === 200) {
+                        availableFonts = this.response.match(/font-family *:.*(\"|\')/gm);
+                        availableFonts = availableFonts.filter(function (elem, pos, self) {
+                            return self.indexOf(elem) === pos;
+                        });
+                        for (i = 0; i < availableFonts.length; i += 1) {
+                            availableFonts[i] = availableFonts[i].match(/".*"/)[0].replace(/\"/g, "");
+                        }
+                        document.editorFonts = availableFonts;
+                    }
+                };
+                fontsXHR.send();
 
                 odfCanvas.addListener("statereadychange", function () {
                     var session,
