@@ -456,7 +456,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
      */
     function declareFont(name, family) {
         var declaration;
-        
+
         if (!name || !family) {
             return;
         }

@@ -52,17 +52,17 @@ define("webodf/editor/widgets/fontPicker", [], function () {
         this.setValue = function (value) {
             select.set('value', value);
         };
-        
+
         // events
         this.onAdd = null;
         this.onRemove = null;
-        
+
         function populateFonts() {
             var i,
                 editorFonts = [],
                 documentFonts = [],
                 selectionList = [];
-                
+
             editorFonts = document.editorFonts;
             documentFonts = editorSession.getDeclaredFonts();
 
@@ -100,15 +100,15 @@ define("webodf/editor/widgets/fontPicker", [], function () {
                 });
 
                 populateFonts();
-                
+
                 return cb();
             });
         }
-    
+
         init(function () {
             return callback(self);
         });
     };
-        
+
     return FontPicker;
 });

@@ -194,7 +194,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                         deleteButton.domNode.style.display = 'block';
                     }
                 }
-                    
+
                 stylePicker.widget().onChange = openStyle;
                 dialog.onShow = function () {
                     var currentStyle = editorSession.getCurrentParagraphStyle();

@@ -74,7 +74,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 s_fontName,
                 s_color,
                 s_backgroundColor;
-            
+
             if (style !== undefined) {
                 s_bold = style['fo:font-weight'];
                 s_italic = style['fo:font-style'];
@@ -83,7 +83,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 s_fontName = style['style:font-name'];
                 s_color = style['fo:color'];
                 s_backgroundColor = style['fo:background-color'];
-                
+
                 form.attr('value', {
                     fontName: s_fontName && s_fontName.length ? s_fontName : 'Arial',
                     fontSize: isNaN(s_fontSize) ? 12 : s_fontSize,
@@ -108,7 +108,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
             }
 
         };
-        
+
         function init(cb) {
             require([
                 "dojo/ready",
@@ -129,10 +129,10 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                         var textColorTB = dijit.byId('textColorTB'),
                             backgroundColorTB = dijit.byId('backgroundColorTB'),
                             fontPicker;
-                        
+
                         form = dijit.byId('fontEffectsPaneForm');
                         document.translateContent(form.domNode);
-                        
+
                         preview = document.getElementById('previewText');
                         textColorPicker = dijit.byId('textColorPicker');
                         backgroundColorPicker = dijit.byId('backgroundColorPicker');
@@ -150,7 +150,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             document.getElementById('fontPicker').appendChild(picker.widget().domNode);
                             picker.widget().name = 'fontName';
                         });
-                            
+
                         // Automatically update preview when selections change
                         form.watch('value', function () {
                             if (form.value.textStyle.indexOf('bold') !== -1) {

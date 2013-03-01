@@ -134,9 +134,9 @@ odf.Formatting = function Formatting() {
     this.setOdfContainer = function (odfcontainer) {
         odfContainer = odfcontainer;
     };
-    
+
     /**
-     * Returns a font face declarations map, where the key is the style:name and 
+     * Returns a font face declarations map, where the key is the style:name and
      * the value is the svg:font-family.
      * @return {Object}
      */

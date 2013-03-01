@@ -114,7 +114,7 @@ define("webodf/editor", [
                     }
                 }
                 document.translateContent = translateContent;
-                
+
                 var fontsXHR = new XMLHttpRequest();
                 fontsXHR.open("GET", "./fonts/fonts.css", true);
                 fontsXHR.onreadystatechange = function () {
