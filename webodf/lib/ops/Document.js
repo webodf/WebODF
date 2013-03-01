@@ -434,8 +434,14 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             }
         }
     }
-    
-    function isFontUsed(fontName) {
+
+    /**
+     * Returns true if there is a font declaration in the ODF with style:font-name
+     * having the value represented by fontName; else returns false.
+     * @param {!string} fontName
+     * @return {!boolean}
+     */
+    function isFontDeclared(fontName) {
         var fontMap = odfCanvas.getFormatting().getFontMap();
         if (fontMap.hasOwnProperty(fontName)) {
             return true;
@@ -443,6 +449,11 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         return false;
     }
 
+    /**
+     * Creates a declaration for a font with the given name and family.
+     * @param {!string} name
+     * @param {!string} family
+     */
     function declareFont(name, family) {
         var declaration;
         
@@ -498,11 +509,13 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                 setRealAttributeNS(textPropertiesNode, fons,
                     'fo:font-size', info.textProperties.fontSize, 'pt');
 
-                if (!isFontUsed(info.textProperties.fontName)) {
+                // Declare the requested font if it is not already declared
+                if (!isFontDeclared(info.textProperties.fontName)) {
                     declareFont(info.textProperties.fontName, info.textProperties.fontName);
                 }
                 setRealAttributeNS(textPropertiesNode, stylens,
                     'style:font-name', info.textProperties.fontName);
+
                 setRealAttributeNS(textPropertiesNode, fons,
                     'fo:color', info.textProperties.color);
                 setRealAttributeNS(textPropertiesNode, fons,
