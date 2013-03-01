@@ -120,6 +120,7 @@ define("webodf/editor", [
                 fontsXHR.onreadystatechange = function () {
                     var availableFonts, i;
                     if (this.readyState === 4 && this.status === 200) {
+                        // Get all `font-family: "..."` lines
                         availableFonts = this.response.match(/font-family *:.*(\"|\')/gm);
                         if (!availableFonts) {
                             document.editorFonts = [];
@@ -129,6 +130,7 @@ define("webodf/editor", [
                             return self.indexOf(elem) === pos;
                         });
                         for (i = 0; i < availableFonts.length; i += 1) {
+                            // Extract the string between the quotes to get the Font Family name
                             availableFonts[i] = availableFonts[i].match(/".*"/)[0].replace(/\"/g, "");
                         }
                         document.editorFonts = availableFonts;

@@ -65,16 +65,19 @@ define("webodf/editor/widgets/fontPicker", [], function () {
                 
             editorFonts = document.editorFonts;
             documentFonts = editorSession.getUsedFonts();
- 
+
+            // First populate the fonts used in the document
             for (i = 0; i < documentFonts.length; i += 1) {
                 selectionList.push({
                     label: '<span style="font-family: ' + documentFonts[i].family + ';">' + documentFonts[i].name + '</span>',
                     value: documentFonts[i].name
                 });
             }
+            // Then add a separator
             selectionList.push({
                 type: 'separator'
             });
+            // Lastly populate the fonts provided by the editor
             for (i = 0; i < editorFonts.length; i += 1) {
                 selectionList.push({
                     label: '<span style="font-family: ' + editorFonts[i] + ';">' + editorFonts[i] + '</span>',
