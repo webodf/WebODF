@@ -282,7 +282,7 @@ define("webodf/editor/EditorSession", [], function () {
                 key,
                 reducedKey,
                 value;
-            
+
             for (key in fontMap) {
                 if (fontMap.hasOwnProperty(key)) {
                     // FIXME?: Here, we're shaving off the number appended to a font name and
@@ -291,7 +291,7 @@ define("webodf/editor/EditorSession", [], function () {
                     if (!reducedMap[reducedKey]) {
                         value = fontMap[reducedKey];
                         reducedMap[reducedKey] = value;
-                        
+
                         array.push({
                             name: reducedKey,
                             family: value
@@ -299,7 +299,7 @@ define("webodf/editor/EditorSession", [], function () {
                     }
                 }
             }
-            
+
             return array;
         };
 
