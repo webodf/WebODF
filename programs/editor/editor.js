@@ -121,6 +121,10 @@ define("webodf/editor", [
                     var availableFonts, i;
                     if (this.readyState === 4 && this.status === 200) {
                         availableFonts = this.response.match(/font-family *:.*(\"|\')/gm);
+                        if (!availableFonts) {
+                            document.editorFonts = [];
+                            return;
+                        }
                         availableFonts = availableFonts.filter(function (elem, pos, self) {
                             return self.indexOf(elem) === pos;
                         });
