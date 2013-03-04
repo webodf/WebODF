@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui*/
+/*global runtime, core, gui, ops*/
 
 runtime.loadClass("gui.Caret");
 
@@ -47,13 +47,13 @@ gui.CaretFactory = function CaretFactory(sessionController) {
     "use strict";
 
     /**
-     * @param {core.Cursor} cursor
+     * @param {ops.OdtCursor} cursor
      * @return {!gui.Caret}
      */
     this.createCaret = function (cursor) {
         var memberid = cursor.getMemberId(),
-            document = sessionController.getSession().getOdfDocument(),
-            canvasElement = document.getOdfCanvas().getElement(),
+            odtDocument = sessionController.getSession().getOdtDocument(),
+            canvasElement = odtDocument.getOdfCanvas().getElement(),
             caret = new gui.Caret(cursor);
 
         // if local input user, then let controller listen on caret span
@@ -61,7 +61,7 @@ gui.CaretFactory = function CaretFactory(sessionController) {
             runtime.log("Starting to track input on new cursor of " + memberid);
 
             // on user edit actions ensure visibility of cursor
-            document.subscribe('paragraphEdited', function (info) {
+            odtDocument.subscribe('paragraphEdited', function (info) {
                 if (info.memberId === memberid) {
                     caret.ensureVisible();
                 }

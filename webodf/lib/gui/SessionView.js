@@ -70,7 +70,7 @@ gui.SessionView = (function () {
                 editInfoMarker = editInfoMap[id];
             } else {
                 id = Math.random().toString();
-                editInfo = new core.EditInfo(element, session.getOdfDocument());
+                editInfo = new core.EditInfo(element, session.getOdtDocument());
                 editInfoMarker = new gui.EditInfoMarker(editInfo);
 
                 editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
@@ -83,7 +83,7 @@ gui.SessionView = (function () {
             editInfoMarker.addEdit(userData.fullname, new Date(), userData.color);
         }
         
-        session.getOdfDocument().subscribe('paragraphEdited', function (info) {
+        session.getOdtDocument().subscribe('paragraphEdited', function (info) {
             highlightEdit(info.element, info.memberId);
         });
         /**
@@ -169,7 +169,7 @@ gui.SessionView = (function () {
             }
 
             userModel = session.getUserModel();
-            cursors = session.getOdfDocument().getCursors();
+            cursors = session.getOdtDocument().getCursors();
 
             for (i = 0; i < cursors.length; i += 1) {
                 memberId = cursors[i].getMemberId();
@@ -189,7 +189,7 @@ gui.SessionView = (function () {
                 return;
             }
 
-            cursors = session.getOdfDocument().getCursors();
+            cursors = session.getOdtDocument().getCursors();
 
             for (i = 0; i < cursors.length; i += 1) {
                 memberId = cursors[i].getMemberId();
@@ -233,7 +233,7 @@ gui.SessionView = (function () {
         memberDataChangedHandler = onMemberDataChanged;
 
         /**
-         * @param {core.Cursor} cursor
+         * @param {ops.OdtCursor} cursor
          */
         function onCursorAdded(cursor) {
             var caret = caretFactory.createCaret(cursor),

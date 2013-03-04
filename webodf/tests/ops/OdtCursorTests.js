@@ -31,18 +31,18 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, gui, ops, odf*/
-runtime.loadClass("gui.Caret");
 runtime.loadClass("odf.OdfCanvas");
-runtime.loadClass("ops.Document");
+runtime.loadClass("ops.OdtCursor");
+runtime.loadClass("ops.OdtDocument");
 
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
  * @implements {core.UnitTest}
  */
-gui.AvatarTests = function AvatarTests(runner) {
+ops.OdtCursorTests = function OdtCursorTests(runner) {
     "use strict";
-    var r = runner, t, maindoc = runtime.getWindow().document, odfDocument, testarea,
+    var r = runner, t, domDocument = runtime.getWindow().document, testarea,
         odfxml =
           '<text:sequence-decls>\n'
         + '  <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>\n'
@@ -107,13 +107,14 @@ gui.AvatarTests = function AvatarTests(runner) {
     textfilter.acceptPosition = textfilter;
 
     this.setUp = function () {
-        var odfContainer = new odf.OdfContainer("", null),
+        var odfContainer,
             odfcanvas;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         odfcanvas = new odf.OdfCanvas(testarea);
+        odfContainer = new odf.OdfContainer("", null);
         odfcanvas.setOdfContainer(odfContainer);
-        odfDocument = new ops.Document(odfcanvas);
+        t.odtDocument = new ops.OdtDocument(odfcanvas);
     };
     this.tearDown = function () {
         t = {};
@@ -155,10 +156,12 @@ gui.AvatarTests = function AvatarTests(runner) {
      * @param {!boolean=} emptyNodes
      * @return {undefined}
      */
-    function createAvatar(xml, splitTexts, emptyNodes) {
+    function createOdtCursor(xml, splitTexts, emptyNodes) {
         var doc, node,
             i,
-            odfRootNode = odfDocument.getRootNode();
+            odfRootNode = t.odtDocument.getRootNode();
+
+        // clean-up odf content. will be refilled
         while (odfRootNode.firstChild) {
             odfRootNode.removeChild(odfRootNode.firstChild);
         }
@@ -171,7 +174,7 @@ gui.AvatarTests = function AvatarTests(runner) {
             xml = '<helper xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">' + xml + '</helper>';
             doc = /**@type{!Document}*/(runtime.parseXML(xml));
             for (i = 0; i < doc.documentElement.childNodes.length; i += 1) {
-                node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement.childNodes[i], true));
+                node = /**@type{!Element}*/(domDocument.importNode(doc.documentElement.childNodes[i], true));
                 odfRootNode.appendChild(node);
             }
         }
@@ -181,13 +184,10 @@ gui.AvatarTests = function AvatarTests(runner) {
         if (emptyNodes) {
             insertEmptyTextNodes(odfRootNode);
         }
-        t.cursor = new core.Cursor("id", odfDocument);
-        t.caret = new gui.Caret(t.cursor);
+        t.cursor = new ops.OdtCursor("id", t.odtDocument);
     }
     function create() {
-        createAvatar();
-        r.shouldBeNonNull(t, "t.caret");
-        r.shouldBe(t, "t.caret.getCursor().getMemberId()", "'id'");
+        createOdtCursor();
         var s = t.cursor.getSelection();
         t.rangeCount = s.rangeCount;
         r.shouldBe(t, "t.rangeCount", "1");
@@ -197,7 +197,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBeNonNull(t, "t.focusNode");
     }
     function moveInEmptyDoc() {
-        createAvatar("");
+        createOdtCursor("");
         var s = t.cursor.getSelection();
         t.startNode = s.focusNode;
         t.cursor.move(1);
@@ -207,7 +207,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         r.shouldBe(t, "t.startNode", "t.focusNode");
     }
     function moveInSimpleDoc() {
-        createAvatar("hello");
+        createOdtCursor("hello");
         var s = t.cursor.getSelection(),
             i;
         t.startNode = s.focusNode;
@@ -246,7 +246,7 @@ gui.AvatarTests = function AvatarTests(runner) {
     function stepCounter(xml, n, m, filter) {
         var steps, s, e;
         t.pos = [];
-        createAvatar(xml, true, true);
+        createOdtCursor(xml, true, true);
         s = t.cursor.getSelection();
         t.counter = t.cursor.getStepCounter();
 
@@ -308,7 +308,7 @@ gui.AvatarTests = function AvatarTests(runner) {
         var i, steps;
         t.pos = [];
         t.filter = filter;
-        createAvatar(xml, splitTexts, emptyNodes);
+        createOdtCursor(xml, splitTexts, emptyNodes);
         t.counter = t.cursor.getStepCounter();
 
         // move to a valid position
@@ -317,7 +317,6 @@ gui.AvatarTests = function AvatarTests(runner) {
         steps = t.counter.countBackwardSteps(1, filter);
         t.cursor.move(-steps);
         t.pos = [];
-
         t.stepsSum = 0;
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
@@ -406,11 +405,11 @@ gui.AvatarTests = function AvatarTests(runner) {
         ];
     };
 };
-gui.AvatarTests.prototype.description = function () {
+ops.OdtCursorTests.prototype.description = function () {
     "use strict";
-    return "Test the Avatar class.";
+    return "Test the OdtCursor class.";
 };
 (function () {
     "use strict";
-    return gui.AvatarTests;
+    return ops.OdtCursorTests;
 }());

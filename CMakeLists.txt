@@ -256,6 +256,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpCloneStyle.js
     lib/ops/OpDeleteStyle.js
     lib/ops/OperationFactory.js
+    lib/ops/OdtCursor.js
     lib/gui/SelectionMover.js
     lib/gui/Avatar.js
     lib/gui/Caret.js
@@ -274,7 +275,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/XMLEdit.js
 
     lib/ops/SessionPointFilter.js
-    lib/ops/Document.js
+    lib/ops/OdtDocument.js
     lib/ops/Session.js
     lib/ops/SessionImplementation.js
 

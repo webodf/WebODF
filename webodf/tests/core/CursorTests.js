@@ -30,9 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, runtime, ops, odf*/
+/*global core, runtime*/
 runtime.loadClass("core.Cursor");
-runtime.loadClass("ops.Document");
 
 /**
  * @constructor
@@ -42,11 +41,9 @@ runtime.loadClass("ops.Document");
 core.CursorTests = function CursorTests(runner) {
     "use strict";
     var r = runner, tests, t = {},
-        memberId = "testuser",
-        maindoc = runtime.getWindow().document,
-        ns = maindoc.body.namespaceURI,
-        testarea,
-        odfcanvas;
+        domDocument = runtime.getWindow().document,
+        ns = domDocument.body.namespaceURI,
+        testarea;
     /**
      * @param {core.Selection} selection
      * @param {Node} startnode
@@ -71,19 +68,19 @@ core.CursorTests = function CursorTests(runner) {
             runtime.log("EVIL");
         }
     }
+
     function setupEmptyRootNode() {
-        var root = maindoc.createElementNS(ns, "p"),
-            document = new ops.Document(odfcanvas),
-            cursor = new core.Cursor(memberId, document);
+        var selection = new core.Selection(domDocument),
+            root = domDocument.createElementNS(ns, "p"),
+            cursor = new core.Cursor(selection, domDocument);
         testarea.appendChild(root);
         t = { selection: cursor.getSelection(), root: root, cursor: cursor };
-        runner.shouldBe(t, "t.cursor.getMemberId()", memberId);
         runner.shouldBeNonNull(t, "t.selection");
     }
 
     function setupSimpleTextDoc() {
         setupEmptyRootNode();
-        t.textnode = maindoc.createTextNode("abc");
+        t.textnode = domDocument.createTextNode("abc");
         t.root.appendChild(t.textnode);
     }
 
@@ -96,7 +93,7 @@ core.CursorTests = function CursorTests(runner) {
             setSelection(t.selection, t.root, 0);
             t.cursor.updateToSelection();
             //r.shouldBeNull(t, "t.cursor.getNode().parentNode");
-        }/*,
+        },
         function testOnEmptyNode2() {
             setupEmptyRootNode();
             setSelection(t.selection, t.root, 0);
@@ -188,7 +185,7 @@ core.CursorTests = function CursorTests(runner) {
             var somenode, textnode2;
             setupSimpleTextDoc();
             // add a child node to the cursor
-            somenode = maindoc.createElementNS(ns, "p");
+            somenode = domDocument.createElementNS(ns, "p");
             t.cursor.getNode().appendChild(somenode);
             // select a single position so the cursor is put in the document
             setSelection(t.selection, t.textnode, 1);
@@ -210,12 +207,11 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBe(t, "t.range.endContainer", "t.textnode");
             r.shouldBe(t, "t.range.endOffset", "3");
             r.shouldBe(t, "t.range.collapsed", "false");
-        }*/
+        }
     ];
     this.setUp = function () {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
-        odfcanvas = new odf.OdfCanvas(testarea);
     };
     this.tearDown = function () {
         t = {};

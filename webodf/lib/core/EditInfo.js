@@ -34,8 +34,9 @@
 
 /**
  * @constructor
+ * @param {!ops.OdtDocument} odtDocument
  */
-core.EditInfo = function EditInfo(container, odfDocument) {
+core.EditInfo = function EditInfo(container, odtDocument) {
     "use strict";
     var self = this,
         editInfoNode,
@@ -65,8 +66,8 @@ core.EditInfo = function EditInfo(container, odfDocument) {
         return editInfoNode;
     };
 
-    this.getOdfDocument = function () {
-        return odfDocument;
+    this.getOdtDocument = function () {
+        return odtDocument;
     };
     
     this.getEdits = function () {
@@ -89,7 +90,7 @@ core.EditInfo = function EditInfo(container, odfDocument) {
 
     function init() {
         var editInfons = 'urn:webodf:names:editinfo',
-            dom = odfDocument.getDOM();
+            dom = odtDocument.getDOM();
 
         editInfoNode = dom.createElementNS(editInfons, 'editinfo');
         container.insertBefore(editInfoNode, container.firstChild);

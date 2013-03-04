@@ -180,7 +180,7 @@ function initSession(odfid, avatarlistid, done_cb) {
         setupAvatarView(sessionView, avatarListDiv);
 
         // set window title
-        document.title = testsession.getOdfDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
+        document.title = testsession.getOdtDocument().getMetaData("title") || odfcanvas.odfContainer().getUrl() || "New Document";
 
         if (is_connected) {
             testsession.setUserModel(new ops.NowjsUserModel(function done() {

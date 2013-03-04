@@ -50,8 +50,8 @@ ops.OpCloneStyle = function OpCloneStyle(session) {
     };
 
     this.execute = function (domroot) {
-        var odfDocument = session.getOdfDocument();
-        odfDocument.cloneStyle(styleName, newStyleName);
+        var odtDocument = session.getOdtDocument();
+        odtDocument.cloneStyle(styleName, newStyleName);
         session.emit(ops.SessionImplementation.signalStyleCreated, newStyleName);
     };
     

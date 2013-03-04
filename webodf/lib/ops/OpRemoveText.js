@@ -51,7 +51,7 @@ ops.OpRemoveText = function OpRemoveText(session) {
     };
 
     this.execute = function (domroot) {
-        session.getOdfDocument().removeText(memberid, position, length);
+        session.getOdtDocument().removeText(memberid, position, length);
     };
 
     this.spec = function () {

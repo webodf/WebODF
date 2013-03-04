@@ -52,7 +52,7 @@ define("webodf/editor/EditorSession", [
             currentParagraphNode = null,
             currentNamedStyleName = null,
             currentStyleName = null,
-            odfDocument = session.getOdfDocument(),
+            odfDocument = session.getOdtDocument(),
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             formatting = odfDocument.getFormatting(),
             eventListener = {};

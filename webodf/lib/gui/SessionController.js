@@ -96,8 +96,8 @@ gui.SessionController = (function () {
                 steps,
                 op,
                 node,
-                document = session.getOdfDocument(),
-                canvasElement = document.getOdfCanvas().getElement();
+                odtDocument = session.getOdtDocument(),
+                canvasElement = odtDocument.getOdfCanvas().getElement();
 
             // check that the node or one of its parent nodes til the canvas are
             // not belonging to a cursor, like e.g. the caret and the cursor
@@ -111,7 +111,7 @@ gui.SessionController = (function () {
             }
 
             // create a move op with the distance to that position
-            steps = document.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor(session);
@@ -134,14 +134,14 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpMoveCursorByHomeKey() {
-            var odfDocument = session.getOdfDocument(),
+            var odtDocument = session.getOdtDocument(),
                 steps,
                 paragraphNode,
                 op = null;
 
             // TODO: instead of going to begin of paragraph go to begin of line
-            paragraphNode = odfDocument.getParagraphElement(odfDocument.getCursor(inputMemberId).getNode());
-            steps = odfDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
+            paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             if (steps !== 0) {
                 op = new ops.OpMoveCursor(session);
                 op.init({memberid: inputMemberId, number: steps});
@@ -153,10 +153,10 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpRemoveTextByBackspaceKey() {
-            var odfDocument = session.getOdfDocument(),
-                position = odfDocument.getCursorPosition(inputMemberId),
+            var odtDocument = session.getOdtDocument(),
+                position = odtDocument.getCursorPosition(inputMemberId),
                 // position-1 must exist for backspace to be valid
-                domPosition = odfDocument.getPositionInTextNode(position - 1),
+                domPosition = odtDocument.getPositionInTextNode(position - 1),
                 op = null;
 
             if (domPosition) {
@@ -174,10 +174,10 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpRemoveTextByDeleteKey() {
-            var odfDocument = session.getOdfDocument(),
-                position = odfDocument.getCursorPosition(inputMemberId),
+            var odtDocument = session.getOdtDocument(),
+                position = odtDocument.getCursorPosition(inputMemberId),
                 // position+1 must exist for delete to be valid
-                domPosition = odfDocument.getPositionInTextNode(position + 1),
+                domPosition = odtDocument.getPositionInTextNode(position + 1),
                 op = null;
 
             if (domPosition) {
@@ -193,8 +193,8 @@ gui.SessionController = (function () {
         }
 
         function enqueueParagraphSplittingOps() {
-            var odfDocument = session.getOdfDocument(),
-                position = odfDocument.getCursorPosition(inputMemberId),
+            var odtDocument = session.getOdtDocument(),
+                position = odtDocument.getCursorPosition(inputMemberId),
                 isAtEndOfParagraph = false, // TODO: find out if at end
                 paragraphNode, styleName, nextStyleName,
                 op;
@@ -209,9 +209,9 @@ gui.SessionController = (function () {
             // disabled for now, because nowjs seems to revert the order of the ops, which does not work here TODO: grouping of ops
             /*
             if (isAtEndOfParagraph) {
-                paragraphNode = odfDocument.getParagraphElement(odfDocument.getCursor(inputMemberId).getNode());
+                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
                 styleName = paragraphNode.getAttributeNS(namespaces.text, 'style-name');
-                nextStyleName = odfDocument.getFormatting().getParagraphStyleAttribute(styleName, namespaces.style, 'next-style-name');
+                nextStyleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, namespaces.style, 'next-style-name');
 
                 if (nextStyleName && nextStyleName !== styleName) {
                     op = new ops.OpSetParagraphStyle(session);
@@ -299,7 +299,7 @@ gui.SessionController = (function () {
                 op = new ops.OpInsertText(session);
                 op.init({
                     memberid: inputMemberId,
-                    position: session.getOdfDocument().getCursorPosition(inputMemberId),
+                    position: session.getOdtDocument().getCursorPosition(inputMemberId),
                     text: text
                 });
                 session.enqueue(op);
@@ -310,7 +310,7 @@ gui.SessionController = (function () {
         /**
          */
         this.startListening = function () {
-            var canvasElement = session.getOdfDocument().getOdfCanvas().getElement();
+            var canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
 
             listenEvent(canvasElement, "keydown", handleKeyDown);
             listenEvent(canvasElement, "keypress", handleKeyPress);

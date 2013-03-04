@@ -30,10 +30,8 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, odf, ops*/
+/*global runtime, core, gui*/
 runtime.loadClass("gui.SelectionMover");
-runtime.loadClass("odf.OdfCanvas");
-runtime.loadClass("ops.Document");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
@@ -41,8 +39,7 @@ runtime.loadClass("ops.Document");
  */
 gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     "use strict";
-    var r = runner, maindoc = runtime.getWindow().document,
-        odfDocument,
+    var r = runner,
         t, testarea,
         testXMLs = [
             { x: "<a/>", n: 1, t: 0 },
@@ -56,24 +53,30 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         ];
 
     function setupDoc() {
-        var p = maindoc.createElement("p"),
-            text = maindoc.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
-            mover,
-            cursor;
-        odfDocument.getRootNode().appendChild(p);
+        var domDocument = testarea.ownerDocument,
+            p = domDocument.createElement("p"),
+            text = domDocument.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
+            selection,
+            cursor,
+            mover;
+        testarea.appendChild(p);
         p.appendChild(text);
         p.style.width = "5em";// break line after each 'MMMMM'
-        cursor = new core.Cursor("id", odfDocument);
+        selection = new core.Selection(domDocument);
+        cursor = new core.Cursor(selection, domDocument);
         mover = new gui.SelectionMover(cursor, p);
-        t = { doc: maindoc, p: p, text: text, selection: cursor.getSelection(), mover: mover };
+        t = { doc: domDocument, p: p, text: text, selection: cursor.getSelection(), mover: mover };
     }
     function createDoc(xml) {
-        var doc = runtime.parseXML(xml),
+        var domDocument = testarea.ownerDocument,
+            doc = runtime.parseXML(xml),
             mover,
+            selection,
             cursor,
-            node = /**@type{!Element}*/(maindoc.importNode(doc.documentElement, true));
-        odfDocument.getRootNode().appendChild(node);
-        cursor = new core.Cursor("id", odfDocument);
+            node = /**@type{!Element}*/(domDocument.importNode(doc.documentElement, true));
+        testarea.appendChild(node);
+        selection = new core.Selection(domDocument);
+        cursor = new core.Cursor(selection, domDocument);
         mover = new gui.SelectionMover(cursor, node);
         t = { doc: doc, root: node, selection: cursor.getSelection(), mover: mover, cursor: cursor };
     }
@@ -187,14 +190,12 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         var odfcanvas;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
-        odfcanvas = new odf.OdfCanvas(testarea);
-        odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
-        odfDocument = new ops.Document(odfcanvas);
     };
     this.tearDown = function () {
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
+
     this.tests = function () {
         return [
             testUpDownTraversal,

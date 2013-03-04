@@ -48,14 +48,14 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
     };
 
     this.execute = function (rootNode) {
-        var document = session.getOdfDocument(),
+        var odtDocument = session.getOdtDocument(),
             domPosition, paragraphNode,
             textNodeCopy,
             node, splitNode, splitChildNode, keptChildNode;
 
-        domPosition = document.getPositionInTextNode(position);
+        domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {
-            paragraphNode = document.getParagraphElement(domPosition.textNode);
+            paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
                 // There can be a chain of multiple nodes between the text node
                 // where the split is done and the containing paragraph nodes,
@@ -141,11 +141,11 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
                 }
 
                 // mark both paragraphs as edited
-                document.emit('paragraphEdited', {
+                odtDocument.emit('paragraphEdited', {
                     element: paragraphNode,
                     memberId: memberid
                 });
-                document.emit('paragraphEdited', {
+                odtDocument.emit('paragraphEdited', {
                     element: splitChildNode,
                     memberId: memberid
                 });

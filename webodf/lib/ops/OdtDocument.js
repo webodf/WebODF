@@ -41,7 +41,7 @@ runtime.loadClass("gui.SelectionManager");
  * @constructor
  * @param {!odf.OdfCanvas} odfCanvas
  */
-ops.Document = function Document(odfCanvas) {
+ops.OdtDocument = function OdtDocument(odfCanvas) {
     "use strict";
 
     var self = this,
@@ -52,9 +52,9 @@ ops.Document = function Document(odfCanvas) {
         rootNode,
         selectionManager,
         filter,
-        cursors = {},
+        /**Array.<!ops.OdtCursor>*/cursors = {},
         eventListener = {};
-    
+
     eventListener.paragraphEdited = [];
     /**
      * @constructor
@@ -206,7 +206,7 @@ ops.Document = function Document(odfCanvas) {
         node = odfCanvas.getFormatting().getStyleElement(odfCanvas.odfContainer().rootElement.styles, styleName, 'paragraph');
         return node;
     }
-    
+
     /**
      * @param {!String} styleName
      * @return {?Object}
@@ -251,13 +251,14 @@ ops.Document = function Document(odfCanvas) {
         var counter,
             cursor = cursors[memberid],
             steps = 0;
-        runtime.assert(node !== null, "Document.getDistanceFromCursor called with node===null");
+        runtime.assert(node !== null, "OdtDocument.getDistanceFromCursor called with node===null");
         if (cursor) {
             counter = cursor.getStepCounter().countStepsToPosition;
             steps = counter(node, offset, filter);
         }
         return steps;
     };
+
     /**
      * This function returns the position in ODF world of the cursor of the member.
      * @param {!string} memberid
@@ -274,6 +275,9 @@ ops.Document = function Document(odfCanvas) {
         return filter;
     };
 
+    /**
+     * @return {!odf.OdfCanvas}
+     */
     this.getOdfCanvas = function () {
         return odfCanvas;
     };
@@ -284,21 +288,23 @@ ops.Document = function Document(odfCanvas) {
     this.getRootNode = function () {
         return rootNode;
     };
+
     /**
      * @return {!Document}
      */
     this.getDOM = function () {
         return rootNode.ownerDocument;
     };
+
     /**
-    * @return {gui.SelectionManager}
-    */
+     * @return {gui.SelectionManager}
+     */
     this.getSelectionManager = function () {
         return selectionManager;
     };
 
     /* This is a workaround for a bug where webkit forgets to relayout
-     * the text when a new character is inserted at the beginning of a line in 
+     * the text when a new character is inserted at the beginning of a line in
      * a Text Node.
      * @param {Node} textNode
      */
@@ -308,7 +314,7 @@ ops.Document = function Document(odfCanvas) {
         parent.removeChild(textNode);
         parent.insertBefore(textNode, next);
     }
-        
+
     /**
      * @param {!string} memberid
      * @param {!number} position
@@ -341,6 +347,7 @@ ops.Document = function Document(odfCanvas) {
         }
         return false;
     };
+
     /**
      * @param {!string} memberid
      * @param {!number} position
@@ -415,7 +422,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         }
         return false;
     };
-    
+
     /**
      * Sets a value as the attribute of a node, if that value is defined.
      * If there is a unit specified, it is suffixed to the value.
@@ -481,7 +488,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         if (styleNode) {
             paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
-            
+
             if (paragraphPropertiesNode === undefined
                     && info.paragraphProperties) {
                 paragraphPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:paragraph-properties');
@@ -492,7 +499,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                 textPropertiesNode = rootNode.ownerDocument.createElementNS(stylens, 'style:text-properties');
                 styleNode.appendChild(textPropertiesNode);
             }
-            
+
             if (info.paragraphProperties) {
                 setRealAttributeNS(paragraphPropertiesNode, fons,
                     'fo:margin-top', info.paragraphProperties.topMargin, 'mm');
@@ -538,7 +545,11 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
 
         return false;
     };
-    
+
+    /**
+     * @param {!String} styleName
+     * @param {!string} newStyleName
+     */
     this.cloneStyle = function (styleName, newStyleName) {
         var styleNode, newStyleNode;
         styleNode = getParagraphStyleElement(styleName);
@@ -549,7 +560,10 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
 
         odfCanvas.refreshCSS();
     };
-    
+
+    /**
+     * @param {!String} styleName
+     */
     this.deleteStyle = function (styleName) {
         var styleNode = getParagraphStyleElement(styleName);
         styleNode.parentNode.removeChild(styleNode);
@@ -558,15 +572,16 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
     };
 
     /**
-    * @param {!string} memberid
-    * @return {core.Cursor}
-    */
+     * @param {!string} memberid
+     * @return {ops.OdtCursor}
+     */
     this.getCursor = function (memberid) {
         return cursors[memberid];
     };
+
     /**
-    * @return {!Array.<!core.Cursor>}
-    */
+     * @return {!Array.<!ops.OdtCursor>}
+     */
     this.getCursors = function () {
         var list = [], i;
         for (i in cursors) {
@@ -576,27 +591,29 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         }
         return list;
     };
+
     /**
-    * @param {!core.Cursor} cursor
-    */
+     * @param {!ops.OdtCursor} cursor
+     */
     this.addCursor = function (cursor) {
         var distanceToFirstTextNode = cursor.getStepCounter().countForwardSteps(1, filter);
         cursor.move(distanceToFirstTextNode);
 
         cursors[cursor.getMemberId()] = cursor;
     };
+
     /**
-    * @param {!string} memberid
-    */
+     * @param {!string} memberid
+     */
     this.removeCursor = function (memberid) {
         var cursor = cursors[memberid],
             cursorNode;
         if (cursor) {
-            // TODO: find out if nodeAfterCursor, textNodeIncrease need to be dealt with in any way
-            cursor.remove(function (nodeAfterCursor, textNodeIncrease) {});
+            cursor.removeFromOdtDocument();
             delete cursors[memberid];
         }
     };
+
     /**
      * @param {!string} metadataId
      * @return {?string}
@@ -616,6 +633,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         }
         return node ? node.data : null;
     };
+
     /**
       * @return {!odf.Formatting}
       */
@@ -640,6 +658,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
         eventListener[eventid].push(cb);
         runtime.log("event \"" + eventid + "\" subscribed.");
     };
+
     /**
      * @return {undefined}
      */

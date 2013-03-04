@@ -48,9 +48,9 @@ ops.OpAddCursor = function OpAddCursor(session) {
     };
 
     this.execute = function (rootNode) {
-        var odfDocument = session.getOdfDocument(),
-            cursor = new core.Cursor(memberid, odfDocument);
-        odfDocument.addCursor(cursor);
+        var odtDocument = session.getOdtDocument(),
+            cursor = new ops.OdtCursor(memberid, odtDocument);
+        odtDocument.addCursor(cursor);
         session.emit(ops.SessionImplementation.signalCursorAdded, cursor);
     };
 

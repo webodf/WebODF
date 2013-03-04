@@ -52,14 +52,14 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
 
     this.execute = function (domroot) {
         var domPosition, paragraphNode,
-            odfDocument = session.getOdfDocument();
+            odtDocument = session.getOdtDocument();
 
-        odfDocument.setParagraphStyle(memberid, position, styleNameBefore, styleNameAfter);
+        odtDocument.setParagraphStyle(memberid, position, styleNameBefore, styleNameAfter);
 
         // TODO: hack, reusing getPositionInTextNode and getParagraphElement, not an optimized solution
-        domPosition = odfDocument.getPositionInTextNode(position);
+        domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {
-            paragraphNode = odfDocument.getParagraphElement(domPosition.textNode);
+            paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             session.emit(ops.SessionImplementation.signalParagraphChanged, paragraphNode);
         }
     };

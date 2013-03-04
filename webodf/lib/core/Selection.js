@@ -30,12 +30,12 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core,ops,runtime */
+/*global core, runtime*/
 /**
  * @constructor
- * @param {!ops.Document} document
+ * @param {!Document} domDocument
  */
-core.Selection = function Selection(document) {
+core.Selection = function Selection(domDocument) {
     "use strict";
     var self = this,
         ranges = [];
@@ -78,7 +78,7 @@ core.Selection = function Selection(document) {
         ranges.length = self.rangeCount = 1;
         var range = ranges[0];
         if (!range) {
-            ranges[0] = range = document.getDOM().createRange();
+            ranges[0] = range = domDocument.createRange();
         }
         range.setStart(node, offset);
         range.collapse(true);

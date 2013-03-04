@@ -38,10 +38,9 @@ runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
-runtime.loadClass("gui.AvatarTests");
-runtime.loadClass("gui.CaretTests");
 runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
+runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.SessionImplementationTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
@@ -60,15 +59,15 @@ var tests = [
 
 // add tests depending on runtime with XML parser
 if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
+// TODO: fix test and enable
+//     tests.push(core.CursorTests);
     tests.push(core.PositionIteratorTests);
     tests.push(gui.SelectionMoverTests);
-    tests.push(gui.AvatarTests);
     tests.push(odf.OdfContainerTests);
+    tests.push(ops.OdtCursorTests);
 }
 // add tests depending on browser runtime
 if (runtime.type() === "BrowserRuntime") {
-//     tests.push(core.CursorTests);
-    tests.push(gui.CaretTests);
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
     tests.push(ops.SessionImplementationTests);

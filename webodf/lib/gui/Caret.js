@@ -30,10 +30,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, gui, runtime*/
+/*global core, gui, ops, runtime*/
 
-runtime.loadClass("core.Cursor");
 runtime.loadClass("gui.Avatar");
+runtime.loadClass("ops.OdtCursor");
 
 /**
  * Class that represents a caret in a document.
@@ -42,7 +42,7 @@ runtime.loadClass("gui.Avatar");
  * Blinking is done by switching the color of the border from transparent to
  * the user color and back.
  * @constructor
- * @param {!core.Cursor} cursor
+ * @param {!ops.OdtCursor} cursor
  */
 gui.Caret = function Caret(cursor) {
     "use strict";
@@ -298,7 +298,7 @@ gui.Caret = function Caret(cursor) {
      * If the caret is already visible nothing will happen.
      */
     this.ensureVisible = function () {
-        var canvasElement = cursor.getOdfDocument().getOdfCanvas().getElement(),
+        var canvasElement = cursor.getOdtDocument().getOdfCanvas().getElement(),
             canvasContainerElement = canvasElement.parentNode,
             caretOffsetRect,
             // margin around the caret when calculating the visibility,
@@ -343,7 +343,7 @@ gui.Caret = function Caret(cursor) {
     };
 
     function init() {
-        var dom = cursor.getOdfDocument().getDOM(),
+        var dom = cursor.getOdtDocument().getDOM(),
             htmlns = dom.documentElement.namespaceURI;
 
         span = dom.createElementNS(htmlns, "span");

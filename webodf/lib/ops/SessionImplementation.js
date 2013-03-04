@@ -35,7 +35,7 @@ runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
 runtime.loadClass("gui.SelectionManager");
-runtime.loadClass("ops.Document");
+runtime.loadClass("ops.OdtDocument");
 /**
  * An operation that can be performed on a document.
  * @constructor
@@ -45,7 +45,7 @@ runtime.loadClass("ops.Document");
 ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     "use strict";
     var self = this,
-        odfDocument = new ops.Document(odfCanvas),
+        odtDocument = new ops.OdtDocument(odfCanvas),
         style2CSS = new odf.Style2CSS(),
         namespaces = style2CSS.namespaces,
         m_user_model = null,
@@ -80,10 +80,10 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     this.getUserModel = getUserModel;
 
     /**
-     * @return {!ops.Document}
+     * @return {!ops.OdtDocument}
      */
-    this.getOdfDocument = function () {
-        return odfDocument;
+    this.getOdtDocument = function () {
+        return odtDocument;
     };
 
     this.emit = function (eventid, args) {
@@ -111,7 +111,7 @@ ops.SessionImplementation = function SessionImplementation(odfCanvas) {
     };
 
     this.playOperation = function (op) {
-        op.execute(odfDocument.getRootNode());
+        op.execute(odtDocument.getRootNode());
     };
 
     /**
