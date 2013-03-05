@@ -154,6 +154,17 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 "webodf/editor/widgets/dialogWidgets/fontEffectsPane"
             ], function (ParagraphStyles, AlignmentPane, FontEffectsPane) {
                 var p, a, f;
+
+                function openStyle(value) {
+                    alignmentPane.setStyle(value);
+                    fontEffectsPane.setStyle(value);
+                    if (editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
+                        deleteButton.domNode.style.display = 'none';
+                    } else {
+                        deleteButton.domNode.style.display = 'block';
+                    }
+                }
+
                 p = new ParagraphStyles(editorSession, function (paragraphStyles) {
                     stylePicker = paragraphStyles;
                     stylePicker.widget().startup();
@@ -173,6 +184,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                         // Set the first style name as current
                         stylePicker.setValue(stylePicker.widget().getOptions(0));
                     };
+                    
+                    stylePicker.widget().onChange = openStyle;
                 });
                 a = new AlignmentPane(editorSession, function (pane) {
                     alignmentPane = pane;
@@ -184,18 +197,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     fontEffectsPane.widget().startup();
                     tabContainer.addChild(fontEffectsPane.widget());
                 });
-                
-                function openStyle(value) {
-                    alignmentPane.setStyle(value);
-                    fontEffectsPane.setStyle(value);
-                    if (editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
-                        deleteButton.domNode.style.display = 'none';
-                    } else {
-                        deleteButton.domNode.style.display = 'block';
-                    }
-                }
 
-                stylePicker.widget().onChange = openStyle;
                 dialog.onShow = function () {
                     var currentStyle = editorSession.getCurrentParagraphStyle();
                     // setting the stylepicker value if the style name is the same
