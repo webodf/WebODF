@@ -32,8 +32,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,runtime,gui,ops,XMLHttpRequest */
-define("webodf/editor/EditorSession", [], function () {
+/*global define,runtime,gui,ops */
+define("webodf/editor/EditorSession", [
+    "dojo/text!webodf/editor/fonts/fonts.css"
+], function (fontsCSS) {
     "use strict";
 
     runtime.loadClass("ops.SessionImplementation");
@@ -53,8 +55,7 @@ define("webodf/editor/EditorSession", [], function () {
             odfDocument = session.getOdfDocument(),
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             formatting = odfDocument.getFormatting(),
-            eventListener = {},
-            fontsXHR;
+            eventListener = {};
 
         this.sessionController = new gui.SessionController(session, memberid);
         this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
@@ -67,33 +68,27 @@ define("webodf/editor/EditorSession", [], function () {
         eventListener.styleCreated = [];
         eventListener.styleDeleted = [];
         eventListener.paragraphStyleModified = [];
-        
-        fontsXHR = new XMLHttpRequest();
-        fontsXHR.open("GET", "./fonts/fonts.css", false);
-        fontsXHR.onreadystatechange = function () {
-            var availableFonts, i;
-            if (this.readyState === 4 && this.status === 200) {
-                // The following regexes are an attempt at simple CSS parsing; they select
-                // font-family declarations on every line, which are followed by a single string enclosed
-                // within quotes, indicating the font family name
-                // Get all `font-family: "..."` lines
-                availableFonts = this.response.match(/font-family *:.*(\"|\')/gm);
-                if (!availableFonts) {
-                    self.availableFonts = [];
-                    return;
-                }
-                availableFonts = availableFonts.filter(function (elem, pos, array) {
-                    return array.indexOf(elem) === pos;
-                });
-                for (i = 0; i < availableFonts.length; i += 1) {
-                    // Extract the string between the quotes to get the Font Family name
-                    availableFonts[i] = availableFonts[i].match(/".*"/)[0].replace(/\"/g, "");
-                }
-                self.availableFonts = availableFonts;
-            }
-        };
-        fontsXHR.send();
 
+        /*
+         * @return {Array.{!string}}
+         */
+        function getAvailableFonts() {
+            var availableFonts, i;
+            availableFonts = fontsCSS.match(/font-family *:.*(\"|\')/gm);
+            if (!availableFonts) {
+                self.availableFonts = [];
+                return;
+            }
+            availableFonts = availableFonts.filter(function (elem, pos, array) {
+                return array.indexOf(elem) === pos;
+            });
+            for (i = 0; i < availableFonts.length; i += 1) {
+                // Extract the string between the quotes to get the Font Family name
+                availableFonts[i] = availableFonts[i].match(/".*"/)[0].replace(/\"/g, "");
+            }
+            return availableFonts;
+        }
+        this.availableFonts = getAvailableFonts();
 
         function checkParagraphStyleName() {
             var newStyleName,
