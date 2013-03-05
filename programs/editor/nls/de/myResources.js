@@ -55,5 +55,25 @@ define({
     chat: "Chat",
     typeYourName_DDD: "Geben Sie Ihren Namen ein...",
     invitePeople: "Leute einladen",
-    startTypingToChat_DDD: "Eingabe beginnen für Chat..."
+    startTypingToChat_DDD: "Eingabe beginnen für Chat...",
+    // Various
+    left: "Linksbündig",
+    right: "Rechtsbündig",
+    top: "Oben",
+    bottom: "Unten",
+    center: "Zentriert",
+    justified: "Blocksatz",
+    spacing: "Abstand",
+    options: "Optionen",
+    style: "Stil",
+    bold: "Fett",
+    italic: "Kursiv",
+    underline: "Unterstrichen",
+    strikethrough: "Durchgestrichen",
+    font: "Schrift",
+    family: "Familie",
+    size: "Größe",
+    color: "Farbe",
+    text: "Text",
+    background: "Hintergrund"
 });
