@@ -76,8 +76,7 @@ define("webodf/editor/EditorSession", [
             var availableFonts, i;
             availableFonts = fontsCSS.match(/font-family *:.*(\"|\')/gm);
             if (!availableFonts) {
-                self.availableFonts = [];
-                return;
+                return [];
             }
             availableFonts = availableFonts.filter(function (elem, pos, array) {
                 return array.indexOf(elem) === pos;
