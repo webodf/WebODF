@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,runtime,gui,ops */
+/*global define,runtime,gui,ops,XMLHttpRequest */
 define("webodf/editor/EditorSession", [], function () {
     "use strict";
 
@@ -53,10 +53,12 @@ define("webodf/editor/EditorSession", [], function () {
             odfDocument = session.getOdfDocument(),
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             formatting = odfDocument.getFormatting(),
-            eventListener = {};
+            eventListener = {},
+            fontsXHR;
 
         this.sessionController = new gui.SessionController(session, memberid);
         this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
+        this.availableFonts = [];
 
         eventListener.userAdded = [];
         eventListener.userRemoved = [];
@@ -65,6 +67,33 @@ define("webodf/editor/EditorSession", [], function () {
         eventListener.styleCreated = [];
         eventListener.styleDeleted = [];
         eventListener.paragraphStyleModified = [];
+        
+        fontsXHR = new XMLHttpRequest();
+        fontsXHR.open("GET", "./fonts/fonts.css", false);
+        fontsXHR.onreadystatechange = function () {
+            var availableFonts, i;
+            if (this.readyState === 4 && this.status === 200) {
+                // The following regexes are an attempt at simple CSS parsing; they select
+                // font-family declarations on every line, which are followed by a single string enclosed
+                // within quotes, indicating the font family name
+                // Get all `font-family: "..."` lines
+                availableFonts = this.response.match(/font-family *:.*(\"|\')/gm);
+                if (!availableFonts) {
+                    self.availableFonts = [];
+                    return;
+                }
+                availableFonts = availableFonts.filter(function (elem, pos, array) {
+                    return array.indexOf(elem) === pos;
+                });
+                for (i = 0; i < availableFonts.length; i += 1) {
+                    // Extract the string between the quotes to get the Font Family name
+                    availableFonts[i] = availableFonts[i].match(/".*"/)[0].replace(/\"/g, "");
+                }
+                self.availableFonts = availableFonts;
+            }
+        };
+        fontsXHR.send();
+
 
         function checkParagraphStyleName() {
             var newStyleName,
@@ -270,33 +299,38 @@ define("webodf/editor/EditorSession", [], function () {
 
         /**
          * Returns an array of the declared fonts in the ODF document,
-         * with 'duplicates' like Arial1, Arial2, etc removed.
+         * with 'duplicates' like Arial1, Arial2, etc removed. The alphabetically
+         * first font name for any given family is kept.
          * The elements of the array are objects containing the font's name and
          * the family.
          * @return {Array.{Object}}
          */
         this.getDeclaredFonts = function () {
             var fontMap = formatting.getFontMap(),
-                reducedMap = {},
+                sortedNames = [],
+                usedFamilies = [],
                 array = [],
                 key,
-                reducedKey,
-                value;
+                value,
+                i;
 
-            for (key in fontMap) {
-                if (fontMap.hasOwnProperty(key)) {
-                    // FIXME?: Here, we're shaving off the number appended to a font name and
-                    // using that as the only font name for that family to be used.
-                    reducedKey = key.replace(/\d+$/, '');
-                    if (!reducedMap[reducedKey]) {
-                        value = fontMap[reducedKey];
-                        reducedMap[reducedKey] = value;
+            // Sort all the keys in the font map alphabetically
+            sortedNames = Object.keys(fontMap);
+            sortedNames.sort();
 
-                        array.push({
-                            name: reducedKey,
-                            family: value
-                        });
-                    }
+            for (i = 0; i < sortedNames.length; i += 1) {
+                key = sortedNames[i];
+                value = fontMap[key];
+
+                // Use the font declaration only if the family is not already used.
+                // Therefore we are able to discard the alphabetic successors of the first
+                // font name.
+                if (usedFamilies.indexOf(value) === -1) {
+                    array.push({
+                        name: key,
+                        family: value
+                    });
+                    usedFamilies.push(value);
                 }
             }
 

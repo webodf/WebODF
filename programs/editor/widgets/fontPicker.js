@@ -63,7 +63,7 @@ define("webodf/editor/widgets/fontPicker", [], function () {
                 documentFonts = [],
                 selectionList = [];
 
-            editorFonts = document.editorFonts;
+            editorFonts = editorSession.availableFonts;
             documentFonts = editorSession.getDeclaredFonts();
 
             // First populate the fonts used in the document
