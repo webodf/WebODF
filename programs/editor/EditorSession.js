@@ -52,9 +52,9 @@ define("webodf/editor/EditorSession", [
             currentParagraphNode = null,
             currentNamedStyleName = null,
             currentStyleName = null,
-            odfDocument = session.getOdtDocument(),
+            odtDocument = session.getOdtDocument(),
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            formatting = odfDocument.getFormatting(),
+            formatting = odtDocument.getFormatting(),
             eventListener = {};
 
         this.sessionController = new gui.SessionController(session, memberid);
@@ -118,7 +118,7 @@ define("webodf/editor/EditorSession", [
         function trackCursor(cursor) {
             var node;
 
-            node = odfDocument.getParagraphElement(cursor.getSelection().focusNode);
+            node = odtDocument.getParagraphElement(cursor.getSelection().focusNode);
             if (!node) {
                 return;
             }
@@ -209,11 +209,11 @@ define("webodf/editor/EditorSession", [
         };
 
         this.getCursorPosition = function () {
-            return odfDocument.getCursorPosition(memberid);
+            return odtDocument.getCursorPosition(memberid);
         };
 
         this.getDocument = function () {
-            return odfDocument;
+            return odtDocument;
         };
 
         this.getCurrentParagraph = function () {
@@ -243,7 +243,7 @@ define("webodf/editor/EditorSession", [
         };
 
         this.getParagraphStyleElement = function (styleName) {
-            return odfDocument.getParagraphStyleElement(styleName);
+            return odtDocument.getParagraphStyleElement(styleName);
         };
         
         /**
@@ -256,7 +256,7 @@ define("webodf/editor/EditorSession", [
         };
 
         this.getParagraphStyleAttributes = function (styleName) {
-            return odfDocument.getParagraphStyleAttributes(styleName);
+            return odtDocument.getParagraphStyleAttributes(styleName);
         };
 
         this.updateParagraphStyle = function (styleName, info) {
