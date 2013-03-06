@@ -73,18 +73,19 @@ define("webodf/editor/EditorSession", [
          * @return {Array.{!string}}
          */
         function getAvailableFonts() {
-            var availableFonts, i;
-            availableFonts = fontsCSS.match(/font-family *:.*(\"|\')/gm);
-            if (!availableFonts) {
-                return [];
+            var availableFonts, regex, matches;
+
+            availableFonts = {};
+
+            regex =  /font-family *: *(?:\'([^']*)\'|\"([^"]*)\")/gm;
+            matches = regex.exec(fontsCSS);
+
+            while (matches) {
+                availableFonts[matches[1] || matches[2]] = 1;
+                matches = regex.exec(fontsCSS);
             }
-            availableFonts = availableFonts.filter(function (elem, pos, array) {
-                return array.indexOf(elem) === pos;
-            });
-            for (i = 0; i < availableFonts.length; i += 1) {
-                // Extract the string between the quotes to get the Font Family name
-                availableFonts[i] = availableFonts[i].match(/".*"/)[0].replace(/\"/g, "");
-            }
+            availableFonts = Object.keys(availableFonts);
+
             return availableFonts;
         }
         this.availableFonts = getAvailableFonts();
