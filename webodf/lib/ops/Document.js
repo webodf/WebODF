@@ -453,6 +453,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
      * Creates a declaration for a font with the given name and family.
      * @param {!string} name
      * @param {!string} family
+     * @return {undefined}
      */
     function declareFont(name, family) {
         var declaration;
