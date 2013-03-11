@@ -530,17 +530,17 @@ core.Zip = function Zip(url, entriesReadCallback) {
         });
     }
     /**
-     * Write the zipfile to the given path.
-     * @param {!string} newurl
-     * @param {!function(?string):undefined} callback receiving possible err
+     * Create a bytearray from the zipfile.
+     * @param {!function(!Runtime.ByteArray):undefined} successCallback receiving zip as bytearray
+     * @param {!function(?string):undefined} errorCallback receiving possible err
      * @return {undefined}
      */
-    function writeAs(newurl, callback) {
+    function createByteArray(successCallback, errorCallback) {
         // make sure all data is in memory, for each entry that has data
         // undefined, try to load the entry
         loadAllEntries(0, function (err) {
             if (err) {
-                callback(err);
+                errorCallback(err);
                 return;
             }
             var data = new core.ByteArrayWriter("utf8"),
@@ -564,8 +564,22 @@ core.Zip = function Zip(url, entriesReadCallback) {
             data.appendUInt32LE(codsize);
             data.appendUInt32LE(codoffset);
             data.appendArray([0, 0]);
-            runtime.writeFile(newurl, data.getByteArray(), callback);
+
+            successCallback(data.getByteArray());
         });
+    }
+    /**
+     * Write the zipfile to the given path.
+     * @param {!string} newurl
+     * @param {!function(?string):undefined} callback receiving possible err
+     * @return {undefined}
+     */
+    function writeAs(newurl, callback) {
+        // make sure all data is in memory, for each entry that has data
+        // undefined, try to load the entry
+        createByteArray(function (data) {
+            runtime.writeFile(newurl, data, callback);
+        }, callback);
     }
     /**
      * Write the zipfile to the given path.
@@ -580,6 +594,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     this.save = save;
     this.write = write;
     this.writeAs = writeAs;
+    this.createByteArray = createByteArray;
     // a special function that makes faster odf loading possible
     this.loadContentXmlAsFragments = loadContentXmlAsFragments;
     this.loadAsString = loadAsString;

@@ -649,11 +649,10 @@ odf.OdfContainer = (function () {
             return zip;
         }
         /**
-         * @param {!string} newurl
-         * @param {function(?string):undefined} callback
+         * Fill the zip with current data.
          * @return {undefined}
          */
-        function saveAs(newurl, callback) {
+        function fillZip() {
             // the assumption so far is that all ODF parts are serialized
             // already, but meta, settings, styles and content should be
             // refreshed
@@ -670,6 +669,25 @@ odf.OdfContainer = (function () {
             zip.save("content.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeManifestXml(), "utf8");
             zip.save("META-INF/manifest.xml", data, true, date);
+        }
+        /**
+         * Create a bytearray from the zipfile.
+         * @param {!function(!Runtime.ByteArray):undefined} successCallback receiving zip as bytearray
+         * @param {!function(?string):undefined} errorCallback receiving possible err
+         * @return {undefined}
+         */
+        function createByteArray(successCallback, errorCallback) {
+            fillZip();
+            zip.createByteArray(successCallback, errorCallback);
+        }
+        this.createByteArray = createByteArray;
+        /**
+         * @param {!string} newurl
+         * @param {function(?string):undefined} callback
+         * @return {undefined}
+         */
+        function saveAs(newurl, callback) {
+            fillZip();
             zip.writeAs(newurl, function (err) {
                 callback(err);
             });
