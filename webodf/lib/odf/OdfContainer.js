@@ -109,6 +109,9 @@ odf.OdfContainer = (function () {
             var styleName, styleFamily, result;
             if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
                 result = 3; // FILTER_SKIP
+            } else if (node.namespaceURI && node.namespaceURI.match(/^urn:webodf:/)) {
+                // skip all webodf nodes incl. child nodes
+                result = 2; // FILTER_REJECT
             } else if (usedKeysList && node.parentNode === automaticStyles &&
                     node.nodeType === 1) {
                 if (usedKeysList.uses(node)) {
