@@ -34,6 +34,7 @@
 define({
     // menus
     file: "Datei",
+    save: "Speichern",
     edit: "Bearbeiten",
     view: "Ansicht",
     insert: "Einfügen",

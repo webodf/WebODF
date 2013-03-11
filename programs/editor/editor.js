@@ -72,6 +72,8 @@ define("webodf/editor", [
             odfElement = document.getElementById("canvas");
             runtime.assert(odfElement, "init_gui_and_doc failed to get odf canvas from html");
             odfCanvas = new odf.OdfCanvas(odfElement);
+            // make the canvas accessible to users of editor.js
+            self.odfCanvas = odfCanvas;
 
             // Editor Translations, Widgets and Avatars
             require({
@@ -147,7 +149,7 @@ define("webodf/editor", [
                         editorSession.endEditing();
                     }
 
-                    loadWidgets(editorSession);
+                    loadWidgets(editorSession, self.saveOdtFile);
                 });
                 odfCanvas.load(doclocation);
                 odfCanvas.setEditable(false);

@@ -35,6 +35,7 @@ define({
     root: {
         // menus
         file: "File",
+        save: "Save",
         edit: "Edit",
         view: "View",
         insert: "Insert",

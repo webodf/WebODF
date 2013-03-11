@@ -40,7 +40,7 @@ define("webodf/editor/widgets", [
 	function (SimpleStyles, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
-        return function loadWidgets(editorSession) {
+        return function loadWidgets(editorSession, saveOdtFile) {
             var translator = document.translator;
 
             // Menubar
@@ -48,11 +48,12 @@ define("webodf/editor/widgets", [
                 "dojo/ready",
                 "dijit/MenuItem",
                 "dijit/DropDownMenu",
+                "dijit/form/Button",
                 "dijit/form/DropDownButton",
                 "dijit/Toolbar"
-            ], function (ready, MenuItem, DropDownMenu, DropDownButton, Toolbar) {
+            ], function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar) {
                 ready(function () {
-                    var dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider;
+                    var saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider;
                     
                     dropDownMenu = new DropDownMenu({});
                     paragraphStylesMenuItem = new MenuItem({
@@ -69,6 +70,7 @@ define("webodf/editor/widgets", [
 
                     // Toolbar
                     toolbar = new Toolbar({}, "toolbar");
+
                     // Simple Style Selector [B, I, U, S]
                     simpleStyles = new SimpleStyles(editorSession, function (widget) {
                         widget.placeAt(toolbar);
@@ -97,6 +99,17 @@ define("webodf/editor/widgets", [
                     });
                     menuButton.placeAt(toolbar);
 
+                    if (saveOdtFile) {
+                        saveButton = new Button({
+                            label: translator('save'),
+                            iconClass: 'dijitEditorIcon dijitEditorIconSave',
+                            style: "float: right; margin-bottom: 5px;",
+                            onClick: function () {
+                                saveOdtFile();
+                            }
+                        });
+                        saveButton.placeAt(toolbar);
+                    }
                 });
             });
         };
