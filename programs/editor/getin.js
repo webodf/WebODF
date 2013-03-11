@@ -2,12 +2,12 @@
 function on_body_load() {
     var net = runtime.getNetwork(),
         accumulated_waiting_time = 0,
-        userId;
+        userId, sessionId;
 
-    function bootEditor(documentPath, userId, sessionid) {
+    function bootEditor(documentPath) {
         require({ }, ["webodf/editor"],
             function(editor) {
-                editor.boot(documentPath, userId, sessionid);
+                editor.boot(documentPath, userId, sessionId);
             }
         );
     }
@@ -29,11 +29,12 @@ function on_body_load() {
         bootEditor(docUrl);
     }
 
-    function enterSession(sessionid) {
+    function enterSession(selectedSessionId) {
+        sessionId = selectedSessionId;
         document.getElementById("sessionListContainer").style.display="none";
         document.getElementById("mainContainer").style.display="";
 
-        bootEditor("/session/"+sessionid+"/genesis", userId, sessionid);
+        bootEditor("/session/"+sessionId+"/genesis", userId, sessionId);
     }
 
     function showSessions() {
