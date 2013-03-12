@@ -44,13 +44,12 @@ core.EditInfo = function EditInfo(container, odtDocument) {
     
     function sortEdits() {
         var arr = [],
-            name;
-        for (name in editHistory) {
-            if (editHistory.hasOwnProperty(name)) {
+            memberid;
+        for (memberid in editHistory) {
+            if (editHistory.hasOwnProperty(memberid)) {
                 arr.push({
-                    'fullname': name,
-                    'time': editHistory[name].time,
-                    'color': editHistory[name].color
+                    'memberid': memberid,
+                    'time': editHistory[memberid].time
                 });
             }
         }
@@ -77,10 +76,9 @@ core.EditInfo = function EditInfo(container, odtDocument) {
     this.getSortedEdits = function () {
         return sortEdits();
     };
-    this.addEdit = function (fullname, timestamp, color) {
-        editHistory[fullname] = {
-            time: timestamp,
-            color: color
+    this.addEdit = function (memberid, timestamp) {
+        editHistory[memberid] = {
+            time: timestamp
         };
     };
 
