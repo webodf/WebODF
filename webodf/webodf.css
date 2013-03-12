@@ -8,7 +8,7 @@
 @namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);
 @namespace runtimens url(urn:webodf); /* namespace for runtime only */
 @namespace cursor url(urn:webodf:names:cursor);
-@namespace editInfo url(urn:webodf:names:editinfo);
+@namespace editinfo url(urn:webodf:names:editinfo);
 
 office|document > *, office|document-content > * {
   display: none;
@@ -292,6 +292,7 @@ cursor|cursor > div:after {
     font-style: normal;
     text-decoration: none;
     color: white;
+    width: 100%;
 }
 .editInfoColor {
     float: left;
