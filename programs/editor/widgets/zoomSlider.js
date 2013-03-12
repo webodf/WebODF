@@ -55,7 +55,7 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
 
             canvas = dojo.byId('canvas');
             widget.onChange = function (value) {
-                document.odfCanvas.setZoomLevel(value / 100.0);
+                editorSession.getOdfCanvas().setZoomLevel(value / 100.0);
             };
 
             return callback(widget);

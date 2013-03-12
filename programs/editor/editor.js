@@ -73,9 +73,6 @@ define("webodf/editor", [
             runtime.assert(odfElement, "init_gui_and_doc failed to get odf canvas from html");
             odfCanvas = new odf.OdfCanvas(odfElement);
 
-            // this needs to be available for the widgets
-            document.odfCanvas = odfCanvas;
-
             // Editor Translations, Widgets and Avatars
             require({
                 paths : {

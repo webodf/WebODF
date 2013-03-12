@@ -212,6 +212,10 @@ define("webodf/editor/EditorSession", [
             return odtDocument.getCursorPosition(memberid);
         };
 
+        this.getOdfCanvas = function () {
+            return odtDocument.getOdfCanvas();
+        };
+
         this.getCurrentParagraph = function () {
             return currentParagraphNode;
         };
