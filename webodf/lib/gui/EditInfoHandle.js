@@ -38,18 +38,35 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     "use strict";
 
     var edits = [],
-        handle;
+        handle,
+        document = /**@type{!Document}*/(parentElement.ownerDocument),
+        htmlns = document.documentElement.namespaceURI,
+        editinfons = 'urn:webodf:names:editinfo';
     
     function renderEdits() {
-        var i;
+        var i, infoDiv, colorSpan, authorSpan, timeSpan;
         handle.innerHTML = '';
         for (i = 0; i < edits.length; i += 1) {
-            handle.innerHTML +=
-            '<div class="editInfo">' +
-            '<div class="editInfoColor" style="background-color: ' + edits[i].color + ';">' + '</div>' +
-            '<span class="editInfoAuthor">'+ edits[i].fullname + '</span>' +
-            '<span class="editInfoTime">' + edits[i].time + '</span>' +
-            '</div>';
+            infoDiv = document.createElementNS(htmlns, 'div');
+            infoDiv.className = "editInfo";
+
+            colorSpan = document.createElementNS(htmlns, 'span');
+            colorSpan.className = "editInfoColor";
+            colorSpan.setAttributeNS(editinfons, 'editinfo:memberid', edits[i].memberid);
+
+            authorSpan = document.createElementNS(htmlns, 'span');
+            authorSpan.className = "editInfoAuthor";
+            authorSpan.setAttributeNS(editinfons, 'editinfo:memberid', edits[i].memberid);
+
+            timeSpan = document.createElementNS(htmlns, 'span');
+            timeSpan.className = "editInfoTime";
+            timeSpan.setAttributeNS(editinfons, 'editinfo:memberid', edits[i].memberid);
+            timeSpan.innerHTML = edits[i].time;
+
+            infoDiv.appendChild(colorSpan);
+            infoDiv.appendChild(authorSpan);
+            infoDiv.appendChild(timeSpan);
+            handle.appendChild(infoDiv);
         }
     }
 
@@ -67,9 +84,6 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     };
 
     function init() {
-        var document = /**@type{!Document}*/(parentElement.ownerDocument),
-            htmlns = document.documentElement.namespaceURI;
-
         handle = document.createElementNS(htmlns, "div");
         handle.setAttribute('class', 'editInfoHandle');
         
