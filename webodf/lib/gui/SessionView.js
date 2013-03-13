@@ -58,7 +58,7 @@ gui.SessionView = (function () {
         /**
          * @param {!string} memberId
          */
-        function highlightEdit(element, memberId) {
+        function highlightEdit(element, memberId, timestamp) {
             var userData,
                 editInfo,
                 editInfoMarker,
@@ -77,11 +77,11 @@ gui.SessionView = (function () {
                 editInfoMap[id] = editInfoMarker;
             }
 
-            editInfoMarker.addEdit(memberId, new Date());
+            editInfoMarker.addEdit(memberId, new Date(timestamp));
         }
 
         session.getOdtDocument().subscribe('paragraphEdited', function (info) {
-            highlightEdit(info.element, info.memberId);
+            highlightEdit(info.element, info.memberId, info.timeStamp);
         });
 
         function createAvatarInfoNodeMatch(nodeName, className, memberId) {

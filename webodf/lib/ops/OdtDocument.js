@@ -321,7 +321,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string} text
      * @return {!boolean}
      */
-    this.insertText = function (memberid, position, text) {
+    this.insertText = function (memberid, timestamp, position, text) {
         var domPosition, textNode;
         domPosition = getPositionInTextNode(position);
         if (domPosition) {
@@ -341,7 +341,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // position. then insert text before `memberid`-cursor.
             self.emit('paragraphEdited', {
                 element: getParagraphElement(domPosition.textNode),
-                memberId: memberid
+                memberId: memberid,
+                timeStamp: timestamp
             });
             return true;
         }
@@ -354,7 +355,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!number} length
      * @return {!boolean}
      */
-    this.removeText = function (memberid, position, length) {
+    this.removeText = function (memberid, timestamp, position, length) {
         var domPosition;
         if (length < 0) {
             length = -length;
@@ -390,7 +391,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             domPosition.textNode.deleteData(domPosition.offset, length);
             self.emit('paragraphEdited', {
                 element: getParagraphElement(domPosition.textNode),
-                memberId: memberid
+                memberId: memberid,
+                timeStamp: timestamp
             });
             return true;
         }
@@ -404,7 +406,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string} styleNameAfter
      * @return {!boolean}
      */
-    this.setParagraphStyle = function (memberid, position, styleNameBefore, styleNameAfter) {
+    this.setParagraphStyle = function (memberid, timestamp, position, styleNameBefore, styleNameAfter) {
         var domPosition, paragraphNode;
         // TODO: reusing getPositionInTextNode and getParagraphElement, not an optimized solution
         domPosition = getPositionInTextNode(position);
@@ -415,6 +417,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
                 self.emit('paragraphEdited', {
                     element: paragraphNode,
+                    timeStamp: timestamp,
                     memberId: memberid
                 });
                 return true;
