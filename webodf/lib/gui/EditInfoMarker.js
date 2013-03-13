@@ -62,7 +62,9 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
     this.clearEdits = function () {
         editInfo.clearEdits();
         handle.setEdits([]);
-        handle.removeAttributeNS(editinfons, 'editinfo:memberid');
+        if (marker.hasAttributeNS(editinfons, 'editinfo:memberid')) {
+            marker.removeAttributeNS(editinfons, 'editinfo:memberid');
+        }
     };
     this.getEditInfo = function () {
         return editInfo;
