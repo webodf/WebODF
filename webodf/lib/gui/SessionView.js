@@ -85,7 +85,8 @@ gui.SessionView = (function () {
         });
 
         function createAvatarInfoNodeMatch(nodeName, className, memberId) {
-            return nodeName + '.' + className + '[editinfo|memberid="' + memberId + '"]';
+            var userId = memberId.split('___')[0];
+            return nodeName + '.' + className + '[editinfo|memberid^="' + userId + '"]';
         }
 
         /**
