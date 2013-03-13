@@ -47,7 +47,7 @@ gui.SessionView = (function () {
       */
     function SessionView(session, caretFactory) {
         var carets = {},
-            avatarEditedStyles,
+            avatarInfoStyles,
             memberDataChangedHandler,
             headlineNodeName = 'text|h',
             paragraphNodeName = 'text|p',
@@ -55,7 +55,6 @@ gui.SessionView = (function () {
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {};
 
-        
         /**
          * @param {!string} memberId
          */
@@ -78,36 +77,15 @@ gui.SessionView = (function () {
                 editInfoMap[id] = editInfoMarker;
             }
 
-            userData = session.getUserModel().getUserDetails(memberId);
-            
-            editInfoMarker.addEdit(userData.fullname, new Date(), userData.color);
+            editInfoMarker.addEdit(memberId, new Date());
         }
-        
+
         session.getOdtDocument().subscribe('paragraphEdited', function (info) {
             highlightEdit(info.element, info.memberId);
         });
-        /**
-         * @param {string} nodeName
-         * @param {string} memberId
-         * @return {string}
-         */
-        function createNodeMatch(nodeName, memberId) {
-            return nodeName + '[class=edited][user="' + memberId + '"]';
-        }
 
-        /**
-         * @param {string} color
-         * @return {string}
-         */
-        function createStyleDefinition(color) {
-            return ' { background-color: ' + color + ';'
-                + '-webkit-animation-name: fade;'
-                + '-webkit-animation-duration: 10s;'
-                + '-webkit-animation-fill-mode: forwards;'
-                + '-moz-animation-name: fade;'
-                + '-moz-animation-duration: 10s;'
-                + '-moz-animation-fill-mode: forwards;'
-                + 'border-radius: 10px;}';
+        function createAvatarInfoNodeMatch(nodeName, className, memberId) {
+            return nodeName + '.' + className + '[editinfo|memberid="' + memberId + '"]';
         }
 
         /**
@@ -115,9 +93,9 @@ gui.SessionView = (function () {
          * @param {string} memberId
          * @return {?Node}
          */
-        function getAvatarEditedStyleNode(nodeName, memberId) {
-            var node = avatarEditedStyles.firstChild,
-                nodeMatch = createNodeMatch(nodeName, memberId);
+        function getAvatarInfoStyle(nodeName, className, memberId) {
+            var node = avatarInfoStyles.firstChild,
+                nodeMatch = createAvatarInfoNodeMatch(nodeName, className, memberId);
 
             while (node) {
                 if ((node.nodeType === 3) && (node.data.indexOf(nodeMatch) === 0)) {
@@ -133,68 +111,50 @@ gui.SessionView = (function () {
          * @param {string} memberId
          * @param {string} color
          */
-        function setAvatarEditedStyle(nodeName, memberId, color) {
-            var styleRule = createNodeMatch(nodeName, memberId) + createStyleDefinition(color),
-                styleNode = getAvatarEditedStyleNode(nodeName, memberId);
+        function setAvatarInfoStyle(memberId, name, color) {
+            function setStyle(nodeName, className, rule) {
+                var styleRule = createAvatarInfoNodeMatch(nodeName, className, memberId) + rule,
+                    styleNode = getAvatarInfoStyle(nodeName, className, memberId);
 
-            // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
-            // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
-            // avatarEditedStyles.sheet.insertRule(paragraphStyleName+styleRuleRudimentCStr, 0);
-            // Workaround for now:
-            if (styleNode) {
-                styleNode.data = styleRule;
-            } else {
-                avatarEditedStyles.appendChild(document.createTextNode(styleRule));
+                // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
+                // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
+                // avatarEditedStyles.sheet.insertRule(paragraphStyleName+styleRuleRudimentCStr, 0);
+                // Workaround for now:
+                if (styleNode) {
+                    styleNode.data = styleRule;
+                } else {
+                    avatarInfoStyles.appendChild(document.createTextNode(styleRule));
+                }
             }
+
+            setStyle('div', 'editInfoMarker', '{ background-color: ' + color + '; }');
+            setStyle('span', 'editInfoColor', '{ background-color: ' + color + '; }');
+            setStyle('span', 'editInfoAuthor', ':before { content: "' + name + '"; }');
         }
 
         /**
          * @param {string} nodeName
          * @param {string} memberId
          */
-        function removeAvatarEditedStyle(nodeName, memberId) {
-            var styleNode = getAvatarEditedStyleNode(nodeName, memberId);
+        function removeAvatarInfoStyle(nodeName, className, memberId) {
+            var styleNode = getAvatarInfoStyle(nodeName, className, memberId);
 
             if (styleNode) {
-                avatarEditedStyles.removeChild(styleNode);
+                avatarInfoStyles.removeChild(styleNode);
             }
         }
 
         this.enableEditHighlighting = function () {
-            var i, userModel, cursors, memberId, userData;
-
-            // no change?
             if (editHighlightingEnabled) {
                 return;
-            }
-
-            userModel = session.getUserModel();
-            cursors = session.getOdtDocument().getCursors();
-
-            for (i = 0; i < cursors.length; i += 1) {
-                memberId = cursors[i].getMemberId();
-                userData = userModel.getUserDetails(memberId);
-                setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
-                setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
             }
 
             editHighlightingEnabled = true;
         };
 
         this.disableEditHighlighting = function () {
-            var i, cursors, memberId;
-
-            // no change?
             if (!editHighlightingEnabled) {
                 return;
-            }
-
-            cursors = session.getOdtDocument().getCursors();
-
-            for (i = 0; i < cursors.length; i += 1) {
-                memberId = cursors[i].getMemberId();
-                removeAvatarEditedStyle(headlineNodeName, memberId);
-                removeAvatarEditedStyle(paragraphNodeName, memberId);
             }
 
             editHighlightingEnabled = false;
@@ -225,10 +185,7 @@ gui.SessionView = (function () {
                 caret.setColor(userData.color);
             }
 
-            if (editHighlightingEnabled) {
-                setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
-                setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
-            }
+            setAvatarInfoStyle(memberId, userData.fullname, userData.color);
         }
         memberDataChangedHandler = onMemberDataChanged;
 
@@ -250,8 +207,7 @@ gui.SessionView = (function () {
 
             if (editHighlightingEnabled) {
                 // Add per-avatar edited styling
-                setAvatarEditedStyle(headlineNodeName, memberId, userData.color);
-                setAvatarEditedStyle(paragraphNodeName, memberId, userData.color);
+                setAvatarInfoStyle(memberId, userData.fullname, userData.color);
             }
         }
 
@@ -270,11 +226,11 @@ gui.SessionView = (function () {
             session.subscribe(ops.SessionImplementation.signalCursorRemoved, onCursorRemoved);
 
             // Add a css sheet for avatar-edited styling
-            avatarEditedStyles = document.createElementNS(head.namespaceURI, 'style');
-            avatarEditedStyles.type = 'text/css';
-            avatarEditedStyles.media = 'screen, print, handheld, projection';
-            avatarEditedStyles.appendChild(document.createTextNode('@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);'));
-            head.appendChild(avatarEditedStyles);
+            avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');
+            avatarInfoStyles.type = 'text/css';
+            avatarInfoStyles.media = 'screen, print, handheld, projection';
+            avatarInfoStyles.appendChild(document.createTextNode('@namespace editinfo url(urn:webodf:names:editinfo);'));
+            head.appendChild(avatarInfoStyles);
         }
         init();
     }

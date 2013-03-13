@@ -44,16 +44,17 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
     var self = this,
         editInfoNode,
         handle,
-        marker;
+        marker,
+        editinfons = 'urn:webodf:names:editinfo';
 
-    function setColor(color) {
-        marker.style.backgroundColor = color;
+    function setLastAuthor(memberid) {
+        marker.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
     }
-    
-    this.addEdit = function (fullname, timestamp, color) {
-        editInfo.addEdit(fullname, timestamp, color);
+
+    this.addEdit = function (memberid, timestamp) {
+        editInfo.addEdit(memberid, timestamp);
         handle.setEdits(editInfo.getSortedEdits());
-        setColor(color);
+        setLastAuthor(memberid);
     };
     this.getEdits = function () {
         return editInfo.getEdits();
@@ -61,7 +62,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
     this.clearEdits = function () {
         editInfo.clearEdits();
         handle.setEdits([]);
-        setColor('rgba(255,255,255,1)');
+        handle.removeAttributeNS(editinfons, 'editinfo:memberid');
     };
     this.getEditInfo = function () {
         return editInfo;
