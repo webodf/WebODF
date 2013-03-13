@@ -77,6 +77,28 @@ core.EditInfo = function EditInfo(container, odtDocument) {
         return sortEdits();
     };
     this.addEdit = function (memberid, timestamp) {
+        // We want only the latest edit by a user, even if the user has
+        // different avatars with different memberids
+        var id,
+            userid = memberid.split('___')[0];
+
+        // If the edit history for this paragraph does not have any entry for
+        // this memberid
+        if (!editHistory[memberid]) {
+            // Check if this memberid is of the same user as any previous memberid (id) in
+            // the editHistory.
+            for (id in editHistory) {
+                if (editHistory.hasOwnProperty(id)) {
+                    if (id.split('___')[0] === userid) {
+                        // Delete the history associated with the old memberid
+                        delete editHistory[id];
+                        break;
+                    }
+                }
+            }
+        }
+
+        // log the edit time for this memberid
         editHistory[memberid] = {
             time: timestamp
         };
