@@ -41,23 +41,25 @@
 ops.OpRemoveText = function OpRemoveText(session) {
     "use strict";
 
-    var memberid, position, length, text;
+    var memberid, timestamp, position, length, text;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         position = data.position;
         length = data.length;
         text = data.text;
     };
 
     this.execute = function (domroot) {
-        session.getOdtDocument().removeText(memberid, position, length);
+        session.getOdtDocument().removeText(memberid, timestamp, position, length);
     };
 
     this.spec = function () {
         return {
             optype: "RemoveText",
             memberid: memberid,
+            timestamp: timestamp,
             position: position,
             length: length,
             text: text

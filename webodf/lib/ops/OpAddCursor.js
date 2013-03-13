@@ -41,10 +41,11 @@
 ops.OpAddCursor = function OpAddCursor(session) {
     "use strict";
 
-    var memberid;
+    var memberid, timestamp;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
     };
 
     this.execute = function (rootNode) {
@@ -57,7 +58,8 @@ ops.OpAddCursor = function OpAddCursor(session) {
     this.spec = function () {
         return {
             optype: "AddCursor",
-            memberid: memberid
+            memberid: memberid,
+            timestamp: timestamp
         };
     };
 

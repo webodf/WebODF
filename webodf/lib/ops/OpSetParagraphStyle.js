@@ -41,10 +41,11 @@
 ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
     "use strict";
 
-    var memberid, position, styleNameBefore, styleNameAfter;
+    var memberid, timestamp, position, styleNameBefore, styleNameAfter;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         position = data.position;
         styleNameBefore = data.styleNameBefore;
         styleNameAfter = data.styleNameAfter;
@@ -54,7 +55,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
         var domPosition, paragraphNode,
             odtDocument = session.getOdtDocument();
 
-        odtDocument.setParagraphStyle(memberid, position, styleNameBefore, styleNameAfter);
+        odtDocument.setParagraphStyle(memberid, timestamp, position, styleNameBefore, styleNameAfter);
 
         // TODO: hack, reusing getPositionInTextNode and getParagraphElement, not an optimized solution
         domPosition = odtDocument.getPositionInTextNode(position);
@@ -68,6 +69,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
         return {
             optype: "SetParagraphStyle",
             memberid: memberid,
+            timestamp: timestamp,
             position: position,
             styleNameBefore: styleNameBefore,
             styleNameAfter: styleNameAfter

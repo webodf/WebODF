@@ -41,22 +41,24 @@
 ops.OpInsertText = function OpInsertText(session) {
     "use strict";
 
-    var memberid, position, text;
+    var memberid, timestamp, position, text;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         position = data.position;
         text = data.text;
     };
 
     this.execute = function (domroot) {
-        session.getOdtDocument().insertText(memberid, position, text);
+        session.getOdtDocument().insertText(memberid, timestamp, position, text);
     };
 
     this.spec = function () {
         return {
             optype: "InsertText",
             memberid: memberid,
+            timestamp: timestamp,
             position: position,
             text: text
         };

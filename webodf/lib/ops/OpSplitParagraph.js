@@ -40,10 +40,11 @@
 ops.OpSplitParagraph = function OpSplitParagraph(session) {
     "use strict";
 
-    var memberid, position;
+    var memberid, timestamp, position;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         position = data.position;
     };
 
@@ -143,11 +144,13 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
                 // mark both paragraphs as edited
                 odtDocument.emit('paragraphEdited', {
                     element: paragraphNode,
-                    memberId: memberid
+                    memberId: memberid,
+                    timeStamp: timestamp
                 });
                 odtDocument.emit('paragraphEdited', {
                     element: splitChildNode,
-                    memberId: memberid
+                    memberId: memberid,
+                    timeStamp: timestamp
                 });
             }
         }
@@ -157,6 +160,7 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
         return {
             optype: "SplitParagraph",
             memberid: memberid,
+            timestamp: timestamp,
             position: position
         };
     };

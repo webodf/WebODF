@@ -41,10 +41,11 @@
 ops.OpRemoveCursor = function OpRemoveCursor(session) {
     "use strict";
 
-    var memberid, cursorns = 'urn:webodf:names:cursor';
+    var memberid, timestamp, cursorns = 'urn:webodf:names:cursor';
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
     };
 
     this.execute = function (domroot) {
@@ -55,7 +56,8 @@ ops.OpRemoveCursor = function OpRemoveCursor(session) {
     this.spec = function () {
         return {
             optype: "RemoveCursor",
-            memberid: memberid
+            memberid: memberid,
+            timestamp: timestamp
         };
     };
 

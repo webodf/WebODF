@@ -41,10 +41,11 @@
 ops.OpDeleteStyle = function OpDeleteStyle(session) {
     "use strict";
     
-    var memberid, styleName;
+    var memberid, timestamp, styleName;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         styleName = data.styleName;
     };
 
@@ -58,6 +59,7 @@ ops.OpDeleteStyle = function OpDeleteStyle(session) {
         return {
             optype: "DeleteStyle",
             memberid: memberid,
+            timestamp: timestamp,
             styleName: styleName
         };
     };

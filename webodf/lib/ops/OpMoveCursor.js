@@ -41,10 +41,11 @@
 ops.OpMoveCursor = function OpMoveCursor(session) {
     "use strict";
 
-    var memberid, number;
+    var memberid, timestamp, number;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         number = data.number;
     };
 
@@ -77,6 +78,7 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
         return {
             optype: "MoveCursor",
             memberid: memberid,
+            timestamp: timestamp,
             number: number
         };
     };

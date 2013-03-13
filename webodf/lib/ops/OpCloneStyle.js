@@ -41,10 +41,11 @@
 ops.OpCloneStyle = function OpCloneStyle(session) {
     "use strict";
     
-    var memberid, styleName, newStyleName;
+    var memberid, timestamp, styleName, newStyleName;
 
     this.init = function (data) {
         memberid = data.memberid;
+        timestamp = data.timestamp;
         styleName = data.styleName;
         newStyleName = data.newStyleName;
     };
@@ -59,6 +60,7 @@ ops.OpCloneStyle = function OpCloneStyle(session) {
         return {
             optype: "CloneStyle",
             memberid: memberid,
+            timestamp: timestamp,
             styleName: styleName,
             newStyleName: newStyleName
         };
