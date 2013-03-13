@@ -197,24 +197,31 @@ odf.Style2CSS = function Style2CSS() {
         node = stylesnode.firstChild;
         while (node) {
             if (node.namespaceURI === stylens &&
-                    ((node.localName === 'style')  || (node.localName === 'default-style'))) {
+                    ((node.localName === 'style') ||
+                     (node.localName === 'default-style'))) {
                 family = node.getAttributeNS(stylens, 'family');
             } else if (node.namespaceURI === textns &&
                     node.localName === 'list-style') {
                 family = "list";
-            }
-            name = family && node.getAttributeNS &&
-                node.getAttributeNS(stylens, 'name');
-            
-            if (!stylemap[family]) {
-                stylemap[family] = {};
+            } else {
+                // Skip insignificant white-space only nodes in the style tree
+                family = undefined;
             }
 
-            if (name) {
-                stylemap[family][name] = node;
-            } else {
-                // For a default style, there is no name
-                stylemap[family][''] = node;
+            if (family) {
+                name = family && node.getAttributeNS &&
+                    node.getAttributeNS(stylens, 'name');
+
+                if (!stylemap[family]) {
+                    stylemap[family] = {};
+                }
+
+                if (name) {
+                    stylemap[family][name] = node;
+                } else {
+                    // For a default style, there is no name
+                    stylemap[family][''] = node;
+                }
             }
 
             node = node.nextSibling;
