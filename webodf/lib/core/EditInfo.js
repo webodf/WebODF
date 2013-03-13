@@ -55,7 +55,7 @@ core.EditInfo = function EditInfo(container, odtDocument) {
         }
         
         arr.sort(function (a, b) {
-            return a.timestamp - b.timestamp;
+            return a.time - b.time;
         });
         
         return arr; // returns array
