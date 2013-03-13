@@ -50,13 +50,21 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
 
     var self = this;
 
-    this.setOperationFactory = function (f) {};
+    this.setOperationFactory = function (f) {
+        self.op_factory = f;
+    };
 
     this.setPlaybackFunction = function (playback_func) {
         self.playback_func = playback_func;
     };
 
     this.push = function (op) {
-        self.playback_func(op);
+        var timedOp,
+            opspec = op.spec();
+
+        opspec.timestamp = (new Date()).getTime();
+        timedOp = self.op_factory.create(opspec);
+
+        self.playback_func(timedOp);
     };
 };
