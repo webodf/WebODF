@@ -190,8 +190,9 @@ gui.SessionView = (function () {
                 caret.setAvatarImageUrl(userData.imageurl);
                 caret.setColor(userData.color);
             }
-
-            setAvatarInfoStyle(memberId, userData.fullname, userData.color);
+            if (editHighlightingEnabled) {
+                setAvatarInfoStyle(memberId, userData.fullname, userData.color);
+            }
         }
         memberDataChangedHandler = onMemberDataChanged;
 
@@ -201,20 +202,11 @@ gui.SessionView = (function () {
         function onCursorAdded(cursor) {
             var caret = caretFactory.createCaret(cursor),
                 memberId = cursor.getMemberId(),
-                userModel = session.getUserModel(),
-                userData = userModel.getUserDetails(memberId, memberDataChangedHandler);
+                userModel = session.getUserModel();
 
-            caret.setAvatarImageUrl(userData.imageurl);
-            caret.setColor(userData.color);
-
+            userModel.getUserDetails(memberId, memberDataChangedHandler);
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
-
             carets[memberId] = caret;
-
-            if (editHighlightingEnabled) {
-                // Add per-avatar edited styling
-                setAvatarInfoStyle(memberId, userData.fullname, userData.color);
-            }
         }
 
         /**
