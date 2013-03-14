@@ -211,7 +211,15 @@ gui.SessionView = (function () {
          */
         function onCursorRemoved(memberid) {
             delete carets[memberid];
-            session.getUserModel().unsubscribeForUserDetails(memberid, memberDataChangedHandler);
+            // FIXME: When the operations are rapidly played when we join a session,
+            // a cursor with a given memberid may be removed very quickly after addition
+            // and if we unsubscribe for it's details upon removal, we don't get the response
+            // of the user details because it comes over the wire.
+            // So as a temporary workaround, let's not unsubscribe upon cursor removal.
+            // This has no noticeable effects, only that the subscriptions keep piling up
+            // (but are never called more than once)
+
+            // session.getUserModel().unsubscribeForUserDetails(memberid, memberDataChangedHandler);
         }
 
         function init() {
