@@ -138,12 +138,8 @@ gui.SessionView = (function () {
                 editInfoNode.setAttributeNS(editInfons, 'id', id);
                 editInfoMap[id] = editInfoMarker;
             }
-            
+
             editInfoMarker.addEdit(memberId, new Date(timestamp));
-            
-            if (!getAvatarInfoStyle('div', 'editInfoMarker', memberId)) {
-                userModel.getUserDetails(memberId, memberDataChangedHandler);
-            }
         }
 
         session.getOdtDocument().subscribe('paragraphEdited', function (info) {
@@ -183,7 +179,7 @@ gui.SessionView = (function () {
         /**
          * @param {!string} memberId
          */
-        function onMemberDataChanged(memberId, userData) {
+        function renderMemberData(memberId, userData) {
             var caret = carets[memberId];
 
             if (caret) {
@@ -194,7 +190,7 @@ gui.SessionView = (function () {
                 setAvatarInfoStyle(memberId, userData.fullname, userData.color);
             }
         }
-        memberDataChangedHandler = onMemberDataChanged;
+        memberDataChangedHandler = renderMemberData;
 
         /**
          * @param {ops.OdtCursor} cursor
@@ -202,11 +198,12 @@ gui.SessionView = (function () {
         function onCursorAdded(cursor) {
             var caret = caretFactory.createCaret(cursor),
                 memberId = cursor.getMemberId(),
-                userModel = session.getUserModel();
+                userModel = session.getUserModel(),
+                userData = userModel.getUserDetails(memberId, memberDataChangedHandler);
 
-            userModel.getUserDetails(memberId, memberDataChangedHandler);
-            runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
             carets[memberId] = caret;
+            renderMemberData(memberId, userData);
+            runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
         }
 
         /**
