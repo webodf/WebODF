@@ -55,35 +55,6 @@ gui.SessionView = (function () {
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {};
 
-        /**
-         * @param {!string} memberId
-         */
-        function highlightEdit(element, memberId, timestamp) {
-            var userData,
-                editInfo,
-                editInfoMarker,
-                id = '',
-                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
-            if (editInfoNode) {
-                id = editInfoNode.getAttributeNS(editInfons, 'id');
-                editInfoMarker = editInfoMap[id];
-            } else {
-                id = Math.random().toString();
-                editInfo = new core.EditInfo(element, session.getOdtDocument());
-                editInfoMarker = new gui.EditInfoMarker(editInfo);
-
-                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
-                editInfoNode.setAttributeNS(editInfons, 'id', id);
-                editInfoMap[id] = editInfoMarker;
-            }
-
-            editInfoMarker.addEdit(memberId, new Date(timestamp));
-        }
-
-        session.getOdtDocument().subscribe('paragraphEdited', function (info) {
-            highlightEdit(info.element, info.memberId, info.timeStamp);
-        });
-
         function createAvatarInfoNodeMatch(nodeName, className, memberId) {
             var userId = memberId.split('___')[0];
             return nodeName + '.' + className + '[editinfo|memberid^="' + userId + '"]';
@@ -144,6 +115,40 @@ gui.SessionView = (function () {
                 avatarInfoStyles.removeChild(styleNode);
             }
         }
+
+        /**
+         * @param {!string} memberId
+         */
+        function highlightEdit(element, memberId, timestamp) {
+            var editInfo,
+                editInfoMarker,
+                id = '',
+                userModel = session.getUserModel(),
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
+
+            if (editInfoNode) {
+                id = editInfoNode.getAttributeNS(editInfons, 'id');
+                editInfoMarker = editInfoMap[id];
+            } else {
+                id = Math.random().toString();
+                editInfo = new core.EditInfo(element, session.getOdtDocument());
+                editInfoMarker = new gui.EditInfoMarker(editInfo);
+
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
+                editInfoNode.setAttributeNS(editInfons, 'id', id);
+                editInfoMap[id] = editInfoMarker;
+            }
+            
+            editInfoMarker.addEdit(memberId, new Date(timestamp));
+            
+            if (!getAvatarInfoStyle('div', 'editInfoMarker', memberId)) {
+                userModel.getUserDetails(memberId, memberDataChangedHandler);
+            }
+        }
+
+        session.getOdtDocument().subscribe('paragraphEdited', function (info) {
+            highlightEdit(info.element, info.memberId, info.timeStamp);
+        });
 
         this.enableEditHighlighting = function () {
             if (editHighlightingEnabled) {
