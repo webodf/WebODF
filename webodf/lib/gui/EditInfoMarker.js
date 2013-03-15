@@ -102,7 +102,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
             decay2 = applyDecay(0.2, decayTimeStep * 2 - age);
         } else if (age >= decayTimeStep && age < decayTimeStep * 2) {
             applyDecay(0.5, 0);
-            decay2 = applyDecay(0.2, decayTimeStep - age);
+            decay2 = applyDecay(0.2, decayTimeStep * 2 - age);
         } else {
             applyDecay(0.2, 0);
         }
