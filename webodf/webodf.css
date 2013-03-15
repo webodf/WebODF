@@ -287,7 +287,7 @@ cursor|cursor > div:after {
     left: 5px;
 }
 .editInfo {
-    font-family: sans serif;
+    font-family: sans-serif;
     font-weight: normal;
     font-style: normal;
     text-decoration: none;
@@ -306,6 +306,8 @@ cursor|cursor > div:after {
     margin-left: 5pt;
     font-size: 10pt;
     text-align: left;
+    height: 12pt;
+    line-height: 12pt;
 }
 .editInfoTime {
     float: right;
@@ -313,6 +315,8 @@ cursor|cursor > div:after {
     font-size: 8pt;
     font-style: italic;
     color: yellow;
+    height: 12pt;
+    line-height: 12pt;
 }
 
 @-webkit-keyframes fade {
