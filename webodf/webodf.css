@@ -318,15 +318,3 @@ cursor|cursor > div:after {
     height: 12pt;
     line-height: 12pt;
 }
-
-@-webkit-keyframes fade {
-    100% {
-        background-color: transparent;
-    }
-}
-
-@-moz-keyframes fade {
-    100% {
-        background-color: transparent;
-    }
-}
