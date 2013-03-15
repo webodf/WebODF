@@ -48,7 +48,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
         editinfons = 'urn:webodf:names:editinfo',
         decay1,
         decay2,
-        decayTimeStep = 5000;
+        decayTimeStep = 10000; // 10 seconds
 
     /**
      * Runs and returns a timer that sets the marker's opacity
