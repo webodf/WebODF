@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, gui, runtime*/
+/*global core, gui, runtime, window*/
 
 runtime.loadClass("core.EditInfo");
 runtime.loadClass("gui.EditInfoHandle");
@@ -45,16 +45,67 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
         editInfoNode,
         handle,
         marker,
-        editinfons = 'urn:webodf:names:editinfo';
+        editinfons = 'urn:webodf:names:editinfo',
+        decay1,
+        decay2,
+        decayTimeStep = 5000;
+
+    /**
+     * Runs and returns a timer that sets the marker's opacity
+     * to the specified value after the specified delay.
+     * @param {!number} opacity
+     * @param {!number} delay
+     * @return {!Object}
+     */
+    function applyDecay(opacity, delay) {
+        return window.setTimeout(function () {
+            marker.style.opacity = opacity;
+        }, delay);
+    }
+
+    /**
+     * Stops the specified timer
+     * @param {Object} timer
+     */
+    function deleteDecay(timer) {
+        window.clearTimeout(timer);
+    }
 
     function setLastAuthor(memberid) {
         marker.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
     }
 
     this.addEdit = function (memberid, timestamp) {
+        var age = (Date.now() - timestamp);
+
         editInfo.addEdit(memberid, timestamp);
         handle.setEdits(editInfo.getSortedEdits());
         setLastAuthor(memberid);
+
+        // Since a new edit has arrived, stop decaying for the old edits
+        if (decay1) {
+            deleteDecay(decay1);
+        }
+        if (decay2) {
+            deleteDecay(decay2);
+        }
+
+        // Decide the decay path:
+        // this decides the initial opacity and subsequent decays to apply
+        // depending on the age of the edit (for example the edit might have arrived
+        // here a long time after it was already processed by the server. We don't want
+        // an opaque marker in that case, we would want it to start with a lower opacity
+        // and decay accordingly further, if possible.
+        if (age < decayTimeStep) {
+            applyDecay(1, 0);
+            decay1 = applyDecay(0.5, decayTimeStep - age);
+            decay2 = applyDecay(0.2, decayTimeStep * 2 - age);
+        } else if (age >= decayTimeStep && age < decayTimeStep * 2) {
+            applyDecay(0.5, 0);
+            decay2 = applyDecay(0.2, decayTimeStep - age);
+        } else {
+            applyDecay(0.2, 0);
+        }
     };
     this.getEdits = function () {
         return editInfo.getEdits();
