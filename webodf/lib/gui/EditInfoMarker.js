@@ -55,7 +55,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
      * to the specified value after the specified delay.
      * @param {!number} opacity
      * @param {!number} delay
-     * @return {!Object}
+     * @return {!number}
      */
     function applyDecay(opacity, delay) {
         return window.setTimeout(function () {
@@ -65,7 +65,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
 
     /**
      * Stops the specified timer
-     * @param {Object} timer
+     * @param {number} timer
      */
     function deleteDecay(timer) {
         window.clearTimeout(timer);
