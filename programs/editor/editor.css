@@ -118,10 +118,6 @@ html, body, #mainContainer {
     border 1px solid black;
 }
 
-.userListButton:hover {
-    opacity: 0.9;
-}
-
 #peopleList .userListLabel {
     color: white;
     border-radius: 5px;
@@ -129,6 +125,9 @@ html, body, #mainContainer {
     font-size: 8pt;
     word-wrap: break-word;
     text-align: center justify;
+}
+div.userListLabel[fullname]:before {
+    content: attr(fullname) "";
 }
 
 #peopleList img {
@@ -140,6 +139,10 @@ html, body, #mainContainer {
     width: 60px;
     display: block;
     margin: auto;
+}
+
+#peopleList img:hover {
+    opacity: 0.9;
 }
 
 #chat {

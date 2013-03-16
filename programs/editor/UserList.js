@@ -55,15 +55,15 @@ define("webodf/editor/UserList", [], function () {
             var node = userListDiv.firstChild;
             while (node) {
                 if (node.memberId === memberId) {
-                    // update background color
-                    node.style.background = userDetails.color;
                     node = node.firstChild;
                     while (node) {
                         if (node.localName === "img") {
                             // update avatar image
                             node.src = userDetails.imageurl;
-                        } else if (node.nodeType == 3) {
-                            node.data = userDetails.fullname;
+                            // update border color
+                            node.style.borderColor = userDetails.color;
+                        } else if (node.localName === "div") {
+                            node.setAttribute('fullname', userDetails.fullname);
                         }
                         node = node.nextSibling;
                     }
@@ -84,15 +84,12 @@ define("webodf/editor/UserList", [], function () {
                 imageElement = doc.createElement("img"),
                 fullnameNode = doc.createElement("div");
 
-            imageElement.src = userDetails.imageurl;
-            fullnameNode.innerHTML = userDetails.fullname;
-
             avatarDiv.className = "userListButton";
             fullnameNode.className = "userListLabel";
             avatarDiv.appendChild(imageElement);
             avatarDiv.appendChild(fullnameNode);
             avatarDiv.memberId = memberId; // TODO: namespace?
-            imageElement.style.borderColor = userDetails.color;
+
             avatarDiv.onmouseover = function () {
                 //avatar.getCaret().showHandle();
             };
@@ -106,6 +103,8 @@ define("webodf/editor/UserList", [], function () {
                 }
             };
             userListDiv.appendChild(avatarDiv);
+
+            updateAvatarButton(memberId, userDetails);
         }
 
         /**
