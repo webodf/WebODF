@@ -82,19 +82,17 @@ define("webodf/editor/UserList", [], function () {
                 htmlns = doc.documentElement.namespaceURI,
                 avatarDiv = doc.createElementNS(htmlns, "div"),
                 imageElement = doc.createElement("img"),
-                fullnameTextNode = doc.createTextNode(userDetails.fullname);
+                fullnameNode = doc.createElement("div");
 
             imageElement.src = userDetails.imageurl;
-            imageElement.width = 22;
-            imageElement.height = 22;
-            imageElement.hspace = 3;
-            imageElement.align = "baseline";
-            imageElement.style['margin-top'] = "3px";
+            fullnameNode.innerHTML = userDetails.fullname;
 
+            avatarDiv.className = "userListButton";
+            fullnameNode.className = "userListLabel";
             avatarDiv.appendChild(imageElement);
-            avatarDiv.appendChild(fullnameTextNode);
+            avatarDiv.appendChild(fullnameNode);
             avatarDiv.memberId = memberId; // TODO: namespace?
-            avatarDiv.style.background = userDetails.color;
+            imageElement.style.borderColor = userDetails.color;
             avatarDiv.onmouseover = function () {
                 //avatar.getCaret().showHandle();
             };

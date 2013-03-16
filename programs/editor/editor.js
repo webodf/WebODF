@@ -158,69 +158,35 @@ define("webodf/editor", [
                 require([
                     "dijit/layout/BorderContainer",
                     "dijit/layout/ContentPane",
-                    "dojox/layout/ExpandoPane"],
+                    ],
                     function (BorderContainer, ContentPane, ExpandoPane) {
                         var mainContainer = new BorderContainer({}, 'mainContainer'),
-                            collabContainer = new BorderContainer({}, 'collabContainer'),
                             filename = doclocation.replace('/^.*[\\\/]/', ''),
                             editorPane,
-                            collabPane,
-                            peoplePane,
-                            chatPane;
+                            peoplePane;
 
                         editorPane = new ContentPane({
                             region: 'center'
                         }, 'editor');
-                        collabPane = new ExpandoPane({
-                            region: 'trailing',
-                            splitter: 'true',
-                            title: translator("collaborationPane")
-                        }, 'collaboration');
                         peoplePane = new ContentPane({
-                            region: 'top',
-                            splitter: 'true',
+                            region: 'right',
                             title: translator("people")
                         }, 'people');
-                        chatPane = new ContentPane({
-                            region: 'center',
-                            title: translator("chat")
-                        }, 'chat');
 
                         mainContainer.addChild(editorPane);
-                        mainContainer.addChild(collabPane);
-                        collabContainer.addChild(peoplePane);
-                        collabContainer.addChild(chatPane);
-                        collabPane.addChild(collabContainer);
+                        mainContainer.addChild(peoplePane);
 
                         mainContainer.startup();
-                        collabContainer.startup();
 
                         require([
-                            "dijit/form/TextBox",
                             "dijit/form/Button"],
-                            function (TextBox, Button) {
-                                // People Box
-                                var nameBox, inviteButton, chatInput;
-
-                                // User's Editable Name
-                                nameBox = new TextBox({
-                                    value: '',
-                                    placeHolder: translator("typeYourName_DDD"),
-                                    style: 'text-align: center;'
-                                }, 'nameEdit');
-
+                            function (Button) {
+                                var inviteButton;
+/*
                                 inviteButton = new Button({
-                                    label: translator("invitePeople")
+                                    label: "Invite"
                                 }, 'inviteButton');
-
-                                // Chat Box
-
-                                // Chat Input
-                                chatInput = new TextBox({
-                                    value: '',
-                                    placeHolder: translator("startTypingToChat_DDD"),
-                                    style: 'text-align: center;'
-                                }, 'chatInput');
+*/
                             });
                     });
             });

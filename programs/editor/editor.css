@@ -8,8 +8,11 @@ html, body, #mainContainer {
     margin: 0;
     font-family: sans-serif;
     font-size: 10pt;
+    padding: 0px;
+}
 
-    padding-top: 0px;
+#mainContainer {
+    background-color: gray;
 }
 
 #editor *:focus {
@@ -18,18 +21,13 @@ html, body, #mainContainer {
 
 #editor {
     border: none;
-    box-shadow: 0px 0px 3px #888;
+    box-shadow: 0px 0px 14px black;
     overflow: hidden;
     padding: 0px !important;
-
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-
+    z-index: 4;
 }
 
 #menubar {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
     border: none;
     overflow: hidden;
     background-color: #E6E6E7;
@@ -93,9 +91,11 @@ html, body, #mainContainer {
 }
 
 #people {
-    height: 30%;
-    padding: 0px;
+    width: 70px;  
+    padding: 2px;
     text-align: center;
+    background-color: gray;
+    border: none;
 }
 
 #people > #nameInfo {
@@ -105,9 +105,41 @@ html, body, #mainContainer {
     background-color: #eef;
 }
 
-#peopleList > div {
+#peopleList .userListButton {
+    margin-top: 5px;
     padding-top: 3px;
-    padding-bottom: 3px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 68px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: black;
+    box-shadow: 0px 0px 5px rgb(90, 90, 90);
+    border 1px solid black;
+}
+
+.userListButton:hover {
+    opacity: 0.9;
+}
+
+#peopleList .userListLabel {
+    color: white;
+    border-radius: 5px;
+    padding: 2px;
+    font-size: 8pt;
+    word-wrap: break-word;
+    text-align: center justify;
+}
+
+#peopleList img {
+    box-shadow: 0px 0px 5px rgb(90, 90, 90) inset;
+    background-color: rgb(200, 200, 200);
+    border-radius: 5px;
+    border: 2px solid;
+    height: 60px;
+    width: 60px;
+    display: block;
+    margin: auto;
 }
 
 #chat {
