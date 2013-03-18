@@ -32,5 +32,6 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 define({
-    file: 'досье'
+    file: 'досье',
+    format: 'Формат'
 });
