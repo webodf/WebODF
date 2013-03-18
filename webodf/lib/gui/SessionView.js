@@ -79,8 +79,8 @@ gui.SessionView = (function () {
         }
 
         /**
-         * @param {string} nodeName
          * @param {string} memberId
+         * @param {string} name
          * @param {string} color
          */
         function setAvatarInfoStyle(memberId, name, color) {
