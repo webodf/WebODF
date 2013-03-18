@@ -178,17 +178,13 @@ define("webodf/editor", [
 
                         mainContainer.startup();
 
-                        require([
-                            "dijit/form/Button"],
-                            function (Button) {
-                                var inviteButton;
-/*
-                                inviteButton = new Button({
-                                    label: "Invite"
-                                }, 'inviteButton');
-*/
-                            });
-                    });
+                        if (window.inviteButtonProxy) {
+                            var inviteButton = document.getElementById('inviteButton');
+                            inviteButton.innerText = translator("invitePeople");
+                            inviteButton.style.display = "block";
+                            inviteButton.onclick = window.inviteButtonProxy.clicked;
+                        }
+                });
             });
         }
 
