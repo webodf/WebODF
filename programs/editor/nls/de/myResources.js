@@ -58,8 +58,8 @@ define({
     invitePeople: "Leute einladen",
     startTypingToChat_DDD: "Eingabe beginnen für Chat...",
     // Various
-    left: "Linksbündig",
-    right: "Rechtsbündig",
+    left: "Links",
+    right: "Rechts",
     top: "Oben",
     bottom: "Unten",
     center: "Zentriert",
