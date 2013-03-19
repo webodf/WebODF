@@ -551,21 +551,6 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
 
     /**
      * @param {!String} styleName
-     * @param {!string} newStyleName
-     */
-    this.cloneStyle = function (styleName, newStyleName) {
-        var styleNode, newStyleNode;
-        styleNode = getParagraphStyleElement(styleName);
-        newStyleNode = styleNode.cloneNode(true);
-        newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);
-        newStyleNode.setAttributeNS(stylens, 'style:display-name', newStyleName);
-        styleNode.parentNode.appendChild(newStyleNode);
-
-        odfCanvas.refreshCSS();
-    };
-
-    /**
-     * @param {!String} styleName
      */
     this.deleteStyle = function (styleName) {
         var styleNode = getParagraphStyleElement(styleName);

@@ -114,6 +114,50 @@ define("webodf/editor/EditorSession", [
                 }
             }
         }
+        /**
+         * Creates a NCName from the passed string
+         * @param {!string} name
+         * @return {!string}
+         */
+        function createNCName(name) {
+            var letter,
+                result = "";
+
+            // encode
+            for (var i = 0; i < name.length; i++) {
+                letter = name[i];
+                // simple approach, can be improved to not skip other allowed chars
+                if (letter.match(/[a-zA-Z0-9.-_]/) !== null) {
+                    result += letter;
+                } else {
+                    result += "_" + letter.charCodeAt(0).toString(16) + "_";
+                }
+            }
+            // ensure leading char is from proper range
+            if (result.match(/^[a-zA-Z_]/) === null) {
+                result = "_" + result;
+            }
+
+            return result;
+        }
+
+        function uniqueParagraphStyleNCName(name) {
+            var result,
+                i = 0,
+                ncMemberId = createNCName(memberid),
+                ncName = createNCName(name);
+
+            // create default paragraph style
+            // memberid is used to avoid id conflicts with ids created by other users
+            result = ncName + "_" + ncMemberId;
+            // then loop until result is really unique
+            while(formatting.hasParagraphStyle(result)) {
+                result = ncName + "_" + i + "_" + ncMemberId;
+                i++;
+            }
+
+            return result;
+        }
 
         function trackCursor(cursor) {
             var node;
@@ -271,15 +315,27 @@ define("webodf/editor/EditorSession", [
             session.enqueue(op);
         };
 
-        this.cloneStyle = function (styleName, newStyleName) {
-            var op;
+        /**
+         * Creates and enqueues a paragraph-style cloning operation.
+         * Returns the created id for the new style.
+         * @param {!string} styleName id of the style to clone
+         * @param {!string} newStyleDisplayName display name of the new style
+         * @return {!string}
+         */
+        this.cloneParagraphStyle = function (styleName, newStyleDisplayName) {
+            var newStyleName = uniqueParagraphStyleNCName(newStyleDisplayName),
+                op;
+
             op = new ops.OpCloneStyle(session);
             op.init({
                 memberid: memberid,
                 styleName: styleName,
-                newStyleName: newStyleName
+                newStyleName: newStyleName,
+                newStyleDisplayName: newStyleDisplayName
             });
             session.enqueue(op);
+
+            return newStyleName;
         };
 
         this.deleteStyle = function (styleName) {

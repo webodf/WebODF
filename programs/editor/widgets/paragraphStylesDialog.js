@@ -79,10 +79,16 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             function cancel() {
                 dialog.hide();
             }
-            
-            function cloneStyle(styleName, newName) {
-                newStyleName = newName;
-                editorSession.cloneStyle(styleName, newName);
+
+            /**
+             * Creates and enqueues a paragraph-style cloning operation.
+             * Remembers the id of the created style in newStyleName, so the
+             * style picker can be set to it, once the operation has been applied.
+             * @param {!string} styleName id of the style to clone
+             * @param {!string} newStyleDisplayName display name of the new style
+             */
+            function cloneStyle(styleName, newStyleDisplayName) {
+                newStyleName = editorSession.cloneParagraphStyle(styleName, newStyleDisplayName);
             }
 
             function deleteStyle(styleName) {

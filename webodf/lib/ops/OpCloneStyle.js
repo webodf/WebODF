@@ -40,29 +40,39 @@
  */
 ops.OpCloneStyle = function OpCloneStyle(session) {
     "use strict";
-    
-    var memberid, timestamp, styleName, newStyleName;
+
+    var memberid, timestamp, styleName, newStyleName, newStyleDisplayName,
+        /** @const */stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         styleName = data.styleName;
         newStyleName = data.newStyleName;
+        newStyleDisplayName = data.newStyleDisplayName;
     };
 
     this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument();
-        odtDocument.cloneStyle(styleName, newStyleName);
+        var odtDocument = session.getOdtDocument(),
+            styleNode = odtDocument.getParagraphStyleElement(styleName),
+            newStyleNode = styleNode.cloneNode(true);
+
+        newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);
+        newStyleNode.setAttributeNS(stylens, 'style:display-name', newStyleDisplayName);
+        styleNode.parentNode.appendChild(newStyleNode);
+
+        odtDocument.getOdfCanvas().refreshCSS();
         session.emit(ops.SessionImplementation.signalStyleCreated, newStyleName);
     };
-    
+
     this.spec = function () {
         return {
             optype: "CloneStyle",
             memberid: memberid,
             timestamp: timestamp,
             styleName: styleName,
-            newStyleName: newStyleName
+            newStyleName: newStyleName,
+            newStyleDisplayName: newStyleDisplayName
         };
     };
 };

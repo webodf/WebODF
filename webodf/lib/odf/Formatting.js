@@ -358,6 +358,16 @@ odf.Formatting = function Formatting() {
     };
 
     /**
+     * Returns if there is an automatic or named paragraph style with the given name.
+     * @param {!string} styleName
+     * @return {!boolean}
+     */
+    this.hasParagraphStyle = function (styleName) {
+        return (getStyleElement(odfContainer.rootElement.automaticStyles, styleName, "paragraph") ||
+                getStyleElement(odfContainer.rootElement.styles, styleName, "paragraph"));
+    };
+
+    /**
      * Get the value of the attribute with the given name from the style with the given name
      * or, if not set there, from the first style in the chain of parent styles where it is set.
      * If the attribute is not found, null is returned.
