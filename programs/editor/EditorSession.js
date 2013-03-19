@@ -34,7 +34,7 @@
  */
 /*global define,runtime,gui,ops */
 define("webodf/editor/EditorSession", [
-    "dojo/text!webodf/editor/fonts/fonts.css"
+    "dojo/text!resources/fonts/fonts.css"
 ], function (fontsCSS) {
     "use strict";
 
