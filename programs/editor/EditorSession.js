@@ -38,6 +38,10 @@ define("webodf/editor/EditorSession", [
 ], function (fontsCSS) {
     "use strict";
 
+    runtime.libraryPaths = function () {
+        return [ "../../webodf/lib" ];
+    };
+
     runtime.loadClass("ops.SessionImplementation");
     runtime.loadClass("ops.NowjsOperationRouter");
     runtime.loadClass("ops.NowjsUserModel");

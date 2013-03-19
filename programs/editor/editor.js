@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -34,11 +34,27 @@
 /*global runtime,define,document,odf,require,ops,gui*/
 
 define("webodf/editor", [
+    "dojo/i18n!webodf/editor/nls/myResources",
+    "webodf/editor/EditorSession",
     "webodf/editor/UserList",
+    "dijit/layout/BorderContainer",
+    "dijit/layout/ContentPane",
     "webodf/editor/widgets"],
-    function (UserList, loadWidgets) {
+    function (myResources,
+        EditorSession,
+        UserList,
+        BorderContainer,
+        ContentPane,
+        loadWidgets) {
         "use strict";
         var self = {};
+
+        function translator(key, context) {
+            if (undefined === myResources[key]) {
+                return "translation missing: " + key;
+            }
+            return myResources[key];
+        }
 
         runtime.currentDirectory = function () {
             return "../../webodf/lib";
@@ -61,7 +77,10 @@ define("webodf/editor", [
         function init_gui_and_doc(doclocation, userid, sessionid) {
             runtime.loadClass('odf.OdfCanvas');
 
-            var odfElement, odfCanvas, filename, isConnectedWithNetwork;
+            var odfElement, odfCanvas, mainContainer,
+                filename, editorPane, peoplePane,
+                inviteButton,
+                isConnectedWithNetwork;
 
             if (userid === undefined) {
                 userid = "undefined";
@@ -75,23 +94,6 @@ define("webodf/editor", [
             // make the canvas accessible to users of editor.js
             self.odfCanvas = odfCanvas;
 
-            // Editor Translations, Widgets and Avatars
-            require({
-                paths : {
-                    "webodf" : "/webodf",
-                    "webodf/editor" : "/programs/editor"
-                }
-            }, [
-                'dojo/i18n!webodf/editor/nls/myResources',
-                'webodf/editor/EditorSession',
-                'webodf/editor/UserList'
-            ], function (myResources, EditorSession, UserList) {
-                function translator(key, context) {
-                    if (undefined === myResources[key]) {
-                        return "translation missing: " + key;
-                    }
-                    return myResources[key];
-                }
                 document.translator = translator;
                 
                 function translateContent(node) {
@@ -147,7 +149,7 @@ define("webodf/editor", [
                     // gracefull cursor removal on pag closing
                     window.onunload = function() {
                         editorSession.endEditing();
-                    }
+                    };
 
                     loadWidgets(editorSession, self.saveOdtFile);
                 });
@@ -155,15 +157,8 @@ define("webodf/editor", [
                 odfCanvas.setEditable(false);
 
                 // App Widgets
-                require([
-                    "dijit/layout/BorderContainer",
-                    "dijit/layout/ContentPane",
-                    ],
-                    function (BorderContainer, ContentPane, ExpandoPane) {
-                        var mainContainer = new BorderContainer({}, 'mainContainer'),
-                            filename = doclocation.replace('/^.*[\\\/]/', ''),
-                            editorPane,
-                            peoplePane;
+                mainContainer = new BorderContainer({}, 'mainContainer');
+                filename = doclocation.replace('/^.*[\\\/]/', '');
 
                         editorPane = new ContentPane({
                             region: 'center'
@@ -179,13 +174,11 @@ define("webodf/editor", [
                         mainContainer.startup();
 
                         if (window.inviteButtonProxy) {
-                            var inviteButton = document.getElementById('inviteButton');
+                            inviteButton = document.getElementById('inviteButton');
                             inviteButton.innerText = translator("invitePeople");
                             inviteButton.style.display = "block";
                             inviteButton.onclick = window.inviteButtonProxy.clicked;
                         }
-                });
-            });
         }
 
         self.boot = function (docurl, userid, sessionid) {
