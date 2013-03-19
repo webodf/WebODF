@@ -323,17 +323,6 @@ odf.Formatting = function Formatting() {
     
     this.getInheritedStyleAttributes = getInheritedStyleAttributes;
 
-    // workaround for not normally named elements, e.g. with a dash TODO: how is this properly done?
-    function getNotNormallyNamedChildElement(element, name) {
-        var node = element.firstChild;
-        while (node) {
-            if (node.nodeType === 1 && node.localName === name) {
-                break;
-            }
-            node = node.nextSibling;
-        }
-        return node;
-    }
     /**
      * Get the name of the first named style in the parent style chain.
      * If none is found, null is returned and you should assume the Default style.
@@ -341,7 +330,7 @@ odf.Formatting = function Formatting() {
      * @return {!string|null}
      */
     this.getFirstNamedParentStyleNameOrSelf = function (styleName) {
-        var automaticStyleElementList = getNotNormallyNamedChildElement(odfContainer.rootElement, "automatic-styles"),
+        var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
             styleElementList = odfContainer.rootElement.styles,
             styleElement;
 
@@ -377,7 +366,7 @@ odf.Formatting = function Formatting() {
      * @return {!string|null}
      */
     this.getParagraphStyleAttribute = function (styleName, attributeNameNS, attributeName) {
-        var automaticStyleElementList = getNotNormallyNamedChildElement(odfContainer.rootElement, "automatic-styles"),
+        var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
             styleElementList = odfContainer.rootElement.styles,
             styleElement,
             attributeValue;
