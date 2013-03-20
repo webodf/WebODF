@@ -260,8 +260,6 @@ gui.SessionController = (function () {
             } else if (keyCode === 46) { // Delete
                 op = createOpRemoveTextByDeleteKey();
                 handled = (op !== null);
-            } else {
-                runtime.log("got keycode: " + keyCode);
             }
             if (op) {
                 session.enqueue(op);

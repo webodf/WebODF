@@ -69,7 +69,6 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
             // nothing to do
             return;
         }
-        runtime.log("Moving. moving, moving... walkableSteps " + steps);
         cursor.move(steps);
         session.emit(ops.SessionImplementation.signalCursorMoved, cursor);
     };

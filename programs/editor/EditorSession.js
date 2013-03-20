@@ -231,7 +231,7 @@ define("webodf/editor/EditorSession", [
             runtime.assert(eventListener.hasOwnProperty(eventid),
                 "unknown event fired \"" + eventid + "\"");
             subscribers = eventListener[eventid];
-            runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
+            // runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
             for (i = 0; i < subscribers.length; i += 1) {
                 subscribers[i](args);
             }
