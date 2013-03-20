@@ -32,9 +32,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,runtime,gui,ops */
+/*global define,runtime,gui,ops,document */
 define("webodf/editor/EditorSession", [
-    "dojo/text!webodf/editor/fonts/fonts.css"
+    "dojo/text!resources/fonts/fonts.css"
 ], function (fontsCSS) {
     "use strict";
 
@@ -60,6 +60,7 @@ define("webodf/editor/EditorSession", [
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             formatting = odtDocument.getFormatting(),
             eventListener = {};
+
 
         this.sessionController = new gui.SessionController(session, memberid);
         this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
@@ -393,6 +394,17 @@ define("webodf/editor/EditorSession", [
         };
 
         this.subscribe('cursorMoved', trackCursor);
+
+        function init() {
+            var head = document.getElementsByTagName('head')[0],
+                fontStyles = document.createElement('style');
+            fontStyles.type = 'text/css';
+            fontStyles.media = 'screen, print, handheld, projection';
+            fontStyles.appendChild(document.createTextNode(fontsCSS));
+            head.appendChild(fontStyles);
+        }
+
+        init();
     };
 
     return EditorSession;
