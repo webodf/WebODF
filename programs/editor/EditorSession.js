@@ -35,7 +35,7 @@
 /*global define,runtime,gui,ops,document */
 define("webodf/editor/EditorSession", [
     "dojo/text!resources/fonts/fonts.css"
-], function (fontsCSS) {
+], function (fontsCSS) { // fontsCSS is retrieved as a string, using dojo's text retrieval AMD plugin
     "use strict";
 
     runtime.libraryPaths = function () {
