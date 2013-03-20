@@ -80,6 +80,9 @@ define("webodf/editor", [
             var odfElement, odfCanvas, mainContainer,
                 filename, editorPane, peoplePane,
                 inviteButton,
+                // existence of that div determines if some objects will
+                // be constructed. it is required for collaborative editing.
+                peopleListDiv = document.getElementById('peopleList'),
                 isConnectedWithNetwork;
 
             if (userid === undefined) {
@@ -125,7 +128,9 @@ define("webodf/editor", [
 
                     session = new ops.SessionImplementation(odfCanvas);
                     editorSession = new EditorSession(session, localUserMemberId);
-                    userList = new UserList(editorSession, document.getElementById('peopleList'));
+                    if (peopleListDiv) {
+                        userList = new UserList(editorSession, peopleListDiv);
+                    }
 
                     if (isConnectedWithNetwork) {
                         // use the nowjs op-router when connected
@@ -163,21 +168,25 @@ define("webodf/editor", [
                         editorPane = new ContentPane({
                             region: 'center'
                         }, 'editor');
-                        peoplePane = new ContentPane({
-                            region: 'right',
-                            title: translator("people")
-                        }, 'people');
-
                         mainContainer.addChild(editorPane);
-                        mainContainer.addChild(peoplePane);
+
+                        if (peopleListDiv) {
+                            peoplePane = new ContentPane({
+                                region: 'right',
+                                title: translator("people")
+                            }, 'people');
+                            mainContainer.addChild(peoplePane);
+                        }
 
                         mainContainer.startup();
 
                         if (window.inviteButtonProxy) {
                             inviteButton = document.getElementById('inviteButton');
-                            inviteButton.innerText = translator("invitePeople");
-                            inviteButton.style.display = "block";
-                            inviteButton.onclick = window.inviteButtonProxy.clicked;
+                            if (inviteButton) {
+                                inviteButton.innerText = translator("invitePeople");
+                                inviteButton.style.display = "block";
+                                inviteButton.onclick = window.inviteButtonProxy.clicked;
+                            }
                         }
         }
 
