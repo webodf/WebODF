@@ -399,6 +399,8 @@ define("webodf/editor/EditorSession", [
             fontStyles.appendChild(document.createTextNode(fontsCSS));
             head.appendChild(fontStyles);
         }
+
+        init();
     };
 
     return EditorSession;
