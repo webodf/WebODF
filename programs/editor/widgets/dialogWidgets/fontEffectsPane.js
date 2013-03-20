@@ -40,7 +40,8 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
             form,
             preview,
             textColorPicker,
-            backgroundColorPicker;
+            backgroundColorPicker,
+            fontPicker;
 
         this.widget = function () {
             return contentPane;
@@ -130,8 +131,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
 
                     contentPane.onLoad = function () {
                         var textColorTB = dijit.byId('textColorTB'),
-                            backgroundColorTB = dijit.byId('backgroundColorTB'),
-                            fontPicker;
+                            backgroundColorTB = dijit.byId('backgroundColorTB');
 
                         form = dijit.byId('fontEffectsPaneForm');
                         document.translateContent(form.domNode);
@@ -173,7 +173,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             }
 
                             preview.style.fontSize = form.value.fontSize + 'pt';
-                            preview.style.fontFamily = form.value.fontName;
+                            preview.style.fontFamily = fontPicker.getFamily(form.value.fontName);
                             preview.style.color = form.value.color;
                             preview.style.backgroundColor = form.value.backgroundColor;
                         });

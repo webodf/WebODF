@@ -39,7 +39,10 @@ define("webodf/editor/widgets/fontPicker", [], function () {
      */
     var FontPicker = function (editorSession, callback) {
         var self = this,
-            select;
+            select,
+            editorFonts = [],
+            documentFonts = [],
+            selectionList = [];
 
         this.widget = function () {
             return select;
@@ -53,16 +56,27 @@ define("webodf/editor/widgets/fontPicker", [], function () {
             select.set('value', value);
         };
 
+        /**
+         * Returns the font family for a given font name. If unavailable,
+         * return the name itself (e.g. editor fonts won't have a name-family separation
+         * @param {!string} name
+         * @return {!string}
+         */
+        this.getFamily = function (name) {
+            var i;
+            for (i = 0; i < documentFonts.length; i += 1) {
+                if (documentFonts[i].name === name) {
+                    return documentFonts[i].family;
+                }
+            }
+            return name;
+        };
         // events
         this.onAdd = null;
         this.onRemove = null;
 
         function populateFonts() {
-            var i,
-                editorFonts = [],
-                documentFonts = [],
-                selectionList = [];
-
+            var i;
             editorFonts = editorSession.availableFonts;
             documentFonts = editorSession.getDeclaredFonts();
 
@@ -73,10 +87,12 @@ define("webodf/editor/widgets/fontPicker", [], function () {
                     value: documentFonts[i].name
                 });
             }
-            // Then add a separator
-            selectionList.push({
-                type: 'separator'
-            });
+            if (editorFonts.length) {
+                // Then add a separator
+                selectionList.push({
+                    type: 'separator'
+                });
+            }
             // Lastly populate the fonts provided by the editor
             for (i = 0; i < editorFonts.length; i += 1) {
                 selectionList.push({
