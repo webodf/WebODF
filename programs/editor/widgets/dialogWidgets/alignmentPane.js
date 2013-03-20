@@ -1,6 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -41,11 +40,11 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
         var self = this,
             contentPane,
             form;
-        
+
         this.widget = function () {
             return contentPane;
         };
-        
+
         this.value = function () {
             return form.get('value');
         };
@@ -65,7 +64,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                 s_rightMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-right'], 'mm'));
                 s_bottomMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-bottom'], 'mm'));
                 s_textAlign = style['fo:text-align'];
-                
+
                 form.attr('value', {
                     topMargin: isNaN(s_topMargin) ? 0 : s_topMargin,
                     bottomMargin: isNaN(s_bottomMargin) ? 0 : s_bottomMargin,
@@ -83,7 +82,7 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                 });
             }
         };
-        
+
         function init(cb) {
             require([
                 "dojo",
@@ -91,7 +90,8 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                 "dojo/dom-construct",
                 "dijit/layout/ContentPane"],
                 function (dojo, ready, domConstruct, ContentPane) {
-                    var editorBase = dojo.config&&dojo.config.paths&&dojo.config.paths['webodf/editor'];
+                    var editorBase = dojo.config && dojo.config.paths &&
+                            dojo.config.paths['webodf/editor'];
                 runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
@@ -112,6 +112,6 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
             return callback(self);
         });
     };
-    
+
     return AlignmentPane;
 });

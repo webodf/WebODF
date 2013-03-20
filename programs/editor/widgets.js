@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -33,11 +33,11 @@
  */
 /*global define,document,require */
 define("webodf/editor/widgets", [
-	"webodf/editor/widgets/simpleStyles",
-	"webodf/editor/widgets/toolbarWidgets/currentStyle",
-	"webodf/editor/widgets/paragraphStylesDialog",
-	"webodf/editor/widgets/zoomSlider"],
-	function (SimpleStyles, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
+    "webodf/editor/widgets/simpleStyles",
+    "webodf/editor/widgets/toolbarWidgets/currentStyle",
+    "webodf/editor/widgets/paragraphStylesDialog",
+    "webodf/editor/widgets/zoomSlider"],
+    function (SimpleStyles, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
         return function loadWidgets(editorSession, saveOdtFile) {
@@ -54,13 +54,13 @@ define("webodf/editor/widgets", [
             ], function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar) {
                 ready(function () {
                     var saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider;
-                    
+
                     dropDownMenu = new DropDownMenu({});
                     paragraphStylesMenuItem = new MenuItem({
                         label: translator("paragraph_DDD")
                     });
                     dropDownMenu.addChild(paragraphStylesMenuItem);
-                    
+
                     dialog = new ParagraphStylesDialog(editorSession, function (dialog) {
                         paragraphStylesMenuItem.onClick = function () {
                             dialog.startup();
@@ -114,4 +114,5 @@ define("webodf/editor/widgets", [
             });
         };
 
-    });
+    }
+);

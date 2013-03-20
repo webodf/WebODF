@@ -1,6 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,require,document,dijit,console */
+/*global runtime,define,require,document,dijit */
 define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
     "use strict";
 
@@ -46,11 +45,11 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
         this.widget = function () {
             return contentPane;
         };
-        
+
         this.value = function () {
             var textProperties = form.get('value'),
                 textStyle = textProperties.textStyle;
-            
+
             textProperties.fontWeight = (textStyle.indexOf('bold') !== -1)
                                             ? 'bold'
                                             : 'normal';
@@ -64,7 +63,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
             delete textProperties.textStyle;
             return textProperties;
         };
-        
+
         this.setStyle = function (styleName) {
             var style = editorSession.getParagraphStyleAttributes(styleName)['style:text-properties'],
                 s_bold,
@@ -116,10 +115,11 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 "dojo/dom-construct",
                 "dijit/layout/ContentPane",
                 "dojox/widget/ColorPicker",
-                "webodf/editor/widgets/fontPicker",
+                "webodf/editor/widgets/fontPicker"
             ], function (dojo, ready, domConstruct, ContentPane, ColorPicker, FontPicker) {
                 var translator = document.translator,
-                    editorBase = dojo.config&&dojo.config.paths&&dojo.config.paths['webodf/editor'];
+                    editorBase = dojo.config && dojo.config.paths &&
+                            dojo.config.paths['webodf/editor'];
                 runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
@@ -139,7 +139,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                         preview = document.getElementById('previewText');
                         textColorPicker = dijit.byId('textColorPicker');
                         backgroundColorPicker = dijit.byId('backgroundColorPicker');
-                        
+
                         // Bind dojox widgets' values to invisible form elements, for easy parsing
                         textColorPicker.onChange = function (value) {
                             textColorTB.set('value', value);
@@ -183,11 +183,11 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 });
             });
         }
-        
+
         init(function () {
             return callback(self);
         });
     };
-    
+
     return FontEffectsPane;
 });

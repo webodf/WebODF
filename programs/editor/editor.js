@@ -97,97 +97,97 @@ define("webodf/editor", [
             // make the canvas accessible to users of editor.js
             self.odfCanvas = odfCanvas;
 
-                document.translator = translator;
-                
-                function translateContent(node) {
-                    var i,
-                        element,
-                        tag,
-                        placeholder,
-                        translatable = node.querySelectorAll("*[text-i18n]");
-                    
-                    for (i = 0; i < translatable.length; i += 1) {
-                        element = translatable[i];
-                        tag = element.localName;
-                        placeholder = element.getAttribute('text-i18n');
-                        if (tag === "label"
-                                || tag === "span"
-                                || /h\d/i.test(tag)) {
-                            element.textContent = document.translator(placeholder);
-                        }
+            document.translator = translator;
+
+            function translateContent(node) {
+                var i,
+                    element,
+                    tag,
+                    placeholder,
+                    translatable = node.querySelectorAll("*[text-i18n]");
+
+                for (i = 0; i < translatable.length; i += 1) {
+                    element = translatable[i];
+                    tag = element.localName;
+                    placeholder = element.getAttribute('text-i18n');
+                    if (tag === "label"
+                            || tag === "span"
+                            || /h\d/i.test(tag)) {
+                        element.textContent = document.translator(placeholder);
                     }
                 }
-                document.translateContent = translateContent;
+            }
+            document.translateContent = translateContent;
 
-                odfCanvas.addListener("statereadychange", function () {
-                    var session,
-                        editorSession,
-                        localUserMemberId = userid + "___" + Date.now(),
-                        userList,
-                        opRouter = null;
+            odfCanvas.addListener("statereadychange", function () {
+                var session,
+                    editorSession,
+                    localUserMemberId = userid + "___" + Date.now(),
+                    userList,
+                    opRouter = null;
 
-                    session = new ops.SessionImplementation(odfCanvas);
-                    editorSession = new EditorSession(session, localUserMemberId);
-                    if (peopleListDiv) {
-                        userList = new UserList(editorSession, peopleListDiv);
-                    }
+                session = new ops.SessionImplementation(odfCanvas);
+                editorSession = new EditorSession(session, localUserMemberId);
+                if (peopleListDiv) {
+                    userList = new UserList(editorSession, peopleListDiv);
+                }
 
-                    if (isConnectedWithNetwork) {
-                        // use the nowjs op-router when connected
-                        session.setOperationRouter(opRouter = new ops.NowjsOperationRouter(sessionid, localUserMemberId));
+                if (isConnectedWithNetwork) {
+                    // use the nowjs op-router when connected
+                    session.setOperationRouter(opRouter = new ops.NowjsOperationRouter(sessionid, localUserMemberId));
 
-                        runtime.log("editor: setting UserModel and requesting replay");
-                        session.setUserModel(new ops.NowjsUserModel());
+                    runtime.log("editor: setting UserModel and requesting replay");
+                    session.setUserModel(new ops.NowjsUserModel());
 
-                        editorSession.sessionView.disableEditHighlighting();
-                        opRouter.requestReplay(function done() {
-                            editorSession.sessionView.enableEditHighlighting();
+                    editorSession.sessionView.disableEditHighlighting();
+                    opRouter.requestReplay(function done() {
+                        editorSession.sessionView.enableEditHighlighting();
 
-                            // start editing: let the controller send the OpAddCursor
-                            editorSession.startEditing();
-                        });
-                    } else {
-                        // offline
+                        // start editing: let the controller send the OpAddCursor
                         editorSession.startEditing();
-                    }
+                    });
+                } else {
+                    // offline
+                    editorSession.startEditing();
+                }
 
-                    // gracefull cursor removal on pag closing
-                    window.onunload = function() {
-                        editorSession.endEditing();
-                    };
+                // gracefull cursor removal on pag closing
+                window.onunload = function() {
+                    editorSession.endEditing();
+                };
 
-                    loadWidgets(editorSession, self.saveOdtFile);
-                });
-                odfCanvas.load(doclocation);
-                odfCanvas.setEditable(false);
+                loadWidgets(editorSession, self.saveOdtFile);
+            });
+            odfCanvas.load(doclocation);
+            odfCanvas.setEditable(false);
 
-                // App Widgets
-                mainContainer = new BorderContainer({}, 'mainContainer');
-                filename = doclocation.replace('/^.*[\\\/]/', '');
+            // App Widgets
+            mainContainer = new BorderContainer({}, 'mainContainer');
+            filename = doclocation.replace('/^.*[\\\/]/', '');
 
-                        editorPane = new ContentPane({
-                            region: 'center'
-                        }, 'editor');
-                        mainContainer.addChild(editorPane);
+            editorPane = new ContentPane({
+                region: 'center'
+            }, 'editor');
+            mainContainer.addChild(editorPane);
 
-                        if (peopleListDiv) {
-                            peoplePane = new ContentPane({
-                                region: 'right',
-                                title: translator("people")
-                            }, 'people');
-                            mainContainer.addChild(peoplePane);
-                        }
+            if (peopleListDiv) {
+                peoplePane = new ContentPane({
+                    region: 'right',
+                    title: translator("people")
+                }, 'people');
+                mainContainer.addChild(peoplePane);
+            }
 
-                        mainContainer.startup();
+            mainContainer.startup();
 
-                        if (window.inviteButtonProxy) {
-                            inviteButton = document.getElementById('inviteButton');
-                            if (inviteButton) {
-                                inviteButton.innerText = translator("invitePeople");
-                                inviteButton.style.display = "block";
-                                inviteButton.onclick = window.inviteButtonProxy.clicked;
-                            }
-                        }
+            if (window.inviteButtonProxy) {
+                inviteButton = document.getElementById('inviteButton');
+                if (inviteButton) {
+                    inviteButton.innerText = translator("invitePeople");
+                    inviteButton.style.display = "block";
+                    inviteButton.onclick = window.inviteButtonProxy.clicked;
+                }
+            }
         }
 
         self.boot = function (docurl, userid, sessionid) {
@@ -220,7 +220,8 @@ define("webodf/editor", [
             later_cb();
         };
         return self;
-    });
+    }
+);
 
         /*
          TODO:
