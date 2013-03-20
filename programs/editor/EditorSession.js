@@ -396,7 +396,7 @@ define("webodf/editor/EditorSession", [
                 fontStyles = document.createElement('style');
             fontStyles.type = 'text/css';
             fontStyles.media = 'screen, print, handheld, projection';
-            fontStyles.appendChild(fontsCSS);
+            fontStyles.appendChild(document.createTextNode(fontsCSS));
             head.appendChild(fontStyles);
         }
     };
