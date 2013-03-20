@@ -1,6 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xml:lang="en" lang="en">
 <head>
+	<!--
+	This HTML page is meant to provide a starting point for testing
+	out of a source-tree. It does not require a dojo-amalgamation
+	but uses dojo directly from CDN.
+	Currently it has all the collaborative editing gadgets included,
+	but will fallback to non-collaborative editing if the server does
+	not provide the nowjs namespace.
+	This page is meant to be served out of a webodf source directory.
+	-->
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
   
   <title>Editor</title>
@@ -28,16 +37,17 @@
   <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
     data-dojo-config="async: true"></script>
 
-  <!-- App stuff -->
+  <!-- connect back to the server for nowjs based communication -->
   <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
-  <!-- obsolete (replaced by wrapper webodf.js as above):
-  <script src="../../webodf/lib/runtime.js" type="text/javascript" charset="utf-8"/></script>
-  -->
+
+  <!-- editor specific code -->
   <link rel="stylesheet" type="text/css" href="editor.css"/>
   <script src="editor.js" type="text/javascript" charset="utf-8"></script>
   <!-- Stuff for selecting a session -->
   <script src="SessionList.js" type="text/javascript" charset="utf-8"></script>
   <script src="SessionListView.js" type="text/javascript" charset="utf-8"></script>
+
+  <!-- booting the editor -->
   <script src="getin.js" type="text/javascript" charset="utf-8"/></script>
  </head>
 
