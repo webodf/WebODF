@@ -85,11 +85,18 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
         };
         
         function init(cb) {
-            require(["dojo/ready", "dojo/dom-construct", "dijit/layout/ContentPane"], function (ready, domConstruct, ContentPane) {
+            require([
+                "dojo",
+                "dojo/ready",
+                "dojo/dom-construct",
+                "dijit/layout/ContentPane"],
+                function (dojo, ready, domConstruct, ContentPane) {
+                    var editorBase = dojo.config&&dojo.config.paths&&dojo.config.paths['webodf/editor'];
+                runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
                         title: document.translator("alignment"),
-                        href: "widgets/dialogWidgets/alignmentPane.html",
+                        href: editorBase+"/widgets/dialogWidgets/alignmentPane.html",
                         preload: true
                     });
                     contentPane.onLoad = function () {

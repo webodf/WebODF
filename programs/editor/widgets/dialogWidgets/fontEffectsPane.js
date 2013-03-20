@@ -111,17 +111,20 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
 
         function init(cb) {
             require([
+                "dojo",
                 "dojo/ready",
                 "dojo/dom-construct",
                 "dijit/layout/ContentPane",
                 "dojox/widget/ColorPicker",
-                "webodf/editor/widgets/fontPicker"
-            ], function (ready, domConstruct, ContentPane, ColorPicker, FontPicker) {
-                var translator = document.translator;
+                "webodf/editor/widgets/fontPicker",
+            ], function (dojo, ready, domConstruct, ContentPane, ColorPicker, FontPicker) {
+                var translator = document.translator,
+                    editorBase = dojo.config&&dojo.config.paths&&dojo.config.paths['webodf/editor'];
+                runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
                         title: translator("fontEffects"),
-                        href: "widgets/dialogWidgets/fontEffectsPane.html",
+                        href: editorBase+"/widgets/dialogWidgets/fontEffectsPane.html",
                         preload: true
                     });
 
@@ -175,6 +178,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             preview.style.backgroundColor = form.value.backgroundColor;
                         });
                     };
+
                     return cb();
                 });
             });
