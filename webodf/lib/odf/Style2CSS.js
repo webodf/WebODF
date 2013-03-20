@@ -190,7 +190,7 @@ odf.Style2CSS = function Style2CSS() {
      */
     function getStyleMap(doc, stylesnode) {
         // put all style elements in a hash map by family and name
-        var stylemap = {}, node, name, family, map;
+        var stylemap = {}, node, name, family, style;
         if (!stylesnode) {
             return stylemap;
         }
@@ -209,19 +209,19 @@ odf.Style2CSS = function Style2CSS() {
             }
 
             if (family) {
-                name = family && node.getAttributeNS &&
-                    node.getAttributeNS(stylens, 'name');
-
-                if (!stylemap[family]) {
-                    stylemap[family] = {};
-                }
-
-                if (name) {
-                    stylemap[family][name] = node;
-                } else {
+                // get style name
+                name = node.getAttributeNS &&
+                       node.getAttributeNS(stylens, 'name');
+                if (!name) {
                     // For a default style, there is no name
-                    stylemap[family][''] = node;
+                    name = '';
                 }
+
+                // get style (and create, if not yet existing)
+                style = stylemap[family] = stylemap[family] || {};
+
+                // then store style node in map
+                style[name] = node;
             }
 
             node = node.nextSibling;
