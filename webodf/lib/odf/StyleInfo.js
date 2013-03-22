@@ -53,6 +53,11 @@ odf.StyleInfo = function StyleInfo() {
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         xmlns = "http://www.w3.org/XML/1998/namespace",
+        /**
+         * Data about the styles.
+         * ens: element namespace, en: element name, ans: attribute namespace, a: attribute
+         * @type {!Object.<string,Array.<Object.<string,string>>>}
+         */
         elementstyles = {
             "text": [
                 { ens: stylens, en: 'tab-stop', ans: stylens, a: 'leader-text-style'},
@@ -302,9 +307,15 @@ odf.StyleInfo = function StyleInfo() {
                 { ens: stylens, en: 'master-page', ans: stylens, a: 'page-layout-name'}
             ]
         },
+        /**
+         * Inversion of elementstyles, created with "inverse(elementstyles);" in init section
+         * Map with element name as primary key, element namespace as secondary key,
+         * then an array of {ns: namespace of attribute, localname: name of attribute, keyname: keyname});
+         * @type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
+         */
         elements,
         xpath = new xmldom.XPath();
-    
+
     /**
      * Return if a particular element is the parent style for any other style of the same family.
      * @param {!Element} odfbody
@@ -338,7 +349,7 @@ odf.StyleInfo = function StyleInfo() {
             elns = elname && elname[element.namespaceURI],
             length = elns ? elns.length : 0,
             i;
-        return elns && elns.length > 0;
+        return length > 0;
     }
 
     /**
@@ -363,41 +374,47 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
-     * @param {!Element} element
-     * @param {!Object.<string,Object.<string,number>>} keys
+     * Determines all stylenames that are referenced in the passed element tree
+     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!Object.<string,Object.<string,number>>} usedStyles  map of used stylesnames, grouped by keyname
      * @return {undefined}
      */
-    function getUsedStylesForAutomatic(element, keys) {
-        var elname = elements[element.localName],
-            elns = elname && elname[element.namespaceURI],
+    function determineUsedStyles(styleUsingElementsRoot, usedStyles) {
+        var elname = elements[styleUsingElementsRoot.localName],
+            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
             length = elns ? elns.length : 0,
-            i, attr, group, map, e;
+            i, stylename, keyname, map, e;
+        // check if any styles are referenced
         for (i = 0; i < length; i += 1) {
-            attr = element.getAttributeNS(elns[i].ns, elns[i].localname);
-            if (attr) { // a style has been found!
-                group = elns[i].keygroup;
-                map = keys[group];
-                if (!map) {
-                    map = keys[group] = {};
-                }
-                map[attr] = 1;
+            stylename = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+            if (stylename) { // a style has been found!
+                keyname = elns[i].keyname;
+                map = usedStyles[keyname] = usedStyles[keyname] || {};
+                map[stylename] = 1;
             }
         }
-        i = element.firstChild;
+        // continue determination with all child elements
+        i = styleUsingElementsRoot.firstChild;
         while (i) {
             if (i.nodeType === 1) {
                 e = /**@type{!Element}*/(i);
-                getUsedStylesForAutomatic(e, keys);
+                determineUsedStyles(e, usedStyles);
             }
             i = i.nextSibling;
         }
     }
 
     /**
+     * Creates the elements data from the elementstyles data.
      * @param {!Object.<Array.<Object.<string,string>>>} elementstyles
+     * @return {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
      */
     function inverse(elementstyles) {
-        var keyname, i, list, item, l, elements = {}, map, array;
+        var keyname, i, l,
+            /**@type {Array.<Object.<string,string>>}*/list,
+            /**@type {Object.<string,string>}*/item,
+            /**@type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}*/elements = {},
+            map, array;
         for (keyname in elementstyles) {
             if (elementstyles.hasOwnProperty(keyname)) {
                 list = elementstyles[keyname];
@@ -407,7 +424,7 @@ odf.StyleInfo = function StyleInfo() {
                     map = elements[item.en] = elements[item.en] || {};
                     array = map[item.ens] = map[item.ens] || [];
                     array.push(
-                        {ns: item.ans, localname: item.a, keygroup: keyname});
+                        {ns: item.ans, localname: item.a, keyname: keyname});
                 }
             }
         }
@@ -415,14 +432,23 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
+     * Object which collects all style names that are used in the passed element tree
      * @constructor
-     * @param {!Element} element
+     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
      */
-    this.UsedKeysList = function (element) {
-        var usedKeys = {};
+    this.UsedStyleList = function (styleUsingElementsRoot) {
+        // usedStyles stores all style names used in the passed element tree.
+        // As styles from different types can have the same names,
+        // all styles are grouped by:
+        // * family attribute for style:style
+        // * "data" for all number:* (boolean-style,currency-style,date-style,
+        //   number-style,percentage-style,text-style,time-style)
+        // * localName for text:list-style, style:page-layout
+        var /** @type !Object.<string,Object.<string,number>> */usedStyles = {};
 
         /**
-         * @param {!Element} element
+         * Checks whether the passed style is referenced by anything
+         * @param {!Element} element  odf style describing element
          * @return {!boolean}
          */
         this.uses = function (element) {
@@ -437,15 +463,17 @@ odf.StyleInfo = function StyleInfo() {
             } else {
                 keyName = localName; // list-style or page-layout
             }
-            map = usedKeys[keyName];
+            map = usedStyles[keyName];
             return map ? (map[name] > 0) : false;
         };
 
-        getUsedStylesForAutomatic(element, usedKeys);
+        determineUsedStyles(styleUsingElementsRoot, usedStyles);
     };
 
     this.canElementHaveStyle = canElementHaveStyle;
     this.hasDerivedStyles = hasDerivedStyles;
 
+
+    // init
     elements = inverse(elementstyles);
 };

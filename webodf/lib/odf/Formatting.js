@@ -223,9 +223,9 @@ odf.Formatting = function Formatting() {
         
         hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, style2CSS.namespaceResolver, styleElement);
 
-        isUsed = new styleInfo.UsedKeysList(odfContainer.rootElement.styles).uses(styleElement)
-            || new styleInfo.UsedKeysList(odfContainer.rootElement.automaticStyles).uses(styleElement)
-            || new styleInfo.UsedKeysList(odfContainer.rootElement.body).uses(styleElement);
+        isUsed = new styleInfo.UsedStyleList(odfContainer.rootElement.styles).uses(styleElement)
+            || new styleInfo.UsedStyleList(odfContainer.rootElement.automaticStyles).uses(styleElement)
+            || new styleInfo.UsedStyleList(odfContainer.rootElement.body).uses(styleElement);
 
         return hasDerivedStyles || isUsed;
     };

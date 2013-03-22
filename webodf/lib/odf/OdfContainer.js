@@ -90,16 +90,18 @@ odf.OdfContainer = (function () {
     }
     /**
      * Class that filters runtime specific nodes from the DOM.
+     * Additionally all unused automatic styles are skipped, if a tree
+     * of elements was passed to check the style usage in it.
      * @constructor
      * @implements {xmldom.LSSerializerFilter}
      * @param {!Element} odfroot
-     * @param {!Element=} usedStylesElement
+     * @param {!Element=} styleUsingElementsRoot root element of tree of elements using styles
      */
-    function OdfNodeFilter(odfroot, usedStylesElement) {
+    function OdfNodeFilter(odfroot, styleUsingElementsRoot) {
         var automaticStyles = odfroot.automaticStyles,
-            usedKeysList;
-        if (usedStylesElement) {
-            usedKeysList = new styleInfo.UsedKeysList(usedStylesElement);
+            usedStyleList;
+        if (styleUsingElementsRoot) {
+            usedStyleList = new styleInfo.UsedStyleList(styleUsingElementsRoot);
         }
         /**
          * @param {!Node} node
@@ -112,9 +114,10 @@ odf.OdfContainer = (function () {
             } else if (node.namespaceURI && node.namespaceURI.match(/^urn:webodf:/)) {
                 // skip all webodf nodes incl. child nodes
                 result = 2; // FILTER_REJECT
-            } else if (usedKeysList && node.parentNode === automaticStyles &&
+            } else if (usedStyleList && node.parentNode === automaticStyles &&
                     node.nodeType === 1) {
-                if (usedKeysList.uses(node)) {
+                // skip all automatic styles which are not used
+                if (usedStyleList.uses(node)) {
                     result = 1; // FILTER_ACCEPT
                 } else {
                     result = 2; // FILTER_REJECT
@@ -575,6 +578,7 @@ odf.OdfContainer = (function () {
             var nsmap = style2CSS.namespaces,
                 serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = documentElement("document-styles", nsmap);
+            // TODO: care about automatic styles only referenced by other automatic styles
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.masterStyles);
             s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
@@ -591,6 +595,7 @@ odf.OdfContainer = (function () {
             var nsmap = style2CSS.namespaces,
                 serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = documentElement("document-content", nsmap);
+            // TODO: care about automatic styles only referenced by other automatic styles
             serializer.filter = new OdfNodeFilter(self.rootElement,
                     self.rootElement.body);
             // Until there is code to  determine if a font is referenced only
