@@ -72,6 +72,8 @@ class WebDAVRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			SubElement(prop, QName("DAV:", 'collection'))
 
 if __name__ == '__main__':
-	server_address = ('', 8080)
+	port = 8080
+	server_address = ('', port)
+	sys.stderr.write("accepting connections at http://0.0.0.0:%i\n"%port)
 	httpd = BaseHTTPServer.HTTPServer(server_address, WebDAVRequestHandler)
 	httpd.serve_forever()
