@@ -408,12 +408,14 @@ odf.Style2CSS = function Style2CSS() {
         while (node) {
             if (node.nodeType === 1) {
                 family = node.getAttributeNS(svgns, 'font-family');
-                name = family && node.getAttributeNS(stylens, 'name');
-                if (name) {
-                    if (!fontFaceDeclsMap[name]) {
-                        fontFaceDeclsMap[name] = {};
+                name = node.getAttributeNS(stylens, 'name');
+                if (family || node.getElementsByTagNameNS(svgns, 'font-face-uri')[0]) {
+                    if (name) {
+                        if (!fontFaceDeclsMap[name]) {
+                            fontFaceDeclsMap[name] = {};
+                        }
+                        fontFaceDeclsMap[name] = family;
                     }
-                    fontFaceDeclsMap[name] = family;
                 }
             }
             node = node.nextSibling;
@@ -433,7 +435,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getTextProperties(props) {
-        var rule = '', value, textDecoration = '';
+        var rule = '', fontName, value, textDecoration = '';
         rule += applySimpleMapping(props, textPropertySimpleMapping);
         
         value = props.getAttributeNS(stylens, 'text-underline-style');
@@ -450,12 +452,10 @@ odf.Style2CSS = function Style2CSS() {
             rule += textDecoration;
         }
 
-        value = props.getAttributeNS(stylens, 'font-name');
-        if (value) {
-            value = getFontDeclaration(value);
-            if (value) {
-                rule += 'font-family: ' + value + ';';
-            }
+        fontName = props.getAttributeNS(stylens, 'font-name');
+        if (fontName) {
+            value = getFontDeclaration(fontName);
+            rule += 'font-family: ' + value || fontName + ';';
         }
         return rule;
     }

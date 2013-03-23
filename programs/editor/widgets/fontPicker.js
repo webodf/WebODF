@@ -65,7 +65,7 @@ define("webodf/editor/widgets/fontPicker", [], function () {
         this.getFamily = function (name) {
             var i;
             for (i = 0; i < documentFonts.length; i += 1) {
-                if (documentFonts[i].name === name) {
+                if (documentFonts[i].name === name && documentFonts[i].family !== null) {
                     return documentFonts[i].family;
                 }
             }
@@ -82,6 +82,7 @@ define("webodf/editor/widgets/fontPicker", [], function () {
 
             // First populate the fonts used in the document
             for (i = 0; i < documentFonts.length; i += 1) {
+                console.log(documentFonts[i].family);
                 selectionList.push({
                     label: '<span style="font-family: ' + documentFonts[i].family + ';">' + documentFonts[i].name + '</span>',
                     value: documentFonts[i].name

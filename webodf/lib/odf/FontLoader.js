@@ -77,10 +77,12 @@ odf.FontLoader = (function () {
         if (!stylesheet) {
             stylesheet = document.styleSheets[0];
         }
-        var rule = "@font-face { font-family: " + font.family + "; src: " +
-            "url(data:application/x-font-ttf;charset=binary;base64," +
-            base64.convertUTF8ArrayToBase64(fontdata) +
-            ") format(\"truetype\"); }";
+
+        var cssFamily = font.family || name,
+            rule = "@font-face { font-family: '" + cssFamily + "'; src: " +
+                "url(data:application/x-font-ttf;charset=binary;base64," +
+                base64.convertUTF8ArrayToBase64(fontdata) +
+                ") format(\"truetype\"); }";
         try {
             stylesheet.insertRule(rule, stylesheet.cssRules.length);
         } catch (e) {
