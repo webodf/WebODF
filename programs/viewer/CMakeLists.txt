@@ -37,6 +37,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js webodf.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js viewer.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/index.html index.html
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/README-viewer.odt README-viewer.odt
 
 	# zip using javascript code running in node.js
 	COMMAND ${NODE} ARGS ${RUNTIME} ${TOOLS}/zipper.js
@@ -46,6 +47,7 @@ add_custom_command(
 		# let's not put the amalgamation in zip until it at
 		# least includes css as well...
 		# ${VIEWER_MERGED_HTML}
+		README-viewer.odt
 		webodf.js
 		viewer.js
 		viewer.css
