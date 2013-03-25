@@ -386,7 +386,7 @@ define("webodf/editor/EditorSession", [
                         name: key,
                         family: value
                     });
-                    if (value !== null) {
+                    if (value) {
                         usedFamilies.push(value);
                     }
                 }
