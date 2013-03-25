@@ -47,7 +47,7 @@ gui.Avatar = function Avatar(parentElement) {
         displayHidden = "none";
 
     this.setColor = function (color) {
-        handle.style.background = color;
+        image.style.borderColor = color;
     };
     this.setImageUrl = function (url) {
         image.src = url;
