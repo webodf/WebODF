@@ -455,7 +455,7 @@ odf.Style2CSS = function Style2CSS() {
         fontName = props.getAttributeNS(stylens, 'font-name');
         if (fontName) {
             value = getFontDeclaration(fontName);
-            rule += 'font-family: ' + value || fontName + ';';
+            rule += 'font-family: ' + (value || fontName) + ';';
         }
         return rule;
     }
