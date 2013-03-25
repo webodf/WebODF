@@ -48,7 +48,6 @@ gui.SessionView = (function () {
     function SessionView(session, caretFactory) {
         var carets = {},
             avatarInfoStyles,
-            memberDataChangedHandler,
             headlineNodeName = 'text|h',
             paragraphNodeName = 'text|p',
             editHighlightingEnabled = true,
@@ -178,9 +177,28 @@ gui.SessionView = (function () {
 
         /**
          * @param {!string} memberId
+         * @param {Object|null} userData
+         * @return {undefined}
+         *
+         * Setting userData to null will apply empty (bogus) user data.
          */
         function renderMemberData(memberId, userData) {
             var caret = carets[memberId];
+
+            // this takes care of incorrectly implemented UserModels,
+            // which might end up returning undefined user data
+            if (userData === undefined) {
+                runtime.log("UserModel sent undefined data for member \""+memberId+"\".");
+                return;
+            }
+
+            if (userData === null) {
+                runtime.log("no userData in SessionView::renderMemberData (highlight)");
+                userData = {
+                    memberid: memberId, fullname: "Unknown Identity",
+                    color: "black", imageurl: "avatar-joe.png"
+                };
+            }
 
             if (caret) {
                 caret.setAvatarImageUrl(userData.imageurl);
@@ -190,19 +208,22 @@ gui.SessionView = (function () {
                 setAvatarInfoStyle(memberId, userData.fullname, userData.color);
             }
         }
-        memberDataChangedHandler = renderMemberData;
 
         /**
          * @param {ops.OdtCursor} cursor
+         * @return {undefined}
          */
         function onCursorAdded(cursor) {
             var caret = caretFactory.createCaret(cursor),
                 memberId = cursor.getMemberId(),
-                userModel = session.getUserModel(),
-                userData = userModel.getUserDetails(memberId, memberDataChangedHandler);
+                userModel = session.getUserModel();
 
             carets[memberId] = caret;
-            renderMemberData(memberId, userData);
+            // preset bogus data
+            renderMemberData(memberId, null);
+            // subscribe to real updates
+            userModel.getUserDetails(memberId, renderMemberData);
+
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
         }
 
