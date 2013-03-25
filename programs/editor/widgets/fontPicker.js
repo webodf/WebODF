@@ -65,7 +65,7 @@ define("webodf/editor/widgets/fontPicker", [], function () {
         this.getFamily = function (name) {
             var i;
             for (i = 0; i < documentFonts.length; i += 1) {
-                if (documentFonts[i].name === name && documentFonts[i].family !== null) {
+                if ((documentFonts[i].name === name) && documentFonts[i].family) {
                     return documentFonts[i].family;
                 }
             }
@@ -76,16 +76,17 @@ define("webodf/editor/widgets/fontPicker", [], function () {
         this.onRemove = null;
 
         function populateFonts() {
-            var i;
+            var i, name, family;
             editorFonts = editorSession.availableFonts;
             documentFonts = editorSession.getDeclaredFonts();
 
             // First populate the fonts used in the document
             for (i = 0; i < documentFonts.length; i += 1) {
-                console.log(documentFonts[i].family);
+                name = documentFonts[i].name;
+                family = documentFonts[i].family || name;
                 selectionList.push({
-                    label: '<span style="font-family: ' + documentFonts[i].family + ';">' + documentFonts[i].name + '</span>',
-                    value: documentFonts[i].name
+                    label: '<span style="font-family: ' + family + ';">' + name + '</span>',
+                    value: name
                 });
             }
             if (editorFonts.length) {
