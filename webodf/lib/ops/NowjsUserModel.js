@@ -112,7 +112,8 @@ ops.NowjsUserModel = function NowjsUserModel() {
 
         // detect double subscription
         for (i=0; i<subscribers.length; i+=1) {
-            if (subscribers[i].subscriber === subscriber) {
+            if ((subscribers[i].subscriber === subscriber) &&
+                (subscribers[i].memberId === memberId)) {
                 break;
             }
         }
@@ -161,7 +162,8 @@ ops.NowjsUserModel = function NowjsUserModel() {
             "tried to unsubscribe when no one is subscribed ('" + memberId + "')");
         if (subscribers) {
             for (i=0; i<subscribers.length; i+=1) {
-                if (subscribers[i].subscriber === subscriber) {
+                if ((subscribers[i].subscriber === subscriber) &&
+                    (subscribers[i].memberId === memberId)) {
                     break;
                 }
             }
