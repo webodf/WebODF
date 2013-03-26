@@ -52,7 +52,7 @@ ops.OpAddCursor = function OpAddCursor(session) {
         var odtDocument = session.getOdtDocument(),
             cursor = new ops.OdtCursor(memberid, odtDocument);
         odtDocument.addCursor(cursor);
-        session.emit(ops.SessionImplementation.signalCursorAdded, cursor);
+        session.emit(ops.Session.signalCursorAdded, cursor);
     };
 
     this.spec = function () {

@@ -70,7 +70,7 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
             return;
         }
         cursor.move(steps);
-        session.emit(ops.SessionImplementation.signalCursorMoved, cursor);
+        session.emit(ops.Session.signalCursorMoved, cursor);
     };
 
     this.spec = function () {

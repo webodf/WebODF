@@ -33,7 +33,7 @@
  */
 /*global document, runtime, odf, ops, gui, alert */
 
-runtime.loadClass("ops.SessionImplementation");
+runtime.loadClass("ops.Session");
 runtime.loadClass("ops.NowjsOperationRouter");
 runtime.loadClass("ops.NowjsUserModel");
 runtime.loadClass("odf.OdfCanvas");
@@ -108,12 +108,12 @@ function setupAvatarView(sessionView, avatarListDiv) {
     // attention: there is a race condition, sessionView also only
     // on this signal creates the caret, so trying to get the caret
     // at this point is not good to do. So fetch it dynamically in the avatarbutton.
-    session.subscribe(ops.SessionImplementation.signalCursorAdded, function(cursor) {
+    session.subscribe(ops.Session.signalCursorAdded, function(cursor) {
         var memberid = cursor.getMemberId();
 
         createAvatarButton(avatarListDiv, sessionView, memberid, session.getUserModel().getUserDetails(memberid));
     });
-    session.subscribe(ops.SessionImplementation.signalCursorRemoved, function(memberid) {
+    session.subscribe(ops.Session.signalCursorRemoved, function(memberid) {
         removeAvatarButton(avatarListDiv, memberid);
     });
 }
@@ -166,7 +166,7 @@ function initSession(odfid, avatarlistid, done_cb) {
         runtime.assert(!ready, "statereadychange fired twice!");
         ready = true;
 
-        testsession = new ops.SessionImplementation(odfcanvas);
+        testsession = new ops.Session(odfcanvas);
 
         if (is_connected) {
             // use the nowjs op-router when connected

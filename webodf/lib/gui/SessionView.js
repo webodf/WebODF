@@ -247,8 +247,8 @@ gui.SessionView = (function () {
         function init() {
             var head = document.getElementsByTagName('head')[0];
 
-            session.subscribe(ops.SessionImplementation.signalCursorAdded, onCursorAdded);
-            session.subscribe(ops.SessionImplementation.signalCursorRemoved, onCursorRemoved);
+            session.subscribe(ops.Session.signalCursorAdded, onCursorAdded);
+            session.subscribe(ops.Session.signalCursorRemoved, onCursorRemoved);
 
             // Add a css sheet for avatar-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');

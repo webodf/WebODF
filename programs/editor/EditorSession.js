@@ -42,7 +42,7 @@ define("webodf/editor/EditorSession", [
         return [ "../../webodf/lib" ];
     };
 
-    runtime.loadClass("ops.SessionImplementation");
+    runtime.loadClass("ops.Session");
     runtime.loadClass("ops.NowjsOperationRouter");
     runtime.loadClass("ops.NowjsUserModel");
     runtime.loadClass("odf.OdfCanvas");
@@ -183,35 +183,35 @@ define("webodf/editor/EditorSession", [
         }
 
         // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
-        session.subscribe(ops.SessionImplementation.signalCursorAdded, function (cursor) {
+        session.subscribe(ops.Session.signalCursorAdded, function (cursor) {
             self.emit('userAdded', cursor.getMemberId());
             trackCursor(cursor);
         });
 
-        session.subscribe(ops.SessionImplementation.signalCursorRemoved, function (memberId) {
+        session.subscribe(ops.Session.signalCursorRemoved, function (memberId) {
             self.emit('userRemoved', memberId);
         });
 
-        session.subscribe(ops.SessionImplementation.signalCursorMoved, function (cursor) {
+        session.subscribe(ops.Session.signalCursorMoved, function (cursor) {
             // Emit 'cursorMoved' only when *I* am moving the cursor, not the other users
             if (cursor.getMemberId() === memberid) {
                 self.emit('cursorMoved', cursor);
             }
         });
         
-        session.subscribe(ops.SessionImplementation.signalStyleCreated, function (newStyleName) {
+        session.subscribe(ops.Session.signalStyleCreated, function (newStyleName) {
             self.emit('styleCreated', newStyleName);
         });
 
-        session.subscribe(ops.SessionImplementation.signalStyleDeleted, function (styleName) {
+        session.subscribe(ops.Session.signalStyleDeleted, function (styleName) {
             self.emit('styleDeleted', styleName);
         });
 
-        session.subscribe(ops.SessionImplementation.signalParagraphStyleModified, function (styleName) {
+        session.subscribe(ops.Session.signalParagraphStyleModified, function (styleName) {
             self.emit('paragraphStyleModified', styleName);
         });
 
-        session.subscribe(ops.SessionImplementation.signalParagraphChanged, trackCurrentParagraph);
+        session.subscribe(ops.Session.signalParagraphChanged, trackCurrentParagraph);
         
         this.startEditing = function () {
             self.sessionController.startEditing();

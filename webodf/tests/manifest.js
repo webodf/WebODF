@@ -43,7 +43,7 @@
         "gui/XMLEditTests.js",
         "odf/OdfContainerTests.js",
         "ops/OdtCursorTests.js",
-        "ops/SessionImplementationTests.js",
+        "ops/SessionTests.js",
         "tests.js",
         "xmldom/OperationalTransformDOMTests.js",
         "xmldom/XPathTests.js"

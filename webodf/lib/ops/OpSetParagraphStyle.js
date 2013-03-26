@@ -61,7 +61,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
         domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
-            session.emit(ops.SessionImplementation.signalParagraphChanged, paragraphNode);
+            session.emit(ops.Session.signalParagraphChanged, paragraphNode);
         }
     };
 

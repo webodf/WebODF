@@ -52,7 +52,7 @@ ops.OpDeleteStyle = function OpDeleteStyle(session) {
     this.execute = function (domroot) {
         var odtDocument = session.getOdtDocument();
         odtDocument.deleteStyle(styleName);
-        session.emit(ops.SessionImplementation.signalStyleDeleted, styleName);
+        session.emit(ops.Session.signalStyleDeleted, styleName);
     };
 
     this.spec = function () {

@@ -131,7 +131,7 @@ define("webodf/editor/Editor", [
 
                     memberid = userid + "___" + Date.now();
 
-                    session = new ops.SessionImplementation(odfCanvas);
+                    session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, memberid);
                     if (peopleListDiv) {
                         userList = new UserList(editorSession, peopleListDiv);

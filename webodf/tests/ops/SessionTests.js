@@ -31,13 +31,13 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, odf, ops*/
-runtime.loadClass("ops.SessionImplementation");
+runtime.loadClass("ops.Session");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
  * @implements {core.UnitTest}
  */
-ops.SessionImplementationTests = function SessionImplementationTests(runner) {
+ops.SessionTests = function SessionTests(runner) {
     "use strict";
     var t, r = runner,
         odfcanvas,
@@ -56,7 +56,7 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
     };
     function newSession() {
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-        t.session = new ops.SessionImplementation(odfcanvas);
+        t.session = new ops.Session(odfcanvas);
         r.shouldBe(t, "t.session.getOdtDocument().getCursors().length", "0");
     }
     this.tests = function () {
@@ -69,11 +69,11 @@ ops.SessionImplementationTests = function SessionImplementationTests(runner) {
         ];
     };
 };
-ops.SessionImplementationTests.prototype.description = function () {
+ops.SessionTests.prototype.description = function () {
     "use strict";
-    return "Test the SessionImplementation class.";
+    return "Test the Session class.";
 };
 (function () {
     "use strict";
-    return ops.SessionImplementationTests;
+    return ops.SessionTests;
 }());

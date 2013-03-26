@@ -77,7 +77,6 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js",
         "ops/Session.js",
-        "ops/SessionImplementation.js",
         "ops/SessionNodeFilter.js",
         "ops/OpAddCursor.js",
         "ops/OpRemoveCursor.js",

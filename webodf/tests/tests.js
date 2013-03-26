@@ -41,7 +41,7 @@ runtime.loadClass("core.ZipTests");
 runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("ops.OdtCursorTests");
-runtime.loadClass("ops.SessionImplementationTests");
+runtime.loadClass("ops.SessionTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
@@ -70,7 +70,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
-    tests.push(ops.SessionImplementationTests);
+    tests.push(ops.SessionTests);
 //    tests.push(gui.XMLEditTests);
 }
 
