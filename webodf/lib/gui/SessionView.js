@@ -193,7 +193,6 @@ gui.SessionView = (function () {
             }
 
             if (userData === null) {
-                runtime.log("no userData in SessionView::renderMemberData (highlight)");
                 userData = {
                     memberid: memberId, fullname: "Unknown Identity",
                     color: "black", imageurl: "avatar-joe.png"
@@ -220,9 +219,11 @@ gui.SessionView = (function () {
 
             carets[memberId] = caret;
             // preset bogus data
+            // TODO: indicate loading state
+            // (instead of setting the final 'unknown identity' data)
             renderMemberData(memberId, null);
             // subscribe to real updates
-            userModel.getUserDetails(memberId, renderMemberData);
+            userModel.getUserDetailsAndUpdates(memberId, renderMemberData);
 
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
         }

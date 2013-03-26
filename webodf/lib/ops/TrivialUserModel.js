@@ -51,12 +51,30 @@ ops.TrivialUserModel = function TrivialUserModel() {
     users.alice = {memberid: "alice", fullname: "Alice Bee", color: "green", imageurl: "avatar-flower.png"};
     users.you = {memberid: "you", fullname: "I, Robot", color: "blue", imageurl: "avatar-joe.png"};
 
-    this.getUserDetails = function (memberid, callback) {
-        var userid = memberid.split("___")[0];
+    /**
+     * callback is called as soon as the userdata is available and after that
+     * on every userdata update.
+     * a parameter `null` passed to the callback means that the user is finally
+     * not known.
+     *
+     * @param {!string} memberId
+     * @param {function(!string, ?Object)} subscriber
+     * @return {undefined}
+     */
+    this.getUserDetailsAndUpdates = function (memberId, subscriber) {
+        var userid = memberId.split("___")[0];
 
-        callback(memberid, users[userid]||null);
+        subscriber(memberId, users[userid]||null);
     };
 
-    this.unsubscribeForUserDetails = function (memberId, subscriber) {
+    /**
+     * getUserDetailsAndUpdates subscribes a callback for updates on user details.
+     * this function undoes this subscription.
+     *
+     * @param {!string} memberId
+     * @param {function(!string, ?Object)} subscriber
+     * @return {undefined}
+     */
+    this.unsubscribeUserDetailsUpdates = function (memberId, subscriber) {
     };
 };

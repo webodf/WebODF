@@ -55,16 +55,13 @@ ops.NowjsUserModel = function NowjsUserModel() {
         return memberId.split("___")[0];
     }
 
-    // use this method to cache
-    function cacheUserDatum(userId, fullName, imageUrl, color) {
+    /**
+     * @param {!string} userId
+     * @param {?Object} userData
+     */
+    function cacheUserDatum(userId, userData) {
         var subscribers,
-            i,
-            userData = {
-                userid:   userId,
-                fullname: fullName,
-                imageurl: imageUrl,
-                color:    color
-            };
+            i;
 
         // cache
         cachedUserData[userId] = userData;
@@ -80,50 +77,88 @@ ops.NowjsUserModel = function NowjsUserModel() {
     }
 
 
-    this.getUserDetails = function (memberId, subscriber) {
-        // remove tje ___ split.
-        // and perhaps create a default "Unknown" user details set if userid is not present
+    /**
+     * callback is called as soon as the userdata is available and after that
+     * on every userdata update.
+     * a parameter `null` passed to the callback means that the user is finally
+     * not known.
+     *
+     * @param {!string} memberId
+     * @param {!function(!string, ?Object)} subscriber
+     * @return {undefined}
+     */
+    this.getUserDetailsAndUpdates = function (memberId, subscriber) {
+        // TODO: remove the ___ split.
+        // FIXME: caching data by userid seems to be incorrect:
+        // a user can have multiple members in a document,
+        // data should be per member (e.g.: current network lag, current
+        // description of what the member is changing, even the avatar
+        // image might be member-specific (home vs. work); this reminds
+        // me of XMPP resources).
+        // member-details should probably start with some values received
+        // from the user. also the subscriptions here should be per
+        // avatar and thus per member (and in fact the handling of the
+        // callback is per memberId already)
+        // fixing that should happen in a later commit to reduce change-
+        // complexity.
         var userId = userIdFromMemberId(memberId),
+            /**@type{Object}*/
             userData = cachedUserData[userId],
-            subscribers;
+            subscribers = memberDataSubscribers[userId] =
+                memberDataSubscribers[userId] || [],
+            i;
 
-        if (subscriber) {
-            subscribers = memberDataSubscribers[userId];
+        runtime.assert(subscriber !== undefined, "missing callback");
 
-            if (subscribers) {
-                subscribers.push({memberId: memberId, subscriber: subscriber});
-            } else {
-                memberDataSubscribers[userId] = [ {memberId: memberId, subscriber: subscriber} ];
+        // detect double subscription
+        for (i=0; i<subscribers.length; i+=1) {
+            if (subscribers[i].subscriber === subscriber) {
+                break;
             }
+        }
+        if (i < subscribers.length) {
+            // already subscribed
+            runtime.log("double subscription request for "+memberId+" in NowjsUserModel::getUserDetailsAndUpdates");
+        } else {
+            // subscribe
+            subscribers.push({memberId: memberId, subscriber: subscriber});
         }
 
         if (userData === undefined) {
-            userData = {
-                userid:   userId,
-                fullname: "Unknown",
-                imageurl: "/user/" + userId + "/avatar.png",
-                color:    "#787878"
-            };
             // query data from server
             // TODO we should start considering security at some point
             net.getUserData(userId, function (udata) {
-                cacheUserDatum(
-                    udata.uid,
-                    udata.fullname,
-                    "/user/" + udata.uid + "/avatar.png",
-                    udata.color
-                );
-            });
-        }
+                // this will call all subscribers
 
-        return userData;
+                cacheUserDatum(userId, udata?{
+                    userid:   udata.uid,
+                    fullname: udata.fullname,
+                    imageurl: "/user/" + udata.uid + "/avatar.png",
+                    color:    udata.color
+                }:null);
+            });
+        } else {
+            // data available from cache
+            subscriber(memberId, userData);
+        }
     };
 
-    this.unsubscribeForUserDetails = function (memberId, subscriber) {
+    /**
+     * getUserDetailsAndUpdates subscribes a callback for updates on user details.
+     * this function undoes this subscription.
+     *
+     * @param {!string} memberId
+     * @param {!function(!string, ?Object)} subscriber
+     * @return {undefined}
+     */
+    this.unsubscribeUserDetailsUpdates = function (memberId, subscriber) {
         var i,
             userId = userIdFromMemberId(memberId),
             subscribers = memberDataSubscribers[userId];
 
+        runtime.assert(subscriber!==undefined, "missing subscriber parameter or null");
+        runtime.assert(subscribers,
+            "tried to unsubscribe when no one is subscribed ('" + memberId + "')");
         if (subscribers) {
             for (i=0; i<subscribers.length; i+=1) {
                 if (subscribers[i].subscriber === subscriber) {

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -35,15 +35,14 @@
 /*global define,runtime */
 define("webodf/editor/UserList", [], function () {
     "use strict";
-    
+
     return function UserList(editorSession, userListDiv) {
-        var self = this,
-            memberDataChangedHandler;
+        var self = this;
 
         editorSession.subscribe('userAdded', function (memberId) {
             self.addUser(memberId);
         });
-        
+
         editorSession.subscribe('userRemoved', function (memberId) {
             self.removeUser(memberId);
         });
@@ -53,6 +52,14 @@ define("webodf/editor/UserList", [], function () {
          */
         function updateAvatarButton(memberId, userDetails) {
             var node = userListDiv.firstChild;
+            if (userDetails === null) {
+                // 'null' here means finally unknown user
+                // (and not that the data is still loading)
+                userDetails = {
+                    memberid: memberId, fullname: "Unknown",
+                    color: "black", imageurl: "avatar-joe.png"
+                };
+            }
             while (node) {
                 if (node.memberId === memberId) {
                     node = node.firstChild;
@@ -76,7 +83,7 @@ define("webodf/editor/UserList", [], function () {
         /**
          * @param {!string} memberId
          */
-        function createAvatarButton(memberId, userDetails) {
+        function createAvatarButton(memberId) {
             runtime.assert(userListDiv, "userListDiv unavailable");
             var doc = userListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
@@ -104,16 +111,11 @@ define("webodf/editor/UserList", [], function () {
             };
             userListDiv.appendChild(avatarDiv);
 
-            updateAvatarButton(memberId, userDetails);
+            // preset bogus data
+            // TODO: indicate loading state
+            // (instead of setting the final 'unknown identity' data)
+            updateAvatarButton(memberId, null);
         }
-
-        /**
-         * @param {!string} memberId
-         */
-        function onNewUserDetails(memberId, userDetails) {
-            updateAvatarButton(memberId, userDetails);
-        }
-        memberDataChangedHandler = onNewUserDetails;
 
         /**
          * @param {!string} memberId
@@ -133,16 +135,15 @@ define("webodf/editor/UserList", [], function () {
          * @param {!string} memberId
          */
         this.addUser = function (memberId) {
-            var userDetails = editorSession.getUserDetails(memberId, memberDataChangedHandler);
-
-            createAvatarButton(memberId, userDetails);
+            createAvatarButton(memberId);
+            editorSession.getUserDetailsAndUpdates(memberId, updateAvatarButton);
         };
 
         /**
          * @param {!string} memberId
          */
         this.removeUser = function (memberId) {
-            editorSession.unsubscribeForUserDetails(memberId, memberDataChangedHandler);
+            editorSession.unsubscribeUserDetailsUpdates(memberId, updateAvatarButton);
             removeAvatarButton(memberId);
         };
     };

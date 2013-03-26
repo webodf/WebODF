@@ -46,7 +46,23 @@
 ops.UserModel = function UserModel() {"use strict"; };
 
 /**
- * @param {!string} memberid
+ * callback is called as soon as the userdata is available and after that
+ * on every userdata update.
+ * a parameter `null` passed to the callback means that the user is finally
+ * not known.
+ *
+ * @param {!string} memberId
+ * @param {function(!string, ?Object)} subscriber
+ * @return {undefined}
  */
-ops.UserModel.prototype.getUserDetails = function (memberid, subscriber) {"use strict"; };
-ops.UserModel.prototype.unsubscribeForUserDetails = function (memberId, subscriber) {"use strict"; };
+ops.UserModel.prototype.getUserDetailsAndUpdates = function (memberId, subscriber) {"use strict"; };
+
+/**
+ * getUserDetailsAndUpdates subscribes a callback for updates on user details.
+ * this function undoes this subscription.
+ *
+ * @param {!string} memberId
+ * @param {function(!string, ?Object)} subscriber
+ * @return {undefined}
+ */
+ops.UserModel.prototype.unsubscribeUserDetailsUpdates = function (memberId, subscriber) {"use strict"; };
