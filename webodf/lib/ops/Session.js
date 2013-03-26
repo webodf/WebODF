@@ -114,21 +114,6 @@ ops.Session = function Session(odfCanvas) {
     };
 
     /**
-     * @param {!number} position
-     * @return {!boolean}
-     */
-    this.insertParagraph = function (position) {
-        return true;
-    };
-    /**
-     * @param {!number} position
-     * @return {!boolean}
-     */
-    this.removeParagraph = function (position) {
-        return true;
-    };
-
-    /**
      * @return {undefined}
      */
     function init() {
