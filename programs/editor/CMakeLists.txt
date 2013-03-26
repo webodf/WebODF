@@ -3,8 +3,8 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     index.html
     collab-index.html
     welcome.odt
-    getin.js
-    editor.js
+    boot_editor.js
+    Editor.js
     editor.css
     widgets.js
     avatar-joe.png

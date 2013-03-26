@@ -54,8 +54,7 @@ ops.TrivialUserModel = function TrivialUserModel() {
     this.getUserDetails = function (memberid, callback) {
         var userid = memberid.split("___")[0];
 
-        callback(memberid, users[userid]);
-        return users[userid];
+        callback(memberid, users[userid]||null);
     };
 
     this.unsubscribeForUserDetails = function (memberId, subscriber) {

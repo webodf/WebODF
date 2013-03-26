@@ -12,14 +12,13 @@
 	-->
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
   
-  <title>Editor</title>
+  <title>Editor (CDN)</title>
 
   <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
 
   <script type="text/javascript" charset="utf-8">
     dojoConfig = {
       paths: {
-        "webodf": "/webodf",
         "webodf/editor": "/programs/editor",
         "resources": "/programs/editor/resources"
       }
@@ -43,13 +42,14 @@
 
   <!-- editor specific code -->
   <link rel="stylesheet" type="text/css" href="editor.css"/>
-  <script src="editor.js" type="text/javascript" charset="utf-8"></script>
-  <!-- Stuff for selecting a session -->
+
+  <!-- Stuff for selecting a session;
+  		TODO: port the two to AMD pattern and let them be included automatically. -->
   <script src="SessionList.js" type="text/javascript" charset="utf-8"></script>
   <script src="SessionListView.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- booting the editor -->
-  <script src="getin.js" type="text/javascript" charset="utf-8"/></script>
+  <script src="boot_editor.js" type="text/javascript" charset="utf-8"/></script>
  </head>
 
  <body onload="on_body_load();" class = "claro">
