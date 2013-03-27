@@ -78,11 +78,11 @@ core.Cursor = function Cursor(selection, document) {
      */
     function putCursorIntoTextNode(container, offset) {
         var parent = container.parentNode;
-        if (offset > 0) {
-            cursorTextNode.data = container.substringData(0, offset);
-            container.deleteData(0, offset);
-            parent.insertBefore(cursorTextNode, container);
-        }
+
+        cursorTextNode.data = container.substringData(0, offset);
+        container.deleteData(0, offset);
+        parent.insertBefore(cursorTextNode, container);
+
         parent.insertBefore(cursorNode, container);
     }
     /**
