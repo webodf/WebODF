@@ -52,6 +52,7 @@ odf.OdfContainer = (function () {
         namespaces = style2CSS.namespaces,
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
+        webodfns = "urn:webodf:names:origin",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
         base64 = new core.Base64(),
@@ -283,6 +284,49 @@ odf.OdfContainer = (function () {
 
         // private functions
         /**
+         * Tags all styles with an attribute noting their origin.
+         * Helper function for the primitive complete backwriting of
+         * the automatic styles.
+         * @param {?Element} stylesRootElement
+         * @param {!string} origin
+         * @return {undefined}
+         */
+        function tagAutomaticStylesOrigin(stylesRootElement, origin) {
+            var n = stylesRootElement && stylesRootElement.firstChild;
+            while (n) {
+                if (n.nodeType === 1) { // ELEMENT
+                    n.setAttributeNS(webodfns, "origin", origin);
+                }
+                n = n.nextSibling;
+            }
+        }
+        /**
+         * Creates a clone of the styles which only has styles tagged
+         * with the given origin.
+         * Helper function for the primitive complete backwriting of
+         * the automatic styles.
+         * @param {?Element} stylesRootElement
+         * @param {!string} origin
+         * @return {?Element}
+         */
+        function cloneStylesByOrigin(stylesRootElement, origin) {
+            var copy = null, n, s;
+            if (stylesRootElement) {
+                copy = stylesRootElement.cloneNode(true);
+                n = copy.firstChild;
+                while (n) {
+                    s = n.nextSibling;
+                    if (n.nodeType === 1) { // ELEMENT
+                        if (n.getAttributeNS(webodfns, "origin") !== origin) {
+                            copy.removeChild(n);
+                        }
+                    }
+                    n = s;
+                }
+            }
+            return copy;
+        }
+        /**
          * Import the document elementnode into the DOM of OdfContainer.
          * Any processing instructions are removed, since importing them
          * gives an exception.
@@ -351,6 +395,8 @@ odf.OdfContainer = (function () {
             setChild(root, root.styles);
             root.automaticStyles = getDirectChild(node, officens,
                     'automatic-styles');
+            // tag the styles, only needed until smart saving of styles is implemented
+            tagAutomaticStylesOrigin(root.automaticStyles, "styles.xml");
             setChild(root, root.automaticStyles);
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
@@ -388,6 +434,8 @@ odf.OdfContainer = (function () {
                 setChild(root, fontFaceDecls);
             }
             automaticStyles = getDirectChild(node, officens, 'automatic-styles');
+            // tag the styles, only needed until smart saving of styles is implemented
+            tagAutomaticStylesOrigin(automaticStyles, "content.xml");
             if (root.automaticStyles && automaticStyles) {
                 c = automaticStyles.firstChild;
                 while (c) {
@@ -577,13 +625,17 @@ odf.OdfContainer = (function () {
         function serializeStylesXml() {
             var nsmap = style2CSS.namespaces,
                 serializer = new xmldom.LSSerializer(),
+                // select the styles by the tag, only needed until smart saving of styles is implemented
+                automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "styles.xml"),
                 /**@type{!string}*/ s = documentElement("document-styles", nsmap);
             // TODO: care about automatic styles only referenced by other automatic styles
-            serializer.filter = new OdfNodeFilter(self.rootElement,
-                    self.rootElement.masterStyles);
+            // once that is done, add self.rootElement.masterStyles as second parameter again
+            // For now just the complete existing automatic styles are written
+            serializer.filter = new OdfNodeFilter(self.rootElement/*,
+                    self.rootElement.masterStyles*/);
             s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
             s += serializer.writeToString(self.rootElement.styles, nsmap);
-            s += serializer.writeToString(self.rootElement.automaticStyles, nsmap);
+            s += serializer.writeToString(automaticStyles, nsmap);
             s += serializer.writeToString(self.rootElement.masterStyles, nsmap);
             s += "</office:document-styles>";
             return s;
@@ -594,13 +646,17 @@ odf.OdfContainer = (function () {
         function serializeContentXml() {
             var nsmap = style2CSS.namespaces,
                 serializer = new xmldom.LSSerializer(),
+                // select the styles by the tag, only needed until smart saving of styles is implemented
+                automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "content.xml"),
                 /**@type{!string}*/ s = documentElement("document-content", nsmap);
             // TODO: care about automatic styles only referenced by other automatic styles
-            serializer.filter = new OdfNodeFilter(self.rootElement,
-                    self.rootElement.body);
+            // once that is done, add self.rootElement.body as second parameter again
+            // For now just the complete existing automatic styles are written
+            serializer.filter = new OdfNodeFilter(self.rootElement/*,
+                    self.rootElement.body*/);
             // Until there is code to  determine if a font is referenced only
             // from all font declaratios will be stored in styles.xml
-            s += serializer.writeToString(self.rootElement.automaticStyles, nsmap);
+            s += serializer.writeToString(automaticStyles, nsmap);
             s += serializer.writeToString(self.rootElement.body, nsmap);
             s += "</office:document-content>";
             return s;
