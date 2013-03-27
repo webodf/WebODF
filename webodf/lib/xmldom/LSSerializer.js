@@ -183,7 +183,7 @@ xmldom.LSSerializer = function LSSerializer() {
      */
     this.filter = null;
     /**
-     * @param {!Node} node
+     * @param {?Node} node
      * @param {!Object.<string,string>} nsmap
      * @return {!string}
      */
