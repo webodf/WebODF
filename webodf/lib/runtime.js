@@ -1331,7 +1331,7 @@ var runtime = (function () {
 }());
 (function (args) {
     if (args) {
-        args = Array.prototype.slice.call(/**@type{Object}*/(args));
+        args = Array.prototype.slice.call(/**@type{{length:number}}*/(args));
     } else {
         args = [];
     }
