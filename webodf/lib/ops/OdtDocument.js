@@ -356,7 +356,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!boolean}
      */
     this.removeText = function (memberid, timestamp, position, length) {
-        var domPosition;
+        var domPosition, textNode;
         if (length < 0) {
             length = -length;
             position -= length;
@@ -388,12 +388,19 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             domPosition.offset -= 1;
         }
         if (domPosition) {
-            domPosition.textNode.deleteData(domPosition.offset, length);
+            textNode = domPosition.textNode;
+
             self.emit('paragraphEdited', {
-                element: getParagraphElement(domPosition.textNode),
+                element: getParagraphElement(textNode),
                 memberId: memberid,
                 timeStamp: timestamp
             });
+
+            if (domPosition.offset === 0) {
+                textNode.parentNode.removeChild(textNode);
+            } else {
+                textNode.deleteData(domPosition.offset, length);
+            }
             return true;
         }
         return false;

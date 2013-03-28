@@ -155,17 +155,21 @@ gui.SessionController = (function () {
         function createOpRemoveTextByBackspaceKey() {
             var odtDocument = session.getOdtDocument(),
                 position = odtDocument.getCursorPosition(inputMemberId),
-                // position-1 must exist for backspace to be valid
-                domPosition = odtDocument.getPositionInTextNode(position - 1),
+                domPosition,
                 op = null;
 
-            if (domPosition) {
-                op = new ops.OpRemoveText(session);
-                op.init({
-                    memberid: inputMemberId,
-                    position: position,
-                    length: -1
-                });
+            if (position > 0) {
+                // position-1 must exist for backspace to be valid
+                domPosition = odtDocument.getPositionInTextNode(position - 1);
+
+                if (domPosition) {
+                    op = new ops.OpRemoveText(session);
+                    op.init({
+                        memberid: inputMemberId,
+                        position: position,
+                        length: -1
+                    });
+                }
             }
 
             return op;
