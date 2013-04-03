@@ -41,12 +41,11 @@
 ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
     "use strict";
 
-    var memberid, timestamp, position, styleName, info;
+    var memberid, timestamp, styleName, info;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
-        position = data.position;
         styleName = data.styleName;
         info = data.info;
     };
@@ -62,7 +61,6 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
             optype: "UpdateParagraphStyle",
             memberid: memberid,
             timestamp: timestamp,
-            position: position,
             styleName: styleName,
             info: info
         };
