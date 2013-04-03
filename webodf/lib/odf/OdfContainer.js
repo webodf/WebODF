@@ -57,8 +57,7 @@ odf.OdfContainer = (function () {
             'automatic-styles', 'master-styles', 'body'],
         automaticStylePrefix = (new Date()).getTime() + "_webodf_",
         base64 = new core.Base64(),
-        fontLoader = new odf.FontLoader(),
-        partMimetypes = {};
+        fontLoader = new odf.FontLoader();
     /**
      * @param {?Node} node
      * @param {!string} ns
@@ -182,7 +181,7 @@ odf.OdfContainer = (function () {
      * @param {!odf.OdfContainer} container
      * @param {core.Zip} zip
      */
-    function OdfPart(name, container, zip) {
+    function OdfPart(name, mimetype,  container, zip) {
         var self = this,
             privatedata;
 
@@ -207,7 +206,6 @@ odf.OdfContainer = (function () {
             if (zip === null) {
                 return;
             }
-            var mimetype = partMimetypes[name];
             this.mimetype = mimetype;
             zip.loadAsDataURL(name, mimetype, function (err, url) {
                 self.url = url;
@@ -251,7 +249,8 @@ odf.OdfContainer = (function () {
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
             zip,
-            contentXmlCompletelyLoaded = false;
+            contentXmlCompletelyLoaded = false,
+            partMimetypes = {};
 
         // NOTE each instance of OdfContainer has a copy of the private functions
         // it would be better to have a class OdfContainerPrivate where the
@@ -606,19 +605,32 @@ odf.OdfContainer = (function () {
             return s;
         }
         /**
+         * @return {!Node}
+         */
+        function createManifestEntry(fullPath, mediaType) {
+            var element = document.createElementNS(manifestns, 'manifest:file-entry');
+            element.setAttributeNS(manifestns, 'manifest:full-path', fullPath);
+            element.setAttributeNS(manifestns, 'manifest:media-type', mediaType);
+            return element;
+        }
+        /**
          * @return {!string}
          */
         function serializeManifestXml() {
-            var xml = "<manifest:manifest xmlns:manifest='urn:oasis:names:tc:opendocument:xmlns:manifest:1.0' manifest:version='1.2'><manifest:file-entry manifest:media-type='application/vnd.oasis.opendocument.text' manifest:full-path='/'/>"
-                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='content.xml'/>"
-                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='styles.xml'/>"
-                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='meta.xml'/>"
-                + "<manifest:file-entry manifest:media-type='text/xml' manifest:full-path='settings.xml'/>"
-                + "</manifest:manifest>",
+            var header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n',
+                xml = '<manifest:manifest xmlns:manifest="' + manifestns + '"></manifest:manifest>',
                 manifest = /**@type{!Document}*/(runtime.parseXML(xml)),
-                serializer = new xmldom.LSSerializer();
+                manifestRoot = getDirectChild(manifest, manifestns, 'manifest'),
+                serializer = new xmldom.LSSerializer(),
+                fullPath;
+
+            for(fullPath in partMimetypes) {
+                if (partMimetypes.hasOwnProperty(fullPath)) {
+                    manifestRoot.appendChild(createManifestEntry(fullPath, partMimetypes[fullPath]));
+                }
+            }
             serializer.filter = new OdfNodeFilter(self.rootElement);
-            return serializer.writeToString(manifest, style2CSS.namespaces);
+            return header + serializer.writeToString(manifest, style2CSS.namespaces);
         }
         /**
          * @return {!string}
@@ -717,7 +729,7 @@ odf.OdfContainer = (function () {
          * @return {!OdfPart}
          **/
         this.getPart = function (partname) {
-            return new OdfPart(partname, self, zip);
+            return new OdfPart(partname, partMimetypes[partname], self, zip);
         };
         function createEmptyTextDocument() {
             var zip = new core.Zip("", null),
