@@ -178,6 +178,7 @@ odf.OdfContainer = (function () {
     /**
      * @constructor
      * @param {!string} name
+     * @param {!string} mimetype
      * @param {!odf.OdfContainer} container
      * @param {core.Zip} zip
      */
@@ -605,6 +606,9 @@ odf.OdfContainer = (function () {
             return s;
         }
         /**
+         * Creates a manifest:file-entry node
+         * @param {!string} fullPath Full-path attribute value for the file-entry
+         * @param {!string} mediaType Media-type attribute value for the file-entry
          * @return {!Node}
          */
         function createManifestEntry(fullPath, mediaType) {
