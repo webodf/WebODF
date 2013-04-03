@@ -34,107 +34,282 @@
 
 /*
  * bootstrap the editor in different ways.
- * this file is meant to be included from HTML and it will
- * load necessary classes. the HTML needs to call on_body_load().
- * dojo and webodf need to be loaded already.
+ * this file is meant to be included from HTML and used
+ * by users who do not want to know much about the inner
+ * complexity.
+ * so we need to make it really easy.
+ *
+ * including this file will result in the namespace/object
+ * "webodfEditor" to be available from the HTML side.
+ * calling webodfEditor.boot() will start the editor.
+ * the method can also take some parameters to specify
+ * behaviour. see documentation of that method.
+ *
  */
 
 /*global runtime,require,document,alert,net */
-function on_body_load() {
-    "use strict";
-    var net = runtime.getNetwork(),
-        accumulated_waiting_time = 0,
-        userId, sessionId;
 
-    function bootEditor(documentPath) {
-        require({ }, ["webodf/editor/Editor"],
-            function(Editor) {
-                (new Editor()).bootWithNetworkDelay(documentPath, userId, sessionId);
+// define the namespace/object we want to provide
+// this is the first line of API, the user gets.
+var webodfEditor = (function() {
+    "use strict";
+
+    var editorInstance = null,
+        booting = false;
+
+    /**
+     * wait for a network connection through nowjs to establish.
+     * call the callback when done, when finally failed, or
+     * when a timeout reached.
+     * the parameter to the callback is a string with the possible
+     * values:
+     * "unavailable", "timeout", "ready"
+     *
+     * @param {!function(!string)} callback
+     * @return {undefined}
+     */
+    function waitForNetwork(callback) {
+        var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+        function later_cb() {
+            if (net.networkStatus === "unavailable") {
+                runtime.log("connection to server unavailable.");
+                callback("unavailable");
+                return;
             }
-        );
+            if (net.networkStatus !== "ready") {
+                if (accumulated_waiting_time > 8000) {
+                    // game over
+                    runtime.log("connection to server timed out.");
+                    callback("timeout");
+                    return;
+                }
+                accumulated_waiting_time += 100;
+                runtime.getWindow().setTimeout(later_cb, 100);
+            } else {
+                runtime.log("connection to collaboration server established.");
+                callback("ready");
+            }
+        }
+        later_cb();
     }
 
-    function bootEditorWithoutNetwork() {
-        var docUrl, pos;
-
-        document.getElementById("mainContainer").style.display="";
-
+    /**
+     * extract document url from the url-fragment
+     *
+     * @return {?string}
+     */
+    function guessDocUrl() {
+        var pos, docUrl = String(document.location);
         // If the URL has a fragment (#...), try to load the file it represents
-        docUrl = String(document.location);
         pos = docUrl.indexOf('#');
         if (pos !== -1) {
             docUrl = docUrl.substr(pos + 1);
         } else {
-            // default document
             docUrl = "welcome.odt";
         }
+        return docUrl||null;
+    }
+
+    /**
+     * create a new editor instance, and start the editor with
+     * the given document.
+     *
+     * @param {!string} docUrl
+     * @param {?function(!Object)} editorReadyCallback
+     */
+    function createLocalEditor(docUrl, editorReadyCallback) {
+        var pos;
+        booting = true;
+
+        runtime.assert(docUrl, "docUrl needs to be specified");
+        runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
+
+        document.getElementById("mainContainer").style.display="";
+
         require({ }, ["webodf/editor/Editor"],
             function(Editor) {
-                (new Editor()).bootLocal(docUrl, userId, sessionId);
+                editorInstance = new Editor({ memberid: "localuser" });
+                editorInstance.loadDocument(docUrl, function() {
+                    editorReadyCallback(editorInstance);
+                });
             }
         );
     }
 
-    function enterSession(selectedSessionId) {
-        sessionId = selectedSessionId;
-        document.getElementById("sessionListContainer").style.display="none";
-        document.getElementById("mainContainer").style.display="";
+    /**
+     * assume the network connection is established, create a new editor instance,
+     * and start the editor on the network.
+     *
+     * @param {!string} sessionId
+     * @param {!string} userid
+     * @param {?string} token
+     * @param {?function(!Object)} editorReadyCallback
+     */
+    function createNetworkedEditor(sessionId, userid, token, editorReadyCallback) {
+        runtime.assert(sessionId, "sessionId needs to be specified");
+        runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
+        require({ }, ["webodf/editor/Editor"],
+            function(Editor) {
+                // TODO: the networkSecurityToken needs to be retrieved via now.login
+                // (but this is to be implemented later)
+                editorInstance = new Editor({
+                    memberid: userid + "___" + Date.now(),
+                    networked:true,
+                    networkSecurityToken:token
+                });
 
-        bootEditor("/session/"+sessionId+"/genesis", userId, sessionId);
+                // load the document and get called back when it's live
+                editorInstance.loadSession(sessionId, function() {
+                    editorReadyCallback(editorInstance);
+                });
+            }
+        );
     }
 
-    function showSessions() {
-        var sessionListDiv = document.getElementById("sessionList"),
+
+    /**
+     * start the login process by offering a login/password prompt.
+     * the login is validated via nowjs namespace.
+     * on success a list of sessions is offered.
+     * when the user selects a session the callback is called
+     * with the sessionId as parameter
+     *
+     * @param {!function(!string)} callback
+     * @returns {undefined}
+     */
+    function startLoginProcess(callback) {
+        var userid, token,
+            net = runtime.getNetwork();
+
+        booting = true;
+
+        runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
+
+        function enterSession(selectedSessionId) {
+            document.getElementById("sessionListContainer").style.display="none";
+            document.getElementById("mainContainer").style.display="";
+
+            callback(selectedSessionId, userid, token);
+        }
+
+        function showSessions() {
+            var sessionListDiv = document.getElementById("sessionList"),
             sessionList = new SessionList(net),
             sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
 
-        // hide login view
-        document.getElementById("loginContainer").style.display="none";
+            // hide login view
+            document.getElementById("loginContainer").style.display="none";
 
-        // show session list
-        document.getElementById("sessionListContainer").style.display="";
-    }
-
-    function loginSuccess(userData) {
-        runtime.log("connected:"+userData.full_name);
-        userId = userData.uid;
-
-        showSessions();
-    }
-
-    function loginFail(result) {
-        alert("Login failed: " + result);
-    }
-
-    function tryToGetIn() {
-         net.login(document.loginForm.login.value, document.loginForm.password.value, loginSuccess, loginFail);
-
-        // block the submit button, we already dealt with the input
-        return false;
-    }
-
-    function later_cb() {
-        if (net.networkStatus === "unavailable") {
-            runtime.log("connection to server unavailable.");
-            bootEditorWithoutNetwork();
-            return;
+            // show session list
+            document.getElementById("sessionListContainer").style.display="";
         }
-        if (net.networkStatus !== "ready") {
-            if (accumulated_waiting_time > 8000) {
-                // game over
-                runtime.log("connection to server timed out.");
-                bootEditorWithoutNetwork();
-                return;
-            }
-            accumulated_waiting_time += 100;
-            runtime.getWindow().setTimeout(later_cb, 100);
+
+        function loginSuccess(userData) {
+            runtime.log("connected:"+userData.full_name);
+            userid = userData.uid;
+            token = userData.securityToken || null;
+
+            showSessions();
+        }
+
+        function loginFail(result) {
+            alert("Login failed: " + result);
+        }
+
+        function onLoginSubmit() {
+            net.login(document.loginForm.login.value, document.loginForm.password.value, loginSuccess, loginFail);
+
+            // block the submit button, we already dealt with the input
+            return false;
+        }
+
+        // bring up the login form
+        document.loginForm.Submit.onclick = onLoginSubmit;
+        document.getElementById("loginContainer").style.display="";
+    }
+
+    /**
+     * make a guess about the document (# in URL)
+     * also guess about local/collaborative (depending on nowjs)
+     *
+     * @param {?Object} args
+     *
+     * args:
+     *
+     * collaborative: if set to true: connect to the network and start a
+     *                collaborative editor. in that case the document url
+     *                is ignored. and user needs to select a session.
+     *
+     *                if set to the string "auto": it will try the above
+     *                but fall back to non-collaborative mode [default]
+     *
+     * docUrl:        if given it is used as the url to the document to load
+     *
+     * callback:      callback to be called as soon as the document is loaded
+     *
+     */
+    function boot(args) {
+        runtime.assert(!booting, "editor creation already in progress");
+
+        args = args || {};
+
+        if (args.collaborative === undefined) {
+            args.collaborative = "auto";
         } else {
-            runtime.log("connection to collaboration server established.");
+            args.collaborative = String(args.collaborative).toLowerCase();
+        }
+        if (args.docUrl === undefined) {
+            args.docUrl = guessDocUrl();
+        }
 
-            document.loginForm.Submit.onclick = tryToGetIn;
-            // show login view
-            document.getElementById("loginContainer").style.display="";
+        // start the editor with network
+        function handleNetworkedSituation() {
+            startLoginProcess(function(sessionId, userid, token) {
+                createNetworkedEditor(sessionId, userid, token, function (ed) {
+                    if (args.callback) {
+                        args.callback(ed);
+                    }
+                }
+                );
+            });
+        }
+
+        // start the editor without network
+        function handleNonNetworkedSituation() {
+            createLocalEditor(args.docUrl, function (editor) {
+                if (args.callback) {
+                    args.callback(editor);
+                }
+            });
+        }
+
+        if (args.collaborative === "auto") {
+            runtime.log("detecting network...");
+            waitForNetwork(function(state) {
+                if (state === "ready") {
+                    runtime.log("... network available.");
+                    handleNetworkedSituation();
+                } else {
+                    runtime.log("... no network available ("+state+").");
+                    handleNonNetworkedSituation();
+                }
+            });
+        } else if ((args.collaborative === "true") ||
+                   (args.collaborative === "1") ||
+                   (args.collaborative === "yes")) {
+            runtime.log("starting collaborative editor.");
+            waitForNetwork(function(state) {
+                if (state === "ready") {
+                    handleNetworkedSituation();
+                }
+            });
+        } else {
+            runtime.log("starting local editor.");
+            handleNonNetworkedSituation();
         }
     }
-    later_cb();
-}
+
+    // exposed API
+    return { boot: boot };
+}());
+

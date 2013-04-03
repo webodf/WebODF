@@ -144,11 +144,10 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
     };
 
     function init() {
-        var sessionJoinSuccess;
 
         net.memberid = memberid;
 
-        sessionJoinSuccess = net.joinSession(sessionId, function(sessionJoinSuccess) {
+        net.joinSession(sessionId, function(sessionJoinSuccess) {
             runtime.assert(sessionJoinSuccess, "Trying to join a session which does not exists or where we are already in");
         });
     }

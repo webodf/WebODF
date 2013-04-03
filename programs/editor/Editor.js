@@ -49,18 +49,24 @@ define("webodf/editor/Editor", [
         loadWidgets) {
         "use strict";
 
-        function Editor() {
+        /**
+         * @constructor
+         * @param {{networked:boolean=, memberid:string=}} args
+         */
+        function Editor(args) {
 
             var self = this,
             // Private
-            userid, memberid, session,
+            userid,
+            memberid = args.memberid,
+            session,
             editorSession,
             userList,
-            networked,
+            networked = args.networked,
             opRouter,
             sessionid,
             userModel,
-            docurl;
+            documentUrl;
 
             function translator(key, context) {
                 if (undefined === myResources[key]) {
@@ -77,30 +83,34 @@ define("webodf/editor/Editor", [
             };
 
             /**
-             * Utility method for testing
-             * @param {?string} memberId
+             * prepare all gui elements and load the given document.
+             * after loading is completed, the given callback is called.
+             * the caller still has to call editorSession.startEditing
+             * which will insert the the cursor.
+             *
+             * @param {!string} initialDocumentUrl
+             * @param {!function()} editorReadyCallback
              */
-            function addCursorToDoc(a_session, memberId) {
-                var op = new ops.OpAddCursor(a_session);
-                op.init({memberid : memberId});
-                a_session.enqueue(op);
-            }
+            function initGuiAndDoc(initialDocumentUrl, editorReadyCallback) {
+                var odfElement, odfCanvas, mainContainer,
+                    editorPane, peoplePane,
+                    inviteButton,
+                    peopleListDiv = document.getElementById('peopleList');
 
+                if (networked) {
+                    runtime.assert(peopleListDiv, "missing peopleList div in HTML");
+                }
 
-            function init_gui_and_doc() {
                 runtime.loadClass('odf.OdfCanvas');
 
-                var odfElement, odfCanvas, mainContainer,
-                filename, editorPane, peoplePane,
-                inviteButton,
-                // existence of that div determines if some objects will
-                // be constructed. it is required for collaborative editing.
-                peopleListDiv = document.getElementById('peopleList');
+                // we might need it later
+                documentUrl = initialDocumentUrl;
+                runtime.assert(documentUrl, "document should be defined here.");
 
-                runtime.assert(userid !== undefined, "userid should be defined here.");
+                runtime.assert(memberid !== undefined, "memberid should be defined here.");
 
                 odfElement = document.getElementById("canvas");
-                runtime.assert(odfElement, "init_gui_and_doc failed to get odf canvas from html");
+                runtime.assert(odfElement, "initGuiAndDoc failed to get odf canvas from html");
                 odfCanvas = new odf.OdfCanvas(odfElement);
                 // make the canvas accessible to users of editor.js
                 self.odfCanvas = odfCanvas;
@@ -129,34 +139,16 @@ define("webodf/editor/Editor", [
 
                 odfCanvas.addListener("statereadychange", function () {
 
-                    memberid = userid + "___" + Date.now();
+                    if (!memberid) {
+                        // legacy - memberid should be passed in the constructor
+                        memberid = (userid||'undefined') + "___" + Date.now();
+                    }
 
                     session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, memberid);
+
                     if (peopleListDiv) {
                         userList = new UserList(editorSession, peopleListDiv);
-                    }
-
-                    if (networked) {
-                        // use the nowjs op-router when connected
-                        opRouter = opRouter ||
-                        new ops.NowjsOperationRouter(sessionid, memberid);
-                        session.setOperationRouter(opRouter);
-
-                        runtime.log("editor: setting UserModel and requesting replay");
-                        userModel = userModel || new ops.NowjsUserModel();
-                        session.setUserModel(userModel);
-
-                        editorSession.sessionView.disableEditHighlighting();
-                        opRouter.requestReplay(function done() {
-                            editorSession.sessionView.enableEditHighlighting();
-
-                            // start editing: let the controller send the OpAddCursor
-                            editorSession.startEditing();
-                        });
-                    } else {
-                        // offline
-                        editorSession.startEditing();
                     }
 
                     // gracefull cursor removal on pag closing
@@ -165,13 +157,14 @@ define("webodf/editor/Editor", [
                     };
 
                     loadWidgets(editorSession, self.saveOdtFile);
+                    editorReadyCallback();
+
                 });
-                odfCanvas.load(docurl);
+                odfCanvas.load(initialDocumentUrl);
                 odfCanvas.setEditable(false);
 
                 // App Widgets
                 mainContainer = new BorderContainer({}, 'mainContainer');
-                filename = docurl.replace('/^.*[\\\/]/', '');
 
                 editorPane = new ContentPane({
                     region: 'center'
@@ -198,56 +191,52 @@ define("webodf/editor/Editor", [
                 }
             }
 
-            /*
-             * initializes GUI and loads given document
+            /**
+             * create the editor, load the starting document,
+             * call editorReadyCallback once everything is done.
+             *
+             * @param {!string} docUrl
+             * @param {?function()} editorReadyCallback
              */
-            self.bootLocal = function (a_docurl, a_userid) {
-                if (a_docurl) {
-                    docurl = a_docurl;
-                }
-                userid = a_userid||"localuser";
-                init_gui_and_doc();
+            self.loadDocument = function (docUrl, editorReadyCallback) {
+                initGuiAndDoc(docUrl, function() {
+                    editorSession.startEditing();
+                    editorReadyCallback();
+                });
             };
 
-            /*
-             * waits for network to become available and initializes
-             * the editor.
+            /**
+             * create the editor, load the starting document of an editing-session,
+             * request a replay of previous operations, call editorReadyCallback once
+             * everything is done.
+             *
+             * @param {!string} sessionId
+             * @param {?function()} editorReadyCallback
              */
-            self.bootWithNetworkDelay = function (a_docurl, a_userid, a_sessionid) {
-                var net = runtime.getNetwork(), accumulated_waiting_time = 0;
+            self.loadSession = function (sessionId, editorReadyCallback) {
+                initGuiAndDoc("/session/"+sessionId+"/genesis", function () {
+                    // use the nowjs op-router when connected
+                    opRouter = opRouter || new ops.NowjsOperationRouter(sessionId, memberid);
+                    session.setOperationRouter(opRouter);
 
-                if (a_docurl) {
-                    docurl = a_docurl;
-                }
-                userid = a_userid || "you";
-                if (a_sessionid) {
-                    sessionid = a_sessionid;
-                }
+                    userModel = userModel || new ops.NowjsUserModel();
+                    session.setUserModel(userModel);
 
-                function later_cb() {
-                    if (net.networkStatus === "unavailable") {
-                        runtime.log("connection to server unavailable.");
-                        networked = false;
-                        init_gui_and_doc();
-                        return;
-                    }
-                    if (net.networkStatus !== "ready") {
-                        if (accumulated_waiting_time > 8000) {
-                            // game over
-                            runtime.log("connection to server timed out.");
-                            networked = false;
-                            init_gui_and_doc();
-                            return;
-                        }
-                        accumulated_waiting_time += 100;
-                        runtime.getWindow().setTimeout(later_cb, 100);
-                    } else {
-                        runtime.log("connection to collaboration server established.");
-                        networked = true;
-                        init_gui_and_doc();
-                    }
-                }
-                later_cb();
+                    editorSession.sessionView.disableEditHighlighting();
+                    opRouter.requestReplay(function done() {
+                        editorSession.sessionView.enableEditHighlighting();
+
+                        // start editing: let the controller send the OpAddCursor
+                        editorSession.startEditing();
+                        editorReadyCallback();
+                    });
+
+                });
+            };
+
+            // access to user model
+            self.getUserModel = function() {
+                return userModel;
             };
         }
         return Editor;
