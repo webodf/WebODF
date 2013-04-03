@@ -356,7 +356,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!boolean}
      */
     this.removeText = function (memberid, timestamp, position, length) {
-        var domPosition, textNode;
+        var domPosition, textNode,
+            removalType = (length < 0) ? 'backspace' : 'delete';
         if (length < 0) {
             length = -length;
             position -= length;
@@ -396,11 +397,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 timeStamp: timestamp
             });
 
-            if (domPosition.offset === 0) {
+            // If we are backspacing, then the textNode is on the left. If this textNode is about to be set to "", we should delete it. Similarly for 'delete', the textNode is on the right, and if we are executing 'delete' just before the last character, we should delete the textNode. If we are not at any extremity, just use textNode.deleteData(...);
+            if ((removalType === 'backspace' && domPosition.offset === 0)
+                    || (removalType === 'delete' && domPosition.offset + 1 === length)) {
                 textNode.parentNode.removeChild(textNode);
             } else {
                 textNode.deleteData(domPosition.offset, length);
             }
+
             return true;
         }
         return false;
