@@ -55,6 +55,7 @@ odf.OdfContainer = (function () {
         webodfns = "urn:webodf:names:origin",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
+        automaticStylePrefix = (new Date()).getTime() + "_webodf_",
         base64 = new core.Base64(),
         fontLoader = new odf.FontLoader(),
         partMimetypes = {};
@@ -400,6 +401,10 @@ odf.OdfContainer = (function () {
             setChild(root, root.automaticStyles);
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
+            // automatic styles from styles.xml could shadow automatic styles from content.xml,
+            // because they could have the same name
+            // so prefix them and their uses with some almost unique string
+            styleInfo.prefixStyleNames(root.automaticStyles, automaticStylePrefix, root.masterStyles);
             //removeUnusedAutomaticStyles(root.automaticStyles,
             //        root.masterStyles);
             if (root.fontFaceDecls) {
@@ -627,16 +632,23 @@ odf.OdfContainer = (function () {
                 serializer = new xmldom.LSSerializer(),
                 // select the styles by the tag, only needed until smart saving of styles is implemented
                 automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "styles.xml"),
+                masterStyles = self.rootElement.masterStyles && self.rootElement.masterStyles.cloneNode(true),
                 /**@type{!string}*/ s = documentElement("document-styles", nsmap);
             // TODO: care about automatic styles only referenced by other automatic styles
             // once that is done, add self.rootElement.masterStyles as second parameter again
             // For now just the complete existing automatic styles are written
             serializer.filter = new OdfNodeFilter(self.rootElement/*,
                     self.rootElement.masterStyles*/);
+            // automatic styles from styles.xml could shadow automatic styles from content.xml,
+            // because they could have the same name
+            // thus they were prefixed on loading with some almost unique string, which cam be removed
+            // again before saving
+            styleInfo.removePrefixFromStyleNames(automaticStyles, automaticStylePrefix, masterStyles);
+
             s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
             s += serializer.writeToString(self.rootElement.styles, nsmap);
             s += serializer.writeToString(automaticStyles, nsmap);
-            s += serializer.writeToString(self.rootElement.masterStyles, nsmap);
+            s += serializer.writeToString(masterStyles, nsmap);
             s += "</office:document-styles>";
             return s;
         }

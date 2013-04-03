@@ -53,6 +53,22 @@ odf.StyleInfo = function StyleInfo() {
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         xmlns = "http://www.w3.org/XML/1998/namespace",
+        /**@const@type{!Object.<string,string>}*/ nsprefixes = {
+            "urn:oasis:names:tc:opendocument:xmlns:chart:1.0": "chart:",
+            "urn:oasis:names:tc:opendocument:xmlns:database:1.0": "db:",
+            "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0": "dr3d:",
+            "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0": "draw:",
+            "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": "fo:",
+            "urn:oasis:names:tc:opendocument:xmlns:form:1.0": "form:",
+            "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0": "number:",
+            "urn:oasis:names:tc:opendocument:xmlns:office:1.0": "office:",
+            "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0": "presentation:",
+            "urn:oasis:names:tc:opendocument:xmlns:style:1.0": "style:",
+            "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0": "svg:",
+            "urn:oasis:names:tc:opendocument:xmlns:table:1.0": "table:",
+            "urn:oasis:names:tc:opendocument:xmlns:text:1.0": "chart:",
+            "http://www.w3.org/XML/1998/namespace": "xml:"
+        },
         /**
          * Data about the styles.
          * ens: element namespace, en: element name, ans: attribute namespace, a: attribute
@@ -374,6 +390,172 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
+     * Prefixes all style ids used to refer to styles in the given DOM element
+     * tree with the given prefix.
+     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!string} prefix
+     * @return {undefined}
+     */
+    function prefixUsedStyleNames(styleUsingElementsRoot, prefix) {
+        var elname = elements[styleUsingElementsRoot.localName],
+            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
+            length = elns ? elns.length : 0,
+            i, stylename, e;
+        // prefix any used style ids
+        for (i = 0; i < length; i += 1) {
+            stylename = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+            if (stylename) { // a style reference has been found!
+                styleUsingElementsRoot.setAttributeNS(elns[i].ns, nsprefixes[elns[i].ns]+elns[i].localname, prefix+stylename);
+            }
+        }
+        // continue prefixing with all child elements
+        i = styleUsingElementsRoot.firstChild;
+        while (i) {
+            if (i.nodeType === 1) {
+                e = /**@type{!Element}*/(i);
+                prefixUsedStyleNames(e, prefix);
+            }
+            i = i.nextSibling;
+        }
+    }
+    /**
+     * Prefixes the id of the style defined in the given DOM element with the
+     * given prefix.
+     * @param {!Element} styleElement
+     * @param {!string} prefix
+     * @return {undefined}
+     */
+    function prefixStyleName(styleElement, prefix) {
+        var stylename = styleElement.getAttributeNS(drawns, "name"),
+            ns;
+        if (stylename) {
+            ns = drawns;
+        } else {
+            stylename = styleElement.getAttributeNS(stylens, "name");
+            if (stylename) {
+                ns = stylens;
+            }
+        }
+
+        if (ns) {
+            styleElement.setAttributeNS(ns, nsprefixes[ns]+"name", prefix+stylename);
+        }
+    }
+
+    /**
+     * Prefixes all style ids with the given prefix. This will affect all style
+     * ids as set in the style definitions by the child elements of
+     * styleElementsRoot and all style ids used to refer to styles, both in
+     * these style definitions and in the given DOM element tree
+     * styleUsingElementsRoot.
+     * @param {?Element} styleElementsRoot  root element with styles nodes as childs
+     * @param {!string} prefix
+     * @param {?Element} styleUsingElementsRoot  root element of tree of elements using styles
+     */
+    function prefixStyleNames(styleElementsRoot, prefix, styleUsingElementsRoot) {
+        var s;
+        if (styleElementsRoot) {
+            // prefix all set style ids
+            s = styleElementsRoot.firstChild;
+            while (s) {
+                if (s.nodeType === 1) {
+                    prefixStyleName(/**@type{!Element}*/(s), prefix);
+                }
+                s = s.nextSibling;
+            }
+            // prefix all ids in style references
+            prefixUsedStyleNames(styleElementsRoot, prefix);
+            if (styleUsingElementsRoot) {
+                prefixUsedStyleNames(styleUsingElementsRoot, prefix);
+            }
+        }
+    }
+
+    /**
+     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!RegExp} regExp
+     * @return {undefined}
+     */
+    function removeRegExpFromUsedStyleNames(styleUsingElementsRoot, regExp) {
+        var elname = elements[styleUsingElementsRoot.localName],
+            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
+            length = elns ? elns.length : 0,
+            i, stylename, e;
+        // remove prefix from any used style id
+        for (i = 0; i < length; i += 1) {
+            stylename = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+            if (stylename) { // a style reference has been found!
+                stylename = stylename.replace(regExp, '');
+                styleUsingElementsRoot.setAttributeNS(elns[i].ns, nsprefixes[elns[i].ns]+elns[i].localname, stylename);
+            }
+        }
+        // continue removal with all child elements
+        i = styleUsingElementsRoot.firstChild;
+        while (i) {
+            if (i.nodeType === 1) {
+                e = /**@type{!Element}*/(i);
+                removeRegExpFromUsedStyleNames(e, regExp);
+            }
+            i = i.nextSibling;
+        }
+    }
+    /**
+     * Remove the given regular expression from the id of the style defined in
+     * the given DOM element.
+     * @param {!Element} styleElement
+     * @param {!RegExp} regExp
+     * @return {undefined}
+     */
+    function removeRegExpFromStyleName(styleElement, regExp) {
+        var stylename = styleElement.getAttributeNS(drawns, "name"),
+            ns;
+        if (stylename) {
+            ns = drawns;
+        } else {
+            stylename = styleElement.getAttributeNS(stylens, "name");
+            if (stylename) {
+                ns = stylens;
+            }
+        }
+
+        if (ns) {
+            stylename = stylename.replace(regExp, '');
+            styleElement.setAttributeNS(ns, nsprefixes[ns]+"name", stylename);
+        }
+    }
+
+    /**
+     * Removes the given prefix from all style ids. This will affect all style
+     * ids as set in the style definitions by the child elements of
+     * styleElementsRoot and all style ids used to refer to styles, both in
+     * these style definitions and in the given DOM element tree
+     * styleUsingElementsRoot.
+     * @param {?Element} styleElementsRoot root element with styles nodes as childs
+     * @param {!string} prefix
+     * @param {?Element} styleUsingElementsRoot  root element of tree of elements using styles
+     */
+    function removePrefixFromStyleNames(styleElementsRoot, prefix, styleUsingElementsRoot) {
+        var s,
+            regExp = new RegExp("^"+prefix);
+
+        if (styleElementsRoot) {
+            // remove prefix from all set style ids
+            s = styleElementsRoot.firstChild;
+            while (s) {
+                if (s.nodeType === 1) {
+                    removeRegExpFromStyleName(/**@type{!Element}*/(s), regExp);
+                }
+                s = s.nextSibling;
+            }
+            // remove prefix from all ids in style references
+            removeRegExpFromUsedStyleNames(styleElementsRoot, regExp);
+            if (styleUsingElementsRoot) {
+                removeRegExpFromUsedStyleNames(styleUsingElementsRoot, regExp);
+            }
+        }
+    }
+
+    /**
      * Determines all stylenames that are referenced in the passed element tree
      * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
      * @param {!Object.<string,Object.<string,number>>} usedStyles  map of used stylesnames, grouped by keyname
@@ -472,6 +654,8 @@ odf.StyleInfo = function StyleInfo() {
 
     this.canElementHaveStyle = canElementHaveStyle;
     this.hasDerivedStyles = hasDerivedStyles;
+    this.prefixStyleNames = prefixStyleNames;
+    this.removePrefixFromStyleNames = removePrefixFromStyleNames;
 
 
     // init
