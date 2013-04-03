@@ -376,6 +376,11 @@ odf.OdfContainer = (function () {
             root.masterStyles = getDirectChild(root, officens, 'master-styles');
             root.body = getDirectChild(root, officens, 'body');
             root.meta = getDirectChild(root, officens, 'meta');
+
+            if (root.fontFaceDecls) {
+                fontLoader.loadFonts(root.fontFaceDecls, zip, null);
+            }
+
             setState(OdfContainer.DONE);
         }
         /**
@@ -407,9 +412,6 @@ odf.OdfContainer = (function () {
             styleInfo.prefixStyleNames(root.automaticStyles, automaticStylePrefix, root.masterStyles);
             //removeUnusedAutomaticStyles(root.automaticStyles,
             //        root.masterStyles);
-            if (root.fontFaceDecls) {
-                fontLoader.loadFonts(root.fontFaceDecls, zip, null);
-            }
         }
         /**
          * @param {Document} xmldoc
@@ -427,6 +429,7 @@ odf.OdfContainer = (function () {
                 return;
             }
             root = self.rootElement;
+            // TODO: check for duplicated font face declarations
             fontFaceDecls = getDirectChild(node, officens, 'font-face-decls');
             if (root.fontFaceDecls && fontFaceDecls) {
                 c = fontFaceDecls.firstChild;
@@ -453,6 +456,11 @@ odf.OdfContainer = (function () {
             }
             root.body = getDirectChild(node, officens, 'body');
             setChild(root, root.body);
+
+            // load all fonts declared in styles.xml and content.xml
+            if (root.fontFaceDecls) {
+                fontLoader.loadFonts(root.fontFaceDecls, zip, null);
+            }
         }
         /**
          * @param {Document} xmldoc
@@ -645,6 +653,8 @@ odf.OdfContainer = (function () {
             // again before saving
             styleInfo.removePrefixFromStyleNames(automaticStyles, automaticStylePrefix, masterStyles);
 
+            // TODO: only store font-face declarations which are used from styles.xml,
+            // and store others with content.xml
             s += serializer.writeToString(self.rootElement.fontFaceDecls, nsmap);
             s += serializer.writeToString(self.rootElement.styles, nsmap);
             s += serializer.writeToString(automaticStyles, nsmap);
