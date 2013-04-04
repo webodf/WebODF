@@ -158,7 +158,7 @@ xmldom.XPath = (function () {
             done = false;
         };
         this.next = function next() {
-            var val = (done) ? null : node;
+            var val = done ? null : node;
             done = true;
             return val;
         };

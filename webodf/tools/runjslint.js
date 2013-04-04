@@ -37,26 +37,22 @@ function checkWithJSLINT(file) {
     "use strict";
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
-            anon:       false, // if the space may be omitted in anonymous function declarations
             bitwise:    false, // if bitwise operators should be allowed
             browser:    false, // if the standard browser globals should be predefined
-            cap:        false, // if upper case HTML should be allowed
+            closure:    true,  // if Google Closure idioms should be tolerated
             'continue': false, // if the continuation statement should be tolerated
-            css:        false, // if CSS workarounds should be tolerated
             debug:      false, // if debugger statements should be allowed
             devel:      false, // if logging should be allowed (console, alert, etc.)
             eqeq:       false, // if == should be allowed
             es5:        false, // if ES5 syntax should be allowed
             evil:       false, // if eval should be allowed
             forin:      false, // if for in statements need not filter
-            fragment:   false, // if HTML fragments should be allowed
             indent:     4, //the indentation factor
             maxerr:     10, //the maximum number of errors to allow
             //maxlen:   300  the maximum length of a source line
             newcap:     false, // if constructor names capitalization is ignored
             node:       false, // if Node.js globals should be predefined
             nomen:      false, // if names may have dangling _
-            on:         false, // if HTML event handlers should be allowed
             passfail:   false, // if the scan should stop on first error
             plusplus:   false, // if increment/decrement should be allowed
             properties: false, // if all property names must be declared with /*properties*/

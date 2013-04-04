@@ -312,7 +312,7 @@ function BrowserRuntime(logoutput) {
      * @extends {Runtime.ByteArray}
      * @param {!number} size
      */
-    this.ByteArray = (useNativeArray)
+    this.ByteArray = useNativeArray
         // if Uint8Array is available, use that
         ? function ByteArray(size) {
             Uint8Array.prototype.slice = function (begin, end) {
@@ -337,7 +337,7 @@ function BrowserRuntime(logoutput) {
             a.length = size;
             return a;
         };
-    this.concatByteArrays = (useNativeArray)
+    this.concatByteArrays = useNativeArray
         ? function (bytearray1, bytearray2) {
             var i, l1 = bytearray1.length, l2 = bytearray2.length,
                 a = new this.ByteArray(l1 + l2);

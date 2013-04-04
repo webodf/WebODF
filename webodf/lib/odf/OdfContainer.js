@@ -65,7 +65,7 @@ odf.OdfContainer = (function () {
      * @return {?Element}
      */
     function getDirectChild(node, ns, name) {
-        node = (node) ? node.firstChild : null;
+        node = node ? node.firstChild : null;
         while (node) {
             if (node.localName === name && node.namespaceURI === ns) {
                 return /**@type{!Element}*/(node);
