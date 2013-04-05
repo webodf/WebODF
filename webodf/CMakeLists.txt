@@ -205,7 +205,7 @@ endif (Java_JAVA_EXECUTABLE)
 add_custom_command(
     OUTPUT instrumented/index.html
     COMMAND ${JSCOVERAGE}
-    ARGS --exclude=extjs --exclude=node_modules --exclude=extjs/.git
+    ARGS --exclude=node_modules
          ${CMAKE_CURRENT_SOURCE_DIR}
          ${CMAKE_CURRENT_BINARY_DIR}/instrumented
     DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
