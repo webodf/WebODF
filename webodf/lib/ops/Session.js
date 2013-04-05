@@ -123,7 +123,6 @@ ops.Session = function Session(odfCanvas) {
     init();
 };
 
-// TODO: find out how this can be moved to ops.Session
 ops.Session.signalCursorAdded =   "cursor/added";
 ops.Session.signalCursorRemoved = "cursor/removed";
 ops.Session.signalCursorMoved =   "cursor/moved";
