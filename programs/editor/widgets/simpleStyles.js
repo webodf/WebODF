@@ -32,7 +32,10 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global define,require,document */
-define("webodf/editor/widgets/simpleStyles", [], function () {
+define("webodf/editor/widgets/simpleStyles",
+       ["webodf/editor/EditorSession"],
+
+  function (EditorSession) {
     "use strict";
 
     function makeWidget(editorSession, callback) {
@@ -133,14 +136,14 @@ define("webodf/editor/widgets/simpleStyles", [], function () {
                 strikethroughButton.set('checked', strikethrough === 'solid' ? true : false);
             }
 
-            editorSession.subscribe('paragraphChanged', function (info) {
+            editorSession.subscribe(EditorSession.signalParagraphChanged, function (info) {
                 var currentStyleName;
                 if (info.type === 'style') {
                     currentStyleName = editorSession.getCurrentParagraphStyle();
                     loadStyle(currentStyleName);
                 }
             });
-            editorSession.subscribe('paragraphStyleModified', function (styleName) {
+            editorSession.subscribe(EditorSession.signalParagraphStyleModified, function (styleName) {
                 var currentStyleName = editorSession.getCurrentParagraphStyle();
                 if (currentStyleName === styleName) {
                     loadStyle(currentStyleName);

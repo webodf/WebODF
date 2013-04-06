@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,36 +32,45 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define, require */
-define("webodf/editor/widgets/toolbarWidgets/currentStyle",
-       ["webodf/editor/EditorSession"],
 
-  function (EditorSession) {
+/*global core, runtime*/
+
+/**
+ * @constructor
+ * @param {!Array.<!string>} eventIds
+ */
+core.EventNotifier = function EventNotifier(eventIds) {
     "use strict";
-    function makeWidget(editorSession, callback) {
-        require(["webodf/editor/widgets/paragraphStyles"], function (ParagraphStyles) {
-            var paragraphStyles, widget;
 
-            paragraphStyles = new ParagraphStyles(editorSession, function (pStyles) {
-                // if the current paragraph style changes, update the widget 
-                editorSession.subscribe(EditorSession.signalParagraphChanged, function (info) {
-                    if (info.type === 'style') {
-                        pStyles.widget().set("value", info.styleName);
-                    }
-                });
-                
-                pStyles.widget().onChange = function (value) {
-                    editorSession.setCurrentParagraphStyle(value);
-                };
+    var self = this,
+        eventListener = {};
 
-                return callback(pStyles.widget());
-            });
-        });
+    this.emit = function (eventId, args) {
+        var i, subscribers;
+
+        runtime.assert(eventListener.hasOwnProperty(eventId),
+            "unknown event fired \"" + eventId + "\"");
+        subscribers = eventListener[eventId];
+        // runtime.log("firing event \"" + eventId + "\" to " + subscribers.length + " subscribers.");
+        for (i = 0; i < subscribers.length; i += 1) {
+            subscribers[i](args);
+        }
+    };
+
+    this.subscribe = function (eventId, cb) {
+        runtime.assert(eventListener.hasOwnProperty(eventId),
+            "tried to subscribe to unknown event \"" + eventId + "\"");
+        eventListener[eventId].push(cb);
+        runtime.log("event \"" + eventId + "\" subscribed.");
+    };
+
+    function init() {
+        var i;
+
+        for (i = 0; i < eventIds.length; i += 1) {
+            eventListener[eventIds[i]] = [];
+        }
     }
 
-    return function CurrentStyle(editorSession, callback) {
-        makeWidget(editorSession, function (widget) {
-            return callback(widget);
-        });
-    };
-});
+    init();
+};

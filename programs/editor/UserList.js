@@ -33,17 +33,20 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global define,runtime */
-define("webodf/editor/UserList", [], function () {
+define("webodf/editor/UserList",
+       ["webodf/editor/EditorSession"],
+
+  function (EditorSession) {
     "use strict";
 
     return function UserList(editorSession, userListDiv) {
         var self = this;
 
-        editorSession.subscribe('userAdded', function (memberId) {
+        editorSession.subscribe(EditorSession.signalUserAdded, function (memberId) {
             self.addUser(memberId);
         });
 
-        editorSession.subscribe('userRemoved', function (memberId) {
+        editorSession.subscribe(EditorSession.signalUserRemoved, function (memberId) {
             self.removeUser(memberId);
         });
 

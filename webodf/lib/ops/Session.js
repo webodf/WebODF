@@ -31,6 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, gui, ops, odf*/
+runtime.loadClass("core.EventNotifier");
 runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
@@ -49,17 +50,14 @@ ops.Session = function Session(odfCanvas) {
         namespaces = style2CSS.namespaces,
         m_user_model = null,
         m_operation_router = null,
-        m_event_listener = {};
-
-
-    /* declare events */
-    m_event_listener[ops.Session.signalCursorAdded] = [];
-    m_event_listener[ops.Session.signalCursorRemoved] = [];
-    m_event_listener[ops.Session.signalCursorMoved] = [];
-    m_event_listener[ops.Session.signalParagraphChanged] = [];
-    m_event_listener[ops.Session.signalStyleCreated] = [];
-    m_event_listener[ops.Session.signalStyleDeleted] = [];
-    m_event_listener[ops.Session.signalParagraphStyleModified] = [];
+        eventNotifier = new core.EventNotifier([
+            ops.Session.signalCursorAdded,
+            ops.Session.signalCursorRemoved,
+            ops.Session.signalCursorMoved,
+            ops.Session.signalParagraphChanged,
+            ops.Session.signalStyleCreated,
+            ops.Session.signalStyleDeleted,
+            ops.Session.signalParagraphStyleModified]);
 
     function setUserModel(userModel) {
         m_user_model = userModel;
@@ -86,20 +84,10 @@ ops.Session = function Session(odfCanvas) {
     };
 
     this.emit = function (eventid, args) {
-        var i, subscribers;
-        runtime.assert(m_event_listener.hasOwnProperty(eventid),
-            "unknown event fired \"" + eventid + "\"");
-        subscribers = m_event_listener[eventid];
-        // runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
-        for (i = 0; i < subscribers.length; i += 1) {
-            subscribers[i](args);
-        }
+        eventNotifier.emit(eventid, args);
     };
     this.subscribe = function (eventid, cb) {
-        runtime.assert(m_event_listener.hasOwnProperty(eventid),
-            "tried to subscribe to unknown event \"" + eventid + "\"");
-        m_event_listener[eventid].push(cb);
-        runtime.log("event \"" + eventid + "\" subscribed.");
+        eventNotifier.subscribe(eventid, cb);
     };
 
     /* SESSION OPERATIONS */
@@ -123,13 +111,13 @@ ops.Session = function Session(odfCanvas) {
     init();
 };
 
-ops.Session.signalCursorAdded =   "cursor/added";
-ops.Session.signalCursorRemoved = "cursor/removed";
-ops.Session.signalCursorMoved =   "cursor/moved";
-ops.Session.signalParagraphChanged = "paragraph/changed";
-ops.Session.signalStyleCreated = "style/created";
-ops.Session.signalStyleDeleted = "style/deleted";
-ops.Session.signalParagraphStyleModified = "paragraphstyle/modified";
+/**@const*/ops.Session.signalCursorAdded =   "cursor/added";
+/**@const*/ops.Session.signalCursorRemoved = "cursor/removed";
+/**@const*/ops.Session.signalCursorMoved =   "cursor/moved";
+/**@const*/ops.Session.signalParagraphChanged = "paragraph/changed";
+/**@const*/ops.Session.signalStyleCreated = "style/created";
+/**@const*/ops.Session.signalStyleDeleted = "style/deleted";
+/**@const*/ops.Session.signalParagraphStyleModified = "paragraphstyle/modified";
 
 (function () {
     "use strict";

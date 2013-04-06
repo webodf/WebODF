@@ -220,6 +220,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/LoopWatchDog.js
     lib/core/Cursor.js
     lib/core/EditInfo.js
+    lib/core/EventNotifier.js
     lib/core/UnitTester.js
     lib/core/PositionIterator.js
     lib/core/PositionFilter.js

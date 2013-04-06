@@ -32,7 +32,10 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global define,require */
-define("webodf/editor/widgets/paragraphStyles", [], function () {
+define("webodf/editor/widgets/paragraphStyles",
+       ["webodf/editor/EditorSession"],
+
+   function (EditorSession) {
     "use strict";
     /**
      * @constructor
@@ -87,7 +90,7 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
 
                 populateStyles();
                 
-                editorSession.subscribe('styleCreated', function (newStyleName) {
+                editorSession.subscribe(EditorSession.signalStyleCreated, function (newStyleName) {
                     var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
                     select.addOption({
                         value: newStyleName,
@@ -99,7 +102,7 @@ define("webodf/editor/widgets/paragraphStyles", [], function () {
                     }
                 });
 
-                editorSession.subscribe('styleDeleted', function (styleName) {
+                editorSession.subscribe(EditorSession.signalStyleDeleted, function (styleName) {
                     select.removeOption(styleName);
                     
                     if (self.onRemove) {

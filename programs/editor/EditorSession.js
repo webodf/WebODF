@@ -50,6 +50,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.Caret");
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
+    runtime.loadClass("core.EventNotifier");
 
     /**
      * Instantiate a new editor session attached to an existing operation session
@@ -66,20 +67,19 @@ define("webodf/editor/EditorSession", [
             odtDocument = session.getOdtDocument(),
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             formatting = odtDocument.getFormatting(),
-            eventListener = {};
+            eventNotifier = new core.EventNotifier([
+                EditorSession.signalUserAdded,
+                EditorSession.signalUserRemoved,
+                EditorSession.signalCursorMoved,
+                EditorSession.signalParagraphChanged,
+                EditorSession.signalStyleCreated,
+                EditorSession.signalStyleDeleted,
+                EditorSession.signalParagraphStyleModified]);
 
 
         this.sessionController = new gui.SessionController(session, memberid);
         this.sessionView = new gui.SessionView(config.viewOptions, session, new gui.CaretFactory(self.sessionController));
         this.availableFonts = [];
-
-        eventListener.userAdded = [];
-        eventListener.userRemoved = [];
-        eventListener.cursorMoved = [];
-        eventListener.paragraphChanged = [];
-        eventListener.styleCreated = [];
-        eventListener.styleDeleted = [];
-        eventListener.paragraphStyleModified = [];
 
         /*
          * @return {Array.{!string}}
@@ -118,7 +118,7 @@ define("webodf/editor/EditorSession", [
                 // a named style
                 if (newNamedStyleName !== currentNamedStyleName) {
                     currentNamedStyleName = newNamedStyleName;
-                    self.emit('paragraphChanged', {
+                    self.emit(EditorSession.signalParagraphChanged, {
                         type: 'style',
                         node: currentParagraphNode,
                         styleName: currentNamedStyleName
@@ -191,35 +191,35 @@ define("webodf/editor/EditorSession", [
 
         // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
         session.subscribe(ops.Session.signalCursorAdded, function (cursor) {
-            self.emit('userAdded', cursor.getMemberId());
+            self.emit(EditorSession.signalUserAdded, cursor.getMemberId());
             trackCursor(cursor);
         });
 
         session.subscribe(ops.Session.signalCursorRemoved, function (memberId) {
-            self.emit('userRemoved', memberId);
+            self.emit(EditorSession.signalUserRemoved, memberId);
         });
 
         session.subscribe(ops.Session.signalCursorMoved, function (cursor) {
             // Emit 'cursorMoved' only when *I* am moving the cursor, not the other users
             if (cursor.getMemberId() === memberid) {
-                self.emit('cursorMoved', cursor);
+                self.emit(EditorSession.signalCursorMoved, cursor);
             }
         });
         
         session.subscribe(ops.Session.signalStyleCreated, function (newStyleName) {
-            self.emit('styleCreated', newStyleName);
+            self.emit(EditorSession.signalStyleCreated, newStyleName);
         });
 
         session.subscribe(ops.Session.signalStyleDeleted, function (styleName) {
-            self.emit('styleDeleted', styleName);
+            self.emit(EditorSession.signalStyleDeleted, styleName);
         });
 
         session.subscribe(ops.Session.signalParagraphStyleModified, function (styleName) {
-            self.emit('paragraphStyleModified', styleName);
+            self.emit(EditorSession.signalParagraphStyleModified, styleName);
         });
 
         session.subscribe(ops.Session.signalParagraphChanged, trackCurrentParagraph);
-        
+
         this.startEditing = function () {
             self.sessionController.startEditing();
         };
@@ -227,33 +227,23 @@ define("webodf/editor/EditorSession", [
         this.endEditing = function () {
             self.sessionController.endEditing();
         };
-        
+
         /**
          * Call all subscribers for the given event with the specified argument
          * @param {!string} eventid
          * @param {Object} args
          */
         this.emit = function (eventid, args) {
-            var i, subscribers;
-            runtime.assert(eventListener.hasOwnProperty(eventid),
-                "unknown event fired \"" + eventid + "\"");
-            subscribers = eventListener[eventid];
-            // runtime.log("firing event \"" + eventid + "\" to " + subscribers.length + " subscribers.");
-            for (i = 0; i < subscribers.length; i += 1) {
-                subscribers[i](args);
-            }
+            eventNotifier.emit(eventid, args);
         };
-        
+
         /**
          * Subscribe to a given event with a callback
          * @param {!string} eventid
          * @param {!Function} cb
          */
         this.subscribe = function (eventid, cb) {
-            runtime.assert(eventListener.hasOwnProperty(eventid),
-                "tried to subscribe to unknown event \"" + eventid + "\"");
-            eventListener[eventid].push(cb);
-            runtime.log("event \"" + eventid + "\" subscribed.");
+            eventNotifier.subscribe(eventid, cb);
         };
 
         this.getUserDetailsAndUpdates = function (memberId, subscriber) {
@@ -401,7 +391,7 @@ define("webodf/editor/EditorSession", [
             return array;
         };
 
-        this.subscribe('cursorMoved', trackCursor);
+        this.subscribe(EditorSession.signalCursorMoved, trackCursor);
 
         function init() {
             var head = document.getElementsByTagName('head')[0],
@@ -414,6 +404,14 @@ define("webodf/editor/EditorSession", [
 
         init();
     };
+
+    /**@const*/EditorSession.signalUserAdded =              "userAdded";
+    /**@const*/EditorSession.signalUserRemoved =            "userRemoved";
+    /**@const*/EditorSession.signalCursorMoved =            "cursorMoved";
+    /**@const*/EditorSession.signalParagraphChanged =       "paragraphChanged";
+    /**@const*/EditorSession.signalStyleCreated =           "styleCreated";
+    /**@const*/EditorSession.signalStyleDeleted =           "styleDeleted";
+    /**@const*/EditorSession.signalParagraphStyleModified = "paragraphStyleModified";
 
     return EditorSession;
 });
