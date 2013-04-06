@@ -32,7 +32,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops*/
+/*global runtime, ops*/
 
 /**
  * @constructor
@@ -41,7 +41,8 @@
 ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
     "use strict";
 
-    var memberid, timestamp, position, styleNameBefore, styleNameAfter;
+    var memberid, timestamp, position, styleNameBefore, styleNameAfter,
+        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -55,13 +56,19 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
         var domPosition, paragraphNode,
             odtDocument = session.getOdtDocument();
 
-        odtDocument.setParagraphStyle(memberid, timestamp, position, styleNameBefore, styleNameAfter);
-
-        // TODO: hack, reusing getPositionInTextNode and getParagraphElement, not an optimized solution
+        // TODO: reusing getPositionInTextNode and getParagraphElement, not an optimized solution
         domPosition = odtDocument.getPositionInTextNode(position);
+runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " + styleNameBefore + "->" + styleNameAfter);
         if (domPosition) {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
-            session.emit(ops.Session.signalParagraphChanged, paragraphNode);
+            if (paragraphNode) {
+                paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
+                session.emit(ops.Session.signalParagraphChanged, {
+                    paragraphElement: paragraphNode,
+                    timeStamp: timestamp,
+                    memberId: memberid
+                });
+            }
         }
     };
 

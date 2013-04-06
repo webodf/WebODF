@@ -182,8 +182,8 @@ define("webodf/editor/EditorSession", [
             checkParagraphStyleName();
         }
 
-        function trackCurrentParagraph(paragraphNode) {
-            if (paragraphNode !== currentParagraphNode) {
+        function trackCurrentParagraph(info) {
+            if (info.paragraphElement !== currentParagraphNode) {
                 return;
             }
             checkParagraphStyleName();

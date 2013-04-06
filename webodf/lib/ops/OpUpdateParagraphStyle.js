@@ -41,7 +41,26 @@
 ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
     "use strict";
 
-    var memberid, timestamp, styleName, info;
+    var memberid, timestamp, styleName,
+        /**@type{{paragraphProperties,textProperties}}*/info,
+        /**@const*/fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        /**@const*/stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+        /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+
+    /**
+     * Sets a value as the attribute of a node, if that value is defined.
+     * If there is a unit specified, it is suffixed to the value.
+     * @param {!Node} node
+     * @param {!string} ns
+     * @param {!string} prefixedAttribute
+     * @param {string} value
+     * @param {string=} unit
+     */
+    function setRealAttributeNS(node, ns, prefixedAttribute, value, unit) {
+        if (value !== undefined) {
+            node.setAttributeNS(ns, prefixedAttribute, (unit !== undefined) ? value + unit : value);
+        }
+    }
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -51,9 +70,73 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
     };
 
     this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument();
-        odtDocument.updateParagraphStyle(styleName, info);
-        session.emit(ops.Session.signalParagraphStyleModified, styleName);
+        var odtDocument = session.getOdtDocument(),
+            styleNode, paragraphPropertiesNode, textPropertiesNode, fontFaceNode;
+
+        styleNode = odtDocument.getParagraphStyleElement(styleName);
+
+        if (styleNode) {
+            paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
+            textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
+
+            if ((paragraphPropertiesNode === undefined)
+                    && info.paragraphProperties) {
+                paragraphPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:paragraph-properties');
+                styleNode.appendChild(paragraphPropertiesNode);
+            }
+            if ((textPropertiesNode === undefined)
+                    && info.textProperties) {
+                textPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:text-properties');
+                styleNode.appendChild(textPropertiesNode);
+            }
+
+            if (info.paragraphProperties) {
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-top', info.paragraphProperties.topMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-bottom', info.paragraphProperties.bottomMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-left', info.paragraphProperties.leftMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:margin-right', info.paragraphProperties.rightMargin, 'mm');
+                setRealAttributeNS(paragraphPropertiesNode, fons,
+                    'fo:text-align', info.paragraphProperties.textAlign);
+            }
+
+            if (info.textProperties) {
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-size', info.textProperties.fontSize, 'pt');
+
+                // Declare the requested font if it is not already declared
+                if (info.textProperties.fontName &&
+                    !odtDocument.getOdfCanvas().getFormatting().getFontMap().hasOwnProperty(info.textProperties.fontName)) {
+
+                    fontFaceNode = odtDocument.getDOM().createElementNS(stylens, 'style:font-face');
+                    fontFaceNode.setAttributeNS(stylens, 'style:name', info.textProperties.fontName);
+                    fontFaceNode.setAttributeNS(svgns, 'svg:font-family', info.textProperties.fontName);
+                    odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
+                }
+                setRealAttributeNS(textPropertiesNode, stylens,
+                    'style:font-name', info.textProperties.fontName);
+
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:color', info.textProperties.color);
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:background-color', info.textProperties.backgroundColor);
+
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-weight', info.textProperties.fontWeight);
+                setRealAttributeNS(textPropertiesNode, fons,
+                    'fo:font-style', info.textProperties.fontStyle);
+                setRealAttributeNS(textPropertiesNode, stylens,
+                    'style:text-underline-style', info.textProperties.underline);
+                setRealAttributeNS(textPropertiesNode, stylens,
+                    'style:text-line-through-style', info.textProperties.strikethrough);
+            }
+
+            odtDocument.getOdfCanvas().refreshCSS();
+            session.emit(ops.Session.signalParagraphStyleModified, styleName);
+        }
     };
 
     this.spec = function () {

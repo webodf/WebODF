@@ -53,7 +53,8 @@ gui.CaretFactory = function CaretFactory(sessionController) {
      */
     this.createCaret = function (cursor, caretAvatarInitiallyVisible) {
         var memberid = cursor.getMemberId(),
-            odtDocument = sessionController.getSession().getOdtDocument(),
+            session = sessionController.getSession(),
+            odtDocument = session.getOdtDocument(),
             canvasElement = odtDocument.getOdfCanvas().getElement(),
             caret = new gui.Caret(cursor, caretAvatarInitiallyVisible);
 
@@ -62,7 +63,7 @@ gui.CaretFactory = function CaretFactory(sessionController) {
             runtime.log("Starting to track input on new cursor of " + memberid);
 
             // on user edit actions ensure visibility of cursor
-            odtDocument.subscribe('paragraphEdited', function (info) {
+            session.subscribe(ops.Session.signalParagraphChanged, function (info) {
                 if (info.memberId === memberid) {
                     caret.ensureVisible();
                 }

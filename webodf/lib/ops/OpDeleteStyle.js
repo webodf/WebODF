@@ -40,7 +40,7 @@
  */
 ops.OpDeleteStyle = function OpDeleteStyle(session) {
     "use strict";
-    
+
     var memberid, timestamp, styleName;
 
     this.init = function (data) {
@@ -50,8 +50,12 @@ ops.OpDeleteStyle = function OpDeleteStyle(session) {
     };
 
     this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument();
-        odtDocument.deleteStyle(styleName);
+        var odtDocument = session.getOdtDocument(),
+            styleNode = odtDocument.getParagraphStyleElement(styleName);
+
+        styleNode.parentNode.removeChild(styleNode);
+
+        odtDocument.getOdfCanvas().refreshCSS();
         session.emit(ops.Session.signalStyleDeleted, styleName);
     };
 

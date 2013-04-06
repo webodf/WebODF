@@ -199,8 +199,8 @@ gui.SessionView = (function () {
             }
         }
 
-        session.getOdtDocument().subscribe('paragraphEdited', function (info) {
-            highlightEdit(info.element, info.memberId, info.timeStamp);
+        session.subscribe(ops.Session.signalParagraphChanged, function (info) {
+            highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
         });
 
         this.enableEditHighlighting = function () {

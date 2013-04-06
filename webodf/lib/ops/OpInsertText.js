@@ -50,8 +50,44 @@ ops.OpInsertText = function OpInsertText(session) {
         text = data.text;
     };
 
+    /* This is a workaround for a bug where webkit forgets to relayout
+     * the text when a new character is inserted at the beginning of a line in
+     * a Text Node.
+     * @param {Node} textNode
+     */
+    function triggerLayoutInWebkit(textNode) {
+        var parent = textNode.parentNode,
+            next = textNode.nextSibling;
+        parent.removeChild(textNode);
+        parent.insertBefore(textNode, next);
+    }
+
     this.execute = function (domroot) {
-        session.getOdtDocument().insertText(memberid, timestamp, position, text);
+        var odtDocument = session.getOdtDocument(),
+            domPosition, textNode;
+
+        domPosition = odtDocument.getPositionInTextNode(position);
+        if (domPosition) {
+            textNode = domPosition.textNode;
+            textNode.insertData(domPosition.offset, text);
+
+            // FIXME A workaround.
+            triggerLayoutInWebkit(textNode);
+
+            // FIXME care must be taken regarding the cursor positions
+            // the new text must appear in front of the (own) cursor.
+            // if there are/were other cursors at the same address,
+            // those must not move along.
+            // conclusion: insert text BEHIND ALL CURSORS, then move
+            // the `memberid`-cursor behind new text; alternatively
+            // move `memberid`-cursor behind all cursors at the same
+            // position. then insert text before `memberid`-cursor.
+            session.emit(ops.Session.signalParagraphChanged, {
+                paragraphElement: odtDocument.getParagraphElement(domPosition.textNode),
+                memberId: memberid,
+                timeStamp: timestamp
+            });
+        }
     };
 
     this.spec = function () {
