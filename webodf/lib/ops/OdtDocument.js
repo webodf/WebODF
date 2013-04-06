@@ -34,8 +34,8 @@
 
 /*global runtime, core, gui, ops, odf*/
 
-runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("gui.SelectionManager");
+runtime.loadClass("core.EventNotifier");
 /**
  * A document that keeps all data related to the mapped document.
  * @constructor
@@ -49,7 +49,15 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         rootNode,
         selectionManager,
         filter,
-        /**Array.<!ops.OdtCursor>*/cursors = {};
+        /**Array.<!ops.OdtCursor>*/cursors = {},
+        eventNotifier = new core.EventNotifier([
+            ops.OdtDocument.signalCursorAdded,
+            ops.OdtDocument.signalCursorRemoved,
+            ops.OdtDocument.signalCursorMoved,
+            ops.OdtDocument.signalParagraphChanged,
+            ops.OdtDocument.signalStyleCreated,
+            ops.OdtDocument.signalStyleDeleted,
+            ops.OdtDocument.signalParagraphStyleModified]);
 
     /**
      * @constructor
@@ -368,6 +376,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return odfCanvas.getFormatting();
     };
 
+    this.emit = function (eventid, args) {
+        eventNotifier.emit(eventid, args);
+    };
+
+    this.subscribe = function (eventid, cb) {
+        eventNotifier.subscribe(eventid, cb);
+    };
+
     /**
      * @return {undefined}
      */
@@ -378,4 +394,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
     init();
 };
+
+/**@const*/ops.OdtDocument.signalCursorAdded =   "cursor/added";
+/**@const*/ops.OdtDocument.signalCursorRemoved = "cursor/removed";
+/**@const*/ops.OdtDocument.signalCursorMoved =   "cursor/moved";
+/**@const*/ops.OdtDocument.signalParagraphChanged = "paragraph/changed";
+/**@const*/ops.OdtDocument.signalStyleCreated = "style/created";
+/**@const*/ops.OdtDocument.signalStyleDeleted = "style/deleted";
+/**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
+
+(function () {
+    "use strict";
+    return ops.OdtDocument;
+}());
+
 // vim:expandtab

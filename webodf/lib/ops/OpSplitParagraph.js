@@ -142,12 +142,12 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
                 }
 
                 // mark both paragraphs as edited
-                session.emit(ops.Session.signalParagraphChanged, {
+                odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                     paragraphElement: paragraphNode,
                     memberId: memberid,
                     timeStamp: timestamp
                 });
-                session.emit(ops.Session.signalParagraphChanged, {
+                odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                     paragraphElement: splitChildNode,
                     memberId: memberid,
                     timeStamp: timestamp

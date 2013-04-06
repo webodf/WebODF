@@ -190,35 +190,35 @@ define("webodf/editor/EditorSession", [
         }
 
         // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
-        session.subscribe(ops.Session.signalCursorAdded, function (cursor) {
+        odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, function (cursor) {
             self.emit(EditorSession.signalUserAdded, cursor.getMemberId());
             trackCursor(cursor);
         });
 
-        session.subscribe(ops.Session.signalCursorRemoved, function (memberId) {
+        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, function (memberId) {
             self.emit(EditorSession.signalUserRemoved, memberId);
         });
 
-        session.subscribe(ops.Session.signalCursorMoved, function (cursor) {
+        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, function (cursor) {
             // Emit 'cursorMoved' only when *I* am moving the cursor, not the other users
             if (cursor.getMemberId() === memberid) {
                 self.emit(EditorSession.signalCursorMoved, cursor);
             }
         });
-        
-        session.subscribe(ops.Session.signalStyleCreated, function (newStyleName) {
+
+        odtDocument.subscribe(ops.OdtDocument.signalStyleCreated, function (newStyleName) {
             self.emit(EditorSession.signalStyleCreated, newStyleName);
         });
 
-        session.subscribe(ops.Session.signalStyleDeleted, function (styleName) {
+        odtDocument.subscribe(ops.OdtDocument.signalStyleDeleted, function (styleName) {
             self.emit(EditorSession.signalStyleDeleted, styleName);
         });
 
-        session.subscribe(ops.Session.signalParagraphStyleModified, function (styleName) {
+        odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, function (styleName) {
             self.emit(EditorSession.signalParagraphStyleModified, styleName);
         });
 
-        session.subscribe(ops.Session.signalParagraphChanged, trackCurrentParagraph);
+        odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, trackCurrentParagraph);
 
         this.startEditing = function () {
             self.sessionController.startEditing();

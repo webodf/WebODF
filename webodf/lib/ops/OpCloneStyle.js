@@ -62,7 +62,7 @@ ops.OpCloneStyle = function OpCloneStyle(session) {
         styleNode.parentNode.appendChild(newStyleNode);
 
         odtDocument.getOdfCanvas().refreshCSS();
-        session.emit(ops.Session.signalStyleCreated, newStyleName);
+        odtDocument.emit(ops.OdtDocument.signalStyleCreated, newStyleName);
     };
 
     this.spec = function () {

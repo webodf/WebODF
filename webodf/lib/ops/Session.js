@@ -31,11 +31,9 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, gui, ops, odf*/
-runtime.loadClass("core.EventNotifier");
 runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
-runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("ops.OdtDocument");
 /**
  * An editing session and what belongs to it.
@@ -46,18 +44,8 @@ ops.Session = function Session(odfCanvas) {
     "use strict";
     var self = this,
         odtDocument = new ops.OdtDocument(odfCanvas),
-        style2CSS = new odf.Style2CSS(),
-        namespaces = style2CSS.namespaces,
         m_user_model = null,
-        m_operation_router = null,
-        eventNotifier = new core.EventNotifier([
-            ops.Session.signalCursorAdded,
-            ops.Session.signalCursorRemoved,
-            ops.Session.signalCursorMoved,
-            ops.Session.signalParagraphChanged,
-            ops.Session.signalStyleCreated,
-            ops.Session.signalStyleDeleted,
-            ops.Session.signalParagraphStyleModified]);
+        m_operation_router = null;
 
     function setUserModel(userModel) {
         m_user_model = userModel;
@@ -83,13 +71,6 @@ ops.Session = function Session(odfCanvas) {
         return odtDocument;
     };
 
-    this.emit = function (eventid, args) {
-        eventNotifier.emit(eventid, args);
-    };
-    this.subscribe = function (eventid, cb) {
-        eventNotifier.subscribe(eventid, cb);
-    };
-
     /* SESSION OPERATIONS */
 
     // controller sends operations to this method
@@ -110,14 +91,6 @@ ops.Session = function Session(odfCanvas) {
     }
     init();
 };
-
-/**@const*/ops.Session.signalCursorAdded =   "cursor/added";
-/**@const*/ops.Session.signalCursorRemoved = "cursor/removed";
-/**@const*/ops.Session.signalCursorMoved =   "cursor/moved";
-/**@const*/ops.Session.signalParagraphChanged = "paragraph/changed";
-/**@const*/ops.Session.signalStyleCreated = "style/created";
-/**@const*/ops.Session.signalStyleDeleted = "style/deleted";
-/**@const*/ops.Session.signalParagraphStyleModified = "paragraphstyle/modified";
 
 (function () {
     "use strict";

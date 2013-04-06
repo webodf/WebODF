@@ -63,7 +63,7 @@ gui.CaretFactory = function CaretFactory(sessionController) {
             runtime.log("Starting to track input on new cursor of " + memberid);
 
             // on user edit actions ensure visibility of cursor
-            session.subscribe(ops.Session.signalParagraphChanged, function (info) {
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, function (info) {
                 if (info.memberId === memberid) {
                     caret.ensureVisible();
                 }

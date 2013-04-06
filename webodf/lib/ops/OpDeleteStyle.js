@@ -56,7 +56,7 @@ ops.OpDeleteStyle = function OpDeleteStyle(session) {
         styleNode.parentNode.removeChild(styleNode);
 
         odtDocument.getOdfCanvas().refreshCSS();
-        session.emit(ops.Session.signalStyleDeleted, styleName);
+        odtDocument.emit(ops.OdtDocument.signalStyleDeleted, styleName);
     };
 
     this.spec = function () {

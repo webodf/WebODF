@@ -63,7 +63,7 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
-                session.emit(ops.Session.signalParagraphChanged, {
+                odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                     paragraphElement: paragraphNode,
                     timeStamp: timestamp,
                     memberId: memberid

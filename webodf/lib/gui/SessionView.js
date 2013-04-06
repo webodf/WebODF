@@ -199,10 +199,6 @@ gui.SessionView = (function () {
             }
         }
 
-        session.subscribe(ops.Session.signalParagraphChanged, function (info) {
-            highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
-        });
-
         this.enableEditHighlighting = function () {
             if (editHighlightingEnabled) {
                 return;
@@ -351,10 +347,15 @@ gui.SessionView = (function () {
         }
 
         function init() {
-            var head = document.getElementsByTagName('head')[0];
+            var odtDocument = session.getOdtDocument(),
+                head = document.getElementsByTagName('head')[0];
 
-            session.subscribe(ops.Session.signalCursorAdded, onCursorAdded);
-            session.subscribe(ops.Session.signalCursorRemoved, onCursorRemoved);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, function (info) {
+                highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
+            });
+
 
             // Add a css sheet for avatar-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');

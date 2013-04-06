@@ -97,7 +97,7 @@ ops.OpRemoveText = function OpRemoveText(session) {
                 textNode.deleteData(domPosition.offset, length);
             }
 
-            session.emit(ops.Session.signalParagraphChanged, {
+            odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                 paragraphElement: odtDocument.getParagraphElement(textNode),
                 memberId: memberid,
                 timeStamp: timestamp

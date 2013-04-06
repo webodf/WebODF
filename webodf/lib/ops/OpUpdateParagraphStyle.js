@@ -135,7 +135,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
             }
 
             odtDocument.getOdfCanvas().refreshCSS();
-            session.emit(ops.Session.signalParagraphStyleModified, styleName);
+            odtDocument.emit(ops.OdtDocument.signalParagraphStyleModified, styleName);
         }
     };
 
