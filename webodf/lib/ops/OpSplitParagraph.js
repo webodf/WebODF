@@ -34,7 +34,7 @@
  */
 
 /*jslint nomen: true, evil: true, bitwise: true */
-/*global core, ops, runtime*/
+/*global ops*/
 
 /**
  * @constructor

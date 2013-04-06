@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, ops*/
+/*global ops*/
 
 /**
  * @constructor
@@ -58,7 +58,6 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
 
         // TODO: reusing getPositionInTextNode and getParagraphElement, not an optimized solution
         domPosition = odtDocument.getPositionInTextNode(position);
-runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " + styleNameBefore + "->" + styleNameAfter);
         if (domPosition) {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {

@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, ops*/
+/*global ops*/
 
 /**
  * @constructor
@@ -81,7 +81,6 @@ ops.OpRemoveText = function OpRemoveText() {
             // have arbitrary XML tags between them)
             //
             if (domPosition.offset !== 1) {
-                runtime.log("unexpected!");
                 return false;
             }
             domPosition.offset -= 1;
