@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpCloneStyle = function OpCloneStyle(session) {
+ops.OpCloneStyle = function OpCloneStyle() {
     "use strict";
 
     var memberid, timestamp, styleName, newStyleName, newStyleDisplayName,
@@ -52,9 +52,8 @@ ops.OpCloneStyle = function OpCloneStyle(session) {
         newStyleDisplayName = data.newStyleDisplayName;
     };
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument(),
-            styleNode = odtDocument.getParagraphStyleElement(styleName),
+    this.execute = function (odtDocument) {
+        var styleNode = odtDocument.getParagraphStyleElement(styleName),
             newStyleNode = styleNode.cloneNode(true);
 
         newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);

@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpDeleteStyle = function OpDeleteStyle(session) {
+ops.OpDeleteStyle = function OpDeleteStyle() {
     "use strict";
 
     var memberid, timestamp, styleName;
@@ -49,9 +49,8 @@ ops.OpDeleteStyle = function OpDeleteStyle(session) {
         styleName = data.styleName;
     };
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument(),
-            styleNode = odtDocument.getParagraphStyleElement(styleName);
+    this.execute = function (odtDocument) {
+        var styleNode = odtDocument.getParagraphStyleElement(styleName);
 
         styleNode.parentNode.removeChild(styleNode);
 

@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
+ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, position, styleNameBefore, styleNameAfter,
@@ -52,9 +52,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle(session) {
         styleNameAfter = data.styleNameAfter;
     };
 
-    this.execute = function (domroot) {
-        var domPosition, paragraphNode,
-            odtDocument = session.getOdtDocument();
+    this.execute = function (odtDocument) {
+        var domPosition, paragraphNode;
 
         // TODO: reusing getPositionInTextNode and getParagraphElement, not an optimized solution
         domPosition = odtDocument.getPositionInTextNode(position);

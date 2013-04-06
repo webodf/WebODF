@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpMoveCursor = function OpMoveCursor(session) {
+ops.OpMoveCursor = function OpMoveCursor() {
     "use strict";
 
     var memberid, timestamp, number;
@@ -49,9 +49,8 @@ ops.OpMoveCursor = function OpMoveCursor(session) {
         number = data.number;
     };
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument(),
-            cursor = odtDocument.getCursor(memberid),
+    this.execute = function (odtDocument) {
+        var cursor = odtDocument.getCursor(memberid),
             positionFilter = odtDocument.getPositionFilter(),
             stepCounter,
             steps;

@@ -37,7 +37,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpSplitParagraph = function OpSplitParagraph(session) {
+ops.OpSplitParagraph = function OpSplitParagraph() {
     "use strict";
 
     var memberid, timestamp, position;
@@ -48,9 +48,8 @@ ops.OpSplitParagraph = function OpSplitParagraph(session) {
         position = data.position;
     };
 
-    this.execute = function (rootNode) {
-        var odtDocument = session.getOdtDocument(),
-            domPosition, paragraphNode,
+    this.execute = function (odtDocument) {
+        var domPosition, paragraphNode,
             textNodeCopy,
             node, splitNode, splitChildNode, keptChildNode;
 

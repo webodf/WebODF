@@ -114,7 +114,7 @@ gui.SessionController = (function () {
             steps = odtDocument.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
 
             if (steps !== 0) {
-                op = new ops.OpMoveCursor(session);
+                op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, number: steps});
                 session.enqueue(op);
             }
@@ -124,7 +124,7 @@ gui.SessionController = (function () {
          * @return {!ops.Operation}
          */
         function createOpMoveCursor(number) {
-            var op = new ops.OpMoveCursor(session);
+            var op = new ops.OpMoveCursor();
 
             op.init({memberid: inputMemberId, number: number});
             return op;
@@ -143,7 +143,7 @@ gui.SessionController = (function () {
             paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
             steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             if (steps !== 0) {
-                op = new ops.OpMoveCursor(session);
+                op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, number: steps});
             }
             return op;
@@ -163,7 +163,7 @@ gui.SessionController = (function () {
                 domPosition = odtDocument.getPositionInTextNode(position - 1);
 
                 if (domPosition) {
-                    op = new ops.OpRemoveText(session);
+                    op = new ops.OpRemoveText();
                     op.init({
                         memberid: inputMemberId,
                         position: position,
@@ -185,7 +185,7 @@ gui.SessionController = (function () {
                 op = null;
 
             if (domPosition) {
-                op = new ops.OpRemoveText(session);
+                op = new ops.OpRemoveText();
                 op.init({
                     memberid: inputMemberId,
                     position: position,
@@ -203,7 +203,7 @@ gui.SessionController = (function () {
                 paragraphNode, styleName, nextStyleName,
                 op;
 
-            op = new ops.OpSplitParagraph(session);
+            op = new ops.OpSplitParagraph();
             op.init({
                 memberid: inputMemberId,
                 position: position
@@ -218,7 +218,7 @@ gui.SessionController = (function () {
                 nextStyleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, namespaces.style, 'next-style-name');
 
                 if (nextStyleName && nextStyleName !== styleName) {
-                    op = new ops.OpSetParagraphStyle(session);
+                    op = new ops.OpSetParagraphStyle();
                     op.init({
                         memberid: inputMemberId,
                         position: position + 1, // +1 should be at the start of the new paragraph
@@ -298,7 +298,7 @@ gui.SessionController = (function () {
                 enqueueParagraphSplittingOps();
                 cancelEvent(e);
             } else if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
-                op = new ops.OpInsertText(session);
+                op = new ops.OpInsertText();
                 op.init({
                     memberid: inputMemberId,
                     position: session.getOdtDocument().getCursorPosition(inputMemberId),
@@ -326,7 +326,7 @@ gui.SessionController = (function () {
        /**
         */
         this.startEditing = function () {
-            var op = new ops.OpAddCursor(session);
+            var op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
             session.enqueue(op);
         };
@@ -334,7 +334,7 @@ gui.SessionController = (function () {
         /**
          */
         this.endEditing = function () {
-            var op = new ops.OpRemoveCursor(session);
+            var op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
             session.enqueue(op);
         };

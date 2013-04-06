@@ -30,11 +30,30 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global ops*/
+
 /**
  * An operation that can be performed on a document.
  * @interface
  */
-ops.Operation = function Operation(session) {
+ops.Operation = function Operation() {
     "use strict";
 };
+
+/**
+ * @param {?} data
+ * @return {undefined}
+ */
+ops.Operation.prototype.init = function (data) {"use strict"; };
+
+/**
+ * @param {!ops.OdtDocument} odtDocument
+ * @return {undefined}
+ */
+ops.Operation.prototype.execute = function (odtDocument) {"use strict"; };
+
+/**
+ * @return {!{optype,memberid,timestamp}}
+ */
+ops.Operation.prototype.spec = function () {"use strict"; };

@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpRemoveText = function OpRemoveText(session) {
+ops.OpRemoveText = function OpRemoveText() {
     "use strict";
 
     var memberid, timestamp, position, length, text;
@@ -51,9 +51,8 @@ ops.OpRemoveText = function OpRemoveText(session) {
         text = data.text;
     };
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument(),
-            domPosition, textNode,
+    this.execute = function (odtDocument) {
+        var domPosition, textNode,
             removalType = (length < 0) ? 'backspace' : 'delete';
 
         if (length < 0) {

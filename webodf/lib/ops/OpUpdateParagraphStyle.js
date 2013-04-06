@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
+ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, styleName,
@@ -69,9 +69,8 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle(session) {
         info = data.info;
     };
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument(),
-            styleNode, paragraphPropertiesNode, textPropertiesNode, fontFaceNode;
+    this.execute = function (odtDocument) {
+        var styleNode, paragraphPropertiesNode, textPropertiesNode, fontFaceNode;
 
         styleNode = odtDocument.getParagraphStyleElement(styleName);
 

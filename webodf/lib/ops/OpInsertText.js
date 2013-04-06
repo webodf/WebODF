@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpInsertText = function OpInsertText(session) {
+ops.OpInsertText = function OpInsertText() {
     "use strict";
 
     var memberid, timestamp, position, text;
@@ -62,9 +62,8 @@ ops.OpInsertText = function OpInsertText(session) {
         parent.insertBefore(textNode, next);
     }
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument(),
-            domPosition, textNode;
+    this.execute = function (odtDocument) {
+        var domPosition, textNode;
 
         domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {

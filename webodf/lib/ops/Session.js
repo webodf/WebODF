@@ -79,7 +79,7 @@ ops.Session = function Session(odfCanvas) {
     };
 
     this.playOperation = function (op) {
-        op.execute(odtDocument.getRootNode());
+        op.execute(odtDocument);
     };
 
     /**

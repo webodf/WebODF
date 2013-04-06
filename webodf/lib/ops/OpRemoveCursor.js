@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpRemoveCursor = function OpRemoveCursor(session) {
+ops.OpRemoveCursor = function OpRemoveCursor() {
     "use strict";
 
     var memberid, timestamp;
@@ -48,9 +48,7 @@ ops.OpRemoveCursor = function OpRemoveCursor(session) {
         timestamp = data.timestamp;
     };
 
-    this.execute = function (domroot) {
-        var odtDocument = session.getOdtDocument();
-
+    this.execute = function (odtDocument) {
         odtDocument.removeCursor(memberid);
         odtDocument.emit(ops.OdtDocument.signalCursorRemoved, memberid);
     };

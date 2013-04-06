@@ -62,25 +62,25 @@ ops.OperationFactory = function OperationFactory(session) {
         // TODO: of course the following code can use some better
         // js language and make it more generic.
         if (spec.optype === "AddCursor") {
-            op = new ops.OpAddCursor(session);
+            op = new ops.OpAddCursor();
         } else if (spec.optype === "InsertText") {
-            op = new ops.OpInsertText(session);
+            op = new ops.OpInsertText();
         } else if (spec.optype === "RemoveText") {
-            op = new ops.OpRemoveText(session);
+            op = new ops.OpRemoveText();
         } else if (spec.optype === "SplitParagraph") {
-            op = new ops.OpSplitParagraph(session);
+            op = new ops.OpSplitParagraph();
         } else if (spec.optype === "SetParagraphStyle") {
-            op = new ops.OpSetParagraphStyle(session);
+            op = new ops.OpSetParagraphStyle();
         } else if (spec.optype === "UpdateParagraphStyle") {
-            op = new ops.OpUpdateParagraphStyle(session);
+            op = new ops.OpUpdateParagraphStyle();
         } else if (spec.optype === "CloneStyle") {
-            op = new ops.OpCloneStyle(session);
+            op = new ops.OpCloneStyle();
         } else if (spec.optype === "DeleteStyle") {
-            op = new ops.OpDeleteStyle(session);
+            op = new ops.OpDeleteStyle();
         } else if (spec.optype === "MoveCursor") {
-            op = new ops.OpMoveCursor(session);
+            op = new ops.OpMoveCursor();
         } else if (spec.optype === "RemoveCursor") {
-            op = new ops.OpRemoveCursor(session);
+            op = new ops.OpRemoveCursor();
         }
         if (op) {
             op.init(spec);

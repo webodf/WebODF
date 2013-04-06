@@ -277,7 +277,7 @@ define("webodf/editor/EditorSession", [
         this.setCurrentParagraphStyle = function (value) {
             var op;
             if (currentNamedStyleName !== value) {
-                op = new ops.OpSetParagraphStyle(session);
+                op = new ops.OpSetParagraphStyle();
                 op.init({
                     memberid: memberid,
                     position: self.getCursorPosition(),
@@ -307,7 +307,7 @@ define("webodf/editor/EditorSession", [
 
         this.updateParagraphStyle = function (styleName, info) {
             var op;
-            op = new ops.OpUpdateParagraphStyle(session);
+            op = new ops.OpUpdateParagraphStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName,
@@ -327,7 +327,7 @@ define("webodf/editor/EditorSession", [
             var newStyleName = uniqueParagraphStyleNCName(newStyleDisplayName),
                 op;
 
-            op = new ops.OpCloneStyle(session);
+            op = new ops.OpCloneStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName,
@@ -341,7 +341,7 @@ define("webodf/editor/EditorSession", [
 
         this.deleteStyle = function (styleName) {
             var op;
-            op = new ops.OpDeleteStyle(session);
+            op = new ops.OpDeleteStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName

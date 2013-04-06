@@ -38,7 +38,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpAddCursor = function OpAddCursor(session) {
+ops.OpAddCursor = function OpAddCursor() {
     "use strict";
 
     var memberid, timestamp;
@@ -48,9 +48,9 @@ ops.OpAddCursor = function OpAddCursor(session) {
         timestamp = data.timestamp;
     };
 
-    this.execute = function (rootNode) {
-        var odtDocument = session.getOdtDocument(),
-            cursor = new ops.OdtCursor(memberid, odtDocument);
+    this.execute = function (odtDocument) {
+        var cursor = new ops.OdtCursor(memberid, odtDocument);
+
         odtDocument.addCursor(cursor);
         odtDocument.emit(ops.OdtDocument.signalCursorAdded, cursor);
     };
