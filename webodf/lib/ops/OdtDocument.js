@@ -339,6 +339,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!string} memberid
+     * @return {!boolean}
      */
     this.removeCursor = function (memberid) {
         var cursor = cursors[memberid],
@@ -346,7 +347,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         if (cursor) {
             cursor.removeFromOdtDocument();
             delete cursors[memberid];
+            return true;
         }
+        return false;
     };
 
     /**

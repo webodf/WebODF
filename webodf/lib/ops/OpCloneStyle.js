@@ -54,14 +54,20 @@ ops.OpCloneStyle = function OpCloneStyle() {
 
     this.execute = function (odtDocument) {
         var styleNode = odtDocument.getParagraphStyleElement(styleName),
-            newStyleNode = styleNode.cloneNode(true);
+            newStyleNode;
 
+        if (!styleNode) {
+            return false;
+        }
+
+        newStyleNode = styleNode.cloneNode(true);
         newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);
         newStyleNode.setAttributeNS(stylens, 'style:display-name', newStyleDisplayName);
         styleNode.parentNode.appendChild(newStyleNode);
 
         odtDocument.getOdfCanvas().refreshCSS();
         odtDocument.emit(ops.OdtDocument.signalStyleCreated, newStyleName);
+        return true;
     };
 
     this.spec = function () {

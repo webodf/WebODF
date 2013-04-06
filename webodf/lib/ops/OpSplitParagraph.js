@@ -151,8 +151,10 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
                     memberId: memberid,
                     timeStamp: timestamp
                 });
+                return true;
             }
         }
+        return false;
     };
 
     this.spec = function () {

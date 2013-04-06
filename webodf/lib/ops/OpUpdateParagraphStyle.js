@@ -135,7 +135,9 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
             odtDocument.getOdfCanvas().refreshCSS();
             odtDocument.emit(ops.OdtDocument.signalParagraphStyleModified, styleName);
+            return true;
         }
+        return false;
     };
 
     this.spec = function () {

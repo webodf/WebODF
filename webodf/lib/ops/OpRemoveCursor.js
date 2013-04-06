@@ -49,8 +49,12 @@ ops.OpRemoveCursor = function OpRemoveCursor() {
     };
 
     this.execute = function (odtDocument) {
-        odtDocument.removeCursor(memberid);
+        if (!odtDocument.removeCursor(memberid)) {
+            return false;
+        }
+
         odtDocument.emit(ops.OdtDocument.signalCursorRemoved, memberid);
+        return true;
     };
 
     this.spec = function () {

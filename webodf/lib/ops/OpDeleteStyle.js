@@ -52,10 +52,15 @@ ops.OpDeleteStyle = function OpDeleteStyle() {
     this.execute = function (odtDocument) {
         var styleNode = odtDocument.getParagraphStyleElement(styleName);
 
+        if (!styleNode) {
+            return false;
+        }
+
         styleNode.parentNode.removeChild(styleNode);
 
         odtDocument.getOdfCanvas().refreshCSS();
         odtDocument.emit(ops.OdtDocument.signalStyleDeleted, styleName);
+        return true;
     };
 
     this.spec = function () {

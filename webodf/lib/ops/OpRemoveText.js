@@ -81,7 +81,7 @@ ops.OpRemoveText = function OpRemoveText() {
             //
             if (domPosition.offset !== 1) {
                 runtime.log("unexpected!");
-                return;
+                return false;
             }
             domPosition.offset -= 1;
         }
@@ -101,7 +101,9 @@ ops.OpRemoveText = function OpRemoveText() {
                 memberId: memberid,
                 timeStamp: timestamp
             });
+            return true;
         }
+        return false;
     };
 
     this.spec = function () {

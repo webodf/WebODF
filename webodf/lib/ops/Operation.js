@@ -49,7 +49,7 @@ ops.Operation.prototype.init = function (data) {"use strict"; };
 
 /**
  * @param {!ops.OdtDocument} odtDocument
- * @return {undefined}
+ * @return {!boolean}
  */
 ops.Operation.prototype.execute = function (odtDocument) {"use strict"; };
 

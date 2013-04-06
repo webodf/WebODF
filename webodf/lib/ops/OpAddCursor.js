@@ -49,10 +49,17 @@ ops.OpAddCursor = function OpAddCursor() {
     };
 
     this.execute = function (odtDocument) {
-        var cursor = new ops.OdtCursor(memberid, odtDocument);
+        var cursor = odtDocument.getCursor(memberid);
 
+        // there should be none
+        if (cursor) {
+            return false;
+        }
+
+        cursor = new ops.OdtCursor(memberid, odtDocument);
         odtDocument.addCursor(cursor);
         odtDocument.emit(ops.OdtDocument.signalCursorAdded, cursor);
+        return true;
     };
 
     this.spec = function () {

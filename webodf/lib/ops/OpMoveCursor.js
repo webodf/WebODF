@@ -55,8 +55,9 @@ ops.OpMoveCursor = function OpMoveCursor() {
             stepCounter,
             steps;
 
-        runtime.assert(cursor !== undefined,
-            "cursor for [" + memberid + "] not found (MoveCursor).");
+        if (!cursor) {
+            return false;
+        }
 
         stepCounter = cursor.getStepCounter();
 
@@ -66,10 +67,11 @@ ops.OpMoveCursor = function OpMoveCursor() {
             steps = -stepCounter.countBackwardSteps(-number, positionFilter);
         } else {
             // nothing to do
-            return;
+            return true;
         }
         cursor.move(steps);
         odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+        return true;
     };
 
     this.spec = function () {

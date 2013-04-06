@@ -67,8 +67,10 @@ runtime.log("Setting paragraph style:" + domPosition + " -- " + position + " " +
                     timeStamp: timestamp,
                     memberId: memberid
                 });
+                return true;
             }
         }
+        return false;
     };
 
     this.spec = function () {

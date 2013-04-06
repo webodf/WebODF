@@ -86,7 +86,9 @@ ops.OpInsertText = function OpInsertText() {
                 memberId: memberid,
                 timeStamp: timestamp
             });
+            return true;
         }
+        return false;
     };
 
     this.spec = function () {
