@@ -115,11 +115,14 @@ var webodfEditor = (function() {
      * the given document.
      *
      * @param {!string} docUrl
+     * @param {?Object} editorOptions
      * @param {?function(!Object)} editorReadyCallback
      */
-    function createLocalEditor(docUrl, editorReadyCallback) {
+    function createLocalEditor(docUrl, editorOptions, editorReadyCallback) {
         var pos;
         booting = true;
+        editorOptions = editorOptions || {};
+        editorOptions.memberid = "localuser";
 
         runtime.assert(docUrl, "docUrl needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
@@ -128,7 +131,7 @@ var webodfEditor = (function() {
 
         require({ }, ["webodf/editor/Editor"],
             function(Editor) {
-                editorInstance = new Editor({ memberid: "localuser" });
+                editorInstance = new Editor(editorOptions);
                 editorInstance.loadDocument(docUrl, function() {
                     editorReadyCallback(editorInstance);
                 });
@@ -143,20 +146,24 @@ var webodfEditor = (function() {
      * @param {!string} sessionId
      * @param {!string} userid
      * @param {?string} token
+     * @param {?Object} editorOptions
      * @param {?function(!Object)} editorReadyCallback
      */
-    function createNetworkedEditor(sessionId, userid, token, editorReadyCallback) {
+    function createNetworkedEditor(sessionId, userid, token, editorOptions, editorReadyCallback) {
+
         runtime.assert(sessionId, "sessionId needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
+
+        editorOptions = editorOptions || {};
+        editorOptions.memberid = userid + "___" + Date.now();
+        editorOptions.networked = true;
+        editorOptions.networkSecurityToken = token;
+
         require({ }, ["webodf/editor/Editor"],
             function(Editor) {
                 // TODO: the networkSecurityToken needs to be retrieved via now.login
                 // (but this is to be implemented later)
-                editorInstance = new Editor({
-                    memberid: userid + "___" + Date.now(),
-                    networked:true,
-                    networkSecurityToken:token
-                });
+                editorInstance = new Editor(editorOptions);
 
                 // load the document and get called back when it's live
                 editorInstance.loadSession(sessionId, function() {
@@ -174,7 +181,7 @@ var webodfEditor = (function() {
      * when the user selects a session the callback is called
      * with the sessionId as parameter
      *
-     * @param {!function(!string)} callback
+     * @param {!function(!string, !string, ?string)} callback
      * @returns {undefined}
      */
     function startLoginProcess(callback) {
@@ -249,6 +256,7 @@ var webodfEditor = (function() {
      *
      */
     function boot(args) {
+        var editorOptions = {}, loginProcedure = startLoginProcess;
         runtime.assert(!booting, "editor creation already in progress");
 
         args = args || {};
@@ -262,10 +270,18 @@ var webodfEditor = (function() {
             args.docUrl = guessDocUrl();
         }
 
+        if (args.saveCallback) {
+            editorOptions.saveCallback = args.saveCallback;
+        }
+
+        if (args.loginProcedure) {
+            loginProcedure = args.loginProcedure;
+        }
+
         // start the editor with network
         function handleNetworkedSituation() {
-            startLoginProcess(function(sessionId, userid, token) {
-                createNetworkedEditor(sessionId, userid, token, function (ed) {
+            loginProcedure(function(sessionId, userid, token) {
+                createNetworkedEditor(sessionId, userid, token, editorOptions, function (ed) {
                     if (args.callback) {
                         args.callback(ed);
                     }
@@ -276,7 +292,7 @@ var webodfEditor = (function() {
 
         // start the editor without network
         function handleNonNetworkedSituation() {
-            createLocalEditor(args.docUrl, function (editor) {
+            createLocalEditor(args.docUrl, editorOptions, function (editor) {
                 if (args.callback) {
                     args.callback(editor);
                 }

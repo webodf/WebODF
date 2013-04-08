@@ -51,7 +51,9 @@ define("webodf/editor/Editor", [
 
         /**
          * @constructor
-         * @param {{networked:boolean=, memberid:string=}} args
+         * @param {{networked:boolean=,
+         *          memberid:string=,
+         *          saveCallback:function()= }} args
          */
         function Editor(args) {
 
@@ -66,6 +68,7 @@ define("webodf/editor/Editor", [
             opRouter,
             sessionid,
             userModel,
+            saveOdtFile = args.saveCallback,
             documentUrl;
 
             function translator(key, context) {
@@ -156,7 +159,7 @@ define("webodf/editor/Editor", [
                         editorSession.endEditing();
                     };
 
-                    loadWidgets(editorSession, self.saveOdtFile);
+                    loadWidgets(editorSession, saveOdtFile);
                     editorReadyCallback();
 
                 });
