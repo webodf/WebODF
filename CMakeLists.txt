@@ -266,6 +266,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/UserModel.js
     lib/ops/TrivialUserModel.js
     lib/ops/NowjsUserModel.js
+    lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
     lib/ops/NowjsOperationRouter.js
     lib/gui/EditInfoHandle.js

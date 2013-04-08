@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -32,58 +32,37 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global ops*/
 
-/*
- * route the operations.
- * this implementation immediately passes them to the
- * playback function.
- * other implementations might want to send them to a
- * server and wait for foreign ops.
+/**
+ * @interface
  */
+ops.OperationRouter = function OperationRouter() {"use strict"; };
 
 /**
- * @constructor
- * @implements ops.OperationRouter
+ * Sets the factory to use to create operation instances from operation specs.
+ *
+ * @param {!ops.OperationFactory} f
+ * @return {undefined}
  */
-ops.TrivialOperationRouter = function TrivialOperationRouter() {
-    "use strict";
+ops.OperationRouter.prototype.setOperationFactory = function (f) {"use strict"; };
 
-    var self = this;
+/**
+ * Sets the method which should be called to apply operations.
+ *
+ * @param {!function(!ops.Operation)} playback_func
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.setPlaybackFunction = function (playback_func) {"use strict"; };
 
-    /**
-     * Sets the factory to use to create operation instances from operation specs.
-     *
-     * @param {!ops.OperationFactory} f
-     * @return {undefined}
-     */
-    this.setOperationFactory = function (f) {
-        self.op_factory = f;
-    };
-
-    /**
-     * Sets the method which should be called to apply operations.
-     *
-     * @param {!function(!ops.Operation)} playback_func
-     * @return {undefined}
-     */
-    this.setPlaybackFunction = function (playback_func) {
-        self.playback_func = playback_func;
-    };
-
-    /**
-     * Brings the locally created operations into the game.
-     *
-     * @param {!ops.Operation} op
-     * @return {undefined}
-     */
-    this.push = function (op) {
-        var timedOp,
-            opspec = op.spec();
-
-        opspec.timestamp = (new Date()).getTime();
-        timedOp = self.op_factory.create(opspec);
-
-        self.playback_func(timedOp);
-    };
-};
+/**
+ * Brings the locally created operations into the game.
+ * TODO: currently all known implementations only use the specs of the operations,
+ * so it might make sense to not create any operations outside of the operation router at all
+ * and instead just create specs and pass them to this push method?
+ *
+ * @param {!ops.Operation} op
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.push = function (op) {"use strict"; };

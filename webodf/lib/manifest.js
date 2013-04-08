@@ -73,6 +73,7 @@
         "ops/TrivialUserModel.js",
         "ops/NowjsUserModel.js",
         "ops/Operation.js",
+        "ops/OperationRouter.js",
         "ops/TrivialOperationRouter.js",
         "ops/NowjsOperationRouter.js",
         "ops/OdtCursor.js",

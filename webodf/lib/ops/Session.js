@@ -52,6 +52,10 @@ ops.Session = function Session(odfCanvas) {
     }
     this.setUserModel = setUserModel;
 
+    /**
+     * @param {!ops.OperationRouter} opRouter
+     * @return {undefined}
+     */
     function setOperationRouter(opRouter) {
         m_operation_router = opRouter;
         opRouter.setPlaybackFunction(self.playOperation);

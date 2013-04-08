@@ -45,6 +45,7 @@
 
 /**
  * @constructor
+ * @implements ops.OperationRouter
  */
 ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
     "use strict";
@@ -62,10 +63,22 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
         return "C:"+memberid+":"+router_sequence;
     }
 
+    /**
+     * Sets the factory to use to create operation instances from operation specs.
+     *
+     * @param {!ops.OperationFactory} f
+     * @return {undefined}
+     */
     this.setOperationFactory = function (f) {
         self.op_factory = f;
     };
 
+    /**
+     * Sets the method which should be called to apply operations.
+     *
+     * @param {!function(!ops.Operation)} playback_func
+     * @return {undefined}
+     */
     this.setPlaybackFunction = function (playback_func) {
         self.playback_func = playback_func;
     };
@@ -116,6 +129,12 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
         }
     };
 
+    /**
+     * Brings the locally created operations into the game.
+     *
+     * @param {!ops.Operation} op
+     * @return {undefined}
+     */
     this.push = function (op) {
         // add client nonce and reference to server-side-op-sequence
         var opspec = op.spec();
