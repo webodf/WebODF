@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,11 +32,14 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf*/
+
+/*global runtime, ops, odf*/
+
 runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
 runtime.loadClass("ops.OdtDocument");
+
 /**
  * An editing session and what belongs to it.
  * @constructor
@@ -43,30 +48,39 @@ runtime.loadClass("ops.OdtDocument");
 ops.Session = function Session(odfCanvas) {
     "use strict";
     var self = this,
+        /**@type{!ops.OdtDocument}*/
         odtDocument = new ops.OdtDocument(odfCanvas),
-        m_user_model = null,
-        m_operation_router = null;
+        /**@type{!ops.UserModel}*/
+        userModel = new ops.TrivialUserModel(),
+        /**@type{?ops.OperationRouter}*/
+        operationRouter = null;
 
-    function setUserModel(userModel) {
-        m_user_model = userModel;
-    }
-    this.setUserModel = setUserModel;
+    /**
+     * @param {!ops.UserModel} uModel
+     * @return {undefined}
+     */
+    this.setUserModel = function (uModel) {
+        userModel = uModel;
+    };
 
     /**
      * @param {!ops.OperationRouter} opRouter
      * @return {undefined}
      */
-    function setOperationRouter(opRouter) {
-        m_operation_router = opRouter;
-        opRouter.setPlaybackFunction(self.playOperation);
+    this.setOperationRouter = function (opRouter) {
+        operationRouter = opRouter;
+        opRouter.setPlaybackFunction(function (op) {
+            op.execute(odtDocument);
+        });
         opRouter.setOperationFactory(new ops.OperationFactory(self));
-    }
-    this.setOperationRouter = setOperationRouter;
+    };
 
-    function getUserModel() {
-        return m_user_model;
-    }
-    this.getUserModel = getUserModel;
+    /**
+     * @return {!ops.UserModel}
+     */
+    this.getUserModel = function () {
+        return userModel;
+    };
 
     /**
      * @return {!ops.OdtDocument}
@@ -75,30 +89,23 @@ ops.Session = function Session(odfCanvas) {
         return odtDocument;
     };
 
-    /* SESSION OPERATIONS */
-
-    // controller sends operations to this method
+    /**
+     * Controller sends operations to this method.
+     *
+     * @param {!ops.Operation} operation
+     * @return {undefined}
+     */
     this.enqueue = function (operation) {
-        m_operation_router.push(operation);
-    };
-
-    this.playOperation = function (op) {
-        op.execute(odtDocument);
+        operationRouter.push(operation);
     };
 
     /**
      * @return {undefined}
      */
     function init() {
-        setUserModel(new ops.TrivialUserModel());
-        setOperationRouter(new ops.TrivialOperationRouter());
+        self.setOperationRouter(new ops.TrivialOperationRouter());
     }
     init();
 };
-
-(function () {
-    "use strict";
-    return ops.Session;
-}());
 
 // vim:expandtab
