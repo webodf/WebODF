@@ -39,20 +39,55 @@ runtime.loadClass("ops.TrivialUserModel");
 runtime.loadClass("core.EditInfo");
 runtime.loadClass("gui.EditInfoMarker");
 
+/**
+ * @interface
+ */
+gui.SessionViewOptions = function() {
+    "use strict";
+
+    /**
+     * Set the initial edit information marker visibility
+     * @type {boolean}
+     */
+    this.editInfoMarkersInitiallyVisible = true;
+
+    /**
+     * Set the initial caret's avatar visibility
+     * @type {boolean}
+     */
+    this.caretAvatarsInitiallyVisible = true;
+};
+
 gui.SessionView = (function () {
     "use strict";
 
     /**
+     * Return a user-specified option, or the default value if no user option
+     * is provided
+     * @param {undefined|boolean} userValue
+     * @param {boolean} defaultValue
+     * @returns {boolean}
+     */
+    function configOption(userValue, defaultValue) {
+        return userValue !== undefined ? userValue : defaultValue;
+    }
+
+    /**
       * @constructor
+     * @param {gui.SessionViewOptions} viewOptions
+     * @param {ops.Session} session
+     * @param {gui.CaretFactory} caretFactory
       */
-    function SessionView(session, caretFactory) {
+    function SessionView(viewOptions, session, caretFactory) {
         var carets = {},
             avatarInfoStyles,
             headlineNodeName = 'text|h',
             paragraphNodeName = 'text|p',
             editHighlightingEnabled = true,
             editInfons = 'urn:webodf:names:editinfo',
-            editInfoMap = {};
+            editInfoMap = {},
+            showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
+            showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true);
 
         function createAvatarInfoNodeMatch(nodeName, className, memberId) {
             var userId = memberId.split('___')[0];
@@ -131,7 +166,7 @@ gui.SessionView = (function () {
             } else {
                 id = Math.random().toString();
                 editInfo = new core.EditInfo(element, session.getOdtDocument());
-                editInfoMarker = new gui.EditInfoMarker(editInfo);
+                editInfoMarker = new gui.EditInfoMarker(editInfo, showEditInfoMarkers);
 
                 editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
                 editInfoNode.setAttributeNS(editInfons, 'id', id);
@@ -139,6 +174,44 @@ gui.SessionView = (function () {
             }
 
             editInfoMarker.addEdit(memberId, new Date(timestamp));
+        }
+
+        /**
+         * Updates the visibility on all existing editInfo entries
+         * @param {boolean} visible
+         */
+        function setEditInfoMarkerVisbility(visible) {
+            var editInfoMarker, keyname;
+
+            for (keyname in editInfoMap) {
+                  if (editInfoMap.hasOwnProperty(keyname)) {
+                      editInfoMarker = editInfoMap[keyname];
+                      if (visible) {
+                          editInfoMarker.show();
+                      } else {
+                          editInfoMarker.hide();
+                      }
+                  }
+              }
+        }
+
+        /**
+         * Updates the visibility on all existing avatars
+         * @param {boolean} visible
+         */
+        function setCaretAvatarVisibility(visible) {
+            var caret, keyname;
+
+            for (keyname in carets) {
+                if (carets.hasOwnProperty(keyname)) {
+                    caret = carets[keyname];
+                    if (visible) {
+                        caret.showHandle();
+                    } else {
+                        caret.hideHandle();
+                    }
+                }
+            }
         }
 
         session.getOdtDocument().subscribe('paragraphEdited', function (info) {
@@ -159,6 +232,54 @@ gui.SessionView = (function () {
             }
 
             editHighlightingEnabled = false;
+        };
+
+        /**
+         * Show edit information markers displayed near edited paragraphs
+         */
+        this.showEditInfoMarkers = function () {
+            if (showEditInfoMarkers) {
+                return;
+            }
+
+            showEditInfoMarkers = true;
+            setEditInfoMarkerVisbility(showEditInfoMarkers);
+        };
+
+        /**
+         * Hide edit information markers displayed near edited paragraphs
+         */
+        this.hideEditInfoMarkers = function () {
+            if (!showEditInfoMarkers) {
+                return;
+            }
+
+            showEditInfoMarkers = false;
+            setEditInfoMarkerVisbility(showEditInfoMarkers);
+        };
+
+        /**
+         * Show member avatars above the cursor
+         */
+        this.showCaretAvatars = function () {
+            if (showCaretAvatars) {
+                return;
+            }
+
+            showCaretAvatars = true;
+            setCaretAvatarVisibility(showCaretAvatars);
+        };
+
+        /**
+         * Hide member avatars above the cursor
+         */
+        this.hideCaretAvatars = function () {
+            if (!showCaretAvatars) {
+                return;
+            }
+
+            showCaretAvatars = false;
+            setCaretAvatarVisibility(showCaretAvatars);
         };
 
         /**
@@ -213,7 +334,7 @@ gui.SessionView = (function () {
          * @return {undefined}
          */
         function onCursorAdded(cursor) {
-            var caret = caretFactory.createCaret(cursor),
+            var caret = caretFactory.createCaret(cursor, showCaretAvatars),
                 memberId = cursor.getMemberId(),
                 userModel = session.getUserModel();
 

@@ -37,8 +37,10 @@ runtime.loadClass("gui.EditInfoHandle");
 
 /**
  * @constructor
+ * @param {!core.EditInfo} editInfo
+ * @param {boolean} initialVisibility Sets the initial edit info marker visibility
  */
-gui.EditInfoMarker = function EditInfoMarker(editInfo) {
+gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
     "use strict";
 
     var self = this,
@@ -121,9 +123,27 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
         return editInfo;
     };
 
+    /**
+     * Shows the edit information marker
+     */
+    this.show = function () {
+        marker.style.display = 'block';
+    };
+
+    /**
+     * Hides the edit information marker
+     */
+    this.hide = function () {
+        self.hideHandle();
+        // edit decays are not cleared as the marker should be properly
+        // faded if it is re-shown
+        marker.style.display = 'none';
+    };
+
     this.showHandle = function () {
         handle.show();
     };
+
     this.hideHandle = function () {
         handle.hide();
     };
@@ -145,6 +165,9 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo) {
         editInfoNode = editInfo.getNode();
         editInfoNode.appendChild(marker);
         handle = new gui.EditInfoHandle(editInfoNode);
+        if (!initialVisibility) {
+            self.hide();
+        }
     }
 
     init();

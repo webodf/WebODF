@@ -51,7 +51,14 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
 
-    var EditorSession = function EditorSession(session, memberid) {
+    /**
+     * Instantiate a new editor session attached to an existing operation session
+     * @param {!ops.Session} session
+     * @param {!string} memberid
+     * @param {{viewOptions:gui.SessionViewOptions}} config
+     * @constructor
+     */
+    var EditorSession = function EditorSession(session, memberid, config) {
         var self = this,
             currentParagraphNode = null,
             currentNamedStyleName = null,
@@ -63,7 +70,7 @@ define("webodf/editor/EditorSession", [
 
 
         this.sessionController = new gui.SessionController(session, memberid);
-        this.sessionView = new gui.SessionView(session, new gui.CaretFactory(self.sessionController));
+        this.sessionView = new gui.SessionView(config.viewOptions, session, new gui.CaretFactory(self.sessionController));
         this.availableFonts = [];
 
         eventListener.userAdded = [];

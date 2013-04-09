@@ -38,11 +38,14 @@
  * move around with the parent element.
  * @constructor
  * @param {!Element} parentElement
+ * @param {boolean} avatarInitiallyVisible Sets the initial visibility of the avatar
  */
-gui.Avatar = function Avatar(parentElement) {
+gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
     "use strict";
-    var handle,
+    var self = this,
+        handle,
         image,
+        pendingImageUrl,
         displayShown = "block",
         displayHidden = "none";
 
@@ -50,12 +53,21 @@ gui.Avatar = function Avatar(parentElement) {
         image.style.borderColor = color;
     };
     this.setImageUrl = function (url) {
-        image.src = url;
+        if (self.isVisible()) {
+            image.src = url;
+        } else {
+            // Delay loading of the associated image until the avatar is displayed
+            pendingImageUrl = url;
+        }
     };
     this.isVisible = function () {
         return (handle.style.display === displayShown);
     };
     this.show = function () {
+        if (pendingImageUrl) {
+            image.src = pendingImageUrl;
+            pendingImageUrl = undefined;
+        }
         handle.style.display = displayShown;
     };
     this.hide = function () {
@@ -79,7 +91,7 @@ gui.Avatar = function Avatar(parentElement) {
         handle.style.position = "absolute";
         handle.style.top = '-80px';
         handle.style.left = '-34px'; // TODO: see to automatically calculate this, depending on the style
-        handle.style.display = displayShown;
+        handle.style.display = avatarInitiallyVisible ? displayShown : displayHidden;
         parentElement.appendChild(handle);
     }
 

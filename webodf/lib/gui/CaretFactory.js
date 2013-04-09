@@ -48,13 +48,14 @@ gui.CaretFactory = function CaretFactory(sessionController) {
 
     /**
      * @param {ops.OdtCursor} cursor
+     * @param {boolean} caretAvatarInitiallyVisible Set to false to hide the associated avatar
      * @return {!gui.Caret}
      */
-    this.createCaret = function (cursor) {
+    this.createCaret = function (cursor, caretAvatarInitiallyVisible) {
         var memberid = cursor.getMemberId(),
             odtDocument = sessionController.getSession().getOdtDocument(),
             canvasElement = odtDocument.getOdfCanvas().getElement(),
-            caret = new gui.Caret(cursor);
+            caret = new gui.Caret(cursor, caretAvatarInitiallyVisible);
 
         // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {

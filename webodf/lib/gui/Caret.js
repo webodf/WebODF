@@ -43,8 +43,9 @@ runtime.loadClass("ops.OdtCursor");
  * the user color and back.
  * @constructor
  * @param {!ops.OdtCursor} cursor
+ * @param {boolean} avatarInitiallyVisible Sets the initial visibility of the caret's avatar
  */
-gui.Caret = function Caret(cursor) {
+gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
     "use strict";
     function clearNode(node) {
         while (node.firstChild !== null) {
@@ -350,7 +351,7 @@ gui.Caret = function Caret(cursor) {
 
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
-        avatar = new gui.Avatar(cursorNode);
+        avatar = new gui.Avatar(cursorNode, avatarInitiallyVisible);
     }
     init();
 };

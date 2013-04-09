@@ -64,7 +64,7 @@ define("webodf/editor/Editor", [
             session,
             editorSession,
             userList,
-            networked = args.networked,
+            networked = args.networked === true,
             opRouter,
             sessionid,
             userModel,
@@ -98,6 +98,7 @@ define("webodf/editor/Editor", [
                 var odfElement, odfCanvas, mainContainer,
                     editorPane, peoplePane,
                     inviteButton,
+                    viewOptions = {editInfoMarkersInitiallyVisible:networked, caretAvatarsInitiallyVisible:networked},
                     peopleListDiv = document.getElementById('peopleList');
 
                 if (networked) {
@@ -148,7 +149,7 @@ define("webodf/editor/Editor", [
                     }
 
                     session = new ops.Session(odfCanvas);
-                    editorSession = new EditorSession(session, memberid);
+                    editorSession = new EditorSession(session, memberid, {viewOptions:viewOptions});
 
                     if (peopleListDiv) {
                         userList = new UserList(editorSession, peopleListDiv);
