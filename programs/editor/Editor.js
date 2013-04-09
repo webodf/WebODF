@@ -66,7 +66,6 @@ define("webodf/editor/Editor", [
             userList,
             networked = args.networked === true,
             opRouter,
-            sessionid,
             userModel,
             saveOdtFile = args.saveCallback,
             documentUrl;

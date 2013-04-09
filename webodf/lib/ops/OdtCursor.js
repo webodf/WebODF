@@ -109,7 +109,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
     };
     /**
      * Obtain the node representing the cursor.
-     * @return {Element}
+     * @return {!Element}
      */
     this.getNode = function () {
         return cursor.getNode();
@@ -130,8 +130,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
     };
 
     function init() {
-        var distanceToFirstTextNode, selection;
-            selection = new core.Selection(odtDocument.getDOM());
+        var selection = new core.Selection(odtDocument.getDOM());
 
         cursor = new core.Cursor(selection, odtDocument.getDOM());
         // mark cursornode with memberid

@@ -73,16 +73,14 @@ gui.SessionView = (function () {
     }
 
     /**
-      * @constructor
+     * @constructor
      * @param {gui.SessionViewOptions} viewOptions
      * @param {ops.Session} session
      * @param {gui.CaretFactory} caretFactory
-      */
+     */
     function SessionView(viewOptions, session, caretFactory) {
         var carets = {},
             avatarInfoStyles,
-            headlineNodeName = 'text|h',
-            paragraphNodeName = 'text|p',
             editHighlightingEnabled = true,
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {},
@@ -96,6 +94,7 @@ gui.SessionView = (function () {
 
         /**
          * @param {string} nodeName
+         * @param {string} className
          * @param {string} memberId
          * @return {?Node}
          */
@@ -157,7 +156,6 @@ gui.SessionView = (function () {
             var editInfo,
                 editInfoMarker,
                 id = '',
-                userModel = session.getUserModel(),
                 editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
 
             if (editInfoNode) {

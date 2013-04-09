@@ -47,11 +47,6 @@ runtime.loadClass("ops.OdtCursor");
  */
 gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
     "use strict";
-    function clearNode(node) {
-        while (node.firstChild !== null) {
-            node.removeNode(node.firstChild);
-        }
-    }
     var self = this,
         span,
         avatar,
@@ -222,6 +217,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
      * without any scrolling
      * @param {!Element} caretElement
      * @param {?Element} containerElement
+     * @param {!number} margin
      * @return {!{left:!number,top:!number,right:!number,bottom:!number}}
      */
     function getRelativeCaretOffsetRect(caretElement, containerElement, margin) {

@@ -369,9 +369,9 @@ define("webodf/editor/EditorSession", [
          */
         this.getDeclaredFonts = function () {
             var fontMap = formatting.getFontMap(),
-                sortedNames = [],
                 usedFamilies = [],
                 array = [],
+                sortedNames,
                 key,
                 value,
                 i;
