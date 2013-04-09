@@ -32,12 +32,12 @@
  */
 /*global core, gui, runtime, window*/
 
-runtime.loadClass("core.EditInfo");
+runtime.loadClass("ops.EditInfo");
 runtime.loadClass("gui.EditInfoHandle");
 
 /**
  * @constructor
- * @param {!core.EditInfo} editInfo
+ * @param {!ops.EditInfo} editInfo
  * @param {boolean} initialVisibility Sets the initial edit info marker visibility
  */
 gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {

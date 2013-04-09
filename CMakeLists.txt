@@ -219,7 +219,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/Selection.js
     lib/core/LoopWatchDog.js
     lib/core/Cursor.js
-    lib/core/EditInfo.js
     lib/core/EventNotifier.js
     lib/core/UnitTester.js
     lib/core/PositionIterator.js
@@ -258,6 +257,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpDeleteStyle.js
     lib/ops/OperationFactory.js
     lib/ops/OdtCursor.js
+    lib/ops/EditInfo.js
     lib/gui/SelectionMover.js
     lib/gui/Avatar.js
     lib/gui/Caret.js

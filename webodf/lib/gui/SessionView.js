@@ -36,7 +36,7 @@
 
 runtime.loadClass("gui.Caret");
 runtime.loadClass("ops.TrivialUserModel");
-runtime.loadClass("core.EditInfo");
+runtime.loadClass("ops.EditInfo");
 runtime.loadClass("gui.EditInfoMarker");
 
 /**
@@ -150,7 +150,7 @@ gui.SessionView = (function () {
                 editInfoMarker = editInfoMap[id];
             } else {
                 id = Math.random().toString();
-                editInfo = new core.EditInfo(element, session.getOdtDocument());
+                editInfo = new ops.EditInfo(element, session.getOdtDocument());
                 editInfoMarker = new gui.EditInfoMarker(editInfo, showEditInfoMarkers);
 
                 editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];

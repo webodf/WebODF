@@ -1,5 +1,7 @@
 /**
+ * @license
  * Copyright (C) 2012 KO GmbH <aditya.bhatt@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,20 +32,28 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global core, ops, runtime*/
 
 /**
  * @constructor
+ * @param {!Element} container
  * @param {!ops.OdtDocument} odtDocument
  */
-core.EditInfo = function EditInfo(container, odtDocument) {
+ops.EditInfo = function EditInfo(container, odtDocument) {
     "use strict";
     var self = this,
+        /**@type {Element}*/
         editInfoNode,
+        /**@type {!Object.<string,{time:Date}>}*/
         editHistory = {};
-    
+
+    /**
+     * @return {!Array.<{memberid:string,time:Date}>}
+     */
     function sortEdits() {
-        var arr = [],
+        var /**@type {!Array.<{memberid:string,time:Date}>}*/
+            arr = [],
             memberid;
         for (memberid in editHistory) {
             if (editHistory.hasOwnProperty(memberid)) {
@@ -53,29 +63,48 @@ core.EditInfo = function EditInfo(container, odtDocument) {
                 });
             }
         }
-        
+
         arr.sort(function (a, b) {
             return a.time - b.time;
         });
-        
-        return arr; // returns array
+
+        return arr;
     }
 
+    /**
+     * @return {Element}
+     */
     this.getNode = function () {
         return editInfoNode;
     };
 
+    /**
+     * @return {!ops.OdtDocument}
+     */
     this.getOdtDocument = function () {
         return odtDocument;
     };
-    
+
+    /**
+     * @return {!Object.<string,{time:Date}>}
+     */
     this.getEdits = function () {
         return editHistory;
     };
-    
+
+    /**
+     * Returns the sorted list of memberid/time pairs, with oldest first.
+     * @return {!Array.<{memberid:string,time:Date}>}
+     */
     this.getSortedEdits = function () {
         return sortEdits();
     };
+
+    /**
+     * @param {!string} memberid
+     * @param {!Date} timestamp
+     * @return {undefined}
+     */
     this.addEdit = function (memberid, timestamp) {
         // We want only the latest edit by a user, even if the user has
         // different avatars with different memberids
@@ -104,6 +133,9 @@ core.EditInfo = function EditInfo(container, odtDocument) {
         };
     };
 
+    /**
+     * @return {undefined}
+     */
     this.clearEdits = function () {
         editHistory = {};
     };
