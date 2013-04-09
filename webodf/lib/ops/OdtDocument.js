@@ -68,12 +68,38 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function TextPositionFilter() {
         var /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
             /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
+
+        /**
+         * This takes a node (a textNode or a span, for example) that exists at some level
+         * inside a p or h element, and returns it's previous sibling after ignoring the cursor
+         * or editinfo elements' existence. If the node is within a span, then we return the node
+         * before that span.
+         * @param {!Node} node
+         * @return {Node}
+         */
+        function getPreviousSiblingInParagraph(node) {
+            var prev = node.previousSibling,
+                prevName = prev && prev.localName;
+            if (prevName === "editinfo") {
+                return null;
+            } else if (prevName === "cursor") {
+                return getPreviousSiblingInParagraph(prev);
+            } else if (prevName === null) {
+                if (node.parentNode.localName === "span") {
+                    return getPreviousSiblingInParagraph(node.parentNode);
+                }
+            }
+
+            return prev;
+        }
         /**
          * @param {!core.PositionIterator} iterator
          * @return {core.PositionFilter.FilterResult}
          */
         this.acceptPosition = function (iterator) {
-            var n = iterator.container(), p, o, d;
+            var n = iterator.container(), p, o, d,
+                textOffset = iterator.textOffset(),
+                previousSibling = getPreviousSiblingInParagraph(n);
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
@@ -91,9 +117,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 return reject;
             }
             // do not stop between spaces
-            o = iterator.textOffset();
-            if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
+            if (textOffset > 0 && iterator.substr(textOffset - 1, 2) === "  ") {
                 return reject;
+            }
+            if (textOffset === 0) {
+                if (o === "span" || (previousSibling && previousSibling.localName) === "span") {
+                    return reject;
+                }
             }
             return accept;
         };
