@@ -641,8 +641,8 @@ odf.Style2CSS = function Style2CSS() {
 
         if (listLevelLabelAlign) {
             labelAlignAttr = listLevelLabelAlign.attributes;
-            bulletIndent = labelAlignAttr["fo:text-indent"].value;
-            listIndent = labelAlignAttr["fo:margin-left"].value;
+            bulletIndent = labelAlignAttr["fo:text-indent"] ? labelAlignAttr["fo:text-indent"].value : undefined;
+            listIndent = labelAlignAttr["fo:margin-left"] ? labelAlignAttr["fo:margin-left"].value : undefined;
         }
 
         // If no values are specified, use default values
