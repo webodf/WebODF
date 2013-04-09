@@ -40,23 +40,10 @@ runtime.loadClass("core.EditInfo");
 runtime.loadClass("gui.EditInfoMarker");
 
 /**
- * @interface
+ * @typedef {{editInfoMarkersInitiallyVisible:boolean,
+ *               caretAvatarsInitiallyVisible:boolean}}
  */
-gui.SessionViewOptions = function() {
-    "use strict";
-
-    /**
-     * Set the initial edit information marker visibility
-     * @type {boolean}
-     */
-    this.editInfoMarkersInitiallyVisible = true;
-
-    /**
-     * Set the initial caret's avatar visibility
-     * @type {boolean}
-     */
-    this.caretAvatarsInitiallyVisible = true;
-};
+gui.SessionViewOptions;
 
 gui.SessionView = (function () {
     "use strict";
