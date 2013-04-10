@@ -57,6 +57,7 @@ office|text {
   margin: 2px;
   text-align: left;
   overflow: hidden;
+  word-wrap: break-word;
 }
 office|spreadsheet {
   display: block;
