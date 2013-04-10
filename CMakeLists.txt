@@ -253,8 +253,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpSplitParagraph.js
     lib/ops/OpSetParagraphStyle.js
     lib/ops/OpUpdateParagraphStyle.js
-    lib/ops/OpCloneStyle.js
-    lib/ops/OpDeleteStyle.js
+    lib/ops/OpCloneParagraphStyle.js
+    lib/ops/OpDeleteParagraphStyle.js
     lib/ops/OperationFactory.js
     lib/ops/OdtCursor.js
     lib/ops/EditInfo.js

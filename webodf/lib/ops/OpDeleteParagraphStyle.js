@@ -39,7 +39,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpDeleteStyle = function OpDeleteStyle() {
+ops.OpDeleteParagraphStyle = function OpDeleteParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, styleName;
@@ -66,7 +66,7 @@ ops.OpDeleteStyle = function OpDeleteStyle() {
 
     this.spec = function () {
         return {
-            optype: "DeleteStyle",
+            optype: "DeleteParagraphStyle",
             memberid: memberid,
             timestamp: timestamp,
             styleName: styleName

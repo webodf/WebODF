@@ -327,7 +327,7 @@ define("webodf/editor/EditorSession", [
             var newStyleName = uniqueParagraphStyleNCName(newStyleDisplayName),
                 op;
 
-            op = new ops.OpCloneStyle();
+            op = new ops.OpCloneParagraphStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName,
@@ -341,7 +341,7 @@ define("webodf/editor/EditorSession", [
 
         this.deleteStyle = function (styleName) {
             var op;
-            op = new ops.OpDeleteStyle();
+            op = new ops.OpDeleteParagraphStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName

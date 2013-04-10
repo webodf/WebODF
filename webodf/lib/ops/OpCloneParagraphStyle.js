@@ -39,7 +39,7 @@
  * @constructor
  * @implements ops.Operation
  */
-ops.OpCloneStyle = function OpCloneStyle() {
+ops.OpCloneParagraphStyle = function OpCloneParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, styleName, newStyleName, newStyleDisplayName,
@@ -73,7 +73,7 @@ ops.OpCloneStyle = function OpCloneStyle() {
 
     this.spec = function () {
         return {
-            optype: "CloneStyle",
+            optype: "CloneParagraphStyle",
             memberid: memberid,
             timestamp: timestamp,
             styleName: styleName,
