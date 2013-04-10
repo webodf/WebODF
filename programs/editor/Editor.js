@@ -53,7 +53,10 @@ define("webodf/editor/Editor", [
          * @constructor
          * @param {{networked:boolean=,
          *          memberid:string=,
-         *          saveCallback:function()= }} args
+         *          saveCallback:function()=,
+         *          cursorAddedCallback:function(!string)=,
+         *          cursorRemovedCallback:function(!string)=,
+         *          registerCallbackForShutdown:function(!function())= }} args
          */
         function Editor(args) {
 
@@ -68,6 +71,9 @@ define("webodf/editor/Editor", [
             opRouter,
             userModel,
             saveOdtFile = args.saveCallback,
+            cursorAddedHandler = args.cursorAddedCallback,
+            cursorRemovedHandler = args.cursorRemovedCallback,
+            registerCallbackForShutdown = args.registerCallbackForShutdown,
             documentUrl;
 
             function translator(key, context) {
@@ -154,10 +160,9 @@ define("webodf/editor/Editor", [
                         userList = new UserList(editorSession, peopleListDiv);
                     }
 
-                    // gracefull cursor removal on pag closing
-                    window.onunload = function() {
-                        editorSession.endEditing();
-                    };
+                    if (registerCallbackForShutdown) {
+                        registerCallbackForShutdown(editorSession.endEditing);
+                    }
 
                     loadWidgets(editorSession, saveOdtFile);
                     editorReadyCallback();
@@ -227,6 +232,17 @@ define("webodf/editor/Editor", [
 
                     editorSession.sessionView.disableEditHighlighting();
                     opRouter.requestReplay(function done() {
+                        var odtDocument = session.getOdtDocument();
+                        if (cursorAddedHandler) {
+                            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, function (cursor) {
+                                cursorAddedHandler(cursor.getMemberId());
+                            });
+                        }
+                        if (cursorRemovedHandler) {
+                            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, function (memberId) {
+                                cursorRemovedHandler(memberId);
+                            });
+                        }
                         editorSession.sessionView.enableEditHighlighting();
 
                         // start editing: let the controller send the OpAddCursor

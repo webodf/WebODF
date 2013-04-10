@@ -273,6 +273,19 @@ var webodfEditor = (function() {
         if (args.saveCallback) {
             editorOptions.saveCallback = args.saveCallback;
         }
+        if (args.cursorAddedCallback) {
+            editorOptions.cursorAddedCallback = args.cursorAddedCallback;
+        }
+        if (args.cursorRemovedCallback) {
+            editorOptions.cursorRemovedCallback = args.cursorRemovedCallback;
+        }
+        if (args.registerCallbackForShutdown) {
+            editorOptions.registerCallbackForShutdown = args.registerCallbackForShutdown;
+        } else {
+            editorOptions.registerCallbackForShutdown = function (callback) {
+                window.onunload = callback;
+            };
+        }
 
         if (args.loginProcedure) {
             loginProcedure = args.loginProcedure;
