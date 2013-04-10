@@ -276,7 +276,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
 
-    lib/ops/SessionPointFilter.js
     lib/ops/OdtDocument.js
     lib/ops/Session.js
 )
