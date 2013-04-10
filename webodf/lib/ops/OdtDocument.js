@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, gui, ops, odf*/
+/*global runtime, core, gui, ops, odf, console*/
 
 runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("core.EventNotifier");
@@ -70,49 +70,36 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
 
         /**
-         * This takes a node (a textNode or a span, for example) that exists at some level
-         * inside a p or h element, and returns it's previous sibling after ignoring the cursor
-         * or editinfo elements' existence. If the node is within a span, then we return the node
-         * before that span.
-         * @param {!Node} node
-         * @return {Node}
-         */
-        function getPreviousSiblingInParagraph(node) {
-            var prev = node.previousSibling,
-                prevName = prev && prev.localName;
-            if (prevName === "editinfo") {
-                return null;
-            } else if (prevName === "cursor") {
-                return getPreviousSiblingInParagraph(prev);
-            } else if (prevName === null) {
-                if (node.parentNode.localName === "span") {
-                    return getPreviousSiblingInParagraph(node.parentNode);
-                }
-            }
-
-            return prev;
-        }
-        /**
          * @param {!core.PositionIterator} iterator
          * @return {core.PositionFilter.FilterResult}
          */
         this.acceptPosition = function (iterator) {
             var n = iterator.container(), p, o, d,
                 textOffset = iterator.textOffset(),
-                previousSibling = getPreviousSiblingInParagraph(n);
+                previousSibling = iterator.previousSibling(),
+                nextSibling = iterator.nextSibling();
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
                     return reject;
                 }
+                if ((previousSibling && previousSibling.localName) === "span") {
+                    return reject;
+                }
                 return accept;
+            }
+
+            p = n.parentNode;
+            o = p && p.localName;
+            if (textOffset === 0) {
+                if (o === "span" || (previousSibling && previousSibling.localName) === "span") {
+                    return reject;
+                }
             }
             if (n.length === 0) {
                 return reject;
             }
             // only stop in text nodes in 'p', 'h' or 'span' elements
-            p = n.parentNode;
-            o = p && p.localName;
             if (o !== "p" && o !== "span" && o !== "h") {
                 return reject;
             }
@@ -120,11 +107,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (textOffset > 0 && iterator.substr(textOffset - 1, 2) === "  ") {
                 return reject;
             }
-            if (textOffset === 0) {
-                if (o === "span" || (previousSibling && previousSibling.localName) === "span") {
-                    return reject;
-                }
-            }
+            
             return accept;
         };
     }
@@ -154,6 +137,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function getPositionInTextNode(position) {
         var iterator = gui.SelectionMover.createPositionIterator(rootNode),
             lastTextNode = null,
+            lastNode = null,
             node,
             nodeOffset = 0;
         position += 1; // add one because we check for position === 0
@@ -193,7 +177,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     lastTextNode = null;
                 } else if (position === 0) {
                     lastTextNode = node.ownerDocument.createTextNode('');
-                    node.appendChild(lastTextNode);
+                    lastNode = iterator.nextSibling();
+                    node.insertBefore(lastTextNode, lastNode && lastNode.nextSibling);
                     nodeOffset = 0;
                     break;
                 }

@@ -237,14 +237,26 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = n;
         return offset;
     };
-    /**
-     * The substring of the current text node as if all neighboring text nodes
-     * were one text node.
-     * @param {!number} start
-     * @param {!number} length
-     * @return {!string}
-     */
-    this.substr = function (start, length) {
+
+    this.previousSibling = function () {
+        var currentNode = walker.currentNode,
+            sibling = walker.previousSibling();
+
+        walker.currentNode = currentNode;
+
+        return sibling;
+    };
+
+    this.nextSibling = function () {
+        var currentNode = walker.currentNode,
+            sibling = walker.nextSibling();
+
+        walker.currentNode = currentNode;
+
+        return sibling;
+    };
+
+    this.text = function () {
         var n = walker.currentNode,
             t,
             data = "";
@@ -261,7 +273,17 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             data += walker.currentNode.data;
         } while (walker.nextSibling() && walker.currentNode.nodeType === 3);
         walker.currentNode = n;
-        return data.substr(start, length);
+        return data;
+    };
+    /**
+     * The substring of the current text node as if all neighboring text nodes
+     * were one text node.
+     * @param {!number} start
+     * @param {!number} length
+     * @return {!string}
+     */
+    this.substr = function (start, length) {
+        return self.text().substr(start, length);
     };
     /**
      * @param {!Node} container
