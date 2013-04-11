@@ -145,13 +145,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             neighborhood = [],
             currentNeighborhood = [],
             currentNode = iterator.container(),
-            iteratedLength = currentNode.data.length - iterator.text().length,
+            iteratedLength,
             advance,
             visited = false,
             i;
 
         advance = length > 0 ? iterator.nextPosition : iterator.previousPosition;
-
+        iteratedLength = (currentNode.nodeType === 3 ? currentNode.data.length : 0) - iterator.text().length;
         do {
             if (filter.acceptPosition(iterator)) {
                 currentNeighborhood = iterator.textNeighborhood();
