@@ -140,6 +140,43 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return iterator;
     }
 
+    this.getTextNeighborhood = function (position, length) {
+        var iterator = getIteratorAtPosition(position),
+            neighborhood = [],
+            currentNeighborhood = [],
+            currentNode = iterator.container(),
+            iteratedLength = currentNode.data.length - iterator.text().length,
+            advance,
+            visited = false,
+            i;
+
+        advance = length > 0 ? iterator.nextPosition : iterator.previousPosition;
+
+        do {
+            if (filter.acceptPosition(iterator)) {
+                currentNeighborhood = iterator.textNeighborhood();
+                currentNode = iterator.container();
+                if (currentNode.nodeType === 3) {
+                    visited = false;
+                    for (i = 0; i < neighborhood.length; i += 1) {
+                        // All neighborhoods are disjoint ordered sets, so comparing
+                        // the first element of two neighborhoods is enough to compare them.
+                        if (neighborhood[i][0] === currentNeighborhood[0]) {
+                            visited = true;
+                            break;
+                        }
+                    }
+                    if (!visited) {
+                        neighborhood.push(currentNeighborhood);
+                        iteratedLength += iterator.text().length;
+                    }
+                }
+            }
+        } while (advance() && iteratedLength < Math.abs(length));
+
+        return neighborhood;
+    };
+
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
