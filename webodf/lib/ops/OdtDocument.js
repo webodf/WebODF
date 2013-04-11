@@ -167,6 +167,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                         }
                     }
                     if (!visited) {
+                        if (length < 0) {
+                            currentNeighborhood.reverse();
+                        }
                         neighborhood.push(currentNeighborhood);
                         iteratedLength += iterator.text().length;
                     }
