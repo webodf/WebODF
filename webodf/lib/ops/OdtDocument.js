@@ -76,8 +76,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         this.acceptPosition = function (iterator) {
             var n = iterator.container(), p, o, d,
                 textOffset = iterator.textOffset(),
-                previousSibling = iterator.previousSibling(),
-                nextSibling = iterator.nextSibling();
+                previousSibling = iterator.getPreviousSibling(),
+                nextSibling = iterator.getNextSibling();
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
@@ -126,6 +126,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
         return root;
     }
+
+    function getIteratorAtPosition(position) {
+        var iterator = gui.SelectionMover.createPositionIterator(rootNode);
+
+        position += 1;
+
+        while (position > 0 && iterator.nextPosition()) {
+            if (filter.acceptPosition(iterator) === 1) {
+                position -= 1;
+            }
+        }
+        return iterator;
+    }
+
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
@@ -177,7 +191,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     lastTextNode = null;
                 } else if (position === 0) {
                     lastTextNode = node.ownerDocument.createTextNode('');
-                    lastNode = iterator.nextSibling();
+                    lastNode = iterator.getNextSibling();
                     node.insertBefore(lastTextNode, lastNode && lastNode.nextSibling);
                     nodeOffset = 0;
                     break;

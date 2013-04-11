@@ -238,7 +238,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return offset;
     };
 
-    this.previousSibling = function () {
+    this.getPreviousSibling = function () {
         var currentNode = walker.currentNode,
             sibling = walker.previousSibling();
 
@@ -247,7 +247,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return sibling;
     };
 
-    this.nextSibling = function () {
+    this.getNextSibling = function () {
         var currentNode = walker.currentNode,
             sibling = walker.nextSibling();
 
