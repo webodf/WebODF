@@ -189,7 +189,7 @@ define("webodf/editor/EditorSession", [
             checkParagraphStyleName();
         }
 
-        // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI. 
+        // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
         odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, function (cursor) {
             self.emit(EditorSession.signalUserAdded, cursor.getMemberId());
             trackCursor(cursor);
@@ -286,6 +286,20 @@ define("webodf/editor/EditorSession", [
                 });
                 session.enqueue(op);
             }
+        };
+
+        this.insertTable = function(initialRows, initialColumns, tableStyleName, tableColumnStyleName, tableCellStyleMatrix) {
+            var op = new ops.OpInsertTable();
+            op.init({
+                memberid: memberid,
+                position: self.getCursorPosition(),
+                initialRows: initialRows,
+                initialColumns: initialColumns,
+                tableStyleName: tableStyleName,
+                tableColumnStyleName: tableColumnStyleName,
+                tableCellStyleMatrix: tableCellStyleMatrix
+            });
+            session.enqueue(op);
         };
 
         this.getParagraphStyleElement = function (styleName) {

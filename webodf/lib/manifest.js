@@ -83,6 +83,7 @@
         "ops/OpAddCursor.js",
         "ops/OpRemoveCursor.js",
         "ops/OpMoveCursor.js",
+        "ops/OpInsertTable.js",
         "ops/OpInsertText.js",
         "ops/OpRemoveText.js",
         "ops/OpSplitParagraph.js",

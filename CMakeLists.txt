@@ -248,6 +248,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpAddCursor.js
     lib/ops/OpRemoveCursor.js
     lib/ops/OpMoveCursor.js
+    lib/ops/OpInsertTable.js
     lib/ops/OpInsertText.js
     lib/ops/OpRemoveText.js
     lib/ops/OpSplitParagraph.js
