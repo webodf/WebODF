@@ -287,7 +287,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = n;
 
         return neighborhood;
-    }
+    };
 
     /**
      * The substring of the current text node as if all neighboring text nodes

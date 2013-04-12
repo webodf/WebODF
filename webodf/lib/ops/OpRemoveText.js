@@ -53,46 +53,48 @@ ops.OpRemoveText = function OpRemoveText() {
     };
 
     this.execute = function (odtDocument) {
-        var domPosition, textNode, paragraphElement,
-            removalType = (length < 0) ? 'backspace' : 'delete';
+        var neighborhood = [],
+            textNode,
+            paragraphElement,
+            textNodeSequence = [],
+            remainingLength = Math.abs(length),
+            removalType = (length < 0) ? 'backspace' : 'delete',
+            currentTextNode,
+            currentParent,
+            currentLength,
+            i;
 
-        if (length < 0) {
-            length = -length;
-            position -= length;
-            domPosition = odtDocument.getPositionInTextNode(position);
-        } else {
-            // get avatars next textnode sibling
-            domPosition = odtDocument.getPositionInTextNode(position + 1);
-            // FIXME: this is dirty and assumes the cursor in place.
-            // actually it will only work correctly with a `length` of 1
-            // or with a `length` > 1 iff no avatar or other XML element
-            // is within the deletion range.
-            // a real implementation of this method should work
-            // independently of the cursor or other XML elements.
-            // (right now getPositionInTextNode will always return an
-            // offset==textnode.length if the (or any) cursor is right
-            // before the deletion position; that is because the
-            // avatar splits the textnode)
-            // the real implementation needs to delete all characters
-            // between (walkable) position and position+length with no
-            // (but preserving) other XML elements. by definition of
-            // walkability, the amount of deleted characters will be
-            // exactly `length` (but the actual deleted characters can
-            // have arbitrary XML tags between them)
-            //
-            if (domPosition.offset !== 1) {
-                return false;
+        textNode = odtDocument.getPositionInTextNode(position).textNode;
+        paragraphElement = odtDocument.getParagraphElement(textNode);
+        neighborhood = odtDocument.getTextNeighborhood(position, length);
+        if (neighborhood.length) {
+            // Pick the index of the textNode from the starting neighborhood.
+            i = neighborhood.indexOf(textNode);
+            if (removalType === 'delete') {
+                i += 1;
             }
-            domPosition.offset -= 1;
-        }
-        if (domPosition) {
-            textNode = domPosition.textNode;
-            paragraphElement = odtDocument.getParagraphElement(textNode);
-            // If we are backspacing, then the textNode is on the left. If this textNode is about to be set to "", we should delete it. Similarly for 'delete', the textNode is on the right, and if we are executing 'delete' just before the last character, we should delete the textNode. If we are not at any extremity, just use textNode.deleteData(...);
-            if (removalType === 'backspace' && domPosition.offset === 0) {
-                textNode.parentNode.removeChild(textNode);
-            } else {
-                textNode.deleteData(domPosition.offset, length);
+
+            for (i; i < neighborhood.length && remainingLength; i += 1) {
+                currentTextNode = neighborhood[i];
+                currentParent = currentTextNode.parentNode;
+                currentLength = currentTextNode.data.length;
+ 
+                if (currentLength <= remainingLength) {
+                    currentParent.removeChild(currentTextNode);
+                    // If this deleted textNode was the only child of it's parent,
+                    // delete the parent too.
+                    if (!currentParent.hasChildNodes()) {
+                        currentParent.parentNode.removeChild(currentParent);
+                    }
+                    remainingLength -= currentLength;
+                } else {
+                    if (removalType === 'delete') {
+                        currentTextNode.deleteData(0, remainingLength);
+                    } else {
+                        currentTextNode.deleteData(currentLength - remainingLength, remainingLength);
+                    }
+                    remainingLength = 0;
+                }
             }
 
             odtDocument.getOdfCanvas().refreshSize();
