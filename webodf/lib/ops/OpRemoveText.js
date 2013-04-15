@@ -62,19 +62,20 @@ ops.OpRemoveText = function OpRemoveText() {
             currentTextNode,
             currentParent,
             currentLength,
-            i;
+            i,
+            firstNode;
 
         textNode = odtDocument.getPositionInTextNode(position).textNode;
         paragraphElement = odtDocument.getParagraphElement(textNode);
         neighborhood = odtDocument.getTextNeighborhood(position, length);
         if (neighborhood.length) {
             // Pick the index of the textNode from the starting neighborhood.
-            i = neighborhood.indexOf(textNode);
+            firstNode = neighborhood.indexOf(textNode);
             if (removalType === 'delete') {
-                i += 1;
+                firstNode += 1;
             }
 
-            for (i; i < neighborhood.length && remainingLength; i += 1) {
+            for (i = firstNode; i < neighborhood.length && remainingLength; i += 1) {
                 currentTextNode = neighborhood[i];
                 currentParent = currentTextNode.parentNode;
                 currentLength = currentTextNode.data.length;
