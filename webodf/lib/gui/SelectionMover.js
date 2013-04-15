@@ -50,9 +50,11 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         selection = cursor.getSelection(),
         positionIterator;
     function doMove(steps, extend, move) {
-        var left = steps;
+        var left = steps,
+            pos = cursor.getPositionInContainer();
+
         // assume positionIterator reflects current state
-        // positionIterator.setPosition(selection.focusNode, selection.focusOffset);
+        positionIterator.setPosition(pos.container, pos.offset);
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         cursor.remove(onCursorRemove);
@@ -109,11 +111,13 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {!number}
      */
     function countForwardSteps(steps, filter) {
-        var c = positionIterator.container(),
-            o = positionIterator.offset(),
+        var pos = cursor.getPositionInContainer(),
+            c = pos.container,
+            o = pos.offset,
             watch = new core.LoopWatchDog(1000),
             stepCount = 0,
             count = 0;
+        positionIterator.setPosition(c, o);
         while (steps > 0 && positionIterator.nextPosition()) {
             stepCount += 1;
             watch.check();
@@ -132,11 +136,13 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {!number}
      */
     function countBackwardSteps(steps, filter) {
-        var c = positionIterator.container(),
-            o = positionIterator.offset(),
+        var pos = cursor.getPositionInContainer(),
+            c = pos.container,
+            o = pos.offset,
             watch = new core.LoopWatchDog(1000),
             stepCount = 0,
             count = 0;
+        positionIterator.setPosition(c, o);
         while (steps > 0 && positionIterator.previousPosition()) {
             stepCount += 1;
             watch.check();
@@ -338,8 +344,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         runtime.assert(element !== null, "SelectionMover.countStepsToPosition called with element===null");
         // first figure out how to get to the element
         // really dumb/inefficient implementation
-        var c = positionIterator.container(),
-            o = positionIterator.offset(),
+        var cursorPos = cursor.getPositionInContainer(),
+            c = cursorPos.container,
+            o = cursorPos.offset,
             steps = 0,
             watch = new core.LoopWatchDog(1000),
             comparison;

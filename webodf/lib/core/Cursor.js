@@ -178,6 +178,36 @@ core.Cursor = function Cursor(selection, document) {
         removeCursor(onCursorRemove);
     };
 
+    function whichChild(elem) {
+        var  i = 0;
+        while ((elem = elem.previousSibling) !== null) {
+            i += 1;
+        }
+        return i;
+    }
+
+    this.getPositionInContainer = function () {
+        var container, offset;
+
+        if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === 3) {
+            container = cursorNode.previousSibling;
+            offset = container.length;
+        } else if (cursorNode.nextSibling && cursorNode.nextSibling.nodeType === 3) {
+            container = cursorNode.nextSibling;
+            offset = 0;
+        }
+
+        if (!container) {
+            container = cursorNode.parentNode;
+            offset = whichChild(cursorNode);
+        }
+
+        return {
+            container: container,
+            offset: offset
+        };
+    };
+
     function init() {
         var cursorns = 'urn:webodf:names:cursor';
 
