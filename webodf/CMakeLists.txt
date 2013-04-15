@@ -35,8 +35,7 @@ add_custom_command(
     DEPENDS NodeJS lib/runtime.js tools/css2js.js webodf.css
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-add_custom_target(webodf.css.js ALL    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js)
+add_custom_target(webodf.css.js-target DEPENDS webodf.css.js)
 
 if (Java_JAVA_EXECUTABLE)
   # nonStandardJsDocs is not used because we use @licstart @licend and @source
@@ -71,6 +70,7 @@ if (Java_JAVA_EXECUTABLE)
       DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES}
         ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
   )
+  add_custom_target(simplecompiled.js-target DEPENDS simplecompiled.js)
 
   add_custom_command(
       OUTPUT compiled.js
@@ -82,8 +82,10 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file compiled.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES} tools/externs.js webodf.css.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES} tools/externs.js
+          webodf.css.js-target
   )
+  add_custom_target(compiled.js-target DEPENDS compiled.js)
 
   add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
@@ -95,12 +97,10 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js webodf.css.js
-         tools/css2js.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
+         webodf.css.js-target tools/css2js.js
   )
-  add_custom_target(webodf.js
-      SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf.js
-  )
+  add_custom_target(webodf.js-target DEPENDS webodf.js)
 
   # too hardcore for now...
   # add_custom_command(
@@ -127,11 +127,10 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js webodf.css.js
+      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
+          webodf.css.js-target
   )
-  add_custom_target(webodf-debug.js
-     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js
-  )
+  add_custom_target(webodf-debug.js-target DEPENDS webodf-debug.js)
 
   add_custom_command(
       OUTPUT odfedit.js
@@ -146,8 +145,9 @@ if (Java_JAVA_EXECUTABLE)
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file odfedit.js
       DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES}
-          tools/externs.js tools/extjsexterns.js odfedit.js webodf.css.js
+          tools/externs.js tools/extjsexterns.js odfedit.js webodf.css.js-target
   )
+  add_custom_target(odfedit.js-target DEPENDS odfedit.js)
 
   add_custom_command(
     OUTPUT gui.js
@@ -163,12 +163,14 @@ if (Java_JAVA_EXECUTABLE)
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
          --js_output_file gui.js
     DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES}
-        tools/externs.js tools/extjsexterns.js webodf.css.js
+        tools/externs.js tools/extjsexterns.js webodf.css.js-target
         filelister.js gui.js
   )
+  add_custom_target(gui.js-target DEPENDS gui.js)
 
   add_custom_target(syntaxcheck ALL
-      DEPENDS simplecompiled.js webodf.js webodf-debug.js compiled.js
+      DEPENDS simplecompiled.js-target webodf.js-target webodf-debug.js-target
+          compiled.js-target
   )
 
   add_custom_target(rhinotest
@@ -181,7 +183,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_target(simplerhinotest
       COMMAND ${Java_JAVA_EXECUTABLE} -jar ${RHINO}
           ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
-      DEPENDS Rhino simplecompiled.js
+      DEPENDS Rhino simplecompiled.js-target
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
   add_custom_command(
@@ -196,7 +198,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_target(doc DEPENDS docs/index.html)
   add_custom_target(simplenodetest ALL
       COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
-      DEPENDS NodeJS simplecompiled.js
+      DEPENDS NodeJS simplecompiled.js-target
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

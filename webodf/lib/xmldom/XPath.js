@@ -32,6 +32,13 @@
  */
 /*global xmldom, XPathResult, runtime*/
 /**
+ * Iterator over nodes uses in the xpath implementation
+ * @class
+ * @interface
+ */
+xmldom.XPathIterator = function XPathIterator() {"use strict"; };
+
+/**
  * Wrapper for XPath functions
  * @constructor
  * @return {?}
@@ -130,24 +137,18 @@ xmldom.XPath = (function () {
         return pos;
     };
     /**
-     * Iterator over nodes uses in the xpath implementation
-     * @class
-     * @interface
-     */
-    function XPathIterator() {}
-    /**
      * @return {Node}
      */
-    XPathIterator.prototype.next = function () {};
+    xmldom.XPathIterator.prototype.next = function () {};
     /**
      * @return {undefined}
      */
-    XPathIterator.prototype.reset = function () {};
+    xmldom.XPathIterator.prototype.reset = function () {};
     /**
      * @class
      * @constructor
-     * @augments XPathIterator
-     * @implements {XPathIterator}
+     * @augments xmldom.XPathIterator
+     * @implements {xmldom.XPathIterator}
      */
     function XPathNodeIterator() {
         var node, done = false;
@@ -166,9 +167,9 @@ xmldom.XPath = (function () {
     /**
      * @class
      * @constructor
-     * @augments XPathIterator
-     * @implements {XPathIterator}
-     * @param {XPathIterator} it
+     * @augments xmldom.XPathIterator
+     * @implements {xmldom.XPathIterator}
+     * @param {xmldom.XPathIterator} it
      * @param {!string} namespace
      * @param {!string} localName
      */
@@ -191,9 +192,9 @@ xmldom.XPath = (function () {
     /**
      * @class
      * @constructor
-     * @augments XPathIterator
-     * @implements {XPathIterator}
-     * @param {XPathIterator} it
+     * @augments xmldom.XPathIterator
+     * @implements {xmldom.XPathIterator}
+     * @param {xmldom.XPathIterator} it
      * @param {boolean} recurse
      */
     function AllChildElementIterator(it, recurse) {
@@ -238,9 +239,9 @@ xmldom.XPath = (function () {
     /**
      * @class
      * @constructor
-     * @augments XPathIterator
-     * @implements {XPathIterator}
-     * @param {XPathIterator} it
+     * @augments xmldom.XPathIterator
+     * @implements {xmldom.XPathIterator}
+     * @param {xmldom.XPathIterator} it
      * @param {function(Node):boolean} condition
      */
     function ConditionIterator(it, condition) {
@@ -256,7 +257,7 @@ xmldom.XPath = (function () {
         };
     }
     /**
-     * @param {XPathIterator} it
+     * @param {xmldom.XPathIterator} it
      * @param {string} name
      * @param {function(string):string} namespaceResolver
      * @return {!ConditionIterator}
@@ -271,7 +272,7 @@ xmldom.XPath = (function () {
         });
     }
     /**
-     * @param {XPathIterator} it
+     * @param {xmldom.XPathIterator} it
      * @param {!Object} p
      * @param {function(string):string} namespaceResolver
      * @return {!ConditionIterator}
@@ -296,10 +297,10 @@ xmldom.XPath = (function () {
         });
     }
     /**
-     * @param {!XPathIterator} it
+     * @param {!xmldom.XPathIterator} it
      * @param {!Object} xpath
      * @param {!Function} namespaceResolver
-     * @return {!XPathIterator}
+     * @return {!xmldom.XPathIterator}
      */
     createXPathPathIterator = function createXPathPathIterator(it, xpath,
                 namespaceResolver) {

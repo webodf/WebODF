@@ -5,7 +5,7 @@ if(WIN32)
     set(APKDEPS AntBin)
 endif()
 
-set(APKDEPS ${APKDEPS} webodf.js)
+set(APKDEPS ${APKDEPS} webodf.js-target)
 
 COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES})
@@ -38,13 +38,13 @@ add_custom_command(
     DEPENDS ${APKDEPS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-add_custom_target(apk ALL DEPENDS ${WEBODFAPK})
-set(WEBODFRELEASEAPK ${CMAKE_CURRENT_BINARY_DIR}/bin/WebODF-release.apk)
+add_custom_target(apk DEPENDS ${WEBODFAPK})
+set(WEBODFRELEASEAPK WebODF-release-unsigned.apk)
 add_custom_command(
-    OUTPUT ${WEBODFRELEASEAPK}
+    OUTPUT bin/${WEBODFRELEASEAPK}
     COMMAND ${ANT}
         ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/cordova-1.8.0.jar release
-    DEPENDS ${WEBODFAPK} webodf.js
+    DEPENDS apk
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-add_custom_target(releaseapk ALL DEPENDS ${WEBODFRELEASEAPK})
+add_custom_target(releaseapk ALL DEPENDS bin/${WEBODFRELEASEAPK})

@@ -26,7 +26,7 @@ COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/webodf
 QT4_ADD_RESOURCES(NATIVEQTCLIENT_RES
     ${CMAKE_CURRENT_BINARY_DIR}/application.qrc)
 
-add_custom_target(nativeQtClientDepencencies ALL DEPENDS ${NATIVEDEPS})
+add_custom_target(nativeQtClientDepencencies DEPENDS ${NATIVEDEPS})
 
 add_executable(nativeQtClient
     main.cpp

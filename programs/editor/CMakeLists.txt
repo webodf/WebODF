@@ -15,12 +15,12 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 COPY_FILES(EDITORDEPS_webodf ${CMAKE_SOURCE_DIR}/webodf
-    ${CMAKE_CURRENT_BINARY_DIR} webodf.css ${LIBJSFILES})
+    ${CMAKE_CURRENT_BINARY_DIR} ${LIBJSFILES})
 
 SET(DOJO_DEPS ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps)
 
 add_custom_command(
-    OUTPUT editor-compiled.js # still phony
+    OUTPUT dojo-amalgamation.js
 
     # from our sources
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
@@ -67,7 +67,7 @@ add_custom_command(
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
-	DEPENDS NodeJS ${EDITORDEPS} ${EDITORDEPS_webodf} Dojo webodf.js
+	DEPENDS NodeJS ${EDITORDEPS} ${EDITORDEPS_webodf} Dojo webodf.js-target
 )
 
-add_custom_target(programs_editor ALL DEPENDS editor-compiled.js webodf.js)
+add_custom_target(editor-compiled.js-target ALL DEPENDS dojo-amalgamation.js)

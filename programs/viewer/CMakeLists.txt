@@ -13,19 +13,33 @@ set(VIEWER_IMAGES
 set (TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
 
 # amalgamation:
-# (write js code into into viewer.html)
-set (VIEWER_MERGED_HTML viewer-amalgamation.html)
+# (write js code into into viewer-amalgamation.html)
 add_custom_command(
-	OUTPUT ${VIEWER_MERGED_HTML}
+	OUTPUT viewer-amalgamation.html
 	COMMAND ${NODE} ARGS ${RUNTIME} ${TOOLS}/replaceByFileContents.js
 		${CMAKE_CURRENT_SOURCE_DIR}/index-amalgamation-template.html
-		${VIEWER_MERGED_HTML}
+		viewer-amalgamation.html
 		@VIEWER_JS@ ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
 		@WEBODF_JS@ ${CMAKE_BINARY_DIR}/webodf/webodf.js
     DEPENDS NodeJS ${TOOLS}/replaceByFileContents.js
-        webodf.js
-        ${CMAKE_CURRENT_SOURCE_DIR}/index-amalgamation-template.html
+        viewer.js
+        webodf.js-target
+        index-amalgamation-template.html
 )
+add_custom_target(viewer-amalgamation.html-target DEPENDS viewer-amalgamation.html)
+
+# minimize js code
+add_custom_command(
+	OUTPUT viewer-minimized.js
+	COMMAND ${Java_JAVA_EXECUTABLE}
+	ARGS -jar ${CLOSURE_JAR}
+	${SHARED_CLOSURE_ARGS}
+	--js ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
+	--compilation_level SIMPLE_OPTIMIZATIONS
+	--js_output_file ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js
+	DEPENDS ClosureCompiler viewer.js
+	)
+add_custom_target(viewer-minimized.js-target DEPENDS viewer-minimized.js)
 
 # create zip file
 set (VIEWER_ZIP ${CMAKE_BINARY_DIR}/viewer-${WEBODF_VERSION}.zip)
@@ -46,34 +60,20 @@ add_custom_command(
 		index.html
 		# let's not put the amalgamation in zip until it at
 		# least includes css as well...
-		# ${VIEWER_MERGED_HTML}
+		# viewer-amalgamation.html
 		README-viewer.odt
 		webodf.js
 		viewer.js
 		viewer.css
 
     DEPENDS NodeJS
-		${TOOLS}/replaceByFileContents.js ${VIEWER_IMAGES}
-        ${CMAKE_BINARY_DIR}/webodf/webodf.js
-		${VIEWER_MERGED_HTML}
-		${CMAKE_CURRENT_SOURCE_DIR}/index.html
-		${CMAKE_CURRENT_SOURCE_DIR}/viewer.css
-		${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
-		${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js
+        ${TOOLS}/zipper.js
+        ${VIEWER_IMAGES}
+        viewer.css
+        webodf.js-target
+        viewer-minimized.js-target
+        index.html
+        README-viewer.odt
+        viewer-amalgamation.html-target
 )
-add_custom_target(programs_viewer ALL DEPENDS ${VIEWER_MERGED_HTML} ${VIEWER_ZIP})
-
-# minimize js code
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js
-	COMMAND ${Java_JAVA_EXECUTABLE}
-	ARGS -jar ${CLOSURE_JAR}
-	${SHARED_CLOSURE_ARGS}
-	--js ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
-	--compilation_level SIMPLE_OPTIMIZATIONS
-	--js_output_file ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js
-	DEPENDS ClosureCompiler ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
-	)
-add_custom_target(viewer-minimized.js)
-
-
+add_custom_target(programs_viewer ALL DEPENDS ${VIEWER_ZIP})

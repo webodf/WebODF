@@ -16,7 +16,7 @@ add_custom_command(
     COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js makeViewerHtml.js
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
     DEPENDS NodeJS
-        webodf.js
+        webodf.js-target
         ${CMAKE_CURRENT_SOURCE_DIR}/content/web/viewer.html.in
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
