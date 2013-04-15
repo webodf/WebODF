@@ -116,12 +116,12 @@ core.Cursor = function Cursor(selection, document) {
                     t.insertData(0, cursorTextNode.nodeValue);
                     textNodeIncrease = cursorTextNode.length;
                 } else {
-                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(), cursorNode);
+                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(true), cursorNode);
                     textNodeIncrease = cursorTextNode.length;
                 }
             } else {
                 if (cursorNode.parentNode) {
-                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(), cursorNode);
+                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(true), cursorNode);
                     textNodeIncrease = cursorTextNode.length;
                 }
             }
