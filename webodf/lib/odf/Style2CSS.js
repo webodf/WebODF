@@ -394,32 +394,36 @@ odf.Style2CSS = function Style2CSS() {
     }
 
     /**
-     * @param {!Document} doc
-     * @param {!Element} fontFaceDeclsNode
-     * @return {!Object}
+     * Creates a lookup table with font name as key and family name as value
+     * from all font face declarations.
+     * @param {?Element} fontFaceDeclsRootNode root node of font face declarations
+     * @return {?Object.<string,string>}
      */
-    function makeFontFaceDeclsMap(doc, fontFaceDeclsNode) {
-        // put all style elements in a hash map by family and name
-        var fontFaceDeclsMap = {}, node, name, family, map;
-        if (!fontFaceDeclsNode) {
-            return fontFaceDeclsNode;
+    function createFontFaceDeclsMap(fontFaceDeclsRootNode) {
+        var /**@type {?Object.<string,string>}*/
+            fontFaceDeclsMap = {},
+            node, name, family;
+
+        if (!fontFaceDeclsRootNode) {
+            return null;
         }
-        node = fontFaceDeclsNode.firstChild;
+
+        node = fontFaceDeclsRootNode.firstChild;
         while (node) {
             if (node.nodeType === 1) {
-                family = node.getAttributeNS(svgns, 'font-family');
                 name = node.getAttributeNS(stylens, 'name');
-                if (family || node.getElementsByTagNameNS(svgns, 'font-face-uri')[0]) {
-                    if (name) {
-                        if (!fontFaceDeclsMap[name]) {
-                            fontFaceDeclsMap[name] = {};
-                        }
+                if (name) {
+                    // add family name as value, or, if there is a
+                    // font-face-uri, an empty string
+                    family = node.getAttributeNS(svgns, 'font-family');
+                    if (family || node.getElementsByTagNameNS(svgns, 'font-face-uri')[0]) {
                         fontFaceDeclsMap[name] = family;
                     }
                 }
             }
             node = node.nextSibling;
         }
+
         return fontFaceDeclsMap;
     }
 
@@ -751,7 +755,7 @@ odf.Style2CSS = function Style2CSS() {
     this.namespaceResolver.lookupNamespaceURI = this.namespaceResolver;
 
     // Font face declarations map
-    this.makeFontFaceDeclsMap = makeFontFaceDeclsMap;
+    this.createFontFaceDeclsMap = createFontFaceDeclsMap;
 
     /**
      * @param {!StyleSheet} stylesheet
@@ -791,7 +795,7 @@ odf.Style2CSS = function Style2CSS() {
         }
         
         // Populate the font face declarations map
-        fontFaceDeclsMap = makeFontFaceDeclsMap(doc, fontFaceDecls);
+        fontFaceDeclsMap = createFontFaceDeclsMap(fontFaceDecls);
         // add the various styles
         stylenodes = getStyleMap(doc, styles);
         styleautonodes = getStyleMap(doc, autostyles);
