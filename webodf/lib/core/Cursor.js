@@ -119,6 +119,11 @@ core.Cursor = function Cursor(selection, document) {
                     cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(), cursorNode);
                     textNodeIncrease = cursorTextNode.length;
                 }
+            } else {
+                if (cursorNode.parentNode) {
+                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(), cursorNode);
+                    textNodeIncrease = cursorTextNode.length;
+                }
             }
         }
         onCursorRemove(t, textNodeIncrease);
