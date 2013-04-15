@@ -110,10 +110,15 @@ core.Cursor = function Cursor(selection, document) {
         var t = cursorNode.nextSibling,
             textNodeIncrease = 0;
         if (cursorTextNode.parentNode) {
-            cursorTextNode.parentNode.removeChild(cursorTextNode);
-            if (t && t.nodeType === 3) {
-                t.insertData(0, cursorTextNode.nodeValue);
-                textNodeIncrease = cursorTextNode.length;
+            if (t) {
+                if (t.nodeType === 3) {
+                    cursorTextNode.parentNode.removeChild(cursorTextNode);
+                    t.insertData(0, cursorTextNode.nodeValue);
+                    textNodeIncrease = cursorTextNode.length;
+                } else {
+                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(), cursorNode);
+                    textNodeIncrease = cursorTextNode.length;
+                }
             }
         }
         onCursorRemove(t, textNodeIncrease);
