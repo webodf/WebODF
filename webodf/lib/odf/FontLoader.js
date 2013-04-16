@@ -96,6 +96,7 @@ odf.FontLoader = (function () {
             if (embeddedFontDeclarations.hasOwnProperty(n)) {
                 if (i === pos) {
                     name = n;
+                    break;
                 }
                 i += 1;
             }
