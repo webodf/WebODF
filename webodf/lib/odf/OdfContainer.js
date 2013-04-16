@@ -76,7 +76,7 @@ odf.OdfContainer = (function () {
      * @return {!number}
      */
     function getNodePosition(child) {
-        var childpos = 0, i, l = nodeorder.length;
+        var i, l = nodeorder.length;
         for (i = 0; i < l; i += 1) {
             if (child.namespaceURI === officens &&
                     child.localName === nodeorder[i]) {
@@ -105,7 +105,7 @@ odf.OdfContainer = (function () {
          * @return {!number}
          */
         this.acceptNode = function (node) {
-            var styleName, styleFamily, result;
+            var result;
             if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
                 result = 3; // FILTER_SKIP
             } else if (node.namespaceURI && node.namespaceURI.match(/^urn:webodf:/)) {
@@ -179,8 +179,7 @@ odf.OdfContainer = (function () {
      * @param {core.Zip} zip
      */
     function OdfPart(name, mimetype,  container, zip) {
-        var self = this,
-            privatedata;
+        var self = this;
 
         // declare public variables
         this.size = 0;
@@ -246,7 +245,6 @@ odf.OdfContainer = (function () {
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
             zip,
-            contentXmlCompletelyLoaded = false,
             partMimetypes = {};
 
         // NOTE each instance of OdfContainer has a copy of the private functions
@@ -502,27 +500,6 @@ odf.OdfContainer = (function () {
                 }
                 n = n.nextSibling;
             }
-        }
-        /**
-         * @param {!function(?string,?Document)} callback
-         * @return {undefined}
-         */
-        function getContentXmlNode(callback) {
-            var handler = {
-                rootElementReady: function (err, rootxml, done) {
-                    contentXmlCompletelyLoaded = err || done;
-                    if (err) {
-                        return callback(err, null);
-                    }
-                    var parser = new DOMParser();
-                    rootxml = parser.parseFromString(rootxml, "text/xml");
-                    callback(null, rootxml);
-                },
-                bodyChildElementsReady: function (err, nodes, done) {
-                    // TODO
-                }
-            };
-            zip.loadContentXmlAsFragments("content.xml", handler);
         }
         /**
          * @param {!string} filepath
