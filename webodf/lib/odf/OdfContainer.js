@@ -91,14 +91,13 @@ odf.OdfContainer = (function () {
      * of elements was passed to check the style usage in it.
      * @constructor
      * @implements {xmldom.LSSerializerFilter}
-     * @param {!Element} odfroot
      * @param {!Element=} styleUsingElementsRoot root element of tree of elements using styles
+     * @param {?Element=} automaticStyles root element of the automatic style definition tree
      */
-    function OdfNodeFilter(odfroot, styleUsingElementsRoot) {
-        var automaticStyles = odfroot.automaticStyles,
-            usedStyleList;
+    function OdfNodeFilter(styleUsingElementsRoot, automaticStyles) {
+        var usedStyleList;
         if (styleUsingElementsRoot) {
-            usedStyleList = new styleInfo.UsedStyleList(styleUsingElementsRoot);
+            usedStyleList = new styleInfo.UsedStyleList(styleUsingElementsRoot, automaticStyles);
         }
         /**
          * @param {!Node} node
@@ -400,8 +399,6 @@ odf.OdfContainer = (function () {
             // because they could have the same name
             // so prefix them and their uses with some almost unique string
             styleInfo.prefixStyleNames(root.automaticStyles, automaticStylePrefix, root.masterStyles);
-            //removeUnusedAutomaticStyles(root.automaticStyles,
-            //        root.masterStyles);
         }
         /**
          * @param {Document} xmldoc
@@ -562,7 +559,7 @@ odf.OdfContainer = (function () {
         function serializeMetaXml() {
             var serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = createDocumentElement("document-meta");
-            serializer.filter = new OdfNodeFilter(self.rootElement);
+            serializer.filter = new OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.meta, odf.Namespaces.namespaceMap);
             s += "</office:document-meta>";
             return s;
@@ -595,7 +592,7 @@ odf.OdfContainer = (function () {
                     manifestRoot.appendChild(createManifestEntry(fullPath, partMimetypes[fullPath]));
                 }
             }
-            serializer.filter = new OdfNodeFilter(self.rootElement);
+            serializer.filter = new OdfNodeFilter();
             return header + serializer.writeToString(manifest, odf.Namespaces.namespaceMap);
         }
         /**
@@ -604,7 +601,7 @@ odf.OdfContainer = (function () {
         function serializeSettingsXml() {
             var serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = createDocumentElement("document-settings");
-            serializer.filter = new OdfNodeFilter(self.rootElement);
+            serializer.filter = new OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
             s += "</office:document-settings>";
             return s;
@@ -619,16 +616,12 @@ odf.OdfContainer = (function () {
                 automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "styles.xml"),
                 masterStyles = self.rootElement.masterStyles && self.rootElement.masterStyles.cloneNode(true),
                 /**@type{!string}*/ s = createDocumentElement("document-styles");
-            // TODO: care about automatic styles only referenced by other automatic styles
-            // once that is done, add self.rootElement.masterStyles as second parameter again
-            // For now just the complete existing automatic styles are written
-            serializer.filter = new OdfNodeFilter(self.rootElement/*,
-                    self.rootElement.masterStyles*/);
             // automatic styles from styles.xml could shadow automatic styles from content.xml,
             // because they could have the same name
             // thus they were prefixed on loading with some almost unique string, which cam be removed
             // again before saving
             styleInfo.removePrefixFromStyleNames(automaticStyles, automaticStylePrefix, masterStyles);
+            serializer.filter = new OdfNodeFilter(masterStyles, automaticStyles);
 
             // TODO: only store font-face declarations which are used from styles.xml,
             // and store others with content.xml
@@ -648,11 +641,7 @@ odf.OdfContainer = (function () {
                 // select the styles by the tag, only needed until smart saving of styles is implemented
                 automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "content.xml"),
                 /**@type{!string}*/ s = createDocumentElement("document-content");
-            // TODO: care about automatic styles only referenced by other automatic styles
-            // once that is done, add self.rootElement.body as second parameter again
-            // For now just the complete existing automatic styles are written
-            serializer.filter = new OdfNodeFilter(self.rootElement/*,
-                    self.rootElement.body*/);
+            serializer.filter = new OdfNodeFilter(self.rootElement.body, automaticStyles);
             // Until there is code to  determine if a font is referenced only
             // from all font declaratios will be stored in styles.xml
             s += serializer.writeToString(automaticStyles, nsmap);

@@ -587,6 +587,92 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
+     * Node defining a style, with references to all required styles necessary to construct it
+     * @param {!string} key Style key
+     * @param {!string} name Style name
+     * @param {!string} family Style family
+     * @constructor
+     */
+    function StyleDefinition(key, name, family) {
+        /**
+         * Unique style definition key
+         * @type {string}
+         */
+        this.key = key;
+
+        /**
+         * Style name
+         * @type {string}
+         */
+        this.name = name;
+
+        /**
+         * Style family (e.g., paragraph, table-cell, text)
+         * @type {string}
+         */
+        this.family = family;
+
+        /**
+         * Styles directly required by this style
+         * @type {Object.<string, StyleDefinition>}
+         */
+        this.requires = {};
+    }
+
+    function getStyleDefinition(stylename, stylefamily, knownStyles) {
+        var styleKey = stylename + '"' + stylefamily,
+            styleDefinition = knownStyles[styleKey];
+        if (!styleDefinition) {
+            styleDefinition = knownStyles[styleKey] = new StyleDefinition(styleKey, stylename, stylefamily);
+        }
+        return styleDefinition;
+    }
+
+    /**
+     * Builds a style dependency map for the supplied style tree
+     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {?StyleDefinition} styleScope parent style the specified style element is part of
+     * @param {!Object.<string,StyleDefinition>} knownStyles  map of used stylesnames, grouped by keyname
+     * @return {!Object.<string,StyleDefinition>}
+     */
+    function determineDependentStyles(styleUsingElementsRoot, styleScope, knownStyles) {
+        var elname = elements[styleUsingElementsRoot.localName],
+            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
+            length = elns ? elns.length : 0,
+            newScopeName = styleUsingElementsRoot.getAttributeNS(stylens, 'name'),
+            newScopeFamily = styleUsingElementsRoot.getAttributeNS(stylens, 'family'),
+            referencedStyleName, referencedStyleFamily, referencedStyleDef,
+            i, e;
+
+        if (newScopeName && newScopeFamily) {
+            styleScope = getStyleDefinition(newScopeName, newScopeFamily, knownStyles);
+        }
+
+        if (styleScope) {
+            // check if any styles are referenced
+            for (i = 0; i < length; i += 1) {
+                referencedStyleName = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+                if (referencedStyleName) { // a style has been found!
+                    referencedStyleFamily = elns[i].keyname;
+                    referencedStyleDef = getStyleDefinition(referencedStyleName, referencedStyleFamily, knownStyles);
+                    styleScope.requires[referencedStyleDef.key] = referencedStyleDef;
+                }
+            }
+        }
+
+        // continue determination with all child elements
+        i = styleUsingElementsRoot.firstChild;
+        while (i) {
+            if (i.nodeType === 1) {
+                e = /**@type{!Element}*/(i);
+                determineDependentStyles(e, styleScope, knownStyles);
+            }
+            i = i.nextSibling;
+        }
+        return knownStyles;
+    }
+
+    /**
      * Creates the elements data from the elementstyles data.
      * @param {!Object.<Array.<Object.<string,string>>>} elementstyles
      * @return {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
@@ -614,11 +700,48 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
+     * Merges the specified style, and style required to complete it into the usedStyles map
+     * @param {!StyleDefinition} styleDependency Style to merge
+     * @param {!Object.<string,Object.<string,number>>} usedStyles Styles map to merge data into
+     */
+    function mergeRequiredStyles(styleDependency, usedStyles) {
+        var family = usedStyles[styleDependency.family];
+        if (!family) {
+            family = usedStyles[styleDependency.family] = {};
+        }
+        family[styleDependency.name] = 1;
+        Object.keys(/**@type {!Object}*/(styleDependency.requires)).forEach(function(requiredStyleKey) {
+            mergeRequiredStyles(/**@type {!StyleDefinition}*/(styleDependency.requires[requiredStyleKey]) , usedStyles);
+        });
+    }
+
+    /**
+     * Marks all required styles as used for any automatic styles referenced within the existing usedStyles map
+     * @param {!Element} automaticStylesRoot Automatic styles tree root
+     * @param {!Object.<string,Object.<string,number>>} usedStyles Styles already referenced
+     */
+    function mergeUsedAutomaticStyles(automaticStylesRoot, usedStyles) {
+        var automaticStyles = determineDependentStyles(automaticStylesRoot, null, {});
+        // Merge into usedStyles
+        Object.keys(automaticStyles).forEach(function(styleKey) {
+            var automaticStyleDefinition = automaticStyles[styleKey],
+                usedFamily = usedStyles[automaticStyleDefinition.family];
+
+            // For each style referenced by the main root, mark all required automatic styles as used as well
+            if (usedFamily && usedFamily.hasOwnProperty(automaticStyleDefinition.name)) {
+                mergeRequiredStyles(automaticStyleDefinition, usedStyles);
+            }
+        });
+    }
+
+    /**
      * Object which collects all style names that are used in the passed element tree
      * @constructor
      * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {?Element} [automaticStylesRoot=]  Additional style information. Styles in this tree are only important
+     *              when used as part of a chain of styles referenced from within the stylesUsingElementsRoot node
      */
-    this.UsedStyleList = function (styleUsingElementsRoot) {
+    this.UsedStyleList = function (styleUsingElementsRoot, automaticStylesRoot) {
         // usedStyles stores all style names used in the passed element tree.
         // As styles from different types can have the same names,
         // all styles are grouped by:
@@ -650,6 +773,9 @@ odf.StyleInfo = function StyleInfo() {
         };
 
         determineUsedStyles(styleUsingElementsRoot, usedStyles);
+        if (automaticStylesRoot) {
+            mergeUsedAutomaticStyles(automaticStylesRoot, usedStyles);
+        }
     };
 
     this.canElementHaveStyle = canElementHaveStyle;
