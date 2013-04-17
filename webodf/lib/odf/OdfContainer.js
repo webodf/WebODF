@@ -36,7 +36,6 @@ runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.FontLoader");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
@@ -55,8 +54,7 @@ odf.OdfContainer = (function () {
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
         automaticStylePrefix = (new Date()).getTime() + "_webodf_",
-        base64 = new core.Base64(),
-        fontLoader = new odf.FontLoader();
+        base64 = new core.Base64();
     /**
      * @param {?Node} node
      * @param {!string} ns
@@ -376,8 +374,6 @@ odf.OdfContainer = (function () {
             root.body = getDirectChild(root, officens, 'body');
             root.meta = getDirectChild(root, officens, 'meta');
 
-            // TODO: handle embedded fonts
-
             setState(OdfContainer.DONE);
         }
         /**
@@ -453,11 +449,6 @@ odf.OdfContainer = (function () {
             }
             root.body = getDirectChild(node, officens, 'body');
             setChild(root, root.body);
-
-            // load all fonts declared in styles.xml and content.xml
-            if (root.fontFaceDecls) {
-                fontLoader.loadFonts(root.fontFaceDecls, zip, null);
-            }
         }
         /**
          * @param {Document} xmldoc
@@ -731,6 +722,15 @@ odf.OdfContainer = (function () {
         this.getPart = function (partname) {
             return new OdfPart(partname, partMimetypes[partname], self, zip);
         };
+        /**
+        * @param {!string} url
+        * @param {!function(?string, ?Runtime.ByteArray)} callback receiving err and data
+        * @return {undefined}
+        */
+        this.getPartData = function (url, callback) {
+            zip.load(url, callback);
+        };
+
         function createEmptyTextDocument() {
             var zip = new core.Zip("", null),
                 data = runtime.byteArrayFromString(

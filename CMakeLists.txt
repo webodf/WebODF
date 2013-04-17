@@ -239,8 +239,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/Namespaces.js
     lib/odf/StyleInfo.js
     lib/odf/Style2CSS.js
-    lib/odf/FontLoader.js
     lib/odf/OdfContainer.js
+    lib/odf/FontLoader.js
     lib/odf/Formatting.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js

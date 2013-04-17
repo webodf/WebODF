@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -35,6 +37,8 @@
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
+runtime.loadClass("odf.FontLoader");
+
 /**
  * This class manages a loaded ODF document that is shown in an element.
  * It takes care of giving visual feedback on loading, ensures that the
@@ -313,6 +317,18 @@ odf.OdfCanvas = (function () {
             odfelement.automaticStyles
         );
     }
+
+    /**
+     * @param {!odf.OdfContainer} odfContainer
+     * @param {!HTMLStyleElement} fontcss
+     * @return {undefined}
+     **/
+    function handleFonts(odfContainer, fontcss) {
+        // update the css references to the fonts
+        var fontLoader = new odf.FontLoader();
+        fontLoader.loadFonts(odfContainer, fontcss.sheet);
+    }
+
     /**
      * @param {!string} id
      * @param {!Element} frame
@@ -378,7 +394,7 @@ odf.OdfCanvas = (function () {
     }
     /**
      * @param {!string} id
-     * @param {!Object} container
+     * @param {!odf.OdfContainer} container
      * @param {!Element} image
      * @param {!StyleSheet} stylesheet
      * @return {undefined}
@@ -736,17 +752,20 @@ odf.OdfCanvas = (function () {
     }
     /**
      * @param {Document} document Put and ODF Canvas inside this element.
+     * @param {odf.Namespaces=} namespaces
      */
-    function addStyleSheet(document) {
+    function addStyleSheet(document, namespaces) {
         var head = document.getElementsByTagName('head')[0],
             style = document.createElementNS(head.namespaceURI, 'style'),
             text = '',
             prefix;
         style.setAttribute('type', 'text/css');
         style.setAttribute('media', 'screen, print, handheld, projection');
-        namespaces.forEachPrefix(function(prefix, ns) {
-            text += "@namespace " + prefix + " url(" + ns + ");\n";
-        });
+        if (namespaces) {
+            namespaces.forEachPrefix(function(prefix, ns) {
+                text += "@namespace " + prefix + " url(" + ns + ");\n";
+            });
+        }
         style.appendChild(document.createTextNode(text));
         head.appendChild(style);
         return style;
@@ -766,6 +785,7 @@ odf.OdfCanvas = (function () {
             selectionWatcher = new SelectionWatcher(element),
             slidecssindex = 0,
             pageSwitcher,
+            fontcss,
             stylesxmlcss,
             positioncss,
             editable = false,
@@ -776,13 +796,14 @@ odf.OdfCanvas = (function () {
             loadingQueue = new LoadingQueue();
 
         addWebODFStyleSheet(doc);
-        pageSwitcher = new PageSwitcher(addStyleSheet(doc));
-        stylesxmlcss = addStyleSheet(doc);
-        positioncss = addStyleSheet(doc);
+        pageSwitcher = new PageSwitcher(addStyleSheet(doc, namespaces));
+        fontcss = addStyleSheet(doc);
+        stylesxmlcss = addStyleSheet(doc, namespaces);
+        positioncss = addStyleSheet(doc, namespaces);
 
         /**
          * Load all the images that are inside an odf element.
-         * @param {!Object} container
+         * @param {!odf.OdfContainer} container
          * @param {!Element} odffragment
          * @param {!StyleSheet} stylesheet
          * @return {undefined}
@@ -897,7 +918,7 @@ odf.OdfCanvas = (function () {
         }
         /**
          * A new content.xml has been loaded. Update the live document with it.
-         * @param {!Object} container
+         * @param {!odf.OdfContainer} container
          * @param {!Element} odfnode
          * @return {undefined}
          **/
@@ -943,6 +964,7 @@ odf.OdfCanvas = (function () {
                 element.ownerDocument.importNode(odfnode, true);
 
                 formatting.setOdfContainer(odfcontainer);
+                handleFonts(odfcontainer, fontcss);
                 handleStyles(odfnode, stylesxmlcss);
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes

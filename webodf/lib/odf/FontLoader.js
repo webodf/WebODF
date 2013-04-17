@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -34,7 +36,7 @@
 /*global runtime, odf, core, document, xmldom*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.Namespaces");
+runtime.loadClass("odf.OdfContainer");
 /**
  * This class loads embedded fonts into the CSS 
  * @constructor
@@ -47,7 +49,7 @@ odf.FontLoader = (function () {
         namespaces = new odf.Namespaces();
     /**
      * @param {!Element} fontFaceDecls
-     * @return {!Object.<string,Object>}
+     * @return {!Object.<string,{href:string,family:string}>}
      */
     function getEmbeddedFontDeclarations(fontFaceDecls) {
         var decls = {}, fonts, i, font, name, uris, href, family;
@@ -71,12 +73,14 @@ odf.FontLoader = (function () {
         }
         return decls;
     }
+    /**
+     * @param {!string} name
+     * @param {!{href:string,family:string}} font
+     * @param {?Runtime.ByteArray} fontdata
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
     function addFontToCSS(name, font, fontdata, stylesheet) {
-        // hack: get the first stylesheet
-        if (!stylesheet) {
-            stylesheet = document.styleSheets[0];
-        }
-
         var cssFamily = font.family || name,
             rule = "@font-face { font-family: '" + cssFamily + "'; src: " +
                 "url(data:application/x-font-ttf;charset=binary;base64," +
@@ -85,10 +89,17 @@ odf.FontLoader = (function () {
         try {
             stylesheet.insertRule(rule, stylesheet.cssRules.length);
         } catch (e) {
-            runtime.log("Problem inserting rule in CSS: " + rule);
+            runtime.log("Problem inserting rule in CSS: " + runtime.toJson(e) + "\nRule: "+rule);
         }
     }
-    function loadFontIntoCSS(embeddedFontDeclarations, zip, pos, stylesheet,
+    /**
+     * @param {!Object.<string,{href:string,family:string}>} embeddedFontDeclarations
+     * @param {!odf.OdfContainer} odfContainer
+     * @param {!number} pos
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos, stylesheet,
             callback) {
         var name, i = 0, n;
         for (n in embeddedFontDeclarations) {
@@ -103,19 +114,24 @@ odf.FontLoader = (function () {
         if (!name) {
             return callback();
         }
-        zip.load(embeddedFontDeclarations[name].href, function (err, fontdata) {
+        odfContainer.getPartData(embeddedFontDeclarations[name].href, function (err, fontdata) {
             if (err) {
                 runtime.log(err);
             } else {
                 addFontToCSS(name, embeddedFontDeclarations[name], fontdata,
                     stylesheet);
             }
-            return loadFontIntoCSS(embeddedFontDeclarations, zip, pos + 1,
-                    stylesheet, callback);
+            loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos + 1, stylesheet, callback);
         });
     }
-    function loadFontsIntoCSS(embeddedFontDeclarations, zip, stylesheet) {
-        loadFontIntoCSS(embeddedFontDeclarations, zip, 0, stylesheet,
+    /**
+     * @param {!Object.<string,{href:string,family:string}>} embeddedFontDeclarations
+     * @param {!odf.OdfContainer} odfContainer
+     * @param {!StyleSheet} stylesheet
+     * @return {undefined}
+     */
+    function loadFontsIntoCSS(embeddedFontDeclarations, odfContainer, stylesheet) {
+        loadFontIntoCSS(embeddedFontDeclarations, odfContainer, 0, stylesheet,
             function () {});
     }
     /**
@@ -125,16 +141,25 @@ odf.FontLoader = (function () {
     odf.FontLoader = function FontLoader() {
         var self = this;
         /**
-         * @param {!Element} fontFaceDecls
-         * @param {!core.Zip} zip
-         * @param {?StyleSheet} stylesheet
+         * @param {!odf.OdfContainer} odfContainer
+         * @param {!StyleSheet} stylesheet Will be cleaned and filled with rules for the fonts
          * @return {undefined}
          */
-        this.loadFonts = function (fontFaceDecls, zip, stylesheet) {
-            var embeddedFontDeclarations = getEmbeddedFontDeclarations(
+        this.loadFonts = function (odfContainer, stylesheet) {
+            var embeddedFontDeclarations,
+                /** @type {?Element}*/fontFaceDecls = odfContainer.rootElement.fontFaceDecls;
+
+            // make stylesheet empty
+            while (stylesheet.cssRules.length) {
+                stylesheet.deleteRule(stylesheet.cssRules.length - 1);
+            }
+
+            if (fontFaceDecls) {
+                embeddedFontDeclarations = getEmbeddedFontDeclarations(
                     fontFaceDecls
                 );
-            loadFontsIntoCSS(embeddedFontDeclarations, zip, stylesheet);
+                loadFontsIntoCSS(embeddedFontDeclarations, odfContainer, stylesheet);
+            }
         };
     };
     return odf.FontLoader;
