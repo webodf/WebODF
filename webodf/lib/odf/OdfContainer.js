@@ -49,11 +49,13 @@ odf.OdfContainer = (function () {
     var styleInfo = new odf.StyleInfo(),
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
-        webodfns = "urn:webodf:names:origin",
+        webodfns = "urn:webodf:names:scope",
         nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
         automaticStylePrefix = (new Date()).getTime() + "_webodf_",
-        base64 = new core.Base64();
+        base64 = new core.Base64(),
+        /** @const */ documentStylesScope = "document-styles",
+        /** @const */ documentContentScope = "document-content";
     /**
      * @param {?Node} node
      * @param {!string} ns
@@ -278,40 +280,41 @@ odf.OdfContainer = (function () {
 
         // private functions
         /**
-         * Tags all styles with an attribute noting their origin.
+         * Tags all styles with an attribute noting their scope.
          * Helper function for the primitive complete backwriting of
          * the automatic styles.
          * @param {?Element} stylesRootElement
-         * @param {!string} origin
+         * @param {!string} scope
          * @return {undefined}
          */
-        function tagAutomaticStylesOrigin(stylesRootElement, origin) {
+        function setAutomaticStylesScope(stylesRootElement, scope) {
             var n = stylesRootElement && stylesRootElement.firstChild;
             while (n) {
                 if (n.nodeType === 1) { // ELEMENT
-                    n.setAttributeNS(webodfns, "origin", origin);
+                    n.setAttributeNS(webodfns, "scope", scope);
                 }
                 n = n.nextSibling;
             }
         }
         /**
-         * Creates a clone of the styles which only has styles tagged
-         * with the given origin.
+         * Creates a clone of the styles tree containing only styles tagged
+         * with the given scope, or with no specified scope.
          * Helper function for the primitive complete backwriting of
          * the automatic styles.
          * @param {?Element} stylesRootElement
-         * @param {!string} origin
+         * @param {!string} scope
          * @return {?Element}
          */
-        function cloneStylesByOrigin(stylesRootElement, origin) {
-            var copy = null, n, s;
+        function cloneStylesInScope(stylesRootElement, scope) {
+            var copy = null, n, s, scopeAttrValue;
             if (stylesRootElement) {
                 copy = stylesRootElement.cloneNode(true);
                 n = copy.firstChild;
                 while (n) {
                     s = n.nextSibling;
                     if (n.nodeType === 1) { // ELEMENT
-                        if (n.getAttributeNS(webodfns, "origin") !== origin) {
+                        scopeAttrValue = n.getAttributeNS(webodfns, "scope");
+                        if (scopeAttrValue && scopeAttrValue !== scope) {
                             copy.removeChild(n);
                         }
                     }
@@ -364,8 +367,7 @@ odf.OdfContainer = (function () {
             self.rootElement = root;
             root.fontFaceDecls = getDirectChild(root, officens, 'font-face-decls');
             root.styles = getDirectChild(root, officens, 'styles');
-            root.automaticStyles = getDirectChild(root, officens,
-                    'automatic-styles');
+            root.automaticStyles = getDirectChild(root, officens, 'automatic-styles');
             root.masterStyles = getDirectChild(root, officens, 'master-styles');
             root.body = getDirectChild(root, officens, 'body');
             root.meta = getDirectChild(root, officens, 'meta');
@@ -390,8 +392,7 @@ odf.OdfContainer = (function () {
             setChild(root, root.styles);
             root.automaticStyles = getDirectChild(node, officens,
                     'automatic-styles');
-            // tag the styles, only needed until smart saving of styles is implemented
-            tagAutomaticStylesOrigin(root.automaticStyles, "styles.xml");
+            setAutomaticStylesScope(root.automaticStyles, documentStylesScope);
             setChild(root, root.automaticStyles);
             root.masterStyles = getDirectChild(node, officens, 'master-styles');
             setChild(root, root.masterStyles);
@@ -429,8 +430,7 @@ odf.OdfContainer = (function () {
                 setChild(root, fontFaceDecls);
             }
             automaticStyles = getDirectChild(node, officens, 'automatic-styles');
-            // tag the styles, only needed until smart saving of styles is implemented
-            tagAutomaticStylesOrigin(automaticStyles, "content.xml");
+            setAutomaticStylesScope(automaticStyles, documentContentScope);
             if (root.automaticStyles && automaticStyles) {
                 c = automaticStyles.firstChild;
                 while (c) {
@@ -612,8 +612,7 @@ odf.OdfContainer = (function () {
         function serializeStylesXml() {
             var nsmap = odf.Namespaces.namespaceMap,
                 serializer = new xmldom.LSSerializer(),
-                // select the styles by the tag, only needed until smart saving of styles is implemented
-                automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "styles.xml"),
+                automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentStylesScope),
                 masterStyles = self.rootElement.masterStyles && self.rootElement.masterStyles.cloneNode(true),
                 /**@type{!string}*/ s = createDocumentElement("document-styles");
             // automatic styles from styles.xml could shadow automatic styles from content.xml,
@@ -638,8 +637,7 @@ odf.OdfContainer = (function () {
         function serializeContentXml() {
             var nsmap = odf.Namespaces.namespaceMap,
                 serializer = new xmldom.LSSerializer(),
-                // select the styles by the tag, only needed until smart saving of styles is implemented
-                automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "content.xml"),
+                automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentContentScope),
                 /**@type{!string}*/ s = createDocumentElement("document-content");
             serializer.filter = new OdfNodeFilter(self.rootElement.body, automaticStyles);
             // Until there is code to  determine if a font is referenced only
