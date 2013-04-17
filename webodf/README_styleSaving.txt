@@ -9,7 +9,11 @@ named/common ones are offered to the user, automatic ones are internal styles
 for implementation of direct formatting.
 
 Common styles are stored in styles.xml, while automatic styles are stored in
-content.xml or, if used by things in styles.xml, in styles.xml.
+content.xml if used within the document content, of in styles.xml if used as part of
+the document's master style definitions. Automatic styles are only applicable for
+the limited document scope (either 'document-styles', or 'document-content') they
+are defined within. That is, an automatic style defined in 'document-styles' cannot
+be referenced from 'document-content' and vice-versa.
 
 Both common styles and automatic styles can get new ids (style:name) during
 roundtrips. Style ids are only required to be unique with a given style:family
@@ -46,7 +50,7 @@ handleContentXml().
 Merging on loading means unmerging on saving to the normal ODT file. To split
 up the automatic styles between styles.xml and content.xml there is code to
 determine all styles that are used in a tree of ODF elements,
-"styleInfo.UsedStyleList". That code just is not yet able to determine all
+"styleInfo.UsedStyleList". That code is also able to determine all
 automatic styles which are used indirectly from other automatic styles, like in
 this example, where the automatic style "List" for a paragraph references the
 list style "ListStyleUsedByParagraph", which again references the char style
@@ -62,26 +66,17 @@ list style "ListStyleUsedByParagraph", which again references the char style
     <style:text-properties style:font-name="OpenSymbol" style:font-name-asian="OpenSymbol" style:font-name-complex="OpenSymbol"/>
 </style:style>
 
-As automatic styles are not modified in the current code, as intermediate
-solution all automatic styles are tagged with their origin on loading and
-accordingly written back on saving, by setting an attribute "origin" in a
-webodf namespace.
+To cope with automatic styles having identical names in both content.xml and styles.xml,
+imported automatic styles are scoped to either 'document-styles' or 'document-content' on load.
 
+Additional automatic styles created by the user are considered "scopeless", and can be used in
+both styles and content scopes. Upon saving of the document, the automatic style will be cloned
+into any scopes that require it. Reloading the newly saved document will follow the normal process
+of loading this new automatic style into only the appropriate scope.
 
 Future implementation
 ---------------------
 
-Instead of the workaround mentioned above, i.e. tagging the origin of the
-automatic styles to write them back to the same place, the code needs to
-determine the target place of automatic styles based one from which places they
-are referenced. The old code used styleInfo.UsedStyleList for that, but ignored
-any styles used from other styles, as noted above.
-
-So styleInfo.UsedStyleList needs to be extended to be able to explore the tree
-of indirectly used styles and collect their ids as well, starting from the set
-of directly used styles.
-
-Other than that there seems no work needed, given that the structure of the
-style data in the DOM directly reflects the structure of the style data in the
-ODF format, and any changes to this data is currently done without breaking
-this structure (and also should in the future).
+The current implementation always stores all referenced fonts in styles.xml. This could be improved
+to only store fonts used within the styles.xml scope, with additional fonts used within the content being
+stored in content.xml
