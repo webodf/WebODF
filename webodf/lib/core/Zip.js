@@ -378,7 +378,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     }
     /**
      * @param {!string} filename
-     * @param {!Object} handler
+     * @param {!{rootElementReady: function(?string, ?string=, boolean=)}} handler
      * @return {undefined}
      */
     function loadContentXmlAsFragments(filename, handler) {
