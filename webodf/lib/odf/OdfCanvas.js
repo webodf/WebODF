@@ -275,18 +275,17 @@ odf.OdfCanvas = (function () {
         listenEvent(element, "keyup", checkSelection);
         listenEvent(element, "keydown", checkSelection);
     }
-    var style2CSS = new odf.Style2CSS(),
-        namespaces = style2CSS.namespaces,
-        drawns  = namespaces.draw,
-        fons    = namespaces.fo,
-        officens = namespaces.office,
-        stylens = namespaces.style,
-        svgns   = namespaces.svg,
-        tablens = namespaces.table,
-        textns  = namespaces.text,
-        xlinkns = namespaces.xlink,
-        xmlns = namespaces.xml,
-        window = runtime.getWindow(),
+    var /**@const@type {!string}*/drawns  = odf.Namespaces.drawns,
+        /**@const@type {!string}*/fons    = odf.Namespaces.fons,
+        /**@const@type {!string}*/officens = odf.Namespaces.officens,
+        /**@const@type {!string}*/stylens = odf.Namespaces.stylens,
+        /**@const@type {!string}*/svgns   = odf.Namespaces.svgns,
+        /**@const@type {!string}*/tablens = odf.Namespaces.tablens,
+        /**@const@type {!string}*/textns  = odf.Namespaces.textns,
+        /**@const@type {!string}*/xlinkns = odf.Namespaces.xlinkns,
+        /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
+        /**@const@type {!string}*/window = runtime.getWindow(),
+        namespaces = new odf.Namespaces(),
         xpath = new xmldom.XPath();
 
     /**
@@ -416,7 +415,7 @@ odf.OdfCanvas = (function () {
             i,
             nodes = xpath.getODFElementsWithXPath(odfbody,
                 ".//*[*[@text:anchor-type='paragraph']]",
-                style2CSS.namespaceResolver);
+                namespaces.resolvePrefix);
         for (i = 0; i < nodes.length; i += 1) {
             n = nodes[i];
             if (n.setAttributeNS) {
@@ -495,9 +494,6 @@ odf.OdfCanvas = (function () {
             frames,
             i,
             images;
-        function namespaceResolver(prefix) {
-            return namespaces[prefix];
-        }
         // find all the frame elements
         frames = [];
         node = odfbody.firstChild;
@@ -640,7 +636,6 @@ odf.OdfCanvas = (function () {
     function loadLists(container, odffragment, stylesheet) {
         var i,
             lists,
-            svgns   = namespaces.svg,
             node,
             id,
             continueList,
@@ -749,12 +744,9 @@ odf.OdfCanvas = (function () {
             prefix;
         style.setAttribute('type', 'text/css');
         style.setAttribute('media', 'screen, print, handheld, projection');
-        for (prefix in namespaces) {
-            if (namespaces.hasOwnProperty(prefix) && prefix) {
-                text += "@namespace " + prefix + " url(" + namespaces[prefix]
-                    + ");\n";
-            }
-        }
+        namespaces.forEachPrefix(function(prefix, ns) {
+            text += "@namespace " + prefix + " url(" + ns + ");\n";
+        });
         style.appendChild(document.createTextNode(text));
         head.appendChild(style);
         return style;

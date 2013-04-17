@@ -30,35 +30,25 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global odf, runtime*/
+
+runtime.loadClass("odf.Namespaces");
+
 /**
  * @constructor
  */
 odf.Style2CSS = function Style2CSS() {
     "use strict";
-    // helper constants
-    var xlinkns = 'http://www.w3.org/1999/xlink',
-        drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
-        stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-        tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        xmlns = "http://www.w3.org/XML/1998/namespace",
-        namespaces = {
-            "draw": drawns,
-            "fo": fons,
-            "office": officens,
-            "presentation": presentationns,
-            "style": stylens,
-            "svg": svgns,
-            "table": tablens,
-            "text": textns,
-            "xlink": xlinkns,
-            "xml": xmlns
-        },
+    var namespaces = new odf.Namespaces(),
+
+        // helper constants
+        /**@const@type{!string}*/ drawns = odf.Namespaces.drawns,
+        /**@const@type{!string}*/ fons = odf.Namespaces.fons,
+        /**@const@type{!string}*/ stylens = odf.Namespaces.stylens,
+        /**@const@type{!string}*/ svgns = odf.Namespaces.svgns,
+        /**@const@type{!string}*/ textns = odf.Namespaces.textns,
+        /**@const@type{!string}*/ xlinkns = odf.Namespaces.xlinkns,
 
         familynamespaceprefixes = {
             'graphic': 'draw',
@@ -176,13 +166,6 @@ odf.Style2CSS = function Style2CSS() {
         fontFaceDeclsMap = {};
 
     // helper functions
-    /**
-     * @param {string} prefix
-     * @return {string}
-     */
-    function namespaceResolver(prefix) {
-        return namespaces[prefix] || null;
-    }
     /**
      * @param {!Document} doc
      * @param {!Element} stylesnode
@@ -750,10 +733,6 @@ odf.Style2CSS = function Style2CSS() {
     // which an element applies. ODF families can be mapped to a group of css
     // elements
 
-    this.namespaces = namespaces;
-    this.namespaceResolver = namespaceResolver;
-    this.namespaceResolver.lookupNamespaceURI = this.namespaceResolver;
-
     // Font face declarations map
     this.createFontFaceDeclsMap = createFontFaceDeclsMap;
 
@@ -782,18 +761,16 @@ odf.Style2CSS = function Style2CSS() {
             return;
         }
         // add @namespace rules
-        for (prefix in namespaces) {
-            if (namespaces.hasOwnProperty(prefix)) {
-                rule = '@namespace ' + prefix + ' url(' + namespaces[prefix] + ');';
-                try {
-                    stylesheet.insertRule(rule, stylesheet.cssRules.length);
-                } catch (e) {
-                    // WebKit can throw an exception here, but it will have
-                    // retained the namespace declarations anyway.
-                }
+        namespaces.forEachPrefix(function(prefix, ns) {
+            rule = '@namespace ' + prefix + ' url(' + ns + ');';
+            try {
+                stylesheet.insertRule(rule, stylesheet.cssRules.length);
+            } catch (e) {
+                // WebKit can throw an exception here, but it will have
+                // retained the namespace declarations anyway.
             }
-        }
-        
+        });
+
         // Populate the font face declarations map
         fontFaceDeclsMap = createFontFaceDeclsMap(fontFaceDecls);
         // add the various styles

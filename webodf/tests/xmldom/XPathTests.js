@@ -32,7 +32,7 @@
  */
 /*global runtime, core, xmldom, odf, XMLSerializer*/
 runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor
@@ -42,15 +42,15 @@ runtime.loadClass("odf.Style2CSS");
 xmldom.XPathTests = function XPathTests(runner) {
     "use strict";
     var r = runner,
-        style2CSS = new odf.Style2CSS(),
+        namespaces = new odf.Namespaces(),
         t;
 
     function setupDoc() {
-        var stylens = style2CSS.namespaceResolver("style"),
-            svgns = style2CSS.namespaceResolver("svg"),
-            drawns = style2CSS.namespaceResolver("draw"),
-            presentationns = style2CSS.namespaceResolver("presentation"),
-            textns = style2CSS.namespaceResolver("text"),
+        var stylens = odf.Namespaces.stylens,
+            svgns = odf.Namespaces.svgns,
+            drawns = odf.Namespaces.drawns,
+            presentationns = odf.Namespaces.presentationns,
+            textns = odf.Namespaces.textns,
             doc = runtime.getDOMImplementation().createDocument("", "a", null),
             r = doc.documentElement,
             fontFace = doc.createElementNS(stylens, "font-face"),
@@ -82,7 +82,7 @@ xmldom.XPathTests = function XPathTests(runner) {
         for (x in xpaths) {
             if (xpaths.hasOwnProperty(x)) {
                 t.result = xpath.getODFElementsWithXPath(t.doc.documentElement,
-                        x, style2CSS.namespaceResolver);
+                        x, namespaces.resolvePrefix);
                 r.shouldBe(t, "t.result.length", "1");
                 r.shouldBe(t, "t.result[0]", xpaths[x]);
             }

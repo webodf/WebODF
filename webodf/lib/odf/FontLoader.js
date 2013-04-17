@@ -34,7 +34,7 @@
 /*global runtime, odf, core, document, xmldom*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.Namespaces");
 /**
  * This class loads embedded fonts into the CSS 
  * @constructor
@@ -42,9 +42,9 @@ runtime.loadClass("odf.Style2CSS");
  **/
 odf.FontLoader = (function () {
     "use strict";
-    var style2CSS = new odf.Style2CSS(),
-        xpath = new xmldom.XPath(),
-        base64 = new core.Base64();
+    var xpath = new xmldom.XPath(),
+        base64 = new core.Base64(),
+        namespaces = new odf.Namespaces();
     /**
      * @param {!Element} fontFaceDecls
      * @return {!Object.<string,Object>}
@@ -56,17 +56,16 @@ odf.FontLoader = (function () {
         }
         fonts = xpath.getODFElementsWithXPath(fontFaceDecls,
                     "style:font-face[svg:font-face-src]",
-                    style2CSS.namespaceResolver);
+                    namespaces.resolvePrefix);
         for (i = 0; i < fonts.length; i += 1) {
             font = fonts[i];
-            name = font.getAttributeNS(style2CSS.namespaces.style, "name");
-            family = font.getAttributeNS(style2CSS.namespaces.svg, "font-family");
+            name = font.getAttributeNS(odf.Namespaces.stylens, "name");
+            family = font.getAttributeNS(odf.Namespaces.svgns, "font-family");
             uris = xpath.getODFElementsWithXPath(font,
                 "svg:font-face-src/svg:font-face-uri",
-                style2CSS.namespaceResolver);
+                namespaces.resolvePrefix);
             if (uris.length > 0) {
-                href = uris[0].getAttributeNS(style2CSS.namespaces["xlink"],
-                        "href");
+                href = uris[0].getAttributeNS(odf.Namespaces.xlinkns, "href");
                 decls[name] = {href: href, family: family};
             }
         }

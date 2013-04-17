@@ -33,11 +33,11 @@
  */
 /*global Ext, app, runtime, xmldom, odf*/
 runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.Namespaces");
 Ext.define('WebODFApp.view.FileDetail', (function () {
     "use strict";
     var panel,
-        style2CSS = new odf.Style2CSS(),
+        namespaces = new odf.Namespaces(),
         xpath = new xmldom.XPath(),
         fileDetail,
         title,
@@ -48,13 +48,13 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
         var ps,
             title;
         ps = xpath.getODFElementsWithXPath(body,
-                ".//text:h", style2CSS.namespaceResolver);
+                ".//text:h", namespaces.resolvePrefix);
         title = "";
         if (ps && ps.length) {
             title = ps[0].nodeValue;
         } else {
             ps = xpath.getODFElementsWithXPath(body,
-                ".//text:p", style2CSS.namespaceResolver);
+                ".//text:p", namespaces.resolvePrefix);
             if (ps && ps.length) {
                 title = ps[0].nodeValue;
             }

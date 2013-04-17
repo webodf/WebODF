@@ -33,6 +33,8 @@
  */
 /*global odf, runtime, console*/
 
+runtime.loadClass("odf.Style2CSS");
+
 /**
  * @constructor
  */
@@ -41,7 +43,8 @@ odf.Formatting = function Formatting() {
     var /**@type{odf.OdfContainer}*/ odfContainer,
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
         /**@type{odf.Style2CSS}*/ style2CSS = new odf.Style2CSS(),
-        /**@type{Object}*/ namespaces = style2CSS.namespaces;
+        /**@const@type {!string}*/ stylens = odf.Namespaces.stylens;
+
     /**
      * Class that iterates over all elements that are part of the range.
      * @constructor
@@ -193,12 +196,12 @@ odf.Formatting = function Formatting() {
             style;
         while (node) {
             if (node.nodeType === 1 && node.localName === "style"
-                    && node.namespaceURI === namespaces.style) {
+                    && node.namespaceURI === stylens) {
                 style = node;
-                p_family = style.getAttributeNS(namespaces.style, 'family');
+                p_family = style.getAttributeNS(stylens, 'family');
                 if (p_family === "paragraph") {
-                    p_name = style.getAttributeNS(namespaces.style, 'name');
-                    p_displayName = style.getAttributeNS(namespaces.style, 'display-name') || p_name;
+                    p_name = style.getAttributeNS(stylens, 'name');
+                    p_displayName = style.getAttributeNS(stylens, 'display-name') || p_name;
                     if (p_name && p_displayName) {
                         paragraphStyles.push({
                             name: p_name,
@@ -218,9 +221,10 @@ odf.Formatting = function Formatting() {
      * @return {boolean}
      */
     this.isStyleUsed = function (styleElement) {
-        var hasDerivedStyles, isUsed;
-        
-        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, style2CSS.namespaceResolver, styleElement);
+        var hasDerivedStyles, isUsed,
+            namespaces = new odf.Namespaces();
+
+        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, namespaces.resolvePrefix, styleElement);
 
         isUsed = new styleInfo.UsedStyleList(odfContainer.rootElement.styles).uses(styleElement)
             || new styleInfo.UsedStyleList(odfContainer.rootElement.automaticStyles).uses(styleElement)
@@ -234,9 +238,9 @@ odf.Formatting = function Formatting() {
 
         while (node) {
             if (node.nodeType === 1
-                    && node.namespaceURI === namespaces.style
+                    && node.namespaceURI === stylens
                     && node.localName === "default-style"
-                    && node.getAttributeNS(namespaces.style, 'family') === family) {
+                    && node.getAttributeNS(stylens, 'family') === family) {
                 return node;
             }
             node = node.nextSibling;
@@ -249,10 +253,10 @@ odf.Formatting = function Formatting() {
 
         while (node) {
             if (node.nodeType === 1
-                    && node.namespaceURI === namespaces.style
+                    && node.namespaceURI === stylens
                     && node.localName === "style"
-                    && node.getAttributeNS(namespaces.style, 'family') === family
-                    && node.getAttributeNS(namespaces.style, 'name') === styleName) {
+                    && node.getAttributeNS(stylens, 'family') === family
+                    && node.getAttributeNS(stylens, 'name') === styleName) {
                 return node;
             }
             node = node.nextSibling;
@@ -273,7 +277,7 @@ odf.Formatting = function Formatting() {
             propertiesNode = styleNode.firstChild;
 
         while (propertiesNode) {
-            if (propertiesNode.nodeType === 1 && propertiesNode.namespaceURI === namespaces.style) {
+            if (propertiesNode.nodeType === 1 && propertiesNode.namespaceURI === stylens) {
                 propertiesMap[propertiesNode.nodeName] = {};
                 for (i = 0; i < propertiesNode.attributes.length; i += 1) {
                     propertiesMap[propertiesNode.nodeName][propertiesNode.attributes[i].name] = propertiesNode.attributes[i].value;
@@ -305,16 +309,16 @@ odf.Formatting = function Formatting() {
             propertiesMap = getStyleAttributes(node);
             inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
             
-            parentStyleName = node.getAttributeNS(namespaces.style, 'parent-style-name');
+            parentStyleName = node.getAttributeNS(stylens, 'parent-style-name');
             if (parentStyleName) {
-                node = getStyleElement(styleListElement, parentStyleName, styleNode.getAttributeNS(namespaces.style, 'family'));
+                node = getStyleElement(styleListElement, parentStyleName, styleNode.getAttributeNS(stylens, 'family'));
             } else {
                 node = null;
             }
         }
         
         // Now incorporate attributes from the default style
-        propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(namespaces.style, 'family')));
+        propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(stylens, 'family')));
         inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
 
         return inheritedPropertiesMap;
@@ -335,7 +339,7 @@ odf.Formatting = function Formatting() {
 
         // first look for automatic style with the name
         while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
-            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+            styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
         }
         // then see if that style is in named styles
         styleElement = getStyleElement(styleElementList, styleName, "paragraph");
@@ -376,7 +380,7 @@ odf.Formatting = function Formatting() {
             if (attributeValue) {
                 return attributeValue;
             }
-            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+            styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
         }
         // then see if that style is in named styles
         while ((styleElement = getStyleElement(styleElementList, styleName, "paragraph")) !== null) {
@@ -384,7 +388,7 @@ odf.Formatting = function Formatting() {
             if (attributeValue) {
                 return attributeValue;
             }
-            styleName = styleElement.getAttributeNS(namespaces.style, 'parent-style-name');
+            styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
         }
         return null;
     };

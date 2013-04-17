@@ -64,6 +64,7 @@
         "odf/CommandLineTools.js",
         "odf/FontLoader.js",
         "odf/Formatting.js",
+        "odf/Namespaces.js",
         "odf/OdfCanvas.js",
         "odf/OdfContainer.js",
         "odf/Style2CSS.js",

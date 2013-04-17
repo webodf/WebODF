@@ -57,8 +57,7 @@ gui.SessionController = (function () {
      * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
-        var self = this,
-        /**@type{Object}*/ namespaces = new odf.Style2CSS().namespaces;
+        var self = this;
 
         function listenEvent(eventTarget, eventType, eventHandler) {
             if (eventTarget.addEventListener) {
@@ -214,8 +213,8 @@ gui.SessionController = (function () {
             /*
             if (isAtEndOfParagraph) {
                 paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
-                styleName = paragraphNode.getAttributeNS(namespaces.text, 'style-name');
-                nextStyleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, namespaces.style, 'next-style-name');
+                styleName = paragraphNode.getAttributeNS(odf.Namespaces.textns, 'style-name');
+                nextStyleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, odf.Namespaces.stylens, 'next-style-name');
 
                 if (nextStyleName && nextStyleName !== styleName) {
                     op = new ops.OpSetParagraphStyle();

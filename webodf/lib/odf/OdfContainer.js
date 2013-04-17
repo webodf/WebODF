@@ -35,7 +35,7 @@ runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
-runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.FontLoader");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
@@ -48,8 +48,7 @@ runtime.loadClass("odf.FontLoader");
 odf.OdfContainer = (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
-        style2CSS = new odf.Style2CSS(),
-        namespaces = style2CSS.namespaces,
+        namespaces = new odf.Namespaces(),
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
         webodfns = "urn:webodf:names:origin",
@@ -581,13 +580,12 @@ odf.OdfContainer = (function () {
                 });
             });
         }
-        function documentElement(name, map) {
+        function createDocumentElement(name, namespaces) {
             var s = "", i;
-            for (i in map) {
-                if (map.hasOwnProperty(i)) {
-                    s += " xmlns:" + i + "=\"" + map[i] + "\"";
-                }
-            }
+
+            namespaces.forEachPrefix(function(prefix, ns) {
+                s += " xmlns:" + prefix + "=\"" + ns + "\"";
+            });
             return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:" + name +
                     " " + s + " office:version=\"1.2\">";
         }
@@ -595,9 +593,9 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         function serializeMetaXml() {
-            var nsmap = style2CSS.namespaces,
+            var nsmap = namespaces.getNamespaceMap(),
                 serializer = new xmldom.LSSerializer(),
-                /**@type{!string}*/ s = documentElement("document-meta", nsmap);
+                /**@type{!string}*/ s = createDocumentElement("document-meta", namespaces);
             serializer.filter = new OdfNodeFilter(self.rootElement);
             s += serializer.writeToString(self.rootElement.meta, nsmap);
             s += "</office:document-meta>";
@@ -632,15 +630,15 @@ odf.OdfContainer = (function () {
                 }
             }
             serializer.filter = new OdfNodeFilter(self.rootElement);
-            return header + serializer.writeToString(manifest, style2CSS.namespaces);
+            return header + serializer.writeToString(manifest, namespaces.getNamespaceMap());
         }
         /**
          * @return {!string}
          */
         function serializeSettingsXml() {
-            var nsmap = style2CSS.namespaces,
+            var nsmap = namespaces.getNamespaceMap(),
                 serializer = new xmldom.LSSerializer(),
-                /**@type{!string}*/ s = documentElement("document-settings", nsmap);
+                /**@type{!string}*/ s = createDocumentElement("document-settings", namespaces);
             serializer.filter = new OdfNodeFilter(self.rootElement);
             s += serializer.writeToString(self.rootElement.settings, nsmap);
             s += "</office:document-settings>";
@@ -650,12 +648,12 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         function serializeStylesXml() {
-            var nsmap = style2CSS.namespaces,
+            var nsmap = namespaces.getNamespaceMap(),
                 serializer = new xmldom.LSSerializer(),
                 // select the styles by the tag, only needed until smart saving of styles is implemented
                 automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "styles.xml"),
                 masterStyles = self.rootElement.masterStyles && self.rootElement.masterStyles.cloneNode(true),
-                /**@type{!string}*/ s = documentElement("document-styles", nsmap);
+                /**@type{!string}*/ s = createDocumentElement("document-styles", namespaces);
             // TODO: care about automatic styles only referenced by other automatic styles
             // once that is done, add self.rootElement.masterStyles as second parameter again
             // For now just the complete existing automatic styles are written
@@ -680,11 +678,11 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         function serializeContentXml() {
-            var nsmap = style2CSS.namespaces,
+            var nsmap = namespaces.getNamespaceMap(),
                 serializer = new xmldom.LSSerializer(),
                 // select the styles by the tag, only needed until smart saving of styles is implemented
                 automaticStyles = cloneStylesByOrigin(self.rootElement.automaticStyles, "content.xml"),
-                /**@type{!string}*/ s = documentElement("document-content", nsmap);
+                /**@type{!string}*/ s = createDocumentElement("document-content", namespaces);
             // TODO: care about automatic styles only referenced by other automatic styles
             // once that is done, add self.rootElement.body as second parameter again
             // For now just the complete existing automatic styles are written

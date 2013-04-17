@@ -236,6 +236,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/xmldom/OperationalTransformDOM.js
     lib/xmldom/XPath.js
 
+    lib/odf/Namespaces.js
     lib/odf/StyleInfo.js
     lib/odf/Style2CSS.js
     lib/odf/FontLoader.js

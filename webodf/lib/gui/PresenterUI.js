@@ -33,13 +33,11 @@
 
 /*global runtime, gui, odf, core, xmldom, document, window*/
 runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.Namespaces");
 
 gui.PresenterUI = (function () {
     "use strict";
-    var s2css = new odf.Style2CSS(),
-        xpath = new xmldom.XPath(),
-        nsResolver = s2css.namespaceResolver;
+    var xpath = new xmldom.XPath();
 
     return function PresenterUI(odf_element) {
         var self = this;
@@ -136,7 +134,7 @@ gui.PresenterUI = (function () {
 
         // return a list of tuples (pagename, pagenode)
         self.getPages = function (root) {
-            var pagenodes = root.getElementsByTagNameNS(nsResolver('draw'), 'page'),
+            var pagenodes = root.getElementsByTagNameNS(odf.Namespaces.drawns, 'page'),
                 pages  = [],
                 i;
             for (i = 0; i < pagenodes.length; i += 1) {
