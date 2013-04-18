@@ -397,16 +397,11 @@ odf.OdfCanvas = (function () {
         // look for a office:binary-data
         if (url) {
             try {
-                if (container.getPartUrl) {
-                    url = container.getPartUrl(url);
-                    callback(url);
-                } else {
-                    part = container.getPart(url);
-                    part.onchange = function (part) {
-                        callback(part.url);
-                    };
-                    part.load();
-                }
+                part = container.getPart(url);
+                part.onchange = function (part) {
+                    callback(part.url);
+                };
+                part.load();
             } catch (e) {
                 runtime.log('slight problem: ' + e);
             }
@@ -560,16 +555,11 @@ odf.OdfCanvas = (function () {
         // look for a office:binary-data
         if (url) {
             try {
-                if (container.getPartUrl) {
-                    url = container.getPartUrl(url);
-                    callback(url, 'video/mp4');
-                } else {
-                    part = container.getPart(url);
-                    part.onchange = function (part) {
-                        callback(part.url, part.mimetype);
-                    };
-                    part.load();
-                }
+                part = container.getPart(url);
+                part.onchange = function (part) {
+                    callback(part.url, part.mimetype);
+                };
+                part.load();
             } catch (e) {
                 runtime.log('slight problem: ' + e);
             }
