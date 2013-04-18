@@ -289,7 +289,6 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/xlinkns = odf.Namespaces.xlinkns,
         /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
         /**@const@type {!string}*/window = runtime.getWindow(),
-        namespaces = new odf.Namespaces(),
         xpath = new xmldom.XPath();
 
     /**
@@ -431,7 +430,7 @@ odf.OdfCanvas = (function () {
             i,
             nodes = xpath.getODFElementsWithXPath(odfbody,
                 ".//*[*[@text:anchor-type='paragraph']]",
-                namespaces.resolvePrefix);
+                odf.Namespaces.resolvePrefix);
         for (i = 0; i < nodes.length; i += 1) {
             n = nodes[i];
             if (n.setAttributeNS) {
@@ -752,20 +751,17 @@ odf.OdfCanvas = (function () {
     }
     /**
      * @param {Document} document Put and ODF Canvas inside this element.
-     * @param {odf.Namespaces=} namespaces
      */
-    function addStyleSheet(document, namespaces) {
+    function addStyleSheet(document) {
         var head = document.getElementsByTagName('head')[0],
             style = document.createElementNS(head.namespaceURI, 'style'),
             text = '',
             prefix;
         style.setAttribute('type', 'text/css');
         style.setAttribute('media', 'screen, print, handheld, projection');
-        if (namespaces) {
-            namespaces.forEachPrefix(function(prefix, ns) {
-                text += "@namespace " + prefix + " url(" + ns + ");\n";
-            });
-        }
+        odf.Namespaces.forEachPrefix(function(prefix, ns) {
+            text += "@namespace " + prefix + " url(" + ns + ");\n";
+        });
         style.appendChild(document.createTextNode(text));
         head.appendChild(style);
         return style;
@@ -796,10 +792,10 @@ odf.OdfCanvas = (function () {
             loadingQueue = new LoadingQueue();
 
         addWebODFStyleSheet(doc);
-        pageSwitcher = new PageSwitcher(addStyleSheet(doc, namespaces));
+        pageSwitcher = new PageSwitcher(addStyleSheet(doc));
         fontcss = addStyleSheet(doc);
-        stylesxmlcss = addStyleSheet(doc, namespaces);
-        positioncss = addStyleSheet(doc, namespaces);
+        stylesxmlcss = addStyleSheet(doc);
+        positioncss = addStyleSheet(doc);
 
         /**
          * Load all the images that are inside an odf element.

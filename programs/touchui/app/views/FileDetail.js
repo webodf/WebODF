@@ -37,7 +37,6 @@ runtime.loadClass("odf.Namespaces");
 Ext.define('WebODFApp.view.FileDetail', (function () {
     "use strict";
     var panel,
-        namespaces = new odf.Namespaces(),
         xpath = new xmldom.XPath(),
         fileDetail,
         title,
@@ -48,13 +47,13 @@ Ext.define('WebODFApp.view.FileDetail', (function () {
         var ps,
             title;
         ps = xpath.getODFElementsWithXPath(body,
-                ".//text:h", namespaces.resolvePrefix);
+                ".//text:h", odf.Namespaces.resolvePrefix);
         title = "";
         if (ps && ps.length) {
             title = ps[0].nodeValue;
         } else {
             ps = xpath.getODFElementsWithXPath(body,
-                ".//text:p", namespaces.resolvePrefix);
+                ".//text:p", odf.Namespaces.resolvePrefix);
             if (ps && ps.length) {
                 title = ps[0].nodeValue;
             }

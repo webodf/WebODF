@@ -40,9 +40,7 @@ runtime.loadClass("odf.Namespaces");
  */
 odf.Style2CSS = function Style2CSS() {
     "use strict";
-    var namespaces = new odf.Namespaces(),
-
-        // helper constants
+    var // helper constants
         /**@const@type{!string}*/ drawns = odf.Namespaces.drawns,
         /**@const@type{!string}*/ fons = odf.Namespaces.fons,
         /**@const@type{!string}*/ stylens = odf.Namespaces.stylens,
@@ -761,7 +759,7 @@ odf.Style2CSS = function Style2CSS() {
             return;
         }
         // add @namespace rules
-        namespaces.forEachPrefix(function(prefix, ns) {
+        odf.Namespaces.forEachPrefix(function(prefix, ns) {
             rule = '@namespace ' + prefix + ' url(' + ns + ');';
             try {
                 stylesheet.insertRule(rule, stylesheet.cssRules.length);

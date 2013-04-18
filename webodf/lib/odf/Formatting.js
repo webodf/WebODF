@@ -221,10 +221,9 @@ odf.Formatting = function Formatting() {
      * @return {boolean}
      */
     this.isStyleUsed = function (styleElement) {
-        var hasDerivedStyles, isUsed,
-            namespaces = new odf.Namespaces();
+        var hasDerivedStyles, isUsed;
 
-        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, namespaces.resolvePrefix, styleElement);
+        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, odf.Namespaces.resolvePrefix, styleElement);
 
         isUsed = new styleInfo.UsedStyleList(odfContainer.rootElement.styles).uses(styleElement)
             || new styleInfo.UsedStyleList(odfContainer.rootElement.automaticStyles).uses(styleElement)

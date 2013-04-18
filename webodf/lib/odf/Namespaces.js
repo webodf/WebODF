@@ -36,87 +36,86 @@
 /*global odf*/
 
 /**
- * @constructor
- * @return {?}
+ * Singleton object which provides namespace ids and
+ * some utility methods related to prefixes and namespaces
+ * @const
  */
 odf.Namespaces = (function () {
     "use strict";
 
-    var drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
-        stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-        tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        xlinkns = 'http://www.w3.org/1999/xlink',
-        xmlns = "http://www.w3.org/XML/1998/namespace";
+    var /**@const@type {!string}*/ drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+        /**@const@type {!string}*/ fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        /**@const@type {!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        /**@const@type {!string}*/ presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
+        /**@const@type {!string}*/ stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+        /**@const@type {!string}*/ svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+        /**@const@type {!string}*/ tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+        /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        /**@const@type {!string}*/ xlinkns = 'http://www.w3.org/1999/xlink',
+        /**@const@type {!string}*/ xmlns = "http://www.w3.org/XML/1998/namespace",
+
+    /** @const@type {!Object.<string,!string>} */
+    namespaceMap = {
+        "draw": drawns,
+        "fo": fons,
+        "office": officens,
+        "presentation": presentationns,
+        "style": stylens,
+        "svg": svgns,
+        "table": tablens,
+        "text": textns,
+        "xlink": xlinkns,
+        "xml": xmlns
+    },
+    namespaces;
 
     /**
-     * @constructor
-     * @return {?}
+     * Calls the passed callback for all pairs of prefix and namespace
+     * which are in the namespaceMap property
+     * @param {function(string,string)} cb
+     * @return {undefined}
      */
-    odf.Namespaces = function Namespaces() {
-        var self = this,
-            /** @const@type {!Object.<!string>} */
-            standardNamespaceMap = {
-                "draw": drawns,
-                "fo": fons,
-                "office": officens,
-                "presentation": presentationns,
-                "style": stylens,
-                "svg": svgns,
-                "table": tablens,
-                "text": textns,
-                "xlink": xlinkns,
-                "xml": xmlns
-            };
+    function forEachPrefix(cb) {
+        var prefix;
 
-        /**
-         * @param {function(string,string)} cb
-         * @return {undefined}
-         */
-        this.forEachPrefix = function (cb) {
-            var prefix;
-
-            for (prefix in standardNamespaceMap) {
-                if (standardNamespaceMap.hasOwnProperty(prefix)) {
-                    cb(prefix, standardNamespaceMap[prefix]);
-                }
+        for (prefix in namespaceMap) {
+            if (namespaceMap.hasOwnProperty(prefix)) {
+                cb(prefix, namespaceMap[prefix]);
             }
-        };
+        }
+    }
 
-         /**
-          * @return {!Object.<!string>}
-          */
-        this.getNamespaceMap = function () {
-            return standardNamespaceMap;
-        };
+    /**
+     * Returns the namespace belonging to the prefix or null.
+     * @param {!string} prefix
+     * @return {?string}
+     */
+    function resolvePrefix(prefix) {
+        return namespaceMap[prefix] || null;
+    }
 
-        /**
-         * @param {!string} prefix
-         * @return {?string}
-         */
-        this.resolvePrefix = function (prefix) {
-            return standardNamespaceMap[prefix] || null;
-        };
+    // TODO: document where and why this is needed
+    resolvePrefix.lookupNamespaceURI = resolvePrefix;
 
-        // TODO: document where and why this is needed
-        this.resolvePrefix.lookupNamespaceURI = this.resolvePrefix;
-    };
+    // create the actual odf.Namespaces object as a function, because the
+    // class loader of runtime expects a function
+    namespaces = function Namespaces() {};
 
-    // add all namespaces as global properties
-    /**@const@type {!string}*/ odf.Namespaces.drawns = drawns;
-    /**@const@type {!string}*/ odf.Namespaces.fons = fons;
-    /**@const@type {!string}*/ odf.Namespaces.officens = officens;
-    /**@const@type {!string}*/ odf.Namespaces.presentationns = presentationns;
-    /**@const@type {!string}*/ odf.Namespaces.stylens = stylens;
-    /**@const@type {!string}*/ odf.Namespaces.svgns = svgns;
-    /**@const@type {!string}*/ odf.Namespaces.tablens = tablens;
-    /**@const@type {!string}*/ odf.Namespaces.textns = textns;
-    /**@const@type {!string}*/ odf.Namespaces.xlinkns = xlinkns;
-    /**@const@type {!string}*/ odf.Namespaces.xmlns = xmlns;
+    namespaces.forEachPrefix = forEachPrefix;
+    namespaces.resolvePrefix = resolvePrefix;
+    namespaces.namespaceMap = namespaceMap;
 
-    return odf.Namespaces;
+    // add all namespaces
+    /**@const@type {!string}*/ namespaces.drawns = drawns;
+    /**@const@type {!string}*/ namespaces.fons = fons;
+    /**@const@type {!string}*/ namespaces.officens = officens;
+    /**@const@type {!string}*/ namespaces.presentationns = presentationns;
+    /**@const@type {!string}*/ namespaces.stylens = stylens;
+    /**@const@type {!string}*/ namespaces.svgns = svgns;
+    /**@const@type {!string}*/ namespaces.tablens = tablens;
+    /**@const@type {!string}*/ namespaces.textns = textns;
+    /**@const@type {!string}*/ namespaces.xlinkns = xlinkns;
+    /**@const@type {!string}*/ namespaces.xmlns = xmlns;
+
+    return namespaces;
 }());

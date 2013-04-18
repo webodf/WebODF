@@ -45,8 +45,7 @@ runtime.loadClass("odf.OdfContainer");
 odf.FontLoader = (function () {
     "use strict";
     var xpath = new xmldom.XPath(),
-        base64 = new core.Base64(),
-        namespaces = new odf.Namespaces();
+        base64 = new core.Base64();
     /**
      * @param {!Element} fontFaceDecls
      * @return {!Object.<string,{href:string,family:string}>}
@@ -58,14 +57,14 @@ odf.FontLoader = (function () {
         }
         fonts = xpath.getODFElementsWithXPath(fontFaceDecls,
                     "style:font-face[svg:font-face-src]",
-                    namespaces.resolvePrefix);
+                    odf.Namespaces.resolvePrefix);
         for (i = 0; i < fonts.length; i += 1) {
             font = fonts[i];
             name = font.getAttributeNS(odf.Namespaces.stylens, "name");
             family = font.getAttributeNS(odf.Namespaces.svgns, "font-family");
             uris = xpath.getODFElementsWithXPath(font,
                 "svg:font-face-src/svg:font-face-uri",
-                namespaces.resolvePrefix);
+                odf.Namespaces.resolvePrefix);
             if (uris.length > 0) {
                 href = uris[0].getAttributeNS(odf.Namespaces.xlinkns, "href");
                 decls[name] = {href: href, family: family};

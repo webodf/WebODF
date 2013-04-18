@@ -42,7 +42,6 @@ runtime.loadClass("odf.Namespaces");
 xmldom.XPathTests = function XPathTests(runner) {
     "use strict";
     var r = runner,
-        namespaces = new odf.Namespaces(),
         t;
 
     function setupDoc() {
@@ -82,7 +81,7 @@ xmldom.XPathTests = function XPathTests(runner) {
         for (x in xpaths) {
             if (xpaths.hasOwnProperty(x)) {
                 t.result = xpath.getODFElementsWithXPath(t.doc.documentElement,
-                        x, namespaces.resolvePrefix);
+                        x, odf.Namespaces.resolvePrefix);
                 r.shouldBe(t, "t.result.length", "1");
                 r.shouldBe(t, "t.result[0]", xpaths[x]);
             }
