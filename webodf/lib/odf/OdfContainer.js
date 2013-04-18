@@ -377,9 +377,7 @@ odf.OdfContainer = (function () {
             root.body = getDirectChild(root, officens, 'body');
             root.meta = getDirectChild(root, officens, 'meta');
 
-            if (root.fontFaceDecls) {
-                fontLoader.loadFonts(root.fontFaceDecls, zip, null);
-            }
+            // TODO: handle embedded fonts
 
             setState(OdfContainer.DONE);
         }
