@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -33,7 +34,7 @@
  */
 /*global odf, runtime, console*/
 
-runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.OdfContainer");
 
 /**
  * @constructor
@@ -42,7 +43,7 @@ odf.Formatting = function Formatting() {
     "use strict";
     var /**@type{odf.OdfContainer}*/ odfContainer,
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
-        /**@type{odf.Style2CSS}*/ style2CSS = new odf.Style2CSS(),
+        /**@const@type {!string}*/ svgns = odf.Namespaces.svgns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens;
 
     /**
@@ -140,12 +141,32 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns a font face declarations map, where the key is the style:name and
-     * the value is the svg:font-family.
-     * @return {?Object.<string,string>}
+     * the value is the svg:font-family or null, if none set but a svg:font-face-uri
+     * @return {!Object.<string,string>}
      */
     this.getFontMap = function () {
-        var fontFaceDecls = odfContainer.rootElement.fontFaceDecls;
-        return style2CSS.createFontFaceDeclsMap(fontFaceDecls);
+        var fontFaceDecls = odfContainer.rootElement.fontFaceDecls,
+            /**@type {!Object.<string,string>}*/
+            fontFaceDeclsMap = {},
+            node, name, family;
+
+        node = fontFaceDecls && fontFaceDecls.firstChild;
+        while (node) {
+            if (node.nodeType === 1) {
+                name = node.getAttributeNS(stylens, 'name');
+                if (name) {
+                    // add family name as value, or, if there is a
+                    // font-face-uri, an empty string
+                    family = node.getAttributeNS(svgns, 'font-family');
+                    if (family || node.getElementsByTagNameNS(svgns, 'font-face-uri')[0]) {
+                        fontFaceDeclsMap[name] = family;
+                    }
+                }
+            }
+            node = node.nextSibling;
+        }
+
+        return fontFaceDeclsMap;
     };
     /**
      * Return true if all parts of the selection are bold.

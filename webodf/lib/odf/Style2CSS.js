@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -48,6 +50,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const@type{!string}*/ textns = odf.Namespaces.textns,
         /**@const@type{!string}*/ xlinkns = odf.Namespaces.xlinkns,
 
+        /**@const@type{!Object.<string,!string>}*/
         familynamespaceprefixes = {
             'graphic': 'draw',
             'paragraph': 'text',
@@ -62,6 +65,7 @@ odf.Style2CSS = function Style2CSS() {
             'list': 'text'
         },
 
+        /**@const@type{!Object.<string,!Array.<!string>>}*/
         familytagnames = {
             'graphic': ['circle', 'connected', 'control', 'custom-shape',
                 'ellipse', 'frame', 'g', 'line', 'measure', 'page',
@@ -95,6 +99,7 @@ odf.Style2CSS = function Style2CSS() {
             'list': ['list-item']
         },
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         textPropertySimpleMapping = [
             [ fons, 'color', 'color' ],
             // this sets the element background, not just the text background
@@ -104,10 +109,12 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'font-size', 'font-size' ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         bgImageSimpleMapping = [
             [ stylens, 'repeat', 'background-repeat' ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         paragraphPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'text-align', 'text-align' ],
@@ -126,6 +133,7 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border', 'border' ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         graphicPropertySimpleMapping = [
             [ drawns, 'fill-color', 'background-color' ],
             [ drawns, 'fill', 'background' ],
@@ -134,6 +142,7 @@ odf.Style2CSS = function Style2CSS() {
             [ svgns, 'stroke-color', 'border-color' ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         tablecellPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'border-left', 'border-left' ],
@@ -147,11 +156,13 @@ odf.Style2CSS = function Style2CSS() {
             [ stylens, 'column-width', 'width' ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         tablerowPropertySimpleMapping = [
             [ stylens, 'row-height', 'height' ],
             [ fons, 'keep-together', null ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
         tablePropertySimpleMapping = [
             [ stylens, 'width', 'width' ],
             [ fons, 'margin-left', 'margin-left' ],
@@ -161,6 +172,7 @@ odf.Style2CSS = function Style2CSS() {
         ],
 
         // A font-face declaration map, to be populated once style2css is called.
+        /**@type{!Object.<string,string>}*/
         fontFaceDeclsMap = {};
 
     // helper functions
@@ -375,54 +387,13 @@ odf.Style2CSS = function Style2CSS() {
     }
 
     /**
-     * Creates a lookup table with font name as key and family name as value
-     * from all font face declarations.
-     * @param {?Element} fontFaceDeclsRootNode root node of font face declarations
-     * @return {?Object.<string,string>}
-     */
-    function createFontFaceDeclsMap(fontFaceDeclsRootNode) {
-        var /**@type {?Object.<string,string>}*/
-            fontFaceDeclsMap = {},
-            node, name, family;
-
-        if (!fontFaceDeclsRootNode) {
-            return null;
-        }
-
-        node = fontFaceDeclsRootNode.firstChild;
-        while (node) {
-            if (node.nodeType === 1) {
-                name = node.getAttributeNS(stylens, 'name');
-                if (name) {
-                    // add family name as value, or, if there is a
-                    // font-face-uri, an empty string
-                    family = node.getAttributeNS(svgns, 'font-family');
-                    if (family || node.getElementsByTagNameNS(svgns, 'font-face-uri')[0]) {
-                        fontFaceDeclsMap[name] = family;
-                    }
-                }
-            }
-            node = node.nextSibling;
-        }
-
-        return fontFaceDeclsMap;
-    }
-
-    /**
-     * @param {!string} name
-     * @return {!string}
-     */
-    function getFontDeclaration(name) {
-        return fontFaceDeclsMap[name];
-    }
-    /**
      * @param {!Element} props
      * @return {!string}
      */
     function getTextProperties(props) {
         var rule = '', fontName, value, textDecoration = '';
         rule += applySimpleMapping(props, textPropertySimpleMapping);
-        
+
         value = props.getAttributeNS(stylens, 'text-underline-style');
         if (value === 'solid') {
             textDecoration += ' underline';
@@ -439,7 +410,7 @@ odf.Style2CSS = function Style2CSS() {
 
         fontName = props.getAttributeNS(stylens, 'font-name');
         if (fontName) {
-            value = getFontDeclaration(fontName);
+            value = fontFaceDeclsMap[fontName];
             rule += 'font-family: ' + (value || fontName) + ';';
         }
         return rule;
@@ -731,17 +702,14 @@ odf.Style2CSS = function Style2CSS() {
     // which an element applies. ODF families can be mapped to a group of css
     // elements
 
-    // Font face declarations map
-    this.createFontFaceDeclsMap = createFontFaceDeclsMap;
-
     /**
      * @param {!StyleSheet} stylesheet
-     * @param {!Element} fontFaceDecls
+     * @param {!Object.<string,string>} fontFaceMap
      * @param {!Element} styles
      * @param {!Element} autostyles
      * @return {undefined}
      */
-    this.style2css = function (stylesheet, fontFaceDecls, styles, autostyles) {
+    this.style2css = function (stylesheet, fontFaceMap, styles, autostyles) {
         var doc, prefix, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
         // make stylesheet empty
@@ -769,8 +737,8 @@ odf.Style2CSS = function Style2CSS() {
             }
         });
 
-        // Populate the font face declarations map
-        fontFaceDeclsMap = createFontFaceDeclsMap(fontFaceDecls);
+        fontFaceDeclsMap = fontFaceMap;
+
         // add the various styles
         stylenodes = getStyleMap(doc, styles);
         styleautonodes = getStyleMap(doc, autostyles);

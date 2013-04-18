@@ -38,6 +38,7 @@ runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.FontLoader");
+runtime.loadClass("odf.Style2CSS");
 
 /**
  * This class manages a loaded ODF document that is shown in an element.
@@ -303,15 +304,16 @@ odf.OdfCanvas = (function () {
     /**
      * A new styles.xml has been loaded. Update the live document with it.
      * @param {!Element} odfelement
+     * @param {!odf.Formatting} formatting
      * @param {!HTMLStyleElement} stylesxmlcss
      * @return {undefined}
      **/
-    function handleStyles(odfelement, stylesxmlcss) {
+    function handleStyles(odfelement, formatting, stylesxmlcss) {
         // update the css translation of the styles
         var style2css = new odf.Style2CSS();
         style2css.style2css(
-            stylesxmlcss.sheet, 
-            odfelement.fontFaceDecls, 
+            stylesxmlcss.sheet,
+            formatting.getFontMap(),
             odfelement.styles,
             odfelement.automaticStyles
         );
@@ -961,7 +963,7 @@ odf.OdfCanvas = (function () {
 
                 formatting.setOdfContainer(odfcontainer);
                 handleFonts(odfcontainer, fontcss);
-                handleStyles(odfnode, stylesxmlcss);
+                handleStyles(odfnode, formatting, stylesxmlcss);
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(odfcontainer, odfnode);
@@ -987,9 +989,9 @@ odf.OdfCanvas = (function () {
                 }, 100);
             }
         }
-        
+
         this.refreshCSS = function () {
-            handleStyles(odfcontainer.rootElement, stylesxmlcss);
+            handleStyles(odfcontainer.rootElement, formatting, stylesxmlcss);
         };
         this.odfContainer = function () {
             return odfcontainer;
