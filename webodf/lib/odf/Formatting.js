@@ -103,7 +103,7 @@ odf.Formatting = function Formatting() {
         }
         return obj1;
     }
-    
+
     /**
      * @param {!Element} element
      * @return {Element}
@@ -169,41 +169,6 @@ odf.Formatting = function Formatting() {
         return fontFaceDeclsMap;
     };
     /**
-     * Return true if all parts of the selection are bold.
-     * @param {!Array.<!Range>} selection
-     * @return {!boolean}
-     */
-    this.isCompletelyBold = function (selection) {
-        return false;
-    };
-    /**
-     * Get the alignment or undefined if no uniform alignment is found
-     * @param {!Array.<!Range>} selection
-     * @return {!string|undefined}
-     */
-    this.getAlignment = function (selection) {
-        var styles = this.getParagraphStyles(selection), i, l = styles.length;
-        return undefined;
-    };
-    /**
-     * Get the list of paragraph styles that covered by the current selection.
-     * @param {!Array.<!Range>} selection
-     * @return {!Array.<Element>}
-     */
-    this.getParagraphStyles = function (selection) {
-        var i, j, s, styles = [];
-        for (i = 0; i < selection.length; i += 1) {
-            s = getParagraphStyles(selection[i]);
-            for (j = 0; j < s.length; j += 1) {
-                if (styles.indexOf(s[j]) === -1) {
-                    styles.push(s[j]);
-                }
-            }
-        }
-        return styles;
-    };
-
-    /**
      * Loop over the <style:style> elements and place the attributes
      * style:name and style:display-name in an array.
      * @return {!Array}
@@ -235,7 +200,7 @@ odf.Formatting = function Formatting() {
         }
         return paragraphStyles;
     };
-    
+
     /**
      * Returns if the given style is used anywhere in the document.
      * @param {!Element} styleElement
@@ -307,9 +272,7 @@ odf.Formatting = function Formatting() {
         }
         return propertiesMap;
     }
-    
-    this.getStyleAttributes = getStyleAttributes;
-    
+
     /**
      * Returns a JSON representation of the style attributes of a given style element, also containing attributes
      * inherited from it's ancestry - up to and including the default style for the family.
@@ -323,12 +286,12 @@ odf.Formatting = function Formatting() {
             propertiesMap = {},
             inheritedPropertiesMap = {},
             node = styleNode;
-        
+
         // Iterate through the style ancestry
         while (node) {
             propertiesMap = getStyleAttributes(node);
             inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
-            
+
             parentStyleName = node.getAttributeNS(stylens, 'parent-style-name');
             if (parentStyleName) {
                 node = getStyleElement(styleListElement, parentStyleName, styleNode.getAttributeNS(stylens, 'family'));
@@ -336,14 +299,14 @@ odf.Formatting = function Formatting() {
                 node = null;
             }
         }
-        
+
         // Now incorporate attributes from the default style
         propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(stylens, 'family')));
         inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
 
         return inheritedPropertiesMap;
     }
-    
+
     this.getInheritedStyleAttributes = getInheritedStyleAttributes;
 
     /**
@@ -411,14 +374,5 @@ odf.Formatting = function Formatting() {
             styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
         }
         return null;
-    };
-
-    /**
-     * Get the list of text styles that are covered by the current selection.
-     * @param {!Array.<!Range>} selection
-     * @return {!Array.<Element>}
-     */
-    this.getTextStyles = function (selection) {
-        return [];
     };
 };
