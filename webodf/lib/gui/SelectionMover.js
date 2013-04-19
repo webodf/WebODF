@@ -105,6 +105,18 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         }
     };
 */
+    function isPositionWalkable(filter) {
+        var pos = cursor.getPositionInContainer(),
+            c = pos.container,
+            o = pos.offset;
+
+        positionIterator.setPosition(c, o);
+        if (filter.acceptPosition(positionIterator) === 1) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @param {!number} steps
      * @param {!core.PositionFilter} filter
@@ -399,7 +411,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             countBackwardSteps: countBackwardSteps,
             countLineDownSteps: countLineDownSteps,
             countLinesUpSteps: countLinesUpSteps,
-            countStepsToPosition: countStepsToPosition
+            countStepsToPosition: countStepsToPosition,
+            isPositionWalkable: isPositionWalkable
         };
     };
     /**

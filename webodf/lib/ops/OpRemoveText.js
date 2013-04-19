@@ -63,7 +63,10 @@ ops.OpRemoveText = function OpRemoveText() {
             currentParent,
             currentLength,
             i,
-            firstNode;
+            firstNode,
+            cursors,
+            steps,
+            filter;
 
         textNode = odtDocument.getPositionInTextNode(position).textNode;
         paragraphElement = odtDocument.getParagraphElement(textNode);
@@ -99,6 +102,20 @@ ops.OpRemoveText = function OpRemoveText() {
             }
 
             odtDocument.getOdfCanvas().refreshSize();
+            cursors = odtDocument.getCursors();
+            filter = odtDocument.getPositionFilter();
+            for (i in cursors) {
+                if (cursors.hasOwnProperty(i)) {
+                    if (!cursors[i].getStepCounter().isPositionWalkable(filter)) {
+                        steps = -cursors[i].getStepCounter().countBackwardSteps(1, filter);
+                        cursors[i].move(steps);
+                        if (i === memberid) {
+                            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
+                        }
+                    }
+                }
+            }
+
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                 paragraphElement: paragraphElement,
                 memberId: memberid,
