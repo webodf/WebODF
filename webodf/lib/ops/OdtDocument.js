@@ -74,7 +74,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {core.PositionFilter.FilterResult}
          */
         this.acceptPosition = function (iterator) {
-            var n = iterator.container(), p, o, d,
+            var n = iterator.container(), p, o,
                 textOffset = iterator.textOffset(),
                 previousSibling = iterator.getPreviousSibling(),
                 nextSibling = iterator.getNextSibling();
@@ -84,6 +84,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     return reject;
                 }
                 if ((previousSibling && previousSibling.localName) === "span") {
+                    return reject;
+                }
+                if (n.localName === "span" && !n.textContent.length) {
                     return reject;
                 }
                 return accept;
