@@ -235,7 +235,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     }
                     lastTextNode = null;
                 } else if (position === 0) {
-                    lastTextNode = node.ownerDocument.createTextNode('');
+                    lastTextNode = rootNode.ownerDocument.createTextNode('');
+                    node.insertBefore(lastTextNode, null);
                     nodeOffset = 0;
                     break;
                 }

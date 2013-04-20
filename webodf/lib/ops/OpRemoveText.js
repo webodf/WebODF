@@ -52,6 +52,27 @@ ops.OpRemoveText = function OpRemoveText() {
         text = data.text;
     };
 
+    function fixCursorPositions(odtDocument) {
+        var cursors, stepCounter, steps, filter, i;
+
+        cursors = odtDocument.getCursors();
+        filter = odtDocument.getPositionFilter();
+
+        for (i in cursors) {
+            if (cursors.hasOwnProperty(i)) {
+                stepCounter = cursors[i].getStepCounter();
+                if (!stepCounter.isPositionWalkable(filter)) {
+                    steps = -stepCounter.countBackwardSteps(1, filter);
+                    cursors[i].move(steps);
+                    if (i === memberid) {
+                        odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
+                    }
+                }
+            }
+        }
+    }
+
+
     this.execute = function (odtDocument) {
         var neighborhood = [],
             textNode,
@@ -63,10 +84,7 @@ ops.OpRemoveText = function OpRemoveText() {
             currentParent,
             currentLength,
             i,
-            firstNode,
-            cursors,
-            steps,
-            filter;
+            firstNode;
 
         textNode = odtDocument.getPositionInTextNode(position).textNode;
         paragraphElement = odtDocument.getParagraphElement(textNode);
@@ -87,6 +105,7 @@ ops.OpRemoveText = function OpRemoveText() {
                     currentParent.removeChild(currentTextNode);
                     // If this deleted textNode was the only child of it's parent,
                     // delete the parent too.
+                    fixCursorPositions(odtDocument);
                     if (!currentParent.hasChildNodes()) {
                         currentParent.parentNode.removeChild(currentParent);
                     }
@@ -101,21 +120,9 @@ ops.OpRemoveText = function OpRemoveText() {
                 }
             }
 
-            odtDocument.getOdfCanvas().refreshSize();
-            cursors = odtDocument.getCursors();
-            filter = odtDocument.getPositionFilter();
-            for (i in cursors) {
-                if (cursors.hasOwnProperty(i)) {
-                    if (!cursors[i].getStepCounter().isPositionWalkable(filter)) {
-                        steps = -cursors[i].getStepCounter().countBackwardSteps(1, filter);
-                        cursors[i].move(steps);
-                        if (i === memberid) {
-                            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
-                        }
-                    }
-                }
-            }
+            fixCursorPositions(odtDocument);
 
+            odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                 paragraphElement: paragraphElement,
                 memberId: memberid,
