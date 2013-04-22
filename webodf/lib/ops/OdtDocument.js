@@ -158,7 +158,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         do {
             currentNeighborhood = iterator.textNeighborhood();
             currentNode = iterator.container();
-            if (currentNode.nodeType === 3) {
+            if (currentNeighborhood.length && currentNode.nodeType === 3) {
                 visited = false;
                 for (i = 0; i < neighborhood.length; i += 1) {
                     // All neighborhoods are disjoint ordered sets, so comparing
