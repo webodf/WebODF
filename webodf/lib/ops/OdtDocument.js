@@ -151,13 +151,17 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             iteratedLength,
             advance,
             visited = false,
-            i;
+            inFirstNeighborhood = true,
+            i,
+            j;
 
         advance = length > 0 ? iterator.nextPosition : iterator.previousPosition;
-        iteratedLength = (currentNode.nodeType === 3 ? currentNode.data.length : 0) - iterator.text().length;
+        iteratedLength = 0;
+
         do {
             currentNeighborhood = iterator.textNeighborhood();
             currentNode = iterator.container();
+
             if (currentNeighborhood.length && currentNode.nodeType === 3) {
                 visited = false;
                 for (i = 0; i < neighborhood.length; i += 1) {
@@ -177,8 +181,27 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     if (length < 0) {
                         currentNeighborhood.reverse();
                     }
+                    // When in the first local neighborhood, remove the elements that are in
+                    // a direction opposite to the length.
+                    if (inFirstNeighborhood) {
+                        for (j = 0; j < currentNeighborhood.length; j += 1) {
+                            if (currentNeighborhood[j] === currentNode) {
+                                currentNeighborhood.splice(0, j);
+                                break;
+                            }
+                        }
+                        if (length < 0) {
+                            currentNeighborhood.splice(0, 1);
+                        }
+                        inFirstNeighborhood = false;
+                    }
+
                     neighborhood = neighborhood.concat(currentNeighborhood);
-                    iteratedLength += iterator.text().length;
+
+                    for (j = 0; j < currentNeighborhood.length; j += 1) {
+                        iteratedLength += currentNeighborhood[j].data.length;
+                    }
+
                 }
             }
         } while (advance() && iteratedLength < Math.abs(length));
