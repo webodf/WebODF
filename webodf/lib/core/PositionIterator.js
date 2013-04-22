@@ -302,9 +302,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
                 n = walker.nextSibling();
             }
         }
-        if (offset !== 0) {
-            throw "Error in setPosition: offset " + o + " is out of range.";
-        }
+        runtime.assert(offset === 0, "Error in setPosition: offset " + o + " is out of range.");
         if (n === null) {
             walker.currentNode = container;
             currentPos = 1;
