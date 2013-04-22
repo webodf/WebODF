@@ -109,7 +109,7 @@ ops.OpRemoveText = function OpRemoveText() {
                     // If this deleted textNode was the only child of it's parent,
                     // delete the parent too.
                     fixCursorPositions(odtDocument);
-                    if (!currentParent.hasChildNodes()) {
+                    if (!currentParent.textContent.length) {
                         currentParent.parentNode.removeChild(currentParent);
                     }
                     remainingLength -= currentLength;
