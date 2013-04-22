@@ -273,20 +273,18 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = container;
         if (container.nodeType === 3) {
             currentPos = offset;
-            if (offset > container.length) {
-                throw "Error in setPosition: " + offset + " > "
-                    + container.length;
-            } else if (offset < 0) {
-                throw "Error in setPosition: " + offset + " < 0";
-            }
+            runtime.assert(offset <= container.length, "Error in setPosition: " +
+                offset + " > " + container.length);
+            runtime.assert(offset >= 0, "Error in setPosition: " +
+                offset + " < 0");
             if (offset === container.length) {
+                currentPos = undefined;
                 if (walker.nextSibling()) {
                     currentPos = 0;
                 } else if (walker.parentNode()) {
                     currentPos = 1;
-                } else {
-                    throw "Error in setPosition: position not valid.";
                 }
+                runtime.assert(currentPos !== undefined, "Error in setPosition: position not valid.");
             }
             return true;
         }
