@@ -77,7 +77,9 @@ core.Cursor = function Cursor(selection, document) {
      * @return {undefined}
      */
     function putCursorIntoTextNode(container, offset) {
+        runtime.assert(Boolean(container), "putCursorIntoTextNode: invalid container");
         var parent = container.parentNode;
+        runtime.assert(Boolean(parent), "putCursorIntoTextNode: container without parent");
 
         cursorTextNode.data = container.substringData(0, offset);
         container.deleteData(0, offset);
@@ -91,6 +93,7 @@ core.Cursor = function Cursor(selection, document) {
      * @return {undefined}
      */
     function putCursorIntoContainer(container, offset) {
+        runtime.assert(Boolean(container), "putCursorIntoContainer: invalid container");
         var node = container.firstChild;
         while (node !== null && offset > 0) {
             node = node.nextSibling;
