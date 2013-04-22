@@ -156,31 +156,29 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         advance = length > 0 ? iterator.nextPosition : iterator.previousPosition;
         iteratedLength = (currentNode.nodeType === 3 ? currentNode.data.length : 0) - iterator.text().length;
         do {
-            if (filter.acceptPosition(iterator)) {
-                currentNeighborhood = iterator.textNeighborhood();
-                currentNode = iterator.container();
-                if (currentNode.nodeType === 3) {
-                    visited = false;
-                    for (i = 0; i < neighborhood.length; i += 1) {
-                        // All neighborhoods are disjoint ordered sets, so comparing
-                        // the first element of two neighborhoods is enough to compare them.
-                        // Therefore, if the first element of the current neighborhood is found in
-                        // the full neighborhood sequence, then the current neighborhood has
-                        // already been appended, and we need not check further.
-                        if (neighborhood[i] === currentNeighborhood[0]) {
-                            visited = true;
-                            break;
-                        }
+            currentNeighborhood = iterator.textNeighborhood();
+            currentNode = iterator.container();
+            if (currentNode.nodeType === 3) {
+                visited = false;
+                for (i = 0; i < neighborhood.length; i += 1) {
+                    // All neighborhoods are disjoint ordered sets, so comparing
+                    // the first element of two neighborhoods is enough to compare them.
+                    // Therefore, if the first element of the current neighborhood is found in
+                    // the full neighborhood sequence, then the current neighborhood has
+                    // already been appended, and we need not check further.
+                    if (neighborhood[i] === currentNeighborhood[0]) {
+                        visited = true;
+                        break;
                     }
-                    if (!visited) {
-                        // A neighborhood is always populated from left to right. So if 
-                        // we are moving towards the left, then reverse it.
-                        if (length < 0) {
-                            currentNeighborhood.reverse();
-                        }
-                        neighborhood = neighborhood.concat(currentNeighborhood);
-                        iteratedLength += iterator.text().length;
+                }
+                if (!visited) {
+                    // A neighborhood is always populated from left to right. So if 
+                    // we are moving towards the left, then reverse it.
+                    if (length < 0) {
+                        currentNeighborhood.reverse();
                     }
+                    neighborhood = neighborhood.concat(currentNeighborhood);
+                    iteratedLength += iterator.text().length;
                 }
             }
         } while (advance() && iteratedLength < Math.abs(length));
