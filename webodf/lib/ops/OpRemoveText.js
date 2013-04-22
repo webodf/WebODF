@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops*/
+/*global ops, runtime*/
 
 /**
  * @constructor
@@ -84,21 +84,24 @@ ops.OpRemoveText = function OpRemoveText() {
             currentParent,
             currentLength,
             i,
-            firstNode;
+            firstIndex;
 
         textNode = odtDocument.getPositionInTextNode(position).textNode;
         paragraphElement = odtDocument.getParagraphElement(textNode);
         neighborhood = odtDocument.getTextNeighborhood(position, length);
+
         if (neighborhood.length) {
             // Pick the index of the textNode from the starting neighborhood.
-            firstNode = neighborhood.indexOf(textNode);
+            firstIndex = neighborhood.indexOf(textNode);
+            runtime.assert(firstIndex !== -1, "OpRemoveText: textNode not found in neighborhood");
             if (removalType === 'delete') {
-                firstNode += 1;
+                firstIndex += 1;
             }
 
-            for (i = firstNode; i < neighborhood.length && remainingLength; i += 1) {
+            for (i = firstIndex; i < neighborhood.length && remainingLength; i += 1) {
                 currentTextNode = neighborhood[i];
                 currentParent = currentTextNode.parentNode;
+                runtime.assert(currentParent !== undefined, "OpRemoveText: undefined currentParent");
                 currentLength = currentTextNode.data.length;
  
                 if (currentLength <= remainingLength) {
