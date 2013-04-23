@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, gui, ops, odf, console*/
+/*global runtime, core, gui, ops, odf*/
 
 runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("core.EventNotifier");
