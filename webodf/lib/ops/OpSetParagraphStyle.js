@@ -62,6 +62,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
+
+                odtDocument.getOdfCanvas().refreshSize();
                 odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                     paragraphElement: paragraphNode,
                     timeStamp: timestamp,

@@ -96,6 +96,7 @@ ops.OpRemoveText = function OpRemoveText() {
                 textNode.deleteData(domPosition.offset, length);
             }
 
+            odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                 paragraphElement: odtDocument.getParagraphElement(textNode),
                 memberId: memberid,

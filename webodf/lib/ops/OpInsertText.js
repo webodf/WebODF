@@ -82,6 +82,8 @@ ops.OpInsertText = function OpInsertText() {
             // the `memberid`-cursor behind new text; alternatively
             // move `memberid`-cursor behind all cursors at the same
             // position. then insert text before `memberid`-cursor.
+
+            odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                 paragraphElement: odtDocument.getParagraphElement(domPosition.textNode),
                 memberId: memberid,

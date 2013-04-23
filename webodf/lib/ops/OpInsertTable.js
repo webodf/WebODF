@@ -109,6 +109,7 @@ ops.OpInsertTable = function OpInsertTable() {
             previousSibling = odtDocument.getParagraphElement(domPosition.textNode);
             rootNode.insertBefore(tableNode, previousSibling ? previousSibling.nextSibling : undefined);
 
+            odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalTableAdded, {
                 tableElement: tableNode,
                 memberId: memberid,

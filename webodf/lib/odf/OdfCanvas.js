@@ -990,8 +990,25 @@ odf.OdfCanvas = (function () {
             }
         }
 
+        /**
+         * Updates the CSS rules to match the ODF document styles and also
+         * updates the size of the canvas to match the new layout.
+         * Needs to be called after changes to the styles of the ODF document.
+         * @return {undefined}
+         */
         this.refreshCSS = function () {
             handleStyles(odfcontainer.rootElement, formatting, stylesxmlcss);
+            // different styles means different layout, thus different sizes:
+            fixContainerSize();
+        };
+
+        /**
+         * Updates the size of the canvas to the size of the content.
+         * Needs to be called after changes to the content of the ODF document.
+         * @return {undefined}
+         */
+        this.refreshSize = function () {
+            fixContainerSize();
         };
         this.odfContainer = function () {
             return odfcontainer;
