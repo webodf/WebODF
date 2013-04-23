@@ -52,6 +52,11 @@ ops.OpRemoveText = function OpRemoveText() {
         text = data.text;
     };
 
+    /**
+     * Iterates through all cursors and checks if they are in
+     * walkable positions; if not, move the cursor 1 filtered step backward
+     * which guarantees walkable state for all cursors.
+     */
     function fixCursorPositions(odtDocument) {
         var cursors, stepCounter, steps, filter, i;
 

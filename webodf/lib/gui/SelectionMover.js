@@ -105,6 +105,13 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         }
     };
 */
+    /**
+     * Returns if the current position is walkable according to the
+     * specified filter. Useful when the position becomes unwalkable after, for example,
+     * text removal.
+     * @param {!core.PositionFilter} filter
+     * @return {boolean}
+     */
     function isPositionWalkable(filter) {
         var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             c = pos.container,

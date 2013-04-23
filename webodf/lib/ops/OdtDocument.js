@@ -130,6 +130,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return root;
     }
 
+    /**
+     * Returns a PositionIterator instance at the
+     * specified starting position
+     * @param {!number} position
+     * @return {!core.PositionIterator}
+     */
     function getIteratorAtPosition(position) {
         var iterator = gui.SelectionMover.createPositionIterator(rootNode);
 
@@ -142,7 +148,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
         return iterator;
     }
-
+    /**
+     * Returns an exteded neighborhood that can span multiple paragraph nodes;
+     * Starting from the specified position, text nodes are added to the neighborhood array
+     * till the sum of their lengths is greater than |length|. The direction of the length
+     * specifies the direction to walk for making the neighborhood: negative is left, positive
+     * is right.
+     * @param {!number} position
+     * @param {!number} length
+     * @return {?Array.<!Node>}
+     */
     this.getTextNeighborhood = function (position, length) {
         var iterator = getIteratorAtPosition(position),
             neighborhood = [],

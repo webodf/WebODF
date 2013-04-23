@@ -238,7 +238,10 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = n;
         return offset;
     };
-
+    /**
+     * Return the previous sibling of the current node
+     * @return {Node}
+     */
     this.getPreviousSibling = function () {
         var currentNode = walker.currentNode,
             sibling = walker.previousSibling();
@@ -247,7 +250,10 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
 
         return sibling;
     };
-
+    /**
+     * Return the next sibling of the current node
+     * @return {Node}
+     */
     this.getNextSibling = function () {
         var currentNode = walker.currentNode,
             sibling = walker.nextSibling();
@@ -256,7 +262,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
 
         return sibling;
     };
-
+    /**
+     * This returns the text string from the current neighborhood as if
+     * all the neighboring text nodes were one
+     * @return {String}
+     */
     this.text = function () {
         var i,
             data = "",
@@ -268,7 +278,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
 
         return data;
     };
-
+    /**
+     * This returns the local text neighborhood as seen from the current
+     * position, which is an ordered array of all sibling text nodes, from
+     * left to right.
+     * @return {Array.<Node>}
+     */
     this.textNeighborhood = function () {
         var n = walker.currentNode,
             t,
@@ -289,7 +304,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
 
         return neighborhood;
     };
-
     /**
      * The substring of the current text node as if all neighboring text nodes
      * were one text node.

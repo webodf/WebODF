@@ -187,11 +187,13 @@ core.Cursor = function Cursor(selection, document) {
     this.remove = function (onCursorRemove) {
         removeCursor(onCursorRemove);
     };
-
+    /**
+     * Returns the filtered offset of the given node
+     * @param {!Node} node
+     * @param {!NodeFilter} nodeFilter
+     */
     function whichChild(node, nodeFilter) {
         var  i = 0;
-        document.nodeFilter = nodeFilter;
-        document.node = node;
         while ((node = node.previousSibling) !== null) {
             if (nodeFilter.acceptNode(node) === 1) {
                 i += 1;
@@ -199,7 +201,13 @@ core.Cursor = function Cursor(selection, document) {
         }
         return i;
     }
-
+    /**
+     * This returns the container and offset of this cursor node,
+     * after filter out some other nodes blacklisted by the specified nodeFilter
+     * (like <cursor> and <editinfo>).
+     * @param {!NodeFilter}
+     * @return {!{container: !Node, offset: !number}}
+     */
     this.getPositionInContainer = function (nodeFilter) {
         var container, offset;
 
