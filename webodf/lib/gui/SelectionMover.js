@@ -51,7 +51,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator;
     function doMove(steps, extend, move) {
         var left = steps,
-            pos = cursor.getPositionInContainer();
+            pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
 
         // assume positionIterator reflects current state
         positionIterator.setPosition(pos.container, pos.offset);
@@ -106,7 +106,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     };
 */
     function isPositionWalkable(filter) {
-        var pos = cursor.getPositionInContainer(),
+        var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             c = pos.container,
             o = pos.offset;
 
@@ -123,7 +123,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {!number}
      */
     function countForwardSteps(steps, filter) {
-        var pos = cursor.getPositionInContainer(),
+        var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             c = pos.container,
             o = pos.offset,
             watch = new core.LoopWatchDog(1000),
@@ -148,7 +148,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {!number}
      */
     function countBackwardSteps(steps, filter) {
-        var pos = cursor.getPositionInContainer(),
+        var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             c = pos.container,
             o = pos.offset,
             watch = new core.LoopWatchDog(1000),
@@ -356,7 +356,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         runtime.assert(element !== null, "SelectionMover.countStepsToPosition called with element===null");
         // first figure out how to get to the element
         // really dumb/inefficient implementation
-        var cursorPos = cursor.getPositionInContainer(),
+        var cursorPos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             c = cursorPos.container,
             o = cursorPos.offset,
             steps = 0,

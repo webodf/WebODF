@@ -71,7 +71,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     }
     var self = this,
         walker,
-        currentPos;
+        currentPos,
+        nodeFilter;
     /**
      * @return {!boolean}
      */
@@ -354,6 +355,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = root;
         currentPos = 1;
     };
+
+    this.getNodeFilter = function () {
+        return nodeFilter;
+    };
+
     function init() {
         var f, acceptNode;
         // a position can never be near an empty TextNode. A NodeFilter is the
@@ -370,6 +376,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         whatToShow = whatToShow || 0xFFFFFFFF;
         walker = root.ownerDocument.createTreeWalker(root, whatToShow,
                 acceptNode, expandEntityReferences);
+        nodeFilter = acceptNode;
+
         currentPos = 0;
         if (walker.firstChild() === null) {
             currentPos = 1;

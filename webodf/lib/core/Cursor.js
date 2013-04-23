@@ -188,15 +188,19 @@ core.Cursor = function Cursor(selection, document) {
         removeCursor(onCursorRemove);
     };
 
-    function whichChild(elem) {
+    function whichChild(node, nodeFilter) {
         var  i = 0;
-        while ((elem = elem.previousSibling) !== null) {
-            i += 1;
+        document.nodeFilter = nodeFilter;
+        document.node = node;
+        while ((node = node.previousSibling) !== null) {
+            if (nodeFilter.acceptNode(node) === 1) {
+                i += 1;
+            }
         }
         return i;
     }
 
-    this.getPositionInContainer = function () {
+    this.getPositionInContainer = function (nodeFilter) {
         var container, offset;
 
         if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === 3) {
@@ -209,7 +213,7 @@ core.Cursor = function Cursor(selection, document) {
 
         if (!container) {
             container = cursorNode.parentNode;
-            offset = whichChild(cursorNode);
+            offset = whichChild(cursorNode, nodeFilter);
         }
 
         return {
