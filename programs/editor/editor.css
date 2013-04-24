@@ -60,7 +60,6 @@ html, body, #mainContainer {
     -o-transform-origin: top center;
 
     overflow: hidden;
-    height: 100%;
 }
 
 #collaboration {
