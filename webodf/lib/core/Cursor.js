@@ -109,22 +109,19 @@ core.Cursor = function Cursor(selection, document) {
     function removeCursor(onCursorRemove) {
         var t = cursorNode.nextSibling,
             textNodeIncrease = 0;
+        runtime.assert(cursorNode.parentNode, "cursorNode.parentNode is undefined");
         if (cursorTextNode.parentNode) {
             if (t && t.nodeType === 3) {
                 cursorTextNode.parentNode.removeChild(cursorTextNode);
                 t.insertData(0, cursorTextNode.nodeValue);
                 textNodeIncrease = cursorTextNode.length;
             } else {
-                if (cursorNode.parentNode) {
-                    cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(true), cursorNode);
-                    textNodeIncrease = cursorTextNode.length;
-                }
+                cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(true), cursorNode);
+                textNodeIncrease = cursorTextNode.length;
             }
         }
         onCursorRemove(t, textNodeIncrease);
-        if (cursorNode.parentNode) {
-            cursorNode.parentNode.removeChild(cursorNode);
-        }
+        cursorNode.parentNode.removeChild(cursorNode);
     }
     /**
      * Put the cursor at a particular position.
@@ -169,7 +166,9 @@ core.Cursor = function Cursor(selection, document) {
      */
     this.updateToSelection = function (onCursorRemove, onCursorAdd) {
         var range;
-        removeCursor(onCursorRemove);
+        if (cursorNode.parentNode) {
+            removeCursor(onCursorRemove);
+        }
         if (selection.focusNode) {
             putCursor(selection.focusNode, selection.focusOffset, onCursorAdd);
         }
