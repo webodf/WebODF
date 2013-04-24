@@ -83,9 +83,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
                     return reject;
                 }
+                // Ensure that we do not stop in between a span and an adjacent non-textnode
                 if ((previousSibling && previousSibling.localName) === "span") {
                     return reject;
                 }
+                // Don't stop in spans with no text content
                 if (n.localName === "span" && !n.textContent.length) {
                     return reject;
                 }
@@ -94,6 +96,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
             p = n.parentNode;
             o = p && p.localName;
+            // Don't stop in textnodes with offset 0 if we are in a span or if the previous
+            // sibling is a span. That is: avoid left extremeties around/in spans.
             if (textOffset === 0) {
                 if (o === "span" || (previousSibling && previousSibling.localName) === "span") {
                     return reject;

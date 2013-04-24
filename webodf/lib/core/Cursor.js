@@ -185,6 +185,7 @@ core.Cursor = function Cursor(selection, document) {
      * Returns the filtered offset of the given node
      * @param {!Node} node
      * @param {!NodeFilter} nodeFilter
+     * @return {!number}
      */
     function whichChild(node, nodeFilter) {
         var  i = 0;
@@ -198,7 +199,7 @@ core.Cursor = function Cursor(selection, document) {
     }
     /**
      * This returns the container and offset of this cursor node,
-     * after filter out some other nodes blacklisted by the specified nodeFilter
+     * after filtering out some other nodes blacklisted by the specified nodeFilter
      * (like <cursor> and <editinfo>).
      * @param {!NodeFilter} nodeFilter
      * @return {!{container: !Node, offset: !number}}
