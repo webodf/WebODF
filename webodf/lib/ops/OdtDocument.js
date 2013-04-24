@@ -74,10 +74,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {core.PositionFilter.FilterResult}
          */
         this.acceptPosition = function (iterator) {
-            var n = iterator.container(), p, o,
+            var n = iterator.container(), p, o, filteredSibling,
+                nodeFilter = iterator.getNodeFilter(),
                 textOffset = iterator.textOffset(),
                 previousSibling = iterator.getPreviousSibling(),
-                nextSibling = iterator.getNextSibling();
+                currentNode = iterator.getCurrentNode(),
+                nextSibling = iterator.getNextSibling(),
+                hasPreviousSibling = true;
+
             // only stop in text nodes or at end of <p>, <h> o <span/>
             if (n.nodeType !== 3) {
                 if (n.localName !== "p" && n.localName !== "h" && n.localName !== "span") {
@@ -91,6 +95,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 if (n.localName === "span" && !n.textContent.length) {
                     return reject;
                 }
+                // Don't stop at positions that are in the beginning of a container
+                // but right before a span
+                if (iterator.offset() === 0 && currentNode.localName === "span") {
+                    return reject;
+                }
                 return accept;
             }
 
@@ -99,8 +108,23 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // Don't stop in textnodes with offset 0 if we are in a span or if the previous
             // sibling is a span. That is: avoid left extremeties around/in spans.
             if (textOffset === 0) {
-                if (o === "span" || (previousSibling && previousSibling.localName) === "span") {
+                if ((previousSibling && previousSibling.localName) === "span") {
                     return reject;
+                }
+                // If this span has no previous allowed siblings, then text offset 0 is walkable
+                if (o === "span") {
+                    filteredSibling = p;
+                    do {
+                        filteredSibling = filteredSibling.previousSibling;
+                        if (!filteredSibling) {
+                            hasPreviousSibling = false;
+                            break;
+                        }
+                    } while (nodeFilter.acceptNode(filteredSibling) !== 1);
+
+                    if (hasPreviousSibling) {
+                        return reject;
+                    }
                 }
             }
             if (n.length === 0) {

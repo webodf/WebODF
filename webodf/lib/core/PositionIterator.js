@@ -146,6 +146,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return n;
     };
     /**
+     * @return {!Node}
+     */
+    this.getCurrentNode = function () {
+        return walker.currentNode;
+    };
+    /**
      * @return {!number}
      */
     this.offset = function () {
