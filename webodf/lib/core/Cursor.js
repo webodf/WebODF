@@ -189,7 +189,8 @@ core.Cursor = function Cursor(selection, document) {
      */
     function whichChild(node, nodeFilter) {
         var  i = 0;
-        while ((node = node.previousSibling) !== null) {
+        while (node.previousSibling !== null) {
+            node = node.previousSibling;
             if (nodeFilter.acceptNode(node) === 1) {
                 i += 1;
             }
@@ -200,7 +201,7 @@ core.Cursor = function Cursor(selection, document) {
      * This returns the container and offset of this cursor node,
      * after filter out some other nodes blacklisted by the specified nodeFilter
      * (like <cursor> and <editinfo>).
-     * @param {!NodeFilter}
+     * @param {!NodeFilter} nodeFilter
      * @return {!{container: !Node, offset: !number}}
      */
     this.getPositionInContainer = function (nodeFilter) {
@@ -220,7 +221,7 @@ core.Cursor = function Cursor(selection, document) {
         }
 
         return {
-            container: container,
+            container: /**@type{!Node}*/(container),
             offset: offset
         };
     };

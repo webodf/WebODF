@@ -164,13 +164,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             currentNeighborhood = [],
             currentNode = iterator.container(),
             iteratedLength,
-            advance,
             visited = false,
             inFirstNeighborhood = true,
             i,
             j;
 
-        advance = length > 0 ? iterator.nextPosition : iterator.previousPosition;
         iteratedLength = 0;
 
         do {
@@ -219,7 +217,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
                 }
             }
-        } while (advance() && iteratedLength < Math.abs(length));
+        } while ((length > 0 ? iterator.nextPosition() : iterator.previousPosition()) === true
+                && iteratedLength < Math.abs(length));
 
         return neighborhood;
     };

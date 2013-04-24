@@ -265,7 +265,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     /**
      * This returns the text string from the current neighborhood as if
      * all the neighboring text nodes were one
-     * @return {String}
+     * @return {!string}
      */
     this.text = function () {
         var i,
