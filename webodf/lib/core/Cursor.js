@@ -109,7 +109,7 @@ core.Cursor = function Cursor(selection, document) {
     function removeCursor(onCursorRemove) {
         var t = cursorNode.nextSibling,
             textNodeIncrease = 0;
-        runtime.assert(cursorNode.parentNode, "cursorNode.parentNode is undefined");
+        runtime.assert(cursorNode.parentNode !== null, "cursorNode.parentNode is undefined");
         if (cursorTextNode.parentNode) {
             if (t && t.nodeType === 3) {
                 cursorTextNode.parentNode.removeChild(cursorTextNode);
