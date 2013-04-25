@@ -371,7 +371,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         var counter,
             cursor = cursors[memberid],
             steps = 0;
-        runtime.assert(node !== null, "OdtDocument.getDistanceFromCursor called with node===null");
+        runtime.assert((node !== null) && (node !== undefined),
+            "OdtDocument.getDistanceFromCursor called without node");
         if (cursor) {
             counter = cursor.getStepCounter().countStepsToPosition;
             steps = counter(node, offset, filter);
@@ -448,10 +449,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!ops.OdtCursor} cursor
      */
     this.addCursor = function (cursor) {
-        var distanceToFirstTextNode = cursor.getStepCounter().countForwardSteps(1, filter);
+        runtime.assert(Boolean(cursor), "OdtDocument::addCursor without cursor");
+        var distanceToFirstTextNode = cursor.getStepCounter().countForwardSteps(1, filter),
+            memberid = cursor.getMemberId();
+
+        runtime.assert(Boolean(memberid), "OdtDocument::addCursor has cursor without memberid");
         cursor.move(distanceToFirstTextNode);
 
-        cursors[cursor.getMemberId()] = cursor;
+        cursors[memberid] = cursor;
     };
 
     /**
