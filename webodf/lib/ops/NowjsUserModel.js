@@ -51,6 +51,10 @@ ops.NowjsUserModel = function NowjsUserModel() {
         net = runtime.getNetwork();
 
 
+    /**
+     * @param {!string} memberId
+     * @return {!string}
+     */
     function userIdFromMemberId(memberId) {
         return memberId.split("___")[0];
     }
@@ -63,19 +67,17 @@ ops.NowjsUserModel = function NowjsUserModel() {
         var subscribers,
             i;
 
-        // cache
-        cachedUserData[userId] = userData;
-
         // notify all subscribers who are interested in this data
         subscribers = memberDataSubscribers[userId];
         if (subscribers) {
+            // cache
+            cachedUserData[userId] = userData;
+
             for (i = 0; i < subscribers.length; i += 1) {
                 subscribers[i].subscriber(subscribers[i].memberId, userData);
             }
         }
-        runtime.log("data for user [" + userId + "] cached.");
     }
-
 
     /**
      * callback is called as soon as the userdata is available and after that
@@ -126,15 +128,7 @@ ops.NowjsUserModel = function NowjsUserModel() {
             // query data from server, if not done yet
             if (subscribers.length === 1) {
                 // TODO we should start considering security at some point
-                net.getUserData(userId, function (udata) {
-                    // this will call all subscribers
-                    cacheUserDatum(userId, udata?{
-                        userid:   udata.uid,
-                        fullname: udata.fullname,
-                        imageurl: "/user/" + udata.uid + "/avatar.png",
-                        color:    udata.color
-                    }:null);
-                });
+                net.subscribeUserDetailsUpdates(userId);
             }
         }
 
@@ -172,7 +166,25 @@ ops.NowjsUserModel = function NowjsUserModel() {
                            "tried to unsubscribe when not subscribed for memberId '" + memberId + "'");
 
             subscribers.splice(i,1);
+
+            // clean up
+            if (subscribers.length === 0) {
+                runtime.log("no more subscribers for: "+memberId);
+                delete memberDataSubscribers[userId];
+                delete cachedUserData[userId];
+                net.unsubscribeUserDetailsUpdates(userId);
+            }
         }
+    };
+
+    net.updateUserDetails = function (userId, udata) {
+        // this will call all subscribers
+        cacheUserDatum(userId, udata?{
+            userid:   udata.uid,
+            fullname: udata.fullname,
+            imageurl: "/user/" + udata.avatarId + "/avatar.png",
+            color:    udata.color
+        }:null);
     };
 
     runtime.assert(net.networkStatus === "ready", "network not ready");
