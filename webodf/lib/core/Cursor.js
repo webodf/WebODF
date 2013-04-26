@@ -208,7 +208,8 @@ core.Cursor = function Cursor(selection, document) {
     this.getPositionInContainer = function (nodeFilter) {
         var container, offset;
 
-        if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === 3) {
+        if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === 3
+            && cursorNode.previousSibling.length > 0) {
             container = cursorNode.previousSibling;
             offset = container.length;
         } else if (cursorNode.nextSibling && cursorNode.nextSibling.nodeType === 3) {
