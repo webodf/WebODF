@@ -11,18 +11,18 @@ Now there are 15 possible, but not necessarily allowed, cursor positions.
 Moving the cursor through a text should not be different when some characters are grouped. So we should disallow two of the positions. To decide what positions are allowed, we introduce a simple rule. This rule requires the definition of categories of elements. We define three categories:
   a) character elements: elements that act as characters, the cursor does not enter them
   b) grouping elements: elements that group characters, character elements and other grouping elements, the cursor enters them, but they do not add new allowed cursor positions
-  c) ghost elements: elements that the cursor does not enter and that do not add new allowed cursor positions
+  c) ghost elements: elements that the cursor does not enter and that do not add new allowed cursor positions. The contents of ghost elements are never considered when evaluating the rule for allowed cursor positions.
 At the end of this text, we have a list that tells which elements belong to which of the above groups.
 
 Only addition of characters or character elements increases the number of allowed cursor positions.
 
   The cursor may only be placed
    1) directly to the right of a non-whitespace character or character element
-   2) directly to the right of a group of whitespace characters if that group has a non-whitespace character or character element to left and to the right in the enclosing <text:p/> or <text:h/> or
+   2) directly to the right of a whitespace sequence (a number of neighbouring whitespace characters), if that group has a non-whitespace character or character element to left and to the right in the enclosing <text:p/> or <text:h/> or
    3) at the first position in the <text:p/> or <text:h/>. The first position is determined as follows:
-      - in a <text:p/> or <text:h/> with non-whitespace characters or character elements, this is directly to the left of the first non-whitespace characters or character element.
-      - if the <text:p/> or <text:h/> has no non-whitespace characters or character elements, but does have grouping elements, then the first position in the first grouping element,
-      - else the first position is directly inside the <text:p/> or <text:h/>.
+      - in a <text:p/> or <text:h/> with non-whitespace characters or character elements in it (directly or in a group element), it is directly to the left of the first non-whitespace characters or character element.
+      - if the <text:p/> or <text:h/> has no non-whitespace characters or character elements, but does have grouping elements, then it is directly to the right of the opening tag of the first grouping element,
+      - else the first position is directly to the right of the opening tag of the <text:p/> or <text:h/>.
 
 In ODF, whitespace characters are space (U+0020), horizontal tab (U+0009), carriage return (U+000D) and line feed (U+000A).
 
@@ -59,6 +59,14 @@ Here is a list of more examples. It is a good excersize to apply the above rule 
 <p>|a|</p>
 <p>    |a|   </p>
 <p>  <span>  |a|  </span>  </p>
+
+3 allowed positions:
+<p>|a|b|</p>
+
+4 allowed positions:
+<p>|a| |b|</p>
+<p>  |a|  |b|  </p>
+<p>  <span>a  </span>  <span>  b</span></p>
 
 TODO: rewrite list below in terms of character elements, group elements and ghost elements
 
