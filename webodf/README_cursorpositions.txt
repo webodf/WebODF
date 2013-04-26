@@ -18,13 +18,13 @@ Only addition of characters or character elements increases the number of allowe
 
   The cursor may only be placed
    1) directly to the right of a non-whitespace character or character element
-   2) directly to the right of a whitespace sequence (a number of neighbouring whitespace characters), if that group has a non-whitespace character or character element to left and to the right in the enclosing <text:p/> or <text:h/> or
+   2) directly to the right of a whitespace sequence (a number of neighbouring whitespace characters), if that sequence has a non-whitespace character or character element to left and to the right in the enclosing <text:p/> or <text:h/> and no whitespace sequence directly in front of it in the document order in the enclosing <text:p/> or <text:h/> or
    3) at the first position in the <text:p/> or <text:h/>. The first position is determined as follows:
       - in a <text:p/> or <text:h/> with non-whitespace characters or character elements in it (directly or in a group element), it is directly to the left of the first non-whitespace characters or character element.
       - if the <text:p/> or <text:h/> has no non-whitespace characters or character elements, but does have grouping elements, then it is directly to the right of the opening tag of the first grouping element,
       - else the first position is directly to the right of the opening tag of the <text:p/> or <text:h/>.
 
-In ODF, whitespace characters are space (U+0020), horizontal tab (U+0009), carriage return (U+000D) and line feed (U+000A).
+In ODF, whitespace characters are space (U+0020), horizontal tab (U+0009), carriage return (U+000D) and line feed (U+000A). See §6.1.2 Whie Space Characters in the ODF 1.2 specification. The elements <text:/s>, <text:tab/> and <text:line-break/> do not count as whitespace characters but as character elements.
 
 The above example now changes:
   <p>|H|e|l|l|o| |<span>w|o|r|l|d|.|</span></p>
@@ -67,6 +67,10 @@ Here is a list of more examples. It is a good excersize to apply the above rule 
 <p>|a| |b|</p>
 <p>  |a|  |b|  </p>
 <p>  <span>a  </span>  <span>  b</span></p>
+
+6 allowed positions:
+<p>|a| |<s/>|<s/>|b|</p>
+<p> <span>|a| |</span> <s/>| <span><s/>|b|</span> </p>
 
 TODO: rewrite list below in terms of character elements, group elements and ghost elements
 
