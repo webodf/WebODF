@@ -8,25 +8,198 @@ If the word 'hello' is put in a group, this is the result:
   <p>|H|e|l|l|o| |<span>|w|o|r|l|d|.|</span>|</p>
 Now there are 15 possible, but not necessarily allowed, cursor positions.
 
-Moving the cursor through a text should not be different when some characters are grouped. So we should disallow two of the positions. To decide what positions are allowed, we introduce a simple rule:
+Moving the cursor through a text should not be different when some characters are grouped. So we should disallow two of the positions. To decide what positions are allowed, we introduce a simple rule. This rule requires the definition of categories of elements. We define three categories:
+  a) character elements: elements that act as characters, the cursor does not enter them
+  b) grouping elements: elements that group characters, character elements and other grouping elements, the cursor enters them, but they do not add new allowed cursor positions
+  c) ghost elements: elements that the cursor does not enter and that do not add new allowed cursor positions
+At the end of this text, we have a list that tells which elements belong to which of the above groups.
+
+Only addition of characters or character elements increases the number of allowed cursor positions.
 
   The cursor may only be placed
-   1) to the right of a non-whitespace character or
-   2) to the right of a group of whitespace characters or
-   3) to the right of an element with no text nodes in it or
-   4) to the left of the first character or element with no text nodes in it in the <p/> or <h/>.
+   1) directly to the right of a non-whitespace character or character element
+   2) directly to the right of a group of whitespace characters if that group has a non-whitespace character or character element to left and to the right in the enclosing <text:p/> or <text:h/> or
+   3) at the first position in the <text:p/> or <text:h/>. The first position is determined as follows:
+      - in a <text:p/> or <text:h/> with non-whitespace characters or character elements, this is directly to the left of the first non-whitespace characters or character element.
+      - if the <text:p/> or <text:h/> has no non-whitespace characters or character elements, but does have grouping elements, then the first position in the first grouping element,
+      - else the first position is directly inside the <text:p/> or <text:h/>.
+
+In ODF, whitespace characters are space (U+0020), horizontal tab (U+0009), carriage return (U+000D) and line feed (U+000A).
 
 The above example now changes:
   <p>|H|e|l|l|o| |<span>w|o|r|l|d|.|</span></p>
 
-Here is another example that shows allowed cursor positions:
+Here is more examples that show allowed cursor positions:
   <p>|A|B|C|</p>
+  <p><span>|A|B|</span>C|</p>
+  <p>|A|<span>B|</span>C|</p>
+  <p>|A|<span>B|C|</span></p>
   <p><span>|A|<span>B|</span></span>C|</p>
   <p>|A|<span><span>B|</span>C|</span></p>
 
-In ODF, two consective spaces count as one space. Also, spaces can be represented by the <text:s/> element. Let's replace the space in the previous example:
+In ODF, two consective spaces count as one space. Also, spaces can be represented by the <text:s/> element. Let's replace the space in the first example:
 
   <p>|H|e|l|l|o|<s/>|<span>w|o|r|l|d|.|</span></p>
 
 The cursor position before the <s/> element is allowed because of rule 3); <s/> counts as an element and not as a whitespace character. A space element may represent multiple space characters: <text:s text:c="5"/>. The cursor is allowed to be placed between each of these, but this is only possible if the element is split into 5 separate <text:s/> elements. This should happen when the document is loaded.
+
+Examples
+
+Here is a list of more examples. It is a good excersize to apply the above rule for allowed cursor positions to these examples. The number of allowed positions increases when going down the list:
+
+1 allowed position:
+<p>|</p>
+<p><span>|</span></p>
+<p><span>|</span><span></span></p>
+<p><span>|<span></span></span></p>
+<p>|  </p>
+<p>  <span>|  </span>  </p>
+
+2 allowed positions:
+<p>|a|</p>
+<p>    |a|   </p>
+<p>  <span>  |a|  </span>  </p>
+
+TODO: rewrite list below in terms of character elements, group elements and ghost elements
+
+In the above rule for allowed cursor positions, a whitelist is referenced. This list is given here. It is complemented by a blacklist. Together, the whitelist and blacklist contain all elements that are allowed in <text:h/> and <text:p/>.
+There is a graylist too. The graylist contains graphical elements with the attribute @text:anchor-type. These elements are only in the whitelist if the value of text:anchor-type is 'as-char'.
+If an element is not in the graylist, whitelist or blacklist, it is considered to be on the blacklist and it does not result in a valid position.
+
+The whitelist contains these elements:
+<presentation:date-time/>
+<presentation:footer/>
+<presentation:header/>
+<text:alphabetical-index-mark/>
+<text:author-initials/>
+<text:author-name/>
+<text:bibliography-mark/>
+<text:bookmark-ref/>
+<text:s/>
+<text:tab/>
+<text:date/>
+<text:line-break/>
+<text:page-count/>
+<text:page-number/>
+<text:reference-ref/>
+<text:subject/>
+<text:time/>
+<text:title/>
+
+The graylist contains these elements:
+<dr3d:scene/>
+<draw:caption/>
+<draw:circle/>
+<draw:connector/>
+<draw:control/>
+<draw:custom-shape/>
+<draw:ellipse/>
+<draw:frame/>
+<draw:g/>
+<draw:line/>
+<draw:measure/>
+<draw:page-thumbnail/>
+<draw:path/>
+<draw:polygon/>
+<draw:polyline/>
+<draw:rect/>
+<draw:regular-polygon/>
+
+The blacklist contains these elements:
+<draw:a/>
+<text:a/>
+<office:annotation-end/>
+<office:annotation/>
+<text:alphabetical-index-mark-end/>
+<text:alphabetical-index-mark-start/>
+<text:bookmark-end/>
+<text:bookmark-start/>
+<text:bookmark/>
+<text:change-end/>
+<text:change-start/>
+<text:span/>
+<text:meta/>
+
+Unsorted: elements for which it has not been determined yet on which list they belong
+<text:change/>
+<text:chapter/>
+<text:character-count/>
+<text:conditional-text/>
+<text:creation-date/>
+<text:creation-time/>
+<text:creator/>
+<text:database-display/>
+<text:database-name/>
+<text:database-next/>
+<text:database-row-number/>
+<text:database-row-select/>
+<text:dde-connection/>
+<text:description/>
+<text:editing-cycles/>
+<text:editing-duration/>
+<text:execute-macro/>
+<text:expression/>
+<text:file-name/>
+<text:hidden-paragraph/>
+<text:hidden-text/>
+<text:image-count/>
+<text:initial-creator/>
+<text:keywords/>
+<text:measure/>
+<text:meta-field/>
+<text:modification-date/>
+<text:modification-time/>
+<text:note-ref/>
+<text:note/>
+<text:number/>
+<text:object-count/>
+<text:page-continuation/>
+<text:page-variable-get/>
+<text:page-variable-set/>
+<text:paragraph-count/>
+<text:placeholder/>
+<text:print-date/>
+<text:print-time/>
+<text:printed-by/>
+<text:reference-mark-end/>
+<text:reference-mark-start/>
+<text:reference-mark/>
+<text:ruby/>
+<text:script/>
+<text:sender-city/>
+<text:sender-company/>
+<text:sender-country/>
+<text:sender-email/>
+<text:sender-fax/>
+<text:sender-firstname/>
+<text:sender-initials/>
+<text:sender-lastname/>
+<text:sender-phone-private/>
+<text:sender-phone-work/>
+<text:sender-position/>
+<text:sender-postal-code/>
+<text:sender-state-or-province/>
+<text:sender-street/>
+<text:sender-title/>
+<text:sequence-ref/>
+<text:sequence/>
+<text:sheet-name/>
+<text:soft-page-break/>
+<text:table-count/>
+<text:table-formula/>
+<text:template-name/>
+<text:text-input/>
+<text:toc-mark-end/>
+<text:toc-mark-start/>
+<text:toc-mark/>
+<text:user-defined/>
+<text:user-field-get/>
+<text:user-field-input/>
+<text:user-index-mark-end/>
+<text:user-index-mark-start/>
+<text:user-index-mark/>
+<text:variable-get/>
+<text:variable-input/>
+<text:variable-set/>
+<text:word-count>
 
