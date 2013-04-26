@@ -123,22 +123,22 @@ ops.NowjsUserModel = function NowjsUserModel() {
         } else {
             // subscribe
             subscribers.push({memberId: memberId, subscriber: subscriber});
+            // query data from server, if not done yet
+            if (subscribers.length === 1) {
+                // TODO we should start considering security at some point
+                net.getUserData(userId, function (udata) {
+                    // this will call all subscribers
+                    cacheUserDatum(userId, udata?{
+                        userid:   udata.uid,
+                        fullname: udata.fullname,
+                        imageurl: "/user/" + udata.uid + "/avatar.png",
+                        color:    udata.color
+                    }:null);
+                });
+            }
         }
 
-        if (userData === undefined) {
-            // query data from server
-            // TODO we should start considering security at some point
-            net.getUserData(userId, function (udata) {
-                // this will call all subscribers
-
-                cacheUserDatum(userId, udata?{
-                    userid:   udata.uid,
-                    fullname: udata.fullname,
-                    imageurl: "/user/" + udata.uid + "/avatar.png",
-                    color:    udata.color
-                }:null);
-            });
-        } else {
+        if (userData) {
             // data available from cache
             subscriber(memberId, userData);
         }
