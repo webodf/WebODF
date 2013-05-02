@@ -84,6 +84,7 @@ gui.SessionController = (function () {
          * @param {!Event} e
          */
         function dummyHandler(e) {
+            // runtime.log("ignore event " + e.type);
             cancelEvent(e);
         }
 
@@ -102,6 +103,9 @@ gui.SessionController = (function () {
             // not belonging to a cursor, like e.g. the caret and the cursor
             // avatarflag are.
             node = selection.focusNode;
+            if (!node) {
+                return;
+            }
             while (node !== canvasElement) {
                 if (node.namespaceURI === 'urn:webodf:names:cursor' && node.localName === 'cursor') {
                     return;
@@ -111,6 +115,7 @@ gui.SessionController = (function () {
 
             // create a move op with the distance to that position
             steps = odtDocument.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
+            selection.collapse();
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
@@ -320,6 +325,7 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "cut", dummyHandler);
             listenEvent(canvasElement, "paste", dummyHandler);
             listenEvent(canvasElement, "click", handleMouseClick);
+            listenEvent(canvasElement, "mouseup", handleMouseClick);
         };
 
        /**
