@@ -93,6 +93,8 @@ gui.SessionController = (function () {
          */
         function handleMouseClick(e) {
             var selection = runtime.getWindow().getSelection(),
+                focusNode = selection.focusNode,
+                focusOffset = selection.focusOffset,
                 steps,
                 op,
                 node,
@@ -102,7 +104,7 @@ gui.SessionController = (function () {
             // check that the node or one of its parent nodes til the canvas are
             // not belonging to a cursor, like e.g. the caret and the cursor
             // avatarflag are.
-            node = selection.focusNode;
+            node = focusNode;
             if (!node) {
                 return;
             }
@@ -114,8 +116,8 @@ gui.SessionController = (function () {
             }
 
             // create a move op with the distance to that position
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
-            selection.collapse();
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, focusNode, focusOffset);
+            selection.collapse(null, 0);
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
