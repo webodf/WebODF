@@ -205,6 +205,9 @@ odf.OdfContainer = (function () {
             }
             this.mimetype = mimetype;
             zip.loadAsDataURL(name, mimetype, function (err, url) {
+                if (err) {
+                    runtime.log(err);
+                }
                 self.url = url;
                 if (self.onchange) {
                     self.onchange(self);

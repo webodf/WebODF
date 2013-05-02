@@ -406,9 +406,12 @@ odf.OdfCanvas = (function () {
             part,
             node;
         function callback(url) {
-            var rule = "background-image: url(" + url + ");";
-            rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
-            stylesheet.insertRule(rule, stylesheet.cssRules.length);
+            var rule;
+            if (url) { // if part cannot be loaded, url is null
+                rule = "background-image: url(" + url + ");";
+                rule = 'draw|image[styleid="' + id + '"] {' + rule + '}';
+                stylesheet.insertRule(rule, stylesheet.cssRules.length);
+            }
         }
         // look for a office:binary-data
         if (url) {
