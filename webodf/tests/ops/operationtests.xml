@@ -1,9 +1,81 @@
-<tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0">
- <test name="Simple">
-  <before><office:text><text:p></text:p></office:text></before>
+<tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
+ <test name="AddCursor_Simple">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></after>
+ </test>
+ <test name="RemoveCursor_Simple">
+  <before><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="AddRemoveCursor_Simple">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="RemoveCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_Simple">
+  <before><office:text><text:p/></office:text></before>
   <ops>
    <op optype="InsertText" position="0" text="hello"/>
   </ops>
   <after><office:text><text:p>hello</text:p></office:text></after>
+ </test>
+ <test name="InsertRemoveText_Simple">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="hello"/>
+   <op optype="RemoveText" position="0" length="5"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_Simple2">
+  <before><office:text><text:p>a</text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="b"/>
+  </ops>
+  <after><office:text><text:p>ba</text:p></office:text></after>
+ </test>
+ <test name="InsertText_Simple3">
+  <before><office:text><text:p>a</text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="1" text="b"/>
+  </ops>
+  <after><office:text><text:p>ab</text:p></office:text></after>
+ </test>
+ <test name="InsertText_Span">
+  <before><office:text><text:p><text:span>a</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="1" text="b"/>
+  </ops>
+  <after><office:text><text:p><text:span>ab</text:span></text:p></office:text></after>
+ </test>
+ <test name="InsertText_Span2">
+  <before><office:text><text:p><text:span>a</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="b"/>
+  </ops>
+  <after><office:text><text:p><text:span>ba</text:span></text:p></office:text></after>
+ </test>
+ <test name="InsertText_BeforeSpace">
+  <before><office:text><text:p><text:s/></text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="1" text="b"/>
+  </ops>
+  <after><office:text><text:p><text:s/>a</text:p></office:text></after>
+ </test>
+ <test name="InsertText_AfterSpace">
+  <before><office:text><text:p><text:s/></text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="1" text="a"/>
+  </ops>
+  <after><office:text><text:p><text:s/>a</text:p></office:text></after>
  </test>
 </tests>

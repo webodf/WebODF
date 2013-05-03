@@ -41,12 +41,11 @@ runtime.loadClass("xmldom.LSSerializer");
  */
 ops.OperationTests = function OperationTests(runner) {
     "use strict";
-    var r = runner, t, domDocument = runtime.getWindow().document, testarea,
-        tests;
+    var r = runner, t, tests;
 
     function serialize(element) {
         var serializer = new xmldom.LSSerializer();
-        return serializer.writeToString(element, {});
+        return serializer.writeToString(element, odf.Namespaces.namespaceMap);
     }
 
     function parseOperation(node) {
@@ -61,19 +60,19 @@ ops.OperationTests = function OperationTests(runner) {
         }
         return op;
     }
-    function parseTest(node) {
+    function parseTest(name, node) {
         var before = node.firstElementChild,
             opsElement = before.nextElementSibling,
             after = opsElement.nextElementSibling,
             ops = [],
             test = {},
             op;
-        runtime.assert(before.localName === "before", "Expected <before/>.");
-        runtime.assert(opsElement.localName === "ops", "Expected <ops/>.");
-        runtime.assert(after.localName === "after", "Expected <after/>.");
+        runtime.assert(before.localName === "before", "Expected <before/> in " + name + ".");
+        runtime.assert(opsElement.localName === "ops", "Expected <ops/> in " + name + ".");
+        runtime.assert(after.localName === "after", "Expected <after/> in " + name + ".");
         op = opsElement.firstElementChild;
         while (op) {
-            runtime.assert(op.localName === "op", "Expected <op/>.");
+            runtime.assert(op.localName === "op", "Expected <op/> in " + name + ".");
             ops.push(parseOperation(op));
             op = op.nextElementChild;
         }
@@ -199,7 +198,6 @@ ops.OperationTests = function OperationTests(runner) {
     }
 
     function loadTests(url) {
-        url = "/home/oever/work/webodf/webodf/webodf/tests/ops/" + url;
         var s = runtime.readFileSync(url, "utf-8"),
             xml = runtime.parseXML(s),
             n,
@@ -209,32 +207,30 @@ ops.OperationTests = function OperationTests(runner) {
         while (n) {
             testName = n.getAttribute("name");
             runtime.assert(!tests.hasOwnProperty(testName), "Test name is not unique.");
-            tests[testName] = parseTest(n);
+            tests[testName] = parseTest(testName, n);
             n = n.nextElementSibling;
         }
         return tests;
     }
 
     this.setUp = function () {
-        var odfContainer,
-            odfcanvas,
-            text,
-            p;
+        var testarea,
+            odfContainer,
+            odfcanvas;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         odfcanvas = new odf.OdfCanvas(testarea);
-        t.odfContainer = odfContainer = new odf.OdfContainer("", null);
+        odfContainer = new odf.OdfContainer("", null);
         odfcanvas.setOdfContainer(odfContainer);
         t.odtDocument = new ops.OdtDocument(odfcanvas);
     };
     this.tearDown = function () {
-        t.odfContainer.saveAs("out.odt", function () {});
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
     this.tests = function () {
         if (!tests) {
-            tests = makeTestsIntoFunction(loadTests("operationtests.xml"));
+            tests = makeTestsIntoFunction(loadTests("ops/operationtests.xml"));
         }
         return tests;
     };
@@ -245,7 +241,7 @@ ops.OperationTests = function OperationTests(runner) {
 };
 ops.OperationTests.prototype.description = function () {
     "use strict";
-    return "Test the OdtCursor class.";
+    return "Test the ODT operations described in an XML file.";
 };
 (function () {
     "use strict";
