@@ -75,26 +75,6 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
                     keptChildNode = domPosition.textNode.previousSibling;
                     splitChildNode = null;
                 } else {
-                    // Add special treatment for cursor:
-                    // cursors are keeping a pointer to the textnode to their left,
-                    // for some optimization to reduce the number of textNode creations/deletions.
-                    // As it can happen that we split (part of) the textnode before a cursor,
-                    // (actually that should be often the case due to the cursor-oriented input)
-                    // we have to workaround that optimization. This is done by cloning the textnode
-                    // and removing the old textnode from the DOM and cleaning its data.
-                    if (domPosition.textNode.nextSibling &&
-                        domPosition.textNode.nextSibling.namespaceURI === 'urn:webodf:names:cursor' &&
-                        domPosition.textNode.nextSibling.localName === 'cursor') {
-                        // insert copy of current textnode
-                        textNodeCopy = domPosition.textNode.cloneNode(false);
-                        domPosition.textNode.parentNode.insertBefore(textNodeCopy, domPosition.textNode);
-                        // unset old textnode
-                        domPosition.textNode.parentNode.removeChild(domPosition.textNode);
-                        domPosition.textNode = "";
-                        // and continue normally with the copied text node
-                        domPosition.textNode = textNodeCopy;
-                    }
-
                     keptChildNode = domPosition.textNode;
                     // if text node is to be split at the end, don't split at all
                     if (domPosition.offset >= domPosition.textNode.length) {
