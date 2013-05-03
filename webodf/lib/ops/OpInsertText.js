@@ -104,6 +104,10 @@ ops.OpInsertText = function OpInsertText() {
             // FIXME A workaround.
             triggerLayoutInWebkit(textNode);
 
+            // If the last text node happens to be an empty text node, clean up.
+            if (textNode.data === "") {
+                textNode.parentNode.removeChild(textNode);
+            }
             // FIXME care must be taken regarding the cursor positions
             // the new text must appear in front of the (own) cursor.
             // if there are/were other cursors at the same address,

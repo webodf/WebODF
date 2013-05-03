@@ -62,9 +62,7 @@ core.Cursor = function Cursor(selection, document) {
     "use strict";
     var self = this,
         /**@type{Element}*/
-        cursorNode,
-        /**@type{!Text}*/
-        cursorTextNode;
+        cursorNode;
 
     /**
      * Split a text node and put the cursor into it.
@@ -78,13 +76,15 @@ core.Cursor = function Cursor(selection, document) {
      */
     function putCursorIntoTextNode(container, offset) {
         runtime.assert(Boolean(container), "putCursorIntoTextNode: invalid container");
-        var parent = container.parentNode;
+        var parent = container.parentNode,
+            prev = document.createTextNode('');
+
         runtime.assert(Boolean(parent), "putCursorIntoTextNode: container without parent");
-
-        cursorTextNode.data = container.substringData(0, offset);
-        container.deleteData(0, offset);
-        parent.insertBefore(cursorTextNode, container);
-
+        if (offset > 0) {
+            prev.data = container.substringData(0, offset);
+            container.deleteData(0, offset);
+            parent.insertBefore(prev, container);
+        }
         parent.insertBefore(cursorNode, container);
     }
     /**
@@ -113,34 +113,16 @@ core.Cursor = function Cursor(selection, document) {
 
         runtime.assert(Boolean(cursorNode.parentNode),
             "cursorNode.parentNode is undefined");
-
-        if (cursorTextNode.parentNode) {
-            // If the previous node is a text node, make that the cursorTextNode
-            if (prev && prev.nodeType === 3) {
-                cursorTextNode = /**@type{!Text}*/(prev);
-            }
-            // Always orphan the cursorTextNode when removing the cursor
-            cursorTextNode.parentNode.removeChild(cursorTextNode);
-            if (next && next.nodeType === 3) {
-                // If the cursor is just before a text node, prepend the
-                // text from the cursorTextNode to that node, to form the 'original' text
-                // node again
-                next.insertData(0, cursorTextNode.nodeValue);
-                textNodeIncrease = cursorTextNode.length;
-            } else if (prev && prev.nodeType === 3) {
-                // If the cursor is just after a text node but before a non-text node,
-                // clone the cursorTextNode and prepend it before the cursor
-                cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(true), cursorNode);
-                textNodeIncrease = cursorTextNode.length;
-            } else {
-                // If the cursor is between two non-text nodes, clear the data
-                // of the cursorTextNode
-                cursorTextNode.data = "";
-                textNodeIncrease = 0;
-            }
+        // Merge the left and right textnodes
+        if ((next && next.nodeType === 3 && next.data.length > 0)
+                && (prev && prev.nodeType === 3 && prev.data.length > 0)) {
+            prev.parentNode.removeChild(prev);
+            next.insertData(0, prev.data);
+            textNodeIncrease = prev.data.length;
         }
-        onCursorRemove(next, textNodeIncrease);
+
         cursorNode.parentNode.removeChild(cursorNode);
+        onCursorRemove(next, textNodeIncrease);
     }
     /**
      * Put the cursor at a particular position.
@@ -249,7 +231,6 @@ core.Cursor = function Cursor(selection, document) {
         var cursorns = 'urn:webodf:names:cursor';
 
         cursorNode = document.createElementNS(cursorns, 'cursor');
-        cursorTextNode = document.createTextNode("");
     }
 
     init();
