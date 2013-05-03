@@ -1,0 +1,9 @@
+<tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0">
+ <test name="Simple">
+  <before><office:text><text:p></text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="hello"/>
+  </ops>
+  <after><office:text><text:p>hello</text:p></office:text></after>
+ </test>
+</tests>

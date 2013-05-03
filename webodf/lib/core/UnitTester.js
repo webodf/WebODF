@@ -222,7 +222,8 @@ core.UnitTester = function UnitTester() {
             i,
             t,
             tests,
-            lastFailCount;
+            lastFailCount,
+            testNameString = "testName";
 
         // check that this test has not been run or started yet
         if (results.hasOwnProperty(testName)) {
@@ -234,7 +235,7 @@ core.UnitTester = function UnitTester() {
         tests = test.tests();
         for (i = 0; i < tests.length; i += 1) {
             t = tests[i];
-            tname = Runtime.getFunctionName(t);
+            tname = Runtime.getFunctionName(t) || t[testNameString];
             runtime.log("Running " + tname);
             lastFailCount = runner.countFailedTests();
             test.setUp();

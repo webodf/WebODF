@@ -42,6 +42,7 @@ runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.SessionTests");
+runtime.loadClass("ops.OperationTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
@@ -71,6 +72,7 @@ if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
     tests.push(ops.SessionTests);
+    tests.push(ops.OperationTests);
 //    tests.push(gui.XMLEditTests);
 }
 
