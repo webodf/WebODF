@@ -139,6 +139,31 @@ gui.SessionController = (function () {
         /**
          * @return {?ops.Operation}
          */
+        function createOpMoveCursorByEndKey() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                steps,
+                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+                paragraphNode = odtDocument.getParagraphElement(cursorNode),
+                op = null;
+
+            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
+
+            iterator.moveToEndOfNode(paragraphNode);
+            // create a move op with the distance to that position
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.offset());
+
+            if (steps !== 0) {
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, number: steps});
+            }
+
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
         function createOpMoveCursorByHomeKey() {
             var odtDocument = session.getOdtDocument(),
                 steps,
@@ -262,7 +287,7 @@ gui.SessionController = (function () {
                 op = createOpMoveCursorByHomeKey();
                 handled = true;
             } else if (keyCode === 35) { // end
-                // TODO: implement an operation! for now just eat the key
+                op = createOpMoveCursorByEndKey();
                 handled = true;
             } else if (keyCode === 8) { // Backspace
                 op = createOpRemoveTextByBackspaceKey();

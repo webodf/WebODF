@@ -377,6 +377,20 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         currentPos = 1;
     };
 
+    /**
+     * Places the iterator at the last position inside the given node.
+     * @param {!Node} node
+     * @return {undefined}
+     */
+    this.moveToEndOfNode = function(node) {
+        if (node.nodeType === 3) {
+            self.setPosition(node, node.length);
+        } else {
+            walker.currentNode = node;
+            currentPos = 1;
+        }
+    };
+
     this.getNodeFilter = function () {
         return nodeFilter;
     };
