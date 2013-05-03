@@ -107,21 +107,39 @@ core.Cursor = function Cursor(selection, document) {
      * @return {undefined}
      */
     function removeCursor(onCursorRemove) {
-        var t = cursorNode.nextSibling,
+        var next = cursorNode.nextSibling,
+            prev = cursorNode.previousSibling,
             textNodeIncrease = 0;
+
         runtime.assert(Boolean(cursorNode.parentNode),
             "cursorNode.parentNode is undefined");
+
         if (cursorTextNode.parentNode) {
-            if (t && t.nodeType === 3) {
-                cursorTextNode.parentNode.removeChild(cursorTextNode);
-                t.insertData(0, cursorTextNode.nodeValue);
+            // If the previous node is a text node, make that the cursorTextNode
+            if (prev && prev.nodeType === 3) {
+                cursorTextNode = /**@type{!Text}*/(prev);
+            }
+            // Always orphan the cursorTextNode when removing the cursor
+            cursorTextNode.parentNode.removeChild(cursorTextNode);
+            if (next && next.nodeType === 3) {
+                // If the cursor is just before a text node, prepend the
+                // text from the cursorTextNode to that node, to form the 'original' text
+                // node again
+                next.insertData(0, cursorTextNode.nodeValue);
                 textNodeIncrease = cursorTextNode.length;
-            } else {
+            } else if (prev && prev.nodeType === 3) {
+                // If the cursor is just after a text node but before a non-text node,
+                // clone the cursorTextNode and prepend it before the cursor
                 cursorNode.parentNode.insertBefore(cursorTextNode.cloneNode(true), cursorNode);
                 textNodeIncrease = cursorTextNode.length;
+            } else {
+                // If the cursor is between two non-text nodes, clear the data
+                // of the cursorTextNode
+                cursorTextNode.data = "";
+                textNodeIncrease = 0;
             }
         }
-        onCursorRemove(t, textNodeIncrease);
+        onCursorRemove(next, textNodeIncrease);
         cursorNode.parentNode.removeChild(cursorNode);
     }
     /**

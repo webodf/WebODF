@@ -29,8 +29,8 @@ text|p, text|h {
 *[runtimens|containsparagraphanchor] {
   position: relative;
 }
-text|s:before { /* this needs to be the number of spaces given by text:c */
-  content: ' ';
+text|s {
+    white-space: pre;
 }
 text|tab:before {
   display: inline;

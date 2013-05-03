@@ -64,12 +64,42 @@ ops.OpInsertText = function OpInsertText() {
     }
 
     this.execute = function (odtDocument) {
-        var domPosition, textNode;
+        var domPosition,
+            textNode,
+            offset,
+            length,
+            space,
+            ownerDocument = odtDocument.getRootNode().ownerDocument,
+            paragraphElement,
+            textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            i;
 
         domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {
             textNode = domPosition.textNode;
-            textNode.insertData(domPosition.offset, text);
+            offset = domPosition.offset;
+            paragraphElement = odtDocument.getParagraphElement(domPosition.textNode);
+
+            // Iterate through the string to be inserted, and insert the characters
+            // one by one. If a space is encountered, insert a <text:s> </text:s> instead
+            // (with the space character inside for better parsing), followed by an empty text
+            // node, into which further text can be appended. If a space is being inserted *after* such
+            // an empty text node, then delete that node.
+            for (i = 0; i < text.length; i += 1) {
+                if (text[i] === ' ') {
+                    space = ownerDocument.createElementNS(textns, 'text:s');
+                    space.appendChild(ownerDocument.createTextNode(' '));
+                    textNode.parentNode.insertBefore(space, textNode.nextSibling);
+                    if (textNode.data === '') {
+                        textNode.parentNode.removeChild(textNode);
+                    }
+                    textNode = ownerDocument.createTextNode('');
+                    space.parentNode.insertBefore(textNode, space.nextSibling);
+                    offset = 0;
+                } else {
+                    textNode.insertData(offset + i, text[i]);
+                }
+            }
 
             // FIXME A workaround.
             triggerLayoutInWebkit(textNode);
@@ -85,7 +115,7 @@ ops.OpInsertText = function OpInsertText() {
 
             odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
-                paragraphElement: odtDocument.getParagraphElement(domPosition.textNode),
+                paragraphElement: paragraphElement,
                 memberId: memberid,
                 timeStamp: timestamp
             });
