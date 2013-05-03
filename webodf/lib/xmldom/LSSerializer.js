@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global xmldom*/
+/*global xmldom, runtime*/
 /*jslint sub: true*/
 if (typeof Object.create !== 'function') {
     Object['create'] = function (o) {
@@ -53,130 +53,159 @@ xmldom.LSSerializer = function LSSerializer() {
     var /**@const@type{!LSSerializer}*/ self = this;
 
     /**
-     * @param {!string} prefix
+     * @constructor
+     * @param {!Object.<string,string>} nsmap
+     */
+    function Namespaces(nsmap) {
+        function invertMap(map) {
+            var m = {}, i;
+            for (i in map) {
+                if (map.hasOwnProperty(i)) {
+                    m[map[i]] = i;
+                }
+            }
+            return m;
+        }
+        var self = this,
+            current = nsmap || {},
+            currentrev = invertMap(nsmap),
+            levels = [ current ],
+            levelsrev = [ currentrev ],
+            level = 0;
+        this.push = function () {
+            level += 1;
+            current = levels[level] = Object.create(current);
+            currentrev = levelsrev[level] = Object.create(currentrev);
+        };
+        this.pop = function () {
+            levels[level] = undefined;
+            levelsrev[level] = undefined;
+            level -= 1;
+            current = levels[level];
+            currentrev = levelsrev[level];
+        };
+        /**
+         * @return {!Object.<string,string>} nsmap
+         */
+        this.getLocalNamespaceDefinitions = function () {
+            return currentrev;
+        };
+        /**
+         * @param {!Node} node
+         * @return {!string}
+         */
+        this.getQName = function (node) {
+            var ns = node.namespaceURI, n, i = 0, p;
+            if (!ns) {
+                return node.localName;
+            }
+            p = currentrev[ns];
+            if (p) {
+                return p + ":" + node.localName;
+            }
+            do {
+                if (p || !node.prefix) {
+                    p = "ns" + i;
+                    i += 1;
+                } else {
+                    p = node.prefix;
+                }
+                if (current[p] === ns) {
+                    break;
+                }
+                if (!current[p]) {
+                    current[p] = ns;
+                    currentrev[ns] = p;
+                    break;
+                }
+                p = null;
+            } while (p === null);
+            return p + ":" + node.localName;
+        };
+    }
+
+    /**
+     * @param {!string} qname
      * @param {!Attr} attr
      * @return {!string}
      */
-    function serializeAttribute(prefix, attr) {
-        var /**@type{!string}*/ s = prefix + attr.localName + "=\"" +
-            attr.nodeValue + "\"";
+    function serializeAttribute(qname, attr) {
+        var /**@type{!string}*/ s = qname + "=\"" + attr.nodeValue + "\"";
         return s;
     }
     /**
-     * @param {!Object.<string,string>} nsmap
-     * @param {string} prefix
-     * @param {string} ns
+     * @param {!Namespaces} ns
+     * @param {!string} qname
+     * @param {!Node} element
      * @return {!string}
      */
-    function attributePrefix(nsmap, prefix, ns) {
-        // TODO: check for double prefix definitions, this needs a special class
-        if (nsmap.hasOwnProperty(ns)) {
-            return nsmap[ns] + ":";
-        }
-        if (nsmap[ns] !== prefix) {
-            nsmap[ns] = prefix;
-        }
-        return prefix + ":";
-    }
-    /**
-     * @param {!Object.<string,string>} nsmap
-     * @param {!Node} node
-     * @return {!string}
-     */
-    function startNode(nsmap, node) {
+    function startElement(ns, qname, element) {
         var /**@type{!string}*/ s = "",
-            /**@const@type{!NamedNodeMap}*/ atts = node.attributes,
+            /**@const@type{!NamedNodeMap}*/ atts = element.attributes,
             /**@const@type{!number}*/ length,
             /**@type{!number}*/ i,
             /**@type{!Attr}*/ attr,
             /**@type{!string}*/ attstr = "",
             /**@type{!number}*/ accept,
-            /**@type{!string}*/ prefix;
-        if (atts) { // ELEMENT
-            if (node.namespaceURI && nsmap[node.namespaceURI] !== node.prefix) {
-                nsmap[node.namespaceURI] = node.prefix;
-            }
-            s += "<" + node.nodeName;
-            length = atts.length;
-            for (i = 0; i < length; i += 1) {
-                attr = /**@type{!Attr}*/(atts.item(i));
-                if (attr.namespaceURI !== "http://www.w3.org/2000/xmlns/") {
-                    accept = (self.filter) ? self.filter.acceptNode(attr) : 1;
-                    if (accept === 1) {
-                        // xml attributes always need a prefix for a namespace
-                        if (attr.namespaceURI) {
-                            prefix = attributePrefix(nsmap, attr.prefix,
-                                   attr.namespaceURI);
-                        } else {
-                            prefix = "";
-                        }
-                        attstr += " " + serializeAttribute(prefix, attr);
-                    }
+            /**@type{!string}*/ prefix,
+            nsmap;
+        s += "<" + qname;
+        length = atts.length;
+        for (i = 0; i < length; i += 1) {
+            attr = /**@type{!Attr}*/(atts.item(i));
+            if (attr.namespaceURI !== "http://www.w3.org/2000/xmlns/") {
+                accept = (self.filter) ? self.filter.acceptNode(attr) : 1;
+                if (accept === 1) {
+                    attstr += " " + serializeAttribute(ns.getQName(attr),
+                        attr);
                 }
             }
-            for (i in nsmap) {
-                if (nsmap.hasOwnProperty(i)) {
-                    prefix = nsmap[i];
-                    if (!prefix) {
-                        s += " xmlns=\"" + i + "\"";
-                    } else if (prefix !== "xmlns") {
-                        s += " xmlns:" + nsmap[i] + "=\"" + i + "\"";
-                    }
-                }
-            }
-            s += attstr + ">";
         }
+        nsmap = ns.getLocalNamespaceDefinitions();
+        for (i in nsmap) {
+            if (nsmap.hasOwnProperty(i)) {
+                prefix = nsmap[i];
+                if (!prefix) {
+                    s += " xmlns=\"" + i + "\"";
+                } else if (prefix !== "xmlns") {
+                    s += " xmlns:" + nsmap[i] + "=\"" + i + "\"";
+                }
+            }
+        }
+        s += attstr + ">";
         return s;
     }
     /**
+     * @param {!Namespaces} ns
      * @param {!Node} node
      * @return {!string}
      */
-    function endNode(node) {
-        var /**@type{!string}*/ s = "";
-        if (node.nodeType === 1) { // ELEMENT
-            s += "</" + node.nodeName + ">";
-        }
-        return s;
-    }
-    /**
-     * @param {!Object.<string,string>} parentnsmap
-     * @param {!Node} node
-     * @return {!string}
-     */
-    function serializeNode(parentnsmap, node) {
+    function serializeNode(ns, node) {
         var /**@type{!string}*/ s = "",
-            /**@const@type{!Object.<string,string>}*/ nsmap
-                = Object.create(parentnsmap),
             /**@const@type{!number}*/ accept
                 = (self.filter) ? self.filter.acceptNode(node) : 1,
-            /**@type{Node}*/child;
-        if (accept === 1) {
-            s += startNode(nsmap, node);
+            /**@type{Node}*/child,
+            /**@const@type{string}*/ qname;
+        if (accept === 1 && node.nodeType === 1) {
+            ns.push();
+            qname = ns.getQName(node);
+            s += startElement(ns, qname, node);
         }
         if (accept === 1 || accept === 3) {
             child = node.firstChild;
             while (child) {
-                s += serializeNode(nsmap, child);
+                s += serializeNode(ns, child);
                 child = child.nextSibling;
             }
             if (node.nodeValue) {
                 s += node.nodeValue;
             }
         }
-        if (accept === 1) {
-            s += endNode(node);
+        if (qname) {
+            s += "</" + qname + ">";
+            ns.pop();
         }
         return s;
-    }
-    function invertMap(map) {
-        var m = {}, i;
-        for (i in map) {
-            if (map.hasOwnProperty(i)) {
-                m[map[i]] = i;
-            }
-        }
-        return m;
     }
     /**
      * @type {xmldom.LSSerializerFilter}
@@ -191,7 +220,7 @@ xmldom.LSSerializer = function LSSerializer() {
         if (!node) {
             return "";
         }
-        nsmap = nsmap ? invertMap(nsmap) : {};
-        return serializeNode(nsmap, node);
+        var ns = new Namespaces(nsmap);
+        return serializeNode(ns, node);
     };
 };
