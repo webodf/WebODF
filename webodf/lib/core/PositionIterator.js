@@ -322,7 +322,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     };
     /**
      * @param {!Node} container
-     * @param {!number} offset
+     * @param {!number} offset offset in unfiltered DOM world
      * @return {!boolean}
      */
     this.setPosition = function (container, offset) {

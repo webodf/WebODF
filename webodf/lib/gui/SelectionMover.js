@@ -306,7 +306,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         return count;
     }
     /**
-     * Calculate node offset.
+     * Calculate node offset in unfiltered DOM world
      * @param {!Node} node
      * @param {!Node} container
      * @return {!number}
@@ -328,10 +328,10 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     /**
      * Return a number > 0 when point 1 precedes point 2. Return 0 if the points
      * are equal. Return < 0 when point 2 precedes point 1.
-     * @param {!Node} c1
-     * @param {!number} o1
-     * @param {!Node} c2
-     * @param {!number} o2
+     * @param {!Node} c1 container of point 1
+     * @param {!number} o1  offset in unfiltered DOM world of point 1
+     * @param {!Node} c2 container of point 2
+     * @param {!number} o2  offset in unfiltered DOM world of point 2
      * @return {!number}
      */
     function comparePoints(c1, o1, c2, o2) {
@@ -354,40 +354,42 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         return comparison;
     }
     /**
-     * @param {!Element} element
-     * @param {!number} offset
+     * @param {!Element} posElement
+     * @param {!number} posOffset  offset in unfiltered DOM world
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countStepsToPosition(element, offset, filter) {
-        runtime.assert(element !== null, "SelectionMover.countStepsToPosition called with element===null");
+    function countStepsToPosition(posElement, posOffset, filter) {
+        runtime.assert(posElement !== null, "SelectionMover.countStepsToPosition called with element===null");
         // first figure out how to get to the element
         // really dumb/inefficient implementation
         var cursorPos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             c = cursorPos.container,
             o = cursorPos.offset,
             steps = 0,
+            posUnfilteredDomOffset,
             watch = new core.LoopWatchDog(1000),
             comparison;
 
         // the iterator may interpret the positions as given by the range
         // differently than the dom positions, so we normalize them by calling
         // setPosition with these values
-        positionIterator.setPosition(element, offset);
-        element = positionIterator.container();
-        runtime.assert(element !== null, "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
-        offset = positionIterator.offset();
+        positionIterator.setPosition(posElement, posOffset);
+        posElement = positionIterator.container();
+        runtime.assert(posElement !== null, "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
+        posOffset = positionIterator.offset();
+        posUnfilteredDomOffset = positionIterator.unfilteredDomOffset();
         positionIterator.setPosition(c, o);
 
-        comparison = comparePoints(element, offset, c, o);
+        comparison = comparePoints(posElement, posUnfilteredDomOffset, positionIterator.container(), positionIterator.unfilteredDomOffset());
         if (comparison < 0) {
             while (positionIterator.nextPosition()) {
                 watch.check();
                 if (filter.acceptPosition(positionIterator) === 1) {
                     steps += 1;
                 }
-                if (positionIterator.container() === element) {
-                    if (positionIterator.offset() === offset) {
+                if (positionIterator.container() === posElement) {
+                    if (positionIterator.offset() === posOffset) {
                         positionIterator.setPosition(c, o);
                         return steps;
                     }
@@ -400,8 +402,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
                 if (filter.acceptPosition(positionIterator) === 1) {
                     steps -= 1;
                 }
-                if (positionIterator.container() === element) {
-                    if (positionIterator.offset() === offset) {
+                if (positionIterator.container() === posElement) {
+                    if (positionIterator.offset() === posOffset) {
                         positionIterator.setPosition(c, o);
                         return steps;
                     }
