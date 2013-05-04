@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012,2013 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, Runtime, core*/
-/*jslint evil: true*/
+/*jslint evil: true, continue: true*/
 /**
  * @interface
  */
@@ -208,12 +208,21 @@ core.UnitTester = function UnitTester() {
     "use strict";
     var failedTests = 0,
         results = {};
+    function link(text, code) {
+        return "<span style='color:blue;cursor:pointer' onclick='" + code + "'>"
+            + text + "</span>";
+    }
     /**
+     * Run the tests from TestClass.
+     * If parameter testNames is supplied only the tests with the names
+     * supplied in that array will be executed.
+     *
      * @param {Function} TestClass the constructor for the test class
      * @param {!function():undefined} callback
+     * @param {!Array.<!string>} testNames
      * @return {undefined}
      */
-    this.runTests = function (TestClass, callback) {
+    this.runTests = function (TestClass, callback, testNames) {
         var testName = Runtime.getFunctionName(TestClass),
             tname,
             runner = new core.UnitTestRunner(),
@@ -223,7 +232,8 @@ core.UnitTester = function UnitTester() {
             t,
             tests,
             lastFailCount,
-            testNameString = "testName";
+            testNameString = "testName",
+            inBrowser = runtime.type() === "BrowserRuntime";
 
         // check that this test has not been run or started yet
         if (results.hasOwnProperty(testName)) {
@@ -231,12 +241,27 @@ core.UnitTester = function UnitTester() {
             return;
         }
 
-        runtime.log("Running " + testName + ": " + test.description());
+        if (inBrowser) {
+            runtime.log("<span>Running "
+                + link(testName, "runSuite(\"" + testName + "\");")
+                + ": " + test.description() + "</span>");
+        } else {
+            runtime.log("Running " + testName + ": " + test.description);
+        }
         tests = test.tests();
         for (i = 0; i < tests.length; i += 1) {
             t = tests[i];
             tname = Runtime.getFunctionName(t) || t[testNameString];
-            runtime.log("Running " + tname);
+            if (testNames && testNames.indexOf(tname) === -1) {
+                continue;
+            }
+            if (inBrowser) {
+                runtime.log("<span>Running "
+                    + link(tname, "runTest(\"" + testName + "\",\""
+                                  + tname + "\")") + "</span>");
+            } else {
+                runtime.log("Running " + tname);
+            }
             lastFailCount = runner.countFailedTests();
             test.setUp();
             t();

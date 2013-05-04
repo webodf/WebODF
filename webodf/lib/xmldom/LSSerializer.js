@@ -130,7 +130,7 @@ xmldom.LSSerializer = function LSSerializer() {
      * @return {!string}
      */
     function serializeAttribute(qname, attr) {
-        var /**@type{!string}*/ s = qname + "=\"" + attr.nodeValue + "\"";
+        var /**@type{!string}*/ s = qname + "=\"" + attr.value + "\"";
         return s;
     }
     /**

@@ -113,4 +113,62 @@ function runNextTest(tests) {
         throw e;
     }
 }
-runNextTest(tests);
+
+/**
+ * Split ? part of the current url into a name value map.
+ * @return {!{suite:?string,test:?string}}
+ */
+function queryObj() {
+    "use strict";
+    var result = { suite: null, test: null },
+        keyValuePairs = window.location.search.slice(1).split('&');
+
+    keyValuePairs.forEach(function (keyValuePair) {
+        keyValuePair = keyValuePair.split('=');
+        result[keyValuePair[0]] = keyValuePair[1] || '';
+    });
+    return result;
+}
+
+function findSuite(name) {
+    "use strict";
+    var i, suite;
+    for (i = 0; !suite && i < tests.length; i += 1) {
+        if (tests[i].name === name) {
+            suite = tests[i];
+        }
+    }
+    return suite;
+}
+
+function runSuite(name) {
+    "use strict";
+    window.location.search = "?suite=" + name;
+}
+function runTest(suite, name) {
+    "use strict";
+    window.location.search = "?suite=" + suite + "&test=" + name;
+}
+
+function runSelectedTest() {
+    "use strict";
+    // only run a selected test
+    var options = queryObj(),
+        suite = findSuite(options.suite),
+        testNames;
+    if (!suite) {
+        return false;
+    }
+    testNames = options.test ? [options.test] : undefined;
+    tester.runTests(suite, function () {
+    }, testNames);
+    return true;
+}
+
+if (runtime.type() === "BrowserRuntime") {
+    if (!runSelectedTest()) {
+        runNextTest(tests);
+    }
+} else {
+    runNextTest(tests);
+}

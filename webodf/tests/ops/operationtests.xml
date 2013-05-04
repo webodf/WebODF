@@ -6,6 +6,7 @@
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></after>
  </test>
+<!--
  <test name="RemoveCursor_Simple">
   <before><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></before>
   <ops>
@@ -13,6 +14,7 @@
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
+-->
  <test name="AddRemoveCursor_Simple">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -67,9 +69,9 @@
  <test name="InsertText_BeforeSpace">
   <before><office:text><text:p><text:s/></text:p></office:text></before>
   <ops>
-   <op optype="InsertText" position="1" text="b"/>
+   <op optype="InsertText" position="0" text="a"/>
   </ops>
-  <after><office:text><text:p><text:s/>a</text:p></office:text></after>
+  <after><office:text><text:p>a<text:s/></text:p></office:text></after>
  </test>
  <test name="InsertText_AfterSpace">
   <before><office:text><text:p><text:s/></text:p></office:text></before>

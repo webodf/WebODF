@@ -53,10 +53,15 @@ ops.OperationTests = function OperationTests(runner) {
             atts = node.attributes,
             att,
             n = atts.length,
-            i;
+            i,
+            value;
         for (i = 0; i < n; i += 1) {
             att = atts.item(i);
-            op[att.localName] = att.nodeValue;
+            value = att.value;
+            if (att.localName === "position") {
+                value = parseInt(value, 10);
+            }
+            op[att.localName] = value;
         }
         return op;
     }
@@ -74,7 +79,7 @@ ops.OperationTests = function OperationTests(runner) {
         while (op) {
             runtime.assert(op.localName === "op", "Expected <op/> in " + name + ".");
             ops.push(parseOperation(op));
-            op = op.nextElementChild;
+            op = op.nextElementSibling;
         }
         return {
             before: before,

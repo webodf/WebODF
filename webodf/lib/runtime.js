@@ -447,7 +447,11 @@ function BrowserRuntime(logoutput) {
                 logoutput.appendChild(doc.createTextNode(" "));
             }
             node = doc.createElement("span");
-            node.appendChild(doc.createTextNode(msg));
+            if (msg.length > 0 && msg[0] === "<") {
+                node.innerHTML = msg;
+            } else {
+                node.appendChild(doc.createTextNode(msg));
+            }
             logoutput.appendChild(node);
             logoutput.appendChild(doc.createElement("br"));
         } else if (console) {
