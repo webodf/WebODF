@@ -146,6 +146,46 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return n;
     };
     /**
+     * Return the node to the right of the current iterator position.
+     * If the iterator is placed between two characters in a text node,
+     * the text node will be returned.
+     * If there is no right neighbor in the container node, then null is
+     * returned.
+     * Both filtered and unfiltered nodes will be returned.
+     * @return {?Node}
+     */
+    this.rightNode = function () {
+        var n = walker.currentNode;
+        if (n.nodeType === 3) {
+            if (currentPos === n.length) {
+                return n.nextSibling;
+            }
+            return n;
+        }
+        if (currentPos === 0) {
+            return n;
+        }
+        return null;
+    };
+    /**
+     * Return the node to the left of the current iterator position.
+     * See rightNode().
+     * @return {?Node}
+     */
+    this.leftNode = function () {
+        var n = walker.currentNode;
+        if (n.nodeType === 3) {
+            if (currentPos === 0) {
+                return n.previousSibling;
+            }
+            return n;
+        }
+        if (currentPos === 0) {
+            return n.previousSibling;
+        }
+        return n.lastChild;
+    };
+    /**
      * @return {!Node}
      */
     this.getCurrentNode = function () {
@@ -382,7 +422,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @param {!Node} node
      * @return {undefined}
      */
-    this.moveToEndOfNode = function(node) {
+    this.moveToEndOfNode = function (node) {
         if (node.nodeType === 3) {
             self.setPosition(node, node.length);
         } else {

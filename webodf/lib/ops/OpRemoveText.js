@@ -102,12 +102,15 @@ ops.OpRemoveText = function OpRemoveText() {
  
                 if (currentLength <= remainingLength) {
                     currentParent.removeChild(currentTextNode);
-                    // If this deleted textNode was the only child of it's parent,
-                    // delete the parent too.
+                    // If the parent is a span that contains no further text
+                    // after deletion, remove the span.
                     fixCursorPositions(odtDocument);
-                    if (!currentParent.textContent.length) {
+/** TODO add logic to determine when to delete a span
+                    if (currentParent.localName === "span"
+                            && currentParent.textContent.length === 0) {
                         currentParent.parentNode.removeChild(currentParent);
                     }
+*/
                     remainingLength -= currentLength;
                 } else {
                     if (removalType === 'delete') {

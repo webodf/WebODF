@@ -265,17 +265,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             lastNode = null,
             node,
             nodeOffset = 0;
+        runtime.assert(position >= 0, "position must be >= 0");
         position += 1; // add one because we check for position === 0
         // iterator should be at the start of rootNode
         if (filter.acceptPosition(iterator) === 1) {
             node = iterator.container();
             if (node.nodeType === 3) {
                 lastTextNode = /**@type{!Text}*/(node);
-                nodeOffset = 0;
-            } else if (position === 0) {
-                // create a new text node at the start of the paragraph
-                lastTextNode = rootNode.ownerDocument.createTextNode('');
-                node.insertBefore(lastTextNode, null);
                 nodeOffset = 0;
             }
         }
@@ -302,7 +298,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     lastTextNode = null;
                 } else if (position === 0) {
                     lastTextNode = rootNode.ownerDocument.createTextNode('');
-                    node.insertBefore(lastTextNode, null);
+                    node.insertBefore(lastTextNode, iterator.rightNode());
                     nodeOffset = 0;
                     break;
                 }
