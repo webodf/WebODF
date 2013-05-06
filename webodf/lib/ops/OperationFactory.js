@@ -54,7 +54,7 @@ runtime.loadClass("ops.OpDeleteParagraphStyle");
 /**
  * @constructor
  */
-ops.OperationFactory = function OperationFactory(session) {
+ops.OperationFactory = function OperationFactory() {
     "use strict";
 
     var self = this;

@@ -167,7 +167,7 @@ ops.OperationTests = function OperationTests(runner) {
     function runTest(test) {
         var text = t.odtDocument.getRootNode(),
             session = new ops.Session(t.odtDocument.getOdfCanvas()),
-            factory = new ops.OperationFactory(session),
+            factory = new ops.OperationFactory(),
             i,
             textbefore = getOfficeTextNode(test.before),
             textafter = getOfficeTextNode(test.after);
