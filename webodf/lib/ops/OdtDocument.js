@@ -282,7 +282,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 }
             }
         }
-        return chardata.join().substr(0, length);
+        return chardata.join("").substr(0, length);
     };
 
     /**
