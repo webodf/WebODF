@@ -69,6 +69,7 @@ ops.OpInsertText = function OpInsertText() {
             offset,
             length,
             space,
+            previousNode,
             ownerDocument = odtDocument.getRootNode().ownerDocument,
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
@@ -76,9 +77,9 @@ ops.OpInsertText = function OpInsertText() {
 
         domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {
-            textNode = domPosition.textNode;
+            previousNode = domPosition.textNode;
             offset = domPosition.offset;
-            paragraphElement = odtDocument.getParagraphElement(domPosition.textNode);
+            paragraphElement = odtDocument.getParagraphElement(previousNode);
 
             // Iterate through the string to be inserted, and insert the characters
             // one by one. If a space is encountered, insert a <text:s> </text:s> instead
@@ -89,24 +90,27 @@ ops.OpInsertText = function OpInsertText() {
                 if (text[i] === ' ') {
                     space = ownerDocument.createElementNS(textns, 'text:s');
                     space.appendChild(ownerDocument.createTextNode(' '));
-                    textNode.parentNode.insertBefore(space, textNode.nextSibling);
-                    if (textNode.data === '') {
-                        textNode.parentNode.removeChild(textNode);
-                    }
-                    textNode = ownerDocument.createTextNode('');
-                    space.parentNode.insertBefore(textNode, space.nextSibling);
-                    offset = 0;
+                    previousNode.parentNode.insertBefore(space, previousNode.nextSibling);
+
+                    previousNode = space;
                 } else {
-                    textNode.insertData(offset + i, text[i]);
+                    if (previousNode.nodeType === 3) {
+                        previousNode.insertData(offset + i, text[i]);
+                    } else {
+                        textNode = ownerDocument.createTextNode('');
+                        previousNode.parentNode.insertBefore(textNode, previousNode.nextSibling);
+
+                        previousNode = textNode;
+                    }
                 }
             }
 
             // FIXME A workaround.
-            triggerLayoutInWebkit(textNode);
+            triggerLayoutInWebkit(previousNode);
 
             // If the last text node happens to be an empty text node, clean up.
-            if (textNode.data === "") {
-                textNode.parentNode.removeChild(textNode);
+            if (previousNode.data === "") {
+                previousNode.parentNode.removeChild(previousNode);
             }
             // FIXME care must be taken regarding the cursor positions
             // the new text must appear in front of the (own) cursor.
