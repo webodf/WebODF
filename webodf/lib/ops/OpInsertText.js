@@ -94,14 +94,16 @@ ops.OpInsertText = function OpInsertText() {
 
                     previousNode = space;
                 } else {
-                    if (previousNode.nodeType === 3) {
-                        previousNode.insertData(offset + i, text[i]);
-                    } else {
+                    if (previousNode.nodeType !== 3) {
                         textNode = ownerDocument.createTextNode('');
                         previousNode.parentNode.insertBefore(textNode, previousNode.nextSibling);
 
                         previousNode = textNode;
+                        offset = 0;
                     }
+
+                    previousNode.insertData(offset, text[i]);
+                    offset += 1;
                 }
             }
 
