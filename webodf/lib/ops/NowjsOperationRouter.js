@@ -51,6 +51,8 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
     "use strict";
 
     var self = this,
+        operationFactory,
+        playbackFunction,
         net = runtime.getNetwork(),
         last_server_seq = -1, // first seq will be 0
         reorder_queue = {},
@@ -70,7 +72,7 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
      * @return {undefined}
      */
     this.setOperationFactory = function (f) {
-        self.op_factory = f;
+        operationFactory = f;
     };
 
     /**
@@ -80,7 +82,7 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
      * @return {undefined}
      */
     this.setPlaybackFunction = function (playback_func) {
-        self.playback_func = playback_func;
+        playbackFunction = playback_func;
     };
 
     /**
@@ -88,19 +90,19 @@ ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
     */
     function receiveOpFromNetwork(opspec) {
         // use factory to create an instance, and playback!
-        var idx, seq, op = self.op_factory.create(opspec);
+        var idx, seq, op = operationFactory.create(opspec);
         runtime.log(" op in: "+runtime.toJson(opspec));
         if (op !== null) {
             seq = Number(opspec.server_seq);
             runtime.assert(!isNaN(seq), "server seq is not a number");
             if (seq === (last_server_seq + 1)) {
-                self.playback_func(op);
+                playbackFunction(op);
                 last_server_seq = seq;
                 sends_since_server_op = 0;
                 for (idx = (last_server_seq + 1);
                         reorder_queue.hasOwnProperty(idx);
                         idx += 1) {
-                    self.playback_func(reorder_queue[idx]);
+                    playbackFunction(reorder_queue[idx]);
                     delete reorder_queue[idx];
                     runtime.log("op with server seq "+seq+" taken from hold (reordered)");
                 }

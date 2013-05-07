@@ -49,7 +49,9 @@
 ops.TrivialOperationRouter = function TrivialOperationRouter() {
     "use strict";
 
-    var self = this;
+    var self = this,
+        operationFactory,
+        playbackFunction;
 
     /**
      * Sets the factory to use to create operation instances from operation specs.
@@ -58,7 +60,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
      * @return {undefined}
      */
     this.setOperationFactory = function (f) {
-        self.op_factory = f;
+        operationFactory = f;
     };
 
     /**
@@ -68,7 +70,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
      * @return {undefined}
      */
     this.setPlaybackFunction = function (playback_func) {
-        self.playback_func = playback_func;
+        playbackFunction = playback_func;
     };
 
     /**
@@ -82,8 +84,8 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
             opspec = op.spec();
 
         opspec.timestamp = (new Date()).getTime();
-        timedOp = self.op_factory.create(opspec);
+        timedOp = operationFactory.create(opspec);
 
-        self.playback_func(timedOp);
+        playbackFunction(timedOp);
     };
 };
