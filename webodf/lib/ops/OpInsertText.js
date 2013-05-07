@@ -94,7 +94,7 @@ ops.OpInsertText = function OpInsertText() {
                 space = ownerDocument.createElementNS(textns, 'text:s');
                 space.appendChild(ownerDocument.createTextNode(' '));
                 parent.insertBefore(space, refNode);
-                if (texts.length > 0) {
+                if (texts[i].length > 0) {
                     parent.insertBefore(ownerDocument.createTextNode(texts[i]), refNode);
                 }
             }
