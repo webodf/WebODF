@@ -166,14 +166,14 @@ ops.OperationTests = function OperationTests(runner) {
 
     function runTest(test) {
         var text = t.odtDocument.getRootNode(),
-            session = new ops.Session(t.odtDocument.getOdfCanvas()),
             factory = new ops.OperationFactory(),
-            i,
+            i, op,
             textbefore = getOfficeTextNode(test.before),
             textafter = getOfficeTextNode(test.after);
         copyChildNodes(textbefore, text);
         for (i = 0; i < test.ops.length; i += 1) {
-            session.enqueue(factory.create(test.ops[i]));
+            op = factory.create(test.ops[i]);
+            op.execute(t.odtDocument);
         }
         if (!compareNodes(textafter, text)) {
             t.text = serialize(text);
