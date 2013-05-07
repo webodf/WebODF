@@ -91,7 +91,7 @@ gui.SessionController = (function () {
         /**
          * @param {!Event} e
          */
-        function handleMouseClick(e) {
+        function handleMouseUp(e) {
             var selection = runtime.getWindow().getSelection(),
                 focusNode = selection.focusNode,
                 focusOffset = selection.focusOffset,
@@ -353,8 +353,7 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "copy", dummyHandler);
             listenEvent(canvasElement, "cut", dummyHandler);
             listenEvent(canvasElement, "paste", dummyHandler);
-            listenEvent(canvasElement, "click", handleMouseClick);
-            listenEvent(canvasElement, "mouseup", handleMouseClick);
+            listenEvent(canvasElement, "mouseup", handleMouseUp);
         };
 
        /**
