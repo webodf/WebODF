@@ -111,12 +111,15 @@ core.Cursor = function Cursor(selection, document) {
 
         runtime.assert(Boolean(cursorNode.parentNode),
             "cursorNode.parentNode is undefined");
+
         // Merge the left and right textnodes
-        if (prev && prev.nodeType === 3 && prev.length > 0) {
+        if (prev && prev.nodeType === 3) {
             textNodeIncrease = prev.length;
-            if (next && next.nodeType === 3 && next.length > 0) {
+            if (next && next.nodeType === 3) {
+                if (prev.length > 0) {
+                    next.insertData(0, prev.data);
+                }
                 prev.parentNode.removeChild(prev);
-                next.insertData(0, prev.data);
             }
         }
 
