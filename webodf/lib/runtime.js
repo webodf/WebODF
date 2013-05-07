@@ -1244,6 +1244,8 @@ var runtime = (function () {
         for (i = 1; i < packageNameComponents.length - 1; i += 1) {
             if (!pkg.hasOwnProperty(packageNameComponents[i])) {
                 pkg = pkg[packageNameComponents[i]] = {};
+            } else {
+                pkg = pkg[packageNameComponents[i]];
             }
         }
         return pkg[packageNameComponents[packageNameComponents.length - 1]];
@@ -1267,7 +1269,7 @@ var runtime = (function () {
             return;
         }
         function getPathFromManifests(classpath) {
-            var path = classpath.replace(".", "/") + ".js",
+            var path = classpath.replace(/\./g, "/") + ".js",
                 dirs = runtime.libraryPaths(),
                 i,
                 dir,
