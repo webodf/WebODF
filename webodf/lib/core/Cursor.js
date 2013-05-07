@@ -66,26 +66,24 @@ core.Cursor = function Cursor(selection, document) {
 
     /**
      * Split a text node and put the cursor into it.
-     * When a text node is split in two, a second node is required. For this
-     * reason, cursorTextNode exists. The front part of the split text node is
-     * placed in cursorTextNode. Then cursorTextNode is inserted before the
-     * original text node and the cursor is placed between the two text nodes.
      * @param {!Text} container
      * @param {!number} offset
      * @return {undefined}
      */
     function putCursorIntoTextNode(container, offset) {
         runtime.assert(Boolean(container), "putCursorIntoTextNode: invalid container");
-        var parent = container.parentNode,
-            prev = document.createTextNode('');
-
+        var parent = container.parentNode;
         runtime.assert(Boolean(parent), "putCursorIntoTextNode: container without parent");
-        if (offset > 0) {
-            prev.data = container.substringData(0, offset);
-            container.deleteData(0, offset);
-            parent.insertBefore(prev, container);
+        runtime.assert(offset >= 0 && offset <= container.length, "putCursorIntoTextNode: offset is out of bounds");
+
+        if (offset === 0) {
+            parent.insertBefore(cursorNode, container);
+        } else if (offset === container.length) {
+            parent.insertBefore(cursorNode, container.nextSibling);
+        } else {
+            container.splitText(offset);
+            parent.insertBefore(cursorNode, container.nextSibling);
         }
-        parent.insertBefore(cursorNode, container);
     }
     /**
      * @param {!Element} container

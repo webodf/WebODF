@@ -66,10 +66,13 @@ ops.OpInsertText = function OpInsertText() {
     this.execute = function (odtDocument) {
         var domPosition,
             textNode,
+            texts = text.split(" "),
             offset,
             length,
             space,
             previousNode,
+            parent,
+            refNode,
             ownerDocument = odtDocument.getRootNode().ownerDocument,
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
@@ -78,32 +81,21 @@ ops.OpInsertText = function OpInsertText() {
         domPosition = odtDocument.getPositionInTextNode(position);
         if (domPosition) {
             previousNode = domPosition.textNode;
+            parent = previousNode.parentNode;
+            refNode = previousNode.nextSibling;
+
             offset = domPosition.offset;
             paragraphElement = odtDocument.getParagraphElement(previousNode);
 
-            // Iterate through the string to be inserted, and insert the characters
-            // one by one. If a space is encountered, insert a <text:s> </text:s> instead
-            // (with the space character inside for better parsing), followed by an empty text
-            // node, into which further text can be appended. If a space is being inserted *after* such
-            // an empty text node, then delete that node.
-            for (i = 0; i < text.length; i += 1) {
-                if (text[i] === ' ') {
-                    space = ownerDocument.createElementNS(textns, 'text:s');
-                    space.appendChild(ownerDocument.createTextNode(' '));
-                    previousNode.parentNode.insertBefore(space, previousNode.nextSibling);
-
-                    previousNode = space;
-                } else {
-                    if (previousNode.nodeType !== 3) {
-                        textNode = ownerDocument.createTextNode('');
-                        previousNode.parentNode.insertBefore(textNode, previousNode.nextSibling);
-
-                        previousNode = textNode;
-                        offset = 0;
-                    }
-
-                    previousNode.insertData(offset, text[i]);
-                    offset += 1;
+            if (texts[0].length > 0) {
+                previousNode.insertData(offset, texts[0]);
+            }
+            for (i = 1; i < texts.length; i += 1) {
+                space = ownerDocument.createElementNS(textns, 'text:s');
+                space.appendChild(ownerDocument.createTextNode(' '));
+                parent.insertBefore(space, refNode);
+                if (texts.length > 0) {
+                    parent.insertBefore(ownerDocument.createTextNode(texts[i]), refNode);
                 }
             }
 
@@ -111,7 +103,7 @@ ops.OpInsertText = function OpInsertText() {
             triggerLayoutInWebkit(previousNode);
 
             // If the last text node happens to be an empty text node, clean up.
-            if (previousNode.data === "") {
+            if (previousNode.length === 0) {
                 previousNode.parentNode.removeChild(previousNode);
             }
             // FIXME care must be taken regarding the cursor positions
