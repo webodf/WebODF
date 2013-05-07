@@ -87,8 +87,11 @@ ops.OpInsertText = function OpInsertText() {
             offset = domPosition.offset;
             paragraphElement = odtDocument.getParagraphElement(previousNode);
 
+            if (offset !== previousNode.length) {
+                refNode = previousNode.splitText(offset);
+            }
             if (texts[0].length > 0) {
-                previousNode.insertData(offset, texts[0]);
+                previousNode.appendData(texts[0]);
             }
             for (i = 1; i < texts.length; i += 1) {
                 space = ownerDocument.createElementNS(textns, 'text:s');
