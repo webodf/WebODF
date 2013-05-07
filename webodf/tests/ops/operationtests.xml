@@ -6,6 +6,34 @@
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></after>
  </test>
+ <test name="AddCursor_Span">
+  <before><office:text><text:p><text:span/></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><c:cursor c:memberId="Joe"/><text:span/></text:p></office:text></after>
+ </test>
+ <test name="AddCursor_Text">
+  <before><office:text><text:p>a</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><c:cursor c:memberId="Joe"/>a</text:p></office:text></after>
+ </test>
+ <test name="AddCursor_Space">
+  <before><office:text><text:p> a</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p> <c:cursor c:memberId="Joe"/>a</text:p></office:text></after>
+ </test>
+ <test name="AddCursor_SpanSpace">
+  <before><office:text><text:p> <text:span> a</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p> <text:span> <c:cursor c:memberId="Joe"/>a</text:span></text:p></office:text></after>
+ </test>
 <!--
  <test name="RemoveCursor_Simple">
   <before><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></before>

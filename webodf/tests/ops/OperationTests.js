@@ -132,6 +132,13 @@ ops.OperationTests = function OperationTests(runner) {
         return true;
     }
 
+    function skipEmptyTextNodes(node) {
+        while (node && node.nodeType === 3 && node.length === 0) {
+            node = node.nextSibling;
+        }
+        return node;
+    }
+
     function compareNodes(a, b) {
         if (a.nodeType !== b.nodeType) {
             return false;
@@ -148,6 +155,8 @@ ops.OperationTests = function OperationTests(runner) {
         }
         var an = a.firstChild,
             bn = b.firstChild;
+        an = skipEmptyTextNodes(an);
+        bn = skipEmptyTextNodes(bn);
         while (an) {
             if (!bn) {
                 return false;
@@ -157,6 +166,8 @@ ops.OperationTests = function OperationTests(runner) {
             }
             an = an.nextSibling;
             bn = bn.nextSibling;
+            an = skipEmptyTextNodes(an);
+            bn = skipEmptyTextNodes(bn);
         }
         if (bn) {
             return false;
@@ -202,18 +213,24 @@ ops.OperationTests = function OperationTests(runner) {
         return functions;
     }
 
-    function loadTests(url) {
+    function loadTests(url, tests) {
         var s = runtime.readFileSync(url, "utf-8"),
             xml = runtime.parseXML(s),
             n,
-            testName,
-            tests = {};
+            testName;
         n = xml.documentElement.firstElementChild;
         while (n) {
             testName = n.getAttribute("name");
             runtime.assert(!tests.hasOwnProperty(testName), "Test name is not unique.");
             tests[testName] = parseTest(testName, n);
             n = n.nextElementSibling;
+        }
+    }
+
+    function loadTestFiles(urls) {
+        var tests = {}, i;
+        for (i = 0; i < urls.length; i += 1) {
+            loadTests(urls[i], tests);
         }
         return tests;
     }
@@ -235,7 +252,9 @@ ops.OperationTests = function OperationTests(runner) {
     };
     this.tests = function () {
         if (!tests) {
-            tests = makeTestsIntoFunction(loadTests("ops/operationtests.xml"));
+            tests = makeTestsIntoFunction(loadTestFiles(
+                ["ops/operationtests.xml", "ops/allowedpositions.xml"]
+            ));
         }
         return tests;
     };
