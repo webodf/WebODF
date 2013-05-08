@@ -106,7 +106,7 @@ function runNextTest(tests) {
     try {
         tester.runTests(test, function () {
             runNextTest(tests.slice(1));
-        });
+        }, []);
     } catch (e) {
         runtime.log(e);
         runtime.exit(1);
@@ -150,25 +150,53 @@ function runTest(suite, name) {
     window.location.search = "?suite=" + suite + "&test=" + name;
 }
 
-function runSelectedTest() {
+function runSelectedTests(selectedTests) {
     "use strict";
-    // only run a selected test
-    var options = queryObj(),
-        suite = findSuite(options.suite),
-        testNames;
-    if (!suite) {
+    if (!selectedTests.suite) {
         return false;
     }
-    testNames = options.test ? [options.test] : undefined;
-    tester.runTests(suite, function () {
-    }, testNames);
+    tester.runTests(selectedTests.suite, function () {
+    }, selectedTests.testNames);
     return true;
 }
 
-if (runtime.type() === "BrowserRuntime") {
-    if (!runSelectedTest()) {
-        runNextTest(tests);
+function getTestNameFromUrl(selectedTests) {
+    "use strict";
+    var options = queryObj();
+    selectedTests.suite = findSuite(options.suite);
+    if (!selectedTests.suite) {
+        return;
     }
-} else {
+    if (options.test) {
+        selectedTests.testNames = options.test.split(",");
+    }
+}
+
+function getTestNamesFromArguments(selectedTests, args) {
+    "use strict";
+    var i;
+    for (i = 0; i < args.length - 1; i += 1) {
+        if (args[i] === "-suite") {
+            selectedTests.suite = findSuite(args[i + 1]);
+        }
+        if (args[i] === "-test") {
+            selectedTests.testNames.push(args[i + 1]);
+        }
+    }
+}
+
+var args = String(typeof arguments) !== "undefined" && Array.prototype.slice.call(arguments),
+    selectedTests = {
+        suite: null,
+        testNames: []
+    };
+
+if (runtime.type() === "BrowserRuntime") {
+    getTestNameFromUrl(selectedTests);
+}
+if (!selectedTests.suite) {
+    getTestNamesFromArguments(selectedTests, args);
+}
+if (!runSelectedTests(selectedTests)) {
     runNextTest(tests);
 }

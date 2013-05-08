@@ -252,7 +252,7 @@ core.UnitTester = function UnitTester() {
         for (i = 0; i < tests.length; i += 1) {
             t = tests[i];
             tname = Runtime.getFunctionName(t) || t[testNameString];
-            if (testNames && testNames.indexOf(tname) === -1) {
+            if (testNames.length && testNames.indexOf(tname) === -1) {
                 continue;
             }
             if (inBrowser) {
