@@ -151,21 +151,21 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * the text node will be returned.
      * If there is no right neighbor in the container node, then null is
      * returned.
-     * Both filtered and unfiltered nodes will be returned.
+     * Only filtered nodes will be returned.
      * @return {?Node}
      */
     this.rightNode = function () {
-        var n = walker.currentNode;
-        if (n.nodeType === 3) {
-            if (currentPos === n.length) {
-                return n.nextSibling;
+        var n = walker.currentNode,
+            nodeType = n.nodeType;
+        if (nodeType === 3 && currentPos === n.length) {
+            n = n.nextSibling;
+            while (n && nodeFilter(n) !== 1) {
+                n = n.nextSibling;
             }
-            return n;
+        } else if (nodeType === 1 && currentPos === 1) {
+            n = null;
         }
-        if (currentPos === 0) {
-            return n;
-        }
-        return null;
+        return n;
     };
     /**
      * Return the node to the left of the current iterator position.
@@ -174,16 +174,18 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      */
     this.leftNode = function () {
         var n = walker.currentNode;
-        if (n.nodeType === 3) {
-            if (currentPos === 0) {
-                return n.previousSibling;
-            }
-            return n;
-        }
         if (currentPos === 0) {
-            return n.previousSibling;
+            n = n.previousSibling;
+            while (n && nodeFilter(n) !== 1) {
+                n = n.previousSibling;
+            }
+        } else if (n.nodeType === 1) {
+            n = n.lastChild;
+            while (n && nodeFilter(n) !== 1) {
+                n = n.previousSibling;
+            }
         }
-        return n.lastChild;
+        return n;
     };
     /**
      * @return {!Node}
@@ -436,7 +438,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     };
 
     function init() {
-        var f, acceptNode;
+        var f;
         // a position can never be near an empty TextNode. A NodeFilter is the
         // easiest way of filtering out these nodes.
         if (filter) {
@@ -446,12 +448,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         // workaround for versions of createTreeWalker that need a function
         // instead of an object with a function such as IE 9 and older webkits
-        acceptNode = f.acceptNode;
-        acceptNode.acceptNode = acceptNode;
+        nodeFilter = f.acceptNode;
+        nodeFilter.acceptNode = nodeFilter;
         whatToShow = whatToShow || 0xFFFFFFFF;
         walker = root.ownerDocument.createTreeWalker(root, whatToShow,
-                acceptNode, expandEntityReferences);
-        nodeFilter = acceptNode;
+                nodeFilter, expandEntityReferences);
 
         currentPos = 0;
         if (walker.firstChild() === null) {

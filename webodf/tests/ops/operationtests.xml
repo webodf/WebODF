@@ -108,4 +108,20 @@
   </ops>
   <after><office:text><text:p><text:s/>a</text:p></office:text></after>
  </test>
+ <test name="InsertText_AfterSpace2">
+  <before><office:text><text:p>a<text:s/></text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="2" text="b"/>
+  </ops>
+  <after><office:text><text:p>a<text:s/>b</text:p></office:text></after>
+ </test>
+ <test name="InsertTextWithCursor_AfterSpace2">
+  <before><office:text><text:p>a<text:s/></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="2"/>
+   <op optype="InsertText" position="2" text="b"/>
+  </ops>
+  <after><office:text><text:p>a<text:s/>b<ns0:cursor xmlns:ns0="urn:webodf:names:cursor" ns0:memberId="Joe"/></text:p></office:text></after>
+ </test>
 </tests>

@@ -106,7 +106,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (ns === textns) {
                 r = n === "s" || n === "tab" || n === "line-break";
             } else if (ns === drawns) {
-                r = n === "frame";
+                r = n === "frame" && e.getAttributeNS(textns, "anchor-type") === "as-char";
             }
             return r;
         }
