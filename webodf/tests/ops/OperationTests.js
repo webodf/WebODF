@@ -178,7 +178,8 @@ ops.OperationTests = function OperationTests(runner) {
     function runTest(test) {
         var text = t.odtDocument.getRootNode(),
             factory = new ops.OperationFactory(),
-            i, op,
+            i,
+            op,
             textbefore = getOfficeTextNode(test.before),
             textafter = getOfficeTextNode(test.after);
         copyChildNodes(textbefore, text);
@@ -218,9 +219,12 @@ ops.OperationTests = function OperationTests(runner) {
             xml = runtime.parseXML(s),
             n,
             testName;
+        runtime.assert(s.length);
+        runtime.assert(xml.documentElement.localName === "tests");
         n = xml.documentElement.firstElementChild;
         while (n) {
             testName = n.getAttribute("name");
+            runtime.assert(n.localName === "test");
             runtime.assert(!tests.hasOwnProperty(testName), "Test name is not unique.");
             tests[testName] = parseTest(testName, n);
             n = n.nextElementSibling;
