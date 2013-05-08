@@ -174,7 +174,7 @@ define("webodf/editor/EditorSession", [
         function trackCursor(cursor) {
             var node;
 
-            node = odtDocument.getParagraphElement(cursor.getSelection().focusNode);
+            node = odtDocument.getParagraphElement(cursor.getNode());
             if (!node) {
                 return;
             }
