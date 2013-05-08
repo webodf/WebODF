@@ -224,8 +224,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     node = node.lastChild;
                 } else if (node.previousSibling) {
                     node = node.previousSibling;
-                } else if (node.localName === "p" || node.localName === "h") {
-                    return node.parentNode.previousSibling;
                 } else {
                     node = null;
                 }
@@ -257,8 +255,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     node = node.firstChild;
                 } else if (node.nextSibling) {
                     node = node.nextSibling;
-                } else if (node.localName === "p" || node.localName === "h") {
-                    node = node.parentNode.nextSibling;
                 } else {
                     node = null;
                 }
