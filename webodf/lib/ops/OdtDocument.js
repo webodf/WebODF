@@ -208,6 +208,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          */
         function scanLeftForAnyCharacter(node) {
             var r = false;
+            if (!node || node.localName === "p" || node.localName === "h") {
+                return false;
+            }
             while (node) {
                 if (node.nodeType === 3 && node.length > 0
                         && !isODFWhitespace(node.data)) {
@@ -216,10 +219,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 } else if (isCharacterElement(node)) {
                     r = true;
                     break;
-                } else if (node.localName === "p" || node.localName === "h") {
-                    return false;
                 }
-                node = previousNode(node);
+                if (node.lastChild !== null && isGroupingElement(node)) {
+                    node = node.lastChild;
+                } else if (node.previousSibling) {
+                    node = node.previousSibling;
+                } else if (node.localName === "p" || node.localName === "h") {
+                    return node.parentNode.previousSibling;
+                } else {
+                    node = null;
+                }
             }
             return r;
         }
@@ -263,19 +272,25 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {!core.PositionFilter.FilterResult}
          */
         function checkLeftRight(container, leftNode, rightNode) {
+            // accept if there is a character immediately to the left
             if (leftNode && scanLeftForCharacter(leftNode)) {
                 return accept;
             }
+            // accept if this is the first position in p or h and there is no
+            // character in the p or h
             if (leftNode === null && (container.localName === "p"
                                       || container.localName === "h")
                     && !scanRightForAnyCharacter(rightNode)) {
                 return accept;
             }
+            // if not to the right of a character, reject
             if (rightNode === null || !scanRightForCharacter(rightNode)) {
                 return reject;
             }
-            return scanLeftForNonWhitespace(rightNode || rightNode.parentNode)
-                ? accept : reject;
+            // accept if there is no character to the left
+            return scanLeftForAnyCharacter(
+                leftNode || container.previousSibling || container.parentNode
+            ) ? reject : accept;
         }
 
         /**

@@ -1,5 +1,5 @@
 <tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
- <test name="MoveCursor0">
+ <test name="MoveCursor00">
   <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -7,7 +7,7 @@
   </ops>
   <after><office:text><text:p>ab<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor1">
+ <test name="MoveCursor01">
   <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -15,7 +15,7 @@
   </ops>
   <after><office:text><text:p>ab<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor2">
+ <test name="MoveCursor02">
   <before><office:text><text:p>a b</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -23,7 +23,7 @@
   </ops>
   <after><office:text><text:p>a b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor3">
+ <test name="MoveCursor03">
   <before><office:text><text:p>a  b</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -31,7 +31,7 @@
   </ops>
   <after><office:text><text:p>a <c:cursor c:memberId="Joe"/> b</text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor4">
+ <test name="MoveCursor04">
   <before><office:text><text:p>a  b</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -39,7 +39,7 @@
   </ops>
   <after><office:text><text:p>a  b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor5">
+ <test name="MoveCursor05">
   <before><office:text><text:p>a<text:s/>b</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -47,7 +47,7 @@
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Joe"/><text:s/>b</text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor6">
+ <test name="MoveCursor06">
   <before><office:text><text:p>a<text:s/>b</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -55,12 +55,84 @@
   </ops>
   <after><office:text><text:p>a<text:s/><c:cursor c:memberId="Joe"/>b</text:p><text:p/></office:text></after>
  </test>
- <test name="MoveCursor7">
+ <test name="MoveCursor07">
   <before><office:text><text:p>a<text:s/>b</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" number="3"/>
   </ops>
   <after><office:text><text:p>a<text:s/>b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor08">
+  <before><office:text><text:p>ABC</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="3"/>
+  </ops>
+  <after><office:text><text:p>ABC<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor09">
+  <before><office:text><text:p><text:span>AB</text:span>C</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="3"/>
+  </ops>
+  <after><office:text><text:p><text:span>AB</text:span>C<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor10">
+  <before><office:text><text:p>A<text:span>B</text:span>C</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="3"/>
+  </ops>
+  <after><office:text><text:p>A<text:span>B</text:span>C<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor11">
+  <before><office:text><text:p>A<text:span>BC</text:span></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="3"/>
+  </ops>
+  <after><office:text><text:p>A<text:span>BC<c:cursor c:memberId="Joe"/></text:span></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor12">
+  <before><office:text><text:p><text:span>A<text:span>B</text:span></text:span>C</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="3"/>
+  </ops>
+  <after><office:text><text:p><text:span>A<text:span>B</text:span></text:span>C<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor13">
+  <before><office:text><text:p>A<text:span><text:span>B</text:span>C</text:span></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="3"/>
+  </ops>
+  <after><office:text><text:p>A<text:span><text:span>B</text:span>C<c:cursor c:memberId="Joe"/></text:span></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor14">
+  <before><office:text><text:p><text:span/>A</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:span/>A<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor15">
+  <before><office:text><text:p><text:span>A</text:span></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>A<c:cursor c:memberId="Joe"/></text:span></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor16">
+  <before><office:text><text:p><text:span>A</text:span>B</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="2"/>
+  </ops>
+  <after><office:text><text:p><text:span>A</text:span>B<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
 </tests>
