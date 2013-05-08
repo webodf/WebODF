@@ -219,12 +219,12 @@ ops.OperationTests = function OperationTests(runner) {
             xml = runtime.parseXML(s),
             n,
             testName;
-        runtime.assert(s.length);
-        runtime.assert(xml.documentElement.localName === "tests");
+        runtime.assert(s.length > 0, "XML file is empty.");
+        runtime.assert(xml.documentElement.localName === "tests", "Element is not <tests/>.");
         n = xml.documentElement.firstElementChild;
         while (n) {
             testName = n.getAttribute("name");
-            runtime.assert(n.localName === "test");
+            runtime.assert(n.localName === "test", "Element is not <test/>.");
             runtime.assert(!tests.hasOwnProperty(testName), "Test name is not unique.");
             tests[testName] = parseTest(testName, n);
             n = n.nextElementSibling;
