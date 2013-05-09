@@ -189,7 +189,7 @@ if(WIN32)
     ExternalProject_Add(
         AntBin
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://mirrors.enquira.co.uk/apache//ant/binaries/apache-ant-1.8.4-bin.zip"
+        URL "http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
         URL_MD5 ca632528c35b8a335edd4e2064f7129e
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
