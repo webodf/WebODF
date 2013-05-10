@@ -65,7 +65,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         selection = new core.Selection(domDocument);
         cursor = new core.Cursor(selection, domDocument);
         mover = new gui.SelectionMover(cursor, p);
-        t = { doc: domDocument, p: p, text: text, selection: cursor.getSelection(), mover: mover };
+        t = { doc: domDocument, p: p, selection: cursor.getSelection(), mover: mover, cursor: cursor };
     }
     function createDoc(xml) {
         var domDocument = testarea.ownerDocument,
@@ -85,16 +85,16 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         r.shouldBe(t, "t.selection.rangeCount", "1");
         t.r = t.selection.getRangeAt(0);
         r.shouldBeNonNull(t, "t.r");
-        t.r.setStart(t.text, 0);
-        r.shouldBe(t, "t.r.startContainer", "t.text");
+        t.r.setStart(t.cursor.getNode().nextSibling, 0);
+        r.shouldBe(t, "t.r.startContainer", "t.cursor.getNode().nextSibling");
         r.shouldBe(t, "t.r.startOffset", "0");
         t.mover.movePointForward(1);
         t.r = t.selection.getRangeAt(0);
-        r.shouldBe(t, "t.r.startContainer", "t.text");
+        r.shouldBe(t, "t.r.startContainer", "t.cursor.getNode().nextSibling");
         r.shouldBe(t, "t.r.startOffset", "0");
         t.mover.movePointBackward(1);
         t.r = t.selection.getRangeAt(0);
-        r.shouldBe(t, "t.r.startContainer", "t.text");
+        r.shouldBe(t, "t.r.startContainer", "t.cursor.getNode().nextSibling");
         r.shouldBe(t, "t.r.startOffset", "0");
 /*
         t.mover.moveLineForward();
@@ -107,18 +107,18 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     function testForthBack() {
         setupDoc();
         var n = 1;
-        t.textValue = t.text.data;
+        t.textValue = t.cursor.getNode().nextSibling.data;
         while (t.mover.movePointForward(1)) {
             n += 1;
         }
         r.shouldBe(t, n.toString(), "30");
-        r.shouldBe(t, "t.text.data", "t.textValue");
+        r.shouldBe(t, "t.cursor.getNode().previousSibling.data", "t.textValue");
         n = 1;
         while (t.mover.movePointBackward(1)) {
             n += 1;
         }
         r.shouldBe(t, n.toString(), "30");
-        r.shouldBe(t, "t.text.data", "t.textValue");
+        r.shouldBe(t, "t.cursor.getNode().nextSibling.data", "t.textValue");
     }
     function testXMLForthBack(xml, positions) {
         createDoc(xml);
