@@ -65,7 +65,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         selection = new core.Selection(domDocument);
         cursor = new core.Cursor(selection, domDocument);
         mover = new gui.SelectionMover(cursor, p);
-        t = { doc: domDocument, p: p, selection: cursor.getSelection(), mover: mover, cursor: cursor };
+        t = { doc: domDocument, p: p, mover: mover, cursor: cursor };
     }
     function createDoc(xml) {
         var domDocument = testarea.ownerDocument,
@@ -78,24 +78,15 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         selection = new core.Selection(domDocument);
         cursor = new core.Cursor(selection, domDocument);
         mover = new gui.SelectionMover(cursor, node);
-        t = { doc: doc, root: node, selection: cursor.getSelection(), mover: mover, cursor: cursor };
+        t = { doc: doc, root: node, mover: mover, cursor: cursor };
     }
     function testUpDownTraversal() {
         setupDoc();
-        r.shouldBe(t, "t.selection.rangeCount", "1");
-        t.r = t.selection.getRangeAt(0);
-        r.shouldBeNonNull(t, "t.r");
-        t.r.setStart(t.cursor.getNode().nextSibling, 0);
-        r.shouldBe(t, "t.r.startContainer", "t.cursor.getNode().nextSibling");
-        r.shouldBe(t, "t.r.startOffset", "0");
         t.mover.movePointForward(1);
-        t.r = t.selection.getRangeAt(0);
-        r.shouldBe(t, "t.r.startContainer", "t.cursor.getNode().nextSibling");
-        r.shouldBe(t, "t.r.startOffset", "0");
+        r.shouldBe(t, "'M'", "t.cursor.getNode().previousSibling.data");
+        r.shouldBe(t, "'MMMM MMMMM MMMMM MMMMM MMMMM'", "t.cursor.getNode().nextSibling.data");
         t.mover.movePointBackward(1);
-        t.r = t.selection.getRangeAt(0);
-        r.shouldBe(t, "t.r.startContainer", "t.cursor.getNode().nextSibling");
-        r.shouldBe(t, "t.r.startOffset", "0");
+        r.shouldBe(t, "'MMMMM MMMMM MMMMM MMMMM MMMMM'", "t.cursor.getNode().nextSibling.data");
 /*
         t.mover.moveLineForward();
 //        t.selection.modify("move", "forward", "line");
