@@ -387,7 +387,8 @@ odf.OdfCanvas = (function () {
             if (node.namespaceURI === officens &&
                     node.localName === "binary-data") {
                 // TODO: detect mime-type, assuming png for now
-                return "data:image/png;base64," + node.textContent;
+                // the base64 data can be  pretty printed, hence we need remove all the line breaks and whitespaces
+                return "data:image/png;base64," + node.textContent.replace(/[\r\n\s]/g, '');
             }
             node = node.nextSibling;
         }
