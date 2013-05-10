@@ -339,17 +339,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     return scanLeftForAnyCharacter(leftNode)
                         ? reject : accept;
                 }
-/*
-                // The first whitespace in a text node can never be the first
-                // significant character of a p or h and the cursor may not be
-                // placed to the left of it.
-                leftNode = container.previousSibling || container.parentNode;
-                if (isODFWhitespace(text.substr(0, 1))) {
-                    return scanLeftForCharacter(leftNode) ? reject : accept;
-                }
-                // position is to the left of a text node
-                r = scanLeftForAnyCharacter(leftNode) ? accept : reject;
-*/
                 leftNode = container.previousSibling;
                 rightNode = container;
                 container = /**@type{!Node}*/(container.parentNode);
@@ -522,7 +511,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             node,
             nodeOffset = 0;
         runtime.assert(position >= 0, "position must be >= 0");
-        position += 1; // add one because we check for position === 0
         // iterator should be at the start of rootNode
         if (filter.acceptPosition(iterator) === 1) {
             node = iterator.container();
@@ -530,6 +518,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 lastTextNode = /**@type{!Text}*/(node);
                 nodeOffset = 0;
             }
+        } else {
+            // add 1 to move into an acceptable position
+            position += 1;
         }
         while (position > 0 || lastTextNode === null) {
             if (!iterator.nextPosition()) {
@@ -567,17 +558,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         // cursor
         while (nodeOffset === 0 && lastTextNode.previousSibling &&
                 lastTextNode.previousSibling.localName === "cursor") {
-            node = lastTextNode.previousSibling.previousSibling;
-            while (node && node.nodeType !== 3) {
-                node = node.previousSibling;
-            }
-            if (node === null) {
-                node = rootNode.ownerDocument.createTextNode('');
-                lastTextNode.parentNode.insertBefore(node,
-                        lastTextNode.parentNode.firstChild);
-            }
-            lastTextNode = /**@type{!Text}*/(node);
-            nodeOffset = lastTextNode.length;
+            lastTextNode.parentNode.insertBefore(lastTextNode,
+                    lastTextNode.previousSibling);
         }
         return {textNode: lastTextNode, offset: nodeOffset };
     }

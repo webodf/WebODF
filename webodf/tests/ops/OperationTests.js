@@ -114,22 +114,23 @@ ops.OperationTests = function OperationTests(runner) {
         return null;
     }
 
-    function compareAttributes(a, b) {
+    function compareAttributes(a, b, skipReverseCheck) {
         var aatts = a.attributes,
             n = aatts.length,
             i,
-            att;
-        if (n !== b.attributes.length) {
-            return false;
-        }
+            att,
+            v;
         for (i = 0; i < n; i += 1) {
             att = aatts.item(i);
-            if (!b.hasAttributeNS(att.namespaceURI, att.localName)
-                    || b.getAttributeNS(att.namespaceURI, att.localName) !== att.value) {
-                return false;
+            if (att.prefix !== "xmlns") {
+                v = b.getAttributeNS(att.namespaceURI, att.localName);
+                if (!b.hasAttributeNS(att.namespaceURI, att.localName)
+                        || v !== att.value) {
+                    return false;
+                }
             }
         }
-        return true;
+        return skipReverseCheck ? true : compareAttributes(b, a, true);
     }
 
     function skipEmptyTextNodes(node) {
@@ -150,7 +151,7 @@ ops.OperationTests = function OperationTests(runner) {
         if (a.namespaceURI !== b.namespaceURI || a.localName !== b.localName) {
             return false;
         }
-        if (!compareAttributes(a, b)) {
+        if (!compareAttributes(a, b, false)) {
             return false;
         }
         var an = a.firstChild,
