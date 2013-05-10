@@ -339,7 +339,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     return scanLeftForAnyCharacter(leftNode)
                         ? reject : accept;
                 }
-                leftNode = container.previousSibling;
+                leftNode = iterator.leftNode();
                 rightNode = container;
                 container = /**@type{!Node}*/(container.parentNode);
                 r = checkLeftRight(container, leftNode, rightNode);
@@ -558,8 +558,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         // cursor
         while (nodeOffset === 0 && lastTextNode.previousSibling &&
                 lastTextNode.previousSibling.localName === "cursor") {
-            lastTextNode.parentNode.insertBefore(lastTextNode,
-                    lastTextNode.previousSibling);
+            node = lastTextNode.previousSibling;
+            if (lastTextNode.length > 0) {
+                lastTextNode = rootNode.ownerDocument.createTextNode('');
+            }
+            node.parentNode.insertBefore(lastTextNode, node);
         }
         return {textNode: lastTextNode, offset: nodeOffset };
     }

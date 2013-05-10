@@ -133,13 +133,6 @@ ops.OperationTests = function OperationTests(runner) {
         return skipReverseCheck ? true : compareAttributes(b, a, true);
     }
 
-    function skipEmptyTextNodes(node) {
-        while (node && node.nodeType === 3 && node.length === 0) {
-            node = node.nextSibling;
-        }
-        return node;
-    }
-
     function compareNodes(a, b) {
         if (a.nodeType !== b.nodeType) {
             return false;
@@ -156,8 +149,6 @@ ops.OperationTests = function OperationTests(runner) {
         }
         var an = a.firstChild,
             bn = b.firstChild;
-        an = skipEmptyTextNodes(an);
-        bn = skipEmptyTextNodes(bn);
         while (an) {
             if (!bn) {
                 return false;
@@ -167,8 +158,6 @@ ops.OperationTests = function OperationTests(runner) {
             }
             an = an.nextSibling;
             bn = bn.nextSibling;
-            an = skipEmptyTextNodes(an);
-            bn = skipEmptyTextNodes(bn);
         }
         if (bn) {
             return false;
@@ -188,6 +177,8 @@ ops.OperationTests = function OperationTests(runner) {
             op = factory.create(test.ops[i]);
             op.execute(t.odtDocument);
         }
+        textafter.normalize();
+        text.normalize();
         if (!compareNodes(textafter, text)) {
             t.text = serialize(text);
             t.after = serialize(textafter);

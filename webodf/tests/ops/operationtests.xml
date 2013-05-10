@@ -122,6 +122,31 @@
    <op optype="MoveCursor" memberid="Joe" number="2"/>
    <op optype="InsertText" position="2" text="b"/>
   </ops>
-  <after><office:text><text:p>a<text:s/>b<ns0:cursor xmlns:ns0="urn:webodf:names:cursor" ns0:memberId="Joe"/></text:p><text:p/></office:text></after>
+  <after><office:text><text:p>a<text:s/>b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_BeforeSpan">
+  <before><office:text><text:p>a<text:span>b</text:span></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="InsertText" position="0" text="c"/>
+  </ops>
+  <after><office:text><text:p>c<c:cursor c:memberId="Joe"/>a<text:span>b</text:span></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_withCursor">
+  <before><office:text><text:p>a</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="InsertText" position="0" text="b"/>
+  </ops>
+  <after><office:text><text:p>b<c:cursor c:memberId="Joe"/>a</text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_withCursor2">
+  <before><office:text><text:p>ab c</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+   <op optype="InsertText" position="1" text="d"/>
+  </ops>
+  <after><office:text><text:p>ad<c:cursor c:memberId="Joe"/>b c</text:p><text:p/></office:text></after>
  </test>
 </tests>
