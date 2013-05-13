@@ -149,4 +149,18 @@
   </ops>
   <after><office:text><text:p>ad<c:cursor c:memberId="Joe"/>b c</text:p><text:p/></office:text></after>
  </test>
+ <test name="InsertSpace">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text=" "/>
+  </ops>
+  <after><office:text><text:p><text:s> </text:s></text:p></office:text></after>
+ </test>
+ <test name="DeleteSpace">
+  <before><office:text><text:p><text:s> </text:s></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="1"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
 </tests>
