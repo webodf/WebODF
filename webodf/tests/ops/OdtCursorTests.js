@@ -186,6 +186,19 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         }
         t.cursor = new ops.OdtCursor("id", t.odtDocument);
     }
+    function surroundingText(cursor) {
+        var previousSibling = cursor.getNode().previousSibling,
+            nextSibling = cursor.getNode().nextSibling,
+            text = "";
+        if (previousSibling && previousSibling.nodeType === 3) {
+            text += previousSibling.data;
+        }
+        if (nextSibling && nextSibling.nodeType === 3) {
+            text += nextSibling.data;
+        }
+
+        return text;
+    }
     function create() {
         createOdtCursor();
         var s = t.cursor.getSelection();
@@ -208,35 +221,40 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
     }
     function moveInSimpleDoc() {
         createOdtCursor("hello");
-        var s = t.cursor.getSelection(),
-            i;
-        t.startNode = s.focusNode;
+        var i;
+
+        t.originalSurroundingText = surroundingText(t.cursor);
+
         for (i = 1; i <= 4; i += 1) {
+            t.oldSurroundingText = surroundingText(t.cursor);
+            t.oldLength = t.cursor.getNode().nextSibling.length;
             t.cursor.move(1);
-            t.focusOffset = s.focusOffset;
-            t.focusNode = s.focusNode;
-            r.shouldBe(t, "t.focusOffset", i.toString());
-            r.shouldBe(t, "t.focusNode", "t.startNode");
+            t.newSurroundingText = surroundingText(t.cursor);
+            t.newLength = t.cursor.getNode().nextSibling.length;
+            r.shouldBe(t, "t.oldLength", "t.newLength + 1");
+            r.shouldBe(t, "t.oldSurroundingText", "t.newSurroundingText");
         }
         t.cursor.move(1);
-        t.focusOffset = s.focusOffset;
-        t.focusNode = s.focusNode;
-        r.shouldBe(t, "t.focusOffset", "1");
-        r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
-        // try to go behind the last char
+        t.newSurroundingText = surroundingText(t.cursor);
+        r.shouldBe(t, "t.originalSurroundingText", "t.newSurroundingText");
+
+        // try to go beyond the last position
         t.cursor.move(1);
-        r.shouldBe(t, "t.focusOffset", "1");
-        r.shouldBe(t, "t.focusNode", "t.startNode.parentNode");
-        for (i = 4; i >= 0; i -= 1) {
+        t.newSurroundingText = surroundingText(t.cursor);
+        r.shouldBe(t, "t.originalSurroundingText", "t.newSurroundingText");
+
+        for (i = 4; i >= 1; i -= 1) {
+            t.oldSurroundingText = surroundingText(t.cursor);
+            t.oldLength = t.cursor.getNode().previousSibling.length;
             t.cursor.move(-1);
-            t.focusOffset = s.focusOffset;
-            t.focusNode = s.focusNode;
-            r.shouldBe(t, "t.focusOffset", i.toString());
-            r.shouldBe(t, "t.focusNode", "t.startNode");
+            t.newSurroundingText = surroundingText(t.cursor);
+            t.newLength = t.cursor.getNode().previousSibling.length;
+            r.shouldBe(t, "t.oldLength", "t.newLength + 1");
+            r.shouldBe(t, "t.oldSurroundingText", "t.newSurroundingText");
         }
-        t.cursor.move(1);
-        r.shouldBe(t, "t.focusOffset", "0");
-        r.shouldBe(t, "t.focusNode", "t.startNode");
+        t.cursor.move(-1);
+        t.newSurroundingText = surroundingText(t.cursor);
+        r.shouldBe(t, "t.originalSurroundingText", "t.newSurroundingText");
     }
     /**
      * Start at a valid position and count how many filtered steps are needed.
