@@ -505,6 +505,45 @@ odf.OdfCanvas = (function () {
     }
 
     /**
+     * Expand ODF spaces of the form <text:s text:c=N/> to N consecutive
+     * <text:s/> elements. This makes things simpler for WebODF during
+     * handling of spaces, in particular during editing.
+     * @param {!Element} odffragment
+     * @return {undefined}
+     */
+    function expandSpaceElements(odffragment) {
+        var i, j,
+            spaces,
+            space,
+            count,
+            doc = odffragment.ownerDocument;
+
+        function expandSpaceElement(space) {
+            // If the space has any children, remove them and put a " " text
+            // node in place.
+            while (space.firstChild) {
+                space.removeChild(space.firstChild);
+            }
+            space.appendChild(doc.createTextNode(" "));
+
+            count = parseInt(space.getAttributeNS(textns, "c"), 10);
+            if (count > 1) {
+                // Make it a 'simple' space node
+                space.removeAttributeNS(textns, "c");
+                // Prepend count-1 clones of this space node to itself
+                for (j = 1; j < count; j += 1) {
+                    space.parentNode.insertBefore(space.cloneNode(true), space);
+                }
+            }
+        }
+
+        spaces = odffragment.getElementsByTagNameNS(textns, "s");
+        for (i = 0; i < spaces.length; i += 1) {
+            space = /**@type{!Element}*/(spaces.item(i));
+            expandSpaceElement(space);
+        }
+    }
+    /**
      * @param {!Object} container
      * @param {!Element} odfbody
      * @param {!StyleSheet} stylesheet
@@ -948,6 +987,7 @@ odf.OdfCanvas = (function () {
             element.appendChild(sizer);
             modifyTables(container, odfnode.body, css);
             modifyLinks(container, odfnode.body, css);
+            expandSpaceElements(odfnode.body);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
             loadLists(container, odfnode.body, css);
