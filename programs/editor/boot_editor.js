@@ -47,11 +47,11 @@
  *
  */
 
-/*global runtime,require,document,alert,net */
+/*global runtime, require, document, alert, net, window, SessionList, SessionListView */
 
 // define the namespace/object we want to provide
 // this is the first line of API, the user gets.
-var webodfEditor = (function() {
+var webodfEditor = (function () {
     "use strict";
 
     var editorInstance = null,
@@ -107,7 +107,7 @@ var webodfEditor = (function() {
         } else {
             docUrl = "welcome.odt";
         }
-        return docUrl||null;
+        return docUrl || null;
     }
 
     /**
@@ -127,16 +127,16 @@ var webodfEditor = (function() {
         runtime.assert(docUrl, "docUrl needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
-        document.getElementById("mainContainer").style.display="";
+        document.getElementById("mainContainer").style.display = "";
 
         require({ }, ["webodf/editor/Editor"],
-            function(Editor) {
+            function (Editor) {
                 editorInstance = new Editor(editorOptions);
-                editorInstance.loadDocument(docUrl, function() {
+                editorInstance.loadDocument(docUrl, function () {
                     editorReadyCallback(editorInstance);
                 });
             }
-        );
+            );
     }
 
     /**
@@ -160,17 +160,17 @@ var webodfEditor = (function() {
         editorOptions.networkSecurityToken = token;
 
         require({ }, ["webodf/editor/Editor"],
-            function(Editor) {
+            function (Editor) {
                 // TODO: the networkSecurityToken needs to be retrieved via now.login
                 // (but this is to be implemented later)
                 editorInstance = new Editor(editorOptions);
 
                 // load the document and get called back when it's live
-                editorInstance.loadSession(sessionId, function() {
+                editorInstance.loadSession(sessionId, function () {
                     editorReadyCallback(editorInstance);
                 });
             }
-        );
+            );
     }
 
 
@@ -193,26 +193,26 @@ var webodfEditor = (function() {
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
         function enterSession(selectedSessionId) {
-            document.getElementById("sessionListContainer").style.display="none";
-            document.getElementById("mainContainer").style.display="";
+            document.getElementById("sessionListContainer").style.display = "none";
+            document.getElementById("mainContainer").style.display = "";
 
             callback(selectedSessionId, userid, token);
         }
 
         function showSessions() {
             var sessionListDiv = document.getElementById("sessionList"),
-            sessionList = new SessionList(net),
-            sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
+                sessionList = new SessionList(net),
+                sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
 
             // hide login view
-            document.getElementById("loginContainer").style.display="none";
+            document.getElementById("loginContainer").style.display = "none";
 
             // show session list
-            document.getElementById("sessionListContainer").style.display="";
+            document.getElementById("sessionListContainer").style.display = "";
         }
 
         function loginSuccess(userData) {
-            runtime.log("connected:"+userData.full_name);
+            runtime.log("connected:" + userData.full_name);
             userid = userData.uid;
             token = userData.securityToken || null;
 
@@ -232,7 +232,7 @@ var webodfEditor = (function() {
 
         // bring up the login form
         document.loginForm.Submit.onclick = onLoginSubmit;
-        document.getElementById("loginContainer").style.display="";
+        document.getElementById("loginContainer").style.display = "";
     }
 
     /**
@@ -293,13 +293,13 @@ var webodfEditor = (function() {
 
         // start the editor with network
         function handleNetworkedSituation() {
-            loginProcedure(function(sessionId, userid, token) {
+            loginProcedure(function (sessionId, userid, token) {
                 createNetworkedEditor(sessionId, userid, token, editorOptions, function (ed) {
                     if (args.callback) {
                         args.callback(ed);
                     }
                 }
-                );
+                    );
             });
         }
 
@@ -314,12 +314,12 @@ var webodfEditor = (function() {
 
         if (args.collaborative === "auto") {
             runtime.log("detecting network...");
-            waitForNetwork(function(state) {
+            waitForNetwork(function (state) {
                 if (state === "ready") {
                     runtime.log("... network available.");
                     handleNetworkedSituation();
                 } else {
-                    runtime.log("... no network available ("+state+").");
+                    runtime.log("... no network available (" + state + ").");
                     handleNonNetworkedSituation();
                 }
             });
@@ -327,7 +327,7 @@ var webodfEditor = (function() {
                    (args.collaborative === "1") ||
                    (args.collaborative === "yes")) {
             runtime.log("starting collaborative editor.");
-            waitForNetwork(function(state) {
+            waitForNetwork(function (state) {
                 if (state === "ready") {
                     handleNetworkedSituation();
                 }
