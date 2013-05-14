@@ -1,27 +1,4 @@
 <tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
- <test name="RemoveBackwards">
-  <before><office:text><text:p>A</text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="1" length="-1"/>
-  </ops>
-  <after><office:text><text:p/></office:text></after>
- </test>
- <test name="InsertRemoveText_Simple_Backwards">
-  <before><office:text><text:p/></office:text></before>
-  <ops>
-   <op optype="InsertText" position="0" text="ABC"/>
-   <op optype="RemoveText" position="3" length="-2"/>
-   <op optype="RemoveText" position="1" length="-1"/>
-  </ops>
-  <after><office:text><text:p/></office:text></after>
- </test>
- <test name="RemoveSpace2">
-  <before><office:text><text:p>a<text:s> </text:s><text:s> </text:s></text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="2" length="-1"/>
-  </ops>
-  <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
- </test>
  <test name="SpaceBetweenParagraphs">
   <before><office:text><text:p>a</text:p> <text:p>b</text:p></office:text></before>
   <ops>

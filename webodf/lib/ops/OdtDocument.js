@@ -414,46 +414,45 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             currentNeighborhood = iterator.textNeighborhood();
             currentNode = iterator.container();
 
-            if (currentNeighborhood.length && currentNode.nodeType === 3) {
-                visited = false;
-                for (i = 0; i < neighborhood.length; i += 1) {
-                    // All neighborhoods are disjoint ordered sets, so comparing
-                    // the first element of two neighborhoods is enough to compare them.
-                    // Therefore, if the first element of the current neighborhood is found in
-                    // the full neighborhood sequence, then the current neighborhood has
-                    // already been appended, and we need not check further.
-                    if (neighborhood[i] === currentNeighborhood[0]) {
-                        visited = true;
-                        break;
-                    }
+            visited = false;
+            for (i = 0; i < neighborhood.length; i += 1) {
+                // All neighborhoods are disjoint ordered sets, so comparing
+                // the first element of two neighborhoods is enough to compare them.
+                // Therefore, if the first element of the current neighborhood is found in
+                // the full neighborhood sequence, then the current neighborhood has
+                // already been appended, and we need not check further.
+                if (neighborhood[i] === currentNeighborhood[0]) {
+                    visited = true;
+                    break;
                 }
-                if (!visited) {
-                    // A neighborhood is always populated from left to right. So if
-                    // we are moving towards the left, then reverse it.
-                    if (length < 0) {
-                        currentNeighborhood.reverse();
-                    }
-                    // When in the first local neighborhood, remove the elements that are in
-                    // a direction opposite to the length.
-                    if (inFirstNeighborhood) {
-                        for (j = 0; j < currentNeighborhood.length; j += 1) {
-                            if (currentNeighborhood[j] === currentNode) {
-                                currentNeighborhood.splice(0, j);
-                                break;
-                            }
-                        }
-                        if (length < 0) {
-                            currentNeighborhood.splice(0, 1);
-                        }
-                        inFirstNeighborhood = false;
-                    }
-
-                    neighborhood = neighborhood.concat(currentNeighborhood);
-
+            }
+            if (!visited) {
+                // A neighborhood is always populated from left to right. So if
+                // we are moving towards the left, then reverse it.
+                if (length < 0) {
+                    currentNeighborhood.reverse();
+                }
+                // When in the first local neighborhood, remove the elements that are in
+                // a direction opposite to the length.
+                if (inFirstNeighborhood) {
                     for (j = 0; j < currentNeighborhood.length; j += 1) {
-                        iteratedLength += currentNeighborhood[j].data.length;
+                        if (currentNeighborhood[j] === currentNode) {
+                            currentNeighborhood.splice(0, j);
+                            break;
+                        }
                     }
+                    if (length < 0) {
+                        currentNeighborhood.splice(0, 1);
+                    }
+                    inFirstNeighborhood = false;
+                }
 
+                if (currentNeighborhood.length) {
+                    neighborhood = neighborhood.concat(currentNeighborhood);
+                }
+
+                for (j = 0; j < currentNeighborhood.length; j += 1) {
+                    iteratedLength += currentNeighborhood[j].data.length;
                 }
             }
         } while ((length > 0 ? iterator.nextPosition() : iterator.previousPosition()) === true

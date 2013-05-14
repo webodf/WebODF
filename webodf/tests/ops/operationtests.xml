@@ -171,4 +171,27 @@
   </ops>
   <after><office:text><text:p>a<text:s> </text:s>b</text:p></office:text></after>
  </test>
+ <test name="RemoveBackwards">
+  <before><office:text><text:p>A</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="1" length="-1"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="InsertRemoveText_Simple_Backwards">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="ABC"/>
+   <op optype="RemoveText" position="3" length="-2"/>
+   <op optype="RemoveText" position="1" length="-1"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="RemoveSpace2">
+  <before><office:text><text:p>a<text:s> </text:s><text:s> </text:s></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="2" length="-1"/>
+  </ops>
+  <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
+ </test>
 </tests>
