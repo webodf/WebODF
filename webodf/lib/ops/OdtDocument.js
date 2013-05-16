@@ -387,6 +387,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
         return iterator;
     }
+
     /**
      * Returns an exteded neighborhood that can span multiple paragraph nodes;
      * Starting from the specified position, text nodes are added to the neighborhood array
@@ -619,6 +620,32 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?{textNode: !Text, offset: !number}}
      */
     this.getPositionInTextNode = getPositionInTextNode;
+
+    /**
+     * This returns the walkable paragraph just before or after the specified paragraph,
+     * depending on the sign of the direction (negative is previous, positive is next).
+     * @param {!Node} paragraph
+     * @param {!number} direction
+     * @return (Node|null)
+     */
+    this.getNeighboringParagraph = function (paragraph, direction) {
+        var iterator = getIteratorAtPosition(0),
+            currentParagraph = null;
+        iterator.setPosition(paragraph, 0);
+
+        do {
+            if (filter.acceptPosition(iterator) === 1) {
+                currentParagraph = getParagraphElement(iterator.container());
+                if (currentParagraph !== paragraph) {
+                    return currentParagraph;
+                }
+            }
+        } while ((direction > 0 ? iterator.nextPosition() : iterator.previousPosition()) === true);
+
+        if (currentParagraph === paragraph) {
+            return null;
+        }
+    };
 
     /**
      * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.

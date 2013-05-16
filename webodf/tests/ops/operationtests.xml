@@ -194,4 +194,32 @@
   </ops>
   <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
  </test>
+ <test name="Remove_backspaceMerge1">
+  <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="5" length="-1"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A">abcdefgh</text:p></office:text></after>
+ </test>
+ <test name="Remove_backspaceMerge2">
+  <before><office:text><text:p text:style-name="A">abc<text:span text:style-name="B">d</text:span></text:p><text:p text:style-name="C"><text:span text:style-name="D">efgh</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="7" length="-5"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMerge1">
+  <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="4" length="1"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A">abcdefgh</text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMerge2">
+  <before><office:text><text:p text:style-name="A">abc<text:span text:style-name="B">d</text:span></text:p><text:p text:style-name="C"><text:span text:style-name="D">efgh</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="2" length="5"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
+ </test>
 </tests>

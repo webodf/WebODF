@@ -77,41 +77,157 @@ ops.OpRemoveText = function OpRemoveText() {
         }
     }
 
+    /**
+     * Merges the 'second' paragraph into the 'first' paragraph
+     * @param {!Node} first
+     * @param {!Node} second
+     * @return {undefined}
+     */
+    function mergeParagraphs(first, second) {
+        var child = second.firstChild;
+        while (child) {
+            second.removeChild(child);
+            if (child.localName !== 'editinfo') {
+                first.appendChild(child);
+            }
+            child = second.firstChild;
+        }
+        second.parentNode.removeChild(second);
+    }
+
+    /**
+     * Takes a given position and signed length, and returns an extended neighborhood
+     * that can be safely iterated on for deletion. The initial textnode might have 
+     * extra characters alongwith the characters of deletion interest. This function
+     * deletes the target characters, and then computes a neighborhood that consists
+     * of the remaining text nodes, which is all that is needed for further deletion.
+     * @param odtDocument
+     * @param {!number} position
+     * @param {!number} length
+     * @return {!{paragraphElement: !Node, neighborhood: ?Array.<!Node>, remainingLength: !number}}
+     */
+    function getPreprocessedNeighborhood(odtDocument, position, length) {
+        var domPosition = odtDocument.getPositionInTextNode(position),
+            initialTextNode = domPosition.textNode,
+            initialTextOffset = domPosition.offset,
+            initialParentElement = initialTextNode.parentNode,
+            paragraphElement = odtDocument.getParagraphElement(initialParentElement),
+            remainingLength = Math.abs(length),
+            direction = (length < 0) ? -1 : 1,
+            removalType = (length < 0) ? 'backspace' : 'delete',
+            neighborhood,
+            difference;
+
+        if (initialTextNode.data === "") {
+            // Sometimes the initialTextNode returned by getPositionInTextNode is "" -
+            // for example when the position is beside a space, etc. These text nodes should be
+            // cleaned up, so remove it
+            initialParentElement.removeChild(initialTextNode);
+            neighborhood = odtDocument.getTextNeighborhood(position, length);
+        } else if (initialTextOffset !== 0) {
+            // If the deletion is around a cursor, this initialTextoffset is 0.
+            // But if not, the neighborhood may come with the first node containing extra
+            // characters than the ones we want to delete.
+            // To avoid that, we must first delete the target content from the initial text node,
+            // and then request the neighborhood, so that the first element in the neighborhood
+            // can be easily operated upon by the deletion loop
+            if (removalType === 'delete') {
+                difference = remainingLength < (initialTextNode.length - initialTextOffset)
+                    ? remainingLength
+                    : (initialTextNode.length - initialTextOffset);
+
+                initialTextNode.deleteData(initialTextOffset, difference);
+            } else {
+                difference = remainingLength < initialTextOffset
+                    ? remainingLength
+                    : initialTextOffset;
+
+                initialTextNode.deleteData(initialTextOffset - difference, difference);
+            }
+            neighborhood = odtDocument.getTextNeighborhood(position, length + difference * direction);
+
+            remainingLength -= difference;
+            if (difference && neighborhood[0] === initialTextNode) {
+                // The initial text node has already been truncated.
+                // Therefore, forget it from the neighborhood
+                neighborhood.splice(0, 1);
+            }
+        } else {
+            neighborhood = odtDocument.getTextNeighborhood(position, length);
+        }
+
+        return {
+            paragraphElement: paragraphElement,
+            neighborhood: neighborhood,
+            remainingLength: remainingLength
+        };
+    }
 
     this.execute = function (odtDocument) {
+        length = parseInt(length, 10);
+        position = parseInt(position, 10);
         var neighborhood = [],
             paragraphElement,
-            textNodeSequence = [],
-            remainingLength = Math.abs(length),
+            currentParagraphElement,
+            nextParagraphElement,
+            remainingLength,
+            direction = (length < 0) ? -1 : 1,
             removalType = (length < 0) ? 'backspace' : 'delete',
-            currentTextNode,
-            currentParent,
+            currentTextNode = null,
+            currentParent = null,
             currentLength,
-            i,
-            firstIndex;
+            preprocessedNeighborhood = getPreprocessedNeighborhood(odtDocument, position, length),
+            i;
 
-        neighborhood = odtDocument.getTextNeighborhood(position, length);
+        neighborhood = preprocessedNeighborhood.neighborhood;
+        remainingLength = preprocessedNeighborhood.remainingLength;
+        paragraphElement = preprocessedNeighborhood.paragraphElement;
 
-        if (neighborhood.length) {
-            paragraphElement = odtDocument.getParagraphElement(neighborhood[0]);
+        // If there is no text neighborhood, and also no neighboring paragraph,
+        // then there is nothing to delete
+        if (odtDocument.getNeighboringParagraph(paragraphElement, direction) === null
+                && neighborhood.length === 0) {
+            return false;
+        }
 
-            for (i = 0; i < neighborhood.length && remainingLength; i += 1) {
-                currentTextNode = neighborhood[i];
+        while (remainingLength) {
+            if (neighborhood[0]) {
+                currentTextNode = neighborhood[0];
                 currentParent = currentTextNode.parentNode;
-                currentLength = currentTextNode.data.length;
- 
+                currentLength = currentTextNode.length;
+            }
+
+            currentParagraphElement = odtDocument.getParagraphElement(currentTextNode);
+            if (paragraphElement !== currentParagraphElement) {
+                // If paragraph element of the current textnode from the neighborhood is different
+                // from the original paragraphElement, a merging must be performed.
+                nextParagraphElement = odtDocument.getNeighboringParagraph(paragraphElement, direction);
+                if (nextParagraphElement) {
+                    if (removalType === 'delete') {
+                        mergeParagraphs(paragraphElement, nextParagraphElement);
+                    } else {
+                        mergeParagraphs(nextParagraphElement, paragraphElement);
+                        paragraphElement = nextParagraphElement;
+                    }
+                }
+                // A paragraph merging is worth 1 delete length
+                remainingLength -= 1;
+            } else {
                 if (currentLength <= remainingLength) {
                     currentParent.removeChild(currentTextNode);
                     // If the parent is a span that contains no further text
                     // after deletion, remove the span.
                     fixCursorPositions(odtDocument);
-                    // If the current node is text:s and is empty, it should
+                    // If the current node is text:s or span and is empty, it should
                     // be removed.
-                    if (currentParent.localName === "s"
+                    if ((currentParent.localName === "s"
+                            || currentParent.localName === "span")
                             && currentParent.textContent.length === 0) {
                         currentParent.parentNode.removeChild(currentParent);
                     }
+
                     remainingLength -= currentLength;
+                    neighborhood.splice(0, 1);
                 } else {
                     if (removalType === 'delete') {
                         currentTextNode.deleteData(0, remainingLength);
@@ -121,18 +237,19 @@ ops.OpRemoveText = function OpRemoveText() {
                     remainingLength = 0;
                 }
             }
-
-            fixCursorPositions(odtDocument);
-
-            odtDocument.getOdfCanvas().refreshSize();
-            odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
-                paragraphElement: paragraphElement,
-                memberId: memberid,
-                timeStamp: timestamp
-            });
-            return true;
         }
-        return false;
+
+        fixCursorPositions(odtDocument);
+
+        odtDocument.getOdfCanvas().refreshSize();
+        odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
+            paragraphElement: paragraphElement,
+            memberId: memberid,
+            timeStamp: timestamp
+        });
+        odtDocument.emit(ops.OdtDocument.signalCursorMoved, odtDocument.getCursor(memberid));
+
+        return true;
     };
 
     this.spec = function () {

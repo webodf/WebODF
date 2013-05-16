@@ -1,4 +1,11 @@
 <tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
+ <test name="Remove_deleteMergeBig">
+  <before><office:text><text:p>zer<text:span>o</text:span></text:p><text:p></text:p><text:p></text:p><text:list><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p><text:span>one</text:span></text:p></text:list-item></text:list></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="4" length="5"/>
+  </ops>
+  <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
+ </test>
  <test name="SpaceBetweenParagraphs">
   <before><office:text><text:p>a</text:p> <text:p>b</text:p></office:text></before>
   <ops>
