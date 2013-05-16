@@ -118,6 +118,7 @@ odf.Style2CSS = function Style2CSS() {
         paragraphPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'text-align', 'text-align' ],
+            [ fons, 'text-indent', 'text-indent' ],
             [ fons, 'padding-left', 'padding-left' ],
             [ fons, 'padding-right', 'padding-right' ],
             [ fons, 'padding-top', 'padding-top' ],
