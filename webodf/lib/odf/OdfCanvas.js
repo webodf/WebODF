@@ -1120,6 +1120,10 @@ odf.OdfCanvas = (function () {
         }
 
         this.setEditable = function (iseditable) {
+            // We start listening to clicks on the canvas to enable editing.
+            // If another process wants to listen to click events on the canvas
+            // setEditable should not be called on that canvas.
+            listenEvent(element, "click", processClick);
             editable = iseditable;
             if (!editable) {
                 stopEditing();
