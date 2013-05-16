@@ -647,6 +647,28 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
     };
 
+    /*
+     * Returns the number of walkable positions of a paragraph node
+     * @param {!Node} paragraph
+     * @return {!number}
+     */
+    this.getWalkableParagraphLength = function (paragraph) {
+        var iterator = getIteratorAtPosition(0),
+            length = 0;
+        iterator.setPosition(paragraph, 0);
+
+        do {
+            if (getParagraphElement(iterator.container()) !== paragraph) {
+                return length;
+            }
+            if (filter.acceptPosition(iterator) === 1) {
+                length += 1;
+            }
+        } while (iterator.nextPosition());
+
+        return length;
+    };
+
     /**
      * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.
      * @param {!string} memberid

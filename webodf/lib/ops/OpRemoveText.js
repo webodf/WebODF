@@ -78,20 +78,38 @@ ops.OpRemoveText = function OpRemoveText() {
     }
 
     /**
-     * Merges the 'second' paragraph into the 'first' paragraph
+     * Merges the 'second' paragraph into the 'first' paragraph,
+     * appending the contents by default. If 'prepend' is true,
+     * the contents are prepended.
      * @param {!Node} first
      * @param {!Node} second
+     * @param {!boolean} prepend
      * @return {undefined}
      */
-    function mergeParagraphs(first, second) {
-        var child = second.firstChild;
+    function mergeParagraphs(first, second, prepend) {
+        var child,
+            firstEditInfo = null;
+
+        child = prepend ? second.lastChild : second.firstChild;
+
         while (child) {
             second.removeChild(child);
             if (child.localName !== 'editinfo') {
-                first.appendChild(child);
+                if (prepend) {
+                    firstEditInfo = first.getElementsByTagNameNS('editinfo')[0];
+                    if (firstEditInfo) {
+                        first.insertBefore(child, firstEditInfo);
+                    } else {
+                        first.insertBefore(child, first.firstChild);
+                    }
+                } else {
+                    first.appendChild(child);
+                }
             }
-            child = second.firstChild;
+
+            child = prepend ? second.lastChild : second.firstChild;
         }
+
         second.parentNode.removeChild(second);
     }
 
@@ -203,11 +221,22 @@ ops.OpRemoveText = function OpRemoveText() {
                 // from the original paragraphElement, a merging must be performed.
                 nextParagraphElement = odtDocument.getNeighboringParagraph(paragraphElement, direction);
                 if (nextParagraphElement) {
+                    // An empty paragraph should never win new childnodes. therefore, check if
+                    // the walkable length of a paragraph is > 1 (non-empty).
                     if (removalType === 'delete') {
-                        mergeParagraphs(paragraphElement, nextParagraphElement);
+                        if (odtDocument.getWalkableParagraphLength(paragraphElement) > 1) {
+                            mergeParagraphs(paragraphElement, nextParagraphElement);
+                        } else {
+                            mergeParagraphs(nextParagraphElement, paragraphElement,/*prepend*/true);
+                            paragraphElement = nextParagraphElement;
+                        }
                     } else {
-                        mergeParagraphs(nextParagraphElement, paragraphElement);
-                        paragraphElement = nextParagraphElement;
+                        if (odtDocument.getWalkableParagraphLength(nextParagraphElement) > 1) {
+                            mergeParagraphs(nextParagraphElement, paragraphElement);
+                            paragraphElement = nextParagraphElement;
+                        } else {
+                            mergeParagraphs(paragraphElement, nextParagraphElement,/*prepend*/true);
+                        }
                     }
                 }
                 // A paragraph merging is worth 1 delete length

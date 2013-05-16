@@ -222,4 +222,18 @@
   </ops>
   <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
  </test>
+ <test name="Remove_backspaceMergeEmpty1">
+  <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="1" length="-1"/>
+  </ops>
+  <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMergeEmpty1">
+  <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="1"/>
+  </ops>
+  <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
+ </test>
 </tests>
