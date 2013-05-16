@@ -1119,17 +1119,6 @@ odf.OdfCanvas = (function () {
             }
         }
 
-        this.setEditable = function (iseditable) {
-            // We start listening to clicks on the canvas to enable editing.
-            // If another process wants to listen to click events on the canvas
-            // setEditable should not be called on that canvas.
-            listenEvent(element, "click", processClick);
-            editable = iseditable;
-            if (!editable) {
-                stopEditing();
-            }
-        };
-
         function processClick(evt) {
             evt = evt || window.event;
             // go up until we find a text:p, if we find it, wrap it in <p> and
@@ -1181,6 +1170,17 @@ odf.OdfCanvas = (function () {
             }
             cancelEvent(evt);
         }
+
+        this.setEditable = function (iseditable) {
+            // We start listening to clicks on the canvas to enable editing.
+            // If another process wants to listen to click events on the canvas
+            // setEditable should not be called on that canvas.
+            listenEvent(element, "click", processClick);
+            editable = iseditable;
+            if (!editable) {
+                stopEditing();
+            }
+        };
 
         /**
          * @param {!string} eventName
