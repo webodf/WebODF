@@ -60,7 +60,7 @@ function addFiles(zip, pos, files, callback) {
         if (err) {
             return callback(err);
         }
-        runtime.log("["+zip.filename+"] << \""+entry.path+"\"");
+        runtime.log("[" + zip.filename + "] << \"" + entry.path + "\"");
         zip.save(entry.path, data, false, entry.date);
         addFiles(zip, pos + 1, files, callback);
     });
@@ -71,7 +71,7 @@ var args = arguments,
     zipmembers = [],
     i,
     zip = new core.Zip(filename, null);
-    zip.filename = filename;
+zip.filename = filename;
 for (i = 2; i < arguments.length; i += 1) {
     zipmembers.push(arguments[i]);
 }

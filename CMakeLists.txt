@@ -331,23 +331,40 @@ add_subdirectory(programs)
 
 # package webodf
 set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
+set(WEBODFZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
 add_custom_command(
     OUTPUT ${WEBODFZIP}
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBODFZIPDIR}
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/viewer/README-viewer.odt ${WEBODFZIPDIR}/README.odt
+    # viewer
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBODFZIPDIR}/viewer
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/programs/viewer/images ${WEBODFZIPDIR}/viewer/images
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/viewer/viewer.css ${WEBODFZIPDIR}/viewer/viewer.css
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodf.js ${WEBODFZIPDIR}/viewer/webodf.js
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/programs/viewer/viewer-minimized.js ${WEBODFZIPDIR}/viewer/viewer.js
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/viewer/index.html ${WEBODFZIPDIR}/viewer/index.html
+    # editor
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/editor ${WEBODFZIPDIR}/editor
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}/editor/dojo-deps
+    # wordpressplugin
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBODFZIPDIR}/viewer ${WEBODFZIPDIR}/wordpressplugin
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/readme.txt ${WEBODFZIPDIR}/wordpressplugin/readme.txt
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/webodf-viewer.php ${WEBODFZIPDIR}/wordpressplugin/webodf-viewer.php
     # zip using javascript code running in node.js
     COMMAND ${NODE} ARGS webodf/lib/runtime.js packwebodf.js
         ${CMAKE_BINARY_DIR}/${WEBODFZIP}
 #input files
         ${CMAKE_BINARY_DIR}/webodf/webodf-debug.js
         ${CMAKE_BINARY_DIR}/webodf/webodf.js
-        ${CMAKE_SOURCE_DIR}/webodf/webodf.css
 #output files
         webodf-debug.js
         webodf.js
-        webodf.css
     DEPENDS NodeJS
         packwebodf.js
         webodf-debug.js-target
         webodf.js-target
+        editor-compiled.js-target
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(zip ALL DEPENDS ${WEBODFZIP})

@@ -38,7 +38,8 @@ function addFiles(zip, pos, inputfiles, zipfiles, callback) {
     "use strict";
     if (inputfiles.length !== zipfiles.length) {
         return callback(
-                "Arrays inputfiles and zipfiles should have the same length.");
+            "Arrays inputfiles and zipfiles should have the same length."
+        );
     }
     if (pos >= inputfiles.length) {
         zip.write(function (err) {
