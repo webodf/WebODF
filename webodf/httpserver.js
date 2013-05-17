@@ -39,7 +39,6 @@ var http = require("http"),
     fs = require("fs"),
     lookForIndexHtml = true,
     ipaddress = "127.0.0.1",
-    //ipaddress = "192.168.1.105",
     port = 8124;
 
 function statFile(dir, filelist, position, callback) {
@@ -222,4 +221,4 @@ http.createServer(function (request, response) {
     });
 }).listen(port, ipaddress);
 
-console.log('Server running at ' + ipaddress + ':' + port + '/');
+console.log('Server running at http://' + ipaddress + ':' + port + '/');
