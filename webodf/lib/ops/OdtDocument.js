@@ -564,6 +564,17 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
             node.parentNode.insertBefore(lastTextNode, node);
         }
+
+        // After the above cursor-specific adjustment, if the lastTextNode
+        // is empty and has a previousSibling, discard it and use that sibling as the
+        // lastTextNode
+        if (lastTextNode.length === 0 && lastTextNode.previousSibling
+                && lastTextNode.previousSibling.nodeType === 3) {
+            lastTextNode = lastTextNode.previousSibling;
+            nodeOffset = lastTextNode.length;
+            lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
+        }
+
         return {textNode: lastTextNode, offset: nodeOffset };
     }
 

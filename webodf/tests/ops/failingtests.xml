@@ -6,19 +6,6 @@
   </ops>
   <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
  </test>
- <test name="20130517_split_text_2space">
-  <before><office:text><text:p>20130517_split_text_2space</text:p></office:text></before>
-  <ops>
-   <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" number="9"/>
-   <op optype="InsertText" position="9" text="A"/>
-   <op optype="InsertText" position="10" text=" "/>
-   <op optype="InsertText" position="11" text=" "/>
-   <op optype="MoveCursor" memberid="Joe" number="-1"/>
-   <op optype="MoveCursor" memberid="Joe" number="-1"/>
-  </ops>
-  <after><office:text><text:p>20130517_A<c:cursor c:memberId="Joe"/><text:s> </text:s><text:s> </text:s>split_text_2space</text:p></office:text></after>
- </test>
  <test name="DeleteExposesSpace1">
   <before><office:text><text:p> a b </text:p></office:text></before>
   <ops>
