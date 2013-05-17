@@ -235,5 +235,12 @@
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
   <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
+ <test name="SpaceBetweenParagraphs">
+  <before><office:text><text:p>a</text:p> <text:p>b</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="2"/>
+  </ops>
+  <after><office:text><text:p>a</text:p> <text:p><c:cursor c:memberId="Joe"/>b</text:p></office:text></after>
  </test>
 </tests>

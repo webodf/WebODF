@@ -274,9 +274,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
             // accept if this is the first position in p or h and there is no
             // character in the p or h
-            if (leftNode === null && (container.localName === "p"
-                                      || container.localName === "h")
-                    && !scanRightForAnyCharacter(rightNode)) {
+            var firstPos = leftNode === null && (container.localName === "p"
+                                      || container.localName === "h");
+            if (firstPos && !scanRightForAnyCharacter(rightNode)) {
                 return accept;
             }
             // if not to the right of a character, reject
@@ -284,9 +284,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 return reject;
             }
             // accept if there is no character to the left
-            return scanLeftForAnyCharacter(
+            return (firstPos || !scanLeftForAnyCharacter(
                 leftNode || container.previousSibling || container.parentNode
-            ) ? reject : accept;
+            )) ? accept : reject;
         }
 
         /**

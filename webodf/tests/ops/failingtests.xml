@@ -6,12 +6,4 @@
   </ops>
   <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
  </test>
- <test name="SpaceBetweenParagraphs">
-  <before><office:text><text:p>a</text:p> <text:p>b</text:p></office:text></before>
-  <ops>
-   <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" number="2"/>
-  </ops>
-  <after><office:text><text:p>a</text:p> <text:p><c:cursor c:memberId="Joe"/>b</text:p></office:text></after>
- </test>
 </tests>
