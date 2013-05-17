@@ -119,6 +119,7 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'text-align', 'text-align' ],
             [ fons, 'text-indent', 'text-indent' ],
+            [ fons, 'line-height', 'line-height' ],
             [ fons, 'padding-left', 'padding-left' ],
             [ fons, 'padding-right', 'padding-right' ],
             [ fons, 'padding-top', 'padding-top' ],
@@ -138,6 +139,7 @@ odf.Style2CSS = function Style2CSS() {
         graphicPropertySimpleMapping = [
             [ drawns, 'fill-color', 'background-color' ],
             [ drawns, 'fill', 'background' ],
+            [ fons, 'background-color', 'background-color'],
             [ fons, 'min-height', 'min-height' ],
             [ drawns, 'stroke', 'border' ],
             [ svgns, 'stroke-color', 'border-color' ]
