@@ -225,14 +225,14 @@ ops.OpRemoveText = function OpRemoveText() {
                     // the walkable length of a paragraph is > 1 (non-empty).
                     if (removalType === 'delete') {
                         if (odtDocument.getWalkableParagraphLength(paragraphElement) > 1) {
-                            mergeParagraphs(paragraphElement, nextParagraphElement);
+                            mergeParagraphs(paragraphElement, nextParagraphElement, false);
                         } else {
                             mergeParagraphs(nextParagraphElement, paragraphElement,/*prepend*/true);
                             paragraphElement = nextParagraphElement;
                         }
                     } else {
                         if (odtDocument.getWalkableParagraphLength(nextParagraphElement) > 1) {
-                            mergeParagraphs(nextParagraphElement, paragraphElement);
+                            mergeParagraphs(nextParagraphElement, paragraphElement, false);
                             paragraphElement = nextParagraphElement;
                         } else {
                             mergeParagraphs(paragraphElement, nextParagraphElement,/*prepend*/true);
