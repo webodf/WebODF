@@ -24,7 +24,7 @@ text|p, text|h {
   margin: 0;
   line-height: normal;
   position: relative;
-  min-height: 1em; /* prevent empty paragraphs and headings from collapsing if they are empty */
+  min-height: 1.3em; /* prevent empty paragraphs and headings from collapsing if they are empty */
 }
 *[runtimens|containsparagraphanchor] {
   position: relative;
