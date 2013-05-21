@@ -221,7 +221,8 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
     }
     function utf8ByteArrayToString(bytearray) {
         var s = "", i, l = bytearray.length,
-            c0, c1, c2;
+            c0, c1, c2, c3, codepoint;
+
         for (i = 0; i < l; i += 1) {
             c0 = bytearray[i];
             if (c0 < 0x80) {
@@ -229,13 +230,24 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
             } else {
                 i += 1;
                 c1 = bytearray[i];
-                if (c0 < 0xe0) {
+                if (c0 >= 0xc2 && c0 < 0xe0) {
                     s += String.fromCharCode(((c0 & 0x1f) << 6) | (c1 & 0x3f));
                 } else {
                     i += 1;
                     c2 = bytearray[i];
-                    s += String.fromCharCode(((c0 & 0x0f) << 12) |
+                    if (c0 >= 0xe0 && c0 < 0xf0) {
+                        s += String.fromCharCode(((c0 & 0x0f) << 12) |
                             ((c1 & 0x3f) << 6) | (c2 & 0x3f));
+                    } else {
+                        i += 1;
+                        c3 = bytearray[i];
+                        if (c0 >= 0xf0 && c0 < 0xf5) {
+                            codepoint = ((c0 & 0x07) << 18) | ((c1 & 0x3f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
+                            codepoint -= 0x10000;
+                            s += String.fromCharCode(
+                                (codepoint >> 10) + 0xd800, (codepoint & 0x3ff) + 0xdc00);
+                        }
+                    }
                 }
             }
         }

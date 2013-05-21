@@ -107,6 +107,20 @@ core.RuntimeTests = function RuntimeTests(runner) {
         });
     }
 
+    function testUtf8ByteArrayToString(callback) {
+        runtime.read("utf8.txt", 3, 4, function (err, data) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            if (data) {
+                // we want to test the actual Runtime implementation rather than the nodejs runtime
+                t.data = Runtime.byteArrayToString(data, "utf8");
+            }
+            r.shouldBe(t, "t.data.charCodeAt(0)", "55378");
+            r.shouldBe(t, "t.data.charCodeAt(1)", "57186");
+            callback();
+        });
+    }
+
     function testLoadXML(callback) {
         runtime.loadXML("tests.html", function (err, xml) {
             t.err = err || null;
@@ -131,6 +145,7 @@ core.RuntimeTests = function RuntimeTests(runner) {
         return [
             testRead,
             testWrite,
+            testUtf8ByteArrayToString,
             testLoadXML
         ];
     };
