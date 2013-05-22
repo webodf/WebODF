@@ -257,4 +257,30 @@
   </ops>
   <after><office:text><text:p>20130517_A<c:cursor c:memberId="Joe"/><text:s> </text:s><text:s> </text:s>split_text_2space</text:p></office:text></after>
  </test>
+ <test name="InsertText_multiCursors">
+  <before><office:text><text:p>abcdefgh</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" number="3"/>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" number="3"/>
+   <op optype="AddCursor" memberid="Eve"/>
+   <op optype="MoveCursor" memberid="Eve" number="3"/>
+   <op optype="InsertText" memberid="Eve" position="3" text="123"/>
+  </ops>
+  <after><office:text><text:p>abc<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/>123<c:cursor c:memberId="Eve"/>defgh</text:p></office:text></after>
+ </test>
+ <test name="SplitParagraph_multiCursors">
+  <before><office:text><text:p>abcdefgh</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" number="3"/>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" number="3"/>
+   <op optype="AddCursor" memberid="Eve"/>
+   <op optype="MoveCursor" memberid="Eve" number="3"/>
+   <op optype="SplitParagraph" memberid="Eve" position="3"/>
+  </ops>
+  <after><office:text><text:p>abc<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/></text:p><text:p><c:cursor c:memberId="Eve"/>defgh</text:p></office:text></after>
+ </test>
 </tests>

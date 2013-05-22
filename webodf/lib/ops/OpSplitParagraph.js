@@ -56,7 +56,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             textNodeCopy,
             node, splitNode, splitChildNode, keptChildNode;
 
-        domPosition = odtDocument.getPositionInTextNode(position);
+        domPosition = odtDocument.getPositionInTextNode(position, memberid);
         if (domPosition) {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {

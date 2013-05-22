@@ -526,6 +526,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * iterator and count only the text positions. When the amount defined by
      * offset has been counted, the Text node that that position is returned
      * as well as the offset in that text node.
+     * Optionally takes a memberid of a cursor, to specifically return the
+     * text node positioned just behind that cursor.
      * @param {!number} position
      * @param {number} memberid
      * @return {?{textNode: !Text, offset: !number}}
@@ -679,6 +681,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * This function will return the Text node as well as the offset in that text node
      * of the cursor.
      * @param {!number} position
+     * @param {number} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
     this.getPositionInTextNode = getPositionInTextNode;
