@@ -584,11 +584,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
 
         // Move the cursor with the current memberid after all adjacent cursors
-        if (memberid) {
+        if (memberid && cursors[memberid]) {
             cursorNode = cursors[memberid].getNode();
             while (nodeOffset === 0 && cursorNode.nextSibling
                     && cursorNode.nextSibling.localName === "cursor") {
                 cursorNode.parentNode.insertBefore(cursorNode, cursorNode.nextSibling.nextSibling);
+            }
+            // The lastTextNode is not "" if the position is at the end of a paragraph.
+            // We definitely need ephemeral empty text nodes instead of a lastTextNode representing
+            // all the previous text, to prevent insertion by one cursor causing movement of the other 
+            // cursors at the same position.
+            if (cursorNode && lastTextNode.length > 0) {
+                lastTextNode = rootNode.ownerDocument.createTextNode('');
+                nodeOffset = 0;
+                cursorNode.parentNode.insertBefore(lastTextNode, cursorNode.nextSibling);
             }
         }
 
@@ -602,18 +611,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
             node.parentNode.insertBefore(lastTextNode, node);
 
-            if (cursorNode) {
+            if (cursorNode === node) {
                 break;
             }
         }
 
         // After the above cursor-specific adjustment, if the lastTextNode
-        // is empty and has a previousSibling, discard it and use that sibling as the
-        // lastTextNode
-        if (lastTextNode.length === 0 && lastTextNode.previousSibling
+        // has a text node previousSibling, merge them and make the result the lastTextNode
+        while (lastTextNode.previousSibling
                 && lastTextNode.previousSibling.nodeType === 3) {
+            lastTextNode.previousSibling.appendData(lastTextNode.data);
+            nodeOffset = lastTextNode.length + lastTextNode.previousSibling.length;
             lastTextNode = lastTextNode.previousSibling;
-            nodeOffset = lastTextNode.length;
             lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
         }
 
