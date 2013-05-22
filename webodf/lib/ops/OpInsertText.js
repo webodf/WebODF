@@ -78,7 +78,7 @@ ops.OpInsertText = function OpInsertText() {
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             i;
 
-        domPosition = odtDocument.getPositionInTextNode(position);
+        domPosition = odtDocument.getPositionInTextNode(position, memberid);
         if (domPosition) {
             previousNode = domPosition.textNode;
             parent = previousNode.parentNode;

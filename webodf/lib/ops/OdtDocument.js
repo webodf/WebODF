@@ -527,14 +527,17 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * offset has been counted, the Text node that that position is returned
      * as well as the offset in that text node.
      * @param {!number} position
+     * @param {number} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
-    function getPositionInTextNode(position) {
+    function getPositionInTextNode(position, memberid) {
         var iterator = gui.SelectionMover.createPositionIterator(rootNode),
             lastTextNode = null,
             lastNode = null,
             node,
-            nodeOffset = 0;
+            nodeOffset = 0,
+            cursorNode = null;
+
         runtime.assert(position >= 0, "position must be >= 0");
         // iterator should be at the start of rootNode
         if (filter.acceptPosition(iterator) === 1) {
@@ -579,8 +582,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         if (lastTextNode === null) {
             return null;
         }
+
+        // Move the cursor with the current memberid after all adjacent cursors
+        if (memberid) {
+            cursorNode = cursors[memberid].getNode();
+            while (nodeOffset === 0 && cursorNode.nextSibling
+                    && cursorNode.nextSibling.localName === "cursor") {
+                cursorNode.parentNode.insertBefore(cursorNode, cursorNode.nextSibling.nextSibling);
+            }
+        }
+
         // if the position is just after a cursor, then move in front of that
-        // cursor
+        // cursor. Give preference to the cursor with the optionally specified memberid
         while (nodeOffset === 0 && lastTextNode.previousSibling &&
                 lastTextNode.previousSibling.localName === "cursor") {
             node = lastTextNode.previousSibling;
@@ -588,6 +601,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 lastTextNode = rootNode.ownerDocument.createTextNode('');
             }
             node.parentNode.insertBefore(lastTextNode, node);
+
+            if (cursorNode) {
+                break;
+            }
         }
 
         // After the above cursor-specific adjustment, if the lastTextNode
