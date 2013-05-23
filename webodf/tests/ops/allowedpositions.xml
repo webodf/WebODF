@@ -135,4 +135,27 @@
   </ops>
   <after><office:text><text:p><text:span>A</text:span>B<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
+ <test name="MoveCursor17">
+  <before><office:text><text:p>  a</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p>  <c:cursor c:memberId="Joe"/>a</text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor18">
+  <before><office:text><text:p>  a</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p>  a<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursor19">
+  <before><office:text><text:p>a b </text:p><text:p/><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="4"/>
+  </ops>
+  <after><office:text><text:p>a b </text:p><text:p><c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
 </tests>

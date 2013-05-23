@@ -156,29 +156,31 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             return r;
         }
         /**
-         * Walk to the left along the DOM and return true if the first thing
-         * encountered is either a non-whitespace character or a character
-         * element or a whitespace character that is preceded directly by a
-         * non-whitespace character or a character element.
+         * Walk to the left along the DOM and return the type of the first
+         * thing encountered.
+         * 0 none of the below
+         * 1 non-whitespace character or a character element
+         * 2 whitespace character that is preceded by a non-whitespace character
+         *   or a character element
          *
          * @param {!Node} node the first node to scan
-         * @return {!boolean}
+         * @return {!number}
          */
         function scanLeftForCharacter(node) {
-            var text, r = false;
+            var text, r = 0;
             if (node.nodeType === 3 && node.length > 0) {
                 text = node.data;
                 if (!isODFWhitespace(text.substr(text.length - 1, 1))) {
-                    r = true; // character found
+                    r = 1; // character found
                 } else if (text.length === 1) {
                     r = scanLeftForNonWhitespace(
                         node.previousSibling || node.parentNode
-                    );
+                    ) ? 2 : 0;
                 } else {
-                    r = !isODFWhitespace(text.substr(text.length - 2, 1));
+                    r = isODFWhitespace(text.substr(text.length - 2, 1)) ? 0 : 2;
                 }
             } else if (isCharacterElement(node)) {
-                r = true;
+                r = 1;
             }
             return r;
         }
@@ -268,13 +270,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {!core.PositionFilter.FilterResult}
          */
         function checkLeftRight(container, leftNode, rightNode) {
+            var r, firstPos;
             // accept if there is a character immediately to the left
-            if (leftNode && scanLeftForCharacter(leftNode)) {
-                return accept;
+            if (leftNode) {
+                r = scanLeftForCharacter(leftNode);
+                if (r === 1) {
+                    return accept;
+                }
+                if (r === 2 && scanRightForAnyCharacter(rightNode)) {
+                    return accept;
+                }
             }
             // accept if this is the first position in p or h and there is no
             // character in the p or h
-            var firstPos = leftNode === null && (container.localName === "p"
+            firstPos = leftNode === null && (container.localName === "p"
                                       || container.localName === "h");
             if (firstPos && !scanRightForAnyCharacter(rightNode)) {
                 return accept;
@@ -300,6 +309,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 offset,
                 text,
                 leftChar,
+                rightChar,
                 leftNode,
                 rightNode,
                 r;
@@ -315,6 +325,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 // equal to the length of the text node.
                 offset = iterator.offset();
                 text = container.data;
+                runtime.assert(offset !== text.length, "Unexpected offset.");
                 if (offset > 0) {
                     // The cursor may be placed to the right of a non-whitespace
                     // character.
@@ -322,19 +333,33 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     if (!isODFWhitespace(leftChar)) {
                         return accept;
                     }
-                    // A whitespace character to the left is only acceptable if
-                    // there is not a whitespace character directly to the left
-                    // of that.
+                    // A whitespace to the left is ok, if
+                    // * there is a non-whitespace character to the right and
+                    //   that is the first non-whitespace character or character
+                    //   element or
+                    // * there is not another whitespace character in front of
+                    //   it.
                     if (offset > 1) {
                         leftChar = text.substr(offset - 2, 1);
-                        return isODFWhitespace(leftChar) ? reject : accept;
+                        if (!isODFWhitespace(leftChar)) {
+                            // a single whitespace after non-whitespace
+                            return accept;
+                        }
+                        // check if this can be leading paragraph space
+                        if (!isODFWhitespace(text.substr(0, offset))) {
+                            return reject;
+                        }
+                        // below, we check if this can be the first position
                     }
-                    // If the whitespace to the left is not part of the leading
-                    // whitespace, then it is acceptable to place the cursor
-                    // here.
+                    // check if there is a non-whitespace character or
+                    // character element in a preceding node
                     leftNode = container.previousSibling || container.parentNode;
-                    if (scanLeftForNonWhitespace(leftNode)) {
+                    if (offset === 1 && scanLeftForNonWhitespace(leftNode)) {
                         return accept;
+                    }
+                    rightChar = text.substr(offset, 1);
+                    if (isODFWhitespace(rightChar)) {
+                        return reject;
                     }
                     return scanLeftForAnyCharacter(leftNode)
                         ? reject : accept;
@@ -475,7 +500,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!number} length
      * @return {!string}
      */
-    this.getText = function(position, length) {
+    this.getText = function (position, length) {
         var i,
             charcount = 0,
             chardata = [],
