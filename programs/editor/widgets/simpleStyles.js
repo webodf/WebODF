@@ -130,10 +130,12 @@ define("webodf/editor/widgets/simpleStyles",
                 underline = textProperties['style:text-underline-style'];
                 strikethrough = textProperties['style:text-line-through-style'];
 
-                boldButton.set('checked', fontWeight === 'bold' ? true : false);
-                italicButton.set('checked', fontStyle === 'italic' ? true : false);
-                underlineButton.set('checked', underline === 'solid' ? true : false);
-                strikethroughButton.set('checked', strikethrough === 'solid' ? true : false);
+                // The 3rd parameter is false to avoid firing onChange when setting the value
+                // programmatically.
+                boldButton.set('checked', fontWeight === 'bold' ? true : false, false);
+                italicButton.set('checked', fontStyle === 'italic' ? true : false, false);
+                underlineButton.set('checked', underline === 'solid' ? true : false, false);
+                strikethroughButton.set('checked', strikethrough === 'solid' ? true : false, false);
             }
 
             editorSession.subscribe(EditorSession.signalParagraphChanged, function (info) {
