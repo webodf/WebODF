@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, runtime*/
+/*global core, runtime, Runtime*/
 /*jslint bitwise: true*/
 
 /**
@@ -111,6 +111,8 @@ core.RuntimeTests = function RuntimeTests(runner) {
         runtime.read("utf8.txt", 3, 4, function (err, data) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
+            t.data = data;
+            r.shouldBe(t, "t.data.length", "4");
             if (data) {
                 // we want to test the actual Runtime implementation rather than the nodejs runtime
                 t.data = Runtime.byteArrayToString(data, "utf8");

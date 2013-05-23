@@ -317,6 +317,24 @@ function BrowserRuntime(logoutput) {
     var self = this,
         cache = {},
         useNativeArray = window.ArrayBuffer && window.Uint8Array;
+    if (useNativeArray) {
+        Uint8Array.prototype.slice = function (begin, end) {
+            if (end === undefined) {
+                if (begin === undefined) {
+                    begin = 0;
+                }
+                end = this.length;
+            }
+            var view = this.subarray(begin, end), array, i;
+            end -= begin;
+            array = new Uint8Array(new ArrayBuffer(end));
+            for (i = 0; i < end; i += 1) {
+                array[i] = view[i];
+            }
+            return array;
+        };
+    }
+
     /**
      * @constructor
      * @augments Runtime.ByteArray
@@ -327,21 +345,6 @@ function BrowserRuntime(logoutput) {
     this.ByteArray = useNativeArray
         // if Uint8Array is available, use that
         ? function ByteArray(size) {
-            Uint8Array.prototype.slice = function (begin, end) {
-                if (end === undefined) {
-                    if (begin === undefined) {
-                        begin = 0;
-                    }
-                    end = this.length;
-                }
-                var view = this.subarray(begin, end), array, i;
-                end -= begin;
-                array = new Uint8Array(new ArrayBuffer(end));
-                for (i = 0; i < end; i += 1) {
-                    array[i] = view[i];
-                }
-                return array;
-            };
             return new Uint8Array(new ArrayBuffer(size));
         }
         : function ByteArray(size) {
@@ -555,6 +558,9 @@ function BrowserRuntime(logoutput) {
                     // report file
                     if (String(typeof VBArray) !== "undefined") {
                         data = new VBArray(xhr.responseBody).toArray();
+                    } else if (xhr.response) {
+                        data = /**@type{!ArrayBuffer}*/(xhr.response);
+                        data = new Uint8Array(data);
                     } else {
                         data = self.byteArrayFromString(xhr.responseText, "binary");
                     }
@@ -571,6 +577,7 @@ function BrowserRuntime(logoutput) {
         if (xhr.overrideMimeType) {
             xhr.overrideMimeType("text/plain; charset=x-user-defined");
         }
+        xhr.responseType = "arraybuffer";
         //xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
         //       (offset + length - 1));
         try {
