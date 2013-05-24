@@ -237,19 +237,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * non-whitespace character or a character element is encountered.
          *
          * @param {?Node} node the first node to scan
+         * @param {boolean=} ignoreFirstNode
          * @return {!boolean}
          */
-        function scanRightForAnyCharacter(node) {
+        function scanRightForAnyCharacter(node, ignoreFirstNode) {
             var r = false;
             if (!node || node.localName === "p" || node.localName === "h") {
                 return false;
             }
             while (node) {
-                if (node.nodeType === 3 && node.length > 0
+                if (!ignoreFirstNode && node.nodeType === 3 && node.length > 0
                         && !isODFWhitespace(node.data)) {
                     r = true;
                     break;
-                } else if (isCharacterElement(node)) {
+                } else if (!ignoreFirstNode && isCharacterElement(node)) {
                     r = true;
                     break;
                 }
@@ -260,6 +261,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 } else {
                     node = null;
                 }
+                ignoreFirstNode = false;
             }
             return r;
         }
@@ -342,6 +344,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     if (offset > 1) {
                         leftChar = text.substr(offset - 2, 1);
                         if (!isODFWhitespace(leftChar)) {
+                            // check that the space is not part of the trailing
+                            // whitespace
+                            if (isODFWhitespace(text.substr(offset))) {
+                                rightNode = container;
+                                if (!scanRightForAnyCharacter(container, true)) {
+                                    return reject;
+                                }
+                            }
                             // a single whitespace after non-whitespace
                             return accept;
                         }

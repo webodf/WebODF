@@ -158,4 +158,12 @@
   </ops>
   <after><office:text><text:p>a b </text:p><text:p><c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
+ <test name="MoveCursor20">
+  <before><office:text><text:p>b  </text:p><text:p/><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="2"/>
+  </ops>
+  <after><office:text><text:p>b  </text:p><text:p><c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
 </tests>
