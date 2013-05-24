@@ -139,7 +139,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                         node = previousNode(node);
                     } else {
                         return !isODFWhitespace(
-                            node.data.substr(node.length - 1, 0)
+                            node.data.substr(node.length - 1, 1)
                         );
                     }
                 } else if (node.namespaceURI === textns &&
@@ -377,7 +377,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     if (isODFWhitespace(rightChar)) {
                         return reject;
                     }
-                    return scanLeftForAnyCharacter(leftNode)
+                    return scanLeftForAnyCharacter(container.previousSibling)
                         ? reject : accept;
                 }
                 leftNode = iterator.leftNode();
