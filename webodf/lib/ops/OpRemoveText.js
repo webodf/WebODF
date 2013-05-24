@@ -125,6 +125,9 @@ ops.OpRemoveText = function OpRemoveText() {
      * @return {!{paragraphElement: !Node, neighborhood: ?Array.<!Node>, remainingLength: !number}}
      */
     function getPreprocessedNeighborhood(odtDocument, position, length) {
+        // First, upgrade whitespaces before any deletion, around the initial position
+        odtDocument.upgradeWhitespacesAtPosition(position);
+
         var domPosition = odtDocument.getPositionInTextNode(position),
             initialTextNode = domPosition.textNode,
             initialTextOffset = domPosition.offset,
@@ -155,14 +158,23 @@ ops.OpRemoveText = function OpRemoveText() {
                     : (initialTextNode.length - initialTextOffset);
 
                 initialTextNode.deleteData(initialTextOffset, difference);
+                // Now the new post-'collapse' position is the same as the old, because the
+                // data to the right is deleted.
+                // Upgrade the whitespaces there.
+                odtDocument.upgradeWhitespacesAtPosition(position);
+                neighborhood = odtDocument.getTextNeighborhood(position, length + difference * direction);
             } else {
                 difference = remainingLength < initialTextOffset
                     ? remainingLength
                     : initialTextOffset;
 
                 initialTextNode.deleteData(initialTextOffset - difference, difference);
+                // Now the new post-collapse position is `position - difference - 1`,
+                // because the data to the left is deleted.
+                // Upgrade the whitespaces there.
+                odtDocument.upgradeWhitespacesAtPosition(position - difference - 1);
+                neighborhood = odtDocument.getTextNeighborhood(position - difference - 1, length + difference * direction);
             }
-            neighborhood = odtDocument.getTextNeighborhood(position, length + difference * direction);
 
             remainingLength -= difference;
             if (difference && neighborhood[0] === initialTextNode) {
@@ -194,8 +206,10 @@ ops.OpRemoveText = function OpRemoveText() {
             currentTextNode = null,
             currentParent = null,
             currentLength,
-            preprocessedNeighborhood = getPreprocessedNeighborhood(odtDocument, position, length),
+            preprocessedNeighborhood,
             i;
+
+        preprocessedNeighborhood = getPreprocessedNeighborhood(odtDocument, position, length);
 
         neighborhood = preprocessedNeighborhood.neighborhood;
         remainingLength = preprocessedNeighborhood.remainingLength;
@@ -260,8 +274,16 @@ ops.OpRemoveText = function OpRemoveText() {
                 } else {
                     if (removalType === 'delete') {
                         currentTextNode.deleteData(0, remainingLength);
+                        // Now the new post-'collapse' position is the same as the old, because the
+                        // data to the right is deleted.
+                        // Upgrade the whitespaces there.
+                        odtDocument.upgradeWhitespacesAtPosition(position);
                     } else {
                         currentTextNode.deleteData(currentLength - remainingLength, remainingLength);
+                        // Now the new post-collapse position is `position + length - 1`,
+                        // because the data to the left is deleted.
+                        // Upgrade the whitespaces there.
+                        odtDocument.upgradeWhitespacesAtPosition(position + length - 1);
                     }
                     remainingLength = 0;
                 }

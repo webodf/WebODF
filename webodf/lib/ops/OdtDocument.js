@@ -495,6 +495,77 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return null;
     }
 
+    function upgradeWhitespaceToElement(textNode, offset) {
+        runtime.assert(textNode.data[offset] === ' ', "upgradeWhitespaceToElement: textNode.data[offset] should be a literal space");
+
+        var space = textNode.ownerDocument.createElementNS(textns, 'text:s');
+        space.appendChild(textNode.ownerDocument.createTextNode(' '));
+
+        textNode.deleteData(offset, 1);
+        textNode.splitText(offset);
+        textNode.parentNode.insertBefore(space, textNode.nextSibling);
+    }
+    /**
+     * Upgrades literal whitespaces (' ') to <text:s> </text:s>,
+     * when given a textNode containing the whitespace and an offset
+     * indicating the location of the whitespace in it.
+     * @param {!Node} textNode
+     * @param {!number} offset
+     * @return {undefined}
+     */
+    this.upgradeWhitespaceToElement = upgradeWhitespaceToElement;
+
+    function isSignificantWhitespace(textNode, offset) {
+        var iterator = getIteratorAtPosition(0),
+            container;
+
+        iterator.setPosition(textNode, offset);
+        container = iterator.container();
+
+        if (container.nodeType === 3
+                && container.data[offset] === ' '
+                && container.parentNode.localName !== 's') {
+            if (filter.acceptPosition(iterator) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    /** Takes a textNode and an offset, and returns true if the character
+     * at that offset is a significant whitespace.
+     * @param {!Node} textNode
+     * @param {!number} offset
+     * @return {!boolean}
+     */
+    this.isSignificantWhitespace = isSignificantWhitespace;
+
+    function upgradeWhitespacesAtPosition(position) {
+        var iterator = getIteratorAtPosition(position),
+            container = null,
+            offset,
+            i = 0;
+
+        iterator.previousPosition();
+        for (i = -1; i <= 1; i += 1) {
+            container = iterator.container();
+            offset = iterator.offset();
+            if (container.nodeType === 3
+                    && container.data[offset] === ' '
+                    && isSignificantWhitespace(container, offset)) {
+                upgradeWhitespaceToElement(container, offset);
+            }
+            iterator.nextPosition();
+        }
+    }
+    /**
+     * Upgrades any significant whitespace at, one step left, and one step right of the given
+     * position to space elements.
+     * @param {!number} position
+     * @return {undefined}
+     */
+    this.upgradeWhitespacesAtPosition = upgradeWhitespacesAtPosition;
+
     this.getParagraphStyleElement = getParagraphStyleElement;
 
     this.getParagraphElement = getParagraphElement;

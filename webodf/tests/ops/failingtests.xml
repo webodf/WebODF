@@ -6,32 +6,4 @@
   </ops>
   <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
  </test>
- <test name="DeleteExposesSpace1">
-  <before><office:text><text:p> a b </text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="0" length="1"/>
-  </ops>
-  <after><office:text><text:p> <s/>b </text:p></office:text></after>
- </test>
- <test name="DeleteExposesSpace2">
-  <before><office:text><text:p> a b </text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="2" length="1"/>
-  </ops>
-  <after><office:text><text:p> a<s/> </text:p></office:text></after>
- </test>
- <test name="BackspaceExposesSpace1">
-  <before><office:text><text:p> a b </text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="1" length="-1"/>
-  </ops>
-  <after><office:text><text:p> <s/>b </text:p></office:text></after>
- </test>
- <test name="BackspaceExposesSpace2">
-  <before><office:text><text:p> a b </text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="3" length="-1"/>
-  </ops>
-  <after><office:text><text:p> <s/>b </text:p></office:text></after>
- </test>
 </tests>
