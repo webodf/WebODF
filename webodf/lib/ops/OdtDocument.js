@@ -347,7 +347,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                             // check that the space is not part of the trailing
                             // whitespace
                             if (isODFWhitespace(text.substr(offset))) {
-                                rightNode = container;
                                 if (!scanRightForAnyCharacter(container, true)) {
                                     return reject;
                                 }
@@ -365,6 +364,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     // character element in a preceding node
                     leftNode = container.previousSibling || container.parentNode;
                     if (offset === 1 && scanLeftForNonWhitespace(leftNode)) {
+                        // check that the space is not part of the trailing
+                        // whitespace
+                        if (isODFWhitespace(text.substr(offset))) {
+                            if (!scanRightForAnyCharacter(container, true)) {
+                                return reject;
+                            }
+                        }
                         return accept;
                     }
                     rightChar = text.substr(offset, 1);
