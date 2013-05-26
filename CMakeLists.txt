@@ -82,10 +82,11 @@ ExternalProject_Add(
 set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 
 # Node.JS
+set(NODEVERSION 0.10.8)
 if(WIN32)
     # On windows, it is significantly faster and more reliable to download
     # a pre-built 32-bit binary
-    set(NODE_BIN_URL "http://nodejs.org/dist/v0.8.19/node.exe")
+    set(NODE_BIN_URL "http://nodejs.org/dist/v${NODEVERSION}/node.exe")
     set(NODE_BIN_MD5 "6f3979fffb38020a1e6c75ccb15c092f")
     file(DOWNLOAD "${NODE_BIN_URL}" "${EXTERNALS_DOWNLOAD_DIR}/node-download.exe"
         SHOW_PROGRESS
@@ -106,8 +107,8 @@ else(WIN32)
         NodeJS
         PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://nodejs.org/dist/v0.8.14/node-v0.8.14.tar.gz"
-        URL_MD5 284fd2c7578064c339d9cf6a3a475ac7
+        URL "http://nodejs.org/dist/v${NODEVERSION}/node-v${NODEVERSION}.tar.gz"
+        URL_MD5 c99a48ddb5c6d4a0d8624e081a97050c
         CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
         INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
         BUILD_IN_SOURCE 1

@@ -47,7 +47,6 @@ runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
 
-
 /**
  * Holds the unit tests to run.
  * @type {!Array.<Function>}
@@ -83,7 +82,7 @@ var tester = new core.UnitTester();
  * @param {!Array.<Function>} tests
  * @return {undefined}
  */
-function runNextTest(tests) {
+function runNextTest(tests, tester) {
     "use strict";
     // done with all tests?
     if (tests.length === 0) {
@@ -105,7 +104,7 @@ function runNextTest(tests) {
     runtime.log("Running test '" + Runtime.getFunctionName(test) + "'.");
     try {
         tester.runTests(test, function () {
-            runNextTest(tests.slice(1));
+            runNextTest(tests.slice(1), tester);
         }, []);
     } catch (e) {
         runtime.log(e);
@@ -198,5 +197,5 @@ if (!selectedTests.suite) {
     getTestNamesFromArguments(selectedTests, args);
 }
 if (!runSelectedTests(selectedTests)) {
-    runNextTest(tests);
+    runNextTest(tests, tester);
 }

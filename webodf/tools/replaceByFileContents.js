@@ -43,32 +43,21 @@
  *
  */
 
-var i, input_file, output_file, keywords=[];
-i = 1;
-input_file = arguments[i]; i+=1;
-output_file = arguments[i]; i+=1;
-
-for (; i+1<arguments.length; i += 2) {
-	keywords.push({
-		from:arguments[i],
-		to:arguments[i+1]
-	});
-}
-runtime.log("filtering ["+input_file+"] to ["+output_file+"]");
-
-runtime.readFile(input_file, "utf-8", function (err, inp_data) {
+function run(input_file, output_file, keywords) {
 	"use strict";
-	var repl_done;
-	if (err) {
-		runtime.log("failed to read input_file \""+input_file+"\":");
+	var repl_done, inp_data;
+    try {
+        inp_data = runtime.readFileSync(input_file, "utf-8");
+    } catch (err) {
+		runtime.log("failed to read input_file \"" + input_file + "\":");
 		runtime.log(err);
 		return;
 	}
 
 	repl_done = [];
-	keywords.forEach(function(trans) {
+	keywords.forEach(function (trans) {
 		if ((trans.from && trans.to)) {
-			runtime.log("replacing \""+trans.from+"\" with contents of ["+trans.to+"].");
+			runtime.log("replacing \"" + trans.from + "\" with contents of [" + trans.to + "].");
 			runtime.readFile(trans.to, "utf-8", function (err, repl_data) {
 				if (err) {
 					runtime.log(err);
@@ -87,9 +76,24 @@ runtime.readFile(input_file, "utf-8", function (err, inp_data) {
 				}
 			});
 		} else {
-			runtime.log("skipping replacement: ["+trans.from+"] / ["+trans.to+"]");
+			runtime.log("skipping replacement: [" + trans.from + "] / [" + trans.to + "]");
 		}
 
 	});
-});
+}
 
+var i, input_file, output_file, keywords = [];
+i = 1;
+input_file = arguments[i];
+i += 1;
+output_file = arguments[i];
+i += 1;
+
+for (; i + 1 < arguments.length; i += 2) {
+	keywords.push({
+		from: arguments[i],
+		to: arguments[i + 1]
+	});
+}
+runtime.log("filtering [" + input_file + "] to [" + output_file + "]");
+run(input_file, output_file, keywords);
