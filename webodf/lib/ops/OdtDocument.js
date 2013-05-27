@@ -394,7 +394,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     if (isODFWhitespace(rightChar)) {
                         return reject;
                     }
-                    return scanLeftForAnyCharacter(container.previousSibling)
+                    return scanLeftForAnyCharacter(previousNode(container))
                         ? reject : accept;
                 }
                 leftNode = iterator.leftNode();
