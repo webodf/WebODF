@@ -515,44 +515,22 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     this.upgradeWhitespaceToElement = upgradeWhitespaceToElement;
 
-    function isSignificantWhitespace(textNode, offset) {
-        var iterator = getIteratorAtPosition(0),
-            container;
-
-        iterator.setPosition(textNode, offset);
-        container = iterator.container();
-
-        if (container.nodeType === 3
-                && container.data[offset] === ' '
-                && container.parentNode.localName !== 's') {
-            if (filter.acceptPosition(iterator) === 1) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-    /** Takes a textNode and an offset, and returns true if the character
-     * at that offset is a significant whitespace.
-     * @param {!Node} textNode
-     * @param {!number} offset
-     * @return {!boolean}
-     */
-    this.isSignificantWhitespace = isSignificantWhitespace;
-
     function upgradeWhitespacesAtPosition(position) {
         var iterator = getIteratorAtPosition(position),
             container = null,
             offset,
             i = 0;
 
+        // Ideally we have to check from *two* positions to the left and right
+        // because the position may be surrounded by node boundaries. Slightly hackish.
         iterator.previousPosition();
-        for (i = -1; i <= 1; i += 1) {
+        iterator.previousPosition();
+        for (i = -2; i <= 2; i += 1) {
             container = iterator.container();
             offset = iterator.offset();
             if (container.nodeType === 3
                     && container.data[offset] === ' '
-                    && isSignificantWhitespace(container, offset)) {
+                    && odfUtils.isSignificantWhitespace(container, offset)) {
                 upgradeWhitespaceToElement(container, offset);
             }
             iterator.nextPosition();

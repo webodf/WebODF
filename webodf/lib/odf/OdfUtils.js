@@ -276,4 +276,53 @@ odf.OdfUtils = function OdfUtils() {
         return !scanRightForAnyCharacter(nextNode(textnode));
     }
     this.isTrailingWhitespace = isTrailingWhitespace;
+
+    function isSignificantWhitespace(textNode, offset) {
+        var text = textNode.data,
+            leftChar,
+            leftNode,
+            rightChar,
+            rightNode,
+            result;
+
+        if (!isODFWhitespace(text[offset])) {
+            return false;
+        }
+
+        if (offset > 0) {
+            if (!isODFWhitespace(text[offset - 1])) {
+                return true;
+            }
+
+            if (offset > 1) {
+                if (!isODFWhitespace(text[offset - 2])) {
+                    result = true;
+                } else if (!isODFWhitespace(text.substr(0, offset))) {
+                    return false;
+                }
+            } else if (scanLeftForNonWhitespace(previousNode(textNode))) {
+                result = true;
+            }
+
+            if (result === true) {
+                return isTrailingWhitespace(textNode, offset)
+                    ? false : true;
+            }
+
+            rightChar = text[offset + 1];
+            if (isODFWhitespace(rightChar)) {
+                return false;
+            }
+            return scanLeftForAnyCharacter(previousNode(textNode))
+                ? false : true;
+        }
+        return false;
+    }
+    /** Takes a textNode and an offset, and returns true if the character
+     * at that offset is a significant whitespace.
+     * @param {!Node} textNode
+     * @param {!number} offset
+     * @return {!boolean}
+     */
+    this.isSignificantWhitespace = isSignificantWhitespace;
 };
