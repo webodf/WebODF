@@ -63,6 +63,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalTableAdded]);
 
     /**
+     * Determine if the node is a text:p or a text:h element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isParagraph(e) {
+        var name = e && e.localName;
+        return (name === "p" || name === "h") && e.namespaceURI === textns;
+    }
+
+    /**
      * @constructor
      * @implements {core.PositionFilter}
      */
@@ -85,11 +95,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {!boolean}
          */
         function isGroupingElement(e) {
-            if (e === null || e.namespaceURI !== textns) {
-                return false;
-            }
-            var n = e.localName;
-            return n === "span" || n === "p" || n === "h";
+            var name = e && e.localName;
+            return (name === "span" || name === "p" || name === "h")
+                && e.namespaceURI === textns;
         }
         /**
          * Determine if the node is a grouping element.
@@ -97,16 +105,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {!boolean}
          */
         function isCharacterElement(e) {
-            if (e === null || e.nodeType !== 1) {
-                return false;
-            }
-            var ns = e.namespaceURI,
-                n = e.localName,
+            var n = e && e.localName,
+                ns,
                 r = false;
-            if (ns === textns) {
-                r = n === "s" || n === "tab" || n === "line-break";
-            } else if (ns === drawns) {
-                r = n === "frame" && e.getAttributeNS(textns, "anchor-type") === "as-char";
+            if (n) {
+                ns = e.namespaceURI;
+                if (ns === textns) {
+                    r = n === "s" || n === "tab" || n === "line-break";
+                } else if (ns === drawns) {
+                    r = n === "frame" && e.getAttributeNS(textns, "anchor-type") === "as-char";
+                }
             }
             return r;
         }
@@ -114,15 +122,24 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @param {!Node} node
          * @return {!Node}
          */
-        function previousNode(node) {
-            if (node.previousSibling === null) {
-                return /**@type{!Node}*/(node.parentNode);
-            }
-            node = node.previousSibling;
+        function lastChild(node) {
             while (node.lastChild !== null && isGroupingElement(node)) {
                 node = node.lastChild;
             }
             return node;
+        }
+        /**
+         * @param {!Node} node
+         * @return {?Node}
+         */
+        function previousNode(node) {
+            while (node.previousSibling === null) {
+                node = /**@type{!Node}*/(node.parentNode);
+                if (isParagraph(node)) {
+                    return null;
+                }
+            }
+            return lastChild(node.previousSibling);
         }
         /**
          * Walk to the left along the DOM and return true if the first thing
@@ -142,8 +159,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                             node.data.substr(node.length - 1, 1)
                         );
                     }
-                } else if (node.namespaceURI === textns &&
-                        (node.localName === "p" || node.localName === "h")) {
+                } else if (node.namespaceURI === textns && isParagraph(node)) {
                     r = false;
                     break;
                 } else if (isCharacterElement(node)) {
@@ -166,16 +182,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @param {!Node} node the first node to scan
          * @return {!number}
          */
-        function scanLeftForCharacter(node) {
+        function lookLeftForCharacter(node) {
             var text, r = 0;
             if (node.nodeType === 3 && node.length > 0) {
                 text = node.data;
                 if (!isODFWhitespace(text.substr(text.length - 1, 1))) {
                     r = 1; // character found
                 } else if (text.length === 1) {
-                    r = scanLeftForNonWhitespace(
-                        node.previousSibling || node.parentNode
-                    ) ? 2 : 0;
+                    r = scanLeftForNonWhitespace(previousNode(node)) ? 2 : 0;
                 } else {
                     r = isODFWhitespace(text.substr(text.length - 2, 1)) ? 0 : 2;
                 }
@@ -185,16 +199,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             return r;
         }
         /**
-         * Walk to the right along the DOM and return true if the first thing
+         * Look to the right along the DOM and return true if the first thing
          * encountered is either a non-whitespace character or a character
          * element.
          *
-         * @param {!Node} node the first node to scan
+         * @param {?Node} node the first node to scan
          * @return {!boolean}
          */
-        function scanRightForCharacter(node) {
+        function lookRightForCharacter(node) {
             var r = false;
-            if (node.nodeType === 3 && node.length > 0) {
+            if (node && node.nodeType === 3 && node.length > 0) {
                 r = !isODFWhitespace(node.data.substr(0, 1));
             } else if (isCharacterElement(node)) {
                 r = true;
@@ -210,9 +224,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          */
         function scanLeftForAnyCharacter(node) {
             var r = false;
-            if (!node || node.localName === "p" || node.localName === "h") {
-                return false;
-            }
+            node = node && lastChild(node);
             while (node) {
                 if (node.nodeType === 3 && node.length > 0
                         && !isODFWhitespace(node.data)) {
@@ -222,13 +234,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     r = true;
                     break;
                 }
-                if (node.lastChild !== null && isGroupingElement(node)) {
-                    node = node.lastChild;
-                } else if (node.previousSibling) {
-                    node = node.previousSibling;
-                } else {
-                    node = null;
-                }
+                node = previousNode(node);
             }
             return r;
         }
@@ -242,9 +248,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          */
         function scanRightForAnyCharacter(node, ignoreFirstNode) {
             var r = false;
-            if (!node || node.localName === "p" || node.localName === "h") {
-                return false;
-            }
             while (node) {
                 if (!ignoreFirstNode && node.nodeType === 3 && node.length > 0
                         && !isODFWhitespace(node.data)) {
@@ -272,38 +275,41 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          * @return {!core.PositionFilter.FilterResult}
          */
         function checkLeftRight(container, leftNode, rightNode) {
-            var r, firstPos;
+            var r, firstPos, rightOfChar;
             // accept if there is a character immediately to the left
             if (leftNode) {
-                r = scanLeftForCharacter(leftNode);
-                if (r === 1) {
+                r = lookLeftForCharacter(leftNode);
+                if (r === 1) {// non-whitespace character or a character element
                     return accept;
                 }
                 if (r === 2 && scanRightForAnyCharacter(rightNode)) {
+                    // significant whitespace is ok, if not in trailing whitesp
                     return accept;
                 }
             }
+            // at this point, we know that the position is not directly to the
+            // right of a significant character or element. so the position is
+            // only acceptable if it is the first in an empty p or h or if it
+            // is to the left of the first significant character or element.
+
             // accept if this is the first position in p or h and there is no
             // character in the p or h
-            firstPos = leftNode === null && (container.localName === "p"
-                                      || container.localName === "h");
-            if (firstPos && !scanRightForAnyCharacter(rightNode)) {
-                return accept;
+            firstPos = leftNode === null && isParagraph(container);
+            rightOfChar = lookRightForCharacter(rightNode);
+            if (firstPos) {
+                if (rightOfChar) {
+                    return accept;
+                }
+                // position is first position in empty paragraph
+                return scanRightForAnyCharacter(rightNode) ? reject : accept;
             }
-            // if not to the right of a character, reject
-            if (rightNode === null || !scanRightForCharacter(rightNode)) {
+            // if not directly to the right of a character, reject
+            if (!rightOfChar) {
                 return reject;
             }
-            if (firstPos) {
-                return accept;
-            }
             // accept if there is no character to the left
-            leftNode = leftNode || container.previousSibling;
-            if (leftNode) {
-                return !scanLeftForAnyCharacter(leftNode) ? accept : reject;
-            }
-            // accept if this is the first element in the paragraph or container
-            return scanLeftForNonWhitespace(container.parentNode) ? reject : accept;
+            leftNode = leftNode || previousNode(container);
+            return scanLeftForAnyCharacter(leftNode) ? reject : accept;
         }
 
         /**
@@ -658,7 +664,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?Node}
      */
     function getParagraphElement(node) {
-        while (node && !((node.localName === "p" || node.localName === "h") && node.namespaceURI === textns)) {
+        while (node && !isParagraph(node)) {
             node = node.parentNode;
         }
         return node;
