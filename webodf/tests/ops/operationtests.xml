@@ -34,6 +34,41 @@
   </ops>
   <after><office:text><text:p> <text:span> <c:cursor c:memberId="Joe"/>a</text:span></text:p></office:text></after>
  </test>
+ <test name="AddCursor_JustAfterEdit">
+  <before><office:text><text:p><editinfo /><text:span>a</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><editinfo /><text:span><c:cursor c:memberId="Joe"/>a</text:span></text:p></office:text></after>
+ </test>
+ <test name="AddCursor_NonEmptySpan">
+  <before><office:text><text:p><text:span>a</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><text:span><c:cursor c:memberId="Joe"/>a</text:span></text:p></office:text></after>
+ </test>
+ <test name="AddCursor_NestedSpan">
+  <before><office:text><text:p><text:span><text:span>a</text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><text:span><text:span><c:cursor c:memberId="Joe"/>a</text:span></text:span></text:p></office:text></after>
+ </test>
+ <test name="AddCursor_NestedSpan_JustAfterEdit_Level1">
+  <before><office:text><text:p><editinfo /><text:span><text:span>a</text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><editinfo /><text:span><text:span><c:cursor c:memberId="Joe"/>a</text:span></text:span></text:p></office:text></after>
+ </test>
+ <test name="AddCursor_NestedSpan_JustAfterEdit_Level2">
+  <before><office:text><text:p><text:span><editinfo /><text:span>a</text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+  </ops>
+  <after><office:text><text:p><text:span><editinfo /><text:span><c:cursor c:memberId="Joe"/>a</text:span></text:span></text:p></office:text></after>
+ </test>
 <!--
  <test name="RemoveCursor_Simple">
   <before><office:text><text:p><c:cursor c:memberId="Joe"/></text:p></office:text></before>

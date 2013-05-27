@@ -184,4 +184,36 @@
   </ops>
   <after><office:text><text:p>  a  b<c:cursor c:memberId="Joe"/>  </text:p><text:p/></office:text></after>
  </test>
+ <test name="MoveCursor_NestedSpan_01">
+  <before><office:text><text:p><text:span>a<text:span>b</text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>a<c:cursor c:memberId="Joe"/><text:span>b</text:span></text:span></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_NestedSpan_02">
+  <before><office:text><text:p><text:span><text:span>ab</text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:span><text:span>a<c:cursor c:memberId="Joe"/>b</text:span></text:span></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_NestedSpan_03">
+  <before><office:text><text:p><text:span><text:span>ab</text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="2"/>
+  </ops>
+  <after><office:text><text:p><text:span><text:span>ab<c:cursor c:memberId="Joe"/></text:span></text:span></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_NestedSpan_04">
+  <before><office:text><text:p><text:span><text:span><text:span>ab</text:span></text:span></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:span><text:span><text:span>a<c:cursor c:memberId="Joe"/>b</text:span></text:span></text:span></text:p></office:text></after>
+ </test>
 </tests>

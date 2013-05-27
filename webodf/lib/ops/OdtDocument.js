@@ -294,10 +294,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (rightNode === null || !scanRightForCharacter(rightNode)) {
                 return reject;
             }
+            if (firstPos) {
+                return accept;
+            }
             // accept if there is no character to the left
-            return (firstPos || !scanLeftForAnyCharacter(
-                leftNode || container.previousSibling || container.parentNode
-            )) ? accept : reject;
+            leftNode = leftNode || container.previousSibling;
+            if (leftNode) {
+                return !scanLeftForAnyCharacter(leftNode) ? accept : reject;
+            }
+            // accept if this is the first element in the paragraph or container
+            return scanLeftForNonWhitespace(container.parentNode) ? reject : accept;
         }
 
         /**
