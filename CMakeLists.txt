@@ -87,7 +87,7 @@ if(WIN32)
     # On windows, it is significantly faster and more reliable to download
     # a pre-built 32-bit binary
     set(NODE_BIN_URL "http://nodejs.org/dist/v${NODEVERSION}/node.exe")
-    set(NODE_BIN_MD5 "6f3979fffb38020a1e6c75ccb15c092f")
+    set(NODE_BIN_MD5 "3174c18de33da74f878c2b6e8f4c8b1e")
     file(DOWNLOAD "${NODE_BIN_URL}" "${EXTERNALS_DOWNLOAD_DIR}/node-download.exe"
         SHOW_PROGRESS
         EXPECTED_MD5 ${NODE_BIN_MD5}
