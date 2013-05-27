@@ -159,7 +159,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                             node.data.substr(node.length - 1, 1)
                         );
                     }
-                } else if (node.namespaceURI === textns && isParagraph(node)) {
+                } else if (isParagraph(node)) {
                     r = false;
                     break;
                 } else if (isCharacterElement(node)) {
