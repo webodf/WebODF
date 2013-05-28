@@ -156,6 +156,15 @@ core.Cursor = function Cursor(document, memberId) {
     function getEndNode() {
         return forwardSelection ? cursorNode : anchorNode;
     }
+
+    /**
+     * Returns true if the focus node is after the anchor node. This setup occurs
+     * if the user clicked and extended the selection forward.
+     * @returns {boolean}
+     */
+    this.isForwardSelection = function () {
+        return forwardSelection;
+    };
     /**
      * Obtain the node representing the cursor. This is
      * the selection end point

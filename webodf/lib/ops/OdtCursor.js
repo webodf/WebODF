@@ -113,6 +113,14 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         return memberId;
     };
     /**
+     * Returns true if the focus node is after the anchor node. This setup occurs
+     * if the user clicked and extended the selection forward.
+     * @returns {boolean}
+     */
+    this.isForwardSelection = function () {
+        return cursor.isForwardSelection();
+    };
+    /**
      * Obtain the node representing the cursor.
      * @return {!Element}
      */
