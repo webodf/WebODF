@@ -54,13 +54,44 @@ ops.OpInsertText = function OpInsertText() {
     /* This is a workaround for a bug where webkit forgets to relayout
      * the text when a new character is inserted at the beginning of a line in
      * a Text Node.
+     * @param {OdtDocument} odtDocument
      * @param {Node} textNode
      */
-    function triggerLayoutInWebkit(textNode) {
+    function triggerLayoutInWebkit(odtDocument, textNode) {
         var parent = textNode.parentNode,
-            next = textNode.nextSibling;
+            next = textNode.nextSibling,
+            impactedCursors = [];
+
+        // Removing and then re-inserting the text node causes
+        // all selections referencing this node to effectively break,
+        // and fall back to the parent container
+        // Workaround this by storing the range nodes, performing the modification
+        // and then resetting the selection ranges
+        odtDocument.getCursors().forEach(function(cursor) {
+            var selection = cursor.getSelection(),
+                range = selection.getRangeAt(0);
+            if (range.startContainer === textNode
+                || range.endContainer === textNode) {
+                impactedCursors.push({
+                    cursor: cursor,
+                    startContainer: range.startContainer,
+                    startOffset: range.startOffset,
+                    endContainer: range.endContainer,
+                    endOffset: range.endOffset
+                });
+            }
+        });
+
         parent.removeChild(textNode);
         parent.insertBefore(textNode, next);
+
+        impactedCursors.forEach(function(entry) {
+            var selection = entry.cursor.getSelection(),
+                range = selection.getRangeAt(0);
+
+            range.setStart(entry.startContainer, entry.startOffset);
+            range.setEnd(entry.endContainer, entry.endOffset);
+        });
     }
 
     this.execute = function (odtDocument) {
@@ -103,7 +134,7 @@ ops.OpInsertText = function OpInsertText() {
             }
 
             // FIXME A workaround.
-            triggerLayoutInWebkit(previousNode);
+            triggerLayoutInWebkit(odtDocument, previousNode);
 
             // If the last text node happens to be an empty text node, clean up.
             if (previousNode.length === 0) {
