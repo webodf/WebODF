@@ -69,6 +69,7 @@
         "odf/OdfContainer.js",
         "odf/Style2CSS.js",
         "odf/StyleInfo.js",
+        "odf/OdfUtils.js",
         "ops/EditInfo.js",
         "ops/UserModel.js",
         "ops/TrivialUserModel.js",

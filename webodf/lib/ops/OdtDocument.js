@@ -37,6 +37,8 @@
 
 runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("core.EventNotifier");
+runtime.loadClass("odf.OdfUtils");
+
 /**
  * A document that keeps all data related to the mapped document.
  * @constructor
@@ -51,6 +53,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         rootNode,
         selectionManager,
         filter,
+        odfUtils,
         /**Array.<!ops.OdtCursor>*/cursors = {},
         eventNotifier = new core.EventNotifier([
             ops.OdtDocument.signalCursorAdded,
@@ -79,213 +82,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function TextPositionFilter() {
         var /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
             /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
-
-        /**
-         * Determine if the text consists entirely of whitespace characters.
-         * At least one whitespace is required.
-         * @param {!string} text
-         * @return {!boolean}
-         */
-        function isODFWhitespace(text) {
-            return (/^[ \t\r\n]+$/).test(text);
-        }
-        /**
-         * Determine if the node is a grouping element.
-         * @param {?Node} e
-         * @return {!boolean}
-         */
-        function isGroupingElement(e) {
-            var name = e && e.localName;
-            return (name === "span" || name === "p" || name === "h")
-                && e.namespaceURI === textns;
-        }
-        /**
-         * Determine if the node is a grouping element.
-         * @param {?Node} e
-         * @return {!boolean}
-         */
-        function isCharacterElement(e) {
-            var n = e && e.localName,
-                ns,
-                r = false;
-            if (n) {
-                ns = e.namespaceURI;
-                if (ns === textns) {
-                    r = n === "s" || n === "tab" || n === "line-break";
-                } else if (ns === drawns) {
-                    r = n === "frame" && e.getAttributeNS(textns, "anchor-type") === "as-char";
-                }
-            }
-            return r;
-        }
-        /**
-         * @param {!Node} node
-         * @return {!Node}
-         */
-        function lastChild(node) {
-            while (node.lastChild !== null && isGroupingElement(node)) {
-                node = node.lastChild;
-            }
-            return node;
-        }
-        /**
-         * @param {!Node} node
-         * @return {?Node}
-         */
-        function previousNode(node) {
-            while (node.previousSibling === null) {
-                node = /**@type{!Node}*/(node.parentNode);
-                if (isParagraph(node)) {
-                    return null;
-                }
-            }
-            return lastChild(node.previousSibling);
-        }
-        /**
-         * @param {!Node} node
-         * @return {?Node}
-         */
-        function nextNode(node) {
-            if (node.firstChild !== null && isGroupingElement(node)) {
-                return node.firstChild;
-            }
-            while (node.nextSibling === null) {
-                node = /**@type{!Node}*/(node.parentNode);
-                if (isParagraph(node)) {
-                    return null;
-                }
-            }
-            return node.nextSibling;
-        }
-        /**
-         * Walk to the left along the DOM and return true if the first thing
-         * encountered is either a non-whitespace character or a character
-         * element. Walking goes through grouping elements.
-         * @param {?Node} node the first node to scan
-         * @return {!boolean}
-         */
-        function scanLeftForNonWhitespace(node) {
-            var r = false;
-            while (node) {
-                if (node.nodeType === 3) {
-                    if (node.length === 0) {
-                        node = previousNode(node);
-                    } else {
-                        return !isODFWhitespace(
-                            node.data.substr(node.length - 1, 1)
-                        );
-                    }
-                } else if (isCharacterElement(node)) {
-                    r = true;
-                    break;
-                } else {
-                    node = previousNode(node);
-                }
-            }
-            return r;
-        }
-        /**
-         * Walk to the left along the DOM and return the type of the first
-         * thing encountered.
-         * 0 none of the below
-         * 1 non-whitespace character or a character element
-         * 2 whitespace character that is preceded by a non-whitespace character
-         *   or a character element
-         *
-         * @param {!Node} node the first node to scan
-         * @return {!number}
-         */
-        function lookLeftForCharacter(node) {
-            var text, r = 0;
-            if (node.nodeType === 3 && node.length > 0) {
-                text = node.data;
-                if (!isODFWhitespace(text.substr(text.length - 1, 1))) {
-                    r = 1; // character found
-                } else if (text.length === 1) {
-                    r = scanLeftForNonWhitespace(previousNode(node)) ? 2 : 0;
-                } else {
-                    r = isODFWhitespace(text.substr(text.length - 2, 1)) ? 0 : 2;
-                }
-            } else if (isCharacterElement(node)) {
-                r = 1;
-            }
-            return r;
-        }
-        /**
-         * Look to the right along the DOM and return true if the first thing
-         * encountered is either a non-whitespace character or a character
-         * element.
-         *
-         * @param {?Node} node the first node to scan
-         * @return {!boolean}
-         */
-        function lookRightForCharacter(node) {
-            var r = false;
-            if (node && node.nodeType === 3 && node.length > 0) {
-                r = !isODFWhitespace(node.data.substr(0, 1));
-            } else if (isCharacterElement(node)) {
-                r = true;
-            }
-            return r;
-        }
-        /**
-         * Walk to the left along the DOM and return true if either a
-         * non-whitespace character or a character element is encountered.
-         *
-         * @param {?Node} node the first node to scan
-         * @return {!boolean}
-         */
-        function scanLeftForAnyCharacter(node) {
-            var r = false;
-            node = node && lastChild(node);
-            while (node) {
-                if (node.nodeType === 3 && node.length > 0
-                        && !isODFWhitespace(node.data)) {
-                    r = true;
-                    break;
-                } else if (isCharacterElement(node)) {
-                    r = true;
-                    break;
-                }
-                node = previousNode(node);
-            }
-            return r;
-        }
-        /**
-         * Walk to the right along the DOM and return true if either a
-         * non-whitespace character or a character element is encountered.
-         *
-         * @param {?Node} node the first node to scan
-         * @return {!boolean}
-         */
-        function scanRightForAnyCharacter(node) {
-            var r = false;
-            while (node) {
-                if (node.nodeType === 3 && node.length > 0
-                        && !isODFWhitespace(node.data)) {
-                    r = true;
-                    break;
-                } else if (isCharacterElement(node)) {
-                    r = true;
-                    break;
-                }
-                node = nextNode(node);
-            }
-            return r;
-        }
-        /**
-         * check if the node is part of the trailing whitespace
-         * @param {!Node} textnode
-         * @param {!number} offset
-         * @return {!boolean}
-         */
-        function isTrailingWhitespace(textnode, offset) {
-            if (!isODFWhitespace(textnode.data.substr(offset))) {
-                return false;
-            }
-            return !scanRightForAnyCharacter(nextNode(textnode));
-        }
-        /**
+       /**
          * @param {!Node} container
          * @param {?Node} leftNode
          * @param {?Node} rightNode
@@ -295,11 +92,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             var r, firstPos, rightOfChar;
             // accept if there is a character immediately to the left
             if (leftNode) {
-                r = lookLeftForCharacter(leftNode);
+                r = odfUtils.lookLeftForCharacter(leftNode);
                 if (r === 1) {// non-whitespace character or a character element
                     return accept;
                 }
-                if (r === 2 && scanRightForAnyCharacter(rightNode)) {
+                if (r === 2 && odfUtils.scanRightForAnyCharacter(rightNode)) {
                     // significant whitespace is ok, if not in trailing whitesp
                     return accept;
                 }
@@ -312,21 +109,21 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // accept if this is the first position in p or h and there is no
             // character in the p or h
             firstPos = leftNode === null && isParagraph(container);
-            rightOfChar = lookRightForCharacter(rightNode);
+            rightOfChar = odfUtils.lookRightForCharacter(rightNode);
             if (firstPos) {
                 if (rightOfChar) {
                     return accept;
                 }
                 // position is first position in empty paragraph
-                return scanRightForAnyCharacter(rightNode) ? reject : accept;
+                return odfUtils.scanRightForAnyCharacter(rightNode) ? reject : accept;
             }
             // if not directly to the right of a character, reject
             if (!rightOfChar) {
                 return reject;
             }
             // accept if there is no character to the left
-            leftNode = leftNode || previousNode(container);
-            return scanLeftForAnyCharacter(leftNode) ? reject : accept;
+            leftNode = leftNode || odfUtils.previousNode(container);
+            return odfUtils.scanLeftForAnyCharacter(leftNode) ? reject : accept;
         }
 
         /**
@@ -349,7 +146,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 return reject;
             }
             if (nodeType === 3) {
-                if (!isGroupingElement(container.parentNode)) {
+                if (!odfUtils.isGroupingElement(container.parentNode)) {
                     return reject;
                 }
                 // In a PositionIterator, the offset in a text node is never
@@ -361,7 +158,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     // The cursor may be placed to the right of a non-whitespace
                     // character.
                     leftChar = text.substr(offset - 1, 1);
-                    if (!isODFWhitespace(leftChar)) {
+                    if (!odfUtils.isODFWhitespace(leftChar)) {
                         return accept;
                     }
                     // A whitespace to the left is ok, if
@@ -372,36 +169,36 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     //   it.
                     if (offset > 1) {
                         leftChar = text.substr(offset - 2, 1);
-                        if (!isODFWhitespace(leftChar)) {
+                        if (!odfUtils.isODFWhitespace(leftChar)) {
                             r = accept;
-                        } else if (!isODFWhitespace(text.substr(0, offset))) {
+                        } else if (!odfUtils.isODFWhitespace(text.substr(0, offset))) {
                             // check if this can be leading paragraph space
                             return reject;
                         }
                     } else {
                         // check if there is a non-whitespace character or
                         // character element in a preceding node
-                        leftNode = previousNode(container);
-                        if (scanLeftForNonWhitespace(leftNode)) {
+                        leftNode = odfUtils.previousNode(container);
+                        if (odfUtils.scanLeftForNonWhitespace(leftNode)) {
                             r = accept;
                         }
                     }
                     if (r === accept) {
-                        return isTrailingWhitespace(container, offset)
+                        return odfUtils.isTrailingWhitespace(container, offset)
                             ? reject : accept;
                     }
                     rightChar = text.substr(offset, 1);
-                    if (isODFWhitespace(rightChar)) {
+                    if (odfUtils.isODFWhitespace(rightChar)) {
                         return reject;
                     }
-                    return scanLeftForAnyCharacter(previousNode(container))
+                    return odfUtils.scanLeftForAnyCharacter(odfUtils.previousNode(container))
                         ? reject : accept;
                 }
                 leftNode = iterator.leftNode();
                 rightNode = container;
                 container = /**@type{!Node}*/(container.parentNode);
                 r = checkLeftRight(container, leftNode, rightNode);
-            } else if (!isGroupingElement(container)) {
+            } else if (!odfUtils.isGroupingElement(container)) {
                 r = reject;
             } else {
                 leftNode = iterator.leftNode();
@@ -923,6 +720,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         filter = new TextPositionFilter();
         rootNode = findTextRoot(odfCanvas.odfContainer());
         selectionManager = new gui.SelectionManager(rootNode);
+        odfUtils = new odf.OdfUtils();
     }
     init();
 };
