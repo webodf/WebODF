@@ -95,6 +95,7 @@ gui.SessionController = (function () {
             var selection = runtime.getWindow().getSelection(),
                 focusNode = selection.focusNode,
                 focusOffset = selection.focusOffset,
+                range,
                 steps,
                 op,
                 node,
@@ -108,6 +109,12 @@ gui.SessionController = (function () {
             if (!node) {
                 return;
             }
+
+            // save the end position
+            range = focusNode.ownerDocument.createRange();
+            range.setStart(focusNode, focusOffset);
+            range.setEnd(focusNode, focusOffset);
+
             while (node !== canvasElement) {
                 if (node.namespaceURI === 'urn:webodf:names:cursor' && node.localName === 'cursor') {
                     return;
@@ -123,6 +130,7 @@ gui.SessionController = (function () {
             // older WebKits are broken and are extending the selection again on next change of the DOM,
             // extending it to node where the DOM change happens. Removing any ranges here prevents that
             selection.removeAllRanges();
+            selection.addRange(range); // onpaste event requires non-empty selection to fire
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
@@ -346,6 +354,30 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {!Event} e
+         */
+        function handlePaste(e) {
+            var plainText, op;
+
+            if (window.clipboardData && window.clipboardData.getData) { // IE
+                plainText = window.clipboardData.getData('Text');
+            } else if (e.clipboardData && e.clipboardData.getData) { // the rest
+                plainText = e.clipboardData.getData('text/plain');
+            }
+
+            if (plainText) {
+                op = new ops.OpInsertText();
+                op.init({
+                    memberid: inputMemberId,
+                    position: session.getOdtDocument().getCursorPosition(inputMemberId),
+                    text: plainText
+                });
+                session.enqueue(op);
+                cancelEvent(e);
+            }
+        }
+
+        /**
          */
         this.startListening = function () {
             var canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
@@ -355,7 +387,7 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "keyup", dummyHandler);
             listenEvent(canvasElement, "copy", dummyHandler);
             listenEvent(canvasElement, "cut", dummyHandler);
-            listenEvent(canvasElement, "paste", dummyHandler);
+            listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", handleMouseUp);
         };
 
