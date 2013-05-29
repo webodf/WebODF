@@ -109,18 +109,32 @@ gui.SessionController = (function () {
             if (!node) {
                 return;
             }
+            while (node !== canvasElement) {
+                if ((node.namespaceURI === 'urn:webodf:names:cursor' && node.localName === 'cursor')
+                        || (node.namespaceURI === 'urn:webodf:names:editinfo' && node.localName === 'editinfo')) {
+                    break;
+                }
+                node = node.parentNode;
+
+                // Sometimes when we click outside the canvasElement, the ancestry
+                // will never reach canvasElement, and the node will eventually become null. In that case,
+                // return.
+                if (!node) {
+                    return;
+                }
+            }
+
+            if (node !== canvasElement && focusNode !== node) {
+                // This happens when the click event has been captured by a cursor or editinfo.
+                // In that case, put the cursor in the capturer's container, just after it.
+                focusNode = node.parentNode;
+                focusOffset = Array.prototype.indexOf.call(focusNode.childNodes, node);
+            }
 
             // save the end position
             range = focusNode.ownerDocument.createRange();
             range.setStart(focusNode, focusOffset);
             range.setEnd(focusNode, focusOffset);
-
-            while (node !== canvasElement) {
-                if (node.namespaceURI === 'urn:webodf:names:cursor' && node.localName === 'cursor') {
-                    return;
-                }
-                node = node.parentNode;
-            }
 
             // create a move op with the distance to that position
             steps = odtDocument.getDistanceFromCursor(inputMemberId, focusNode, focusOffset);
