@@ -355,4 +355,22 @@
    </ops>
   <after><office:text><text:list><text:list-item><text:p>hello</text:p></text:list-item><text:list-item><text:p><c:cursor c:memberId="Bob"/>world</text:p></text:list-item></text:list></office:text></after>
  </test>
+ <test name="SplitListParagraph_singleCursor_singleSpan">
+  <before><office:text><text:list><text:list-item><text:p><text:span>helloworld</text:span></text:p></text:list-item></text:list></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" number="5"/>
+   <op optype="SplitParagraph" memberid="Bob" position="5"/>
+  </ops>
+  <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:p></text:list-item></text:list></office:text></after>
+ </test>
+ <test name="SplitListParagraph_singleCursor_nestedSpan">
+  <before><office:text><text:list><text:list-item><text:p><text:span><text:span>helloworld</text:span></text:span></text:p></text:list-item></text:list></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" number="5"/>
+   <op optype="SplitParagraph" memberid="Bob" position="5"/>
+  </ops>
+  <after><office:text><text:list><text:list-item><text:p><text:span><text:span>hello</text:span></text:span></text:p></text:list-item><text:list-item><text:p><text:span><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:span></text:p></text:list-item></text:list></office:text></after>
+ </test>
 </tests>

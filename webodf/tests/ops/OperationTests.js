@@ -217,7 +217,7 @@ ops.OperationTests = function OperationTests(runner) {
         while (n) {
             testName = n.getAttribute("name");
             runtime.assert(n.localName === "test", "Element is not <test/>.");
-            runtime.assert(!tests.hasOwnProperty(testName), "Test name is not unique.");
+            runtime.assert(!tests.hasOwnProperty(testName), "Test name " + testName + " is not unique.");
             tests[testName] = parseTest(testName, n);
             n = n.nextElementSibling;
         }
