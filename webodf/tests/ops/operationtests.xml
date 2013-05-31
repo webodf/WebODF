@@ -346,4 +346,13 @@
   </ops>
   <after><office:text><text:p> a<text:s> </text:s> </text:p></office:text></after>
  </test>
+ <test name="SplitListParagraph_singleCursor">
+  <before><office:text><text:list><text:list-item><text:p>helloworld</text:p></text:list-item></text:list></office:text></before>
+   <ops>
+    <op optype="AddCursor" memberid="Bob"/>
+    <op optype="MoveCursor" memberid="Bob" number="5"/>
+    <op optype="SplitParagraph" memberid="Bob" position="5"/>
+   </ops>
+  <after><office:text><text:list><text:list-item><text:p>hello</text:p></text:list-item><text:list-item><text:p><c:cursor c:memberId="Bob"/>world</text:p></text:list-item></text:list></office:text></after>
+ </test>
 </tests>

@@ -45,6 +45,11 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
 
     var memberid, timestamp, position;
 
+    function isListItem (node) {
+        return node && node.localName === "list-item"
+            && node.namespaceURI === "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+    }
+
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -52,7 +57,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
     };
 
     this.execute = function (odtDocument) {
-        var domPosition, paragraphNode,
+        var domPosition, paragraphNode, targetNode,
             node, splitNode, splitChildNode, keptChildNode;
 
         domPosition = odtDocument.getPositionInTextNode(position, memberid);
@@ -63,6 +68,12 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
         if (!paragraphNode) {
             return false;
+        }
+
+        if (isListItem(paragraphNode.parentNode)) {
+            targetNode = paragraphNode.parentNode;
+        } else {
+            targetNode = paragraphNode;
         }
 
         // There can be a chain of multiple nodes between the text node
@@ -96,7 +107,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         // create a clone and add as childs the split node of the node below
         // and any next siblings of it
         node = domPosition.textNode;
-        while (node !== paragraphNode) {
+        while (node !== targetNode) {
             node = node.parentNode;
 
             // split off the node copy
@@ -126,6 +137,10 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
                 keptChildNode = node;
                 splitChildNode = splitNode;
             }
+        }
+
+        if (isListItem(splitChildNode)) {
+            splitChildNode = splitChildNode.childNodes[0];
         }
 
         odtDocument.getOdfCanvas().refreshSize();
