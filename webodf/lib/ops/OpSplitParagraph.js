@@ -53,92 +53,94 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
 
     this.execute = function (odtDocument) {
         var domPosition, paragraphNode,
-            textNodeCopy,
             node, splitNode, splitChildNode, keptChildNode;
 
         domPosition = odtDocument.getPositionInTextNode(position, memberid);
-        if (domPosition) {
-            paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
-            if (paragraphNode) {
-                // There can be a chain of multiple nodes between the text node
-                // where the split is done and the containing paragraph nodes,
-                // e.g. text:span nodes
-                // So all nodes in this chain need to be split up, i.e. they need
-                // to be cloned, and then the clone and any next siblings have to
-                // be moved to the new paragraph node, which is also cloned from
-                // the current one.
+        if (!domPosition) {
+            return false;
+        }
 
-                // start with text node the cursor is in, needs special treatment
-                // if text node is split at the beginning, do not split but simply
-                // move the whole text node
-                if (domPosition.offset === 0) {
-                    keptChildNode = domPosition.textNode.previousSibling;
-                    splitChildNode = null;
-                } else {
-                    keptChildNode = domPosition.textNode;
-                    // if text node is to be split at the end, don't split at all
-                    if (domPosition.offset >= domPosition.textNode.length) {
-                        splitChildNode = null;
-                    } else {
-                        // splitText always returns {!Text} here
-                        splitChildNode = /**@type{!Text}*/(
-                            domPosition.textNode.splitText(domPosition.offset)
-                        );
-                    }
-                }
+        paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
+        if (!paragraphNode) {
+            return false;
+        }
 
-                // then handle all nodes until (incl.) the paragraph node:
-                // create a clone and add as childs the split node of the node below
-                // and any next siblings of it
-                node = domPosition.textNode;
-                while (node !== paragraphNode) {
-                    node = node.parentNode;
+        // There can be a chain of multiple nodes between the text node
+        // where the split is done and the containing paragraph nodes,
+        // e.g. text:span nodes
+        // So all nodes in this chain need to be split up, i.e. they need
+        // to be cloned, and then the clone and any next siblings have to
+        // be moved to the new paragraph node, which is also cloned from
+        // the current one.
 
-                    // split off the node copy
-                    // TODO: handle unique attributes, e.g. xml:id
-                    splitNode = node.cloneNode(false);
-                    // if the existing node will be completely empty,
-                    // just switch roles and insert the empty clone as old node
-                    if (! keptChildNode) {
-                        node.parentNode.insertBefore(splitNode, node);
-
-                        // prepare next level
-                        keptChildNode = splitNode;
-                        splitChildNode = node;
-                    } else {
-                        // add the split child node
-                        if (splitChildNode) {
-                            splitNode.appendChild(splitChildNode);
-                        }
-                        // and move all child nodes behind the split to the node copy,
-                        // by using n.nextSibling as automatically updated queue head
-                        while (keptChildNode.nextSibling) {
-                            splitNode.appendChild(keptChildNode.nextSibling);
-                        }
-                        node.parentNode.insertBefore(splitNode, node.nextSibling);
-
-                        // prepare next level
-                        keptChildNode = node;
-                        splitChildNode = splitNode;
-                    }
-                }
-
-                odtDocument.getOdfCanvas().refreshSize();
-                // mark both paragraphs as edited
-                odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
-                    paragraphElement: paragraphNode,
-                    memberId: memberid,
-                    timeStamp: timestamp
-                });
-                odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
-                    paragraphElement: splitChildNode,
-                    memberId: memberid,
-                    timeStamp: timestamp
-                });
-                return true;
+        // start with text node the cursor is in, needs special treatment
+        // if text node is split at the beginning, do not split but simply
+        // move the whole text node
+        if (domPosition.offset === 0) {
+            keptChildNode = domPosition.textNode.previousSibling;
+            splitChildNode = null;
+        } else {
+            keptChildNode = domPosition.textNode;
+            // if text node is to be split at the end, don't split at all
+            if (domPosition.offset >= domPosition.textNode.length) {
+                splitChildNode = null;
+            } else {
+                // splitText always returns {!Text} here
+                splitChildNode = /**@type{!Text}*/(
+                    domPosition.textNode.splitText(domPosition.offset)
+                );
             }
         }
-        return false;
+
+        // then handle all nodes until (incl.) the paragraph node:
+        // create a clone and add as childs the split node of the node below
+        // and any next siblings of it
+        node = domPosition.textNode;
+        while (node !== paragraphNode) {
+            node = node.parentNode;
+
+            // split off the node copy
+            // TODO: handle unique attributes, e.g. xml:id
+            splitNode = node.cloneNode(false);
+            // if the existing node will be completely empty,
+            // just switch roles and insert the empty clone as old node
+            if (! keptChildNode) {
+                node.parentNode.insertBefore(splitNode, node);
+
+                // prepare next level
+                keptChildNode = splitNode;
+                splitChildNode = node;
+            } else {
+                // add the split child node
+                if (splitChildNode) {
+                    splitNode.appendChild(splitChildNode);
+                }
+                // and move all child nodes behind the split to the node copy,
+                // by using n.nextSibling as automatically updated queue head
+                while (keptChildNode.nextSibling) {
+                    splitNode.appendChild(keptChildNode.nextSibling);
+                }
+                node.parentNode.insertBefore(splitNode, node.nextSibling);
+
+                // prepare next level
+                keptChildNode = node;
+                splitChildNode = splitNode;
+            }
+        }
+
+        odtDocument.getOdfCanvas().refreshSize();
+        // mark both paragraphs as edited
+        odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
+            paragraphElement: paragraphNode,
+            memberId: memberid,
+            timeStamp: timestamp
+        });
+        odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
+            paragraphElement: splitChildNode,
+            memberId: memberid,
+            timeStamp: timestamp
+        });
+        return true;
     };
 
     this.spec = function () {
