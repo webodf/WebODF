@@ -1336,6 +1336,9 @@ var runtime = (function () {
             if (code === undefined) {
                 throw "Cannot load class " + classpath;
             }
+            // add label to dynamic script for easier debugging
+            code += "\n//# sourceURL=" + path;
+            // evaluate loaded code
             try {
                 code = eval(classpath + " = eval(code);");
             } catch (e4) {
