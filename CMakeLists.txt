@@ -352,19 +352,15 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/readme.txt ${WEBODFZIPDIR}/wordpressplugin/readme.txt
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/webodf-viewer.php ${WEBODFZIPDIR}/wordpressplugin/webodf-viewer.php
     # zip using javascript code running in node.js
-    COMMAND ${NODE} ARGS webodf/lib/runtime.js packwebodf.js
-        ${CMAKE_BINARY_DIR}/${WEBODFZIP}
-#input files
-        ${CMAKE_BINARY_DIR}/webodf/webodf-debug.js
-        ${CMAKE_BINARY_DIR}/webodf/webodf.js
-#output files
-        webodf-debug.js
-        webodf.js
+    COMMAND ${NODE} ARGS webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools/zipdir.js
+        ${WEBODFZIPDIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
     DEPENDS NodeJS
-        packwebodf.js
+        webodf/tools/zipdir.js
         webodf-debug.js-target
         webodf.js-target
         editor-compiled.js-target
+        viewer-minimized.js-target
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(zip ALL DEPENDS ${WEBODFZIP})
