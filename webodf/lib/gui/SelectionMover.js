@@ -184,62 +184,95 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         return { top: y, left: x };
     }
     /**
-     * Return the number of steps needed to move up one line.
-     * If it is not possible to move up one line, then 0 is returned.
+     * Return the number of steps needed to move across one line in the specified direction.
+     * If it is not possible to move across one line, then 0 is returned.
      *
+     * @param {!number} direction -1 for upwards, +1 for downwards
      * @param {!Range} range
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countLineUpSteps(range, filter) {
+    function countLineSteps(range, filter, direction) {
         var c = positionIterator.container(),
-            o = positionIterator.offset(),
-            stepCount = 0,
+            o = positionIterator.unfilteredDomOffset(),
             count = 0,
-            bestc = null,
-            besto,
-            bestXDiff,
+            bestContainer = null,
+            bestOffset,
+            bestXDiff = 10,
+            xDiff,
             bestCount = 0,
-            rect,
             top,
             left,
-            newTop,
-            xDiff;
-        // get the starting position
+            lastTop,
+            rect,
+            containerOffset,
+            lastChild;
+
+        // Get the starting position
         range.setStart(c, o);
+
         rect = range.getClientRects()[0];
-        newTop = top = rect.top;
+        if (!rect) {
+            rect = {};
+            if (c.lastChild) {
+                range.setStart(c, o  - 1);
+                range.setEnd(c, o);
+                containerOffset = range.getClientRects()[0];
+                rect.top = containerOffset.top;
+                rect.left = containerOffset.right;
+            } else if (c.nodeType === 3) {
+                rect = c.previousSibling.getClientRects()[0];
+            } else {
+                rect = c.getClientRects()[0];
+            }
+        }
+        top = rect.top;
         left = rect.left;
-        while (positionIterator.previousPosition()) {
-            stepCount += 1;
+        lastTop = top;
+        
+        while (direction < 0 ? positionIterator.previousPosition() : positionIterator.nextPosition()) {
             if (filter.acceptPosition(positionIterator) === 1) {
-                count += stepCount;
-                stepCount = 0;
+                count += 1;
+
                 c = positionIterator.container();
-                o = positionIterator.offset();
+                o = positionIterator.unfilteredDomOffset();
                 range.setStart(c, o);
                 rect = range.getClientRects()[0];
-                if (rect.top !== top) { // not on starting line any more
-                    if (rect.top !== newTop) { // moved off the next line
+                if (!rect) {
+                    rect = {};
+                    if (c.lastChild) {
+                        range.setStart(c, o  - 1);
+                        range.setEnd(c, o);
+                        containerOffset = range.getClientRects()[0];
+                        rect.top = containerOffset.top;
+                        rect.left = containerOffset.right;
+                    } else {
+                        rect = c.getClientRects()[0];
+                    }
+                }
+                if (rect.top !== top) { // Not on the initial line anymore
+                    if (rect.top !== lastTop && lastTop !== top) { // Not even on the next line
                         break;
                     }
-                    newTop = top;
+                    lastTop = rect.top;
                     xDiff = Math.abs(left - rect.left);
-                    if (bestc === null || xDiff < bestXDiff) {
-                        bestc = c;
-                        besto = o;
+                    if (bestContainer === null || xDiff < bestXDiff) {
+                        bestContainer = c;
+                        bestOffset = positionIterator.offset();
                         bestXDiff = xDiff;
                         bestCount = count;
                     }
                 }
             }
         }
-        if (bestc !== null) {
-            positionIterator.setPosition(bestc, besto);
+
+        if (bestContainer !== null) {
+            positionIterator.setPosition(bestContainer, bestOffset);
             count = bestCount;
         } else {
             count = 0;
         }
+
         return count;
     }
     /**
@@ -248,15 +281,17 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * @return {!number}
      */
     function countLinesUpSteps(lines, filter) {
-        var c = positionIterator.container(),
-            o = positionIterator.offset(),
-            stepCount,
+        var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
+            c = pos.container,
+            o = pos.offset,
+            stepCount = 0,
             count = 0,
             range = c.ownerDocument.createRange();
+        positionIterator.setPosition(c, o);
         // move back in the document, until a position is found for which the
         // top is smaller than initially and the left is closest
         while (lines > 0) {
-            stepCount += countLineUpSteps(range, filter);
+            stepCount += countLineSteps(range, filter, /*upwards*/-1);
             if (stepCount === 0) {
                 break;
             }
@@ -267,44 +302,33 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator.setPosition(c, o);
         return count;
     }
-    /**
-     * @param {!number} lines
+    /* @param {!number} lines
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countLineDownSteps(lines, filter) {
-        var c = positionIterator.container(),
-            o = positionIterator.offset(),
-            span = cursor.getNode().firstChild,
-            watch = new core.LoopWatchDog(1000),
+    function countLinesDownSteps(lines, filter) {
+        var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
+            c = pos.container,
+            o = pos.offset,
             stepCount = 0,
             count = 0,
-            offset = span.offsetTop,
-            i;
-        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
-        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
-        while (lines > 0 && positionIterator.nextPosition()) {
-            watch.check();
-            stepCount += 1;
-            if (filter.acceptPosition(positionIterator) === 1) {
-                offset = span.offsetTop;
-                selection.collapse(positionIterator.container(),
-                        positionIterator.offset());
-                cursor.updateToSelection(onCursorRemove, onCursorAdd);
-                offset = span.offsetTop; // for now, always accept
-                if (offset !== span.offsetTop) {
-                    count += stepCount;
-                    stepCount = 0;
-                    lines -= 1;
-                }
-            }
-        }
+            range = c.ownerDocument.createRange();
         positionIterator.setPosition(c, o);
-        selection.collapse(positionIterator.container(),
-                positionIterator.offset());
-        cursor.updateToSelection(onCursorRemove, onCursorAdd);
+        // move back in the document, until a position is found for which the
+        // top is smaller than initially and the left is closest
+        while (lines > 0) {
+            stepCount += countLineSteps(range, filter, /*downwards*/1);
+            if (stepCount === 0) {
+                break;
+            }
+            count += stepCount;
+            lines -= 1;
+        }
+        range.detach();
+        positionIterator.setPosition(c, o);
         return count;
     }
+
     /**
      * Calculate node offset in unfiltered DOM world
      * @param {!Node} node
@@ -418,7 +442,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         return {
             countForwardSteps: countForwardSteps,
             countBackwardSteps: countBackwardSteps,
-            countLineDownSteps: countLineDownSteps,
+            countLinesDownSteps: countLinesDownSteps,
             countLinesUpSteps: countLinesUpSteps,
             countStepsToPosition: countStepsToPosition,
             isPositionWalkable: isPositionWalkable

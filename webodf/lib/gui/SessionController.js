@@ -166,6 +166,47 @@ gui.SessionController = (function () {
         /**
          * @return {?ops.Operation}
          */
+        function createOpMoveCursorByUpKey() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                steps,
+                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+                paragraphNode = odtDocument.getParagraphElement(cursorNode),
+                op = null;
+
+            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
+            steps = -odtDocument.getCursor(inputMemberId).getStepCounter().countLinesUpSteps(1, odtDocument.getPositionFilter());
+            if (steps !== 0) {
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, number: steps});
+            }
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function createOpMoveCursorByDownKey() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                steps,
+                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+                paragraphNode = odtDocument.getParagraphElement(cursorNode),
+                op = null;
+
+            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesDownSteps(1, odtDocument.getPositionFilter());
+            if (steps !== 0) {
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, number: steps});
+            }
+            return op;
+        }
+
+
+        /**
+         * @return {?ops.Operation}
+         */
         function createOpMoveCursorByEndKey() {
             var odtDocument = session.getOdtDocument(),
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
@@ -304,11 +345,11 @@ gui.SessionController = (function () {
                 handled = true;
             } else if (keyCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = createOpMoveCursor(-10);
+                op = createOpMoveCursorByUpKey();
                 handled = true;
             } else if (keyCode === 40) { // down
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = createOpMoveCursor(10);
+                op = createOpMoveCursorByDownKey();
                 handled = true;
             } else if (keyCode === 36) { // home
                 op = createOpMoveCursorByHomeKey();
