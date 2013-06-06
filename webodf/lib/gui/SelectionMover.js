@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, XMLSerializer*/
+/*global runtime, core, gui, XMLSerializer, window*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.PositionFilter");
@@ -48,13 +48,58 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     "use strict";
     var self = this,
         selection = cursor.getSelection(),
-        positionIterator;
+        positionIterator,
+        cachedXOffset,
+        timeoutHandle;
+
+    /**
+     * Gets the client rect of a position specified by the container and an
+     * offset. If this is not possible with a range, then the last element's coordinates
+     * are used to guesstimate the position.
+     * @param {!Node} container
+     * @param {!number} offset
+     * @return {?{top: !number, left: !number}}
+     */
+    function getRect(container, offset) {
+        var range = rootNode.ownerDocument.createRange(),
+            rect,
+            containerOffset;
+        range.setStart(container, offset);
+        rect = range.getClientRects()[0];
+        if (!rect) {
+            rect = {};
+            if (container.childNodes[offset - 1]) {
+                range.setStart(container, offset  - 1);
+                range.setEnd(container, offset);
+                containerOffset = range.getClientRects()[0];
+                rect.top = containerOffset.top;
+                rect.left = containerOffset.right;
+            } else if (container.nodeType === 3) {
+                range.setStart(container, 0);
+                range.setEnd(container, offset);
+                rect = range.getClientRects()[0];
+            } else {
+                rect = container.getClientRects()[0];
+            }
+        }
+        rect = {
+            top: rect.top,
+            left: rect.left
+        };
+        range.detach();
+        return rect;
+    }
+
     function doMove(steps, extend, move) {
         var left = steps,
-            pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
+            pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
+            initialRect,
+            newRect,
+            horizontalMovement;
 
         // assume positionIterator reflects current state
         positionIterator.setPosition(pos.container, pos.offset);
+        initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0);
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         cursor.remove(onCursorRemove);
@@ -66,6 +111,18 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
                     positionIterator.unfilteredDomOffset());
         }
         cursor.updateToSelection(onCursorRemove, onCursorAdd);
+
+        pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
+        newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0);
+
+        horizontalMovement = (newRect.top === initialRect.top) ? true : false;
+        if (horizontalMovement || cachedXOffset === undefined) {
+            cachedXOffset = newRect.left;
+        }
+        window.clearTimeout(timeoutHandle);
+        timeoutHandle = window.setTimeout(function () {
+            cachedXOffset = undefined;
+        }, 2000);
         return steps - left;
     }
     /**
@@ -188,11 +245,10 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * If it is not possible to move across one line, then 0 is returned.
      *
      * @param {!number} direction -1 for upwards, +1 for downwards
-     * @param {!Range} range
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countLineSteps(range, filter, direction) {
+    function countLineSteps(filter, direction) {
         var c = positionIterator.container(),
             o = positionIterator.unfilteredDomOffset(),
             count = 0,
@@ -206,7 +262,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             lastTop,
             rect,
             containerOffset,
-            lastChild;
+            lastChild,
+            range = c.ownerDocument.createRange();
 
         // Get the starting position
         range.setStart(c, o);
@@ -214,7 +271,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         rect = range.getClientRects()[0];
         if (!rect) {
             rect = {};
-            if (c.lastChild) {
+            if (c.childNodes[o - 1]) {
                 range.setStart(c, o  - 1);
                 range.setEnd(c, o);
                 containerOffset = range.getClientRects()[0];
@@ -227,10 +284,14 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             }
         }
         top = rect.top;
-        left = rect.left;
+        if (cachedXOffset === undefined) {
+            left = rect.left;
+        } else {
+            left = cachedXOffset;
+        }
         lastTop = top;
         
-        while (direction < 0 ? positionIterator.previousPosition() : positionIterator.nextPosition()) {
+        while ((direction < 0 ? positionIterator.previousPosition() : positionIterator.nextPosition()) === true) {
             if (filter.acceptPosition(positionIterator) === 1) {
                 count += 1;
 
@@ -240,10 +301,13 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
                 rect = range.getClientRects()[0];
                 if (!rect) {
                     rect = {};
-                    if (c.lastChild) {
+                    if (c.childNodes[o - 1]) {
                         range.setStart(c, o  - 1);
                         range.setEnd(c, o);
                         containerOffset = range.getClientRects()[0];
+                        if (!containerOffset) {
+                            containerOffset = getOffset(c);
+                        }
                         rect.top = containerOffset.top;
                         rect.left = containerOffset.right;
                     } else {
@@ -273,6 +337,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             count = 0;
         }
 
+        range.detach();
         return count;
     }
     /**
@@ -285,24 +350,23 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             c = pos.container,
             o = pos.offset,
             stepCount = 0,
-            count = 0,
-            range = c.ownerDocument.createRange();
+            count = 0;
         positionIterator.setPosition(c, o);
         // move back in the document, until a position is found for which the
         // top is smaller than initially and the left is closest
         while (lines > 0) {
-            stepCount += countLineSteps(range, filter, /*upwards*/-1);
+            stepCount += countLineSteps(filter, /*upwards*/-1);
             if (stepCount === 0) {
                 break;
             }
             count += stepCount;
             lines -= 1;
         }
-        range.detach();
         positionIterator.setPosition(c, o);
         return count;
     }
-    /* @param {!number} lines
+    /**
+     * @param {!number} lines
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
@@ -311,20 +375,18 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             c = pos.container,
             o = pos.offset,
             stepCount = 0,
-            count = 0,
-            range = c.ownerDocument.createRange();
+            count = 0;
         positionIterator.setPosition(c, o);
         // move back in the document, until a position is found for which the
         // top is smaller than initially and the left is closest
         while (lines > 0) {
-            stepCount += countLineSteps(range, filter, /*downwards*/1);
+            stepCount += countLineSteps(filter, /*downwards*/1);
             if (stepCount === 0) {
                 break;
             }
             count += stepCount;
             lines -= 1;
         }
-        range.detach();
         positionIterator.setPosition(c, o);
         return count;
     }
