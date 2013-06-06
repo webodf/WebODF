@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime*/
+/*global ops, runtime, odf*/
 
 /**
  * @constructor
