@@ -42,7 +42,7 @@
 ops.OpRemoveText = function OpRemoveText() {
     "use strict";
 
-    var memberid, timestamp, position, length, text;
+    var memberid, timestamp, position, length, text, odfUtils;
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -50,6 +50,7 @@ ops.OpRemoveText = function OpRemoveText() {
         position = data.position;
         length = data.length;
         text = data.text;
+        odfUtils = new odf.OdfUtils();
     };
 
     /**
@@ -87,14 +88,17 @@ ops.OpRemoveText = function OpRemoveText() {
      * @return {undefined}
      */
     function mergeParagraphs(first, second, prepend) {
-        var child,
+        var parent,
+            child,
+            isEmptyNode,
             firstEditInfo = null;
 
         child = prepend ? second.lastChild : second.firstChild;
 
         while (child) {
             second.removeChild(child);
-            if (child.localName !== 'editinfo') {
+            isEmptyNode = (child.localName === "s" || child.localName === "span") && child.textContent.length === 0;
+            if (child.localName !== 'editinfo' && !isEmptyNode) {
                 if (prepend) {
                     firstEditInfo = first.getElementsByTagNameNS('editinfo')[0];
                     if (firstEditInfo) {
@@ -110,7 +114,12 @@ ops.OpRemoveText = function OpRemoveText() {
             child = prepend ? second.lastChild : second.firstChild;
         }
 
-        second.parentNode.removeChild(second);
+        parent = second.parentNode;
+        if (odfUtils.isListItem(parent)) {
+            parent.parentNode.removeChild(parent);
+        } else {
+            parent.removeChild(second);
+        }
     }
 
     /**

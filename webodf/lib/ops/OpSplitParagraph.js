@@ -43,17 +43,13 @@
 ops.OpSplitParagraph = function OpSplitParagraph() {
     "use strict";
 
-    var memberid, timestamp, position;
-
-    function isListItem (node) {
-        return node && node.localName === "list-item"
-            && node.namespaceURI === "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-    }
+    var memberid, timestamp, position, odfUtils;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
+        odfUtils = new odf.OdfUtils();
     };
 
     this.execute = function (odtDocument) {
@@ -70,7 +66,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             return false;
         }
 
-        if (isListItem(paragraphNode.parentNode)) {
+        if (odfUtils.isListItem(paragraphNode.parentNode)) {
             targetNode = paragraphNode.parentNode;
         } else {
             targetNode = paragraphNode;
@@ -139,7 +135,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             }
         }
 
-        if (isListItem(splitChildNode)) {
+        if (odfUtils.isListItem(splitChildNode)) {
             splitChildNode = splitChildNode.childNodes[0];
         }
 

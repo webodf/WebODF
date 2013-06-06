@@ -57,6 +57,16 @@ odf.OdfUtils = function OdfUtils() {
     this.isParagraph = isParagraph;
 
     /**
+     * Determine if the node is a text:list-item element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    this.isListItem = function (e) {
+        var name = e && e.localName;
+        return name === "list-item" && e.namespaceURI === textns;
+    };
+
+    /**
      * Determine if the text consists entirely of whitespace characters.
      * At least one whitespace is required.
      * @param {!string} text

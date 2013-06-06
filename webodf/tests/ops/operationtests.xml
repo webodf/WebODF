@@ -243,6 +243,13 @@
   </ops>
   <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
  </test>
+ <test name="Remove_backspaceMergeListItem">
+  <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
+   <ops>
+    <op optype="RemoveText" position="6" length="-1"/>
+   </ops>
+  <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></text:list-item></text:list></office:text></after>
+ </test>
  <test name="Remove_deleteMerge1">
   <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
@@ -256,6 +263,13 @@
    <op optype="RemoveText" position="2" length="5"/>
   </ops>
   <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMergeListItem">
+  <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
+   <ops>
+    <op optype="RemoveText" position="5" length="1"/>
+   </ops>
+  <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
  <test name="Remove_backspaceMergeEmpty1">
   <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
