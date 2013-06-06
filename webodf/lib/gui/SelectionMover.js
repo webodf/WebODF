@@ -51,6 +51,15 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator,
         cachedXOffset,
         timeoutHandle;
+    function getOffset(el) {
+        var x = 0, y = 0;
+        while (el && el.nodeType === 1) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+            x += el.offsetLeft - el.scrollLeft;
+            y += el.offsetTop - el.scrollTop;
+            el = el.parentNode;//offsetParent;
+        }
+        return { top: y, left: x };
+    }
 
     /**
      * Gets the client rect of a position specified by the container and an
@@ -58,48 +67,64 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      * are used to guesstimate the position.
      * @param {!Node} container
      * @param {!number} offset
+     * @param {!Range} range
      * @return {?{top: !number, left: !number}}
      */
-    function getRect(container, offset) {
-        var range = rootNode.ownerDocument.createRange(),
-            rect,
+    function getRect(container, offset, range) {
+        var rect,
             containerOffset;
+
         range.setStart(container, offset);
         rect = range.getClientRects()[0];
         if (!rect) {
             rect = {};
+            // There are various places where the list of client rects will be empty,
+            // for example in the last position of a paragraph, or when the range covers and empty text node.
+            // In that case, we need to handle these positions in a more special manner to get an equivalent
+            // clientRect
             if (container.childNodes[offset - 1]) {
                 range.setStart(container, offset  - 1);
                 range.setEnd(container, offset);
                 containerOffset = range.getClientRects()[0];
+                if (!containerOffset) {
+                    containerOffset = getOffset(container);
+                }
                 rect.top = containerOffset.top;
                 rect.left = containerOffset.right;
             } else if (container.nodeType === 3) {
-                range.setStart(container, 0);
-                range.setEnd(container, offset);
-                rect = range.getClientRects()[0];
+                // If the container is a text node and we were not able to get the client rects for it,
+                // try using the client rects from it's previous sibling
+                if (container.previousSibling) {
+                    rect = container.previousSibling.getClientRects()[0];
+                }
+                // If even that did not work, extend the range over the textnode and try to get it's client rect
+                if (!rect) {
+                    range.setStart(container, 0);
+                    range.setEnd(container, offset);
+                    rect = range.getClientRects()[0];
+                }
             } else {
+                // finally, if none of the above cases were true, just get the client rect of the container itself
                 rect = container.getClientRects()[0];
             }
         }
-        rect = {
+        return {
             top: rect.top,
             left: rect.left
         };
-        range.detach();
-        return rect;
     }
 
     function doMove(steps, extend, move) {
         var left = steps,
             pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             initialRect,
+            range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
             newRect,
             horizontalMovement;
 
         // assume positionIterator reflects current state
         positionIterator.setPosition(pos.container, pos.offset);
-        initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0);
+        initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         cursor.remove(onCursorRemove);
@@ -113,7 +138,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         cursor.updateToSelection(onCursorRemove, onCursorAdd);
 
         pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
-        newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0);
+        newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
 
         horizontalMovement = (newRect.top === initialRect.top) ? true : false;
         if (horizontalMovement || cachedXOffset === undefined) {
@@ -123,6 +148,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         timeoutHandle = window.setTimeout(function () {
             cachedXOffset = undefined;
         }, 2000);
+
+        range.detach();
         return steps - left;
     }
     /**
@@ -231,15 +258,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         positionIterator.setPosition(c, o);
         return count;
     }
-    function getOffset(el) {
-        var x = 0, y = 0;
-        while (el && el.nodeType === 1) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
-            x += el.offsetLeft - el.scrollLeft;
-            y += el.offsetTop - el.scrollTop;
-            el = el.parentNode;//offsetParent;
-        }
-        return { top: y, left: x };
-    }
     /**
      * Return the number of steps needed to move across one line in the specified direction.
      * If it is not possible to move across one line, then 0 is returned.
@@ -263,26 +281,12 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             rect,
             containerOffset,
             lastChild,
-            range = c.ownerDocument.createRange();
+            range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
+            watch = new core.LoopWatchDog(1000);
 
         // Get the starting position
-        range.setStart(c, o);
+        rect = getRect(c, o, range);
 
-        rect = range.getClientRects()[0];
-        if (!rect) {
-            rect = {};
-            if (c.childNodes[o - 1]) {
-                range.setStart(c, o  - 1);
-                range.setEnd(c, o);
-                containerOffset = range.getClientRects()[0];
-                rect.top = containerOffset.top;
-                rect.left = containerOffset.right;
-            } else if (c.nodeType === 3) {
-                rect = c.previousSibling.getClientRects()[0];
-            } else {
-                rect = c.getClientRects()[0];
-            }
-        }
         top = rect.top;
         if (cachedXOffset === undefined) {
             left = rect.left;
@@ -292,28 +296,14 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         lastTop = top;
         
         while ((direction < 0 ? positionIterator.previousPosition() : positionIterator.nextPosition()) === true) {
+            watch.check();
             if (filter.acceptPosition(positionIterator) === 1) {
                 count += 1;
 
                 c = positionIterator.container();
                 o = positionIterator.unfilteredDomOffset();
-                range.setStart(c, o);
-                rect = range.getClientRects()[0];
-                if (!rect) {
-                    rect = {};
-                    if (c.childNodes[o - 1]) {
-                        range.setStart(c, o  - 1);
-                        range.setEnd(c, o);
-                        containerOffset = range.getClientRects()[0];
-                        if (!containerOffset) {
-                            containerOffset = getOffset(c);
-                        }
-                        rect.top = containerOffset.top;
-                        rect.left = containerOffset.right;
-                    } else {
-                        rect = c.getClientRects()[0];
-                    }
-                }
+                rect = getRect(c, o, range);
+
                 if (rect.top !== top) { // Not on the initial line anymore
                     if (rect.top !== lastTop && lastTop !== top) { // Not even on the next line
                         break;
