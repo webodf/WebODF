@@ -130,7 +130,8 @@ xmldom.LSSerializer = function LSSerializer() {
      * @return {!string}
      */
     function serializeAttribute(qname, attr) {
-        var /**@type{!string}*/ s = qname + "=\"" + attr.value + "\"";
+        var escapedValue = typeof attr.value === 'string' ? attr.value.replace(/"/g, "&quot;").replace(/'/g, "&apos;") : attr.value,
+            /**@type{!string}*/ s = qname + "=\"" + escapedValue + "\"";
         return s;
     }
     /**
@@ -176,6 +177,19 @@ xmldom.LSSerializer = function LSSerializer() {
         return s;
     }
     /**
+     * Escape characters within document content
+     * Follows basic guidelines specified at http://xerces.apache.org/xerces2-j/javadocs/api/org/w3c/dom/ls/LSSerializer.html
+     * @param {string} value
+     * @returns {string}
+     */
+    function escapeContent(value) {
+        return value.replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/'/g,"&apos;")
+            .replace(/"/g,"&quot;");
+    }
+    /**
      * @param {!Namespaces} ns
      * @param {!Node} node
      * @return {!string}
@@ -198,7 +212,7 @@ xmldom.LSSerializer = function LSSerializer() {
                 child = child.nextSibling;
             }
             if (node.nodeValue) {
-                s += node.nodeValue;
+                s += escapeContent(node.nodeValue);
             }
         }
         if (qname) {
