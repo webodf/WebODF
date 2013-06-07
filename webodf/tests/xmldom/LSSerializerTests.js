@@ -56,11 +56,11 @@ xmldom.LSSerializerTests = function LSSerializerTests(runner) {
     }
     function testEscapeCharactersInAttributeValue() {
         node = t.doc.createElementNS('text', 'p');
-        node.setAttributeNS('mynamespace', 'myattribute', '" \'');
+        node.setAttributeNS('mynamespace', 'myattribute', '< & > \' " "');
 
         t.result = serializer.writeToString(node, {});
 
-        r.shouldBe(t, "t.result", "'<ns0:p xmlns:ns0=\"text\" xmlns:ns1=\"mynamespace\" ns1:myattribute=\"&quot; &apos;\"></ns0:p>'");
+        r.shouldBe(t, "t.result", "'<ns0:p xmlns:ns0=\"text\" xmlns:ns1=\"mynamespace\" ns1:myattribute=\"&lt; &amp; &gt; &apos; &quot; &quot;\"></ns0:p>'");
     }
     this.setUp = function () {
         serializer = new xmldom.LSSerializer();

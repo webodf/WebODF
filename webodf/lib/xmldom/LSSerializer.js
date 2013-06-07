@@ -123,14 +123,26 @@ xmldom.LSSerializer = function LSSerializer() {
             return p + ":" + node.localName;
         };
     }
-
+    /**
+     * Escape characters within document content
+     * Follows basic guidelines specified at http://xerces.apache.org/xerces2-j/javadocs/api/org/w3c/dom/ls/LSSerializer.html
+     * @param {string} value
+     * @returns {string}
+     */
+    function escapeContent(value) {
+        return value.replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/'/g,"&apos;")
+            .replace(/"/g,"&quot;");
+    }
     /**
      * @param {!string} qname
      * @param {!Attr} attr
      * @return {!string}
      */
     function serializeAttribute(qname, attr) {
-        var escapedValue = typeof attr.value === 'string' ? attr.value.replace(/"/g, "&quot;").replace(/'/g, "&apos;") : attr.value,
+        var escapedValue = typeof attr.value === 'string' ? escapeContent(attr.value) : attr.value,
             /**@type{!string}*/ s = qname + "=\"" + escapedValue + "\"";
         return s;
     }
@@ -175,19 +187,6 @@ xmldom.LSSerializer = function LSSerializer() {
         }
         s += attstr + ">";
         return s;
-    }
-    /**
-     * Escape characters within document content
-     * Follows basic guidelines specified at http://xerces.apache.org/xerces2-j/javadocs/api/org/w3c/dom/ls/LSSerializer.html
-     * @param {string} value
-     * @returns {string}
-     */
-    function escapeContent(value) {
-        return value.replace(/&/g,"&amp;")
-            .replace(/</g,"&lt;")
-            .replace(/>/g,"&gt;")
-            .replace(/'/g,"&apos;")
-            .replace(/"/g,"&quot;");
     }
     /**
      * @param {!Namespaces} ns
