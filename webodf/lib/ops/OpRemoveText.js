@@ -224,13 +224,6 @@ ops.OpRemoveText = function OpRemoveText() {
         remainingLength = preprocessedNeighborhood.remainingLength;
         paragraphElement = preprocessedNeighborhood.paragraphElement;
 
-        // If there is no text neighborhood, and also no neighboring paragraph,
-        // then there is nothing to delete
-        if (odtDocument.getNeighboringParagraph(paragraphElement, direction) === null
-                && neighborhood.length === 0) {
-            return false;
-        }
-
         while (remainingLength) {
             if (neighborhood[0]) {
                 currentTextNode = neighborhood[0];
