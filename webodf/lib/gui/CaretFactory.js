@@ -77,9 +77,6 @@ gui.CaretFactory = function CaretFactory(sessionController) {
             canvasElement.onfocus = caret.setFocus;
             canvasElement.onblur = caret.removeFocus;
             canvasElement.focus();
-
-            // everything prepared, so now let's start to deal with any input
-            sessionController.startListening();
         }
 
         return caret;

@@ -70,6 +70,17 @@ gui.SessionController = (function () {
             }
         }
 
+        function removeEvent(eventTarget, eventType, eventHandler) {
+            if (eventTarget.removeEventListener) {
+                eventTarget.removeEventListener(eventType, eventHandler, false);
+            } else if (eventTarget.detachEvent) {
+                eventType = "on" + eventType;
+                eventTarget.detachEvent(eventType, eventHandler);
+            } else {
+                eventTarget["on" + eventType] = null;
+            }
+        }
+
         /**
          * @param {!Event} event
          */
@@ -432,11 +443,12 @@ gui.SessionController = (function () {
             }
         }
 
-        /**
-         */
-        this.startListening = function () {
-            var canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
+       /**
+        */
+        this.startEditing = function () {
+            var canvasElement, op;
 
+            canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
             listenEvent(canvasElement, "keydown", handleKeyDown);
             listenEvent(canvasElement, "keypress", handleKeyPress);
             listenEvent(canvasElement, "keyup", dummyHandler);
@@ -444,12 +456,8 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "cut", dummyHandler);
             listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", handleMouseUp);
-        };
 
-       /**
-        */
-        this.startEditing = function () {
-            var op = new ops.OpAddCursor();
+            op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
             session.enqueue(op);
         };
@@ -457,7 +465,18 @@ gui.SessionController = (function () {
         /**
          */
         this.endEditing = function () {
-            var op = new ops.OpRemoveCursor();
+            var canvasElement, op;
+
+            canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
+            removeEvent(canvasElement, "keydown", handleKeyDown);
+            removeEvent(canvasElement, "keypress", handleKeyPress);
+            removeEvent(canvasElement, "keyup", dummyHandler);
+            removeEvent(canvasElement, "copy", dummyHandler);
+            removeEvent(canvasElement, "cut", dummyHandler);
+            removeEvent(canvasElement, "paste", handlePaste);
+            removeEvent(canvasElement, "mouseup", handleMouseUp);
+
+            op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
             session.enqueue(op);
         };
