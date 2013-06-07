@@ -6,13 +6,4 @@
   </ops>
   <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
  </test>
- <test name="Remove_backspaceOnlyCharacter">
-  <before><office:text><text:p><text:span>A</text:span></text:p></office:text></before>
-  <ops>
-   <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="1"/>
-   <op optype="RemoveText" memberid="Bob" position="1" length="-1"/>
-  </ops>
-  <after><office:text><text:p><c:cursor c:memberId="Bob"/><text:span></text:span></text:p></office:text></after>
- </test>
 </tests>
