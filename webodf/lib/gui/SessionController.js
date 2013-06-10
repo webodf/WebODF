@@ -370,7 +370,7 @@ gui.SessionController = (function () {
                 handled = true;
             } else if (keyCode === 8) { // Backspace
                 op = createOpRemoveTextByBackspaceKey();
-                handled = (op !== null);
+                handled = true;
             } else if (keyCode === 46) { // Delete
                 op = createOpRemoveTextByDeleteKey();
                 handled = (op !== null);
