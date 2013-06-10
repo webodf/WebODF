@@ -49,13 +49,6 @@ office|binary-data {
 }
 office|text {
   display: block;
-  width: 210mm; /* default to A4 width */
-  min-height: 297mm;
-  padding-left: 32mm;
-  padding-right: 32mm;
-  padding-top: 25mm;
-  padding-bottom: 13mm;
-  margin: 2px;
   text-align: left;
   overflow: hidden;
   word-wrap: break-word;

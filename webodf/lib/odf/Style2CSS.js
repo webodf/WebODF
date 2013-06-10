@@ -62,7 +62,8 @@ odf.Style2CSS = function Style2CSS() {
             'table-column': 'table',
             'table-row': 'table',
             'text': 'text',
-            'list': 'text'
+            'list': 'text',
+            'page': 'office'
         },
 
         /**@const@type{!Object.<string,!Array.<!string>>}*/
@@ -174,6 +175,33 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'margin-bottom', 'margin-bottom' ]
         ],
 
+        /**@const@type{!Array.<!Array.<!string>>}*/
+        pageContentPropertySimpleMapping = [
+            [ fons, 'background-color', 'background-color' ],
+            [ fons, 'padding', 'padding' ],
+            [ fons, 'padding-left', 'padding-left' ],
+            [ fons, 'padding-right', 'padding-right' ],
+            [ fons, 'padding-top', 'padding-top' ],
+            [ fons, 'padding-bottom', 'padding-bottom' ],
+            [ fons, 'border', 'border' ],
+            [ fons, 'border-left', 'border-left' ],
+            [ fons, 'border-right', 'border-right' ],
+            [ fons, 'border-top', 'border-top' ],
+            [ fons, 'border-bottom', 'border-bottom' ],
+            [ fons, 'margin', 'margin' ],
+            [ fons, 'margin-left', 'margin-left' ],
+            [ fons, 'margin-right', 'margin-right' ],
+            [ fons, 'margin-top', 'margin-top' ],
+            [ fons, 'margin-bottom', 'margin-bottom' ]
+        ],
+
+        /**@const@type{!Array.<!Array.<!string>>}*/
+        pageSizePropertySimpleMapping = [
+            [ fons, 'page-width', 'width' ]
+            //TODO: This is temporarily disabled till we have pagination
+            //[ fons, 'page-height', 'height' ]
+        ],
+
         // A font-face declaration map, to be populated once style2css is called.
         /**@type{!Object.<string,string>}*/
         fontFaceDeclsMap = {};
@@ -199,6 +227,9 @@ odf.Style2CSS = function Style2CSS() {
             } else if (node.namespaceURI === textns &&
                     node.localName === 'list-style') {
                 family = "list";
+            } else if (node.namespaceURI === stylens &&
+                    (node.localName === 'page-layout' || node.localName === 'default-page-layout')) {
+                family = "page";
             } else {
                 // Skip insignificant white-space only nodes in the style tree
                 family = undefined;
@@ -437,7 +468,7 @@ odf.Style2CSS = function Style2CSS() {
         }
         return rule;
     }
-    /**
+   /**
      * @param {!Element} props
      * @return {!string}
      */
@@ -646,6 +677,51 @@ odf.Style2CSS = function Style2CSS() {
     }
     /**
      * @param {!StyleSheet} sheet
+     * @param {!Element} props
+     * @return {undefined}
+     */
+    function addPageStyleRules(sheet, node) {
+        var rule = '', imageProps, url, element,
+            contentLayoutRule = '',
+            pageSizeRule = '',
+            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0];
+
+        rule += applySimpleMapping(props, pageContentPropertySimpleMapping);
+        imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
+        if (imageProps.length > 0) {
+            url = imageProps.item(0).getAttributeNS(xlinkns, 'href');
+            if (url) {
+                rule += "background-image: url('odfkit:" + url + "');";
+                //rule += "background-repeat: repeat;"; //FIXME test
+                element = /**@type{!Element}*/(imageProps.item(0));
+                rule += applySimpleMapping(element, bgImageSimpleMapping);
+            }
+        }
+        contentLayoutRule = 'office|text {' + rule + '}';
+        rule = '';
+
+        rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
+        pageSizeRule = 'office|body {' + rule + '}';
+
+        try {
+            sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
+            sheet.insertRule(pageSizeRule, sheet.cssRules.length);
+        } catch (e) {
+            throw e;
+        }
+    }
+    /**
+     * @param {!Element} props
+     * @return {!string}
+     */
+    function getPageSizeProperties(props) {
+        var rule = '';
+        rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
+        return rule;
+    }
+ 
+    /**
+     * @param {!StyleSheet} sheet
      * @param {!string} name
      * @param {!Element} node
      * @return {undefined}
@@ -679,6 +755,8 @@ odf.Style2CSS = function Style2CSS() {
     function addRule(sheet, family, name, node) {
         if (family === "list") {
             addListStyleRules(sheet, name, node);
+        } else if (family === "page") {
+            addPageStyleRules(sheet, node);
         } else {
             addStyleRule(sheet, family, name, node);
         }
