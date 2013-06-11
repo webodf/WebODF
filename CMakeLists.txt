@@ -46,8 +46,8 @@ if(Java_JAVA_EXECUTABLE)
     ExternalProject_Add(
         ClosureCompiler
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://closure-compiler.googlecode.com/files/compiler-20130411.tar.gz"
-        URL_MD5 bbdbecd1bba7a53a90f3378eb689268c
+        URL "http://closure-compiler.googlecode.com/files/compiler-20130603.tar.gz"
+        URL_MD5 88dcfc777323b5768be4d7d5167b3a91
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
@@ -82,12 +82,12 @@ ExternalProject_Add(
 set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 
 # Node.JS
-set(NODEVERSION 0.10.8)
+set(NODEVERSION 0.10.10)
 if(WIN32)
     # On windows, it is significantly faster and more reliable to download
     # a pre-built 32-bit binary
     set(NODE_BIN_URL "http://nodejs.org/dist/v${NODEVERSION}/node.exe")
-    set(NODE_BIN_MD5 "3174c18de33da74f878c2b6e8f4c8b1e")
+    set(NODE_BIN_MD5 "42d450d4a4ee9e9181cb94df30e59f13")
     file(DOWNLOAD "${NODE_BIN_URL}" "${EXTERNALS_DOWNLOAD_DIR}/node-download.exe"
         SHOW_PROGRESS
         EXPECTED_MD5 ${NODE_BIN_MD5}
@@ -108,7 +108,7 @@ else(WIN32)
         PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
         URL "http://nodejs.org/dist/v${NODEVERSION}/node-v${NODEVERSION}.tar.gz"
-        URL_MD5 c99a48ddb5c6d4a0d8624e081a97050c
+        URL_MD5 a47a9141567dd591eec486db05b09e1c
         CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
         INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
         BUILD_IN_SOURCE 1
