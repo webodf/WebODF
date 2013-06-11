@@ -69,6 +69,10 @@ ops.OpRemoveText = function OpRemoveText() {
                 stepCounter = cursors[i].getStepCounter();
                 if (!stepCounter.isPositionWalkable(filter)) {
                     steps = -stepCounter.countBackwardSteps(1, filter);
+                    if(steps === 0) {
+                        // the cursor now occupies BEFORE the first walkable position in the document
+                        steps = stepCounter.countForwardSteps(1, filter);
+                    }
                     cursors[i].move(steps);
                     if (i === memberid) {
                         odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
