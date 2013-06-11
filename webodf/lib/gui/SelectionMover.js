@@ -131,10 +131,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         while (left > 0 && move()) {
             left -= 1;
         }
-        if (steps - left > 0) {
-            selection.collapse(positionIterator.container(),
-                    positionIterator.unfilteredDomOffset());
-        }
+        selection.collapse(positionIterator.container(), positionIterator.unfilteredDomOffset());
         cursor.updateToSelection(onCursorRemove, onCursorAdd);
 
         pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
