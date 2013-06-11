@@ -1338,6 +1338,7 @@ var runtime = (function () {
             }
             // add label to dynamic script for easier debugging
             code += "\n//# sourceURL=" + path;
+            code += "\n//@ sourceURL=" + path; // Chrome
             // evaluate loaded code
             try {
                 code = eval(classpath + " = eval(code);");
