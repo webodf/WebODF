@@ -50,7 +50,7 @@ office|binary-data {
 office|text {
   display: block;
   text-align: left;
-  overflow: hidden;
+  overflow: visible;
   word-wrap: break-word;
 }
 office|spreadsheet {
