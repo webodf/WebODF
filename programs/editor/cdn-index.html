@@ -17,10 +17,12 @@
   <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
 
   <script type="text/javascript" charset="utf-8">
+    var basedir = window.location.pathname;
+    basedir = basedir.substr(0, basedir.lastIndexOf("/"));
     dojoConfig = {
       paths: {
-        "webodf/editor": "/programs/editor",
-        "resources": "/programs/editor/resources"
+        "webodf/editor": basedir,
+        "resources": basedir + "/resources"
       }
     }
   </script>
