@@ -134,7 +134,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         selection.collapse(positionIterator.container(), positionIterator.unfilteredDomOffset());
         cursor.updateToSelection(onCursorRemove, onCursorAdd);
 
-        pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
         newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
 
         horizontalMovement = (newRect.top === initialRect.top) ? true : false;
