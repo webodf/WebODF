@@ -167,24 +167,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     this.movePointBackward = function (steps, extend) {
         return doMove(steps, extend, positionIterator.previousPosition);
     };
-/*
-    this.moveLineForward = function (extend) {
-        if (selection.modify) {
-            // TODO add a way to
-            selection.modify(extend ? "extend" : "move", "forward", "line");
-        } else {
-            doMove(extend, moveCursorDown);
-        }
-    };
-    this.moveLineBackward = function (extend) {
-        if (selection.modify) {
-            selection.modify(extend ? "extend" : "move", "backward", "line");
-        } else {
-            doMove(extend, function () {
-            });
-        }
-    };
-*/
+
     /**
      * Returns if the current position is walkable according to the
      * specified filter. Useful when the position becomes unwalkable after, for example,
