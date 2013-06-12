@@ -32,6 +32,18 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
+/*global runtime, document, odf*/
+
+runtime.currentDirectory = function () {
+    return "../../webodf/lib";
+};
+runtime.libraryPaths = function () {
+    return [ runtime.currentDirectory() ];
+};
+
+runtime.loadClass('odf.OdfCanvas');
+
 function isFullScreen() {
     // Note that the browser fullscreen (triggered by short keys) might
     // be considered different from content fullscreen when expecting a boolean
