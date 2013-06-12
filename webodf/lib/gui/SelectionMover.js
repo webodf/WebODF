@@ -47,7 +47,6 @@ runtime.loadClass("core.LoopWatchDog");
 gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCursorRemove) {
     "use strict";
     var self = this,
-        selection = cursor.getSelection(),
         positionIterator,
         cachedXOffset,
         timeoutHandle;
@@ -119,6 +118,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             pos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
             initialRect,
             range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
+            selectionRange = (rootNode.ownerDocument.createRange()),
             newRect,
             horizontalMovement;
 
@@ -131,8 +131,10 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         while (left > 0 && move()) {
             left -= 1;
         }
-        selection.collapse(positionIterator.container(), positionIterator.unfilteredDomOffset());
-        cursor.updateToSelection(onCursorRemove, onCursorAdd);
+
+        selectionRange.setStart(positionIterator.container(), positionIterator.unfilteredDomOffset());
+        selectionRange.collapse(true);
+        cursor.setSelectedRange(selectionRange, onCursorRemove, onCursorAdd);
 
         newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
 
@@ -523,14 +525,14 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     };
     function init() {
         positionIterator = gui.SelectionMover.createPositionIterator(rootNode);
-        // put the cursor at the start of the rootNode
-        selection.collapse(positionIterator.container(),
-                positionIterator.offset());
 
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
 
-        cursor.updateToSelection(onCursorRemove, onCursorAdd);
+        var range = rootNode.ownerDocument.createRange();
+        range.setStart(positionIterator.container(), positionIterator.unfilteredDomOffset());
+        range.collapse(true);
+        cursor.setSelectedRange(range, onCursorRemove, onCursorAdd);
     }
     init();
 };

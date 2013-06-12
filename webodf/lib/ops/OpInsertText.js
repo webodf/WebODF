@@ -68,10 +68,9 @@ ops.OpInsertText = function OpInsertText() {
         // Workaround this by storing the range nodes, performing the modification
         // and then resetting the selection ranges
         odtDocument.getCursors().forEach(function(cursor) {
-            var selection = cursor.getSelection(),
-                range = selection.getRangeAt(0);
-            if (range.startContainer === textNode
-                || range.endContainer === textNode) {
+            var range = cursor.getSelectedRange();
+            if (range && (range.startContainer === textNode
+                || range.endContainer === textNode)) {
                 impactedCursors.push({
                     cursor: cursor,
                     startContainer: range.startContainer,
@@ -86,9 +85,8 @@ ops.OpInsertText = function OpInsertText() {
         parent.insertBefore(textNode, next);
 
         impactedCursors.forEach(function(entry) {
-            var selection = entry.cursor.getSelection(),
-                range = selection.getRangeAt(0);
-
+            var range = entry.cursor.getSelectedRange();
+            // the cursor hasn't physically moved, we're just fixing the ranges again
             range.setStart(entry.startContainer, entry.startOffset);
             range.setEnd(entry.endContainer, entry.endOffset);
         });

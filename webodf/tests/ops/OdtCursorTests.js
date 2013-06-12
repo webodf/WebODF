@@ -201,23 +201,20 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
     }
     function create() {
         createOdtCursor();
-        var s = t.cursor.getSelection();
-        t.rangeCount = s.rangeCount;
-        r.shouldBe(t, "t.rangeCount", "1");
-        t.focusOffset = s.focusOffset;
-        r.shouldBe(t, "t.focusOffset", "0");
-        t.focusNode = s.focusNode;
-        r.shouldBeNonNull(t, "t.focusNode");
+        t.range = t.cursor.getSelectedRange();
+        r.shouldBeNonNull(t, "t.range");
+        r.shouldBe(t, "t.range.startOffset", "0");
+        r.shouldBeNonNull(t, "t.range.startContainer");
     }
     function moveInEmptyDoc() {
         createOdtCursor("");
-        var s = t.cursor.getSelection();
-        t.startNode = s.focusNode;
+        t.range = t.cursor.getSelectedRange();
+        t.originalStartContainer = t.range.startContainer;
+        t.originalStartOffset = t.range.startOffset;
         t.cursor.move(1);
-        t.focusOffset = s.focusOffset;
-        t.focusNode = s.focusNode;
-        r.shouldBe(t, "t.focusOffset", "0");
-        r.shouldBe(t, "t.startNode", "t.focusNode");
+        t.range = t.cursor.getSelectedRange();
+        r.shouldBe(t, "t.range.startOffset", "t.originalStartOffset");
+        r.shouldBe(t, "t.range.startContainer", "t.originalStartContainer");
     }
     function moveInSimpleDoc() {
         createOdtCursor("hello");
@@ -265,46 +262,51 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         var steps, s, e;
         t.pos = [];
         createOdtCursor(xml, true, true);
-        s = t.cursor.getSelection();
+        s = t.cursor.getSelectedRange();
         t.counter = t.cursor.getStepCounter();
 
         // move to a valid position
-        t.startFocusOffset = s.focusOffset;
-        t.startFocusNode = s.focusNode;
-        t.startText = s.focusNode.data;
-        t.focusOffset = s.focusOffset;
-        t.focusNode = s.focusNode;
-        t.text = s.focusNode.data;
+        t.initialStartOffset = s.startOffset;
+        t.initialStartContainer = s.startContainer;
+        t.startText = s.startContainer.data;
+        t.startOffset = s.startOffset;
+        t.startContainer = s.startContainer;
+        t.text = s.startContainer.data;
+
         steps = t.counter.countForwardSteps(n, filter);
         r.shouldBe(t, steps.toString(), m.toString());
-        t.focusOffset2 = s.focusOffset;
-        t.focusNode2 = s.focusNode;
-        t.text2 = s.focusNode.data;
-        r.shouldBe(t, "t.focusOffset", "t.focusOffset2");
-        r.shouldBe(t, "t.focusNode", "t.focusNode2");
+
+        s = t.cursor.getSelectedRange();
+        t.startOffset2 = s.startOffset;
+        t.startContainer2 = s.startContainer;
+        t.text2 = s.startContainer.data;
+        r.shouldBe(t, "t.startOffset", "t.startOffset2");
+        r.shouldBe(t, "t.startContainer", "t.startContainer2");
         r.shouldBe(t, "t.text", "t.text2");
 
         t.cursor.move(steps);
+        s = t.cursor.getSelectedRange();
+        t.startOffset = s.startOffset;
+        t.startContainer = s.startContainer;
+        t.text = s.startContainer.data;
 
-        t.focusOffset = s.focusOffset;
-        t.focusNode = s.focusNode;
-        t.text = s.focusNode.data;
         steps = t.counter.countBackwardSteps(n, filter);
         r.shouldBe(t, steps.toString(), m.toString());
-        t.focusOffset2 = s.focusOffset;
-        t.focusNode2 = s.focusNode;
-        t.text2 = s.focusNode.data;
-        r.shouldBe(t, "t.focusOffset", "t.focusOffset2");
-        r.shouldBe(t, "t.focusNode", "t.focusNode2");
+        s = t.cursor.getSelectedRange();
+        t.startOffset2 = s.startOffset;
+        t.startContainer2 = s.startContainer;
+        t.text2 = s.startContainer.data;
+        r.shouldBe(t, "t.startOffset", "t.startOffset2");
+        r.shouldBe(t, "t.startContainer", "t.startContainer2");
         r.shouldBe(t, "t.text", "t.text2");
 
         t.cursor.move(-steps);
-
-        t.focusOffset = s.focusOffset;
-        t.focusNode = s.focusNode;
-        t.text = s.focusNode.data;
-        r.shouldBe(t, "t.focusOffset", "t.startFocusOffset");
-        r.shouldBe(t, "t.focusNode", "t.startFocusNode");
+        s = t.cursor.getSelectedRange();
+        t.startOffset = s.startOffset;
+        t.startContainer = s.startContainer;
+        t.text = s.startContainer.data;
+        r.shouldBe(t, "t.startOffset", "t.initialStartOffset");
+        r.shouldBe(t, "t.startContainer", "t.initialStartContainer");
         r.shouldBe(t, "t.text", "t.startText");
     }
     function stepCounter1() {

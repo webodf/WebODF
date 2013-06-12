@@ -217,7 +217,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js
     lib/core/RawInflate.js
-    lib/core/Selection.js
     lib/core/LoopWatchDog.js
     lib/core/Cursor.js
     lib/core/EventNotifier.js

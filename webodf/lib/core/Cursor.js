@@ -31,7 +31,6 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global core, ops, runtime*/
-runtime.loadClass("core.Selection");
 
 /**
  * @class
@@ -55,14 +54,14 @@ runtime.loadClass("core.Selection");
  * the cursor by not letting it be part of the DOM.
  *
  * @constructor
- * @param {core.Selection} selection The selection to which the cursor corresponds
  * @param {!Document} document  The DOM document in which the cursor is placed
  */
-core.Cursor = function Cursor(selection, document) {
+core.Cursor = function Cursor(document) {
     "use strict";
     var self = this,
         /**@type{Element}*/
-        cursorNode;
+        cursorNode,
+        selectedRange;
 
     /**
      * Split a text node and put the cursor into it.
@@ -154,26 +153,30 @@ core.Cursor = function Cursor(selection, document) {
     };
     /**
      * Obtain the selection to which the cursor corresponds.
-     * @return {core.Selection}
+     * @return {?Range}
      */
-    this.getSelection = function () {
-        return selection;
+    this.getSelectedRange = function () {
+        return selectedRange;
     };
     /**
-     * Synchronize the cursor with the current selection.
+     * Synchronize the cursor to a specific range
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
+     * @param {!Range} range
      * @param {!function(?Node,!number):undefined} onCursorRemove
      * @param {!function(?Node,!number):undefined} onCursorAdd
      * @return {undefined}
      */
-    this.updateToSelection = function (onCursorRemove, onCursorAdd) {
-        var range;
+    this.setSelectedRange = function (range, onCursorRemove, onCursorAdd) {
+        if (selectedRange && selectedRange !== range) {
+            selectedRange.detach();
+        }
+        selectedRange = range;
         if (cursorNode.parentNode) {
             removeCursor(onCursorRemove);
         }
-        if (selection.focusNode) {
-            putCursor(selection.focusNode, selection.focusOffset, onCursorAdd);
+        if (range.startContainer) {
+            putCursor(range.startContainer, range.startOffset, onCursorAdd);
         }
     };
     /**

@@ -115,11 +115,11 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         return cursor.getNode();
     };
     /**
-     * Obtain the selection to which the cursor corresponds.
-     * @return {core.Selection}
+     * Obtain the currently selected range to which the cursor corresponds.
+     * @return {Range}
      */
-    this.getSelection = function () {
-        return cursor.getSelection();
+    this.getSelectedRange = function () {
+        return cursor.getSelectedRange();
     };
     /**
      * Obtain the odtDocument to which the cursor corresponds.
@@ -130,9 +130,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
     };
 
     function init() {
-        var selection = new core.Selection(odtDocument.getDOM());
-
-        cursor = new core.Cursor(selection, odtDocument.getDOM());
+        cursor = new core.Cursor(odtDocument.getDOM());
         // mark cursornode with memberid
         cursor.getNode().setAttributeNS('urn:webodf:names:cursor', "memberId", memberId);
 
