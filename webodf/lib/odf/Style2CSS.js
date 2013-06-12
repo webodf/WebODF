@@ -677,7 +677,7 @@ odf.Style2CSS = function Style2CSS() {
     }
     /**
      * @param {!StyleSheet} sheet
-     * @param {!Element} props
+     * @param {!Element} node
      * @return {undefined}
      */
     function addPageStyleRules(sheet, node) {
