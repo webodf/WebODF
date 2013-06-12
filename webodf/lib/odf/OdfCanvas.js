@@ -488,12 +488,41 @@ odf.OdfCanvas = (function () {
             node;
 
         function modifyLink(container, node, stylesheet) {
-            if (node.hasAttributeNS(xlinkns, "href")) {
+            var url, clickHandler;
+            if (!node.hasAttributeNS(xlinkns, "href")) {
+                return;
+            }
+
+            url = node.getAttributeNS(xlinkns, "href");
+            if (url[0] === '#') { // bookmark
+                url = url.substring(1);
+                clickHandler = function () {
+                    var bookmarks = xpath.getODFElementsWithXPath(
+                        odffragment,
+                        "//text:bookmark-start[@text:name='" + url + "']",
+                        odf.Namespaces.resolvePrefix);
+
+                    if (bookmarks.length === 0) {
+                        bookmarks = xpath.getODFElementsWithXPath(
+                            odffragment,
+                            "//text:bookmark[@text:name='" + url + "']",
+                            odf.Namespaces.resolvePrefix);
+                    }
+
+                    if (bookmarks.length > 0) {
+                        bookmarks[0].scrollIntoView(true);
+                    }
+
+                    return false;
+                };
+            } else {
                 // Ask the browser to open the link in a new window.
-                node.onclick = function () {
-                    window.open(node.getAttributeNS(xlinkns, "href"));
+                clickHandler = function () {
+                    window.open(url);
                 };
             }
+
+            node.onclick = clickHandler;
         }
         
         // All links are of name text:a.
