@@ -363,6 +363,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return self.text().substr(start, length);
     };
     /**
+     * Set the position of the iterator.
+     *
      * @param {!Node} container
      * @param {!number} offset offset in filtered DOM world
      * @return {!boolean}
@@ -412,6 +414,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return true;
     };
     /**
+     * Set the position of the iterator.
+     * The position can be on an unfiltered, i.e. forbidden, position.
+     * This means that this function should be moved left or right after setting
+     * the position, so that the iterator may move to a valid position.
+     *
      * @param {!Node} container
      * @param {!number} offset offset in unfiltered DOM world
      * @return {!boolean}
@@ -427,7 +434,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             walker.currentNode = container.childNodes[offset];
             currentPos = 0;
         } else {
-            currentPos = 1;
+            currentPos = 1; // set position to past the last container child
         }
         return true;
     };
