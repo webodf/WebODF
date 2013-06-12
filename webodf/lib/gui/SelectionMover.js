@@ -412,7 +412,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
     }
     /**
      * @param {!Element} posElement
-     * @param {!number} posOffset  offset in unfiltered DOM world
+     * @param {!number} posOffset  offset in filtered DOM world
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */

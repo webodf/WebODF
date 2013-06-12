@@ -617,7 +617,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.
      * @param {!string} memberid
      * @param {!Node} node
-     * @param {!number} offset
+     * @param {!number} offset offset in filtered DOM world
      * @return {!number}
      */
     this.getDistanceFromCursor = function (memberid, node, offset) {

@@ -320,6 +320,18 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             testPositions(xml.n);
         }
     }
+    function testSetPositionUsesFilteredOffsets() {
+        createWalker('<p><b id="b1"/><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/><b id="b4"/><a id="a3"/></p>');
+        t.iterator.setPosition(t.doc.documentElement, 1);
+        r.shouldBe(t, "t.iterator.leftNode() && t.iterator.leftNode().getAttribute('id')", "'a1'");
+        r.shouldBe(t, "t.iterator.rightNode() && t.iterator.rightNode().getAttribute('id')", "'a2'");
+    }
+    function testSetUnfilteredPositionUsesUnfilteredOffsets() {
+        createWalker('<p><b id="b1"/><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/><b id="b4"/><a id="a3"/></p>');
+        t.iterator.setUnfilteredPosition(t.doc.documentElement, 4);
+        r.shouldBe(t, "t.iterator.leftNode() && t.iterator.leftNode().getAttribute('id')", "'a1'");
+        r.shouldBe(t, "t.iterator.rightNode() && t.iterator.rightNode().getAttribute('id')", "'a2'");
+    }
     this.tests = function () {
         return [
             create,
@@ -331,7 +343,9 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             backwardInDoc,
             rejectedNodes,
             emptyTextNodes,
-            testSplitTextNodes
+            testSplitTextNodes,
+            testSetPositionUsesFilteredOffsets,
+            testSetUnfilteredPositionUsesUnfilteredOffsets
         ];
     };
     this.asyncTests = function () {

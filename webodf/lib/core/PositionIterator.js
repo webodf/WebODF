@@ -364,7 +364,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     };
     /**
      * @param {!Node} container
-     * @param {!number} offset offset in unfiltered DOM world
+     * @param {!number} offset offset in filtered DOM world
      * @return {!boolean}
      */
     this.setPosition = function (container, offset) {
@@ -408,6 +408,26 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             currentPos = 1;
         } else {
             currentPos = 0;
+        }
+        return true;
+    };
+    /**
+     * @param {!Node} container
+     * @param {!number} offset offset in unfiltered DOM world
+     * @return {!boolean}
+     */
+    this.setUnfilteredPosition = function (container, offset) {
+        runtime.assert((container !== null) && (container !== undefined),
+            "PositionIterator.setPosition called without container");
+        if (container.nodeType === 3) {
+            return self.setPosition(container, offset);
+        }
+        walker.currentNode = container;
+        if (offset < container.childNodes.length) {
+            walker.currentNode = container.childNodes[offset];
+            currentPos = 0;
+        } else {
+            currentPos = 1;
         }
         return true;
     };

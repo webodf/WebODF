@@ -111,6 +111,7 @@ gui.SessionController = (function () {
                 op,
                 node,
                 odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 canvasElement = odtDocument.getOdfCanvas().getElement();
 
             // check that the node or one of its parent nodes til the canvas are
@@ -148,7 +149,8 @@ gui.SessionController = (function () {
             range.setEnd(focusNode, focusOffset);
 
             // create a move op with the distance to that position
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, focusNode, focusOffset);
+            iterator.setUnfilteredPosition(focusNode, focusOffset);
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.offset());
 
             // Remove any possible selection now, as selections are not supported in WebODF ATM
             // Used to be done by calling "selection.collapseToStart();" but it seems that
