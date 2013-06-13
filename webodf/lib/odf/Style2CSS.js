@@ -144,7 +144,6 @@ odf.Style2CSS = function Style2CSS() {
 
         /**@const@type{!Array.<!Array.<!string>>}*/
         graphicPropertySimpleMapping = [
-            [ drawns, 'fill-color', 'background-color' ],
             [ fons, 'background-color', 'background-color'],
             [ fons, 'min-height', 'min-height' ],
             [ drawns, 'stroke', 'border' ],
@@ -487,26 +486,37 @@ odf.Style2CSS = function Style2CSS() {
             b: parseInt(result[3], 16)
         } : null;
     }
- 
+
+    function isNumber(n) {
+        return !isNaN(parseFloat(n));
+    }
+
    /**
      * @param {!Element} props
      * @return {!string}
      */
     function getGraphicProperties(props) {
         var rule = '', alpha, bgcolor, fill;
+
         rule += applySimpleMapping(props, graphicPropertySimpleMapping);
         alpha = props.getAttributeNS(drawns, 'opacity');
         fill = props.getAttributeNS(drawns, 'fill');
         bgcolor = props.getAttributeNS(drawns, 'fill-color');
 
-        if (bgcolor && bgcolor !== 'none') {
-            alpha = (alpha) ? parseFloat(alpha) / 100 : 0;
-            bgcolor = hexToRgb(bgcolor);
-            rule += "background-color: rgba("
-                + bgcolor.r + ","
-                + bgcolor.g + ","
-                + bgcolor.b + ","
-                + alpha + ");";
+        if (fill === 'solid' || fill === 'hatch') {
+            if (bgcolor && bgcolor !== 'none') {
+                alpha = isNumber(alpha) ? parseFloat(alpha) / 100 : 1;
+                bgcolor = hexToRgb(bgcolor);
+                rule += "background-color: rgba("
+                    + bgcolor.r + ","
+                    + bgcolor.g + ","
+                    + bgcolor.b + ","
+                    + alpha + ");";
+            } else {
+                rule += "background: none;";
+            }
+        } else if (fill === "none") {
+            rule += "background: none;";
         }
 
         return rule;
