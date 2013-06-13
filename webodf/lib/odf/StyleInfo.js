@@ -534,25 +534,40 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
-     * Determines all stylenames that are referenced in the passed element tree
-     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
-     * @param {!Object.<string,Object.<string,number>>} usedStyles  map of used stylesnames, grouped by keyname
-     * @return {undefined}
+     * Determines all stylenames that are referenced in the passed element
+     * @param {!Element} node  element to check for styles
+     * @param {Object.<string,Object.<string,number>>} [usedStyles=]  map of used styles names, grouped by style family
+     * @return {Object.<string,Object.<string,number>>|undefined} Returns either map of used styles, or undefined if none
+     *      have been found an usedStyles was not passed in
      */
-    function determineUsedStyles(styleUsingElementsRoot, usedStyles) {
-        var elname = elements[styleUsingElementsRoot.localName],
-            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
+    function determineStylesForNode(node, usedStyles) {
+        var elname = elements[node.localName],
+            elns = elname && elname[node.namespaceURI],
             length = elns ? elns.length : 0,
-            i, stylename, keyname, map, e;
+            stylename, keyname, map, i;
+
         // check if any styles are referenced
         for (i = 0; i < length; i += 1) {
-            stylename = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+            stylename = node.getAttributeNS(elns[i].ns, elns[i].localname);
             if (stylename) { // a style has been found!
+                usedStyles = usedStyles || {};
                 keyname = elns[i].keyname;
                 map = usedStyles[keyname] = usedStyles[keyname] || {};
                 map[stylename] = 1;
             }
         }
+        return usedStyles;
+    }
+
+    /**
+     * Determines all stylenames that are referenced in the passed element tree
+     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!Object.<string,Object.<string,number>>} usedStyles  map of used styles names, grouped by style family
+     * @return {undefined}
+     */
+    function determineUsedStyles(styleUsingElementsRoot, usedStyles) {
+        var i, e;
+        determineStylesForNode(styleUsingElementsRoot, usedStyles);
         // continue determination with all child elements
         i = styleUsingElementsRoot.firstChild;
         while (i) {
@@ -760,6 +775,7 @@ odf.StyleInfo = function StyleInfo() {
     this.hasDerivedStyles = hasDerivedStyles;
     this.prefixStyleNames = prefixStyleNames;
     this.removePrefixFromStyleNames = removePrefixFromStyleNames;
+    this.determineStylesForNode = determineStylesForNode;
 
 
     // init

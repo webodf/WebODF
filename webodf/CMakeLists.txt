@@ -11,7 +11,9 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/core/RuntimeTests.js
     tests/gui/SelectionMoverTests.js
     tests/gui/XMLEditTests.js
+    tests/odf/FormattingTests.js
     tests/odf/OdfContainerTests.js
+    tests/odf/StyleInfoTests.js
     tests/ops/OdtCursorTests.js
     tests/ops/OperationTests.js
     tests/ops/SessionTests.js

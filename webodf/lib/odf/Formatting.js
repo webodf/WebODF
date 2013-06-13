@@ -32,10 +32,11 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf, runtime, console*/
+/*global odf, runtime, console, NodeFilter*/
 
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
+runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor
@@ -45,7 +46,8 @@ odf.Formatting = function Formatting() {
     var /**@type{odf.OdfContainer}*/ odfContainer,
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
         /**@const@type {!string}*/ svgns = odf.Namespaces.svgns,
-        /**@const@type {!string}*/ stylens = odf.Namespaces.stylens;
+        /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
+        odfUtils = new odf.OdfUtils();
 
     /**
      * Recursively merge properties of two objects
@@ -316,5 +318,114 @@ odf.Formatting = function Formatting() {
             styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
         }
         return null;
+    };
+
+    /**
+     * Builds up a style chain for a given node by climbing up all parent nodes and checking for style information
+     * @param {!Node} node
+     * @param {Object.<string, Array.<Object>>} collectedChains Dictionary to add any new style chains to
+     */
+    function buildStyleChain(node, collectedChains) {
+        var parent = node.nodeType === 3 /* Node.TEXT_NODE */ ? node.parentNode : node,
+            nodeStyles,
+            appliedStyles = [],
+            chainKey = '',
+            foundContainer = false;
+        while(parent) {
+            if(!foundContainer && odfUtils.isGroupingElement(parent)) {
+                foundContainer = true;
+            }
+            nodeStyles = styleInfo.determineStylesForNode(/**@type {!Element}*/(parent));
+            if(nodeStyles) {
+                appliedStyles.push(nodeStyles);
+            }
+            parent = parent.parentNode;
+        }
+
+        if(foundContainer) {
+            appliedStyles.forEach(function(usedStyleMap) {
+                Object.keys(usedStyleMap).forEach(function(styleFamily) {
+                    Object.keys(usedStyleMap[styleFamily]).forEach(function(styleName) {
+                        chainKey += '|' + styleFamily + ':' + styleName + '|';
+                    });
+                });
+            });
+            collectedChains[chainKey] = appliedStyles;
+        }
+    }
+
+    /**
+     * Takes a provided style chain and calculates the resulting inherited style, starting from the outer-most to the
+     * inner-most style
+     * @param {Array.<Object>} styleChain Ordered list starting from inner-most style to outer-most style
+     * @param {!Element} automaticStyleElementList
+     * @param {!Element} styleElementList
+     * @returns {Object}
+     */
+    function calculateAppliedStyle(styleChain, automaticStyleElementList, styleElementList) {
+        var mergedChildStyle = { orderedStyles: [] };
+
+        // The complete style is built up by starting at the base known style and merging each new entry
+        // on top of it, so the inner-most style properties override the outer-most
+        styleChain.forEach(function(elementStyleSet) {
+            Object.keys(/**@type {!Object}*/(elementStyleSet)).forEach(function(styleFamily) {
+                // Expect there to only be a single style for a given family per element (e.g., 1 text, 1 paragraph)
+                var styleName = Object.keys(elementStyleSet[styleFamily])[0],
+                    styleElement,
+                    parentStyle;
+
+                styleElement = getStyleElement(automaticStyleElementList, styleName, styleFamily)
+                    || getStyleElement(styleElementList, styleName, styleFamily);
+
+                parentStyle = getInheritedStyleAttributes(styleElementList, styleElement);
+                mergedChildStyle = mergeRecursive(parentStyle, mergedChildStyle);
+                mergedChildStyle.orderedStyles.push({
+                    name: styleName,
+                    family: styleFamily,
+                    displayName: styleElement.getAttributeNS(stylens, 'display-name')
+                });
+            });
+        });
+        return mergedChildStyle;
+    }
+
+    /**
+     * Returns an array of all unique styles in a given range for each text node
+     * @param {Range} range
+     * @returns {Array.<Object>}
+     */
+    this.getAppliedStyles = function(range) {
+        var document = runtime.getWindow().document,
+            root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === 3 /*Node.TEXT_NODE*/ ?
+                range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
+            nodeRange = document.createRange(),
+            iterator = document.createTreeWalker(root,
+                NodeFilter.SHOW_ALL,
+                function(node) {
+                    nodeRange.selectNode(node);
+                    if(range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1 &&
+                        range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
+                        return node.nodeType === 3 /*Node.TEXT_NODE*/ ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                    }
+                    return NodeFilter.FILTER_REJECT;
+                },
+                false),
+            automaticStyleElementList = odfContainer.rootElement.automaticStyles,
+            styleElementList = odfContainer.rootElement.styles,
+            styleChains = {},
+            n = iterator.nextNode(),
+            styles = [];
+
+        while(n) {
+            buildStyleChain(n, styleChains);
+            n = iterator.nextNode();
+        }
+
+        Object.keys(styleChains).forEach(function(key) {
+            styles.push(calculateAppliedStyle(styleChains[key], automaticStyleElementList, styleElementList));
+        });
+
+        nodeRange.detach();
+        return styles;
     };
 };

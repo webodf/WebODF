@@ -43,7 +43,9 @@ runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.SessionTests");
 runtime.loadClass("ops.OperationTests");
+runtime.loadClass("odf.FormattingTests");
 runtime.loadClass("odf.OdfContainerTests");
+runtime.loadClass("odf.StyleInfoTests");
 runtime.loadClass("xmldom.LSSerializerTests");
 runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
@@ -64,7 +66,9 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 //     tests.push(core.CursorTests);
     tests.push(core.PositionIteratorTests);
     tests.push(gui.SelectionMoverTests);
+    tests.push(odf.FormattingTests);
     tests.push(odf.OdfContainerTests);
+    tests.push(odf.StyleInfoTests);
     tests.push(ops.OdtCursorTests);
 }
 // add tests depending on browser runtime

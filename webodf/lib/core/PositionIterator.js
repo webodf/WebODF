@@ -475,7 +475,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         // workaround for versions of createTreeWalker that need a function
         // instead of an object with a function such as IE 9 and older webkits
-        nodeFilter = f.acceptNode;
+        nodeFilter = /**@type {function(Node):number}*/(f.acceptNode);
         nodeFilter.acceptNode = nodeFilter;
         whatToShow = whatToShow || 0xFFFFFFFF;
         walker = root.ownerDocument.createTreeWalker(root, whatToShow,

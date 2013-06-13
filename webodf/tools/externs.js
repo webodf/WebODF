@@ -417,3 +417,85 @@ Document.prototype.createTreeWalker = function (root, whatToShow, filter, entity
  * @return {!NodeIterator}
  */
 Document.prototype.createNodeIterator = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };
+
+/**
+ * http://www.w3.org/TR/DOM-Level-2-Traversal-Range/traversal.html#Traversal-NodeFilter
+ * @interface
+ */
+// Already defined as a deprecated class...
+//function NodeFilter() {"use strict"; }
+
+// Constants returned by acceptNode
+/**
+ * @type {!number}
+ */
+NodeFilter.FILTER_ACCEPT;//                  = 1;
+/**
+ * @type {!number}
+ */
+NodeFilter.FILTER_REJECT;//                  = 2;
+/**
+ * @type {!number}
+ */
+NodeFilter.FILTER_SKIP;//                    = 3;
+
+
+// Constants for whatToShow
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ALL;//                       = 0xFFFFFFFF;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ELEMENT;//                   = 0x00000001;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ATTRIBUTE;//                 = 0x00000002;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_TEXT;//                      = 0x00000004;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_CDATA_SECTION;//             = 0x00000008;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ENTITY_REFERENCE;//          = 0x00000010;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ENTITY;//                    = 0x00000020;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_PROCESSING_INSTRUCTION;//    = 0x00000040;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_COMMENT;//                   = 0x00000080;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_DOCUMENT;//                  = 0x00000100;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_DOCUMENT_TYPE;//             = 0x00000200;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_DOCUMENT_FRAGMENT;//         = 0x00000400;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_NOTATION;//                  = 0x00000800;
+
+/**
+ * @param {!Node} node
+ * @return {!number}
+ */
+NodeFilter.prototype.acceptNode = function(node) {"use strict"; };
