@@ -128,6 +128,7 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'text-align', 'text-align' ],
             [ fons, 'text-indent', 'text-indent' ],
             [ fons, 'line-height', 'line-height' ],
+            [ fons, 'padding', 'padding' ],
             [ fons, 'padding-left', 'padding-left' ],
             [ fons, 'padding-right', 'padding-right' ],
             [ fons, 'padding-top', 'padding-top' ],
@@ -136,6 +137,7 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border-right', 'border-right' ],
             [ fons, 'border-top', 'border-top' ],
             [ fons, 'border-bottom', 'border-bottom' ],
+            [ fons, 'margin', 'margin' ],
             [ fons, 'margin-left', 'margin-left' ],
             [ fons, 'margin-right', 'margin-right' ],
             [ fons, 'margin-top', 'margin-top' ],
@@ -148,7 +150,8 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'background-color', 'background-color'],
             [ fons, 'min-height', 'min-height' ],
             [ drawns, 'stroke', 'border' ],
-            [ svgns, 'stroke-color', 'border-color' ]
+            [ svgns, 'stroke-color', 'border-color' ],
+            [ svgns, 'stroke-width', 'border-width' ]
         ],
 
         /**@const@type{!Array.<!Array.<!string>>}*/
