@@ -329,6 +329,8 @@ endmacro(COPY_FILES _directory _files)
 set (VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
 set (WORDPRESSZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-wordpress-${WEBODF_VERSION})
 set (WORDPRESSZIP ${WORDPRESSZIPDIR}.zip)
+set(WEBODFXPIDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
+set(WEBODFXPI ${WEBODFXPIDIR}.xpi)
 
 add_subdirectory(webodf)
 add_subdirectory(programs)
@@ -349,6 +351,10 @@ add_custom_command(
     # wordpressplugin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/readme.txt ${WEBODFZIPDIR}/wordpressplugin-readme.txt
     COMMAND ${CMAKE_COMMAND} -E copy ${WORDPRESSZIP} ${WEBODFZIPDIR}
+
+    # firefox
+    COMMAND ${CMAKE_COMMAND} -E copy ${WEBODFXPI} ${WEBODFZIPDIR}
+
     # zip using javascript code running in node.js
     COMMAND ${NODE} ARGS webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools/zipdir.js
         ${WEBODFZIPDIR}
@@ -359,6 +365,7 @@ add_custom_command(
         webodf.js-target
         editor-compiled.js-target
         viewer-minimized.js-target
+        firefoxextension-target
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(zip ALL DEPENDS ${WEBODFZIP})

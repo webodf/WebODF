@@ -36,9 +36,10 @@
 runtime.loadClass("core.Zip");
 
 var directory = process.argv[3],
-    zipfile = process.argv[4];
+    zipfile = process.argv[4],
+    notopdir = process.argv[5];
 
-function zipdirectory(zipfile, directory) {
+function zipdirectory(zipfile, directory, notopdir) {
     "use strict";
     var fs = require('fs'),
         path = require('path'),
@@ -64,12 +65,11 @@ function zipdirectory(zipfile, directory) {
         entry.date = new Date();
         runtime.log(abspath);
         data = runtime.readFileSync(abspath, "binary");
-        runtime.log("[" + zip.filename + "] << \"" + entry.path + "\"");
+        runtime.log("[" + zipfile + "] << \"" + entry.path + "\"");
         zip.save(entry.path, data, false, entry.date);
     }
-    function zipList(directory, zipfilepath, list) {
-        var base = path.dirname(directory),
-            zip = new core.Zip(zipfilepath, null),
+    function zipList(base, zipfilepath, list) {
+        var zip = new core.Zip(zipfilepath, null),
             i;
         for (i = 0; i < list.length; i += 1) {
             zipFile(zip, path.join(base, list[i]), list[i]);
@@ -89,7 +89,12 @@ function zipdirectory(zipfile, directory) {
         throw directory + " is not a directory.";
     }
     list = [];
-    listFiles(directory, path.basename(directory), list);
+    if (notopdir) {
+        listFiles(directory, "", list);
+    } else {
+        listFiles(directory, path.basename(directory), list);
+    }
+    runtime.log(list);
     if (list.length === 0) {
         throw "Directory " + directory + " is empty.";
     }
@@ -97,7 +102,11 @@ function zipdirectory(zipfile, directory) {
         runtime.log("Deleting " + zipfile);
         fs.unlinkSync(zipfile);
     }
-    zipList(directory, zipfile, list);
+    if (notopdir) {
+        zipList(directory, zipfile, list);
+    } else {
+        zipList(path.dirname(directory), zipfile, list);
+    }
     runtime.log("Created " + zipfile);
 }
-zipdirectory(zipfile, directory);
+zipdirectory(zipfile, directory, notopdir);

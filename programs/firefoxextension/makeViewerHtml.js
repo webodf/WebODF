@@ -35,7 +35,8 @@
 runtime.loadClass("core.Base64");
 
 var args = arguments,
-    webodfjsFilename = args[1];
+    webodfjsFilename = args[1],
+    outputFilename = args[2];
 
 runtime.readFile("content/web/viewer.html.in", "utf-8", function (err, vdata) {
     if (err) {
@@ -48,7 +49,7 @@ runtime.readFile("content/web/viewer.html.in", "utf-8", function (err, vdata) {
             return;
         }
         vdata = vdata.replace("@WEBODF_JS@", wdata);
-        runtime.writeFile("content/web/viewer.html", vdata, function (err) {
+        runtime.writeFile(outputFilename, vdata, function (err) {
             if (err) {
                 runtime.log(err);
                 return;
