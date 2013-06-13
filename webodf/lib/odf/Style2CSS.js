@@ -145,7 +145,6 @@ odf.Style2CSS = function Style2CSS() {
         /**@const@type{!Array.<!Array.<!string>>}*/
         graphicPropertySimpleMapping = [
             [ drawns, 'fill-color', 'background-color' ],
-            [ drawns, 'fill', 'background' ],
             [ fons, 'background-color', 'background-color'],
             [ fons, 'min-height', 'min-height' ],
             [ drawns, 'stroke', 'border' ],
@@ -494,24 +493,22 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getGraphicProperties(props) {
-        var rule = '', opacity, bgcolor;
+        var rule = '', alpha, bgcolor, fill;
         rule += applySimpleMapping(props, graphicPropertySimpleMapping);
-        opacity = props.getAttributeNS(drawns, 'opacity');
+        alpha = props.getAttributeNS(drawns, 'opacity');
+        fill = props.getAttributeNS(drawns, 'fill');
         bgcolor = props.getAttributeNS(drawns, 'fill-color');
-        if (opacity) {
-            opacity = parseFloat(opacity) / 100;
 
-            if (bgcolor) {
-                bgcolor = hexToRgb(bgcolor);
-                rule += "background-color: rgba("
-                    + bgcolor.r + ","
-                    + bgcolor.g + ","
-                    + bgcolor.b + ","
-                    + opacity + ");";
-            } else {
-                rule += "opacity :" + opacity + ";";
-            }
+        if (bgcolor && bgcolor !== 'none') {
+            alpha = (alpha) ? parseFloat(alpha) / 100 : 0;
+            bgcolor = hexToRgb(bgcolor);
+            rule += "background-color: rgba("
+                + bgcolor.r + ","
+                + bgcolor.g + ","
+                + bgcolor.b + ","
+                + alpha + ");";
         }
+
         return rule;
     }
     /**
