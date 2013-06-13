@@ -106,9 +106,12 @@ odf.OdfCanvas = (function () {
             while (sheet.cssRules.length > 0) {
                 sheet.deleteRule(0);
             }
-            sheet.insertRule('office|presentation draw|page {display:none;}', 0);
+            sheet.insertRule('#shadowContent draw|page {display:none;}', 0);
+            sheet.insertRule('office|presentation draw|page {display:none;}', 1);
+            sheet.insertRule("#shadowContent draw|page:nth-child(" +
+                position + ") {display:block;}", 2);
             sheet.insertRule("office|presentation draw|page:nth-child(" +
-                position + ") {display:block;}", 1);
+                position + ") {display:block;}", 3);
         }
         this.showFirstPage = function () {
             position = 1;
@@ -1058,6 +1061,7 @@ odf.OdfCanvas = (function () {
             // in the body first. Once the styling is handled, it can then be lifted out of the
             // ODF body and placed beside it, to not pollute the ODF dom.
             shadowContent = doc.createElementNS(element.namespaceURI, 'div');
+            shadowContent.id = "shadowContent";
             shadowContent.style.position = 'absolute';
             shadowContent.style.top = 0;
             shadowContent.style.left = 0;
