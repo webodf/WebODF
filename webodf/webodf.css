@@ -72,7 +72,7 @@ draw|page {
   position: relative;
   overflow: hidden;
 }
-presentation|notes {
+presentation|notes, presentation|footer-decl, presentation|date-time-decl {
     display: none;
 }
 @media print {

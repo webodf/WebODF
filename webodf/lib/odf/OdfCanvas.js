@@ -108,9 +108,9 @@ odf.OdfCanvas = (function () {
             }
             sheet.insertRule('#shadowContent draw|page {display:none;}', 0);
             sheet.insertRule('office|presentation draw|page {display:none;}', 1);
-            sheet.insertRule("#shadowContent draw|page:nth-child(" +
+            sheet.insertRule("#shadowContent draw|page:nth-of-type(" +
                 position + ") {display:block;}", 2);
-            sheet.insertRule("office|presentation draw|page:nth-child(" +
+            sheet.insertRule("office|presentation draw|page:nth-of-type(" +
                 position + ") {display:block;}", 3);
         }
         this.showFirstPage = function () {
