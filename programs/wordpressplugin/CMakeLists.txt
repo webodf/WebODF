@@ -1,7 +1,7 @@
 add_custom_command(
     OUTPUT ${WORDPRESSZIP}
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${WORDPRESSZIPDIR}
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${VIEWERBUILDDIR} ${WORDPRESSZIPDIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${VIEWERBUILDDIR} ${WORDPRESSZIPDIR}/wv
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/readme.txt ${WORDPRESSZIPDIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/webodf-viewer.php ${WORDPRESSZIPDIR}
     # zip using javascript code running in node.js
