@@ -8,6 +8,7 @@ add_custom_command(
     COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools/zipdir.js
         ${WORDPRESSZIPDIR}
         ${WORDPRESSZIP}
+        notopdir
     DEPENDS NodeJS
         ../../webodf/tools/zipdir.js
         readme.txt
