@@ -198,15 +198,15 @@ odf.Style2CSS = function Style2CSS() {
 
         /**@const@type{!Array.<!Array.<!string>>}*/
         pageSizePropertySimpleMapping = [
-            [ fons, 'page-width', 'width' ]
-            //TODO: This is temporarily disabled till we have pagination
-            //[ fons, 'page-height', 'height' ]
+            [ fons, 'page-width', 'width' ],
+            [ fons, 'page-height', 'height' ]
         ],
 
         // A font-face declaration map, to be populated once style2css is called.
         /**@type{!Object.<string,string>}*/
         fontFaceDeclsMap = {},
-        utils = new odf.OdfUtils();
+        utils = new odf.OdfUtils(),
+        documentType;
 
     // helper functions
     /**
@@ -676,9 +676,11 @@ odf.Style2CSS = function Style2CSS() {
      */
     function addPageStyleRules(sheet, node) {
         var rule = '', imageProps, url, element,
-            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0],
-            contentLayoutRule,
-            pageSizeRule;
+            contentLayoutRule = '',
+            pageSizeRule = '',
+            height,
+            width,
+            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0];
 
         rule += applySimpleMapping(props, pageContentPropertySimpleMapping);
         imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
@@ -691,15 +693,33 @@ odf.Style2CSS = function Style2CSS() {
                 rule += applySimpleMapping(element, bgImageSimpleMapping);
             }
         }
-        contentLayoutRule = 'office|text {' + rule + '}';
-        rule = '';
 
-        rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
-        pageSizeRule = 'office|body {' + rule + '}';
+        if (documentType === 'presentation') {
+            contentLayoutRule = 'draw|page {' + rule + '}';
+            rule = '';
+            
+            height = parseFloat(props.getAttributeNS(fons, 'page-height'));
+            width = parseFloat(props.getAttributeNS(fons, 'page-width'));
+
+            if (height < width) {
+                rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
+                pageSizeRule = 'office|body, draw|page {' + rule + '}';
+            }
+        } else if (documentType === 'text') {
+            contentLayoutRule = 'office|text {' + rule + '}';
+            rule = '';
+
+            rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
+            pageSizeRule = 'office|body {' + rule + '}';
+        }
 
         try {
-            sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
-            sheet.insertRule(pageSizeRule, sheet.cssRules.length);
+            if (contentLayoutRule) {
+                sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
+            }
+            if (pageSizeRule) {
+                sheet.insertRule(pageSizeRule, sheet.cssRules.length);
+            }
         } catch (e) {
             throw e;
         }
@@ -778,14 +798,15 @@ odf.Style2CSS = function Style2CSS() {
     // elements
 
     /**
+     * @param {!string} doctype 
      * @param {!StyleSheet} stylesheet
      * @param {!Object.<string,string>} fontFaceMap
      * @param {!Element} styles
      * @param {!Element} autostyles
      * @return {undefined}
      */
-    this.style2css = function (stylesheet, fontFaceMap, styles, autostyles) {
-        var doc, styletree, tree, name, rule, family,
+    this.style2css = function (doctype, stylesheet, fontFaceMap, styles, autostyles) {
+        var doc, prefix, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
         // make stylesheet empty
         while (stylesheet.cssRules.length) {
@@ -813,6 +834,7 @@ odf.Style2CSS = function Style2CSS() {
         });
 
         fontFaceDeclsMap = fontFaceMap;
+        documentType = doctype;
 
         // add the various styles
         stylenodes = getStyleMap(styles);

@@ -305,19 +305,20 @@ odf.OdfCanvas = (function () {
     }
     /**
      * A new styles.xml has been loaded. Update the live document with it.
-     * @param {!Element} odfelement
+     * @param {!odf.OdfContainer} odfcontainer
      * @param {!odf.Formatting} formatting
      * @param {!HTMLStyleElement} stylesxmlcss
      * @return {undefined}
      **/
-    function handleStyles(odfelement, formatting, stylesxmlcss) {
+    function handleStyles(odfcontainer, formatting, stylesxmlcss) {
         // update the css translation of the styles
         var style2css = new odf.Style2CSS();
         style2css.style2css(
+            odfcontainer.getDocumentType(),
             stylesxmlcss.sheet,
             formatting.getFontMap(),
-            odfelement.styles,
-            odfelement.automaticStyles
+            odfcontainer.rootElement.styles,
+            odfcontainer.rootElement.automaticStyles
         );
     }
 
@@ -955,6 +956,7 @@ odf.OdfCanvas = (function () {
                 handlers[i].apply(null, args);
             }
         }
+        document.fix = fixContainerSize;
         function fixContainerSize() {
             var sizer = element.firstChild,
                 odfdoc = sizer.firstChild;
@@ -1038,7 +1040,7 @@ odf.OdfCanvas = (function () {
 
                 formatting.setOdfContainer(odfcontainer);
                 handleFonts(odfcontainer, fontcss);
-                handleStyles(odfnode, formatting, stylesxmlcss);
+                handleStyles(odfcontainer, formatting, stylesxmlcss);
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(odfcontainer, odfnode);
@@ -1072,7 +1074,7 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.refreshCSS = function () {
-            handleStyles(odfcontainer.rootElement, formatting, stylesxmlcss);
+            handleStyles(odfcontainer, formatting, stylesxmlcss);
             // different styles means different layout, thus different sizes:
             fixContainerSize();
         };

@@ -69,9 +69,6 @@ office|presentation {
 }
 draw|page {
   display: block;
-  height: 21cm;
-  width: 28cm;
-  margin: 3px;
   position: relative;
   overflow: hidden;
 }

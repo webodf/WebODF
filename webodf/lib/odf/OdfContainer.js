@@ -674,6 +674,16 @@ odf.OdfContainer = (function () {
             });
         }
         // public functions
+        this.getDocumentType = function () {
+            var body = self.rootElement.body;
+
+            return (
+                body.getElementsByTagNameNS(officens, 'text')[0] ||
+                    body.getElementsByTagNameNS(officens, 'presentation')[0] ||
+                    body.getElementsByTagNameNS(officens, 'spreadsheet')[0]
+            ).localName;
+            
+        };
         /**
          * Open file and parse it. Return the XML Node. Return the root node of
          * the file or null if this is not possible.
