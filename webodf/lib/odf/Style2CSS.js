@@ -208,11 +208,10 @@ odf.Style2CSS = function Style2CSS() {
 
     // helper functions
     /**
-     * @param {!Document} doc
      * @param {!Element} stylesnode
      * @return {!Object}
      */
-    function getStyleMap(doc, stylesnode) {
+    function getStyleMap(stylesnode) {
         // put all style elements in a hash map by family and name
         var stylemap = {}, node, name, family, style;
         if (!stylesnode) {
@@ -268,8 +267,7 @@ odf.Style2CSS = function Style2CSS() {
         if (stylestree[name]) {
             return stylestree[name];
         }
-        var derivedStyles = stylestree.derivedStyles,
-            n,
+        var n,
             style;
         for (n in stylestree) {
             if (stylestree.hasOwnProperty(n)) {
@@ -335,8 +333,7 @@ odf.Style2CSS = function Style2CSS() {
     function createSelector(family, name) {
         var prefix = familynamespaceprefixes[family],
             namepart,
-            selector = "",
-            first = true;
+            selector;
         if (prefix === null) {
             return null;
         }
@@ -573,12 +570,9 @@ odf.Style2CSS = function Style2CSS() {
         var style = node.getAttributeNS(stylens, "num-format"),
             suffix = node.getAttributeNS(stylens, "num-suffix"),
             prefix = node.getAttributeNS(stylens, "num-prefix"),
-            rule = "",
             stylemap = {'1': 'decimal', 'a': 'lower-latin', 'A': 'upper-latin',
                 'i': 'lower-roman', 'I': 'upper-roman'},
-            content = "";
-
-        content = prefix || "";
+            content = prefix || "";
 
         if (stylemap.hasOwnProperty(style)) {
             content += " counter(list, " + stylemap[style] + ")";
@@ -590,8 +584,7 @@ odf.Style2CSS = function Style2CSS() {
         if (suffix) {
             content += " '" + suffix + "'";
         }
-        rule = "content: " + content + ";";
-        return rule;
+        return "content: " + content + ";";
     }
     /**
      * @param {!Element} node
@@ -606,8 +599,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getBulletRule(node) {
-        var rule = "",
-            bulletChar = node.getAttributeNS(textns, "bullet-char");
+        var bulletChar = node.getAttributeNS(textns, "bullet-char");
         return "content: '" + bulletChar + "';";
     }
     /**
@@ -627,7 +619,7 @@ odf.Style2CSS = function Style2CSS() {
             bulletIndent,
             listIndent,
             bulletWidth,
-            rule = "";
+            rule;
 
         if (listLevelLabelAlign) {
             labelAlignAttr = listLevelLabelAlign.attributes;
@@ -682,9 +674,9 @@ odf.Style2CSS = function Style2CSS() {
      */
     function addPageStyleRules(sheet, node) {
         var rule = '', imageProps, url, element,
-            contentLayoutRule = '',
-            pageSizeRule = '',
-            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0];
+            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0],
+            contentLayoutRule,
+            pageSizeRule;
 
         rule += applySimpleMapping(props, pageContentPropertySimpleMapping);
         imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
@@ -791,7 +783,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {undefined}
      */
     this.style2css = function (stylesheet, fontFaceMap, styles, autostyles) {
-        var doc, prefix, styletree, tree, name, rule, family,
+        var doc, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
         // make stylesheet empty
         while (stylesheet.cssRules.length) {
@@ -821,8 +813,8 @@ odf.Style2CSS = function Style2CSS() {
         fontFaceDeclsMap = fontFaceMap;
 
         // add the various styles
-        stylenodes = getStyleMap(doc, styles);
-        styleautonodes = getStyleMap(doc, autostyles);
+        stylenodes = getStyleMap(styles);
+        styleautonodes = getStyleMap(autostyles);
         styletree = {};
         for (family in familynamespaceprefixes) {
             if (familynamespaceprefixes.hasOwnProperty(family)) {

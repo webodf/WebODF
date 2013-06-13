@@ -363,30 +363,8 @@ odf.StyleInfo = function StyleInfo() {
     function canElementHaveStyle(family, element) {
         var elname = elements[element.localName],
             elns = elname && elname[element.namespaceURI],
-            length = elns ? elns.length : 0,
-            i;
+            length = elns ? elns.length : 0;
         return length > 0;
-    }
-
-    /**
-     * @param {!string} family
-     * @param {!Element} element
-     * @return {{name:string,family:string}|null}
-     */
-    function getStyleRef(family, element) {
-        var elname = elements[element.localName],
-            elns = elname && elname[element.namespaceURI],
-            length = elns ? elns.length : 0,
-            i, attr;
-        for (i = 0; i < length; i += 1) {
-            attr = element.getAttributeNS(elns[i].ns, elns[i].localname);
-/*
-            if (attr) { // a style has been found!
-                return attr;
-            }
-*/
-        }
-        return null;
     }
 
     /**

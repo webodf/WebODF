@@ -35,6 +35,7 @@
 /*global odf, runtime, console*/
 
 runtime.loadClass("odf.OdfContainer");
+runtime.loadClass("odf.StyleInfo");
 
 /**
  * @constructor
@@ -47,88 +48,26 @@ odf.Formatting = function Formatting() {
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens;
 
     /**
-     * Class that iterates over all elements that are part of the range.
-     * @constructor
-     * @param {!Range} range
-     * @return {undefined}
+     * Recursively merge properties of two objects
+     * @param {!Object} destination
+     * @param {!Object} source
+     * @return {!Object}
      */
-    function RangeElementIterator(range) {
-        /**
-         * @param {Node} parent
-         * @param {!number} n
-         * @return {Node}
-         */
-        function getNthChild(parent, n) {
-            var c = parent && parent.firstChild;
-            while (c && n) {
-                c = c.nextSibling;
-                n -= 1;
-            }
-            return c;
-        }
-        var start = getNthChild(range.startContainer, range.startOffset),
-            end = getNthChild(range.endContainer, range.endOffset),
-            current = start;
-        /**
-         * @return {Element|null}
-         */
-        this.next = function () {
-            var c = current;
-            if (c === null) {
-                return c;
-            }
-            return null;
-        };
-    }
-
-    /**
-     * Recursively merge properties of two objects 
-     */
-    function mergeRecursive(obj1, obj2) {
-        var p;
-        for (p in obj2) {
-            if (obj2.hasOwnProperty(p)) {
-                try {
-                    // Property in destination object set; update its value.
-                    if (obj2[p].constructor === Object) {
-                        obj1[p] = mergeRecursive(obj1[p], obj2[p]);
-                    } else {
-                        obj1[p] = obj2[p];
-                    }
-                } catch (e) {
-                    // Property in destination object not set; create it and set its value.
-                    obj1[p] = obj2[p];
+    function mergeRecursive(destination, source) {
+        Object.keys(source).forEach(function(p) {
+            try {
+                // Property in destination object set; update its value.
+                if (source[p].constructor === Object) {
+                    destination[p] = mergeRecursive(destination[p], source[p]);
+                } else {
+                    destination[p] = source[p];
                 }
+            } catch (e) {
+                // Property in destination object not set; create it and set its value.
+                destination[p] = source[p];
             }
-        }
-        return obj1;
-    }
-
-    /**
-     * @param {!Element} element
-     * @return {Element}
-     */
-    function getParentStyle(element) {
-        var n = element.firstChild, e;
-        if (n.nodeType === 1) { // Element
-            e = /**@type{Element}*/(n);
-            return e;
-        }
-        return null;
-    }
-    /**
-     * @param {!Range} range
-     * @return {!Array.<!Element>}
-     */
-    function getParagraphStyles(range) {
-        var iter = new RangeElementIterator(range), e, styles = [];
-        e = iter.next();
-        while (e) {
-            if (styleInfo.canElementHaveStyle("paragraph", e)) {
-                styles.push(e);
-            }
-        }
-        return styles;
+        });
+        return destination;
     }
 
     /**
@@ -254,7 +193,7 @@ odf.Formatting = function Formatting() {
     /**
      * Returns a JSON representation of the style attributes of a given style element
      * @param {!Node} styleNode
-     * @return {Object}
+     * @return {!Object}
      */
     function getStyleAttributes(styleNode) {
         var i,
@@ -278,11 +217,10 @@ odf.Formatting = function Formatting() {
      * inherited from it's ancestry - up to and including the default style for the family.
      * @param {!Element} styleListElement
      * @param {!Node} styleNode
-     * @return {Object}
+     * @return {!Object}
      */
     function getInheritedStyleAttributes(styleListElement, styleNode) {
-        var i,
-            parentStyleName,
+        var parentStyleName,
             propertiesMap = {},
             inheritedPropertiesMap = {},
             node = styleNode;
@@ -290,6 +228,7 @@ odf.Formatting = function Formatting() {
         // Iterate through the style ancestry
         while (node) {
             propertiesMap = getStyleAttributes(node);
+            // All child properties should override any matching parent properties
             inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
 
             parentStyleName = node.getAttributeNS(stylens, 'parent-style-name');
@@ -301,9 +240,12 @@ odf.Formatting = function Formatting() {
         }
 
         // Now incorporate attributes from the default style
-        propertiesMap = getStyleAttributes(getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(stylens, 'family')));
-        inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
-
+        node = getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(stylens, 'family'));
+        if(node) {
+            propertiesMap = getStyleAttributes(node);
+            // All child properties should override any matching parent properties
+            inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
+        }
         return inheritedPropertiesMap;
     }
 

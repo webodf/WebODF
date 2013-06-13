@@ -404,7 +404,7 @@ NodeIterator.prototype.detach = function () {"use strict"; };
 /**
  * @param {!Node} root
  * @param {!number} whatToShow
- * @param {function(!Node):boolean=} filter
+ * @param {function(!Node):number=} filter
  * @param {boolean=} entityReferenceExpansion
  * @return {!TreeWalker}
  */
@@ -412,7 +412,7 @@ Document.prototype.createTreeWalker = function (root, whatToShow, filter, entity
 /**
  * @param {!Node} root
  * @param {!number} whatToShow
- * @param {function(!Node):boolean=} filter
+ * @param {function(!Node):number=} filter
  * @param {boolean=} entityReferenceExpansion
  * @return {!NodeIterator}
  */
