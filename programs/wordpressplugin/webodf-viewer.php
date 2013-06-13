@@ -2,8 +2,8 @@
 
 /*
 Plugin Name: WebODF Viewer
-Version: 0.1
-Plugin URI: http://kogmbh.com/webodf/wordpress/
+Version: 0.2
+Plugin URI: http://webodf.org/
 Description: Embed ODF in Wordpress
 Author: Tobias Hintze
 Author URI: http://kogmbh.com
@@ -113,22 +113,35 @@ function mime_type_icon($icon_uri, $mime_type, $post_id) {
 add_filter( 'wp_mime_type_icon', 'mime_type_icon', 10, 3);
 
 function webodf_media_send_to_editor($html, $send_id, $attachment) {
-	// if this POST did not came from our "special button", just call super()
-	if ($_POST["send"][$send_id] != 'Insert WebODF Viewer') {
-		return media_send_to_editor($html);
+	$pid = $attachment['id'];
+
+	$post = get_post($pid, ARRAY_A);
+	if (preg_match('/^application\/vnd\.oasis\.opendocument/', $post['post_mime_type'])) {
+			// place shortcode
+			preg_match('/^http:\/\/[^\/]*(\/.*)$/', $attachment['url'], $matches);
+			$document_url = $matches[1];
+			return "[webodf_viewer ".$document_url."]";
 	}
-	// place shortcode
-	return "[webodf_viewer ".$attachment['webodf_document_url']."]";
+	return $html;
 }
 add_filter( 'media_send_to_editor', 'webodf_media_send_to_editor', 10, 3);
 
 
+/*
+	TODO: introduce a smart switch on [post | attachment] scope
+		to skip webodf-embedding... (user might to simply link
+		some documents)
+		For now: always use webodf for embedding, if this plugin
+		is enabled.
+
 function field_filter($fields, $post_object) {
+	if ($post_object->post_parent > 0) {
+		// inside a post
+		$use_webodf = get_post_meta($post_object['post_parent'], 'use_webodf');
+	}
 
 	if (preg_match('/^application\/vnd\.oasis\.opendocument\.(text|presentation|spreadsheet)/',
 				$post_object->post_mime_type)) {
-		$webodf_button_code = "<input type='submit' class='button-primary' ".
-			"name='send[$post_object->ID]' value='Insert WebODF Viewer'/>";
 
 		// insert document path
 		preg_match('/^http:\/\/[^\/]*(\/.*)$/', $post_object->guid, $matches);
@@ -137,15 +150,45 @@ function field_filter($fields, $post_object) {
 			"input" => "text",
 			"value" => $matches[1]
 		);
-
-		// insert our "special button"
-		$fields["webodf_insert_submit"] = array(
-			"tr" => "<tr class='submit'><td></td><td class='savesend'>$webodf_button_code</td></tr>\n"
-		);
+		$fields["webodf_embed"] = array(
+				"input" => "html",
+				"label" => "Embed with WebODF",
+				"html" => '<label for="attachments-'.$post_object->ID.'-webodf_embed"> '.
+				'<input type="checkbox" id="attachments-"'.$post_object->ID.'-webodf_embed" '.
+				' name="attachments['.$post_object->ID.'][webodf_embed]" value="1" checked="checked"/>Use WebODF?</label>'
+				);
 	}
 	return $fields;
 }
 add_filter('attachment_fields_to_edit', 'field_filter', 10, 2);
+
+function field_save_legacy( $post, $attachment ) {
+	$postid = $post['post_ID'];
+	if (! $postid) $postid = $post['ID'];
+	return field_save($postid);
+}
+
+function field_save( $post ) {
+	$postid = $post;
+	
+	if (! empty($_POST['attachments'])) {
+		if ($_POST['attachments'][$postid]['webodf_embed']) {
+			update_post_meta($postid, 'webodf_embed', "yes");
+		} else {
+			update_post_meta($postid, 'webodf_embed', "no");
+		}
+	}
+	return $post;
+}
+
+// legacy (wp < 3.5.1):
+add_filter('attachment_fields_to_save', 'field_save_legacy', 10, 2);
+
+// recent:
+add_filter('add_attachment', 'field_save', 10, 1);
+add_filter('edit_attachment', 'field_save', 10, 1);
+
+*/
 
 function webodf_shortcode_handler($args) {
 	global $this_plugin_url;

@@ -2,7 +2,7 @@
 Contributors: Tobias Hintze
 Tags: ODF, open document, WebODF
 Requires at least: 3.2
-Tested up to: 3.4.2
+Tested up to: 3.5.1
 Stable tag: 1.0
 
 
@@ -36,4 +36,8 @@ no screenshots available (yet)
 = 0.1 =
 
 * first version hacked together.
+
+= 0.2 =
+
+* made it work with recent 3.5.1 (which changed API around attachment-fields)
 
