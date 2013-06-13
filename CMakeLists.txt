@@ -7,6 +7,12 @@ if(WIN32)
 else()
     cmake_minimum_required(VERSION 2.8.2)
 endif(WIN32)
+include(ProcessorCount OPTIONAL RESULT_VARIABLE ProcessorCountFound)
+if (ProcessorCountFound)
+  ProcessorCount(NProcessors)
+else (ProcessorCountFound)
+  set(NProcessors 1)
+endif (ProcessorCountFound)
 
 # At this point, the version number that is used throughout is defined
 set(WEBODF_VERSION 0.4.2)
@@ -111,6 +117,7 @@ else(WIN32)
         URL_MD5 a47a9141567dd591eec486db05b09e1c
         CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
         INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
+        BUILD_COMMAND make -j${NProcessors}
         BUILD_IN_SOURCE 1
     )
 
@@ -146,6 +153,7 @@ else(WIN32)
         URL_MD5 a70d79a6759367fbcc0bcc18d6866ff3
         PATCH_COMMAND  cat ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch | patch -p0
         CONFIGURE_COMMAND "./configure"
+        BUILD_COMMAND make -j${NProcessors}
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
