@@ -54,6 +54,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const@type{!Object.<string,!string>}*/
         familynamespaceprefixes = {
             'graphic': 'draw',
+            'drawing-page': 'draw',
             'paragraph': 'text',
             'presentation': 'presentation',
             'ruby': 'text',
@@ -79,6 +80,10 @@ odf.Style2CSS = function Style2CSS() {
                 'table-index-entry-template', 'table-of-content-entry-template',
                 'user-index-entry-template'],
             'presentation': ['caption', 'circle', 'connector', 'control',
+                'custom-shape', 'ellipse', 'frame', 'g', 'line', 'measure',
+                'page-thumbnail', 'path', 'polygon', 'polyline', 'rect',
+                'regular-polygon'],
+            'drawing-page': ['caption', 'circle', 'connector', 'control', 'page',
                 'custom-shape', 'ellipse', 'frame', 'g', 'line', 'measure',
                 'page-thumbnail', 'path', 'polygon', 'polyline', 'rect',
                 'regular-polygon'],
@@ -467,13 +472,46 @@ odf.Style2CSS = function Style2CSS() {
         }
         return rule;
     }
+
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        var result,
+            shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+
+        result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+ 
    /**
      * @param {!Element} props
      * @return {!string}
      */
     function getGraphicProperties(props) {
-        var rule = '';
+        var rule = '', opacity, bgcolor;
         rule += applySimpleMapping(props, graphicPropertySimpleMapping);
+        opacity = props.getAttributeNS(drawns, 'opacity');
+        bgcolor = props.getAttributeNS(drawns, 'fill-color');
+        if (opacity) {
+            opacity = parseFloat(opacity) / 100;
+
+            if (bgcolor) {
+                bgcolor = hexToRgb(bgcolor);
+                rule += "background-color: rgba("
+                    + bgcolor.r + ","
+                    + bgcolor.g + ","
+                    + bgcolor.b + ","
+                    + opacity + ");";
+            } else {
+                rule += "opacity :" + opacity + ";";
+            }
+        }
         return rule;
     }
     /**
@@ -532,6 +570,10 @@ odf.Style2CSS = function Style2CSS() {
             rule += getParagraphProperties(properties);
         }
         properties = getDirectChild(node, stylens, 'graphic-properties');
+        if (properties) {
+            rule += getGraphicProperties(properties);
+        }
+        properties = getDirectChild(node, stylens, 'drawing-page-properties');
         if (properties) {
             rule += getGraphicProperties(properties);
         }
