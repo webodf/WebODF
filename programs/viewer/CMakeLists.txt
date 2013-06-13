@@ -10,18 +10,18 @@ set(VIEWER_IMAGES
 	images/toolbarButton-zoomOut.png
 )
 
-set (TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
+set (TOOLSDIR ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
 
 # amalgamation:
-# (write js code into into viewer-amalgamation.html)
+# (write js code into into viewer-amalgamation.html), currently unused
 add_custom_command(
 	OUTPUT viewer-amalgamation.html
-	COMMAND ${NODE} ARGS ${RUNTIME} ${TOOLS}/replaceByFileContents.js
+	COMMAND ${NODE} ARGS ${RUNTIME} ${TOOLSDIR}/replaceByFileContents.js
 		${CMAKE_CURRENT_SOURCE_DIR}/index-amalgamation-template.html
 		viewer-amalgamation.html
 		@VIEWER_JS@ ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
 		@WEBODF_JS@ ${CMAKE_BINARY_DIR}/webodf/webodf.js
-    DEPENDS NodeJS ${TOOLS}/replaceByFileContents.js
+    DEPENDS NodeJS ${TOOLSDIR}/replaceByFileContents.js
         viewer.js
         webodf.js-target
         index-amalgamation-template.html
@@ -40,3 +40,21 @@ add_custom_command(
 	DEPENDS ClosureCompiler viewer.js
 	)
 add_custom_target(viewer-minimized.js-target DEPENDS viewer-minimized.js)
+
+add_custom_command(
+    OUTPUT ${VIEWERBUILDDIR}
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${VIEWERBUILDDIR}
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${VIEWERBUILDDIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/images ${VIEWERBUILDDIR}/images
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/viewer.css ${VIEWERBUILDDIR}/viewer.css
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/../../webodf/webodf.js ${VIEWERBUILDDIR}/webodf.js
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js ${VIEWERBUILDDIR}/viewer.js
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/index.html ${VIEWERBUILDDIR}/index.html
+    DEPENDS
+        ${VIEWER_IMAGES}
+        viewer.css
+        index.html
+        webodf.js-target
+        viewer-minimized.js-target
+)
+add_custom_target(viewerbuilddir-target DEPENDS ${VIEWERBUILDDIR})

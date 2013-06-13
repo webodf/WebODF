@@ -1,13 +1,19 @@
-
-set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/lib/runtime.js)
-set (TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
-
-set (VIEWER ${CMAKE_CURRENT_BINARY_DIR}/../viewer)
-
-FILE( GLOB WP_VIEWER_IMAGES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/../viewer ${CMAKE_CURRENT_SOURCE_DIR}/../viewer/images/* )
-FOREACH(img ${WP_VIEWER_IMAGES})
-	LIST(APPEND WP_VIEWER_IMAGES_WVPREFIX wv/${img})
-ENDFOREACH(img)
-
-add_custom_target(wordpressplugin DEPENDS programs_wordpressplugin)
+add_custom_command(
+    OUTPUT ${WORDPRESSZIP}
+	COMMAND ${CMAKE_COMMAND} -E remove_directory ${WORDPRESSZIPDIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${VIEWERBUILDDIR} ${WORDPRESSZIPDIR}
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/readme.txt ${WORDPRESSZIPDIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/webodf-viewer.php ${WORDPRESSZIPDIR}
+    # zip using javascript code running in node.js
+    COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools/zipdir.js
+        ${WORDPRESSZIPDIR}
+        ${WORDPRESSZIP}
+    DEPENDS NodeJS
+        ../../webodf/tools/zipdir.js
+        readme.txt
+        webodf-viewer.php
+        viewerbuilddir-target
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+add_custom_target(wordpress-target DEPENDS ${WORDPRESSZIP})
 
