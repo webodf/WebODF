@@ -290,9 +290,11 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/textns  = odf.Namespaces.textns,
         /**@const@type {!string}*/xlinkns = odf.Namespaces.xlinkns,
         /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
+        /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@const@type {!string}*/window = runtime.getWindow(),
         xpath = new xmldom.XPath(),
-        utils = new odf.OdfUtils();
+        utils = new odf.OdfUtils(),
+        shadowContent;
 
     /**
      * @param {!Element} element
@@ -334,12 +336,13 @@ odf.OdfCanvas = (function () {
     }
 
     /**
+     * @param {!odf.OdfContainer odfContainer
      * @param {!string} id
      * @param {!Element} frame
      * @param {!StyleSheet} stylesheet
      * @return {undefined}
      **/
-    function setFramePosition(id, frame, stylesheet) {
+    function setFramePosition(odfContainer, id, frame, stylesheet) {
         frame.setAttribute('styleid', id);
         var rule,
             anchor = frame.getAttributeNS(textns, 'anchor-type'),
@@ -348,7 +351,40 @@ odf.OdfCanvas = (function () {
             width = frame.getAttributeNS(svgns, 'width'),
             height = frame.getAttributeNS(svgns, 'height'),
             minheight = frame.getAttributeNS(fons, 'min-height'),
-            minwidth = frame.getAttributeNS(fons, 'min-width');
+            minwidth = frame.getAttributeNS(fons, 'min-width'),
+            masterPageName = frame.getAttributeNS(drawns, 'master-page-name'),
+            masterStyles,
+            masterPages = null,
+            masterPage = null,
+            i,
+            clonedPage,
+            node;
+        
+        if (masterPageName) {
+            masterStyles = odfContainer.rootElement.masterStyles;
+            masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page');
+            for (i = 0; i < masterPages.length; i += 1) {
+                if (masterPages[i].getAttributeNS(stylens, 'name') === masterPageName) {
+                    masterPage = masterPages[i];
+                    break;
+                }
+            }
+            if (masterPage) {
+                clonedPage = document.createElementNS(drawns, 'draw:page');
+                clonedPage.setAttributeNS(drawns, 'draw:name', masterPage.getAttributeNS(stylens, 'name'));
+                node = masterPage.firstChild;
+                while (node) {
+                    if (node.getAttributeNS(presentationns, 'placeholder') !== 'true') {
+                        clonedPage.appendChild(node.cloneNode(true));
+                    }
+                    node = node.nextSibling;
+                }
+
+                shadowContent.appendChild(clonedPage);
+
+                setFramePosition(odfContainer, id, clonedPage, stylesheet);
+            }
+        }
         if (anchor === "as-char") {
             rule = 'display: inline-block;';
         } else if (anchor || x || y) {
@@ -607,7 +643,7 @@ odf.OdfCanvas = (function () {
         // adjust all the frame positions
         for (i = 0; i < frames.length; i += 1) {
             node = frames[i];
-            setFramePosition('frame' + String(i), node, stylesheet);
+            setFramePosition(container, 'frame' + String(i), node, stylesheet);
         }
         formatParagraphAnchors(odfbody);
     }
@@ -998,7 +1034,6 @@ odf.OdfCanvas = (function () {
          **/
         function handleContent(container, odfnode) {
             var css = positioncss.sheet, sizer;
-            modifyImages(container, odfnode.body, css);
 /*
             slidecssindex = css.insertRule(
                 'office|presentation draw|page:nth-child(1n) {display:block;}',
@@ -1008,22 +1043,35 @@ odf.OdfCanvas = (function () {
             // FIXME: this is a hack to have a defined background now
             // should be removed as soon as we have sane background
             // handling for pages
-            css.insertRule('draw|page { background-color:#fff; }',
-                css.cssRules.length);
 
             // only append the content at the end
             clear(element);
+
             sizer = doc.createElementNS(element.namespaceURI, 'div');
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
+
+            // A "Shadow Content" div. This will contain stuff like pages extracted from
+            // <style:master-page>. These need to be nicely styled, so we will populate this 
+            // in the body first. Once the styling is handled, it can then be lifted out of the
+            // ODF body and placed beside it, to not pollute the ODF dom.
+            shadowContent = doc.createElementNS(element.namespaceURI, 'div');
+            shadowContent.style.position = 'absolute';
+            shadowContent.style.top = 0;
+            shadowContent.style.left = 0;
+            odfnode.body.firstChild.appendChild(shadowContent);
+
+            modifyImages(container, odfnode.body, css);
             modifyTables(container, odfnode.body, css);
             modifyLinks(container, odfnode.body, css);
             expandSpaceElements(odfnode.body);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
             loadLists(container, odfnode.body, css);
+
+            sizer.insertBefore(shadowContent, sizer.firstChild);
             fixContainerSize();
         }
         /**
