@@ -133,6 +133,7 @@ table|table-column {
 table|table-cell {
   width: 0.889in;
   display: table-cell;
+  word-break: break-all; /* prevent long words from extending out the table cell */
 }
 draw|frame {
   display: block;
