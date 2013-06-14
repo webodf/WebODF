@@ -85,7 +85,8 @@ core.UnitTest.cleanupTestAreaDiv = function () {
  */
 core.UnitTestRunner = function UnitTestRunner() {
     "use strict";
-    var failedTests = 0;
+    var failedTests = 0,
+        areObjectsEqual;
     function debug(msg) {
         runtime.log(msg);
     }
@@ -125,6 +126,9 @@ core.UnitTestRunner = function UnitTestRunner() {
         if (Object.prototype.toString.call(expected) ===
                 Object.prototype.toString.call([])) {
             return areArraysEqual(actual, expected);
+        }
+        if (typeof expected === "object" && typeof actual === "object") {
+            return areObjectsEqual(expected, actual);
         }
         return false;
     }
@@ -193,6 +197,16 @@ core.UnitTestRunner = function UnitTestRunner() {
     function shouldBeNull(t, a) {
         shouldBe(t, a, "null");
     }
+
+    areObjectsEqual = function(a, b) {
+        var akeys = Object.keys(a),
+            bkeys = Object.keys(b);
+        akeys.sort();
+        bkeys.sort();
+        return areArraysEqual(akeys, bkeys)
+            && Object.keys(a).every(function(key) { return isResultCorrect(a[key], b[key]); });
+    };
+
     this.shouldBeNull = shouldBeNull;
     this.shouldBeNonNull = shouldBeNonNull;
     this.shouldBe = shouldBe;

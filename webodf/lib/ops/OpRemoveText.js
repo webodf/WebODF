@@ -42,7 +42,8 @@
 ops.OpRemoveText = function OpRemoveText() {
     "use strict";
 
-    var memberid, timestamp, position, length, text, odfUtils;
+    var memberid, timestamp, position, length, text, odfUtils,
+        editinfons = 'urn:webodf:names:editinfo';
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -104,7 +105,7 @@ ops.OpRemoveText = function OpRemoveText() {
             isEmptyNode = (child.localName === "s" || child.localName === "span") && child.textContent.length === 0;
             if (child.localName !== 'editinfo' && !isEmptyNode) {
                 if (prepend) {
-                    firstEditInfo = first.getElementsByTagNameNS('editinfo')[0];
+                    firstEditInfo = first.getElementsByTagNameNS(editinfons, 'editinfo')[0];
                     if (firstEditInfo) {
                         first.insertBefore(child, firstEditInfo);
                     } else {
