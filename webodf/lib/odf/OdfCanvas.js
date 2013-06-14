@@ -363,6 +363,8 @@ odf.OdfCanvas = (function () {
             j,
             clonedPage,
             clonedNode,
+            pageNumber = 0,
+            pageNumberContainer,
             node;
         
         if (masterPageName) {
@@ -390,7 +392,15 @@ odf.OdfCanvas = (function () {
                 }
 
                 shadowContent.appendChild(clonedPage);
+                pageNumber = shadowContent.getElementsByTagNameNS(drawns, 'page').length;
 
+                pageNumberContainer = clonedPage.getElementsByTagNameNS(textns, 'page-number')[0];
+                if (pageNumberContainer) {
+                    while (pageNumberContainer.firstChild) {
+                        pageNumberContainer.removeChild(pageNumberContainer.firstChild);
+                    }
+                    pageNumberContainer.appendChild(document.createTextNode(pageNumber));
+                }
                 setFramePosition(odfContainer, id, clonedPage, stylesheet);
             }
         }
