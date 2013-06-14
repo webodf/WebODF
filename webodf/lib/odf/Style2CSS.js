@@ -50,6 +50,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const@type{!string}*/ svgns = odf.Namespaces.svgns,
         /**@const@type{!string}*/ textns = odf.Namespaces.textns,
         /**@const@type{!string}*/ xlinkns = odf.Namespaces.xlinkns,
+        /**@const@type{!string}*/ presentationns = odf.Namespaces.presentationns,
 
         /**@const@type{!Object.<string,!string>}*/
         familynamespaceprefixes = {
@@ -521,6 +522,19 @@ odf.Style2CSS = function Style2CSS() {
 
         return rule;
     }
+   /**
+     * @param {!Element} props
+     * @return {!string}
+     */
+    function getDrawingPageProperties(props) {
+        var rule = '';
+
+        rule += applySimpleMapping(props, graphicPropertySimpleMapping);
+        if (props.getAttributeNS(presentationns, 'background-visible') === true) {
+            rule += "background: none;";
+        }
+        return rule;
+    }
     /**
      * @param {!Element} props
      * @return {!string}
@@ -582,7 +596,7 @@ odf.Style2CSS = function Style2CSS() {
         }
         properties = getDirectChild(node, stylens, 'drawing-page-properties');
         if (properties) {
-            rule += getGraphicProperties(properties);
+            rule += getDrawingPageProperties(properties);
         }
         properties = getDirectChild(node, stylens, 'table-cell-properties');
         if (properties) {
