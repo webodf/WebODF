@@ -360,7 +360,9 @@ odf.OdfCanvas = (function () {
             masterPages = null,
             masterPage = null,
             i,
+            j,
             clonedPage,
+            clonedNode,
             node;
         
         if (masterPageName) {
@@ -376,11 +378,15 @@ odf.OdfCanvas = (function () {
                 clonedPage = document.createElementNS(drawns, 'draw:page');
                 clonedPage.setAttributeNS(drawns, 'draw:name', masterPage.getAttributeNS(stylens, 'name'));
                 node = masterPage.firstChild;
+                j = 0;
                 while (node) {
                     if (node.getAttributeNS(presentationns, 'placeholder') !== 'true') {
-                        clonedPage.appendChild(node.cloneNode(true));
+                        clonedNode = node.cloneNode(true);
+                        clonedPage.appendChild(clonedNode);
+                        setFramePosition(odfContainer, id + '_' + j, clonedNode, stylesheet);
                     }
                     node = node.nextSibling;
+                    j += 1;
                 }
 
                 shadowContent.appendChild(clonedPage);
