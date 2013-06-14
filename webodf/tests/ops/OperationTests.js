@@ -58,7 +58,7 @@ ops.OperationTests = function OperationTests(runner) {
         for (i = 0; i < n; i += 1) {
             att = atts.item(i);
             value = att.value;
-            if (att.localName === "position") {
+            if (/length|number|position/.test(att.localName)) {
                 value = parseInt(value, 10);
             }
             op[att.localName] = value;
