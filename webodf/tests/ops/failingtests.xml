@@ -1,4 +1,12 @@
 <tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
+ <test name="InsertText_OneByOneBeforeExisting">
+  <before><office:text><text:p>T</text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="a"/>
+   <op optype="InsertText" position="1" text="b"/>
+  </ops>
+  <after><office:text><text:p>abT</text:p></office:text></after>
+ </test>
  <test name="Remove_deleteMergeBig">
   <before><office:text><text:p>zer<text:span>o</text:span></text:p><text:p></text:p><text:p></text:p><text:list><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p><text:span>one</text:span></text:p></text:list-item></text:list></office:text></before>
   <ops>
