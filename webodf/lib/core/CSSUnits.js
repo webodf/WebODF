@@ -78,4 +78,9 @@ core.CSSUnits = function CSSUnits() {
 
         return newMeasure.toString();
     };
+
+    this.getUnits = function (measure) {
+        return measure.substr(measure.length - 2, measure.length);
+    };
+
 };
