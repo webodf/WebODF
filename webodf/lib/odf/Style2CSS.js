@@ -553,7 +553,7 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         value = props.getAttributeNS(fons, 'line-height');
-        if (value !== 'normal') {
+        if (value && value !== 'normal') {
             if (value.indexOf('%') === -1) {
                 rule += 'line-height: ' + value + ';';
             } else {
