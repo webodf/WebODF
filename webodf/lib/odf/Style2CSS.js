@@ -128,7 +128,6 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'text-align', 'text-align' ],
             [ fons, 'text-indent', 'text-indent' ],
-            [ fons, 'line-height', 'line-height' ],
             [ fons, 'padding', 'padding' ],
             [ fons, 'padding-left', 'padding-left' ],
             [ fons, 'padding-right', 'padding-right' ],
@@ -540,7 +539,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getParagraphProperties(props) {
-        var rule = '', imageProps, url, element;
+        var rule = '', imageProps, url, element, value;
         rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
         imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
         if (imageProps.length > 0) {
@@ -552,6 +551,16 @@ odf.Style2CSS = function Style2CSS() {
                 rule += applySimpleMapping(element, bgImageSimpleMapping);
             }
         }
+
+        value = props.getAttributeNS(fons, 'line-height');
+        if (value !== 'normal') {
+            if (value.indexOf('%') === -1) {
+                rule += 'line-height: ' + value + ';';
+            } else {
+                rule += 'line-height: ' + parseFloat(value) / 100 + ';';
+            }
+        }
+
         return rule;
     }
 
