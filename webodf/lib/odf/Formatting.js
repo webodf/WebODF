@@ -323,7 +323,8 @@ odf.Formatting = function Formatting() {
     /**
      * Builds up a style chain for a given node by climbing up all parent nodes and checking for style information
      * @param {!Node} node
-     * @param {Object.<string, Array.<Object>>} collectedChains Dictionary to add any new style chains to
+     * @param {Object.<string, Array.<Object>>} [collectedChains=] Dictionary to add any new style chains to
+     * @returns {Array.<Object>|undefined}
      */
     function buildStyleChain(node, collectedChains) {
         var parent = node.nodeType === Node.TEXT_NODE ? node.parentNode : node,
@@ -350,8 +351,12 @@ odf.Formatting = function Formatting() {
                     });
                 });
             });
-            collectedChains[chainKey] = appliedStyles;
+            if (collectedChains) {
+                collectedChains[chainKey] = appliedStyles;
+            }
         }
+
+        return foundContainer ? appliedStyles : undefined;
     }
 
     /**
@@ -427,5 +432,21 @@ odf.Formatting = function Formatting() {
 
         nodeRange.detach();
         return styles;
+    };
+
+    /**
+     * Returns a the applied style to the current node
+     * @param {!Element} node
+     * @returns {Object|undefined}
+     */
+    this.getAppliedStylesForElement = function(node) {
+        var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
+            styleElementList = odfContainer.rootElement.styles,
+            styleChain,
+            appliedStyle;
+
+        styleChain = buildStyleChain(node);
+        appliedStyle = styleChain && calculateAppliedStyle(styleChain, automaticStyleElementList, styleElementList);
+        return appliedStyle;
     };
 };
