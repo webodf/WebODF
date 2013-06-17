@@ -258,6 +258,10 @@ define("webodf/editor/EditorSession", [
             return odtDocument.getCursorPosition(memberid);
         };
 
+        this.getCursorSelection = function() {
+            return odtDocument.getCursorSelection(memberid);
+        };
+
         this.getOdfCanvas = function () {
             return odtDocument.getOdfCanvas();
         };
@@ -270,8 +274,29 @@ define("webodf/editor/EditorSession", [
             return formatting.getAvailableParagraphStyles();
         };
 
+        this.getCurrentSelectionStyle = function() {
+            var cursor = odtDocument.getCursor(memberid),
+                selectedRange = cursor.getSelectedRange();
+            if (selectedRange.collapsed) {
+                return [formatting.getAppliedStylesForElement(cursor.getNode())];
+            }
+            return formatting.getAppliedStyles(selectedRange);
+        };
+
         this.getCurrentParagraphStyle = function () {
             return currentNamedStyleName;
+        };
+
+        this.formatSelection = function(value) {
+            var op = new ops.OpApplyStyle(),
+                selection = self.getCursorSelection();
+            op.init({
+                memberid: memberid,
+                position: selection.position,
+                length: selection.length,
+                info: value
+            });
+            session.enqueue(op);
         };
 
         this.setCurrentParagraphStyle = function (value) {

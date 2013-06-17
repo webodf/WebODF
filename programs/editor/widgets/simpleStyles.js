@@ -53,16 +53,12 @@ define("webodf/editor/widgets/simpleStyles",
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconBold",
                 onChange: function (checked) {
-                    var currentStyleName = editorSession.getCurrentParagraphStyle();
-                    if (checked) {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { fontWeight: 'bold' }
-                        });
-                    } else {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { fontWeight: 'normal' }
-                        });
-                    }
+                    var value = checked ? 'bold' : 'normal';
+                    editorSession.formatSelection({
+                        'style:text-properties': {
+                            'fo:font-weight' : value
+                        }
+                    });
                 }
             });
 
@@ -72,16 +68,12 @@ define("webodf/editor/widgets/simpleStyles",
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconItalic",
                 onChange: function (checked) {
-                    var currentStyleName = editorSession.getCurrentParagraphStyle();
-                    if (checked) {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { fontStyle: 'italic' }
-                        });
-                    } else {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { fontStyle: 'normal' }
-                        });
-                    }
+                    var value = checked ? 'italic' : 'normal';
+                    editorSession.formatSelection({
+                        'style:text-properties': {
+                            'fo:font-style' : value
+                        }
+                    });
                 }
             });
             underlineButton = new ToggleButton({
@@ -90,16 +82,12 @@ define("webodf/editor/widgets/simpleStyles",
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconUnderline",
                 onChange: function (checked) {
-                    var currentStyleName = editorSession.getCurrentParagraphStyle();
-                    if (checked) {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { underline: 'solid' }
-                        });
-                    } else {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { underline: 'none' }
-                        });
-                    }
+                    var value = checked ? 'solid' : 'none';
+                    editorSession.formatSelection({
+                        'style:text-properties': {
+                            'style:text-underline-style' : value
+                        }
+                    });
                 }
             });
             strikethroughButton = new ToggleButton({
@@ -108,49 +96,43 @@ define("webodf/editor/widgets/simpleStyles",
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
                 onChange: function (checked) {
-                    var currentStyleName = editorSession.getCurrentParagraphStyle();
-                    if (checked) {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { strikethrough: 'solid' }
-                        });
-                    } else {
-                        editorSession.updateParagraphStyle(currentStyleName, {
-                            textProperties: { strikethrough: 'none' }
-                        });
-                    }
+                    var value = checked ? 'solid' : 'none';
+                    editorSession.formatSelection({
+                        'style:text-properties': {
+                            'style:text-line-through-style' : value
+                        }
+                    });
                 }
             });
+            
+            function checkStyleButtons() {
+                var fontWeight, fontStyle, underline, strikethrough, appliedStyles;
+                appliedStyles = editorSession.getCurrentSelectionStyle();
 
-            function loadStyle(styleName) {
-                var fontWeight, fontStyle, underline, strikethrough, textProperties;
-                textProperties = editorSession.getParagraphStyleAttributes(styleName)['style:text-properties'];
+                fontWeight = false;
+                fontStyle = false;
+                underline = false;
+                strikethrough = false;
 
-                fontWeight = textProperties['fo:font-weight'];
-                fontStyle = textProperties['fo:font-style'];
-                underline = textProperties['style:text-underline-style'];
-                strikethrough = textProperties['style:text-line-through-style'];
+                appliedStyles.forEach(function(appliedStyle) {
+                    var textProperties = appliedStyle['style:text-properties'];
+                    fontWeight = fontWeight || textProperties['fo:font-weight'] === 'bold';
+                    fontStyle = fontStyle || textProperties['fo:font-style'] === 'italic';
+                    underline = underline || textProperties['style:text-underline-style'] === 'solid';
+                    strikethrough = strikethrough || textProperties['style:text-line-through-style'] === 'solid';
+                });
 
                 // The 3rd parameter is false to avoid firing onChange when setting the value
                 // programmatically.
-                boldButton.set('checked', fontWeight === 'bold' ? true : false, false);
-                italicButton.set('checked', fontStyle === 'italic' ? true : false, false);
-                underlineButton.set('checked', underline === 'solid' ? true : false, false);
-                strikethroughButton.set('checked', strikethrough === 'solid' ? true : false, false);
+                boldButton.set('checked', fontWeight, false);
+                italicButton.set('checked', fontStyle, false);
+                underlineButton.set('checked', underline, false);
+                strikethroughButton.set('checked', strikethrough, false);
             }
 
-            editorSession.subscribe(EditorSession.signalParagraphChanged, function (info) {
-                var currentStyleName;
-                if (info.type === 'style') {
-                    currentStyleName = editorSession.getCurrentParagraphStyle();
-                    loadStyle(currentStyleName);
-                }
-            });
-            editorSession.subscribe(EditorSession.signalParagraphStyleModified, function (styleName) {
-                var currentStyleName = editorSession.getCurrentParagraphStyle();
-                if (currentStyleName === styleName) {
-                    loadStyle(currentStyleName);
-                }
-            });
+            editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);
+            editorSession.subscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
+            editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
 
             widget.children = [boldButton, italicButton, underlineButton, strikethroughButton];
             widget.startup = function () {
