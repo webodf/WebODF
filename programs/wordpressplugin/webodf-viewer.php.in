@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: WebODF Viewer
-Version: 0.2
+Version: @WEBODF_VERSION@
 Plugin URI: http://webodf.org/
 Description: Embed ODF in Wordpress
 Author: Tobias Hintze
@@ -41,10 +41,10 @@ function WebODF_ViewerOptions() {
 		if (isset($_POST['height'])) {
 			$options['height'] = $_POST['height'];
 		}
-		
+
 		update_option('WebODF_ViewerSettings', $options);
 		$message = '<div class="updated"><p>width=' . $options['width'] .
-			' height=' . $options['height'] .'<strong>&nbsp; Options saved.</strong></p></div>';	
+			' height=' . $options['height'] .'<strong>&nbsp; Options saved.</strong></p></div>';
 	}
 	echo '<div class="wrap">';
 	echo '<h2>WebODF-Viewer Options</h2>';
@@ -65,7 +65,7 @@ function WebODF_ViewerOptions() {
 	echo '</form>';
 
 	echo '</div>';
-}	
+}
 
 function WebODF_ViewerLoadDefaults() {
 	$ret = array();
@@ -89,7 +89,7 @@ register_deactivation_hook(__FILE__,'WebODF_Viewer_deactivate');
 add_action('admin_menu', 'WebODF_ViewerAddPage');
 
 
-function mime_type_filter($mime_types) { 
+function mime_type_filter($mime_types) {
     $mime_types['odt'] = 'application/vnd.oasis.opendocument.text';
     $mime_types['odp'] = 'application/vnd.oasis.opendocument.presentation';
     $mime_types['ods'] = 'application/vnd.oasis.opendocument.spreadsheet';
@@ -170,7 +170,7 @@ function field_save_legacy( $post, $attachment ) {
 
 function field_save( $post ) {
 	$postid = $post;
-	
+
 	if (! empty($_POST['attachments'])) {
 		if ($_POST['attachments'][$postid]['webodf_embed']) {
 			update_post_meta($postid, 'webodf_embed', "yes");
