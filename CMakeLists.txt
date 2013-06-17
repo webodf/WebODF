@@ -29,10 +29,12 @@ else (CMAKE_MATCH_1)
     ARGS describe --tags --dirty
     OUTPUT_VARIABLE GIT_WEBODF_VERSION)
   # check version number from git
-  string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+(-[0-9]+-[0-9a-z]+(-dirty)?)?)$" WEBODF_VERSION "${GIT_WEBODF_VERSION}")
-  if (NOT CMAKE_MATCH_1)
+  string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+(-[0-9]+-[0-9a-z]+(-dirty)?)?)$" CHECKED_WEBODF_VERSION "${GIT_WEBODF_VERSION}")
+  if (CMAKE_MATCH_1)
+    set(WEBODF_VERSION ${CMAKE_MATCH_1})
+  else (CMAKE_MATCH_1)
     message(FATAL_ERROR "No valid version number found via git: ${GIT_WEBODF_VERSION}")
-  endif (NOT CMAKE_MATCH_1)
+  endif (CMAKE_MATCH_1)
 endif (CMAKE_MATCH_1)
 message(STATUS "WebODF version " ${WEBODF_VERSION})
 
