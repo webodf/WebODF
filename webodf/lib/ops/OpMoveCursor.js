@@ -42,17 +42,21 @@
 ops.OpMoveCursor = function OpMoveCursor() {
     "use strict";
 
-    var memberid, timestamp, number;
+    var memberid, timestamp, position;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
-        number = data.number;
+        position = data.position;
     };
 
+    // TODO: instead of calling odtDocument.getCursorPosition(...) and calculating the difference
+    // get the position directly and reinsert the cursor there
     this.execute = function (odtDocument) {
         var cursor = odtDocument.getCursor(memberid),
+            oldPosition = odtDocument.getCursorPosition(memberid),
             positionFilter = odtDocument.getPositionFilter(),
+            number = position - oldPosition,
             stepCounter,
             steps;
 
@@ -80,7 +84,7 @@ ops.OpMoveCursor = function OpMoveCursor() {
             optype: "MoveCursor",
             memberid: memberid,
             timestamp: timestamp,
-            number: number
+            position: position
         };
     };
 

@@ -111,6 +111,7 @@ gui.SessionController = (function () {
                 op,
                 node,
                 odtDocument = session.getOdtDocument(),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 canvasElement = odtDocument.getOdfCanvas().getElement();
 
@@ -161,18 +162,20 @@ gui.SessionController = (function () {
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, number: steps});
+                op.init({memberid: inputMemberId, position: oldPosition+steps});
                 session.enqueue(op);
             }
         }
 
         /**
+         * @param {!number} steps
          * @return {!ops.Operation}
          */
-        function createOpMoveCursor(number) {
-            var op = new ops.OpMoveCursor();
+        function createOpMoveCursor(steps) {
+            var op = new ops.OpMoveCursor(),
+                oldPosition = session.getOdtDocument().getCursorPosition(inputMemberId);
 
-            op.init({memberid: inputMemberId, number: number});
+            op.init({memberid: inputMemberId, position: oldPosition+steps});
             return op;
         }
 
@@ -181,7 +184,7 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorByUpKey() {
             var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 steps,
                 cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
                 paragraphNode = odtDocument.getParagraphElement(cursorNode),
@@ -191,7 +194,7 @@ gui.SessionController = (function () {
             steps = -odtDocument.getCursor(inputMemberId).getStepCounter().countLinesUpSteps(1, odtDocument.getPositionFilter());
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, number: steps});
+                op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
             return op;
         }
@@ -201,7 +204,7 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorByDownKey() {
             var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 steps,
                 cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
                 paragraphNode = odtDocument.getParagraphElement(cursorNode),
@@ -211,7 +214,7 @@ gui.SessionController = (function () {
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesDownSteps(1, odtDocument.getPositionFilter());
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, number: steps});
+                op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
             return op;
         }
@@ -223,6 +226,7 @@ gui.SessionController = (function () {
         function createOpMoveCursorByEndKey() {
             var odtDocument = session.getOdtDocument(),
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 steps,
                 cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
                 paragraphNode = odtDocument.getParagraphElement(cursorNode),
@@ -236,7 +240,7 @@ gui.SessionController = (function () {
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, number: steps});
+                op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
 
             return op;
@@ -247,6 +251,7 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorByHomeKey() {
             var odtDocument = session.getOdtDocument(),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 steps,
                 paragraphNode,
                 op = null;
@@ -256,7 +261,7 @@ gui.SessionController = (function () {
             steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, number: steps});
+                op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
             return op;
         }

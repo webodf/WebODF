@@ -154,7 +154,7 @@
   <before><office:text><text:p>a<text:s/></text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" number="2"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
    <op optype="InsertText" position="2" text="b"/>
   </ops>
   <after><office:text><text:p>a<text:s/>b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
@@ -179,7 +179,7 @@
   <before><office:text><text:p>ab c</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" number="1"/>
+   <op optype="MoveCursor" memberid="Joe" position="1"/>
    <op optype="InsertText" position="1" text="d"/>
   </ops>
   <after><office:text><text:p>ad<c:cursor c:memberId="Joe"/>b c</text:p><text:p/></office:text></after>
@@ -254,7 +254,7 @@
   <before><office:text><text:p><text:span>A</text:span></text:p></office:text></before>
   <ops>
       <op optype="AddCursor" memberid="Bob"/>
-      <op optype="MoveCursor" memberid="Bob" number="1"/>
+      <op optype="MoveCursor" memberid="Bob" position="1"/>
       <op optype="RemoveText" memberid="Bob" position="1" length="-1"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Bob"/><text:span></text:span></text:p></office:text></after>
@@ -287,7 +287,7 @@
   <before><office:text><text:p><text:span><text:tab/><text:tab/>a</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="2"/>
+   <op optype="MoveCursor" memberid="Bob" position="2"/>
    <op optype="RemoveText" position="2" length="1"/>
   </ops>
   <after><office:text><text:p><text:span><text:tab/><text:tab/><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
@@ -296,7 +296,7 @@
   <before><office:text><text:p>a<text:span><e:editinfo e:id="A"/>b</text:span>c</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="1"/>
+   <op optype="MoveCursor" memberid="Bob" position="1"/>
    <op optype="RemoveText" position="1" length="1"/>
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Bob"/><e:editinfo e:id="A"/>c</text:p></office:text></after>
@@ -326,7 +326,7 @@
   <before><office:text><text:p>a</text:p> <text:p>b</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" number="2"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
   </ops>
   <after><office:text><text:p>a</text:p> <text:p><c:cursor c:memberId="Joe"/>b</text:p></office:text></after>
  </test>
@@ -334,12 +334,12 @@
   <before><office:text><text:p>20130517_split_text_2space</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" number="9"/>
+   <op optype="MoveCursor" memberid="Joe" position="9"/>
    <op optype="InsertText" position="9" text="A"/>
    <op optype="InsertText" position="10" text=" "/>
    <op optype="InsertText" position="11" text=" "/>
-   <op optype="MoveCursor" memberid="Joe" number="-1"/>
-   <op optype="MoveCursor" memberid="Joe" number="-1"/>
+   <op optype="MoveCursor" memberid="Joe" position="11"/>
+   <op optype="MoveCursor" memberid="Joe" position="10"/>
   </ops>
   <after><office:text><text:p>20130517_A<c:cursor c:memberId="Joe"/><text:s> </text:s><text:s> </text:s>split_text_2space</text:p></office:text></after>
  </test>
@@ -347,11 +347,11 @@
   <before><office:text><text:p>abcdefgh</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="MoveCursor" memberid="Alice" number="3"/>
+   <op optype="MoveCursor" memberid="Alice" position="3"/>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="3"/>
+   <op optype="MoveCursor" memberid="Bob" position="3"/>
    <op optype="AddCursor" memberid="Eve"/>
-   <op optype="MoveCursor" memberid="Eve" number="3"/>
+   <op optype="MoveCursor" memberid="Eve" position="3"/>
    <op optype="InsertText" memberid="Eve" position="3" text="123"/>
   </ops>
   <after><office:text><text:p>abc<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/>123<c:cursor c:memberId="Eve"/>defgh</text:p></office:text></after>
@@ -360,11 +360,11 @@
   <before><office:text><text:p>abcdefgh</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="MoveCursor" memberid="Alice" number="3"/>
+   <op optype="MoveCursor" memberid="Alice" position="3"/>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="3"/>
+   <op optype="MoveCursor" memberid="Bob" position="3"/>
    <op optype="AddCursor" memberid="Eve"/>
-   <op optype="MoveCursor" memberid="Eve" number="3"/>
+   <op optype="MoveCursor" memberid="Eve" position="3"/>
    <op optype="SplitParagraph" memberid="Eve" position="3"/>
   </ops>
   <after><office:text><text:p>abc<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/></text:p><text:p><c:cursor c:memberId="Eve"/>defgh</text:p></office:text></after>
@@ -401,7 +401,7 @@
   <before><office:text><text:list><text:list-item><text:p>helloworld</text:p></text:list-item></text:list></office:text></before>
    <ops>
     <op optype="AddCursor" memberid="Bob"/>
-    <op optype="MoveCursor" memberid="Bob" number="5"/>
+    <op optype="MoveCursor" memberid="Bob" position="5"/>
     <op optype="SplitParagraph" memberid="Bob" position="5"/>
    </ops>
   <after><office:text><text:list><text:list-item><text:p>hello</text:p></text:list-item><text:list-item><text:p><c:cursor c:memberId="Bob"/>world</text:p></text:list-item></text:list></office:text></after>
@@ -410,7 +410,7 @@
   <before><office:text><text:list><text:list-item><text:p><text:span>helloworld</text:span></text:p></text:list-item></text:list></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="5"/>
+   <op optype="MoveCursor" memberid="Bob" position="5"/>
    <op optype="SplitParagraph" memberid="Bob" position="5"/>
   </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:p></text:list-item></text:list></office:text></after>
@@ -419,7 +419,7 @@
   <before><office:text><text:list><text:list-item><text:p><text:span><text:span>helloworld</text:span></text:span></text:p></text:list-item></text:list></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" number="5"/>
+   <op optype="MoveCursor" memberid="Bob" position="5"/>
    <op optype="SplitParagraph" memberid="Bob" position="5"/>
   </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span><text:span>hello</text:span></text:span></text:p></text:list-item><text:list-item><text:p><text:span><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:span></text:p></text:list-item></text:list></office:text></after>
