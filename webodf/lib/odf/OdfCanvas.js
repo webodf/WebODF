@@ -39,6 +39,7 @@ runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.FontLoader");
 runtime.loadClass("odf.Style2CSS");
+runtime.loadClass("odf.OdfUtils");
 
 /**
  * This class manages a loaded ODF document that is shown in an element.
@@ -290,7 +291,8 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/xlinkns = odf.Namespaces.xlinkns,
         /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
         /**@const@type {!string}*/window = runtime.getWindow(),
-        xpath = new xmldom.XPath();
+        xpath = new xmldom.XPath(),
+        utils = new odf.OdfUtils();
 
     /**
      * @param {!Element} element
@@ -762,7 +764,7 @@ odf.OdfCanvas = (function () {
                 styleName = node.getAttributeNS(textns, 'style-name');
                 if (styleName) {
                     node = listStyleMap[styleName];
-                    bulletRule = getBulletsRule(node.firstChild);
+                    bulletRule = getBulletsRule(utils.getFirstNonWhitespaceChild(node));
                 }
 
                 if (continueList) {

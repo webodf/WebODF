@@ -36,6 +36,7 @@
 /*global odf, runtime*/
 
 runtime.loadClass("odf.Namespaces");
+runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor
@@ -204,7 +205,8 @@ odf.Style2CSS = function Style2CSS() {
 
         // A font-face declaration map, to be populated once style2css is called.
         /**@type{!Object.<string,string>}*/
-        fontFaceDeclsMap = {};
+        fontFaceDeclsMap = {},
+        utils = new odf.OdfUtils();
 
     // helper functions
     /**
@@ -613,8 +615,8 @@ odf.Style2CSS = function Style2CSS() {
             level = node.getAttributeNS(textns, "level"),
             itemSelector,
             listItemRule,
-            listLevelProps = node.firstChild, // {Element}
-            listLevelLabelAlign = listLevelProps.firstChild, // {Element}
+            listLevelProps = utils.getFirstNonWhitespaceChild(node), // {Element}
+            listLevelLabelAlign = utils.getFirstNonWhitespaceChild(listLevelProps), // {Element}
             labelAlignAttr,
             bulletIndent,
             listIndent,

@@ -43,7 +43,8 @@ odf.OdfUtils = function OdfUtils() {
 
     var self = this,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0";
+        drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+        whitespaceOnly = /^\s*$/;
 
    /**
      * Determine if the node is a text:p or a text:h element.
@@ -335,4 +336,18 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     this.isSignificantWhitespace = isSignificantWhitespace;
+
+    /**
+     * Returns the first non-whitespace-only child of a given node
+     * @param {Node} node
+     * @returns {Node|null}
+     */
+    function getFirstNonWhitespaceChild(node) {
+        var child = node.firstChild;
+        while (child && child.nodeType === 3 /* Node.TEXT_NODE */ && whitespaceOnly.test(child.nodeValue)) {
+            child = child.nextSibling;
+        }
+        return child;
+    }
+    this.getFirstNonWhitespaceChild = getFirstNonWhitespaceChild;
 };
