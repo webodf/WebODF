@@ -743,7 +743,11 @@ odf.Style2CSS = function Style2CSS() {
             pageSizeRule = '',
             height,
             width,
-            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0];
+            props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0],
+            masterStyles = props.parentNode.parentNode.parentNode.masterStyles,
+            masterPages,
+            masterStyleName = '',
+            i;
 
         rule += applySimpleMapping(props, pageContentPropertySimpleMapping);
         imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
@@ -758,22 +762,33 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         if (documentType === 'presentation') {
-            contentLayoutRule = 'draw|page {' + rule + '}';
-            rule = '';
-            
-            height = parseFloat(props.getAttributeNS(fons, 'page-height'));
-            width = parseFloat(props.getAttributeNS(fons, 'page-width'));
-
-            if (height < width) {
-                rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
-                pageSizeRule = 'office|body, draw|page {' + rule + '}';
+            if (masterStyles) {
+                masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page');
+                for (i = 0; i < masterPages.length; i += 1) {
+                    if (masterPages[i].getAttributeNS(stylens, 'page-layout-name') === props.parentNode.getAttributeNS(stylens, 'name')) {
+                        masterStyleName = masterPages[i].getAttributeNS(stylens, 'name');
+                        break;
+                    }
+                }
             }
+
+            if (masterStyleName) {
+                contentLayoutRule = 'draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
+                rule = '';
+                rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
+                pageSizeRule = 'office|body, draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
+            }
+
         } else if (documentType === 'text') {
             contentLayoutRule = 'office|text {' + rule + '}';
             rule = '';
 
-            rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
-            pageSizeRule = 'office|body {' + rule + '}';
+            // TODO: We want to use the simpleMapping for ODTs, but not until we have pagination.
+            // So till then, set only the width.
+            //rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
+            pageSizeRule = 'office|body {'
+                + 'width: ' + props.getAttributeNS(fons, 'page-width') + ';'
+                + '}';
         }
 
         try {
