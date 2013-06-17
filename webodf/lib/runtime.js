@@ -1299,18 +1299,21 @@ var runtime = (function () {
             for (i = 0; i < dirs.length; i += 1) {
                 dir = dirs[i];
                 if (!dircontents.hasOwnProperty(dir)) {
-                    code = runtime.readFileSync(dirs[i] + "/manifest.js",
-                            "utf8");
-                    if (code && code.length) {
-                        try {
-                            dircontents[dir] = eval(code);
-                        } catch (e1) {
+                    try {
+                        code = runtime.readFileSync(dirs[i] + "/manifest.js",
+                                "utf8");
+                        if (code && code.length) {
+
+                                dircontents[dir] = eval(code);
+
+
+                        } else {
                             dircontents[dir] = null;
-                            runtime.log("Cannot load manifest for " + dir +
-                                    ".");
                         }
-                    } else {
+                    } catch (e1) {
                         dircontents[dir] = null;
+                        runtime.log("Cannot load manifest for " + dir +
+                            ".");
                     }
                 }
                 code = null;
