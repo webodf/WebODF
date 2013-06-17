@@ -530,7 +530,7 @@ odf.Style2CSS = function Style2CSS() {
         var rule = '';
 
         rule += applySimpleMapping(props, graphicPropertySimpleMapping);
-        if (props.getAttributeNS(presentationns, 'background-visible') === true) {
+        if (props.getAttributeNS(presentationns, 'background-visible') === 'true') {
             rule += "background: none;";
         }
         return rule;
@@ -765,18 +765,24 @@ odf.Style2CSS = function Style2CSS() {
             if (masterStyles) {
                 masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page');
                 for (i = 0; i < masterPages.length; i += 1) {
+
+                    // Generate CSS for all the pages that use the master page that use this page-layout
                     if (masterPages[i].getAttributeNS(stylens, 'page-layout-name') === props.parentNode.getAttributeNS(stylens, 'name')) {
                         masterStyleName = masterPages[i].getAttributeNS(stylens, 'name');
-                        break;
+
+                        contentLayoutRule = 'draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
+                        pageSizeRule = 'office|body, draw|page[draw|master-page-name=' + masterStyleName + '] {'
+                            + applySimpleMapping(props, pageSizePropertySimpleMapping)
+                            + ' }';
+
+                        try {
+                            sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
+                            sheet.insertRule(pageSizeRule, sheet.cssRules.length);
+                        } catch (e1) {
+                            throw e1;
+                        }
                     }
                 }
-            }
-
-            if (masterStyleName) {
-                contentLayoutRule = 'draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
-                rule = '';
-                rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
-                pageSizeRule = 'office|body, draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
             }
 
         } else if (documentType === 'text') {
@@ -789,18 +795,15 @@ odf.Style2CSS = function Style2CSS() {
             pageSizeRule = 'office|body {'
                 + 'width: ' + props.getAttributeNS(fons, 'page-width') + ';'
                 + '}';
+
+            try {
+                sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
+                sheet.insertRule(pageSizeRule, sheet.cssRules.length);
+            } catch (e2) {
+                throw e2;
+            }
         }
 
-        try {
-            if (contentLayoutRule) {
-                sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
-            }
-            if (pageSizeRule) {
-                sheet.insertRule(pageSizeRule, sheet.cssRules.length);
-            }
-        } catch (e) {
-            throw e;
-        }
     }
     /**
      * @param {!Element} props

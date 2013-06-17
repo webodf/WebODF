@@ -106,6 +106,9 @@ odf.OdfCanvas = (function () {
             while (sheet.cssRules.length > 0) {
                 sheet.deleteRule(0);
             }
+            // The #shadowContent contains the master pages, with each page in the slideshow
+            // corresponding to a master page in #shadowContent, and in the same order.
+            // So, when showing a page, also make it's master page (behind it) visible.
             sheet.insertRule('#shadowContent draw|page {display:none;}', 0);
             sheet.insertRule('office|presentation draw|page {display:none;}', 1);
             sheet.insertRule("#shadowContent draw|page:nth-of-type(" +
@@ -339,7 +342,7 @@ odf.OdfCanvas = (function () {
     }
 
     /**
-     * @param {!odf.OdfContainer odfContainer
+     * @param {!odf.OdfContainer} odfContainer
      * @param {!string} id
      * @param {!Element} frame
      * @param {!StyleSheet} stylesheet
@@ -365,20 +368,25 @@ odf.OdfCanvas = (function () {
             clonedNode,
             pageNumber = 0,
             pageNumberContainer,
-            node;
-        
+            node,
+            document = odfContainer.rootElement.ownerDocument;
+
+        // If there was a master-page-name attribute, then we are dealing with a page.
         if (masterPageName) {
             masterStyles = odfContainer.rootElement.masterStyles;
             masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page');
+            // Get the referenced master page element from the master styles
             for (i = 0; i < masterPages.length; i += 1) {
                 if (masterPages[i].getAttributeNS(stylens, 'name') === masterPageName) {
                     masterPage = masterPages[i];
                     break;
                 }
             }
+
+            // If the referenced master page exists, create a new page and copy over it's contents into the new page,
+            // except for the ones that are placeholders. Also, call setFramePosition on each of those child frames.
             if (masterPage) {
                 clonedPage = document.createElementNS(drawns, 'draw:page');
-                clonedPage.setAttributeNS(drawns, 'draw:name', masterPage.getAttributeNS(stylens, 'name'));
                 node = masterPage.firstChild;
                 j = 0;
                 while (node) {
@@ -391,9 +399,12 @@ odf.OdfCanvas = (function () {
                     j += 1;
                 }
 
+                // Append the cloned master page to the "Shadow Content" element outside the main ODF dom
                 shadowContent.appendChild(clonedPage);
-                pageNumber = shadowContent.getElementsByTagNameNS(drawns, 'page').length;
 
+                // Get the page number by counting the number of previous master pages in this shadowContent
+                pageNumber = shadowContent.getElementsByTagNameNS(drawns, 'page').length;
+                // Get the page-number tag in the cloned master page and set the text content to the calculated number
                 pageNumberContainer = clonedPage.getElementsByTagNameNS(textns, 'page-number')[0];
                 if (pageNumberContainer) {
                     while (pageNumberContainer.firstChild) {
@@ -401,7 +412,11 @@ odf.OdfCanvas = (function () {
                     }
                     pageNumberContainer.appendChild(document.createTextNode(pageNumber));
                 }
+
+                // Now call setFramePosition on this new page to set the proper dimensions
                 setFramePosition(odfContainer, id, clonedPage, stylesheet);
+                // And finally, add an attribute referring to the master page, so the CSS targeted for that master page will style this
+                clonedPage.setAttributeNS(drawns, 'draw:master-page-name', masterPage.getAttributeNS(stylens, 'name'));
             }
         }
         if (anchor === "as-char") {
@@ -631,7 +646,7 @@ odf.OdfCanvas = (function () {
         }
     }
     /**
-     * @param {!Object} container
+     * @param {!odf.OdfContainer} container
      * @param {!Element} odfbody
      * @param {!StyleSheet} stylesheet
      * @return {undefined}
@@ -906,7 +921,7 @@ odf.OdfCanvas = (function () {
     odf.OdfCanvas = function OdfCanvas(element) {
         var self = this,
             doc = element.ownerDocument,
-            /**@type{odf.OdfContainer}*/
+            /**@type{!odf.OdfContainer}*/
             odfcontainer,
             /**@type{!odf.Formatting}*/
             formatting = new odf.Formatting(),
@@ -1011,7 +1026,7 @@ odf.OdfCanvas = (function () {
                 handlers[i].apply(null, args);
             }
         }
-        document.fix = fixContainerSize;
+
         function fixContainerSize() {
             var sizer = element.firstChild,
                 odfdoc = sizer.firstChild;
@@ -1059,10 +1074,6 @@ odf.OdfCanvas = (function () {
                 css.cssRules.length
             );
 */
-            // FIXME: this is a hack to have a defined background now
-            // should be removed as soon as we have sane background
-            // handling for pages
-
             // only append the content at the end
             clear(element);
 
@@ -1074,7 +1085,7 @@ odf.OdfCanvas = (function () {
 
             // A "Shadow Content" div. This will contain stuff like pages extracted from
             // <style:master-page>. These need to be nicely styled, so we will populate this 
-            // in the body first. Once the styling is handled, it can then be lifted out of the
+            // in the ODF body first. Once the styling is handled, it can then be lifted out of the
             // ODF body and placed beside it, to not pollute the ODF dom.
             shadowContent = doc.createElementNS(element.namespaceURI, 'div');
             shadowContent.id = "shadowContent";
