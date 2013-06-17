@@ -473,23 +473,23 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
-     * @param {!String} styleName
-     * @return {?Node}
+     * @param {!string} styleName
+     * @return {Element}
      */
     function getParagraphStyleElement(styleName) {
         var node;
-        node = odfCanvas.getFormatting().getStyleElement(odfCanvas.odfContainer().rootElement.styles, styleName, 'paragraph');
+        node = odfCanvas.getFormatting().getStyleElement(styleName, 'paragraph');
         return node;
     }
 
     /**
-     * @param {!String} styleName
+     * @param {!string} styleName
      * @return {?Object}
      */
     function getParagraphStyleAttributes(styleName) {
         var node = getParagraphStyleElement(styleName);
         if (node) {
-            return odfCanvas.getFormatting().getInheritedStyleAttributes(odfCanvas.odfContainer().rootElement.styles, node);
+            return odfCanvas.getFormatting().getInheritedStyleAttributes(node);
         }
 
         return null;
@@ -551,7 +551,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * This method returns the style attributes for a given stylename, including all properties
      * inherited from any parent styles, and also the Default style in the family.
-     * @param {!String} styleName
+     * @param {!string} styleName
      * @return {?Object}
      */
     this.getParagraphStyleAttributes = getParagraphStyleAttributes;

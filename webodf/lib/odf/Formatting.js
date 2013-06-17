@@ -56,7 +56,7 @@ odf.Formatting = function Formatting() {
      * @return {!Object}
      */
     function mergeRecursive(destination, source) {
-        Object.keys(source).forEach(function(p) {
+        Object.keys(source).forEach(function (p) {
             try {
                 // Property in destination object set; update its value.
                 if (source[p].constructor === Object) {
@@ -89,7 +89,9 @@ odf.Formatting = function Formatting() {
         var fontFaceDecls = odfContainer.rootElement.fontFaceDecls,
             /**@type {!Object.<string,string>}*/
             fontFaceDeclsMap = {},
-            node, name, family;
+            node,
+            name,
+            family;
 
         node = fontFaceDecls && fontFaceDecls.firstChild;
         while (node) {
@@ -159,8 +161,8 @@ odf.Formatting = function Formatting() {
         return hasDerivedStyles || isUsed;
     };
 
-    function getDefaultStyleElement(styleListElement, family) {
-        var node = styleListElement.firstChild;
+    function getDefaultStyleElement(family) {
+        var node = odfContainer.rootElement.styles.firstChild;
 
         while (node) {
             if (node.nodeType === Node.ELEMENT_NODE
@@ -174,18 +176,34 @@ odf.Formatting = function Formatting() {
         return null;
     }
 
-    function getStyleElement(styleListElement, styleName, family) {
-        var node = styleListElement.firstChild;
+    /**
+     * Fetch style element associated with the requested name and family
+     * @param {string} styleName
+     * @param {string} family
+     * @param {Array.<Element>} [styleElements=] Specific style trees to search. If unspecified will search both automatic
+     *  and user-created styles
+     * @returns {Element}
+     */
+    function getStyleElement(styleName, family, styleElements) {
+        var node,
+            styleListElement;
 
-        while (node) {
-            if (node.nodeType === Node.ELEMENT_NODE
-                    && node.namespaceURI === stylens
-                    && node.localName === "style"
-                    && node.getAttributeNS(stylens, 'family') === family
-                    && node.getAttributeNS(stylens, 'name') === styleName) {
-                return node;
+        styleElements = styleElements || [odfContainer.rootElement.automaticStyles, odfContainer.rootElement.styles];
+        styleListElement = styleElements.shift();
+        while (styleListElement) {
+            node = styleListElement.firstChild;
+            while (node) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    if (node.namespaceURI === stylens
+                            && node.localName === "style"
+                            && node.getAttributeNS(stylens, 'family') === family
+                            && node.getAttributeNS(stylens, 'name') === styleName) {
+                        return node;
+                    }
+                }
+                node = node.nextSibling;
             }
-            node = node.nextSibling;
+            styleListElement = styleElements.shift();
         }
         return null;
     }
@@ -217,12 +235,12 @@ odf.Formatting = function Formatting() {
     /**
      * Returns a JSON representation of the style attributes of a given style element, also containing attributes
      * inherited from it's ancestry - up to and including the default style for the family.
-     * @param {!Element} styleListElement
-     * @param {!Node} styleNode
+     * @param {!Element} styleNode
      * @return {!Object}
      */
-    function getInheritedStyleAttributes(styleListElement, styleNode) {
-        var parentStyleName,
+    function getInheritedStyleAttributes(styleNode) {
+        var styleListElement = odfContainer.rootElement.styles,
+            parentStyleName,
             propertiesMap = {},
             inheritedPropertiesMap = {},
             node = styleNode;
@@ -235,15 +253,15 @@ odf.Formatting = function Formatting() {
 
             parentStyleName = node.getAttributeNS(stylens, 'parent-style-name');
             if (parentStyleName) {
-                node = getStyleElement(styleListElement, parentStyleName, styleNode.getAttributeNS(stylens, 'family'));
+                node = getStyleElement(parentStyleName, styleNode.getAttributeNS(stylens, 'family'), [styleListElement]);
             } else {
                 node = null;
             }
         }
 
         // Now incorporate attributes from the default style
-        node = getDefaultStyleElement(styleListElement, styleNode.getAttributeNS(stylens, 'family'));
-        if(node) {
+        node = getDefaultStyleElement(styleNode.getAttributeNS(stylens, 'family'));
+        if (node) {
             propertiesMap = getStyleAttributes(node);
             // All child properties should override any matching parent properties
             inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
@@ -265,11 +283,11 @@ odf.Formatting = function Formatting() {
             styleElement;
 
         // first look for automatic style with the name
-        while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
+        while ((styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList])) !== null) {
             styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
         }
         // then see if that style is in named styles
-        styleElement = getStyleElement(styleElementList, styleName, "paragraph");
+        styleElement = getStyleElement(styleName, "paragraph", [styleElementList]);
         if (!styleElement) {
             return null;
         }
@@ -282,42 +300,7 @@ odf.Formatting = function Formatting() {
      * @return {!boolean}
      */
     this.hasParagraphStyle = function (styleName) {
-        return (getStyleElement(odfContainer.rootElement.automaticStyles, styleName, "paragraph") ||
-                getStyleElement(odfContainer.rootElement.styles, styleName, "paragraph"));
-    };
-
-    /**
-     * Get the value of the attribute with the given name from the style with the given name
-     * or, if not set there, from the first style in the chain of parent styles where it is set.
-     * If the attribute is not found, null is returned.
-     * @param {!string} styleName
-     * @param {!string} attributeNameNS
-     * @param {!string} attributeName
-     * @return {!string|null}
-     */
-    this.getParagraphStyleAttribute = function (styleName, attributeNameNS, attributeName) {
-        var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
-            styleElementList = odfContainer.rootElement.styles,
-            styleElement,
-            attributeValue;
-
-        // first look for automatic style with the attribute
-        while ((styleElement = getStyleElement(automaticStyleElementList, styleName, "paragraph")) !== null) {
-            attributeValue = styleElement.getAttributeNS(attributeNameNS, attributeName);
-            if (attributeValue) {
-                return attributeValue;
-            }
-            styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
-        }
-        // then see if that style is in named styles
-        while ((styleElement = getStyleElement(styleElementList, styleName, "paragraph")) !== null) {
-            attributeValue = styleElement.getAttributeNS(attributeNameNS, attributeName);
-            if (attributeValue) {
-                return attributeValue;
-            }
-            styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
-        }
-        return null;
+        return Boolean(getStyleElement(styleName, "paragraph"));
     };
 
     /**
@@ -332,21 +315,21 @@ odf.Formatting = function Formatting() {
             appliedStyles = [],
             chainKey = '',
             foundContainer = false;
-        while(parent) {
-            if(!foundContainer && odfUtils.isGroupingElement(parent)) {
+        while (parent) {
+            if (!foundContainer && odfUtils.isGroupingElement(parent)) {
                 foundContainer = true;
             }
             nodeStyles = styleInfo.determineStylesForNode(/**@type {!Element}*/(parent));
-            if(nodeStyles) {
+            if (nodeStyles) {
                 appliedStyles.push(nodeStyles);
             }
             parent = parent.parentNode;
         }
 
-        if(foundContainer) {
-            appliedStyles.forEach(function(usedStyleMap) {
-                Object.keys(usedStyleMap).forEach(function(styleFamily) {
-                    Object.keys(usedStyleMap[styleFamily]).forEach(function(styleName) {
+        if (foundContainer) {
+            appliedStyles.forEach(function (usedStyleMap) {
+                Object.keys(usedStyleMap).forEach(function (styleFamily) {
+                    Object.keys(usedStyleMap[styleFamily]).forEach(function (styleName) {
                         chainKey += '|' + styleFamily + ':' + styleName + '|';
                     });
                 });
@@ -363,26 +346,23 @@ odf.Formatting = function Formatting() {
      * Takes a provided style chain and calculates the resulting inherited style, starting from the outer-most to the
      * inner-most style
      * @param {Array.<Object>} styleChain Ordered list starting from inner-most style to outer-most style
-     * @param {!Element} automaticStyleElementList
-     * @param {!Element} styleElementList
      * @returns {Object}
      */
-    function calculateAppliedStyle(styleChain, automaticStyleElementList, styleElementList) {
+    function calculateAppliedStyle(styleChain) {
         var mergedChildStyle = { orderedStyles: [] };
 
         // The complete style is built up by starting at the base known style and merging each new entry
         // on top of it, so the inner-most style properties override the outer-most
-        styleChain.forEach(function(elementStyleSet) {
-            Object.keys(/**@type {!Object}*/(elementStyleSet)).forEach(function(styleFamily) {
+        styleChain.forEach(function (elementStyleSet) {
+            Object.keys(/**@type {!Object}*/(elementStyleSet)).forEach(function (styleFamily) {
                 // Expect there to only be a single style for a given family per element (e.g., 1 text, 1 paragraph)
                 var styleName = Object.keys(elementStyleSet[styleFamily])[0],
                     styleElement,
                     parentStyle;
 
-                styleElement = getStyleElement(automaticStyleElementList, styleName, styleFamily)
-                    || getStyleElement(styleElementList, styleName, styleFamily);
+                styleElement = getStyleElement(styleName, styleFamily);
 
-                parentStyle = getInheritedStyleAttributes(styleElementList, styleElement);
+                parentStyle = getInheritedStyleAttributes(/**@type {!Element}*/(styleElement));
                 mergedChildStyle = mergeRecursive(parentStyle, mergedChildStyle);
                 mergedChildStyle.orderedStyles.push({
                     name: styleName,
@@ -399,35 +379,33 @@ odf.Formatting = function Formatting() {
      * @param {Range} range
      * @returns {Array.<Object>}
      */
-    this.getAppliedStyles = function(range) {
+    this.getAppliedStyles = function (range) {
         var document = runtime.getWindow().document,
             root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ?
                 range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
             nodeRange = document.createRange(),
             iterator = document.createTreeWalker(root,
                 NodeFilter.SHOW_ALL,
-                function(node) {
+                function (node) {
                     nodeRange.selectNode(node);
-                    if(range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1 &&
-                        range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
+                    if (range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1 &&
+                            range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
                         return node.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
                     }
                     return NodeFilter.FILTER_REJECT;
                 },
                 false),
-            automaticStyleElementList = odfContainer.rootElement.automaticStyles,
-            styleElementList = odfContainer.rootElement.styles,
             styleChains = {},
             n = iterator.nextNode(),
             styles = [];
 
-        while(n) {
+        while (n) {
             buildStyleChain(n, styleChains);
             n = iterator.nextNode();
         }
 
-        Object.keys(styleChains).forEach(function(key) {
-            styles.push(calculateAppliedStyle(styleChains[key], automaticStyleElementList, styleElementList));
+        Object.keys(styleChains).forEach(function (key) {
+            styles.push(calculateAppliedStyle(styleChains[key]));
         });
 
         nodeRange.detach();
@@ -439,14 +417,9 @@ odf.Formatting = function Formatting() {
      * @param {!Element} node
      * @returns {Object|undefined}
      */
-    this.getAppliedStylesForElement = function(node) {
-        var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
-            styleElementList = odfContainer.rootElement.styles,
-            styleChain,
-            appliedStyle;
-
+    this.getAppliedStylesForElement = function (node) {
+        var styleChain;
         styleChain = buildStyleChain(node);
-        appliedStyle = styleChain && calculateAppliedStyle(styleChain, automaticStyleElementList, styleElementList);
-        return appliedStyle;
+        return styleChain ? calculateAppliedStyle(styleChain) : undefined;
     };
 };
