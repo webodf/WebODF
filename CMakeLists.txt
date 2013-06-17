@@ -15,7 +15,26 @@ else (ProcessorCountFound)
 endif (ProcessorCountFound)
 
 # At this point, the version number that is used throughout is defined
-set(WEBODF_VERSION 0.4.2)
+# The version number is gotten from either the git repository or the name of the
+# folder. If the current folder has a name that matches "webodf-\d+.\d+.\d+"
+# then that version number is used. If not, the folder should be a git folder
+# and have ability to get a tag.
+
+string(REGEX MATCH "^.*/webodf-([0-9]+.[0-9]+.[0-9]+)$" WEBODF_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
+if (CMAKE_MATCH_1)
+  set(WEBODF_VERSION ${CMAKE_MATCH_1})
+else (CMAKE_MATCH_1)
+  # get version number from git
+  exec_program(git ${CMAKE_CURRENT_SOURCE_DIR}
+    ARGS describe --tags --dirty
+    OUTPUT_VARIABLE GIT_WEBODF_VERSION)
+  # check version number from git
+  string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+(-[0-9]+-[0-9a-z]+(-dirty)?)?)$" WEBODF_VERSION "${GIT_WEBODF_VERSION}")
+  if (NOT CMAKE_MATCH_1)
+    message(FATAL_ERROR "No valid version number found via git: ${GIT_WEBODF_VERSION}")
+  endif (NOT CMAKE_MATCH_1)
+endif (CMAKE_MATCH_1)
+message(STATUS "WebODF version " ${WEBODF_VERSION})
 
 # This makefile 'compiles' WebODF using various tools, instruments the code and
 # builds and packages programs that use WebODF.
