@@ -427,70 +427,70 @@ Document.prototype.createNodeIterator = function (root, whatToShow, filter, enti
 
 // Constants returned by acceptNode
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.FILTER_ACCEPT;//                  = 1;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.FILTER_REJECT;//                  = 2;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.FILTER_SKIP;//                    = 3;
 
 
 // Constants for whatToShow
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_ALL;//                       = 0xFFFFFFFF;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_ELEMENT;//                   = 0x00000001;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_ATTRIBUTE;//                 = 0x00000002;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_TEXT;//                      = 0x00000004;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_CDATA_SECTION;//             = 0x00000008;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_ENTITY_REFERENCE;//          = 0x00000010;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_ENTITY;//                    = 0x00000020;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_PROCESSING_INSTRUCTION;//    = 0x00000040;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_COMMENT;//                   = 0x00000080;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_DOCUMENT;//                  = 0x00000100;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_DOCUMENT_TYPE;//             = 0x00000200;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_DOCUMENT_FRAGMENT;//         = 0x00000400;
 /**
- * @type {!number}
+ * @const @type {!number}
  */
 NodeFilter.SHOW_NOTATION;//                  = 0x00000800;
 
