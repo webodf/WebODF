@@ -84,6 +84,27 @@ ops.OpRemoveText = function OpRemoveText() {
     }
 
     /**
+     * Returns true if the supplied node contains no text or ODF character elements
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    function isEmpty(node) {
+        var localName = node.localName,
+            childNode;
+        if ((localName === "s" || localName === "span") && node.textContent.length === 0) {
+            childNode = node.firstChild;
+            while (childNode) {
+                if (odfUtils.isCharacterElement(childNode)) {
+                    return false;
+                }
+                childNode = childNode.nextSibling;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Merges the 'second' paragraph into the 'first' paragraph,
      * appending the contents by default. If 'prepend' is true,
      * the contents are prepended.
@@ -95,15 +116,13 @@ ops.OpRemoveText = function OpRemoveText() {
     function mergeParagraphs(first, second, prepend) {
         var parent,
             child,
-            isEmptyNode,
             firstEditInfo = null;
 
         child = prepend ? second.lastChild : second.firstChild;
 
         while (child) {
             second.removeChild(child);
-            isEmptyNode = (child.localName === "s" || child.localName === "span") && child.textContent.length === 0;
-            if (child.localName !== 'editinfo' && !isEmptyNode) {
+            if (child.localName !== 'editinfo' && !isEmpty(child)) {
                 if (prepend) {
                     firstEditInfo = first.getElementsByTagNameNS(editinfons, 'editinfo')[0];
                     if (firstEditInfo) {
@@ -270,9 +289,7 @@ ops.OpRemoveText = function OpRemoveText() {
                     fixCursorPositions(odtDocument);
                     // If the current node is text:s or span and is empty, it should
                     // be removed.
-                    if ((currentParent.localName === "s"
-                            || currentParent.localName === "span")
-                            && currentParent.textContent.length === 0) {
+                    if (isEmpty(currentParent)) {
                         currentParent.parentNode.removeChild(currentParent);
                     }
 

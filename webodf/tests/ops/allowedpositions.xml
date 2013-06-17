@@ -216,4 +216,21 @@
   </ops>
   <after><office:text><text:p><text:span><text:span><text:span>a<c:cursor c:memberId="Joe"/>b</text:span></text:span></text:span></text:p></office:text></after>
  </test>
+ <test name="MoveCursor_OverTab">
+  <before><office:text><text:p><text:tab/></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:tab /><c:cursor c:memberId="Joe"/></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_OverTwoTabs">
+  <before><office:text><text:p><text:tab/><text:tab/></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+   <op optype="MoveCursor" memberid="Joe" number="1"/>
+  </ops>
+  <after><office:text><text:p><text:tab /><text:tab/><c:cursor c:memberId="Joe"/></text:p></office:text></after>
+ </test>
 </tests>
