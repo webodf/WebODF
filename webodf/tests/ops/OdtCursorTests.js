@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf*/
+/*global Node, runtime, core, gui, ops, odf*/
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("ops.OdtCursor");
 runtime.loadClass("ops.OdtDocument");
@@ -73,7 +73,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         textfilter = function acceptPosition(iterator) {
             var n = iterator.container(), p, o, d;
             // only stop in text nodes or at end of <p> or <h>
-            if (n.nodeType !== 3) {
+            if (n.nodeType !== Node.TEXT_NODE) {
                 if (n.localName !== "p" && n.localName !== "h") {
                     return 2;
                 }
@@ -128,7 +128,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         var iterator = root.ownerDocument.createNodeIterator(root, 0xFFFFFFFF),
             n = iterator.nextNode();
         while (n !== null) {
-            if (n.nodeType === 3 && n.data.length > 1) {
+            if (n.nodeType === Node.TEXT_NODE && n.data.length > 1) {
                 n.splitText(1);
             }
             n = iterator.nextNode();
@@ -190,10 +190,10 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         var previousSibling = cursor.getNode().previousSibling,
             nextSibling = cursor.getNode().nextSibling,
             text = "";
-        if (previousSibling && previousSibling.nodeType === 3) {
+        if (previousSibling && previousSibling.nodeType === Node.TEXT_NODE) {
             text += previousSibling.data;
         }
-        if (nextSibling && nextSibling.nodeType === 3) {
+        if (nextSibling && nextSibling.nodeType === Node.TEXT_NODE) {
             text += nextSibling.data;
         }
 

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf, xmldom*/
+/*global Node, runtime, core, gui, ops, odf, xmldom*/
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("xmldom.LSSerializer");
 
@@ -137,10 +137,10 @@ ops.OperationTests = function OperationTests(runner) {
         if (a.nodeType !== b.nodeType) {
             return false;
         }
-        if (a.nodeType === 3) {
+        if (a.nodeType === Node.TEXT_NODE) {
             return a.data === b.data;
         }
-        runtime.assert(a.nodeType === 1, "Only textnodes and elements supported.");
+        runtime.assert(a.nodeType === Node.ELEMENT_NODE, "Only textnodes and elements supported.");
         if (a.namespaceURI !== b.namespaceURI || a.localName !== b.localName) {
             return false;
         }

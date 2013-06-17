@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, xmldom, odf, DOMParser, document*/
+/*global Node, runtime, core, xmldom, odf, DOMParser, document*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
@@ -113,7 +113,7 @@ odf.OdfContainer = (function () {
                 // skip all webodf nodes incl. child nodes
                 result = 2; // FILTER_REJECT
             } else if (usedStyleList && node.parentNode === automaticStyles &&
-                    node.nodeType === 1) {
+                    node.nodeType === Node.ELEMENT_NODE) {
                 // skip all automatic styles which are not used
                 if (usedStyleList.uses(node)) {
                     result = 1; // FILTER_ACCEPT
@@ -271,10 +271,10 @@ odf.OdfContainer = (function () {
             var n = element.firstChild, next, e;
             while (n) {
                 next = n.nextSibling;
-                if (n.nodeType === 1) { // ELEMENT
+                if (n.nodeType === Node.ELEMENT_NODE) {
                     e = /**@type{!Element}*/(n);
                     removeProcessingInstructions(e);
-                } else if (n.nodeType === 7) { // PROCESSING_INSTRUCTION_NODE
+                } else if (n.nodeType === Node.PROCESSING_INSTRUCTION_NODE) {
                     element.removeChild(n);
                 }
                 n = next;
@@ -293,7 +293,7 @@ odf.OdfContainer = (function () {
         function setAutomaticStylesScope(stylesRootElement, scope) {
             var n = stylesRootElement && stylesRootElement.firstChild;
             while (n) {
-                if (n.nodeType === 1) { // ELEMENT
+                if (n.nodeType === Node.ELEMENT_NODE) {
                     n.setAttributeNS(webodfns, "scope", scope);
                 }
                 n = n.nextSibling;
@@ -315,7 +315,7 @@ odf.OdfContainer = (function () {
                 n = copy.firstChild;
                 while (n) {
                     s = n.nextSibling;
-                    if (n.nodeType === 1) { // ELEMENT
+                    if (n.nodeType === Node.ELEMENT_NODE) {
                         scopeAttrValue = n.getAttributeNS(webodfns, "scope");
                         if (scopeAttrValue && scopeAttrValue !== scope) {
                             copy.removeChild(n);
@@ -493,7 +493,7 @@ odf.OdfContainer = (function () {
             root.manifest = node;
             n = root.manifest.firstChild;
             while (n) {
-                if (n.nodeType === 1 && n.localName === "file-entry" &&
+                if (n.nodeType === Node.ELEMENT_NODE && n.localName === "file-entry" &&
                         n.namespaceURI === manifestns) {
                     partMimetypes[n.getAttributeNS(manifestns, "full-path")] =
                         n.getAttributeNS(manifestns, "media-type");

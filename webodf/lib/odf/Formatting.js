@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf, runtime, console, NodeFilter*/
+/*global Node, odf, runtime, console, NodeFilter*/
 
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
@@ -93,7 +93,7 @@ odf.Formatting = function Formatting() {
 
         node = fontFaceDecls && fontFaceDecls.firstChild;
         while (node) {
-            if (node.nodeType === 1) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
                 name = node.getAttributeNS(stylens, 'name');
                 if (name) {
                     // add family name as value, or, if there is a
@@ -122,7 +122,7 @@ odf.Formatting = function Formatting() {
             paragraphStyles = [],
             style;
         while (node) {
-            if (node.nodeType === 1 && node.localName === "style"
+            if (node.nodeType === Node.ELEMENT_NODE && node.localName === "style"
                     && node.namespaceURI === stylens) {
                 style = node;
                 p_family = style.getAttributeNS(stylens, 'family');
@@ -163,7 +163,7 @@ odf.Formatting = function Formatting() {
         var node = styleListElement.firstChild;
 
         while (node) {
-            if (node.nodeType === 1
+            if (node.nodeType === Node.ELEMENT_NODE
                     && node.namespaceURI === stylens
                     && node.localName === "default-style"
                     && node.getAttributeNS(stylens, 'family') === family) {
@@ -178,7 +178,7 @@ odf.Formatting = function Formatting() {
         var node = styleListElement.firstChild;
 
         while (node) {
-            if (node.nodeType === 1
+            if (node.nodeType === Node.ELEMENT_NODE
                     && node.namespaceURI === stylens
                     && node.localName === "style"
                     && node.getAttributeNS(stylens, 'family') === family
@@ -203,7 +203,7 @@ odf.Formatting = function Formatting() {
             propertiesNode = styleNode.firstChild;
 
         while (propertiesNode) {
-            if (propertiesNode.nodeType === 1 && propertiesNode.namespaceURI === stylens) {
+            if (propertiesNode.nodeType === Node.ELEMENT_NODE && propertiesNode.namespaceURI === stylens) {
                 propertiesMap[propertiesNode.nodeName] = {};
                 for (i = 0; i < propertiesNode.attributes.length; i += 1) {
                     propertiesMap[propertiesNode.nodeName][propertiesNode.attributes[i].name] = propertiesNode.attributes[i].value;
@@ -326,7 +326,7 @@ odf.Formatting = function Formatting() {
      * @param {Object.<string, Array.<Object>>} collectedChains Dictionary to add any new style chains to
      */
     function buildStyleChain(node, collectedChains) {
-        var parent = node.nodeType === 3 /* Node.TEXT_NODE */ ? node.parentNode : node,
+        var parent = node.nodeType === Node.TEXT_NODE ? node.parentNode : node,
             nodeStyles,
             appliedStyles = [],
             chainKey = '',
@@ -396,7 +396,7 @@ odf.Formatting = function Formatting() {
      */
     this.getAppliedStyles = function(range) {
         var document = runtime.getWindow().document,
-            root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === 3 /*Node.TEXT_NODE*/ ?
+            root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ?
                 range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
             nodeRange = document.createRange(),
             iterator = document.createTreeWalker(root,
@@ -405,7 +405,7 @@ odf.Formatting = function Formatting() {
                     nodeRange.selectNode(node);
                     if(range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1 &&
                         range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
-                        return node.nodeType === 3 /*Node.TEXT_NODE*/ ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                        return node.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
                     }
                     return NodeFilter.FILTER_REJECT;
                 },

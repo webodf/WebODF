@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global xmldom, runtime*/
+/*global Node, xmldom, runtime*/
 /*jslint sub: true*/
 if (typeof Object.create !== 'function') {
     Object['create'] = function (o) {
@@ -199,7 +199,7 @@ xmldom.LSSerializer = function LSSerializer() {
                 = (self.filter) ? self.filter.acceptNode(node) : 1,
             /**@type{Node}*/child,
             /**@const@type{string}*/ qname;
-        if (accept === 1 && node.nodeType === 1) {
+        if (accept === 1 && node.nodeType === Node.ELEMENT_NODE) {
             ns.push();
             qname = ns.getQName(node);
             s += startElement(ns, qname, node);

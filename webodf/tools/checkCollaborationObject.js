@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, ops*/
+/*global Node, runtime, ops*/
 
 runtime.loadClass("ops.Session");
 
@@ -82,7 +82,7 @@ function parseOperation(element) {
         args = [],
         c = element.firstChild;
     while (c) {
-        if (c.nodeType === 1) {
+        if (c.nodeType === Node.ELEMENT_NODE) {
             if (c.localName === "argument") {
                 args.push({
                     name: c.getAttribute("name"),
@@ -103,7 +103,7 @@ function parseOperations(dom) {
     var e = dom.documentElement.firstChild,
         operations = [];
     while (e) {
-        if (e.nodeType === 1) {
+        if (e.nodeType === Node.ELEMENT_NODE) {
             if (e.localName === "operation") {
                 operations.push(parseOperation(e));
             } else {

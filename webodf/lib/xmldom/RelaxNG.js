@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, xmldom*/
+/*global Node, runtime, xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -508,9 +508,9 @@ xmldom.RelaxNG = function RelaxNG() {
             p;
         // simple incomplete implementation: only use non-empty text nodes
         while (childNode) {
-            if (childNode.nodeType === 1) {
+            if (childNode.nodeType === Node.ELEMENT_NODE) {
                 childNodes.push(childNode);
-            } else if (childNode.nodeType === 3 &&
+            } else if (childNode.nodeType === Node.TEXT_NODE &&
                     !/^\s*$/.test(childNode.nodeValue)) {
                 childNodes.push(childNode.nodeValue);
                 numberOfTextNodes += 1;

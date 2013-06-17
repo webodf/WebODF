@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, xmldom*/
+/*global Node, runtime, xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -63,7 +63,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
     function RelaxNGParseError(error, context) {
         this.message = function () {
             if (context) {
-                error += (context.nodeType === 1) ? " Element " : " Node ";
+                error += (context.nodeType === Node.ELEMENT_NODE) ? " Element " : " Node ";
                 error += context.nodeName;
                 if (context.nodeValue) {
                     error += " with value '" + context.nodeValue + "'";
@@ -109,7 +109,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
      * @return {!boolean}
      */
     function isWhitespace(node) {
-        return node && node.nodeType === 3 && /^\s+$/.test(node.nodeValue);
+        return node && node.nodeType === Node.TEXT_NODE && /^\s+$/.test(node.nodeValue);
     }
     /**
      * @param elementdef
@@ -188,10 +188,10 @@ xmldom.RelaxNG2 = function RelaxNG2() {
             /**@type{number}*/ type = node ? node.nodeType : 0,
             error = null;
         // find the next element, skip text nodes with only whitespace
-        while (type > 1) {
-            if (type !== 8 &&
-                    (type !== 3 ||
-                     !/^\s+$/.test(walker.currentNode.nodeValue))) {// TEXT_NODE
+        while (type > Node.ELEMENT_NODE) {
+            if (type !== Node.COMMENT_NODE &&
+                    (type !== Node.TEXT_NODE ||
+                     !/^\s+$/.test(walker.currentNode.nodeValue))) {
                 depth -= 1;
                 return [new RelaxNGParseError("Not allowed node of type " +
                         type + ".")];
@@ -216,7 +216,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
             // there should be no content left
             while (walker.nextSibling()) {
                 type = walker.currentNode.nodeType;
-                if (!isWhitespace(walker.currentNode) && type !== 8) {
+                if (!isWhitespace(walker.currentNode) && type !== Node.COMMENT_NODE) {
                     depth -= 1;
                     return [new RelaxNGParseError("Spurious content.",
                             walker.currentNode)];

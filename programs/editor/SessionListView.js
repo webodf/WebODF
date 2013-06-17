@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,runtime */
+/*global Node, define, runtime */
 
 function SessionListView(sessionList, sessionListDiv, cb) {
         "use strict";
@@ -67,7 +67,7 @@ function SessionListView(sessionList, sessionListDiv, cb) {
                 if (node.sessionId === sessionDetails.id) {
                     node = node.firstChild;
                     while (node) {
-                        if (node.nodeType == 3) {
+                        if (node.nodeType == Node.TEXT_NODE) {
                             node.data = createSessionDescription(sessionDetails);
                         }
                         node = node.nextSibling;

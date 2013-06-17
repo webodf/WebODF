@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global xmldom, XPathResult, runtime*/
+/*global Node, xmldom, XPathResult, runtime*/
 /**
  * Iterator over nodes uses in the xpath implementation
  * @class
@@ -229,7 +229,7 @@ xmldom.XPath = (function () {
                         }
                     } while (root && !node);
                 }
-                if (node && node.nodeType === 1) {
+                if (node && node.nodeType === Node.ELEMENT_NODE) {
                     return node;
                 }
             }
@@ -367,7 +367,7 @@ xmldom.XPath = (function () {
                 XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
             n = nodes.iterateNext();
             while (n !== null) {
-                if (n.nodeType === 1) {
+                if (n.nodeType === Node.ELEMENT_NODE) {
                     elements.push(n);
                 }
                 n = nodes.iterateNext();

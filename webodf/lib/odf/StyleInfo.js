@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global odf, runtime, xmldom*/
+/*global Node, odf, runtime, xmldom*/
 
 runtime.loadClass("xmldom.XPath");
 /**
@@ -389,7 +389,7 @@ odf.StyleInfo = function StyleInfo() {
         // continue prefixing with all child elements
         i = styleUsingElementsRoot.firstChild;
         while (i) {
-            if (i.nodeType === 1) {
+            if (i.nodeType === Node.ELEMENT_NODE) {
                 e = /**@type{!Element}*/(i);
                 prefixUsedStyleNames(e, prefix);
             }
@@ -436,7 +436,7 @@ odf.StyleInfo = function StyleInfo() {
             // prefix all set style ids
             s = styleElementsRoot.firstChild;
             while (s) {
-                if (s.nodeType === 1) {
+                if (s.nodeType === Node.ELEMENT_NODE) {
                     prefixStyleName(/**@type{!Element}*/(s), prefix);
                 }
                 s = s.nextSibling;
@@ -470,7 +470,7 @@ odf.StyleInfo = function StyleInfo() {
         // continue removal with all child elements
         i = styleUsingElementsRoot.firstChild;
         while (i) {
-            if (i.nodeType === 1) {
+            if (i.nodeType === Node.ELEMENT_NODE) {
                 e = /**@type{!Element}*/(i);
                 removeRegExpFromUsedStyleNames(e, regExp);
             }
@@ -520,7 +520,7 @@ odf.StyleInfo = function StyleInfo() {
             // remove prefix from all set style ids
             s = styleElementsRoot.firstChild;
             while (s) {
-                if (s.nodeType === 1) {
+                if (s.nodeType === Node.ELEMENT_NODE) {
                     removeRegExpFromStyleName(/**@type{!Element}*/(s), regExp);
                 }
                 s = s.nextSibling;
@@ -571,7 +571,7 @@ odf.StyleInfo = function StyleInfo() {
         // continue determination with all child elements
         i = styleUsingElementsRoot.firstChild;
         while (i) {
-            if (i.nodeType === 1) {
+            if (i.nodeType === Node.ELEMENT_NODE) {
                 e = /**@type{!Element}*/(i);
                 determineUsedStyles(e, usedStyles);
             }
@@ -656,7 +656,7 @@ odf.StyleInfo = function StyleInfo() {
         // continue determination with all child elements
         i = styleUsingElementsRoot.firstChild;
         while (i) {
-            if (i.nodeType === 1) {
+            if (i.nodeType === Node.ELEMENT_NODE) {
                 e = /**@type{!Element}*/(i);
                 determineDependentStyles(e, styleScope, knownStyles);
             }

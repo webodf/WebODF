@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, XMLSerializer, window*/
+/*global Node, runtime, core, gui, XMLSerializer, window*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.PositionFilter");
@@ -52,7 +52,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         timeoutHandle;
     function getOffset(el) {
         var x = 0, y = 0;
-        while (el && el.nodeType === 1) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+        while (el && el.nodeType === Node.ELEMENT_NODE) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
             x += el.offsetLeft - el.scrollLeft;
             y += el.offsetTop - el.scrollTop;
             el = el.parentNode;//offsetParent;
@@ -90,7 +90,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
                 }
                 rect.top = containerOffset.top;
                 rect.left = containerOffset.right;
-            } else if (container.nodeType === 3) {
+            } else if (container.nodeType === Node.TEXT_NODE) {
                 // If the container is a text node and we were not able to get the client rects for it,
                 // try using the client rects from it's previous sibling
                 if (container.previousSibling) {
@@ -488,7 +488,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      */
     this.adaptToCursorRemoval = function (nodeAfterCursor, textNodeIncrease) {
         if (textNodeIncrease === 0 || nodeAfterCursor === null
-                || nodeAfterCursor.nodeType !== 3) {
+                || nodeAfterCursor.nodeType !== Node.TEXT_NODE) {
             return;
         }
         var c = positionIterator.container();
@@ -504,7 +504,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
      */
     this.adaptToInsertedCursor = function (nodeAfterCursor, textNodeDecrease) {
         if (textNodeDecrease === 0 || nodeAfterCursor === null
-                || nodeAfterCursor.nodeType !== 3) {
+                || nodeAfterCursor.nodeType !== Node.TEXT_NODE) {
             return;
         }
         var c = positionIterator.container(),
@@ -513,7 +513,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             if (oldOffset < textNodeDecrease) {
                 do {
                     c = c.previousSibling;
-                } while (c && c.nodeType !== 3);
+                } while (c && c.nodeType !== Node.TEXT_NODE);
                 if (c) {
                     positionIterator.setPosition(c, oldOffset);
                 }

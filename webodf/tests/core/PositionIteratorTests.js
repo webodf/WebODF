@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, xmldom, ops*/
+/*global Node, runtime, core, gui, xmldom, ops*/
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("xmldom.LSSerializer");
 
@@ -272,7 +272,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
             n = iterator.nextNode();
         while (n !== null) {
-            if (n.nodeType === 3 && n.data.length > 1) {
+            if (n.nodeType === Node.TEXT_NODE && n.data.length > 1) {
                 n.splitText(1);
             }
             n = iterator.nextNode();

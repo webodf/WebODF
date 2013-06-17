@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, ops, runtime*/
+/*global Node, core, ops, runtime*/
 
 /**
  * @class
@@ -112,9 +112,9 @@ core.Cursor = function Cursor(document) {
             "cursorNode.parentNode is undefined");
 
         // Merge the left and right textnodes
-        if (prev && prev.nodeType === 3) {
+        if (prev && prev.nodeType === Node.TEXT_NODE) {
             textNodeIncrease = prev.length;
-            if (next && next.nodeType === 3) {
+            if (next && next.nodeType === Node.TEXT_NODE) {
                 if (prev.length > 0) {
                     next.insertData(0, prev.data);
                 }
@@ -134,11 +134,11 @@ core.Cursor = function Cursor(document) {
      */
     function putCursor(container, offset, onCursorAdd) {
         var text, element;
-        if (container.nodeType === 3) { // TEXT_NODE
+        if (container.nodeType === Node.TEXT_NODE) {
             text = /**@type{!Text}*/(container);
             putCursorIntoTextNode(text, offset);
             onCursorAdd(cursorNode.nextSibling, offset);
-        } else if (container.nodeType === 1) { // ELEMENT_NODE
+        } else if (container.nodeType === Node.ELEMENT_NODE) {
             element = /**@type{!Element}*/(container);
             putCursorIntoContainer(element, offset);
             onCursorAdd(cursorNode.nextSibling, 0);
@@ -213,10 +213,10 @@ core.Cursor = function Cursor(document) {
     this.getPositionInContainer = function (nodeFilter) {
         var container, offset;
 
-        if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === 3) {
+        if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === Node.TEXT_NODE) {
             container = cursorNode.previousSibling;
             offset = container.length;
-        } else if (cursorNode.nextSibling && cursorNode.nextSibling.nodeType === 3) {
+        } else if (cursorNode.nextSibling && cursorNode.nextSibling.nodeType === Node.TEXT_NODE) {
             container = cursorNode.nextSibling;
             offset = 0;
         }

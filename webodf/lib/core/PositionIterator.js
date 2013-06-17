@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core*/
+/*global Node, runtime, core*/
 /**
  * An iterator that iterators through positions in a DOM tree.
  * @constructor
@@ -50,7 +50,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      */
     function EmptyTextNodeFilter() {
         this.acceptNode = function (node) {
-            if (node.nodeType === 3 && node.length === 0) {
+            if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
                 return 2;
             }
             return 1;
@@ -63,7 +63,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      */
     function FilteredEmptyTextNodeFilter(filter) {
         this.acceptNode = function (node) {
-            if (node.nodeType === 3 && node.length === 0) {
+            if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
                 return 2;
             }
             return filter.acceptNode(node);
@@ -80,12 +80,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         if (walker.currentNode === root) {
             return false;
         }
-        if (currentPos === 0 && walker.currentNode.nodeType === 1) {
+        if (currentPos === 0 && walker.currentNode.nodeType === Node.ELEMENT_NODE) {
             // step inside an element
             if (walker.firstChild() === null) {
                 currentPos = 1;
             }
-        } else if (walker.currentNode.nodeType === 3
+        } else if (walker.currentNode.nodeType === Node.TEXT_NODE
                 && currentPos + 1 < walker.currentNode.length) {
             // advance inside a text node
             currentPos += 1;
@@ -101,10 +101,10 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     };
     function setAtEnd() {
         var type = walker.currentNode.nodeType;
-        if (type === 3) {
+        if (type === Node.TEXT_NODE) {
             currentPos = walker.currentNode.length - 1;
         } else {
-            currentPos = (type === 1) ? 1 : 0;
+            currentPos = (type === Node.ELEMENT_NODE) ? 1 : 0;
         }
     }
     /**
@@ -123,7 +123,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             } else {
                 setAtEnd();
             }
-        } else if (walker.currentNode.nodeType === 3) {
+        } else if (walker.currentNode.nodeType === Node.TEXT_NODE) {
             currentPos -= 1;
         } else if (walker.lastChild() !== null) {
             setAtEnd();
@@ -140,7 +140,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     this.container = function () {
         var n = walker.currentNode,
             t = n.nodeType;
-        if (currentPos === 0 && t !== 3) {
+        if (currentPos === 0 && t !== Node.TEXT_NODE) {
             return /**@type{!Node}*/(n.parentNode);
         }
         return n;
@@ -157,12 +157,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     this.rightNode = function () {
         var n = walker.currentNode,
             nodeType = n.nodeType;
-        if (nodeType === 3 && currentPos === n.length) {
+        if (nodeType === Node.TEXT_NODE && currentPos === n.length) {
             n = n.nextSibling;
             while (n && nodeFilter(n) !== 1) {
                 n = n.nextSibling;
             }
-        } else if (nodeType === 1 && currentPos === 1) {
+        } else if (nodeType === Node.ELEMENT_NODE && currentPos === 1) {
             n = null;
         }
         return n;
@@ -179,7 +179,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             while (n && nodeFilter(n) !== 1) {
                 n = n.previousSibling;
             }
-        } else if (n.nodeType === 1) {
+        } else if (n.nodeType === Node.ELEMENT_NODE) {
             n = n.lastChild;
             while (n && nodeFilter(n) !== 1) {
                 n = n.previousSibling;
@@ -197,7 +197,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!number}
      */
     this.offset = function () {
-        if (walker.currentNode.nodeType === 3) {
+        if (walker.currentNode.nodeType === Node.TEXT_NODE) {
             return currentPos;
         }
         var c = 0,
@@ -211,8 +211,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         while (n) {
             // neighboring texts count as 1 position
-            if (n.nodeType !== 3 || n.nextSibling !== nextNode
-                    || nextNode.nodeType !== 3) {
+            if (n.nodeType !== Node.TEXT_NODE || n.nextSibling !== nextNode
+                    || nextNode.nodeType !== Node.TEXT_NODE) {
                 c += 1;
             }
             nextNode = n;
@@ -227,7 +227,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!number}
      */
     this.domOffset = function () {
-        if (walker.currentNode.nodeType === 3) {
+        if (walker.currentNode.nodeType === Node.TEXT_NODE) {
             return currentPos;
         }
         var c = 0,
@@ -252,7 +252,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!number}
      */
     this.unfilteredDomOffset = function () {
-        if (walker.currentNode.nodeType === 3) {
+        if (walker.currentNode.nodeType === Node.TEXT_NODE) {
             return currentPos;
         }
         var c = 0,
@@ -274,13 +274,13 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!number}
      */
     this.textOffset = function () {
-        if (walker.currentNode.nodeType !== 3) {
+        if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
             return 0;
         }
         var offset = currentPos,
             n = walker.currentNode;
         // add lengths of preceding textnodes
-        while (walker.previousSibling() && walker.currentNode.nodeType === 3) {
+        while (walker.previousSibling() && walker.currentNode.nodeType === Node.TEXT_NODE) {
             offset += walker.currentNode.length;
         }
         walker.currentNode = n;
@@ -336,18 +336,18 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         var n = walker.currentNode,
             t,
             neighborhood = [];
-        if (n.nodeType !== 3) {
+        if (n.nodeType !== Node.TEXT_NODE) {
             return neighborhood;
         }
         while (walker.previousSibling()) {
-            if (walker.currentNode.nodeType !== 3) {
+            if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
                 walker.nextSibling();
                 break;
             }
         }
         do {
             neighborhood.push(walker.currentNode);
-        } while (walker.nextSibling() && walker.currentNode.nodeType === 3);
+        } while (walker.nextSibling() && walker.currentNode.nodeType === Node.TEXT_NODE);
         walker.currentNode = n;
 
         return neighborhood;
@@ -373,7 +373,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         runtime.assert((container !== null) && (container !== undefined),
             "PositionIterator.setPosition called without container");
         walker.currentNode = container;
-        if (container.nodeType === 3) {
+        if (container.nodeType === Node.TEXT_NODE) {
             currentPos = offset;
             runtime.assert(offset <= container.length, "Error in setPosition: " +
                 offset + " > " + container.length);
@@ -398,7 +398,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             prevNode = n;
             n = walker.nextSibling();
             // neighboring texts count as 1 position
-            while (n && n.nodeType === 3 && prevNode.nodeType === 3
+            while (n && n.nodeType === Node.TEXT_NODE && prevNode.nodeType === Node.TEXT_NODE
                     && n.previousSibling === prevNode) {
                 prevNode = n;
                 n = walker.nextSibling();
@@ -426,7 +426,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     this.setUnfilteredPosition = function (container, offset) {
         runtime.assert((container !== null) && (container !== undefined),
             "PositionIterator.setPosition called without container");
-        if (container.nodeType === 3) {
+        if (container.nodeType === Node.TEXT_NODE) {
             return self.setPosition(container, offset);
         }
         walker.currentNode = container;
@@ -452,7 +452,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {undefined}
      */
     this.moveToEndOfNode = function (node) {
-        if (node.nodeType === 3) {
+        if (node.nodeType === Node.TEXT_NODE) {
             self.setPosition(node, node.length);
         } else {
             walker.currentNode = node;

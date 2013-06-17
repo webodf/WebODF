@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, xmldom*/
+/*global Node, runtime, xmldom*/
 
 /**
  * RelaxNG can check a DOM tree against a Relax NG schema
@@ -160,7 +160,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     function parseChildren(c, e, elements, names) {
         var text = "", ce;
         while (c) {
-            if (c.nodeType === 1 && c.namespaceURI === rngns) {
+            if (c.nodeType === Node.ELEMENT_NODE && c.namespaceURI === rngns) {
                 ce = parse(c, elements, e);
                 if (ce) {
                     if (ce.name === "name") {
@@ -175,7 +175,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
                         e.push(ce);
                     }
                 }
-            } else if (c.nodeType === 3) {
+            } else if (c.nodeType === Node.TEXT_NODE) {
                 text += c.nodeValue;
             }
             c = c.nextSibling;

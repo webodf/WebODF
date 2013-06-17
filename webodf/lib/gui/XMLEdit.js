@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui*/
+/*global Node, runtime, core, gui*/
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.Cursor");
 //runtime.loadClass("gui.Caret");
@@ -184,7 +184,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         while (n && n !== node) {
             p = n;
             n = n.nextSibling || n.parentNode;
-            if (p.nodeType === 3 && re.test(p.nodeValue)) {
+            if (p.nodeType === Node.TEXT_NODE && re.test(p.nodeValue)) {
                 p.parentNode.removeChild(p);
             }
         }
@@ -213,7 +213,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         var n = node.firstChild;
         // recurse over the dom
         while (n && n !== node) {
-            if (n.nodeType === 1) {
+            if (n.nodeType === Node.ELEMENT_NODE) {
                 addExplicitAttributes(n);
             }
             n = n.nextSibling || n.parentNode;
@@ -225,7 +225,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
     function getNamespacePrefixes(node, prefixes) {
         var n = node.firstChild, atts, att, i;
         while (n && n !== node) {
-            if (n.nodeType === 1) {
+            if (n.nodeType === Node.ELEMENT_NODE) {
                 getNamespacePrefixes(n, prefixes);
                 atts = n.attributes;
                 for (i = atts.length - 1; i >= 0; i -= 1) {

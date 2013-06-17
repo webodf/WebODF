@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, gui, ops, odf*/
+/*global Node, runtime, core, gui, ops, odf*/
 
 runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("core.EventNotifier");
@@ -142,10 +142,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 rightNode,
                 r;
 
-            if (nodeType !== 1 && nodeType !== 3) {
+            if (nodeType !== Node.ELEMENT_NODE && nodeType !== Node.TEXT_NODE) {
                 return reject;
             }
-            if (nodeType === 3) {
+            if (nodeType === Node.TEXT_NODE) {
                 if (!odfUtils.isGroupingElement(container.parentNode)) {
                     return reject;
                 }
@@ -374,7 +374,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         // iterator should be at the start of rootNode
         if (filter.acceptPosition(iterator) === 1) {
             node = iterator.container();
-            if (node.nodeType === 3) {
+            if (node.nodeType === Node.TEXT_NODE) {
                 lastTextNode = /**@type{!Text}*/(node);
                 nodeOffset = 0;
             }
@@ -390,7 +390,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (filter.acceptPosition(iterator) === 1) {
                 position -= 1;
                 node = iterator.container();
-                if (node.nodeType === 3) {
+                if (node.nodeType === Node.TEXT_NODE) {
                     if (node !== lastTextNode) {
                         lastTextNode = /**@type{!Text}*/(node);
                         nodeOffset = iterator.domOffset();
@@ -451,7 +451,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         // After the above cursor-specific adjustment, if the lastTextNode
         // has a text node previousSibling, merge them and make the result the lastTextNode
         while (lastTextNode.previousSibling
-                && lastTextNode.previousSibling.nodeType === 3) {
+                && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
             lastTextNode.previousSibling.appendData(lastTextNode.data);
             nodeOffset = lastTextNode.length + lastTextNode.previousSibling.length;
             lastTextNode = lastTextNode.previousSibling;
@@ -528,7 +528,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         for (i = -2; i <= 2; i += 1) {
             container = iterator.container();
             offset = iterator.offset();
-            if (container.nodeType === 3
+            if (container.nodeType === Node.TEXT_NODE
                     && container.data[offset] === ' '
                     && odfUtils.isSignificantWhitespace(container, offset)) {
                 upgradeWhitespaceToElement(container, offset);
@@ -741,7 +741,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             node = node.nextSibling;
         }
         node = node && node.firstChild;
-        while (node && node.nodeType !== 3) {
+        while (node && node.nodeType !== Node.TEXT_NODE) {
             node = node.nextSibling;
         }
         return node ? node.data : null;

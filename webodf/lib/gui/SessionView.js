@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global document, runtime, gui, ops, core */
+/*global Node, document, runtime, gui, ops, core */
 
 runtime.loadClass("gui.Caret");
 runtime.loadClass("ops.TrivialUserModel");
@@ -90,7 +90,7 @@ gui.SessionView = (function () {
                 nodeMatch = createAvatarInfoNodeMatch(nodeName, className, memberId);
 
             while (node) {
-                if ((node.nodeType === 3) && (node.data.indexOf(nodeMatch) === 0)) {
+                if ((node.nodeType === Node.TEXT_NODE) && (node.data.indexOf(nodeMatch) === 0)) {
                     return node;
                 }
                 node = node.nextSibling;

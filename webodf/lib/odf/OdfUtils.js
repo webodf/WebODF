@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, odf*/
+/*global Node, runtime, odf*/
 
 /**
  * @constructor
@@ -162,7 +162,7 @@ odf.OdfUtils = function OdfUtils() {
     function scanLeftForNonWhitespace(node) {
         var r = false;
         while (node) {
-            if (node.nodeType === 3) {
+            if (node.nodeType === Node.TEXT_NODE) {
                 if (node.length === 0) {
                     node = previousNode(node);
                 } else {
@@ -193,7 +193,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     function lookLeftForCharacter(node) {
         var text, r = 0;
-        if (node.nodeType === 3 && node.length > 0) {
+        if (node.nodeType === Node.TEXT_NODE && node.length > 0) {
             text = node.data;
             if (!isODFWhitespace(text.substr(text.length - 1, 1))) {
                 r = 1; // character found
@@ -218,7 +218,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     function lookRightForCharacter(node) {
         var r = false;
-        if (node && node.nodeType === 3 && node.length > 0) {
+        if (node && node.nodeType === Node.TEXT_NODE && node.length > 0) {
             r = !isODFWhitespace(node.data.substr(0, 1));
         } else if (isCharacterElement(node)) {
             r = true;
@@ -237,7 +237,7 @@ odf.OdfUtils = function OdfUtils() {
         var r = false;
         node = node && lastChild(node);
         while (node) {
-            if (node.nodeType === 3 && node.length > 0
+            if (node.nodeType === Node.TEXT_NODE && node.length > 0
                     && !isODFWhitespace(node.data)) {
                 r = true;
                 break;
@@ -260,7 +260,7 @@ odf.OdfUtils = function OdfUtils() {
     function scanRightForAnyCharacter(node) {
         var r = false;
         while (node) {
-            if (node.nodeType === 3 && node.length > 0
+            if (node.nodeType === Node.TEXT_NODE && node.length > 0
                     && !isODFWhitespace(node.data)) {
                 r = true;
                 break;
@@ -344,7 +344,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     function getFirstNonWhitespaceChild(node) {
         var child = node.firstChild;
-        while (child && child.nodeType === 3 /* Node.TEXT_NODE */ && whitespaceOnly.test(child.nodeValue)) {
+        while (child && child.nodeType === Node.TEXT_NODE && whitespaceOnly.test(child.nodeValue)) {
             child = child.nextSibling;
         }
         return child;
