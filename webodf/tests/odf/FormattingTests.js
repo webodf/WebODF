@@ -77,7 +77,16 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "    </style:style>";
         xml += "</office:styles>";
 
-        xml += "<office:automatic-styles />";
+        xml += "<office:automatic-styles>";
+        xml += "    <text:list-style style:name='L1' style:display-name='L1 Display'>";
+        xml += "        <text:list-level-style-bullet text:level='1' text:bullet-char='*' />";
+        xml += "        <text:list-level-style-bullet text:level='2' text:bullet-char='@' />";
+        xml += "    </text:list-style>";
+        xml += "    <text:list-style style:name='L2' style:display-name='L2 Display'>";
+        xml += "        <text:list-level-style-number text:level='1' text:num-format='1' />";
+        xml += "    </text:list-style>";
+        xml += "</office:automatic-styles>";
+
 
         xml += "<office:text>" + dom + "</office:text>";
         xml += "</office:document>";
@@ -190,6 +199,72 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
+    function getAppliedStyles_SimpleList() {
+        var xml = "<text:list text:style-name='L2'><text:list-item>" +
+                    "<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>" +
+                  "</text:list-item></text:list>";
+        t.doc = createDocument(xml);
+        t.range.selectNode(t.doc.firstChild.firstChild);
+
+        t.appliedStyles = t.formatting.getAppliedStyles(t.range);
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "3");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getAppliedStyles_NestedList() {
+        var xml = "<text:list text:style-name='L1'><text:list-item>" +
+            "<text:list text:style-name='L2'><text:list-item>" +
+            "<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>" +
+            "</text:list-item></text:list>" +
+            "</text:list-item></text:list>";
+        t.doc = createDocument(xml);
+        t.range.selectNode(t.doc.firstChild.firstChild);
+
+        t.appliedStyles = t.formatting.getAppliedStyles(t.range);
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "4");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L1', displayName: 'L1 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getStyleElement_ParagraphStyle() {
+        createDocument("<text:p/>");
+
+        t.element = t.formatting.getStyleElement("P1", "paragraph");
+
+        r.shouldBeNonNull(t, "t.element");
+        r.shouldBe(t, "t.element.getAttributeNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'name')", "'P1'");
+    }
+    function getStyleElement_TextStyle() {
+        createDocument("<text:p/>");
+
+        t.element = t.formatting.getStyleElement("S1", "text");
+
+        r.shouldBeNonNull(t, "t.element");
+        r.shouldBe(t, "t.element.getAttributeNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'name')", "'S1'");
+    }
+    function getStyleElement_ListStyle() {
+        createDocument("<text:p/>");
+
+        t.element = t.formatting.getStyleElement("L2", "list-style");
+
+        r.shouldBeNonNull(t, "t.element");
+        r.shouldBe(t, "t.element.getAttributeNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'name')", "'L2'");
+    }
+    function getStyleElement_MismatchedFamily_ReturnsNull() {
+        createDocument("<text:p/>");
+
+        t.element = t.formatting.getStyleElement("L2", "paragraph");
+
+        r.shouldBeNull(t, "t.element");
+    }
     this.tests = function () {
         return [
             getAppliedStyles_SimpleHierarchy,
@@ -198,7 +273,14 @@ odf.FormattingTests = function FormattingTests(runner) {
             getAppliedStyles_StartsAfterChild,
             getAppliedStyles_CompleteContent_OnlyReportsUniqueStyles,
             getAppliedStyles_StartsAndEnds_InSameTextNode,
-            getAppliedStyles_StartsAndEnds_InDifferentTextNodes
+            getAppliedStyles_StartsAndEnds_InDifferentTextNodes,
+            getAppliedStyles_SimpleList,
+            getAppliedStyles_NestedList,
+
+            getStyleElement_ParagraphStyle,
+            getStyleElement_TextStyle,
+            getStyleElement_ListStyle,
+            getStyleElement_MismatchedFamily_ReturnsNull
         ];
     };
     this.asyncTests = function () {

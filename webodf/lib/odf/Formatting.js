@@ -47,6 +47,7 @@ odf.Formatting = function Formatting() {
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
         /**@const@type {!string}*/ svgns = odf.Namespaces.svgns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
+        /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         odfUtils = new odf.OdfUtils();
 
     /**
@@ -198,6 +199,12 @@ odf.Formatting = function Formatting() {
                             && node.localName === "style"
                             && node.getAttributeNS(stylens, 'family') === family
                             && node.getAttributeNS(stylens, 'name') === styleName) {
+                        return node;
+                    }
+                    if(family === "list-style"
+                        && node.namespaceURI === textns
+                        && node.localName === "list-style"
+                        && node.getAttributeNS(stylens, 'name') === styleName) {
                         return node;
                     }
                 }
