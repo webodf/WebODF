@@ -147,6 +147,18 @@ ops.OpRemoveText = function OpRemoveText() {
     }
 
     /**
+     * Merge all child nodes into the node's parent and remove the supplied node entirely
+     * @param {Node} node
+     */
+    function mergeIntoParent(node) {
+        var parent = node.parentNode;
+        while (node.firstChild) {
+            parent.insertBefore(node.firstChild, node);
+        }
+        node.parentNode.removeChild(node);
+    }
+
+    /**
      * Takes a given position and signed length, and returns an extended neighborhood
      * that can be safely iterated on for deletion. The initial textnode might have 
      * extra characters alongwith the characters of deletion interest. This function
@@ -290,7 +302,7 @@ ops.OpRemoveText = function OpRemoveText() {
                     // If the current node is text:s or span and is empty, it should
                     // be removed.
                     if (isEmpty(currentParent)) {
-                        currentParent.parentNode.removeChild(currentParent);
+                        mergeIntoParent(currentParent);
                     }
 
                     remainingLength -= currentLength;

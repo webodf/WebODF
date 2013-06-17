@@ -292,6 +292,15 @@
   </ops>
   <after><office:text><text:p><text:span><text:tab/><text:tab/><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
  </test>
+ <test name="Remove_DeleteLastCharacterInSpan">
+  <before><office:text><text:p>a<text:span><e:editinfo e:id="A"/>b</text:span>c</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" number="1"/>
+   <op optype="RemoveText" position="1" length="1"/>
+  </ops>
+  <after><office:text><text:p>a<c:cursor c:memberId="Bob"/><e:editinfo e:id="A"/>c</text:p></office:text></after>
+ </test>
  <test name="Remove_deleteMergeListItem">
   <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
    <ops>
