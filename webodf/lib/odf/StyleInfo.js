@@ -536,7 +536,7 @@ odf.StyleInfo = function StyleInfo() {
     /**
      * Determines all stylenames that are referenced in the passed element
      * @param {!Element} node  element to check for styles
-     * @param {Object.<string,Object.<string,number>>} [usedStyles=]  map of used styles names, grouped by style family
+     * @param {Object.<string,Object.<string,number>>=} usedStyles  map of used styles names, grouped by style family
      * @return {Object.<string,Object.<string,number>>|undefined} Returns either map of used styles, or undefined if none
      *      have been found an usedStyles was not passed in
      */
@@ -731,7 +731,7 @@ odf.StyleInfo = function StyleInfo() {
      * Object which collects all style names that are used in the passed element tree
      * @constructor
      * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
-     * @param {?Element} [automaticStylesRoot=]  Additional style information. Styles in this tree are only important
+     * @param {?Element=} automaticStylesRoot  Additional style information. Styles in this tree are only important
      *              when used as part of a chain of styles referenced from within the stylesUsingElementsRoot node
      */
     this.UsedStyleList = function (styleUsingElementsRoot, automaticStylesRoot) {

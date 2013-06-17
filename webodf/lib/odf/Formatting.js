@@ -181,7 +181,7 @@ odf.Formatting = function Formatting() {
      * Fetch style element associated with the requested name and family
      * @param {string} styleName
      * @param {string} family
-     * @param {Array.<Element>} [styleElements=] Specific style trees to search. If unspecified will search both automatic
+     * @param {Array.<Element>=} styleElements Specific style trees to search. If unspecified will search both automatic
      *  and user-created styles
      * @returns {Element}
      */
@@ -313,7 +313,7 @@ odf.Formatting = function Formatting() {
     /**
      * Builds up a style chain for a given node by climbing up all parent nodes and checking for style information
      * @param {!Node} node
-     * @param {Object.<string, Array.<Object>>} [collectedChains=] Dictionary to add any new style chains to
+     * @param {Object.<string, Array.<Object>>=} collectedChains Dictionary to add any new style chains to
      * @returns {Array.<Object>|undefined}
      */
     function buildStyleChain(node, collectedChains) {
