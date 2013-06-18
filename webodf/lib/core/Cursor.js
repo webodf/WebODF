@@ -164,11 +164,9 @@ core.Cursor = function Cursor(document) {
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
      * @param {!Range} range
-     * @param {!function(?Node,!number):undefined} onCursorRemove
-     * @param {!function(?Node,!number):undefined} onCursorAdd
      * @return {undefined}
      */
-    this.setSelectedRange = function (range, onCursorRemove, onCursorAdd) {
+    this.setSelectedRange = function (range) {
         var merge;
         if (selectedRange && selectedRange !== range) {
             selectedRange.detach();
@@ -186,10 +184,9 @@ core.Cursor = function Cursor(document) {
     };
     /**
      * Remove the cursor from the document tree.
-     * @param {!function(?Node,!number):undefined} onCursorRemove
      * @return {undefined}
      */
-    this.remove = function (onCursorRemove) {
+    this.remove = function () {
         var merge = removeCursor();
         mergeAdjacentTextNodes(merge);
     };

@@ -40,34 +40,11 @@ gui.SelectionManager = function SelectionManager(rootNode) {
     "use strict";
     var movers = [];
     /**
-     * @param {?Node} nodeAfterCursor
-     * @param {!number} textNodeIncrease
-     * @return {undefined}
-     */
-    function onCursorRemove(nodeAfterCursor, textNodeIncrease) {
-        var i;
-        for (i = 0; i < movers.length; i += 1) {
-            movers[i].adaptToCursorRemoval(nodeAfterCursor, textNodeIncrease);
-        }
-    }
-    /**
-     * @param {?Node} nodeAfterCursor
-     * @param {!number} textNodeIncrease
-     * @return {undefined}
-     */
-    function onCursorAdd(nodeAfterCursor, textNodeIncrease) {
-        var i;
-        for (i = 0; i < movers.length; i += 1) {
-            movers[i].adaptToInsertedCursor(nodeAfterCursor, textNodeIncrease);
-        }
-    }
-    /**
      * @param {core.Cursor} cursor
      * @return {!gui.SelectionMover}
      */
     this.createSelectionMover = function (cursor) {
-        var selectionMover = new gui.SelectionMover(cursor, rootNode, onCursorAdd,
-                onCursorRemove);
+        var selectionMover = new gui.SelectionMover(cursor, rootNode);
         movers.push(selectionMover);
         return selectionMover;
     };

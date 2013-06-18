@@ -41,10 +41,8 @@ runtime.loadClass("core.LoopWatchDog");
  * @constructor
  * @param {core.Cursor} cursor
  * @param {!Node} rootNode
- * @param {!function(?Node,!number):undefined=} onCursorAdd
- * @param {!function(?Node,!number):undefined=} onCursorRemove
  */
-gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCursorRemove) {
+gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     "use strict";
     var self = this,
         positionIterator,
@@ -133,15 +131,13 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             horizontalMovement;
 
         initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
-        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
-        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
         while (left > 0 && move()) {
             left -= 1;
         }
 
         selectionRange.setStart(iterator.container(), iterator.unfilteredDomOffset());
         selectionRange.collapse(true);
-        cursor.setSelectedRange(selectionRange, onCursorRemove, onCursorAdd);
+        cursor.setSelectedRange(selectionRange);
 
         newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
 
@@ -462,58 +458,12 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
             isPositionWalkable: isPositionWalkable
         };
     };
-    /**
-     * @param {?Node} nodeAfterCursor
-     * @param {!number} textNodeIncrease
-     * @return {undefined}
-     */
-    this.adaptToCursorRemoval = function (nodeAfterCursor, textNodeIncrease) {
-        if (textNodeIncrease === 0 || nodeAfterCursor === null
-                || nodeAfterCursor.nodeType !== Node.TEXT_NODE) {
-            return;
-        }
-        var c = positionIterator.container();
-        if (c === nodeAfterCursor) {
-            positionIterator.setPosition(c,
-                    positionIterator.offset() + textNodeIncrease);
-        }
-    };
-    /**
-     * @param {?Node} nodeAfterCursor
-     * @param {!number} textNodeDecrease
-     * @return {undefined}
-     */
-    this.adaptToInsertedCursor = function (nodeAfterCursor, textNodeDecrease) {
-        if (textNodeDecrease === 0 || nodeAfterCursor === null
-            || nodeAfterCursor.nodeType !== Node.TEXT_NODE) {
-            return;
-        }
-        var c = positionIterator.container(),
-            oldOffset = positionIterator.offset();
-        if (c === nodeAfterCursor) {
-            if (oldOffset < textNodeDecrease) {
-                do {
-                    c = c.previousSibling;
-                } while (c && c.nodeType !== Node.TEXT_NODE);
-                if (c) {
-                    positionIterator.setPosition(c, oldOffset);
-                }
-            } else {
-                positionIterator.setPosition(c,
-                    positionIterator.offset() - textNodeDecrease);
-            }
-        }
-    };
     function init() {
         positionIterator = gui.SelectionMover.createPositionIterator(rootNode);
-
-        onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
-        onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
-
         var range = rootNode.ownerDocument.createRange();
         range.setStart(positionIterator.container(), positionIterator.unfilteredDomOffset());
         range.collapse(true);
-        cursor.setSelectedRange(range, onCursorRemove, onCursorAdd);
+        cursor.setSelectedRange(range);
     }
     init();
 };

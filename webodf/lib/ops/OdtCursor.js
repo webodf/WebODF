@@ -71,7 +71,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      */
     this.removeFromOdtDocument = function () {
         // TODO: find out if nodeAfterCursor, textNodeIncrease need to be dealt with in any way
-        cursor.remove(function (nodeAfterCursor, textNodeIncrease) {});
+        cursor.remove();
     };
 
     /**
