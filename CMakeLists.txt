@@ -288,13 +288,12 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpCloneParagraphStyle.js
     lib/ops/OpDeleteParagraphStyle.js
     lib/ops/OperationFactory.js
+    lib/gui/SelectionMover.js
     lib/ops/OdtCursor.js
     lib/ops/EditInfo.js
-    lib/gui/SelectionMover.js
     lib/gui/Avatar.js
     lib/gui/Caret.js
     lib/gui/SessionController.js
-    lib/gui/SelectionManager.js
     lib/ops/UserModel.js
     lib/ops/TrivialUserModel.js
     lib/ops/NowjsUserModel.js

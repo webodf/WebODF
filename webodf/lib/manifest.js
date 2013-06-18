@@ -57,7 +57,6 @@
         "gui/EditInfoHandle.js",
         "gui/EditInfoMarker.js",
         "gui/SessionView.js",
-        "gui/SelectionManager.js",
         "gui/SelectionMover.js",
         "gui/XMLEdit.js",
         "odf/CommandLineTools.js",

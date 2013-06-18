@@ -30,8 +30,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, ops, runtime*/
+/*global core, ops, gui, runtime*/
 runtime.loadClass("core.Cursor");
+runtime.loadClass("gui.SelectionMover");
 
 /**
  * @class
@@ -134,7 +135,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         // mark cursornode with memberid
         cursor.getNode().setAttributeNS('urn:webodf:names:cursor', "memberId", memberId);
 
-        selectionMover = odtDocument.getSelectionManager().createSelectionMover(cursor);
+        selectionMover = new gui.SelectionMover(cursor, odtDocument.getRootNode());
     }
 
     init();

@@ -35,7 +35,6 @@
 
 /*global Node, runtime, core, gui, ops, odf*/
 
-runtime.loadClass("gui.SelectionManager");
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("odf.OdfUtils");
 
@@ -51,7 +50,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         rootNode,
-        selectionManager,
         filter,
         odfUtils,
         /**Array.<!ops.OdtCursor>*/cursors = {},
@@ -671,13 +669,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * @return {gui.SelectionManager}
-     */
-    this.getSelectionManager = function () {
-        return selectionManager;
-    };
-
-    /**
      * @param {!string} memberid
      * @return {ops.OdtCursor}
      */
@@ -768,7 +759,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function init() {
         filter = new TextPositionFilter();
         rootNode = findTextRoot(odfCanvas.odfContainer());
-        selectionManager = new gui.SelectionManager(rootNode);
         odfUtils = new odf.OdfUtils();
     }
     init();
