@@ -135,7 +135,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode, onCursorAdd, onCu
         initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
         onCursorRemove = onCursorRemove || self.adaptToCursorRemoval;
         onCursorAdd = onCursorAdd || self.adaptToInsertedCursor;
-        cursor.remove(onCursorRemove);
         while (left > 0 && move()) {
             left -= 1;
         }

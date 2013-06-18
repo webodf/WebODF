@@ -100,48 +100,49 @@ core.Cursor = function Cursor(document) {
     }
     /**
      * Remove the cursor from the tree.
-     * @param {!function(?Node,!number):undefined} onCursorRemove
-     * @return {undefined}
+     * @return {{prev: ?Node, next: ?Node}}
      */
-    function removeCursor(onCursorRemove) {
+    function removeCursor() {
         var next = cursorNode.nextSibling,
-            prev = cursorNode.previousSibling,
-            textNodeIncrease = 0;
+            prev = cursorNode.previousSibling;
 
         runtime.assert(Boolean(cursorNode.parentNode),
             "cursorNode.parentNode is undefined");
 
-        // Merge the left and right textnodes
-        if (prev && prev.nodeType === Node.TEXT_NODE) {
-            textNodeIncrease = prev.length;
-            if (next && next.nodeType === Node.TEXT_NODE) {
-                if (prev.length > 0) {
-                    next.insertData(0, prev.data);
-                }
-                prev.parentNode.removeChild(prev);
-            }
-        }
-
         cursorNode.parentNode.removeChild(cursorNode);
-        onCursorRemove(next, textNodeIncrease);
+        return {prev: prev, next: next};
+    }
+    function mergeTextNodes(node1, node2) {
+        // Merge the left and right textnodes
+        if (node1.nodeType === Node.TEXT_NODE && node2.nodeType === Node.TEXT_NODE) {
+            if (node1.length > 0) {
+                node2.insertData(0, node1.data);
+            }
+            node1.parentNode.removeChild(node1);
+        }
+    }
+    function mergeAdjacentTextNodes(nodes) {
+        if (nodes && nodes.prev && nodes.prev.nextSibling) {
+            mergeTextNodes(nodes.prev, nodes.prev.nextSibling);
+        }
+        if (nodes && nodes.next && nodes.next.previousSibling) {
+            mergeTextNodes(nodes.next.previousSibling, nodes.next);
+        }
     }
     /**
      * Put the cursor at a particular position.
      * @param {!Node} container
      * @param {!number} offset
-     * @param {!function(?Node,!number):undefined} onCursorAdd
      * @return {undefined}
      */
-    function putCursor(container, offset, onCursorAdd) {
+    function putCursor(container, offset) {
         var text, element;
         if (container.nodeType === Node.TEXT_NODE) {
             text = /**@type{!Text}*/(container);
             putCursorIntoTextNode(text, offset);
-            onCursorAdd(cursorNode.nextSibling, offset);
         } else if (container.nodeType === Node.ELEMENT_NODE) {
             element = /**@type{!Element}*/(container);
             putCursorIntoContainer(element, offset);
-            onCursorAdd(cursorNode.nextSibling, 0);
         }
     }
     /**
@@ -168,16 +169,20 @@ core.Cursor = function Cursor(document) {
      * @return {undefined}
      */
     this.setSelectedRange = function (range, onCursorRemove, onCursorAdd) {
+        var merge;
         if (selectedRange && selectedRange !== range) {
             selectedRange.detach();
         }
         selectedRange = range;
         if (cursorNode.parentNode) {
-            removeCursor(onCursorRemove);
+            merge = removeCursor();
         }
         if (range.startContainer) {
-            putCursor(range.startContainer, range.startOffset, onCursorAdd);
+            putCursor(range.startContainer, range.startOffset);
+            range.setStart(cursorNode, 0);
+            range.collapse(true);
         }
+        mergeAdjacentTextNodes(merge);
     };
     /**
      * Remove the cursor from the document tree.
@@ -185,7 +190,8 @@ core.Cursor = function Cursor(document) {
      * @return {undefined}
      */
     this.remove = function (onCursorRemove) {
-        removeCursor(onCursorRemove);
+        var merge = removeCursor();
+        mergeAdjacentTextNodes(merge);
     };
     /**
      * Returns the filtered offset of the given node
