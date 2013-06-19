@@ -99,32 +99,22 @@ gui.SessionController = (function () {
             cancelEvent(e);
         }
 
-        /**
-         * @param {!Event} e
-         */
-        function handleMouseUp(e) {
-            var selection = runtime.getWindow().getSelection(),
-                focusNode = selection.focusNode,
-                focusOffset = selection.focusOffset,
-                range,
-                steps,
-                op,
-                node,
-                odtDocument = session.getOdtDocument(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
+        function countStepsToNode(targetNode, targetOffset) {
+            var odtDocument = session.getOdtDocument(),
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                canvasElement = odtDocument.getOdfCanvas().getElement();
+                canvasElement = odtDocument.getOdfCanvas().getElement(),
+                node;
 
             // check that the node or one of its parent nodes til the canvas are
             // not belonging to a cursor, like e.g. the caret and the cursor
             // avatarflag are.
-            node = focusNode;
+            node = targetNode;
             if (!node) {
                 return;
             }
             while (node !== canvasElement) {
                 if ((node.namespaceURI === 'urn:webodf:names:cursor' && node.localName === 'cursor')
-                        || (node.namespaceURI === 'urn:webodf:names:editinfo' && node.localName === 'editinfo')) {
+                    || (node.namespaceURI === 'urn:webodf:names:editinfo' && node.localName === 'editinfo')) {
                     break;
                 }
                 node = node.parentNode;
@@ -137,32 +127,35 @@ gui.SessionController = (function () {
                 }
             }
 
-            if (node !== canvasElement && focusNode !== node) {
+            if (node !== canvasElement && targetNode !== node) {
                 // This happens when the click event has been captured by a cursor or editinfo.
                 // In that case, put the cursor in the capturer's container, just after it.
-                focusNode = node.parentNode;
-                focusOffset = Array.prototype.indexOf.call(focusNode.childNodes, node);
+                targetNode = node.parentNode;
+                targetOffset = Array.prototype.indexOf.call(targetNode.childNodes, node);
             }
 
-            // save the end position
-            range = focusNode.ownerDocument.createRange();
-            range.setStart(focusNode, focusOffset);
-            range.setEnd(focusNode, focusOffset);
-
             // create a move op with the distance to that position
-            iterator.setUnfilteredPosition(focusNode, focusOffset);
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.offset());
+            iterator.setUnfilteredPosition(targetNode, targetOffset);
+            return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.offset());
+        }
 
-            // Remove any possible selection now, as selections are not supported in WebODF ATM
-            // Used to be done by calling "selection.collapseToStart();" but it seems that
-            // older WebKits are broken and are extending the selection again on next change of the DOM,
-            // extending it to node where the DOM change happens. Removing any ranges here prevents that
-            selection.removeAllRanges();
-            selection.addRange(range); // onpaste event requires non-empty selection to fire
+        /**
+         * @param {!Event} e
+         */
+        function handleMouseUp(e) {
+            var selection = runtime.getWindow().getSelection(),
+                odtDocument = session.getOdtDocument(),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
+                stepsToAnchor,
+                stepsToFocus,
+                op;
 
-            if (steps !== 0) {
+            stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
+            stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
+
+            if (stepsToFocus !== 0 || stepsToAnchor !== 0) {
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+steps});
+                op.init({memberid: inputMemberId, position: oldPosition+stepsToAnchor, length: stepsToFocus - stepsToAnchor});
                 session.enqueue(op);
             }
         }
@@ -450,6 +443,20 @@ gui.SessionController = (function () {
             }
         }
 
+
+        // TODO: This method and associated event subscriptions really belong in SessionView
+        // As this implementation relies on the current browser selection, only a single
+        // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
+        // implemented, this limitation will be eliminated
+        function onCursorMoved(cursor) {
+            var selection;
+            if (cursor.getMemberId() === inputMemberId) {
+                selection = runtime.getWindow().getSelection();
+                selection.removeAllRanges();
+                selection.addRange(cursor.getSelectedRange().cloneRange());
+            }
+        }
+
        /**
         */
         this.startEditing = function () {
@@ -501,6 +508,12 @@ gui.SessionController = (function () {
         this.getSession = function () {
             return session;
         };
+
+        function init() {
+            var odtDocument = session.getOdtDocument();
+            odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+        }
+        init();
     };
 
     return gui.SessionController;

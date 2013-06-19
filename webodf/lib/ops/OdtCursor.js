@@ -77,14 +77,16 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
 
     /**
      * @param {!number} number
+     * @param {boolean=} extend true if range is to be expanded from the current
+     *                      point
      * @return {!number}
      */
-    this.move = function (number) {
+    this.move = function (number, extend) {
         var moved = 0;
         if (number > 0) {
-            moved = selectionMover.movePointForward(number);
+            moved = selectionMover.movePointForward(number, extend);
         } else if (number <= 0) {
-            moved = -selectionMover.movePointBackward(-number);
+            moved = -selectionMover.movePointBackward(-number, extend);
         }
         self.handleUpdate();
         return moved;
@@ -116,6 +118,15 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         return cursor.getNode();
     };
     /**
+     * Obtain the node representing the selection start point.
+     * If a 0-length range is selected (e.g., by clicking without
+     * dragging),, this will return the exact same node as getNode
+     * @returns {!Element}
+     */
+    this.getAnchorNode = function() {
+        return cursor.getAnchorNode();
+    };
+    /**
      * Obtain the currently selected range to which the cursor corresponds.
      * @return {Range}
      */
@@ -131,10 +142,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
     };
 
     function init() {
-        cursor = new core.Cursor(odtDocument.getDOM());
-        // mark cursornode with memberid
-        cursor.getNode().setAttributeNS('urn:webodf:names:cursor', "memberId", memberId);
-
+        cursor = new core.Cursor(odtDocument.getDOM(), memberId);
         selectionMover = new gui.SelectionMover(cursor, odtDocument.getRootNode());
     }
 

@@ -55,108 +55,163 @@
  *
  * @constructor
  * @param {!Document} document  The DOM document in which the cursor is placed
+ * @param {!string} memberId The memberid this cursor is assigned to
  */
-core.Cursor = function Cursor(document) {
+core.Cursor = function Cursor(document, memberId) {
     "use strict";
     var self = this,
-        /**@type{Element}*/
-        cursorNode,
+        cursorns = 'urn:webodf:names:cursor',
+        /**@type{!Element}*/
+        cursorNode = document.createElementNS(cursorns, 'cursor'),
+        /**@type{!Element}*/
+        anchorNode = document.createElementNS(cursorns, 'anchor'),
+        forwardSelection,
+        recentlyModifiedNodes = [],
         selectedRange;
 
     /**
      * Split a text node and put the cursor into it.
+     * @param {!Node} node
      * @param {!Text} container
      * @param {!number} offset
      * @return {undefined}
      */
-    function putCursorIntoTextNode(container, offset) {
+    function putIntoTextNode(node, container, offset) {
         runtime.assert(Boolean(container), "putCursorIntoTextNode: invalid container");
         var parent = container.parentNode;
         runtime.assert(Boolean(parent), "putCursorIntoTextNode: container without parent");
         runtime.assert(offset >= 0 && offset <= container.length, "putCursorIntoTextNode: offset is out of bounds");
 
         if (offset === 0) {
-            parent.insertBefore(cursorNode, container);
+            parent.insertBefore(node, container);
         } else if (offset === container.length) {
-            parent.insertBefore(cursorNode, container.nextSibling);
+            parent.insertBefore(node, container.nextSibling);
         } else {
             container.splitText(offset);
-            parent.insertBefore(cursorNode, container.nextSibling);
+            parent.insertBefore(node, container.nextSibling);
         }
     }
     /**
+     * @param {!Node} node
      * @param {!Element} container
      * @param {!number} offset
      * @return {undefined}
      */
-    function putCursorIntoContainer(container, offset) {
+    function putIntoContainer(node, container, offset) {
         runtime.assert(Boolean(container), "putCursorIntoContainer: invalid container");
-        var node = container.firstChild;
-        while (node !== null && offset > 0) {
-            node = node.nextSibling;
+        var n = container.firstChild;
+        while (n !== null && offset > 0) {
+            n = n.nextSibling;
             offset -= 1;
         }
-        container.insertBefore(cursorNode, node);
+        container.insertBefore(node, n);
     }
     /**
      * Remove the cursor from the tree.
-     * @return {{prev: ?Node, next: ?Node}}
+     * @param {!Element} node
      */
-    function removeCursor() {
-        var next = cursorNode.nextSibling,
-            prev = cursorNode.previousSibling;
-
-        runtime.assert(Boolean(cursorNode.parentNode),
-            "cursorNode.parentNode is undefined");
-
-        cursorNode.parentNode.removeChild(cursorNode);
-        return {prev: prev, next: next};
-    }
-    function mergeTextNodes(node1, node2) {
-        // Merge the left and right textnodes
-        if (node1.nodeType === Node.TEXT_NODE && node2.nodeType === Node.TEXT_NODE) {
-            if (node1.length > 0) {
-                node2.insertData(0, node1.data);
-            }
-            node1.parentNode.removeChild(node1);
-        }
-    }
-    function mergeAdjacentTextNodes(nodes) {
-        if (nodes && nodes.prev && nodes.prev.nextSibling) {
-            mergeTextNodes(nodes.prev, nodes.prev.nextSibling);
-        }
-        if (nodes && nodes.next && nodes.next.previousSibling) {
-            mergeTextNodes(nodes.next.previousSibling, nodes.next);
+    function removeNode(node) {
+        if (node.parentNode) {
+            recentlyModifiedNodes.push({prev: node.previousSibling, next: node.nextSibling});
+            node.parentNode.removeChild(node);
         }
     }
     /**
+     * Merges the content of node1 into node2 if node2 exists.
+     * If node1 is an empty text node, it will be removed
+     * @param {CharacterData} node1
+     * @param {CharacterData} node2
+     */
+    function mergeTextNodes(node1, node2) {
+        if (node1.nodeType === Node.TEXT_NODE) {
+            if (node1.length === 0) {
+                node1.parentNode.removeChild(node1);
+            } else if (node2.nodeType === Node.TEXT_NODE) {
+                node2.insertData(0, node1.data);
+                node1.parentNode.removeChild(node1);
+            }
+        }
+    }
+
+    /**
+     * Merge all text nodes near areas of impact during the most recent selection change
+     */
+    function mergeAdjacentTextNodes() {
+        recentlyModifiedNodes
+            .forEach(function(nodePair) {
+                if (nodePair.prev && nodePair.prev.nextSibling) {
+                    mergeTextNodes(nodePair.prev, nodePair.prev.nextSibling);
+                }
+                if (nodePair.next && nodePair.next.previousSibling) {
+                    mergeTextNodes(nodePair.next.previousSibling, nodePair.next);
+                }
+            });
+        recentlyModifiedNodes.length = 0;
+    }
+    /**
      * Put the cursor at a particular position.
+     * @param {!Node} node
      * @param {!Node} container
      * @param {!number} offset
      * @return {undefined}
      */
-    function putCursor(container, offset) {
+    function putNode(node, container, offset) {
         var text, element;
         if (container.nodeType === Node.TEXT_NODE) {
             text = /**@type{!Text}*/(container);
-            putCursorIntoTextNode(text, offset);
+            putIntoTextNode(node, text, offset);
         } else if (container.nodeType === Node.ELEMENT_NODE) {
             element = /**@type{!Element}*/(container);
-            putCursorIntoContainer(element, offset);
+            putIntoContainer(node, element, offset);
         }
+        recentlyModifiedNodes.push({prev: node.previousSibling, next: node.nextSibling});
+    }
+
+    /**
+     * Gets the earliest selection node in the document
+     * @returns {!Node}
+     */
+    function getStartNode() {
+        return forwardSelection ? anchorNode : cursorNode;
+    }
+
+    /**
+     * Gets the latest selection node in the document
+     * @returns {!Node}
+     */
+    function getEndNode() {
+        return forwardSelection ? cursorNode : anchorNode;
     }
     /**
-     * Obtain the node representing the cursor.
-     * @return {Element}
+     * Obtain the node representing the cursor. This is
+     * the selection end point
+     * @return {!Element}
      */
     this.getNode = function () {
         return cursorNode;
+    };
+    /**
+     * Obtain the node representing the selection start point.
+     * If a 0-length range is selected (e.g., by clicking without
+     * dragging),, this will return the exact same node as getNode
+     * @returns {!Element}
+     */
+    this.getAnchorNode = function() {
+        return anchorNode.parentNode ? anchorNode : cursorNode;
     };
     /**
      * Obtain the selection to which the cursor corresponds.
      * @return {?Range}
      */
     this.getSelectedRange = function () {
+        if (selectedRange.collapsed) {
+            selectedRange.setStartBefore(cursorNode);
+            selectedRange.collapse(true);
+        } else {
+            selectedRange.setStartAfter(getStartNode());
+            selectedRange.setEndBefore(getEndNode());
+        }
+
         return selectedRange;
     };
     /**
@@ -164,31 +219,40 @@ core.Cursor = function Cursor(document) {
      * If there is a single collapsed selection range, the cursor will be placed
      * there. If not, the cursor will be removed from the document tree.
      * @param {!Range} range
+     * @param {boolean=} isForwardSelection Set to true to indicate the direction of the
+     *                          range is startContainer => endContainer. This should be false if
+     *                          the user creates a selection that ends before it starts in the document (i.e.,
+     *                          drags the range backwards from the start point)
      * @return {undefined}
      */
-    this.setSelectedRange = function (range) {
-        var merge;
+    this.setSelectedRange = function (range, isForwardSelection) {
         if (selectedRange && selectedRange !== range) {
             selectedRange.detach();
         }
         selectedRange = range;
-        if (cursorNode.parentNode) {
-            merge = removeCursor();
+        forwardSelection = isForwardSelection !== false;
+
+        // TODO the nodes need to be added and removed in the right order to preserve the range
+        if (range.collapsed) {
+            removeNode(anchorNode);
+            removeNode(cursorNode);
+            putNode(cursorNode, /**@type {!Node}*/(range.startContainer), range.startOffset);
+        } else {
+            removeNode(anchorNode);
+            removeNode(cursorNode);
+            // putting in the end node first eliminates the chance the position of the start node is destroyed
+            putNode(getEndNode(), /**@type {!Node}*/(range.endContainer), range.endOffset);
+            putNode(getStartNode(), /**@type {!Node}*/(range.startContainer), range.startOffset);
         }
-        if (range.startContainer) {
-            putCursor(range.startContainer, range.startOffset);
-            range.setStart(cursorNode, 0);
-            range.collapse(true);
-        }
-        mergeAdjacentTextNodes(merge);
+        mergeAdjacentTextNodes();
     };
     /**
      * Remove the cursor from the document tree.
      * @return {undefined}
      */
     this.remove = function () {
-        var merge = removeCursor();
-        mergeAdjacentTextNodes(merge);
+        removeNode(cursorNode);
+        mergeAdjacentTextNodes();
     };
     /**
      * Returns the filtered offset of the given node
@@ -236,9 +300,9 @@ core.Cursor = function Cursor(document) {
     };
 
     function init() {
-        var cursorns = 'urn:webodf:names:cursor';
-
-        cursorNode = document.createElementNS(cursorns, 'cursor');
+        // mark cursornode with memberid
+        cursorNode.setAttributeNS(cursorns, "memberId", memberId);
+        anchorNode.setAttributeNS(cursorns, "memberId", memberId);
     }
 
     init();

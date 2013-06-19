@@ -42,13 +42,24 @@
 ops.OpMoveCursor = function OpMoveCursor() {
     "use strict";
 
-    var memberid, timestamp, position;
+    var memberid, timestamp, position, length;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
+        length = data.length || 0;
     };
+
+    function countSteps(number, stepCounter, positionFilter) {
+        if (number > 0) {
+            return stepCounter.countForwardSteps(number, positionFilter);
+        }
+        if (number < 0) {
+            return -stepCounter.countBackwardSteps(-number, positionFilter);
+        }
+        return 0;
+    }
 
     // TODO: instead of calling odtDocument.getCursorPosition(...) and calculating the difference
     // get the position directly and reinsert the cursor there
@@ -57,24 +68,24 @@ ops.OpMoveCursor = function OpMoveCursor() {
             oldPosition = odtDocument.getCursorPosition(memberid),
             positionFilter = odtDocument.getPositionFilter(),
             number = position - oldPosition,
-            stepCounter,
-            steps;
+            stepsToSelectionStart,
+            stepsToSelectionEnd,
+            stepCounter;
 
         if (!cursor) {
             return false;
         }
 
         stepCounter = cursor.getStepCounter();
-
-        if (number > 0) {
-            steps = stepCounter.countForwardSteps(number, positionFilter);
-        } else if (number < 0) {
-            steps = -stepCounter.countBackwardSteps(-number, positionFilter);
-        } else {
-            // nothing to do
-            return true;
+        stepsToSelectionStart = countSteps(number, stepCounter, positionFilter);
+        cursor.move(stepsToSelectionStart);
+        if (length) {
+            // if the length is non-zero (either positive or negative), this indicates that a range of nodes is
+            // being selected.
+            stepsToSelectionEnd = countSteps(length, stepCounter, positionFilter);
+            cursor.move(stepsToSelectionEnd, true);
         }
-        cursor.move(steps);
+
         odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
         return true;
     };
@@ -84,7 +95,8 @@ ops.OpMoveCursor = function OpMoveCursor() {
             optype: "MoveCursor",
             memberid: memberid,
             timestamp: timestamp,
-            position: position
+            position: position,
+            length: length
         };
     };
 

@@ -126,18 +126,31 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             iterator = getIteratorAtCursor(),
             initialRect,
             range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
-            selectionRange = (rootNode.ownerDocument.createRange()),
+            selectionRange = cursor.getSelectedRange() ? cursor.getSelectedRange().cloneRange() : (rootNode.ownerDocument.createRange()),
             newRect,
-            horizontalMovement;
+            horizontalMovement,
+            o, c,
+            isForwardSelection;
 
         initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
         while (left > 0 && move()) {
             left -= 1;
         }
 
-        selectionRange.setStart(iterator.container(), iterator.unfilteredDomOffset());
-        selectionRange.collapse(true);
-        cursor.setSelectedRange(selectionRange);
+        if (extend) {
+            c = iterator.container();
+            o = iterator.unfilteredDomOffset();
+            if (selectionRange.comparePoint(c, o) === -1) {
+                selectionRange.setStart(c, o);
+                isForwardSelection = false;
+            } else {
+                selectionRange.setEnd(c, o);
+            }
+        } else {
+            selectionRange.setStart(iterator.container(), iterator.unfilteredDomOffset());
+            selectionRange.collapse(true);
+        }
+        cursor.setSelectedRange(selectionRange, isForwardSelection);
 
         newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
 

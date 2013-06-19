@@ -630,7 +630,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
         return steps;
     };
-
     /**
      * This function returns the position in ODF world of the cursor of the member.
      * @param {!string} memberid
@@ -640,6 +639,27 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return -self.getDistanceFromCursor(memberid, rootNode, 0);
     };
 
+    /**
+     * This function returns the position and selection length in ODF world of
+     * the cursor of the member
+     * @param {!string} memberid
+     * @returns {{position: !number, length: !number}}
+     */
+    this.getCursorSelection = function(memberid) {
+        var counter,
+            cursor = cursors[memberid],
+            position = 0,
+            length = 0;
+        if (cursor) {
+            counter = cursor.getStepCounter().countStepsToPosition;
+            position = -counter(rootNode, 0, filter);
+            length = counter(cursor.getAnchorNode(), 0, filter);
+        }
+        return {
+            position: position,
+            length: length
+        };
+    };
     /**
      * @return {!core.PositionFilter}
      */
