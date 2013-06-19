@@ -55,16 +55,16 @@ define("webodf/editor/widgets/paragraphStyles",
         this.setValue = function (value) {
             select.set('value', value);
         };
-        
+
         // events
         this.onAdd = null;
         this.onRemove = null;
-        
+
         function populateStyles() {
             var i, availableStyles, selectionList;
             selectionList = [];
             availableStyles = editorSession.getAvailableParagraphStyles();
-            
+
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
                     label: availableStyles[i].displayName,
@@ -79,7 +79,7 @@ define("webodf/editor/widgets/paragraphStyles",
         function init(cb) {
             require(["dijit/form/Select"], function (Select) {
                 var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-                 
+
                 select = new Select({
                     name: 'ParagraphStyles',
                     maxHeight: 200,
@@ -89,14 +89,14 @@ define("webodf/editor/widgets/paragraphStyles",
                 });
 
                 populateStyles();
-                
+
                 editorSession.subscribe(EditorSession.signalStyleCreated, function (newStyleName) {
                     var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
                     select.addOption({
                         value: newStyleName,
                         label: newStyleElement.getAttributeNS(stylens, 'display-name')
                     });
-                    
+
                     if (self.onAdd) {
                         self.onAdd(newStyleName);
                     }
@@ -104,7 +104,7 @@ define("webodf/editor/widgets/paragraphStyles",
 
                 editorSession.subscribe(EditorSession.signalStyleDeleted, function (styleName) {
                     select.removeOption(styleName);
-                    
+
                     if (self.onRemove) {
                         self.onRemove(styleName);
                     }
@@ -112,11 +112,11 @@ define("webodf/editor/widgets/paragraphStyles",
                 return cb();
             });
         }
-    
+
         init(function () {
             return callback(self);
         });
     };
-        
+
     return ParagraphStyles;
 });

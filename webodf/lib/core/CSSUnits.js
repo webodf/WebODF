@@ -47,7 +47,7 @@ core.CSSUnits = function CSSUnits() {
         "pt": 72,
         "pc": 12
     };
-    
+
     /**
      * Takes a number of an oldUnit and returns it's value in newUnit
      * @param {number} value
@@ -58,7 +58,7 @@ core.CSSUnits = function CSSUnits() {
     this.convert = function (value, oldUnit, newUnit) {
         return (value * sizemap[newUnit] / sizemap[oldUnit]);
     };
-    
+
     /**
      * Takes a measure such as "2cm" and returns it's measurement in newUnit, e.g. "20mm"
      * @param {!string} measure
@@ -70,7 +70,7 @@ core.CSSUnits = function CSSUnits() {
         if (measure && newUnit) {
             value = parseFloat(measure);
             oldUnit = measure.replace(value.toString(), "");
-        
+
             newMeasure = this.convert(value, oldUnit, newUnit);
         } else {
             newMeasure = '';

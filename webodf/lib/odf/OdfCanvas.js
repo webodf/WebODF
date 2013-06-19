@@ -544,7 +544,7 @@ odf.OdfCanvas = (function () {
             node;
 
         function modifyTableCell(container, node, stylesheet) {
-            // If we have a cell which spans columns or rows, 
+            // If we have a cell which spans columns or rows,
             // then add col-span or row-span attributes.
             if (node.hasAttributeNS(tablens, "number-columns-spanned")) {
                 node.setAttribute("colspan",
@@ -561,7 +561,7 @@ odf.OdfCanvas = (function () {
             modifyTableCell(container, node, stylesheet);
         }
     }
-    
+
     /**
      * Modify ODF links to work like HTML links.
      * @param {!Object} container
@@ -611,7 +611,7 @@ odf.OdfCanvas = (function () {
 
             node.onclick = clickHandler;
         }
-        
+
         // All links are of name text:a.
         links = odffragment.getElementsByTagNameNS(textns, 'a');
         for (i = 0; i < links.length; i += 1) {
@@ -1065,7 +1065,7 @@ odf.OdfCanvas = (function () {
                 sizer.style.OTransformOrigin = 'left top';
                 sizer.style.msTransformOrigin = 'left top';
             }
-            
+
             sizer.style.WebkitTransform = 'scale(' + zoomLevel + ')';
             sizer.style.MozTransform = 'scale(' + zoomLevel + ')';
             sizer.style.OTransform = 'scale(' + zoomLevel + ')';
@@ -1098,7 +1098,7 @@ odf.OdfCanvas = (function () {
             element.appendChild(sizer);
 
             // A "Shadow Content" div. This will contain stuff like pages extracted from
-            // <style:master-page>. These need to be nicely styled, so we will populate this 
+            // <style:master-page>. These need to be nicely styled, so we will populate this
             // in the ODF body first. Once the styling is handled, it can then be lifted out of the
             // ODF body and placed beside it, to not pollute the ODF dom.
             shadowContent = doc.createElementNS(element.namespaceURI, 'div');

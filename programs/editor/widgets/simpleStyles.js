@@ -120,11 +120,11 @@ define("webodf/editor/widgets/simpleStyles",
                     }
                 }
             });
-            
+
             function loadStyle(styleName) {
                 var fontWeight, fontStyle, underline, strikethrough, textProperties;
                 textProperties = editorSession.getParagraphStyleAttributes(styleName)['style:text-properties'];
-                
+
                 fontWeight = textProperties['fo:font-weight'];
                 fontStyle = textProperties['fo:font-style'];
                 underline = textProperties['style:text-underline-style'];

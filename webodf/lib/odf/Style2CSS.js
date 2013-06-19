@@ -442,7 +442,7 @@ odf.Style2CSS = function Style2CSS() {
         if (value === 'solid') {
             textDecoration += ' line-through';
         }
- 
+
         if (textDecoration.length) {
             textDecoration = 'text-decoration:' + textDecoration + ';';
             rule += textDecoration;
@@ -823,7 +823,7 @@ odf.Style2CSS = function Style2CSS() {
         rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
         return rule;
     }
- 
+
     /**
      * @param {!StyleSheet} sheet
      * @param {!string} name
@@ -888,7 +888,7 @@ odf.Style2CSS = function Style2CSS() {
     // elements
 
     /**
-     * @param {!string} doctype 
+     * @param {!string} doctype
      * @param {!StyleSheet} stylesheet
      * @param {!Object.<string,string>} fontFaceMap
      * @param {!Element} styles

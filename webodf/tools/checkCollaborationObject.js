@@ -71,7 +71,7 @@ function checkOperationsOnSession(session, operations) {
             runtime.log("operation " + operation.name + " is missing.");
             hasErrors = true;
         }
-            
+
     }
     return hasErrors;
 }

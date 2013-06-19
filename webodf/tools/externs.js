@@ -237,7 +237,7 @@ Packages.javax.xml.parsers.DocumentBuilder = function () {"use strict"; };
 Packages.javax.xml.parsers.DocumentBuilder.prototype.setEntityResolver =
     function (entityresolver) {"use strict"; };
 /**
- * @param {!Packages.org.xml.sax.InputSource} source 
+ * @param {!Packages.org.xml.sax.InputSource} source
  * @return {Document}
  */
 Packages.javax.xml.parsers.DocumentBuilder.prototype.parse =

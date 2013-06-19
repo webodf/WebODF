@@ -240,11 +240,11 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
                     });
             };
         },
-    
+
         create: function (operation, callback, scope) {
             finishOperation(this, operation, callback, scope);
         },
-    
+
         read: function (operation, callback, scope) {
             var me = this,
                 records = scanner.files;
@@ -262,15 +262,15 @@ Ext.define("WebODFApp.model.FileSystemProxy", (function () {
             // announce success
             operation.setSuccessful();
             operation.setCompleted();
-    
+
             // finish with callback
             Ext.callback(callback, scope || me, [operation]);
         },
-    
+
         update: function (operation, callback, scope) {
             finishOperation(this, operation, callback, scope);
         },
-    
+
         destroy: function (operation, callback, scope) {
             finishOperation(this, operation, callback, scope);
         }

@@ -38,7 +38,7 @@ runtime.loadClass("core.Base64");
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.OdfContainer");
 /**
- * This class loads embedded fonts into the CSS 
+ * This class loads embedded fonts into the CSS
  * @constructor
  * @return {?}
  **/

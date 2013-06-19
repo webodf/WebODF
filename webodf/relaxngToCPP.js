@@ -131,7 +131,7 @@ function parseAttributes(e, att) {
     } else if (e.name === "data") {
         att.types.push(e.a.type);
     } else if (e.name === "list") {
-        name = null; // todo 
+        name = null; // todo
     } else if (e.name === "empty") {
         att.empty = true;
     } else {
@@ -285,13 +285,13 @@ function writeMembers(e, atts, optional) {
     } else if (e.name === "oneOrMore") {
         writeMembers(e.e[0], atts, optional);
     } else if (e.name === "value") {
-        name = null; // todo 
+        name = null; // todo
     } else if (e.name === "data") {
-        name = null; // todo 
+        name = null; // todo
     } else if (e.name === "text") {
         out("    void addTextNode(const QString& str) { xml->addTextNode(str); }");
     } else if (e.name === "empty") {
-        name = null; // todo 
+        name = null; // todo
     } else {
         runtime.log("OOPS " + e.name);
         throw null;

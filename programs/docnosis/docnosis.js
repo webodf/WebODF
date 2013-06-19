@@ -615,7 +615,7 @@ function JobRunner(datarenderer) {
         data,
         busy = false,
         todo = [];
-        
+
     jobtypes.push(new UnpackJob());
     jobtypes.push(new MimetypeTestJob());
     jobtypes.push(new GetThumbnailJob());

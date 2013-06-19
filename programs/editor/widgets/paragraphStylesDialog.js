@@ -75,7 +75,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
 
                 dialog.hide();
             }
-            
+
             function cancel() {
                 dialog.hide();
             }
@@ -98,7 +98,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             dialog = new Dialog({
                 title: translator("paragraphStyles")
             });
-            
+
             cloneTooltip = new TooltipDialog({
                 content:
                     '<h2 style="margin: 0;">Clone this style</h2><br/>' +
@@ -190,7 +190,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                         // Set the first style name as current
                         stylePicker.setValue(stylePicker.widget().getOptions(0));
                     };
-                    
+
                     stylePicker.widget().onChange = openStyle;
                 });
                 a = new AlignmentPane(editorSession, function (pane) {
@@ -216,7 +216,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     }
                 };
             });
-            
+
             tabContainer.startup();
 
             return callback(dialog);

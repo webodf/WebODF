@@ -318,7 +318,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * returns a string of text contents within the "extended neighborhood"
-     * (see this.getTextNeighborhood). the function will return less 
+     * (see this.getTextNeighborhood). the function will return less
      * characters than requested, if too few characters are available.
      * the function will never return more characters then requested.
      * parameters position and length specify the extended neighborhood
@@ -422,7 +422,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
             // The lastTextNode is not "" if the position is at the end of a paragraph.
             // We definitely need ephemeral empty text nodes instead of a lastTextNode representing
-            // all the previous text, to prevent insertion by one cursor causing movement of the other 
+            // all the previous text, to prevent insertion by one cursor causing movement of the other
             // cursors at the same position.
             if (cursorNode && lastTextNode.length > 0) {
                 lastTextNode = rootNode.ownerDocument.createTextNode('');

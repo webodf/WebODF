@@ -99,7 +99,7 @@ core.CursorTests = function CursorTests(runner) {
         },
         function testOnSimpleText() {
             setupSimpleTextDoc();
-            // put the cursor at the start of the text node 
+            // put the cursor at the start of the text node
             setSelection(t.textnode, 0);
             r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             r.shouldBeNull(t, "t.cursor.getNode().previousSibling");
@@ -107,7 +107,7 @@ core.CursorTests = function CursorTests(runner) {
         },
         function testOnSimpleText2() {
             setupSimpleTextDoc();
-            // put the cursor in the middle of the text node 
+            // put the cursor in the middle of the text node
             setSelection(t.textnode, 1);
             r.shouldBeNonNull(t, "t.cursor.getNode().parentNode");
             r.shouldBe(t, "t.cursor.getNode().previousSibling.nodeValue", "'a'");

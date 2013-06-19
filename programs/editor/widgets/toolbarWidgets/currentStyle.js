@@ -42,13 +42,13 @@ define("webodf/editor/widgets/toolbarWidgets/currentStyle",
             var paragraphStyles, widget;
 
             paragraphStyles = new ParagraphStyles(editorSession, function (pStyles) {
-                // if the current paragraph style changes, update the widget 
+                // if the current paragraph style changes, update the widget
                 editorSession.subscribe(EditorSession.signalParagraphChanged, function (info) {
                     if (info.type === 'style') {
                         pStyles.widget().set("value", info.styleName);
                     }
                 });
-                
+
                 pStyles.widget().onChange = function (value) {
                     editorSession.setCurrentParagraphStyle(value);
                 };

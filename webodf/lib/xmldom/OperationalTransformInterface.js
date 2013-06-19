@@ -36,7 +36,7 @@
  * transformations. The interface is modelled after Google Wave.
  * Manual editing of XML documents will also be done via this interface.
  *
- * 
+ *
  * @class
  * @interface
  */

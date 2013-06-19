@@ -305,7 +305,7 @@ define("webodf/editor/EditorSession", [
         this.getParagraphStyleElement = function (styleName) {
             return odtDocument.getParagraphStyleElement(styleName);
         };
-        
+
         /**
          * Returns if the style is used anywhere in the document
          * @param {!Element} styleElement

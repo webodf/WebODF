@@ -78,7 +78,7 @@ function listFiles(startdir, filepattern, fileCallback, doneCallback) {
         if (!xml) {
             throw new Error('No proper XML response.');
         }
-        
+
         var refs = xml.getElementsByTagNameNS('DAV:', 'response'),
             directories = [],
             files = [],

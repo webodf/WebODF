@@ -42,7 +42,7 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
         document = /**@type{!Document}*/(parentElement.ownerDocument),
         htmlns = document.documentElement.namespaceURI,
         editinfons = 'urn:webodf:names:editinfo';
-    
+
     function renderEdits() {
         var i, infoDiv, colorSpan, authorSpan, timeSpan;
         handle.innerHTML = '';
@@ -86,7 +86,7 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     function init() {
         handle = document.createElementNS(htmlns, "div");
         handle.setAttribute('class', 'editInfoHandle');
-        
+
         handle.style.display = 'none';
         parentElement.appendChild(handle);
     }

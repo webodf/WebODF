@@ -66,13 +66,13 @@ function selectScaleOption(value) {
 }
 
 // that should probably be provided by webodf
-function nsResolver(prefix) {  
-    var ns = {  
+function nsResolver(prefix) {
+    var ns = {
         'draw' : "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         'presentation' : "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
         'text' : "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         'office' : "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
-    };  
+    };
     return ns[prefix] || alert('prefix ['+prefix+'] unknown.');
 }
 
@@ -115,7 +115,7 @@ var Viewer = {
         this.element = document.getElementById('viewer');
         this.url = location;
         this.filename = this.url.replace(/^.*[\\\/]/, '');
-        
+
         this.odfElement = document.getElementById('canvas');
         this.odfCanvas = new odf.OdfCanvas(this.odfElement);
         this.odfCanvas.load(location);
@@ -131,7 +131,7 @@ var Viewer = {
             self.root = self.odfCanvas.odfContainer().rootElement;
             self.initialized = true;
             self.documentType = getDocumentType(self.root);
-            
+
             if(self.documentType == 'presentation') {
                 // temporary hack: remove zoom buttons to make way for the navigation controls
                 document.getElementById('toolbarMiddleContainer').style.visibility = 'hidden';
@@ -183,7 +183,7 @@ var Viewer = {
             }
         }
     },
-    
+
     zoomLevel: function() {
         return this.odfCanvas.getZoomLevel();
     },
@@ -193,7 +193,7 @@ var Viewer = {
           return;
 
         this.odfCanvas.setZoomLevel(val);
-        
+
         var event = document.createEvent('UIEvents');
         event.initUIEvent('scalechange', false, false, window, 0);
         event.scale = val;
@@ -273,7 +273,7 @@ var Viewer = {
             n = 1;
         else if (n > this.pages.length)
             n = this.pages.length;
-        
+
         this.odfCanvas.showPage(n);
         this.currentPage = n;
         document.getElementById('pageNumber').value = this.currentPage;
@@ -290,7 +290,7 @@ var Viewer = {
 
 window.onload = function() {
     Viewer.initialize();
-    
+
     document.getElementById('fullscreen').addEventListener('click', function() {
         Viewer.toggleFullScreen();
     });

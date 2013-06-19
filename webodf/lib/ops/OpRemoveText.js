@@ -160,7 +160,7 @@ ops.OpRemoveText = function OpRemoveText() {
 
     /**
      * Takes a given position and signed length, and returns an extended neighborhood
-     * that can be safely iterated on for deletion. The initial textnode might have 
+     * that can be safely iterated on for deletion. The initial textnode might have
      * extra characters alongwith the characters of deletion interest. This function
      * deletes the target characters, and then computes a neighborhood that consists
      * of the remaining text nodes, which is all that is needed for further deletion.

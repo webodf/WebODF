@@ -35,7 +35,7 @@
 /*
 * @preserve
 * WebODF
-* Copyright (c) 2010 Jos van den Oever 
+* Copyright (c) 2010 Jos van den Oever
 * Licensed under the ... License:
 *
 * Project home: http://www.webodf.org/
@@ -68,8 +68,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @return {!number}
      */
     function crc32(data) {
-        // Calculate the crc32 polynomial of a string  
-        // 
+        // Calculate the crc32 polynomial of a string
+        //
         // version: 1009.2513
         // discuss at: http:\/\/phpjs.org\/functions\/crc32
         // +   original by: Webtoolkit.info (http:\/\/www.webtoolkit.info\/)

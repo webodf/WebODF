@@ -154,7 +154,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
 
         marker = dom.createElementNS(htmlns, "div");
         marker.setAttribute("class", "editInfoMarker");
-        
+
         marker.onmouseover = function () {
             self.showHandle();
         };
