@@ -438,7 +438,7 @@ odf.Style2CSS = function Style2CSS() {
     function getFontSize(styleNode) {
         var props = getDirectChild(/**@type{Element}*/(styleNode), stylens, 'text-properties');
         if (props) {
-            return utils.parseFontSize(props.getAttributeNS(fons, 'font-size'));
+            return utils.parseLength(props.getAttributeNS(fons, 'font-size'));
         }
         return null;
     }
@@ -539,7 +539,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getParagraphProperties(props) {
-        var rule = '', imageProps, url, element, value;
+        var rule = '', imageProps, url, element, lineHeight;
         rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
         imageProps = props.getElementsByTagNameNS(stylens, 'background-image');
         if (imageProps.length > 0) {
@@ -552,12 +552,13 @@ odf.Style2CSS = function Style2CSS() {
             }
         }
 
-        value = props.getAttributeNS(fons, 'line-height');
-        if (value && value !== 'normal') {
-            if (value.indexOf('%') === -1) {
-                rule += 'line-height: ' + value + ';';
+        lineHeight = props.getAttributeNS(fons, 'line-height');
+        if (lineHeight && lineHeight !== 'normal') {
+            lineHeight = utils.parseLength(lineHeight);
+            if (lineHeight.unit !== '%') {
+                rule += 'line-height: ' + lineHeight.value + ';';
             } else {
-                rule += 'line-height: ' + parseFloat(value) / 100 + ';';
+                rule += 'line-height: ' + lineHeight.value / 100 + ';';
             }
         }
 

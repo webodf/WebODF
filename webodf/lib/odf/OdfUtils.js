@@ -356,7 +356,7 @@ odf.OdfUtils = function OdfUtils() {
      * @param {!string} positiveLength
      * @return {?{value:!number,unit:!string}}
      */
-    function parseFontSize(positiveLength) {
+    function parseLength(positiveLength) {
         var re = /-?([0-9]*[1-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px)|(%))/,
             m = re.exec(positiveLength);
         if (!m) {
@@ -364,5 +364,5 @@ odf.OdfUtils = function OdfUtils() {
         }
         return {value: parseFloat(m[1]), unit: m[3]};
     }
-    this.parseFontSize = parseFontSize;
+    this.parseLength = parseLength;
 };
