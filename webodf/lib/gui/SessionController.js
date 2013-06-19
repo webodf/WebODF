@@ -264,20 +264,20 @@ gui.SessionController = (function () {
          */
         function createOpRemoveTextByBackspaceKey() {
             var odtDocument = session.getOdtDocument(),
-                position = odtDocument.getCursorPosition(inputMemberId),
+                selection = odtDocument.getCursorSelection(inputMemberId),
                 domPosition,
                 op = null;
 
-            if (position > 0) {
+            if (selection.position > 0) {
                 // position-1 must exist for backspace to be valid
-                domPosition = odtDocument.getPositionInTextNode(position - 1);
+                domPosition = odtDocument.getPositionInTextNode(selection.position - 1);
 
                 if (domPosition) {
                     op = new ops.OpRemoveText();
                     op.init({
                         memberid: inputMemberId,
-                        position: position,
-                        length: -1
+                        position: selection.position,
+                        length: selection.length || -1
                     });
                 }
             }
