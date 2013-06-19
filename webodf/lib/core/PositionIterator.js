@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, runtime, core*/
+/*global Node, runtime, core, NodeFilter*/
 /**
  * An iterator that iterators through positions in a DOM tree.
  * @constructor
