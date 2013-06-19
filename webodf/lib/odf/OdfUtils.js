@@ -350,4 +350,19 @@ odf.OdfUtils = function OdfUtils() {
         return child;
     }
     this.getFirstNonWhitespaceChild = getFirstNonWhitespaceChild;
+
+    /**
+     * Returns the font size split as value and unit, from an ODF attribute
+     * @param {!string} positiveLength
+     * @return {?{value:!number,unit:!string}}
+     */
+    function parseFontSize(positiveLength) {
+        var re = /-?([0-9]*[1-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px)|(%))/,
+            m = re.exec(positiveLength);
+        if (!m) {
+            return null;
+        }
+        return {value: parseFloat(m[1]), unit: m[3]};
+    }
+    this.parseFontSize = parseFontSize;
 };

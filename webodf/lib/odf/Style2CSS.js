@@ -434,13 +434,14 @@ odf.Style2CSS = function Style2CSS() {
     /**
      * Returns the font size attribute value from the text properties of a style node
      * @param {!Node} styleNode
-     * @return {string}
+     * @return {?{value: !number, unit: !string}}
      */
     function getFontSize(styleNode) {
         var props = getDirectChild(/**@type{Element}*/(styleNode), stylens, 'text-properties');
         if (props) {
-            return props.getAttributeNS(fons, 'font-size');
+            return utils.parseFontSize(props.getAttributeNS(fons, 'font-size'));
         }
+        return null;
     }
 
     /*
@@ -514,13 +515,12 @@ odf.Style2CSS = function Style2CSS() {
             if (fontSize) {
                 // If the current style's font size is a non-% value, then apply the multiplier to get the child style (with the %)'s
                 // actual font size. And now we can stop crawling up the style ancestry since we have a concrete font size.
-                if (fontSize.indexOf('%') === -1) {
-                    fontSize = parseFloat(fontSize) * sizeMultiplier + cssUnits.getUnits(fontSize);
-                    fontSizeRule = 'font-size: ' + fontSize + ';';
+                if (fontSize.unit !== '%') {
+                    fontSizeRule = 'font-size: ' + (fontSize.value * sizeMultiplier) + fontSize.unit + ';';
                     break;
                 } else {
                 // If we got a % font size for the current style, then update the multiplier with it's 'normalized' multiplier
-                    sizeMultiplier *= (parseFloat(fontSize) / 100);
+                    sizeMultiplier *= (fontSize.value / 100);
                 }
             }
             // Crawl up the style ancestry
@@ -528,7 +528,7 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         // If there was nothing in the ancestry that specified a concrete font size, just apply the multiplier onto the page's default font size.
-        if (!fontSize) {
+        if (!fontSizeRule) {
             fontSizeRule = 'font-size: ' + parseFloat(defaultFontSize) * sizeMultiplier + cssUnits.getUnits(defaultFontSize) + ';';
         }
 
