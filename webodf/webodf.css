@@ -67,6 +67,10 @@ office|presentation {
   display: inline-block;
   text-align: left;
 }
+#shadowContent {
+  display: inline-block;
+  text-align: left;
+}
 draw|page {
   display: block;
   position: relative;
