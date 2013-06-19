@@ -62,7 +62,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         testarea.appendChild(p);
         p.appendChild(text);
         p.style.width = "5em";// break line after each 'MMMMM'
-        cursor = new core.Cursor(domDocument);
+        cursor = new core.Cursor(domDocument, "Joe");
         mover = new gui.SelectionMover(cursor, p);
         t = { doc: domDocument, p: p, mover: mover, cursor: cursor };
     }
@@ -74,7 +74,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             cursor,
             node = /**@type{!Element}*/(domDocument.importNode(doc.documentElement, true));
         testarea.appendChild(node);
-        cursor = new core.Cursor(domDocument);
+        cursor = new core.Cursor(domDocument, "Joe");
         mover = new gui.SelectionMover(cursor, node);
         t = { doc: doc, root: node, mover: mover, cursor: cursor };
     }

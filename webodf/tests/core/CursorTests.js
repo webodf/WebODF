@@ -68,7 +68,7 @@ core.CursorTests = function CursorTests(runner) {
 
     function setupEmptyRootNode() {
         var root = domDocument.createElementNS(ns, "p"),
-            cursor = new core.Cursor(domDocument);
+            cursor = new core.Cursor(domDocument, "Joe");
         testarea.appendChild(root);
         t = { root: root, cursor: cursor };
         runner.shouldBeNonNull(t, "t.cursor.getSelectedRange()");
