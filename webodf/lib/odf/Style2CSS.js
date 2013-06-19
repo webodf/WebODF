@@ -472,6 +472,10 @@ odf.Style2CSS = function Style2CSS() {
         return rule;
     }
 
+    /**
+     * @param {!string} hex
+     * @return {?{ r: number, g: number, b: number}}
+     */
     function hexToRgb(hex) {
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
         var result,
@@ -508,11 +512,13 @@ odf.Style2CSS = function Style2CSS() {
             if (bgcolor && bgcolor !== 'none') {
                 alpha = isNumber(alpha) ? parseFloat(alpha) / 100 : 1;
                 bgcolor = hexToRgb(bgcolor);
-                rule += "background-color: rgba("
-                    + bgcolor.r + ","
-                    + bgcolor.g + ","
-                    + bgcolor.b + ","
-                    + alpha + ");";
+                if (bgcolor) {
+                    rule += "background-color: rgba("
+                        + bgcolor.r + ","
+                        + bgcolor.g + ","
+                        + bgcolor.b + ","
+                        + alpha + ");";
+                }
             } else {
                 rule += "background: none;";
             }

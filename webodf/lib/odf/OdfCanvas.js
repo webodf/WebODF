@@ -347,7 +347,7 @@ odf.OdfCanvas = (function () {
      * @return {Node}
      */
     function getMasterPage(odfContainer, masterPageName) {
-        if (!Boolean(masterPageName)) {
+        if (!masterPageName) {
             return null;
         }
 
@@ -368,7 +368,7 @@ odf.OdfCanvas = (function () {
     /**
      * @param {!odf.OdfContainer} odfContainer
      * @param {!string} id
-     * @param {!Element} frame
+     * @param {!Node} frame
      * @param {!StyleSheet} stylesheet
      * @return {undefined}
      **/
@@ -407,7 +407,7 @@ odf.OdfCanvas = (function () {
                 if (node.getAttributeNS(presentationns, 'placeholder') !== 'true') {
                     clonedNode = node.cloneNode(true);
                     clonedPage.appendChild(clonedNode);
-                    setFramePosition(odfContainer, id + '_' + j, clonedNode, stylesheet);
+                    setFramePosition(odfContainer, id + '_' + j, /**@type{!Node}*/(clonedNode), stylesheet);
                 }
                 node = node.nextSibling;
                 j += 1;
