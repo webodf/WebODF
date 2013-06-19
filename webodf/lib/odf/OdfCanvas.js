@@ -343,6 +343,30 @@ odf.OdfCanvas = (function () {
 
     /**
      * @param {!odf.OdfContainer} odfContainer
+     * @param {!string} masterPageName
+     * @return {Node}
+     */
+    function getMasterPage(odfContainer, masterPageName) {
+        if (!Boolean(masterPageName)) {
+            return null;
+        }
+
+        var masterStyles = odfContainer.rootElement.masterStyles,
+            masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page'),
+            masterPage = null,
+            i;
+
+        for (i = 0; i < masterPages.length; i += 1) {
+            if (masterPages[i].getAttributeNS(stylens, 'name') === masterPageName) {
+                masterPage = masterPages[i];
+                break;
+            }
+        }
+        return masterPage;
+    }
+
+    /**
+     * @param {!odf.OdfContainer} odfContainer
      * @param {!string} id
      * @param {!Element} frame
      * @param {!StyleSheet} stylesheet
@@ -359,8 +383,6 @@ odf.OdfCanvas = (function () {
             minheight = frame.getAttributeNS(fons, 'min-height'),
             minwidth = frame.getAttributeNS(fons, 'min-width'),
             masterPageName = frame.getAttributeNS(drawns, 'master-page-name'),
-            masterStyles,
-            masterPages = null,
             masterPage = null,
             i,
             j,
@@ -372,53 +394,45 @@ odf.OdfCanvas = (function () {
             document = odfContainer.rootElement.ownerDocument;
 
         // If there was a master-page-name attribute, then we are dealing with a page.
-        if (masterPageName) {
-            masterStyles = odfContainer.rootElement.masterStyles;
-            masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page');
-            // Get the referenced master page element from the master styles
-            for (i = 0; i < masterPages.length; i += 1) {
-                if (masterPages[i].getAttributeNS(stylens, 'name') === masterPageName) {
-                    masterPage = masterPages[i];
-                    break;
+        // Get the referenced master page element from the master styles
+        masterPage = getMasterPage(odfContainer, masterPageName);
+
+        // If the referenced master page exists, create a new page and copy over it's contents into the new page,
+        // except for the ones that are placeholders. Also, call setFramePosition on each of those child frames.
+        if (masterPage) {
+            clonedPage = document.createElementNS(drawns, 'draw:page');
+            node = masterPage.firstChild;
+            j = 0;
+            while (node) {
+                if (node.getAttributeNS(presentationns, 'placeholder') !== 'true') {
+                    clonedNode = node.cloneNode(true);
+                    clonedPage.appendChild(clonedNode);
+                    setFramePosition(odfContainer, id + '_' + j, clonedNode, stylesheet);
                 }
+                node = node.nextSibling;
+                j += 1;
             }
 
-            // If the referenced master page exists, create a new page and copy over it's contents into the new page,
-            // except for the ones that are placeholders. Also, call setFramePosition on each of those child frames.
-            if (masterPage) {
-                clonedPage = document.createElementNS(drawns, 'draw:page');
-                node = masterPage.firstChild;
-                j = 0;
-                while (node) {
-                    if (node.getAttributeNS(presentationns, 'placeholder') !== 'true') {
-                        clonedNode = node.cloneNode(true);
-                        clonedPage.appendChild(clonedNode);
-                        setFramePosition(odfContainer, id + '_' + j, clonedNode, stylesheet);
-                    }
-                    node = node.nextSibling;
-                    j += 1;
+            // Append the cloned master page to the "Shadow Content" element outside the main ODF dom
+            shadowContent.appendChild(clonedPage);
+
+            // Get the page number by counting the number of previous master pages in this shadowContent
+            pageNumber = shadowContent.getElementsByTagNameNS(drawns, 'page').length;
+            // Get the page-number tag in the cloned master page and set the text content to the calculated number
+            pageNumberContainer = clonedPage.getElementsByTagNameNS(textns, 'page-number')[0];
+            if (pageNumberContainer) {
+                while (pageNumberContainer.firstChild) {
+                    pageNumberContainer.removeChild(pageNumberContainer.firstChild);
                 }
-
-                // Append the cloned master page to the "Shadow Content" element outside the main ODF dom
-                shadowContent.appendChild(clonedPage);
-
-                // Get the page number by counting the number of previous master pages in this shadowContent
-                pageNumber = shadowContent.getElementsByTagNameNS(drawns, 'page').length;
-                // Get the page-number tag in the cloned master page and set the text content to the calculated number
-                pageNumberContainer = clonedPage.getElementsByTagNameNS(textns, 'page-number')[0];
-                if (pageNumberContainer) {
-                    while (pageNumberContainer.firstChild) {
-                        pageNumberContainer.removeChild(pageNumberContainer.firstChild);
-                    }
-                    pageNumberContainer.appendChild(document.createTextNode(pageNumber));
-                }
-
-                // Now call setFramePosition on this new page to set the proper dimensions
-                setFramePosition(odfContainer, id, clonedPage, stylesheet);
-                // And finally, add an attribute referring to the master page, so the CSS targeted for that master page will style this
-                clonedPage.setAttributeNS(drawns, 'draw:master-page-name', masterPage.getAttributeNS(stylens, 'name'));
+                pageNumberContainer.appendChild(document.createTextNode(pageNumber));
             }
+
+            // Now call setFramePosition on this new page to set the proper dimensions
+            setFramePosition(odfContainer, id, clonedPage, stylesheet);
+            // And finally, add an attribute referring to the master page, so the CSS targeted for that master page will style this
+            clonedPage.setAttributeNS(drawns, 'draw:master-page-name', masterPage.getAttributeNS(stylens, 'name'));
         }
+
         if (anchor === "as-char") {
             rule = 'display: inline-block;';
         } else if (anchor || x || y) {
