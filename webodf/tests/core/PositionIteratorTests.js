@@ -339,6 +339,16 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         r.shouldBe(t, "t.iterator.leftNode() && t.iterator.leftNode().getAttribute('id')", "'a1'");
         r.shouldBe(t, "t.iterator.rightNode() && t.iterator.rightNode().getAttribute('id')", "'a2'");
     }
+    function testSetUnfilteredPosition_ImmediatelyMovesToNextValidPosition() {
+        createWalker('<p><b id="b1"/><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/><b id="b4"/><a id="a3"/></p>');
+        t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0], 0);
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.offset()", "0");
+
+        t.iterator.nextPosition();
+        r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
+        r.shouldBe(t, "t.iterator.offset()", "0");
+    }
     this.tests = function () {
         return [
             create,
@@ -353,7 +363,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             testSplitTextNodes,
             testSetPositionUsesFilteredOffsets,
             testSetPosition_ToLastPossiblePoint,
-            testSetUnfilteredPositionUsesUnfilteredOffsets
+            testSetUnfilteredPositionUsesUnfilteredOffsets,
+            testSetUnfilteredPosition_ImmediatelyMovesToNextValidPosition
         ];
     };
     this.asyncTests = function () {
