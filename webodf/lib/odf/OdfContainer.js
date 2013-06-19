@@ -675,18 +675,20 @@ odf.OdfContainer = (function () {
         }
         // public functions
 
+        this.getContentElement = function () {
+            var body = self.rootElement.body;
+            return body.getElementsByTagNameNS(officens, 'text')[0] ||
+                    body.getElementsByTagNameNS(officens, 'presentation')[0] ||
+                    body.getElementsByTagNameNS(officens, 'spreadsheet')[0];
+        };
+
         /**
          * Gets the document type as 'text', 'presentation', or 'spreadsheet'.
          * @return {!string}
          */
         this.getDocumentType = function () {
-            var body = self.rootElement.body;
-
-            return (
-                body.getElementsByTagNameNS(officens, 'text')[0] ||
-                    body.getElementsByTagNameNS(officens, 'presentation')[0] ||
-                    body.getElementsByTagNameNS(officens, 'spreadsheet')[0]
-            ).localName;
+            var contentElement = self.getContentElement();
+            return contentElement && contentElement.localName;
         };
         /**
          * Open file and parse it. Return the XML Node. Return the root node of

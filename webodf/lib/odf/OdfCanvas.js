@@ -1097,16 +1097,17 @@ odf.OdfCanvas = (function () {
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
 
-            // A "Shadow Content" div. This will contain stuff like pages extracted from
-            // <style:master-page>. These need to be nicely styled, so we will populate this
-            // in the ODF body first. Once the styling is handled, it can then be lifted out of the
+            // A "Shadow Content" div. This will contain stuff like pages
+            // extracted from <style:master-page>. These need to be nicely
+            // styled, so we will populate this in the ODF body first. Once the
+            // styling is handled, it can then be lifted out of the
             // ODF body and placed beside it, to not pollute the ODF dom.
             shadowContent = doc.createElementNS(element.namespaceURI, 'div');
             shadowContent.id = "shadowContent";
             shadowContent.style.position = 'absolute';
             shadowContent.style.top = 0;
             shadowContent.style.left = 0;
-            odfnode.body.firstChild.appendChild(shadowContent);
+            container.getContentElement().appendChild(shadowContent);
 
             modifyImages(container, odfnode.body, css);
             modifyTables(container, odfnode.body, css);
