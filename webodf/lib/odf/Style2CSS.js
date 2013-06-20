@@ -438,7 +438,7 @@ odf.Style2CSS = function Style2CSS() {
     function getFontSize(styleNode) {
         var props = getDirectChild(/**@type{Element}*/(styleNode), stylens, 'text-properties');
         if (props) {
-            return utils.parseLength(props.getAttributeNS(fons, 'font-size'));
+            return utils.parseFoFontSize(props.getAttributeNS(fons, 'font-size'));
         }
         return null;
     }
@@ -554,7 +554,7 @@ odf.Style2CSS = function Style2CSS() {
 
         lineHeight = props.getAttributeNS(fons, 'line-height');
         if (lineHeight && lineHeight !== 'normal') {
-            lineHeight = utils.parseLength(lineHeight);
+            lineHeight = utils.parseFoLineHeight(lineHeight);
             if (lineHeight.unit !== '%') {
                 rule += 'line-height: ' + lineHeight.value + ';';
             } else {

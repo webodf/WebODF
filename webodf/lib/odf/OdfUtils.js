@@ -352,17 +352,79 @@ odf.OdfUtils = function OdfUtils() {
     this.getFirstNonWhitespaceChild = getFirstNonWhitespaceChild;
 
     /**
-     * Returns the font size split as value and unit, from an ODF attribute
-     * @param {!string} positiveLength
+     * Returns the length split as value and unit, from an ODF attribute
+     * @param {!string} length
      * @return {?{value:!number,unit:!string}}
      */
-    function parseLength(positiveLength) {
-        var re = /-?([0-9]*[1-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px)|(%))/,
-            m = re.exec(positiveLength);
+    function parseLength(length) {
+        var re = /-?([0-9]*[0-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px)|(%))/,
+            m = re.exec(length);
         if (!m) {
             return null;
         }
         return {value: parseFloat(m[1]), unit: m[3]};
     }
     this.parseLength = parseLength;
+
+    /**
+     * Returns the value and unit of the length, if it is positive ( > 0)
+     * @param {!string} length
+     * @return {?{value:!number,unit:!string}}
+     */
+    function parsePositiveLength(length) {
+        var result = parseLength(length);
+        if (result && (result.value <= 0 || result.unit === '%')) {
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * Returns the value and unit of the length, if it is non-negative ( >= 0)
+     * @param {!string} length
+     * @return {?{value:!number,unit:!string}}
+     */
+    function parseNonNegativeLength(length) {
+        var result = parseLength(length);
+        if (result && (result.value < 0 || result.unit === '%')) {
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * Returns the value and unit(%) of the length, if it is specified in %age
+     * @param {!string} length
+     * @return {?{value:!number,unit:!string}}
+     */
+    function parsePercentage(length) {
+        var result = parseLength(length);
+        if (result && (result.unit !== '%')) {
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * Returns the value and unit of the font size, in conformance with fo:font-size
+     * constraints
+     * @param {!string} fontSize
+     * @return {?{value:!number,unit:!string}}
+     */
+    function parseFoFontSize(fontSize) {
+        return parsePositiveLength(fontSize) || parsePercentage(fontSize);
+    }
+    this.parseFoFontSize = parseFoFontSize;
+
+    /**
+     * Returns the value and unit of the line height, in conformance with fo:line-height
+     * constraints
+     * @param {!string} lineHeight
+     * @return {?{value:!number,unit:!string}}
+     */
+    function parseFoLineHeight(lineHeight) {
+        return parseNonNegativeLength(lineHeight) || parsePercentage(lineHeight);
+    }
+    this.parseFoLineHeight = parseFoLineHeight;
+
 };
