@@ -315,40 +315,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return neighborhood;
     };
 
-
-    /**
-     * returns a string of text contents within the "extended neighborhood"
-     * (see this.getTextNeighborhood). the function will return less
-     * characters than requested, if too few characters are available.
-     * the function will never return more characters then requested.
-     * parameters position and length specify the extended neighborhood
-     * (see this.getTextNeighborhood).
-     *
-     * @param {!number} position
-     * @param {!number} length
-     * @return {!string}
-     */
-    this.getText = function (position, length) {
-        var i,
-            charcount = 0,
-            chardata = [],
-            neighborhood = this.getTextNeighborhood(position, length);
-
-        if (neighborhood.length < 1) {
-            return "";
-        }
-        for (i = 0; i < neighborhood.length; i += 1) {
-            if (neighborhood[i].textContent !== undefined) {
-                chardata.push(neighborhood[i].textContent);
-                charcount += neighborhood[i].textContent.length;
-                if (charcount >= length) {
-                    break;
-                }
-            }
-        }
-        return chardata.join("").substr(0, length);
-    };
-
     /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
