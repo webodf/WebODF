@@ -720,9 +720,31 @@ odf.OdfContainer = (function () {
                 root = self.rootElement,
                 text = document.createElementNS(officens, 'text');
             zip.save("mimetype", data, false, new Date());
-            root.body = document.createElementNS(officens, 'body');
+            /**
+             * @param {!string} memberName  variant of the real local name which allows dot notation
+             * @param {!string=} realLocalName
+             * @return {undefined}
+             */
+            function addToplevelElement(memberName, realLocalName) {
+                var element;
+                if (!realLocalName) {
+                    realLocalName = memberName;
+                }
+                element = document.createElementNS(officens, realLocalName);
+                root[memberName] = element;
+                root.appendChild(element);
+            }
+            // add toplevel elements in correct order to the root node
+            addToplevelElement("meta");
+            addToplevelElement("settings");
+            addToplevelElement("scripts");
+            addToplevelElement("fontFaceDecls",   "font-face-decls");
+            addToplevelElement("styles");
+            addToplevelElement("automaticStyles", "automatic-styles");
+            addToplevelElement("masterStyles",    "master-styles");
+            addToplevelElement("body");
             root.body.appendChild(text);
-            root.appendChild(root.body);
+
             setState(OdfContainer.DONE);
             return zip;
         }
