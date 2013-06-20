@@ -254,50 +254,6 @@ core.Cursor = function Cursor(document, memberId) {
         removeNode(cursorNode);
         mergeAdjacentTextNodes();
     };
-    /**
-     * Returns the filtered offset of the given node
-     * @param {!Node} node
-     * @param {!NodeFilter} nodeFilter
-     * @return {!number}
-     */
-    function whichChild(node, nodeFilter) {
-        var  i = 0;
-        while (node.previousSibling !== null) {
-            node = node.previousSibling;
-            if (nodeFilter.acceptNode(node) === 1) {
-                i += 1;
-            }
-        }
-        return i;
-    }
-    /**
-     * This returns the container and offset of this cursor node,
-     * after filtering out some other nodes blacklisted by the specified nodeFilter
-     * (like <cursor> and <editinfo>).
-     * @param {!NodeFilter} nodeFilter
-     * @return {!{container: !Node, offset: !number}}
-     */
-    this.getPositionInContainer = function (nodeFilter) {
-        var container, offset;
-
-        if (cursorNode.previousSibling && cursorNode.previousSibling.nodeType === Node.TEXT_NODE) {
-            container = cursorNode.previousSibling;
-            offset = container.length;
-        } else if (cursorNode.nextSibling && cursorNode.nextSibling.nodeType === Node.TEXT_NODE) {
-            container = cursorNode.nextSibling;
-            offset = 0;
-        }
-
-        if (!container) {
-            container = cursorNode.parentNode;
-            offset = whichChild(cursorNode, nodeFilter);
-        }
-
-        return {
-            container: /**@type{!Node}*/(container),
-            offset: offset
-        };
-    };
 
     function init() {
         // mark cursornode with memberid

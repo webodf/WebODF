@@ -63,8 +63,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * @return {!core.PositionIterator}
      */
     function getIteratorAtCursor() {
-        var pos = cursor.getPositionInContainer(positionIterator.getNodeFilter());
-        positionIterator.setPosition(pos.container, pos.offset);
+        positionIterator.setUnfilteredPosition(cursor.getNode(), 0);
         return positionIterator;
     }
 
@@ -414,9 +413,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         runtime.assert(posElement !== null, "SelectionMover.countStepsToPosition called with element===null");
         // first figure out how to get to the element
         // really dumb/inefficient implementation
-        var cursorPos = cursor.getPositionInContainer(positionIterator.getNodeFilter()),
-            c = cursorPos.container,
-            o = cursorPos.offset,
+        var iterator = getIteratorAtCursor(),
+            c = iterator.container(),
+            o = iterator.offset(),
             steps = 0,
             posUnfilteredDomOffset,
             watch = new core.LoopWatchDog(1000),
@@ -425,34 +424,34 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         // the iterator may interpret the positions as given by the range
         // differently than the dom positions, so we normalize them by calling
         // setPosition with these values
-        positionIterator.setUnfilteredPosition(posElement, posOffset);
-        posElement = positionIterator.container();
+        iterator.setUnfilteredPosition(posElement, posOffset);
+        posElement = iterator.container();
         runtime.assert(posElement !== null, "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
-        posOffset = positionIterator.offset();
-        posUnfilteredDomOffset = positionIterator.unfilteredDomOffset();
-        positionIterator.setPosition(c, o);
+        posOffset = iterator.offset();
+        posUnfilteredDomOffset = iterator.unfilteredDomOffset();
+        iterator.setPosition(c, o);
 
-        comparison = comparePoints(posElement, posUnfilteredDomOffset, positionIterator.container(), positionIterator.unfilteredDomOffset());
+        comparison = comparePoints(posElement, posUnfilteredDomOffset, iterator.container(), iterator.unfilteredDomOffset());
         if (comparison < 0) {
-            while (positionIterator.nextPosition()) {
+            while (iterator.nextPosition()) {
                 watch.check();
-                if (filter.acceptPosition(positionIterator) === 1) {
+                if (filter.acceptPosition(iterator) === 1) {
                     steps += 1;
                 }
-                if (positionIterator.container() === posElement) {
-                    if (positionIterator.offset() === posOffset) {
+                if (iterator.container() === posElement) {
+                    if (iterator.offset() === posOffset) {
                         return steps;
                     }
                 }
             }
         } else if (comparison > 0) {
-            while (positionIterator.previousPosition()) {
+            while (iterator.previousPosition()) {
                 watch.check();
-                if (filter.acceptPosition(positionIterator) === 1) {
+                if (filter.acceptPosition(iterator) === 1) {
                     steps -= 1;
                 }
-                if (positionIterator.container() === posElement) {
-                    if (positionIterator.offset() === posOffset) {
+                if (iterator.container() === posElement) {
+                    if (iterator.offset() === posOffset) {
                         return steps;
                     }
                 }
