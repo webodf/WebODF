@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*jslint sub: true*/
-/*global runtime, odf, xmldom, webodf_css, alert */
+/*global runtime, odf, xmldom, webodf_css */
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
@@ -933,6 +933,8 @@ odf.OdfCanvas = (function () {
      * @return {?}
      */
     odf.OdfCanvas = function OdfCanvas(element) {
+        runtime.assert((element !== null) && (element !== undefined),
+            "odf.OdfCanvas constructor needs DOM element");
         var self = this,
             doc = element.ownerDocument,
             /**@type{!odf.OdfContainer}*/
