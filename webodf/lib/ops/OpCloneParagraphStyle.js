@@ -63,7 +63,13 @@ ops.OpCloneParagraphStyle = function OpCloneParagraphStyle() {
 
         newStyleNode = styleNode.cloneNode(true);
         newStyleNode.setAttributeNS(stylens, 'style:name', newStyleName);
-        newStyleNode.setAttributeNS(stylens, 'style:display-name', newStyleDisplayName);
+        // style:display-name can be unset, will default to style:name in that case, see ODF 1.2 § 19.472
+        if (newStyleDisplayName) {
+            newStyleNode.setAttributeNS(stylens, 'style:display-name', newStyleDisplayName);
+        } else {
+            // remove any cloned display-name
+            newStyleNode.removeAttributeNS(stylens, 'display-name');
+        }
         styleNode.parentNode.appendChild(newStyleNode);
 
         odtDocument.getOdfCanvas().refreshCSS();
