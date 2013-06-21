@@ -135,13 +135,13 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return moved;
     };
     /**
-     * @return {!Node}
+     * @return {!Element|!Text}
      */
     this.container = function () {
         var n = walker.currentNode,
             t = n.nodeType;
         if (currentPos === 0 && t !== Node.TEXT_NODE) {
-            return /**@type{!Node}*/(n.parentNode);
+            return /**@type{!Element|!Text}*/(n.parentNode);
         }
         return n;
     };

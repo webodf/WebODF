@@ -425,8 +425,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         // differently than the dom positions, so we normalize them by calling
         // setPosition with these values
         iterator.setUnfilteredPosition(posElement, posOffset);
-        posElement = iterator.container();
-        runtime.assert(posElement !== null, "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
+        posElement = /**@type{!Element}*/(iterator.container());
+        runtime.assert(posElement.nodeType === Node.ELEMENT_NODE, "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
         posOffset = iterator.offset();
         posUnfilteredDomOffset = iterator.unfilteredDomOffset();
         iterator.setPosition(c, o);
