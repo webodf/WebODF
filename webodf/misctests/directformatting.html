@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Formatting</title>
+    <script type="text/javascript">
+        'use strict';
+        var runtime = {
+            getWindow : function() { return window; },
+            getDOM : function() { return document; },
+            log : function(msg) { console.log(msg); }
+        };
+
+        function LoopWatchDog(timeout, maxChecks) {
+            "use strict";
+            var startTime = Date.now(),
+                    checks = 0;
+            function check() {
+                var t;
+                if (timeout) {
+                    t = Date.now();
+                    if (t - startTime > timeout) {
+                        runtime.log("alert", "watchdog timeout");
+                        throw "timeout!";
+                    }
+                }
+                if (maxChecks > 0) {
+                    checks += 1;
+                    if (checks > maxChecks) {
+                        runtime.log("alert", "watchdog loop overflow");
+                        throw "loop overflow";
+                    }
+                }
+            }
+            this.check = check;
+        }
+
+        function containsNode(range, node) {
+            var nodeRange = document.createRange(),
+                result;
+            nodeRange.selectNode(node);
+            result = range.compareBoundaryPoints(range.START_TO_START, nodeRange) === -1 &&
+                        range.compareBoundaryPoints(range.END_TO_END, nodeRange) === 1;
+            nodeRange.detach();
+            return result;
+        }
+
+        function getTextNodes(document, range, nodeRange) {
+            var root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ?
+                range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
+                treeWalker = document.createTreeWalker(root,
+                        NodeFilter.SHOW_ALL,
+                        function (node) {
+                            nodeRange.selectNode(node);
+                            if (range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1 &&
+                                    range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
+                                return node.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                            }
+                            return NodeFilter.FILTER_REJECT;
+                        },
+                        false);
+            treeWalker.currentNode = range.startContainer.previousSibling || range.startContainer.parentNode;
+            // Make the first call to nextNode return startContainer
+            return treeWalker;
+        }
+
+        function isParagraph(node) {
+            return node.localName === 'p' || node.localName === 'h';
+        }
+
+        function StyleApplicator(range, info) {
+            var nextTextNodes;
+
+            function isStyleApplied(textNode) {
+                var style = window.getComputedStyle(textNode.parentNode, null);
+                return style && Object.keys(info).every(function(key) { return info[key] === style[key]; });
+            }
+
+            function splitBoundaries(range) {
+                var newNode;
+
+                // Must split end first to stop the start point from being lost
+                if (range.endOffset !== 0
+                        && range.endContainer.nodeType === Node.TEXT_NODE
+                        && range.endOffset !== range.endContainer.length) {
+                    nextTextNodes.push(range.endContainer.splitText(range.endOffset));
+                    // The end doesn't need to be reset as endContainer & endOffset are still valid after the modification
+                }
+
+                if (range.startOffset !== 0
+                        && range.startContainer.nodeType === Node.TEXT_NODE
+                        && range.startOffset !== range.startContainer.length) {
+                    newNode = range.startContainer.splitText(range.startOffset);
+                    nextTextNodes.push(newNode);
+                    range.setStart(newNode, 0);
+                }
+            }
+
+            function moveToNewSpan(textNode) {
+                var originalContainer = textNode.parentNode,
+                    parentContainer,
+                    styledContainer,
+                    parentInsertionNode,
+                    unstyledContainer,
+                    unstyledInsertionPoint,
+                    passedRange = false,
+                    loopGuard = new LoopWatchDog(false, 100);
+
+                if (isParagraph(originalContainer)) {
+                    // Text node is at the first level within a paragraph element
+                    parentContainer = originalContainer;
+                    // No other spans encapsulate this node, so create a new one to do this
+                    styledContainer = textNode.ownerDocument.createElement('span');
+                    parentInsertionNode = textNode;
+                    // Insert trailing siblings after the new styledContainer
+                    unstyledContainer = originalContainer;
+                    unstyledInsertionPoint = textNode;
+                } else if(!textNode.previousSibling) {
+                    // The text node is the first child in a span element
+                    parentContainer = originalContainer.parentNode;
+                    // Claim the original span as the styled container
+                    styledContainer = originalContainer;
+                    parentInsertionNode = originalContainer.nextSibling;
+                    // Insert trailing siblings into a clone of the original container
+                    unstyledContainer = null; // Created if necessary
+                    unstyledInsertionPoint = null; // Brand new container, so simply append unstyled children
+                } else {
+                    // The text node has some preceding elements
+                    parentContainer = originalContainer.parentNode;
+                    // A new styled container is necessary as the preceding elements will be left in the original place
+                    styledContainer = originalContainer.cloneNode(false);
+                    parentInsertionNode = originalContainer.nextSibling;
+                    // Insert trailing siblings into a clone of the original container
+                    unstyledContainer = null; // Created if necessary
+                    unstyledInsertionPoint = null; // Brand new container, so simply append unstyled children
+                }
+                if (!parentContainer.contains(styledContainer)) {
+                    parentContainer.insertBefore(styledContainer, parentInsertionNode);
+                }
+
+                while (textNode.nextSibling) {
+                    loopGuard.check();
+                    if (!passedRange && containsNode(range, textNode.nextSibling)) {
+                        styledContainer.appendChild(textNode.nextSibling);
+                    } else {
+                        if (!unstyledContainer) {
+                            // A new container is necessary to hold the trailing unstyled children
+                            unstyledContainer = originalContainer.cloneNode(false);
+                            parentContainer.insertBefore(unstyledContainer, parentInsertionNode);
+                        }
+                        passedRange = true;
+                        unstyledContainer.insertBefore(textNode.nextSibling, unstyledInsertionPoint);
+                    }
+                }
+
+                if (!styledContainer.contains(textNode)) {
+                    styledContainer.insertBefore(textNode, styledContainer.firstChild);
+                }
+                return styledContainer;
+            }
+
+            function processNode(textNode) {
+                var isStyled = isStyleApplied(textNode),
+                    container;
+
+                if (isStyled === false) {
+                    container = moveToNewSpan(textNode);
+                    Object.keys(info).forEach(function(key) {
+                        container.style[key] = info[key];
+                    });
+                }
+            }
+
+            function mergeTextNodes(node1, node2) {
+                if (node1.nodeType === Node.TEXT_NODE) {
+                    if (node1.length === 0) {
+                        node1.parentNode.removeChild(node1);
+                    } else if (node2.nodeType === Node.TEXT_NODE) {
+                        node2.insertData(0, node1.data);
+                        node1.parentNode.removeChild(node1);
+                        return node2;
+                    }
+                }
+                return node1;
+            }
+
+            function cleanupTextNode(node) {
+                if (node.nextSibling) {
+                    node = mergeTextNodes(node, node.nextSibling);
+                }
+                if (node.previousSibling) {
+                    mergeTextNodes(node.previousSibling, node);
+                }
+            }
+
+            this.applyStyle = function() {
+                var document = runtime.getWindow().document,
+                    nodeRange = document.createRange(),
+                    iterator, n;
+
+                nextTextNodes = []; // Reset instance node-modified stack
+                splitBoundaries(range);
+                iterator = getTextNodes(document, range, nodeRange);
+                n = iterator.nextNode();
+
+                while (n) {
+                    processNode(n);
+                    n = iterator.nextNode();
+                }
+
+                nextTextNodes.forEach(cleanupTextNode);
+                nodeRange.detach();
+            }
+
+        }
+    </script>
+    <script type="text/javascript">
+        'use strict';
+        function range(startNode, startOffset, endNode, endOffset) {
+            var range = document.createRange();
+            range.setStart(startNode, startOffset);
+            range.setEnd(endNode, endOffset);
+            return range
+        }
+
+        function applyStyle(range, info) {
+            var applicator = new StyleApplicator(range, info);
+            applicator.applyStyle();
+        }
+
+        /**
+         * @param {!Element} parent
+         * @param {...Number} children
+         * @return {!Element} parent
+         */
+        function child() {
+            var args = Array.prototype.slice.call(arguments, 0),
+                parent = args.shift(),
+                children = args.slice(0),
+                node = parent;
+            while (children.length && node) {
+                node = node.childNodes[children.shift()];
+            }
+            return node;
+        }
+
+        function init() {
+            var p = document.getElementsByTagName('p'),
+                ranges = [];
+
+            ranges.push(range(child(p[0], 0), 2,            child(p[0], 0), 5));
+            ranges.push(range(child(p[1], 0, 0), 2,         child(p[1], 0, 0), 5));
+            ranges.push(range(child(p[2], 1, 0), 0,         child(p[2], 1, 0), 3));
+            ranges.push(range(child(p[3], 1), 0,            child(p[3], 1), 3));
+            ranges.push(range(child(p[4], 0, 0), 2,         child(p[4], 0, 0), 5));
+            ranges.push(range(child(p[5], 0, 0), 2,         child(p[5], 0, 0), 5));
+            ranges.push(range(child(p[6], 0), 2,            child(p[6], 1, 0), 3));
+            ranges.push(range(child(p[7], 0, 0, 0), 2,      child(p[7], 0, 0, 0), 5));
+            ranges.push(range(child(p[8], 1, 0), 0,         child(p[8], 2, 0), 1));
+            ranges.push(range(child(p[9], 0), 2,         child(p[9], 0), 5));
+            ranges.push(range(child(p[10], 0), 0,         child(p[10], 0), 3));
+
+            ranges.forEach(function(range, i) {
+                console.log('Processing range ' + i);
+                applyStyle(range, { "color" : "red" });
+            })
+        }
+    </script>
+</head>
+<body onload="init()">
+<p>ABCDEFG</p>
+<p><span>ABCDEFG</span></p>
+<p><span>AB</span><span>CDE</span><span>FG</span></p>
+<p><span>AB</span>CDE<span>FG</span></p>
+<p><span style="background-color: lightblue">ABCDEFG</span></p>
+<p><span style="color: red">ABCDEFG</span></p>
+<p>ABC<span style="color: red">DEFG</span></p>
+<p><span><span>ABCDEFG</span></span></p>
+<p>AB<span>CD</span><span style="text-decoration: underline">EFG</span></p>
+<p>ABCDE</p>
+<p>CDEFG</p>
+</body>
+</html>

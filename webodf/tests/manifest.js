@@ -41,6 +41,7 @@
         "core/ZipTests.js",
         "gui/SelectionMoverTests.js",
         "gui/XMLEditTests.js",
+        "odf/TextStyleApplicatorTests.js",
         "odf/FormattingTests.js",
         "odf/OdfContainerTests.js",
         "odf/StyleInfoTests.js",

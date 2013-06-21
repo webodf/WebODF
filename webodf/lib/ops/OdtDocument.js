@@ -241,6 +241,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
         return iterator;
     }
+    this.getIteratorAtPosition = getIteratorAtPosition;
 
     /**
      * Returns an exteded neighborhood that can span multiple paragraph nodes;

@@ -268,6 +268,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/Namespaces.js
     lib/odf/StyleInfo.js
     lib/odf/OdfUtils.js
+    lib/odf/TextStyleApplicator.js
     lib/odf/Style2CSS.js
     lib/odf/OdfContainer.js
     lib/odf/FontLoader.js
@@ -277,6 +278,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/ops/Operation.js
     lib/ops/OpAddCursor.js
+    lib/ops/OpApplyStyle.js
     lib/ops/OpRemoveCursor.js
     lib/ops/OpMoveCursor.js
     lib/ops/OpInsertTable.js

@@ -40,6 +40,7 @@
  */
 
 runtime.loadClass("ops.OpAddCursor");
+runtime.loadClass("ops.OpApplyStyle");
 runtime.loadClass("ops.OpRemoveCursor");
 runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertTable");
@@ -65,6 +66,8 @@ ops.OperationFactory = function OperationFactory() {
         // js language and make it more generic.
         if (spec.optype === "AddCursor") {
             op = new ops.OpAddCursor();
+        } else if (spec.optype === "ApplyStyle") {
+            op = new ops.OpApplyStyle();
         } else if (spec.optype === "InsertTable") {
             op = new ops.OpInsertTable();
         } else if (spec.optype === "InsertText") {

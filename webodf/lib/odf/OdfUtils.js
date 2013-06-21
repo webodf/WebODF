@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global Node, runtime, odf*/
+/*global Node, runtime, odf, NodeFilter*/
 
 /**
  * @constructor
@@ -430,4 +430,51 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.parseFoLineHeight = parseFoLineHeight;
 
+    /**
+     * Returns a array of text nodes considered to be part of the supplied range.
+     * This will exclude elements that are not part of the ODT main text bot
+     * @param {!Range} range    Range to search for nodes within
+     * @param {boolean=} includePartial Include partially intersecting text nodes in the result. Default value is true
+     * @returns {!Array.<!CharacterData>}
+     */
+    function getTextNodes(range, includePartial) {
+        var document = range.startContainer.ownerDocument,
+            nodeRange = document.createRange(),
+            textNodes = [],
+            n,
+            root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ?
+                range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
+            treeWalker;
+
+        treeWalker = document.createTreeWalker(root,
+            NodeFilter.SHOW_ALL,
+            function (node) {
+                nodeRange.selectNodeContents(node);
+                // TODO exclude child nodes of non-body elements as per ODT plain text rules
+                if (includePartial === false && node.nodeType === Node.TEXT_NODE) {
+                    if (range.compareBoundaryPoints(range.START_TO_START, nodeRange) <= 0
+                        && range.compareBoundaryPoints(range.END_TO_END, nodeRange) >= 0) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                } else if (range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1
+                    && range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
+                    return node.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                }
+                return NodeFilter.FILTER_REJECT;
+            },
+            false);
+
+        // Make the first call to nextNode return startContainer
+        treeWalker.currentNode = range.startContainer.previousSibling || range.startContainer.parentNode;
+
+        n = treeWalker.nextNode();
+        while (n) {
+            textNodes.push(n);
+            n = treeWalker.nextNode();
+        }
+
+        nodeRange.detach();
+        return textNodes;
+    }
+    this.getTextNodes = getTextNodes;
 };

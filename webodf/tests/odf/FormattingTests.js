@@ -49,11 +49,16 @@ odf.FormattingTests = function FormattingTests(runner) {
         };
 
     this.setUp = function () {
-        t = { formatting : new odf.Formatting() };
+        t = {
+            formatting : new odf.Formatting(),
+            body : core.UnitTest.provideTestAreaDiv(),
+            ns : namespace
+        };
     };
     this.tearDown = function () {
         t.range.detach();
         t = {};
+        core.UnitTest.cleanupTestAreaDiv();
     };
     function createDocument(dom) {
         var xml = "<?xml version='1.0' encoding='UTF-8'?>",
@@ -92,13 +97,14 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "</office:document>";
 
         fragment = runtime.parseXML(xml);
+        t.body.appendChild(fragment.documentElement);
         container = { rootElement : {
-            styles : fragment.documentElement.childNodes[0],
-            automaticStyles: fragment.documentElement.childNodes[1]
+            styles : t.body.firstChild.childNodes[0],
+            automaticStyles: t.body.firstChild.childNodes[1]
         }};
         t.formatting.setOdfContainer(container);
-        t.range = fragment.createRange();
-        return fragment.documentElement.childNodes[2].firstChild;
+        t.range = t.body.ownerDocument.createRange();
+        return t.body.firstChild.childNodes[2].firstChild;
     }
     function getAppliedStyles_SimpleHierarchy() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>");
@@ -240,7 +246,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.element = t.formatting.getStyleElement("P1", "paragraph");
 
         r.shouldBeNonNull(t, "t.element");
-        r.shouldBe(t, "t.element.getAttributeNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'name')", "'P1'");
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name')", "'P1'");
     }
     function getStyleElement_TextStyle() {
         createDocument("<text:p/>");
@@ -248,7 +254,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.element = t.formatting.getStyleElement("S1", "text");
 
         r.shouldBeNonNull(t, "t.element");
-        r.shouldBe(t, "t.element.getAttributeNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'name')", "'S1'");
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name')", "'S1'");
     }
     function getStyleElement_ListStyle() {
         createDocument("<text:p/>");
@@ -256,7 +262,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.element = t.formatting.getStyleElement("L2", "list-style");
 
         r.shouldBeNonNull(t, "t.element");
-        r.shouldBe(t, "t.element.getAttributeNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'name')", "'L2'");
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name')", "'L2'");
     }
     function getStyleElement_MismatchedFamily_ReturnsNull() {
         createDocument("<text:p/>");
@@ -264,6 +270,36 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.element = t.formatting.getStyleElement("L2", "paragraph");
 
         r.shouldBeNull(t, "t.element");
+    }
+
+    function applyStyle_UpdatesStyleElement() {
+        createDocument("<text:p/>");
+        t.element = t.formatting.getStyleElement("P1", "paragraph");
+
+        t.formatting.updateStyle(t.element, {
+            "style:family" : "frog",
+            "style:paragraph-properties": { "fo:background-color" : "red" },
+            "style:text-properties": { "fo:font-size" : "12pt" }
+        });
+
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'family')", "'frog'");
+
+        t.paragraphProperties = t.element.getElementsByTagNameNS(t.ns.style, 'paragraph-properties')[0];
+        t.textProperties = t.element.getElementsByTagNameNS(t.ns.style, 'text-properties')[0];
+        r.shouldBe(t, "t.paragraphProperties.getAttributeNS(t.ns.fo, 'background-color')", "'red'");
+        r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
+        r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-name')", "'P1 Font'");
+    }
+    function applyStyle_UpdatesStyleElement_WithGeneratedName() {
+        createDocument("<text:p/>");
+        t.element = t.formatting.getStyleElement("P1", "paragraph");
+
+        t.formatting.updateStyle(t.element, { "style:text-properties": { "fo:font-size" : "12pt" } }, true);
+
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name').search(/^auto.*/)", "0");
+
+        t.textProperties = t.element.getElementsByTagNameNS(t.ns.style, 'text-properties')[0];
+        r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
     }
     this.tests = function () {
         return [
@@ -280,7 +316,10 @@ odf.FormattingTests = function FormattingTests(runner) {
             getStyleElement_ParagraphStyle,
             getStyleElement_TextStyle,
             getStyleElement_ListStyle,
-            getStyleElement_MismatchedFamily_ReturnsNull
+            getStyleElement_MismatchedFamily_ReturnsNull,
+
+            applyStyle_UpdatesStyleElement,
+            applyStyle_UpdatesStyleElement_WithGeneratedName
         ];
     };
     this.asyncTests = function () {

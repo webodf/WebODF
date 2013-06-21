@@ -34,16 +34,19 @@
  */
 /*global Node, odf, runtime, console, NodeFilter*/
 
+runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("odf.TextStyleApplicator");
 
 /**
  * @constructor
  */
 odf.Formatting = function Formatting() {
     "use strict";
-    var /**@type{odf.OdfContainer}*/ odfContainer,
+    var self = this,
+        /**@type{odf.OdfContainer}*/ odfContainer,
         /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
         /**@const@type {!string}*/ svgns = odf.Namespaces.svgns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
@@ -214,7 +217,6 @@ odf.Formatting = function Formatting() {
         }
         return null;
     }
-
     this.getStyleElement = getStyleElement;
 
     /**
@@ -237,6 +239,34 @@ odf.Formatting = function Formatting() {
             propertiesNode = propertiesNode.nextSibling;
         }
         return propertiesMap;
+    }
+    this.getStyleAttributes = getStyleAttributes;
+
+    /**
+     * Maps attributes and elements in the info object over top of the node. Supports
+     * recursion and deep mapping. This is effectively the inverse of getStyleAttributes
+     * @param {!Element} node
+     * @param {!Object} info
+     */
+    function mapObjOntoNode(node, info) {
+        Object.keys(info).forEach(function(key) {
+            var parts = key.split(":"),
+                prefix = parts[0],
+                localName = parts[1],
+                ns = odf.Namespaces.resolvePrefix(prefix),
+                value = info[key],
+                element;
+
+            if (typeof value === "object" && Object.keys(value).length) {
+                element = node.getElementsByTagNameNS(ns, localName)[0]
+                    || node.ownerDocument.createElementNS(ns, key);
+                node.appendChild(element);
+                mapObjOntoNode(element, value);
+            } else {
+                node.setAttributeNS(ns, key, value);
+
+            }
+        });
     }
 
     /**
@@ -275,7 +305,6 @@ odf.Formatting = function Formatting() {
         }
         return inheritedPropertiesMap;
     }
-
     this.getInheritedStyleAttributes = getInheritedStyleAttributes;
 
     /**
@@ -383,39 +412,21 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns an array of all unique styles in a given range for each text node
-     * @param {Range} range
+     * @param {!Range} range
      * @returns {Array.<Object>}
      */
     this.getAppliedStyles = function (range) {
-        var document = runtime.getWindow().document,
-            root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ?
-                range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
-            nodeRange = document.createRange(),
-            iterator = document.createTreeWalker(root,
-                NodeFilter.SHOW_ALL,
-                function (node) {
-                    nodeRange.selectNode(node);
-                    if (range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1 &&
-                            range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
-                        return node.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-                    }
-                    return NodeFilter.FILTER_REJECT;
-                },
-                false),
+        var textNodes = odfUtils.getTextNodes(range),
             styleChains = {},
-            n = iterator.nextNode(),
             styles = [];
 
-        while (n) {
+        textNodes.forEach(function(n) {
             buildStyleChain(n, styleChains);
-            n = iterator.nextNode();
-        }
+        });
 
         Object.keys(styleChains).forEach(function (key) {
             styles.push(calculateAppliedStyle(styleChains[key]));
         });
-
-        nodeRange.detach();
         return styles;
     };
 
@@ -428,5 +439,61 @@ odf.Formatting = function Formatting() {
         var styleChain;
         styleChain = buildStyleChain(node);
         return styleChain ? calculateAppliedStyle(styleChain) : undefined;
+    };
+
+    /**
+     * Apply the specified style properties to all elements within the given range.
+     * Currently, only text styles are applied.
+     * @param {!Range} range Range to apply text style to
+     * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
+     */
+    this.applyStyle = function(range, info) {
+        var textStyles = new odf.TextStyleApplicator(self, odfContainer.rootElement.automaticStyles);
+        textStyles.applyStyle(range, info);
+    };
+
+    /**
+     * Get an exhaustive list of all style names in the current document
+     * @returns {!Array.<string>}
+     */
+    function getAllStyleNames() {
+        var styleElements = [odfContainer.rootElement.automaticStyles, odfContainer.rootElement.styles],
+            node,
+            styleNames = [];
+
+        styleElements.forEach(function(styleListElement) {
+            node = styleListElement.firstChild;
+            while (node) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    if ((node.namespaceURI === stylens && node.localName === "style")
+                        || (node.namespaceURI === textns && node.localName === "list-style")) {
+                        styleNames.push(node.getAttributeNS(stylens, 'name'));
+                    }
+                }
+                node = node.nextSibling;
+            }
+        });
+        return styleNames;
+    }
+
+    /**
+     * Overrides the specific properties on the styleNode from the values in the supplied info Object
+     * @param {!Element} styleNode
+     * @param {!Object} info
+     * @param {boolean=} autoGenerateName Automatically generate a unique name for the style node
+     */
+    this.updateStyle = function(styleNode, info, autoGenerateName) {
+        var name, existingNames, startIndex;
+        mapObjOntoNode(styleNode, info);
+        name = styleNode.getAttributeNS(stylens, "name");
+        if (autoGenerateName || !name) {
+            existingNames = getAllStyleNames();
+            startIndex = Math.floor(Math.random() * 100000000);
+            do {
+                name = "auto" + startIndex;
+                startIndex += 1;
+            } while(existingNames.indexOf(name) !== -1);
+            styleNode.setAttributeNS(stylens, "style:name", name);
+        }
     };
 };
