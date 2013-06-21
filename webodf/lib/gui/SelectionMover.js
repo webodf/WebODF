@@ -59,10 +59,16 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
-     * Resets the positionIterator back to the current cursor position and returns the iterator
+     * Resets the positionIterator back to the current cursor position and
+     * returns the iterator.
      * @return {!core.PositionIterator}
      */
     function getIteratorAtCursor() {
+        // This call relies on setUnfilteredPosition magic. After this call, the
+        // iterator position will be just after the cursor because a position
+        // in the cursor is not allowed. So this only works because the filter
+        // in this instance of PositionIterator disallows positions in the
+        // cursor.
         positionIterator.setUnfilteredPosition(cursor.getNode(), 0);
         return positionIterator;
     }
