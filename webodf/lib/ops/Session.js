@@ -71,6 +71,7 @@ ops.Session = function Session(odfCanvas) {
         operationRouter = opRouter;
         opRouter.setPlaybackFunction(function (op) {
             op.execute(odtDocument);
+            odtDocument.emit(ops.OdtDocument.signalOperationExecuted, op);
         });
         opRouter.setOperationFactory(new ops.OperationFactory());
     };

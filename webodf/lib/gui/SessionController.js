@@ -443,18 +443,15 @@ gui.SessionController = (function () {
             }
         }
 
-
         // TODO: This method and associated event subscriptions really belong in SessionView
         // As this implementation relies on the current browser selection, only a single
         // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
         // implemented, this limitation will be eliminated
-        function onCursorMoved(cursor) {
-            var selection;
-            if (cursor.getMemberId() === inputMemberId) {
+        function maintainCursorSelection() {
+            var cursor = session.getOdtDocument().getCursor(inputMemberId),
                 selection = runtime.getWindow().getSelection();
-                selection.removeAllRanges();
-                selection.addRange(cursor.getSelectedRange().cloneRange());
-            }
+            selection.removeAllRanges();
+            selection.addRange(cursor.getSelectedRange().cloneRange());
         }
 
        /**
@@ -511,7 +508,7 @@ gui.SessionController = (function () {
 
         function init() {
             var odtDocument = session.getOdtDocument();
-            odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
         }
         init();
     };

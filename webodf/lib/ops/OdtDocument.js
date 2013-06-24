@@ -61,7 +61,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalParagraphStyleModified,
             ops.OdtDocument.signalStyleCreated,
             ops.OdtDocument.signalStyleDeleted,
-            ops.OdtDocument.signalTableAdded]);
+            ops.OdtDocument.signalTableAdded,
+            ops.OdtDocument.signalOperationExecuted]);
 
     /**
      * Determine if the node is a text:p or a text:h element.
@@ -771,6 +772,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalStyleCreated = "style/created";
 /**@const*/ops.OdtDocument.signalStyleDeleted = "style/deleted";
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
+/**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
 
 (function () {
     "use strict";
