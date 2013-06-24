@@ -56,7 +56,6 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         var domDocument = testarea.ownerDocument,
             p = domDocument.createElement("p"),
             text = domDocument.createTextNode("MMMMM MMMMM MMMMM MMMMM MMMMM"),
-            selection,
             cursor,
             mover;
         testarea.appendChild(p);
@@ -70,7 +69,6 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         var domDocument = testarea.ownerDocument,
             doc = runtime.parseXML(xml),
             mover,
-            selection,
             cursor,
             node = /**@type{!Element}*/(domDocument.importNode(doc.documentElement, true));
         testarea.appendChild(node);
@@ -136,15 +134,6 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             return 1;
         };
     }
-    /**
-     * @constructor
-     * @implements core.PositionFilter
-     */
-    function TextNodePositionFilter() {
-        this.acceptPosition = function (iterator) {
-            return 1;
-        };
-    }
     function testXMLsForthBack() {
         var i, xml;
         for (i = 0; i < testXMLs.length; i += 1) {
@@ -152,7 +141,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             testXMLForthBack(xml.x, xml.n);
         }
     }
-    function countAndConfirm(xml, n, availableSteps, filter) {
+    function countAndConfirm(xml, n, filter) {
         createDoc(xml);
         var counter = t.mover.getStepCounter(),
             steps = counter.countForwardSteps(1, filter),
@@ -163,20 +152,21 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             sum += steps;
             steps = counter.countForwardSteps(1, filter);
         }
+        t.totalSteps = counter.countStepsToPosition(t.root, 0,filter);
         r.shouldBe(t, stepped.toString(), (n - 1).toString());
         r.shouldBe(t, sum.toString(), (n - 1).toString());
+        r.shouldBe(t, "t.totalSteps", (-1 * (n - 1)).toString());
     }
     function testCountAndConfirm() {
-        var i, xml, filter1 = new TextNodePositionFilter(),
+        var i, xml,
             filter2 = new AcceptAllPositionFilter();
         for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
-            countAndConfirm(xml.x, xml.n, xml.n - 1, filter2);
+            countAndConfirm(xml.x, xml.n, filter2);
         }
     }
 
     this.setUp = function () {
-        var odfcanvas;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
     };
