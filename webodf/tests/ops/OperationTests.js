@@ -173,57 +173,6 @@ ops.OperationTests = function OperationTests(runner) {
         return getOfficeNSElement(node, "styles");
     }
 
-    function compareAttributes(a, b, skipReverseCheck) {
-        var aatts = a.attributes,
-            n = aatts.length,
-            i,
-            att,
-            v;
-        for (i = 0; i < n; i += 1) {
-            att = aatts.item(i);
-            if (att.prefix !== "xmlns") {
-                v = b.getAttributeNS(att.namespaceURI, att.localName);
-                if (!b.hasAttributeNS(att.namespaceURI, att.localName)
-                        || v !== att.value) {
-                    return false;
-                }
-            }
-        }
-        return skipReverseCheck ? true : compareAttributes(b, a, true);
-    }
-
-    function compareNodes(a, b) {
-        if (a.nodeType !== b.nodeType) {
-            return false;
-        }
-        if (a.nodeType === Node.TEXT_NODE) {
-            return a.data === b.data;
-        }
-        runtime.assert(a.nodeType === Node.ELEMENT_NODE, "Only textnodes and elements supported.");
-        if (a.namespaceURI !== b.namespaceURI || a.localName !== b.localName) {
-            return false;
-        }
-        if (!compareAttributes(a, b, false)) {
-            return false;
-        }
-        var an = a.firstChild,
-            bn = b.firstChild;
-        while (an) {
-            if (!bn) {
-                return false;
-            }
-            if (!compareNodes(an, bn)) {
-                return false;
-            }
-            an = an.nextSibling;
-            bn = bn.nextSibling;
-        }
-        if (bn) {
-            return false;
-        }
-        return true;
-    }
-
     function runTest(test) {
         var text = t.odtDocument.getRootNode(),
             factory = new ops.OperationFactory(),
@@ -256,7 +205,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByNSAttribute(stylesafter, odf.Namespaces.stylens, "name");
             styles.normalize();
             sortChildrenByNSAttribute(styles, odf.Namespaces.stylens, "name");
-            if (!compareNodes(stylesafter, styles)) {
+            if (!r.areNodesEqual(stylesafter, styles)) {
                 t.styles = serialize(styles);
                 t.stylesafter = serialize(stylesafter);
             } else {
@@ -267,7 +216,7 @@ ops.OperationTests = function OperationTests(runner) {
 
         textafter.normalize();
         text.normalize();
-        if (!compareNodes(textafter, text)) {
+        if (!r.areNodesEqual(textafter, text)) {
             t.text = serialize(text);
             t.after = serialize(textafter);
         } else {

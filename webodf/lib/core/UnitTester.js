@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, Runtime, core*/
+/*global runtime, Runtime, core, Node, Element*/
 /*jslint evil: true, continue: true*/
 /**
  * @interface
@@ -101,14 +101,71 @@ core.UnitTestRunner = function UnitTestRunner() {
         var i;
         try {
             if (a.length !== b.length) {
+                testFailed("array of length " + a.length + " should be " + b.length + " long");
                 return false;
             }
             for (i = 0; i < a.length; i += 1) {
                 if (a[i] !== b[i]) {
+                    testFailed(a[i] + " should be " + b[i] + " at array index " + i);
                     return false;
                 }
             }
         } catch (ex) {
+            return false;
+        }
+        return true;
+    }
+    function areAttributesEqual(a, b, skipReverseCheck) {
+        var aatts = a.attributes,
+            n = aatts.length,
+            i,
+            att,
+            v;
+        for (i = 0; i < n; i += 1) {
+            att = aatts.item(i);
+            if (att.prefix !== "xmlns") {
+                v = b.getAttributeNS(att.namespaceURI, att.localName);
+                if (!b.hasAttributeNS(att.namespaceURI, att.localName)) {
+                    testFailed("Attribute " + att.localName + " with value " + att.value + " was not present");
+                    return false;
+                }
+                if (v !== att.value) {
+                    testFailed("Attribute " + att.localName + " was " + v + " should be " + att.value);
+                    return false;
+                }
+            }
+        }
+        return skipReverseCheck ? true : areAttributesEqual(b, a, true);
+    }
+    function areNodesEqual(a, b) {
+        if (a.nodeType !== b.nodeType) {
+            testFailed(a.nodeType + " should be " + b.nodeType);
+            return false;
+        }
+        if (a.nodeType === Node.TEXT_NODE) {
+            return a.data === b.data;
+        }
+        runtime.assert(a.nodeType === Node.ELEMENT_NODE, "Only textnodes and elements supported.");
+        if (a.namespaceURI !== b.namespaceURI || a.localName !== b.localName) {
+            testFailed(a.namespaceURI + " should be " + b.namespaceURI);
+            return false;
+        }
+        if (!areAttributesEqual(a, b, false)) {
+            return false;
+        }
+        var an = a.firstChild,
+            bn = b.firstChild;
+        while (an) {
+            if (!bn) {
+                return false;
+            }
+            if (!areNodesEqual(an, bn)) {
+                return false;
+            }
+            an = an.nextSibling;
+            bn = bn.nextSibling;
+        }
+        if (bn) {
             return false;
         }
         return true;
@@ -128,6 +185,9 @@ core.UnitTestRunner = function UnitTestRunner() {
             return areArraysEqual(actual, expected);
         }
         if (typeof expected === "object" && typeof actual === "object") {
+            if (expected.constructor === Element || expected.constructor === Node) {
+                return areNodesEqual(expected, actual);
+            }
             return areObjectsEqual(expected, actual);
         }
         return false;
@@ -204,9 +264,17 @@ core.UnitTestRunner = function UnitTestRunner() {
         akeys.sort();
         bkeys.sort();
         return areArraysEqual(akeys, bkeys)
-            && Object.keys(a).every(function(key) { return isResultCorrect(a[key], b[key]); });
+            && Object.keys(a).every(function(key) {
+            var aval = a[key], bval = b[key];
+            if (!isResultCorrect(aval, bval)) {
+                testFailed(aval + " should be " + bval + " for key " + key);
+                return false;
+            }
+            return true;
+        });
     };
 
+    this.areNodesEqual = areNodesEqual;
     this.shouldBeNull = shouldBeNull;
     this.shouldBeNonNull = shouldBeNonNull;
     this.shouldBe = shouldBe;
