@@ -113,6 +113,17 @@ odf.OdfUtils = function OdfUtils() {
      * @param {!Node} node
      * @return {!Node}
      */
+    function firstChild(node) {
+        while (node.firstChild !== null && isGroupingElement(node)) {
+            node = node.firstChild;
+        }
+        return node;
+    }
+    this.firstChild = firstChild;
+    /**
+     * @param {!Node} node
+     * @return {!Node}
+     */
     function lastChild(node) {
         while (node.lastChild !== null && isGroupingElement(node)) {
             node = node.lastChild;
@@ -125,13 +136,10 @@ odf.OdfUtils = function OdfUtils() {
      * @return {?Node}
      */
     function previousNode(node) {
-        while (node.previousSibling === null) {
+        while (!isParagraph(node) && node.previousSibling === null) {
             node = /**@type{!Node}*/(node.parentNode);
-            if (isParagraph(node)) {
-                return null;
-            }
         }
-        return lastChild(node.previousSibling);
+        return isParagraph(node) ? null : lastChild(/**@type{!Node}*/(node.previousSibling));
     }
     this.previousNode = previousNode;
     /**
@@ -139,16 +147,10 @@ odf.OdfUtils = function OdfUtils() {
      * @return {?Node}
      */
     function nextNode(node) {
-        if (node.firstChild !== null && isGroupingElement(node)) {
-            return node.firstChild;
-        }
-        while (node.nextSibling === null) {
+        while (!isParagraph(node) && node.nextSibling === null) {
             node = /**@type{!Node}*/(node.parentNode);
-            if (isParagraph(node)) {
-                return null;
-            }
         }
-        return node.nextSibling;
+        return isParagraph(node) ? null : firstChild(/**@type{!Node}*/(node.nextSibling));
     }
     this.nextNode = nextNode;
 
@@ -259,6 +261,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     function scanRightForAnyCharacter(node) {
         var r = false;
+        node = node && firstChild(node);
         while (node) {
             if (node.nodeType === Node.TEXT_NODE && node.length > 0
                     && !isODFWhitespace(node.data)) {
