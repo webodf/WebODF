@@ -713,9 +713,6 @@ odf.Style2CSS = function Style2CSS() {
         if (properties) {
             rule += getTableProperties(properties);
         }
-        if (family === "table") {
-            runtime.log(rule);
-        }
         if (rule.length === 0) {
             return;
         }
