@@ -67,7 +67,8 @@ core.Cursor = function Cursor(document, memberId) {
         anchorNode = document.createElementNS(cursorns, 'anchor'),
         forwardSelection,
         recentlyModifiedNodes = [],
-        selectedRange;
+        selectedRange,
+        isCollapsed;
 
     /**
      * Split a text node and put the cursor into it.
@@ -204,7 +205,7 @@ core.Cursor = function Cursor(document, memberId) {
      * @return {?Range}
      */
     this.getSelectedRange = function () {
-        if (selectedRange.collapsed) {
+        if (isCollapsed) {
             selectedRange.setStartBefore(cursorNode);
             selectedRange.collapse(true);
         } else {
@@ -231,6 +232,7 @@ core.Cursor = function Cursor(document, memberId) {
         }
         selectedRange = range;
         forwardSelection = isForwardSelection !== false;
+        isCollapsed = range.collapsed;
 
         // TODO the nodes need to be added and removed in the right order to preserve the range
         if (range.collapsed) {
