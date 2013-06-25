@@ -184,6 +184,62 @@
   </ops>
   <after><office:text><text:p>  a  b<c:cursor c:memberId="Joe"/>  </text:p><text:p/></office:text></after>
  </test>
+ <test name="MoveCursor_StyledSpace">
+  <before><office:text><text:p>a<text:span> </text:span>b</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+  </ops>
+  <after><office:text><text:p>a<text:span> <c:cursor c:memberId="Joe"/></text:span>b</text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_StyledSpace_2">
+  <before><office:text><text:p>a<text:span> b</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+  </ops>
+  <after><office:text><text:p>a<text:span> <c:cursor c:memberId="Joe"/>b</text:span></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_StyledSpace_3">
+  <before><office:text><text:p>a <text:span> </text:span>b</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+  </ops>
+  <after><office:text><text:p>a <c:cursor c:memberId="Joe"/><text:span> </text:span>b</text:p></office:text></after>
+ </test>
+  <test name="MoveCursor_StyledSpace_4">
+  <before><office:text><text:p>a<text:span> b</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+  </ops>
+  <after><office:text><text:p>a<text:span> <c:cursor c:memberId="Joe"/>b</text:span></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_StyledSpace_5">
+  <before><office:text><text:p>a <text:span> </text:span>b</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="3"/>
+  </ops>
+  <after><office:text><text:p>a <text:span> </text:span>b<c:cursor c:memberId="Joe"/></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_StyledSpace_6">
+  <before><office:text><text:p>a<text:span> </text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+  </ops>
+  <after><office:text><text:p>a<c:cursor c:memberId="Joe"/><text:span> </text:span></text:p></office:text></after>
+ </test>
+ <test name="MoveCursor_SpaceBetweenSpans">
+  <before><office:text><text:p><text:span>a</text:span> <text:span>b</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+  </ops>
+  <after><office:text><text:p><text:span>a</text:span> <c:cursor c:memberId="Joe"/><text:span>b</text:span></text:p></office:text></after>
+ </test>
  <test name="MoveCursor_NestedSpan_01">
   <before><office:text><text:p><text:span>a<text:span>b</text:span></text:span></text:p></office:text></before>
   <ops>

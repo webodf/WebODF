@@ -94,7 +94,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 if (r === 1) {// non-whitespace character or a character element
                     return accept;
                 }
-                if (r === 2 && odfUtils.scanRightForAnyCharacter(rightNode)) {
+                if (r === 2 && (odfUtils.scanRightForAnyCharacter(rightNode)
+                    || odfUtils.scanRightForAnyCharacter(odfUtils.nextNode(container)))) {
                     // significant whitespace is ok, if not in trailing whitesp
                     return accept;
                 }
