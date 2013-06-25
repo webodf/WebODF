@@ -2,7 +2,13 @@
     <head>
         <link rel="stylesheet" type="text/css" href="viewer.css" media="screen"/>
         <script src="webodf.js" type="text/javascript" charset="utf-8"></script> 
+        <script src="ODFViewerPlugin.js" type="text/javascript" charset="utf-8"></script>
         <script src="viewer.js" type="text/javascript" charset="utf-8"></script>
+        <script>
+            window.onload = function () {
+                viewer = new Viewer(new ODFViewerPlugin());
+            };
+        </script>
     </head>
 
     <body>
