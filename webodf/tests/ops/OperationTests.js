@@ -48,20 +48,52 @@ ops.OperationTests = function OperationTests(runner) {
         return serializer.writeToString(element, odf.Namespaces.namespaceMap);
     }
 
+    function sortChildrenByNSAttribute(element, attrns, attrLocalName) {
+        var child = element.firstChild,
+            childArray = [],
+            i;
+        while(child) {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+                childArray.push(child);
+            }
+            child = child.nextSibling;
+        }
+        childArray.sort(function(a, b) {
+            var attra = a.getAttributeNS(attrns, attrLocalName),
+                attrb = b.getAttributeNS(attrns, attrLocalName);
+            return attra === attrb ? 0 :
+                  (attra > attrb ?   1 :
+                                    -1);
+        });
+
+        for(i = 0; i < childArray.length; i += 1) {
+            element.appendChild(childArray[i]);
+        }
+    }
+
     function parseOperation(node) {
         var op = {},
+            child = node.firstChild,
             atts = node.attributes,
             att,
             n = atts.length,
             i,
             value;
+        // read plain data by attributes
         for (i = 0; i < n; i += 1) {
             att = atts.item(i);
             value = att.value;
-            if (/length|number|position/.test(att.localName)) {
+            if (/length|number|position|fontSize|topMargin|bottomMargin|leftMargin|rightMargin/.test(att.localName)) {
                 value = parseInt(value, 10);
             }
             op[att.localName] = value;
+        }
+        // read complex data by childs
+        while(child) {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+                op[child.localName] = parseOperation(child);
+            }
+            child = child.nextSibling;
         }
         return op;
     }
@@ -122,15 +154,21 @@ ops.OperationTests = function OperationTests(runner) {
         }
     }
 
-    function getOfficeTextNode(node) {
-        var t = node.firstElementChild;
-        while (t) {
-            if (t.localName === "text") {
-                return t;
-            }
-            t = t.nextElementChild;
+    function getOfficeNSElement(node, localName) {
+        var e = node.getElementsByTagNameNS(odf.Namespaces.officens, localName);
+
+        if (e.length === 1) {
+            return e[0];
         }
         return null;
+    }
+
+    function getOfficeTextElement(node) {
+        return getOfficeNSElement(node, "text");
+    }
+
+    function getOfficeStylesElement(node) {
+        return getOfficeNSElement(node, "styles");
     }
 
     function compareAttributes(a, b, skipReverseCheck) {
@@ -189,13 +227,42 @@ ops.OperationTests = function OperationTests(runner) {
             factory = new ops.OperationFactory(),
             i,
             op,
-            textbefore = getOfficeTextNode(test.before),
-            textafter = getOfficeTextNode(test.after);
+            textbefore = getOfficeTextElement(test.before),
+            textafter = getOfficeTextElement(test.after),
+            styles = t.odfContainer.rootElement.styles,
+            stylesbefore = getOfficeStylesElement(test.before),
+            stylesafter = getOfficeStylesElement(test.after);
+        // inject test data
+        if (stylesbefore) {
+            copyChildNodes(stylesbefore, styles);
+        }
         copyChildNodes(textbefore, text);
+
+        // execute test ops
         for (i = 0; i < test.ops.length; i += 1) {
             op = factory.create(test.ops[i]);
             op.execute(t.odtDocument);
         }
+
+        // check result
+        if (stylesbefore) {
+            stylesafter.normalize();
+            // for now just normalize the order of the styles to create
+            // comparability
+            // any possible orderless listing in the style subchilds will be
+            // only cared for once it is needed
+            sortChildrenByNSAttribute(stylesafter, odf.Namespaces.stylens, "name");
+            styles.normalize();
+            sortChildrenByNSAttribute(styles, odf.Namespaces.stylens, "name");
+            if (!compareNodes(stylesafter, styles)) {
+                t.styles = serialize(styles);
+                t.stylesafter = serialize(stylesafter);
+            } else {
+                t.styles = t.stylesafter = "OK";
+            }
+            r.shouldBe(t, "t.styles", "t.stylesafter");
+        }
+
         textafter.normalize();
         text.normalize();
         if (!compareNodes(textafter, text)) {
@@ -252,13 +319,12 @@ ops.OperationTests = function OperationTests(runner) {
 
     this.setUp = function () {
         var testarea,
-            odfContainer,
             odfcanvas;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         odfcanvas = new odf.OdfCanvas(testarea);
-        odfContainer = new odf.OdfContainer("", null);
-        odfcanvas.setOdfContainer(odfContainer);
+        t.odfContainer = new odf.OdfContainer("", null);
+        odfcanvas.setOdfContainer(t.odfContainer);
         t.odtDocument = new ops.OdtDocument(odfcanvas);
     };
     this.tearDown = function () {

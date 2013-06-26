@@ -1,4 +1,10 @@
-<tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor" xmlns:e="urn:webodf:names:editinfo">
+<tests
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+    xmlns:c="urn:webodf:names:cursor"
+    xmlns:e="urn:webodf:names:editinfo">
  <test name="AddCursor_Simple">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -447,5 +453,99 @@
    <op optype="RemoveText" position="0" length="5"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
+
+ <test name="CloneParagraphStyle_noDisplayName_noDisplayName">
+  <before>
+   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="CloneParagraphStyle" memberid="Alice" styleName="S" newStyleName="C"/>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/><style:style style:name="C" style:family="paragraph" style:class="text"/></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="CloneParagraphStyle_noDisplayName_displayName">
+  <before>
+   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="CloneParagraphStyle" memberid="Alice" styleName="S" newStyleName="C" newStyleDisplayName="Clone"/>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/><style:style style:name="C" style:display-name="Clone" style:family="paragraph" style:class="text"/></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="CloneParagraphStyle_displayName_noDisplayName">
+  <before>
+   <office:styles><style:style style:name="S" style:display-name="Style" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="CloneParagraphStyle" memberid="Alice" styleName="S" newStyleName="C"/>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S" style:display-name="Style" style:family="paragraph" style:class="text"/><style:style style:name="C" style:family="paragraph" style:class="text"/></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="CloneParagraphStyle_displayName_displayName">
+  <before>
+   <office:styles><style:style style:name="S" style:display-name="Style" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="CloneParagraphStyle" memberid="Alice" styleName="S" newStyleName="C" newStyleDisplayName="Clone"/>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S" style:display-name="Style" style:family="paragraph" style:class="text"/><style:style style:name="C" style:display-name="Clone" style:family="paragraph" style:class="text"/></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+
+ <test name="DeleteParagraphStyle">
+  <before>
+   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="DeleteParagraphStyle" memberid="Alice" styleName="S"/>
+  </ops>
+  <after>
+   <office:styles></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+
+ <test name="UpdateParagraphStyle_nothing_fontSize">
+  <before>
+    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+    <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><info><textProperties fontSize="8"/></info></op>
+  </ops>
+  <after>
+    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="8pt"></style:text-properties></style:style></office:styles>
+    <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="UpdateParagraphStyle_fontSize6_fontSize8">
+  <before>
+    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="6pt"/></style:style></office:styles>
+    <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><info><textProperties fontSize="8"/></info></op>
+  </ops>
+  <after>
+    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="8pt"/></style:style></office:styles>
+    <office:text><text:p/></office:text>
+  </after>
  </test>
 </tests>
