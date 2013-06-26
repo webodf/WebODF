@@ -116,22 +116,27 @@ ops.OpRemoveText = function OpRemoveText() {
     function mergeParagraphs(first, second, prepend) {
         var parent,
             child,
-            firstEditInfo = null;
+            insertionPoint;
 
         child = prepend ? second.lastChild : second.firstChild;
+        if (prepend) {
+            insertionPoint = first.getElementsByTagNameNS(editinfons, 'editinfo')[0]
+                                || first.firstChild;
+        }
 
         while (child) {
             second.removeChild(child);
-            if (child.localName !== 'editinfo' && !isEmpty(child)) {
-                if (prepend) {
-                    firstEditInfo = first.getElementsByTagNameNS(editinfons, 'editinfo')[0];
-                    if (firstEditInfo) {
-                        first.insertBefore(child, firstEditInfo);
-                    } else {
-                        first.insertBefore(child, first.firstChild);
+            if (child.localName !== 'editinfo') {
+                if (isEmpty(child)) {
+                    // Even though the node is devoid of ODT elements,
+                    // it may still contain cursors and other things.
+                    // In this case, merge all child elements into the parent
+                    // before throwing the node away.
+                    while(child.firstChild) {
+                        first.insertBefore(child.firstChild, insertionPoint);
                     }
                 } else {
-                    first.appendChild(child);
+                    first.insertBefore(child, insertionPoint);
                 }
             }
 
@@ -155,7 +160,8 @@ ops.OpRemoveText = function OpRemoveText() {
         while (node.firstChild) {
             parent.insertBefore(node.firstChild, node);
         }
-        node.parentNode.removeChild(node);
+        parent.removeChild(node);
+        return parent;
     }
 
     /**
@@ -301,8 +307,8 @@ ops.OpRemoveText = function OpRemoveText() {
                     fixCursorPositions(odtDocument);
                     // If the current node is text:s or span and is empty, it should
                     // be removed.
-                    if (isEmpty(currentParent)) {
-                        mergeIntoParent(currentParent);
+                    while (isEmpty(currentParent)) {
+                        currentParent = mergeIntoParent(currentParent);
                     }
 
                     remainingLength -= currentLength;

@@ -431,4 +431,21 @@
   </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span><text:span>hello</text:span></text:span></text:p></text:list-item><text:list-item><text:p><text:span><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
+ <test name="BackspaceSpaceInSpan">
+  <before><office:text><text:p>A</text:p><text:p><text:span><text:s> </text:s></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5"/>
+   <op optype="RemoveText" position="5" length="-5"/>
+  </ops>
+  <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
+ <test name="DeleteSpaceInSpan">
+  <before><office:text><text:p>A</text:p><text:p><text:span><text:s> </text:s></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="RemoveText" position="0" length="5"/>
+  </ops>
+  <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
 </tests>
