@@ -139,10 +139,10 @@ ops.OpRemoveText = function OpRemoveText() {
         }
 
         parent = second.parentNode;
-        if (odfUtils.isListItem(parent)) {
+        parent.removeChild(second);
+
+        if (odfUtils.isListItem(parent) && parent.childNodes.length === 0) {
             parent.parentNode.removeChild(parent);
-        } else {
-            parent.removeChild(second);
         }
     }
 

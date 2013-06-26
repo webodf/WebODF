@@ -301,14 +301,21 @@
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Bob"/><e:editinfo e:id="A"/>c</text:p></office:text></after>
  </test>
- <test name="Remove_deleteMergeListItem">
+ <test name="Remove_deleteMergeListItem1">
   <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
    <ops>
     <op optype="RemoveText" position="5" length="1"/>
    </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
- <test name="Remove_backspaceMergeEmpty1">
+ <test name="Remove_deleteMergeListItem2">
+  <before><office:text><text:list><text:list-item><text:p><text:span></text:span></text:p><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></before>
+   <ops>
+    <op optype="RemoveText" position="0" length="1"/>
+   </ops>
+  <after><office:text><text:list><text:list-item><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></after>
+ </test>
+    <test name="Remove_backspaceMergeEmpty1">
   <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
    <op optype="RemoveText" position="1" length="-1"/>
