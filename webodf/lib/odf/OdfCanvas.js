@@ -659,6 +659,20 @@ odf.OdfCanvas = (function () {
             expandSpaceElement(space);
         }
     }
+
+    /**
+     * Expand tabs to contain tab characters. This eases cursor behaviour
+     * during editing
+     * @param {!Element} odffragment
+     */
+    function expandTabElements(odffragment) {
+        var i, tabs;
+
+        tabs = odffragment.getElementsByTagNameNS(textns, "tab");
+        for (i = 0; i < tabs.length; i += 1) {
+            tabs[i].textContent = "\t";
+        }
+    }
     /**
      * @param {!odf.OdfContainer} container
      * @param {!Element} odfbody
@@ -1115,6 +1129,7 @@ odf.OdfCanvas = (function () {
             modifyTables(container, odfnode.body, css);
             modifyLinks(container, odfnode.body, css);
             expandSpaceElements(odfnode.body);
+            expandTabElements(odfnode.body);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body, css);
             loadLists(container, odfnode.body, css);

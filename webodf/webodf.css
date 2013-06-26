@@ -32,9 +32,9 @@ text|p, text|h {
 text|s {
     white-space: pre;
 }
-text|tab:before {
+text|tab {
   display: inline;
-  content: '        ';
+  white-space: pre;
 }
 text|line-break {
   content: " ";

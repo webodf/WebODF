@@ -97,18 +97,18 @@ ops.OperationTests = function OperationTests(runner) {
         }
         return op;
     }
-    function checkWhitespaceTexts(element) {
+    function checkWhitespaceTexts(element, expectedChar) {
         var text = element.firstChild;
         return (element.childNodes.length === 1
             && element.hasAttributeNS(odf.Namespaces.textns, "c") === false
             && text.nodeType === Node.TEXT_NODE
-            && text.textContent === " ");
+            && text.textContent === expectedChar);
     }
-    function checkWhitespace(rootElement) {
+    function checkWhitespace(rootElement, localName, expectedChar) {
         var i,
-            spaceElements = rootElement.getElementsByTagNameNS(odf.Namespaces.textns, "s");
+            spaceElements = rootElement.getElementsByTagNameNS(odf.Namespaces.textns, localName);
         for (i = 0; i < spaceElements.length; i+=1) {
-            if (!checkWhitespaceTexts(spaceElements[i])) {
+            if (!checkWhitespaceTexts(spaceElements[i], expectedChar)) {
                 return false;
             }
         }
@@ -122,10 +122,12 @@ ops.OperationTests = function OperationTests(runner) {
             test = {},
             op;
         runtime.assert(before.localName === "before", "Expected <before/> in " + name + ".");
-        runtime.assert(checkWhitespace(before), "Unexpanded test:s element or text:c attribute found in " + name + ".");
+        runtime.assert(checkWhitespace(before, "s", " "), "Unexpanded text:s element or text:c attribute found in " + name + ".");
+        runtime.assert(checkWhitespace(before, "tab", "\t"), "Unexpanded text:tab element found in " + name + ".");
         runtime.assert(opsElement.localName === "ops", "Expected <ops/> in " + name + ".");
         runtime.assert(after.localName === "after", "Expected <after/> in " + name + ".");
-        runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
+        runtime.assert(checkWhitespace(after, "s", " "), "Unexpanded text:s element or text:c attribute found in " + name + ".");
+        runtime.assert(checkWhitespace(after, "tab", "\t"), "Unexpanded text:tab element found in " + name + ".");
         op = opsElement.firstElementChild;
         while (op) {
             runtime.assert(op.localName === "op", "Expected <op/> in " + name + ".");

@@ -89,9 +89,8 @@ ops.OpRemoveText = function OpRemoveText() {
      * @returns {boolean}
      */
     function isEmpty(node) {
-        var localName = node.localName,
-            childNode;
-        if ((localName === "s" || localName === "span") && node.textContent.length === 0) {
+        var childNode;
+        if (!odfUtils.isParagraph(node) && (odfUtils.isGroupingElement(node) || odfUtils.isCharacterElement(node)) && node.textContent.length === 0) {
             childNode = node.firstChild;
             while (childNode) {
                 if (odfUtils.isCharacterElement(childNode)) {

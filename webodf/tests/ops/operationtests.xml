@@ -290,13 +290,13 @@
   <after><office:text><text:p text:style-name="B"><text:span><c:cursor c:memberId="Bob"/>cde</text:span></text:p></office:text></after>
  </test>
  <test name="Remove_DeleteLastCharacterNearTabs">
-  <before><office:text><text:p><text:span><text:tab/><text:tab/>a</text:span></text:p></office:text></before>
+  <before><office:text><text:p><text:span><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab>a</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="2"/>
    <op optype="RemoveText" position="2" length="1"/>
   </ops>
-  <after><office:text><text:p><text:span><text:tab/><text:tab/><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
+  <after><office:text><text:p><text:span><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
  </test>
  <test name="Remove_DeleteLastCharacterInSpan">
   <before><office:text><text:p>a<text:span><e:editinfo e:id="A"/>b</text:span>c</text:p></office:text></before>
@@ -306,6 +306,24 @@
    <op optype="RemoveText" position="1" length="1"/>
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Bob"/><e:editinfo e:id="A"/>c</text:p></office:text></after>
+ </test>
+ <test name="Remove_DeleteTabs">
+  <before><office:text><text:p><text:span><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1"/>
+   <op optype="RemoveText" position="1" length="1"/>
+  </ops>
+  <after><office:text><text:p><text:span><text:tab>&#09;</text:tab><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
+ </test>
+ <test name="Remove_DeleteTabs2">
+  <before><office:text><text:p><text:span>a<text:tab>&#09;</text:tab><text:tab>&#09;</text:tab></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2"/>
+   <op optype="RemoveText" position="2" length="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>a<text:tab>&#09;</text:tab><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
  </test>
  <test name="Remove_deleteMergeListItem1">
   <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
