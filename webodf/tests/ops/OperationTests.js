@@ -65,6 +65,23 @@ ops.OperationTests = function OperationTests(runner) {
         }
         return op;
     }
+    function checkWhitespaceTexts(element) {
+        var text = element.firstChild;
+        return (element.childNodes.length === 1
+            && element.hasAttributeNS(odf.Namespaces.textns, "c") === false
+            && text.nodeType === Node.TEXT_NODE
+            && text.textContent === " ");
+    }
+    function checkWhitespace(rootElement) {
+        var i,
+            spaceElements = rootElement.getElementsByTagNameNS(odf.Namespaces.textns, "s");
+        for (i = 0; i < spaceElements.length; i+=1) {
+            if (!checkWhitespaceTexts(spaceElements[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
     function parseTest(name, node) {
         var before = node.firstElementChild,
             opsElement = before.nextElementSibling,
@@ -73,8 +90,10 @@ ops.OperationTests = function OperationTests(runner) {
             test = {},
             op;
         runtime.assert(before.localName === "before", "Expected <before/> in " + name + ".");
+        runtime.assert(checkWhitespace(before), "Unexpanded test:s element or text:c attribute found in " + name + ".");
         runtime.assert(opsElement.localName === "ops", "Expected <ops/> in " + name + ".");
         runtime.assert(after.localName === "after", "Expected <after/> in " + name + ".");
+        runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
         op = opsElement.firstElementChild;
         while (op) {
             runtime.assert(op.localName === "op", "Expected <op/> in " + name + ".");

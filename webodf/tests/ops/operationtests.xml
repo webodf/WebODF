@@ -130,34 +130,34 @@
   <after><office:text><text:p><text:span>ba</text:span></text:p></office:text></after>
  </test>
  <test name="InsertText_BeforeSpace">
-  <before><office:text><text:p><text:s/></text:p></office:text></before>
+  <before><office:text><text:p><text:s> </text:s></text:p></office:text></before>
   <ops>
    <op optype="InsertText" position="0" text="a"/>
   </ops>
-  <after><office:text><text:p>a<text:s/></text:p></office:text></after>
+  <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
  </test>
  <test name="InsertText_AfterSpace">
-  <before><office:text><text:p><text:s/></text:p></office:text></before>
+  <before><office:text><text:p><text:s> </text:s></text:p></office:text></before>
   <ops>
    <op optype="InsertText" position="1" text="a"/>
   </ops>
-  <after><office:text><text:p><text:s/>a</text:p></office:text></after>
+  <after><office:text><text:p><text:s> </text:s>a</text:p></office:text></after>
  </test>
  <test name="InsertText_AfterSpace2">
-  <before><office:text><text:p>a<text:s/></text:p></office:text></before>
+  <before><office:text><text:p>a<text:s> </text:s></text:p></office:text></before>
   <ops>
    <op optype="InsertText" position="2" text="b"/>
   </ops>
-  <after><office:text><text:p>a<text:s/>b</text:p></office:text></after>
+  <after><office:text><text:p>a<text:s> </text:s>b</text:p></office:text></after>
  </test>
  <test name="InsertTextWithCursor_AfterSpace2">
-  <before><office:text><text:p>a<text:s/></text:p><text:p/></office:text></before>
+  <before><office:text><text:p>a<text:s> </text:s></text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" position="2"/>
    <op optype="InsertText" position="2" text="b"/>
   </ops>
-  <after><office:text><text:p>a<text:s/>b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+  <after><office:text><text:p>a<text:s> </text:s>b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
  <test name="InsertText_BeforeSpan">
   <before><office:text><text:p>a<text:span>b</text:span></text:p><text:p/></office:text></before>
