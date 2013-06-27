@@ -425,7 +425,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      */
     this.setUnfilteredPosition = function (container, offset) {
         runtime.assert((container !== null) && (container !== undefined),
-            "PositionIterator.setPosition called without container");
+            "PositionIterator.setUnfilteredPosition called without container");
         if (container.nodeType === Node.TEXT_NODE) {
             return self.setPosition(container, offset);
         }
