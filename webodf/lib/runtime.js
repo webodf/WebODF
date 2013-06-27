@@ -509,7 +509,7 @@ function BrowserRuntime(logoutput) {
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     if (encoding === "binary") {
-                        if (String(typeof VBArray) !== "undefined") { // IE9
+                        if (xhr.responseBody !== null && String(typeof VBArray) !== "undefined") { // IE9
                             data = new VBArray(xhr.responseBody).toArray();
                         } else {
                             data = self.byteArrayFromString(xhr.responseText,
@@ -555,14 +555,17 @@ function BrowserRuntime(logoutput) {
                     // and empty files, so empty files are considered as errors
                     callback("File " + path + " is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
-                    // report file
-                    if (String(typeof VBArray) !== "undefined") {
-                        data = new VBArray(xhr.responseBody).toArray();
-                    } else if (xhr.response) {
-                        data = /**@type{!ArrayBuffer}*/(xhr.response);
-                        data = new Uint8Array(data);
+                    // report fi
+                    if(xhr.response) {
+                       // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
+                       data = /**@type{!ArrayBuffer}*/(xhr.response);
+                       data = new Uint8Array(data);
+                    } else if (xhr.responseBody !== null && String(typeof VBArray) !== "undefined") {
+                       // fallback for IE < 9
+                       data = (new VBArray(xhr.responseBody)).toArray();
                     } else {
-                        data = self.byteArrayFromString(xhr.responseText, "binary");
+                       // fallback for some really weird browsers
+                       data = self.byteArrayFromString(xhr.responseText, "binary");
                     }
                     cache[path] = data;
                     callback(null, data.slice(offset, offset + length));
