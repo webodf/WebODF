@@ -555,7 +555,7 @@ function BrowserRuntime(logoutput) {
                     // and empty files, so empty files are considered as errors
                     callback("File " + path + " is empty.");
                 } else if (xhr.status === 200 || xhr.status === 0) {
-                    // report fi
+                    // report file
                     if(xhr.response) {
                        // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
                        data = /**@type{!ArrayBuffer}*/(xhr.response);
