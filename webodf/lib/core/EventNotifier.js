@@ -45,6 +45,11 @@ core.EventNotifier = function EventNotifier(eventIds) {
     var self = this,
         eventListener = {};
 
+    /**
+     * @param {!string} eventId
+     * @param {*} args
+     * @return {undefined}
+     */
     this.emit = function (eventId, args) {
         var i, subscribers;
 
@@ -57,6 +62,11 @@ core.EventNotifier = function EventNotifier(eventIds) {
         }
     };
 
+    /**
+     * @param {!string} eventId
+     * @param {!function(*)} cb
+     * @return {undefined}
+     */
     this.subscribe = function (eventId, cb) {
         runtime.assert(eventListener.hasOwnProperty(eventId),
             "tried to subscribe to unknown event \"" + eventId + "\"");
@@ -64,6 +74,9 @@ core.EventNotifier = function EventNotifier(eventIds) {
         runtime.log("event \"" + eventId + "\" subscribed.");
     };
 
+    /**
+     * @return {undefined}
+     */
     function init() {
         var i;
 

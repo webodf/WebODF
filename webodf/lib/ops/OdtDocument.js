@@ -324,7 +324,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Optionally takes a memberid of a cursor, to specifically return the
      * text node positioned just behind that cursor.
      * @param {!number} position
-     * @param {number} memberid
+     * @param {!number=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
     function getPositionInTextNode(position, memberid) {
@@ -525,7 +525,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * This function will return the Text node as well as the offset in that text node
      * of the cursor.
      * @param {!number} position
-     * @param {number} memberid
+     * @param {!number=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
     this.getPositionInTextNode = getPositionInTextNode;
@@ -678,6 +678,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
      */
     this.addCursor = function (cursor) {
         runtime.assert(Boolean(cursor), "OdtDocument::addCursor without cursor");
@@ -732,10 +733,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return odfCanvas.getFormatting();
     };
 
+    /**
+     * @param {!string} eventid
+     * @param {*} args
+     * @return {undefined}
+     */
     this.emit = function (eventid, args) {
         eventNotifier.emit(eventid, args);
     };
 
+    /**
+     * @param {!string} eventid
+     * @param {!function(*)} cb
+     * @return {undefined}
+     */
     this.subscribe = function (eventid, cb) {
         eventNotifier.subscribe(eventid, cb);
     };
