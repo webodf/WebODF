@@ -152,7 +152,6 @@ gui.SessionController = (function () {
 
             stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
             stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
-
             if (stepsToFocus !== 0 || stepsToAnchor !== 0) {
                 op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, position: oldPosition+stepsToAnchor, length: stepsToFocus - stepsToAnchor});
@@ -169,6 +168,18 @@ gui.SessionController = (function () {
                 oldPosition = session.getOdtDocument().getCursorPosition(inputMemberId);
 
             op.init({memberid: inputMemberId, position: oldPosition+steps});
+            return op;
+        }
+
+        /**
+         * @param {!number} increment
+         * @return {!ops.Operation}
+         */
+        function createOpMoveCursorByShiftLeftOrRight(increment) {
+            var op = new ops.OpMoveCursor(),
+                selection = session.getOdtDocument().getCursorSelection(inputMemberId);
+
+            op.init({memberid: inputMemberId, position: selection.position, length: selection.length+increment});
             return op;
         }
 
@@ -349,10 +360,14 @@ gui.SessionController = (function () {
                 handled = false;
 
             if (keyCode === 37) { // left
-                op = createOpMoveCursor(-1);
+                op = e.shiftKey
+                    ? createOpMoveCursorByShiftLeftOrRight(-1)
+                    : createOpMoveCursor(-1);
                 handled = true;
             } else if (keyCode === 39) { // right
-                op = createOpMoveCursor(1);
+                op = e.shiftKey
+                    ? createOpMoveCursorByShiftLeftOrRight(1)
+                    : createOpMoveCursor(1);
                 handled = true;
             } else if (keyCode === 38) { // up
                 // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10

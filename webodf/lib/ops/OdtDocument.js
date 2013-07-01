@@ -610,23 +610,25 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * This function returns the position and selection length in ODF world of
-     * the cursor of the member
+     * the cursor of the member.
+     * position is always the number of steps from root node to the anchor node
+     * length is the number of steps from anchor node to focus node
      * @param {!string} memberid
      * @returns {{position: !number, length: !number}}
      */
     this.getCursorSelection = function(memberid) {
         var counter,
             cursor = cursors[memberid],
-            position = 0,
-            length = 0;
+            focusPosition = 0,
+            stepsToAnchor = 0;
         if (cursor) {
             counter = cursor.getStepCounter().countStepsToPosition;
-            position = -counter(rootNode, 0, filter);
-            length = counter(cursor.getAnchorNode(), 0, filter);
+            focusPosition = -counter(rootNode, 0, filter);
+            stepsToAnchor = counter(cursor.getAnchorNode(), 0, filter);
         }
         return {
-            position: position,
-            length: length
+            position: focusPosition + stepsToAnchor,
+            length: -stepsToAnchor
         };
     };
     /**
