@@ -151,7 +151,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 }
                 // In a PositionIterator, the offset in a text node is never
                 // equal to the length of the text node.
-                offset = iterator.offset();
+                offset = iterator.unfilteredDomOffset();
                 text = container.data;
                 runtime.assert(offset !== text.length, "Unexpected offset.");
                 if (offset > 0) {
@@ -494,7 +494,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         iterator.previousPosition();
         for (i = -2; i <= 2; i += 1) {
             container = iterator.container();
-            offset = iterator.offset();
+            offset = iterator.unfilteredDomOffset();
             if (container.nodeType === Node.TEXT_NODE
                     && container.data[offset] === ' '
                     && odfUtils.isSignificantWhitespace(container, offset)) {
