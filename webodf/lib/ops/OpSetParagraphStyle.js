@@ -61,7 +61,11 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         if (domPosition) {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
-                paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
+                if (styleNameAfter !== "") {
+                    paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
+                } else {
+                    paragraphNode.removeAttributeNS(textns, 'style-name');
+                }
 
                 odtDocument.getOdfCanvas().refreshSize();
                 odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
