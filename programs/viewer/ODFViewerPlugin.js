@@ -55,14 +55,11 @@ function ODFViewerPlugin() {
             'text' : "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             'office' : "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
         };
-        return ns[prefix] || alert('prefix ['+prefix+'] unknown.');
+        return ns[prefix] || console.log('prefix [' + prefix + '] unknown.');
     }
 
     var self = this,
-        url =  null,
-        filename = null,
         odfCanvas = null,
-        element = null,
         odfElement = null,
         initialized = false,
         root = null,
@@ -73,7 +70,6 @@ function ODFViewerPlugin() {
     this.initialize = function (viewerElement, location) {
         // If the URL has a fragment (#...), try to load the file it represents
 
-        element = viewerElement;
         odfElement = document.getElementById('canvas');
         odfCanvas = new odf.OdfCanvas(odfElement);
         odfCanvas.load(location);
@@ -85,11 +81,6 @@ function ODFViewerPlugin() {
 
             if (documentType === 'presentation') {
                 self.slideshow = true;
-                // no padding for presentations
-                odfElement.parentNode.style.padding = 0;
-                // get a list of pages
-
-                // start with the first page
             }
 
             self.onLoad();
@@ -121,6 +112,14 @@ function ODFViewerPlugin() {
 
     this.fitSmart = function (width) {
         odfCanvas.fitSmart(width);
+    };
+
+    this.getZoomLevel = function () {
+        return odfCanvas.getZoomLevel();
+    };
+
+    this.setZoomLevel = function (value) {
+        odfCanvas.setZoomLevel(value);
     };
 
     // return a list of tuples (pagename, pagenode)

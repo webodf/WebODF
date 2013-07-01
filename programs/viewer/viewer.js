@@ -96,6 +96,8 @@ function Viewer(viewerPlugin) {
 
         viewerPlugin.onLoad = function () {
             if (viewerPlugin.slideshow) {
+                // No padding for slideshows
+                document.getElementById('canvasContainer').style.padding = 0;
                 // temporary hack: remove zoom buttons to make way for the navigation controls
                 document.getElementById('toolbarMiddleContainer').style.visibility = 'hidden';
 
@@ -172,8 +174,8 @@ function Viewer(viewerPlugin) {
         return viewerPlugin.getZoomLevel();
     };
 
-    this.setZoomLevel = function () {
-        viewerPlugin.setZoomLevel();
+    this.setZoomLevel = function (value) {
+        viewerPlugin.setZoomLevel(value);
     };
 
     this.setScale = function (val, resetAutoSettings, noScroll) {
