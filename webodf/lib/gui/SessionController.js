@@ -136,7 +136,7 @@ gui.SessionController = (function () {
 
             // create a move op with the distance to that position
             iterator.setUnfilteredPosition(targetNode, targetOffset);
-            return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.offset());
+            return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
         }
 
         /**
@@ -240,7 +240,7 @@ gui.SessionController = (function () {
 
             iterator.moveToEndOfNode(paragraphNode);
             // create a move op with the distance to that position
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.offset());
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.unfilteredDomOffset());
 
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
