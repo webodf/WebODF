@@ -66,7 +66,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         dummyfilter = function acceptPosition(p) {
             t.pos.push({
                 c: p.container(),
-                o: p.offset()
+                o: p.unfilteredDomOffset()
             });
             return 1;
         },
@@ -79,7 +79,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
                 }
                 t.pos.push({
                     c: iterator.container(),
-                    o: iterator.offset()
+                    o: iterator.unfilteredDomOffset()
                 });
                 return 1;
             }
@@ -99,7 +99,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
             }
             t.pos.push({
                 c: iterator.container(),
-                o: iterator.offset()
+                o: iterator.unfilteredDomOffset()
             });
             return 1;
         };

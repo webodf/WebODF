@@ -300,7 +300,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                     xDiff = Math.abs(left - rect.left);
                     if (bestContainer === null || xDiff < bestXDiff) {
                         bestContainer = c;
-                        bestOffset = iterator.offset();
+                        bestOffset = iterator.unfilteredDomOffset();
                         bestXDiff = xDiff;
                         bestCount = count;
                     }
@@ -309,7 +309,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
 
         if (bestContainer !== null) {
-            iterator.setPosition(bestContainer, /**@type {!number}*/(bestOffset));
+            iterator.setUnfilteredPosition(bestContainer, /**@type {!number}*/(bestOffset));
             count = bestCount;
         } else {
             count = 0;
@@ -421,9 +421,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         // really dumb/inefficient implementation
         var iterator = getIteratorAtCursor(),
             c = iterator.container(),
-            o = iterator.offset(),
+            o = iterator.unfilteredDomOffset(),
             steps = 0,
-            posUnfilteredDomOffset,
             watch = new core.LoopWatchDog(1000),
             comparison;
 
@@ -433,11 +432,10 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         iterator.setUnfilteredPosition(posElement, posOffset);
         posElement = /**@type{!Element}*/(iterator.container());
         runtime.assert(Boolean(posElement), "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
-        posOffset = iterator.offset();
-        posUnfilteredDomOffset = iterator.unfilteredDomOffset();
-        iterator.setPosition(c, o);
+        posOffset = iterator.unfilteredDomOffset();
+        iterator.setUnfilteredPosition(c, o);
 
-        comparison = comparePoints(posElement, posUnfilteredDomOffset, iterator.container(), iterator.unfilteredDomOffset());
+        comparison = comparePoints(posElement, posOffset, iterator.container(), iterator.unfilteredDomOffset());
         if (comparison < 0) {
             while (iterator.nextPosition()) {
                 watch.check();
@@ -445,7 +443,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                     steps += 1;
                 }
                 if (iterator.container() === posElement) {
-                    if (iterator.offset() === posOffset) {
+                    if (iterator.unfilteredDomOffset() === posOffset) {
                         return steps;
                     }
                 }
@@ -457,7 +455,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                     steps -= 1;
                 }
                 if (iterator.container() === posElement) {
-                    if (iterator.offset() === posOffset) {
+                    if (iterator.unfilteredDomOffset() === posOffset) {
                         return steps;
                     }
                 }

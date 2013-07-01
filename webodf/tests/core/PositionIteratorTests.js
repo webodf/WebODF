@@ -84,51 +84,51 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         createWalker("<a/>");
         r.shouldBeNonNull(t, "t.iterator");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     function forwardInEmptyDoc() {
         createWalker("<a/>");
         r.shouldBe(t, "t.iterator.nextPosition()", "false");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     function backwardInEmptyDoc() {
         createWalker("<a/>");
         r.shouldBe(t, "t.iterator.previousPosition()", "false");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     function forwardInSimpleDoc() {
         var i;
         createWalker("<a>hello</a>");
         t.textNode = t.doc.documentElement.firstChild;
         r.shouldBe(t, "t.iterator.container()", "t.textNode");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
         for (i = 1; i <= 4; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.textNode");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.nextPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
         r.shouldBe(t, "t.iterator.nextPosition()", "false");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
     }
     function backwardInSimpleDoc() {
         var i;
         createWalker("<a>hello</a>");
         t.iterator.moveToEnd();
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
         t.textNode = t.doc.documentElement.firstChild;
         for (i = 4; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.textNode");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.previousPosition()", "false");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     function forwardInDoc() {
         var i;
@@ -137,34 +137,34 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         for (i = 1; i < 3; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.node");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.nextPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
         t.node = t.node.nextSibling;
         t.node = t.node.firstChild;
         for (i = 0; i < 3; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.node");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         t.node = t.node.parentNode;
         r.shouldBe(t, "t.iterator.nextPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.node");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
         t.node = t.node.nextSibling;
         for (i = 0; i < 3; i += 1) {
             r.shouldBe(t, "t.iterator.nextPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.node");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.nextPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "3");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "3");
         r.shouldBe(t, "t.iterator.nextPosition()", "false");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "3");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "3");
     }
     function backwardInDoc() {
         createWalker("<a>abc<a>abc</a>1bc</a>");
@@ -174,30 +174,30 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         for (i = 2; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.node");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         t.node = t.node.previousSibling;
         r.shouldBe(t, "t.iterator.previousPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.node");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
         t.node = t.node.firstChild;
         for (i = 2; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.node");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.previousPosition()", "true");
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "1");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
         t.node = t.doc.documentElement.firstChild;
         for (i = 2; i >= 0; i -= 1) {
             r.shouldBe(t, "t.iterator.previousPosition()", "true");
             r.shouldBe(t, "t.iterator.container()", "t.node");
-            r.shouldBe(t, "t.iterator.offset()", i.toString());
+            r.shouldBe(t, "t.iterator.unfilteredDomOffset()", i.toString());
         }
         r.shouldBe(t, "t.iterator.previousPosition()", "false");
         r.shouldBe(t, "t.iterator.container()", "t.node");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     function countPositions(xml) {
         var n = 1;
@@ -220,10 +220,10 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         var n = 0, i, it = t.iterator, ok = true;
         while (it.nextPosition() && n <= count) {
             t.c1 = it.container();
-            t.o1 = it.offset();
-            it.setPosition(t.c1, t.o1);
+            t.o1 = it.unfilteredDomOffset();
+            it.setUnfilteredPosition(t.c1, t.o1);
             t.c2 = it.container();
-            t.o2 = it.offset();
+            t.o2 = it.unfilteredDomOffset();
             r.shouldBe(t, "t.c2", "t.c1");
             r.shouldBe(t, "t.o2", "t.o1");
             for (i = 0; i <= n; i += 1) {
@@ -236,7 +236,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
                 ok = ok && it.previousPosition();
             }
             t.c2 = it.container();
-            t.o2 = it.offset();
+            t.o2 = it.unfilteredDomOffset();
             r.shouldBe(t, "t.c2", "t.c1");
             r.shouldBe(t, "t.o2", "t.o1");
             n += 1;
@@ -331,7 +331,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         t.iterator.setPosition(t.doc.documentElement.childNodes[0], 4);
         t.iterator.previousPosition();
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement.childNodes[0]");
-        r.shouldBe(t, "t.iterator.offset()", "3");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "3");
     }
     function testSetUnfilteredPositionUsesUnfilteredOffsets() {
         createWalker('<p><b id="b1"/><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/><b id="b4"/><a id="a3"/></p>');
@@ -343,11 +343,11 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         createWalker('<p><b id="b1"/><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/><b id="b4"/><a id="a3"/></p>');
         t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0], 0);
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
 
         t.iterator.nextPosition();
         r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
-        r.shouldBe(t, "t.iterator.offset()", "0");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     this.tests = function () {
         return [

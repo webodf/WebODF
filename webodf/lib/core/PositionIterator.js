@@ -194,34 +194,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return walker.currentNode;
     };
     /**
-     * @return {!number}
-     */
-    this.offset = function () {
-        if (walker.currentNode.nodeType === Node.TEXT_NODE) {
-            return currentPos;
-        }
-        var c = 0,
-            startNode = walker.currentNode,
-            n,
-            nextNode;
-        if (currentPos === 1) {
-            n = walker.lastChild();
-        } else {
-            n = walker.previousSibling();
-        }
-        while (n) {
-            // neighboring texts count as 1 position
-            if (n.nodeType !== Node.TEXT_NODE || n.nextSibling !== nextNode
-                    || nextNode.nodeType !== Node.TEXT_NODE) {
-                c += 1;
-            }
-            nextNode = n;
-            n = walker.previousSibling();
-        }
-        walker.currentNode = startNode;
-        return c;
-    };
-    /**
      * The same as offset(), except that adjacent text nodes are counted
      * separately.
      * @return {!number}
