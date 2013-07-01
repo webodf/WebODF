@@ -77,6 +77,69 @@ function Viewer(viewerPlugin) {
         return predefinedValueFound;
     }
 
+    function getPages() {
+        return viewerPlugin.getPages();
+    }
+
+    function setScale(val, resetAutoSettings, noScroll) {
+        if (val === self.getZoomLevel()) {
+            return;
+        }
+
+        self.setZoomLevel(val);
+
+        var event = document.createEvent('UIEvents');
+        event.initUIEvent('scalechange', false, false, window, 0);
+        event.scale = val;
+        event.resetAutoSettings = resetAutoSettings;
+        window.dispatchEvent(event);
+    }
+
+    function parseScale(value, resetAutoSettings, noScroll) {
+        var scale,
+            maxWidth,
+            maxHeight,
+            container = document.getElementById('canvasContainer');
+
+        if (value === 'custom') {
+            scale = parseFloat(document.getElementById('customScaleOption').textContent) / 100;
+        } else {
+            scale = parseFloat(value);
+        }
+
+        if (scale) {
+            setScale(scale, true, noScroll);
+            return;
+        }
+
+        maxWidth = container.clientWidth - kScrollbarPadding;
+        maxHeight = container.clientHeight - kScrollbarPadding;
+
+        switch (value) {
+        case 'page-actual':
+            setScale(1, resetAutoSettings, noScroll);
+            break;
+        case 'page-width':
+            viewerPlugin.fitToWidth(maxWidth);
+            break;
+        case 'page-height':
+            viewerPlugin.fitToHeight(maxHeight);
+            break;
+        case 'page-fit':
+            viewerPlugin.fitToPage(maxWidth, maxHeight);
+            break;
+        case 'auto':
+            if (viewerPlugin.isSlideshow()) {
+                viewerPlugin.fitToPage(maxWidth + kScrollbarPadding, maxHeight + kScrollbarPadding);
+            } else {
+                viewerPlugin.fitSmart(maxWidth);
+            }
+            break;
+        }
+
+        selectScaleOption(value);
+    }
+
     this.initialize = function () {
         var location = String(document.location),
             pos = location.indexOf('#'),
@@ -101,7 +164,7 @@ function Viewer(viewerPlugin) {
                 // Show page nav controls only for presentations
                 document.getElementById('toolbarLeft').style.visibility = 'visible';
 
-                pages = self.getPages();
+                pages = getPages();
                 document.getElementById('numPages').innerHTML = 'of ' + pages.length;
 
                 self.showPage(1);
@@ -111,7 +174,7 @@ function Viewer(viewerPlugin) {
             }
                 
             // WTF, but I need to call it thrice to render presentations properly. Need to investigate.
-            self.parseScale(kDefaultScale);
+            parseScale(kDefaultScale);
 
             initialized = true;
         };
@@ -119,10 +182,11 @@ function Viewer(viewerPlugin) {
         viewerPlugin.initialize(viewerElement, location);
     };
 
-    this.getPages = function () {
-        return viewerPlugin.getPages();
-    };
-
+    /**
+     * Shows the 'n'th page. If n is larger than the page count,
+     * shows the last page. If n is less than 1, shows the first page.
+     * @return {undefined}
+     */
     this.showPage = function (n) {
         if (n <= 0) {
             n = 1;
@@ -136,20 +200,36 @@ function Viewer(viewerPlugin) {
         document.getElementById('pageNumber').value = currentPage;
     };
 
+    /**
+     * Shows the next page. If there is no subsequent page, does nothing.
+     * @return {undefined}
+     */
     this.showNextPage = function () {
         self.showPage(currentPage + 1);
     };
 
+    /**
+     * Shows the previous page. If there is no previous page, does nothing.
+     * @return {undefined}
+     */
     this.showPreviousPage = function () {
         self.showPage(currentPage - 1);
     };
 
+    /**
+     * Attempts to 'download' the file.
+     * @return {undefined}
+     */
     this.download = function () {
         var documentUrl = url.split('#')[0];
         documentUrl += '#viewer.action=download';
         window.open(documentUrl, '_parent');
     };
 
+    /**
+     * Toggles the fullscreen state of the viewer
+     * @return {undefined}
+     */
     this.toggleFullScreen = function () {
         var elem = viewerElement;
         if (!isFullScreen()) {
@@ -171,85 +251,43 @@ function Viewer(viewerPlugin) {
         }
     };
 
+    /**
+     * Gets the zoom level of the document
+     * @return {!number}
+     */
     this.getZoomLevel = function () {
         return viewerPlugin.getZoomLevel();
     };
 
+    /**
+     * Set the zoom level of the document
+     * @param {!number} value
+     * @return {undefined}
+     */
     this.setZoomLevel = function (value) {
         viewerPlugin.setZoomLevel(value);
     };
 
-    this.setScale = function (val, resetAutoSettings, noScroll) {
-        if (val === self.getZoomLevel()) {
-            return;
-        }
-
-        self.setZoomLevel(val);
-
-        var event = document.createEvent('UIEvents');
-        event.initUIEvent('scalechange', false, false, window, 0);
-        event.scale = val;
-        event.resetAutoSettings = resetAutoSettings;
-        window.dispatchEvent(event);
-    };
-
-    this.parseScale = function (value, resetAutoSettings, noScroll) {
-        var scale,
-            maxWidth,
-            maxHeight,
-            container = document.getElementById('canvasContainer');
-
-        if (value === 'custom') {
-            scale = parseFloat(document.getElementById('customScaleOption').textContent) / 100;
-        } else {
-            scale = parseFloat(value);
-        }
-
-        if (scale) {
-            self.setScale(scale, true, noScroll);
-            return;
-        }
-
-        maxWidth = container.clientWidth - kScrollbarPadding;
-        maxHeight = container.clientHeight - kScrollbarPadding;
-
-        switch (value) {
-        case 'page-actual':
-            self.setScale(1, resetAutoSettings, noScroll);
-            break;
-        case 'page-width':
-            viewerPlugin.fitToWidth(maxWidth);
-            break;
-        case 'page-height':
-            viewerPlugin.fitToHeight(maxHeight);
-            break;
-        case 'page-fit':
-            viewerPlugin.fitToPage(maxWidth, maxHeight);
-            break;
-        case 'auto':
-            if (viewerPlugin.isSlideshow()) {
-                viewerPlugin.fitToPage(maxWidth + kScrollbarPadding, maxHeight + kScrollbarPadding);
-            } else {
-                viewerPlugin.fitSmart(maxWidth);
-            }
-            break;
-        }
-
-        selectScaleOption(value);
-    };
-
+    /**
+     * Zoom out by 10 %
+     * @return {undefined}
+     */
     this.zoomOut = function () {
         // 10 % decrement
         var newScale = (self.getZoomLevel() / kDefaultScaleDelta).toFixed(2);
         newScale = Math.max(kMinScale, newScale);
-        self.parseScale(newScale, true);
+        parseScale(newScale, true);
     };
 
+    /**
+     * Zoom in by 10%
+     * @return {undefined}
+     */
     this.zoomIn = function () {
         // 10 % increment
         var newScale = (self.getZoomLevel() * kDefaultScaleDelta).toFixed(2);
         newScale = Math.min(kMaxScale, newScale);
-        self.parseScale(newScale, true);
+        parseScale(newScale, true);
     };
 
     function init() {
@@ -289,7 +327,7 @@ function Viewer(viewerPlugin) {
         });
 
         document.getElementById('scaleSelect').addEventListener('change', function () {
-            self.parseScale(this.value);
+            parseScale(this.value);
         });
 
         window.addEventListener('scalechange', function (evt) {
@@ -308,7 +346,7 @@ function Viewer(viewerPlugin) {
             if (initialized &&
                       (document.getElementById('pageWidthOption').selected ||
                       document.getElementById('pageAutoOption').selected)) {
-                self.parseScale(document.getElementById('scaleSelect').value);
+                parseScale(document.getElementById('scaleSelect').value);
             }
         });
 
