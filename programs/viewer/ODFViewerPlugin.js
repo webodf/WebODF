@@ -79,15 +79,14 @@ function ODFViewerPlugin() {
             initialized = true;
             documentType = odfCanvas.odfContainer().getDocumentType(root);
 
-            if (documentType === 'presentation') {
-                self.slideshow = true;
-            }
-
             self.onLoad();
         });
     };
 
-    this.slideshow = false;
+    this.isSlideshow = function () {
+        return documentType === 'presentation';
+    };
+
     this.onLoad = function () {};
 
     this.getWidth = function () {

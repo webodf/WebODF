@@ -95,18 +95,19 @@ function Viewer(viewerPlugin) {
         document.getElementById('documentName').innerHTML = document.title;
 
         viewerPlugin.onLoad = function () {
-            if (viewerPlugin.slideshow) {
+            if (viewerPlugin.isSlideshow()) {
                 // No padding for slideshows
                 document.getElementById('canvasContainer').style.padding = 0;
-                // temporary hack: remove zoom buttons to make way for the navigation controls
-                document.getElementById('toolbarMiddleContainer').style.visibility = 'hidden';
+                // Show page nav controls only for presentations
+                document.getElementById('toolbarLeft').style.visibility = 'visible';
 
                 pages = self.getPages();
                 document.getElementById('numPages').innerHTML = 'of ' + pages.length;
 
                 self.showPage(1);
             } else {
-                document.getElementById('toolbarLeft').style.visibility = 'hidden';
+                // Show zoom controls only for text documents
+                document.getElementById('toolbarMiddleContainer').style.visibility = 'visible';
             }
                 
             // WTF, but I need to call it thrice to render presentations properly. Need to investigate.
@@ -226,7 +227,7 @@ function Viewer(viewerPlugin) {
             viewerPlugin.fitToPage(maxWidth, maxHeight);
             break;
         case 'auto':
-            if (viewerPlugin.slideshow) {
+            if (viewerPlugin.isSlideshow()) {
                 viewerPlugin.fitToPage(maxWidth + kScrollbarPadding, maxHeight + kScrollbarPadding);
             } else {
                 viewerPlugin.fitSmart(maxWidth);

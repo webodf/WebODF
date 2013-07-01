@@ -68,6 +68,10 @@ select {
     position: relative;
 }
 
+#toolbarMiddleContainer, #toolbarLeft {
+    visibility: hidden;
+}
+
 html[dir='ltr'] #toolbarLeft {
     margin-left: -1px;
 }
