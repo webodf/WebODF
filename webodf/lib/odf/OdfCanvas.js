@@ -628,13 +628,11 @@ odf.OdfCanvas = (function () {
      * @return {undefined}
      */
     function expandSpaceElements(odffragment) {
-        var i, j,
-            spaces,
-            space,
-            count,
+        var spaces,
             doc = odffragment.ownerDocument;
 
         function expandSpaceElement(space) {
+            var j, count;
             // If the space has any children, remove them and put a " " text
             // node in place.
             while (space.firstChild) {
@@ -653,11 +651,8 @@ odf.OdfCanvas = (function () {
             }
         }
 
-        spaces = odffragment.getElementsByTagNameNS(textns, "s");
-        for (i = 0; i < spaces.length; i += 1) {
-            space = /**@type{!Element}*/(spaces.item(i));
-            expandSpaceElement(space);
-        }
+        spaces = Array.prototype.slice.call(odffragment.getElementsByTagNameNS(textns, "s"));
+        spaces.forEach(expandSpaceElement);
     }
 
     /**
