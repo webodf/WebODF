@@ -335,16 +335,14 @@ gui.SessionController = (function () {
             /*
             if (isAtEndOfParagraph) {
                 paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
-                styleName = paragraphNode.getAttributeNS(odf.Namespaces.textns, 'style-name');
-                nextStyleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, odf.Namespaces.stylens, 'next-style-name');
+                styleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, odf.Namespaces.stylens, 'next-style-name');
 
                 if (nextStyleName && nextStyleName !== styleName) {
                     op = new ops.OpSetParagraphStyle();
                     op.init({
                         memberid: inputMemberId,
                         position: position + 1, // +1 should be at the start of the new paragraph
-                        styleNameBefore: styleName,
-                        styleNameAfter: nextStyleName
+                        styleName: styleName
                     });
                     session.enqueue(op);
                 }

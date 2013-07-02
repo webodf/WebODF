@@ -42,15 +42,14 @@
 ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     "use strict";
 
-    var memberid, timestamp, position, styleNameBefore, styleNameAfter,
+    var memberid, timestamp, position, styleName,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
-        styleNameBefore = data.styleNameBefore;
-        styleNameAfter = data.styleNameAfter;
+        styleName = data.styleName;
     };
 
     this.execute = function (odtDocument) {
@@ -61,8 +60,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         if (domPosition) {
             paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
             if (paragraphNode) {
-                if (styleNameAfter !== "") {
-                    paragraphNode.setAttributeNS(textns, 'text:style-name', styleNameAfter);
+                if (styleName !== "") {
+                    paragraphNode.setAttributeNS(textns, 'text:style-name', styleName);
                 } else {
                     paragraphNode.removeAttributeNS(textns, 'style-name');
                 }
@@ -85,8 +84,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
-            styleNameBefore: styleNameBefore,
-            styleNameAfter: styleNameAfter
+            styleName: styleName
         };
     };
 

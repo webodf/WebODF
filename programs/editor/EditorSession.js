@@ -306,8 +306,7 @@ define("webodf/editor/EditorSession", [
                 op.init({
                     memberid: memberid,
                     position: self.getCursorPosition(),
-                    styleNameBefore: currentNamedStyleName,
-                    styleNameAfter: value
+                    styleName: value
                 });
                 session.enqueue(op);
             }
