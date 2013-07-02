@@ -277,6 +277,7 @@ gui.SessionController = (function () {
             var odtDocument = session.getOdtDocument(),
                 selection = odtDocument.getCursorSelection(inputMemberId),
                 domPosition,
+                length,
                 op = null;
 
             if (selection.position > 0) {
@@ -285,10 +286,11 @@ gui.SessionController = (function () {
 
                 if (domPosition) {
                     op = new ops.OpRemoveText();
+                    length = selection.length || 1; // default length is 1
                     op.init({
                         memberid: inputMemberId,
-                        position: selection.position,
-                        length: selection.length || -1
+                        position: selection.position - length,
+                        length: length
                     });
                 }
             }

@@ -212,10 +212,10 @@
   </ops>
   <after><office:text><text:p>a<text:s> </text:s>b</text:p></office:text></after>
  </test>
- <test name="RemoveBackwards">
+ <test name="RemoveCharacter">
   <before><office:text><text:p>A</text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="1" length="-1"/>
+   <op optype="RemoveText" position="0" length="1"/>
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
@@ -223,47 +223,26 @@
   <before><office:text><text:p/></office:text></before>
   <ops>
    <op optype="InsertText" position="0" text="ABC"/>
-   <op optype="RemoveText" position="3" length="-2"/>
-   <op optype="RemoveText" position="1" length="-1"/>
+   <op optype="RemoveText" position="1" length="2"/>
+   <op optype="RemoveText" position="0" length="1"/>
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
  <test name="RemoveSpace2">
   <before><office:text><text:p>a<text:s> </text:s><text:s> </text:s></text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="2" length="-1"/>
+   <op optype="RemoveText" position="1" length="1"/>
   </ops>
   <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
  </test>
- <test name="Remove_backspaceMerge1">
-  <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="5" length="-1"/>
-  </ops>
-  <after><office:text><text:p text:style-name="A">abcdefgh</text:p></office:text></after>
- </test>
- <test name="Remove_backspaceMerge2">
-  <before><office:text><text:p text:style-name="A">abc<text:span text:style-name="B">d</text:span></text:p><text:p text:style-name="C"><text:span text:style-name="D">efgh</text:span></text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="7" length="-5"/>
-  </ops>
-  <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
- </test>
- <test name="Remove_backspaceMergeListItem">
-  <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
-   <ops>
-    <op optype="RemoveText" position="6" length="-1"/>
-   </ops>
-  <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></text:list-item></text:list></office:text></after>
- </test>
- <test name="Remove_backspaceOnlyCharacter">
+ <test name="Remove_characterInSpanCursorBehind">
   <before><office:text><text:p><text:span>A</text:span></text:p></office:text></before>
   <ops>
       <op optype="AddCursor" memberid="Bob"/>
       <op optype="MoveCursor" memberid="Bob" position="1"/>
-      <op optype="RemoveText" memberid="Bob" position="1" length="-1"/>
+      <op optype="RemoveText" memberid="Bob" position="0" length="1"/>
   </ops>
-  <after><office:text><text:p><c:cursor c:memberId="Bob"/><text:span></text:span></text:p></office:text></after>
+  <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
  <test name="Remove_deleteMerge1">
   <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
@@ -339,13 +318,6 @@
    </ops>
   <after><office:text><text:list><text:list-item><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></after>
  </test>
-    <test name="Remove_backspaceMergeEmpty1">
-  <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="1" length="-1"/>
-  </ops>
-  <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
- </test>
  <test name="Remove_deleteMergeEmpty1">
   <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
@@ -414,20 +386,6 @@
   </ops>
   <after><office:text><text:p> a<text:s> </text:s> </text:p></office:text></after>
  </test>
- <test name="BackspaceExposesSpace1">
-  <before><office:text><text:p> a b </text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="1" length="-1"/>
-  </ops>
-  <after><office:text><text:p> <text:s> </text:s>b </text:p></office:text></after>
- </test>
- <test name="BackspaceExposesSpace2">
-  <before><office:text><text:p> a b </text:p></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="3" length="-1"/>
-  </ops>
-  <after><office:text><text:p> a<text:s> </text:s> </text:p></office:text></after>
- </test>
  <test name="SplitListParagraph_singleCursor">
   <before><office:text><text:list><text:list-item><text:p>helloworld</text:p></text:list-item></text:list></office:text></before>
    <ops>
@@ -455,16 +413,16 @@
   </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span><text:span>hello</text:span></text:span></text:p></text:list-item><text:list-item><text:p><text:span><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
- <test name="BackspaceSpaceInSpan">
+ <test name="DeleteSpaceInSpanCursorBefore">
   <before><office:text><text:p>A</text:p><text:p><text:span><text:s> </text:s></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="5"/>
-   <op optype="RemoveText" position="5" length="-5"/>
+   <op optype="RemoveText" position="0" length="5"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
- <test name="DeleteSpaceInSpan">
+ <test name="DeleteSpaceInSpanCursorBehind">
   <before><office:text><text:p>A</text:p><text:p><text:span><text:s> </text:s></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>

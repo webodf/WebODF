@@ -42,14 +42,19 @@
 ops.OpRemoveText = function OpRemoveText() {
     "use strict";
 
-    var memberid, timestamp, position, length, text, odfUtils,
+    var memberid, timestamp,
+        /**@type {number}*/
+        position,
+        /**@type {number}*/
+        length,
+        text, odfUtils,
         editinfons = 'urn:webodf:names:editinfo';
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
-        position = data.position;
-        length = data.length;
+        position = parseInt(data.position, 10);
+        length = parseInt(data.length, 10);
         text = data.text;
         odfUtils = new odf.OdfUtils();
     };
@@ -169,7 +174,7 @@ ops.OpRemoveText = function OpRemoveText() {
      * extra characters alongwith the characters of deletion interest. This function
      * deletes the target characters, and then computes a neighborhood that consists
      * of the remaining text nodes, which is all that is needed for further deletion.
-     * @param odtDocument
+     * @param {!ops.OdtDocument } odtDocument
      * @param {!number} position
      * @param {!number} length
      * @return {!{paragraphElement: !Node, neighborhood: ?Array.<!Node>, remainingLength: !number}}
@@ -183,9 +188,7 @@ ops.OpRemoveText = function OpRemoveText() {
             initialTextOffset = domPosition.offset,
             initialParentElement = initialTextNode.parentNode,
             paragraphElement = odtDocument.getParagraphElement(initialParentElement),
-            remainingLength = Math.abs(length),
-            direction = (length < 0) ? -1 : 1,
-            removalType = (length < 0) ? 'backspace' : 'delete',
+            remainingLength = length,
             neighborhood,
             difference;
 
@@ -202,29 +205,16 @@ ops.OpRemoveText = function OpRemoveText() {
             // To avoid that, we must first delete the target content from the initial text node,
             // and then request the neighborhood, so that the first element in the neighborhood
             // can be easily operated upon by the deletion loop
-            if (removalType === 'delete') {
-                difference = remainingLength < (initialTextNode.length - initialTextOffset)
-                    ? remainingLength
-                    : (initialTextNode.length - initialTextOffset);
+            difference = remainingLength < (initialTextNode.length - initialTextOffset)
+                ? remainingLength
+                : (initialTextNode.length - initialTextOffset);
 
-                initialTextNode.deleteData(initialTextOffset, difference);
-                // Now the new post-'collapse' position is the same as the old, because the
-                // data to the right is deleted.
-                // Upgrade the whitespaces there.
-                odtDocument.upgradeWhitespacesAtPosition(position);
-                neighborhood = odtDocument.getTextNeighborhood(position, length + difference * direction);
-            } else {
-                difference = remainingLength < initialTextOffset
-                    ? remainingLength
-                    : initialTextOffset;
-
-                initialTextNode.deleteData(initialTextOffset - difference, difference);
-                // Now the new post-collapse position is `position - difference - 1`,
-                // because the data to the left is deleted.
-                // Upgrade the whitespaces there.
-                odtDocument.upgradeWhitespacesAtPosition(position - difference - 1);
-                neighborhood = odtDocument.getTextNeighborhood(position - difference - 1, length + difference * direction);
-            }
+            initialTextNode.deleteData(initialTextOffset, difference);
+            // Now the new post-'collapse' position is the same as the old, because the
+            // data to the right is deleted.
+            // Upgrade the whitespaces there.
+            odtDocument.upgradeWhitespacesAtPosition(position);
+            neighborhood = odtDocument.getTextNeighborhood(position, length + difference);
 
             remainingLength -= difference;
             if (difference && neighborhood[0] === initialTextNode) {
@@ -244,20 +234,15 @@ ops.OpRemoveText = function OpRemoveText() {
     }
 
     this.execute = function (odtDocument) {
-        length = parseInt(length, 10);
-        position = parseInt(position, 10);
         var neighborhood = [],
             paragraphElement,
             currentParagraphElement,
             nextParagraphElement,
             remainingLength,
-            direction = (length < 0) ? -1 : 1,
-            removalType = (length < 0) ? 'backspace' : 'delete',
             currentTextNode = null,
             currentParent = null,
             currentLength,
-            preprocessedNeighborhood,
-            i;
+            preprocessedNeighborhood;
 
         preprocessedNeighborhood = getPreprocessedNeighborhood(odtDocument, position, length);
 
@@ -276,24 +261,15 @@ ops.OpRemoveText = function OpRemoveText() {
             if (paragraphElement !== currentParagraphElement) {
                 // If paragraph element of the current textnode from the neighborhood is different
                 // from the original paragraphElement, a merging must be performed.
-                nextParagraphElement = odtDocument.getNeighboringParagraph(paragraphElement, direction);
+                nextParagraphElement = odtDocument.getNeighboringParagraph(paragraphElement, 1);
                 if (nextParagraphElement) {
                     // An empty paragraph should never win new childnodes. therefore, check if
                     // the walkable length of a paragraph is > 1 (non-empty).
-                    if (removalType === 'delete') {
-                        if (odtDocument.getWalkableParagraphLength(paragraphElement) > 1) {
-                            mergeParagraphs(paragraphElement, nextParagraphElement, false);
-                        } else {
-                            mergeParagraphs(nextParagraphElement, paragraphElement,/*prepend*/true);
-                            paragraphElement = nextParagraphElement;
-                        }
+                    if (odtDocument.getWalkableParagraphLength(paragraphElement) > 1) {
+                        mergeParagraphs(paragraphElement, nextParagraphElement, false);
                     } else {
-                        if (odtDocument.getWalkableParagraphLength(nextParagraphElement) > 1) {
-                            mergeParagraphs(nextParagraphElement, paragraphElement, false);
-                            paragraphElement = nextParagraphElement;
-                        } else {
-                            mergeParagraphs(paragraphElement, nextParagraphElement,/*prepend*/true);
-                        }
+                        mergeParagraphs(nextParagraphElement, paragraphElement,/*prepend*/true);
+                        paragraphElement = nextParagraphElement;
                     }
                 }
                 // A paragraph merging is worth 1 delete length
@@ -313,19 +289,11 @@ ops.OpRemoveText = function OpRemoveText() {
                     remainingLength -= currentLength;
                     neighborhood.splice(0, 1);
                 } else {
-                    if (removalType === 'delete') {
-                        currentTextNode.deleteData(0, remainingLength);
-                        // Now the new post-'collapse' position is the same as the old, because the
-                        // data to the right is deleted.
-                        // Upgrade the whitespaces there.
-                        odtDocument.upgradeWhitespacesAtPosition(position);
-                    } else {
-                        currentTextNode.deleteData(currentLength - remainingLength, remainingLength);
-                        // Now the new post-collapse position is `position + length - 1`,
-                        // because the data to the left is deleted.
-                        // Upgrade the whitespaces there.
-                        odtDocument.upgradeWhitespacesAtPosition(position + length - 1);
-                    }
+                    currentTextNode.deleteData(0, remainingLength);
+                    // Now the new post-'collapse' position is the same as the old, because the
+                    // data to the right is deleted.
+                    // Upgrade the whitespaces there.
+                    odtDocument.upgradeWhitespacesAtPosition(position);
                     remainingLength = 0;
                 }
             }
