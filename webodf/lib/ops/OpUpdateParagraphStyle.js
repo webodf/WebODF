@@ -46,7 +46,76 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         /**@type{{paragraphProperties,textProperties}}*/info,
         /**@const*/fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         /**@const*/stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+        /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+        /**
+         * Mapping of the properties from info.textProperties to the attributes of style:text-properties
+         * @const@type{Array.<!{propertyName:string,attrNs:string,attrLocaName:string,unit:string}>}
+         */
+        textPropertyMapping = [
+        {
+            propertyName: 'fontSize',
+            attrNs:       fons,
+            attrLocaName: 'fo:font-size',
+            unit:         'pt'
+        }, {
+            propertyName: 'fontName',
+            attrNs:       stylens,
+            attrLocaName: 'style:font-name'
+        }, {
+            propertyName: 'color',
+            attrNs:       fons,
+            attrLocaName: 'fo:color'
+        }, {
+            propertyName: 'backgroundColor',
+            attrNs:       fons,
+            attrLocaName: 'fo:background-color'
+        }, {
+            propertyName: 'fontWeight',
+            attrNs:       fons,
+            attrLocaName: 'fo:font-weight'
+        }, {
+            propertyName: 'fontStyle',
+            attrNs:       fons,
+            attrLocaName: 'fo:font-style'
+        }, {
+            propertyName: 'underline',
+            attrNs:       stylens,
+            attrLocaName: 'style:text-underline-style'
+        }, {
+            propertyName: 'strikethrough',
+            attrNs:       stylens,
+            attrLocaName: 'style:text-line-through-style'
+        }],
+        /**
+         * Mapping of the properties from info.paragraphProperties to the attributes of style:paragraph-properties
+         * @const@type{Array.<!{propertyName:string,attrNs:string,attrLocaName:string,unit:string}>}
+         */
+        paragraphPropertyMapping = [
+        {
+            propertyName: 'topMargin',
+            attrNs:       fons,
+            attrLocaName: 'fo:margin-top',
+            unit:         'mm'
+        }, {
+            propertyName: 'bottomMargin',
+            attrNs:       fons,
+            attrLocaName: 'fo:margin-bottom',
+            unit:         'mm'
+        }, {
+            propertyName: 'leftMargin',
+            attrNs:       fons,
+            attrLocaName: 'fo:margin-left',
+            unit:         'mm'
+        }, {
+            propertyName: 'rightMargin',
+            attrNs:       fons,
+            attrLocaName: 'fo:margin-right',
+            unit:         'mm'
+        }, {
+            propertyName: 'textAlign',
+            attrNs:       fons,
+            attrLocaName: 'fo:text-align'
+        }];
 
     /**
      * Sets a value as the attribute of a node, if that value is defined.
@@ -60,6 +129,21 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     function setRealAttributeNS(node, ns, prefixedAttribute, value, unit) {
         if (value !== undefined) {
             node.setAttributeNS(ns, prefixedAttribute, (unit !== undefined) ? value + unit : value);
+        }
+    }
+
+    /**
+     * Sets attributes of a node by the properties of the object properties,
+     * based on the mapping defined in propertyData.
+     * @param {!Node} node
+     * @param {!Object} properties
+     * @param {!Array.<!{propertyName:string,attrNs:string,attrLocaName:string,unit:string}>} propertyData
+     */
+    function setProperties(node, properties, propertyData) {
+        var i, d;
+        for (i = 0; i < propertyData.length; i += 1) {
+            d = propertyData[i];
+            setRealAttributeNS(node, d.attrNs, d.attrLocaName, properties[d.propertyName], d.unit);
         }
     }
 
@@ -79,6 +163,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
 
+            // ensure nodes if needed
             if ((paragraphPropertiesNode === undefined)
                     && info.paragraphProperties) {
                 paragraphPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:paragraph-properties');
@@ -90,23 +175,12 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
                 styleNode.appendChild(textPropertiesNode);
             }
 
+            // update the style nodes
             if (info.paragraphProperties) {
-                setRealAttributeNS(paragraphPropertiesNode, fons,
-                    'fo:margin-top', info.paragraphProperties.topMargin, 'mm');
-                setRealAttributeNS(paragraphPropertiesNode, fons,
-                    'fo:margin-bottom', info.paragraphProperties.bottomMargin, 'mm');
-                setRealAttributeNS(paragraphPropertiesNode, fons,
-                    'fo:margin-left', info.paragraphProperties.leftMargin, 'mm');
-                setRealAttributeNS(paragraphPropertiesNode, fons,
-                    'fo:margin-right', info.paragraphProperties.rightMargin, 'mm');
-                setRealAttributeNS(paragraphPropertiesNode, fons,
-                    'fo:text-align', info.paragraphProperties.textAlign);
+                setProperties(paragraphPropertiesNode, info.paragraphProperties, paragraphPropertyMapping);
             }
 
             if (info.textProperties) {
-                setRealAttributeNS(textPropertiesNode, fons,
-                    'fo:font-size', info.textProperties.fontSize, 'pt');
-
                 // Declare the requested font if it is not already declared
                 if (info.textProperties.fontName &&
                     !odtDocument.getOdfCanvas().getFormatting().getFontMap().hasOwnProperty(info.textProperties.fontName)) {
@@ -116,22 +190,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
                     fontFaceNode.setAttributeNS(svgns, 'svg:font-family', info.textProperties.fontName);
                     odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
                 }
-                setRealAttributeNS(textPropertiesNode, stylens,
-                    'style:font-name', info.textProperties.fontName);
-
-                setRealAttributeNS(textPropertiesNode, fons,
-                    'fo:color', info.textProperties.color);
-                setRealAttributeNS(textPropertiesNode, fons,
-                    'fo:background-color', info.textProperties.backgroundColor);
-
-                setRealAttributeNS(textPropertiesNode, fons,
-                    'fo:font-weight', info.textProperties.fontWeight);
-                setRealAttributeNS(textPropertiesNode, fons,
-                    'fo:font-style', info.textProperties.fontStyle);
-                setRealAttributeNS(textPropertiesNode, stylens,
-                    'style:text-underline-style', info.textProperties.underline);
-                setRealAttributeNS(textPropertiesNode, stylens,
-                    'style:text-line-through-style', info.textProperties.strikethrough);
+                setProperties(textPropertiesNode, info.textProperties, textPropertyMapping);
             }
 
             odtDocument.getOdfCanvas().refreshCSS();
