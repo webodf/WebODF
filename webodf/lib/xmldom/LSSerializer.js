@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, xmldom, runtime*/
+/*global Node, NodeFilter, xmldom, runtime*/
 /*jslint sub: true*/
 if (typeof Object.create !== 'function') {
     Object['create'] = function (o) {
@@ -167,8 +167,8 @@ xmldom.LSSerializer = function LSSerializer() {
         for (i = 0; i < length; i += 1) {
             attr = /**@type{!Attr}*/(atts.item(i));
             if (attr.namespaceURI !== "http://www.w3.org/2000/xmlns/") {
-                accept = (self.filter) ? self.filter.acceptNode(attr) : 1;
-                if (accept === 1) {
+                accept = (self.filter) ? self.filter.acceptNode(attr) : NodeFilter.FILTER_ACCEPT;
+                if (accept === NodeFilter.FILTER_ACCEPT) {
                     attstr += " " + serializeAttribute(ns.getQName(attr),
                         attr);
                 }
@@ -196,15 +196,15 @@ xmldom.LSSerializer = function LSSerializer() {
     function serializeNode(ns, node) {
         var /**@type{!string}*/ s = "",
             /**@const@type{!number}*/ accept
-                = (self.filter) ? self.filter.acceptNode(node) : 1,
+                = (self.filter) ? self.filter.acceptNode(node) : NodeFilter.FILTER_ACCEPT,
             /**@type{Node}*/child,
             /**@const@type{string}*/ qname;
-        if (accept === 1 && node.nodeType === Node.ELEMENT_NODE) {
+        if (accept === NodeFilter.FILTER_ACCEPT && node.nodeType === Node.ELEMENT_NODE) {
             ns.push();
             qname = ns.getQName(node);
             s += startElement(ns, qname, node);
         }
-        if (accept === 1 || accept === 3) {
+        if (accept === NodeFilter.FILTER_ACCEPT || accept === NodeFilter.FILTER_SKIP) {
             child = node.firstChild;
             while (child) {
                 s += serializeNode(ns, child);

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, runtime, core, NodeFilter*/
+/*global Node, NodeFilter, runtime, core*/
 /**
  * An iterator that iterators through positions in a DOM tree.
  * @constructor
@@ -51,9 +51,9 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     function EmptyTextNodeFilter() {
         this.acceptNode = function (node) {
             if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
-                return 2;
+                return NodeFilter.FILTER_REJECT;
             }
-            return 1;
+            return NodeFilter.FILTER_ACCEPT;
         };
     }
     /**
@@ -64,7 +64,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     function FilteredEmptyTextNodeFilter(filter) {
         this.acceptNode = function (node) {
             if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
-                return 2;
+                return NodeFilter.FILTER_REJECT;
             }
             return filter.acceptNode(node);
         };

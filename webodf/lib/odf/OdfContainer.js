@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, runtime, core, xmldom, odf, DOMParser, document*/
+/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document*/
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
@@ -116,12 +116,12 @@ odf.OdfContainer = (function () {
                     node.nodeType === Node.ELEMENT_NODE) {
                 // skip all automatic styles which are not used
                 if (usedStyleList.uses(node)) {
-                    result = 1; // FILTER_ACCEPT
+                    result = NodeFilter.FILTER_ACCEPT;
                 } else {
-                    result = 2; // FILTER_REJECT
+                    result = NodeFilter.FILTER_REJECT;
                 }
             } else {
-                result = 1; // FILTER_ACCEPT
+                result = NodeFilter.FILTER_ACCEPT;
             }
             return result;
         };

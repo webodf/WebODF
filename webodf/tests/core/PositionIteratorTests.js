@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, runtime, core, gui, xmldom, ops*/
+/*global Node, NodeFilter, runtime, core, gui, xmldom, ops*/
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("xmldom.LSSerializer");
 
@@ -48,12 +48,12 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     function TestFilter() {
         this.acceptNode = function (node) {
             if (node.localName === "b") {
-                return 2;
+                return NodeFilter.FILTER_REJECT;
             }
             if (node.localName === "c") {
-                return 3;
+                return NodeFilter.FILTER_SKIP;
             }
-            return 1;
+            return NodeFilter.FILTER_ACCEPT;
         };
     }
     var r = runner, t, filter = new TestFilter(),

@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, runtime, core, gui, XMLSerializer, window*/
+/*global Node, NodeFilter, runtime, core, gui, XMLSerializer, window*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.PositionFilter");
@@ -501,9 +501,9 @@ gui.SelectionMover.createPositionIterator = function (rootNode) {
         this.acceptNode = function (node) {
             if (node.namespaceURI === "urn:webodf:names:cursor" ||
                     node.namespaceURI === "urn:webodf:names:editinfo") {
-                return 2;
+                return NodeFilter.FILTER_REJECT;
             }
-            return 1;
+            return NodeFilter.FILTER_ACCEPT;
         };
     }
     var filter = new CursorFilter();
