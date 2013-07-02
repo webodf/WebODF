@@ -351,15 +351,15 @@ function Viewer(viewerPlugin) {
         });
 
         window.addEventListener('keydown', function (evt) {
-            var key = evt.keyIdentifier;
+            var key = evt.keyCode;
 
             switch (key) {
-            case 'Up': // up
-            case 'Left': // left
+            case 38: // up
+            case 37: // left
                 self.showPreviousPage();
                 break;
-            case 'Down': // down
-            case 'Right': // right
+            case 40: // down
+            case 39: // right
                 self.showNextPage();
                 break;
             }
