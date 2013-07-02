@@ -172,8 +172,7 @@ function Viewer(viewerPlugin) {
                 // Show zoom controls only for text documents
                 document.getElementById('toolbarMiddleContainer').style.visibility = 'visible';
             }
-                
-            // WTF, but I need to call it thrice to render presentations properly. Need to investigate.
+   
             parseScale(kDefaultScale);
 
             initialized = true;

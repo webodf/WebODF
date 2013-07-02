@@ -1431,6 +1431,7 @@ odf.OdfCanvas = (function () {
          */
         this.showPage = function (n) {
             pageSwitcher.showPage(n);
+            fixContainerSize();
         };
         /**
          * @return {undefined}
