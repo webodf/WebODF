@@ -343,13 +343,22 @@ define("webodf/editor/EditorSession", [
             return odtDocument.getParagraphStyleAttributes(styleName);
         };
 
-        this.updateParagraphStyle = function (styleName, info) {
+        /**
+         * Creates and enqueues a paragraph-style cloning operation.
+         * Returns the created id for the new style.
+         * @param {!string} styleName  id of the style to update
+         * @param {!{paragraphProperties,textProperties}} setProperties  properties which are set
+         * @param {!{paragraphProperties,textProperties}=} removedProperties  properties which are removed
+         * @return {undefined}
+         */
+        this.updateParagraphStyle = function (styleName, setProperties, removedProperties) {
             var op;
             op = new ops.OpUpdateParagraphStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName,
-                info: info
+                setProperties: setProperties,
+                removedProperties: (!removedProperties) ? {} : removedProperties
             });
             session.enqueue(op);
         };

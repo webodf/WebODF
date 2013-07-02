@@ -43,107 +43,128 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, styleName,
-        /**@type{{paragraphProperties,textProperties}}*/info,
+        /**@type{{paragraphProperties,textProperties}}*/setProperties,
+        /**@type{{paragraphPropertyNames,textPropertyNames}}*/removedProperties,
         /**@const*/fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         /**@const*/stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
         /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         /**
          * Mapping of the properties from info.textProperties to the attributes of style:text-properties
-         * @const@type{Array.<!{propertyName:string,attrNs:string,attrLocaName:string,unit:string}>}
+         * @const@type{Array.<!{propertyName:string,attrNs:string,attrPrefix:string,attrLocaName:string,unit:string}>}
          */
         textPropertyMapping = [
         {
             propertyName: 'fontSize',
             attrNs:       fons,
-            attrLocaName: 'fo:font-size',
+            attrPrefix:   'fo',
+            attrLocaName: 'font-size',
             unit:         'pt'
         }, {
             propertyName: 'fontName',
             attrNs:       stylens,
-            attrLocaName: 'style:font-name'
+            attrPrefix:   'style',
+            attrLocaName: 'font-name'
         }, {
             propertyName: 'color',
             attrNs:       fons,
-            attrLocaName: 'fo:color'
+            attrPrefix:   'fo',
+            attrLocaName: 'color'
         }, {
             propertyName: 'backgroundColor',
             attrNs:       fons,
-            attrLocaName: 'fo:background-color'
+            attrPrefix:   'fo',
+            attrLocaName: 'background-color'
         }, {
             propertyName: 'fontWeight',
             attrNs:       fons,
-            attrLocaName: 'fo:font-weight'
+            attrPrefix:   'fo',
+            attrLocaName: 'font-weight'
         }, {
             propertyName: 'fontStyle',
             attrNs:       fons,
-            attrLocaName: 'fo:font-style'
+            attrPrefix:   'fo',
+            attrLocaName: 'font-style'
         }, {
             propertyName: 'underline',
             attrNs:       stylens,
-            attrLocaName: 'style:text-underline-style'
+            attrPrefix:   'style',
+            attrLocaName: 'text-underline-style'
         }, {
             propertyName: 'strikethrough',
             attrNs:       stylens,
-            attrLocaName: 'style:text-line-through-style'
+            attrPrefix:   'style',
+            attrLocaName: 'text-line-through-style'
         }],
         /**
          * Mapping of the properties from info.paragraphProperties to the attributes of style:paragraph-properties
-         * @const@type{Array.<!{propertyName:string,attrNs:string,attrLocaName:string,unit:string}>}
+         * @const@type{Array.<!{propertyName:string,attrNs:string,attrPrefix:string,attrLocaName:string,unit:string}>}
          */
         paragraphPropertyMapping = [
         {
             propertyName: 'topMargin',
             attrNs:       fons,
-            attrLocaName: 'fo:margin-top',
+            attrPrefix:   'fo',
+            attrLocaName: 'margin-top',
             unit:         'mm'
         }, {
             propertyName: 'bottomMargin',
             attrNs:       fons,
-            attrLocaName: 'fo:margin-bottom',
+            attrPrefix:   'fo',
+            attrLocaName: 'margin-bottom',
             unit:         'mm'
         }, {
             propertyName: 'leftMargin',
             attrNs:       fons,
-            attrLocaName: 'fo:margin-left',
+            attrPrefix:   'fo',
+            attrLocaName: 'margin-left',
             unit:         'mm'
         }, {
             propertyName: 'rightMargin',
             attrNs:       fons,
-            attrLocaName: 'fo:margin-right',
+            attrPrefix:   'fo',
+            attrLocaName: 'margin-right',
             unit:         'mm'
         }, {
             propertyName: 'textAlign',
             attrNs:       fons,
-            attrLocaName: 'fo:text-align'
+            attrPrefix:   'fo',
+            attrLocaName: 'text-align'
         }];
 
     /**
-     * Sets a value as the attribute of a node, if that value is defined.
-     * If there is a unit specified, it is suffixed to the value.
+     * Sets attributes of a node by the properties of the object properties,
+     * based on the mapping defined in propertyMapping.
      * @param {!Node} node
-     * @param {!string} ns
-     * @param {!string} prefixedAttribute
-     * @param {string} value
-     * @param {string=} unit
+     * @param {!Object} properties
+     * @param {!Array.<!{propertyName:string,attrNs:string,attrPrefix:string,attrLocaName:string,unit:string}>} propertyMapping
      */
-    function setRealAttributeNS(node, ns, prefixedAttribute, value, unit) {
-        if (value !== undefined) {
-            node.setAttributeNS(ns, prefixedAttribute, (unit !== undefined) ? value + unit : value);
+    function setPropertiesInStyleNode(node, properties, propertyMapping) {
+        var i, m, value;
+        for (i = 0; i < propertyMapping.length; i += 1) {
+            m = propertyMapping[i];
+            value = properties[m.propertyName];
+            // Set a value as the attribute of a node, if that value is defined.
+            // If there is a unit specified, it is suffixed to the value.
+            if (value !== undefined) {
+                node.setAttributeNS(m.attrNs, m.attrPrefix+":"+m.attrLocaName, (m.unit !== undefined) ? value + m.unit : value);
+            }
         }
     }
 
     /**
-     * Sets attributes of a node by the properties of the object properties,
-     * based on the mapping defined in propertyData.
+     * Removes attributes of a node by the names listed in removedPropertyNames,
+     * based on the mapping defined in propertyMapping.
      * @param {!Node} node
-     * @param {!Object} properties
-     * @param {!Array.<!{propertyName:string,attrNs:string,attrLocaName:string,unit:string}>} propertyData
+     * @param {!Array.<!string>} removedPropertyNames
+     * @param {!Array.<!{propertyName:string,attrNs:string,attrPrefix:string,attrLocaName:string,unit:string}>} propertyMapping
      */
-    function setProperties(node, properties, propertyData) {
-        var i, d;
-        for (i = 0; i < propertyData.length; i += 1) {
-            d = propertyData[i];
-            setRealAttributeNS(node, d.attrNs, d.attrLocaName, properties[d.propertyName], d.unit);
+    function removePropertiesFromStyleNode(node, removedPropertyNames, propertyMapping) {
+        var i, m;
+        for (i = 0; i < propertyMapping.length; i += 1) {
+            m = propertyMapping[i];
+            if (removedPropertyNames.indexOf(m.propertyName) !== -1) {
+                node.removeAttributeNS(m.attrNs, m.attrLocaName);
+            }
         }
     }
 
@@ -151,7 +172,8 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         memberid = data.memberid;
         timestamp = data.timestamp;
         styleName = data.styleName;
-        info = data.info;
+        setProperties = data.setProperties;
+        removedProperties = data.removedProperties;
     };
 
     this.execute = function (odtDocument) {
@@ -163,34 +185,54 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
 
-            // ensure nodes if needed
-            if ((paragraphPropertiesNode === undefined)
-                    && info.paragraphProperties) {
-                paragraphPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:paragraph-properties');
-                styleNode.appendChild(paragraphPropertiesNode);
-            }
-            if ((textPropertiesNode === undefined)
-                    && info.textProperties) {
-                textPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:text-properties');
-                styleNode.appendChild(textPropertiesNode);
-            }
-
-            // update the style nodes
-            if (info.paragraphProperties) {
-                setProperties(paragraphPropertiesNode, info.paragraphProperties, paragraphPropertyMapping);
-            }
-
-            if (info.textProperties) {
-                // Declare the requested font if it is not already declared
-                if (info.textProperties.fontName &&
-                    !odtDocument.getOdfCanvas().getFormatting().getFontMap().hasOwnProperty(info.textProperties.fontName)) {
-
-                    fontFaceNode = odtDocument.getDOM().createElementNS(stylens, 'style:font-face');
-                    fontFaceNode.setAttributeNS(stylens, 'style:name', info.textProperties.fontName);
-                    fontFaceNode.setAttributeNS(svgns, 'svg:font-family', info.textProperties.fontName);
-                    odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
+            if (setProperties) {
+                // ensure nodes if needed
+                if ((paragraphPropertiesNode === undefined)
+                        && setProperties.paragraphProperties) {
+                    paragraphPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:paragraph-properties');
+                    styleNode.appendChild(paragraphPropertiesNode);
                 }
-                setProperties(textPropertiesNode, info.textProperties, textPropertyMapping);
+                if ((textPropertiesNode === undefined)
+                        && setProperties.textProperties) {
+                    textPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:text-properties');
+                    styleNode.appendChild(textPropertiesNode);
+                }
+
+                // set attributes in the style nodes
+                if (setProperties.paragraphProperties) {
+                    setPropertiesInStyleNode(paragraphPropertiesNode, setProperties.paragraphProperties, paragraphPropertyMapping);
+                }
+
+                if (setProperties.textProperties) {
+                    // Declare the requested font if it is not already declared
+                    if (setProperties.textProperties.fontName &&
+                        !odtDocument.getOdfCanvas().getFormatting().getFontMap().hasOwnProperty(setProperties.textProperties.fontName)) {
+
+                        fontFaceNode = odtDocument.getDOM().createElementNS(stylens, 'style:font-face');
+                        fontFaceNode.setAttributeNS(stylens, 'style:name', setProperties.textProperties.fontName);
+                        fontFaceNode.setAttributeNS(svgns, 'svg:font-family', setProperties.textProperties.fontName);
+                        odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
+                    }
+                    setPropertiesInStyleNode(textPropertiesNode, setProperties.textProperties, textPropertyMapping);
+                }
+            }
+
+            // remove attributes in the style nodes
+            if (removedProperties) {
+                if (removedProperties.paragraphPropertyNames) {
+                    removePropertiesFromStyleNode(paragraphPropertiesNode, removedProperties.paragraphPropertyNames, paragraphPropertyMapping);
+                    if (paragraphPropertiesNode.attributes.length === 0) {
+                        styleNode.removeChild(paragraphPropertiesNode);
+                    }
+                }
+
+                if (removedProperties.textPropertyNames) {
+                    // TODO: check if fontname can be removed from font-face-declaration
+                    removePropertiesFromStyleNode(textPropertiesNode, removedProperties.textPropertyNames, textPropertyMapping);
+                    if (textPropertiesNode.attributes.length === 0) {
+                        styleNode.removeChild(textPropertiesNode);
+                    }
+                }
             }
 
             odtDocument.getOdfCanvas().refreshCSS();
@@ -206,7 +248,8 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             memberid: memberid,
             timestamp: timestamp,
             styleName: styleName,
-            info: info
+            setProperties: setProperties,
+            removedProperties: removedProperties
         };
     };
 
