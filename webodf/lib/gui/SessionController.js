@@ -57,7 +57,9 @@ gui.SessionController = (function () {
      * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
-        var self = this;
+        var self = this,
+            odfUtils = new odf.OdfUtils(),
+            isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1;
 
         function listenEvent(eventTarget, eventType, eventHandler) {
             if (eventTarget.addEventListener) {
@@ -175,7 +177,7 @@ gui.SessionController = (function () {
          * @param {!number} increment
          * @return {!ops.Operation}
          */
-        function createOpMoveCursorByShiftLeftOrRight(increment) {
+        function extendSelection(increment) {
             var op = new ops.OpMoveCursor(),
                 selection = session.getOdtDocument().getCursorSelection(inputMemberId);
 
@@ -223,6 +225,74 @@ gui.SessionController = (function () {
             return op;
         }
 
+        /**
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToParagraphStart() {
+            var odtDocument = session.getOdtDocument(),
+                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                iterator, node, selection, steps, op = null;
+
+            if (!paragraphNode) {
+                return op;
+            }
+
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
+            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
+            iterator.setUnfilteredPosition(paragraphNode, 0);
+
+            while (steps === 0 && iterator.previousPosition()) {
+                node = iterator.getCurrentNode();
+
+                if (odfUtils.isParagraph(node)) {
+                    steps = odtDocument.getDistanceFromCursor(inputMemberId, node, 0);
+                }
+            }
+
+            if (steps !== 0) {
+                selection = odtDocument.getCursorSelection(inputMemberId);
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
+            }
+
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToParagraphEnd() {
+            var odtDocument = session.getOdtDocument(),
+                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                iterator, node, selection, steps, op = null;
+
+            if (!paragraphNode) {
+                return op;
+            }
+
+            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
+            iterator.moveToEndOfNode(paragraphNode);
+            steps = odtDocument.getDistanceFromCursor(
+                inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+
+            while (steps === 0 && iterator.nextPosition()) {
+                node = iterator.getCurrentNode();
+
+                if (odfUtils.isParagraph(node)) {
+                    iterator.moveToEndOfNode(node);
+                    steps = odtDocument.getDistanceFromCursor(
+                        inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+                }
+            }
+
+            if (steps !== 0) {
+                selection = odtDocument.getCursorSelection(inputMemberId);
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
+            }
+
+            return op;
+        }
 
         /**
          * @return {?ops.Operation}
@@ -267,6 +337,84 @@ gui.SessionController = (function () {
                 op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToDocumentEnd() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                selection, steps, op = null;
+
+            iterator.moveToEnd();
+            steps = odtDocument.getDistanceFromCursor(
+                inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+
+            if (steps !== 0) {
+                selection = odtDocument.getCursorSelection(inputMemberId);
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
+            }
+
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToDocumentStart() {
+            var odtDocument = session.getOdtDocument(),
+                selection, steps, op = null;
+
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
+
+            if (steps !== 0) {
+                selection = odtDocument.getCursorSelection(inputMemberId);
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
+            }
+
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function moveCursorToDocumentEnd() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                oldPosition, steps, op = null;
+
+            iterator.moveToEnd();
+            steps = odtDocument.getDistanceFromCursor(
+                inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+
+            if (steps !== 0) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: oldPosition + steps, length: 0});
+            }
+
+            return op;
+        }
+
+        /**
+         * @return {?ops.Operation}
+         */
+        function moveCursorToDocumentStart() {
+            var odtDocument = session.getOdtDocument(),
+                oldPosition, steps, op = null;
+
+            steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
+
+            if (steps !== 0) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: oldPosition+steps, length: 0});
+            }
+
             return op;
         }
 
@@ -387,27 +535,49 @@ gui.SessionController = (function () {
 
             if (keyCode === 37) { // left
                 op = e.shiftKey
-                    ? createOpMoveCursorByShiftLeftOrRight(-1)
+                    ? extendSelection(-1)
                     : createOpMoveCursor(-1);
                 handled = true;
             } else if (keyCode === 39) { // right
                 op = e.shiftKey
-                    ? createOpMoveCursorByShiftLeftOrRight(1)
+                    ? extendSelection(1)
                     : createOpMoveCursor(1);
                 handled = true;
             } else if (keyCode === 38) { // up
-                // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = createOpMoveCursorByUpKey();
+                if ((isMacOS && e.altKey && e.shiftKey) || (e.ctrlKey && e.shiftKey)) {
+                    op = extendSelectionToParagraphStart();
+                } else if (e.metaKey && e.shiftKey) {
+                    op = extendSelectionToDocumentStart();
+                } else {
+                    op = createOpMoveCursorByUpKey();
+                }
                 handled = true;
             } else if (keyCode === 40) { // down
-                // TODO: fimd a way to get the number of needed steps here, for now hardcoding 10
-                op = createOpMoveCursorByDownKey();
+                if ((isMacOS && e.altKey && e.shiftKey) || (e.ctrlKey && e.shiftKey)) {
+                    op = extendSelectionToParagraphEnd();
+                } else if (e.metaKey && e.shiftKey) {
+                    op = extendSelectionToDocumentEnd();
+                } else {
+                    op = createOpMoveCursorByDownKey();
+                }
                 handled = true;
             } else if (keyCode === 36) { // home
-                op = createOpMoveCursorByHomeKey();
+                if (!isMacOS && e.ctrlKey && e.shiftKey) {
+                    op = extendSelectionToDocumentStart();
+                } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
+                    op = moveCursorToDocumentStart();
+                } else {
+                    op = createOpMoveCursorByHomeKey();
+                }
                 handled = true;
             } else if (keyCode === 35) { // end
-                op = createOpMoveCursorByEndKey();
+                if (!isMacOS && e.ctrlKey && e.shiftKey) {
+                    op = extendSelectionToDocumentEnd();
+                } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
+                    op = moveCursorToDocumentEnd();
+                } else {
+                    op = createOpMoveCursorByEndKey();
+                }
                 handled = true;
             } else if (keyCode === 8) { // Backspace
                 op = createOpRemoveTextByBackspaceKey();
