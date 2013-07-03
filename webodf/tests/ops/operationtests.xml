@@ -244,6 +244,15 @@
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
+ <test name="RemoveText_bridgeSpan_withCursor">
+  <before><office:text><text:p text:style-name="A">ab<text:span>cd</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="2"/>
+   <op optype="RemoveText" position="1" length="2"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A">a<c:cursor c:memberId="Bob"/><text:span>d</text:span></text:p></office:text></after>
+ </test>
  <test name="Remove_deleteMerge1">
   <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
@@ -257,6 +266,15 @@
    <op optype="RemoveText" position="2" length="5"/>
   </ops>
   <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMerge_withCursor">
+  <before><office:text><text:p text:style-name="A"><text:span>a</text:span>bcd</text:p><text:p text:style-name="B"><text:span>e</text:span>fgh</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="5"/>
+   <op optype="RemoveText" position="2" length="5"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A"><text:span>a</text:span>b<c:anchor c:memberId="Bob"/><c:cursor c:memberId="Bob"/>gh</text:p></office:text></after>
  </test>
  <test name="Remove_deleteOntoFirstLine">
   <before><office:text><text:p text:style-name="A"><text:span>ab</text:span></text:p><text:p text:style-name="B"><text:span>cde</text:span></text:p></office:text></before>

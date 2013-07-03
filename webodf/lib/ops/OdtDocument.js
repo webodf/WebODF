@@ -258,17 +258,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         var iterator = getIteratorAtPosition(position),
             neighborhood = [],
             currentNeighborhood = [],
-            currentNode = iterator.container(),
+            currentNode,
             iteratedLength = 0,
             visited = false,
             inFirstNeighborhood = true,
+            neighborhoodStartIndex = 0,
+            segmentStartIndex,
             i,
             j;
 
         runtime.assert(length >= 0, "OdtDocument.getTextNeighborhood only supports positive lengths");
         do {
             currentNeighborhood = iterator.textNeighborhood();
-            currentNode = iterator.container();
 
             visited = false;
             for (i = 0; i < neighborhood.length; i += 1) {
@@ -283,15 +284,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 }
             }
             if (!visited) {
+                segmentStartIndex = 0;
                 // When in the first local neighborhood, remove the elements that are in
                 // a direction opposite to the length.
                 if (inFirstNeighborhood) {
+                    currentNode = iterator.container();
                     for (j = 0; j < currentNeighborhood.length; j += 1) {
                         if (currentNeighborhood[j] === currentNode) {
-                            currentNeighborhood.splice(0, j);
+                            neighborhoodStartIndex = j;
                             break;
                         }
                     }
+                    segmentStartIndex = neighborhoodStartIndex;
                     inFirstNeighborhood = false;
                 }
 
@@ -299,13 +303,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     neighborhood = neighborhood.concat(currentNeighborhood);
                 }
 
-                for (j = 0; j < currentNeighborhood.length; j += 1) {
+                for (j = segmentStartIndex; j < currentNeighborhood.length; j += 1) {
                     iteratedLength += currentNeighborhood[j].data.length;
                 }
             }
         } while (iterator.nextPosition() === true && iteratedLength < length);
 
-        return neighborhood;
+        return neighborhood.slice(neighborhoodStartIndex);
     };
 
     /**
