@@ -259,14 +259,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             neighborhood = [],
             currentNeighborhood = [],
             currentNode = iterator.container(),
-            iteratedLength,
+            iteratedLength = 0,
             visited = false,
             inFirstNeighborhood = true,
             i,
             j;
 
-        iteratedLength = 0;
-
+        runtime.assert(length >= 0, "OdtDocument.getTextNeighborhood only supports positive lengths");
         do {
             currentNeighborhood = iterator.textNeighborhood();
             currentNode = iterator.container();
@@ -284,11 +283,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 }
             }
             if (!visited) {
-                // A neighborhood is always populated from left to right. So if
-                // we are moving towards the left, then reverse it.
-                if (length < 0) {
-                    currentNeighborhood.reverse();
-                }
                 // When in the first local neighborhood, remove the elements that are in
                 // a direction opposite to the length.
                 if (inFirstNeighborhood) {
@@ -297,9 +291,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                             currentNeighborhood.splice(0, j);
                             break;
                         }
-                    }
-                    if (length < 0) {
-                        currentNeighborhood.splice(0, 1);
                     }
                     inFirstNeighborhood = false;
                 }
@@ -312,8 +303,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     iteratedLength += currentNeighborhood[j].data.length;
                 }
             }
-        } while ((length > 0 ? iterator.nextPosition() : iterator.previousPosition()) === true
-                && iteratedLength < Math.abs(length));
+        } while (iterator.nextPosition() === true && iteratedLength < length);
 
         return neighborhood;
     };

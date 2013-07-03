@@ -51,6 +51,7 @@ ops.OpRemoveText = function OpRemoveText() {
         editinfons = 'urn:webodf:names:editinfo';
 
     this.init = function (data) {
+        runtime.assert(data.length >= 0, "OpRemoveText only supports positive lengths");
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = parseInt(data.position, 10);
