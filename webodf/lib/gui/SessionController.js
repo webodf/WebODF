@@ -271,30 +271,54 @@ gui.SessionController = (function () {
         }
 
         /**
+         * Ensures the provided selection is a "forward" selection (i.e., length is positive)
+         * @param {!{position: number, length: number}} selection
+         * @returns {!{position: number, length: number}}
+         */
+        function toForwardSelection(selection) {
+            if (selection.length < 0) {
+                selection.position += selection.length;
+                selection.length = -selection.length;
+            }
+            return selection;
+        }
+
+        /**
+         * Creates an operation to remove the provided selection
+         * @param {{position: number, length: number}} selection
+         * @returns {!ops.OpRemoveText}
+         */
+        function createOpRemoveSelection(selection) {
+            var op = new ops.OpRemoveText();
+            op.init({
+                memberid: inputMemberId,
+                position: selection.position,
+                length: selection.length
+            });
+            return op;
+        }
+
+        /**
          * @return {?ops.Operation}
          */
         function createOpRemoveTextByBackspaceKey() {
             var odtDocument = session.getOdtDocument(),
-                selection = odtDocument.getCursorSelection(inputMemberId),
-                domPosition,
-                length,
+                selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op = null;
 
-            if (selection.position > 0) {
+            if (selection.length === 0) {
                 // position-1 must exist for backspace to be valid
-                domPosition = odtDocument.getPositionInTextNode(selection.position - 1);
-
-                if (domPosition) {
+                if (selection.position > 0 && odtDocument.getPositionInTextNode(selection.position - 1)) {
                     op = new ops.OpRemoveText();
-                    length = selection.length || 1; // default length is 1
                     op.init({
                         memberid: inputMemberId,
-                        position: selection.position - length,
-                        length: length
+                        position: selection.position - 1,
+                        length: 1
                     });
                 }
+            } else {
+                op = createOpRemoveSelection(selection);
             }
-
             return op;
         }
         /**
@@ -302,20 +326,22 @@ gui.SessionController = (function () {
          */
         function createOpRemoveTextByDeleteKey() {
             var odtDocument = session.getOdtDocument(),
-                selection = odtDocument.getCursorSelection(inputMemberId),
-                // position+1 must exist for delete to be valid
-                domPosition = odtDocument.getPositionInTextNode(selection.position + 1),
+                selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op = null;
 
-            if (domPosition) {
-                op = new ops.OpRemoveText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: selection.position,
-                    length: selection.length || 1
-                });
+            if (selection.length === 0) {
+                // position+1 must exist for delete to be valid
+                if (odtDocument.getPositionInTextNode(selection.position + 1)) {
+                    op = new ops.OpRemoveText();
+                    op.init({
+                        memberid: inputMemberId,
+                        position: selection.position,
+                        length: 1
+                    });
+                }
+            } else {
+                op = createOpRemoveSelection(selection);
             }
-
             return op;
         }
 

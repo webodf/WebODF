@@ -603,6 +603,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * the cursor of the member.
      * position is always the number of steps from root node to the anchor node
      * length is the number of steps from anchor node to focus node
+     * !IMPORTANT! length is a vector, and may be negative if the cursor selection
+     * is reversed (i.e., user clicked and dragged the cursor backwards)
      * @param {!string} memberid
      * @returns {{position: !number, length: !number}}
      */
