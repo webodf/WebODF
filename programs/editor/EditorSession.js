@@ -276,7 +276,12 @@ define("webodf/editor/EditorSession", [
 
         this.getCurrentSelectionStyle = function() {
             var cursor = odtDocument.getCursor(memberid),
-                selectedRange = cursor.getSelectedRange();
+                selectedRange;
+            // no own cursor yet/currently added?
+            if (!cursor) {
+                return [];
+            }
+            selectedRange = cursor.getSelectedRange();
             if (selectedRange.collapsed) {
                 return [formatting.getAppliedStylesForElement(cursor.getNode())];
             }

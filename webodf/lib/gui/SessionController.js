@@ -498,9 +498,10 @@ gui.SessionController = (function () {
        /**
         */
         this.startEditing = function () {
-            var canvasElement, op;
+            var canvasElement, op,
+                odtDocument = session.getOdtDocument();
 
-            canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
+            canvasElement = odtDocument.getOdfCanvas().getElement();
             listenEvent(canvasElement, "keydown", handleKeyDown);
             listenEvent(canvasElement, "keypress", handleKeyPress);
             listenEvent(canvasElement, "keyup", dummyHandler);
@@ -508,6 +509,9 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "cut", dummyHandler);
             listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", handleMouseUp);
+
+            // start maintaining the cursor selection now
+            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
 
             op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
@@ -546,12 +550,6 @@ gui.SessionController = (function () {
         this.getSession = function () {
             return session;
         };
-
-        function init() {
-            var odtDocument = session.getOdtDocument();
-            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
-        }
-        init();
     };
 
     return gui.SessionController;
