@@ -661,12 +661,12 @@ odf.OdfCanvas = (function () {
      * @param {!Element} odffragment
      */
     function expandTabElements(odffragment) {
-        var i, tabs;
+        var tabs;
 
-        tabs = odffragment.getElementsByTagNameNS(textns, "tab");
-        for (i = 0; i < tabs.length; i += 1) {
-            tabs[i].textContent = "\t";
-        }
+        tabs = Array.prototype.slice.call(odffragment.getElementsByTagNameNS(textns, "tab"));
+        tabs.forEach(function(tab) {
+            tab.textContent = "\t";
+        });
     }
     /**
      * @param {!odf.OdfContainer} container
