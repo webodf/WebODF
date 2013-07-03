@@ -389,33 +389,49 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * Set the position of the iterator.
      * The position can be on an unfiltered, i.e. forbidden, position.
      * If the specified container is forbidden, the iterator will immediately
-     * move to the next valid position
+     * move to the next visible position
      *
      * @param {!Node} container
      * @param {!number} offset offset in unfiltered DOM world
      * @return {!boolean}
      */
     this.setUnfilteredPosition = function (container, offset) {
+        var filterResult;
         runtime.assert((container !== null) && (container !== undefined),
             "PositionIterator.setUnfilteredPosition called without container");
         if (container.nodeType === Node.TEXT_NODE) {
             return self.setPosition(container, offset);
         }
-        walker.currentNode = container;
-        if (filter.acceptNode(container) === NodeFilter.FILTER_ACCEPT) {
-            if (offset < container.childNodes.length) {
-                walker.currentNode = container.childNodes[offset];
-                currentPos = 0;
-            } else {
-                currentPos = 1; // set position to past the last container child
-            }
+
+        filterResult = nodeFilter(container);
+        // Need to ensure the container can have children, otherwise the treewalker will happily
+        // iterate over the child nodes of the container if started on one of the children
+        if (offset < container.childNodes.length && filterResult !== NodeFilter.FILTER_REJECT) {
+            walker.currentNode = container.childNodes[offset];
+            filterResult = nodeFilter(walker.currentNode);
+            currentPos = 0; // Assume the current position is ok. Will get modified later if necessary
         } else {
-            if (walker.nextSibling()) {
-                currentPos = 0; // set position to before the next sibling in the container
-            } else if (walker.parentNode()) {
-                currentPos = 1; // set position to past the last container child
-            }
+            walker.currentNode = container;
+            // Either
+            // - the node has no children
+            // - or offset === childNodes.length
+            // - or the container is rejected.
+            // If the container is rejected, this will get modified later regardless, so don't bother checking now
+            currentPos = offset === 0 ? 0 : 1;
         }
+
+        if (filterResult === NodeFilter.FILTER_REJECT) {
+            // Setting currentPos to 1 indicates iteration on the currentNode is complete.
+            // This will cause the subsequent call to self.nextPosition() to jump to the next
+            // available sibling or parent
+            currentPos = 1;
+        }
+        if (filterResult !== NodeFilter.FILTER_ACCEPT) {
+            // The current position is not valid! Move along to the next one that is
+            return self.nextPosition();
+        }
+        runtime.assert(nodeFilter(walker.currentNode) === NodeFilter.FILTER_ACCEPT,
+            "PositionIterater.setUnfilteredPosition call resulted in an non-visible node being set");
         return true;
     };
     /**

@@ -165,7 +165,18 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             countAndConfirm(xml.x, xml.n, filter2);
         }
     }
-
+    function testCountStepsToNode() {
+        createDoc("<t><p>hello</p><p></p></t>");
+        var range = t.root.ownerDocument.createRange(),
+            counter = t.mover.getStepCounter(),
+            emptyNode = t.root.lastChild,
+            steps;
+        range.setStart(emptyNode);
+        range.collapse(true);
+        t.cursor.setSelectedRange(range);
+        steps = counter.countStepsToPosition(emptyNode, 0, new AcceptAllPositionFilter());
+        r.shouldBe(t, steps.toString(), "0");
+    }
     this.setUp = function () {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
@@ -180,7 +191,8 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             testUpDownTraversal,
             testForthBack,
             testXMLsForthBack,
-            testCountAndConfirm
+            testCountAndConfirm,
+            testCountStepsToNode
         ];
     };
     this.asyncTests = function () {
