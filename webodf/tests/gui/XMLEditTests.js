@@ -50,7 +50,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         t.countForward = 0;
         t.countBackward = 0;
         t.endpos = endpos;
-        t.walker.setPosition(t.node, 0);
+        t.walker.setUnfilteredPosition(t.node, 0);
         while (t.walker.nextPosition()) {
             t.countForward += 1;
         }
@@ -60,7 +60,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         if (endpos !== null) {
             r.shouldBe("t.walker.position()", "t.endpos");
         }
-        t.walker.setPosition(t.node, endpos);
+        t.walker.setUnfilteredPosition(t.node, endpos);
         while (t.walker.previousPosition()) {
             t.countBackward += 1;
         }

@@ -336,14 +336,18 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     };
     /**
      * Set the position of the iterator.
+     * The position can be on an unfiltered, i.e. forbidden, position.
+     * If the specified container is forbidden, the iterator will immediately
+     * move to the next visible position
      *
      * @param {!Node} container
-     * @param {!number} offset offset in filtered DOM world
+     * @param {!number} offset offset in unfiltered DOM world
      * @return {!boolean}
      */
-    this.setPosition = function (container, offset) {
+    this.setUnfilteredPosition = function (container, offset) {
+        var filterResult;
         runtime.assert((container !== null) && (container !== undefined),
-            "PositionIterator.setPosition called without container");
+            "PositionIterator.setUnfilteredPosition called without container");
         walker.currentNode = container;
         if (container.nodeType === Node.TEXT_NODE) {
             currentPos = offset;
@@ -362,46 +366,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             }
             return true;
         }
-        var o = offset,
-            n = walker.firstChild(),
-            prevNode;
-        while (offset > 0 && n) {
-            offset -= 1;
-            prevNode = n;
-            n = walker.nextSibling();
-            // neighboring texts count as 1 position
-            while (n && n.nodeType === Node.TEXT_NODE && prevNode.nodeType === Node.TEXT_NODE
-                    && n.previousSibling === prevNode) {
-                prevNode = n;
-                n = walker.nextSibling();
-            }
-        }
-        runtime.assert(offset === 0, "Error in setPosition: offset " + o + " is out of range.");
-        if (n === null) {
-            walker.currentNode = container;
-            currentPos = 1;
-        } else {
-            currentPos = 0;
-        }
-        return true;
-    };
-    /**
-     * Set the position of the iterator.
-     * The position can be on an unfiltered, i.e. forbidden, position.
-     * If the specified container is forbidden, the iterator will immediately
-     * move to the next visible position
-     *
-     * @param {!Node} container
-     * @param {!number} offset offset in unfiltered DOM world
-     * @return {!boolean}
-     */
-    this.setUnfilteredPosition = function (container, offset) {
-        var filterResult;
-        runtime.assert((container !== null) && (container !== undefined),
-            "PositionIterator.setUnfilteredPosition called without container");
-        if (container.nodeType === Node.TEXT_NODE) {
-            return self.setPosition(container, offset);
-        }
 
         filterResult = nodeFilter(container);
         // Need to ensure the container can have children, otherwise the treewalker will happily
@@ -411,7 +375,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             filterResult = nodeFilter(walker.currentNode);
             currentPos = 0; // Assume the current position is ok. Will get modified later if necessary
         } else {
-            walker.currentNode = container;
             // Either
             // - the node has no children
             // - or offset === childNodes.length
@@ -449,7 +412,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      */
     this.moveToEndOfNode = function (node) {
         if (node.nodeType === Node.TEXT_NODE) {
-            self.setPosition(node, node.length);
+            self.setUnfilteredPosition(node, node.length);
         } else {
             walker.currentNode = node;
             currentPos = 1;

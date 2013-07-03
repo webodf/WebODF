@@ -536,7 +536,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getNeighboringParagraph = function (paragraph, direction) {
         var iterator = getIteratorAtPosition(0),
             currentParagraph = null;
-        iterator.setPosition(paragraph, 0);
+        iterator.setUnfilteredPosition(paragraph, 0);
 
         do {
             if (filter.acceptPosition(iterator) === 1) {
@@ -560,7 +560,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getWalkableParagraphLength = function (paragraph) {
         var iterator = getIteratorAtPosition(0),
             length = 0;
-        iterator.setPosition(paragraph, 0);
+        iterator.setUnfilteredPosition(paragraph, 0);
 
         do {
             if (getParagraphElement(iterator.container()) !== paragraph) {
