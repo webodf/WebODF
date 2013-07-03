@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <title>Clipboard Behaviours</title>
+    <script type="text/javascript">
+
+        function record(msg, result) {
+            return function() { log(msg); return result; };
+        }
+
+        function log(msg) {
+            $("#log").append(msg + "\n");
+        }
+
+        function listenEvent(eventTarget, eventType, eventHandler) {
+            var onVariant = "on" + eventType;
+            if (eventTarget.hasOwnProperty(onVariant)) {
+                log("Attached on" + eventType + " using direct property '" + onVariant + "'");
+                eventTarget[onVariant] = eventHandler;
+            } else if (eventTarget.attachEvent && eventTarget.attachEvent(onVariant, eventHandler)) {
+                log("Attached on" + eventType + " using attachEvent");
+            } else if (eventTarget.addEventListener) {
+                eventTarget.addEventListener(eventType, eventHandler, false);
+                log("Attached " + eventType + " using addEventListener ");
+            }
+        }
+        
+        $(function() {
+            var content = $("#content");
+            listenEvent(content[0], "cut", record("cut"));
+            listenEvent(content[0], "beforecut", record("beforecut", false));
+            listenEvent(content[0], "copy", record("copy"));
+            listenEvent(content[0], "beforecopy", record("beforecopy"));
+            listenEvent(content[0], "paste", record("paste"));
+            listenEvent(content[0], "beforepaste", record("beforepaste", false));
+        })
+    </script>
+</head>
+<body>
+<pre id="content">       /**
+        */
+        this.startEditing = function () {
+            var canvasElement, op,
+                odtDocument = session.getOdtDocument();
+
+            canvasElement = odtDocument.getOdfCanvas().getElement();
+            listenEvent(canvasElement, "keydown", handleKeyDown);
+            listenEvent(canvasElement, "keypress", handleKeyPress);
+            listenEvent(canvasElement, "keyup", dummyHandler);
+            listenEvent(canvasElement, "copy", dummyHandler);
+            listenEvent(canvasElement, "cut", handleCut);
+            listenEvent(canvasElement, "beforecut", handleBeforeCut);
+            listenEvent(canvasElement, "paste", handlePaste);
+            listenEvent(canvasElement, "mouseup", handleMouseUp);
+
+            // start maintaining the cursor selection now
+            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
+
+            op = new ops.OpAddCursor();
+            op.init({memberid: inputMemberId});
+            session.enqueue(op);
+        };</pre>
+<pre id="log"></pre>
+</body>
+</html>

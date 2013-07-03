@@ -51,6 +51,7 @@
         "core/Zip.js",
         "gui/Avatar.js",
         "gui/Caret.js",
+        "gui/Clipboard.js",
         "gui/PresenterUI.js",
         "gui/SessionController.js",
         "gui/CaretFactory.js",

@@ -40,6 +40,7 @@ runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
+runtime.loadClass("gui.Clipboard");
 
 /**
  * @constructor
@@ -59,27 +60,41 @@ gui.SessionController = (function () {
     gui.SessionController = function SessionController(session, inputMemberId) {
         var self = this,
             odfUtils = new odf.OdfUtils(),
-            isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1;
+            isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
+            clipboard = new gui.Clipboard();
 
-        function listenEvent(eventTarget, eventType, eventHandler) {
-            if (eventTarget.addEventListener) {
+        /**
+         * @param {!Element} eventTarget
+         * @param {!string} eventType
+         * @param {function(!Event)|function()} eventHandler
+         * @param {boolean=} includeDirect
+         */
+        function listenEvent(eventTarget, eventType, eventHandler, includeDirect) {
+            var onVariant = "on" + eventType,
+                bound = false;
+            if (eventTarget.attachEvent) {
+                bound = eventTarget.attachEvent(onVariant, eventHandler);
+            }
+            if (!bound && eventTarget.addEventListener) {
                 eventTarget.addEventListener(eventType, eventHandler, false);
-            } else if (eventTarget.attachEvent) {
-                eventType = "on" + eventType;
-                eventTarget.attachEvent(eventType, eventHandler);
-            } else {
-                eventTarget["on" + eventType] = eventHandler;
+                bound = true;
+            }
+
+            if ((!bound || includeDirect) && eventTarget.hasOwnProperty(onVariant)) {
+                eventTarget[onVariant] = eventHandler;
             }
         }
 
         function removeEvent(eventTarget, eventType, eventHandler) {
+            var onVariant = "on" + eventType;
+            if (eventTarget.detachEvent) {
+                eventTarget.detachEvent(onVariant, eventHandler);
+            }
             if (eventTarget.removeEventListener) {
                 eventTarget.removeEventListener(eventType, eventHandler, false);
-            } else if (eventTarget.detachEvent) {
-                eventType = "on" + eventType;
-                eventTarget.detachEvent(eventType, eventHandler);
-            } else {
-                eventTarget["on" + eventType] = null;
+            }
+            if (eventTarget[onVariant] === eventHandler) {
+                eventTarget[onVariant] = null;
             }
         }
 
@@ -631,6 +646,49 @@ gui.SessionController = (function () {
         }
 
         /**
+         * Handle the cut operation request
+         * @param {!Event} e
+         */
+        function handleCut(e) {
+            var cursor = session.getOdtDocument().getCursor(inputMemberId),
+                selectedRange = cursor.getSelectedRange(),
+                selection,
+                op;
+
+            if (selectedRange.collapsed) {
+                // Modifying the clipboard data will clear any existing data,
+                // so cut shouldn't touch the clipboard if there is nothing selected
+                return;
+            }
+
+            // The document is readonly, so the data will never get placed on the clipboard in
+            // most browsers unless we do it ourselves.
+            if (clipboard.setDataFromRange(e, cursor.getSelectedRange())) {
+                op = new ops.OpRemoveText();
+                selection = toForwardSelection(session.getOdtDocument().getCursorSelection(inputMemberId));
+                op.init({
+                    memberid: inputMemberId,
+                    position: selection.position,
+                    length: selection.length
+                });
+                session.enqueue(op);
+            } else {
+                // TODO What should we do if cut isn't supported?
+                runtime.log("Cut operation failed");
+            }
+        }
+
+        /**
+         * Tell Safari that it's ok to perform a cut action on our read-only body
+         * @returns {boolean}
+         */
+        function handleBeforeCut() {
+            var cursor = session.getOdtDocument().getCursor(inputMemberId),
+                selectedRange = cursor.getSelectedRange();
+            return !(selectedRange.collapsed === false); // return false to enable cut menu... straightforward right?!
+        }
+
+        /**
          * @param {!Event} e
          */
         function handlePaste(e) {
@@ -676,7 +734,10 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "keypress", handleKeyPress);
             listenEvent(canvasElement, "keyup", dummyHandler);
             listenEvent(canvasElement, "copy", dummyHandler);
-            listenEvent(canvasElement, "cut", dummyHandler);
+            listenEvent(canvasElement, "cut", handleCut);
+            // In Safari 6.0.5 (7536.30.1), Using either attachEvent or addEventListener
+            // results in the beforecut return value being ignored which prevents cut from being called.
+            listenEvent(canvasElement, "beforecut", handleBeforeCut, true);
             listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", handleMouseUp);
 
@@ -701,7 +762,8 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "keypress", handleKeyPress);
             removeEvent(canvasElement, "keyup", dummyHandler);
             removeEvent(canvasElement, "copy", dummyHandler);
-            removeEvent(canvasElement, "cut", dummyHandler);
+            removeEvent(canvasElement, "cut", handleCut);
+            removeEvent(canvasElement, "beforecut", handleBeforeCut);
             removeEvent(canvasElement, "paste", handlePaste);
             removeEvent(canvasElement, "mouseup", handleMouseUp);
 
