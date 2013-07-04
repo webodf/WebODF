@@ -68,7 +68,6 @@ gui.SessionView = (function () {
     function SessionView(viewOptions, session, caretFactory) {
         var carets = {},
             avatarInfoStyles,
-            editHighlightingEnabled = true,
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {},
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
@@ -199,22 +198,6 @@ gui.SessionView = (function () {
             }
         }
 
-        this.enableEditHighlighting = function () {
-            if (editHighlightingEnabled) {
-                return;
-            }
-
-            editHighlightingEnabled = true;
-        };
-
-        this.disableEditHighlighting = function () {
-            if (!editHighlightingEnabled) {
-                return;
-            }
-
-            editHighlightingEnabled = false;
-        };
-
         /**
          * Show edit information markers displayed near edited paragraphs
          */
@@ -305,9 +288,8 @@ gui.SessionView = (function () {
                 caret.setAvatarImageUrl(userData.imageurl);
                 caret.setColor(userData.color);
             }
-            if (editHighlightingEnabled) {
-                setAvatarInfoStyle(memberId, userData.fullname, userData.color);
-            }
+
+            setAvatarInfoStyle(memberId, userData.fullname, userData.color);
         }
 
         /**

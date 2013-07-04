@@ -230,7 +230,6 @@ define("webodf/editor/Editor", [
                     userModel = userModel || new ops.NowjsUserModel();
                     session.setUserModel(userModel);
 
-                    editorSession.sessionView.disableEditHighlighting();
                     opRouter.requestReplay(function done() {
                         var odtDocument = session.getOdtDocument();
                         if (cursorAddedHandler) {
@@ -243,7 +242,6 @@ define("webodf/editor/Editor", [
                                 cursorRemovedHandler(memberId);
                             });
                         }
-                        editorSession.sessionView.enableEditHighlighting();
 
                         // start editing: let the controller send the OpAddCursor
                         editorSession.startEditing();
