@@ -807,15 +807,14 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "keydown", handleKeyDown);
             listenEvent(canvasElement, "keypress", handleKeyPress);
             listenEvent(canvasElement, "keyup", dummyHandler);
-            listenEvent(canvasElement, "copy", dummyHandler);
-            listenEvent(canvasElement, "cut", handleCut);
             // In Safari 6.0.5 (7536.30.1), Using either attachEvent or addEventListener
             // results in the beforecut return value being ignored which prevents cut from being called.
             listenEvent(canvasElement, "beforecut", handleBeforeCut, true);
-            listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            listenEvent(canvasElement, "cut", handleCut);
             // Epiphany 3.6.1 requires this to allow the paste event to fire
             listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
+            listenEvent(canvasElement, "paste", handlePaste);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
@@ -837,7 +836,6 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "keydown", handleKeyDown);
             removeEvent(canvasElement, "keypress", handleKeyPress);
             removeEvent(canvasElement, "keyup", dummyHandler);
-            removeEvent(canvasElement, "copy", dummyHandler);
             removeEvent(canvasElement, "cut", handleCut);
             removeEvent(canvasElement, "beforecut", handleBeforeCut);
             removeEvent(canvasElement, "paste", handlePaste);
