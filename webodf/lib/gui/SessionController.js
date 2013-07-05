@@ -745,7 +745,7 @@ gui.SessionController = (function () {
         }
 
         /**
-         * Tell Safari that it's ok to perform a cut action on our read-only body
+         * Tell the browser that it's ok to perform a cut action on our read-only body
          * @returns {boolean}
          */
         function handleBeforeCut() {
@@ -778,6 +778,14 @@ gui.SessionController = (function () {
             }
         }
 
+        /**
+         * Tell the browser that it's ok to perform a paste action on our read-only body
+         * @returns {boolean}
+         */
+        function handleBeforePaste() {
+            return false;
+        }
+
         // TODO: This method and associated event subscriptions really belong in SessionView
         // As this implementation relies on the current browser selection, only a single
         // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
@@ -806,6 +814,8 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "beforecut", handleBeforeCut, true);
             listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            // Epiphany 3.6.1 requires this to allow the paste event to fire
+            listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
@@ -832,6 +842,7 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "beforecut", handleBeforeCut);
             removeEvent(canvasElement, "paste", handlePaste);
             removeEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            removeEvent(canvasElement, "beforepaste", handleBeforePaste);
 
             op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
