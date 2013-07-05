@@ -752,6 +752,15 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
+     * @param {!string} eventid
+     * @param {!function(*)} cb
+     * @return {undefined}
+     */
+    this.unsubscribe = function (eventid, cb) {
+        eventNotifier.unsubscribe(eventid, cb);
+    };
+
+    /**
      * @return {undefined}
      */
     function init() {

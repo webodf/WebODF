@@ -75,6 +75,24 @@ core.EventNotifier = function EventNotifier(eventIds) {
     };
 
     /**
+     * @param {!string} eventId
+     * @param {!function(*)} cb
+     * @return {undefined}
+     */
+    this.unsubscribe = function (eventId, cb) {
+        var cbIndex;
+        runtime.assert(eventListener.hasOwnProperty(eventId),
+            "tried to unsubscribe from unknown event \"" + eventId + "\"");
+
+        cbIndex = eventListener[eventId].indexOf(cb);
+        runtime.assert(cbIndex !== -1, "tried to unsubscribe unknown callback from event \"" + eventId + "\"");
+        if (cbIndex !== -1) {
+            eventListener[eventId].splice(cbIndex, 1);
+        }
+        runtime.log("event \"" + eventId + "\" unsubscribed.");
+    };
+
+    /**
      * @return {undefined}
      */
     function init() {

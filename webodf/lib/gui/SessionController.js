@@ -691,9 +691,12 @@ gui.SessionController = (function () {
         /**
          */
         this.endEditing = function () {
-            var canvasElement, op;
+            var canvasElement, op,
+                odtDocument = session.getOdtDocument();
 
-            canvasElement = session.getOdtDocument().getOdfCanvas().getElement();
+            odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
+
+            canvasElement = odtDocument.getOdfCanvas().getElement();
             removeEvent(canvasElement, "keydown", handleKeyDown);
             removeEvent(canvasElement, "keypress", handleKeyPress);
             removeEvent(canvasElement, "keyup", dummyHandler);
