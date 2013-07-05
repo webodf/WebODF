@@ -353,7 +353,7 @@ define("webodf/editor/EditorSession", [
          * Returns the created id for the new style.
          * @param {!string} styleName  id of the style to update
          * @param {!{paragraphProperties,textProperties}} setProperties  properties which are set
-         * @param {!{paragraphProperties,textProperties}=} removedProperties  properties which are removed
+         * @param {!{paragraphPropertyNames,textPropertyNames}=} removedProperties  properties which are removed
          * @return {undefined}
          */
         this.updateParagraphStyle = function (styleName, setProperties, removedProperties) {
