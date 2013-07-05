@@ -67,12 +67,12 @@ function ODFViewerPlugin() {
         pages = [],
         currentPage = null;
 
-    this.initialize = function (viewerElement, location) {
+    this.initialize = function (viewerElement, documentUrl) {
         // If the URL has a fragment (#...), try to load the file it represents
 
         odfElement = document.getElementById('canvas');
         odfCanvas = new odf.OdfCanvas(odfElement);
-        odfCanvas.load(location);
+        odfCanvas.load(documentUrl);
 
         odfCanvas.addListener('statereadychange', function () {
             root = odfCanvas.odfContainer().rootElement;
@@ -123,7 +123,7 @@ function ODFViewerPlugin() {
 
     // return a list of tuples (pagename, pagenode)
     this.getPages = function () {
-        var pageNodes = root.getElementsByTagNameNS(nsResolver('draw'), 'page'),
+        var pageNodes = Array.prototype.slice.call(root.getElementsByTagNameNS(nsResolver('draw'), 'page')),
             pages  = [],
             i,
             tuple;

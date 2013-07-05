@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -39,7 +39,6 @@ function Viewer(viewerPlugin) {
     "use strict";
 
     var self = this,
-        kCssUnits = 96.0 / 72.0,
         kScrollbarPadding = 40,
         kMinScale = 0.25,
         kMaxScale = 4.0,
@@ -49,9 +48,14 @@ function Viewer(viewerPlugin) {
         initialized = false,
         url,
         viewerElement,
+        canvasContainer = document.getElementById('canvasContainer'),
+        pageSwitcher = document.getElementById('toolbarLeft'),
+        zoomWidget = document.getElementById('toolbarMiddleContainer'),
+        scaleSelector = document.getElementById('scaleSelect'),
         filename,
         pages = [],
-        currentPage;
+        currentPage,
+        scaleChangeTimer;
 
     function isFullScreen() {
     // Note that the browser fullscreen (triggered by short keys) might
@@ -60,7 +64,8 @@ function Viewer(viewerPlugin) {
     }
 
     function selectScaleOption(value) {
-        var options = document.getElementById('scaleSelect').options,
+        // Retrieve the options from the zoom level <select> element
+        var options = scaleSelector.options,
             option,
             predefinedValueFound = false,
             i;
@@ -95,11 +100,32 @@ function Viewer(viewerPlugin) {
         window.dispatchEvent(event);
     }
 
+    function onScroll() {
+        var pageNumber;
+
+        if (viewerPlugin.onScroll) {
+            viewerPlugin.onScroll();
+        }
+        if (viewerPlugin.getPageInView) {
+            pageNumber = viewerPlugin.getPageInView();
+            if (pageNumber) {
+                currentPage = pageNumber;
+                document.getElementById('pageNumber').value = pageNumber;
+            }
+        }
+    }
+
+    function delayedRefresh(milliseconds) {
+        window.clearTimeout(scaleChangeTimer);
+        scaleChangeTimer = window.setTimeout(function () {
+            onScroll();
+        }, milliseconds);
+    }
+
     function parseScale(value, resetAutoSettings, noScroll) {
         var scale,
             maxWidth,
-            maxHeight,
-            container = document.getElementById('canvasContainer');
+            maxHeight;
 
         if (value === 'custom') {
             scale = parseFloat(document.getElementById('customScaleOption').textContent) / 100;
@@ -109,11 +135,12 @@ function Viewer(viewerPlugin) {
 
         if (scale) {
             setScale(scale, true, noScroll);
+            delayedRefresh(300);
             return;
         }
 
-        maxWidth = container.clientWidth - kScrollbarPadding;
-        maxHeight = container.clientHeight - kScrollbarPadding;
+        maxWidth = canvasContainer.clientWidth - kScrollbarPadding;
+        maxHeight = canvasContainer.clientHeight - kScrollbarPadding;
 
         switch (value) {
         case 'page-actual':
@@ -138,8 +165,10 @@ function Viewer(viewerPlugin) {
         }
 
         selectScaleOption(value);
+        delayedRefresh(300);
     }
 
+    
     this.initialize = function () {
         var location = String(document.location),
             pos = location.indexOf('#'),
@@ -160,25 +189,32 @@ function Viewer(viewerPlugin) {
         viewerPlugin.onLoad = function () {
             if (viewerPlugin.isSlideshow()) {
                 // No padding for slideshows
-                document.getElementById('canvasContainer').style.padding = 0;
+                canvasContainer.style.padding = 0;
                 // Show page nav controls only for presentations
-                document.getElementById('toolbarLeft').style.visibility = 'visible';
-
-                pages = getPages();
-                document.getElementById('numPages').innerHTML = 'of ' + pages.length;
-
-                self.showPage(1);
+                pageSwitcher.style.visibility = 'visible';
             } else {
-                // Show zoom controls only for text documents
-                document.getElementById('toolbarMiddleContainer').style.visibility = 'visible';
+                // For text documents, show the zoom widget.
+                zoomWidget.style.visibility = 'visible';
+                // Only show the page switcher widget if the plugin supports page numbers
+                if (viewerPlugin.getPageInView) {
+                    pageSwitcher.style.visibility = 'visible';
+                }
             }
-   
+
+            // Set default scale
             parseScale(kDefaultScale);
 
+            canvasContainer.onscroll = onScroll;
+            delayedRefresh();
+
             initialized = true;
+            pages = getPages();
+            document.getElementById('numPages').innerHTML = 'of ' + pages.length;
+
+            self.showPage(1);
         };
 
-        viewerPlugin.initialize(viewerElement, location);
+        viewerPlugin.initialize(canvasContainer, location);
     };
 
     /**
