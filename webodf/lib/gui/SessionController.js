@@ -61,7 +61,10 @@ gui.SessionController = (function () {
         var self = this,
             odfUtils = new odf.OdfUtils(),
             isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
-            clipboard = new gui.Clipboard();
+            clipboard = new gui.Clipboard(),
+            clickCount = 0,
+            clickPosition = null,
+            clickTimer;
 
         /**
          * @param {!Element} eventTarget
@@ -156,16 +159,11 @@ gui.SessionController = (function () {
             return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
         }
 
-        /**
-         * @param {!Event} e
-         */
-        function handleMouseUp(e) {
+        function moveCursor() {
             var selection = runtime.getWindow().getSelection(),
                 odtDocument = session.getOdtDocument(),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                stepsToAnchor,
-                stepsToFocus,
-                op;
+                stepsToAnchor, stepsToFocus, op;
 
             stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
             stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
@@ -173,6 +171,108 @@ gui.SessionController = (function () {
                 op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, position: oldPosition+stepsToAnchor, length: stepsToFocus - stepsToAnchor});
                 session.enqueue(op);
+            }
+        }
+
+        function selectWord() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
+                alphaNumeric = /[A-Za-z0-9]/,
+                stepsToStart = 0,
+                stepsToEnd = 0,
+                currentNode, i, c, op;
+
+            iterator.setUnfilteredPosition(cursorNode, 0);
+            if (iterator.previousPosition()) {
+                currentNode = iterator.getCurrentNode();
+                if (currentNode.nodeType === Node.TEXT_NODE) {
+                    for (i=currentNode.data.length-1; i>=0; i--) {
+                        c = currentNode.data[i];
+                        if (alphaNumeric.test(c)) {
+                            stepsToStart -= 1;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            iterator.setUnfilteredPosition(cursorNode, 0);
+            if (iterator.nextPosition()) {
+                currentNode = iterator.getCurrentNode();
+                if (currentNode.nodeType === Node.TEXT_NODE) {
+                    for (i=0; i<currentNode.data.length; i++) {
+                        c = currentNode.data[i];
+                        if (alphaNumeric.test(c)) {
+                            stepsToEnd += 1;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (stepsToStart !== 0 || stepsToEnd !== 0) {
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: oldPosition+stepsToStart, length: Math.abs(stepsToStart) + Math.abs(stepsToEnd)});
+                session.enqueue(op);
+            }
+        }
+
+        function selectParagraph() {
+            var odtDocument = session.getOdtDocument(),
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                oldPosition = odtDocument.getCursorPosition(inputMemberId),
+                stepsToStart, stepsToEnd, op;
+
+            stepsToStart = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
+            iterator.moveToEndOfNode(paragraphNode);
+            stepsToEnd = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.unfilteredDomOffset());
+
+            if (stepsToStart !== 0 || stepsToEnd !== 0) {
+                op = new ops.OpMoveCursor();
+                op.init({memberid: inputMemberId, position: oldPosition+stepsToStart, length: Math.abs(stepsToStart) + Math.abs(stepsToEnd)});
+                session.enqueue(op);
+            }
+        }
+
+        function resetClick () {
+            clickCount = 0;
+            clickPosition = null;
+        }
+
+        /**
+         * @param {!Event} e
+         */
+        function handleMouseUp(e) {
+            var window = runtime.getWindow();
+
+            if (clickPosition && clickPosition.x === e.screenX && clickPosition.y === e.screenY) {
+                clickCount++;
+
+                if (clickCount === 1) {
+                    moveCursor();
+                }
+                else if (clickCount === 2) { // double click
+                    selectWord();
+                }
+                else if (clickCount === 3) { // triple click
+                    window.clearTimeout(clickTimer);
+                    selectParagraph();
+                    resetClick();
+                }
+            } else {
+                moveCursor();
+
+                clickCount = 1;
+                clickPosition = {x: e.screenX, y: e.screenY};
+                window.clearTimeout(clickTimer);
+                clickTimer = window.setTimeout(resetClick, 400);
             }
         }
 
