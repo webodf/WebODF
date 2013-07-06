@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, ops, odf, window */
+/*global runtime, core, gui, Node, ops, odf, window */
 
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
@@ -40,6 +40,7 @@ runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
+runtime.loadClass("gui.ClickHandler");
 runtime.loadClass("gui.Clipboard");
 
 /**
@@ -62,9 +63,7 @@ gui.SessionController = (function () {
             odfUtils = new odf.OdfUtils(),
             isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
             clipboard = new gui.Clipboard(),
-            clickCount = 0,
-            clickPosition = null,
-            clickTimer;
+            clickHandler = new gui.ClickHandler();
 
         /**
          * @param {!Element} eventTarget
@@ -188,7 +187,7 @@ gui.SessionController = (function () {
             if (iterator.previousPosition()) {
                 currentNode = iterator.getCurrentNode();
                 if (currentNode.nodeType === Node.TEXT_NODE) {
-                    for (i=currentNode.data.length-1; i>=0; i--) {
+                    for (i=currentNode.data.length-1; i>=0; i-=1) {
                         c = currentNode.data[i];
                         if (alphaNumeric.test(c)) {
                             stepsToStart -= 1;
@@ -204,7 +203,7 @@ gui.SessionController = (function () {
             if (iterator.nextPosition()) {
                 currentNode = iterator.getCurrentNode();
                 if (currentNode.nodeType === Node.TEXT_NODE) {
-                    for (i=0; i<currentNode.data.length; i++) {
+                    for (i=0; i<currentNode.data.length; i+=1) {
                         c = currentNode.data[i];
                         if (alphaNumeric.test(c)) {
                             stepsToEnd += 1;
@@ -238,41 +237,6 @@ gui.SessionController = (function () {
                 op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, position: oldPosition+stepsToStart, length: Math.abs(stepsToStart) + Math.abs(stepsToEnd)});
                 session.enqueue(op);
-            }
-        }
-
-        function resetClick () {
-            clickCount = 0;
-            clickPosition = null;
-        }
-
-        /**
-         * @param {!Event} e
-         */
-        function handleMouseUp(e) {
-            var window = runtime.getWindow();
-
-            if (clickPosition && clickPosition.x === e.screenX && clickPosition.y === e.screenY) {
-                clickCount++;
-
-                if (clickCount === 1) {
-                    moveCursor();
-                }
-                else if (clickCount === 2) { // double click
-                    selectWord();
-                }
-                else if (clickCount === 3) { // triple click
-                    window.clearTimeout(clickTimer);
-                    selectParagraph();
-                    resetClick();
-                }
-            } else {
-                moveCursor();
-
-                clickCount = 1;
-                clickPosition = {x: e.screenX, y: e.screenY};
-                window.clearTimeout(clickTimer);
-                clickTimer = window.setTimeout(resetClick, 400);
             }
         }
 
@@ -839,7 +803,7 @@ gui.SessionController = (function () {
             // results in the beforecut return value being ignored which prevents cut from being called.
             listenEvent(canvasElement, "beforecut", handleBeforeCut, true);
             listenEvent(canvasElement, "paste", handlePaste);
-            listenEvent(canvasElement, "mouseup", handleMouseUp);
+            listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
@@ -865,7 +829,7 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "cut", handleCut);
             removeEvent(canvasElement, "beforecut", handleBeforeCut);
             removeEvent(canvasElement, "paste", handlePaste);
-            removeEvent(canvasElement, "mouseup", handleMouseUp);
+            removeEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
 
             op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
@@ -885,6 +849,14 @@ gui.SessionController = (function () {
         this.getSession = function () {
             return session;
         };
+
+        function init() {
+            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, moveCursor);
+            clickHandler.subscribe(gui.ClickHandler.signalDoubleClick, selectWord);
+            clickHandler.subscribe(gui.ClickHandler.signalTripleClick, selectParagraph);
+        }
+
+        init();
     };
 
     return gui.SessionController;
