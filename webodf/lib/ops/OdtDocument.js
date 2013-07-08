@@ -61,7 +61,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalStyleCreated,
             ops.OdtDocument.signalStyleDeleted,
             ops.OdtDocument.signalTableAdded,
-            ops.OdtDocument.signalOperationExecuted]);
+            ops.OdtDocument.signalOperationExecuted,
+            ops.OdtDocument.signalUndoStackChanged]);
 
     function getRootNode() {
         var element = odfCanvas.odfContainer().getContentElement(),
@@ -758,6 +759,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalStyleDeleted = "style/deleted";
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
 /**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
+/**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";
 
 (function () {
     "use strict";

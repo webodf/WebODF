@@ -813,6 +813,10 @@ gui.SessionController = (function () {
             }
         }
 
+        function forwardUndoStackChange(e) {
+            session.getOdtDocument().emit(ops.OdtDocument.signalUndoStackChanged, e);
+        }
+
        /**
         */
         this.startEditing = function () {
@@ -892,12 +896,17 @@ gui.SessionController = (function () {
          * @param {gui.UndoManager} manager
          */
         this.setUndoManager = function(manager) {
+            if (undoManager) {
+                undoManager.unsubscribe(gui.UndoManager.signalUndoStackChanged, forwardUndoStackChange);
+            }
+
             undoManager = manager;
             if (undoManager) {
                 undoManager.setOdtDocument(session.getOdtDocument());
                 undoManager.setPlaybackFunction(function (op) {
                     op.execute(session.getOdtDocument());
                 });
+                undoManager.subscribe(gui.UndoManager.signalUndoStackChanged, forwardUndoStackChange);
             }
         };
 

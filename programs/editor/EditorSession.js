@@ -224,19 +224,11 @@ define("webodf/editor/EditorSession", [
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, trackCurrentParagraph);
 
         this.startEditing = function () {
-            var undoManager = self.sessionController.getUndoManager();
-            if (undoManager) {
-                undoManager.subscribe(gui.UndoManager.signalUndoStackChanged, undoStackModified);
-            }
             self.sessionController.startEditing();
         };
 
         this.endEditing = function () {
-            var undoManager = self.sessionController.getUndoManager();
             self.sessionController.endEditing();
-            if (undoManager) {
-                undoManager.unsubscribe(gui.UndoManager.signalUndoStackChanged, undoStackModified);
-            }
         };
 
         /**
@@ -454,14 +446,8 @@ define("webodf/editor/EditorSession", [
             return array;
         };
 
-        function undoStackModified() {
-            var undoManager = self.sessionController.getUndoManager();
-            if (undoManager) {
-                self.emit(EditorSession.signalUndoStackChanged, {
-                    undoAvailable: undoManager.hasUndoStates(),
-                    redoAvailable: undoManager.hasRedoStates()
-                });
-            }
+        function undoStackModified(e) {
+            self.emit(EditorSession.signalUndoStackChanged, e);
         }
 
         this.hasUndoManager = function() {
@@ -487,6 +473,7 @@ define("webodf/editor/EditorSession", [
             fontStyles.media = 'screen, print, handheld, projection';
             fontStyles.appendChild(document.createTextNode(fontsCSS));
             head.appendChild(fontStyles);
+            odtDocument.subscribe(ops.OdtDocument.signalUndoStackChanged, undoStackModified);
         }
 
         init();
