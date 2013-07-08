@@ -506,50 +506,40 @@ odf.OdfContainer = (function () {
             }
         }
         /**
-         * @param {!string} filepath
-         * @param {!function(?string,?Document)} callback
+         * @param {!Array} remainingComponents
          * @return {undefined}
          */
-        function getXmlNode(filepath, callback) {
-            zip.loadAsDOM(filepath, callback);
+        function loadNextComponent(remainingComponents) {
+            var component = remainingComponents.shift(),
+                filepath,
+                callback;
+
+            if (component) {
+                filepath = /**@type {!string}*/(component[0]);
+                callback = /**@type {!function(?Document)}*/(component[1]);
+                zip.loadAsDOM(filepath, function(err, xmldoc) {
+                    callback(xmldoc);
+                    if (self.state === OdfContainer.INVALID) {
+                        return;
+                    }
+                    loadNextComponent(remainingComponents);
+                });
+            } else {
+                setState(OdfContainer.DONE);
+            }
         }
         /**
          * @return {undefined}
          */
         function loadComponents() {
-            // always load content.xml, meta.xml, styles.xml and settings.xml
-            getXmlNode('styles.xml', function (err, xmldoc) {
-                handleStylesXml(xmldoc);
-                if (self.state === OdfContainer.INVALID) {
-                    return;
-                }
-                getXmlNode('content.xml', function (err, xmldoc) {
-                    handleContentXml(xmldoc);
-                    if (self.state === OdfContainer.INVALID) {
-                        return;
-                    }
-                    getXmlNode('meta.xml', function (err, xmldoc) {
-                        handleMetaXml(xmldoc);
-                        if (self.state === OdfContainer.INVALID) {
-                            return;
-                        }
-                        getXmlNode('settings.xml', function (err, xmldoc) {
-                            if (xmldoc) {
-                                handleSettingsXml(xmldoc);
-                            }
-                            getXmlNode('META-INF/manifest.xml', function (err,
-                                    xmldoc) {
-                                if (xmldoc) {
-                                    handleManifestXml(xmldoc);
-                                }
-                                if (self.state !== OdfContainer.INVALID) {
-                                    setState(OdfContainer.DONE);
-                                }
-                            });
-                        });
-                    });
-                });
-            });
+            var componentOrder = [
+                ['styles.xml', handleStylesXml],
+                ['content.xml', handleContentXml],
+                ['meta.xml', handleMetaXml],
+                ['settings.xml', handleSettingsXml],
+                ['META-INF/manifest.xml', handleManifestXml]
+            ];
+            loadNextComponent(componentOrder);
         }
         function createDocumentElement(name) {
             var s = "", i;
