@@ -265,39 +265,37 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {!number} lines
          * @return {?ops.Operation}
          */
-        function createOpMoveCursorByUpKey() {
+        function extendSelectionByLines(lines) {
             var odtDocument = session.getOdtDocument(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                steps,
-                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
-                paragraphNode = odtDocument.getParagraphElement(cursorNode),
-                op = null;
+                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                selection, steps, op = null;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = -odtDocument.getCursor(inputMemberId).getStepCounter().countLinesUpSteps(1, odtDocument.getPositionFilter());
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lines, odtDocument.getPositionFilter());
             if (steps !== 0) {
+                selection = session.getOdtDocument().getCursorSelection(inputMemberId);
                 op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+steps});
+                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
             }
             return op;
         }
 
         /**
+         * @param {!number} lines
          * @return {?ops.Operation}
          */
-        function createOpMoveCursorByDownKey() {
+        function createOpMoveCursorByLines(lines) {
             var odtDocument = session.getOdtDocument(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                steps,
-                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
-                paragraphNode = odtDocument.getParagraphElement(cursorNode),
-                op = null;
+                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                oldPosition, steps, op = null;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesDownSteps(1, odtDocument.getPositionFilter());
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lines, odtDocument.getPositionFilter());
             if (steps !== 0) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
                 op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
@@ -627,8 +625,10 @@ gui.SessionController = (function () {
                     op = extendSelectionToParagraphStart();
                 } else if (e.metaKey && e.shiftKey) {
                     op = extendSelectionToDocumentStart();
+                } else if (e.shiftKey) {
+                    op = extendSelectionByLines(-1);
                 } else {
-                    op = createOpMoveCursorByUpKey();
+                    op = createOpMoveCursorByLines(-1);
                 }
                 handled = true;
             } else if (keyCode === 40) { // down
@@ -636,8 +636,10 @@ gui.SessionController = (function () {
                     op = extendSelectionToParagraphEnd();
                 } else if (e.metaKey && e.shiftKey) {
                     op = extendSelectionToDocumentEnd();
+                } else if (e.shiftKey) {
+                    op = extendSelectionByLines(1);
                 } else {
-                    op = createOpMoveCursorByDownKey();
+                    op = createOpMoveCursorByLines(1);
                 }
                 handled = true;
             } else if (keyCode === 36) { // home

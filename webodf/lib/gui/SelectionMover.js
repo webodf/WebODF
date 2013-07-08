@@ -319,46 +319,28 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         return count;
     }
     /**
-     * @param {!number} lines
+     * @param {!number} lines negative number for upwards, positive number for downwards
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countLinesUpSteps(lines, filter) {
+    function countLinesSteps(lines, filter) {
         var iterator = getIteratorAtCursor(),
             stepCount = 0,
-            count = 0;
+            count = 0,
+            direction =  lines < 0 ? -1 : 1;
+
+        lines = Math.abs(lines);
         // move back in the document, until a position is found for which the
         // top is smaller than initially and the left is closest
         while (lines > 0) {
-            stepCount += countLineSteps(filter, /*upwards*/-1, iterator);
+            stepCount += countLineSteps(filter, direction, iterator);
             if (stepCount === 0) {
                 break;
             }
             count += stepCount;
             lines -= 1;
         }
-        return count;
-    }
-    /**
-     * @param {!number} lines
-     * @param {!core.PositionFilter} filter
-     * @return {!number}
-     */
-    function countLinesDownSteps(lines, filter) {
-        var iterator = getIteratorAtCursor(),
-            stepCount = 0,
-            count = 0;
-        // move back in the document, until a position is found for which the
-        // top is smaller than initially and the left is closest
-        while (lines > 0) {
-            stepCount += countLineSteps(filter, /*downwards*/1, iterator);
-            if (stepCount === 0) {
-                break;
-            }
-            count += stepCount;
-            lines -= 1;
-        }
-        return count;
+        return count * direction;
     }
 
     /**
@@ -468,8 +450,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         return {
             countForwardSteps: countForwardSteps,
             countBackwardSteps: countBackwardSteps,
-            countLinesDownSteps: countLinesDownSteps,
-            countLinesUpSteps: countLinesUpSteps,
+            countLinesSteps: countLinesSteps,
             countStepsToPosition: countStepsToPosition,
             isPositionWalkable: isPositionWalkable
         };
