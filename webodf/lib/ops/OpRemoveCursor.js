@@ -54,7 +54,6 @@ ops.OpRemoveCursor = function OpRemoveCursor() {
             return false;
         }
 
-        odtDocument.emit(ops.OdtDocument.signalCursorRemoved, memberid);
         return true;
     };
 

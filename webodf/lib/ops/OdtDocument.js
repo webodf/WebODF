@@ -65,16 +65,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalOperationExecuted]);
 
     /**
-     * Determine if the node is a text:p or a text:h element.
-     * @param {?Node} e
-     * @return {!boolean}
-     */
-    function isParagraph(e) {
-        var name = e && e.localName;
-        return (name === "p" || name === "h") && e.namespaceURI === textns;
-    }
-
-    /**
      * @constructor
      * @implements {core.PositionFilter}
      */
@@ -108,7 +98,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
             // accept if this is the first position in p or h and there is no
             // character in the p or h
-            firstPos = leftNode === null && isParagraph(container);
+            firstPos = leftNode === null && odfUtils.isParagraph(container);
             rightOfChar = odfUtils.lookRightForCharacter(rightNode);
             if (firstPos) {
                 if (rightOfChar) {
@@ -207,21 +197,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
             return r;
         };
-    }
-    /**
-     * @param {!odf.OdfContainer} odfcontainer
-     */
-    function findTextRoot(odfcontainer) {
-        // set the root node to be the text node
-        var root = odfcontainer.rootElement.firstChild;
-        while (root && root.localName !== "body") {
-            root = root.nextSibling;
-        }
-        root = root && root.firstChild;
-        while (root && root.localName !== "text") {
-            root = root.nextSibling;
-        }
-        return root;
     }
 
     /**
@@ -427,7 +402,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?Node}
      */
     function getParagraphElement(node) {
-        while (node && !isParagraph(node)) {
+        while (node && !odfUtils.isParagraph(node)) {
             node = node.parentNode;
         }
         return node;
@@ -696,11 +671,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!boolean}
      */
     this.removeCursor = function (memberid) {
-        var cursor = cursors[memberid],
-            cursorNode;
+        var cursor = cursors[memberid];
         if (cursor) {
             cursor.removeFromOdtDocument();
             delete cursors[memberid];
+            self.emit(ops.OdtDocument.signalCursorRemoved, memberid);
             return true;
         }
         return false;
@@ -765,7 +740,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     function init() {
         filter = new TextPositionFilter();
-        rootNode = findTextRoot(odfCanvas.odfContainer());
+        rootNode = odfCanvas.odfContainer().getContentElement();
         odfUtils = new odf.OdfUtils();
     }
     init();
