@@ -208,8 +208,7 @@ define("webodf/editor/Editor", [
              */
             self.loadDocument = function (docUrl, editorReadyCallback) {
                 initGuiAndDoc(docUrl, function() {
-                    editorSession.startEditing();
-                    editorReadyCallback();
+                    editorReadyCallback(editorSession);
                 });
             };
 
@@ -243,9 +242,7 @@ define("webodf/editor/Editor", [
                             });
                         }
 
-                        // start editing: let the controller send the OpAddCursor
-                        editorSession.startEditing();
-                        editorReadyCallback();
+                        editorReadyCallback(editorSession);
                     });
 
                 });

@@ -310,6 +310,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/CaretFactory.js
     lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
+    lib/gui/UndoManager.js
+    lib/gui/TrivialUndoManager.js
 
     lib/ops/OdtDocument.js
     lib/ops/Session.js

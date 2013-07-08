@@ -132,7 +132,9 @@ var webodfEditor = (function () {
         require({ }, ["webodf/editor/Editor"],
             function (Editor) {
                 editorInstance = new Editor(editorOptions);
-                editorInstance.loadDocument(docUrl, function () {
+                editorInstance.loadDocument(docUrl, function (editorSession) {
+                    editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                    editorSession.startEditing();
                     editorReadyCallback(editorInstance);
                 });
             }
@@ -166,7 +168,8 @@ var webodfEditor = (function () {
                 editorInstance = new Editor(editorOptions);
 
                 // load the document and get called back when it's live
-                editorInstance.loadSession(sessionId, function () {
+                editorInstance.loadSession(sessionId, function (editorSession) {
+                    editorSession.startEditing();
                     editorReadyCallback(editorInstance);
                 });
             }

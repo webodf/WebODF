@@ -61,6 +61,8 @@
         "gui/SessionView.js",
         "gui/SelectionMover.js",
         "gui/XMLEdit.js",
+        "gui/UndoManager.js",
+        "gui/TrivialUndoManager.js",
         "odf/CommandLineTools.js",
         "odf/FontLoader.js",
         "odf/TextStyleApplicator.js",

@@ -34,10 +34,11 @@
 /*global define,document,require */
 define("webodf/editor/widgets", [
     "webodf/editor/widgets/simpleStyles",
+    "webodf/editor/widgets/undoRedoMenu",
     "webodf/editor/widgets/toolbarWidgets/currentStyle",
     "webodf/editor/widgets/paragraphStylesDialog",
     "webodf/editor/widgets/zoomSlider"],
-    function (SimpleStyles, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
+    function (SimpleStyles, UndoRedoMenu, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
         return function loadWidgets(editorSession, saveOdtFile) {
@@ -53,7 +54,8 @@ define("webodf/editor/widgets", [
                 "dijit/Toolbar"
             ], function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar) {
                 ready(function () {
-                    var saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider;
+                    var saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider,
+                        undoRedoMenu;
 
                     dropDownMenu = new DropDownMenu({});
                     paragraphStylesMenuItem = new MenuItem({
@@ -70,6 +72,13 @@ define("webodf/editor/widgets", [
 
                     // Toolbar
                     toolbar = new Toolbar({}, "toolbar");
+
+                    if (editorSession.hasUndoManager()) {
+                        undoRedoMenu = new UndoRedoMenu(editorSession, function (widget) {
+                            widget.placeAt(toolbar);
+                            widget.startup();
+                        });
+                    }
 
                     // Simple Style Selector [B, I, U, S]
                     simpleStyles = new SimpleStyles(editorSession, function (widget) {

@@ -63,7 +63,8 @@ gui.SessionController = (function () {
             odfUtils = new odf.OdfUtils(),
             isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
             clipboard = new gui.Clipboard(),
-            clickHandler = new gui.ClickHandler();
+            clickHandler = new gui.ClickHandler(),
+            undoManager;
 
         /**
          * @param {!Element} eventTarget
@@ -602,6 +603,16 @@ gui.SessionController = (function () {
             }
             */
         }
+        // TODO: This method and associated event subscriptions really belong in SessionView
+        // As this implementation relies on the current browser selection, only a single
+        // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
+        // implemented, this limitation will be eliminated
+        function maintainCursorSelection() {
+            var cursor = session.getOdtDocument().getCursor(inputMemberId),
+                selection = runtime.getWindow().getSelection();
+            selection.removeAllRanges();
+            selection.addRange(cursor.getSelectedRange().cloneRange());
+        }
         /**
          * @param {!Event} e
          */
@@ -666,6 +677,16 @@ gui.SessionController = (function () {
             } else if (keyCode === 46) { // Delete
                 op = createOpRemoveTextByDeleteKey();
                 handled = (op !== null);
+            } else if (undoManager && keyCode === 90) { // z
+                if ((!isMacOS && e.ctrlKey) || (isMacOS && e.metaKey)) {
+                    if (e.shiftKey) {
+                        undoManager.moveForward(1);
+                    } else {
+                        undoManager.moveBackward(1);
+                    }
+                    maintainCursorSelection();
+                    handled = true;
+                }
             }
             if (op) {
                 session.enqueue(op);
@@ -786,15 +807,10 @@ gui.SessionController = (function () {
             return false;
         }
 
-        // TODO: This method and associated event subscriptions really belong in SessionView
-        // As this implementation relies on the current browser selection, only a single
-        // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
-        // implemented, this limitation will be eliminated
-        function maintainCursorSelection() {
-            var cursor = session.getOdtDocument().getCursor(inputMemberId),
-                selection = runtime.getWindow().getSelection();
-            selection.removeAllRanges();
-            selection.addRange(cursor.getSelectedRange().cloneRange());
+        function updateUndoStack(op) {
+            if (undoManager) {
+                undoManager.onOperationExecuted(op);
+            }
         }
 
        /**
@@ -818,10 +834,16 @@ gui.SessionController = (function () {
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
 
             op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
             session.enqueue(op);
+
+            if (undoManager) {
+                // For most undo managers, the initial state is a clean document *with* a cursor present
+                undoManager.saveInitialState();
+            }
         };
 
         /**
@@ -830,6 +852,7 @@ gui.SessionController = (function () {
             var canvasElement, op,
                 odtDocument = session.getOdtDocument();
 
+            odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
 
             canvasElement = odtDocument.getOdfCanvas().getElement();
@@ -845,6 +868,10 @@ gui.SessionController = (function () {
             op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
             session.enqueue(op);
+
+            if (undoManager) {
+                undoManager.resetInitialState();
+            }
         };
 
         /**
@@ -859,6 +886,26 @@ gui.SessionController = (function () {
          */
         this.getSession = function () {
             return session;
+        };
+
+        /**
+         * @param {gui.UndoManager} manager
+         */
+        this.setUndoManager = function(manager) {
+            undoManager = manager;
+            if (undoManager) {
+                undoManager.setOdtDocument(session.getOdtDocument());
+                undoManager.setPlaybackFunction(function (op) {
+                    op.execute(session.getOdtDocument());
+                });
+            }
+        };
+
+        /**
+         * @returns {gui.UndoManager}
+         */
+        this.getUndoManager = function() {
+            return undoManager;
         };
 
         function init() {

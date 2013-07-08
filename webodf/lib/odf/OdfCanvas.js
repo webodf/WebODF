@@ -1133,9 +1133,10 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         }
         /**
+         * @param {boolean} suppressEvent Suppress the statereadychange event from firing. Used for refreshing the OdtContainer
          * @return {undefined}
          **/
-        function refreshOdf() {
+        function refreshOdf(suppressEvent) {
 
             // synchronize the object a window.odfcontainer with the view
             function callback() {
@@ -1150,7 +1151,10 @@ odf.OdfCanvas = (function () {
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(odfcontainer, odfnode);
-                fireEvent("statereadychange", [odfcontainer]);
+
+                if (!suppressEvent) {
+                    fireEvent("statereadychange", [odfcontainer]);
+                }
             }
 
             if (odfcontainer.state === odf.OdfContainer.DONE) {
@@ -1202,10 +1206,11 @@ odf.OdfCanvas = (function () {
         /**
          * Set a odfcontainer manually.
          * @param {!odf.OdfContainer} container
+         * @param {boolean=} suppressEvent Default value is false
          */
-        this.setOdfContainer = function (container) {
+        this.setOdfContainer = function (container, suppressEvent) {
             odfcontainer = container;
-            refreshOdf();
+            refreshOdf(suppressEvent === true);
         };
         /**
          * @param {!string} url
@@ -1220,7 +1225,7 @@ odf.OdfCanvas = (function () {
                 // assignment might be necessary if the callback
                 // fires before the assignment above happens.
                 odfcontainer = container;
-                refreshOdf();
+                refreshOdf(false);
             });
         };
 

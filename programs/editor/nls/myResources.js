@@ -68,6 +68,8 @@ define({
         spacing: "Spacing",
         options: "Options",
         style: "Style",
+        undo: "Undo",
+        redo: "Redo",
         bold: "Bold",
         italic: "Italic",
         underline: "Underline",

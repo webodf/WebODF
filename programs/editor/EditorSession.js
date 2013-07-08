@@ -42,6 +42,7 @@ define("webodf/editor/EditorSession", [
         return [ "../../webodf/lib" ];
     };
 
+    runtime.loadClass("ops.OdtDocument");
     runtime.loadClass("ops.Session");
     runtime.loadClass("ops.NowjsOperationRouter");
     runtime.loadClass("ops.NowjsUserModel");
@@ -50,6 +51,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.Caret");
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
+    runtime.loadClass("gui.TrivialUndoManager");
     runtime.loadClass("core.EventNotifier");
 
     /**
@@ -74,7 +76,8 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalParagraphChanged,
                 EditorSession.signalStyleCreated,
                 EditorSession.signalStyleDeleted,
-                EditorSession.signalParagraphStyleModified]);
+                EditorSession.signalParagraphStyleModified,
+                EditorSession.signalUndoStackChanged]);
 
 
         this.sessionController = new gui.SessionController(session, memberid);
@@ -221,11 +224,19 @@ define("webodf/editor/EditorSession", [
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, trackCurrentParagraph);
 
         this.startEditing = function () {
+            var undoManager = self.sessionController.getUndoManager();
+            if (undoManager) {
+                undoManager.subscribe(gui.UndoManager.signalUndoStackChanged, undoStackModified);
+            }
             self.sessionController.startEditing();
         };
 
         this.endEditing = function () {
+            var undoManager = self.sessionController.getUndoManager();
             self.sessionController.endEditing();
+            if (undoManager) {
+                undoManager.unsubscribe(gui.UndoManager.signalUndoStackChanged, undoStackModified);
+            }
         };
 
         /**
@@ -443,6 +454,30 @@ define("webodf/editor/EditorSession", [
             return array;
         };
 
+        function undoStackModified() {
+            var undoManager = self.sessionController.getUndoManager();
+            if (undoManager) {
+                self.emit(EditorSession.signalUndoStackChanged, {
+                    undoAvailable: undoManager.hasUndoStates(),
+                    redoAvailable: undoManager.hasRedoStates()
+                });
+            }
+        }
+
+        this.hasUndoManager = function() {
+            return Boolean(self.sessionController.getUndoManager());
+        };
+
+        this.undo = function() {
+            var undoManager = self.sessionController.getUndoManager();
+            undoManager.moveBackward(1);
+        };
+
+        this.redo = function() {
+            var undoManager = self.sessionController.getUndoManager();
+            undoManager.moveForward(1);
+        };
+
         this.subscribe(EditorSession.signalCursorMoved, trackCursor);
 
         function init() {
@@ -464,6 +499,7 @@ define("webodf/editor/EditorSession", [
     /**@const*/EditorSession.signalStyleCreated =           "styleCreated";
     /**@const*/EditorSession.signalStyleDeleted =           "styleDeleted";
     /**@const*/EditorSession.signalParagraphStyleModified = "paragraphStyleModified";
+    /**@const*/EditorSession.signalUndoStackChanged =      "signalUndoStackChanged";
 
     return EditorSession;
 });
