@@ -53,6 +53,14 @@ office|text {
   overflow: visible;
   word-wrap: break-word;
 }
+
+office|text::selection {
+    /** Let's not draw selection highlight that overflows into the office|text
+     * node when selecting content across several paragraphs
+     */
+    background: transparent;
+}
+
 office|spreadsheet {
   display: block;
   border-collapse: collapse;
