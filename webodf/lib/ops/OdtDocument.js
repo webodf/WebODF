@@ -49,7 +49,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     var self = this,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        rootNode,
         filter,
         odfUtils,
         /**Array.<!ops.OdtCursor>*/cursors = {},
@@ -63,6 +62,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalStyleDeleted,
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted]);
+
+    function getRootNode() {
+        var element = odfCanvas.odfContainer().getContentElement(),
+            localName = element && element.localName;
+        runtime.assert(localName === "text", "Unsupported content element type '" + localName + "'for OdtDocument");
+        return element;
+    }
 
     /**
      * @constructor
@@ -206,7 +212,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!core.PositionIterator}
      */
     function getIteratorAtPosition(position) {
-        var iterator = gui.SelectionMover.createPositionIterator(rootNode);
+        var iterator = gui.SelectionMover.createPositionIterator(getRootNode());
 
         position += 1;
 
@@ -299,7 +305,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?{textNode: !Text, offset: !number}}
      */
     function getPositionInTextNode(position, memberid) {
-        var iterator = gui.SelectionMover.createPositionIterator(rootNode),
+        var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
             lastTextNode = null,
             lastNode = null,
             node,
@@ -307,7 +313,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             cursorNode = null;
 
         runtime.assert(position >= 0, "position must be >= 0");
-        // iterator should be at the start of rootNode
+        // iterator should be at the start of getRootNode()
         if (filter.acceptPosition(iterator) === 1) {
             node = iterator.container();
             if (node.nodeType === Node.TEXT_NODE) {
@@ -340,7 +346,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     }
                     lastTextNode = null;
                 } else if (position === 0) {
-                    lastTextNode = rootNode.ownerDocument.createTextNode('');
+                    lastTextNode = getRootNode().ownerDocument.createTextNode('');
                     node.insertBefore(lastTextNode, iterator.rightNode());
                     nodeOffset = 0;
                     break;
@@ -363,7 +369,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // all the previous text, to prevent insertion by one cursor causing movement of the other
             // cursors at the same position.
             if (cursorNode && lastTextNode.length > 0) {
-                lastTextNode = rootNode.ownerDocument.createTextNode('');
+                lastTextNode = getRootNode().ownerDocument.createTextNode('');
                 nodeOffset = 0;
                 cursorNode.parentNode.insertBefore(lastTextNode, cursorNode.nextSibling);
             }
@@ -375,7 +381,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 lastTextNode.previousSibling.localName === "cursor") {
             node = lastTextNode.previousSibling;
             if (lastTextNode.length > 0) {
-                lastTextNode = rootNode.ownerDocument.createTextNode('');
+                lastTextNode = getRootNode().ownerDocument.createTextNode('');
             }
             node.parentNode.insertBefore(lastTextNode, node);
 
@@ -574,7 +580,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!number}
      */
     this.getCursorPosition = function (memberid) {
-        return -self.getDistanceFromCursor(memberid, rootNode, 0);
+        return -self.getDistanceFromCursor(memberid, getRootNode(), 0);
     };
 
     /**
@@ -594,7 +600,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             stepsToAnchor = 0;
         if (cursor) {
             counter = cursor.getStepCounter().countStepsToPosition;
-            focusPosition = -counter(rootNode, 0, filter);
+            focusPosition = -counter(getRootNode(), 0, filter);
             stepsToAnchor = counter(cursor.getAnchorNode(), 0, filter);
         }
         return {
@@ -619,15 +625,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * @return {!Node}
      */
-    this.getRootNode = function () {
-        return rootNode;
-    };
+    this.getRootNode = getRootNode;
 
     /**
      * @return {!Document}
      */
     this.getDOM = function () {
-        return rootNode.ownerDocument;
+        return getRootNode().ownerDocument;
     };
 
     /**
@@ -740,7 +744,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     function init() {
         filter = new TextPositionFilter();
-        rootNode = odfCanvas.odfContainer().getContentElement();
         odfUtils = new odf.OdfUtils();
     }
     init();

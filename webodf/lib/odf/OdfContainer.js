@@ -249,7 +249,8 @@ odf.OdfContainer = (function () {
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
             zip,
-            partMimetypes = {};
+            partMimetypes = {},
+            contentElement;
 
         // NOTE each instance of OdfContainer has a copy of the private functions
         // it would be better to have a class OdfContainerPrivate where the
@@ -356,6 +357,16 @@ odf.OdfContainer = (function () {
                 self.onstatereadychange(self);
             }
         }
+        function setRootElement(root) {
+            contentElement = null;
+            self.rootElement = root;
+            root.fontFaceDecls = getDirectChild(root, officens, 'font-face-decls');
+            root.styles = getDirectChild(root, officens, 'styles');
+            root.automaticStyles = getDirectChild(root, officens, 'automatic-styles');
+            root.masterStyles = getDirectChild(root, officens, 'master-styles');
+            root.body = getDirectChild(root, officens, 'body');
+            root.meta = getDirectChild(root, officens, 'meta');
+        }
         /**
          * @param {Document} xmldoc
          * @return {undefined}
@@ -367,14 +378,7 @@ odf.OdfContainer = (function () {
                 setState(OdfContainer.INVALID);
                 return;
             }
-            self.rootElement = root;
-            root.fontFaceDecls = getDirectChild(root, officens, 'font-face-decls');
-            root.styles = getDirectChild(root, officens, 'styles');
-            root.automaticStyles = getDirectChild(root, officens, 'automatic-styles');
-            root.masterStyles = getDirectChild(root, officens, 'master-styles');
-            root.body = getDirectChild(root, officens, 'body');
-            root.meta = getDirectChild(root, officens, 'meta');
-
+            setRootElement(root);
             setState(OdfContainer.DONE);
         }
         /**
@@ -674,12 +678,17 @@ odf.OdfContainer = (function () {
             });
         }
         // public functions
+        this.setRootElement = setRootElement;
 
         this.getContentElement = function () {
-            var body = self.rootElement.body;
-            return body.getElementsByTagNameNS(officens, 'text')[0] ||
+            var body;
+            if (!contentElement) {
+                body = self.rootElement.body;
+                contentElement = body.getElementsByTagNameNS(officens, 'text')[0] ||
                     body.getElementsByTagNameNS(officens, 'presentation')[0] ||
                     body.getElementsByTagNameNS(officens, 'spreadsheet')[0];
+            }
+            return contentElement;
         };
 
         /**
