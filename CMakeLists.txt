@@ -402,6 +402,6 @@ add_custom_command(
         firefoxextension-target
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
-add_custom_target(zip ALL DEPENDS ${WEBODFZIP})
+add_custom_target(zip DEPENDS ${WEBODFZIP})
 
 # vim:expandtab

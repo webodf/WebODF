@@ -70,4 +70,4 @@ add_custom_command(
 	DEPENDS NodeJS ${EDITORDEPS} ${EDITORDEPS_webodf} Dojo webodf.js-target
 )
 
-add_custom_target(editor-compiled.js-target ALL DEPENDS dojo-amalgamation.js)
+add_custom_target(editor-compiled.js-target DEPENDS dojo-amalgamation.js)
