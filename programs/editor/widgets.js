@@ -41,7 +41,7 @@ define("webodf/editor/widgets", [
     function (SimpleStyles, UndoRedoMenu, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
-        return function loadWidgets(editorSession, saveOdtFile) {
+        return function loadWidgets(editorSession, loadOdtFile, saveOdtFile) {
             var translator = document.translator;
 
             // Menubar
@@ -54,7 +54,7 @@ define("webodf/editor/widgets", [
                 "dijit/Toolbar"
             ], function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar) {
                 ready(function () {
-                    var saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider,
+                    var loadButton, saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider,
                         undoRedoMenu;
 
                     dropDownMenu = new DropDownMenu({});
@@ -98,6 +98,35 @@ define("webodf/editor/widgets", [
                         widget.startup();
                     });
 
+                    if (loadOdtFile) {
+                        loadButton = new Button({
+                            label: translator('open'),
+                            showLabel: false,
+                            iconClass: 'dijitIcon dijitIconFolderOpen',
+                            style: {
+                                float: 'left'
+                            },
+                            onClick: function () {
+                                loadOdtFile();
+                            }
+                        });
+                        loadButton.placeAt(toolbar);
+                    }
+                    if (saveOdtFile) {
+                        saveButton = new Button({
+                            label: translator('save'),
+                            showLabel: false,
+                            iconClass: 'dijitEditorIcon dijitEditorIconSave',
+                            style: {
+                                float: 'left'
+                            },
+                            onClick: function () {
+                                saveOdtFile();
+                            }
+                        });
+                        saveButton.placeAt(toolbar);
+                    }
+
                     menuButton = new DropDownButton({
                         dropDown: dropDownMenu,
                         label: translator('format'),
@@ -107,21 +136,8 @@ define("webodf/editor/widgets", [
                         }
                     });
                     menuButton.placeAt(toolbar);
-
-                    if (saveOdtFile) {
-                        saveButton = new Button({
-                            label: translator('save'),
-                            iconClass: 'dijitEditorIcon dijitEditorIconSave',
-                            style: "float: right; margin-bottom: 5px;",
-                            onClick: function () {
-                                saveOdtFile();
-                            }
-                        });
-                        saveButton.placeAt(toolbar);
-                    }
                 });
             });
         };
 
-    }
-);
+    });

@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime,define,document,odf,ops */
+/*global runtime, define, document, odf, ops, window, gui, alert, saveAs, Blob */
 
 define("webodf/editor/Editor", [
     "dojo/i18n!webodf/editor/nls/myResources",
@@ -53,6 +53,7 @@ define("webodf/editor/Editor", [
          * @constructor
          * @param {{networked:boolean=,
          *          memberid:string=,
+         *          loadCallback:function()=,
          *          saveCallback:function()=,
          *          cursorAddedCallback:function(!string)=,
          *          cursorRemovedCallback:function(!string)=,
@@ -61,20 +62,22 @@ define("webodf/editor/Editor", [
         function Editor(args) {
 
             var self = this,
-            // Private
-            userid,
-            memberid = args.memberid,
-            session,
-            editorSession,
-            userList,
-            networked = args.networked === true,
-            opRouter,
-            userModel,
-            saveOdtFile = args.saveCallback,
-            cursorAddedHandler = args.cursorAddedCallback,
-            cursorRemovedHandler = args.cursorRemovedCallback,
-            registerCallbackForShutdown = args.registerCallbackForShutdown,
-            documentUrl;
+                // Private
+                userid,
+                memberid = args.memberid,
+                session,
+                editorSession,
+                userList,
+                networked = args.networked === true,
+                opRouter,
+                userModel,
+                loadOdtFile = args.loadCallback,
+                saveOdtFile = args.saveCallback,
+                cursorAddedHandler = args.cursorAddedCallback,
+                cursorRemovedHandler = args.cursorRemovedCallback,
+                registerCallbackForShutdown = args.registerCallbackForShutdown,
+                documentUrl,
+                odfCanvas;
 
             function translator(key, context) {
                 if (undefined === myResources[key]) {
@@ -100,10 +103,13 @@ define("webodf/editor/Editor", [
              * @param {!function()} editorReadyCallback
              */
             function initGuiAndDoc(initialDocumentUrl, editorReadyCallback) {
-                var odfElement, odfCanvas, mainContainer,
+                var odfElement, mainContainer,
                     editorPane, peoplePane,
                     inviteButton,
-                    viewOptions = {editInfoMarkersInitiallyVisible:networked, caretAvatarsInitiallyVisible:networked},
+                    viewOptions = {
+                        editInfoMarkersInitiallyVisible: networked,
+                        caretAvatarsInitiallyVisible: networked
+                    },
                     peopleListDiv = document.getElementById('peopleList');
 
                 if (networked) {
@@ -128,33 +134,41 @@ define("webodf/editor/Editor", [
 
                 function translateContent(node) {
                     var i,
-                    element,
-                    tag,
-                    placeholder,
-                    translatable = node.querySelectorAll("*[text-i18n]");
+                        element,
+                        tag,
+                        placeholder,
+                        translatable = node.querySelectorAll("*[text-i18n]");
 
                     for (i = 0; i < translatable.length; i += 1) {
                         element = translatable[i];
                         tag = element.localName;
                         placeholder = element.getAttribute('text-i18n');
                         if (tag === "label"
-                            || tag === "span"
-                            || /h\d/i.test(tag)) {
-                                element.textContent = document.translator(placeholder);
-                            }
+                                || tag === "span"
+                                || /h\d/i.test(tag)) {
+                            element.textContent = document.translator(placeholder);
+                        }
                     }
                 }
                 document.translateContent = translateContent;
 
                 odfCanvas.addListener("statereadychange", function () {
+                    if (!editorReadyCallback) {
+                        // already called once, restart session and return
+                        editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                        editorSession.startEditing();
+                        return;
+                    }
 
                     if (!memberid) {
                         // legacy - memberid should be passed in the constructor
-                        memberid = (userid||'undefined') + "___" + Date.now();
+                        memberid = (userid || 'undefined') + "___" + Date.now();
                     }
 
                     session = new ops.Session(odfCanvas);
-                    editorSession = new EditorSession(session, memberid, {viewOptions:viewOptions});
+                    editorSession = new EditorSession(session, memberid, {
+                        viewOptions: viewOptions
+                    });
 
                     if (peopleListDiv) {
                         userList = new UserList(editorSession, peopleListDiv);
@@ -164,9 +178,9 @@ define("webodf/editor/Editor", [
                         registerCallbackForShutdown(editorSession.endEditing);
                     }
 
-                    loadWidgets(editorSession, saveOdtFile);
+                    loadWidgets(editorSession, loadOdtFile, saveOdtFile);
                     editorReadyCallback();
-
+                    editorReadyCallback = null;
                 });
                 odfCanvas.load(initialDocumentUrl);
                 odfCanvas.setEditable(false);
@@ -179,7 +193,7 @@ define("webodf/editor/Editor", [
                 }, 'editor');
                 mainContainer.addChild(editorPane);
 
-                if (peopleListDiv) {
+                if (networked && peopleListDiv) {
                     peoplePane = new ContentPane({
                         region: 'right',
                         title: translator("people")
@@ -205,23 +219,57 @@ define("webodf/editor/Editor", [
              *
              * @param {!string} docUrl
              * @param {?function()} editorReadyCallback
+             * @return {undefined}
              */
-            self.loadDocument = function (docUrl, editorReadyCallback) {
-                initGuiAndDoc(docUrl, function() {
+            self.initAndLoadDocument = function (docUrl, editorReadyCallback) {
+                initGuiAndDoc(docUrl, function () {
                     editorReadyCallback(editorSession);
                 });
             };
 
             /**
-             * create the editor, load the starting document of an editing-session,
-             * request a replay of previous operations, call editorReadyCallback once
-             * everything is done.
+             * Load a document in an editor that has already been initialized.
+             */
+            self.loadDocument = function (docUrl) {
+                editorSession.endEditing();
+                odfCanvas.load(docUrl);
+            };
+
+            /**
+             * @param {?function()} callback
+             * @return {undefined}
+             */
+            self.saveDocument = function (filename, callback) {
+                function onsuccess(data) {
+                    var mimebase = "application/vnd.oasis.opendocument.",
+                        mimetype = mimebase + "text",
+                        blob;
+                    filename = filename || "doc.odt";
+                    if (filename.substr(-4) === ".odp") {
+                        mimetype = mimebase + "presentation";
+                    } else if (filename.substr(-4) === ".ods") {
+                        mimetype = mimebase + "spreadsheet";
+                    }
+                    blob = new Blob([data.buffer], {type: mimetype});
+                    saveAs(blob, filename);
+                }
+                function onerror(error) {
+                    alert(error);
+                }
+                var doc = odfCanvas.odfContainer();
+                doc.createByteArray(onsuccess, onerror);
+            };
+
+            /**
+             * create the editor, load the starting document of an
+             * editing-session, request a replay of previous operations, call
+             * editorReadyCallback once everything is done.
              *
              * @param {!string} sessionId
              * @param {?function()} editorReadyCallback
              */
             self.loadSession = function (sessionId, editorReadyCallback) {
-                initGuiAndDoc("/session/"+sessionId+"/genesis", function () {
+                initGuiAndDoc("/session/" + sessionId + "/genesis", function () {
                     // use the nowjs op-router when connected
                     opRouter = opRouter || new ops.NowjsOperationRouter(sessionId, memberid);
                     session.setOperationRouter(opRouter);
@@ -249,12 +297,11 @@ define("webodf/editor/Editor", [
             };
 
             // access to user model
-            self.getUserModel = function() {
+            self.getUserModel = function () {
                 return userModel;
             };
         }
         return Editor;
-    }
-);
+    });
 
 // vim:expandtab

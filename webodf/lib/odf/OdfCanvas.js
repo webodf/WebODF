@@ -401,7 +401,7 @@ odf.OdfCanvas = (function () {
         // except for the ones that are placeholders. Also, call setFramePosition on each of those child frames.
         if (masterPage) {
             clonedPage = document.createElementNS(drawns, 'draw:page');
-            node = masterPage.firstChild;
+            node = masterPage.firstElementChild;
             j = 0;
             while (node) {
                 if (node.getAttributeNS(presentationns, 'placeholder') !== 'true') {
@@ -409,7 +409,7 @@ odf.OdfCanvas = (function () {
                     clonedPage.appendChild(clonedNode);
                     setFramePosition(odfContainer, id + '_' + j, /**@type{!Node}*/(clonedNode), stylesheet);
                 }
-                node = node.nextSibling;
+                node = node.nextElementSibling;
                 j += 1;
             }
 

@@ -47,7 +47,7 @@
  *
  */
 
-/*global runtime, require, document, alert, net, window, SessionList, SessionListView */
+/*global runtime, require, document, alert, gui, window, SessionList, SessionListView, FileReader, Uint8Array */
 
 // define the namespace/object we want to provide
 // this is the first line of API, the user gets.
@@ -55,7 +55,8 @@ var webodfEditor = (function () {
     "use strict";
 
     var editorInstance = null,
-        booting = false;
+        booting = false,
+        loadedFilename;
 
     /**
      * wait for a network connection through nowjs to establish.
@@ -110,6 +111,77 @@ var webodfEditor = (function () {
         return docUrl || null;
     }
 
+    function fileSelectHandler(evt) {
+        var file, files, reader;
+        files = (evt.target && evt.target.files) ||
+            (evt.dataTransfer && evt.dataTransfer.files);
+        function onloadend() {
+            if (reader.readyState === 2) {
+                runtime.registerFile(file.name, reader.result);
+                loadedFilename = file.name;
+                editorInstance.loadDocument(file.name);
+            }
+        }
+        if (files && files.length === 1) {
+            file = files[0];
+            reader = new FileReader();
+            reader.onloadend = onloadend;
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert("File could not be opened in this browser.");
+        }
+    }
+
+    function enhanceRuntime() {
+        var openedFiles = {},
+            read = runtime.read,
+            getFileSize = runtime.getFileSize;
+        runtime.read = function (path, offset, length, callback) {
+            var array;
+            if (openedFiles.hasOwnProperty(path)) {
+                array = new Uint8Array(openedFiles[path], offset, length);
+                callback(undefined, array);
+            } else {
+                return read(path, offset, length, callback);
+            }
+        };
+        runtime.getFileSize = function (path, callback) {
+            if (openedFiles.hasOwnProperty(path)) {
+                return callback(openedFiles[path].byteLength);
+            } else {
+                return getFileSize(path, callback);
+            }
+        };
+        runtime.registerFile = function (path, data) {
+            openedFiles[path] = data;
+        };
+    }
+
+    function createFileLoadForm() {
+        var form = document.createElement("form"),
+            input = document.createElement("input");
+        form.appendChild(input);
+        form.style.display = "none";
+        input.id = "fileloader";
+        input.setAttribute("type", "file");
+        input.addEventListener("change", fileSelectHandler, false);
+        document.body.appendChild(form);
+    }
+
+    function load() {
+        var form = document.getElementById("fileloader");
+        if (!form) {
+            enhanceRuntime();
+            createFileLoadForm();
+            form = document.getElementById("fileloader");
+        }
+        form.click();
+    }
+
+    function save() {
+        editorInstance.saveDocument(loadedFilename);
+    }
+
     /**
      * create a new editor instance, and start the editor with
      * the given document.
@@ -123,6 +195,8 @@ var webodfEditor = (function () {
         booting = true;
         editorOptions = editorOptions || {};
         editorOptions.memberid = "localuser";
+        editorOptions.loadCallback = load;
+        editorOptions.saveCallback = save;
 
         runtime.assert(docUrl, "docUrl needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
@@ -132,7 +206,7 @@ var webodfEditor = (function () {
         require({ }, ["webodf/editor/Editor"],
             function (Editor) {
                 editorInstance = new Editor(editorOptions);
-                editorInstance.loadDocument(docUrl, function (editorSession) {
+                editorInstance.initAndLoadDocument(docUrl, function (editorSession) {
                     editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
                     editorSession.startEditing();
                     editorReadyCallback(editorInstance);
