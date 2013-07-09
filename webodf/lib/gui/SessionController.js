@@ -375,46 +375,19 @@ gui.SessionController = (function () {
         /**
          * @return {?ops.Operation}
          */
-        function createOpMoveCursorByEndKey() {
+        function moveToLineBoundary(direction) {
             var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 steps,
-                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
-                paragraphNode = odtDocument.getParagraphElement(cursorNode),
                 op = null;
 
-            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-
-            iterator.moveToEndOfNode(paragraphNode);
-            // create a move op with the distance to that position
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.unfilteredDomOffset());
-
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
+                direction, odtDocument.getPositionFilter());
             if (steps !== 0) {
                 op = new ops.OpMoveCursor();
                 op.init({memberid: inputMemberId, position: oldPosition+steps});
             }
 
-            return op;
-        }
-
-        /**
-         * @return {?ops.Operation}
-         */
-        function createOpMoveCursorByHomeKey() {
-            var odtDocument = session.getOdtDocument(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                steps,
-                paragraphNode,
-                op = null;
-
-            // TODO: instead of going to begin of paragraph go to begin of line
-            paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
-            if (steps !== 0) {
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+steps});
-            }
             return op;
         }
 
@@ -659,7 +632,7 @@ gui.SessionController = (function () {
                 } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
                     op = moveCursorToDocumentStart();
                 } else {
-                    op = createOpMoveCursorByHomeKey();
+                    op = moveToLineBoundary(-1);
                 }
                 handled = true;
             } else if (keyCode === 35) { // end
@@ -668,7 +641,7 @@ gui.SessionController = (function () {
                 } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
                     op = moveCursorToDocumentEnd();
                 } else {
-                    op = createOpMoveCursorByEndKey();
+                    op = moveToLineBoundary(1);
                 }
                 handled = true;
             } else if (keyCode === 8) { // Backspace

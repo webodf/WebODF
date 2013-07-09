@@ -409,10 +409,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?Node}
      */
     function getParagraphElement(node) {
-        while (node && !odfUtils.isParagraph(node)) {
-            node = node.parentNode;
-        }
-        return node;
+        return odfUtils.getParagraphElement(node);
     }
 
     /**

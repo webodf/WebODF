@@ -58,6 +58,17 @@ odf.OdfUtils = function OdfUtils() {
     this.isParagraph = isParagraph;
 
     /**
+     * @param {?Node} node
+     * @return {?Node}
+     */
+    this.getParagraphElement = function (node) {
+        while (node && !isParagraph(node)) {
+            node = node.parentNode;
+        }
+        return node;
+    };
+
+    /**
      * Determine if the node is a text:list-item element.
      * @param {?Node} e
      * @return {!boolean}

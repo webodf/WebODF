@@ -30,11 +30,12 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, NodeFilter, runtime, core, gui, XMLSerializer, window*/
+/*global Node, NodeFilter, runtime, core, gui, odf, XMLSerializer, window*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.PositionFilter");
 runtime.loadClass("core.LoopWatchDog");
+runtime.loadClass("odf.OdfUtils");
 
 /**
  * This class modifies the selection in different ways.
@@ -45,6 +46,7 @@ runtime.loadClass("core.LoopWatchDog");
 gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     "use strict";
     var self = this,
+        odfUtils,
         positionIterator,
         cachedXOffset,
         timeoutHandle;
@@ -103,6 +105,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                 }
                 rect.top = containerOffset.top;
                 rect.left = containerOffset.right;
+                rect.bottom = containerOffset.bottom;
             } else if (container.nodeType === Node.TEXT_NODE) {
                 // If the container is a text node and we were not able to get the client rects for it,
                 // try using the client rects from it's previous sibling
@@ -122,7 +125,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return {
             top: rect.top,
-            left: rect.left
+            left: rect.left,
+            bottom: rect.bottom
         };
     }
 
@@ -342,7 +346,53 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return count * direction;
     }
+    /*
+     * Returns the number of steps needed to move to the beginning/end of the line.
+     * @param {!number} direction -1 for beginning of the line, 1 for end of the line
+     * @param {!core.PositionFilter} filter
+     */
+    function countStepsToLineBoundary(direction, filter) {
+        var iterator = getIteratorAtCursor(),
+            paragraphNode = odfUtils.getParagraphElement(iterator.getCurrentNode()),
+            count = 0,
+            fnNextPos, increment,
+            lastRect, rect, onSameLine,
+            range = /**@type{!Range}*/(rootNode.ownerDocument.createRange());
 
+        if (direction < 0) {
+            fnNextPos = iterator.previousPosition;
+            increment = -1;
+        } else {
+            fnNextPos = iterator.nextPosition;
+            increment = 1;
+        }
+
+        lastRect = getRect(iterator.container(), iterator.unfilteredDomOffset(), range);
+        while (fnNextPos.call(iterator)) {
+            if (filter.acceptPosition(iterator) === NodeFilter.FILTER_ACCEPT) {
+                // hit another paragraph node, so won't be the same line
+                if (odfUtils.getParagraphElement(iterator.getCurrentNode()) !== paragraphNode) {
+                    break;
+                }
+
+                rect = getRect(iterator.container(), iterator.unfilteredDomOffset(), range);
+                if (rect.bottom !== lastRect.bottom) { // most cases it means hit the line above/below
+                    // if top and bottom overlaps, assume they are on the same line
+                    onSameLine = (rect.top >= lastRect.top && rect.bottom < lastRect.bottom)
+                        || (rect.top <= lastRect.top && rect.bottom > lastRect.bottom);
+                    if (!onSameLine) {
+                        break;
+                    }
+                }
+
+                count += increment;
+                lastRect = rect;
+            }
+        }
+
+        range.detach();
+        return count;
+    }
     /**
      * Calculate node offset in unfiltered DOM world
      * @param {!Node} node
@@ -451,11 +501,13 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             countForwardSteps: countForwardSteps,
             countBackwardSteps: countBackwardSteps,
             countLinesSteps: countLinesSteps,
+            countStepsToLineBoundary: countStepsToLineBoundary,
             countStepsToPosition: countStepsToPosition,
             isPositionWalkable: isPositionWalkable
         };
     };
     function init() {
+        odfUtils = new odf.OdfUtils();
         positionIterator = gui.SelectionMover.createPositionIterator(rootNode);
         var range = rootNode.ownerDocument.createRange();
         range.setStart(positionIterator.container(), positionIterator.unfilteredDomOffset());
