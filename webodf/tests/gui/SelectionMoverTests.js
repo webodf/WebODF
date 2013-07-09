@@ -171,7 +171,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             counter = t.mover.getStepCounter(),
             emptyNode = t.root.lastChild,
             steps;
-        range.setStart(emptyNode);
+        range.setStart(emptyNode, 0);
         range.collapse(true);
         t.cursor.setSelectedRange(range);
         steps = counter.countStepsToPosition(emptyNode, 0, new AcceptAllPositionFilter());
