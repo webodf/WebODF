@@ -61,17 +61,20 @@ gui.UndoManager.prototype.unsubscribe = function(signal, callback) {"use strict"
 gui.UndoManager.prototype.setOdtDocument = function (newDocument) {"use strict"; };
 
 /**
- * Sets the initial document state and operation state
+ * Sets the initial document state and operation state. This is the earliest point
+ * in time the document can be rewound to.
  */
 gui.UndoManager.prototype.saveInitialState = function () {"use strict"; };
 
 /**
- * Resets the initial document state and operation state
+ * Resets the initial document state and operation state, including clearing
+ * all undo and redo stacks
  */
 gui.UndoManager.prototype.resetInitialState = function () {"use strict"; };
 
 /**
- * Sets the playback function to use to re-execute operations from the undo stack
+ * Sets the playback function to use to re-execute operations from the undo stack.
+ * This should *not* report these operations back to the undo manager as being executed.
  * @param {!function(!ops.Operation)} playback_func
  */
 gui.UndoManager.prototype.setPlaybackFunction = function (playback_func) {"use strict"; };
@@ -89,23 +92,23 @@ gui.UndoManager.prototype.hasUndoStates = function () {"use strict"; };
 gui.UndoManager.prototype.hasRedoStates = function () {"use strict"; };
 
 /**
- * Move forward the desired number of steps. Will stop when the number of
- * steps is reached, or no more redo steps are available.
- * @param {!number} steps
- * @return {undefined}
+ * Move forward the desired number of states. Will stop when the number of
+ * states is reached, or no more redo states are available.
+ * @param {!number} states
+ * @return {!number} Returns the number of states actually moved
  */
-gui.UndoManager.prototype.moveForward = function (steps) {"use strict"; };
+gui.UndoManager.prototype.moveForward = function (states) {"use strict"; };
 
 /**
- * Move backward the desired number of steps. Will stop when the number of
- * steps is reached, or no more undo steps are available.
- * @param {!number} steps
- * @return {undefined}
+ * Move backward the desired number of states. Will stop when the number of
+ * states is reached, or no more undo states are available.
+ * @param {!number} states
+ * @return {!number} Returns the number of states actually moved
  */
-gui.UndoManager.prototype.moveBackward = function (steps) {"use strict"; };
+gui.UndoManager.prototype.moveBackward = function (states) {"use strict"; };
 
 /**
- * Track the execution of an operation
+ * Track the execution of an operation, and add it to the available undo states
  * @param {!ops.Operation} op
  * @return {undefined}
  */

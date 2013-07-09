@@ -903,6 +903,8 @@ gui.SessionController = (function () {
             undoManager = manager;
             if (undoManager) {
                 undoManager.setOdtDocument(session.getOdtDocument());
+                // As per gui.UndoManager, this should NOT fire any signals or report
+                // events being executed back to the undo manager.
                 undoManager.setPlaybackFunction(function (op) {
                     op.execute(session.getOdtDocument());
                 });

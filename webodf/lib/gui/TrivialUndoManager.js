@@ -59,26 +59,52 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
         });
     }
 
+    /**
+     * Subscribe to events related to the undo manager
+     * @param {!string} signal
+     * @param {!function(*)} callback
+     */
     this.subscribe = function(signal, callback) {
         eventNotifier.subscribe(signal, callback);
     };
 
+    /**
+     * Unsubscribe to events related to the undo manager
+     * @param {!string} signal
+     * @param {!function(*)} callback
+     */
     this.unsubscribe = function(signal, callback) {
         eventNotifier.unsubscribe(signal, callback);
     };
 
+    /**
+     * Returns true if there are one or more undo states available
+     * @return {boolean}
+     */
     this.hasUndoStates = function() {
         return undoStack.length > 0;
     };
 
+    /**
+     * Returns true if there are one or more redo states available
+     * @return {boolean}
+     */
     this.hasRedoStates = function() {
         return redoStack.length > 0;
     };
 
+    /**
+     * Set the OdtDocument to operate on
+     * @param newDocument
+     */
     this.setOdtDocument = function(newDocument) {
         odtDocument = newDocument;
     };
 
+    /**
+     * Resets the initial document state and operation state, including clearing
+     * all undo and redo stacks
+     */
     this.resetInitialState = function() {
         undoStack.length = 0;
         redoStack.length = 0;
@@ -87,6 +113,10 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
         emitStackChange();
     };
 
+    /**
+     * Sets the initial document state and operation state. This is the earliest point
+     * in time the document can be rewound to.
+     */
     this.saveInitialState = function() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer();
         // Want to catch any initial cursor add operations that are part of initial document setup.
@@ -98,10 +128,20 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
         emitStackChange();
     };
 
-    this.setPlaybackFunction = function(playbackFunction) {
-        playFunc = playbackFunction;
+    /**
+     * Sets the playback function to use to re-execute operations from the undo stack.
+     * This should *not* report these operations back to the undo manager as being executed.
+     * @param {!function(!ops.Operation)} playback_func
+     */
+    this.setPlaybackFunction = function(playback_func) {
+        playFunc = playback_func;
     };
 
+    /**
+     * Track the execution of an operation, and add it to the available undo states
+     * @param {!ops.Operation} op
+     * @return {undefined}
+     */
     this.onOperationExecuted = function(op) {
         if (redoStack.length) {
             redoStack.length = 0;
@@ -110,23 +150,41 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
         emitStackChange();
     };
 
-    this.moveForward = function(steps) {
-        var op;
-        while (steps && redoStack.length) {
+    /**
+     * Move forward the desired number of states. Will stop when the number of
+     * states is reached, or no more redo states are available.
+     * @param {!number} states
+     * @return {!number} Returns the number of states actually moved
+     */
+    this.moveForward = function(states) {
+        var op,
+            moved = 0;
+        while (states && redoStack.length) {
             op = redoStack.pop();
             playFunc(op);
             undoStack.push(op);
-            steps -= 1;
+            states -= 1;
+            moved += 1;
         }
+
         emitStackChange();
+        return moved;
     };
 
-    this.moveBackward = function(steps) {
+    /**
+     * Move backward the desired number of states. Will stop when the number of
+     * states is reached, or no more undo states are available.
+     * @param {!number} states
+     * @return {!number} Returns the number of states actually moved
+     */
+    this.moveBackward = function(states) {
         var odfCanvas = odtDocument.getOdfCanvas(),
-            odfContainer = odfCanvas.odfContainer();
-        while (steps && undoStack.length) {
+            odfContainer = odfCanvas.odfContainer(),
+            moved = 0;
+        while (states && undoStack.length) {
             redoStack.push(undoStack.pop());
-            steps -= 1;
+            states -= 1;
+            moved += 1;
         }
 
         // TODO Replace with a neater hack for reloading the Odt tree
@@ -139,7 +197,9 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
         initialStack.forEach(playFunc);
         undoStack.forEach(playFunc);
         odfCanvas.refreshCSS();
+
         emitStackChange();
+        return moved;
     };
 };
 
