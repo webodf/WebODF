@@ -39,6 +39,8 @@
         "core/PositionIteratorTests.js",
         "core/RuntimeTests.js",
         "core/ZipTests.js",
+        "gui/UndoStateRulesTests.js",
+        "gui/TrivialUndoManagerTests.js",
         "gui/SelectionMoverTests.js",
         "gui/XMLEditTests.js",
         "odf/TextStyleApplicatorTests.js",

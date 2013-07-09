@@ -62,6 +62,7 @@
         "gui/SelectionMover.js",
         "gui/XMLEdit.js",
         "gui/UndoManager.js",
+        "gui/UndoStateRules.js",
         "gui/TrivialUndoManager.js",
         "odf/CommandLineTools.js",
         "odf/FontLoader.js",

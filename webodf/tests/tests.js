@@ -38,6 +38,8 @@ runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
+runtime.loadClass("gui.UndoStateRulesTests");
+runtime.loadClass("gui.TrivialUndoManagerTests");
 runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("ops.OdtCursorTests");
@@ -66,6 +68,8 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 // TODO: fix test and enable
 //     tests.push(core.CursorTests);
     tests.push(core.PositionIteratorTests);
+    tests.push(gui.UndoStateRulesTests);
+    tests.push(gui.TrivialUndoManagerTests);
     tests.push(gui.SelectionMoverTests);
     tests.push(odf.FormattingTests);
     tests.push(odf.OdfContainerTests);

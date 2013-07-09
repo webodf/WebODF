@@ -9,6 +9,8 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/core/CursorTests.js
     tests/core/PositionIteratorTests.js
     tests/core/RuntimeTests.js
+    tests/gui/UndoStateRulesTests.js
+    tests/gui/TrivialUndoManagerTests.js
     tests/gui/SelectionMoverTests.js
     tests/gui/XMLEditTests.js
     tests/odf/FormattingTests.js
