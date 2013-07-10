@@ -33,7 +33,10 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime, odf*/
+/*global ops, runtime, odf, core*/
+
+runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("core.DomUtils");
 
 /**
  * @constructor
@@ -48,6 +51,7 @@ ops.OpRemoveText = function OpRemoveText() {
         /**@type {number}*/
         length,
         text, odfUtils,
+        domUtils,
         editinfons = 'urn:webodf:names:editinfo';
 
     this.init = function (data) {
@@ -58,6 +62,7 @@ ops.OpRemoveText = function OpRemoveText() {
         length = parseInt(data.length, 10);
         text = data.text;
         odfUtils = new odf.OdfUtils();
+        domUtils = new core.DomUtils();
     };
 
     /**
@@ -125,19 +130,6 @@ ops.OpRemoveText = function OpRemoveText() {
         if (odfUtils.isListItem(parent) && parent.childNodes.length === 0) {
             parent.parentNode.removeChild(parent);
         }
-    }
-
-    /**
-     * Merge all child nodes into the node's parent and remove the supplied node entirely
-     * @param {Node} node
-     */
-    function mergeIntoParent(node) {
-        var parent = node.parentNode;
-        while (node.firstChild) {
-            parent.insertBefore(node.firstChild, node);
-        }
-        parent.removeChild(node);
-        return parent;
     }
 
     /**
@@ -255,7 +247,7 @@ ops.OpRemoveText = function OpRemoveText() {
                     // If the current node is text:s or span and is empty, it should
                     // be removed.
                     while (isEmpty(currentParent)) {
-                        currentParent = mergeIntoParent(currentParent);
+                        currentParent = domUtils.mergeIntoParent(currentParent);
                     }
 
                     remainingLength -= currentLength;

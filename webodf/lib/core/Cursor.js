@@ -32,6 +32,8 @@
  */
 /*global Node, core, ops, runtime*/
 
+runtime.loadClass("core.DomUtils");
+
 /**
  * @class
  * A cursor is a dom node that visually represents a cursor in a DOM tree.
@@ -68,7 +70,8 @@ core.Cursor = function Cursor(document, memberId) {
         forwardSelection,
         recentlyModifiedNodes = [],
         selectedRange,
-        isCollapsed;
+        isCollapsed,
+        domUtils = new core.DomUtils();
 
     /**
      * Split a text node and put the cursor into it.
@@ -113,42 +116,12 @@ core.Cursor = function Cursor(document, memberId) {
      */
     function removeNode(node) {
         if (node.parentNode) {
-            recentlyModifiedNodes.push({prev: node.previousSibling, next: node.nextSibling});
+            recentlyModifiedNodes.push(node.previousSibling);
+            recentlyModifiedNodes.push(node.nextSibling);
             node.parentNode.removeChild(node);
         }
     }
-    /**
-     * Merges the content of node1 into node2 if node2 exists.
-     * If node1 is an empty text node, it will be removed
-     * @param {CharacterData} node1
-     * @param {CharacterData} node2
-     */
-    function mergeTextNodes(node1, node2) {
-        if (node1.nodeType === Node.TEXT_NODE) {
-            if (node1.length === 0) {
-                node1.parentNode.removeChild(node1);
-            } else if (node2.nodeType === Node.TEXT_NODE) {
-                node2.insertData(0, node1.data);
-                node1.parentNode.removeChild(node1);
-            }
-        }
-    }
 
-    /**
-     * Merge all text nodes near areas of impact during the most recent selection change
-     */
-    function mergeAdjacentTextNodes() {
-        recentlyModifiedNodes
-            .forEach(function(nodePair) {
-                if (nodePair.prev && nodePair.prev.nextSibling) {
-                    mergeTextNodes(nodePair.prev, nodePair.prev.nextSibling);
-                }
-                if (nodePair.next && nodePair.next.previousSibling) {
-                    mergeTextNodes(nodePair.next.previousSibling, nodePair.next);
-                }
-            });
-        recentlyModifiedNodes.length = 0;
-    }
     /**
      * Put the cursor at a particular position.
      * @param {!Node} node
@@ -165,7 +138,8 @@ core.Cursor = function Cursor(document, memberId) {
             element = /**@type{!Element}*/(container);
             putIntoContainer(node, element, offset);
         }
-        recentlyModifiedNodes.push({prev: node.previousSibling, next: node.nextSibling});
+        recentlyModifiedNodes.push(node.previousSibling);
+        recentlyModifiedNodes.push(node.nextSibling);
     }
 
     /**
@@ -246,7 +220,8 @@ core.Cursor = function Cursor(document, memberId) {
             putNode(getEndNode(), /**@type {!Node}*/(range.endContainer), range.endOffset);
             putNode(getStartNode(), /**@type {!Node}*/(range.startContainer), range.startOffset);
         }
-        mergeAdjacentTextNodes();
+        recentlyModifiedNodes.forEach(domUtils.normalizeTextNodes);
+        recentlyModifiedNodes.length = 0;
     };
     /**
      * Remove the cursor from the document tree.
@@ -254,7 +229,8 @@ core.Cursor = function Cursor(document, memberId) {
      */
     this.remove = function () {
         removeNode(cursorNode);
-        mergeAdjacentTextNodes();
+        recentlyModifiedNodes.forEach(domUtils.normalizeTextNodes);
+        recentlyModifiedNodes.length = 0;
     };
 
     function init() {

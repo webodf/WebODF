@@ -33,7 +33,8 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*jslint sub: true*/
-/*global runtime, odf, xmldom, webodf_css */
+/*global runtime, odf, xmldom, webodf_css, core */
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
 runtime.loadClass("xmldom.XPath");
@@ -300,6 +301,7 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/window = runtime.getWindow(),
         xpath = new xmldom.XPath(),
         utils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
         shadowContent;
 
     /**
@@ -651,7 +653,7 @@ odf.OdfCanvas = (function () {
             }
         }
 
-        spaces = Array.prototype.slice.call(odffragment.getElementsByTagNameNS(textns, "s"));
+        spaces = domUtils.getElementsByTagNameNS(odffragment, textns, "s");
         spaces.forEach(expandSpaceElement);
     }
 
@@ -663,7 +665,7 @@ odf.OdfCanvas = (function () {
     function expandTabElements(odffragment) {
         var tabs;
 
-        tabs = Array.prototype.slice.call(odffragment.getElementsByTagNameNS(textns, "tab"));
+        tabs = domUtils.getElementsByTagNameNS(odffragment, textns, "tab");
         tabs.forEach(function(tab) {
             tab.textContent = "\t";
         });

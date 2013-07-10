@@ -34,6 +34,7 @@
  */
 /*global Node, odf, runtime, console, NodeFilter, core*/
 
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.LoopWatchDog");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
@@ -48,6 +49,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
     "use strict";
     var nextTextNodes,
         odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
         textProperties = "style:text-properties",
@@ -130,65 +132,6 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
         };
     }
 
-    // TODO Push into common area and remove duplicate code
-    function containsNode(limits, node) {
-        var range = node.ownerDocument.createRange(),
-            nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length,
-            result;
-        range.setStart(limits.startContainer, limits.startOffset);
-        range.setEnd(limits.endContainer, limits.endOffset);
-        result = range.comparePoint(node, 0) === 0 && range.comparePoint(node, nodeLength) === 0;
-        range.detach();
-        return result;
-    }
-
-    // TODO Push into common area and remove duplicate code in cursor
-    function splitBoundaries(range) {
-        var newNode;
-
-        // Must split end first to stop the start point from being lost
-        if (range.endOffset !== 0
-            && range.endContainer.nodeType === Node.TEXT_NODE
-            && range.endOffset !== range.endContainer.length) {
-            nextTextNodes.push(range.endContainer.splitText(range.endOffset));
-            nextTextNodes.push(range.endContainer);
-            // The end doesn't need to be reset as endContainer & endOffset are still valid after the modification
-        }
-
-        if (range.startOffset !== 0
-            && range.startContainer.nodeType === Node.TEXT_NODE
-            && range.startOffset !== range.startContainer.length) {
-            newNode = range.startContainer.splitText(range.startOffset);
-            nextTextNodes.push(range.startContainer);
-            nextTextNodes.push(newNode);
-            range.setStart(newNode, 0);
-        }
-    }
-
-    // TODO Push into common area and remove duplicate code in cursor
-    function mergeTextNodes(node1, node2) {
-        if (node1.nodeType === Node.TEXT_NODE) {
-            if (node1.length === 0) {
-                node1.parentNode.removeChild(node1);
-            } else if (node2.nodeType === Node.TEXT_NODE) {
-                node2.insertData(0, node1.data);
-                node1.parentNode.removeChild(node1);
-                return node2;
-            }
-        }
-        return node1;
-    }
-
-    // TODO Push into common area and remove duplicate code in cursor
-    function cleanupTextNode(node) {
-        if (node.nextSibling) {
-            node = mergeTextNodes(node, node.nextSibling);
-        }
-        if (node.previousSibling) {
-            mergeTextNodes(node.previousSibling, node);
-        }
-    }
-
     /**
      * Moves the specified node and all further siblings within the outer range into a new standalone container
      * @param {!CharacterData} startNode Node to start movement to new container
@@ -211,7 +154,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
             styledContainer = document.createElementNS(textns, "text:span");
             originalContainer.insertBefore(styledContainer, startNode);
             moveTrailing = false;
-        } else if (startNode.previousSibling && !containsNode(limits, startNode.previousSibling)) {
+        } else if (startNode.previousSibling && !domUtils.rangeContainsNode(limits, startNode.previousSibling)) {
             // Yes, text node has prior siblings that are not styled
             // TODO what elements should be stripped when the clone occurs?
             styledContainer = originalContainer.cloneNode(false);
@@ -224,7 +167,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
         }
 
         // Starting at the startNode, iterate forward until leaving the affected range
-        while (node && (node === startNode || containsNode(limits, node))) {
+        while (node && (node === startNode || domUtils.rangeContainsNode(limits, node))) {
             loopGuard.check();
             nextNode = node.nextSibling;
             if (node.parentNode !== styledContainer) {
@@ -271,8 +214,8 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
         styleCache = new StyleManager(textPropsOnly);
         styleLookup = new StyleLookup(textPropsOnly);
 
-        nextTextNodes = []; // Reset instance node-modified stack
-        splitBoundaries(range);
+        // Reset instance node-modified stack
+        nextTextNodes = domUtils.splitBoundaries(range);
         textNodes = odfUtils.getTextNodes(range, false);
         // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
         limits = {
@@ -288,7 +231,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
                 styleCache.applyStyleToContainer(container);
             }
         });
-        nextTextNodes.forEach(cleanupTextNode);
+        nextTextNodes.forEach(domUtils.normalizeTextNodes);
         nextTextNodes = null;
     };
 };
