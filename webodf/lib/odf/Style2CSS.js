@@ -422,7 +422,7 @@ odf.Style2CSS = function Style2CSS() {
             if (mapping.hasOwnProperty(r)) {
                 r = mapping[r];
                 value = props.getAttributeNS(r[0], r[1]);
-                if (value) {
+                if (r[2] && value) {
                     rule += r[2] + ':' + value + ';';
                 }
             }
