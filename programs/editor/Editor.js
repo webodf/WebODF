@@ -218,7 +218,7 @@ define("webodf/editor/Editor", [
              * call editorReadyCallback once everything is done.
              *
              * @param {!string} docUrl
-             * @param {?function()} editorReadyCallback
+             * @param {!function()} editorReadyCallback
              * @return {undefined}
              */
             self.initAndLoadDocument = function (docUrl, editorReadyCallback) {

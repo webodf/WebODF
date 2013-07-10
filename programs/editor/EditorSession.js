@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global define,runtime,gui,ops,document */
+/*global define, runtime, core, gui, ops, document */
 define("webodf/editor/EditorSession", [
     "dojo/text!resources/fonts/fonts.css"
 ], function (fontsCSS) { // fontsCSS is retrieved as a string, using dojo's text retrieval AMD plugin
@@ -136,10 +136,11 @@ define("webodf/editor/EditorSession", [
          */
         function createNCName(name) {
             var letter,
-                result = "";
+                result = "",
+                i;
 
             // encode
-            for (var i = 0; i < name.length; i++) {
+            for (i = 0; i < name.length; i++) {
                 letter = name[i];
                 // simple approach, can be improved to not skip other allowed chars
                 if (letter.match(/[a-zA-Z0-9.-_]/) !== null) {
@@ -166,7 +167,7 @@ define("webodf/editor/EditorSession", [
             // memberid is used to avoid id conflicts with ids created by other users
             result = ncName + "_" + ncMemberId;
             // then loop until result is really unique
-            while(formatting.hasParagraphStyle(result)) {
+            while (formatting.hasParagraphStyle(result)) {
                 result = ncName + "_" + i + "_" + ncMemberId;
                 i++;
             }
@@ -261,7 +262,7 @@ define("webodf/editor/EditorSession", [
             return odtDocument.getCursorPosition(memberid);
         };
 
-        this.getCursorSelection = function() {
+        this.getCursorSelection = function () {
             return odtDocument.getCursorSelection(memberid);
         };
 
@@ -277,7 +278,7 @@ define("webodf/editor/EditorSession", [
             return formatting.getAvailableParagraphStyles();
         };
 
-        this.getCurrentSelectionStyle = function() {
+        this.getCurrentSelectionStyle = function () {
             var cursor = odtDocument.getCursor(memberid),
                 selectedRange;
             // no own cursor yet/currently added?
@@ -295,7 +296,7 @@ define("webodf/editor/EditorSession", [
             return currentNamedStyleName;
         };
 
-        this.formatSelection = function(value) {
+        this.formatSelection = function (value) {
             var op = new ops.OpApplyStyle(),
                 selection = self.getCursorSelection();
             op.init({
@@ -320,7 +321,7 @@ define("webodf/editor/EditorSession", [
             }
         };
 
-        this.insertTable = function(initialRows, initialColumns, tableStyleName, tableColumnStyleName, tableCellStyleMatrix) {
+        this.insertTable = function (initialRows, initialColumns, tableStyleName, tableColumnStyleName, tableCellStyleMatrix) {
             var op = new ops.OpInsertTable();
             op.init({
                 memberid: memberid,
@@ -450,16 +451,16 @@ define("webodf/editor/EditorSession", [
             self.emit(EditorSession.signalUndoStackChanged, e);
         }
 
-        this.hasUndoManager = function() {
+        this.hasUndoManager = function () {
             return Boolean(self.sessionController.getUndoManager());
         };
 
-        this.undo = function() {
+        this.undo = function () {
             var undoManager = self.sessionController.getUndoManager();
             undoManager.moveBackward(1);
         };
 
-        this.redo = function() {
+        this.redo = function () {
             var undoManager = self.sessionController.getUndoManager();
             undoManager.moveForward(1);
         };
