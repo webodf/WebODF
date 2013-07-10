@@ -169,6 +169,7 @@ define("webodf/editor/Editor", [
                     editorSession = new EditorSession(session, memberid, {
                         viewOptions: viewOptions
                     });
+                    editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
 
                     if (peopleListDiv) {
                         userList = new UserList(editorSession, peopleListDiv);

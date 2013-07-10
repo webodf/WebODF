@@ -207,7 +207,6 @@ var webodfEditor = (function () {
             function (Editor) {
                 editorInstance = new Editor(editorOptions);
                 editorInstance.initAndLoadDocument(docUrl, function (editorSession) {
-                    editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
                     editorSession.startEditing();
                     editorReadyCallback(editorInstance);
                 });
