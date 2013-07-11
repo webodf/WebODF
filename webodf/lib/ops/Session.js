@@ -48,6 +48,8 @@ runtime.loadClass("ops.OdtDocument");
 ops.Session = function Session(odfCanvas) {
     "use strict";
     var self = this,
+        /**@type{!ops.OperationFactory}*/
+        operationFactory = new ops.OperationFactory(),
         /**@type{!ops.OdtDocument}*/
         odtDocument = new ops.OdtDocument(odfCanvas),
         /**@type{!ops.UserModel}*/
@@ -64,6 +66,16 @@ ops.Session = function Session(odfCanvas) {
     };
 
     /**
+     * @param {!ops.OperationFactory} opFactory
+     */
+    this.setOperationFactory = function (opFactory) {
+        operationFactory = opFactory;
+        if (operationRouter) {
+            operationRouter.setOperationFactory(operationFactory);
+        }
+    };
+
+    /**
      * @param {!ops.OperationRouter} opRouter
      * @return {undefined}
      */
@@ -73,7 +85,7 @@ ops.Session = function Session(odfCanvas) {
             op.execute(odtDocument);
             odtDocument.emit(ops.OdtDocument.signalOperationExecuted, op);
         });
-        opRouter.setOperationFactory(new ops.OperationFactory());
+        opRouter.setOperationFactory(operationFactory);
     };
 
     /**
@@ -81,6 +93,13 @@ ops.Session = function Session(odfCanvas) {
      */
     this.getUserModel = function () {
         return userModel;
+    };
+
+    /**
+     * @returns {!ops.OperationFactory}
+     */
+    this.getOperationFactory = function () {
+        return operationFactory;
     };
 
     /**

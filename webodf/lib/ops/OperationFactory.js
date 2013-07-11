@@ -57,41 +57,59 @@ runtime.loadClass("ops.OpDeleteParagraphStyle");
  */
 ops.OperationFactory = function OperationFactory() {
     "use strict";
+    var specs;
 
-    var self = this;
+    /**
+     * Registers an operation constructor with this operation factory
+     * @param {!string} specName
+     * @param {!function(Object) : !ops.Operation} specConstructor
+     */
+    this.register = function(specName, specConstructor) {
+        specs[specName] = specConstructor;
+    };
 
+    /**
+     * Create an instance of an operation based on the provided spec
+     * @param {Object} spec
+     * @returns {ops.Operation|null}
+     */
     this.create = function (spec) {
-        var op = null;
-        // TODO: of course the following code can use some better
-        // js language and make it more generic.
-        if (spec.optype === "AddCursor") {
-            op = new ops.OpAddCursor();
-        } else if (spec.optype === "ApplyStyle") {
-            op = new ops.OpApplyStyle();
-        } else if (spec.optype === "InsertTable") {
-            op = new ops.OpInsertTable();
-        } else if (spec.optype === "InsertText") {
-            op = new ops.OpInsertText();
-        } else if (spec.optype === "RemoveText") {
-            op = new ops.OpRemoveText();
-        } else if (spec.optype === "SplitParagraph") {
-            op = new ops.OpSplitParagraph();
-        } else if (spec.optype === "SetParagraphStyle") {
-            op = new ops.OpSetParagraphStyle();
-        } else if (spec.optype === "UpdateParagraphStyle") {
-            op = new ops.OpUpdateParagraphStyle();
-        } else if (spec.optype === "CloneParagraphStyle") {
-            op = new ops.OpCloneParagraphStyle();
-        } else if (spec.optype === "DeleteParagraphStyle") {
-            op = new ops.OpDeleteParagraphStyle();
-        } else if (spec.optype === "MoveCursor") {
-            op = new ops.OpMoveCursor();
-        } else if (spec.optype === "RemoveCursor") {
-            op = new ops.OpRemoveCursor();
-        }
-        if (op) {
+        var op = null,
+            specConstructor = specs[spec.optype];
+        if (specConstructor) {
+            op = specConstructor(spec);
             op.init(spec);
         }
         return op;
     };
+
+    /**
+     * Returns a constructor function for the provided type
+     * @param OperationType Operation type
+     * @returns {Function}
+     */
+    function constructor(OperationType) {
+        return function() {
+            return new OperationType();
+        };
+    }
+
+    function init() {
+        specs = {
+            AddCursor : constructor(ops.OpAddCursor),
+            ApplyStyle : constructor(ops.OpApplyStyle),
+            InsertTable : constructor(ops.OpInsertTable),
+            InsertText : constructor(ops.OpInsertText),
+            RemoveText : constructor(ops.OpRemoveText),
+            SplitParagraph : constructor(ops.OpSplitParagraph),
+            SetParagraphStyle : constructor(ops.OpSetParagraphStyle),
+            UpdateParagraphStyle : constructor(ops.OpUpdateParagraphStyle),
+            CloneParagraphStyle : constructor(ops.OpCloneParagraphStyle),
+            DeleteParagraphStyle : constructor(ops.OpDeleteParagraphStyle),
+            MoveCursor : constructor(ops.OpMoveCursor),
+            RemoveCursor : constructor(ops.OpRemoveCursor)
+        };
+    }
+
+    init();
 };
