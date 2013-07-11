@@ -52,6 +52,7 @@ gui.UndoStateRules = function UndoStateRules() {
     function getOpType(op) {
         return op.spec().optype;
     }
+    this.getOpType = getOpType;
 
     function getOpPosition(op) {
         return op.spec().position;

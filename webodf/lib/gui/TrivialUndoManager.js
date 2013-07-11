@@ -38,11 +38,11 @@ runtime.loadClass("gui.UndoManager");
 runtime.loadClass("gui.UndoStateRules");
 
 /**
- *
+ * @param {gui.UndoStateRules=} defaultRules
  * @constructor
  * @implements gui.UndoManager
  */
-gui.TrivialUndoManager = function TrivialUndoManager() {
+gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     "use strict";
 
     var self = this,
@@ -53,8 +53,13 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
         currentUndoState = [],
         /**@type {!Array.<Array.<!ops.Operation>>}*/undoStates = [],
         /**@type {!Array.<Array.<!ops.Operation>>}*/redoStates = [],
-        eventNotifier = new core.EventNotifier([gui.UndoManager.signalUndoStackChanged]),
-        undoRules = new gui.UndoStateRules();
+        eventNotifier = new core.EventNotifier([
+            gui.UndoManager.signalUndoStackChanged,
+            gui.UndoManager.signalUndoStateCreated,
+            gui.UndoManager.signalUndoStateModified,
+            gui.TrivialUndoManager.signalDocumentRootReplaced
+        ]),
+        undoRules = defaultRules || new gui.UndoStateRules();
 
     function emitStackChange() {
         eventNotifier.emit(gui.UndoManager.signalUndoStackChanged, {
@@ -180,9 +185,11 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
             currentUndoState = [op];
             // Every undo state *MUST* contain an edit for it to be valid for undo or redo
             undoStates.push(currentUndoState);
+            eventNotifier.emit(gui.UndoManager.signalUndoStateCreated, { operations: currentUndoState });
             emitStackChange();
         } else {
             currentUndoState.push(op);
+            eventNotifier.emit(gui.UndoManager.signalUndoStateModified, { operations: currentUndoState });
         }
     };
 
@@ -235,6 +242,7 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
             // TODO Replace with a neater hack for reloading the Odt tree
             odfContainer.setRootElement(initialDoc.cloneNode(true));
             odfCanvas.setOdfContainer(odfContainer, true);
+            eventNotifier.emit(gui.TrivialUndoManager.signalDocumentRootReplaced, { });
             // Need to reset the odt document cursor list back to nil so new cursors are correctly re-registered
             odtDocument.getCursors().forEach(function (cursor) {
                 odtDocument.removeCursor(cursor.getMemberId());
@@ -255,3 +263,9 @@ gui.TrivialUndoManager = function TrivialUndoManager() {
     };
 };
 
+/**@const*/ gui.TrivialUndoManager.signalDocumentRootReplaced = "documentRootReplaced";
+
+(function() {
+    "use strict";
+    return gui.TrivialUndoManager;
+}());

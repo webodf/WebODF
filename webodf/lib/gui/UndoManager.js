@@ -115,6 +115,8 @@ gui.UndoManager.prototype.moveBackward = function (states) {"use strict"; };
 gui.UndoManager.prototype.onOperationExecuted = function (op) {"use strict"; };
 
 /**@const*/gui.UndoManager.signalUndoStackChanged = "undoStackChanged";
+/**@const*/gui.UndoManager.signalUndoStateCreated = "undoStateCreated";
+/**@const*/gui.UndoManager.signalUndoStateModified = "undoStateModified";
 
 (function () {
     "use strict";
