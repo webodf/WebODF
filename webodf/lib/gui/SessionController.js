@@ -41,6 +41,7 @@ runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("gui.ClickHandler");
+runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.Clipboard");
 
 /**
@@ -62,9 +63,10 @@ gui.SessionController = (function () {
         var self = this,
             odtDocument = session.getOdtDocument(),
             odfUtils = new odf.OdfUtils(),
-            isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
             clipboard = new gui.Clipboard(),
             clickHandler = new gui.ClickHandler(),
+            keyDownHandler = new gui.KeyboardHandler(),
+            keyPressHandler = new gui.KeyboardHandler(),
             undoManager;
 
         /**
@@ -247,6 +249,15 @@ gui.SessionController = (function () {
             }
         }
 
+        /*
+         * {?ops.Operation} op
+         */
+        function sessionEnqueue(op) {
+            if (op) {
+                session.enqueue(op);
+            }
+        }
+
         /**
          * @param {!number} posAdjust   position adjustment
          * @param {!number} lenAdjust   length adjustment
@@ -263,33 +274,37 @@ gui.SessionController = (function () {
             newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
             return createOpMoveCursor(newPos, newLen);
         }
-        
+
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorToLeft() {
-            return createOpMoveCursorByAdjustment(-1, 0);
+            sessionEnqueue(createOpMoveCursorByAdjustment(-1, 0));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorToRight() {
-            return createOpMoveCursorByAdjustment(1, 0);
+            sessionEnqueue(createOpMoveCursorByAdjustment(1, 0));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionToLeft() {
-            return createOpMoveCursorByAdjustment(0, -1);
+            sessionEnqueue(createOpMoveCursorByAdjustment(0, -1));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionToRight() {
-            return createOpMoveCursorByAdjustment(0, 1);
+            sessionEnqueue(createOpMoveCursorByAdjustment(0, 1));
+            return true;
         }
 
         /**
@@ -306,31 +321,35 @@ gui.SessionController = (function () {
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorUp() {
-            return createOpMoveCursorDirection(-1, false);
+            sessionEnqueue(createOpMoveCursorDirection(-1, false));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorDown() {
-            return createOpMoveCursorDirection(1, false);
+            sessionEnqueue(createOpMoveCursorDirection(1, false));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionUp() {
-            return createOpMoveCursorDirection(-1, true);
+            sessionEnqueue(createOpMoveCursorDirection(-1, true));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionDown() {
-            return createOpMoveCursorDirection(1, true);
+            sessionEnqueue(createOpMoveCursorDirection(1, true));
+            return true;
         }
 
         /**
@@ -344,21 +363,23 @@ gui.SessionController = (function () {
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorToLineStart() {
-            return createOpMoveCursorLineBoundary(-1);
+            sessionEnqueue(createOpMoveCursorLineBoundary(-1));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorToLineEnd() {
-            return createOpMoveCursorLineBoundary(1);
+            sessionEnqueue(createOpMoveCursorLineBoundary(1));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionToParagraphStart() {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
@@ -376,11 +397,12 @@ gui.SessionController = (function () {
                     steps = odtDocument.getDistanceFromCursor(inputMemberId, node, 0);
                 }
             }
-            return createOpMoveCursorByAdjustment(0, steps);
+            sessionEnqueue(createOpMoveCursorByAdjustment(0, steps));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionToParagraphEnd() {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
@@ -401,7 +423,8 @@ gui.SessionController = (function () {
                         inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
                 }
             }
-            return createOpMoveCursorByAdjustment(0, steps);
+            sessionEnqueue(createOpMoveCursorByAdjustment(0, steps));
+            return true;
         }
 
         /**
@@ -421,31 +444,35 @@ gui.SessionController = (function () {
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorToDocumentStart() {
-            return createOpMoveCursorDocument(-1, false);
+            sessionEnqueue(createOpMoveCursorDocument(-1, false));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function moveCursorToDocumentEnd() {
-            return createOpMoveCursorDocument(1, false);
+            sessionEnqueue(createOpMoveCursorDocument(1, false));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionToDocumentStart() {
-            return createOpMoveCursorDocument(-1, true);
+            sessionEnqueue(createOpMoveCursorDocument(-1, true));
+            return true;
         }
 
         /*
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
         function extendSelectionToDocumentEnd() {
-            return createOpMoveCursorDocument(1, true);
+            sessionEnqueue(createOpMoveCursorDocument(1, true));
+            return true;
         }
 
         /**
@@ -477,9 +504,9 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
-        function createOpRemoveTextByBackspaceKey() {
+        function removeTextByBackspaceKey() {
             var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op = null;
 
@@ -496,12 +523,13 @@ gui.SessionController = (function () {
             } else {
                 op = createOpRemoveSelection(selection);
             }
-            return op;
+            sessionEnqueue(op);
+            return true;
         }
         /**
-         * @return {?ops.Operation}
+         * @return {!boolean}
          */
-        function createOpRemoveTextByDeleteKey() {
+        function removeTextByDeleteKey() {
             var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op = null;
 
@@ -518,9 +546,13 @@ gui.SessionController = (function () {
             } else {
                 op = createOpRemoveSelection(selection);
             }
-            return op;
+            sessionEnqueue(op);
+            return op !== null;
         }
 
+        /**
+         * @return {!boolean}
+         */
         function enqueueParagraphSplittingOps() {
             var position = odtDocument.getCursorPosition(inputMemberId),
                 isAtEndOfParagraph = false, // TODO: find out if at end
@@ -536,21 +568,23 @@ gui.SessionController = (function () {
 
             // disabled for now, because nowjs seems to revert the order of the ops, which does not work here TODO: grouping of ops
             /*
-            if (isAtEndOfParagraph) {
-                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
-                styleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, odf.Namespaces.stylens, 'next-style-name');
+             if (isAtEndOfParagraph) {
+             paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
+             styleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, odf.Namespaces.stylens, 'next-style-name');
 
-                if (nextStyleName && nextStyleName !== styleName) {
-                    op = new ops.OpSetParagraphStyle();
-                    op.init({
-                        memberid: inputMemberId,
-                        position: position + 1, // +1 should be at the start of the new paragraph
-                        styleName: styleName
-                    });
-                    session.enqueue(op);
-                }
-            }
-            */
+             if (nextStyleName && nextStyleName !== styleName) {
+             op = new ops.OpSetParagraphStyle();
+             op.init({
+             memberid: inputMemberId,
+             position: position + 1, // +1 should be at the start of the new paragraph
+             styleName: styleName
+             });
+             session.enqueue(op);
+             }
+             }
+             */
+
+            return true;
         }
         // TODO: This method and associated event subscriptions really belong in SessionView
         // As this implementation relies on the current browser selection, only a single
@@ -561,88 +595,6 @@ gui.SessionController = (function () {
                 selection = runtime.getWindow().getSelection();
             selection.removeAllRanges();
             selection.addRange(cursor.getSelectedRange().cloneRange());
-        }
-        /**
-         * @param {!Event} e
-         */
-        function handleKeyDown(e) {
-            var keyCode = e.keyCode,
-                op = null,
-                handled = false;
-
-            if (keyCode === 37) { // left
-                op = e.shiftKey
-                    ? extendSelectionToLeft()
-                    : moveCursorToLeft();
-                handled = true;
-            } else if (keyCode === 39) { // right
-                op = e.shiftKey
-                    ? extendSelectionToRight()
-                    : moveCursorToRight();
-                handled = true;
-            } else if (keyCode === 38) { // up
-                if ((isMacOS && e.altKey && e.shiftKey) || (e.ctrlKey && e.shiftKey)) {
-                    op = extendSelectionToParagraphStart();
-                } else if (e.metaKey && e.shiftKey) {
-                    op = extendSelectionToDocumentStart();
-                } else if (e.shiftKey) {
-                    op = extendSelectionUp();
-                } else {
-                    op = moveCursorUp();
-                }
-                handled = true;
-            } else if (keyCode === 40) { // down
-                if ((isMacOS && e.altKey && e.shiftKey) || (e.ctrlKey && e.shiftKey)) {
-                    op = extendSelectionToParagraphEnd();
-                } else if (e.metaKey && e.shiftKey) {
-                    op = extendSelectionToDocumentEnd();
-                } else if (e.shiftKey) {
-                    op = extendSelectionDown();
-                } else {
-                    op = moveCursorDown();
-                }
-                handled = true;
-            } else if (keyCode === 36) { // home
-                if (!isMacOS && e.ctrlKey && e.shiftKey) {
-                    op = extendSelectionToDocumentStart();
-                } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
-                    op = moveCursorToDocumentStart();
-                } else {
-                    op = moveCursorToLineStart();
-                }
-                handled = true;
-            } else if (keyCode === 35) { // end
-                if (!isMacOS && e.ctrlKey && e.shiftKey) {
-                    op = extendSelectionToDocumentEnd();
-                } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
-                    op = moveCursorToDocumentEnd();
-                } else {
-                    op = moveCursorToLineEnd();
-                }
-                handled = true;
-            } else if (keyCode === 8) { // Backspace
-                op = createOpRemoveTextByBackspaceKey();
-                handled = true;
-            } else if (keyCode === 46) { // Delete
-                op = createOpRemoveTextByDeleteKey();
-                handled = (op !== null);
-            } else if (undoManager && keyCode === 90) { // z
-                if ((!isMacOS && e.ctrlKey) || (isMacOS && e.metaKey)) {
-                    if (e.shiftKey) {
-                        undoManager.moveForward(1);
-                    } else {
-                        undoManager.moveBackward(1);
-                    }
-                    maintainCursorSelection();
-                    handled = true;
-                }
-            }
-            if (op) {
-                session.enqueue(op);
-            }
-            if (handled) {
-                cancelEvent(e);
-            }
         }
 
         /**
@@ -657,28 +609,6 @@ gui.SessionController = (function () {
                 return String.fromCharCode(event.which);   // the rest
             }
             return null; // special key
-        }
-
-        /**
-         * @param {!Event} e
-         */
-        function handleKeyPress(e) {
-            var op,
-                text = stringFromKeyPress(e);
-
-            if (e.keyCode === 13) { // enter
-                enqueueParagraphSplittingOps();
-                cancelEvent(e);
-            } else if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
-                op = new ops.OpInsertText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: odtDocument.getCursorPosition(inputMemberId),
-                    text: text
-                });
-                session.enqueue(op);
-                cancelEvent(e);
-            }
         }
 
         /**
@@ -766,14 +696,40 @@ gui.SessionController = (function () {
             odtDocument.emit(ops.OdtDocument.signalUndoStackChanged, e);
         }
 
-       /**
-        */
+        /**
+         * @return {!boolean}
+         */
+        function undo() {
+            if (undoManager) {
+                undoManager.moveBackward(1);
+                maintainCursorSelection();
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * @return {!boolean}
+         */
+        function redo() {
+            if (undoManager) {
+                undoManager.moveForward(1);
+                maintainCursorSelection();
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         */
         this.startEditing = function () {
             var canvasElement, op;
 
             canvasElement = odtDocument.getOdfCanvas().getElement();
-            listenEvent(canvasElement, "keydown", handleKeyDown);
-            listenEvent(canvasElement, "keypress", handleKeyPress);
+            listenEvent(canvasElement, "keydown", keyDownHandler.handleEvent);
+            listenEvent(canvasElement, "keypress", keyPressHandler.handleEvent);
             listenEvent(canvasElement, "keyup", dummyHandler);
             // In Safari 6.0.5 (7536.30.1), Using either attachEvent or addEventListener
             // results in the beforecut return value being ignored which prevents cut from being called.
@@ -807,8 +763,8 @@ gui.SessionController = (function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
 
             canvasElement = odtDocument.getOdfCanvas().getElement();
-            removeEvent(canvasElement, "keydown", handleKeyDown);
-            removeEvent(canvasElement, "keypress", handleKeyPress);
+            removeEvent(canvasElement, "keydown", keyDownHandler.handleEvent);
+            removeEvent(canvasElement, "keypress", keyPressHandler.handleEvent);
             removeEvent(canvasElement, "keyup", dummyHandler);
             removeEvent(canvasElement, "cut", handleCut);
             removeEvent(canvasElement, "beforecut", handleBeforeCut);
@@ -867,6 +823,56 @@ gui.SessionController = (function () {
         };
 
         function init() {
+            var isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
+                modifier = gui.KeyboardHandler.Modifier,
+                keyCode = gui.KeyboardHandler.KeyCode;
+
+            keyDownHandler.bind(keyCode.Left, modifier.None, moveCursorToLeft);
+            keyDownHandler.bind(keyCode.Right, modifier.None, moveCursorToRight);
+            keyDownHandler.bind(keyCode.Up, modifier.None, moveCursorUp);
+            keyDownHandler.bind(keyCode.Down, modifier.None, moveCursorDown);
+            keyDownHandler.bind(keyCode.Home, modifier.None, moveCursorToLineStart);
+            keyDownHandler.bind(keyCode.End, modifier.None, moveCursorToLineEnd);
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, removeTextByBackspaceKey);
+            keyDownHandler.bind(keyCode.Delete, modifier.None, removeTextByDeleteKey);
+            keyDownHandler.bind(keyCode.Left, modifier.Shift, extendSelectionToLeft);
+            keyDownHandler.bind(keyCode.Right, modifier.Shift, extendSelectionToRight);
+            keyDownHandler.bind(keyCode.Up, modifier.Shift, extendSelectionUp);
+            keyDownHandler.bind(keyCode.Down, modifier.Shift, extendSelectionDown);
+
+            if (isMacOS) {
+                keyDownHandler.bind(keyCode.Up, modifier.MetaShift, extendSelectionToDocumentStart);
+                keyDownHandler.bind(keyCode.Down, modifier.MetaShift, extendSelectionToDocumentEnd);
+                keyDownHandler.bind(keyCode.Up, modifier.AltShift, extendSelectionToParagraphStart);
+                keyDownHandler.bind(keyCode.Down, modifier.AltShift, extendSelectionToParagraphEnd);
+                keyDownHandler.bind(keyCode.Home, modifier.Meta, moveCursorToDocumentStart);
+                keyDownHandler.bind(keyCode.End, modifier.Meta, moveCursorToDocumentEnd);
+                keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
+                keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
+            } else {
+                keyDownHandler.bind(keyCode.Up, modifier.CtrlShift, extendSelectionToParagraphStart);
+                keyDownHandler.bind(keyCode.Down, modifier.CtrlShift, extendSelectionToParagraphEnd);
+                keyDownHandler.bind(keyCode.Home, modifier.CtrlShift, extendSelectionToDocumentStart);
+                keyDownHandler.bind(keyCode.End, modifier.CtrlShift, extendSelectionToDocumentEnd);
+                keyDownHandler.bind(keyCode.Home, modifier.Ctrl, moveCursorToDocumentStart);
+                keyDownHandler.bind(keyCode.End, modifier.Ctrl, moveCursorToDocumentEnd);
+                keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
+                keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
+            }
+
+            keyPressHandler.setDefault(function (e) {
+                var text = stringFromKeyPress(e),
+                    op = new ops.OpInsertText();
+                op.init({
+                    memberid: inputMemberId,
+                    position: odtDocument.getCursorPosition(inputMemberId),
+                    text: text
+                });
+                session.enqueue(op);
+                return true;
+            });
+            keyPressHandler.bind(keyCode.Enter, modifier.None, enqueueParagraphSplittingOps);
+
             clickHandler.subscribe(gui.ClickHandler.signalSingleClick, select);
             clickHandler.subscribe(gui.ClickHandler.signalDoubleClick, selectWord);
             clickHandler.subscribe(gui.ClickHandler.signalTripleClick, selectParagraph);
