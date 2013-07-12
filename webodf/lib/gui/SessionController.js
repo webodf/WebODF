@@ -354,19 +354,20 @@ gui.SessionController = (function () {
 
         /**
          * @param {!number} direction -1 for beginning 1 for end
+         * @param {!boolean} extend
          * @return {?ops.Operation}
          */
-        function createOpMoveCursorLineBoundary(direction) {
+        function createOpMoveCursorLineBoundary(direction, extend) {
             var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
                 direction, odtDocument.getPositionFilter());
-            return createOpMoveCursorByAdjustment(steps, 0);
+            return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
         /*
          * @return {!boolean}
          */
         function moveCursorToLineStart() {
-            sessionEnqueue(createOpMoveCursorLineBoundary(-1));
+            sessionEnqueue(createOpMoveCursorLineBoundary(-1, false));
             return true;
         }
 
@@ -374,7 +375,23 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorToLineEnd() {
-            sessionEnqueue(createOpMoveCursorLineBoundary(1));
+            sessionEnqueue(createOpMoveCursorLineBoundary(1, false));
+            return true;
+        }
+
+        /*
+         * @return {!boolean}
+         */
+        function extendSelectionToLineStart() {
+            sessionEnqueue(createOpMoveCursorLineBoundary(-1, true));
+            return true;
+        }
+
+        /*
+         * @return {!boolean}
+         */
+        function extendSelectionToLineEnd() {
+            sessionEnqueue(createOpMoveCursorLineBoundary(1, true));
             return true;
         }
 
@@ -831,8 +848,6 @@ gui.SessionController = (function () {
             keyDownHandler.bind(keyCode.Right, modifier.None, moveCursorToRight);
             keyDownHandler.bind(keyCode.Up, modifier.None, moveCursorUp);
             keyDownHandler.bind(keyCode.Down, modifier.None, moveCursorDown);
-            keyDownHandler.bind(keyCode.Home, modifier.None, moveCursorToLineStart);
-            keyDownHandler.bind(keyCode.End, modifier.None, moveCursorToLineEnd);
             keyDownHandler.bind(keyCode.Backspace, modifier.None, removeTextByBackspaceKey);
             keyDownHandler.bind(keyCode.Delete, modifier.None, removeTextByDeleteKey);
             keyDownHandler.bind(keyCode.Left, modifier.Shift, extendSelectionToLeft);
@@ -841,21 +856,29 @@ gui.SessionController = (function () {
             keyDownHandler.bind(keyCode.Down, modifier.Shift, extendSelectionDown);
 
             if (isMacOS) {
-                keyDownHandler.bind(keyCode.Up, modifier.MetaShift, extendSelectionToDocumentStart);
-                keyDownHandler.bind(keyCode.Down, modifier.MetaShift, extendSelectionToDocumentEnd);
-                keyDownHandler.bind(keyCode.Up, modifier.AltShift, extendSelectionToParagraphStart);
-                keyDownHandler.bind(keyCode.Down, modifier.AltShift, extendSelectionToParagraphEnd);
+                keyDownHandler.bind(keyCode.Left, modifier.Meta, moveCursorToLineStart);
+                keyDownHandler.bind(keyCode.Right, modifier.Meta, moveCursorToLineEnd);
                 keyDownHandler.bind(keyCode.Home, modifier.Meta, moveCursorToDocumentStart);
                 keyDownHandler.bind(keyCode.End, modifier.Meta, moveCursorToDocumentEnd);
+                keyDownHandler.bind(keyCode.Left, modifier.MetaShift, extendSelectionToLineStart);
+                keyDownHandler.bind(keyCode.Right, modifier.MetaShift, extendSelectionToLineEnd);
+                keyDownHandler.bind(keyCode.Up, modifier.AltShift, extendSelectionToParagraphStart);
+                keyDownHandler.bind(keyCode.Down, modifier.AltShift, extendSelectionToParagraphEnd);
+                keyDownHandler.bind(keyCode.Up, modifier.MetaShift, extendSelectionToDocumentStart);
+                keyDownHandler.bind(keyCode.Down, modifier.MetaShift, extendSelectionToDocumentEnd);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
+                keyDownHandler.bind(keyCode.Home, modifier.None, moveCursorToLineStart);
+                keyDownHandler.bind(keyCode.End, modifier.None, moveCursorToLineEnd);
+                keyDownHandler.bind(keyCode.Home, modifier.Ctrl, moveCursorToDocumentStart);
+                keyDownHandler.bind(keyCode.End, modifier.Ctrl, moveCursorToDocumentEnd);
+                keyDownHandler.bind(keyCode.Home, modifier.Shift, extendSelectionToLineStart);
+                keyDownHandler.bind(keyCode.End, modifier.Shift, extendSelectionToLineEnd);
                 keyDownHandler.bind(keyCode.Up, modifier.CtrlShift, extendSelectionToParagraphStart);
                 keyDownHandler.bind(keyCode.Down, modifier.CtrlShift, extendSelectionToParagraphEnd);
                 keyDownHandler.bind(keyCode.Home, modifier.CtrlShift, extendSelectionToDocumentStart);
                 keyDownHandler.bind(keyCode.End, modifier.CtrlShift, extendSelectionToDocumentEnd);
-                keyDownHandler.bind(keyCode.Home, modifier.Ctrl, moveCursorToDocumentStart);
-                keyDownHandler.bind(keyCode.End, modifier.Ctrl, moveCursorToDocumentEnd);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }
