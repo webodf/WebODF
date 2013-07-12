@@ -60,6 +60,7 @@ gui.SessionController = (function () {
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
         var self = this,
+            odtDocument = session.getOdtDocument(),
             odfUtils = new odf.OdfUtils(),
             isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
             clipboard = new gui.Clipboard(),
@@ -119,9 +120,36 @@ gui.SessionController = (function () {
             cancelEvent(e);
         }
 
+        /**
+         * @param {!number} position
+         * @param {!number} length
+         * @return {!ops.Operation}
+         */
+        function createOpMoveCursor(position, length) {
+            var op = new ops.OpMoveCursor();
+            op.init({memberid: inputMemberId, position: position, length: length || 0});
+            return op;
+        }
+
+        /**
+         * @param {!number} posAdjust   position adjustment
+         * @param {!number} lenAdjust   length adjustment
+         * @return {?ops.Operation}
+         */
+        function createOpMoveCursorByAdjustment(posAdjust, lenAdjust) {
+            var selection = odtDocument.getCursorSelection(inputMemberId),
+                newPos, newLen;
+            if (posAdjust === 0 && lenAdjust === 0) {
+                return null;
+            }
+
+            newPos = selection.position + posAdjust;
+            newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
+            return createOpMoveCursor(newPos, newLen);
+        }
+
         function countStepsToNode(targetNode, targetOffset) {
-            var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 canvasElement = odtDocument.getOdfCanvas().getElement(),
                 node;
 
@@ -159,24 +187,21 @@ gui.SessionController = (function () {
             return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
         }
 
-        function moveCursor() {
+        function select() {
             var selection = runtime.getWindow().getSelection(),
-                odtDocument = session.getOdtDocument(),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 stepsToAnchor, stepsToFocus, op;
 
             stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
             stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
             if (stepsToFocus !== 0 || stepsToAnchor !== 0) {
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+stepsToAnchor, length: stepsToFocus - stepsToAnchor});
+                op = createOpMoveCursor(oldPosition + stepsToAnchor, stepsToFocus - stepsToAnchor);
                 session.enqueue(op);
             }
         }
 
         function selectWord() {
-            var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 alphaNumeric = /[A-Za-z0-9]/,
@@ -217,15 +242,13 @@ gui.SessionController = (function () {
             }
 
             if (stepsToStart !== 0 || stepsToEnd !== 0) {
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+stepsToStart, length: Math.abs(stepsToStart) + Math.abs(stepsToEnd)});
+                op = createOpMoveCursor(oldPosition + stepsToStart, Math.abs(stepsToStart) + Math.abs(stepsToEnd));
                 session.enqueue(op);
             }
         }
 
         function selectParagraph() {
-            var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 stepsToStart, stepsToEnd, op;
@@ -235,34 +258,25 @@ gui.SessionController = (function () {
             stepsToEnd = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.unfilteredDomOffset());
 
             if (stepsToStart !== 0 || stepsToEnd !== 0) {
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+stepsToStart, length: Math.abs(stepsToStart) + Math.abs(stepsToEnd)});
+                op = createOpMoveCursor(oldPosition + stepsToStart, Math.abs(stepsToStart) + Math.abs(stepsToEnd));
                 session.enqueue(op);
             }
         }
 
         /**
          * @param {!number} steps
-         * @return {!ops.Operation}
+         * @return {?ops.Operation}
          */
-        function createOpMoveCursor(steps) {
-            var op = new ops.OpMoveCursor(),
-                oldPosition = session.getOdtDocument().getCursorPosition(inputMemberId);
-
-            op.init({memberid: inputMemberId, position: oldPosition+steps});
-            return op;
+        function moveCursor(steps) {
+            return createOpMoveCursorByAdjustment(steps, 0);
         }
 
         /**
          * @param {!number} increment
-         * @return {!ops.Operation}
+         * @return {?ops.Operation}
          */
         function extendSelection(increment) {
-            var op = new ops.OpMoveCursor(),
-                selection = session.getOdtDocument().getCursorSelection(inputMemberId);
-
-            op.init({memberid: inputMemberId, position: selection.position, length: selection.length+increment});
-            return op;
+            return createOpMoveCursorByAdjustment(0, increment);
         }
 
         /**
@@ -270,18 +284,12 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function extendSelectionByLines(lines) {
-            var odtDocument = session.getOdtDocument(),
-                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                selection, steps, op = null;
+            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lines, odtDocument.getPositionFilter());
-            if (steps !== 0) {
-                selection = session.getOdtDocument().getCursorSelection(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
-            }
-            return op;
+            return createOpMoveCursorByAdjustment(0, steps);
         }
 
         /**
@@ -289,32 +297,22 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpMoveCursorByLines(lines) {
-            var odtDocument = session.getOdtDocument(),
-                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                oldPosition, steps, op = null;
+            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lines, odtDocument.getPositionFilter());
-            if (steps !== 0) {
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+steps});
-            }
-            return op;
+            return createOpMoveCursorByAdjustment(steps, 0);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function extendSelectionToParagraphStart() {
-            var odtDocument = session.getOdtDocument(),
-                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                iterator, node, selection, steps, op = null;
+            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                iterator, node, steps;
 
-            if (!paragraphNode) {
-                return op;
-            }
-
+            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
             iterator.setUnfilteredPosition(paragraphNode, 0);
@@ -326,28 +324,17 @@ gui.SessionController = (function () {
                     steps = odtDocument.getDistanceFromCursor(inputMemberId, node, 0);
                 }
             }
-
-            if (steps !== 0) {
-                selection = odtDocument.getCursorSelection(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
-            }
-
-            return op;
+            return createOpMoveCursorByAdjustment(0, steps);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function extendSelectionToParagraphEnd() {
-            var odtDocument = session.getOdtDocument(),
-                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                iterator, node, selection, steps, op = null;
+            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                iterator, node, steps;
 
-            if (!paragraphNode) {
-                return op;
-            }
-
+            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
             iterator.moveToEndOfNode(paragraphNode);
             steps = odtDocument.getDistanceFromCursor(
@@ -362,111 +349,58 @@ gui.SessionController = (function () {
                         inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
                 }
             }
-
-            if (steps !== 0) {
-                selection = odtDocument.getCursorSelection(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
-            }
-
-            return op;
+            return createOpMoveCursorByAdjustment(0, steps);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function moveToLineBoundary(direction) {
-            var odtDocument = session.getOdtDocument(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                steps,
-                op = null;
-
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
+            var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
                 direction, odtDocument.getPositionFilter());
-            if (steps !== 0) {
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+steps});
-            }
-
-            return op;
+            return createOpMoveCursorByAdjustment(steps, 0);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function extendSelectionToDocumentEnd() {
-            var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                selection, steps, op = null;
+            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                steps;
 
             iterator.moveToEnd();
             steps = odtDocument.getDistanceFromCursor(
                 inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-
-            if (steps !== 0) {
-                selection = odtDocument.getCursorSelection(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
-            }
-
-            return op;
+            return createOpMoveCursorByAdjustment(0, steps);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function extendSelectionToDocumentStart() {
-            var odtDocument = session.getOdtDocument(),
-                selection, steps, op = null;
-
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
-
-            if (steps !== 0) {
-                selection = odtDocument.getCursorSelection(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: selection.position, length: selection.length+steps});
-            }
-
-            return op;
+            var steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
+            return createOpMoveCursorByAdjustment(0, steps);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function moveCursorToDocumentEnd() {
-            var odtDocument = session.getOdtDocument(),
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                oldPosition, steps, op = null;
+            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                steps;
 
             iterator.moveToEnd();
             steps = odtDocument.getDistanceFromCursor(
                 inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-
-            if (steps !== 0) {
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition + steps, length: 0});
-            }
-
-            return op;
+            return createOpMoveCursorByAdjustment(steps, 0);
         }
 
         /**
          * @return {?ops.Operation}
          */
         function moveCursorToDocumentStart() {
-            var odtDocument = session.getOdtDocument(),
-                oldPosition, steps, op = null;
-
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
-
-            if (steps !== 0) {
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                op = new ops.OpMoveCursor();
-                op.init({memberid: inputMemberId, position: oldPosition+steps, length: 0});
-            }
-
-            return op;
+            var steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
+            return createOpMoveCursorByAdjustment(steps, 0);
         }
 
         /**
@@ -501,8 +435,7 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpRemoveTextByBackspaceKey() {
-            var odtDocument = session.getOdtDocument(),
-                selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+            var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op = null;
 
             if (selection.length === 0) {
@@ -524,8 +457,7 @@ gui.SessionController = (function () {
          * @return {?ops.Operation}
          */
         function createOpRemoveTextByDeleteKey() {
-            var odtDocument = session.getOdtDocument(),
-                selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+            var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op = null;
 
             if (selection.length === 0) {
@@ -545,8 +477,7 @@ gui.SessionController = (function () {
         }
 
         function enqueueParagraphSplittingOps() {
-            var odtDocument = session.getOdtDocument(),
-                position = odtDocument.getCursorPosition(inputMemberId),
+            var position = odtDocument.getCursorPosition(inputMemberId),
                 isAtEndOfParagraph = false, // TODO: find out if at end
                 paragraphNode, styleName, nextStyleName,
                 op;
@@ -581,7 +512,7 @@ gui.SessionController = (function () {
         // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
         // implemented, this limitation will be eliminated
         function maintainCursorSelection() {
-            var cursor = session.getOdtDocument().getCursor(inputMemberId),
+            var cursor = odtDocument.getCursor(inputMemberId),
                 selection = runtime.getWindow().getSelection();
             selection.removeAllRanges();
             selection.addRange(cursor.getSelectedRange().cloneRange());
@@ -597,12 +528,12 @@ gui.SessionController = (function () {
             if (keyCode === 37) { // left
                 op = e.shiftKey
                     ? extendSelection(-1)
-                    : createOpMoveCursor(-1);
+                    : moveCursor(-1);
                 handled = true;
             } else if (keyCode === 39) { // right
                 op = e.shiftKey
                     ? extendSelection(1)
-                    : createOpMoveCursor(1);
+                    : moveCursor(1);
                 handled = true;
             } else if (keyCode === 38) { // up
                 if ((isMacOS && e.altKey && e.shiftKey) || (e.ctrlKey && e.shiftKey)) {
@@ -697,7 +628,7 @@ gui.SessionController = (function () {
                 op = new ops.OpInsertText();
                 op.init({
                     memberid: inputMemberId,
-                    position: session.getOdtDocument().getCursorPosition(inputMemberId),
+                    position: odtDocument.getCursorPosition(inputMemberId),
                     text: text
                 });
                 session.enqueue(op);
@@ -710,7 +641,7 @@ gui.SessionController = (function () {
          * @param {!Event} e
          */
         function handleCut(e) {
-            var cursor = session.getOdtDocument().getCursor(inputMemberId),
+            var cursor = odtDocument.getCursor(inputMemberId),
                 selectedRange = cursor.getSelectedRange(),
                 selection,
                 op;
@@ -743,7 +674,7 @@ gui.SessionController = (function () {
          * @returns {boolean}
          */
         function handleBeforeCut() {
-            var cursor = session.getOdtDocument().getCursor(inputMemberId),
+            var cursor = odtDocument.getCursor(inputMemberId),
                 selectedRange = cursor.getSelectedRange();
             return !(selectedRange.collapsed === false); // return false to enable cut menu... straightforward right?!
         }
@@ -764,7 +695,7 @@ gui.SessionController = (function () {
                 op = new ops.OpInsertText();
                 op.init({
                     memberid: inputMemberId,
-                    position: session.getOdtDocument().getCursorPosition(inputMemberId),
+                    position: odtDocument.getCursorPosition(inputMemberId),
                     text: plainText
                 });
                 session.enqueue(op);
@@ -787,14 +718,13 @@ gui.SessionController = (function () {
         }
 
         function forwardUndoStackChange(e) {
-            session.getOdtDocument().emit(ops.OdtDocument.signalUndoStackChanged, e);
+            odtDocument.emit(ops.OdtDocument.signalUndoStackChanged, e);
         }
 
        /**
         */
         this.startEditing = function () {
-            var canvasElement, op,
-                odtDocument = session.getOdtDocument();
+            var canvasElement, op;
 
             canvasElement = odtDocument.getOdfCanvas().getElement();
             listenEvent(canvasElement, "keydown", handleKeyDown);
@@ -826,8 +756,7 @@ gui.SessionController = (function () {
         /**
          */
         this.endEditing = function () {
-            var canvasElement, op,
-                odtDocument = session.getOdtDocument();
+            var canvasElement, op;
 
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
@@ -875,11 +804,11 @@ gui.SessionController = (function () {
 
             undoManager = manager;
             if (undoManager) {
-                undoManager.setOdtDocument(session.getOdtDocument());
+                undoManager.setOdtDocument(odtDocument);
                 // As per gui.UndoManager, this should NOT fire any signals or report
                 // events being executed back to the undo manager.
                 undoManager.setPlaybackFunction(function (op) {
-                    op.execute(session.getOdtDocument());
+                    op.execute(odtDocument);
                 });
                 undoManager.subscribe(gui.UndoManager.signalUndoStackChanged, forwardUndoStackChange);
             }
@@ -893,7 +822,7 @@ gui.SessionController = (function () {
         };
 
         function init() {
-            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, moveCursor);
+            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, select);
             clickHandler.subscribe(gui.ClickHandler.signalDoubleClick, selectWord);
             clickHandler.subscribe(gui.ClickHandler.signalTripleClick, selectParagraph);
         }
