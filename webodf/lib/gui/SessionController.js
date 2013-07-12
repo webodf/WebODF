@@ -112,6 +112,7 @@ gui.SessionController = (function () {
                 event.returnValue = false;
             }
         }
+
         /**
          * @param {!Event} e
          */
@@ -129,23 +130,6 @@ gui.SessionController = (function () {
             var op = new ops.OpMoveCursor();
             op.init({memberid: inputMemberId, position: position, length: length || 0});
             return op;
-        }
-
-        /**
-         * @param {!number} posAdjust   position adjustment
-         * @param {!number} lenAdjust   length adjustment
-         * @return {?ops.Operation}
-         */
-        function createOpMoveCursorByAdjustment(posAdjust, lenAdjust) {
-            var selection = odtDocument.getCursorSelection(inputMemberId),
-                newPos, newLen;
-            if (posAdjust === 0 && lenAdjust === 0) {
-                return null;
-            }
-
-            newPos = selection.position + posAdjust;
-            newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
-            return createOpMoveCursor(newPos, newLen);
         }
 
         function countStepsToNode(targetNode, targetOffset) {
@@ -264,48 +248,116 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!number} steps
+         * @param {!number} posAdjust   position adjustment
+         * @param {!number} lenAdjust   length adjustment
          * @return {?ops.Operation}
          */
-        function moveCursor(steps) {
+        function createOpMoveCursorByAdjustment(posAdjust, lenAdjust) {
+            var selection = odtDocument.getCursorSelection(inputMemberId),
+                newPos, newLen;
+            if (posAdjust === 0 && lenAdjust === 0) {
+                return null;
+            }
+
+            newPos = selection.position + posAdjust;
+            newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
+            return createOpMoveCursor(newPos, newLen);
+        }
+        
+        /*
+         * @return {?ops.Operation}
+         */
+        function moveCursorToLeft() {
+            return createOpMoveCursorByAdjustment(-1, 0);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function moveCursorToRight() {
+            return createOpMoveCursorByAdjustment(1, 0);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToLeft() {
+            return createOpMoveCursorByAdjustment(0, -1);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToRight() {
+            return createOpMoveCursorByAdjustment(0, 1);
+        }
+
+        /**
+         * @param {!number} direction -1 for upwards 1 for downwards
+         * @param {!boolean} extend
+         */
+        function createOpMoveCursorDirection(direction, extend) {
+            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+                steps, op;
+
+            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, odtDocument.getPositionFilter());
+            return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function moveCursorUp() {
+            return createOpMoveCursorDirection(-1, false);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function moveCursorDown() {
+            return createOpMoveCursorDirection(1, false);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function extendSelectionUp() {
+            return createOpMoveCursorDirection(-1, true);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function extendSelectionDown() {
+            return createOpMoveCursorDirection(1, true);
+        }
+
+        /**
+         * @param {!number} direction -1 for beginning 1 for end
+         * @return {?ops.Operation}
+         */
+        function createOpMoveCursorLineBoundary(direction) {
+            var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
+                direction, odtDocument.getPositionFilter());
             return createOpMoveCursorByAdjustment(steps, 0);
         }
 
-        /**
-         * @param {!number} increment
+        /*
          * @return {?ops.Operation}
          */
-        function extendSelection(increment) {
-            return createOpMoveCursorByAdjustment(0, increment);
+        function moveCursorToLineStart() {
+            return createOpMoveCursorLineBoundary(-1);
         }
 
-        /**
-         * @param {!number} lines
+        /*
          * @return {?ops.Operation}
          */
-        function extendSelectionByLines(lines) {
-            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                steps;
-
-            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lines, odtDocument.getPositionFilter());
-            return createOpMoveCursorByAdjustment(0, steps);
+        function moveCursorToLineEnd() {
+            return createOpMoveCursorLineBoundary(1);
         }
 
-        /**
-         * @param {!number} lines
-         * @return {?ops.Operation}
-         */
-        function createOpMoveCursorByLines(lines) {
-            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                steps;
-
-            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lines, odtDocument.getPositionFilter());
-            return createOpMoveCursorByAdjustment(steps, 0);
-        }
-
-        /**
+        /*
          * @return {?ops.Operation}
          */
         function extendSelectionToParagraphStart() {
@@ -327,7 +379,7 @@ gui.SessionController = (function () {
             return createOpMoveCursorByAdjustment(0, steps);
         }
 
-        /**
+        /*
          * @return {?ops.Operation}
          */
         function extendSelectionToParagraphEnd() {
@@ -353,54 +405,47 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {!number} direction -1 for beginning 1 for end
          * @return {?ops.Operation}
          */
-        function moveToLineBoundary(direction) {
-            var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
-                direction, odtDocument.getPositionFilter());
-            return createOpMoveCursorByAdjustment(steps, 0);
-        }
-
-        /**
-         * @return {?ops.Operation}
-         */
-        function extendSelectionToDocumentEnd() {
+        function createOpMoveCursorDocument(direction, extend) {
             var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 steps;
+            if (direction > 0) {
+                iterator.moveToEnd();
+            }
 
-            iterator.moveToEnd();
             steps = odtDocument.getDistanceFromCursor(
                 inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-            return createOpMoveCursorByAdjustment(0, steps);
+            return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
-        /**
-         * @return {?ops.Operation}
-         */
-        function extendSelectionToDocumentStart() {
-            var steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
-            return createOpMoveCursorByAdjustment(0, steps);
-        }
-
-        /**
-         * @return {?ops.Operation}
-         */
-        function moveCursorToDocumentEnd() {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                steps;
-
-            iterator.moveToEnd();
-            steps = odtDocument.getDistanceFromCursor(
-                inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-            return createOpMoveCursorByAdjustment(steps, 0);
-        }
-
-        /**
+        /*
          * @return {?ops.Operation}
          */
         function moveCursorToDocumentStart() {
-            var steps = odtDocument.getDistanceFromCursor(inputMemberId, odtDocument.getRootNode(), 0);
-            return createOpMoveCursorByAdjustment(steps, 0);
+            return createOpMoveCursorDocument(-1, false);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function moveCursorToDocumentEnd() {
+            return createOpMoveCursorDocument(1, false);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToDocumentStart() {
+            return createOpMoveCursorDocument(-1, true);
+        }
+
+        /*
+         * @return {?ops.Operation}
+         */
+        function extendSelectionToDocumentEnd() {
+            return createOpMoveCursorDocument(1, true);
         }
 
         /**
@@ -527,13 +572,13 @@ gui.SessionController = (function () {
 
             if (keyCode === 37) { // left
                 op = e.shiftKey
-                    ? extendSelection(-1)
-                    : moveCursor(-1);
+                    ? extendSelectionToLeft()
+                    : moveCursorToLeft();
                 handled = true;
             } else if (keyCode === 39) { // right
                 op = e.shiftKey
-                    ? extendSelection(1)
-                    : moveCursor(1);
+                    ? extendSelectionToRight()
+                    : moveCursorToRight();
                 handled = true;
             } else if (keyCode === 38) { // up
                 if ((isMacOS && e.altKey && e.shiftKey) || (e.ctrlKey && e.shiftKey)) {
@@ -541,9 +586,9 @@ gui.SessionController = (function () {
                 } else if (e.metaKey && e.shiftKey) {
                     op = extendSelectionToDocumentStart();
                 } else if (e.shiftKey) {
-                    op = extendSelectionByLines(-1);
+                    op = extendSelectionUp();
                 } else {
-                    op = createOpMoveCursorByLines(-1);
+                    op = moveCursorUp();
                 }
                 handled = true;
             } else if (keyCode === 40) { // down
@@ -552,9 +597,9 @@ gui.SessionController = (function () {
                 } else if (e.metaKey && e.shiftKey) {
                     op = extendSelectionToDocumentEnd();
                 } else if (e.shiftKey) {
-                    op = extendSelectionByLines(1);
+                    op = extendSelectionDown();
                 } else {
-                    op = createOpMoveCursorByLines(1);
+                    op = moveCursorDown();
                 }
                 handled = true;
             } else if (keyCode === 36) { // home
@@ -563,7 +608,7 @@ gui.SessionController = (function () {
                 } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
                     op = moveCursorToDocumentStart();
                 } else {
-                    op = moveToLineBoundary(-1);
+                    op = moveCursorToLineStart();
                 }
                 handled = true;
             } else if (keyCode === 35) { // end
@@ -572,7 +617,7 @@ gui.SessionController = (function () {
                 } else if ((isMacOS && e.metaKey) || e.ctrlKey) {
                     op = moveCursorToDocumentEnd();
                 } else {
-                    op = moveToLineBoundary(1);
+                    op = moveCursorToLineEnd();
                 }
                 handled = true;
             } else if (keyCode === 8) { // Backspace
