@@ -37,7 +37,7 @@
 
 var viewer;
 
-function loadPlugin(pluginName, hasStyle, callback) {
+function loadPlugin(pluginName, callback) {
     "use strict";
     var script, style;
 
@@ -48,15 +48,6 @@ function loadPlugin(pluginName, hasStyle, callback) {
     script.src = pluginName + '.js';
     script.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(script);
-
-    if (hasStyle) {
-        // Load plugin CSS
-        style = document.createElement('link');
-        style.rel = 'stylesheet';
-        style.href = pluginName + '.css';
-        style.type = 'text/css';
-        document.getElementsByTagName('head')[0].appendChild(style);
-    }
 }
 
 function loadDocument(documentUrl) {
@@ -71,7 +62,7 @@ function loadDocument(documentUrl) {
         case 'odp':
         case 'ods':
         case 'fodt':
-            loadPlugin('./ODFViewerPlugin', false, function () {
+            loadPlugin('./ODFViewerPlugin', function () {
                 Plugin = ODFViewerPlugin;
             });
             break;
