@@ -38,14 +38,25 @@
 function ODFViewerPlugin() {
     "use strict";
 
-    runtime.currentDirectory = function () {
-        return "../../webodf/lib";
-    };
-    runtime.libraryPaths = function () {
-        return [ runtime.currentDirectory() ];
-    };
+    function init(callback) {
+        var lib = document.createElement('script');
+        lib.async = false;
+        lib.src = './webodf.js';
+        lib.type = 'text/javascript';
+        lib.onload = function () {
+            runtime.currentDirectory = function () {
+                return "../../webodf/lib";
+            };
+            runtime.libraryPaths = function () {
+                return [ runtime.currentDirectory() ];
+            };
 
-    runtime.loadClass('odf.OdfCanvas');
+            runtime.loadClass('odf.OdfCanvas');
+            callback();
+        };
+
+        document.getElementsByTagName('head')[0].appendChild(lib);
+    }
 
     // that should probably be provided by webodf
     function nsResolver(prefix) {
@@ -69,17 +80,18 @@ function ODFViewerPlugin() {
 
     this.initialize = function (viewerElement, documentUrl) {
         // If the URL has a fragment (#...), try to load the file it represents
+        init(function () {
+            odfElement = document.getElementById('canvas');
+            odfCanvas = new odf.OdfCanvas(odfElement);
+            odfCanvas.load(documentUrl);
 
-        odfElement = document.getElementById('canvas');
-        odfCanvas = new odf.OdfCanvas(odfElement);
-        odfCanvas.load(documentUrl);
+            odfCanvas.addListener('statereadychange', function () {
+                root = odfCanvas.odfContainer().rootElement;
+                initialized = true;
+                documentType = odfCanvas.odfContainer().getDocumentType(root);
 
-        odfCanvas.addListener('statereadychange', function () {
-            root = odfCanvas.odfContainer().rootElement;
-            initialized = true;
-            documentType = odfCanvas.odfContainer().getDocumentType(root);
-
-            self.onLoad();
+                self.onLoad();
+            });
         });
     };
 
@@ -141,4 +153,5 @@ function ODFViewerPlugin() {
     this.showPage = function (n) {
         odfCanvas.showPage(n);
     };
+ 
 }
