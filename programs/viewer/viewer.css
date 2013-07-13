@@ -435,6 +435,11 @@ html[dir='rtl'] .dropdownToolbarButton {
     content: url(images/toolbarButton-fullscreen.png);
 }
 
+.toolbarButton.presentation::before {
+    display: inline-block;
+    content: url(images/toolbarButton-presentation.png);
+}
+
 .toolbarButton.download::before {
     display: inline-block;
     content: url(images/toolbarButton-download.png);

@@ -44,7 +44,7 @@ function Viewer(viewerPlugin) {
         kMaxScale = 4.0,
         kDefaultScaleDelta = 1.1,
         kDefaultScale = 'auto',
-        slide_mode = false,
+        presentationMode = false,
         initialized = false,
         url,
         viewerElement,
@@ -60,7 +60,7 @@ function Viewer(viewerPlugin) {
     function isFullScreen() {
     // Note that the browser fullscreen (triggered by short keys) might
     // be considered different from content fullscreen when expecting a boolean
-        return document.mozFullScreen || document.webkitIsFullScreen;
+        return document.isFullScreen || document.mozFullScreen || document.webkitIsFullScreen;
     }
 
     function selectScaleOption(value) {
@@ -285,6 +285,29 @@ function Viewer(viewerPlugin) {
             }
         }
     };
+ 
+    /**
+     * Toggles the presentation mode of the viewer.
+     * Presentation mode involves fullscreen + hidden UI controls
+     */
+    this.togglePresentationMode = function () {
+        var titlebar = document.getElementById('titlebar'),
+            toolbar = document.getElementById('toolbarContainer');
+
+        if (!presentationMode) {
+            titlebar.style.display = toolbar.style.display = 'none';
+            canvasContainer.style.top = canvasContainer.style.bottom = '0';
+            canvasContainer.style.backgroundColor = 'black';
+            parseScale('page-fit');
+        } else {
+            titlebar.style.display = toolbar.style.display = 'block';
+            canvasContainer.style.top = canvasContainer.style.bottom = '32px';
+            canvasContainer.style.backgroundColor = '#888';
+            parseScale('auto');
+        }
+
+        presentationMode = !presentationMode;
+    };
 
     /**
      * Gets the zoom level of the document
@@ -325,6 +348,12 @@ function Viewer(viewerPlugin) {
         parseScale(newScale, true);
     };
 
+    function cancelPresentationMode() {
+        if (presentationMode && !isFullScreen()) {
+            self.togglePresentationMode();
+        }
+    }
+
     function init() {
 
         self.initialize();
@@ -333,9 +362,15 @@ function Viewer(viewerPlugin) {
             document.getElementById('fullscreen').style.visibility = 'hidden';
         }
 
-        document.getElementById('fullscreen').addEventListener('click', function () {
+        document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
+        document.getElementById('presentation').addEventListener('click', function () {
             self.toggleFullScreen();
+            self.togglePresentationMode();
         });
+
+        document.addEventListener('fullscreenchange', cancelPresentationMode);
+        document.addEventListener('webkitfullscreenchange', cancelPresentationMode);
+        document.addEventListener('mozfullscreenchange', cancelPresentationMode);
 
         document.getElementById('download').addEventListener('click', function () {
             self.download();
