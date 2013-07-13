@@ -296,13 +296,28 @@ function Viewer(viewerPlugin) {
 
         if (!presentationMode) {
             titlebar.style.display = toolbar.style.display = 'none';
-            canvasContainer.style.top = canvasContainer.style.bottom = '0';
-            canvasContainer.style.backgroundColor = 'black';
+            canvasContainer.className = 'presentationMode';
+            canvasContainer.onmousedown = function (event) {
+                event.preventDefault();
+            };
+            canvasContainer.oncontextmenu = function (event) {
+                event.preventDefault();
+            };
+            canvasContainer.onmouseup = function (event) {
+                event.preventDefault();
+                if (event.which === 1) {
+                    self.showNextPage();
+                } else {
+                    self.showPreviousPage();
+                }
+            };
             parseScale('page-fit');
         } else {
             titlebar.style.display = toolbar.style.display = 'block';
-            canvasContainer.style.top = canvasContainer.style.bottom = '32px';
-            canvasContainer.style.backgroundColor = '#888';
+            canvasContainer.className = '';
+            canvasContainer.onmouseup = function () {};
+            canvasContainer.oncontextmenu = function () {};
+            canvasContainer.onmousedown = function () {};
             parseScale('auto');
         }
 
@@ -364,7 +379,9 @@ function Viewer(viewerPlugin) {
 
         document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
         document.getElementById('presentation').addEventListener('click', function () {
-            self.toggleFullScreen();
+            if (!isFullScreen()) {
+                self.toggleFullScreen();
+            }
             self.togglePresentationMode();
         });
 
@@ -421,7 +438,8 @@ function Viewer(viewerPlugin) {
         });
 
         window.addEventListener('keydown', function (evt) {
-            var key = evt.keyCode;
+            var key = evt.keyCode,
+                shiftKey = evt.shiftKey;
 
             switch (key) {
             case 38: // up
@@ -431,6 +449,9 @@ function Viewer(viewerPlugin) {
             case 40: // down
             case 39: // right
                 self.showNextPage();
+                break;
+            case 32: // space
+                shiftKey ? self.showPreviousPage() : self.showNextPage();
                 break;
             }
         });
