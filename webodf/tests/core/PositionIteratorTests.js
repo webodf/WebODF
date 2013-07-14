@@ -356,6 +356,47 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         t.iterator.setUnfilteredPosition(t.doc.documentElement.firstChild, 0);
         r.shouldBe(t, "t.iterator.getCurrentNode() && t.iterator.getCurrentNode().getAttribute('id')", "'a1'");
     }
+    function iterateOverNode_NextPosition_EventuallyStops() {
+        var fragment;
+        createWalker('<p id="p1"><c id="c1"><c id="c2"><a id="a1"/></c></c></p>');
+        fragment = t.doc.documentElement.firstChild;
+        t.iterator.setUnfilteredPosition(fragment, 0);
+        t.loopCount = 0;
+
+        while (t.iterator.nextPosition() && t.loopCount < 100) {
+            t.loopCount += 1;
+        }
+
+        r.shouldBe(t, "t.loopCount", "2");
+    }
+    function iterateOverDisconnectedNode_NextPosition_EventuallyStops() {
+        var fragment;
+        createWalker('<p id="p1"><c id="c1"><c id="c2"><a id="a1"/></c></c></p>');
+        fragment = t.doc.documentElement.firstChild;
+        t.doc.documentElement.removeChild(fragment);
+        t.iterator.setUnfilteredPosition(fragment, 0);
+        t.loopCount = 0;
+
+        while (t.iterator.nextPosition() && t.loopCount < 100) {
+            t.loopCount += 1;
+        }
+
+        r.shouldBe(t, "t.loopCount", "1");
+    }
+    function iterateOverDisconnectedNode_PreviousPosition_EventuallyStops() {
+        var fragment;
+        createWalker('<p id="p1"><c id="c1"><c id="c2"><a id="a1"/></c></c></p>');
+        fragment = t.doc.documentElement.firstChild;
+        t.doc.documentElement.removeChild(fragment);
+        t.iterator.setUnfilteredPosition(fragment, 0);
+        t.loopCount = 0;
+
+        while (t.iterator.previousPosition() && t.loopCount < 100) {
+            t.loopCount += 1;
+        }
+
+        r.shouldBe(t, "t.loopCount", "0");
+    }
     this.tests = function () {
         return [
             create,
@@ -373,7 +414,11 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             testSetUnfilteredPosition_HandlesChildNodesCorrectly,
             testSetUnfilteredPosition_ChildOfNonVisibleNode,
             testSetUnfilteredPosition_ChildOfSkippedNode,
-            testSetUnfilteredPosition_NestedChildOfSkippedNode
+            testSetUnfilteredPosition_NestedChildOfSkippedNode,
+
+            iterateOverNode_NextPosition_EventuallyStops,
+            iterateOverDisconnectedNode_NextPosition_EventuallyStops,
+            iterateOverDisconnectedNode_PreviousPosition_EventuallyStops
         ];
     };
     this.asyncTests = function () {

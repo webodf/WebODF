@@ -92,9 +92,10 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         } else {
             if (walker.nextSibling() !== null) {
                 currentPos = 0;
-            } else {
-                walker.parentNode();
+            } else if (walker.parentNode()) {
                 currentPos = 1;
+            } else {
+                return false;
             }
         }
         return true;
@@ -114,8 +115,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         var moved = true;
         if (currentPos === 0) {
             if (walker.previousSibling() === null) {
-                walker.parentNode();
-                if (walker.currentNode === root) {
+                if (!walker.parentNode() || walker.currentNode === root) {
                     walker.firstChild();
                     return false;
                 }
