@@ -81,10 +81,19 @@ odf.StyleInfoTests = function StyleInfoTests(runner) {
         r.shouldBe(t, "t.usedStyles['text'] && t.usedStyles['text']['S1']", "1");
         r.shouldBe(t, "t.usedStyles['paragraph'] && t.usedStyles['paragraph']['P1']", "1");
     }
+    function determineStylesForNode_NoStyles() {
+        t.doc = createDocument("<text:p><text:span>B</text:span></text:p>");
+        t.usedStyles = {};
+
+        t.usedStyles = t.styleInfo.determineStylesForNode(t.doc.firstChild);
+
+        r.shouldBe(t, "t.usedStyles", "undefined");
+    }
     this.tests = function () {
         return [
             determineStylesForNode,
-            determineStylesForNode_2
+            determineStylesForNode_2,
+            determineStylesForNode_NoStyles
         ];
     };
     this.asyncTests = function () {

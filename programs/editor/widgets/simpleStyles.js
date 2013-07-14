@@ -116,10 +116,12 @@ define("webodf/editor/widgets/simpleStyles",
 
                 appliedStyles.forEach(function(appliedStyle) {
                     var textProperties = appliedStyle['style:text-properties'];
-                    fontWeight = fontWeight || textProperties['fo:font-weight'] === 'bold';
-                    fontStyle = fontStyle || textProperties['fo:font-style'] === 'italic';
-                    underline = underline || textProperties['style:text-underline-style'] === 'solid';
-                    strikethrough = strikethrough || textProperties['style:text-line-through-style'] === 'solid';
+                    if (textProperties) {
+                        fontWeight = fontWeight || textProperties['fo:font-weight'] === 'bold';
+                        fontStyle = fontStyle || textProperties['fo:font-style'] === 'italic';
+                        underline = underline || textProperties['style:text-underline-style'] === 'solid';
+                        strikethrough = strikethrough || textProperties['style:text-line-through-style'] === 'solid';
+                    }
                 });
 
                 // The 3rd parameter is false to avoid firing onChange when setting the value
