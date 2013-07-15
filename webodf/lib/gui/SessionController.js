@@ -855,6 +855,17 @@ gui.SessionController = (function () {
             keyDownHandler.bind(keyCode.Up, modifier.Shift, extendSelectionUp);
             keyDownHandler.bind(keyCode.Down, modifier.Shift, extendSelectionDown);
 
+            keyDownHandler.bind(keyCode.Home, modifier.None, moveCursorToLineStart);
+            keyDownHandler.bind(keyCode.End, modifier.None, moveCursorToLineEnd);
+            keyDownHandler.bind(keyCode.Home, modifier.Ctrl, moveCursorToDocumentStart);
+            keyDownHandler.bind(keyCode.End, modifier.Ctrl, moveCursorToDocumentEnd);
+            keyDownHandler.bind(keyCode.Home, modifier.Shift, extendSelectionToLineStart);
+            keyDownHandler.bind(keyCode.End, modifier.Shift, extendSelectionToLineEnd);
+            keyDownHandler.bind(keyCode.Up, modifier.CtrlShift, extendSelectionToParagraphStart);
+            keyDownHandler.bind(keyCode.Down, modifier.CtrlShift, extendSelectionToParagraphEnd);
+            keyDownHandler.bind(keyCode.Home, modifier.CtrlShift, extendSelectionToDocumentStart);
+            keyDownHandler.bind(keyCode.End, modifier.CtrlShift, extendSelectionToDocumentEnd);
+
             if (isMacOS) {
                 keyDownHandler.bind(keyCode.Left, modifier.Meta, moveCursorToLineStart);
                 keyDownHandler.bind(keyCode.Right, modifier.Meta, moveCursorToLineEnd);
@@ -869,16 +880,6 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
-                keyDownHandler.bind(keyCode.Home, modifier.None, moveCursorToLineStart);
-                keyDownHandler.bind(keyCode.End, modifier.None, moveCursorToLineEnd);
-                keyDownHandler.bind(keyCode.Home, modifier.Ctrl, moveCursorToDocumentStart);
-                keyDownHandler.bind(keyCode.End, modifier.Ctrl, moveCursorToDocumentEnd);
-                keyDownHandler.bind(keyCode.Home, modifier.Shift, extendSelectionToLineStart);
-                keyDownHandler.bind(keyCode.End, modifier.Shift, extendSelectionToLineEnd);
-                keyDownHandler.bind(keyCode.Up, modifier.CtrlShift, extendSelectionToParagraphStart);
-                keyDownHandler.bind(keyCode.Down, modifier.CtrlShift, extendSelectionToParagraphEnd);
-                keyDownHandler.bind(keyCode.Home, modifier.CtrlShift, extendSelectionToDocumentStart);
-                keyDownHandler.bind(keyCode.End, modifier.CtrlShift, extendSelectionToDocumentEnd);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }
