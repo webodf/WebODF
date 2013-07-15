@@ -64,7 +64,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
      */
     function getKeyCombo (keyCode, modifiers) {
         if (!modifiers) {
-            modifiers = modifiers.None;
+            modifiers = modifier.None;
         }
         return keyCode + ':' + modifiers;
     }
@@ -151,6 +151,9 @@ gui.KeyboardHandler = function KeyboardHandler() {
     Down: 40,
     Delete: 46,
     A: 65,
+    B: 66,
+    I: 73,
+    U: 85,
     Z: 90
 };
 

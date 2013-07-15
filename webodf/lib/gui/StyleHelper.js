@@ -159,6 +159,73 @@ gui.StyleHelper = function StyleHelper(formatting) {
         nextTextNodes.forEach(domUtils.normalizeTextNodes);
     };
 
+    /*
+     * Returns true if all the node within given range have the same value for the property; otherwise false.
+     * @param {!Range} range
+     * @param {!string} propertyName
+     * @param {!string} propertyValue
+     * @return {!boolean}
+     */
+    function hasTextPropertyValue(range, propertyName, propertyValue) {
+        var hasOtherValue = true,
+            nodes, styles, properties, container, i;
+
+        if (range.collapsed) {
+            container = range.startContainer;
+            if (container.hasChildNodes() && range.startOffset < container.childNodes.length) {
+                container = container.childNodes[range.startOffset];
+            }
+            nodes = [container];
+        } else {
+            nodes = getTextNodes(range, true);
+        }
+
+        styles = formatting.getAppliedStyles(nodes);
+        for (i=0; i<styles.length; i+=1) {
+            properties = styles[i]['style:text-properties'];
+            hasOtherValue = !properties || properties[propertyName] !== propertyValue;
+            if (hasOtherValue) {
+                break;
+            }
+        }
+        return !hasOtherValue;
+    }
+
+    /*
+     * Returns true if all the text within the range are bold; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.isBold = function(range) {
+        return hasTextPropertyValue(range, 'fo:font-weight', 'bold');
+    };
+
+    /*
+     * Returns true if all the text within the range are italic; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.isItalic = function(range) {
+        return hasTextPropertyValue(range, 'fo:font-style', 'italic');
+    };
+
+    /*
+     * Returns true if all the text within the range have underline; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.hasUnderline = function(range) {
+        return hasTextPropertyValue(range, 'style:text-underline-style', 'solid');
+    };
+
+    /*
+     * Returns true if all the text within the range have strike through; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.hasStrikeThrough = function(range) {
+        return hasTextPropertyValue(range, 'style:text-line-through-style', 'solid');
+    };
 
     /**
      * Get all character elements and text nodes fully contained within the supplied range in document order

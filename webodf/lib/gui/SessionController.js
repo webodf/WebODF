@@ -41,8 +41,9 @@ runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("gui.ClickHandler");
-runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.Clipboard");
+runtime.loadClass("gui.KeyboardHandler");
+runtime.loadClass("gui.StyleHelper");
 
 /**
  * @constructor
@@ -67,6 +68,7 @@ gui.SessionController = (function () {
             clickHandler = new gui.ClickHandler(),
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
+            styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
             undoManager;
 
         /**
@@ -787,6 +789,53 @@ gui.SessionController = (function () {
             return false;
         }
 
+        // duplicate of EditorSession.formatSelection method
+        // TODO: find a better place for this method to live so it can be reused
+        function formatTextSelection (propertyName, propertyValue) {
+            var selection = odtDocument.getCursorSelection(inputMemberId),
+                op = new ops.OpApplyStyle(),
+                properties = {};
+
+            properties[propertyName] = propertyValue;
+            op.init({
+                memberid: inputMemberId,
+                position: selection.position,
+                length: selection.length,
+                info: {'style:text-properties' : properties }
+            });
+            session.enqueue(op);
+        }
+
+        /**
+         * @return {!boolean}
+         */
+        function toggleBold () {
+            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+                value = styleHelper.isBold(range) ? 'normal' : 'bold';
+            formatTextSelection('fo:font-weight', value);
+            return true;
+        }
+
+        /**
+         * @return {!boolean}
+         */
+        function toggleItalic () {
+            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+                value = styleHelper.isItalic(range) ? 'normal' : 'italic';
+            formatTextSelection('fo:font-style', value);
+            return true;
+        }
+
+        /**
+         * @return {!boolean}
+         */
+        function toggleUnderline () {
+            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+                value = styleHelper.hasUnderline(range) ? 'none' : 'solid';
+            formatTextSelection('style:text-underline-style', value);
+            return true;
+        }
+
         /**
          */
         this.startEditing = function () {
@@ -927,13 +976,19 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Down, modifier.AltShift, extendSelectionToParagraphEnd);
                 keyDownHandler.bind(keyCode.Up, modifier.MetaShift, extendSelectionToDocumentStart);
                 keyDownHandler.bind(keyCode.Down, modifier.MetaShift, extendSelectionToDocumentEnd);
+                keyDownHandler.bind(keyCode.A, modifier.Meta, extendSelectionToEntireDocument);
+                keyDownHandler.bind(keyCode.B, modifier.Meta, toggleBold);
+                keyDownHandler.bind(keyCode.I, modifier.Meta, toggleItalic);
+                keyDownHandler.bind(keyCode.U, modifier.Meta, toggleUnderline);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
-                keyDownHandler.bind(keyCode.A, modifier.Meta, extendSelectionToEntireDocument);
             } else {
+                keyDownHandler.bind(keyCode.A, modifier.Ctrl, extendSelectionToEntireDocument);
+                keyDownHandler.bind(keyCode.B, modifier.Ctrl, toggleBold);
+                keyDownHandler.bind(keyCode.I, modifier.Ctrl, toggleItalic);
+                keyDownHandler.bind(keyCode.U, modifier.Ctrl, toggleUnderline);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
-                keyDownHandler.bind(keyCode.A, modifier.Ctrl, extendSelectionToEntireDocument);
             }
 
             // the default action is to insert text into the document

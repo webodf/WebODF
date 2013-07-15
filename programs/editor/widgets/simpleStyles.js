@@ -106,30 +106,12 @@ define("webodf/editor/widgets/simpleStyles",
             });
             
             function checkStyleButtons() {
-                var fontWeight, fontStyle, underline, strikethrough, appliedStyles;
-                appliedStyles = editorSession.getCurrentSelectionStyle();
-
-                fontWeight = false;
-                fontStyle = false;
-                underline = false;
-                strikethrough = false;
-
-                appliedStyles.forEach(function(appliedStyle) {
-                    var textProperties = appliedStyle['style:text-properties'];
-                    if (textProperties) {
-                        fontWeight = fontWeight || textProperties['fo:font-weight'] === 'bold';
-                        fontStyle = fontStyle || textProperties['fo:font-style'] === 'italic';
-                        underline = underline || textProperties['style:text-underline-style'] === 'solid';
-                        strikethrough = strikethrough || textProperties['style:text-line-through-style'] === 'solid';
-                    }
-                });
-
                 // The 3rd parameter is false to avoid firing onChange when setting the value
                 // programmatically.
-                boldButton.set('checked', fontWeight, false);
-                italicButton.set('checked', fontStyle, false);
-                underlineButton.set('checked', underline, false);
-                strikethroughButton.set('checked', strikethrough, false);
+                boldButton.set('checked', editorSession.isBold(), false);
+                italicButton.set('checked', editorSession.isItalic(), false);
+                underlineButton.set('checked', editorSession.hasUnderline(), false);
+                strikethroughButton.set('checked', editorSession.hasStrikeThrough(), false);
             }
 
             editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);

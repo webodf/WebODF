@@ -192,6 +192,7 @@ define("webodf/editor/EditorSession", [
             if (info.paragraphElement !== currentParagraphNode) {
                 return;
             }
+            self.emit(EditorSession.signalParagraphChanged, info);
             checkParagraphStyleName();
         }
 
@@ -280,18 +281,40 @@ define("webodf/editor/EditorSession", [
             return formatting.getAvailableParagraphStyles();
         };
 
-        this.getCurrentSelectionStyle = function () {
-            var cursor = odtDocument.getCursor(memberid),
-                selectedRange;
+        this.isBold = function () {
+            var cursor = odtDocument.getCursor(memberid);
             // no own cursor yet/currently added?
             if (!cursor) {
-                return [];
+                return false;
             }
-            selectedRange = cursor.getSelectedRange();
-            if (selectedRange.collapsed) {
-                return [formatting.getAppliedStylesForElement(cursor.getNode())];
+            return styleHelper.isBold(cursor.getSelectedRange());
+        };
+
+        this.isItalic = function () {
+            var cursor = odtDocument.getCursor(memberid);
+            // no own cursor yet/currently added?
+            if (!cursor) {
+                return false;
             }
-            return styleHelper.getAppliedStyles(selectedRange);
+            return styleHelper.isItalic(cursor.getSelectedRange());
+        };
+
+        this.hasUnderline = function () {
+            var cursor = odtDocument.getCursor(memberid);
+            // no own cursor yet/currently added?
+            if (!cursor) {
+                return false;
+            }
+            return styleHelper.hasUnderline(cursor.getSelectedRange());
+        };
+
+        this.hasStrikeThrough = function () {
+            var cursor = odtDocument.getCursor(memberid);
+            // no own cursor yet/currently added?
+            if (!cursor) {
+                return false;
+            }
+            return styleHelper.hasStrikeThrough(cursor.getSelectedRange());
         };
 
         this.getCurrentParagraphStyle = function () {

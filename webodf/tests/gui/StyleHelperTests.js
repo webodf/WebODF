@@ -31,6 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core, gui, odf, NodeFilter*/
+runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("gui.StyleHelper");
 runtime.loadClass("odf.Formatting");
 /**
@@ -83,8 +84,17 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         xml += "    <style:style style:name='S1' style:display-name='S1 Display' style:family='text'>";
         xml += "        <style:text-properties fo:font-name='S1 Font' />";
         xml += "    </style:style>";
-        xml += "    <style:style style:name='S2' style:display-name='S2 Display' style:family='text'>";
+        xml += "    <style:style style:name='SBold' style:display-name='SBold Display' style:family='text'>";
         xml += "        <style:text-properties fo:font-weight='bold'/>";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SItalic' style:family='text'>";
+        xml += "        <style:text-properties fo:font-style='italic' />";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SUnderline' style:family='text'>";
+        xml += "        <style:text-properties style:text-underline-style='solid' />";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SStrikeThrough' style:family='text'>";
+        xml += "        <style:text-properties style:text-line-through-style='solid' />";
         xml += "    </style:style>";
         xml += "</office:styles>";
 
@@ -127,14 +137,14 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_NestedHierarchy() {
-        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'><text:span text:style-name='S2'>A</text:span></text:span></text:p>");
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'><text:span text:style-name='SBold'>A</text:span></text:span></text:p>");
         t.range.selectNode(t.doc.firstChild.firstChild);
 
         t.appliedStyles = t.styleHelper.getAppliedStyles(t.range);
 
         r.shouldBe(t, "t.appliedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "3");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S2', displayName: 'S2 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'SBold', displayName: 'SBold Display', family: 'text'})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font', 'fo:font-weight': 'bold'})");
@@ -267,7 +277,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
                 self.setUp();
             }
 
-            node = "<" + invalidNodes[i] + "><text:span text:style-name='S2'>test</text:span></" + invalidNodes[i] + ">";
+            node = "<" + invalidNodes[i] + "><text:span text:style-name='SBold'>test</text:span></" + invalidNodes[i] + ">";
             t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span>" + node + "</text:p>");
             t.range.selectNode(t.doc);
             t.appliedStyles = t.styleHelper.getAppliedStyles(t.range);
@@ -281,6 +291,52 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
                 self.tearDown();
             }
         }
+    }
+    function isBold_CollapsedRangeReturnTrue () {
+        var cursor = new core.Cursor(t.testArea.ownerDocument, "Joe"),
+            mover;
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SBold'>A</text:span><text:span text:style-name='S1'>B</text:span></text:p>");
+        mover = new gui.SelectionMover(cursor, t.doc);
+        mover.movePointForward(2);
+        t.range = cursor.getSelectedRange();
+
+        t.isBold = t.styleHelper.isBold(t.range);
+        r.shouldBe(t, "t.isBold", "true");
+    }
+    function isBold_ReturnTrue () {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SBold'>A</text:span><text:span text:style-name='SBold'>B</text:span></text:p>");
+        t.range.selectNode(t.doc);
+
+        t.isBold = t.styleHelper.isBold(t.range);
+        r.shouldBe(t, "t.isBold", "true");
+    }
+    function isBold_ReturnFalse() {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span><text:span text:style-name='SBold'>B</text:span></text:p>");
+        t.range.selectNode(t.doc);
+
+        t.isBold = t.styleHelper.isBold(t.range);
+        r.shouldBe(t, "t.isBold", "false");
+    }
+    function isItalic_ReturnTrue () {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SItalic'>A</text:span><text:span text:style-name='SItalic'>B</text:span></text:p>");
+        t.range.selectNode(t.doc);
+
+        t.isItalic = t.styleHelper.isItalic(t.range);
+        r.shouldBe(t, "t.isItalic", "true");
+    }
+    function hasUnderline_ReturnTrue () {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SUnderline'>A</text:span><text:span text:style-name='SUnderline'>B</text:span></text:p>");
+        t.range.selectNode(t.doc);
+
+        t.hasUnderline = t.styleHelper.hasUnderline(t.range);
+        r.shouldBe(t, "t.hasUnderline", "true");
+    }
+    function hasStrikeThrough_ReturnTrue () {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SStrikeThrough'>A</text:span><text:span text:style-name='SStrikeThrough'>B</text:span></text:p>");
+        t.range.selectNode(t.doc);
+
+        t.hasStrikeThrough = t.styleHelper.hasStrikeThrough(t.range);
+        r.shouldBe(t, "t.hasStrikeThrough", "true");
     }
     function getOdtElements_EncompassedWithinParagraph() {
         t.doc = createDocument("<text:p>AB<text:s/>CD</text:p>");
@@ -359,6 +415,13 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
             getAppliedStyles_SimpleList,
             getAppliedStyles_NestedList,
             getAppliedStyles_InvalidNodes,
+
+            isBold_CollapsedRangeReturnTrue,
+            isBold_ReturnTrue,
+            isBold_ReturnFalse,
+            isItalic_ReturnTrue,
+            hasUnderline_ReturnTrue,
+            hasStrikeThrough_ReturnTrue,
 
             getOdtElements_EncompassedWithinParagraph,
             getOdtElements_EncompassedWithinSpan_And_Paragraph,
