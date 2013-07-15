@@ -150,6 +150,7 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
     width: 32px;
     height: 25px;
     border-radius: 2px;
+    background-image: none;
 }
 
 html[dir='ltr'] .toolbarButton,
