@@ -219,6 +219,15 @@
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
+ <test name="Split_Then_MoveCursor">
+  <before><office:text><text:p><text:span>A</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="1"/>
+   <op optype="SplitParagraph" memberid="Joe" position="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>A</text:span></text:p><text:p><c:cursor c:memberId="Joe"/><text:span></text:span></text:p></office:text></after>
+ </test>
  <test name="InsertRemoveText_Simple_Backwards">
   <before><office:text><text:p/></office:text></before>
   <ops>

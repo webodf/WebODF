@@ -61,35 +61,6 @@ ops.OpRemoveText = function OpRemoveText() {
     };
 
     /**
-     * Iterates through all cursors and checks if they are in
-     * walkable positions; if not, move the cursor 1 filtered step backward
-     * which guarantees walkable state for all cursors.
-     */
-    function fixCursorPositions(odtDocument) {
-        var cursors, stepCounter, steps, filter, i;
-
-        cursors = odtDocument.getCursors();
-        filter = odtDocument.getPositionFilter();
-
-        for (i in cursors) {
-            if (cursors.hasOwnProperty(i)) {
-                stepCounter = cursors[i].getStepCounter();
-                if (!stepCounter.isPositionWalkable(filter)) {
-                    steps = -stepCounter.countBackwardSteps(1, filter);
-                    if(steps === 0) {
-                        // the cursor now occupies BEFORE the first walkable position in the document
-                        steps = stepCounter.countForwardSteps(1, filter);
-                    }
-                    cursors[i].move(steps);
-                    if (i === memberid) {
-                        odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Returns true if the supplied node contains no text or ODF character elements
      * @param {Node} node
      * @returns {boolean}
@@ -280,7 +251,7 @@ ops.OpRemoveText = function OpRemoveText() {
                     currentParent.removeChild(currentTextNode);
                     // If the parent is a span that contains no further text
                     // after deletion, remove the span.
-                    fixCursorPositions(odtDocument);
+                    odtDocument.fixCursorPositions(memberid);
                     // If the current node is text:s or span and is empty, it should
                     // be removed.
                     while (isEmpty(currentParent)) {
@@ -300,8 +271,7 @@ ops.OpRemoveText = function OpRemoveText() {
             }
         }
 
-        fixCursorPositions(odtDocument);
-
+        odtDocument.fixCursorPositions(memberid);
         odtDocument.getOdfCanvas().refreshSize();
         odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
             paragraphElement: paragraphElement,

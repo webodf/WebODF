@@ -531,6 +531,36 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
     };
 
+    /**
+     * Iterates through all cursors and checks if they are in
+     * walkable positions; if not, move the cursor 1 filtered step backward
+     * which guarantees walkable state for all cursors.
+     * @param {!string} localMemberId An event will be raised for this cursor if it is moved
+     */
+    this.fixCursorPositions = function(localMemberId) {
+        var cursors, stepCounter, steps, filter, i;
+
+        cursors = self.getCursors();
+        filter = self.getPositionFilter();
+
+        for (i in cursors) {
+            if (cursors.hasOwnProperty(i)) {
+                stepCounter = cursors[i].getStepCounter();
+                if (!stepCounter.isPositionWalkable(filter)) {
+                    steps = -stepCounter.countBackwardSteps(1, filter);
+                    if(steps === 0) {
+                        // the cursor now occupies BEFORE the first walkable position in the document
+                        steps = stepCounter.countForwardSteps(1, filter);
+                    }
+                    cursors[i].move(steps);
+                    if (i === localMemberId) {
+                        self.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
+                    }
+                }
+            }
+        }
+    };
+
     /*
      * Returns the number of walkable positions of a paragraph node
      * @param {!Node} paragraph

@@ -139,6 +139,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             splitChildNode = splitChildNode.childNodes[0];
         }
 
+        odtDocument.fixCursorPositions(memberid);
         odtDocument.getOdfCanvas().refreshSize();
         // mark both paragraphs as edited
         odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
