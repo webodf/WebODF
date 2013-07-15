@@ -54,6 +54,23 @@ odf.Formatting = function Formatting() {
         odfUtils = new odf.OdfUtils();
 
     /**
+     * Simple string hash
+     * Based off http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
+     * @param {!string} value
+     * @returns {!number}
+     */
+    function hashString(value){
+        var hash = 0, i, l;
+        for (i = 0, l = value.length; i < l; i += 1) {
+            /*jslint bitwise:true*/
+            hash  = ((hash<<5)-hash)+value.charCodeAt(i);
+            hash |= 0; // Convert to 32bit integer
+            /*jslint bitwise:false*/
+        }
+        return hash;
+    }
+
+    /**
      * Recursively merge properties of two objects
      * @param {!Object} destination
      * @param {!Object} source
@@ -444,11 +461,12 @@ odf.Formatting = function Formatting() {
     /**
      * Apply the specified style properties to all elements within the given range.
      * Currently, only text styles are applied.
+     * @param {!string} memberId Identifier of the member applying the style. This is used for naming generated autostyles
      * @param {!Range} range Range to apply text style to
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      */
-    this.applyStyle = function(range, info) {
-        var textStyles = new odf.TextStyleApplicator(self, odfContainer.rootElement.automaticStyles);
+    this.applyStyle = function(memberId, range, info) {
+        var textStyles = new odf.TextStyleApplicator("auto" + hashString(memberId) + "_", self, odfContainer.rootElement.automaticStyles);
         textStyles.applyStyle(range, info);
     };
 
@@ -477,20 +495,21 @@ odf.Formatting = function Formatting() {
     }
 
     /**
-     * Overrides the specific properties on the styleNode from the values in the supplied info Object
+     * Overrides the specific properties on the styleNode from the values in the supplied info Object.
+     * If a newStylePrefix is supplied, this method will automatically generate a unique name for the style node
      * @param {!Element} styleNode
      * @param {!Object} info
-     * @param {boolean=} autoGenerateName Automatically generate a unique name for the style node
+     * @param {string=} newStylePrefix Prefix to put in front of new auto styles
      */
-    this.updateStyle = function(styleNode, info, autoGenerateName) {
+    this.updateStyle = function(styleNode, info, newStylePrefix) {
         var name, existingNames, startIndex;
         mapObjOntoNode(styleNode, info);
         name = styleNode.getAttributeNS(stylens, "name");
-        if (autoGenerateName || !name) {
+        if (newStylePrefix) {
             existingNames = getAllStyleNames();
-            startIndex = Math.floor(Math.random() * 100000000);
+            startIndex = 0;
             do {
-                name = "auto" + startIndex;
+                name = newStylePrefix + startIndex;
                 startIndex += 1;
             } while(existingNames.indexOf(name) !== -1);
             styleNode.setAttributeNS(stylens, "style:name", name);

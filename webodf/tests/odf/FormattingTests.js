@@ -294,9 +294,9 @@ odf.FormattingTests = function FormattingTests(runner) {
         createDocument("<text:p/>");
         t.element = t.formatting.getStyleElement("P1", "paragraph");
 
-        t.formatting.updateStyle(t.element, { "style:text-properties": { "fo:font-size" : "12pt" } }, true);
+        t.formatting.updateStyle(t.element, { "style:text-properties": { "fo:font-size" : "12pt" } }, "fTest");
 
-        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name').search(/^auto.*/)", "0");
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name')", "'fTest0'");
 
         t.textProperties = t.element.getElementsByTagNameNS(t.ns.style, 'text-properties')[0];
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");

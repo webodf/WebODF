@@ -42,10 +42,11 @@ runtime.loadClass("odf.OdfUtils");
 /**
  * Class for applying a supplied text style to all text nodes within a range.
  * @constructor
+ * @param {!string} newStylePrefix Prefix to put in front of new auto styles
  * @param {!odf.Formatting} formatting Formatting retrieval and computation store
  * @param {!Node} automaticStyles Root element for automatic styles
  */
-odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyles) {
+odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formatting, automaticStyles) {
     "use strict";
     var nextTextNodes,
         odfUtils = new odf.OdfUtils(),
@@ -108,7 +109,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(formatting, automaticStyl
                 styleNode.setAttributeNS(stylens, "style:family", "text");
                 styleNode.setAttributeNS(webodfns, "scope", "document-content");
             }
-            formatting.updateStyle(styleNode, info, true);
+            formatting.updateStyle(styleNode, info, newStylePrefix);
             automaticStyles.appendChild(styleNode);
             return styleNode;
         }

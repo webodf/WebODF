@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime, odf, Node*/
+/*global ops, runtime, odf, Node, core*/
 
 runtime.loadClass("odf.OdfUtils");
 
@@ -94,7 +94,7 @@ ops.OpApplyStyle = function OpApplyStyle() {
         var range = getRange(odtDocument),
             impactedParagraphs = getImpactedParagraphs(range);
 
-        odtDocument.getFormatting().applyStyle(range, info);
+        odtDocument.getFormatting().applyStyle(memberid, range, info);
         range.detach();
         odtDocument.getOdfCanvas().refreshCSS();
 
