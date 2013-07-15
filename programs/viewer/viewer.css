@@ -538,6 +538,18 @@ html[dir='rtl'] .dropdownToolbarButton {
     
     background-color: #888;
     background-image: url(images/texture.png);
+
+    display:box;
+    box-pack:center;
+    box-align:center;
+
+    display:-moz-box;
+    -moz-box-pack:center;
+    -moz-box-align:center;
+
+    display:-webkit-box;
+    -webkit-box-pack:center;
+    -webkit-box-align:center;
 }
 
 .presentationMode {
