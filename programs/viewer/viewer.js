@@ -201,17 +201,17 @@ function Viewer(viewerPlugin) {
                 }
             }
 
-            // Set default scale
-            parseScale(kDefaultScale);
-
-            canvasContainer.onscroll = onScroll;
-            delayedRefresh();
-
             initialized = true;
             pages = getPages();
             document.getElementById('numPages').innerHTML = 'of ' + pages.length;
 
             self.showPage(1);
+
+            // Set default scale
+            parseScale(kDefaultScale);
+
+            canvasContainer.onscroll = onScroll;
+            delayedRefresh();
         };
 
         viewerPlugin.initialize(canvasContainer, location);
