@@ -4,7 +4,8 @@
     xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
     xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
     xmlns:c="urn:webodf:names:cursor"
-    xmlns:e="urn:webodf:names:editinfo">
+    xmlns:e="urn:webodf:names:editinfo"
+    xmlns:wo="urn:webodf:names:scope">
  <test name="AddCursor_Simple">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -633,6 +634,21 @@
   <after>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="ApplyStyle_UnstyledParagraph">
+  <before>
+    <office:automatic-styles/>
+    <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <ops>
+   <op optype="ApplyStyle" memberid="Alice" position="1" length="2">
+      <info><style:text-properties fo:font-weight="bold" /></info>
+   </op>
+  </ops>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
   </after>
  </test>
 </tests>

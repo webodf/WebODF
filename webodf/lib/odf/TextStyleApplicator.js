@@ -210,7 +210,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
             textPropsOnly = {},
             limits;
 
-        runtime.assert(Boolean(info[textProperties]), "applyStyle without any text properties");
+        runtime.assert(info && info[textProperties], "applyStyle without any text properties");
         textPropsOnly[textProperties] = info[textProperties];
         styleCache = new StyleManager(textPropsOnly);
         styleLookup = new StyleLookup(textPropsOnly);

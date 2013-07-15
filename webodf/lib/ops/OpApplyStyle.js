@@ -46,6 +46,7 @@ ops.OpApplyStyle = function OpApplyStyle() {
 
     var memberid, timestamp, position, length, info,
         odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
 
     this.init = function (data) {
@@ -75,10 +76,12 @@ ops.OpApplyStyle = function OpApplyStyle() {
 
     function getImpactedParagraphs(range) {
         var outerContainer = range.commonAncestorContainer,
-            impactedParagraphs;
+            impactedParagraphs = [];
 
-        impactedParagraphs = Array.prototype.slice.call(outerContainer.getElementsByTagNameNS(textns, "p"));
-        impactedParagraphs = impactedParagraphs.concat(Array.prototype.slice.call(outerContainer.getElementsByTagNameNS(textns, "h")));
+        if (outerContainer.nodeType === Node.ELEMENT_NODE) {
+            impactedParagraphs = domUtils.getElementsByTagNameNS(outerContainer, textns, "p")
+                                .concat(domUtils.getElementsByTagNameNS(outerContainer, textns, "h"));
+        }
 
         while (outerContainer && !odfUtils.isParagraph(outerContainer)) {
             outerContainer = outerContainer.parentNode;

@@ -86,16 +86,16 @@ ops.OperationTests = function OperationTests(runner) {
             if (/length|number|position|fontSize|topMargin|bottomMargin|leftMargin|rightMargin/.test(att.localName)) {
                 value = parseInt(value, 10);
             }
-            op[att.localName] = value;
+            op[att.nodeName] = value;
         }
         // read complex data by childs
         while(child) {
             if (child.nodeType === Node.ELEMENT_NODE) {
                 // list?
                 if (/paragraphPropertyNames|textPropertyNames/.test(child.localName)) {
-                    op[child.localName] = child.textContent.split(',');
+                    op[child.nodeName] = child.textContent.split(',');
                 } else {
-                    op[child.localName] = parseOperation(child);
+                    op[child.nodeName] = parseOperation(child);
                 }
             }
             child = child.nextSibling;
@@ -178,6 +178,10 @@ ops.OperationTests = function OperationTests(runner) {
         return getOfficeNSElement(node, "styles");
     }
 
+    function getOfficeAutoStylesElement(node) {
+        return getOfficeNSElement(node, "automatic-styles");
+    }
+
     function runTest(test) {
         var text = t.odtDocument.getRootNode(),
             factory = new ops.OperationFactory(),
@@ -186,11 +190,17 @@ ops.OperationTests = function OperationTests(runner) {
             textbefore = getOfficeTextElement(test.before),
             textafter = getOfficeTextElement(test.after),
             styles = t.odfContainer.rootElement.styles,
+            autostyles = t.odfContainer.rootElement.automaticStyles,
             stylesbefore = getOfficeStylesElement(test.before),
-            stylesafter = getOfficeStylesElement(test.after);
+            stylesafter = getOfficeStylesElement(test.after),
+            autostylesbefore = getOfficeAutoStylesElement(test.before),
+            autostylesafter = getOfficeAutoStylesElement(test.after);
         // inject test data
         if (stylesbefore) {
             copyChildNodes(stylesbefore, styles);
+        }
+        if (autostylesbefore) {
+            copyChildNodes(autostylesbefore, autostyles);
         }
         copyChildNodes(textbefore, text);
 
@@ -217,6 +227,20 @@ ops.OperationTests = function OperationTests(runner) {
                 t.styles = t.stylesafter = "OK";
             }
             r.shouldBe(t, "t.styles", "t.stylesafter");
+        }
+
+        if (autostylesbefore) {
+            autostylesbefore.normalize();
+            sortChildrenByNSAttribute(autostylesafter, odf.Namespaces.stylens, "name");
+            autostyles.normalize();
+            sortChildrenByNSAttribute(autostyles, odf.Namespaces.stylens, "name");
+            if (!r.areNodesEqual(autostylesafter, autostyles)) {
+                t.autostyles = serialize(autostyles);
+                t.autostylesafter = serialize(autostylesafter);
+            } else {
+                t.autostyles = t.autostylesafter = "OK";
+            }
+            r.shouldBe(t, "t.autostyles", "t.autostylesafter");
         }
 
         textafter.normalize();
