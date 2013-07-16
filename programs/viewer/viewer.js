@@ -46,16 +46,19 @@ function Viewer(viewerPlugin) {
         kDefaultScale = 'auto',
         presentationMode = false,
         initialized = false,
+        isSlideshow = false,
         url,
         viewerElement,
         canvasContainer = document.getElementById('canvasContainer'),
+        overlayNavigator = document.getElementById('overlayNavigator'),
         pageSwitcher = document.getElementById('toolbarLeft'),
         zoomWidget = document.getElementById('toolbarMiddleContainer'),
         scaleSelector = document.getElementById('scaleSelect'),
         filename,
         pages = [],
         currentPage,
-        scaleChangeTimer;
+        scaleChangeTimer,
+        touchTimer;
 
     function isFullScreen() {
     // Note that the browser fullscreen (triggered by short keys) might
@@ -187,7 +190,8 @@ function Viewer(viewerPlugin) {
         document.getElementById('documentName').innerHTML = document.title;
 
         viewerPlugin.onLoad = function () {
-            if (viewerPlugin.isSlideshow()) {
+            isSlideshow = viewerPlugin.isSlideshow();
+            if (isSlideshow) {
                 // No padding for slideshows
                 canvasContainer.style.padding = 0;
                 // Show page nav controls only for presentations
@@ -292,11 +296,14 @@ function Viewer(viewerPlugin) {
      */
     this.togglePresentationMode = function () {
         var titlebar = document.getElementById('titlebar'),
-            toolbar = document.getElementById('toolbarContainer');
+            toolbar = document.getElementById('toolbarContainer'),
+            overlayCloseButton = document.getElementById('overlayCloseButton');
 
         if (!presentationMode) {
             titlebar.style.display = toolbar.style.display = 'none';
+            overlayCloseButton.style.display = 'block';
             canvasContainer.className = 'presentationMode';
+            isSlideshow = true;
             canvasContainer.onmousedown = function (event) {
                 event.preventDefault();
             };
@@ -314,11 +321,13 @@ function Viewer(viewerPlugin) {
             parseScale('page-fit');
         } else {
             titlebar.style.display = toolbar.style.display = 'block';
+            overlayCloseButton.style.display = 'none';
             canvasContainer.className = '';
             canvasContainer.onmouseup = function () {};
             canvasContainer.oncontextmenu = function () {};
             canvasContainer.onmousedown = function () {};
             parseScale('auto');
+            isSlideshow = viewerPlugin.isSlideshow();
         }
 
         presentationMode = !presentationMode;
@@ -369,6 +378,16 @@ function Viewer(viewerPlugin) {
         }
     }
 
+    function showOverlayNavigator() {
+        if (isSlideshow) {
+            overlayNavigator.className = 'touched';
+            window.clearTimeout(touchTimer);
+            touchTimer = window.setTimeout(function () {
+                overlayNavigator.className = '';
+            }, 2000);
+        }
+    }
+
     function init() {
 
         self.initialize();
@@ -377,6 +396,7 @@ function Viewer(viewerPlugin) {
             document.getElementById('fullscreen').style.visibility = 'hidden';
         }
 
+        document.getElementById('overlayCloseButton').addEventListener('click', self.toggleFullScreen);
         document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
         document.getElementById('presentation').addEventListener('click', function () {
             if (!isFullScreen()) {
@@ -409,6 +429,14 @@ function Viewer(viewerPlugin) {
             self.showNextPage();
         });
 
+        document.getElementById('previousPage').addEventListener('click', function () {
+            self.showPreviousPage();
+        });
+
+        document.getElementById('nextPage').addEventListener('click', function () {
+            self.showNextPage();
+        });
+
         document.getElementById('pageNumber').addEventListener('change', function () {
             self.showPage(this.value);
         });
@@ -416,6 +444,9 @@ function Viewer(viewerPlugin) {
         document.getElementById('scaleSelect').addEventListener('change', function () {
             parseScale(this.value);
         });
+
+        canvasContainer.addEventListener('click', showOverlayNavigator);
+        overlayNavigator.addEventListener('click', showOverlayNavigator);
 
         window.addEventListener('scalechange', function (evt) {
             var customScaleOption = document.getElementById('customScaleOption'),
@@ -435,6 +466,7 @@ function Viewer(viewerPlugin) {
                       document.getElementById('pageAutoOption').selected)) {
                 parseScale(document.getElementById('scaleSelect').value);
             }
+            showOverlayNavigator();
         });
 
         window.addEventListener('keydown', function (evt) {
