@@ -198,7 +198,7 @@ ops.OpRemoveText = function OpRemoveText() {
     }
 
     this.execute = function (odtDocument) {
-        var neighborhood = [],
+        var neighborhood,
             paragraphElement,
             currentParagraphElement,
             nextParagraphElement,
@@ -241,9 +241,6 @@ ops.OpRemoveText = function OpRemoveText() {
             } else {
                 if (currentLength <= remainingLength) {
                     currentParent.removeChild(currentTextNode);
-                    // If the parent is a span that contains no further text
-                    // after deletion, remove the span.
-                    odtDocument.fixCursorPositions(memberid);
                     // If the current node is text:s or span and is empty, it should
                     // be removed.
                     while (isEmpty(currentParent)) {

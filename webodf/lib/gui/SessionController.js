@@ -567,6 +567,27 @@ gui.SessionController = (function () {
             return op !== null;
         }
 
+        /*
+         * Removes currently selected text (if any) before inserts the text.
+         */
+        function insertText(text) {
+            var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+                op = null;
+
+            if (selection.length > 0) {
+                op = createOpRemoveSelection(selection);
+                session.enqueue(op);
+            }
+
+            op = new ops.OpInsertText();
+            op.init({
+                memberid: inputMemberId,
+                position: selection.position,
+                text: text
+            });
+            session.enqueue(op);
+        }
+
         /**
          * @return {!boolean}
          */
@@ -684,13 +705,7 @@ gui.SessionController = (function () {
             }
 
             if (plainText) {
-                op = new ops.OpInsertText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: odtDocument.getCursorPosition(inputMemberId),
-                    text: plainText
-                });
-                session.enqueue(op);
+                insertText(plainText);
                 cancelEvent(e);
             }
         }
@@ -885,14 +900,7 @@ gui.SessionController = (function () {
             }
 
             keyPressHandler.setDefault(function (e) {
-                var text = stringFromKeyPress(e),
-                    op = new ops.OpInsertText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: odtDocument.getCursorPosition(inputMemberId),
-                    text: text
-                });
-                session.enqueue(op);
+                insertText(stringFromKeyPress(e));
                 return true;
             });
             keyPressHandler.bind(keyCode.Enter, modifier.None, enqueueParagraphSplittingOps);
