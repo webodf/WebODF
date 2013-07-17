@@ -33,6 +33,7 @@
 /*global window, runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops*/
 
 runtime.loadClass("core.Base64Tests");
+runtime.loadClass("core.DomUtilsTests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
@@ -69,6 +70,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 // TODO: fix test and enable
 //     tests.push(core.CursorTests);
     tests.push(core.PositionIteratorTests);
+    tests.push(core.DomUtilsTests);
     tests.push(gui.UndoStateRulesTests);
     tests.push(gui.TrivialUndoManagerTests);
     tests.push(gui.SelectionMoverTests);

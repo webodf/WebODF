@@ -41,32 +41,68 @@ core.DomUtils = function DomUtils() {
     "use strict";
 
     /**
-     * Splits the range boundaries if either start of end offsets is partially within
-     * a text node
+     * Find the inner-most child point that is equivalent
+     * to the provided container and offset.
+     * @param {Node} container
+     * @param {!number} offset
+     * @returns {{container: Node, offset: !number}}
+     */
+    function findStablePoint(container, offset) {
+        if (offset < container.childNodes.length) {
+            container = container.childNodes[offset];
+            offset = 0;
+            while (container.firstChild) {
+                container = container.firstChild;
+            }
+        } else {
+            while (container.lastChild) {
+                container = container.lastChild;
+                offset = container.nodeType === Node.TEXT_NODE ? container.textContent.length : container.childNodes.length;
+            }
+        }
+        return {container: container, offset: offset};
+    }
+
+    /**
+     * If either the start or end boundaries of a range start within a text node, this function will split these text nodes
+     * and reset the range boundaries to select the new nodes. The end result is that there are no partially contained
+     * text nodes within the resulting range.
+     * E.g., the text node with selection:
+     *  "A|BCD|E"
+     * would be split into 3 text nodes, with the range modified to maintain only the completely selected text node:
+     *  "A" "|BCD|" "E"
      * @param {!Range} range
-     * @returns {!Array.<!Node>}
+     * @returns {!Array.<!Node>} Return a list of nodes modified as a result of this split operation. These are often
+     *  processed through DomUtils.normalizeTextNodes after all processing has been complete.
      */
     function splitBoundaries(range) {
-        var modifiedNodes = [],
-            splitStart;
+        var modifiedNodes = [], end, splitStart;
 
-        // Must split end first to stop the start point from being lost
-        if (range.endOffset !== 0
-            && range.endContainer.nodeType === Node.TEXT_NODE
-            && range.endOffset !== range.endContainer.length) {
-            modifiedNodes.push(range.endContainer.splitText(range.endOffset));
-            modifiedNodes.push(range.endContainer);
-            // The end doesn't need to be reset as endContainer & endOffset are still valid after the modification
+        if (range.startContainer.nodeType === Node.TEXT_NODE || range.endContainer.nodeType === Node.TEXT_NODE) {
+            end = findStablePoint(range.endContainer, range.endOffset);
+            // Stable points need to be found to ensure splitting the text node
+            // doesn't inadvertently modify the other end of the range
+            range.setEnd(end.container, end.offset);
+
+            // Must split end first to stop the start point from being lost
+            if (range.endOffset !== 0
+                && range.endContainer.nodeType === Node.TEXT_NODE
+                && range.endOffset !== range.endContainer.length) {
+                modifiedNodes.push(range.endContainer.splitText(range.endOffset));
+                modifiedNodes.push(range.endContainer);
+                // The end doesn't need to be reset as endContainer & endOffset are still valid after the modification
+            }
+
+            if (range.startOffset !== 0
+                && range.startContainer.nodeType === Node.TEXT_NODE
+                && range.startOffset !== range.startContainer.length) {
+                splitStart = range.startContainer.splitText(range.startOffset);
+                modifiedNodes.push(range.startContainer);
+                modifiedNodes.push(splitStart);
+                range.setStart(splitStart, 0);
+            }
         }
 
-        if (range.startOffset !== 0
-            && range.startContainer.nodeType === Node.TEXT_NODE
-            && range.startOffset !== range.startContainer.length) {
-            splitStart = range.startContainer.splitText(range.startOffset);
-            modifiedNodes.push(range.startContainer);
-            modifiedNodes.push(splitStart);
-            range.setStart(splitStart, 0);
-        }
         return modifiedNodes;
     }
     this.splitBoundaries = splitBoundaries;

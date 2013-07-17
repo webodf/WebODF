@@ -35,6 +35,7 @@
     "use strict";
     return [
         "core/Base64Tests.js",
+        "core/DomUtilsTests.js",
         "core/CursorTests.js",
         "core/PositionIteratorTests.js",
         "core/RuntimeTests.js",

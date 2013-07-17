@@ -638,17 +638,32 @@
  </test>
  <test name="ApplyStyle_UnstyledParagraph">
   <before>
-    <office:automatic-styles/>
-    <office:text><text:p>ABCD</text:p></office:text>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
   </before>
   <ops>
    <op optype="ApplyStyle" memberid="Alice" position="1" length="2">
-      <info><style:text-properties fo:font-weight="bold" /></info>
+    <info><style:text-properties fo:font-weight="bold" /></info>
    </op>
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
    <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyStyle_ExistingSpan">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>A<text:span>BCDE</text:span>F</text:p></office:text>
+  </before>
+  <ops>
+   <op optype="ApplyStyle" memberid="Alice" position="3" length="2">
+    <info><style:text-properties fo:font-weight="bold" /></info>
+   </op>
+  </ops>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span>BC</text:span><text:span text:style-name="auto63350368_0">DE</text:span>F</text:p></office:text>
   </after>
  </test>
 </tests>
