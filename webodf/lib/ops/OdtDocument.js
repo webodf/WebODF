@@ -444,7 +444,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * indicating the location of the whitespace in it.
      * @param {!Text} textNode
      * @param {!number} offset
-     * @return {undefined}
+     * @return {!Element}
      */
     function upgradeWhitespaceToElement(textNode, offset) {
         runtime.assert(textNode.data[offset] === ' ', "upgradeWhitespaceToElement: textNode.data[offset] should be a literal space");
@@ -453,8 +453,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         space.appendChild(textNode.ownerDocument.createTextNode(' '));
 
         textNode.deleteData(offset, 1);
-        textNode.splitText(offset);
-        textNode.parentNode.insertBefore(space, textNode.nextSibling);
+        if (offset > 0) { // Don't create an empty text node if the offset is 0...
+            textNode = /**@type {!Text}*/(textNode.splitText(offset));
+        }
+        textNode.parentNode.insertBefore(space, textNode);
+        return space;
     }
 
     function upgradeWhitespacesAtPosition(position) {
@@ -473,7 +476,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (container.nodeType === Node.TEXT_NODE
                     && container.data[offset] === ' '
                     && odfUtils.isSignificantWhitespace(container, offset)) {
-                upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
+                container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
+                // Reset the iterator position to be after the newly created space character
+                iterator.moveToEndOfNode(container);
             }
             iterator.nextPosition();
         }

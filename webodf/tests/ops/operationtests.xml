@@ -408,7 +408,7 @@
   <after><office:text><text:p> <text:s> </text:s>b </text:p></office:text></after>
  </test>
  <test name="DeleteExposesSpace2">
-  <before><office:text><text:p> a b </text:p></office:text></before>
+  <before><office:text><text:p> a b<text:s> </text:s></text:p></office:text></before>
   <ops>
    <op optype="RemoveText" position="2" length="1"/>
   </ops>
@@ -440,6 +440,24 @@
    <op optype="SplitParagraph" memberid="Bob" position="5"/>
   </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span><text:span>hello</text:span></text:span></text:p></text:list-item><text:list-item><text:p><text:span><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:span></text:p></text:list-item></text:list></office:text></after>
+ </test>
+ <test name="SplitParagraph_InSpaceBlock">
+  <before><office:text><text:p>hello world</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5"/>
+   <op optype="SplitParagraph" memberid="Bob" position="5"/>
+  </ops>
+  <after><office:text><text:p>hello</text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
+ </test>
+ <test name="SplitParagraph_InSpaceBlock_LeadingSpace">
+  <before><office:text><text:p>hello  world</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6"/>
+   <op optype="SplitParagraph" memberid="Bob" position="6"/>
+  </ops>
+  <after><office:text><text:p>hello<text:s> </text:s></text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
  <test name="DeleteSpaceInSpanCursorBefore">
   <before><office:text><text:p>A</text:p><text:p><text:span><text:s> </text:s></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text></before>

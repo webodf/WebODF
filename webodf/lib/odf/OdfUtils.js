@@ -304,50 +304,48 @@ odf.OdfUtils = function OdfUtils() {
 
     function isSignificantWhitespace(textNode, offset) {
         var text = textNode.data,
-            leftChar,
-            leftNode,
-            rightChar,
-            rightNode,
             result;
 
         if (!isODFWhitespace(text[offset])) {
+            // Character is not whitespace
+            return false;
+        }
+
+        if (isCharacterElement(textNode.parentNode)) {
+            // Parent is a character element, and therefore does not actually contain text
+            // This prevents a space element from being upgraded again
             return false;
         }
 
         if (offset > 0) {
             if (!isODFWhitespace(text[offset - 1])) {
-                return true;
-            }
-
-            if (offset > 1) {
-                if (!isODFWhitespace(text[offset - 2])) {
-                    result = true;
-                } else if (!isODFWhitespace(text.substr(0, offset))) {
-                    return false;
-                }
-            } else if (scanLeftForNonWhitespace(previousNode(textNode))) {
+                // First whitespace after a character is significant
                 result = true;
             }
+        } else if (scanLeftForNonWhitespace(previousNode(textNode))) {
+            // If the first character found scanning to the left is non-whitespace, this might still be significant
+            result = true;
+        }
 
-            if (result === true) {
-                return isTrailingWhitespace(textNode, offset)
-                    ? false : true;
-            }
-
-            rightChar = text[offset + 1];
-            if (isODFWhitespace(rightChar)) {
-                return false;
-            }
-            return scanLeftForAnyCharacter(previousNode(textNode))
+        if (result === true) {
+            return isTrailingWhitespace(textNode, offset)
                 ? false : true;
         }
         return false;
     }
-    /** Takes a textNode and an offset, and returns true if the character
+    /**
+     * Takes a textNode and an offset, and returns true if the character
      * at that offset is a significant whitespace.
-     * @param {!Node} textNode
+     *
+     * Significant whitespace is defined as:
+     * - Not part of the leading whitespace block in a paragraph
+     * - Not part of the trailing whitespace block in a paragraph
+     * - The first whitespace character after a text node or character
+     *
+     * All other whitespace elements are considered insignificant
+     * @param {!Text} textNode
      * @param {!number} offset
-     * @return {!boolean}
+     * @returns {!boolean}
      */
     this.isSignificantWhitespace = isSignificantWhitespace;
 

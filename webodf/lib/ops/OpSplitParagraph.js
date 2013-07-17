@@ -56,6 +56,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         var domPosition, paragraphNode, targetNode,
             node, splitNode, splitChildNode, keptChildNode;
 
+        odtDocument.upgradeWhitespacesAtPosition(position);
         domPosition = odtDocument.getPositionInTextNode(position, memberid);
         if (!domPosition) {
             return false;
