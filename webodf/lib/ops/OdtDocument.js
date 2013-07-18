@@ -553,13 +553,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                         steps = stepCounter.countForwardSteps(1, filter);
                     }
                     cursors[i].move(steps);
-                    if (cursors[i].getMemberId() === localMemberId) {
+                    if (i === localMemberId) {
                         self.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
                     }
-                } else if (cursors[i].getSelectedRange().collapsed) {
-                    // call move(0) here to force the cursor to reset its selection to collapsed
-                    // and remove the now-unnecessary anchor node
-                    cursors[i].move(0);
                 }
             }
         }
