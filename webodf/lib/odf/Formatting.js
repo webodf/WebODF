@@ -427,14 +427,13 @@ odf.Formatting = function Formatting() {
         return mergedChildStyle;
     }
 
-    /**
-     * Returns an array of all unique styles in a given range for each text node
-     * @param {!Range} range
+    /*
+     * Returns an array of all unique styles in the given text nodes
+     * @param {!Array.<!CharacterData>} textNodes
      * @returns {Array.<Object>}
      */
-    this.getAppliedStyles = function (range) {
-        var textNodes = odfUtils.getTextNodes(range),
-            styleChains = {},
+    this.getAppliedStyles = function (textNodes) {
+        var styleChains = {},
             styles = [];
 
         textNodes.forEach(function(n) {
@@ -459,15 +458,17 @@ odf.Formatting = function Formatting() {
     };
 
     /**
-     * Apply the specified style properties to all elements within the given range.
+     * Apply the specified style properties to all given text nodes
      * Currently, only text styles are applied.
      * @param {!string} memberId Identifier of the member applying the style. This is used for naming generated autostyles
-     * @param {!Range} range Range to apply text style to
+     * @param {!Array.<!CharacterData>} textNodes
+     * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      */
-    this.applyStyle = function(memberId, range, info) {
-        var textStyles = new odf.TextStyleApplicator("auto" + hashString(memberId) + "_", self, odfContainer.rootElement.automaticStyles);
-        textStyles.applyStyle(range, info);
+    this.applyStyle = function (memberId, textNodes, limits, info) {
+        var textStyles = new odf.TextStyleApplicator(
+            "auto" + hashString(memberId) + "_", self, odfContainer.rootElement.automaticStyles);
+        textStyles.applyStyle(textNodes, limits, info);
     };
 
     /**

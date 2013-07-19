@@ -52,6 +52,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.TrivialUndoManager");
+    runtime.loadClass("gui.StyleHelper");
     runtime.loadClass("core.EventNotifier");
 
     /**
@@ -69,6 +70,7 @@ define("webodf/editor/EditorSession", [
             odtDocument = session.getOdtDocument(),
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             formatting = odtDocument.getFormatting(),
+            styleHelper = new gui.StyleHelper(formatting),
             eventNotifier = new core.EventNotifier([
                 EditorSession.signalUserAdded,
                 EditorSession.signalUserRemoved,
@@ -289,7 +291,7 @@ define("webodf/editor/EditorSession", [
             if (selectedRange.collapsed) {
                 return [formatting.getAppliedStylesForElement(cursor.getNode())];
             }
-            return formatting.getAppliedStyles(selectedRange);
+            return styleHelper.getAppliedStyles(selectedRange);
         };
 
         this.getCurrentParagraphStyle = function () {

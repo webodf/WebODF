@@ -33,8 +33,9 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime, odf, Node, core*/
+/*global ops, runtime, gui, odf, Node, core*/
 
+runtime.loadClass("gui.StyleHelper");
 runtime.loadClass("odf.OdfUtils");
 
 /**
@@ -95,9 +96,10 @@ ops.OpApplyStyle = function OpApplyStyle() {
 
     this.execute = function (odtDocument) {
         var range = getRange(odtDocument),
-            impactedParagraphs = getImpactedParagraphs(range);
+            impactedParagraphs = getImpactedParagraphs(range),
+            styleHelper = new gui.StyleHelper(odtDocument.getFormatting());
 
-        odtDocument.getFormatting().applyStyle(memberid, range, info);
+        styleHelper.applyStyle(memberid, range, info);
         range.detach();
         odtDocument.getOdfCanvas().refreshCSS();
 

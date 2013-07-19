@@ -42,6 +42,7 @@
         "gui/UndoStateRulesTests.js",
         "gui/TrivialUndoManagerTests.js",
         "gui/SelectionMoverTests.js",
+        "gui/StyleHelperTests.js",
         "gui/XMLEditTests.js",
         "odf/TextStyleApplicatorTests.js",
         "odf/FormattingTests.js",

@@ -40,7 +40,7 @@ runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
 
 /**
- * Class for applying a supplied text style to all text nodes within a range.
+ * Class for applying a supplied text style to the given text nodes.
  * @constructor
  * @param {!string} newStylePrefix Prefix to put in front of new auto styles
  * @param {!odf.Formatting} formatting Formatting retrieval and computation store
@@ -48,8 +48,7 @@ runtime.loadClass("odf.OdfUtils");
  */
 odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formatting, automaticStyles) {
     "use strict";
-    var nextTextNodes,
-        odfUtils = new odf.OdfUtils(),
+    var odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
@@ -197,34 +196,22 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
     }
 
     /**
-     * Apply the specified text style to all text nodes within the given range
-     * @param {!Range} range Range to apply text style to
+     * Apply the specified text style to the given text nodes
+     * @param {!Array.<!CharacterData>} textNodes
+     * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      */
-    this.applyStyle = function(range, info) {
-        var textNodes,
+    this.applyStyle = function(textNodes, limits, info) {
+        var textPropsOnly = {},
             isStyled,
             container,
             styleCache,
-            styleLookup,
-            textPropsOnly = {},
-            limits;
-
+            styleLookup;
         runtime.assert(info && info[textProperties], "applyStyle without any text properties");
         textPropsOnly[textProperties] = info[textProperties];
         styleCache = new StyleManager(textPropsOnly);
         styleLookup = new StyleLookup(textPropsOnly);
 
-        // Reset instance node-modified stack
-        nextTextNodes = domUtils.splitBoundaries(range);
-        textNodes = odfUtils.getTextNodes(range, false);
-        // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
-        limits = {
-            startContainer: range.startContainer,
-            startOffset: range.startOffset,
-            endContainer: range.endContainer,
-            endOffset: range.endOffset
-        };
         textNodes.forEach(function(n) {
             isStyled = styleLookup.isStyleApplied(n);
             if (isStyled === false) {
@@ -232,7 +219,5 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
                 styleCache.applyStyleToContainer(container);
             }
         });
-        nextTextNodes.forEach(domUtils.normalizeTextNodes);
-        nextTextNodes = null;
     };
 };

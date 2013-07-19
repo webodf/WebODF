@@ -42,6 +42,7 @@ runtime.loadClass("gui.UndoStateRulesTests");
 runtime.loadClass("gui.TrivialUndoManagerTests");
 runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
+runtime.loadClass("gui.StyleHelperTests");
 runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.SessionTests");
 runtime.loadClass("ops.OperationTests");
@@ -71,6 +72,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(gui.UndoStateRulesTests);
     tests.push(gui.TrivialUndoManagerTests);
     tests.push(gui.SelectionMoverTests);
+    tests.push(gui.StyleHelperTests);
     tests.push(odf.FormattingTests);
     tests.push(odf.OdfContainerTests);
     tests.push(odf.StyleInfoTests);

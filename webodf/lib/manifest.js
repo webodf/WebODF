@@ -62,6 +62,7 @@
         "gui/EditInfoMarker.js",
         "gui/SessionView.js",
         "gui/SelectionMover.js",
+        "gui/StyleHelper.js",
         "gui/XMLEdit.js",
         "gui/UndoManager.js",
         "gui/UndoStateRules.js",
