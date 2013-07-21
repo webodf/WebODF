@@ -284,7 +284,7 @@
    <op optype="MoveCursor" memberid="Bob" position="2" length="5"/>
    <op optype="RemoveText" position="2" length="5"/>
   </ops>
-  <after><office:text><text:p text:style-name="A"><text:span>a</text:span>b<c:anchor c:memberId="Bob"/><c:cursor c:memberId="Bob"/>gh</text:p></office:text></after>
+  <after><office:text><text:p text:style-name="A"><text:span>a</text:span>b<c:cursor c:memberId="Bob"/>gh</text:p></office:text></after>
  </test>
  <test name="Remove_deleteOntoFirstLine">
   <before><office:text><text:p text:style-name="A"><text:span>ab</text:span></text:p><text:p text:style-name="B"><text:span>cde</text:span></text:p></office:text></before>
@@ -312,7 +312,7 @@
    <op optype="MoveCursor" memberid="Bob" position="1"/>
    <op optype="RemoveText" position="1" length="1"/>
   </ops>
-  <after><office:text><text:p>a<c:cursor c:memberId="Bob"/><e:editinfo e:id="A"/>c</text:p></office:text></after>
+  <after><office:text><text:p>a<e:editinfo e:id="A"/><c:cursor c:memberId="Bob"/>c</text:p></office:text></after>
  </test>
  <test name="Remove_DeleteTabs">
   <before><office:text><text:p><text:span><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab></text:span></text:p></office:text></before>
