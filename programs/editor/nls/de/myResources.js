@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,9 +32,11 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 define({
     // menus
     file: "Datei",
+    open: "Öffnen",
     save: "Speichern",
     edit: "Bearbeiten",
     view: "Ansicht",
@@ -67,6 +70,8 @@ define({
     spacing: "Abstand",
     options: "Optionen",
     style: "Stil",
+    undo: "Rückgängig",
+    redo: "Wiederherstellen",
     bold: "Fett",
     italic: "Kursiv",
     underline: "Unterstrichen",
