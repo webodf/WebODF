@@ -33,7 +33,9 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global Node, runtime, odf, NodeFilter*/
+/*global Node, runtime, odf, NodeFilter, core*/
+
+runtime.loadClass("core.DomUtils");
 
 /**
  * @constructor
@@ -43,7 +45,8 @@ odf.OdfUtils = function OdfUtils() {
 
     var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        whitespaceOnly = /^\s*$/;
+        whitespaceOnly = /^\s*$/,
+        domUtils = new core.DomUtils();
 
     /**
      * Determine if the node is a text:p or a text:h element.
@@ -95,8 +98,10 @@ odf.OdfUtils = function OdfUtils() {
      */
     function isGroupingElement(e) {
         var name = e && e.localName;
-        return (name === "span" || name === "p" || name === "h")
-            && e.namespaceURI === textns;
+        if (((name === "span" || name === "p" || name === "h") && e.namespaceURI === textns)
+                || (name === "span" && e.namespaceURI === "urn:webodf:names:annotation")) {
+            return true;
+        }
     }
     this.isGroupingElement = isGroupingElement;
     /**
@@ -439,4 +444,172 @@ odf.OdfUtils = function OdfUtils() {
         return parseNonNegativeLength(lineHeight) || parsePercentage(lineHeight);
     }
     this.parseFoLineHeight = parseFoLineHeight;
+
+    function getImpactedParagraphs(range) {
+        var outerContainer = range.commonAncestorContainer,
+            impactedParagraphs = [];
+
+        if (outerContainer.nodeType === Node.ELEMENT_NODE) {
+            impactedParagraphs = domUtils.getElementsByTagNameNS(outerContainer, textns, "p")
+                                .concat(domUtils.getElementsByTagNameNS(outerContainer, textns, "h"));
+        }
+
+        while (outerContainer && !isParagraph(outerContainer)) {
+            outerContainer = outerContainer.parentNode;
+        }
+        if (outerContainer) {
+            impactedParagraphs.push(outerContainer);
+        }
+
+        return impactedParagraphs.filter(function (n) { return domUtils.rangeIntersectsNode(range, n); });
+    }
+    this.getImpactedParagraphs = getImpactedParagraphs;
+
+    /**
+     * Adapted from instructions on how to generate plain text from an ODT document.
+     * See algorithm at http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1415196_253892949
+     * @param node
+     * @returns {boolean}
+     */
+    function isAcceptedNode(node) {
+        switch (node.namespaceURI) {
+            // Namespace skips
+        case odf.Namespaces.drawns:
+        case odf.Namespaces.svgns:
+        case odf.Namespaces.dr3dns:
+            return false;
+        case odf.Namespaces.textns:
+            // Specific node type skips
+            //noinspection FallthroughInSwitchStatementJS
+            switch (node.localName) {
+            case 'note-body':
+            case 'ruby-text':
+                return false;
+            }
+            break;
+        case odf.Namespaces.officens:
+            // Specific node type skips
+            //noinspection FallthroughInSwitchStatementJS
+            switch (node.localName) {
+            case 'annotation':
+            case 'binary-data':
+            case 'event-listeners':
+                return false;
+            }
+            break;
+        default:
+            // Skip webodf edit markers
+            switch (node.localName) {
+            case 'editinfo':
+                return false;
+            }
+            break;
+        }
+        return true;
+    }
+
+    /**
+     * Returns a array of text nodes considered to be part of the supplied range.
+     * This will exclude elements that are not part of the ODT main text bot
+     * @param {!Range} range    Range to search for nodes within
+     * @param {boolean} includePartial Include partially intersecting text nodes in the result
+     * @returns {!Array.<Node>}
+     */
+    function getTextNodes(range, includePartial) {
+        var document = range.startContainer.ownerDocument,
+            nodeRange = document.createRange(),
+            textNodes;
+
+        function nodeFilter(node) {
+            nodeRange.selectNodeContents(node);
+
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (includePartial && domUtils.rangesIntersect(range, nodeRange)) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+                if (domUtils.containsRange(range, nodeRange)) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (domUtils.rangesIntersect(range, nodeRange)) {
+                if (isAcceptedNode(node)) {
+                    return NodeFilter.FILTER_SKIP;
+                }
+            }
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        textNodes = domUtils.getNodesInRange(range, nodeFilter);
+
+        nodeRange.detach();
+        return textNodes;
+    }
+    this.getTextNodes = getTextNodes;
+
+    /**
+     * Get all character elements and text nodes fully contained within the supplied range in document order
+     *
+     * For example, given the following fragment, with the range starting at b, and ending at c:
+     *      <text:p>ab<text:s/>cd</text:p>
+     * this function would return the following array:
+     *      ["b", text:s, "c"]
+     * @param {!Range} range
+     * @returns {!Array.<Node>}
+     */
+    this.getTextElements = function (range) {
+        var document = range.startContainer.ownerDocument,
+            nodeRange = document.createRange(),
+            elements;
+
+        function nodeFilter(node) {
+            var nodeType = node.nodeType;
+            nodeRange.selectNodeContents(node);
+            if (nodeType === Node.TEXT_NODE || isCharacterElement(node)) {
+                if (domUtils.containsRange(range, nodeRange)) {
+                    // text nodes and character elements should only be returned if they are fully contained within the range
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (isAcceptedNode(node) || isGroupingElement(node)) {
+                return NodeFilter.FILTER_SKIP;
+            }
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        elements = domUtils.getNodesInRange(range, nodeFilter);
+        nodeRange.detach();
+
+        return elements;
+    };
+
+    /**
+     * Get all paragraph elements that intersect the supplied range in document order
+     *
+     * For example, given the following fragment, with the range starting at b, and ending at c:
+     *      <text:p id="A">ab</text:p><text:p id="B"><text:s/>cd</text:p>
+     * this function would return the following array:
+     *      [text:p{id="A"}, text:p{id="B"}]
+     * @param {!Range} range
+     * @returns {!Array.<Node>}
+     */
+    this.getParagraphElements = function (range) {
+        var document = range.startContainer.ownerDocument,
+            nodeRange = document.createRange(),
+            elements;
+
+        function nodeFilter(node) {
+            nodeRange.selectNodeContents(node);
+            if (isParagraph(node)) {
+                if (domUtils.rangesIntersect(range, nodeRange)) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (isAcceptedNode(node) || isGroupingElement(node)) {
+                return NodeFilter.FILTER_SKIP;
+            }
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        elements = domUtils.getNodesInRange(range, nodeFilter);
+        nodeRange.detach();
+
+        return elements;
+    };
 };

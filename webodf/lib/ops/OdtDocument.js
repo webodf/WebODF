@@ -52,7 +52,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         filter,
         odfUtils,
-        styleHelper,
         /**Array.<!ops.OdtCursor>*/cursors = {},
         eventNotifier = new core.EventNotifier([
             ops.OdtDocument.signalCursorAdded,
@@ -651,12 +650,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return odfCanvas.getFormatting();
     };
 
-    this.getTextElements = function(range) {
-        return styleHelper.getTextElements(range);
+    this.getTextElements = function (range) {
+        return odfUtils.getTextElements(range);
     };
 
-    this.getParagraphElements = function(range) {
-        return styleHelper.getParagraphElements(range);
+    this.getParagraphElements = function (range) {
+        return odfUtils.getParagraphElements(range);
     };
 
     /**
@@ -692,7 +691,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function init() {
         filter = new TextPositionFilter();
         odfUtils = new odf.OdfUtils();
-        styleHelper = new gui.StyleHelper(self);
     }
     init();
 };

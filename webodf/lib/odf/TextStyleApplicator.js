@@ -53,7 +53,12 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
         textProperties = "style:text-properties",
-        webodfns = "urn:webodf:names:scope";
+        webodfns = "urn:webodf:names:scope",
+        annotationns = "urn:webodf:names:annotation",
+        SPAN_TYPE = {
+            ODF: 0,
+            GUI: 1
+        };
 
     /**
      * @param {!Object} info Style information
@@ -136,9 +141,10 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
      * Moves the specified node and all further siblings within the outer range into a new standalone container
      * @param {!CharacterData} startNode Node to start movement to new container
      * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
+     * @param {!number} type SPAN_TYPE.ODF or SPAN_TYPE.GUI
      * @returns {!Element}  Returns the container node that is to be restyled
      */
-    function moveToNewSpan(startNode, limits) {
+    function moveToNewSpan(startNode, limits, type) {
         var document = startNode.ownerDocument,
             originalContainer = startNode.parentNode,
             styledContainer,
@@ -151,7 +157,11 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
         // Do we need a new style container?
         if (odfUtils.isParagraph(originalContainer)) {
             // Yes, text node has no wrapping span
-            styledContainer = document.createElementNS(textns, "text:span");
+            if (type === SPAN_TYPE.GUI) {
+                styledContainer = document.createElementNS(annotationns,  "annotation:span");
+            } else {
+                styledContainer = document.createElementNS(textns, "text:span");
+            }
             originalContainer.insertBefore(styledContainer, startNode);
             moveTrailing = false;
         } else if (startNode.previousSibling && !domUtils.rangeContainsNode(limits, startNode.previousSibling)) {
@@ -215,8 +225,22 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
         textNodes.forEach(function(n) {
             isStyled = styleLookup.isStyleApplied(n);
             if (isStyled === false) {
-                container = moveToNewSpan(/**@type {!CharacterData}*/(n), limits);
+                container = moveToNewSpan(/**@type {!CharacterData}*/(n), limits, SPAN_TYPE.ODF);
                 styleCache.applyStyleToContainer(container);
+            }
+        });
+    };
+
+    this.applyGUIStyle = function (textNodes, limits, attributes) {
+        textNodes.forEach(function (n) {
+            var container, key;
+
+            container = moveToNewSpan(/**@type {!CharacterData}*/(n), limits, SPAN_TYPE.GUI);
+
+            for (key in attributes) {
+                if (attributes.hasOwnProperty(key)) {
+                    container.setAttributeNS(annotationns, 'annotation:' + key, attributes[key]);
+                }
             }
         });
     };

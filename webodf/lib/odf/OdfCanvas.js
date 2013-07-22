@@ -301,10 +301,12 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
         /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@type{?Window}*/window = runtime.getWindow(),
+        /**@const@type {!string}*/annotationns = "urn:webodf:names:annotation",
         xpath = new xmldom.XPath(),
         utils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
-        shadowContent;
+        shadowContent,
+        annotationsPane;
 
     /**
      * @param {!Element} element
@@ -559,6 +561,62 @@ odf.OdfCanvas = (function () {
         for (i = 0; i < tableCells.length; i += 1) {
             node = /**@type{!Element}*/(tableCells.item(i));
             modifyTableCell(node);
+        }
+    }
+
+    function modifyAnnotations(odffragment, formatting) {
+        var i,
+            annotations = [],
+            annotationNodes,
+            annotationEnds,
+            currentAnnotationNode;
+
+        function modifyAnnotation(annotation) {
+            var range,
+                limits,
+                textNodes,
+                connector,
+                highlightSpan,
+                doc = odffragment.ownerDocument;
+
+            // Only do the highlighting if there is an annotation-end element
+            if (annotation.annotationEnd) {
+                range = doc.createRange();
+                range.setStart(utils.nextNode(annotation.annotationNode), 0);
+                range.setEnd(annotation.annotationEnd, 0);
+
+                limits = {
+                    startContainer: range.startContainer,
+                    startOffset: range.startOffset,
+                    endContainer: range.endContainer,
+                    endOffset: range.endOffset
+                };
+                textNodes = utils.getTextNodes(range, false);
+
+                formatting.applyGUIStyle(textNodes, limits, {
+                    name: annotation.annotationNode.getAttributeNS(officens, 'name')
+                });
+
+                // We will insert a 'connector' node at the very beginning of the highlighting span
+                connector = doc.createElementNS(annotationns, 'annotation:connector');
+                highlightSpan = annotation.annotationNode.nextSibling;
+                highlightSpan.insertBefore(connector, highlightSpan.firstChild);
+            }
+        }
+
+        annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation');
+        annotationEnds = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation-end');
+
+        function matchAnnotationEnd(element) {
+            return currentAnnotationNode.getAttributeNS(officens, 'name') === element.getAttributeNS(officens, 'name');
+        }
+        for (i = 0; i < annotationNodes.length; i += 1) {
+            currentAnnotationNode = annotationNodes[i];
+            annotations.push({
+                annotationNode: annotationNodes[i],
+                annotationEnd: annotationEnds.filter(matchAnnotationEnd)[0]
+            });
+            modifyAnnotation(annotations[i]);
         }
     }
 
@@ -1086,6 +1144,8 @@ odf.OdfCanvas = (function () {
             sizer = doc.createElementNS(element.namespaceURI, 'div');
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
+            sizer.style.paddingRight = "4cm";
+            sizer.id = "sizer";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
 
@@ -1113,6 +1173,17 @@ odf.OdfCanvas = (function () {
             sizer.insertBefore(shadowContent, sizer.firstChild);
             fixContainerSize();
         }
+
+        function handleAnnotations(formatting, odfnode) {
+            if (!annotationsPane) {
+                annotationsPane = doc.createElementNS(element.namespaceURI, 'div');
+                annotationsPane.id = "annotationsPane";
+            }
+
+            doc.getElementById('sizer').appendChild(annotationsPane);
+            modifyAnnotations(odfnode.body, formatting);
+        }
+
         /**
          * @param {boolean} suppressEvent Suppress the statereadychange event from firing. Used for refreshing the OdtContainer
          * @return {undefined}
@@ -1132,6 +1203,7 @@ odf.OdfCanvas = (function () {
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(odfcontainer, odfnode);
+                handleAnnotations(formatting, odfnode);
 
                 if (!suppressEvent) {
                     fireEvent("statereadychange", [odfcontainer]);

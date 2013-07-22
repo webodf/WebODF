@@ -486,6 +486,11 @@ odf.Formatting = function Formatting() {
         textStyles.applyStyle(textNodes, limits, info);
     };
 
+    this.applyGUIStyle = function (textNodes, limits, attributes) {
+        var textStyles = new odf.TextStyleApplicator("", self, odfContainer.rootElement.automaticStyles);
+        textStyles.applyGUIStyle(textNodes, limits, attributes);
+    };
+
     /**
      * Get an exhaustive list of all style names in the current document
      * @returns {!Array.<string>}

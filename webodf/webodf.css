@@ -9,6 +9,8 @@
 @namespace runtimens url(urn:webodf); /* namespace for runtime only */
 @namespace cursor url(urn:webodf:names:cursor);
 @namespace editinfo url(urn:webodf:names:editinfo);
+@namespace annotation url(urn:webodf:names:annotation);
+@namespace dc url(http://purl.org/dc/elements/1.1/);
 
 office|document > *, office|document-content > * {
   display: none;
@@ -213,6 +215,7 @@ cursor|cursor {
     /* making the position relative enables the avatar to use
        the cursor as reference for its absolute position */
     position: relative;
+    z-index: 1;
 }
 cursor|cursor > span {
     display: inline;
@@ -322,4 +325,70 @@ cursor|cursor > div:after {
     color: yellow;
     height: 12pt;
     line-height: 12pt;
+}
+
+office|annotation {
+    width: 4cm;
+    right: -6cm;
+    position: absolute;
+    z-index: 10;
+    background: rgb(130, 158, 255);
+    background: -moz-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
+    background: -webkit-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
+    background: -o-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
+    background: -ms-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
+    background: linear-gradient(0deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
+    box-shadow: 0 3px 4px -3px #ccc;
+}
+
+office|annotation > dc|creator {
+    display: block;
+    font-size: 0.8em;
+    font-family: sans-serif;
+    color: white;
+    background-color: brown;
+    border: 4px solid brown;
+}
+office|annotation > dc|date {
+    display: block;
+    font-size: 0.6em;
+    font-family: sans-serif;
+    border: 4px solid transparent;
+}
+office|annotation > text|list {
+    display: block;
+    padding: 5px;
+}
+
+dc|*::selection {
+    background: transparent;
+}
+dc|*::-moz-selection {
+    background: transparent;
+}
+
+#annotationsPane {
+    background-color: #EAEAEA;
+    width: 4cm;
+    height: 100%;
+    display: inline-block;
+    position: absolute;
+    outline: 1px solid #ccc;
+}
+
+annotation|connector {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: -100cm;
+    z-index: 10;
+    border-top: 1px dashed brown;
+}
+
+annotation|span {
+    background-color: yellow;
+    position: relative;
+}
+annotation|span[highlight="true"] {
+    box-shadow: 1px 1px 5px blue;
 }

@@ -58,8 +58,9 @@ html, body, #mainContainer {
     -webkit-transform-origin: top center;
     -moz-transform-origin: top center;
     -o-transform-origin: top center;
-
     overflow: hidden;
+
+    border: 1px solid #ccc;
 }
 
 #collaboration {
@@ -314,3 +315,4 @@ cursor div:after {
     top: 100%;
     left: 43%;
 }
+

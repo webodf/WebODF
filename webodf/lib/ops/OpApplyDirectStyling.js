@@ -51,9 +51,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         /**@type {number}*/
         length,
         setProperties,
-        odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
-        /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+        odfUtils = new odf.OdfUtils();
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -75,40 +73,16 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         return range;
     }
 
-    function intersectsNode(range, node) {
-        var nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length;
-        return range.comparePoint(node, 0) <= 0 && range.comparePoint(node, nodeLength) >= 0;
-    }
-
-    function getImpactedParagraphs(range) {
-        var outerContainer = range.commonAncestorContainer,
-            impactedParagraphs = [];
-
-        if (outerContainer.nodeType === Node.ELEMENT_NODE) {
-            impactedParagraphs = domUtils.getElementsByTagNameNS(outerContainer, textns, "p")
-                                .concat(domUtils.getElementsByTagNameNS(outerContainer, textns, "h"));
-        }
-
-        while (outerContainer && !odfUtils.isParagraph(outerContainer)) {
-            outerContainer = outerContainer.parentNode;
-        }
-        if (outerContainer) {
-            impactedParagraphs.push(outerContainer);
-        }
-
-        return impactedParagraphs.filter(function(n) { return intersectsNode(range, n); });
-    }
-
     this.execute = function (odtDocument) {
         var range = getRange(odtDocument),
-            impactedParagraphs = getImpactedParagraphs(range),
+            impactedParagraphs = odfUtils.getImpactedParagraphs(range),
             styleHelper = new gui.StyleHelper(odtDocument.getFormatting());
 
         styleHelper.applyStyle(memberid, range, setProperties);
         range.detach();
         odtDocument.getOdfCanvas().refreshCSS();
 
-        impactedParagraphs.forEach(function(n) {
+        impactedParagraphs.forEach(function (n) {
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
                 paragraphElement: n,
                 memberId: memberid,

@@ -47,91 +47,12 @@ gui.StyleHelper = function StyleHelper(formatting) {
         odfUtils = new odf.OdfUtils();
 
     /**
-     * Adapted from instructions on how to generate plain text from an ODT document.
-     * See algorithm at http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1415196_253892949
-     * @param node
-     * @returns {boolean}
-     */
-    function isAcceptedNode(node) {
-        switch(node.namespaceURI) {
-            // Namespace skips
-            case odf.Namespaces.drawns:
-            case odf.Namespaces.svgns:
-            case odf.Namespaces.dr3dns:
-                return false;
-            case odf.Namespaces.textns:
-                // Specific node type skips
-                //noinspection FallthroughInSwitchStatementJS
-                switch(node.localName) {
-                    case 'note-body':
-                    case 'ruby-text':
-                        return false;
-                }
-                break;
-            case odf.Namespaces.officens:
-                // Specific node type skips
-                //noinspection FallthroughInSwitchStatementJS
-                switch(node.localName) {
-                    case 'annotation':
-                    case 'binary-data':
-                    case 'event-listeners':
-                        return false;
-                }
-                break;
-            default:
-                // Skip webodf edit markers
-                switch(node.localName) {
-                    case 'editinfo':
-                        return false;
-                }
-                break;
-        }
-        return true;
-    }
-
-    /**
-     * Returns a array of text nodes considered to be part of the supplied range.
-     * This will exclude elements that are not part of the ODT main text bot
-     * @param {!Range} range    Range to search for nodes within
-     * @param {boolean} includePartial Include partially intersecting text nodes in the result
-     * @returns {!Array.<Node>}
-     */
-    function getTextNodes(range, includePartial) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            textNodes;
-
-        function nodeFilter(node) {
-            nodeRange.selectNodeContents(node);
-
-            if (node.nodeType === Node.TEXT_NODE) {
-                if (includePartial && domUtils.rangesIntersect(range, nodeRange)) {
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-                if (domUtils.containsRange(range, nodeRange)) {
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            } else if (domUtils.rangesIntersect(range, nodeRange)) {
-                if (isAcceptedNode(node)) {
-                    return NodeFilter.FILTER_SKIP;
-                }
-            }
-            return NodeFilter.FILTER_REJECT;
-        }
-
-        textNodes = domUtils.getNodesInRange(range, nodeFilter);
-
-        nodeRange.detach();
-        return textNodes;
-    }
-
-    /**
      * Returns an array of all unique styles in a given range for each text node
      * @param {!Range} range
      * @returns {Array.<Object>}
      */
     this.getAppliedStyles = function (range) {
-        var textNodes = getTextNodes(range, true);
+        var textNodes = odfUtils.getTextNodes(range, true);
         return formatting.getAppliedStyles(textNodes);
     };
 
@@ -142,9 +63,9 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range Range to apply text style to
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      */
-    this.applyStyle = function(memberId, range, info) {
+    this.applyStyle = function (memberId, range, info) {
         var nextTextNodes = domUtils.splitBoundaries(range),
-            textNodes = getTextNodes(range, false),
+            textNodes = odfUtils.getTextNodes(range, false),
             limits;
 
         // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
@@ -178,11 +99,11 @@ gui.StyleHelper = function StyleHelper(formatting) {
             }
             nodes = [container];
         } else {
-            nodes = getTextNodes(range, true);
+            nodes = odfUtils.getTextNodes(range, true);
         }
 
         styles = formatting.getAppliedStyles(nodes);
-        for (i=0; i<styles.length; i+=1) {
+        for (i = 0; i < styles.length; i += 1) {
             properties = styles[i]['style:text-properties'];
             hasOtherValue = !properties || properties[propertyName] !== propertyValue;
             if (hasOtherValue) {
@@ -197,7 +118,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.isBold = function(range) {
+    this.isBold = function (range) {
         return hasTextPropertyValue(range, 'fo:font-weight', 'bold');
     };
 
@@ -206,7 +127,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.isItalic = function(range) {
+    this.isItalic = function (range) {
         return hasTextPropertyValue(range, 'fo:font-style', 'italic');
     };
 
@@ -215,7 +136,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.hasUnderline = function(range) {
+    this.hasUnderline = function (range) {
         return hasTextPropertyValue(range, 'style:text-underline-style', 'solid');
     };
 
@@ -224,75 +145,12 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.hasStrikeThrough = function(range) {
+    this.hasStrikeThrough = function (range) {
         return hasTextPropertyValue(range, 'style:text-line-through-style', 'solid');
     };
-
-    /**
-     * Get all character elements and text nodes fully contained within the supplied range in document order
-     *
-     * For example, given the following fragment, with the range starting at b, and ending at c:
-     *      <text:p>ab<text:s/>cd</text:p>
-     * this function would return the following array:
-     *      ["b", text:s, "c"]
-     * @param {!Range} range
-     * @returns {!Array.<Node>}
-     */
-    this.getTextElements = function(range) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            elements;
-
-        function nodeFilter(node) {
-            var nodeType = node.nodeType;
-            nodeRange.selectNodeContents(node);
-            if (nodeType === Node.TEXT_NODE || odfUtils.isCharacterElement(node)) {
-                if (domUtils.containsRange(range, nodeRange)) {
-                    // text nodes and character elements should only be returned if they are fully contained within the range
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            } else if (isAcceptedNode(node) || odfUtils.isGroupingElement(node)) {
-                return NodeFilter.FILTER_SKIP;
-            }
-            return NodeFilter.FILTER_REJECT;
-        }
-
-        elements = domUtils.getNodesInRange(range, nodeFilter);
-        nodeRange.detach();
-
-        return elements;
-    };
-
-    /**
-     * Get all paragraph elements that intersect the supplied range in document order
-     *
-     * For example, given the following fragment, with the range starting at b, and ending at c:
-     *      <text:p id="A">ab</text:p><text:p id="B"><text:s/>cd</text:p>
-     * this function would return the following array:
-     *      [text:p{id="A"}, text:p{id="B"}]
-     * @param {!Range} range
-     * @returns {!Array.<Node>}
-     */
-    this.getParagraphElements = function(range) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            elements;
-
-        function nodeFilter(node) {
-            nodeRange.selectNodeContents(node);
-            if (odfUtils.isParagraph(node)) {
-                if (domUtils.rangesIntersect(range, nodeRange)) {
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            } else if (isAcceptedNode(node) || odfUtils.isGroupingElement(node)) {
-                return NodeFilter.FILTER_SKIP;
-            }
-            return NodeFilter.FILTER_REJECT;
-        }
-
-        elements = domUtils.getNodesInRange(range, nodeFilter);
-        nodeRange.detach();
-
-        return elements;
-    };
+    // These should later go and from StyleHelperTests they should be split
+    // off into OdfUtilsTests
+    this.getTextNodes = odfUtils.getTextNodes;
+    this.getParagraphElements = odfUtils.getParagraphElements;
+    this.getTextElements = odfUtils.getTextElements;
 };

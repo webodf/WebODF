@@ -114,10 +114,11 @@ core.DomUtils = function DomUtils() {
      * @param {!Range} insideRange
      * @returns {boolean}
      */
-    this.containsRange = function(container, insideRange) {
+    function containsRange(container, insideRange) {
         return container.compareBoundaryPoints(container.START_TO_START, insideRange) <= 0
             && container.compareBoundaryPoints(container.END_TO_END, insideRange) >= 0;
-    };
+    }
+    this.containsRange = containsRange;
 
     /**
      * Returns true if there is any intersection between range1 and range2
@@ -125,10 +126,11 @@ core.DomUtils = function DomUtils() {
      * @param {!Range} range2
      * @returns {boolean}
      */
-    this.rangesIntersect = function(range1, range2) {
+    function rangesIntersect(range1, range2) {
         return range1.compareBoundaryPoints(range1.END_TO_START, range2) <= 0
             && range1.compareBoundaryPoints(range1.START_TO_END, range2) >= 0;
-    };
+    }
+    this.rangesIntersect = rangesIntersect;
 
     /**
      * Fetches all nodes within a supplied range that pass the required filter
@@ -148,6 +150,8 @@ core.DomUtils = function DomUtils() {
         while (n) {
             if (nodeFilter(n) === NodeFilter.FILTER_ACCEPT) {
                 elements.push(n);
+            } else if (nodeFilter(n) === NodeFilter.FILTER_REJECT) {
+                break;
             }
             n = n.parentNode;
         }
@@ -241,4 +245,10 @@ core.DomUtils = function DomUtils() {
         return Array.prototype.slice.call(node.getElementsByTagNameNS(namespace, tagName));
     }
     this.getElementsByTagNameNS = getElementsByTagNameNS;
+
+    function rangeIntersectsNode(range, node) {
+        var nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length;
+        return range.comparePoint(node, 0) <= 0 && range.comparePoint(node, nodeLength) >= 0;
+    }
+    this.rangeIntersectsNode = rangeIntersectsNode;
 };
