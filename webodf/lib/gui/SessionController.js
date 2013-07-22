@@ -899,6 +899,7 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }
 
+            // the default action is to insert text into the document
             keyPressHandler.setDefault(function (e) {
                 var text = stringFromKeyPress(e),
                     op;
