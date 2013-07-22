@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global core, gui, runtime, window*/
+/*global core, gui, runtime*/
 
 runtime.loadClass("ops.EditInfo");
 runtime.loadClass("gui.EditInfoHandle");
@@ -60,7 +60,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
      * @return {!number}
      */
     function applyDecay(opacity, delay) {
-        return window.setTimeout(function () {
+        return runtime.getWindow().setTimeout(function () {
             marker.style.opacity = opacity;
         }, delay);
     }
@@ -70,7 +70,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
      * @param {number} timer
      */
     function deleteDecay(timer) {
-        window.clearTimeout(timer);
+        runtime.getWindow().clearTimeout(timer);
     }
 
     function setLastAuthor(memberid) {

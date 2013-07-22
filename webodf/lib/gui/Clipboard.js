@@ -58,7 +58,7 @@ gui.Clipboard = function Clipboard() {
         var result = true,
             setDataResult,
             clipboard = e.clipboardData,
-            window = runtime.getWindow(),
+            /**@type{?Window}*/window = runtime.getWindow(),
             document = range.startContainer.ownerDocument,
             fragmentContainer;
 

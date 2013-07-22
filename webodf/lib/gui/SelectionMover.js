@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, NodeFilter, runtime, core, gui, odf, XMLSerializer, window*/
+/*global Node, NodeFilter, runtime, core, gui, odf, XMLSerializer*/
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.PositionIterator");
 runtime.loadClass("core.PositionFilter");
@@ -138,7 +138,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             newRect,
             horizontalMovement,
             o, c,
-            isForwardSelection;
+            isForwardSelection,
+            /**@type{?Window}*/window = runtime.getWindow();
 
         initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
         while (left > 0 && move()) {

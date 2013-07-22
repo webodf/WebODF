@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui, Node, ops, odf, window */
+/*global runtime, core, gui, Node, ops, odf */
 
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
@@ -789,7 +789,8 @@ gui.SessionController = (function () {
          * @param {!Event} e
          */
         function handlePaste(e) {
-            var plainText;
+            var plainText,
+                /**@type{?Window}*/window = runtime.getWindow();
 
             if (window.clipboardData && window.clipboardData.getData) { // IE
                 plainText = window.clipboardData.getData('Text');

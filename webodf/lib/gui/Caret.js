@@ -110,7 +110,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     function getOffsetBaseElement(element) {
         var anchorElement = element,
             nodeStyle,
-            /**@type{Window|null}*/window = runtime.getWindow();
+            /**@type{?Window}*/window = runtime.getWindow();
 
         runtime.assert(window !== null,
                        "Expected to be run in an environment which has a global window, like a browser.");
@@ -138,7 +138,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         var x = 0,
             y = 0,
             elementStyle,
-            /**@type{Window|null}*/window = runtime.getWindow();
+            /**@type{?Window}*/window = runtime.getWindow();
 
         runtime.assert(window !== null,
                        "Expected to be run in an environment which has a global window, like a browser.");

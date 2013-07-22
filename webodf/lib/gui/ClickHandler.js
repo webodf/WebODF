@@ -31,7 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, gui, core, window */
+/*global runtime, gui, core*/
 
 runtime.loadClass("core.EventNotifier");
 
@@ -68,7 +68,7 @@ gui.ClickHandler = function ClickHandler() {
      * @param {!Event} e
      */
     this.handleMouseUp = function (e) {
-        var window = runtime.getWindow();
+        var /**@type{?Window}*/window = runtime.getWindow();
 
         if (clickPosition && clickPosition.x === e.screenX && clickPosition.y === e.screenY) {
             clickCount += 1;

@@ -31,13 +31,14 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, gui, odf, core, xmldom, document, window*/
+/*global runtime, gui, odf, core, xmldom, document*/
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.Namespaces");
 
 gui.PresenterUI = (function () {
     "use strict";
-    var xpath = new xmldom.XPath();
+    var xpath = new xmldom.XPath(),
+        /**@type{?Window}*/window = runtime.getWindow();
 
     return function PresenterUI(odf_element) {
         var self = this;

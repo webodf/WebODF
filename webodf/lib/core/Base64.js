@@ -52,7 +52,7 @@ core.Base64 = (function () {
         }(b64chars)),
         convertUTF16StringToBase64,
         convertBase64ToUTF16String,
-        /**@type{Window|null}*/window = runtime.getWindow(),
+        /**@type{?Window}*/window = runtime.getWindow(),
         btoa, atob;
 
     /**

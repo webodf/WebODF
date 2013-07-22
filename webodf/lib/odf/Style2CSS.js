@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global odf, runtime, xmldom, core, document, window*/
+/*global odf, runtime, xmldom, core, document*/
 
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
@@ -974,6 +974,7 @@ odf.Style2CSS = function Style2CSS() {
     this.style2css = function (doctype, stylesheet, fontFaceMap, styles, autostyles) {
         var doc, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
+
         // make stylesheet empty
         while (stylesheet.cssRules.length) {
             stylesheet.deleteRule(stylesheet.cssRules.length - 1);
@@ -1004,7 +1005,7 @@ odf.Style2CSS = function Style2CSS() {
 
         fontFaceDeclsMap = fontFaceMap;
         documentType = doctype;
-        defaultFontSize = window.getComputedStyle(document.body, null).getPropertyValue('font-size') || '12pt';
+        defaultFontSize = runtime.getWindow().getComputedStyle(document.body, null).getPropertyValue('font-size') || '12pt';
 
         // add the various styles
         stylenodes = getStyleMap(styles);
