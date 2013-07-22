@@ -492,6 +492,18 @@ gui.SessionController = (function () {
             return true;
         }
 
+        function extendSelectionToEntireDocument() {
+            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                steps;
+            // The root node is always before the cursor, therefore the returned number of steps is always negative
+            steps = -odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+
+            iterator.moveToEnd();
+            steps += odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+            sessionEnqueue(createOpMoveCursor(0, steps));
+            return true;
+        }
+
         /**
          * Ensures the provided selection is a "forward" selection (i.e., length is positive)
          * @param {!{position: number, length: number}} selection
@@ -894,9 +906,11 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Down, modifier.MetaShift, extendSelectionToDocumentEnd);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
+                keyDownHandler.bind(keyCode.A, modifier.Meta, extendSelectionToEntireDocument);
             } else {
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
+                keyDownHandler.bind(keyCode.A, modifier.Ctrl, extendSelectionToEntireDocument);
             }
 
             // the default action is to insert text into the document

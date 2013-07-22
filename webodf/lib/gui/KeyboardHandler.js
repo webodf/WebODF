@@ -150,6 +150,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
     Right: 39,
     Down: 40,
     Delete: 46,
+    A: 65,
     Z: 90
 };
 
