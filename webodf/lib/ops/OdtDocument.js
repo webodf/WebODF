@@ -37,6 +37,7 @@
 
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("gui.SelectionMover");
 
 /**
  * A document that keeps all data related to the mapped document.

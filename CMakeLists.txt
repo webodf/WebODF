@@ -279,6 +279,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/ops/Operation.js
     lib/ops/OpAddCursor.js
+    lib/gui/StyleHelper.js
     lib/ops/OpApplyStyle.js
     lib/ops/OpRemoveCursor.js
     lib/ops/OpMoveCursor.js
@@ -300,7 +301,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/KeyboardHandler.js
     lib/gui/Clipboard.js
     lib/gui/SessionController.js
-    lib/gui/StyleHelper.js
     lib/ops/UserModel.js
     lib/ops/TrivialUserModel.js
     lib/ops/NowjsUserModel.js
