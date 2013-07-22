@@ -900,8 +900,19 @@ gui.SessionController = (function () {
             }
 
             keyPressHandler.setDefault(function (e) {
-                insertText(stringFromKeyPress(e));
-                return true;
+                var text = stringFromKeyPress(e),
+                    op;
+                if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
+                    op = new ops.OpInsertText();
+                    op.init({
+                        memberid: inputMemberId,
+                        position: odtDocument.getCursorPosition(inputMemberId),
+                        text: text
+                    });
+                    session.enqueue(op);
+                    return true;
+                }
+                return false;
             });
             keyPressHandler.bind(keyCode.Enter, modifier.None, enqueueParagraphSplittingOps);
 
