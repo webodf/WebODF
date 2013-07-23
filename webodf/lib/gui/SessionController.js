@@ -705,10 +705,31 @@ gui.SessionController = (function () {
         }
 
         /**
+         * Handle the copy operation request
+         * @param {!Event} e
+         */
+        function handleCopy(e) {
+            var cursor = odtDocument.getCursor(inputMemberId),
+                selectedRange = cursor.getSelectedRange();
+
+            if (selectedRange.collapsed) {
+                // Modifying the clipboard data will clear any existing data,
+                // so cut shouldn't touch the clipboard if there is nothing selected
+                return;
+            }
+
+            // Place the data on the clipboard ourselves to ensure consistency with cut behaviours
+            if (!clipboard.setDataFromRange(e, cursor.getSelectedRange())) {
+                // TODO What should we do if cut isn't supported?
+                runtime.log("Cut operation failed");
+            }
+        }
+
+        /**
          * @param {!Event} e
          */
         function handlePaste(e) {
-            var plainText, op;
+            var plainText;
 
             if (window.clipboardData && window.clipboardData.getData) { // IE
                 plainText = window.clipboardData.getData('Text');
@@ -778,11 +799,12 @@ gui.SessionController = (function () {
             // In Safari 6.0.5 (7536.30.1), Using either attachEvent or addEventListener
             // results in the beforecut return value being ignored which prevents cut from being called.
             listenEvent(canvasElement, "beforecut", handleBeforeCut, true);
-            listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
             listenEvent(canvasElement, "cut", handleCut);
+            listenEvent(canvasElement, "copy", handleCopy);
             // Epiphany 3.6.1 requires this to allow the paste event to fire
             listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
             listenEvent(canvasElement, "paste", handlePaste);
+            listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
@@ -812,9 +834,10 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "keyup", dummyHandler);
             removeEvent(canvasElement, "cut", handleCut);
             removeEvent(canvasElement, "beforecut", handleBeforeCut);
+            removeEvent(canvasElement, "copy", handleCopy);
             removeEvent(canvasElement, "paste", handlePaste);
-            removeEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
             removeEvent(canvasElement, "beforepaste", handleBeforePaste);
+            removeEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
 
             op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
