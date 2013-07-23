@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global Node, core, ops, runtime*/
+/*global Node, core, ops, runtime, NodeFilter*/
 
 /**
  * A collection of Dom utilities
@@ -129,6 +129,39 @@ core.DomUtils = function DomUtils() {
         return range1.compareBoundaryPoints(range1.END_TO_START, range2) <= 0
             && range1.compareBoundaryPoints(range1.START_TO_END, range2) >= 0;
     };
+
+    /**
+     * Fetches all nodes within a supplied range that pass the required filter
+     * @param {!Range} range
+     * @param {!function(!Node) : number} nodeFilter
+     * @returns {!Array.<Node>}
+     */
+    function getNodesInRange(range, nodeFilter) {
+        var document = range.startContainer.ownerDocument,
+            elements = [],
+            root = /**@type{!Node}*/(range.commonAncestorContainer),
+            n,
+            treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, nodeFilter, false);
+
+        treeWalker.currentNode = range.startContainer;
+        n = range.startContainer;
+        while (n) {
+            if (nodeFilter(n) === NodeFilter.FILTER_ACCEPT) {
+                elements.push(n);
+            }
+            n = n.parentNode;
+        }
+        // The expected sequence is outer-most to inner-most element, thus, the array just built needs to be reversed
+        elements.reverse();
+
+        n = treeWalker.nextNode();
+        while (n) {
+            elements.push(n);
+            n = treeWalker.nextNode();
+        }
+        return elements;
+    }
+    this.getNodesInRange = getNodesInRange;
 
     /**
      * Merges the content of node1 into node2 if node2 exists.

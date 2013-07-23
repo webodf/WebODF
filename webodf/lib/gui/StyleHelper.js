@@ -93,49 +93,33 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * Returns a array of text nodes considered to be part of the supplied range.
      * This will exclude elements that are not part of the ODT main text bot
      * @param {!Range} range    Range to search for nodes within
-     * @param {boolean=} includePartial Include partially intersecting text nodes in the result. Default value is true
-     * @returns {!Array.<!CharacterData>}
+     * @param {boolean} includePartial Include partially intersecting text nodes in the result
+     * @returns {!Array.<Node>}
      */
     function getTextNodes(range, includePartial) {
         var document = range.startContainer.ownerDocument,
             nodeRange = document.createRange(),
-            textNodes = [],
-            n,
-            root = /**@type {!Node}*/ (range.commonAncestorContainer.nodeType === Node.TEXT_NODE ?
-                range.commonAncestorContainer.parentNode : range.commonAncestorContainer),
-            treeWalker;
+            textNodes;
 
-        treeWalker = document.createTreeWalker(root,
-            NodeFilter.SHOW_ALL,
-            function (node) {
-                nodeRange.selectNodeContents(node);
+        function nodeFilter(node) {
+            nodeRange.selectNodeContents(node);
 
-                if (includePartial === false && node.nodeType === Node.TEXT_NODE) {
-                    if (range.compareBoundaryPoints(range.START_TO_START, nodeRange) <= 0
-                        && range.compareBoundaryPoints(range.END_TO_END, nodeRange) >= 0) {
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
-                } else if (range.compareBoundaryPoints(range.END_TO_START, nodeRange) === -1
-                    && range.compareBoundaryPoints(range.START_TO_END, nodeRange) === 1) {
-                    if (node.nodeType === Node.TEXT_NODE) {
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
-                    if (isAcceptedNode(node)) {
-                        return NodeFilter.FILTER_SKIP;
-                    }
+            if (node.nodeType === Node.TEXT_NODE) {
+                if (includePartial && domUtils.rangesIntersect(range, nodeRange)) {
+                    return NodeFilter.FILTER_ACCEPT;
                 }
-                return NodeFilter.FILTER_REJECT;
-            },
-            false);
-
-        // Make the first call to nextNode return startContainer
-        treeWalker.currentNode = range.startContainer.previousSibling || range.startContainer.parentNode;
-
-        n = treeWalker.nextNode();
-        while (n) {
-            textNodes.push(n);
-            n = treeWalker.nextNode();
+                if (domUtils.containsRange(range, nodeRange)) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (domUtils.rangesIntersect(range, nodeRange)) {
+                if (isAcceptedNode(node)) {
+                    return NodeFilter.FILTER_SKIP;
+                }
+            }
+            return NodeFilter.FILTER_REJECT;
         }
+
+        textNodes = domUtils.getNodesInRange(range, nodeFilter);
 
         nodeRange.detach();
         return textNodes;
@@ -147,7 +131,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @returns {Array.<Object>}
      */
     this.getAppliedStyles = function (range) {
-        var textNodes = getTextNodes(range);
+        var textNodes = getTextNodes(range, true);
         return formatting.getAppliedStyles(textNodes);
     };
 
@@ -160,7 +144,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      */
     this.applyStyle = function(memberId, range, info) {
         var nextTextNodes = domUtils.splitBoundaries(range),
-            textNodes = getTextNodes(range),
+            textNodes = getTextNodes(range, false),
             limits;
 
         // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
@@ -175,42 +159,17 @@ gui.StyleHelper = function StyleHelper(formatting) {
         nextTextNodes.forEach(domUtils.normalizeTextNodes);
     };
 
+
     /**
-     * Fetch all fully encompassed character elements and text nodes, and any intersecting ODT paragraph elements in
-     * the specified range in document order.
+     * Get all character elements and text nodes fully contained within the supplied range in document order
+     *
      * For example, given the following fragment, with the range starting at b, and ending at c:
      *      <text:p>ab<text:s/>cd</text:p>
      * this function would return the following array:
-     *      [text:p, "b", text:s, "c"]
-     * @param {!Range} range    Range to search for nodes within
-     * @returns {!Array.<!Node>}
+     *      ["b", text:s, "c"]
+     * @param {!Range} range
+     * @returns {!Array.<Node>}
      */
-    function getNodesInRange(range, nodeFilter) {
-        var document = range.startContainer.ownerDocument,
-            elements = [],
-            root = /**@type{!Node}*/(range.commonAncestorContainer),
-            n,
-            treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, nodeFilter, false);
-
-        treeWalker.currentNode = range.startContainer;
-        n = range.startContainer;
-        while (n) {
-            if (nodeFilter(n) === NodeFilter.FILTER_ACCEPT) {
-                elements.push(n);
-            }
-            n = n.parentNode;
-        }
-        // The expected sequence is outer-most to inner-most element, thus, the array just built needs to be reversed
-        elements.reverse();
-
-        n = treeWalker.nextNode();
-        while (n) {
-            elements.push(n);
-            n = treeWalker.nextNode();
-        }
-        return elements;
-    }
-
     this.getTextElements = function(range) {
         var document = range.startContainer.ownerDocument,
             nodeRange = document.createRange(),
@@ -230,16 +189,21 @@ gui.StyleHelper = function StyleHelper(formatting) {
             return NodeFilter.FILTER_REJECT;
         }
 
-        elements = getNodesInRange(range, nodeFilter);
+        elements = domUtils.getNodesInRange(range, nodeFilter);
         nodeRange.detach();
 
         return elements;
     };
 
     /**
-     * Get all paragraph elements that intersect or are contained within the supplied range
+     * Get all paragraph elements that intersect the supplied range in document order
+     *
+     * For example, given the following fragment, with the range starting at b, and ending at c:
+     *      <text:p id="A">ab</text:p><text:p id="B"><text:s/>cd</text:p>
+     * this function would return the following array:
+     *      [text:p{id="A"}, text:p{id="B"}]
      * @param {!Range} range
-     * @returns {!Array.<!Element>}
+     * @returns {!Array.<Node>}
      */
     this.getParagraphElements = function(range) {
         var document = range.startContainer.ownerDocument,
@@ -258,7 +222,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
             return NodeFilter.FILTER_REJECT;
         }
 
-        elements = getNodesInRange(range, nodeFilter);
+        elements = domUtils.getNodesInRange(range, nodeFilter);
         nodeRange.detach();
 
         return elements;
