@@ -51,13 +51,12 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
         span,
         avatar,
         cursorNode,
-        focussed = false,
+        focused = false,
         blinking = false,
-        blinkTimeout,
-        color = "";
+        blinkTimeout;
 
     function blink(reset) {
-        if (!focussed || !cursorNode.parentNode) {
+        if (!focused || !cursorNode.parentNode) {
             // stop blinking when removed from the document
             return;
         }
@@ -69,10 +68,10 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
 
             blinking = true;
             // switch between transparent and color
-            span.style.borderColor =
-                (reset || span.style.borderColor === "transparent")
-                    ? color
-                    : "transparent";
+            span.style.opacity =
+                (reset || span.style.opacity === "0")
+                    ? "1"
+                    : "0";
 
             blinkTimeout = runtime.setTimeout(function () {
                 blinking = false;
@@ -250,29 +249,21 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
     };
 
     this.setFocus = function () {
-        focussed = true;
+        focused = true;
         avatar.markAsFocussed(true);
         blink(true);
     };
     this.removeFocus = function () {
-        focussed = false;
+        focused = false;
         avatar.markAsFocussed(false);
-        // reset
-        span.style.borderColor = color;
+        span.style.opacity = "1";
     };
     this.setAvatarImageUrl = function (url) {
         avatar.setImageUrl(url);
     };
     this.setColor = function (newColor) {
-        if (color === newColor) {
-            return;
-        }
-
-        color = newColor;
-        if (span.style.borderColor !== "transparent") {
-            span.style.borderColor = color;
-        }
-        avatar.setColor(color);
+        span.style.borderColor = newColor;
+        avatar.setColor(newColor);
     };
     this.getCursor = function () {
         return cursor;
