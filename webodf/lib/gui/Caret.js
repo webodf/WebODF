@@ -53,25 +53,30 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
         cursorNode,
         focussed = false,
         blinking = false,
+        blinkTimeout,
         color = "";
 
-    function blink() {
+    function blink(reset) {
         if (!focussed || !cursorNode.parentNode) {
             // stop blinking when removed from the document
             return;
         }
 
-        if (!blinking) {
+        if (!blinking || reset) {
+            if (reset && blinkTimeout !== undefined) {
+                runtime.clearTimeout(blinkTimeout);
+            }
+
             blinking = true;
             // switch between transparent and color
             span.style.borderColor =
-                (span.style.borderColor === "transparent")
+                (reset || span.style.borderColor === "transparent")
                     ? color
                     : "transparent";
 
-            runtime.setTimeout(function () {
+            blinkTimeout = runtime.setTimeout(function () {
                 blinking = false;
-                blink();
+                blink(false);
             }, 500);
         }
     }
@@ -240,10 +245,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
         };
     }
 
+    this.refreshCursor = function() {
+        blink(true);
+    };
+
     this.setFocus = function () {
         focussed = true;
         avatar.markAsFocussed(true);
-        blink();
+        blink(true);
     };
     this.removeFocus = function () {
         focussed = false;

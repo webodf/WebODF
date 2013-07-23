@@ -58,6 +58,12 @@ gui.CaretFactory = function CaretFactory(sessionController) {
             canvasElement = odtDocument.getOdfCanvas().getElement(),
             caret = new gui.Caret(cursor, caretAvatarInitiallyVisible);
 
+        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, function (info) {
+            if (info.getMemberId() === memberid) {
+                caret.refreshCursor();
+            }
+        });
+
         // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
             runtime.log("Starting to track input on new cursor of " + memberid);

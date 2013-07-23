@@ -34,7 +34,7 @@
 /*global window, XMLHttpRequest, require, console, DOMParser,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
-  navigator, VBArray, alert, now */
+  navigator, VBArray, alert, now, clearTimeout */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -168,9 +168,14 @@ Runtime.prototype.log = function (msgOrCategory, msg) {"use strict"; };
 /**
  * @param {!function():undefined} callback
  * @param {!number} milliseconds
- * @return {undefined}
+ * @return {!number}
  */
 Runtime.prototype.setTimeout = function (callback, milliseconds) {"use strict"; };
+/**
+ * @param {!number} timeoutID
+ * @return {undefined}
+ */
+Runtime.prototype.clearTimeout = function (timeoutID) {"use strict"; };
 /**
  * @return {!Array.<string>}
  */
@@ -742,9 +747,12 @@ function BrowserRuntime(logoutput) {
     this.log = log;
     this.assert = assert;
     this.setTimeout = function (f, msec) {
-        setTimeout(function () {
+        return setTimeout(function () {
             f();
         }, msec);
+    };
+    this.clearTimeout = function (timeoutID) {
+        clearTimeout(timeoutID);
     };
     this.libraryPaths = function () {
         return ["lib"]; // TODO: find a good solution
@@ -952,9 +960,12 @@ function NodeJSRuntime() {
     this.assert = assert;
 
     this.setTimeout = function (f, msec) {
-        setTimeout(function () {
+        return setTimeout(function () {
             f();
         }, msec);
+    };
+    this.clearTimeout = function (timeoutID) {
+        clearTimeout(timeoutID);
     };
     this.libraryPaths = function () {
         return [__dirname];
@@ -1208,6 +1219,9 @@ function RhinoRuntime() {
     this.assert = assert;
     this.setTimeout = function (f, msec) {
         f();
+        return 0;
+    };
+    this.clearTimeout = function(timeoutID) {
     };
     this.libraryPaths = function () {
         return ["lib"];
