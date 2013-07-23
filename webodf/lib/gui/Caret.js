@@ -256,7 +256,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
     this.removeFocus = function () {
         focused = false;
         avatar.markAsFocussed(false);
-        span.style.opacity = "1";
+        span.style.opacity = "0";
     };
     this.setAvatarImageUrl = function (url) {
         avatar.setImageUrl(url);
