@@ -49,14 +49,15 @@ gui.CaretFactory = function CaretFactory(sessionController) {
     /**
      * @param {ops.OdtCursor} cursor
      * @param {boolean} caretAvatarInitiallyVisible Set to false to hide the associated avatar
+     * @param {boolean} blinkOnRangeSelect Specify that the caret should blink if a non-collapsed range is selected
      * @return {!gui.Caret}
      */
-    this.createCaret = function (cursor, caretAvatarInitiallyVisible) {
+    this.createCaret = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
         var memberid = cursor.getMemberId(),
             session = sessionController.getSession(),
             odtDocument = session.getOdtDocument(),
             canvasElement = odtDocument.getOdfCanvas().getElement(),
-            caret = new gui.Caret(cursor, caretAvatarInitiallyVisible);
+            caret = new gui.Caret(cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect);
 
         odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, function (info) {
             if (info.getMemberId() === memberid) {

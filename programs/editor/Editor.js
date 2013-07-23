@@ -108,7 +108,8 @@ define("webodf/editor/Editor", [
                     inviteButton,
                     viewOptions = {
                         editInfoMarkersInitiallyVisible: networked,
-                        caretAvatarsInitiallyVisible: networked
+                        caretAvatarsInitiallyVisible: networked,
+                        caretBlinksOnRangeSelect: true
                     },
                     peopleListDiv = document.getElementById('peopleList');
 

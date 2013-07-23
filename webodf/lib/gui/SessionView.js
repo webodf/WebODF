@@ -40,10 +40,30 @@ runtime.loadClass("ops.EditInfo");
 runtime.loadClass("gui.EditInfoMarker");
 
 /**
- * @typedef {{editInfoMarkersInitiallyVisible:boolean,
- *               caretAvatarsInitiallyVisible:boolean}}
+ * @constructor
+ * @struct
  */
-gui.SessionViewOptions;
+gui.SessionViewOptions = function() {
+    "use strict";
+
+    /**
+     * Set the initial edit information marker visibility
+     * @type {boolean}
+     */
+    this.editInfoMarkersInitiallyVisible = true;
+
+    /**
+     * Sets the initial visibility of the avatar
+     * @type {boolean}
+     */
+    this.caretAvatarsInitiallyVisible = true;
+
+    /**
+     * Specify that the caret should blink if a non-collapsed range is selected
+     * @type {boolean}
+     */
+    this.caretBlinksOnRangeSelect = true;
+};
 
 gui.SessionView = (function () {
     "use strict";
@@ -71,7 +91,8 @@ gui.SessionView = (function () {
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {},
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
-            showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true);
+            showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true),
+            blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true);
 
         function createAvatarInfoNodeMatch(nodeName, className, memberId) {
             var userId = memberId.split('___')[0];
@@ -297,7 +318,7 @@ gui.SessionView = (function () {
          * @return {undefined}
          */
         function onCursorAdded(cursor) {
-            var caret = caretFactory.createCaret(cursor, showCaretAvatars),
+            var caret = caretFactory.createCaret(cursor, showCaretAvatars, blinkOnRangeSelect),
                 memberId = cursor.getMemberId(),
                 userModel = session.getUserModel();
 

@@ -44,27 +44,28 @@ runtime.loadClass("ops.OdtCursor");
  * @constructor
  * @param {!ops.OdtCursor} cursor
  * @param {boolean} avatarInitiallyVisible Sets the initial visibility of the caret's avatar
+ * @param {boolean} blinkOnRangeSelect Specify that the caret should blink if a non-collapsed range is selected
  */
-gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
+gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
     var self = this,
         span,
         avatar,
         cursorNode,
-        focused = false,
+        shouldBlink = false,
         blinking = false,
         blinkTimeout;
 
     function blink(reset) {
-        if (!focused || !cursorNode.parentNode) {
+        if (!shouldBlink || !cursorNode.parentNode) {
             // stop blinking when removed from the document
             return;
         }
 
         if (!blinking || reset) {
             if (reset && blinkTimeout !== undefined) {
-                runtime.clearTimeout(blinkTimeout);
-            }
+                    runtime.clearTimeout(blinkTimeout);
+                }
 
             blinking = true;
             // switch between transparent and color
@@ -245,16 +246,22 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible) {
     }
 
     this.refreshCursor = function() {
-        blink(true);
+        if (blinkOnRangeSelect || cursor.getSelectedRange().collapsed) {
+            shouldBlink = true;
+            blink(true);
+        } else {
+            shouldBlink = false;
+            span.style.opacity = "0";
+        }
     };
 
     this.setFocus = function () {
-        focused = true;
+        shouldBlink = true;
         avatar.markAsFocussed(true);
         blink(true);
     };
     this.removeFocus = function () {
-        focused = false;
+        shouldBlink = false;
         avatar.markAsFocussed(false);
         span.style.opacity = "0";
     };
