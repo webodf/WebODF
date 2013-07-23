@@ -93,8 +93,8 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
                 return 2;
             }
             // do not stop between spaces
-            o = iterator.textOffset();
-            if (o > 0 && iterator.substr(o - 1, 2) === "  ") {
+            o = textOffset(iterator);
+            if (o > 0 && text(iterator).substr(o - 1, 2) === "  ") {
                 return 2;
             }
             t.pos.push({
@@ -120,6 +120,72 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
+
+    function createWalker(iterator) {
+        var document = iterator.getCurrentNode().ownerDocument,
+            walker = document.createTreeWalker(t.odtDocument.getRootNode(), NodeFilter.SHOW_ALL, iterator.getNodeFilter(), false);
+
+        walker.currentNode = iterator.getCurrentNode();
+        return walker;
+    }
+
+    /**
+     * Return the offset as it would be if all neighboring text nodes were one
+     * text node.
+     * @return {!number}
+     */
+    function  textOffset(iterator) {
+        var walker = createWalker(iterator),
+            offset = iterator.unfilteredDomOffset();
+        if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
+            return 0;
+        }
+        // add lengths of preceding textnodes
+        while (walker.previousSibling() && walker.currentNode.nodeType === Node.TEXT_NODE) {
+            offset += walker.currentNode.length;
+        }
+        return offset;
+    }
+    /**
+     * This returns the local text neighborhood as seen from the current
+     * position, which is an ordered array of all sibling text nodes, from
+     * left to right.
+     * @return {Array.<Node>}
+     */
+    function textNeighborhood(iterator) {
+        var walker = createWalker(iterator),
+            neighborhood = [];
+        if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
+            return neighborhood;
+        }
+        while (walker.previousSibling()) {
+            if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
+                walker.nextSibling();
+                break;
+            }
+        }
+        do {
+            neighborhood.push(walker.currentNode);
+        } while (walker.nextSibling() && walker.currentNode.nodeType === Node.TEXT_NODE);
+        return neighborhood;
+    }
+    /**
+     * This returns the text string from the current neighborhood as if
+     * all the neighboring text nodes were one
+     * @return {!string}
+     */
+    function text(iterator) {
+        var i,
+            data = "",
+            neighborhood = textNeighborhood(iterator);
+
+        for (i = 0; i < neighborhood.length; i += 1) {
+            data += neighborhood[i].data;
+        }
+
+        return data;
+    }
+
     /**
      * @param {!Element} root
      * @return {undefined}

@@ -241,24 +241,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return c;
     };
     /**
-     * Return the offset as it would be if all neighboring text nodes were one
-     * text node.
-     * @return {!number}
-     */
-    this.textOffset = function () {
-        if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
-            return 0;
-        }
-        var offset = currentPos,
-            n = walker.currentNode;
-        // add lengths of preceding textnodes
-        while (walker.previousSibling() && walker.currentNode.nodeType === Node.TEXT_NODE) {
-            offset += walker.currentNode.length;
-        }
-        walker.currentNode = n;
-        return offset;
-    };
-    /**
      * Return the previous sibling of the current node
      * @return {Node}
      */
@@ -281,58 +263,6 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker.currentNode = currentNode;
 
         return sibling;
-    };
-    /**
-     * This returns the text string from the current neighborhood as if
-     * all the neighboring text nodes were one
-     * @return {!string}
-     */
-    this.text = function () {
-        var i,
-            data = "",
-            neighborhood = self.textNeighborhood();
-
-        for (i = 0; i < neighborhood.length; i += 1) {
-            data += neighborhood[i].data;
-        }
-
-        return data;
-    };
-    /**
-     * This returns the local text neighborhood as seen from the current
-     * position, which is an ordered array of all sibling text nodes, from
-     * left to right.
-     * @return {Array.<Node>}
-     */
-    this.textNeighborhood = function () {
-        var n = walker.currentNode,
-            t,
-            neighborhood = [];
-        if (n.nodeType !== Node.TEXT_NODE) {
-            return neighborhood;
-        }
-        while (walker.previousSibling()) {
-            if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
-                walker.nextSibling();
-                break;
-            }
-        }
-        do {
-            neighborhood.push(walker.currentNode);
-        } while (walker.nextSibling() && walker.currentNode.nodeType === Node.TEXT_NODE);
-        walker.currentNode = n;
-
-        return neighborhood;
-    };
-    /**
-     * The substring of the current text node as if all neighboring text nodes
-     * were one text node.
-     * @param {!number} start
-     * @param {!number} length
-     * @return {!string}
-     */
-    this.substr = function (start, length) {
-        return self.text().substr(start, length);
     };
     /**
      * Set the position of the iterator.
