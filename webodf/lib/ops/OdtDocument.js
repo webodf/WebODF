@@ -230,74 +230,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getIteratorAtPosition = getIteratorAtPosition;
 
     /**
-     * Returns an exteded neighborhood that can span multiple paragraph nodes;
-     * Starting from the specified position, text nodes are added to the neighborhood array
-     * till the sum of their lengths is greater than |length|. The direction of the length
-     * specifies the direction to walk for making the neighborhood: negative is left, positive
-     * is right.
-     * @param {!number} position
-     * @param {!number} length
-     * @return {?Array.<!Node>}
-     */
-    this.getTextNeighborhood = function (position, length) {
-        var iterator = getIteratorAtPosition(position),
-            neighborhood = [],
-            currentNeighborhood = [],
-            currentNode,
-            iteratedLength = 0,
-            visited = false,
-            inFirstNeighborhood = true,
-            neighborhoodStartIndex = 0,
-            segmentStartIndex,
-            i,
-            j;
-
-        runtime.assert(length >= 0, "OdtDocument.getTextNeighborhood only supports positive lengths");
-        do {
-            currentNeighborhood = iterator.textNeighborhood();
-
-            visited = false;
-            for (i = 0; i < neighborhood.length; i += 1) {
-                // All neighborhoods are disjoint ordered sets, so comparing
-                // the first element of two neighborhoods is enough to compare them.
-                // Therefore, if the first element of the current neighborhood is found in
-                // the full neighborhood sequence, then the current neighborhood has
-                // already been appended, and we need not check further.
-                if (neighborhood[i] === currentNeighborhood[0]) {
-                    visited = true;
-                    break;
-                }
-            }
-            if (!visited) {
-                segmentStartIndex = 0;
-                // When in the first local neighborhood, remove the elements that are in
-                // a direction opposite to the length.
-                if (inFirstNeighborhood) {
-                    currentNode = iterator.container();
-                    for (j = 0; j < currentNeighborhood.length; j += 1) {
-                        if (currentNeighborhood[j] === currentNode) {
-                            neighborhoodStartIndex = j;
-                            break;
-                        }
-                    }
-                    segmentStartIndex = neighborhoodStartIndex;
-                    inFirstNeighborhood = false;
-                }
-
-                if (currentNeighborhood.length) {
-                    neighborhood = neighborhood.concat(currentNeighborhood);
-                }
-
-                for (j = segmentStartIndex; j < currentNeighborhood.length; j += 1) {
-                    iteratedLength += currentNeighborhood[j].data.length;
-                }
-            }
-        } while (iterator.nextPosition() === true && iteratedLength < length);
-
-        return neighborhood.slice(neighborhoodStartIndex);
-    };
-
-    /**
      * This function will iterate through positions allowed by the position
      * iterator and count only the text positions. When the amount defined by
      * offset has been counted, the Text node that that position is returned
@@ -511,32 +443,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?{textNode: !Text, offset: !number}}
      */
     this.getPositionInTextNode = getPositionInTextNode;
-
-    /**
-     * This returns the walkable paragraph just before or after the specified paragraph,
-     * depending on the sign of the direction (negative is previous, positive is next).
-     * @param {!Node} paragraph
-     * @param {!number} direction
-     * @return (Node|null)
-     */
-    this.getNeighboringParagraph = function (paragraph, direction) {
-        var iterator = getIteratorAtPosition(0),
-            currentParagraph = null;
-        iterator.setUnfilteredPosition(paragraph, 0);
-
-        do {
-            if (filter.acceptPosition(iterator) === 1) {
-                currentParagraph = getParagraphElement(iterator.container());
-                if (currentParagraph !== paragraph) {
-                    return currentParagraph;
-                }
-            }
-        } while ((direction > 0 ? iterator.nextPosition() : iterator.previousPosition()) === true);
-
-        if (currentParagraph === paragraph) {
-            return null;
-        }
-    };
 
     /**
      * Iterates through all cursors and checks if they are in
