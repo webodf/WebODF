@@ -266,9 +266,11 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/xmldom/OperationalTransformDOM.js
     lib/xmldom/XPath.js
 
+    lib/odf/OdfNodeFilter.js
     lib/odf/Namespaces.js
     lib/odf/StyleInfo.js
     lib/odf/OdfUtils.js
+    lib/odf/TextSerializer.js
     lib/odf/TextStyleApplicator.js
     lib/odf/Style2CSS.js
     lib/odf/OdfContainer.js

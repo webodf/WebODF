@@ -3,14 +3,151 @@
 <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <title>Clipboard Behaviours</title>
+    <style>
+        table {
+            white-space: pre;
+            background-color: rgba(0,0,0,0.2);
+            border: 1px solid white;
+            border-collapse: collapse;
+        }
+
+        tr, td {
+            border: 1px solid white;
+            border-collapse: collapse;
+        }
+    </style>
     <script type="text/javascript">
+        var logNode;
+
+        function dumpTypes(clipboard) {
+            var typesTable = $("<table/>");
+            clipboard.types.forEach(function(type) {
+                var row = $("<tr/>"),
+                    nameCell = $("<td/>"),
+                    valueCell =  $("<td/>");
+
+                nameCell.append(type);
+                valueCell.append(document.createTextNode(clipboard.getData(type)));
+
+                row.append(nameCell);
+                row.append(valueCell);
+                typesTable.append(row);
+            });
+            return typesTable;
+        }
+
+
+        function dumpItems(clipboard) {
+            var itemsTable = $("<table/>"),
+                    i;
+
+            function addItem(item) {
+                var row = $("<tr/>"),
+                    nameCell = $("<td/>"),
+                    valueCell =  $("<td/>"),
+                    dataCell =  $("<td/>");
+
+                nameCell.append(item.kind);
+                valueCell.append(item.type);
+                item.getAsString(function(content) {
+                    dataCell.append(document.createTextNode(content));
+                });
+
+                row.append(nameCell);
+                row.append(valueCell);
+                row.append(dataCell);
+                itemsTable.append(row);
+            }
+
+            for(i = 0; i < clipboard.items.length; i++) {
+                addItem(clipboard.items[i]);
+            }
+            return i === 0 ? "No files" : itemsTable;
+        }
+
+        function dumpFiles(clipboard) {
+            var filesTable = $("<table/>"),
+                i;
+
+            for(i = 0; i < clipboard.files.length; i++) {
+                var row = $("<tr/>"),
+                    nameCell = $("<td/>"),
+                    valueCell =  $("<td/>");
+
+                nameCell.append(clipboard.files[i].name);
+                valueCell.append(clipboard.files[i].type);
+
+                row.append(nameCell);
+                row.append(valueCell);
+                filesTable.append(row);
+            }
+            return i === 0 ? "No files" : filesTable;
+        }
+
+        function captureHtml(cell) {
+            return function() {
+                var pasteDest = $("#content");
+                cell.append(document.createTextNode(pasteDest[0].innerHTML));
+            };
+        }
+
+        function onPaste(e) {
+            var clipboardTable = $("#clipboardData"),
+                capturedRow = $("<tr/>"),
+                capturedName = $("<td/>"),
+                capturedHtml = $("<td/>");
+
+            clipboardTable.empty();
+            log("paste");
+            if (e.clipboardData) {
+                Object.keys(e.clipboardData).forEach(function(key) {
+                    var row = $("<tr/>"),
+                        nameCell = $("<td/>"),
+                        valueCell =  $("<td/>");
+
+                    nameCell.append(key);
+
+                    switch(key) {
+                        case "types":
+                            valueCell.append(dumpTypes(e.clipboardData));
+                            break;
+                        case "files":
+                            valueCell.append(dumpFiles(e.clipboardData));
+                            break;
+                        case "items":
+                            valueCell.append(dumpItems(e.clipboardData));
+                            break;
+                        default:
+                            valueCell.append('' + e.clipboardData[key]);
+                            break;
+                    }
+
+                    row.append(nameCell);
+                    row.append(valueCell);
+                    clipboardTable.append(row);
+                });
+            }
+
+            capturedName.append("Captured HTML");
+            capturedRow.append(capturedName);
+            capturedRow.append(capturedHtml);
+            clipboardTable.append(capturedRow);
+
+            $("#content").empty();
+            setTimeout(captureHtml(capturedHtml), 500);
+//            e.preventDefault();
+        }
 
         function record(msg, result) {
-            return function() { log(msg); return result; };
+            return function(e) {
+                e.preventDefault();
+                log(msg);
+                return result;
+            };
         }
 
         function log(msg) {
-            $("#log").append(msg + "\n");
+            logNode.append(msg + "\n");
         }
 
         function listenEvent(eventTarget, eventType, eventHandler) {
@@ -27,40 +164,20 @@
         }
         
         $(function() {
-            var content = $("#content");
+            var content = $('body');
+            logNode = $("#log");
             listenEvent(content[0], "cut", record("cut"));
             listenEvent(content[0], "beforecut", record("beforecut", false));
             listenEvent(content[0], "copy", record("copy"));
             listenEvent(content[0], "beforecopy", record("beforecopy"));
-            listenEvent(content[0], "paste", record("paste"));
+            listenEvent(content[0], "paste", onPaste);
             listenEvent(content[0], "beforepaste", record("beforepaste", false));
         })
     </script>
 </head>
 <body>
-<pre id="content">       /**
-        */
-        this.startEditing = function () {
-            var canvasElement, op,
-                odtDocument = session.getOdtDocument();
-
-            canvasElement = odtDocument.getOdfCanvas().getElement();
-            listenEvent(canvasElement, "keydown", handleKeyDown);
-            listenEvent(canvasElement, "keypress", handleKeyPress);
-            listenEvent(canvasElement, "keyup", dummyHandler);
-            listenEvent(canvasElement, "copy", dummyHandler);
-            listenEvent(canvasElement, "cut", handleCut);
-            listenEvent(canvasElement, "beforecut", handleBeforeCut);
-            listenEvent(canvasElement, "paste", handlePaste);
-            listenEvent(canvasElement, "mouseup", handleMouseUp);
-
-            // start maintaining the cursor selection now
-            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
-
-            op = new ops.OpAddCursor();
-            op.init({memberid: inputMemberId});
-            session.enqueue(op);
-        };</pre>
+<div id="content" contenteditable="true">paste here!</div>
+<table id="clipboardData"></table>
 <pre id="log"></pre>
 </body>
 </html>

@@ -33,7 +33,12 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global gui, runtime, XMLSerializer */
+/*global gui, runtime, odf, xmldom*/
+
+runtime.loadClass("odf.Namespaces");
+runtime.loadClass("xmldom.LSSerializer");
+runtime.loadClass("odf.OdfNodeFilter");
+runtime.loadClass("odf.TextSerializer");
 
 /**
  * Clipboard wrapper to attempt some semblance of cross-browser clipboard support
@@ -41,6 +46,7 @@
  */
 gui.Clipboard = function Clipboard() {
     "use strict";
+    var xmlSerializer, textSerializer, filter;
 
     /**
      * Copy the contents of the supplied range onto the clipboard (if available).
@@ -53,29 +59,26 @@ gui.Clipboard = function Clipboard() {
             setDataResult,
             clipboard = e.clipboardData,
             window = runtime.getWindow(),
-            serializer, dom, newNode, fragmentContainer;
+            document = range.startContainer.ownerDocument,
+            fragmentContainer;
 
         if (!clipboard && window) {
             clipboard = window.clipboardData;
         }
 
         if (clipboard) {
-            serializer = new XMLSerializer();
-            dom = runtime.getDOMImplementation().createDocument('', '', null);
-            newNode = dom.importNode(range.cloneContents(), true);
-            fragmentContainer = dom.createElement('span');
+            fragmentContainer = document.createElement('span');
 
             // the document fragment needs to be wrapped in a span as
             // text nodes cannot be inserted at the top level of the DOM
-            fragmentContainer.appendChild(newNode);
-            dom.appendChild(fragmentContainer);
+            fragmentContainer.appendChild(range.cloneContents());
 
             // By calling preventDefault on the copy event, no data is actually placed into the clipboard.
             // However, if we don't call it, the data we add is stripped out and thrown away :-/
-            setDataResult = clipboard.setData('text/plain', range.toString());
+            setDataResult = clipboard.setData('text/plain', textSerializer.writeToString(fragmentContainer));
             result = result && setDataResult;
             // Lazy-man's way of generating pretend html
-            setDataResult = clipboard.setData('text/html', serializer.serializeToString(dom));
+            setDataResult = clipboard.setData('text/html', xmlSerializer.writeToString(fragmentContainer, odf.Namespaces.namespaceMap));
             result = result && setDataResult;
             e.preventDefault();
         } else {
@@ -85,9 +88,13 @@ gui.Clipboard = function Clipboard() {
         return result;
     };
 
-};
+    function init() {
+        xmlSerializer = new xmldom.LSSerializer();
+        textSerializer = new odf.TextSerializer();
+        filter = new odf.OdfNodeFilter();
+        xmlSerializer.filter = filter;
+        textSerializer.filter = filter;
+    }
 
-(function () {
-    "use strict";
-    return gui.Clipboard;
-}());
+    init();
+};

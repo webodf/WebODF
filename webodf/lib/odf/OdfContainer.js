@@ -36,6 +36,7 @@ runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Namespaces");
+runtime.loadClass("odf.OdfNodeFilter");
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
@@ -93,35 +94,27 @@ odf.OdfContainer = (function () {
      * of elements was passed to check the style usage in it.
      * @constructor
      * @implements {xmldom.LSSerializerFilter}
-     * @param {!Element=} styleUsingElementsRoot root element of tree of elements using styles
+     * @param {!Element} styleUsingElementsRoot root element of tree of elements using styles
      * @param {?Element=} automaticStyles root element of the automatic style definition tree
      */
-    function OdfNodeFilter(styleUsingElementsRoot, automaticStyles) {
-        var usedStyleList;
-        if (styleUsingElementsRoot) {
-            usedStyleList = new styleInfo.UsedStyleList(styleUsingElementsRoot, automaticStyles);
-        }
+    function OdfStylesFilter(styleUsingElementsRoot, automaticStyles) {
+        var usedStyleList = new styleInfo.UsedStyleList(styleUsingElementsRoot, automaticStyles),
+            odfNodeFilter = new odf.OdfNodeFilter();
+
         /**
          * @param {!Node} node
          * @return {!number}
          */
         this.acceptNode = function (node) {
-            var result;
-            if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
-                result = 3; // FILTER_SKIP
-            } else if (node.namespaceURI && node.namespaceURI.match(/^urn:webodf:/)) {
-                // skip all webodf nodes incl. child nodes
-                result = 2; // FILTER_REJECT
-            } else if (usedStyleList && node.parentNode === automaticStyles &&
-                    node.nodeType === Node.ELEMENT_NODE) {
+            var result = odfNodeFilter.acceptNode(node);
+            if (result === NodeFilter.FILTER_ACCEPT &&
+                node.parentNode === automaticStyles && node.nodeType === Node.ELEMENT_NODE) {
                 // skip all automatic styles which are not used
-                if (usedStyleList.uses(node)) {
+                if (usedStyleList.uses(/**@type{!Element}*/(node))) {
                     result = NodeFilter.FILTER_ACCEPT;
                 } else {
                     result = NodeFilter.FILTER_REJECT;
                 }
-            } else {
-                result = NodeFilter.FILTER_ACCEPT;
             }
             return result;
         };
@@ -556,7 +549,7 @@ odf.OdfContainer = (function () {
         function serializeMetaXml() {
             var serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = createDocumentElement("document-meta");
-            serializer.filter = new OdfNodeFilter();
+            serializer.filter = new odf.OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.meta, odf.Namespaces.namespaceMap);
             s += "</office:document-meta>";
             return s;
@@ -589,7 +582,7 @@ odf.OdfContainer = (function () {
                     manifestRoot.appendChild(createManifestEntry(fullPath, partMimetypes[fullPath]));
                 }
             }
-            serializer.filter = new OdfNodeFilter();
+            serializer.filter = new odf.OdfNodeFilter();
             return header + serializer.writeToString(manifest, odf.Namespaces.namespaceMap);
         }
         /**
@@ -598,7 +591,7 @@ odf.OdfContainer = (function () {
         function serializeSettingsXml() {
             var serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/ s = createDocumentElement("document-settings");
-            serializer.filter = new OdfNodeFilter();
+            serializer.filter = new odf.OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
             s += "</office:document-settings>";
             return s;
@@ -617,7 +610,7 @@ odf.OdfContainer = (function () {
             // thus they were prefixed on loading with some almost unique string, which cam be removed
             // again before saving
             styleInfo.removePrefixFromStyleNames(automaticStyles, automaticStylePrefix, masterStyles);
-            serializer.filter = new OdfNodeFilter(masterStyles, automaticStyles);
+            serializer.filter = new OdfStylesFilter(masterStyles, automaticStyles);
 
             // TODO: only store font-face declarations which are used from styles.xml,
             // and store others with content.xml
@@ -636,7 +629,7 @@ odf.OdfContainer = (function () {
                 serializer = new xmldom.LSSerializer(),
                 automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentContentScope),
                 /**@type{!string}*/ s = createDocumentElement("document-content");
-            serializer.filter = new OdfNodeFilter(self.rootElement.body, automaticStyles);
+            serializer.filter = new OdfStylesFilter(self.rootElement.body, automaticStyles);
             // Until there is code to  determine if a font is referenced only
             // from all font declaratios will be stored in styles.xml
             s += serializer.writeToString(automaticStyles, nsmap);
