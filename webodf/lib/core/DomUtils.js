@@ -108,6 +108,29 @@ core.DomUtils = function DomUtils() {
     this.splitBoundaries = splitBoundaries;
 
     /**
+     * Returns true if the container range completely contains the insideRange. Aligned boundaries
+     * are counted as inclusion
+     * @param {!Range} container
+     * @param {!Range} insideRange
+     * @returns {boolean}
+     */
+    this.containsRange = function(container, insideRange) {
+        return container.compareBoundaryPoints(container.START_TO_START, insideRange) <= 0
+            && container.compareBoundaryPoints(container.END_TO_END, insideRange) >= 0;
+    };
+
+    /**
+     * Returns true if there is any intersection between range1 and range2
+     * @param {!Range} range1
+     * @param {!Range} range2
+     * @returns {boolean}
+     */
+    this.rangesIntersect = function(range1, range2) {
+        return range1.compareBoundaryPoints(range1.END_TO_START, range2) <= 0
+            && range1.compareBoundaryPoints(range1.START_TO_END, range2) >= 0;
+    };
+
+    /**
      * Merges the content of node1 into node2 if node2 exists.
      * If node1 is an empty text node, it will be removed
      * @param {!Node} node1

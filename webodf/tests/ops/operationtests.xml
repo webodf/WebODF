@@ -220,15 +220,6 @@
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
- <test name="Split_Then_MoveCursor">
-  <before><office:text><text:p><text:span>A</text:span></text:p></office:text></before>
-  <ops>
-   <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" position="1"/>
-   <op optype="SplitParagraph" memberid="Joe" position="1"/>
-  </ops>
-  <after><office:text><text:p><text:span>A</text:span></text:p><text:p><c:cursor c:memberId="Joe"/><text:span></text:span></text:p></office:text></after>
- </test>
  <test name="InsertRemoveText_Simple_Backwards">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -340,11 +331,11 @@
   <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
  <test name="Remove_deleteMergeListItem2">
-  <before><office:text><text:list><text:list-item><text:p><text:span></text:span></text:p><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></before>
+  <before><office:text><text:list><text:list-item><text:p></text:p><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></before>
    <ops>
     <op optype="RemoveText" position="0" length="1"/>
    </ops>
-  <after><office:text><text:list><text:list-item><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></after>
+  <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
  <test name="Remove_deleteMergeEmpty1">
   <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
@@ -352,6 +343,15 @@
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
   <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteNearSpace">
+  <before><office:text><text:p>AB</text:p><text:p><text:s> </text:s><text:span>CD</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3"/>
+   <op optype="RemoveText" position="3" length="1"/>
+  </ops>
+  <after><office:text><text:p>AB</text:p><text:p><text:span><c:cursor c:memberId="Bob" />CD</text:span></text:p></office:text></after>
  </test>
  <test name="SpaceBetweenParagraphs">
   <before><office:text><text:p>a</text:p> <text:p>b</text:p></office:text></before>
@@ -412,7 +412,7 @@
   <ops>
    <op optype="RemoveText" position="2" length="1"/>
   </ops>
-  <after><office:text><text:p> a<text:s> </text:s> </text:p></office:text></after>
+  <after><office:text><text:p> a<text:s> </text:s><text:s> </text:s></text:p></office:text></after>
  </test>
  <test name="SplitListParagraph_singleCursor">
   <before><office:text><text:list><text:list-item><text:p>helloworld</text:p></text:list-item></text:list></office:text></before>
@@ -635,6 +635,31 @@
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
   </after>
+ </test>
+  <test name="Remove_deleteMergeBig">
+  <before><office:text><text:p>zer<text:span>o</text:span></text:p><text:p></text:p><text:p></text:p><text:list><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p><text:span>one</text:span></text:p></text:list-item></text:list></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="4" length="5"/>
+  </ops>
+  <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMerge_paragraphWithTrailingSpace">
+  <before><office:text><text:p>ab </text:p><text:p>cd</text:p></office:text></before>
+   <ops>
+    <op optype="AddCursor" memberid="Bob"/>
+    <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
+    <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
+   </ops>
+  <after><office:text><text:p>a<c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteWithUncompressedWhiteSpace">
+  <before><office:text><text:p>ab   cd</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
+   <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
+  </ops>
+  <after><office:text><text:p>a<c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
  </test>
  <test name="ApplyStyle_UnstyledParagraph">
   <before>

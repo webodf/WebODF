@@ -38,6 +38,7 @@
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("gui.SelectionMover");
+runtime.loadClass("gui.StyleHelper");
 
 /**
  * A document that keeps all data related to the mapped document.
@@ -52,6 +53,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         filter,
         odfUtils,
+        styleHelper,
         /**Array.<!ops.OdtCursor>*/cursors = {},
         eventNotifier = new core.EventNotifier([
             ops.OdtDocument.signalCursorAdded,
@@ -436,6 +438,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return null;
     }
 
+    /**
+     * Upgrades literal whitespaces (' ') to <text:s> </text:s>,
+     * when given a textNode containing the whitespace and an offset
+     * indicating the location of the whitespace in it.
+     * @param {!Text} textNode
+     * @param {!number} offset
+     * @return {undefined}
+     */
     function upgradeWhitespaceToElement(textNode, offset) {
         runtime.assert(textNode.data[offset] === ' ', "upgradeWhitespaceToElement: textNode.data[offset] should be a literal space");
 
@@ -446,33 +456,24 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         textNode.splitText(offset);
         textNode.parentNode.insertBefore(space, textNode.nextSibling);
     }
-    /**
-     * Upgrades literal whitespaces (' ') to <text:s> </text:s>,
-     * when given a textNode containing the whitespace and an offset
-     * indicating the location of the whitespace in it.
-     * @param {!Node} textNode
-     * @param {!number} offset
-     * @return {undefined}
-     */
-    this.upgradeWhitespaceToElement = upgradeWhitespaceToElement;
 
     function upgradeWhitespacesAtPosition(position) {
         var iterator = getIteratorAtPosition(position),
-            container = null,
+            container,
             offset,
-            i = 0;
+            i;
 
         // Ideally we have to check from *two* positions to the left and right
         // because the position may be surrounded by node boundaries. Slightly hackish.
         iterator.previousPosition();
         iterator.previousPosition();
-        for (i = -2; i <= 2; i += 1) {
+        for (i = -1; i <= 1; i += 1) {
             container = iterator.container();
             offset = iterator.unfilteredDomOffset();
             if (container.nodeType === Node.TEXT_NODE
                     && container.data[offset] === ' '
                     && odfUtils.isSignificantWhitespace(container, offset)) {
-                upgradeWhitespaceToElement(container, offset);
+                upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
             }
             iterator.nextPosition();
         }
@@ -548,11 +549,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (cursors.hasOwnProperty(i)) {
                 stepCounter = cursors[i].getStepCounter();
                 if (!stepCounter.isPositionWalkable(filter)) {
-                    steps = -stepCounter.countBackwardSteps(1, filter);
-                    if(steps === 0) {
-                        // the cursor now occupies BEFORE the first walkable position in the document
-                        steps = stepCounter.countForwardSteps(1, filter);
-                    }
+                    steps = stepCounter.countStepsToValidPosition(filter);
                     cursors[i].move(steps);
                     if (cursors[i].getMemberId() === localMemberId) {
                         self.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
@@ -739,10 +736,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-      * @return {!odf.Formatting}
-      */
+     * @return {!odf.Formatting}
+     */
     this.getFormatting = function () {
         return odfCanvas.getFormatting();
+    };
+
+    this.getTextElements = function(range) {
+        return styleHelper.getTextElements(range);
+    };
+
+    this.getParagraphElements = function(range) {
+        return styleHelper.getParagraphElements(range);
     };
 
     /**
@@ -778,6 +783,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function init() {
         filter = new TextPositionFilter();
         odfUtils = new odf.OdfUtils();
+        styleHelper = new gui.StyleHelper(self);
     }
     init();
 };

@@ -110,7 +110,9 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         }};
         t.formatting.setOdfContainer(container);
         t.range = t.testArea.ownerDocument.createRange();
-        return t.testArea.firstChild.childNodes[2].firstChild;
+        return t.testArea.firstChild.childNodes[2].childNodes.length === 1
+            ? t.testArea.firstChild.childNodes[2].firstChild
+            : t.testArea.firstChild.childNodes[2];
     }
     function getAppliedStyles_SimpleHierarchy() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>");
@@ -280,6 +282,71 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
             }
         }
     }
+    function getOdtElements_EncompassedWithinParagraph() {
+        t.doc = createDocument("<text:p>AB<text:s/>CD</text:p>");
+        t.range.setStart(t.doc.childNodes[0], 0);
+        t.range.setEnd(t.doc.childNodes[2], 0);
+
+        t.paragraphs = t.styleHelper.getParagraphElements(t.range);
+        t.textElements = t.styleHelper.getTextElements(t.range);
+
+        r.shouldBe(t, "t.paragraphs.length", "1");
+        r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
+
+        r.shouldBe(t, "t.textElements.length", "2");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]"); // "AB"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1]"); // text:s
+    }
+    function getOdtElements_EncompassedWithinSpan_And_Paragraph() {
+        t.doc = createDocument("<text:p><text:span>A</text:span>B<text:s/>CD</text:p>");
+        t.range.setStart(t.doc.childNodes[0], 0);
+        t.range.setEnd(t.doc.childNodes[2], 0);
+
+        t.paragraphs = t.styleHelper.getParagraphElements(t.range);
+        t.textElements = t.styleHelper.getTextElements(t.range);
+
+        r.shouldBe(t, "t.paragraphs.length", "1");
+        r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
+
+        r.shouldBe(t, "t.textElements.length", "3");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0].childNodes[0]"); // "A"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1]"); // "B"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]"); // text:s
+    }
+    function getOdtElements_IgnoresEditInfo() {
+        t.doc = createDocument("<text:p>AB<editinfo>HI</editinfo><text:s/>CD</text:p>");
+        t.range.setStart(t.doc.childNodes[0], 0);
+        t.range.setEnd(t.doc.childNodes[2], 0);
+
+        t.paragraphs = t.styleHelper.getParagraphElements(t.range);
+        t.textElements = t.styleHelper.getTextElements(t.range);
+
+        r.shouldBe(t, "t.paragraphs.length", "1");
+        r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
+
+        r.shouldBe(t, "t.textElements.length", "2");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]"); // "AB"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]"); // text:s
+    }
+    function getOdtElements_SpansMultipleParagraphs() {
+        t.doc = createDocument("<text:p>AB<text:s/>CD</text:p><text:p>EF<text:s/>GH</text:p>");
+        t.range.setStart(t.doc.childNodes[0].childNodes[0], 0);
+        t.range.setEnd(t.doc.childNodes[1].childNodes[1], 0);
+
+        t.paragraphs = t.styleHelper.getParagraphElements(t.range);
+        t.textElements = t.styleHelper.getTextElements(t.range);
+
+        r.shouldBe(t, "t.paragraphs.length", "2");
+        r.shouldBe(t, "t.paragraphs.shift()", "t.doc.childNodes[0]");
+        r.shouldBe(t, "t.paragraphs.shift()", "t.doc.childNodes[1]");
+
+        r.shouldBe(t, "t.textElements.length", "5");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0].childNodes[0]"); // "AB"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0].childNodes[1]"); // text:s
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0].childNodes[2]"); // "CD"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1].childNodes[0]"); // "EF"
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1].childNodes[1]"); // text:s
+    }
     this.tests = function () {
         return [
             getAppliedStyles_SimpleHierarchy,
@@ -291,7 +358,12 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
             getAppliedStyles_StartsAndEnds_InDifferentTextNodes,
             getAppliedStyles_SimpleList,
             getAppliedStyles_NestedList,
-            getAppliedStyles_InvalidNodes
+            getAppliedStyles_InvalidNodes,
+
+            getOdtElements_EncompassedWithinParagraph,
+            getOdtElements_EncompassedWithinSpan_And_Paragraph,
+            getOdtElements_IgnoresEditInfo,
+            getOdtElements_SpansMultipleParagraphs
         ];
     };
     this.asyncTests = function () {

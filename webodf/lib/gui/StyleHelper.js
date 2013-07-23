@@ -36,14 +36,15 @@
 /*global core, Node, runtime, gui, odf, NodeFilter*/
 
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor
  */
 gui.StyleHelper = function StyleHelper(formatting) {
     "use strict";
-    var self = this,
-        domUtils = new core.DomUtils();
+    var domUtils = new core.DomUtils(),
+        odfUtils = new odf.OdfUtils();
 
     /**
      * Adapted from instructions on how to generate plain text from an ODT document.
@@ -172,5 +173,94 @@ gui.StyleHelper = function StyleHelper(formatting) {
 
         formatting.applyStyle(memberId, textNodes, limits, info);
         nextTextNodes.forEach(domUtils.normalizeTextNodes);
+    };
+
+    /**
+     * Fetch all fully encompassed character elements and text nodes, and any intersecting ODT paragraph elements in
+     * the specified range in document order.
+     * For example, given the following fragment, with the range starting at b, and ending at c:
+     *      <text:p>ab<text:s/>cd</text:p>
+     * this function would return the following array:
+     *      [text:p, "b", text:s, "c"]
+     * @param {!Range} range    Range to search for nodes within
+     * @returns {!Array.<!Node>}
+     */
+    function getNodesInRange(range, nodeFilter) {
+        var document = range.startContainer.ownerDocument,
+            elements = [],
+            root = /**@type{!Node}*/(range.commonAncestorContainer),
+            n,
+            treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, nodeFilter, false);
+
+        treeWalker.currentNode = range.startContainer;
+        n = range.startContainer;
+        while (n) {
+            if (nodeFilter(n) === NodeFilter.FILTER_ACCEPT) {
+                elements.push(n);
+            }
+            n = n.parentNode;
+        }
+        // The expected sequence is outer-most to inner-most element, thus, the array just built needs to be reversed
+        elements.reverse();
+
+        n = treeWalker.nextNode();
+        while (n) {
+            elements.push(n);
+            n = treeWalker.nextNode();
+        }
+        return elements;
+    }
+
+    this.getTextElements = function(range) {
+        var document = range.startContainer.ownerDocument,
+            nodeRange = document.createRange(),
+            elements;
+
+        function nodeFilter(node) {
+            var nodeType = node.nodeType;
+            nodeRange.selectNodeContents(node);
+            if (nodeType === Node.TEXT_NODE || odfUtils.isCharacterElement(node)) {
+                if (domUtils.containsRange(range, nodeRange)) {
+                    // text nodes and character elements should only be returned if they are fully contained within the range
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (isAcceptedNode(node) || odfUtils.isGroupingElement(node)) {
+                return NodeFilter.FILTER_SKIP;
+            }
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        elements = getNodesInRange(range, nodeFilter);
+        nodeRange.detach();
+
+        return elements;
+    };
+
+    /**
+     * Get all paragraph elements that intersect or are contained within the supplied range
+     * @param {!Range} range
+     * @returns {!Array.<!Element>}
+     */
+    this.getParagraphElements = function(range) {
+        var document = range.startContainer.ownerDocument,
+            nodeRange = document.createRange(),
+            elements;
+
+        function nodeFilter(node) {
+            nodeRange.selectNodeContents(node);
+            if (odfUtils.isParagraph(node)) {
+                if (domUtils.rangesIntersect(range, nodeRange)) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (isAcceptedNode(node) || odfUtils.isGroupingElement(node)) {
+                return NodeFilter.FILTER_SKIP;
+            }
+            return NodeFilter.FILTER_REJECT;
+        }
+
+        elements = getNodesInRange(range, nodeFilter);
+        nodeRange.detach();
+
+        return elements;
     };
 };

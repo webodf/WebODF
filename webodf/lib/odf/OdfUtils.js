@@ -46,7 +46,7 @@ odf.OdfUtils = function OdfUtils() {
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         whitespaceOnly = /^\s*$/;
 
-   /**
+    /**
      * Determine if the node is a text:p or a text:h element.
      * @param {?Node} e
      * @return {!boolean}

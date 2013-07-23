@@ -7,29 +7,4 @@
   </ops>
   <after><office:text><text:p>abT</text:p></office:text></after>
  </test>
- <test name="Remove_deleteMergeBig">
-  <before><office:text><text:p>zer<text:span>o</text:span></text:p><text:p></text:p><text:p></text:p><text:list><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p><text:span>one</text:span></text:p></text:list-item></text:list></office:text></before>
-  <ops>
-   <op optype="RemoveText" position="4" length="5"/>
-  </ops>
-  <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
- </test>
- <test name="Remove_deleteMerge_paragraphWithTrailingSpace">
-  <before><office:text><text:p>ab </text:p><text:p>cd</text:p></office:text></before>
-   <ops>
-    <op optype="AddCursor" memberid="Bob"/>
-    <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
-    <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
-   </ops>
-  <after><office:text><text:p>a<c:anchor c:memberId="Bob"/><c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
- </test>
- <test name="Remove_deleteWithUncompressedWhiteSpace">
-  <before><office:text><text:p>ab   cd</text:p></office:text></before>
-  <ops>
-   <op optype="AddCursor" memberid="Bob"/>
-   <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
-   <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
-  </ops>
-  <after><office:text><text:p>a<c:anchor c:memberId="Bob"/><c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
- </test>
 </tests>

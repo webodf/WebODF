@@ -253,6 +253,25 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return count;
     }
+
+    /**
+     * Finds the most appropriate valid position to move the cursor to. Attempts to keep
+     * the cursor within the same paragraph, so that cursors near the front or end of a paragraph do not
+     * incorrectly jump to the next or previous paragraph.
+     * @param filter
+     * @returns {number}
+     */
+    function countStepsToValidPosition(filter) {
+        var iterator = getIteratorAtCursor(),
+            paragraphNode = odfUtils.getParagraphElement(iterator.getCurrentNode()),
+            count;
+
+        count = -countBackwardSteps(1, filter);
+        if (count === 0 || (paragraphNode && paragraphNode !== odfUtils.getParagraphElement(iterator.getCurrentNode()))) {
+            count = countForwardSteps(1, filter);
+        }
+        return count;
+    }
     /**
      * Return the number of steps needed to move across one line in the specified direction.
      * If it is not possible to move across one line, then 0 is returned.
@@ -503,7 +522,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             countLinesSteps: countLinesSteps,
             countStepsToLineBoundary: countStepsToLineBoundary,
             countStepsToPosition: countStepsToPosition,
-            isPositionWalkable: isPositionWalkable
+            isPositionWalkable: isPositionWalkable,
+            countStepsToValidPosition: countStepsToValidPosition
         };
     };
     function init() {

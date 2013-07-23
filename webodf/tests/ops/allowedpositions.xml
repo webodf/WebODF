@@ -289,4 +289,12 @@
   </ops>
   <after><office:text><text:p><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab><c:cursor c:memberId="Joe"/></text:p></office:text></after>
  </test>
+ <test name="MoveCursor_ParagraphStartsWithSpace">
+  <before><office:text><text:p><text:s> </text:s></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="0"/>
+  </ops>
+  <after><office:text><text:p><c:cursor c:memberId="Joe"/><text:s> </text:s></text:p></office:text></after>
+ </test>
 </tests>

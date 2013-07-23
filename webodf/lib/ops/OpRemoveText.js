@@ -33,8 +33,9 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime, odf, core*/
+/*global ops, runtime, odf, core, Node, NodeFilter*/
 
+runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("core.DomUtils");
 
@@ -50,7 +51,8 @@ ops.OpRemoveText = function OpRemoveText() {
         position,
         /**@type {number}*/
         length,
-        text, odfUtils,
+        text, 
+        odfUtils,
         domUtils,
         editinfons = 'urn:webodf:names:editinfo';
 
@@ -66,204 +68,165 @@ ops.OpRemoveText = function OpRemoveText() {
     };
 
     /**
-     * Returns true if the supplied node contains no text or ODF character elements
-     * @param {Node} node
-     * @returns {boolean}
+     * Defines a set of rules for how elements can be collapsed based on whether they contain ODT content (e.g.,
+     * text or character elements).
+     * @param {!Node} rootNode Root text element of the odtDocument
+     * @constructor
      */
-    function isEmpty(node) {
-        var childNode;
-        if (!odfUtils.isParagraph(node) && (odfUtils.isGroupingElement(node) || odfUtils.isCharacterElement(node)) && node.textContent.length === 0) {
+    function CollapsingRules(rootNode) {
+        /**
+         * Returns true if the supplied node contains no text or ODF character elements
+         * @param {Node} node
+         * @returns {boolean}
+         */
+        function isEmpty(node) {
+            var childNode;
+            if (odfUtils.isCharacterElement(node)) {
+                return false;
+            }
+            if (node.nodeType === Node.TEXT_NODE) {
+                return node.textContent.length === 0;
+            }
             childNode = node.firstChild;
             while (childNode) {
-                if (odfUtils.isCharacterElement(childNode)) {
+                if (!isEmpty(childNode)) {
                     return false;
                 }
                 childNode = childNode.nextSibling;
             }
             return true;
         }
-        return false;
+        this.isEmpty = isEmpty;
+
+        /**
+         * Returns true if the supplied node should be automatically collapsed (i.e., removed) if it contains no
+         * text or ODF character elements. The only element that should always be kept is a paragraph element.
+         * Paragraph elements can only be deleted through merging
+         * @param node
+         * @returns {boolean}
+         */
+        function isCollapsibleContainer(node) {
+            return !odfUtils.isParagraph(node) && node !== rootNode && isEmpty(node);
+        }
+
+        /**
+         * Merge all child nodes into the node's parent and remove the node entirely
+         * @param {Node} node Node to merge into parent
+         * @return {!Node} Final parent node collapsing ended at
+         */
+        function mergeChildrenIntoParent(node) {
+            var parent = domUtils.mergeIntoParent(node);
+            if (isCollapsibleContainer(parent)) {
+                return mergeChildrenIntoParent(parent);
+            }
+            return parent;
+        }
+        this.mergeChildrenIntoParent = mergeChildrenIntoParent;
     }
 
     /**
-     * Merges the 'second' paragraph into the 'first' paragraph,
-     * appending the contents by default. If 'prepend' is true,
-     * the contents are prepended.
-     * @param {!Node} first
-     * @param {!Node} second
-     * @param {!boolean} prepend
-     * @return {undefined}
+     * Merges the 'second' paragraph into the 'first' paragraph.
+     * If the first paragraph is empty, it will be replaced by the second
+     * paragraph instead (all non-odt elements will be migrated however).
+     * @param {!Node} first Paragraph to merge content into
+     * @param {!Node} second Paragraph to merge content from
+     * @param collapseRules
+     * @return {!Node} Destination paragraph
      */
-    function mergeParagraphs(first, second, prepend) {
-        var parent,
-            child,
+    function mergeParagraphs(first, second, collapseRules) {
+        var child,
+            mergeForward,
+            destination = first,
+            source = second,
+            secondParent,
             insertionPoint;
 
-        child = prepend ? second.lastChild : second.firstChild;
-        if (prepend) {
-            insertionPoint = first.getElementsByTagNameNS(editinfons, 'editinfo')[0]
-                                || first.firstChild;
-        }
-
-        while (child) {
-            second.removeChild(child);
-            if (child.localName !== 'editinfo') {
-                if (isEmpty(child)) {
-                    // Even though the node is devoid of ODT elements,
-                    // it may still contain cursors and other things.
-                    // In this case, merge all child elements into the parent
-                    // before throwing the node away.
-                    while(child.firstChild) {
-                        first.insertBefore(child.firstChild, insertionPoint);
-                    }
-                } else {
-                    first.insertBefore(child, insertionPoint);
-                }
+        if (collapseRules.isEmpty(first)) {
+            mergeForward = true;
+            if (second.parentNode !== first.parentNode) {
+                // We're just about to move the second paragraph in to the right position for the merge.
+                // Therefore, we need to remember if the second paragraph is from a different parent in order to clean
+                // it up afterwards
+                secondParent = second.parentNode;
+                first.parentNode.insertBefore(second, first.nextSibling);
             }
-
-            child = prepend ? second.lastChild : second.firstChild;
+            source = first;
+            destination = second;
+            insertionPoint = destination.getElementsByTagNameNS(editinfons, 'editinfo')[0] || destination.firstChild;
         }
 
-        parent = second.parentNode;
-        parent.removeChild(second);
-
-        if (odfUtils.isListItem(parent) && parent.childNodes.length === 0) {
-            parent.parentNode.removeChild(parent);
+        while (source.hasChildNodes()) {
+            child = mergeForward ? source.lastChild : source.firstChild;
+            source.removeChild(child);
+            if (child.localName !== 'editinfo') {
+                destination.insertBefore(child, insertionPoint);
+            }
         }
+
+        if (secondParent && collapseRules.isEmpty(secondParent)) {
+            // Make sure the second paragraph's original parent is checked to see if it can be cleaned up too
+            collapseRules.mergeChildrenIntoParent(secondParent);
+        }
+        // All children have been migrated, now consume up the source parent chain
+        collapseRules.mergeChildrenIntoParent(source);
+        return destination;
     }
 
-    /**
-     * Takes a given position and signed length, and returns an extended neighborhood
-     * that can be safely iterated on for deletion. The initial textnode might have
-     * extra characters alongwith the characters of deletion interest. This function
-     * deletes the target characters, and then computes a neighborhood that consists
-     * of the remaining text nodes, which is all that is needed for further deletion.
-     * @param {!ops.OdtDocument } odtDocument
-     * @param {!number} position
-     * @param {!number} length
-     * @return {!{paragraphElement: !Node, neighborhood: ?Array.<!Node>, remainingLength: !number}}
-     */
-    function getPreprocessedNeighborhood(odtDocument, position, length) {
-        // First, upgrade whitespaces before any deletion, around the initial position
-        odtDocument.upgradeWhitespacesAtPosition(position);
-
-        var domPosition = odtDocument.getPositionInTextNode(position),
-            initialTextNode = domPosition.textNode,
-            initialTextOffset = domPosition.offset,
-            initialParentElement = initialTextNode.parentNode,
-            paragraphElement = odtDocument.getParagraphElement(initialParentElement),
+    function stepsToRange(odtDocument) {
+        var iterator,
+            filter = odtDocument.getPositionFilter(),
+            startContainer, startOffset,
+            endContainer, endOffset,
             remainingLength = length,
-            neighborhood,
-            difference;
+            range = odtDocument.getDOM().createRange();
 
-        if (initialTextNode.data === "") {
-            // Sometimes the initialTextNode returned by getPositionInTextNode is "" -
-            // for example when the position is beside a space, etc. These text nodes should be
-            // cleaned up, so remove it
-            initialParentElement.removeChild(initialTextNode);
-            neighborhood = odtDocument.getTextNeighborhood(position, length);
-        } else if (initialTextOffset !== 0) {
-            // If the deletion is around a cursor, this initialTextoffset is 0.
-            // But if not, the neighborhood may come with the first node containing extra
-            // characters than the ones we want to delete.
-            // To avoid that, we must first delete the target content from the initial text node,
-            // and then request the neighborhood, so that the first element in the neighborhood
-            // can be easily operated upon by the deletion loop
-            difference = remainingLength < (initialTextNode.length - initialTextOffset)
-                ? remainingLength
-                : (initialTextNode.length - initialTextOffset);
-
-            initialTextNode.deleteData(initialTextOffset, difference);
-            // Now the new post-'collapse' position is the same as the old, because the
-            // data to the right is deleted.
-            // Upgrade the whitespaces there.
-            odtDocument.upgradeWhitespacesAtPosition(position);
-            neighborhood = odtDocument.getTextNeighborhood(position, length + difference);
-
-            remainingLength -= difference;
-            if (difference && neighborhood[0] === initialTextNode) {
-                // The initial text node has already been truncated.
-                // Therefore, forget it from the neighborhood
-                neighborhood.splice(0, 1);
+        iterator = odtDocument.getIteratorAtPosition(position);
+        startContainer = iterator.container();
+        startOffset = iterator.unfilteredDomOffset();
+        while (remainingLength && iterator.nextPosition()) {
+            endContainer = iterator.container();
+            endOffset = iterator.unfilteredDomOffset();
+            if (filter.acceptPosition(iterator) === NodeFilter.FILTER_ACCEPT) {
+                remainingLength -= 1;
             }
-        } else {
-            neighborhood = odtDocument.getTextNeighborhood(position, length);
         }
 
-        return {
-            paragraphElement: paragraphElement,
-            neighborhood: neighborhood,
-            remainingLength: remainingLength
-        };
+        range.setStart(startContainer, startOffset);
+        range.setEnd(endContainer, endOffset);
+        domUtils.splitBoundaries(range);
+        return range;
     }
 
     this.execute = function (odtDocument) {
-        var neighborhood,
-            paragraphElement,
-            currentParagraphElement,
-            nextParagraphElement,
-            remainingLength,
-            currentTextNode = null,
-            currentParent = null,
-            currentLength,
-            preprocessedNeighborhood;
+        var paragraphElement,
+            destinationParagraph,
+            range,
+            textNodes,
+            paragraphs,
+            collapseRules = new CollapsingRules(odtDocument.getRootNode());
 
-        preprocessedNeighborhood = getPreprocessedNeighborhood(odtDocument, position, length);
+        odtDocument.upgradeWhitespacesAtPosition(position);
+        odtDocument.upgradeWhitespacesAtPosition(position + length);
 
-        neighborhood = preprocessedNeighborhood.neighborhood;
-        remainingLength = preprocessedNeighborhood.remainingLength;
-        paragraphElement = preprocessedNeighborhood.paragraphElement;
+        range = stepsToRange(odtDocument);
+        paragraphElement = odtDocument.getParagraphElement(range.startContainer);
+        textNodes = odtDocument.getTextElements(range);
+        paragraphs = odtDocument.getParagraphElements(range);
+        range.detach();
 
-        while (remainingLength) {
-            if (neighborhood[0]) {
-                currentTextNode = neighborhood[0];
-                currentParent = currentTextNode.parentNode;
-                currentLength = currentTextNode.length;
-            }
+        // Each character element is fully contained within the range, so will be completely removed
+        textNodes.forEach(function (element) {
+            collapseRules.mergeChildrenIntoParent(element);
+        });
 
-            currentParagraphElement = odtDocument.getParagraphElement(currentTextNode);
-            if (paragraphElement !== currentParagraphElement) {
-                // If paragraph element of the current textnode from the neighborhood is different
-                // from the original paragraphElement, a merging must be performed.
-                nextParagraphElement = odtDocument.getNeighboringParagraph(paragraphElement, 1);
-                if (nextParagraphElement) {
-                    // An empty paragraph should never win new childnodes. therefore, check if
-                    // the walkable length of a paragraph is > 1 (non-empty).
-                    if (odtDocument.getWalkableParagraphLength(paragraphElement) > 1) {
-                        mergeParagraphs(paragraphElement, nextParagraphElement, false);
-                    } else {
-                        mergeParagraphs(nextParagraphElement, paragraphElement,/*prepend*/true);
-                        paragraphElement = nextParagraphElement;
-                    }
-                }
-                // A paragraph merging is worth 1 delete length
-                remainingLength -= 1;
-            } else {
-                if (currentLength <= remainingLength) {
-                    currentParent.removeChild(currentTextNode);
-                    // If the current node is text:s or span and is empty, it should
-                    // be removed.
-                    while (isEmpty(currentParent)) {
-                        currentParent = domUtils.mergeIntoParent(currentParent);
-                    }
-
-                    remainingLength -= currentLength;
-                    neighborhood.splice(0, 1);
-                } else {
-                    currentTextNode.deleteData(0, remainingLength);
-                    // Now the new post-'collapse' position is the same as the old, because the
-                    // data to the right is deleted.
-                    // Upgrade the whitespaces there.
-                    odtDocument.upgradeWhitespacesAtPosition(position);
-                    remainingLength = 0;
-                }
-            }
-        }
+        destinationParagraph = paragraphs.reduce(function (destination, paragraph) {
+            return mergeParagraphs(destination, paragraph, collapseRules);
+        });
 
         odtDocument.fixCursorPositions(memberid);
         odtDocument.getOdfCanvas().refreshSize();
         odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
-            paragraphElement: paragraphElement,
+            paragraphElement: destinationParagraph || paragraphElement,
             memberId: memberid,
             timeStamp: timestamp
         });
