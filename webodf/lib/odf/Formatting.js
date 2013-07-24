@@ -216,8 +216,8 @@ odf.Formatting = function Formatting() {
         while (styleListElement) {
             node = styleListElement.firstChild;
             while (node) {
-                nodeStyleName = node.getAttributeNS(stylens, 'name');
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    nodeStyleName = node.getAttributeNS(stylens, 'name');
                     if (node.namespaceURI === stylens
                             && node.localName === "style"
                             && node.getAttributeNS(stylens, 'family') === family
