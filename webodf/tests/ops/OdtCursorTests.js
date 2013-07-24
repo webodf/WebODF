@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, runtime, core, gui, ops, odf*/
+/*global Node, runtime, core, gui, ops, odf, NodeFilter*/
 runtime.loadClass("odf.OdfCanvas");
 runtime.loadClass("ops.OdtCursor");
 runtime.loadClass("ops.OdtDocument");
@@ -43,8 +43,7 @@ runtime.loadClass("ops.OdtDocument");
 ops.OdtCursorTests = function OdtCursorTests(runner) {
     "use strict";
     var r = runner, t, domDocument = runtime.getWindow().document, testarea,
-        odfxml =
-          '<text:sequence-decls>\n'
+        odfxml = '<text:sequence-decls>\n'
         + '  <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>\n'
         + '  <text:sequence-decl text:display-outline-level="0" text:name="Table"/>\n'
         + '  <text:sequence-decl text:display-outline-level="0" text:name="Text"/>\n'
@@ -59,68 +58,11 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         + '</text:section>',
         odfxml2 = '<p>a </p>',
         odfxml3 = '<p>  a  b</p>',
-        odfxml4 =
-          '<text:section>\n'
+        odfxml4 = '<text:section>\n'
         + '  <text:p/>\n'
         + '</text:section>',
-        dummyfilter = function acceptPosition(p) {
-            t.pos.push({
-                c: p.container(),
-                o: p.unfilteredDomOffset()
-            });
-            return 1;
-        },
-        textfilter = function acceptPosition(iterator) {
-            var n = iterator.container(), p, o, d;
-            // only stop in text nodes or at end of <p> or <h>
-            if (n.nodeType !== Node.TEXT_NODE) {
-                if (n.localName !== "p" && n.localName !== "h") {
-                    return 2;
-                }
-                t.pos.push({
-                    c: iterator.container(),
-                    o: iterator.unfilteredDomOffset()
-                });
-                return 1;
-            }
-            if (n.length === 0) {
-                return 2;
-            }
-            // only stop in text nodes in 'p', 'h' or 'span' elements
-            p = n.parentNode;
-            o = p && p.localName;
-            if (o !== "p" && o !== "span" && o !== "h") {
-                return 2;
-            }
-            // do not stop between spaces
-            o = textOffset(iterator);
-            if (o > 0 && text(iterator).substr(o - 1, 2) === "  ") {
-                return 2;
-            }
-            t.pos.push({
-                c: iterator.container(),
-                o: iterator.unfilteredDomOffset()
-            });
-            return 1;
-        };
-    dummyfilter.acceptPosition = dummyfilter;
-    textfilter.acceptPosition = textfilter;
-
-    this.setUp = function () {
-        var odfContainer,
-            odfcanvas;
-        t = {};
-        testarea = core.UnitTest.provideTestAreaDiv();
-        odfcanvas = new odf.OdfCanvas(testarea);
-        odfContainer = new odf.OdfContainer("", null);
-        odfcanvas.setOdfContainer(odfContainer);
-        t.odtDocument = new ops.OdtDocument(odfcanvas);
-    };
-    this.tearDown = function () {
-        t = {};
-        core.UnitTest.cleanupTestAreaDiv();
-    };
-
+        dummyfilter,
+        textfilter;
     function createWalker(iterator) {
         var document = iterator.getCurrentNode().ownerDocument,
             walker = document.createTreeWalker(t.odtDocument.getRootNode(), NodeFilter.SHOW_ALL, iterator.getNodeFilter(), false);
@@ -134,7 +76,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
      * text node.
      * @return {!number}
      */
-    function  textOffset(iterator) {
+    function textOffset(iterator) {
         var walker = createWalker(iterator),
             offset = iterator.unfilteredDomOffset();
         if (walker.currentNode.nodeType !== Node.TEXT_NODE) {
@@ -185,6 +127,63 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
 
         return data;
     }
+    dummyfilter = function acceptPosition(p) {
+        t.pos.push({
+            c: p.container(),
+            o: p.unfilteredDomOffset()
+        });
+        return 1;
+    };
+    textfilter = function acceptPosition(iterator) {
+        var n = iterator.container(), p, o, d;
+        // only stop in text nodes or at end of <p> or <h>
+        if (n.nodeType !== Node.TEXT_NODE) {
+            if (n.localName !== "p" && n.localName !== "h") {
+                return 2;
+            }
+            t.pos.push({
+                c: iterator.container(),
+                o: iterator.unfilteredDomOffset()
+            });
+            return 1;
+        }
+        if (n.length === 0) {
+            return 2;
+        }
+        // only stop in text nodes in 'p', 'h' or 'span' elements
+        p = n.parentNode;
+        o = p && p.localName;
+        if (o !== "p" && o !== "span" && o !== "h") {
+            return 2;
+        }
+        // do not stop between spaces
+        o = textOffset(iterator);
+        if (o > 0 && text(iterator).substr(o - 1, 2) === "  ") {
+            return 2;
+        }
+        t.pos.push({
+            c: iterator.container(),
+            o: iterator.unfilteredDomOffset()
+        });
+        return 1;
+    };
+    dummyfilter.acceptPosition = dummyfilter;
+    textfilter.acceptPosition = textfilter;
+
+    this.setUp = function () {
+        var odfContainer,
+            odfcanvas;
+        t = {};
+        testarea = core.UnitTest.provideTestAreaDiv();
+        odfcanvas = new odf.OdfCanvas(testarea);
+        odfContainer = new odf.OdfContainer("", null);
+        odfcanvas.setOdfContainer(odfContainer);
+        t.odtDocument = new ops.OdtDocument(odfcanvas);
+    };
+    this.tearDown = function () {
+        t = {};
+        core.UnitTest.cleanupTestAreaDiv();
+    };
 
     /**
      * @param {!Element} root
