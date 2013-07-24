@@ -183,7 +183,9 @@
 //     closure    true, if Google Closure idioms should be tolerated
 //     continue   true, if the continuation statement should be tolerated
 //     debug      true, if debugger statements should be allowed
+//     defined    true, if already defined variables are allowed
 //     devel      true, if logging should be allowed (console, alert, etc.)
+//     emptyblock true, if empty blocks should be allowed
 //     eqeq       true, if == should be allowed
 //     es5        true, if ES5 syntax should be allowed
 //     evil       true, if eval should be allowed
@@ -200,6 +202,7 @@
 //     regexp     true, if the . should be allowed in regexp literals
 //     rhino      true, if the Rhino environment globals should be predefined
 //     unparam    true, if unused parameters should be tolerated
+//     unvar      true, if unused variables should be tolerated
 //     sloppy     true, if the 'use strict'; pragma is optional
 //     stupid     true, if really stupid practices are tolerated
 //     sub        true, if all forms of subscript notation are tolerated
@@ -293,7 +296,9 @@ var JSLINT = (function () {
             continue  : true,
             couch     : true,
             debug     : true,
+            defined   : true,
             devel     : true,
+            emptyblock: true,
             eqeq      : true,
             es5       : true,
             evil      : true,
@@ -310,6 +315,7 @@ var JSLINT = (function () {
             regexp    : true,
             rhino     : true,
             unparam   : true,
+            unvar     : true,
             sloppy    : true,
             stupid    : true,
             sub       : true,
@@ -1350,7 +1356,7 @@ klass:              do {
 // It is an error if the name has already been defined in this scope, except
 // when reusing an exception variable name.
 
-            if (master) {
+            if (master && !option.defined) {
                 if (master.function === funct) {
                     if (master.kind !== 'exception' || kind !== 'exception' ||
                             !master.dead) {
@@ -2407,7 +2413,7 @@ klass:              do {
             array = [statement()];
             array.disrupt = array[0].disrupt;
         }
-        if (kind !== 'catch' && array.length === 0) {
+        if (!option.emptyblock && (kind !== 'catch' && array.length === 0)) {
             curly.warn('empty_block');
         }
         block_var.forEach(function (name) {
@@ -3157,9 +3163,10 @@ klass:              do {
         Object.keys(scope).forEach(function (name) {
             var master = scope[name];
             if (!master.used && master.kind !== 'exception' &&
-                    (master.kind !== 'parameter' || !option.unparam)) {
+                    ((master.kind === 'var' && !option.unvar)
+                    || (master.kind === 'parameter' && !option.unparam))) {
                 master.warn('unused_a');
-            } else if (!master.init) {
+            } else if (!master.init && (master.kind !== 'var' || !option.unvar)) {
                 master.warn('uninitialized_a');
             }
         });
