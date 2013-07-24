@@ -1,5 +1,5 @@
 // jslint.js
-// 2013-03-28
+// 2013-07-22
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -82,13 +82,8 @@
 //             {
 //                 name: STRING,
 //                 line: NUMBER,
-//                 last: NUMBER,
-//                 params: [
-//                     {
-//                         string: STRING
-//                     }
-//                 ],
-//                 closure: [
+//                 level: NUMBER,
+//                 parameter: [
 //                     STRING
 //                 ],
 //                 var: [
@@ -97,13 +92,10 @@
 //                 exception: [
 //                     STRING
 //                 ],
+//                 closure: [
+//                     STRING
+//                 ],
 //                 outer: [
-//                     STRING
-//                 ],
-//                 unused: [
-//                     STRING
-//                 ],
-//                 undef: [
 //                     STRING
 //                 ],
 //                 global: [
@@ -114,24 +106,19 @@
 //                 ]
 //             }
 //         ],
-//         globals: [
+//         global: [
 //             STRING
 //         ],
 //         member: {
 //             STRING: NUMBER
 //         },
-//         urls: [
-//             STRING
-//         ],
 //         json: BOOLEAN
 //     }
-
-// Empty arrays will not be included.
 
 // You can request a Function Report, which shows all of the functions
 // and the parameters and vars that they use. This can be used to find
 // implied global variables and other problems. The report is in HTML and
-// can be inserted in an HTML <body>. It should be given the result of the
+// can be inserted into an HTML <body>. It should be given the result of the
 // JSLINT.data function.
 
 //     var myReport = JSLINT.report(data);
@@ -190,6 +177,7 @@
 
 // The current option set is
 
+//     ass        true, if assignment expressions should be allowed
 //     bitwise    true, if bitwise operators should be allowed
 //     browser    true, if the standard browser globals should be predefined
 //     closure    true, if Google Closure idioms should be tolerated
@@ -211,7 +199,6 @@
 //     properties true, if all property names must be declared with /*properties*/
 //     regexp     true, if the . should be allowed in regexp literals
 //     rhino      true, if the Rhino environment globals should be predefined
-//     undef      true, if variables can be declared out of order
 //     unparam    true, if unused parameters should be tolerated
 //     sloppy     true, if the 'use strict'; pragma is optional
 //     stupid     true, if really stupid practices are tolerated
@@ -219,7 +206,6 @@
 //     todo       true, if TODO comments are tolerated
 //     vars       true, if multiple var statements per function should be allowed
 //     white      true, if sloppy whitespace is tolerated
-//     windows    true, if MS Windows-specific globals should be predefined
 
 // The properties directive declares an exclusive list of property names.
 // Any properties named in the program that are not in the list will
@@ -228,51 +214,50 @@
 // For example:
 
 /*properties
-    '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'',
-    '(arguments)', '(begin)', '(breakage)', '(context)', '(error)',
-    '(identifier)', '(level)', '(line)', '(loopage)', '(name)', '(params)',
-    '(scope)', '(token)', '(vars)', '(verb)', '*', '+', '-', '/', '<', '<=',
-    '==', '===', '>', '>=', '\\', a, a_label, a_scope, already_defined, and,
-    apply, arity, assign, assign_exception, assignment_function_expression, at,
-    avoid_a, b, bad_assignment, bad_constructor, bad_in_a, bad_invocation,
-    bad_new, bad_number, bad_operand, bad_wrap, bitwise, block, browser, c,
-    call, charAt, charCodeAt, character, closure, color, combine_var, comments,
+    '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'', '(begin)',
+    '(error)', '*', '+', '-', '/', '<', '<=', '==', '===', '>', '>=', '\\', a,
+    a_label, a_scope, already_defined, and, arguments, arity, ass, assign,
+    assignment_expression, assignment_function_expression, at, avoid_a, b,
+    bad_assignment, bad_constructor, bad_in_a, bad_invocation, bad_new,
+    bad_number, bad_operand, bad_wrap, bitwise, block, browser, c, call, charAt,
+    charCodeAt, character, closure, code, color, combine_var, comments,
     conditional_assignment, confusing_a, confusing_regexp, constructor_name_a,
-    continue, control_a, couch, create, d, dangling_a, data, debug, deleted,
-    devel, disrupt, duplicate_a, edge, edition, else, empty_block, empty_case,
-    empty_class, entityify, eqeq, error_report, errors, es5, evidence, evil,
-    exception, exec, expected_a, expected_a_at_b_c, expected_a_b,
+    continue, control_a, couch, create, d, dangling_a, data, dead, debug,
+    deleted, devel, disrupt, duplicate_a, edge, edition, else, empty_block,
+    empty_case, empty_class, entityify, eqeq, error_report, errors, es5,
+    evidence, evil, exception, exec, expected_a_at_b_c, expected_a_b,
     expected_a_b_from_c_d, expected_id_a, expected_identifier_a,
     expected_identifier_a_reserved, expected_number_a, expected_operator_a,
     expected_positive_a, expected_small_a, expected_space_a_b,
-    expected_string_a, f, filter, first, flag, floor, forEach, for_if, forin,
-    from, fromCharCode, fud, function, function_block, function_eval,
-    function_loop, function_statement, function_strict, functions, global,
-    globals, hasOwnProperty, id, identifier, identifier_function, immed,
-    implied_evil, indent, indexOf, infix_in, init, insecure_a, isAlpha, isArray,
-    isDigit, isNaN, join, jslint, json, keys, label, labeled, lbp,
-    leading_decimal_a, led, left, length, level, line, match, maxerr, maxlen,
-    message, missing_a, missing_a_after_b, missing_property, missing_space_a_b,
-    missing_use_strict, mode, move_invocation, move_var, n, name, name_function,
-    nested_comment, newcap, node, nomen, not, not_a_constructor, not_a_defined,
-    not_a_function, not_a_label, not_a_scope, not_greater, nud, number, octal_a,
-    open, outer, parameter_a_get_b, parameter_arguments_a, parameter_set_a,
+    expected_string_a, f, first, flag, floor, forEach, for_if, forin, from,
+    fromCharCode, fud, function, function_block, function_eval, function_loop,
+    function_statement, function_strict, functions, global, hasOwnProperty, id,
+    identifier, identifier_function, immed, implied_evil, indent, indexOf,
+    infix_in, init, insecure_a, isAlpha, isArray, isDigit, isNaN, join, jslint,
+    json, keys, kind, label, labeled, lbp, leading_decimal_a, led, left, length,
+    level, line, loopage, master, match, maxerr, maxlen, message, missing_a,
+    missing_a_after_b, missing_property, missing_space_a_b, missing_use_strict,
+    mode, move_invocation, move_var, n, name, name_function, nested_comment,
+    newcap, node, nomen, not, not_a_constructor, not_a_defined, not_a_function,
+    not_a_label, not_a_scope, not_greater, nud, number, octal_a, open, outer,
+    parameter, parameter_a_get_b, parameter_arguments_a, parameter_set_a,
     params, paren, passfail, plusplus, postscript, predef, properties,
     properties_report, property, prototype, push, quote, r, radix, raw,
-    read_only, reason, regexp, replace, report, reserved, reserved_a, rhino,
-    right, scanned_a_b, search, second, shift, slash_equal, slice, sloppy, sort,
-    split, statement_block, stopping, strange_loop, strict, string, stupid, sub,
-    subscript, substr, supplant, sync_a, t, tag_a_in_b, test, third, thru,
-    toString, todo, todo_comment, token, tokens, too_long, too_many,
-    trailing_decimal_a, tree, unclosed, unclosed_comment, unclosed_regexp,
-    undef, undefined, unescaped_a, unexpected_a, unexpected_char_a,
-    unexpected_comment, unexpected_else, unexpected_label_a,
+    read_only, reason, regexp, relation, replace, report, reserved, reserved_a,
+    rhino, right, scanned_a_b, scope, search, second, shift, slash_equal, slice,
+    sloppy, sort, split, statement, statement_block, stop, stopping,
+    strange_loop, strict, string, stupid, sub, subscript, substr, supplant,
+    sync_a, t, tag_a_in_b, test, third, thru, toString, todo, todo_comment,
+    token, tokens, too_long, too_many, trailing_decimal_a, tree, unclosed,
+    unclosed_comment, unclosed_regexp, unescaped_a, unexpected_a,
+    unexpected_char_a, unexpected_comment, unexpected_label_a,
     unexpected_property_a, unexpected_space_a_b, unexpected_typeof_a,
-    unnecessary_initialize, unnecessary_use, unparam, unreachable_a_b, unsafe,
-    unused, url, urls, use_array, use_braces, use_object, use_or, use_param,
-    use_spaces, used_before_a, var, var_a_not, vars, was, weird_assignment,
-    weird_condition, weird_new, weird_program, weird_relation, weird_ternary,
-    white, windows, wrap, wrap_immediate, wrap_regexp, write_is_wrong,
+    uninitialized_a, unnecessary_else, unnecessary_initialize, unnecessary_use,
+    unparam, unreachable_a_b, unsafe, unused_a, url, use_array, use_braces,
+    use_object, use_or, use_param, use_spaces, used, used_before_a, var,
+    var_a_not, var_loop, vars, varstatement, warn, warning, was,
+    weird_assignment, weird_condition, weird_new, weird_program, weird_relation,
+    weird_ternary, white, wrap, wrap_immediate, wrap_regexp, write_is_wrong,
     writeable
 */
 
@@ -292,7 +277,7 @@ var JSLINT = (function () {
 
 // Make an object from an array of keys and a common value.
 
-        var i, length = array.length, object = {};
+        var i, length = array.length, object = Object.create(null);
         for (i = 0; i < length; i += 1) {
             object[array[i]] = value;
         }
@@ -301,6 +286,7 @@ var JSLINT = (function () {
 
 
     var allowed_option = {
+            ass       : true,
             bitwise   : true,
             browser   : true,
             closure   : true,
@@ -323,15 +309,13 @@ var JSLINT = (function () {
             properties: true,
             regexp    : true,
             rhino     : true,
-            undef     : true,
             unparam   : true,
             sloppy    : true,
             stupid    : true,
             sub       : true,
             todo      : true,
             vars      : true,
-            white     : true,
-            windows   : true
+            white     : true
         },
         anonname,       // The guessed name for anonymous functions.
 
@@ -353,6 +337,7 @@ var JSLINT = (function () {
             '%'  : true
         },
         begin,          // The root token
+        block_var,     // vars defined in the current block
 
 // browser contains a set of global names that are commonly provided by a
 // web browser environment.
@@ -371,7 +356,7 @@ var JSLINT = (function () {
             a_scope: "'{a}' used out of scope.",
             already_defined: "'{a}' is already defined.",
             and: "The '&&' subexpression should be wrapped in parens.",
-            assign_exception: "Do not assign to the exception parameter.",
+            assignment_expression: "Unexpected assignment expression.",
             assignment_function_expression: "Expected an assignment or " +
                 "function call and instead saw an expression.",
             avoid_a: "Avoid '{a}'.",
@@ -400,7 +385,6 @@ var JSLINT = (function () {
             empty_class: "Empty class.",
             es5: "This is an ES5 feature.",
             evil: "eval is evil.",
-            expected_a: "Expected '{a}'.",
             expected_a_b: "Expected '{a}' and instead saw '{b}'.",
             expected_a_b_from_c_d: "Expected '{a}' to match '{b}' from line " +
                 "{c} and instead saw '{d}'.",
@@ -422,7 +406,7 @@ var JSLINT = (function () {
                 "the outer function.",
             function_eval: "The Function constructor is eval.",
             function_loop: "Don't make functions within a loop.",
-            function_statement: "Function statements are not invocable." +
+            function_statement: "Function statements are not invocable. " +
                 "Wrap the whole function invocation in parens.",
             function_strict: "Use the function form of 'use strict'.",
             identifier_function: "Expected an identifier in an assignment " +
@@ -478,35 +462,39 @@ var JSLINT = (function () {
             unexpected_a: "Unexpected '{a}'.",
             unexpected_char_a: "Unexpected character '{a}'.",
             unexpected_comment: "Unexpected comment.",
-            unexpected_else: "Unexpected 'else' after 'return'.",
             unexpected_label_a: "Unexpected label '{a}'.",
             unexpected_property_a: "Unexpected /*property*/ '{a}'.",
             unexpected_space_a_b: "Unexpected space between '{a}' and '{b}'.",
             unexpected_typeof_a: "Unexpected 'typeof'. " +
                 "Use '===' to compare directly with {a}.",
+            uninitialized_a: "Uninitialized '{a}'.",
+            unnecessary_else: "Unnecessary 'else' after disruption.",
             unnecessary_initialize: "It is not necessary to initialize '{a}' " +
                 "to 'undefined'.",
             unnecessary_use: "Unnecessary 'use strict'.",
             unreachable_a_b: "Unreachable '{a}' after '{b}'.",
             unsafe: "Unsafe character.",
+            unused_a: "Unused '{a}'.",
             url: "JavaScript URL.",
             use_array: "Use the array literal notation [].",
             use_braces: "Spaces are hard to count. Use {{a}}.",
-            use_object: "Use the object literal notation {}.",
+            use_object: "Use the object literal notation {} or Object.create(null).",
             use_or: "Use the || operator.",
             use_param: "Use a named parameter.",
             use_spaces: "Use spaces, not tabs.",
             used_before_a: "'{a}' was used before it was defined.",
             var_a_not: "Variable {a} was not declared correctly.",
+            var_loop: "Don't declare variables in a loop.",
             weird_assignment: "Weird assignment.",
             weird_condition: "Weird condition.",
             weird_new: "Weird construction. Delete 'new'.",
             weird_program: "Weird program.",
             weird_relation: "Weird relation.",
             weird_ternary: "Weird ternary.",
-            wrap_immediate: "Wrap an immediate function invocation in parentheses " +
-                "to assist the reader in understanding that the expression " +
-                "is the result of a function, and not the function itself.",
+            wrap_immediate: "Wrap an immediate function invocation in " +
+                "parentheses to assist the reader in understanding that the " +
+                "expression is the result of a function, and not the " +
+                "function itself.",
             wrap_regexp: "Wrap the /regexp/ literal in parens to " +
                 "disambiguate the slash operator.",
             write_is_wrong: "document.write can be a form of eval."
@@ -517,7 +505,8 @@ var JSLINT = (function () {
         comments,
         comments_off,
         couch = array_to_object([
-            'emit'
+            'emit', 'getRow', 'isArray', 'log', 'provides', 'registerType',
+            'require', 'send', 'start', 'sum', 'toJSON'
         ], false),
 
         descapes = {
@@ -548,30 +537,23 @@ var JSLINT = (function () {
             '\\': '\\\\'
         },
 
-        funct,          // The current function, including the labels used in
-                        // the function, as well as (breakage),
-                        // (context), (loopage), (name), (params), (token),
-                        // (vars), (verb)
-
-        functionicity = [
-            'closure', 'exception', 'global', 'label', 'outer', 'undef',
-            'unused', 'var'
-        ],
+        funct,          // The current function
 
         functions,      // All of the functions
         global_funct,   // The global body
         global_scope,   // The global scope
-        in_block,
+        in_block,       // Where function statements are not allowed
         indent,
-        itself,         // JSLint itself
+        itself,         // JSLINT itself
         json_mode,
         lex,            // the tokenizer
         lines,
         lookahead,
         node = array_to_object([
-            'Buffer', 'clearInterval', 'clearTimeout', 'console', 'exports',
-            'global', 'module', 'process', 'querystring', 'require',
-            'setInterval', 'setTimeout', '__dirname', '__filename'
+            'Buffer', 'clearImmediate', 'clearInterval', 'clearTimeout',
+            'console', 'exports', 'global', 'module', 'process', 'querystring',
+            'require', 'setImmediate', 'setInterval', 'setTimeout',
+            '__dirname', '__filename'
         ], false),
         node_js,
         numbery = array_to_object(['indexOf', 'lastIndexOf', 'search'], true),
@@ -581,6 +563,7 @@ var JSLINT = (function () {
         prereg,
         prev_token,
         property,
+        protosymbol,
         regexp_flag = array_to_object(['g', 'i', 'm'], true),
         return_this = function return_this() {
             return this;
@@ -593,7 +576,6 @@ var JSLINT = (function () {
 
         scope,      // An object containing an object for each variable in scope
         semicolon_coda = array_to_object([';', '"', '\'', ')'], true),
-        stack,
 
 // standard contains the global names that are provided by the
 // ECMAScript standard.
@@ -607,18 +589,11 @@ var JSLINT = (function () {
         ], false),
 
         strict_mode,
-        syntax = {},
-        tab,
+        syntax = Object.create(null),
         token,
         tokens,
-        urls,
         var_mode,
         warnings,
-
-        windows = array_to_object([
-            'ActiveXObject', 'CScript', 'Debug', 'Enumerator', 'System',
-            'VBArray', 'WScript', 'WSH'
-        ], false),
 
 // Regular expressions. Some of these are stupidly long.
 
@@ -629,7 +604,7 @@ var JSLINT = (function () {
 // identifier
         ix = /^([a-zA-Z_$][a-zA-Z0-9_$]*)$/,
 // javascript url
-        jx = /^(?:javascript|jscript|ecmascript|vbscript|mocha|livescript)\s*:/i,
+        jx = /^(?:javascript|jscript|ecmascript|vbscript)\s*:/i,
 // star slash
         lx = /\*\/|\/\*/,
 // characters in strings that need escapement
@@ -641,63 +616,6 @@ var JSLINT = (function () {
 // token
         tx = /^\s*([(){}\[\]\?.,:;'"~#@`]|={1,3}|\/(\*(jslint|properties|property|members?|globals?)?|=|\/)?|\*[\/=]?|\+(?:=|\++)?|-(?:=|-+)?|[\^%]=?|&[&=]?|\|[|=]?|>{1,3}=?|<(?:[\/=!]|\!(\[|--)?|<=?)?|\!(\!|==?)?|[a-zA-Z_$][a-zA-Z0-9_$]*|[0-9]+(?:[xX][0-9a-fA-F]+|\.[0-9]*)?(?:[eE][+\-]?[0-9]+)?)/;
 
-
-    function F() {}     // Used by Object.create
-
-// Provide critical ES5 functions to ES3.
-
-    if (typeof Array.prototype.filter !== 'function') {
-        Array.prototype.filter = function (f) {
-            var i, length = this.length, result = [], value;
-            for (i = 0; i < length; i += 1) {
-                try {
-                    value = this[i];
-                    if (f(value)) {
-                        result.push(value);
-                    }
-                } catch (ignore) {
-                }
-            }
-            return result;
-        };
-    }
-
-    if (typeof Array.prototype.forEach !== 'function') {
-        Array.prototype.forEach = function (f) {
-            var i, length = this.length;
-            for (i = 0; i < length; i += 1) {
-                try {
-                    f(this[i]);
-                } catch (ignore) {
-                }
-            }
-        };
-    }
-
-    if (typeof Array.isArray !== 'function') {
-        Array.isArray = function (o) {
-            return Object.prototype.toString.apply(o) === '[object Array]';
-        };
-    }
-
-    if (!Object.prototype.hasOwnProperty.call(Object, 'create')) {
-        Object.create = function (o) {
-            F.prototype = o;
-            return new F();
-        };
-    }
-
-    if (typeof Object.keys !== 'function') {
-        Object.keys = function (o) {
-            var array = [], key;
-            for (key in o) {
-                if (Object.prototype.hasOwnProperty.call(o, key)) {
-                    array.push(key);
-                }
-            }
-            return array;
-        };
-    }
 
     if (typeof String.prototype.entityify !== 'function') {
         String.prototype.entityify = function () {
@@ -755,11 +673,11 @@ var JSLINT = (function () {
         }
         if (option.closure) {
             add_to_predefined(closure);
-            option.browser = false;
         }
         if (option.couch) {
             add_to_predefined(couch);
             option.couch = false;
+            option.es5 = true;
         }
         if (option.devel) {
             add_to_predefined(devel);
@@ -768,15 +686,12 @@ var JSLINT = (function () {
         if (option.node) {
             add_to_predefined(node);
             option.node = false;
+            option.es5 = true;
             node_js = true;
         }
         if (option.rhino) {
             add_to_predefined(rhino);
             option.rhino = false;
-        }
-        if (option.windows) {
-            add_to_predefined(windows);
-            option.windows = false;
         }
     }
 
@@ -787,7 +702,7 @@ var JSLINT = (function () {
         if (!tok) {
             tok = next_token;
         }
-        return tok.number || tok.string;
+        return tok.id === '(number)' ? tok.number : tok.string;
     }
 
     function quit(message, line, character) {
@@ -796,65 +711,45 @@ var JSLINT = (function () {
             line: line,
             character: character,
             message: bundle.scanned_a_b.supplant({
-                a: message,
+                a: bundle[message] || message,
                 b: Math.floor((line / lines.length) * 100)
             })
         };
     }
 
-    function warn(message, offender, a, b, c, d) {
-        var character, line, warning;
-        offender = offender || next_token;  // ~~
-        line = offender.line || 0;
-        character = offender.from || 0;
-        warning = {
+    function warn(code, line, character, a, b, c, d) {
+        var warning = {         // ~~
             id: '(error)',
-            raw: bundle[message] || message,
+            raw: bundle[code] || code,
+            code: code,
             evidence: lines[line - 1] || '',
             line: line,
             character: character,
-            a: a || (offender.id === '(number)'
-                ? String(offender.number)
-                : offender.string),
+            a: a || artifact(this),
             b: b,
             c: c,
             d: d
         };
         warning.reason = warning.raw.supplant(warning);
-        JSLINT.errors.push(warning);
+        itself.errors.push(warning);
         if (option.passfail) {
-            quit(bundle.stopping, line, character);
+            quit('stopping', line, character);
         }
         warnings += 1;
         if (warnings >= option.maxerr) {
-            quit(bundle.too_many, line, character);
+            quit('too_many', line, character);
         }
         return warning;
     }
 
-    function warn_at(message, line, character, a, b, c, d) {
-        return warn(message, {
-            line: line,
-            from: character
-        }, a, b, c, d);
-    }
-
-    function stop(message, offender, a, b, c, d) {
-        var warning = warn(message, offender, a, b, c, d);
-        quit(bundle.stopping, warning.line, warning.character);
-    }
-
-    function stop_at(message, line, character, a, b, c, d) {
-        return stop(message, {
-            line: line,
-            from: character
-        }, a, b, c, d);
+    function stop(code, line, character, a, b, c, d) {
+        var warning = warn(code, line, character, a, b, c, d);
+        quit('stopping', warning.line, warning.character);
     }
 
     function expected_at(at) {
         if (!option.white && next_token.from !== at) {
-            warn('expected_a_at_b_c', next_token, '', at,
-                next_token.from);
+            next_token.warn('expected_a_at_b_c', '', at, next_token.from);
         }
     }
 
@@ -878,15 +773,15 @@ var JSLINT = (function () {
                 if (option.white) {
                     source_row = source_row.replace(/\t/g, ' ');
                 } else {
-                    warn_at('use_spaces', line, at + 1);
+                    warn('use_spaces', line, at + 1);
                 }
             }
             at = source_row.search(cx);
             if (at >= 0) {
-                warn_at('unsafe', line, at);
+                warn('unsafe', line, at);
             }
             if (option.maxlen && option.maxlen < source_row.length) {
-                warn_at('too_long', line, source_row.length);
+                warn('too_long', line, source_row.length);
             }
             return true;
         }
@@ -897,7 +792,7 @@ var JSLINT = (function () {
             var id, the_token;
             if (type === '(string)') {
                 if (jx.test(value)) {
-                    warn_at('url', line, from);
+                    warn('url', line, from);
                 }
             }
             the_token = Object.create(syntax[(
@@ -909,11 +804,11 @@ var JSLINT = (function () {
             if (type === '(identifier)') {
                 the_token.identifier = true;
                 if (value === '__iterator__' || value === '__proto__') {
-                    stop_at('reserved_a', line, from, value);
+                    stop('reserved_a', line, from, value);
                 } else if (!option.nomen &&
                         (value.charAt(0) === '_' ||
                         value.charAt(value.length - 1) === '_')) {
-                    warn_at('dangling_a', line, from, value);
+                    warn('dangling_a', line, from, value);
                 }
             }
             if (type === '(number)') {
@@ -950,7 +845,7 @@ var JSLINT = (function () {
             for (;;) {
                 if (!source_row) {
                     if (!option.white) {
-                        warn_at('unexpected_char_a', line, character - 1, '(space)');
+                        warn('unexpected_char_a', line, character - 1, '(space)');
                     }
                     return;
                 }
@@ -961,64 +856,64 @@ var JSLINT = (function () {
                 source_row = source_row.slice(1);
                 character += 1;
             }
-            stop_at('unexpected_char_a', line, character, c);
+            stop('unexpected_char_a', line, character, c);
 
         }
 
         function string(x) {
-            var c, pos = 0, r = '', result;
+            var ch, at = 0, r = '', result;
 
             function hex(n) {
-                var i = parseInt(source_row.substr(pos + 1, n), 16);
-                pos += n;
+                var i = parseInt(source_row.substr(at + 1, n), 16);
+                at += n;
                 if (i >= 32 && i <= 126 &&
                         i !== 34 && i !== 92 && i !== 39) {
-                    warn_at('unexpected_a', line, character, '\\');
+                    warn('unexpected_a', line, character, '\\');
                 }
                 character += n;
-                c = String.fromCharCode(i);
+                ch = String.fromCharCode(i);
             }
 
             if (json_mode && x !== '"') {
-                warn_at('expected_a', line, character, '"');
+                warn('expected_a_b', line, character, '"', x);
             }
 
             for (;;) {
-                while (pos >= source_row.length) {
-                    pos = 0;
+                while (at >= source_row.length) {
+                    at = 0;
                     if (!next_line()) {
-                        stop_at('unclosed', line, from);
+                        stop('unclosed', line - 1, from);
                     }
                 }
-                c = source_row.charAt(pos);
-                if (c === x) {
+                ch = source_row.charAt(at);
+                if (ch === x) {
                     character += 1;
-                    source_row = source_row.slice(pos + 1);
+                    source_row = source_row.slice(at + 1);
                     result = it('(string)', r);
                     result.quote = x;
                     return result;
                 }
-                if (c < ' ') {
-                    if (c === '\n' || c === '\r') {
+                if (ch < ' ') {
+                    if (ch === '\n' || ch === '\r') {
                         break;
                     }
-                    warn_at('control_a', line, character + pos,
-                        source_row.slice(0, pos));
-                } else if (c === '\\') {
-                    pos += 1;
+                    warn('control_a', line, character + at,
+                        source_row.slice(0, at));
+                } else if (ch === '\\') {
+                    at += 1;
                     character += 1;
-                    c = source_row.charAt(pos);
-                    switch (c) {
+                    ch = source_row.charAt(at);
+                    switch (ch) {
                     case '':
                         if (!option.es5) {
-                            warn_at('es5', line, character);
+                            warn('es5', line, character);
                         }
                         next_line();
-                        pos = -1;
+                        at = -1;
                         break;
                     case '\'':
                         if (json_mode) {
-                            warn_at('unexpected_a', line, character, '\\\'');
+                            warn('unexpected_a', line, character, '\\\'');
                         }
                         break;
                     case 'u':
@@ -1026,53 +921,53 @@ var JSLINT = (function () {
                         break;
                     case 'v':
                         if (json_mode) {
-                            warn_at('unexpected_a', line, character, '\\v');
+                            warn('unexpected_a', line, character, '\\v');
                         }
-                        c = '\v';
+                        ch = '\v';
                         break;
                     case 'x':
                         if (json_mode) {
-                            warn_at('unexpected_a', line, character, '\\x');
+                            warn('unexpected_a', line, character, '\\x');
                         }
                         hex(2);
                         break;
                     default:
-                        if (typeof descapes[c] !== 'string') {
-                            warn_at(c >= '0' && c <= '7' ? 'octal_a' : 'unexpected_a',
-                                line, character, '\\' + c);
+                        if (typeof descapes[ch] !== 'string') {
+                            warn(ch >= '0' && ch <= '7' ? 'octal_a' : 'unexpected_a',
+                                line, character, '\\' + ch);
                         } else {
-                            c = descapes[c];
+                            ch = descapes[ch];
                         }
                     }
                 }
-                r += c;
+                r += ch;
                 character += 1;
-                pos += 1;
+                at += 1;
             }
         }
 
         function number(snippet) {
             var digit;
             if (source_row.charAt(0).isAlpha()) {
-                warn_at('expected_space_a_b',
+                warn('expected_space_a_b',
                     line, character, c, source_row.charAt(0));
             }
             if (c === '0') {
                 digit = snippet.charAt(1);
                 if (digit.isDigit()) {
                     if (token.id !== '.') {
-                        warn_at('unexpected_a', line, character, snippet);
+                        warn('unexpected_a', line, character, snippet);
                     }
                 } else if (json_mode && (digit === 'x' || digit === 'X')) {
-                    warn_at('unexpected_a', line, character, '0x');
+                    warn('unexpected_a', line, character, '0x');
                 }
             }
             if (snippet.slice(snippet.length - 1) === '.') {
-                warn_at('trailing_decimal_a', line, character, snippet);
+                warn('trailing_decimal_a', line, character, snippet);
             }
             digit = +snippet;
             if (!isFinite(digit)) {
-                warn_at('bad_number', line, character, snippet);
+                warn('bad_number', line, character, snippet);
             }
             snippet = digit;
             return it('(number)', snippet);
@@ -1080,9 +975,9 @@ var JSLINT = (function () {
 
         function comment(snippet, type) {
             if (comments_off) {
-                warn_at('unexpected_comment', line, character);
+                warn('unexpected_comment', line, character);
             } else if (!option.todo && tox.test(snippet)) {
-                warn_at('todo_comment', line, character);
+                warn('todo_comment', line, character);
             }
             comments.push({
                 id: type,
@@ -1094,79 +989,76 @@ var JSLINT = (function () {
         }
 
         function regexp() {
-            var b,
+            var at = 0,
+                b,
                 bit,
-                captures = 0,
                 depth = 0,
                 flag = '',
                 high,
                 letter,
-                length = 0,
                 low,
                 potential,
                 quote,
                 result;
             for (;;) {
                 b = true;
-                c = source_row.charAt(length);
-                length += 1;
+                c = source_row.charAt(at);
+                at += 1;
                 switch (c) {
                 case '':
-                    stop_at('unclosed_regexp', line, from);
+                    stop('unclosed_regexp', line, from);
                     return;
                 case '/':
                     if (depth > 0) {
-                        warn_at('unescaped_a', line, from + length, '/');
+                        warn('unescaped_a', line, from + at, '/');
                     }
-                    c = source_row.slice(0, length - 1);
+                    c = source_row.slice(0, at - 1);
                     potential = Object.create(regexp_flag);
                     for (;;) {
-                        letter = source_row.charAt(length);
+                        letter = source_row.charAt(at);
                         if (potential[letter] !== true) {
                             break;
                         }
                         potential[letter] = false;
-                        length += 1;
+                        at += 1;
                         flag += letter;
                     }
-                    if (source_row.charAt(length).isAlpha()) {
-                        stop_at('unexpected_a', line, from, source_row.charAt(length));
+                    if (source_row.charAt(at).isAlpha()) {
+                        stop('unexpected_a', line, from, source_row.charAt(at));
                     }
-                    character += length;
-                    source_row = source_row.slice(length);
+                    character += at;
+                    source_row = source_row.slice(at);
                     quote = source_row.charAt(0);
                     if (quote === '/' || quote === '*') {
-                        stop_at('confusing_regexp', line, from);
+                        stop('confusing_regexp', line, from);
                     }
                     result = it('(regexp)', c);
                     result.flag = flag;
                     return result;
                 case '\\':
-                    c = source_row.charAt(length);
+                    c = source_row.charAt(at);
                     if (c < ' ') {
-                        warn_at('control_a', line, from + length, String(c));
+                        warn('control_a', line, from + at, String(c));
                     } else if (c === '<') {
-                        warn_at(bundle.unexpected_a, line, from + length, '\\');
+                        warn('unexpected_a', line, from + at, '\\');
                     }
-                    length += 1;
+                    at += 1;
                     break;
                 case '(':
                     depth += 1;
                     b = false;
-                    if (source_row.charAt(length) === '?') {
-                        length += 1;
-                        switch (source_row.charAt(length)) {
+                    if (source_row.charAt(at) === '?') {
+                        at += 1;
+                        switch (source_row.charAt(at)) {
                         case ':':
                         case '=':
                         case '!':
-                            length += 1;
+                            at += 1;
                             break;
                         default:
-                            warn_at(bundle.expected_a_b, line, from + length,
-                                ':', source_row.charAt(length));
+                            warn('expected_a_b', line, from + at,
+                                ':', source_row.charAt(at));
                         }
-                    } else {
-                        captures += 1;
                     }
                     break;
                 case '|':
@@ -1174,70 +1066,70 @@ var JSLINT = (function () {
                     break;
                 case ')':
                     if (depth === 0) {
-                        warn_at('unescaped_a', line, from + length, ')');
+                        warn('unescaped_a', line, from + at, ')');
                     } else {
                         depth -= 1;
                     }
                     break;
                 case ' ':
                     pos = 1;
-                    while (source_row.charAt(length) === ' ') {
-                        length += 1;
+                    while (source_row.charAt(at) === ' ') {
+                        at += 1;
                         pos += 1;
                     }
                     if (pos > 1) {
-                        warn_at('use_braces', line, from + length, pos);
+                        warn('use_braces', line, from + at, pos);
                     }
                     break;
                 case '[':
-                    c = source_row.charAt(length);
+                    c = source_row.charAt(at);
                     if (c === '^') {
-                        length += 1;
+                        at += 1;
                         if (!option.regexp) {
-                            warn_at('insecure_a', line, from + length, c);
-                        } else if (source_row.charAt(length) === ']') {
-                            stop_at('unescaped_a', line, from + length, '^');
+                            warn('insecure_a', line, from + at, c);
+                        } else if (source_row.charAt(at) === ']') {
+                            stop('unescaped_a', line, from + at, '^');
                         }
                     }
                     bit = false;
                     if (c === ']') {
-                        warn_at('empty_class', line, from + length - 1);
+                        warn('empty_class', line, from + at - 1);
                         bit = true;
                     }
 klass:              do {
-                        c = source_row.charAt(length);
-                        length += 1;
+                        c = source_row.charAt(at);
+                        at += 1;
                         switch (c) {
                         case '[':
                         case '^':
-                            warn_at('unescaped_a', line, from + length, c);
+                            warn('unescaped_a', line, from + at, c);
                             bit = true;
                             break;
                         case '-':
                             if (bit) {
                                 bit = false;
                             } else {
-                                warn_at('unescaped_a', line, from + length, '-');
+                                warn('unescaped_a', line, from + at, '-');
                                 bit = true;
                             }
                             break;
                         case ']':
                             if (!bit) {
-                                warn_at('unescaped_a', line, from + length - 1, '-');
+                                warn('unescaped_a', line, from + at - 1, '-');
                             }
                             break klass;
                         case '\\':
-                            c = source_row.charAt(length);
+                            c = source_row.charAt(at);
                             if (c < ' ') {
-                                warn_at(bundle.control_a, line, from + length, String(c));
+                                warn('control_a', line, from + at, String(c));
                             } else if (c === '<') {
-                                warn_at(bundle.unexpected_a, line, from + length, '\\');
+                                warn('unexpected_a', line, from + at, '\\');
                             }
-                            length += 1;
+                            at += 1;
                             bit = true;
                             break;
                         case '/':
-                            warn_at('unescaped_a', line, from + length - 1, '/');
+                            warn('unescaped_a', line, from + at - 1, '/');
                             bit = true;
                             break;
                         default:
@@ -1247,7 +1139,7 @@ klass:              do {
                     break;
                 case '.':
                     if (!option.regexp) {
-                        warn_at('insecure_a', line, from + length, c);
+                        warn('insecure_a', line, from + at, c);
                     }
                     break;
                 case ']':
@@ -1256,74 +1148,74 @@ klass:              do {
                 case '}':
                 case '+':
                 case '*':
-                    warn_at('unescaped_a', line, from + length, c);
+                    warn('unescaped_a', line, from + at, c);
                     break;
                 }
                 if (b) {
-                    switch (source_row.charAt(length)) {
+                    switch (source_row.charAt(at)) {
                     case '?':
                     case '+':
                     case '*':
-                        length += 1;
-                        if (source_row.charAt(length) === '?') {
-                            length += 1;
+                        at += 1;
+                        if (source_row.charAt(at) === '?') {
+                            at += 1;
                         }
                         break;
                     case '{':
-                        length += 1;
-                        c = source_row.charAt(length);
+                        at += 1;
+                        c = source_row.charAt(at);
                         if (c < '0' || c > '9') {
-                            warn_at(bundle.expected_number_a, line,
-                                from + length, c);
+                            warn('expected_number_a', line,
+                                from + at, c);
                         }
-                        length += 1;
+                        at += 1;
                         low = +c;
                         for (;;) {
-                            c = source_row.charAt(length);
+                            c = source_row.charAt(at);
                             if (c < '0' || c > '9') {
                                 break;
                             }
-                            length += 1;
+                            at += 1;
                             low = +c + (low * 10);
                         }
                         high = low;
                         if (c === ',') {
-                            length += 1;
+                            at += 1;
                             high = Infinity;
-                            c = source_row.charAt(length);
+                            c = source_row.charAt(at);
                             if (c >= '0' && c <= '9') {
-                                length += 1;
+                                at += 1;
                                 high = +c;
                                 for (;;) {
-                                    c = source_row.charAt(length);
+                                    c = source_row.charAt(at);
                                     if (c < '0' || c > '9') {
                                         break;
                                     }
-                                    length += 1;
+                                    at += 1;
                                     high = +c + (high * 10);
                                 }
                             }
                         }
-                        if (source_row.charAt(length) !== '}') {
-                            warn_at(bundle.expected_a_b, line, from + length,
+                        if (source_row.charAt(at) !== '}') {
+                            warn('expected_a_b', line, from + at,
                                 '}', c);
                         } else {
-                            length += 1;
+                            at += 1;
                         }
-                        if (source_row.charAt(length) === '?') {
-                            length += 1;
+                        if (source_row.charAt(at) === '?') {
+                            at += 1;
                         }
                         if (low > high) {
-                            warn_at(bundle.not_greater, line, from + length,
+                            warn('not_greater', line, from + at,
                                 low, high);
                         }
                         break;
                     }
                 }
             }
-            c = source_row.slice(0, length - 1);
-            character += length;
-            source_row = source_row.slice(length);
+            c = source_row.slice(0, at - 1);
+            character += at;
+            source_row = source_row.slice(at);
             return it('(regexp)', c);
         }
 
@@ -1344,7 +1236,7 @@ klass:              do {
 // token -- this is called by advance to get the next token.
 
             token: function () {
-                var c, i, snippet;
+                var first, i, snippet;
 
                 for (;;) {
                     while (!source_row) {
@@ -1357,14 +1249,14 @@ klass:              do {
 
 //      identifier
 
-                        c = snippet.charAt(0);
-                        if (c.isAlpha() || c === '_' || c === '$') {
+                        first = snippet.charAt(0);
+                        if (first.isAlpha() || first === '_' || first === '$') {
                             return it('(identifier)', snippet);
                         }
 
 //      number
 
-                        if (c.isDigit()) {
+                        if (first.isDigit()) {
                             return number(snippet);
                         }
                         switch (snippet) {
@@ -1394,13 +1286,13 @@ klass:              do {
                                 comment(source_row);
                                 from = 0;
                                 if (!next_line()) {
-                                    stop_at('unclosed_comment', line, character);
+                                    stop('unclosed_comment', line, character);
                                 }
                             }
                             comment(source_row.slice(0, i), '/*');
                             character += i + 2;
                             if (source_row.charAt(i) === '/') {
-                                stop_at('nested_comment', line, character);
+                                stop('nested_comment', line, character);
                             }
                             source_row = source_row.slice(i + 2);
                             break;
@@ -1410,47 +1302,13 @@ klass:              do {
 //      /
                         case '/':
                             if (token.id === '/=') {
-                                stop_at(
-                                    bundle.slash_equal,
-                                    line,
-                                    from
-                                );
+                                stop('slash_equal', line, from);
                             }
                             return prereg
                                 ? regexp()
                                 : it('(punctuator)', snippet);
 
 //      punctuator
-
-                        case '<!--':
-                            length = line;
-//                            c = character;
-                            for (;;) {
-                                i = source_row.indexOf('--');
-                                if (i >= 0) {
-                                    break;
-                                }
-                                i = source_row.indexOf('<!');
-                                if (i >= 0) {
-                                    stop_at('nested_comment',
-                                        line, character + i);
-                                }
-                                if (!next_line()) {
-                                    stop_at('unclosed_comment', length, c);
-                                }
-                            }
-                            length = source_row.indexOf('<!');
-                            if (length >= 0 && length < i) {
-                                stop_at('nested_comment',
-                                    line, character + length);
-                            }
-                            character += i;
-                            if (source_row.charAt(i + 2) !== '>') {
-                                stop_at('expected_a', line, character, '-->');
-                            }
-                            character += 3;
-                            source_row = source_row.slice(i + 3);
-                            break;
                         default:
                             return it('(punctuator)', snippet);
                         }
@@ -1460,50 +1318,56 @@ klass:              do {
         };
     }());
 
+    function define(kind, token) {
 
-    function add_label(token, kind, name) {
+// Define a name.
 
-// Define the symbol in the current function in the current scope.
+        var name = token.string,
+            master = scope[name];       // The current definition of the name
 
-        name = name || token.string;
-        if (funct === global_funct) {
-            if (typeof global_funct[name] !== 'string') {
-                token.writeable = typeof predefined[name] === 'boolean'
-                    ? predefined[name]
-                    : true;
+// vars are created with a deadzone, so that the expression that initializes
+// the var cannot access the var. Functions are not writeable.
+
+        token.dead = false;
+        token.init = false;
+        token.kind = kind;
+        token.master = master;
+        token.used = 0;
+        token.writeable = false;
+
+// Global variables are a little weird. They can be defined multiple times.
+// Some predefined global vars are (or should) not be writeable.
+
+        if (kind === 'var' && funct === global_funct) {
+            if (!master) {
+                if (predefined[name] === false) {
+                    token.writeable = false;
+                }
                 global_scope[name] = token;
             }
-            if (kind === 'becoming') {
-                kind = 'var';
-            }
-
-// Ordinary variables.
-
         } else {
 
-// Warn if the variable already exists.
+// It is an error if the name has already been defined in this scope, except
+// when reusing an exception variable name.
 
-            if (typeof funct[name] === 'string') {
-                if (funct[name] === 'undef') {
-                    if (!option.undef) {
-                        warn('used_before_a', token, name);
+            if (master) {
+                if (master.function === funct) {
+                    if (master.kind !== 'exception' || kind !== 'exception' ||
+                            !master.dead) {
+                        token.warn('already_defined', name);
                     }
-                    kind = 'var';
-                } else {
-                    warn('already_defined', token, name);
+                } else if (master.function !== global_funct) {
+                    if (kind === 'var') {
+                        token.warn('already_defined', name);
+                    }
                 }
-            } else {
-
-// Add the symbol to the current function.
-
-                token.writeable = true;
-                scope[name] = token;
+            }
+            scope[name] = token;
+            if (kind === 'var') {
+                block_var.push(name);
             }
         }
-        token.function = funct;
-        funct[name] = kind;
     }
-
 
     function peek(distance) {
 
@@ -1595,17 +1459,17 @@ klass:              do {
         switch (token.id) {
         case '(number)':
             if (next_token.id === '.') {
-                warn('trailing_decimal_a');
+                next_token.warn('trailing_decimal_a');
             }
             break;
         case '-':
             if (next_token.id === '-' || next_token.id === '--') {
-                warn('confusing_a');
+                next_token.warn('confusing_a');
             }
             break;
         case '+':
             if (next_token.id === '+' || next_token.id === '++') {
-                warn('confusing_a');
+                next_token.warn('confusing_a');
             }
             break;
         }
@@ -1615,10 +1479,10 @@ klass:              do {
 
         if (id && next_token.id !== id) {
             if (match) {
-                warn('expected_a_b_from_c_d', next_token, id,
+                next_token.warn('expected_a_b_from_c_d', id,
                     match.id, match.line, artifact());
             } else if (!next_token.identifier || next_token.string !== id) {
-                warn('expected_a_b', next_token, id, artifact());
+                next_token.warn('expected_a_b', id, artifact());
             }
         }
         prev_token = token;
@@ -1649,7 +1513,7 @@ klass:              do {
                     advance('false');
                     break;
                 default:
-                    stop('unexpected_a');
+                    next_token.stop('unexpected_a');
                 }
             }
             predefined[name] = writeable;
@@ -1666,18 +1530,18 @@ klass:              do {
         while (next_token.id === '(string)' || next_token.identifier) {
             name = next_token.string;
             if (!allowed_option[name]) {
-                stop('unexpected_a');
+                next_token.stop('unexpected_a');
             }
             advance();
             if (next_token.id !== ':') {
-                stop('expected_a_b', next_token, ':', artifact());
+                next_token.stop('expected_a_b', ':', artifact());
             }
             advance(':');
             if (typeof allowed_option[name] === 'number') {
                 value = next_token.number;
                 if (value > allowed_option[name] || value <= 0 ||
                         Math.floor(value) !== value) {
-                    stop('expected_small_a');
+                    next_token.stop('expected_small_a');
                 }
                 option[name] = value;
             } else {
@@ -1686,7 +1550,7 @@ klass:              do {
                 } else if (next_token.id === 'false') {
                     option[name] = false;
                 } else {
-                    stop('unexpected_a');
+                    next_token.stop('unexpected_a');
                 }
             }
             advance();
@@ -1731,10 +1595,10 @@ klass:              do {
         comments_off = true;
         indent = null;
         if (next_token.line === token.line && next_token.from === token.thru) {
-            warn('missing_space_a_b', next_token, artifact(token), artifact());
+            next_token.warn('missing_space_a_b', artifact(token), artifact());
         }
         if (lookahead.length > 0) {
-            warn('unexpected_a', this);
+            this.warn('unexpected_a');
         }
         switch (command) {
         case '/*properties':
@@ -1751,7 +1615,7 @@ klass:              do {
             do_globals();
             break;
         default:
-            stop('unexpected_a', this);
+            this.stop('unexpected_a');
         }
         comments_off = old_comments_off;
         advance('*/');
@@ -1823,7 +1687,7 @@ klass:              do {
         if (right.id !== '(end)' && !option.white &&
                 (token.line !== right.line ||
                 token.thru + 1 !== right.from)) {
-            warn('expected_space_a_b', right, artifact(token), artifact(right));
+            right.warn('expected_space_a_b', artifact(token), artifact(right));
         }
     }
 
@@ -1832,7 +1696,7 @@ klass:              do {
         right = right || next_token;
         if (right.id !== '(end)' && (left.line !== right.line ||
                 (!option.white && left.thru + 1 !== right.from))) {
-            warn('expected_space_a_b', right, artifact(left), artifact(right));
+            right.warn('expected_space_a_b', artifact(left), artifact(right));
         }
     }
 
@@ -1841,7 +1705,7 @@ klass:              do {
         right = right || next_token;
         if ((!option.white) &&
                 left.thru !== right.from && left.line === right.line) {
-            warn('unexpected_space_a_b', right, artifact(left), artifact(right));
+            right.warn('unexpected_space_a_b', artifact(left), artifact(right));
         }
     }
 
@@ -1850,7 +1714,7 @@ klass:              do {
         right = right || next_token;
         if (right.id !== '(end)' && (left.line !== right.line ||
                 (!option.white && left.thru !== right.from))) {
-            warn('unexpected_space_a_b', right, artifact(left), artifact(right));
+            right.warn('unexpected_space_a_b', artifact(left), artifact(right));
         }
     }
 
@@ -1859,14 +1723,14 @@ klass:              do {
             left = left || token;
             right = right || next_token;
             if (left.thru === right.from && left.line === right.line) {
-                warn('missing_space_a_b', right, artifact(left), artifact(right));
+                right.warn('missing_space_a_b', artifact(left), artifact(right));
             }
         }
     }
 
     function comma() {
         if (next_token.id !== ',') {
-            warn_at('expected_a_b', token.line, token.thru, ',', artifact());
+            warn('expected_a_b', token.line, token.thru, ',', artifact());
         } else {
             if (!option.white) {
                 no_space_only();
@@ -1879,7 +1743,7 @@ klass:              do {
 
     function semicolon() {
         if (next_token.id !== ';') {
-            warn_at('expected_a_b', token.line, token.thru, ';', artifact());
+            warn('expected_a_b', token.line, token.thru, ';', artifact());
         } else {
             if (!option.white) {
                 no_space_only();
@@ -1894,13 +1758,12 @@ klass:              do {
     function use_strict() {
         if (next_token.string === 'use strict') {
             if (strict_mode) {
-                warn('unnecessary_use');
+                next_token.warn('unnecessary_use');
             }
             edge();
             advance();
             semicolon();
             strict_mode = true;
-            option.undef = false;
             return true;
         }
         return false;
@@ -1931,9 +1794,10 @@ klass:              do {
         }
         if (a.arity === b.arity && a.string === b.string) {
             switch (a.arity) {
+            case undefined:
+                return a.string === b.string;
             case 'prefix':
             case 'suffix':
-            case undefined:
                 return a.id === b.id && are_similar(a.first, b.first) &&
                     a.id !== '{' && a.id !== '[';
             case 'infix':
@@ -1949,13 +1813,12 @@ klass:              do {
             default:
                 return true;
             }
-        } else {
-            if (a.id === '.' && b.id === '[' && b.arity === 'infix') {
-                return a.second.string === b.second.string && b.second.id === '(string)';
-            }
-            if (a.id === '[' && a.arity === 'infix' && b.id === '.') {
-                return a.second.string === b.second.string && a.second.id === '(string)';
-            }
+        }
+        if (a.id === '.' && b.id === '[' && b.arity === 'infix') {
+            return a.second.string === b.second.string && b.second.id === '(string)';
+        }
+        if (a.id === '[' && a.arity === 'infix' && b.id === '.') {
+            return a.second.string === b.second.string && a.second.id === '(string)';
         }
         return false;
     }
@@ -1982,12 +1845,11 @@ klass:              do {
 
         var left;
         if (next_token.id === '(end)') {
-            stop('unexpected_a', token, next_token.id);
+            token.stop('unexpected_a', next_token.id);
         }
         advance();
         if (initial) {
             anonname = 'anonymous';
-            funct['(verb)'] = token.string;
         }
         if (initial === true && token.fud) {
             left = token.fud();
@@ -1996,36 +1858,59 @@ klass:              do {
                 left = token.nud();
             } else {
                 if (next_token.id === '(number)' && token.id === '.') {
-                    warn('leading_decimal_a', token, artifact());
+                    token.warn('leading_decimal_a', artifact());
                     advance();
                     return token;
                 }
-                stop('expected_identifier_a', token, token.id);
+                token.stop('expected_identifier_a', artifact(token));
             }
             while (rbp < next_token.lbp) {
                 advance();
-                if (token.led) {
-                    left = token.led(left);
-                } else {
-                    stop('expected_operator_a', token, token.id);
-                }
+                left = token.led(left);
+            }
+        }
+        if (left && left.assign && !initial) {
+            if (!option.ass) {
+                left.warn('assignment_expression');
+            }
+            if (left.id !== '=' && left.first.master) {
+                left.first.master.used = true;
             }
         }
         return left;
     }
 
+    protosymbol = {
+        nud: function () {
+            this.stop('unexpected_a');
+        },
+        led: function () {
+            this.stop('expected_operator_a');
+        },
+        warn: function (code, a, b, c, d) {
+            if (!this.warning) {
+                this.warning = warn(code, this.line || 0, this.from || 0,
+                    a || artifact(this), b, c, d);
+            }
+        },
+        stop: function (code, a, b, c, d) {
+            this.warning = undefined;
+            this.warn(code, a, b, c, d);
+            return quit('stopping', this.line, this.character);
+        },
+        lbp: 0
+    };
 
 // Functional constructors for making the symbols that will be inherited by
 // tokens.
 
-    function symbol(s, p) {
+    function symbol(s, bp) {
         var x = syntax[s];
-        if (!x || typeof x !== 'object') {
-            syntax[s] = x = {
-                id: s,
-                lbp: p || 0,
-                string: s
-            };
+        if (!x) {
+            x = Object.create(protosymbol);
+            x.id = x.string = s;
+            x.lbp = bp || 0;
+            syntax[s] = x;
         }
         return x;
     }
@@ -2045,25 +1930,6 @@ klass:              do {
         return postscript(x);
     }
 
-
-    function stmt(s, f) {
-        var x = symbol(s);
-        x.identifier = x.reserved = true;
-        x.fud = f;
-        return x;
-    }
-
-    function labeled_stmt(s, f) {
-        var x = stmt(s, f);
-        x.labeled = true;
-    }
-
-    function disrupt_stmt(s, f) {
-        var x = stmt(s, f);
-        x.disrupt = true;
-    }
-
-
     function reserve_name(x) {
         var c = x.id.charAt(0);
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
@@ -2072,6 +1938,21 @@ klass:              do {
         return x;
     }
 
+    function stmt(s, f) {
+        var x = symbol(s);
+        x.fud = f;
+        return reserve_name(x);
+    }
+
+    function disrupt_stmt(s, f) {
+        var x = stmt(s, f);
+        x.disrupt = true;
+    }
+
+    function labeled_stmt(s, f) {
+        var x = stmt(s, f);
+        x.labeled = true;
+    }
 
     function prefix(s, f) {
         var x = symbol(s, 150);
@@ -2096,16 +1977,16 @@ klass:              do {
             case '++':
             case '--':
                 if (!option.plusplus) {
-                    warn('unexpected_a', that);
+                    that.warn('unexpected_a');
                 } else if ((!that.first.identifier || that.first.reserved) &&
                         that.first.id !== '.' && that.first.id !== '[') {
-                    warn('bad_operand', that);
+                    that.warn('bad_operand');
                 }
                 break;
             default:
                 if (that.first.arity === 'prefix' ||
                         that.first.arity === 'function') {
-                    warn('unexpected_a', that);
+                    that.warn('unexpected_a');
                 }
             }
             return that;
@@ -2162,7 +2043,7 @@ klass:              do {
                 spaces();
             }
             if (!option.bitwise && this.bitwise) {
-                warn('unexpected_a', this);
+                this.warn('unexpected_a');
             }
             if (typeof f === 'function') {
                 return f(left, this);
@@ -2176,7 +2057,7 @@ klass:              do {
 
     function expected_relation(node, message) {
         if (node.assign) {
-            warn(message || bundle.conditional_assignment, node);
+            node.warn(message || 'conditional_assignment');
         }
         return node;
     }
@@ -2186,7 +2067,7 @@ klass:              do {
         case '[':
         case '-':
             if (node.arity !== 'infix') {
-                warn(message || bundle.weird_condition, node);
+                node.warn(message || 'weird_condition');
             }
             break;
         case 'false':
@@ -2203,14 +2084,14 @@ klass:              do {
         case '{':
         case '?':
         case '~':
-            warn(message || bundle.weird_condition, node);
+            node.warn(message || 'weird_condition');
             break;
         case '(':
             if (node.first.id === 'new' ||
                     (node.first.string === 'Boolean') ||
                     (node.first.id === '.' &&
                         numbery[node.first.second.string] === true)) {
-                warn(message || bundle.weird_condition, node);
+                node.warn(message || 'weird_condition');
             }
             break;
         }
@@ -2223,20 +2104,22 @@ klass:              do {
             switch (node.id) {
             case '{':
             case '[':
-                warn('unexpected_a', node);
+                node.warn('unexpected_a');
                 break;
             case '!':
-                warn('confusing_a', node);
+                node.warn('confusing_a');
                 break;
             }
             break;
         case 'function':
         case 'regexp':
-            warn('unexpected_a', node);
+            node.warn('unexpected_a');
             break;
         default:
             if (node.id  === 'NaN') {
-                warn('isNaN', node);
+                node.warn('isNaN');
+            } else if (node.relation) {
+                node.warn('weird_relation');
             }
         }
         return node;
@@ -2244,78 +2127,79 @@ klass:              do {
 
 
     function relation(s, eqeq) {
-        return infix(s, 100, function (left, that) {
+        var x = infix(s, 100, function (left, that) {
             check_relation(left);
             if (eqeq && !option.eqeq) {
-                warn('expected_a_b', that, eqeq, that.id);
+                that.warn('expected_a_b', eqeq, that.id);
             }
             var right = expression(100);
             if (are_similar(left, right) ||
                     ((left.id === '(string)' || left.id === '(number)') &&
                     (right.id === '(string)' || right.id === '(number)'))) {
-                warn('weird_relation', that);
+                that.warn('weird_relation');
             } else if (left.id === 'typeof') {
                 if (right.id !== '(string)') {
-                    warn("expected_string_a", right, right.id === '(number)'
-                        ? right.number
-                        : right.string);
+                    right.warn("expected_string_a", artifact(right));
                 } else if (right.string === 'undefined' ||
                         right.string === 'null') {
-                    warn("unexpected_typeof_a", left, right.string);
+                    left.warn("unexpected_typeof_a", right.string);
                 }
             } else if (right.id === 'typeof') {
                 if (left.id !== '(string)') {
-                    warn("expected_string_a", left, left.id === '(number)'
-                        ? left.number
-                        : left.string);
+                    left.warn("expected_string_a", artifact(left));
                 } else if (left.string === 'undefined' ||
                         left.string === 'null') {
-                    warn("unexpected_typeof_a", right, left.string);
+                    right.warn("unexpected_typeof_a", left.string);
                 }
             }
             that.first = left;
             that.second = check_relation(right);
             return that;
         });
+        x.relation = true;
+        return x;
+    }
+
+    function lvalue(that, s) {
+        var master;
+        if (that.identifier) {
+            master = scope[that.string];
+            if (master) {
+                if (scope[that.string].writeable !== true) {
+                    that.warn('read_only');
+                }
+                master.used -= 1;
+                if (s === '=') {
+                    master.init = true;
+                }
+            }
+        } else if (that.id === '.' || that.id === '[') {
+            if (!that.first || that.first.string === 'arguments') {
+                that.warn('bad_assignment');
+            }
+        } else {
+            that.warn('bad_assignment');
+        }
     }
 
 
     function assignop(s, op) {
         var x = infix(s, 20, function (left, that) {
+            var next;
             that.first = left;
-            if (left.identifier) {
-                if (scope[left.string]) {
-                    if (scope[left.string].writeable === false) {
-                        warn('read_only', left);
-                    }
-                } else {
-                    stop('read_only');
-                }
-                if (funct['(params)']) {
-                    funct['(params)'].forEach(function (value) {
-                        if (value.string === left.string) {
-                            value.assign = true;
-                        }
-                    });
-                }
-            }
-            if (left === syntax.function) {
-                warn('identifier_function', token);
-            }
-            if (left.id === '.' || left.id === '[') {
-                if (!left.first || left.first.string === 'arguments') {
-                    warn('bad_assignment', that);
-                }
-            } else if (left.identifier) {
-                if (!left.reserved && funct[left.string] === 'exception') {
-                    warn('assign_exception', left);
-                }
-            } else {
-                warn('bad_assignment', that);
-            }
-            that.second = expression(19);
+            lvalue(left, s);
+            that.second = expression(20);
             if (that.id === '=' && are_similar(that.first, that.second)) {
-                warn('weird_assignment', that);
+                that.warn('weird_assignment');
+            }
+            next = that;
+            while (next_token.id === '=') {
+                lvalue(next.second, '=');
+                next_token.first = next.second;
+                next.second = next_token;
+                next = next_token;
+                advance('=');
+                next.second = expression(20);
             }
             return that;
         });
@@ -2341,10 +2225,10 @@ klass:              do {
         x.led = function (left) {
             no_space_only(prev_token, token);
             if (!option.plusplus) {
-                warn('unexpected_a', this);
+                this.warn('unexpected_a');
             } else if ((!left.identifier || left.reserved) &&
                     left.id !== '.' && left.id !== '[') {
-                warn('bad_operand', this);
+                this.warn('bad_operand');
             }
             this.first = left;
             this.arity = 'suffix';
@@ -2358,7 +2242,7 @@ klass:              do {
         if (next_token.identifier) {
             advance();
             if (token.reserved && (!option.es5 || variable)) {
-                warn('expected_identifier_a_reserved', token);
+                token.warn('expected_identifier_a_reserved');
             }
             return token.string;
         }
@@ -2368,7 +2252,7 @@ klass:              do {
     function identifier(variable) {
         var i = optional_identifier(variable);
         if (!i) {
-            stop(token.id === 'function' && next_token.id === '('
+            next_token.stop(token.id === 'function' && next_token.id === '('
                 ? 'name_function'
                 : 'expected_identifier_a');
         }
@@ -2378,12 +2262,12 @@ klass:              do {
 
     function statement() {
 
-        var label, old_scope = scope, preamble, the_statement;
+        var label, preamble, the_statement;
 
 // We don't like the empty statement.
 
         if (next_token.id === ';') {
-            warn('unexpected_a');
+            next_token.warn('unexpected_a');
             semicolon();
             return;
         }
@@ -2395,14 +2279,14 @@ klass:              do {
             label = next_token;
             advance();
             advance(':');
-            scope = Object.create(old_scope);
-            add_label(label, 'label');
+            define('label', label);
             if (next_token.labeled !== true || funct === global_funct) {
-                stop('unexpected_label_a', label);
+                label.stop('unexpected_label_a');
             } else if (jx.test(label.string + ':')) {
-                warn('url', label);
+                label.warn('url');
             }
             next_token.label = label;
+            label.init = true;
         }
 
 // Parse the statement.
@@ -2435,21 +2319,24 @@ klass:              do {
 
                 if (the_statement.id === '(') {
                     if (the_statement.first.id === 'new') {
-                        warn('bad_new');
+                        next_token.warn('bad_new');
                     }
+                } else if (the_statement.id === '++' ||
+                        the_statement.id === '--') {
+                    lvalue(the_statement.first);
                 } else if (!the_statement.assign &&
-                        the_statement.id !== 'delete' &&
-                        the_statement.id !== '++' &&
-                        the_statement.id !== '--') {
+                        the_statement.id !== 'delete') {
                     if (!option.closure || !preamble.comments) {
-                        warn('assignment_function_expression', preamble);
+                        preamble.warn('assignment_function_expression');
                     }
                 }
                 semicolon();
             }
         }
         step_out();
-        scope = old_scope;
+        if (label) {
+            label.dead = true;
+        }
         return the_statement;
     }
 
@@ -2462,17 +2349,17 @@ klass:              do {
 
         while (next_token.postscript !== true) {
             if (next_token.id === ';') {
-                warn('unexpected_a', next_token);
+                next_token.warn('unexpected_a');
                 semicolon();
             } else {
                 if (next_token.string === 'use strict') {
                     if ((!node_js) || funct !== global_funct || array.length > 0) {
-                        warn('function_strict');
+                        next_token.warn('function_strict');
                     }
                     use_strict();
                 }
                 if (disruptor) {
-                    warn('unreachable_a_b', next_token, next_token.string,
+                    next_token.warn('unreachable_a_b', next_token.string,
                         disruptor.string);
                     disruptor = null;
                 }
@@ -2490,53 +2377,53 @@ klass:              do {
     }
 
 
-    function block(ordinary) {
+    function block(kind) {
 
-// array block is array sequence of statements wrapped in braces.
-// ordinary is false for function bodies and try blocks.
-// ordinary is true for if statements, while, etc.
+// A block is a sequence of statements wrapped in braces.
 
         var array,
             curly = next_token,
+            old_block_var = block_var,
             old_in_block = in_block,
-            old_scope = scope,
             old_strict_mode = strict_mode;
 
-        in_block = ordinary;
-        scope = Object.create(scope);
-        if (next_token.id === '{') {
+        in_block = kind !== 'function' && kind !== 'try' && kind !== 'catch';
+        block_var = [];
+        if (curly.id === '{') {
             spaces();
             advance('{');
             step_in();
-            if (!ordinary && !use_strict() && !old_strict_mode &&
-                    !option.sloppy && funct['(context)'] === global_funct) {
-                warn('missing_use_strict');
+            if (kind === 'function' && !use_strict() && !old_strict_mode &&
+                    !option.sloppy && funct.level === 1) {
+                next_token.warn('missing_use_strict');
             }
             array = statements();
             strict_mode = old_strict_mode;
             step_out('}', curly);
-        } else if (!ordinary) {
-            stop('expected_a_b', next_token, '{', artifact());
+        } else if (in_block) {
+            curly.stop('expected_a_b', '{', artifact());
         } else {
-            warn('expected_a_b', next_token, '{', artifact());
+            curly.warn('expected_a_b', '{', artifact());
             array = [statement()];
             array.disrupt = array[0].disrupt;
         }
-        funct['(verb)'] = null;
-        scope = old_scope;
-        in_block = old_in_block;
-        if (ordinary && array.length === 0) {
-            warn('empty_block');
+        if (kind !== 'catch' && array.length === 0) {
+            curly.warn('empty_block');
         }
+        block_var.forEach(function (name) {
+            scope[name].dead = true;
+        });
+        block_var = old_block_var;
+        in_block = old_in_block;
         return array;
     }
 
 
     function tally_property(name) {
         if (option.properties && typeof property[name] !== 'number') {
-            warn('unexpected_property_a', token, name);
+            token.warn('unexpected_property_a', name);
         }
-        if (typeof property[name] === 'number') {
+        if (property[name]) {
             property[name] += 1;
         } else {
             property[name] = 1;
@@ -2546,131 +2433,67 @@ klass:              do {
 
 // ECMAScript parser
 
-    syntax['(identifier)'] = {
-        id: '(identifier)',
-        lbp: 0,
-        identifier: true,
-        nud: function () {
+    (function () {
+        var x = symbol('(identifier)');
+        x.nud = function () {
             var name = this.string,
-                variable = scope[name],
-                site,
+                master = scope[name],
                 writeable;
 
-// If the variable is not in scope, then we may have an undeclared variable.
+// If the master is not in scope, then we may have an undeclared variable.
 // Check the predefined list. If it was predefined, create the global
 // variable.
 
-            if (typeof variable !== 'object') {
+            if (!master) {
                 writeable = predefined[name];
                 if (typeof writeable === 'boolean') {
-                    global_scope[name] = variable = {
+                    global_scope[name] = master = {
+                        dead: false,
+                        function: global_funct,
+                        kind: 'var',
                         string: name,
-                        writeable: writeable,
-                        function: global_funct
+                        writeable: writeable
                     };
-                    global_funct[name] = 'var';
 
 // But if the variable is not in scope, and is not predefined, and if we are not
 // in the global scope, then we have an undefined variable error.
 
                 } else {
-                    if (!option.undef) {
-                        warn('used_before_a', token);
-                    }
-                    scope[name] = variable = {
-                        string: name,
-                        writeable: true,
-                        function: funct
-                    };
-                    funct[name] = 'undef';
+                    token.warn('used_before_a');
                 }
-
-            }
-            site = variable.function;
-
-// The name is in scope and defined in the current function.
-
-            if (funct === site) {
-
-//      Change 'unused' to 'var', and reject labels.
-
-                switch (funct[name]) {
-                case 'becoming':
-                    warn('unexpected_a', token);
-                    funct[name] = 'var';
-                    break;
-                case 'unused':
-                    funct[name] = 'var';
-                    break;
-                case 'unparam':
-                    funct[name] = 'parameter';
-                    break;
-                case 'unction':
-                    funct[name] = 'function';
-                    break;
-                case 'label':
-                    warn('a_label', token, name);
-                    break;
-                }
-                this.function = funct;
-
-// If the name is already defined in the current
-// function, but not as outer, then there is a scope error.
-
             } else {
-                switch (funct[name]) {
-                case 'closure':
-                case 'function':
-                case 'var':
-                case 'unused':
-                    warn('a_scope', token, name);
-                    break;
-                case 'label':
-                    warn('a_label', token, name);
-                    break;
-                case 'outer':
-                case 'global':
-                    break;
-                default:
+                this.master = master;
+            }
 
-// If the name is defined in an outer function, make an outer entry, and if
-// it was unused, make it var.
+// Annotate uses that cross scope boundaries.
 
-                    switch (site[name]) {
-                    case 'becoming':
-                    case 'closure':
-                    case 'function':
-                    case 'parameter':
-                    case 'unction':
-                    case 'unparam':
-                    case 'unused':
-                    case 'var':
-                        site[name] = 'closure';
-                        funct[name] = site === global_funct
-                            ? 'global'
-                            : 'outer';
-                        this.function = site;
-                        break;
-                    case 'undef':
-                        funct[name] = 'undef';
-                        break;
-                    case 'label':
-                        warn('a_label', token, name);
-                        break;
+            if (master) {
+                if (master.kind === 'label') {
+                    this.warn('a_label');
+                } else {
+                    if (master.dead === true || master.dead === funct) {
+                        this.warn('a_scope');
+                    }
+                    master.used += 1;
+                    if (master.function !== funct) {
+                        if (master.function === global_funct) {
+                            funct.global.push(name);
+                        } else {
+                            master.function.closure.push(name);
+                            funct.outer.push(name);
+                        }
                     }
                 }
             }
             return this;
-        },
-        led: function () {
-            stop('expected_operator_a');
-        }
-    };
+        };
+        x.identifier = true;
+    }());
+
 
 // Build the syntax table by declaring the syntactic elements.
 
     type('(array)', 'array');
-    type('(color)', 'color');
     type('(function)', 'function');
     type('(number)', 'number', return_this);
     type('(object)', 'object');
@@ -2681,10 +2504,6 @@ klass:              do {
     ultimate('(begin)');
     ultimate('(end)');
     ultimate('(error)');
-    postscript(symbol('</'));
-    symbol('<!');
-    symbol('<!--');
-    symbol('-->');
     postscript(symbol('}'));
     symbol(')');
     symbol(']');
@@ -2704,9 +2523,9 @@ klass:              do {
 
     reservevar('arguments', function (x) {
         if (strict_mode && funct === global_funct) {
-            warn('strict', x);
+            x.warn('strict');
         }
-        funct['(arguments)'] = true;
+        funct.arguments = true;
     });
     reservevar('eval');
     constant('false', 'boolean');
@@ -2714,10 +2533,8 @@ klass:              do {
     constant('NaN', 'number');
     constant('null', '');
     reservevar('this', function (x) {
-        if (strict_mode && funct['(token)'] &&
-                (funct['(token)'].arity === 'statement' &&
-                funct['(name)'].charAt(0) > 'Z')) {
-            warn('strict', x);
+        if (strict_mode && funct.statement && funct.name.charAt(0) > 'Z') {
+            x.warn('strict');
         }
     });
     constant('true', 'boolean');
@@ -2736,9 +2553,9 @@ klass:              do {
         that.third = expression(10);
         that.arity = 'ternary';
         if (are_similar(that.second, that.third)) {
-            warn('weird_ternary', colon);
+            colon.warn('weird_ternary');
         } else if (are_similar(that.first, that.second)) {
-            warn('use_or', that);
+            that.warn('use_or');
         }
         step_out();
         return that;
@@ -2747,7 +2564,7 @@ klass:              do {
     infix('||', 40, function (left, that) {
         function paren_check(that) {
             if (that.id === '&&' && !that.paren) {
-                warn('and', that);
+                that.warn('and');
             }
             return that;
         }
@@ -2755,7 +2572,7 @@ klass:              do {
         that.first = paren_check(expected_condition(expected_relation(left)));
         that.second = paren_check(expected_relation(expression(40)));
         if (are_similar(that.first, that.second)) {
-            warn('weird_condition', that);
+            that.warn('weird_condition');
         }
         return that;
     });
@@ -2764,7 +2581,7 @@ klass:              do {
         that.first = expected_condition(expected_relation(left));
         that.second = expected_relation(expression(50));
         if (are_similar(that.first, that.second)) {
-            warn('weird_condition', that);
+            that.warn('weird_condition');
         }
         return that;
     });
@@ -2772,9 +2589,9 @@ klass:              do {
     prefix('void', function (that) {
         that.first = expression(0);
         if (option.es5 || strict_mode) {
-            warn('expected_a_b', that, 'undefined', 'void');
+            that.warn('expected_a_b', 'undefined', 'void');
         } else if (that.first.number !== 0) {
-            warn('expected_a_b', that.first, '0', artifact(that.first));
+            that.first.warn('expected_a_b', '0', artifact(that.first));
         }
         return that;
     });
@@ -2797,7 +2614,7 @@ klass:              do {
     bitwise('>>>', 120);
 
     infix('in', 120, function (left, that) {
-        warn('infix_in', that);
+        that.warn('infix_in');
         that.left = left;
         that.right = expression(130);
         return that;
@@ -2806,21 +2623,21 @@ klass:              do {
     infix('+', 130, function (left, that) {
         if (left.id === '(number)') {
             if (left.number === 0) {
-                warn('unexpected_a', left, '0');
+                left.warn('unexpected_a', '0');
             }
         } else if (left.id === '(string)') {
             if (left.string === '') {
-                warn('expected_a_b', left, 'String', '\'\'');
+                left.warn('expected_a_b', 'String', '\'\'');
             }
         }
         var right = expression(130);
         if (right.id === '(number)') {
             if (right.number === 0) {
-                warn('unexpected_a', right, '0');
+                right.warn('unexpected_a', '0');
             }
         } else if (right.id === '(string)') {
             if (right.string === '') {
-                warn('expected_a_b', right, 'String', '\'\'');
+                right.warn('expected_a_b', 'String', '\'\'');
             }
         }
         if (left.id === right.id) {
@@ -2828,7 +2645,7 @@ klass:              do {
                 if (left.id === '(string)') {
                     left.string += right.string;
                     if (jx.test(left.string)) {
-                        warn('url', left);
+                        left.warn('url');
                     }
                 } else {
                     left.number += right.number;
@@ -2843,24 +2660,24 @@ klass:              do {
     });
     prefix('+');
     prefix('+++', function () {
-        warn('confusing_a', token);
+        token.warn('confusing_a');
         this.first = expression(150);
         this.arity = 'prefix';
         return this;
     });
     infix('+++', 130, function (left) {
-        warn('confusing_a', token);
+        token.warn('confusing_a');
         this.first = left;
         this.second = expression(130);
         return this;
     });
     infix('-', 130, function (left, that) {
         if ((left.id === '(number)' && left.number === 0) || left.id === '(string)') {
-            warn('unexpected_a', left);
+            left.warn('unexpected_a');
         }
         var right = expression(130);
         if ((right.id === '(number)' && right.number === 0) || right.id === '(string)') {
-            warn('unexpected_a', right);
+            right.warn('unexpected_a');
         }
         if (left.id === right.id && left.id === '(number)') {
             left.number -= right.number;
@@ -2873,24 +2690,24 @@ klass:              do {
     });
     prefix('-');
     prefix('---', function () {
-        warn('confusing_a', token);
+        token.warn('confusing_a');
         this.first = expression(150);
         this.arity = 'prefix';
         return this;
     });
     infix('---', 130, function (left) {
-        warn('confusing_a', token);
+        token.warn('confusing_a');
         this.first = left;
         this.second = expression(130);
         return this;
     });
     infix('*', 140, function (left, that) {
         if ((left.id === '(number)' && (left.number === 0 || left.number === 1)) || left.id === '(string)') {
-            warn('unexpected_a', left);
+            left.warn('unexpected_a');
         }
         var right = expression(140);
         if ((right.id === '(number)' && (right.number === 0 || right.number === 1)) || right.id === '(string)') {
-            warn('unexpected_a', right);
+            right.warn('unexpected_a');
         }
         if (left.id === right.id && left.id === '(number)') {
             left.number *= right.number;
@@ -2903,11 +2720,11 @@ klass:              do {
     });
     infix('/', 140, function (left, that) {
         if ((left.id === '(number)' && left.number === 0) || left.id === '(string)') {
-            warn('unexpected_a', left);
+            left.warn('unexpected_a');
         }
         var right = expression(140);
         if ((right.id === '(number)' && (right.number === 0 || right.number === 1)) || right.id === '(string)') {
-            warn('unexpected_a', right);
+            right.warn('unexpected_a');
         }
         if (left.id === right.id && left.id === '(number)') {
             left.number /= right.number;
@@ -2920,11 +2737,11 @@ klass:              do {
     });
     infix('%', 140, function (left, that) {
         if ((left.id === '(number)' && (left.number === 0 || left.number === 1)) || left.id === '(string)') {
-            warn('unexpected_a', left);
+            left.warn('unexpected_a');
         }
         var right = expression(140);
         if ((right.id === '(number)' && right.number === 0) || right.id === '(string)') {
-            warn('unexpected_a', right);
+            right.warn('unexpected_a');
         }
         if (left.id === right.id && left.id === '(number)') {
             left.number %= right.number;
@@ -2945,7 +2762,7 @@ klass:              do {
         one_space();
         var p = expression(0);
         if (!p || (p.id !== '.' && p.id !== '[')) {
-            warn('deleted');
+            next_token.warn('deleted');
         }
         that.first = p;
         return that;
@@ -2955,7 +2772,7 @@ klass:              do {
     prefix('~', function (that) {
         no_space_only();
         if (!option.bitwise) {
-            warn('unexpected_a', that);
+            that.warn('unexpected_a');
         }
         that.first = expression(150);
         return that;
@@ -2964,7 +2781,7 @@ klass:              do {
         no_space_only();
         that.first = expected_condition(expression(150));
         if (bang[that.first.id] === that || that.first.assign) {
-            warn('confusing_a', that);
+            that.warn('confusing_a');
         }
         return that;
     }
@@ -2979,7 +2796,7 @@ klass:              do {
             if (c.identifier) {
                 switch (c.string) {
                 case 'Object':
-                    warn('use_object', token);
+                    token.warn('use_object');
                     break;
                 case 'Array':
                     if (next_token.id === '(') {
@@ -2990,30 +2807,30 @@ klass:              do {
                             n = expression(0);
                             p.second = [n];
                             if (n.id !== '(number)' || next_token.id === ',') {
-                                warn('use_array', p);
+                                p.warn('use_array');
                             }
                             while (next_token.id === ',') {
                                 advance(',');
                                 p.second.push(expression(0));
                             }
                         } else {
-                            warn('use_array', token);
+                            token.warn('use_array');
                         }
                         advance(')', p);
                         return p;
                     }
-                    warn('use_array', token);
+                    token.warn('use_array');
                     break;
                 case 'Number':
                 case 'String':
                 case 'Boolean':
                 case 'Math':
                 case 'JSON':
-                    warn('not_a_constructor', c);
+                    c.warn('not_a_constructor');
                     break;
                 case 'Function':
                     if (!option.evil) {
-                        warn('function_eval');
+                        next_token.warn('function_eval');
                     }
                     break;
                 case 'Date':
@@ -3024,20 +2841,20 @@ klass:              do {
                     if (c.id !== 'function') {
                         v = c.string.charAt(0);
                         if (!option.newcap && (v < 'A' || v > 'Z')) {
-                            warn('constructor_name_a', token);
+                            token.warn('constructor_name_a');
                         }
                     }
                 }
             } else {
                 if (c.id !== '.' && c.id !== '[' && c.id !== '(') {
-                    warn('bad_constructor', token);
+                    token.warn('bad_constructor');
                 }
             }
         } else {
-            warn('weird_new', that);
+            that.warn('weird_new');
         }
         if (next_token.id !== '(') {
-            warn('missing_a', next_token, '()');
+            next_token.warn('missing_a', '()');
         }
         return that;
     });
@@ -3050,26 +2867,28 @@ klass:              do {
             no_space_only(prev_token, token);
         }
         if (!left.immed && left.id === 'function') {
-            warn('wrap_immediate');
+            next_token.warn('wrap_immediate');
         }
         p = [];
         if (left.identifier) {
             if (left.string.match(/^[A-Z]([A-Z0-9_$]*[a-z][A-Za-z0-9_$]*)?$/)) {
                 if (left.string !== 'Number' && left.string !== 'String' &&
                         left.string !== 'Boolean' && left.string !== 'Date') {
-                    if (left.string === 'Math' || left.string === 'JSON') {
-                        warn('not_a_function', left);
+                    if (left.string === 'Math') {
+                        left.warn('not_a_function');
                     } else if (left.string === 'Object') {
-                        warn('use_object', token);
+                        token.warn('use_object');
                     } else if (left.string === 'Array' || !option.newcap) {
-                        warn('missing_a', left, 'new');
+                        left.warn('missing_a', 'new');
                     }
                 }
+            } else if (left.string === 'JSON') {
+                left.warn('not_a_function');
             }
         } else if (left.id === '.') {
             if (left.second.string === 'split' &&
                     left.first.id === '(string)') {
-                warn('use_array', left.second);
+                left.second.warn('use_array');
             }
         }
         step_in();
@@ -3079,7 +2898,7 @@ klass:              do {
                 edge();
                 e = expression(10);
                 if (left.string === 'Boolean' && (e.id === '!' || e.id === '~')) {
-                    warn('weird_condition', e);
+                    e.warn('weird_condition');
                 }
                 p.push(e);
                 if (next_token.id !== ',') {
@@ -3092,24 +2911,24 @@ klass:              do {
         step_out(')', that);
         if (typeof left === 'object') {
             if (left.string === 'parseInt' && p.length === 1) {
-                warn('radix', left);
+                left.warn('radix');
             } else if (left.string === 'String' && p.length >= 1 && p[0].id === '(string)') {
-                warn('unexpected_a', left);
+                left.warn('unexpected_a');
             }
             if (!option.evil) {
                 if (left.string === 'eval' || left.string === 'Function' ||
                         left.string === 'execScript') {
-                    warn('evil', left);
+                    left.warn('evil');
                 } else if (p[0] && p[0].id === '(string)' &&
                         (left.string === 'setTimeout' ||
                         left.string === 'setInterval')) {
-                    warn('implied_evil', left);
+                    left.warn('implied_evil');
                 }
             }
             if (!left.identifier && left.id !== '.' && left.id !== '[' &&
                     left.id !== '(' && left.id !== '&&' && left.id !== '||' &&
                     left.id !== '?') {
-                warn('bad_invocation', left);
+                left.warn('bad_invocation');
             }
             if (left.id === '.') {
                 if (p.length > 0 &&
@@ -3118,12 +2937,12 @@ klass:              do {
                     if (left.second.string === 'call' ||
                             (left.second.string === 'apply' && (p.length === 1 ||
                             (p[1].arity === 'prefix' && p[1].id === '[')))) {
-                        warn('unexpected_a', left.second);
+                        left.second.warn('unexpected_a');
                     }
                 }
                 if (left.second.string === 'toString') {
                     if (left.first.id === '(string)' || left.first.id === '(number)') {
-                        warn('unexpected_a', left.second);
+                        left.second.warn('unexpected_a');
                     }
                 }
             }
@@ -3147,18 +2966,18 @@ klass:              do {
         if (value.id === 'function') {
             switch (next_token.id) {
             case '(':
-                warn('move_invocation');
+                next_token.warn('move_invocation');
                 break;
             case '.':
             case '[':
-                warn('unexpected_a');
+                next_token.warn('unexpected_a');
                 break;
             default:
-                warn('bad_wrap', that);
+                that.warn('bad_wrap');
             }
         } else if (!value.arity) {
             if (!option.closure || !that.comments) {
-                warn('unexpected_a', that);
+                that.warn('unexpected_a');
             }
         }
         return value;
@@ -3175,15 +2994,15 @@ klass:              do {
         that.second = token;
         if (left && left.string === 'arguments' &&
                 (name === 'callee' || name === 'caller')) {
-            warn('avoid_a', left, 'arguments.' + name);
+            left.warn('avoid_a', 'arguments.' + name);
         } else if (!option.evil && left && left.string === 'document' &&
                 (name === 'write' || name === 'writeln')) {
-            warn('write_is_wrong', left);
+            left.warn('write_is_wrong');
         } else if (!option.stupid && syx.test(name)) {
-            warn('sync_a', token);
+            token.warn('sync_a');
         }
         if (!option.evil && (name === 'eval' || name === 'execScript')) {
-            warn('evil');
+            next_token.warn('evil');
         }
         return that;
     }, true);
@@ -3198,17 +3017,17 @@ klass:              do {
         switch (e.id) {
         case '(number)':
             if (e.id === '(number)' && left.id === 'arguments') {
-                warn('use_param', left);
+                left.warn('use_param');
             }
             break;
         case '(string)':
             if (!option.evil &&
                     (e.string === 'eval' || e.string === 'execScript')) {
-                warn('evil', e);
+                e.warn('evil');
             } else if (!option.sub && ix.test(e.string)) {
                 s = syntax[e.string];
                 if (!s || !s.reserved) {
-                    warn('subscript', e);
+                    e.warn('subscript');
                 }
             }
             tally_property(e.string);
@@ -3226,7 +3045,7 @@ klass:              do {
         step_in('array');
         while (next_token.id !== '(end)') {
             while (next_token.id === ',') {
-                warn('unexpected_a', next_token);
+                next_token.warn('unexpected_a');
                 advance(',');
             }
             if (next_token.id === ']') {
@@ -3238,7 +3057,7 @@ klass:              do {
             if (next_token.id === ',') {
                 comma();
                 if (next_token.id === ']' && !option.es5) {
-                    warn('unexpected_a', token);
+                    token.warn('unexpected_a');
                     break;
                 }
             } else {
@@ -3271,7 +3090,7 @@ klass:              do {
     assignop('-=', '-');
     assignop('*=', '*');
     assignop('/=', '/').nud = function () {
-        stop('slash_equal');
+        next_token.stop('slash_equal');
     };
     assignop('%=', '%');
     assignop('&=', '&');
@@ -3281,73 +3100,76 @@ klass:              do {
     assignop('>>=', '>>');
     assignop('>>>=', '>>>');
 
-    function function_params() {
-        var id, paren = next_token, params = [];
+    function function_parameters() {
+        var id, parameters = [], paren = next_token;
         advance('(');
         token.function = funct;
         step_in();
         no_space();
-        if (next_token.id === ')') {
-            no_space();
-            step_out(')', paren);
-            return params;
-        }
-        for (;;) {
-            edge();
-            id = identifier();
-            params.push(token);
-            add_label(token, option.unparam ? 'parameter' : 'unparam');
-            if (next_token.id === ',') {
+        if (next_token.id !== ')') {
+            for (;;) {
+                edge();
+                id = identifier();
+                define('parameter', token);
+                parameters.push(id);
+                token.init = true;
+                token.writeable = true;
+                if (next_token.id !== ',') {
+                    break;
+                }
                 comma();
-            } else {
-                no_space();
-                step_out(')', paren);
-                return params;
             }
         }
+        no_space();
+        step_out(')', paren);
+        return parameters;
     }
 
     function do_function(func, name) {
-        var old_funct      = funct,
-            old_option     = option,
-            old_scope      = scope;
+        var old_funct = funct,
+            old_option = option,
+            old_scope = scope;
+        scope = Object.create(old_scope);
         funct = {
-            '(name)'     : name || '\'' + (anonname || '').replace(nx, sanitize) + '\'',
-            '(line)'     : next_token.line,
-            '(context)'  : old_funct,
-            '(breakage)' : 0,
-            '(loopage)'  : 0,
-            '(scope)'    : scope,
-            '(token)'    : func,
-            '(level)'    : old_funct['(level)'] + 1
+            closure: [],
+            global: [],
+            level: old_funct.level + 1,
+            line: next_token.line,
+            loopage: 0,
+            name: name || '\'' + (anonname || '').replace(nx, sanitize) + '\'',
+            outer: [],
+            scope: scope
         };
+        funct.parameter = function_parameters();
         func.function = funct;
         option = Object.create(old_option);
-        scope = Object.create(old_scope);
         functions.push(funct);
-        func.name = name;
-        func.function = funct;
         if (name) {
-            add_label(func, 'function', name);
+            func.name = name;
+            func.string = name;
+            define('function', func);
+            func.init = true;
+            func.used += 1;
         }
         func.writeable = false;
-        func.first = funct['(params)'] = function_params();
         one_space();
-        func.block = block(false);
-        if (funct['(arguments)']) {
-            func.first.forEach(function (value) {
-                if (value.assign) {
-                    warn('parameter_arguments_a', value, value.string);
-                }
-            });
-        }
-        funct      = old_funct;
-        option     = old_option;
-        scope      = old_scope;
+        func.block = block('function');
+        Object.keys(scope).forEach(function (name) {
+            var master = scope[name];
+            if (!master.used && master.kind !== 'exception' &&
+                    (master.kind !== 'parameter' || !option.unparam)) {
+                master.warn('unused_a');
+            } else if (!master.init) {
+                master.warn('uninitialized_a');
+            }
+        });
+        funct = old_funct;
+        option = old_option;
+        scope = old_scope;
     }
 
     prefix('{', function (that) {
-        var get, i, j, name, p, set, seen = {};
+        var get, i, j, name, p, set, seen = Object.create(null);
         that.first = [];
         step_in();
         while (next_token.id !== '}') {
@@ -3359,7 +3181,7 @@ klass:              do {
             edge();
             if (next_token.string === 'get' && peek().id !== ':') {
                 if (!option.es5) {
-                    warn('es5');
+                    next_token.warn('es5');
                 }
                 get = next_token;
                 advance('get');
@@ -3367,16 +3189,16 @@ klass:              do {
                 name = next_token;
                 i = property_name();
                 if (!i) {
-                    stop('missing_property');
+                    next_token.stop('missing_property');
                 }
                 get.string = '';
                 do_function(get);
-                if (funct['(loopage)']) {
-                    warn('function_loop', get);
+                if (funct.loopage) {
+                    get.warn('function_loop');
                 }
                 p = get.first;
                 if (p && p.length) {
-                    warn('parameter_a_get_b', p[0], p[0].string, i);
+                    p[0].warn('parameter_a_get_b', p[0].string, i);
                 }
                 comma();
                 set = next_token;
@@ -3387,24 +3209,24 @@ klass:              do {
                 one_space_only();
                 j = property_name();
                 if (i !== j) {
-                    stop('expected_a_b', token, i, j || next_token.string);
+                    token.stop('expected_a_b', i, j || next_token.string);
                 }
                 do_function(set);
                 if (set.block.length === 0) {
-                    warn('missing_a', token, 'throw');
+                    token.warn('missing_a', 'throw');
                 }
                 p = set.first;
                 if (!p || p.length !== 1) {
-                    stop('parameter_set_a', set, 'value');
+                    set.stop('parameter_set_a', 'value');
                 } else if (p[0].string !== 'value') {
-                    stop('expected_a_b', p[0], 'value', p[0].string);
+                    p[0].stop('expected_a_b', 'value', p[0].string);
                 }
                 name.first = [get, set];
             } else {
                 name = next_token;
                 i = property_name();
                 if (typeof i !== 'string') {
-                    stop('missing_property');
+                    next_token.stop('missing_property');
                 }
                 advance(':');
                 spaces();
@@ -3412,7 +3234,7 @@ klass:              do {
             }
             that.first.push(name);
             if (seen[i] === true) {
-                warn('duplicate_a', next_token, i);
+                next_token.warn('duplicate_a', i);
             }
             seen[i] = true;
             tally_property(i);
@@ -3424,10 +3246,10 @@ klass:              do {
                 if (next_token.id !== ',') {
                     break;
                 }
-                warn('unexpected_a', next_token);
+                next_token.warn('unexpected_a');
             }
             if (next_token.id === '}' && !option.es5) {
-                warn('unexpected_a', token);
+                token.warn('unexpected_a');
             }
         }
         step_out('}', that);
@@ -3435,7 +3257,7 @@ klass:              do {
     });
 
     stmt('{', function () {
-        warn('statement_block');
+        next_token.warn('statement_block');
         this.arity = 'statement';
         this.block = statements();
         this.disrupt = this.block.disrupt;
@@ -3461,10 +3283,13 @@ klass:              do {
 
         var assign, id, name;
 
-        if (funct['(vars)'] && !option.vars) {
-            warn('combine_var');
-        } else if (funct !== global_funct) {
-            funct['(vars)'] = true;
+        if (funct.loopage) {
+            next_token.warn('var_loop');
+        } else if (funct.varstatement && !option.vars) {
+            next_token.warn('combine_var');
+        }
+        if (funct !== global_funct) {
+            funct.varstatement = true;
         }
         this.arity = 'statement';
         this.first = [];
@@ -3472,8 +3297,8 @@ klass:              do {
         for (;;) {
             name = next_token;
             id = identifier(true);
-            add_label(name, 'becoming');
-
+            define('var', name);
+            name.dead = funct;
             if (next_token.id === '=') {
                 assign = next_token;
                 assign.first = name;
@@ -3481,20 +3306,20 @@ klass:              do {
                 advance('=');
                 spaces();
                 if (next_token.id === 'undefined') {
-                    warn('unnecessary_initialize', token, id);
+                    token.warn('unnecessary_initialize', id);
                 }
                 if (peek(0).id === '=' && next_token.identifier) {
-                    stop('var_a_not');
+                    next_token.stop('var_a_not');
                 }
                 assign.second = expression(0);
                 assign.arity = 'infix';
+                name.init = true;
                 this.first.push(assign);
             } else {
                 this.first.push(name);
             }
-            if (funct[id] === 'becoming') {
-                funct[id] = 'unused';
-            }
+            name.dead = false;
+            name.writeable = true;
             if (next_token.id !== ',') {
                 break;
             }
@@ -3517,30 +3342,37 @@ klass:              do {
     stmt('function', function () {
         one_space();
         if (in_block) {
-            warn('function_block', token);
+            token.warn('function_block');
         }
         var name = next_token,
             id = identifier(true);
-        add_label(name, 'unction');
+        define('var', name);
+        name.init = true;
+        name.statement = true;
         no_space();
         this.arity = 'statement';
         do_function(this, id);
         if (next_token.id === '(' && next_token.line === token.line) {
-            stop('function_statement');
+            next_token.stop('function_statement');
         }
         return this;
     });
 
     prefix('function', function (that) {
-        var id = optional_identifier(true);
+        var id = optional_identifier(true), name;
         if (id) {
+            name = token;
             no_space();
         } else {
             id = '';
+            one_space();
         }
         do_function(that, id);
-        if (funct['(loopage)']) {
-            warn('function_loop');
+        if (name) {
+            name.function = that.function;
+        }
+        if (funct.loopage) {
+            that.warn('function_loop');
         }
         switch (next_token.id) {
         case ';':
@@ -3553,11 +3385,11 @@ klass:              do {
             break;
         case '.':
             if (peek().string !== 'bind' || peek(1).id !== '(') {
-                warn('unexpected_a');
+                next_token.warn('unexpected_a');
             }
             break;
         default:
-            stop('unexpected_a');
+            next_token.stop('unexpected_a');
         }
         that.arity = 'function';
         return that;
@@ -3575,14 +3407,17 @@ klass:              do {
         no_space();
         step_out(')', paren);
         one_space();
-        this.block = block(true);
+        this.block = block('if');
         if (next_token.id === 'else') {
+            if (this.block.disrupt) {
+                next_token.warn('unnecessary_else');
+            }
             one_space();
             advance('else');
             one_space();
             this.else = next_token.id === 'if' || next_token.id === 'switch'
                 ? statement(true)
-                : block(true);
+                : block('else');
             if (this.else.disrupt && this.block.disrupt) {
                 this.disrupt = true;
             }
@@ -3597,10 +3432,10 @@ klass:              do {
 // try.third    The finally clause
 // try.block    The try block
 
-        var exception_variable, old_scope, paren;
+        var exception_variable, paren;
         one_space();
         this.arity = 'statement';
-        this.block = block(false);
+        this.block = block('try');
         if (next_token.id === 'catch') {
             one_space();
             advance('catch');
@@ -3610,29 +3445,33 @@ klass:              do {
             step_in('control');
             no_space();
             edge();
-            old_scope = scope;
-            scope = Object.create(old_scope);
-            exception_variable = next_token.string;
-            this.first = exception_variable;
-            if (!next_token.identifier) {
-                warn('expected_identifier_a', next_token);
-            } else {
-                add_label(next_token, 'exception');
-            }
-            advance();
+            exception_variable = next_token;
+            this.first = identifier();
+            define('exception', exception_variable);
+            exception_variable.init = true;
             no_space();
             step_out(')', paren);
             one_space();
-            this.second = block(false);
-            scope = old_scope;
+            this.second = block('catch');
+            if (this.second.length) {
+                if (this.first === 'ignore') {
+                    exception_variable.warn('unexpected_a');
+                }
+            } else {
+                if (this.first !== 'ignore') {
+                    exception_variable.warn('expected_a_b', 'ignore',
+                        exception_variable.string);
+                }
+            }
+            exception_variable.dead = true;
         }
         if (next_token.id === 'finally') {
             one_space();
             advance('finally');
             one_space();
-            this.third = block(false);
+            this.third = block('finally');
         } else if (!this.second) {
-            stop('expected_a_b', next_token, 'catch', artifact());
+            next_token.stop('expected_a_b', 'catch', artifact());
         }
         return this;
     });
@@ -3640,8 +3479,7 @@ klass:              do {
     labeled_stmt('while', function () {
         one_space();
         var paren = next_token;
-        funct['(breakage)'] += 1;
-        funct['(loopage)'] += 1;
+        funct.loopage += 1;
         advance('(');
         step_in('control');
         no_space();
@@ -3649,17 +3487,16 @@ klass:              do {
         this.arity = 'statement';
         this.first = expected_relation(expression(0));
         if (this.first.id !== 'true') {
-            expected_condition(this.first, bundle.unexpected_a);
+            expected_condition(this.first, 'unexpected_a');
         }
         no_space();
         step_out(')', paren);
         one_space();
-        this.block = block(true);
+        this.block = block('while');
         if (this.block.disrupt) {
-            warn('strange_loop', prev_token);
+            prev_token.warn('strange_loop');
         }
-        funct['(breakage)'] -= 1;
-        funct['(loopage)'] -= 1;
+        funct.loopage -= 1;
         return this;
     });
 
@@ -3682,11 +3519,10 @@ klass:              do {
 
         function find_duplicate_case(value) {
             if (are_similar(particular, value)) {
-                warn('duplicate_a', value);
+                value.warn('duplicate_a');
             }
         }
 
-        funct['(breakage)'] += 1;
         one_space();
         advance('(');
         no_space();
@@ -3701,7 +3537,7 @@ klass:              do {
         in_block = true;
         this.second = [];
         if (that.from !== next_token.from && !option.white) {
-            warn('expected_a_at_b_c', next_token, next_token.string, that.from, next_token.from);
+            next_token.warn('expected_a_at_b_c', next_token.string, that.from, next_token.from);
         }
         while (next_token.id === 'case') {
             the_case = next_token;
@@ -3718,7 +3554,7 @@ klass:              do {
                 cases.push(particular);
                 the_case.first.push(particular);
                 if (particular.id === 'NaN') {
-                    warn('unexpected_a', particular);
+                    particular.warn('unexpected_a');
                 }
                 no_space_only();
                 advance(':');
@@ -3738,15 +3574,15 @@ klass:              do {
                         unbroken = false;
                     }
                 } else {
-                    warn('missing_a_after_b', next_token, 'break', 'case');
+                    next_token.warn('missing_a_after_b', 'break', 'case');
                 }
             } else {
-                warn('empty_case');
+                next_token.warn('empty_case');
             }
             this.second.push(the_case);
         }
         if (this.second.length === 0) {
-            warn('missing_a', next_token, 'case');
+            next_token.warn('missing_a', 'case');
         }
         if (next_token.id === 'default') {
             spaces();
@@ -3766,7 +3602,6 @@ klass:              do {
             }
             this.second.push(the_case);
         }
-        funct['(breakage)'] -= 1;
         spaces();
         step_out('}', this);
         in_block = old_in_block;
@@ -3775,20 +3610,19 @@ klass:              do {
 
     stmt('debugger', function () {
         if (!option.debug) {
-            warn('unexpected_a', this);
+            this.warn('unexpected_a');
         }
         this.arity = 'statement';
         return this;
     });
 
     labeled_stmt('do', function () {
-        funct['(breakage)'] += 1;
-        funct['(loopage)'] += 1;
+        funct.loopage += 1;
         one_space();
         this.arity = 'statement';
-        this.block = block(true);
+        this.block = block('do');
         if (this.block.disrupt) {
-            warn('strange_loop', prev_token);
+            prev_token.warn('strange_loop');
         }
         one_space();
         advance('while');
@@ -3798,20 +3632,18 @@ klass:              do {
         step_in();
         no_space();
         edge();
-        this.first = expected_condition(expected_relation(expression(0)), bundle.unexpected_a);
+        this.first = expected_condition(expected_relation(expression(0)), 'unexpected_a');
         no_space();
         step_out(')', paren);
-        funct['(breakage)'] -= 1;
-        funct['(loopage)'] -= 1;
+        funct.loopage -= 1;
         return this;
     });
 
     labeled_stmt('for', function () {
 
-        var blok, filter, ok = false, paren = next_token, value;
+        var blok, filter, master, ok = false, paren = next_token, value;
         this.arity = 'statement';
-        funct['(breakage)'] += 1;
-        funct['(loopage)'] += 1;
+        funct.loopage += 1;
         advance('(');
         if (next_token.id === ';') {
             no_space();
@@ -3820,72 +3652,76 @@ klass:              do {
             advance(';');
             no_space();
             advance(')');
-            blok = block(true);
+            blok = block('for');
         } else {
             step_in('control');
             spaces(this, paren);
             no_space();
             if (next_token.id === 'var') {
-                stop('move_var');
+                next_token.stop('move_var');
             }
             edge();
             if (peek(0).id === 'in') {
                 this.forin = true;
-                value = next_token;
-                switch (funct[value.string]) {
-                case 'unused':
-                    funct[value.string] = 'var';
-                    break;
-                case 'closure':
-                case 'var':
-                    break;
-                default:
-                    warn('bad_in_a', value);
+                value = expression(1000);
+                master = value.master;
+                if (master.kind !== 'var' || master.function !== funct ||
+                        !master.writeable || master.dead) {
+                    value.warn('bad_in_a');
                 }
-                advance();
-                advance('in');
+                master.init = true;
+                master.used -= 1;
                 this.first = value;
+                advance('in');
                 this.second = expression(20);
                 step_out(')', paren);
-                blok = block(true);
+                blok = block('for');
                 if (!option.forin) {
-                    if (blok.length === 1 && typeof blok[0] === 'object' &&
-                            blok[0].string === 'if' && !blok[0].else) {
-                        filter = blok[0].first;
-                        while (filter.id === '&&') {
-                            filter = filter.first;
-                        }
-                        switch (filter.id) {
-                        case '===':
-                        case '!==':
-                            ok = filter.first.id === '['
-                                ? filter.first.first.string === this.second.string &&
-                                    filter.first.second.string === this.first.string
-                                : filter.first.id === 'typeof' &&
-                                    filter.first.first.id === '[' &&
-                                    filter.first.first.first.string === this.second.string &&
-                                    filter.first.first.second.string === this.first.string;
-                            break;
-                        case '(':
-                            ok = filter.first.id === '.' && ((
-                                filter.first.first.string === this.second.string &&
-                                filter.first.second.string === 'hasOwnProperty' &&
-                                filter.second[0].string === this.first.string
-                            ) || (
-                                filter.first.first.id === '.' &&
-                                filter.first.first.first.id === '.' &&
-                                filter.first.first.first.first.string === 'Object' &&
-                                filter.first.first.first.second.string === 'prototype' &&
-                                filter.first.first.second.string === 'hasOwnProperty' &&
-                                filter.first.second.string === 'call' &&
-                                filter.second[0].string === this.second.string &&
-                                filter.second[1].string === this.first.string
-                            ));
-                            break;
+                    if (blok.length === 1 && typeof blok[0] === 'object') {
+                        if (blok[0].id === 'if' && !blok[0].else) {
+                            filter = blok[0].first;
+                            while (filter.id === '&&') {
+                                filter = filter.first;
+                            }
+                            switch (filter.id) {
+                            case '===':
+                            case '!==':
+                                ok = filter.first.id === '['
+                                    ? are_similar(filter.first.first, this.second) &&
+                                        are_similar(filter.first.second, this.first)
+                                    : filter.first.id === 'typeof' &&
+                                        filter.first.first.id === '[' &&
+                                        are_similar(filter.first.first.first, this.second) &&
+                                        are_similar(filter.first.first.second, this.first);
+                                break;
+                            case '(':
+                                ok = filter.first.id === '.' && ((
+                                    are_similar(filter.first.first, this.second) &&
+                                    filter.first.second.string === 'hasOwnProperty' &&
+                                    are_similar(filter.second[0], this.first)
+                                ) || (
+                                    filter.first.first.id === '.' &&
+                                    filter.first.first.first.first &&
+                                    filter.first.first.first.first.string === 'Object' &&
+                                    filter.first.first.first.id === '.' &&
+                                    filter.first.first.first.second.string === 'prototype' &&
+                                    filter.first.first.second.string === 'hasOwnProperty' &&
+                                    filter.first.second.string === 'call' &&
+                                    are_similar(filter.second[0], this.second) &&
+                                    are_similar(filter.second[1], this.first)
+                                ));
+                                break;
+                            }
+                        } else if (blok[0].id === 'switch') {
+                            ok = blok[0].id === 'switch' &&
+                                blok[0].first.id === 'typeof' &&
+                                blok[0].first.first.id === '[' &&
+                                are_similar(blok[0].first.first.first, this.second) &&
+                                are_similar(blok[0].first.first.second, this.first);
                         }
                     }
                     if (!ok) {
-                        warn('for_if', this);
+                        this.warn('for_if');
                     }
                 }
             } else {
@@ -3902,11 +3738,11 @@ klass:              do {
                 edge();
                 this.second = expected_relation(expression(0));
                 if (this.second.id !== 'true') {
-                    expected_condition(this.second, bundle.unexpected_a);
+                    expected_condition(this.second, 'unexpected_a');
                 }
                 semicolon(token);
                 if (next_token.id === ';') {
-                    stop('expected_a_b', next_token, ')', ';');
+                    next_token.stop('expected_a_b', ')', ';');
                 }
                 this.third = [];
                 edge();
@@ -3920,62 +3756,52 @@ klass:              do {
                 no_space();
                 step_out(')', paren);
                 one_space();
-                blok = block(true);
+                blok = block('for');
             }
         }
         if (blok.disrupt) {
-            warn('strange_loop', prev_token);
+            prev_token.warn('strange_loop');
         }
         this.block = blok;
-        funct['(breakage)'] -= 1;
-        funct['(loopage)'] -= 1;
+        funct.loopage -= 1;
         return this;
     });
 
-    disrupt_stmt('break', function () {
-        var label = next_token.string;
-        this.arity = 'statement';
-        if (funct['(breakage)'] === 0) {
-            warn('unexpected_a', this);
-        }
+    function optional_label(that) {
+        var label = next_token.string,
+            master;
+        that.arity = 'statement';
         if (next_token.identifier && token.line === next_token.line) {
             one_space_only();
-            if (funct[label] !== 'label') {
-                warn('not_a_label', next_token);
-            } else if (scope[label].function !== funct) {
-                warn('not_a_scope', next_token);
+            master = scope[label];
+            if (!master || master.kind !== 'label') {
+                next_token.warn('not_a_label');
+            } else if (master.dead || master.function !== funct) {
+                next_token.warn('not_a_scope');
+            } else {
+                master.used += 1;
             }
-            this.first = next_token;
+            that.first = next_token;
             advance();
         }
-        return this;
+        return that;
+
+    }
+
+    disrupt_stmt('break', function () {
+        return optional_label(this);
     });
 
     disrupt_stmt('continue', function () {
         if (!option.continue) {
-            warn('unexpected_a', this);
+            this.warn('unexpected_a');
         }
-        var label = next_token.string;
-        this.arity = 'statement';
-        if (funct['(breakage)'] === 0) {
-            warn('unexpected_a', this);
-        }
-        if (next_token.identifier && token.line === next_token.line) {
-            one_space_only();
-            if (funct[label] !== 'label') {
-                warn('not_a_label', next_token);
-            } else if (scope[label].function !== funct) {
-                warn('not_a_scope', next_token);
-            }
-            this.first = next_token;
-            advance();
-        }
-        return this;
+        return optional_label(this);
     });
 
     disrupt_stmt('return', function () {
         if (funct === global_funct) {
-            warn('unexpected_a', this);
+            this.warn('unexpected_a');
         }
         this.arity = 'statement';
         if (next_token.id !== ';' && next_token.line === token.line) {
@@ -3985,15 +3811,12 @@ klass:              do {
                 one_space_only();
             }
             if (next_token.id === '/' || next_token.id === '(regexp)') {
-                warn('wrap_regexp');
+                next_token.warn('wrap_regexp');
             }
             this.first = expression(0);
             if (this.first.assign) {
-                warn('unexpected_a', this.first);
+                this.first.warn('unexpected_a');
             }
-        }
-        if (peek(0).id === '}' && peek(1).id === 'else') {
-            warn('unexpected_else', this);
         }
         return this;
     });
@@ -4034,21 +3857,21 @@ klass:              do {
     function json_value() {
 
         function json_object() {
-            var brace = next_token, object = {};
+            var brace = next_token, object = Object.create(null);
             advance('{');
             if (next_token.id !== '}') {
                 while (next_token.id !== '(end)') {
                     while (next_token.id === ',') {
-                        warn('unexpected_a', next_token);
+                        next_token.warn('unexpected_a');
                         advance(',');
                     }
                     if (next_token.id !== '(string)') {
-                        warn('expected_string_a');
+                        next_token.warn('expected_string_a');
                     }
                     if (object[next_token.string] === true) {
-                        warn('duplicate_a');
+                        next_token.warn('duplicate_a');
                     } else if (next_token.string === '__proto__') {
-                        warn('dangling_a');
+                        next_token.warn('dangling_a');
                     } else {
                         object[next_token.string] = true;
                     }
@@ -4060,7 +3883,7 @@ klass:              do {
                     }
                     advance(',');
                     if (next_token.id === '}') {
-                        warn('unexpected_a', token);
+                        token.warn('unexpected_a');
                         break;
                     }
                 }
@@ -4074,7 +3897,7 @@ klass:              do {
             if (next_token.id !== ']') {
                 while (next_token.id !== '(end)') {
                     while (next_token.id === ',') {
-                        warn('unexpected_a', next_token);
+                        next_token.warn('unexpected_a');
                         advance(',');
                     }
                     json_value();
@@ -4083,7 +3906,7 @@ klass:              do {
                     }
                     advance(',');
                     if (next_token.id === ']') {
-                        warn('unexpected_a', token);
+                        token.warn('unexpected_a');
                         break;
                     }
                 }
@@ -4111,7 +3934,7 @@ klass:              do {
             advance('(number)');
             break;
         default:
-            stop('unexpected_a');
+            next_token.stop('unexpected_a');
         }
     }
 
@@ -4121,15 +3944,15 @@ klass:              do {
     itself = function JSLint(the_source, the_option) {
 
         var i, predef, tree;
-        JSLINT.errors = [];
-        JSLINT.tree = '';
-        JSLINT.properties = '';
+        itself.errors = [];
+        itself.tree = '';
+        itself.properties = '';
         begin = prev_token = token = next_token =
             Object.create(syntax['(begin)']);
         tokens = [];
-        predefined = {};
+        predefined = Object.create(null);
         add_to_predefined(standard);
-        property = {};
+        property = Object.create(null);
         if (the_option) {
             option = Object.create(the_option);
             predef = option.predef;
@@ -4143,22 +3966,18 @@ klass:              do {
                 }
             }
         } else {
-            option = {};
+            option = Object.create(null);
         }
         option.indent = +option.indent || 4;
         option.maxerr = +option.maxerr || 50;
-        tab = '';
-        for (i = 0; i < option.indent; i += 1) {
-            tab += ' ';
-        }
-        global_scope = scope = {};
+        global_scope = scope = Object.create(null);
         global_funct = funct = {
-            '(scope)': scope,
-            '(breakage)': 0,
-            '(loopage)': 0,
-            '(level)': 0
+            scope: scope,
+            loopage: 0,
+            level: 0
         };
         functions = [funct];
+        block_var = [];
 
         comments = [];
         comments_off = false;
@@ -4168,9 +3987,7 @@ klass:              do {
         lookahead = [];
         node_js = false;
         prereg = true;
-        stack = null;
         strict_mode = false;
-        urls = [];
         var_mode = null;
         warnings = 0;
         lex.init(the_source);
@@ -4180,7 +3997,7 @@ klass:              do {
         try {
             advance();
             if (next_token.id === '(number)') {
-                stop('unexpected_a');
+                next_token.stop('unexpected_a');
             } else {
                 switch (next_token.id) {
                 case '{':
@@ -4203,7 +4020,7 @@ klass:              do {
                     begin.first = tree;
                     itself.tree = begin;
                     if (tree.disrupt) {
-                        warn('weird_program', prev_token);
+                        prev_token.warn('weird_program');
                     }
                 }
             }
@@ -4212,106 +4029,82 @@ klass:              do {
             itself.property = property;
         } catch (e) {
             if (e) {        // ~~
-                JSLINT.errors.push({
+                itself.errors.push({
                     reason    : e.message,
                     line      : e.line || next_token.line,
                     character : e.character || next_token.from
                 }, null);
             }
         }
-        return JSLINT.errors.length === 0;
+        return itself.errors.length === 0;
     };
 
+    function unique(array) {
+        array = array.sort();
+        var i, length = 0, previous, value;
+        for (i = 0; i < array.length; i += 1) {
+            value = array[i];
+            if (value !== previous) {
+                array[length] = value;
+                previous = value;
+                length += 1;
+            }
+        }
+        array.length = length;
+        return array;
+    }
 
 // Data summary.
 
     itself.data = function () {
         var data = {functions: []},
             function_data,
-            globals,
             i,
-            j,
-            kind,
-            name,
             the_function,
-            undef = [],
-            unused = [];
-        if (itself.errors.length) {
-            data.errors = itself.errors;
-        }
+            the_scope;
+        data.errors = itself.errors;
+        data.json = json_mode;
+        data.global = unique(Object.keys(global_scope));
 
-        if (json_mode) {
-            data.json = true;
-        }
-
-        if (urls.length > 0) {
-            data.urls = urls;
-        }
-
-        globals = Object.keys(global_scope).filter(function (value) {
-            return value.charAt(0) !== '(' && typeof standard[value] !== 'boolean';
-        });
-        if (globals.length > 0) {
-            data.globals = globals;
+        function selects(name) {
+            var kind = the_scope[name].kind;
+            switch (kind) {
+            case 'var':
+            case 'exception':
+            case 'label':
+                function_data[kind].push(name);
+                break;
+            }
         }
 
         for (i = 1; i < functions.length; i += 1) {
             the_function = functions[i];
-            function_data = {};
-            for (j = 0; j < functionicity.length; j += 1) {
-                function_data[functionicity[j]] = [];
-            }
-            for (name in the_function) {
-                if (Object.prototype.hasOwnProperty.call(the_function, name)) {
-                    if (name.charAt(0) !== '(') {
-                        kind = the_function[name];
-                        if (kind === 'unction' || kind === 'unparam') {
-                            kind = 'unused';
-                        }
-                        if (Array.isArray(function_data[kind])) {
-                            function_data[kind].push(name);
-                            if (kind === 'unused') {
-                                unused.push({
-                                    name: name,
-                                    line: the_function['(line)'],
-                                    'function': the_function['(name)']
-                                });
-                            } else if (kind === 'undef') {
-                                undef.push({
-                                    name: name,
-                                    line: the_function['(line)'],
-                                    'function': the_function['(name)']
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            for (j = 0; j < functionicity.length; j += 1) {
-                if (function_data[functionicity[j]].length === 0) {
-                    delete function_data[functionicity[j]];
-                }
-            }
-            function_data.name = the_function['(name)'];
-            function_data.params = the_function['(params)'];
-            function_data.line = the_function['(line)'];
-            function_data.level = the_function['(level)'];
+            function_data = {
+                name: the_function.name,
+                line: the_function.line,
+                level: the_function.level,
+                parameter: the_function.parameter,
+                var: [],
+                exception: [],
+                closure: unique(the_function.closure),
+                outer: unique(the_function.outer),
+                global: unique(the_function.global),
+                label: []
+            };
+            the_scope = the_function.scope;
+            Object.keys(the_scope).forEach(selects);
+            function_data.var.sort();
+            function_data.exception.sort();
+            function_data.label.sort();
             data.functions.push(function_data);
-        }
-
-        if (unused.length > 0) {
-            data.unused = unused;
-        }
-        if (undef.length > 0) {
-            data.undefined = undef;
         }
         data.tokens = tokens;
         return data;
     };
 
     itself.error_report = function (data) {
-        var evidence, i, output = [], snippets, warning;
-        if (data.errors) {
+        var evidence, i, output = [], warning;
+        if (data.errors.length) {
             if (data.json) {
                 output.push('<cite>JSON: bad.</cite><br>');
             }
@@ -4333,33 +4126,6 @@ klass:              do {
                 }
             }
         }
-        if (data.unused || data.undefined) {
-            output.push('<dl>');
-            if (data.undefined) {
-                output.push('<dt>undefined</dt><dd>');
-                snippets = [];
-                for (i = 0; i < data.undefined.length; i += 1) {
-                    snippets[i] = '<code>' + data.undefined[i].name +
-                        '</code>&nbsp;<address>' +
-                        data.undefined[i]['function']  + ' ' +
-                        String(data.undefined[i].line) + '</address>';
-                }
-                output.push(snippets.join(', '));
-                output.push('</dd>');
-            }
-            if (data.unused) {
-                output.push('<dt>unused</dt><dd>');
-                snippets = [];
-                for (i = 0; i < data.unused.length; i += 1) {
-                    snippets[i] = '<code>' + data.unused[i].name + '</code>&nbsp;<address>' +
-                        data.unused[i].function  + ' ' +
-                        String(data.unused[i].line) + '</address>';
-                }
-                output.push(snippets.join(', '));
-                output.push('</dd>');
-            }
-            output.push('</dl>');
-        }
         return output.join('');
     };
 
@@ -4367,33 +4133,24 @@ klass:              do {
     itself.report = function (data) {
         var dl, i, j, names, output = [], the_function;
 
-        function detail(h, value) {
-            var comma_needed, singularity;
-            if (Array.isArray(value)) {
+        function detail(h, array) {
+            var comma_needed = false;
+            if (array.length) {
                 output.push("<dt>" + h + "</dt><dd>");
-                value.sort().forEach(function (item) {
-                    if (item !== singularity) {
-                        singularity = item;
-                        output.push((comma_needed ? ', ' : '') + singularity);
-                        comma_needed = true;
-                    }
+                array.forEach(function (item) {
+                    output.push((comma_needed ? ', ' : '') + item);
+                    comma_needed = true;
                 });
                 output.push("</dd>");
-            } else if (value) {
-                output.push("<dt>" + h + "</dt><dd>", value, "</dd>");
             }
         }
 
         output.push('<dl class=level0>');
-        if (data.urls) {
-            detail('url', data.urls);
-            dl = true;
-        }
-        if (data.globals) {
-            detail('global', data.globals);
+        if (data.global.length) {
+            detail('global', data.global);
             dl = true;
         } else if (data.json) {
-            if (!data.errors) {
+            if (!data.errors.length) {
                 output.push("<dt>JSON: good.</dt>");
             }
         } else {
@@ -4418,11 +4175,10 @@ klass:              do {
                     '><address>line ' + String(the_function.line) +
                     '</address>' + the_function.name.entityify() + '(' +
                     names.join(', ') + ')');
-                detail('undefined', the_function.undefined);
-                detail('unused', the_function.unused);
-                detail('closure', the_function.closure);
+                detail('parameter', the_function.parameter);
                 detail('variable', the_function.var);
                 detail('exception', the_function.exception);
+                detail('closure', the_function.closure);
                 detail('outer', the_function.outer);
                 detail('global', the_function.global);
                 detail('label', the_function.label);
@@ -4439,7 +4195,6 @@ klass:              do {
         var i,
             key,
             keys = Object.keys(property).sort(),
-            length,
             mem = '    ',
             name,
             not_first = false,
@@ -4453,7 +4208,6 @@ klass:              do {
                 name = ix.test(key)
                     ? key
                     : '\'' + key.replace(nx, sanitize) + '\'';
-                length += name.length + 2;
                 if (mem.length + name.length >= 80) {
                     output.push(mem);
                     mem = '    ';
@@ -4473,18 +4227,19 @@ klass:              do {
             line,
             result = [],
             thru,
-            token = data.tokens[0];
-        while (token && token.id !== '(end)') {
-            from = token.from;
-            line = token.line;
-            thru = token.thru;
-            level = token.function['(level)'];
+            data_token = data.tokens[0];
+        while (data_token && data_token.id !== '(end)') {
+            from = data_token.from;
+            line = data_token.line;
+            thru = data_token.thru;
+            level = data_token.function.level;
             do {
-                thru = token.thru;
-                token = data.tokens[i];
+                thru = data_token.thru;
+                data_token = data.tokens[i];
                 i += 1;
-            } while (token && token.line === line && token.from - thru < 5 &&
-                    level === token.function['(level)']);
+            } while (data_token && data_token.line === line &&
+                    data_token.from - thru < 5 &&
+                    level === data_token.function.level);
             result.push({
                 line: line,
                 level: level,
@@ -4497,10 +4252,11 @@ klass:              do {
 
     itself.jslint = itself;
 
-    itself.edition = '2013-03-28';
+    itself.edition = '2013-07-22';
 
     return itself;
 }());
 core.JSLint = function JSLint() {
     this.JSLINT = JSLINT;
 };
+
