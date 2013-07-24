@@ -411,16 +411,21 @@ odf.Formatting = function Formatting() {
                 // Expect there to only be a single style for a given family per element (e.g., 1 text, 1 paragraph)
                 var styleName = Object.keys(elementStyleSet[styleFamily])[0],
                     styleElement,
-                    parentStyle;
+                    parentStyle,
+                    displayName;
 
                 styleElement = getStyleElement(styleName, styleFamily);
-
-                parentStyle = getInheritedStyleAttributes(/**@type {!Element}*/(styleElement));
-                mergedChildStyle = mergeRecursive(parentStyle, mergedChildStyle);
+                if (styleElement) {
+                    parentStyle = getInheritedStyleAttributes(/**@type {!Element}*/(styleElement));
+                    mergedChildStyle = mergeRecursive(parentStyle, mergedChildStyle);
+                    displayName = styleElement.getAttributeNS(stylens, 'display-name');
+                } else {
+                    runtime.log("No style element found for '" + styleName + "' of family '" + styleFamily + "'");
+                }
                 mergedChildStyle.orderedStyles.push({
                     name: styleName,
                     family: styleFamily,
-                    displayName: styleElement.getAttributeNS(stylens, 'display-name')
+                    displayName: displayName
                 });
             });
         });
