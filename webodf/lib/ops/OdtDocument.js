@@ -448,27 +448,26 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Iterates through all cursors and checks if they are in
      * walkable positions; if not, move the cursor 1 filtered step backward
      * which guarantees walkable state for all cursors.
-     * @param {!string} localMemberId An event will be raised for this cursor if it is moved
+     * @param {?string} localMemberId An event will be raised for this cursor if it is moved
      */
     this.fixCursorPositions = function(localMemberId) {
-        var cursors, stepCounter, steps, filter, i;
+        var filter = self.getPositionFilter(),
+            memberId, cursor, stepCounter, steps;
 
-        cursors = self.getCursors();
-        filter = self.getPositionFilter();
-
-        for (i in cursors) {
-            if (cursors.hasOwnProperty(i)) {
-                stepCounter = cursors[i].getStepCounter();
+        for (memberId in cursors) {
+            if (cursors.hasOwnProperty(memberId)) {
+                cursor = cursors[memberId];
+                stepCounter = cursor.getStepCounter();
                 if (!stepCounter.isPositionWalkable(filter)) {
                     steps = stepCounter.countStepsToValidPosition(filter);
-                    cursors[i].move(steps);
-                    if (cursors[i].getMemberId() === localMemberId) {
-                        self.emit(ops.OdtDocument.signalCursorMoved, cursors[i]);
+                    cursor.move(steps);
+                    if (memberId === localMemberId) {
+                        self.emit(ops.OdtDocument.signalCursorMoved, cursor);
                     }
-                } else if (cursors[i].getSelectedRange().collapsed) {
+                } else if (self.getCursorSelection(memberId).length === 0) {
                     // call move(0) here to force the cursor to reset its selection to collapsed
                     // and remove the now-unnecessary anchor node
-                    cursors[i].move(0);
+                    cursor.move(0);
                 }
             }
         }

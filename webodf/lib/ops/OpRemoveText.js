@@ -223,7 +223,7 @@ ops.OpRemoveText = function OpRemoveText() {
             return mergeParagraphs(destination, paragraph, collapseRules);
         });
 
-        odtDocument.fixCursorPositions(memberid);
+        odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();
         odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
             paragraphElement: destinationParagraph || paragraphElement,
