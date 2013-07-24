@@ -34,6 +34,7 @@
  */
 /*global gui,ops,core,runtime*/
 
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("gui.UndoManager");
 runtime.loadClass("gui.UndoStateRules");
 
@@ -46,8 +47,10 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     "use strict";
 
     var self = this,
+        cursorns = 'urn:webodf:names:cursor',
+        domUtils = new core.DomUtils(),
         initialDoc,
-        initialState,
+        initialState = [],
         playFunc,
         odtDocument,
         currentUndoState = [],
@@ -82,6 +85,78 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             // has moved backwards and then forwards in time
             undoStates.push(currentUndoState);
         }
+    }
+
+    function removeNode(node) {
+        var sibling = node.previousSibling || node.nextSibling;
+        node.parentNode.removeChild(node);
+        domUtils.normalizeTextNodes(sibling);
+    }
+
+    function removeCursors(root) {
+        domUtils.getElementsByTagNameNS(root, cursorns, "cursor").forEach(removeNode);
+        domUtils.getElementsByTagNameNS(root, cursorns, "anchor").forEach(removeNode);
+    }
+
+    /**
+     * Converts an object hash into an unordered array of its values
+     * @param {!Object} obj
+     * @returns {!Array.<Object>}
+     */
+    function values(obj) {
+        return Object.keys(obj).map(function(key) { return obj[key]; });
+    }
+
+    /**
+     * Reduce the provided undo states to just unique AddCursor followed by
+     * MoveCursor commands for each still-present cursor. This is used when
+     * restoring the original document state at the start of an undo step
+     * @param {!Array.<Array.<!ops.Operation>>} undoStates
+     * @returns {!Array.<!ops.Operation>}
+     */
+    function extractCursorStates(undoStates) {
+        var addCursor = {},
+            moveCursor = {},
+            requiredAddOps = {},
+            remainingAddOps,
+            operations = undoStates.pop();
+
+        odtDocument.getCursors().forEach(function(cursor) {
+            requiredAddOps[cursor.getMemberId()] = true;
+        });
+        remainingAddOps = Object.keys(requiredAddOps).length;
+
+        // Every cursor that is visible on the document will need to be restored
+        // Only need the *last* move or add operation for each visible cursor, as the length & position
+        // are absolute
+        function processOp(op) {
+            var spec = op.spec();
+            if (!requiredAddOps[spec.memberid]) {
+                return;
+            }
+            switch (spec.optype) {
+                case "AddCursor":
+                    if (!addCursor[spec.memberid]) {
+                        addCursor[spec.memberid] = op;
+                        delete requiredAddOps[spec.memberid];
+                        remainingAddOps -= 1;
+                    }
+                    break;
+                case "MoveCursor":
+                    if (!moveCursor[spec.memberid]) {
+                        moveCursor[spec.memberid] = op;
+                    }
+                    break;
+            }
+        }
+
+        while (operations && remainingAddOps > 0) {
+            operations.reverse(); // Want the LAST move/add operation seen
+            operations.forEach(processOp);
+            operations = undoStates.pop();
+        }
+
+        return values(addCursor).concat(values(moveCursor));
     }
 
     /**
@@ -146,15 +221,17 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     this.saveInitialState = function() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer();
         initialDoc = odfContainer.rootElement.cloneNode(true);
-        // Want to catch any initial cursor add operations that are part of initial document setup.
-        // These will not be restored when the DOM is reset on undo, and should
-        // not be able to be undone
-        initialState = [];
+        // The current state may contain cursors if the initial state is modified whilst the document is in edit mode.
+        // To prevent this issue, immediately purge all cursor nodes after cloning
+        removeCursors(initialDoc);
         completeCurrentUndoState();
-        undoStates.forEach(function(state) {
-            initialState = initialState.concat(state);
-        });
-        currentUndoState = initialState;
+        // This is the only time the initialState should ever end up on the undo stack
+        // Random important point: the initialState will *always* contain the most recent cursor positions,
+        // hence why it is safe to call this method multiple times
+        undoStates.unshift(initialState);
+        // We just threw away the cursors in the snapshot, so need to recover all these operations so the
+        // cursor can be re-inserted when an undo is performed
+        currentUndoState = initialState = extractCursorStates(undoStates);
         undoStates.length = 0;
         redoStates.length = 0;
         emitStackChange();
