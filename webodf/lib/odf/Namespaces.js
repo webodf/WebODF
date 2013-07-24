@@ -52,6 +52,7 @@ odf.Namespaces = (function () {
         /**@const@type {!string}*/ tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         /**@const@type {!string}*/ dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
+        /**@const@type {!string}*/ numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         /**@const@type {!string}*/ xlinkns = 'http://www.w3.org/1999/xlink',
         /**@const@type {!string}*/ xmlns = "http://www.w3.org/XML/1998/namespace",
 
@@ -66,6 +67,7 @@ odf.Namespaces = (function () {
         "table": tablens,
         "text": textns,
         "dr3d": dr3dns,
+        "numberns": numberns,
         "xlink": xlinkns,
         "xml": xmlns
     },
@@ -117,6 +119,7 @@ odf.Namespaces = (function () {
     /**@const@type {!string}*/ namespaces.tablens = tablens;
     /**@const@type {!string}*/ namespaces.textns = textns;
     /**@const@type {!string}*/ namespaces.dr3dns = dr3dns;
+    /**@const@type {!string}*/ namespaces.numberns = numberns;
     /**@const@type {!string}*/ namespaces.xlinkns = xlinkns;
     /**@const@type {!string}*/ namespaces.xmlns = xmlns;
 

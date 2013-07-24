@@ -51,6 +51,7 @@ odf.Formatting = function Formatting() {
         /**@const@type {!string}*/ svgns = odf.Namespaces.svgns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
+        /**@const@type {!string}*/ numberns = odf.Namespaces.numberns,
         odfUtils = new odf.OdfUtils();
 
     /**
@@ -207,6 +208,7 @@ odf.Formatting = function Formatting() {
      */
     function getStyleElement(styleName, family, styleElements) {
         var node,
+            nodeStyleName,
             styleListElement;
 
         styleElements = styleElements || [odfContainer.rootElement.automaticStyles, odfContainer.rootElement.styles];
@@ -214,17 +216,23 @@ odf.Formatting = function Formatting() {
         while (styleListElement) {
             node = styleListElement.firstChild;
             while (node) {
+                nodeStyleName = node.getAttributeNS(stylens, 'name');
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     if (node.namespaceURI === stylens
                             && node.localName === "style"
                             && node.getAttributeNS(stylens, 'family') === family
-                            && node.getAttributeNS(stylens, 'name') === styleName) {
+                            && nodeStyleName === styleName) {
                         return node;
                     }
                     if(family === "list-style"
                         && node.namespaceURI === textns
                         && node.localName === "list-style"
-                        && node.getAttributeNS(stylens, 'name') === styleName) {
+                        && nodeStyleName === styleName) {
+                        return node;
+                    }
+                    if(family === "data"
+                        && node.namespaceURI === numberns
+                        && nodeStyleName === styleName) {
                         return node;
                     }
                 }
