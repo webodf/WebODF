@@ -94,17 +94,19 @@ ops.OpInsertText = function OpInsertText() {
 
     this.execute = function (odtDocument) {
         var domPosition,
-            textNode,
-            texts = text.split(" "),
-            offset,
-            length,
-            space,
             previousNode,
             parent,
             refNode,
             ownerDocument = odtDocument.getRootNode().ownerDocument,
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            space = " ",
+            tab = "\t",
+            append = true,
+            startIndex = 0,
+            textToInsert,
+            spaceTag,
+            node,
             i;
 
         domPosition = odtDocument.getPositionInTextNode(position, memberid);
@@ -112,22 +114,37 @@ ops.OpInsertText = function OpInsertText() {
             previousNode = domPosition.textNode;
             parent = previousNode.parentNode;
             refNode = previousNode.nextSibling;
-
-            offset = domPosition.offset;
             paragraphElement = odtDocument.getParagraphElement(previousNode);
 
-            if (offset !== previousNode.length) {
-                refNode = previousNode.splitText(offset);
+            if (domPosition.offset !== previousNode.length) {
+                refNode = previousNode.splitText(domPosition.offset);
             }
-            if (texts[0].length > 0) {
-                previousNode.appendData(texts[0]);
+
+            for (i=0; i<text.length; i+=1) {
+                if (text[i] === space || text[i] === tab) {
+                    if (startIndex < i) {
+                        textToInsert = text.substring(startIndex, i);
+                        if (append) {
+                            previousNode.appendData(textToInsert);
+                        } else {
+                            parent.insertBefore(ownerDocument.createTextNode(textToInsert), refNode);
+                        }
+                    }
+                    startIndex = i+1;
+                    append = false;
+
+                    spaceTag = text[i] === space ? "text:s" : "text:tab";
+                    node = ownerDocument.createElementNS(textns, spaceTag);
+                    node.appendChild(ownerDocument.createTextNode(text[i]));
+                    parent.insertBefore(node, refNode);
+                }
             }
-            for (i = 1; i < texts.length; i += 1) {
-                space = ownerDocument.createElementNS(textns, 'text:s');
-                space.appendChild(ownerDocument.createTextNode(' '));
-                parent.insertBefore(space, refNode);
-                if (texts[i].length > 0) {
-                    parent.insertBefore(ownerDocument.createTextNode(texts[i]), refNode);
+            textToInsert = text.substring(startIndex);
+            if (textToInsert.length > 0) {
+                if (append) {
+                    previousNode.appendData(textToInsert);
+                } else {
+                    parent.insertBefore(ownerDocument.createTextNode(textToInsert), refNode);
                 }
             }
 

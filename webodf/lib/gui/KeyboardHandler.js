@@ -142,6 +142,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
 
 /**@const*/gui.KeyboardHandler.KeyCode = {
     Backspace: 8,
+    Tab: 9,
     Enter: 13,
     End: 35,
     Home: 36,

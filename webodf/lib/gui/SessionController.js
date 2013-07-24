@@ -943,6 +943,10 @@ gui.SessionController = (function () {
                 modifier = gui.KeyboardHandler.Modifier,
                 keyCode = gui.KeyboardHandler.KeyCode;
 
+            keyDownHandler.bind(keyCode.Tab, modifier.None, function () {
+                insertText("\t");
+                return true;
+            });
             keyDownHandler.bind(keyCode.Left, modifier.None, moveCursorToLeft);
             keyDownHandler.bind(keyCode.Right, modifier.None, moveCursorToRight);
             keyDownHandler.bind(keyCode.Up, modifier.None, moveCursorUp);
@@ -993,16 +997,9 @@ gui.SessionController = (function () {
 
             // the default action is to insert text into the document
             keyPressHandler.setDefault(function (e) {
-                var text = stringFromKeyPress(e),
-                    op;
+                var text = stringFromKeyPress(e);
                 if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
-                    op = new ops.OpInsertText();
-                    op.init({
-                        memberid: inputMemberId,
-                        position: odtDocument.getCursorPosition(inputMemberId),
-                        text: text
-                    });
-                    session.enqueue(op);
+                    insertText(text);
                     return true;
                 }
                 return false;

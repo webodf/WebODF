@@ -213,6 +213,20 @@
   </ops>
   <after><office:text><text:p>a<text:s> </text:s>b</text:p></office:text></after>
  </test>
+ <test name="InsertTab">
+  <before><office:text><text:p/></office:text></before>
+   <ops>
+    <op optype="InsertText" position="0" text="&#x9;"/>
+   </ops>
+  <after><office:text><text:p><text:tab>&#09;</text:tab></text:p></office:text></after>
+ </test>
+ <test name="InsertText_TabSpaceChars">
+  <before><office:text><text:p/></office:text></before>
+   <ops>
+    <op optype="InsertText" position="0" text="a b&#x9;c"/>
+   </ops>
+  <after><office:text><text:p>a<text:s> </text:s>b<text:tab>&#09;</text:tab>c</text:p></office:text></after>
+ </test>
  <test name="RemoveCharacter">
   <before><office:text><text:p>A</text:p></office:text></before>
   <ops>
