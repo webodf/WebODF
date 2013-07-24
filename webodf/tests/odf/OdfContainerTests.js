@@ -65,17 +65,22 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             });
         });
     }
+/*
     function compareZipEntryList(odf1path, odf2path, callback) {
-        var z1 = new core.Zip(odf1path, function (e, z1) {
-            var z2 = new core.Zip(odf2path, function (e, z2) {
+        var z1 = new core.Zip(odf1path, function (err, z1) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            var z2 = new core.Zip(odf2path, function (err, z2) {
+                t.err = err;
+                r.shouldBeNull(t, "t.err");
+                r.shouldBe(t, "t.e1", "t.e2.length");
                 t.e1 = z1.getEntries();
                 t.e2 = z2.getEntries();
                 r.shouldBe(t, "t.e1.length", "t.e2.length");
-                var i, j, f1, date1;
+                var i, j, f1;
                 t.allPresent = true;
                 for (i = 0; t.allPresent && i < t.e1.length; i += 1) {
                     f1 = t.e1[i].filename;
-                    date1 = t.e1[i].date;
                     j = 0;
                     while (t.e2[j].filename !== f1 && j < t.e2.length) {
                         j += 1;
@@ -94,7 +99,9 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
                 r.shouldBe(t, "t.allPresent", "true");
                 callback();
             });
+            return z2;
         });
+        return z1;
     }
     function compare(odf1, odf2, odf1path, odf2path, callback) {
         compareZipEntryList(odf1path, odf2path, callback);
@@ -116,6 +123,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             });
         });
     }
+*/
     this.tests = function () {
         return [
             createNew

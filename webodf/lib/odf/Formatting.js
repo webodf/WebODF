@@ -344,8 +344,10 @@ odf.Formatting = function Formatting() {
             styleElement;
 
         // first look for automatic style with the name
-        while ((styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList])) !== null) {
+        styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList]);
+        while (styleElement) {
             styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
+            styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList]);
         }
         // then see if that style is in named styles
         styleElement = getStyleElement(styleName, "paragraph", [styleElementList]);

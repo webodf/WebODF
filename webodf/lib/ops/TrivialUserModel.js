@@ -67,6 +67,7 @@ ops.TrivialUserModel = function TrivialUserModel() {
         subscriber(memberId, users[userid]||null);
     };
 
+/*jslint emptyblock: true, unparam: true*/
     /**
      * getUserDetailsAndUpdates subscribes a callback for updates on user details.
      * this function undoes this subscription.

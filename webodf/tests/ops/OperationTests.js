@@ -124,7 +124,6 @@ ops.OperationTests = function OperationTests(runner) {
             opsElement = before.nextElementSibling,
             after = opsElement.nextElementSibling,
             ops = [],
-            test = {},
             op;
         runtime.assert(before.localName === "before", "Expected <before/> in " + name + ".");
         runtime.assert(checkWhitespace(before, "s", " "), "Unexpanded text:s element or text:c attribute found in " + name + ".");
@@ -290,11 +289,11 @@ ops.OperationTests = function OperationTests(runner) {
     }
 
     function loadTestFiles(urls) {
-        var tests = {}, i;
+        var optests = {}, i;
         for (i = 0; i < urls.length; i += 1) {
-            loadTests(urls[i], tests);
+            loadTests(urls[i], optests);
         }
-        return tests;
+        return optests;
     }
 
     this.setUp = function () {

@@ -42,8 +42,7 @@
  */
 ops.EditInfo = function EditInfo(container, odtDocument) {
     "use strict";
-    var self = this,
-        /**@type {Element}*/
+    var /**@type {Element}*/
         editInfoNode,
         /**@type {!Object.<string,{time:Date}>}*/
         editHistory = {};

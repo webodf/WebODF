@@ -262,8 +262,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/xmldom/RelaxNGParser.js
     lib/xmldom/RelaxNG.js
     lib/xmldom/RelaxNG2.js
-    lib/xmldom/OperationalTransformInterface.js
-    lib/xmldom/OperationalTransformDOM.js
     lib/xmldom/XPath.js
 
     lib/odf/OdfNodeFilter.js

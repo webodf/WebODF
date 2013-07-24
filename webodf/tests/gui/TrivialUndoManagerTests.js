@@ -56,8 +56,9 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
      */
     function AdaptiveMock(rootElement) {
         var self = this;
-
+/*jslint emptyblock: true*/
         function noOp() { }
+/*jslint emptyblock: false*/
         function returnThis() { return self; }
         this.rootElement = rootElement;
 

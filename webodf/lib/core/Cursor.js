@@ -61,8 +61,7 @@ runtime.loadClass("core.DomUtils");
  */
 core.Cursor = function Cursor(document, memberId) {
     "use strict";
-    var self = this,
-        cursorns = 'urn:webodf:names:cursor',
+    var cursorns = 'urn:webodf:names:cursor',
         /**@type{!Element}*/
         cursorNode = document.createElementNS(cursorns, 'cursor'),
         /**@type{!Element}*/

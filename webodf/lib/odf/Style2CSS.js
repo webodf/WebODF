@@ -517,10 +517,9 @@ odf.Style2CSS = function Style2CSS() {
                 if (fontSize.unit !== '%') {
                     fontSizeRule = 'font-size: ' + (fontSize.value * sizeMultiplier) + fontSize.unit + ';';
                     break;
-                } else {
-                // If we got a % font size for the current style, then update the multiplier with it's 'normalized' multiplier
-                    sizeMultiplier *= (fontSize.value / 100);
                 }
+                // If we got a % font size for the current style, then update the multiplier with it's 'normalized' multiplier
+                sizeMultiplier *= (fontSize.value / 100);
             }
             // Crawl up the style ancestry
             parentStyle = getParentStyleNode(parentStyle);
@@ -573,9 +572,11 @@ odf.Style2CSS = function Style2CSS() {
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
         var result,
             shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+/*jslint unparam: true*/
         hex = hex.replace(shorthandRegex, function (m, r, g, b) {
             return r + r + g + g + b + b;
         });
+/*jslint unparam: false*/
 
         result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
@@ -748,10 +749,9 @@ odf.Style2CSS = function Style2CSS() {
         return "content: " + content + ";";
     }
     /**
-     * @param {!Element} node
      * @return {!string}
      */
-    function getImageRule(node) {
+    function getImageRule() {
         var rule = "content: none;";
         return rule;
     }
@@ -837,8 +837,6 @@ odf.Style2CSS = function Style2CSS() {
         var rule = '', imageProps, url, element,
             contentLayoutRule = '',
             pageSizeRule = '',
-            height,
-            width,
             props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0],
             masterStyles = props.parentNode.parentNode.parentNode.masterStyles,
             masterPages,
@@ -901,15 +899,6 @@ odf.Style2CSS = function Style2CSS() {
         }
 
     }
-    /**
-     * @param {!Element} props
-     * @return {!string}
-     */
-    function getPageSizeProperties(props) {
-        var rule = '';
-        rule += applySimpleMapping(props, pageSizePropertySimpleMapping);
-        return rule;
-    }
 
     /**
      * @param {!StyleSheet} sheet
@@ -926,7 +915,7 @@ odf.Style2CSS = function Style2CSS() {
                     itemrule = getNumberRule(e);
                     addListStyleRule(sheet, name, e, itemrule);
                 } else if (n.localName === "list-level-style-image") {
-                    itemrule = getImageRule(e);
+                    itemrule = getImageRule();
                     addListStyleRule(sheet, name, e, itemrule);
                 } else if (n.localName === "list-level-style-bullet") {
                     itemrule = getBulletRule(e);
@@ -983,7 +972,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {undefined}
      */
     this.style2css = function (doctype, stylesheet, fontFaceMap, styles, autostyles) {
-        var doc, prefix, styletree, tree, name, rule, family,
+        var doc, styletree, tree, name, rule, family,
             stylenodes, styleautonodes;
         // make stylesheet empty
         while (stylesheet.cssRules.length) {
@@ -1007,7 +996,7 @@ odf.Style2CSS = function Style2CSS() {
             rule = '@namespace ' + prefix + ' url(' + ns + ');';
             try {
                 stylesheet.insertRule(rule, stylesheet.cssRules.length);
-            } catch (e) {
+            } catch (ignore) {
                 // WebKit can throw an exception here, but it will have
                 // retained the namespace declarations anyway.
             }

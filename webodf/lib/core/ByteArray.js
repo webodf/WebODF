@@ -50,19 +50,21 @@ core.ByteArray = function ByteArray(data) {
      * @return {number}
      */
     this.readUInt32LE = function () {
-        var data = this.data,
-            pos = (this.pos += 4);
-        return (data[--pos] << 24) |
-            (data[--pos] << 16) |
-            (data[--pos] <<  8) |
-            data[--pos];
+        this.pos += 4;
+        var d = this.data,
+            pos = this.pos;
+        return (d[--pos] << 24) |
+            (d[--pos] << 16) |
+            (d[--pos] <<  8) |
+            d[--pos];
     };
     /**
      * @return {number}
      */
     this.readUInt16LE = function () {
-        var data = this.data,
-            pos = (this.pos += 2);
-        return (data[--pos] << 8) | data[--pos];
+        this.pos += 2;
+        var d = this.data,
+            pos = this.pos;
+        return (d[--pos] << 8) | d[--pos];
     };
 };

@@ -106,9 +106,9 @@ ops.NowjsUserModel = function NowjsUserModel() {
         var userId = userIdFromMemberId(memberId),
             /**@type{Object}*/
             userData = cachedUserData[userId],
-            subscribers = memberDataSubscribers[userId] =
-                memberDataSubscribers[userId] || [],
+            subscribers = memberDataSubscribers[userId] || [],
             i;
+        memberDataSubscribers[userId] = subscribers;
 
         runtime.assert(subscriber !== undefined, "missing callback");
 

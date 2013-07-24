@@ -51,21 +51,21 @@ xmldom.XPathTests = function XPathTests(runner) {
             presentationns = odf.Namespaces.presentationns,
             textns = odf.Namespaces.textns,
             doc = runtime.getDOMImplementation().createDocument("", "a", null),
-            r = doc.documentElement,
+            d = doc.documentElement,
             fontFace = doc.createElementNS(stylens, "font-face"),
             fontFaceSrc = doc.createElementNS(svgns, "font-face-src"),
             drawFrame = doc.createElementNS(drawns, "frame"),
             p = doc.createElementNS(textns, "p");
-        r.appendChild(p);
-        r.appendChild(fontFace);
+        d.appendChild(p);
+        d.appendChild(fontFace);
         fontFace = doc.createElementNS(stylens, "font-face");
         fontFace.appendChild(fontFaceSrc);
         fontFaceSrc.setAttributeNS(textns, "anchor-type", "paragraph");
-        r.appendChild(fontFace);
-        r.appendChild(drawFrame);
+        d.appendChild(fontFace);
+        d.appendChild(drawFrame);
         drawFrame = doc.createElementNS(drawns, "frame");
         drawFrame.setAttributeNS(presentationns, "class", "title");
-        r.appendChild(drawFrame);
+        d.appendChild(drawFrame);
 
         t = { doc: doc, fontFace: fontFace, drawFrame: drawFrame };
     }

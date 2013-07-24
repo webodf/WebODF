@@ -49,6 +49,7 @@ core.ZipTests = function ZipTests(runner) {
             r.shouldBeNonNull(t, "t.err");
             callback();
         });
+        return zip;
     }
 
     function testNonZipFile(callback) {
@@ -58,7 +59,7 @@ core.ZipTests = function ZipTests(runner) {
             t.exists = exists;
             r.shouldBe(t, "t.exists", "true");
             // check that zip file opening returns an error
-            var zip = new core.Zip("core/ZipTests.js", function (err) {
+            t.zip = new core.Zip("core/ZipTests.js", function (err) {
                 t.err = err;
                 r.shouldBeNonNull(t, "t.err");
                 callback();
@@ -67,7 +68,7 @@ core.ZipTests = function ZipTests(runner) {
     }
 
     function testHi(path, callback) {
-        var zip = new core.Zip(path, function (err, zip) {
+        t.zip = new core.Zip(path, function (err, zip) {
             t.err = err;
             t.zip = zip;
             r.shouldBeNull(t, "t.err");
@@ -109,7 +110,7 @@ core.ZipTests = function ZipTests(runner) {
             zip.write(function (err) {
                 t.err = err;
                 r.shouldBeNull(t, "t.err");
-                runtime.deleteFile(filename, function (err) {
+                runtime.deleteFile(filename, function () {
                     callback();
                 });
             });

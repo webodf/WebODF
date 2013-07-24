@@ -51,9 +51,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
     "use strict";
     var start,
         validateNonEmptyPattern,
-        nsmap,
-        depth = 0,
-        p = "                                                                ";
+        nsmap;
 
     /**
      * @constructor
@@ -175,14 +173,12 @@ xmldom.RelaxNG2 = function RelaxNG2() {
      * error occurred, the walker is at the same depth in the dom tree.
      * @param elementdef
      * @param walker
-     * @param {Element} element
      * @return {Array.<RelaxNGParseError>}
      */
-    function validateElement(elementdef, walker, element) {
+    function validateElement(elementdef, walker) {
         if (elementdef.e.length !== 2) {
             throw "Element with wrong # of elements: " + elementdef.e.length;
         }
-        depth += 1;
         // forward until an element is seen, then check the name
         var /**@type{Node}*/ node = walker.currentNode,
             /**@type{number}*/ type = node ? node.nodeType : 0,
@@ -192,7 +188,6 @@ xmldom.RelaxNG2 = function RelaxNG2() {
             if (type !== Node.COMMENT_NODE &&
                     (type !== Node.TEXT_NODE ||
                      !/^\s+$/.test(walker.currentNode.nodeValue))) {
-                depth -= 1;
                 return [new RelaxNGParseError("Not allowed node of type " +
                         type + ".")];
             }
@@ -200,12 +195,10 @@ xmldom.RelaxNG2 = function RelaxNG2() {
             type = node ? node.nodeType : 0;
         }
         if (!node) {
-            depth -= 1;
             return [new RelaxNGParseError("Missing element " +
                     elementdef.names)];
         }
         if (elementdef.names && elementdef.names.indexOf(qName(node)) === -1) {
-            depth -= 1;
             return [new RelaxNGParseError("Found " + node.nodeName +
                     " instead of " + elementdef.names + ".", node)];
         }
@@ -217,19 +210,16 @@ xmldom.RelaxNG2 = function RelaxNG2() {
             while (walker.nextSibling()) {
                 type = walker.currentNode.nodeType;
                 if (!isWhitespace(walker.currentNode) && type !== Node.COMMENT_NODE) {
-                    depth -= 1;
                     return [new RelaxNGParseError("Spurious content.",
                             walker.currentNode)];
                 }
             }
             if (walker.parentNode() !== node) {
-                depth -= 1;
                 return [new RelaxNGParseError("Implementation error.")];
             }
         } else {
             error = validateTop(elementdef.e[1], walker, node);
         }
-        depth -= 1;
         // move to the next node
         node = walker.nextSibling();
         return error;
@@ -339,6 +329,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
         return validateNonEmptyPattern(elementdef.e[0], walker, element) ||
             validateNonEmptyPattern(elementdef.e[1], walker, element);
     }
+/*jslint unparam: true*/
     /**
      * @param elementdef
      * @param walker
@@ -347,8 +338,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
      */
     function validateText(elementdef, walker, element) {
         var /**@type{Node}*/ node = walker.currentNode,
-            /**@type{number}*/ type = node ? node.nodeType : 0,
-            error = null;
+            /**@type{number}*/ type = node ? node.nodeType : 0;
         // find the next element, skip text nodes with only whitespace
         while (node !== element && type !== 3) {
             if (type === 1) {
@@ -362,6 +352,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
         walker.nextSibling();
         return null;
     }
+/*jslint unparam: false*/
     /**
      * @param elementdef
      * @param walker
@@ -386,7 +377,7 @@ xmldom.RelaxNG2 = function RelaxNG2() {
         } else if (name === "attribute") {
             err = validateAttribute(elementdef, walker, element);
         } else if (name === "element") {
-            err = validateElement(elementdef, walker, element);
+            err = validateElement(elementdef, walker);
         } else if (name === "oneOrMore") {
             err = validateOneOrMore(elementdef, walker, element);
         } else if (name === "choice") {

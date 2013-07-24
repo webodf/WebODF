@@ -33,6 +33,7 @@
  */
 
 /*global ops*/
+/*jslint emptyblock: true, unparam: true*/
 
 /*
  * this thing might feel a bit more at home in a namespaces

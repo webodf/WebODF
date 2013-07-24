@@ -40,7 +40,7 @@ runtime.loadClass("gui.XMLEdit");
  */
 gui.XMLEditTests = function XMLEditTests(runner) {
     "use strict";
-    var t, r = runner, tests;
+    var t, r = runner;
 
     function checkWalker(node, count, endpos) {
         t = {};
@@ -144,7 +144,7 @@ gui.XMLEditTests = function XMLEditTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [ testSimpleDocument ];
+        return [ testSimpleDocument, testXmlEdit ];
     };
     this.asyncTests = function () {
         return [];

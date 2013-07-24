@@ -107,13 +107,15 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
 
     function splitQNames(def) {
         var i, l = (def.names) ? def.names.length : 0, name,
-            localnames = def.localnames = [l],
-            namespaces = def.namespaces = [l];
+            localnames = [],
+            namespaces = [];
         for (i = 0; i < l; i += 1) {
             name = splitQName(def.names[i]);
             namespaces[i] = name[0];
             localnames[i] = name[1];
         }
+        def.localnames = localnames;
+        def.namespaces = namespaces;
     }
 
     /**
@@ -395,7 +397,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     }
 
     function resolveElements(def, elements) {
-        var i = 0, e, name;
+        var i = 0, e;
         while (def.e && i < def.e.length) {
             e = def.e[i];
             if (e.name === "elementref") {

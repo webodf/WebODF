@@ -92,6 +92,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         return moved;
     };
 
+/*jslint emptyblock: true*/
     /**
      * Is called whenever the cursor is moved around manually.
      * Set this property to another function that should be called,
@@ -100,6 +101,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      */
     this.handleUpdate = function () {
     };
+/*jslint emptyblock: false*/
     this.getStepCounter = function () {
         return selectionMover.getStepCounter();
     };

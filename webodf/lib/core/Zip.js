@@ -135,7 +135,6 @@ core.Zip = function Zip(url, entriesReadCallback) {
             /**@const@type{!number}*/ compressedSize,
             /**@const@type{!number}*/ uncompressedSize,
             /**@const@type{!number}*/ offset,
-            /**@const@type{!number}*/ crc,
             /**@const@type{!ZipEntry}*/ entry = this;
 
         /**
@@ -144,22 +143,22 @@ core.Zip = function Zip(url, entriesReadCallback) {
          * @return {undefined}
          */
         function handleEntryData(data, callback) {
-            var /**@const@type{!core.ByteArray}*/ stream
+            var /**@const@type{!core.ByteArray}*/ estream
                         = new core.ByteArray(data),
-                /**@const@type{!number}*/ sig = stream.readUInt32LE(),
+                /**@const@type{!number}*/ esig = estream.readUInt32LE(),
                 /**@const@type{!number}*/ filenamelen,
-                /**@const@type{!number}*/ extralen;
-            if (sig !== 0x04034b50) {
-                callback('File entry signature is wrong.' + sig.toString() +
+                /**@const@type{!number}*/ eextralen;
+            if (esig !== 0x04034b50) {
+                callback('File entry signature is wrong.' + esig.toString() +
                         ' ' + data.length.toString(), null);
                 return;
             }
-            stream.pos += 22;
-            filenamelen = stream.readUInt16LE();
-            extralen = stream.readUInt16LE();
-            stream.pos += filenamelen + extralen;
+            estream.pos += 22;
+            filenamelen = estream.readUInt16LE();
+            eextralen = estream.readUInt16LE();
+            estream.pos += filenamelen + eextralen;
             if (compressionMethod) {
-                data = data.slice(stream.pos, stream.pos + compressedSize);
+                data = data.slice(estream.pos, estream.pos + compressedSize);
                 if (compressedSize !== data.length) {
                     callback("The amount of compressed bytes read was " +
                         data.length.toString() + " instead of " +
@@ -169,7 +168,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
                 }
                 data = inflate(data, uncompressedSize);
             } else {
-                data = data.slice(stream.pos, stream.pos + uncompressedSize);
+                data = data.slice(estream.pos, estream.pos + uncompressedSize);
             }
             if (uncompressedSize !== data.length) {
                 callback("The amount of bytes read was " +
@@ -250,7 +249,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         stream.pos += 6;
         compressionMethod = stream.readUInt16LE();
         this.date = dosTime2Date(stream.readUInt32LE());
-        crc = stream.readUInt32LE();
+        stream.readUInt32LE();
         compressedSize = stream.readUInt32LE();
         uncompressedSize = stream.readUInt32LE();
         namelen = stream.readUInt16LE();
@@ -340,7 +339,6 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function load(filename, callback) {
         var entry = null,
-            end = filesize,
             e,
             i;
         for (i = 0; i < entries.length; i += 1) {
@@ -398,7 +396,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             var /**@const@type{!Runtime.ByteArray}*/p = data,
                 chunksize = 45000, // must be multiple of 3 and less than 50000
                 i = 0,
-                url;
+                dataurl;
             if (!mimetype) {
                 if (p[1] === 0x50 && p[2] === 0x4E && p[3] === 0x47) {
                     mimetype = "image/png";
@@ -410,16 +408,16 @@ core.Zip = function Zip(url, entriesReadCallback) {
                     mimetype = "";
                 }
             }
-            url = 'data:' + mimetype + ';base64,';
+            dataurl = 'data:' + mimetype + ';base64,';
             // to avoid exceptions, base64 encoding is done in chunks
             // it would make sense to move this to base64.toBase64
             while (i < data.length) {
-                url += base64.convertUTF8ArrayToBase64(
+                dataurl += base64.convertUTF8ArrayToBase64(
                     p.slice(i, Math.min(i + chunksize, p.length))
                 );
                 i += chunksize;
             }
-            callback(null, url);
+            callback(null, dataurl);
         });
     }
     function loadAsDOM(filename, callback) {

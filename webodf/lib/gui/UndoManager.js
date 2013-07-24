@@ -34,6 +34,7 @@
  */
 
 /*global ops, gui*/
+/*jslint emptyblock: true, unparam: true*/
 
 /**
  * @interface

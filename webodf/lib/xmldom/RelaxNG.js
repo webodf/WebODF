@@ -79,7 +79,7 @@ xmldom.RelaxNG = function RelaxNG() {
             hash: "empty",
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function () { return notAllowed; },
-            attDeriv: function (context, attribute) { return notAllowed; },
+            attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return empty; },
             endTagDeriv: function () { return notAllowed; }
         },
@@ -402,7 +402,7 @@ xmldom.RelaxNG = function RelaxNG() {
                 }
                 return notAllowed;
             },
-            attDeriv: function (context, attribute) { return notAllowed; },
+            attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return this; }
         };
     }
@@ -431,11 +431,12 @@ xmldom.RelaxNG = function RelaxNG() {
             type: "list",
             nullable: false,
             hash: "list",
-            textDeriv: function (context, text) {
+            textDeriv: function () {
                 return empty;
             }
         };
     }
+/*jslint unparam: true*/
     createValue = memoize1arg("value", function (value) {
         return {
             type: "value",
@@ -448,6 +449,7 @@ xmldom.RelaxNG = function RelaxNG() {
             startTagCloseDeriv: function () { return this; }
         };
     });
+/*jslint unparam: false*/
     createData = memoize1arg("data", function (type) {
         return {
             type: "data",
@@ -458,13 +460,6 @@ xmldom.RelaxNG = function RelaxNG() {
             startTagCloseDeriv: function () { return this; }
         };
     });
-    function createDataExcept() {
-        return {
-            type: "dataExcept",
-            nullable: false,
-            hash: "dataExcept"
-        };
-    }
     applyAfter = function applyAfter(f, p) {
         var result;
         if (p.type === "after") {
@@ -502,7 +497,6 @@ xmldom.RelaxNG = function RelaxNG() {
     function childrenDeriv(context, pattern, walker) {
         var element = walker.currentNode,
             childNode = walker.firstChild(),
-            numberOfTextNodes = 0,
             childNodes = [],
             i,
             p;
@@ -513,7 +507,6 @@ xmldom.RelaxNG = function RelaxNG() {
             } else if (childNode.nodeType === Node.TEXT_NODE &&
                     !/^\s*$/.test(childNode.nodeValue)) {
                 childNodes.push(childNode.nodeValue);
-                numberOfTextNodes += 1;
             }
             childNode = walker.nextSibling();
         }
@@ -585,10 +578,10 @@ xmldom.RelaxNG = function RelaxNG() {
             result = {
                 hash: hash,
                 contains: function (node) {
-                    var i;
-                    for (i = 0; i < name.length; i += 1) {
-                        if (name[i] === node.localName &&
-                                ns[i] === node.namespaceURI) {
+                    var j;
+                    for (j = 0; j < name.length; j += 1) {
+                        if (name[j] === node.localName &&
+                                ns[j] === node.namespaceURI) {
                             return true;
                         }
                     }

@@ -300,7 +300,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         }
     }
     function testSplitTextNodes() {
-        var i, xml, n, s = new xmldom.LSSerializer();
+        var i, xml, n;
         for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
             t.doc = runtime.parseXML(xml.x);

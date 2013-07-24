@@ -31,6 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, core*/
+/*jslint emptyblock: true, unparam: true*/
 runtime.loadClass("core.PositionIterator");
 /**
  * @interface

@@ -41,7 +41,7 @@ odf.CommandLineTools = function CommandLineTools() {
      * @param {!string} inputfilepath
      * @param {!string} outputfilepath
      * @param {!function(string=):undefined} callback
-     * @return {undefined}
+     * @return {!odf.OdfContainer}
      */
     this.roundTrip = function (inputfilepath, outputfilepath, callback) {
         function onready(odfcontainer) {
@@ -57,6 +57,7 @@ odf.CommandLineTools = function CommandLineTools() {
             }
         }
         var odfcontainer = new odf.OdfContainer(inputfilepath, onready);
+        return odfcontainer;
     };
     /**
      * @param {!string} inputfilepath

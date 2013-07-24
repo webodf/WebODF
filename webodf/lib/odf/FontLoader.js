@@ -96,10 +96,11 @@ odf.FontLoader = (function () {
      * @param {!odf.OdfContainer} odfContainer
      * @param {!number} pos
      * @param {!StyleSheet} stylesheet
+     * @param {!function():undefined=} callback
      * @return {undefined}
      */
-    function loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos, stylesheet,
-            callback) {
+    function loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos,
+            stylesheet, callback) {
         var name, i = 0, n;
         for (n in embeddedFontDeclarations) {
             if (embeddedFontDeclarations.hasOwnProperty(n)) {
@@ -111,7 +112,10 @@ odf.FontLoader = (function () {
             }
         }
         if (!name) {
-            return callback();
+            if (callback) {
+                callback();
+            }
+            return;
         }
         odfContainer.getPartData(embeddedFontDeclarations[name].href, function (err, fontdata) {
             if (err) {
@@ -120,7 +124,8 @@ odf.FontLoader = (function () {
                 addFontToCSS(name, embeddedFontDeclarations[name], fontdata,
                     stylesheet);
             }
-            loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos + 1, stylesheet, callback);
+            loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos + 1,
+                    stylesheet, callback);
         });
     }
     /**
@@ -129,16 +134,15 @@ odf.FontLoader = (function () {
      * @param {!StyleSheet} stylesheet
      * @return {undefined}
      */
-    function loadFontsIntoCSS(embeddedFontDeclarations, odfContainer, stylesheet) {
-        loadFontIntoCSS(embeddedFontDeclarations, odfContainer, 0, stylesheet,
-            function () {});
+    function loadFontsIntoCSS(embeddedFontDeclarations, odfContainer,
+            stylesheet) {
+        loadFontIntoCSS(embeddedFontDeclarations, odfContainer, 0, stylesheet);
     }
     /**
      * @constructor
      * @return {?}
      */
     odf.FontLoader = function FontLoader() {
-        var self = this;
         /**
          * @param {!odf.OdfContainer} odfContainer
          * @param {!StyleSheet} stylesheet Will be cleaned and filled with rules for the fonts

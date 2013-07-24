@@ -34,6 +34,7 @@
  */
 
 /*global ops*/
+/*jslint emptyblock: true, unparam: true*/
 
 /**
  * An operation that can be performed on a document.

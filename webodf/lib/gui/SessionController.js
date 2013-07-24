@@ -61,8 +61,7 @@ gui.SessionController = (function () {
      * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
-        var self = this,
-            odtDocument = session.getOdtDocument(),
+        var odtDocument = session.getOdtDocument(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
             clickHandler = new gui.ClickHandler(),
@@ -318,8 +317,7 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorDirection(direction, extend) {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                steps,
-                op;
+                steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, odtDocument.getPositionFilter());
@@ -626,8 +624,6 @@ gui.SessionController = (function () {
          */
         function enqueueParagraphSplittingOps() {
             var position = odtDocument.getCursorPosition(inputMemberId),
-                isAtEndOfParagraph = false, // TODO: find out if at end
-                paragraphNode, styleName, nextStyleName,
                 op;
 
             op = new ops.OpSplitParagraph();

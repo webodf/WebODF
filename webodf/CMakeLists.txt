@@ -23,7 +23,6 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/ops/OperationTests.js
     tests/ops/SessionTests.js
     tests/xmldom/LSSerializerTests.js
-    tests/xmldom/OperationalTransformDOMTests.js
     tests/xmldom/XPathTests.js
     tests/tests.js
 )

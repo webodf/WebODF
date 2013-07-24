@@ -31,12 +31,14 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global Node, xmldom, XPathResult, runtime*/
+/*jslint emptyblock: true*/
 /**
  * Iterator over nodes uses in the xpath implementation
  * @class
  * @interface
  */
 xmldom.XPathIterator = function XPathIterator() {"use strict"; };
+/*jslint emptyblock: false*/
 
 /**
  * Wrapper for XPath functions
@@ -69,12 +71,9 @@ xmldom.XPath = (function () {
     function parseXPathStep(xpath, pos, end, steps) {
         var location = "",
             predicates = [],
-            value,
             brapos = xpath.indexOf('[', pos),
             slapos = xpath.indexOf('/', pos),
-            eqpos = xpath.indexOf('=', pos),
-            depth = 0,
-            start = 0;
+            eqpos = xpath.indexOf('=', pos);
         // parse the location
         if (isSmallestPositive(slapos, brapos, eqpos)) {
             location = xpath.substring(pos, slapos);
@@ -107,7 +106,7 @@ xmldom.XPath = (function () {
                 } else {
                     try {
                         value = parseInt(value, 10);
-                    } catch (e) {
+                    } catch (ignore) {
                     }
                 }
                 p = end;
@@ -118,7 +117,6 @@ xmldom.XPath = (function () {
     parsePredicates = function parsePredicates(xpath, start, predicates) {
         var pos = start,
             l = xpath.length,
-            selector,
             depth = 0;
         while (pos < l) {
             if (xpath[pos] === ']') {
@@ -136,6 +134,7 @@ xmldom.XPath = (function () {
         }
         return pos;
     };
+/*jslint emptyblock: true*/
     /**
      * @return {Node}
      */
@@ -144,6 +143,7 @@ xmldom.XPath = (function () {
      * @return {undefined}
      */
     xmldom.XPathIterator.prototype.reset = function () {};
+/*jslint emptyblock: false*/
     /**
      * @class
      * @constructor
@@ -178,7 +178,7 @@ xmldom.XPath = (function () {
             it.reset();
         };
         this.next = function next() {
-            var node = it.next(), attr;
+            var node = it.next();
             while (node) {
                 node = node.getAttributeNodeNS(namespace, localName);
                 if (node) {
@@ -304,7 +304,7 @@ xmldom.XPath = (function () {
      */
     createXPathPathIterator = function createXPathPathIterator(it, xpath,
                 namespaceResolver) {
-        var i, j, step, location, namespace, localName, prefix, p;
+        var i, j, step, location, p;
         for (i = 0; i < xpath.steps.length; i += 1) {
             step = xpath.steps[i];
             location = step.location;
@@ -336,8 +336,7 @@ xmldom.XPath = (function () {
         var it = new XPathNodeIterator(),
             i,
             nodelist,
-            parsedXPath,
-            pos;
+            parsedXPath;
         it.setNode(node);
         parsedXPath = parseXPath(xpath);
         it = createXPathPathIterator(it, parsedXPath, namespaceResolver);

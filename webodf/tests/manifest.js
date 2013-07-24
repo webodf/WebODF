@@ -54,7 +54,6 @@
         "ops/SessionTests.js",
         "tests.js",
         "xmldom/LSSerializerTests.js",
-        "xmldom/OperationalTransformDOMTests.js",
         "xmldom/XPathTests.js"
     ];
 }());

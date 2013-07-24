@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global Node, NodeFilter, xmldom, runtime*/
-/*jslint sub: true*/
+/*jslint sub: true, emptyblock: true*/
 if (typeof Object.create !== 'function') {
     Object['create'] = function (o) {
         "use strict";
@@ -43,6 +43,7 @@ if (typeof Object.create !== 'function') {
         return new F();
     };
 }
+/*jslint emptyblock: false*/
 
 /**
  * Partial implementation of LSSerializer
@@ -66,8 +67,7 @@ xmldom.LSSerializer = function LSSerializer() {
             }
             return m;
         }
-        var self = this,
-            current = nsmap || {},
+        var current = nsmap || {},
             currentrev = invertMap(nsmap),
             levels = [ current ],
             levelsrev = [ currentrev ],
@@ -95,7 +95,7 @@ xmldom.LSSerializer = function LSSerializer() {
          * @return {!string}
          */
         this.getQName = function (node) {
-            var ns = node.namespaceURI, n, i = 0, p;
+            var ns = node.namespaceURI, i = 0, p;
             if (!ns) {
                 return node.localName;
             }

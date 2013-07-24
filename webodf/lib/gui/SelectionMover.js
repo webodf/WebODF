@@ -45,8 +45,7 @@ runtime.loadClass("odf.OdfUtils");
  */
 gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     "use strict";
-    var self = this,
-        odfUtils,
+    var odfUtils,
         positionIterator,
         cachedXOffset,
         timeoutHandle;

@@ -49,8 +49,7 @@
 ops.TrivialOperationRouter = function TrivialOperationRouter() {
     "use strict";
 
-    var self = this,
-        operationFactory,
+    var operationFactory,
         playbackFunction;
 
     /**

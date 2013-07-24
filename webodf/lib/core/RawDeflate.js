@@ -315,31 +315,6 @@ core.RawDeflate = function () {
         zip_flag_buf.length = parseInt(zip_LIT_BUFSIZE / 8, 10);
     }
 
-    var zip_deflate_end = function () {
-        zip_free_queue = zip_qhead = zip_qtail = null;
-        zip_outbuf = null;
-        zip_window = null;
-        zip_d_buf = null;
-        zip_l_buf = null;
-        zip_prev = null;
-        zip_dyn_ltree = null;
-        zip_dyn_dtree = null;
-        zip_static_ltree = null;
-        zip_static_dtree = null;
-        zip_bl_tree = null;
-        zip_l_desc = null;
-        zip_d_desc = null;
-        zip_bl_desc = null;
-        zip_bl_count = null;
-        zip_heap = null;
-        zip_depth = null;
-        zip_length_code = null;
-        zip_dist_code = null;
-        zip_base_length = null;
-        zip_base_dist = null;
-        zip_flag_buf = null;
-    };
-
     var zip_reuse_queue = function (p) {
         p.next = zip_free_queue;
         zip_free_queue = p;
@@ -686,8 +661,8 @@ core.RawDeflate = function () {
                 scan_end1  = zip_window[scanp + best_len - 1];
                 scan_end   = zip_window[scanp + best_len];
             }
-        } while ((cur_match = zip_prev[cur_match & zip_WMASK]) > limit
-            && --chain_length !== 0);
+            cur_match = zip_prev[cur_match & zip_WMASK];
+        } while (cur_match > limit && --chain_length !== 0);
 
         return best_len;
     };
@@ -936,8 +911,9 @@ core.RawDeflate = function () {
     //        "inconsistent bit counts");
     //    Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
 
+            var len;
             for (n = 0; n <= max_code; n++) {
-                var len = tree[n].dl;
+                len = tree[n].dl;
                 if (len === 0) {
                     continue;
                 }
@@ -987,8 +963,9 @@ core.RawDeflate = function () {
          * possible code. So to avoid special checks later on we force at least
          * two codes of non zero frequency.
          */
+        var xnew;
         while (zip_heap_len < 2) {
-            var xnew = zip_heap[++zip_heap_len] = (max_code < 2 ? ++max_code : 0);
+            xnew = zip_heap[++zip_heap_len] = (max_code < 2 ? ++max_code : 0);
             tree[xnew].fc = 1;
             zip_depth[xnew] = 0;
             zip_opt_len--;
@@ -1074,7 +1051,8 @@ core.RawDeflate = function () {
                 nextlen = tree[n + 1].dl;
                 if (++count < max_count && curlen === nextlen) {
                     continue;
-                } else if (count < min_count) {
+                }
+                if (count < min_count) {
                     zip_bl_tree[curlen].fc += count;
                 } else if (curlen !== 0) {
                     if (curlen !== prevlen) {
@@ -1227,7 +1205,8 @@ core.RawDeflate = function () {
                 nextlen = tree[n + 1].dl;
                 if (++count < max_count && curlen === nextlen) {
                     continue;
-                } else if (count < min_count) {
+                }
+                if (count < min_count) {
                     do {
                         zip_SEND_CODE(curlen, zip_bl_tree);
                     } while (--count !== 0);
@@ -1403,8 +1382,8 @@ core.RawDeflate = function () {
      * matches. It is used only for the fast compression options.
      */
     var zip_deflate_fast = function () {
+        var flush; // set if current block must be flushed
         while (zip_lookahead !== 0 && zip_qhead === null) {
-            var flush; // set if current block must be flushed
 
         /* Insert the string window[strstart .. strstart+2] in the
          * dictionary, and set hash_head to the head of the hash chain:
@@ -1483,6 +1462,7 @@ core.RawDeflate = function () {
     };
 
     var zip_deflate_better = function () {
+        var flush; // set if current block must be flushed
         /* Process the input block. */
         while (zip_lookahead !== 0 && zip_qhead === null) {
         /* Insert the string window[strstart .. strstart+2] in the
@@ -1523,7 +1503,6 @@ core.RawDeflate = function () {
          */
             if (zip_prev_length >= zip_MIN_MATCH &&
                      zip_match_length <= zip_prev_length) {
-                var flush; // set if current block must be flushed
 
     //        check_match(strstart - 1, prev_match, prev_length);
                 flush = zip_ct_tally(zip_strstart - 1 - zip_prev_match,
@@ -1719,7 +1698,7 @@ core.RawDeflate = function () {
     };
 
     var zip_qcopy = function (buff, off, buff_size) {
-        var n, i, j;
+        var n, i, j, p;
 
         n = 0;
         while (zip_qhead !== null && n < buff_size) {
@@ -1736,7 +1715,6 @@ core.RawDeflate = function () {
             zip_qhead.len -= i;
             n += i;
             if (zip_qhead.len === 0) {
-                var p;
                 p = zip_qhead;
                 zip_qhead = zip_qhead.next;
                 zip_reuse_queue(p);
@@ -1782,7 +1760,8 @@ core.RawDeflate = function () {
             }
         }
 
-        if ((n = zip_qcopy(buff, off, buff_size)) === buff_size) {
+        n = zip_qcopy(buff, off, buff_size);
+        if (n === buff_size) {
             return buff_size;
         }
 
@@ -1816,14 +1795,16 @@ core.RawDeflate = function () {
         zip_deflate_start(level);
 
         var buff = new Array(1024);
-        var aout = [];
-        while ((i = zip_deflate_internal(buff, 0, buff.length)) > 0) {
-            var cbuf = [];
+        var aout = [],
+            cbuf = [];
+        i = zip_deflate_internal(buff, 0, buff.length);
+        while (i > 0) {
             cbuf.length = i;
             for (j = 0; j < i; j++) {
                 cbuf[j] = String.fromCharCode(buff[j]);
             }
             aout[aout.length] = cbuf.join("");
+            i = zip_deflate_internal(buff, 0, buff.length);
         }
         zip_deflate_data = null; // G.C.
         return aout.join("");

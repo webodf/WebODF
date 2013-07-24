@@ -43,16 +43,16 @@ odf.StyleInfo = function StyleInfo() {
         dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
         dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        //fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         formns = "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
         numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
         stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+        //svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        xmlns = "http://www.w3.org/XML/1998/namespace",
+        //xmlns = "http://www.w3.org/XML/1998/namespace",
         /**@const@type{!Object.<string,string>}*/ nsprefixes = {
             "urn:oasis:names:tc:opendocument:xmlns:chart:1.0": "chart:",
             "urn:oasis:names:tc:opendocument:xmlns:database:1.0": "db:",
@@ -303,9 +303,11 @@ odf.StyleInfo = function StyleInfo() {
             ]
         },
         /**
-         * Inversion of elementstyles, created with "inverse(elementstyles);" in init section
-         * Map with element name as primary key, element namespace as secondary key,
-         * then an array of {ns: namespace of attribute, localname: name of attribute, keyname: keyname});
+         * Inversion of elementstyles, created with "inverse(elementstyles);" in
+         * init section
+         * Map with element name as primary key, element namespace as secondary
+         * key, then an array of {ns: namespace of attribute, localname: name of
+         * attribute, keyname: keyname});
          * @type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
          */
         elements,
@@ -321,9 +323,9 @@ odf.StyleInfo = function StyleInfo() {
     function hasDerivedStyles(odfbody, nsResolver, styleElement) {
         var nodes,
             xp,
-            stylens = nsResolver('style'),
-            styleName = styleElement.getAttributeNS(stylens, 'name'),
-            styleFamily = styleElement.getAttributeNS(stylens, 'family');
+            resolver = nsResolver('style'),
+            styleName = styleElement.getAttributeNS(resolver, 'name'),
+            styleFamily = styleElement.getAttributeNS(resolver, 'family');
 
         xp = "//style:*[@style:parent-style-name='" + styleName + "'][@style:family='" + styleFamily + "']";
         nodes = xpath.getODFElementsWithXPath(odfbody, xp, nsResolver);
@@ -331,19 +333,6 @@ odf.StyleInfo = function StyleInfo() {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Return if a particular element can have a style for a particular family.
-     * @param {!string} family
-     * @param {!Element} element
-     * @return {!boolean}
-     */
-    function canElementHaveStyle(family, element) {
-        var elname = elements[element.localName],
-            elns = elname && elname[element.namespaceURI],
-            length = elns ? elns.length : 0;
-        return length > 0;
     }
 
     /**
@@ -653,7 +642,7 @@ odf.StyleInfo = function StyleInfo() {
         var keyname, i, l,
             /**@type {Array.<Object.<string,string>>}*/list,
             /**@type {Object.<string,string>}*/item,
-            /**@type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}*/elements = {},
+            /**@type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}*/e = {},
             map, array;
         for (keyname in elementstyles) {
             if (elementstyles.hasOwnProperty(keyname)) {
@@ -661,14 +650,14 @@ odf.StyleInfo = function StyleInfo() {
                 l = list.length;
                 for (i = 0; i < l; i += 1) {
                     item = list[i];
-                    map = elements[item.en] = elements[item.en] || {};
+                    map = e[item.en] = e[item.en] || {};
                     array = map[item.ens] = map[item.ens] || [];
                     array.push(
                         {ns: item.ans, localname: item.a, keyname: keyname});
                 }
             }
         }
-        return elements;
+        return e;
     }
 
     /**
@@ -750,7 +739,6 @@ odf.StyleInfo = function StyleInfo() {
         }
     };
 
-    this.canElementHaveStyle = canElementHaveStyle;
     this.hasDerivedStyles = hasDerivedStyles;
     this.prefixStyleNames = prefixStyleNames;
     this.removePrefixFromStyleNames = removePrefixFromStyleNames;

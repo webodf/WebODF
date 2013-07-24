@@ -42,7 +42,6 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
     var simplecss,
         cssprefix,
         documentElement,
-        customNS = "customns",
         walker = null;
 
     if (!element.id) {
@@ -50,9 +49,6 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
     }
 //    element.contentEditable = true;
     cssprefix = "#" + element.id + " ";
-
-    function installHandlers() {
-    }
 
     // generic css for doing xml formatting: color tags and do indentation
     simplecss = cssprefix + "*," + cssprefix + ":visited, " + cssprefix + ":link {display:block; margin: 0px; margin-left: 10px; font-size: medium; color: black; background: white; font-variant: normal; font-weight: normal; font-style: normal; font-family: sans-serif; text-decoration: none; white-space: pre-wrap; height: auto; width: auto}\n" +
@@ -130,17 +126,12 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
         cancelEvent(event);
     }
 
-    function handleKeyPress(event) {
-//        handleKeyDown(event);
-    }
-
     function handleClick(event) {
 //        alert(event.target.nodeName);
-        var sel = element.ownerDocument.defaultView.getSelection(),
-            r = sel.getRangeAt(0),
-            n = r.startContainer;
-        // if cursor is in customns node, move up to the top one
         /*
+        var sel = element.ownerDocument.defaultView.getSelection(),
+            r = sel.getRangeAt(0);
+        // if cursor is in customns node, move up to the top one
         if (n.parentNode.namespaceURI === customNS) {
             while (n.parentNode.namespaceURI === customNS) {
                 n = n.parentNode;
@@ -167,7 +158,6 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
     function initElement(element) {
         listenEvent(element, "click", handleClick);
         listenEvent(element, "keydown", handleKeyDown);
-        listenEvent(element, "keypress", handleKeyPress);
         //listenEvent(element, "mouseup", handleMouseUp);
         // ignore drop events, dragstart, drag, dragenter, dragover are ok for now
         listenEvent(element, "drop", cancelEvent);
@@ -272,12 +262,7 @@ gui.XMLEdit = function XMLEdit(element, stylesheet) {
     function createCssFromXmlInstance(node) {
         // collect all prefixes and elements
         var prefixes = {},    // namespace prefixes as they occur in the XML
-            css = "@namespace customns url(customns);\n",
-            name,
-            pre,
-            ns,
-            names,
-            csssel;
+            css = "@namespace customns url(customns);\n";
         getNamespacePrefixes(node, prefixes);
         generateUniquePrefixes(prefixes);
 /*

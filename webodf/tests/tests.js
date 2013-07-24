@@ -52,7 +52,6 @@ runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("odf.StyleInfoTests");
 runtime.loadClass("odf.TextStyleApplicatorTests");
 runtime.loadClass("xmldom.LSSerializerTests");
-runtime.loadClass("xmldom.OperationalTransformDOMTests");
 runtime.loadClass("xmldom.XPathTests");
 
 /**
@@ -84,7 +83,6 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 // add tests depending on browser runtime
 if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.LSSerializerTests);
-    tests.push(xmldom.OperationalTransformDOMTests);
     tests.push(xmldom.XPathTests);
     tests.push(ops.SessionTests);
     tests.push(ops.OperationTests);
@@ -170,8 +168,10 @@ function runSelectedTests(selectedTests) {
     if (!selectedTests.suite) {
         return false;
     }
+/*jslint emptyblock: true*/
     tester.runTests(selectedTests.suite, function () {
     }, selectedTests.testNames);
+/*jslint emptyblock: false*/
     return true;
 }
 

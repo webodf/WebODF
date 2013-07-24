@@ -101,9 +101,11 @@ odf.Namespaces = (function () {
     // TODO: document where and why this is needed
     resolvePrefix.lookupNamespaceURI = resolvePrefix;
 
+/*jslint emptyblock: true*/
     // create the actual odf.Namespaces object as a function, because the
     // class loader of runtime expects a function
     namespaces = function Namespaces() {};
+/*jslint emptyblock: false*/
 
     namespaces.forEachPrefix = forEachPrefix;
     namespaces.resolvePrefix = resolvePrefix;

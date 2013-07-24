@@ -50,7 +50,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     var self = this,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         filter,
         odfUtils,
         styleHelper,
@@ -133,7 +132,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         this.acceptPosition = function (iterator) {
             var container = iterator.container(),
                 nodeType = container.nodeType,
-                localName,
                 offset,
                 text,
                 leftChar,
@@ -243,7 +241,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function getPositionInTextNode(position, memberid) {
         var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
             lastTextNode = null,
-            lastNode = null,
             node,
             nodeOffset = 0,
             cursorNode = null;
@@ -450,16 +447,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * which guarantees walkable state for all cursors.
      * @param {?string} localMemberId An event will be raised for this cursor if it is moved
      */
-    this.fixCursorPositions = function(localMemberId) {
-        var filter = self.getPositionFilter(),
+    this.fixCursorPositions = function (localMemberId) {
+        var posfilter = self.getPositionFilter(),
             memberId, cursor, stepCounter, steps;
 
         for (memberId in cursors) {
             if (cursors.hasOwnProperty(memberId)) {
                 cursor = cursors[memberId];
                 stepCounter = cursor.getStepCounter();
-                if (!stepCounter.isPositionWalkable(filter)) {
-                    steps = stepCounter.countStepsToValidPosition(filter);
+                if (!stepCounter.isPositionWalkable(posfilter)) {
+                    steps = stepCounter.countStepsToValidPosition(posfilter);
                     cursor.move(steps);
                     if (memberId === localMemberId) {
                         self.emit(ops.OdtDocument.signalCursorMoved, cursor);

@@ -41,8 +41,7 @@
 odf.OdfUtils = function OdfUtils() {
     "use strict";
 
-    var self = this,
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+    var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         whitespaceOnly = /^\s*$/;
 
@@ -185,7 +184,7 @@ odf.OdfUtils = function OdfUtils() {
                 }
             } else if (isCharacterElement(node)) {
                 r = true;
-                break;
+                node = null;
             } else {
                 node = previousNode(node);
             }
@@ -254,7 +253,8 @@ odf.OdfUtils = function OdfUtils() {
                     && !isODFWhitespace(node.data)) {
                 r = true;
                 break;
-            } else if (isCharacterElement(node)) {
+            }
+            if (isCharacterElement(node)) {
                 r = true;
                 break;
             }
@@ -278,7 +278,8 @@ odf.OdfUtils = function OdfUtils() {
                     && !isODFWhitespace(node.data)) {
                 r = true;
                 break;
-            } else if (isCharacterElement(node)) {
+            }
+            if (isCharacterElement(node)) {
                 r = true;
                 break;
             }

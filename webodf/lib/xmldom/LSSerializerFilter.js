@@ -31,6 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global xmldom*/
+/*jslint emptyblock: true*/
 /**
  * Partial implementation of LSSerializerFilter
  * @interface

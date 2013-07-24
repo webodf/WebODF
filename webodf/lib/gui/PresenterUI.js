@@ -71,7 +71,7 @@ gui.PresenterUI = (function () {
         };
 
         self.root = function () { return self.odf_canvas.odfContainer().rootElement; };
-
+/*jslint unparam: true*/
         self.firstSlide = function () { self.slideChange(function (old, pc) { return 0; }); };
         self.lastSlide = function () { self.slideChange(function (old, pc) { return pc - 1; }); };
 
@@ -89,8 +89,7 @@ gui.PresenterUI = (function () {
                 newidx,
                 pagelist;
             pages.forEach(function (tuple) {
-                var name = tuple[0],
-                    node = tuple[1];
+                var node = tuple[1];
                 if (node.hasAttribute('slide_current')) {
                     last = i;
                     node.removeAttribute('slide_current');

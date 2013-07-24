@@ -44,11 +44,11 @@ runtime.loadClass("gui.UndoStateRules");
 gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
     "use strict";
     var r = runner,
-        t, testarea;
+        t;
 
     this.setUp = function () {
         t = { rules : new gui.UndoStateRules() };
-        testarea = core.UnitTest.provideTestAreaDiv();
+        core.UnitTest.provideTestAreaDiv();
     };
     this.tearDown = function () {
         t = {};

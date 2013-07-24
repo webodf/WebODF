@@ -130,7 +130,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
      * @implements core.PositionFilter
      */
     function AcceptAllPositionFilter() {
-        this.acceptPosition = function (iterator) {
+        this.acceptPosition = function () {
             return 1;
         };
     }

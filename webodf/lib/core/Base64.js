@@ -43,25 +43,6 @@ core.Base64 = (function () {
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
 
-        b64charcodes = (function () {
-            var a = [], i,
-                codeA = 'A'.charCodeAt(0),
-                codea = 'a'.charCodeAt(0),
-                code0 = '0'.charCodeAt(0);
-            for (i = 0; i < 26; i += 1) {
-                a.push(codeA + i);
-            }
-            for (i = 0; i < 26; i += 1) {
-                a.push(codea + i);
-            }
-            for (i = 0; i < 10; i += 1) {
-                a.push(code0 + i);
-            }
-            a.push('+'.charCodeAt(0));
-            a.push('/'.charCodeAt(0));
-            return a;
-        }()),
-
         b64tab = (function (bin) {
             var t = {}, i, l;
             for (i = 0, l = bin.length; i < l; i += 1) {
@@ -250,7 +231,6 @@ core.Base64 = (function () {
      */
     function convertUTF8StringToUTF16String(bin, callback) {
         var partsize = 100000,
-            numparts = bin.length / partsize,
             str = "",
             pos = 0;
         if (bin.length < partsize) {

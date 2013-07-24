@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*jslint nomen: true, evil: true, bitwise: true */
+/*jslint nomen: true, evil: true, bitwise: true, emptyblock: true, unparam: true */
 /*global window, XMLHttpRequest, require, console, DOMParser,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
@@ -205,6 +205,7 @@ Runtime.prototype.getWindow = function () {"use strict"; };
  * @return {undefined}
  */
 Runtime.prototype.assert = function (condition, message, callback) { "use strict"; };
+/*jslint emptyblock: false, unparam: false */
 
 /** @define {boolean} */
 var IS_COMPILED_CODE = false;
@@ -610,7 +611,7 @@ function BrowserRuntime(logoutput) {
             if (xhr.status === 200 || xhr.status === 0) {
                 result = xhr.responseText;
             }
-        } catch (e) {
+        } catch (ignore) {
         }
         return result;
     }
@@ -717,25 +718,6 @@ function BrowserRuntime(logoutput) {
         };
         xhr.send(null);
     }
-    function wrap(nativeFunction, nargs) {
-        if (!nativeFunction) {
-            return null;
-        }
-        return function () {
-            // clear cache
-            cache = {};
-            // assume the last argument is a callback function
-            var callback = arguments[nargs],
-                args = Array.prototype.slice.call(arguments, 0, nargs),
-                callbackname = "callback" + String(Math.random()).substring(2);
-            window[callbackname] = function () {
-                delete window[callbackname];
-                callback.apply(this, arguments);
-            };
-            args.push(callbackname);
-            nativeFunction.apply(this, args);
-        };
-    }
     this.readFile = readFile;
     this.read = read;
     this.readFileSync = readFileSync;
@@ -758,8 +740,10 @@ function BrowserRuntime(logoutput) {
         return ["lib"]; // TODO: find a good solution
                                        // probably let html app specify it
     };
-    this.setCurrentDirectory = function (dir) {
+/*jslint emptyblock: true */
+    this.setCurrentDirectory = function () {
     };
+/*jslint emptyblock: false */
     this.type = function () {
         return "BrowserRuntime";
     };
@@ -892,7 +876,7 @@ function NodeJSRuntime() {
                 return;
             }
             var buffer = new Buffer(length);
-            fs.read(fd, buffer, 0, length, offset, function (err, bytesRead) {
+            fs.read(fd, buffer, 0, length, offset, function (err) {
                 fs.close(fd);
                 callback(err, buffer);
             });
@@ -1015,6 +999,7 @@ function RhinoRuntime() {
     dom.setNamespaceAware(true);
     dom.setExpandEntityReferences(false);
     dom.setSchema(null);
+/*jslint unparam: true */
     entityresolver = Packages.org.xml.sax.EntityResolver({
         resolveEntity: function (publicId, systemId) {
             var file, open = function (path) {
@@ -1027,6 +1012,7 @@ function RhinoRuntime() {
             return open(file);
         }
     });
+/*jslint unparam: false */
     //dom.setEntityResolver(entityresolver);
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
@@ -1041,6 +1027,7 @@ function RhinoRuntime() {
     this.byteArrayFromArray = function (array) {
         return array;
     };
+/*jslint unparam: true*/
     this.byteArrayFromString = function (string, encoding) {
         // ignore encoding for now
         var a = [], i, l = string.length;
@@ -1049,6 +1036,7 @@ function RhinoRuntime() {
         }
         return a;
     };
+/*jslint unparam: false*/
     this.byteArrayToString = Runtime.byteArrayToString;
 
     /**
@@ -1108,7 +1096,7 @@ function RhinoRuntime() {
      * @return {?string}
      */
     function runtimeReadFileSync(path, encoding) {
-        var file = new Packages.java.io.File(path), data, i;
+        var file = new Packages.java.io.File(path);
         if (!file.isFile()) {
             return null;
         }
@@ -1217,12 +1205,14 @@ function RhinoRuntime() {
         }
     }
     this.assert = assert;
-    this.setTimeout = function (f, msec) {
+    this.setTimeout = function (f) {
         f();
         return 0;
     };
-    this.clearTimeout = function(timeoutID) {
+/*jslint emptyblock: true */
+    this.clearTimeout = function() {
     };
+/*jslint emptyblock: false */
     this.libraryPaths = function () {
         return ["lib"];
     };
@@ -1385,6 +1375,7 @@ var runtime = (function () {
         args = [];
     }
 
+/*jslint unvar: true, defined: true*/
     function run(argv) {
         if (!argv.length) {
             return;
@@ -1392,14 +1383,13 @@ var runtime = (function () {
         var script = argv[0];
         runtime.readFile(script, "utf8", function (err, code) {
             var path = "",
-                paths = runtime.libraryPaths(),
                 codestring = /**@type{string}*/(code);
             if (script.indexOf("/") !== -1) {
                 path = script.substring(0, script.indexOf("/"));
             }
             runtime.setCurrentDirectory(path);
-            function run() {
-                var script, path, paths, args, argv, result; // hide variables
+            function inner_run() {
+                var script, path, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
                 result = eval(codestring);
                 if (result) {
@@ -1412,10 +1402,11 @@ var runtime = (function () {
                 runtime.exit(1);
             } else {
                 // run the script with arguments bound to arguments parameter
-                run.apply(null, argv);
+                inner_run.apply(null, argv);
             }
         });
     }
+/*jslint unvar: false, defined: false*/
     // if rhino or node.js, run the scripts provided as arguments
     if (runtime.type() === "NodeJSRuntime") {
         run(process.argv.slice(2));

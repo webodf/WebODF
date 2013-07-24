@@ -145,6 +145,7 @@ odf.OdfContainer = (function () {
         }
         node.insertBefore(child, c);
     }
+/*jslint emptyblock: true*/
     /**
      * A DOM element that is part of and ODF part of a DOM.
      * @constructor
@@ -152,6 +153,7 @@ odf.OdfContainer = (function () {
      */
     function ODFElement() {
     }
+/*jslint emptyblock: false*/
     /**
      * The root element of an ODF document.
      * @constructor
@@ -210,29 +212,17 @@ odf.OdfContainer = (function () {
                 }
             });
         };
-        this.abort = function () {
-            // TODO
-        };
     }
+/*jslint emptyblock: true*/
     OdfPart.prototype.load = function () {
     };
+/*jslint emptyblock: false*/
     OdfPart.prototype.getUrl = function () {
         if (this.data) {
             return 'data:;base64,' + base64.toBase64(this.data);
         }
         return null;
     };
-    /**
-     * @constructor
-     * @param {!odf.OdfContainer} odfcontainer
-     */
-    function OdfPartList(odfcontainer) {
-        var self = this;
-        // declare public variables
-        this.length = 0;
-        this.item = function (index) {
-        };
-    }
     /**
      * @constructor
      * @param {!string} url
@@ -255,7 +245,6 @@ odf.OdfContainer = (function () {
         this.onchange = null;
         this.state = null;
         this.rootElement = null;
-        this.parts = null;
 
         /**
          * @param {!Element} element
@@ -336,7 +325,7 @@ odf.OdfContainer = (function () {
                 removeProcessingInstructions(xmldoc.documentElement);
                 try {
                     node = doc.importNode(xmldoc.documentElement, true);
-                } catch (e) {
+                } catch (ignore) {
                 }
             }
             return node;
@@ -512,7 +501,7 @@ odf.OdfContainer = (function () {
                 callback = /**@type {!function(?Document)}*/(component[1]);
                 zip.loadAsDOM(filepath, function(err, xmldoc) {
                     callback(xmldoc);
-                    if (self.state === OdfContainer.INVALID) {
+                    if (err || self.state === OdfContainer.INVALID) {
                         return;
                     }
                     loadNextComponent(remainingComponents);
@@ -535,7 +524,7 @@ odf.OdfContainer = (function () {
             loadNextComponent(componentOrder);
         }
         function createDocumentElement(name) {
-            var s = "", i;
+            var s = "";
 
             odf.Namespaces.forEachPrefix(function(prefix, ns) {
                 s += " xmlns:" + prefix + "=\"" + ns + "\"";
@@ -679,8 +668,8 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         this.getDocumentType = function () {
-            var contentElement = self.getContentElement();
-            return contentElement && contentElement.localName;
+            var content = self.getContentElement();
+            return content && content.localName;
         };
         /**
          * Open file and parse it. Return the XML Node. Return the root node of
@@ -704,14 +693,14 @@ odf.OdfContainer = (function () {
         };
 
         function createEmptyTextDocument() {
-            var zip = new core.Zip("", null),
+            var emptyzip = new core.Zip("", null),
                 data = runtime.byteArrayFromString(
                     "application/vnd.oasis.opendocument.text",
                     "utf8"
                 ),
                 root = self.rootElement,
                 text = document.createElementNS(officens, 'text');
-            zip.save("mimetype", data, false, new Date());
+            emptyzip.save("mimetype", data, false, new Date());
             /**
              * @param {!string} memberName  variant of the real local name which allows dot notation
              * @param {!string=} realLocalName
@@ -738,7 +727,7 @@ odf.OdfContainer = (function () {
             root.body.appendChild(text);
 
             setState(OdfContainer.DONE);
-            return zip;
+            return emptyzip;
         }
         /**
          * Fill the zip with current data.
@@ -801,7 +790,6 @@ odf.OdfContainer = (function () {
         // initialize public variables
         this.state = OdfContainer.LOADING;
         this.rootElement = createElement(ODFDocumentElement);
-        this.parts = new OdfPartList(this);
 
         // initialize private variables
         if (url) {

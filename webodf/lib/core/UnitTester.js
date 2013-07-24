@@ -31,7 +31,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global runtime, Runtime, core, Node, Element*/
-/*jslint evil: true, continue: true*/
+/*jslint evil: true, continue: true, emptyblock: true, unparam: true*/
 /**
  * @interface
  */
@@ -358,13 +358,13 @@ core.UnitTester = function UnitTester() {
                 return;
             }
             t = todo[0];
-            var tname = Runtime.getFunctionName(t);
-            runtime.log("Running " + tname);
+            var fname = Runtime.getFunctionName(t);
+            runtime.log("Running " + fname);
             lastFailCount = runner.countFailedTests();
             test.setUp();
             t(function () {
                 test.tearDown();
-                testResults[tname] = lastFailCount ===
+                testResults[fname] = lastFailCount ===
                     runner.countFailedTests();
                 runAsyncTests(todo.slice(1));
             });

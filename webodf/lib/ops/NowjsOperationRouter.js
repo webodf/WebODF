@@ -50,8 +50,7 @@
 ops.NowjsOperationRouter = function NowjsOperationRouter(sessionId, memberid) {
     "use strict";
 
-    var self = this,
-        operationFactory,
+    var operationFactory,
         playbackFunction,
         net = runtime.getNetwork(),
         last_server_seq = -1, // first seq will be 0

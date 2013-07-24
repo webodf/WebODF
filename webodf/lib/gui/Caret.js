@@ -48,8 +48,7 @@ runtime.loadClass("ops.OdtCursor");
  */
 gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
-    var self = this,
-        span,
+    var span,
         avatar,
         cursorNode,
         shouldBlink = false,

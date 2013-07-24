@@ -116,7 +116,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
      * all the neighboring text nodes were one
      * @return {!string}
      */
-    function text(iterator) {
+    function getText(iterator) {
         var i,
             data = "",
             neighborhood = textNeighborhood(iterator);
@@ -135,7 +135,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         return 1;
     };
     textfilter = function acceptPosition(iterator) {
-        var n = iterator.container(), p, o, d;
+        var n = iterator.container(), p, o;
         // only stop in text nodes or at end of <p> or <h>
         if (n.nodeType !== Node.TEXT_NODE) {
             if (n.localName !== "p" && n.localName !== "h") {
@@ -158,7 +158,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         }
         // do not stop between spaces
         o = textOffset(iterator);
-        if (o > 0 && text(iterator).substr(o - 1, 2) === "  ") {
+        if (o > 0 && getText(iterator).substr(o - 1, 2) === "  ") {
             return 2;
         }
         t.pos.push({
@@ -206,8 +206,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
     function insertEmptyTextNodes(root) {
         var doc = root.ownerDocument,
             iterator = doc.createNodeIterator(root, 0xFFFFFFFF),
-            n = iterator.nextNode(),
-            count = 0;
+            n = iterator.nextNode();
         while (n !== null) {
             if (n !== root) {
                 n.parentNode.insertBefore(doc.createTextNode(''), n);
@@ -324,7 +323,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
      * starting position.
      */
     function stepCounter(xml, n, m, filter) {
-        var steps, s, e;
+        var steps, s;
         t.pos = [];
         createOdtCursor(xml, true, true);
         s = t.cursor.getSelectedRange();

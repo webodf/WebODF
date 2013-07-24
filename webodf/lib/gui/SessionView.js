@@ -43,7 +43,7 @@ runtime.loadClass("gui.EditInfoMarker");
  * @constructor
  * @struct
  */
-gui.SessionViewOptions = function() {
+gui.SessionViewOptions = function () {
     "use strict";
 
     /**
@@ -145,18 +145,6 @@ gui.SessionView = (function () {
         }
 
         /**
-         * @param {string} nodeName
-         * @param {string} memberId
-         */
-        function removeAvatarInfoStyle(nodeName, className, memberId) {
-            var styleNode = getAvatarInfoStyle(nodeName, className, memberId);
-
-            if (styleNode) {
-                avatarInfoStyles.removeChild(styleNode);
-            }
-        }
-
-        /**
          * @param {!string} memberId
          */
         function highlightEdit(element, memberId, timestamp) {
@@ -189,15 +177,15 @@ gui.SessionView = (function () {
             var editInfoMarker, keyname;
 
             for (keyname in editInfoMap) {
-                  if (editInfoMap.hasOwnProperty(keyname)) {
-                      editInfoMarker = editInfoMap[keyname];
-                      if (visible) {
-                          editInfoMarker.show();
-                      } else {
-                          editInfoMarker.hide();
-                      }
-                  }
-              }
+                if (editInfoMap.hasOwnProperty(keyname)) {
+                    editInfoMarker = editInfoMap[keyname];
+                    if (visible) {
+                        editInfoMarker.show();
+                    } else {
+                        editInfoMarker.hide();
+                    }
+                }
+            }
         }
 
         /**
@@ -294,14 +282,16 @@ gui.SessionView = (function () {
             // this takes care of incorrectly implemented UserModels,
             // which might end up returning undefined user data
             if (userData === undefined) {
-                runtime.log("UserModel sent undefined data for member \""+memberId+"\".");
+                runtime.log("UserModel sent undefined data for member \"" + memberId + "\".");
                 return;
             }
 
             if (userData === null) {
                 userData = {
-                    memberid: memberId, fullname: "Unknown Identity",
-                    color: "black", imageurl: "avatar-joe.png"
+                    memberid: memberId,
+                    fullname: "Unknown Identity",
+                    color: "black",
+                    imageurl: "avatar-joe.png"
                 };
             }
 
@@ -345,7 +335,7 @@ gui.SessionView = (function () {
             // check if there is any edit info with this member
             for (keyname in editInfoMap) {
                 if (editInfoMap.hasOwnProperty(keyname) &&
-                    editInfoMap[keyname].getEditInfo().getEdits().hasOwnProperty(memberid)) {
+                        editInfoMap[keyname].getEditInfo().getEdits().hasOwnProperty(memberid)) {
                     hasMemberEditInfo = true;
                     break;
                 }

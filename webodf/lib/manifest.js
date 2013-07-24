@@ -106,8 +106,6 @@
         "ops/OperationFactory.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",
-        "xmldom/OperationalTransformDOM.js",
-        "xmldom/OperationalTransformInterface.js",
         "xmldom/RelaxNG.js",
         "xmldom/RelaxNG2.js",
         "xmldom/RelaxNGParser.js",
