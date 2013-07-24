@@ -365,17 +365,19 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return count * direction;
     }
-    /*
-     * Returns the number of steps needed to move to the beginning/end of the line.
-     * @param {!number} direction -1 for beginning of the line, 1 for end of the line
+    /**
+     * Returns the number of steps needed to move to the beginning/end of the
+     * line.
+     * @param {!number} direction -1 for beginning of the line, 1 for end of the
+     *                  line
      * @param {!core.PositionFilter} filter
      */
     function countStepsToLineBoundary(direction, filter) {
-        var iterator = getIteratorAtCursor(),
+        var fnNextPos, increment,
+            lastRect, rect, onSameLine,
+            iterator = getIteratorAtCursor(),
             paragraphNode = odfUtils.getParagraphElement(iterator.getCurrentNode()),
             count = 0,
-            fnNextPos, increment,
-            lastRect, rect, onSameLine,
             range = /**@type{!Range}*/(rootNode.ownerDocument.createRange());
 
         if (direction < 0) {

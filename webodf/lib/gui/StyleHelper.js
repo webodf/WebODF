@@ -159,8 +159,9 @@ gui.StyleHelper = function StyleHelper(formatting) {
         nextTextNodes.forEach(domUtils.normalizeTextNodes);
     };
 
-    /*
-     * Returns true if all the node within given range have the same value for the property; otherwise false.
+    /**
+     * Returns true if all the node within given range have the same value for
+     * the property; otherwise false.
      * @param {!Range} range
      * @param {!string} propertyName
      * @param {!string} propertyValue
@@ -191,7 +192,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
         return !hasOtherValue;
     }
 
-    /*
+    /**
      * Returns true if all the text within the range are bold; otherwise false.
      * @param {!Range} range
      * @return {!boolean}
@@ -200,7 +201,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
         return hasTextPropertyValue(range, 'fo:font-weight', 'bold');
     };
 
-    /*
+    /**
      * Returns true if all the text within the range are italic; otherwise false.
      * @param {!Range} range
      * @return {!boolean}
@@ -209,7 +210,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
         return hasTextPropertyValue(range, 'fo:font-style', 'italic');
     };
 
-    /*
+    /**
      * Returns true if all the text within the range have underline; otherwise false.
      * @param {!Range} range
      * @return {!boolean}
@@ -218,7 +219,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
         return hasTextPropertyValue(range, 'style:text-underline-style', 'solid');
     };
 
-    /*
+    /**
      * Returns true if all the text within the range have strike through; otherwise false.
      * @param {!Range} range
      * @return {!boolean}

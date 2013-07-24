@@ -73,8 +73,8 @@ if(Java_JAVA_EXECUTABLE)
     ExternalProject_Add(
         ClosureCompiler
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://closure-compiler.googlecode.com/files/compiler-20130603.tar.gz"
-        URL_MD5 88dcfc777323b5768be4d7d5167b3a91
+        URL "http://closure-compiler.googlecode.com/files/compiler-20130722.tar.gz"
+        URL_MD5 8d8f3f3d429742ca7fd7bfa9e164d8b5
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
         INSTALL_COMMAND ""

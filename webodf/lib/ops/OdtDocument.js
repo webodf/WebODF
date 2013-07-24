@@ -473,7 +473,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
     };
 
-    /*
+    /**
      * Returns the number of walkable positions of a paragraph node
      * @param {!Node} paragraph
      * @return {!number}
@@ -496,7 +496,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * This function calculates the steps in ODF world between the cursor of the member and the given position in the DOM.
+     * This function calculates the steps in ODF world between the cursor of the
+     * member and the given position in the DOM.
      * @param {!string} memberid
      * @param {!Node} node
      * @param {!number} offset offset in filtered DOM world

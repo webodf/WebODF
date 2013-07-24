@@ -51,11 +51,13 @@ ops.OpInsertText = function OpInsertText() {
         text = data.text;
     };
 
-    /* This is a workaround for a bug where webkit forgets to relayout
+    /**
+     * This is a workaround for a bug where webkit forgets to relayout
      * the text when a new character is inserted at the beginning of a line in
      * a Text Node.
-     * @param {OdtDocument} odtDocument
-     * @param {Node} textNode
+     * @param {!ops.OdtDocument} odtDocument
+     * @param {!Node} textNode
+     * @return {undefined}
      */
     function triggerLayoutInWebkit(odtDocument, textNode) {
         var parent = textNode.parentNode,
@@ -67,7 +69,7 @@ ops.OpInsertText = function OpInsertText() {
         // and fall back to the parent container
         // Workaround this by storing the range nodes, performing the modification
         // and then resetting the selection ranges
-        odtDocument.getCursors().forEach(function(cursor) {
+        odtDocument.getCursors().forEach(function (cursor) {
             var range = cursor.getSelectedRange();
             if (range && (range.startContainer === textNode
                 || range.endContainer === textNode)) {
@@ -84,7 +86,7 @@ ops.OpInsertText = function OpInsertText() {
         parent.removeChild(textNode);
         parent.insertBefore(textNode, next);
 
-        impactedCursors.forEach(function(entry) {
+        impactedCursors.forEach(function (entry) {
             var range = entry.cursor.getSelectedRange();
             // the cursor hasn't physically moved, we're just fixing the ranges again
             range.setStart(entry.startContainer, entry.startOffset);
@@ -120,7 +122,7 @@ ops.OpInsertText = function OpInsertText() {
                 refNode = previousNode.splitText(domPosition.offset);
             }
 
-            for (i=0; i<text.length; i+=1) {
+            for (i = 0; i < text.length; i += 1) {
                 if (text[i] === space || text[i] === tab) {
                     if (startIndex < i) {
                         textToInsert = text.substring(startIndex, i);
@@ -130,7 +132,7 @@ ops.OpInsertText = function OpInsertText() {
                             parent.insertBefore(ownerDocument.createTextNode(textToInsert), refNode);
                         }
                     }
-                    startIndex = i+1;
+                    startIndex = i + 1;
                     append = false;
 
                     spaceTag = text[i] === space ? "text:s" : "text:tab";

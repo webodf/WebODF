@@ -34,6 +34,7 @@
  */
 
 /*global gui, runtime */
+/*jslint bitwise: true*/
 
 /**
  * @constructor
@@ -45,31 +46,29 @@ gui.KeyboardHandler = function KeyboardHandler() {
         defaultBinding = null,
         bindings = {};
 
-    /*
+    /**
      * @return {!number}
      */
-    function getModifiers (e) {
+    function getModifiers(e) {
         var modifiers = modifier.None;
-        /*jslint bitwise: true*/
         if (e.metaKey) { modifiers |= modifier.Meta; }
         if (e.ctrlKey) { modifiers |= modifier.Ctrl; }
         if (e.altKey) { modifiers |= modifier.Alt; }
         if (e.shiftKey) { modifiers |= modifier.Shift; }
-        /*jslint bitwise: false*/
         return modifiers;
     }
 
-    /*
+    /**
      * @return {!string}
      */
-    function getKeyCombo (keyCode, modifiers) {
+    function getKeyCombo(keyCode, modifiers) {
         if (!modifiers) {
             modifiers = modifier.None;
         }
         return keyCode + ':' + modifiers;
     }
 
-    /*
+    /**
      * @param {!Function}   callback
      */
     this.setDefault = function (callback) {
@@ -81,7 +80,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
      * @param {!number}     modifiers
      * @param {!Function}   callback
      */
-    this.bind = function(keyCode, modifiers, callback) {
+    this.bind = function (keyCode, modifiers, callback) {
         var keyCombo = getKeyCombo(keyCode, modifiers);
         runtime.assert(bindings.hasOwnProperty(keyCombo) === false,
             "tried to overwrite the callback handler of key combo: " + keyCombo);
@@ -92,7 +91,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
      * @param {!number}     keyCode
      * @@param {!number}    modifiers
      */
-    this.unbind = function(keyCode, modifiers) {
+    this.unbind = function (keyCode, modifiers) {
         var keyCombo = getKeyCombo(keyCode, modifiers);
         delete bindings[keyCombo];
     };
@@ -129,7 +128,8 @@ gui.KeyboardHandler = function KeyboardHandler() {
     };
 };
 
-/**@const*/gui.KeyboardHandler.Modifier = {
+/**@const*/
+gui.KeyboardHandler.Modifier = {
     None: 0,
     Meta: 1,
     Ctrl: 2,
@@ -140,7 +140,8 @@ gui.KeyboardHandler = function KeyboardHandler() {
     AltShift: 12
 };
 
-/**@const*/gui.KeyboardHandler.KeyCode = {
+/**@const*/
+gui.KeyboardHandler.KeyCode = {
     Backspace: 8,
     Tab: 9,
     Enter: 13,

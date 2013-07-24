@@ -280,7 +280,7 @@ gui.SessionController = (function () {
             return createOpMoveCursor(newPos, newLen);
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorToLeft() {
@@ -288,7 +288,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorToRight() {
@@ -296,7 +296,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToLeft() {
@@ -304,7 +304,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToRight() {
@@ -326,7 +326,7 @@ gui.SessionController = (function () {
             return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorUp() {
@@ -334,7 +334,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorDown() {
@@ -342,7 +342,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionUp() {
@@ -350,7 +350,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionDown() {
@@ -371,7 +371,7 @@ gui.SessionController = (function () {
             return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorToLineStart() {
@@ -379,7 +379,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorToLineEnd() {
@@ -387,7 +387,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToLineStart() {
@@ -395,7 +395,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToLineEnd() {
@@ -403,7 +403,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToParagraphStart() {
@@ -428,7 +428,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToParagraphEnd() {
@@ -481,7 +481,7 @@ gui.SessionController = (function () {
             return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorToDocumentStart() {
@@ -489,7 +489,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function moveCursorToDocumentEnd() {
@@ -497,7 +497,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToDocumentStart() {
@@ -505,7 +505,7 @@ gui.SessionController = (function () {
             return true;
         }
 
-        /*
+        /**
          * @return {!boolean}
          */
         function extendSelectionToDocumentEnd() {

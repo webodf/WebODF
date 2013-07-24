@@ -32,7 +32,7 @@
  */
 /*global runtime, core, DOMParser*/
 /*jslint bitwise: true*/
-/*
+/**
 * @preserve
 * WebODF
 * Copyright (c) 2010 Jos van den Oever

@@ -443,7 +443,7 @@ odf.Style2CSS = function Style2CSS() {
         return null;
     }
 
-    /*
+    /**
      * Returns the parent style node of a given style node
      * @param {!Node} styleNode
      * @return {Node}

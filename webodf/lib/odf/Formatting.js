@@ -60,7 +60,7 @@ odf.Formatting = function Formatting() {
      * @param {!string} value
      * @returns {!number}
      */
-    function hashString(value){
+    function hashString(value) {
         var hash = 0, i, l;
         for (i = 0, l = value.length; i < l; i += 1) {
             /*jslint bitwise:true*/
@@ -440,7 +440,7 @@ odf.Formatting = function Formatting() {
         return mergedChildStyle;
     }
 
-    /*
+    /**
      * Returns an array of all unique styles in the given text nodes
      * @param {!Array.<!CharacterData>} textNodes
      * @returns {Array.<Object>}
