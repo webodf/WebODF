@@ -149,8 +149,10 @@ gui.SessionController = (function () {
                 return;
             }
             while (node !== canvasElement) {
-                if ((node.namespaceURI === 'urn:webodf:names:cursor' && node.localName === 'cursor')
-                    || (node.namespaceURI === 'urn:webodf:names:editinfo' && node.localName === 'editinfo')) {
+                if ((node.namespaceURI === 'urn:webodf:names:cursor'
+                     && node.localName === 'cursor')
+                        || (node.namespaceURI === 'urn:webodf:names:editinfo'
+                            && node.localName === 'editinfo')) {
                     break;
                 }
                 node = node.parentNode;
@@ -178,7 +180,9 @@ gui.SessionController = (function () {
         function select() {
             var selection = runtime.getWindow().getSelection(),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                stepsToAnchor, stepsToFocus, op;
+                stepsToAnchor,
+                stepsToFocus,
+                op;
 
             stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
             stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
@@ -189,24 +193,23 @@ gui.SessionController = (function () {
         }
 
         function selectWord() {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            var currentNode, i, c, op,
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
                 oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 alphaNumeric = /[A-Za-z0-9]/,
                 stepsToStart = 0,
-                stepsToEnd = 0,
-                currentNode, i, c, op;
+                stepsToEnd = 0;
 
             iterator.setUnfilteredPosition(cursorNode, 0);
             if (iterator.previousPosition()) {
                 currentNode = iterator.getCurrentNode();
                 if (currentNode.nodeType === Node.TEXT_NODE) {
-                    for (i=currentNode.data.length-1; i>=0; i-=1) {
+                    for (i = currentNode.data.length - 1; i >= 0; i -= 1) {
                         c = currentNode.data[i];
                         if (alphaNumeric.test(c)) {
                             stepsToStart -= 1;
-                        }
-                        else {
+                        } else {
                             break;
                         }
                     }
@@ -217,12 +220,11 @@ gui.SessionController = (function () {
             if (iterator.nextPosition()) {
                 currentNode = iterator.getCurrentNode();
                 if (currentNode.nodeType === Node.TEXT_NODE) {
-                    for (i=0; i<currentNode.data.length; i+=1) {
+                    for (i = 0; i < currentNode.data.length; i += 1) {
                         c = currentNode.data[i];
                         if (alphaNumeric.test(c)) {
                             stepsToEnd += 1;
-                        }
-                        else {
+                        } else {
                             break;
                         }
                     }
@@ -236,10 +238,10 @@ gui.SessionController = (function () {
         }
 
         function selectParagraph() {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            var stepsToStart, stepsToEnd, op,
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                stepsToStart, stepsToEnd, op;
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
 
             stepsToStart = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             iterator.moveToEndOfNode(paragraphNode);
@@ -267,7 +269,8 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorByAdjustment(posAdjust, lenAdjust) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
-                newPos, newLen;
+                newPos,
+                newLen;
             if (posAdjust === 0 && lenAdjust === 0) {
                 return null;
             }
@@ -315,7 +318,8 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorDirection(direction, extend) {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                steps, op;
+                steps,
+                op;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, odtDocument.getPositionFilter());
@@ -361,7 +365,9 @@ gui.SessionController = (function () {
          */
         function createOpMoveCursorLineBoundary(direction, extend) {
             var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
-                direction, odtDocument.getPositionFilter());
+                direction,
+                odtDocument.getPositionFilter()
+            );
             return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
@@ -402,7 +408,9 @@ gui.SessionController = (function () {
          */
         function extendSelectionToParagraphStart() {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                iterator, node, steps;
+                iterator,
+                node,
+                steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
@@ -425,13 +433,18 @@ gui.SessionController = (function () {
          */
         function extendSelectionToParagraphEnd() {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                iterator, node, steps;
+                iterator,
+                node,
+                steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
             iterator.moveToEndOfNode(paragraphNode);
             steps = odtDocument.getDistanceFromCursor(
-                inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+                inputMemberId,
+                iterator.container(),
+                iterator.unfilteredDomOffset()
+            );
 
             while (steps === 0 && iterator.nextPosition()) {
                 node = iterator.getCurrentNode();
@@ -439,7 +452,10 @@ gui.SessionController = (function () {
                 if (odfUtils.isParagraph(node)) {
                     iterator.moveToEndOfNode(node);
                     steps = odtDocument.getDistanceFromCursor(
-                        inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+                        inputMemberId,
+                        iterator.container(),
+                        iterator.unfilteredDomOffset()
+                    );
                 }
             }
             sessionEnqueue(createOpMoveCursorByAdjustment(0, steps));
@@ -458,7 +474,10 @@ gui.SessionController = (function () {
             }
 
             steps = odtDocument.getDistanceFromCursor(
-                inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
+                inputMemberId,
+                iterator.container(),
+                iterator.unfilteredDomOffset()
+            );
             return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
         }
 
@@ -703,7 +722,7 @@ gui.SessionController = (function () {
         function handleBeforeCut() {
             var cursor = odtDocument.getCursor(inputMemberId),
                 selectedRange = cursor.getSelectedRange();
-            return !(selectedRange.collapsed === false); // return false to enable cut menu... straightforward right?!
+            return selectedRange.collapsed !== false; // return false to enable cut menu... straightforward right?!
         }
 
         /**
@@ -791,7 +810,7 @@ gui.SessionController = (function () {
 
         // duplicate of EditorSession.formatSelection method
         // TODO: find a better place for this method to live so it can be reused
-        function formatTextSelection (propertyName, propertyValue) {
+        function formatTextSelection(propertyName, propertyValue) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
                 op = new ops.OpApplyStyle(),
                 properties = {};
@@ -809,7 +828,7 @@ gui.SessionController = (function () {
         /**
          * @return {!boolean}
          */
-        function toggleBold () {
+        function toggleBold() {
             var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
                 value = styleHelper.isBold(range) ? 'normal' : 'bold';
             formatTextSelection('fo:font-weight', value);
@@ -819,7 +838,7 @@ gui.SessionController = (function () {
         /**
          * @return {!boolean}
          */
-        function toggleItalic () {
+        function toggleItalic() {
             var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
                 value = styleHelper.isItalic(range) ? 'normal' : 'italic';
             formatTextSelection('fo:font-style', value);
@@ -829,7 +848,7 @@ gui.SessionController = (function () {
         /**
          * @return {!boolean}
          */
-        function toggleUnderline () {
+        function toggleUnderline() {
             var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
                 value = styleHelper.hasUnderline(range) ? 'none' : 'solid';
             formatTextSelection('style:text-underline-style', value);
@@ -914,7 +933,7 @@ gui.SessionController = (function () {
         /**
          * @param {gui.UndoManager} manager
          */
-        this.setUndoManager = function(manager) {
+        this.setUndoManager = function (manager) {
             if (undoManager) {
                 undoManager.unsubscribe(gui.UndoManager.signalUndoStackChanged, forwardUndoStackChange);
             }
@@ -934,7 +953,7 @@ gui.SessionController = (function () {
         /**
          * @returns {gui.UndoManager}
          */
-        this.getUndoManager = function() {
+        this.getUndoManager = function () {
             return undoManager;
         };
 
