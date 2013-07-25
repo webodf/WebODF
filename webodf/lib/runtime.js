@@ -713,7 +713,18 @@ function BrowserRuntime(logoutput) {
             if (cl) {
                 callback(parseInt(cl, 10));
             } else {
-                callback(-1);
+                // Due to CORS implementation bugs, some browsers will not allow access to certain headers
+                // even if the server says it's ok. This specific bug was observed in Cocoa's WebView on OSX10.8.
+                // However, even though the browser won't pull the content-length header (coz it's a security risk!)
+                // the content can still be fetched.
+                // This data will be cached, so we'll still only ever have to fetch it once
+                readFile(path, "binary", function(err, data) {
+                    if (!err) {
+                        callback(data.length);
+                    } else {
+                        callback(-1);
+                    }
+                });
             }
         };
         xhr.send(null);
