@@ -564,7 +564,7 @@
     <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><textProperties fontSize="8"/></setProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><style:text-properties fo:font-size="8pt"/></setProperties></op>
   </ops>
   <after>
     <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="8pt"></style:text-properties></style:style></office:styles>
@@ -577,7 +577,7 @@
     <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><textProperties fontSize="8"/></setProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><style:text-properties fo:font-size="8pt"/></setProperties></op>
   </ops>
   <after>
     <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="8pt"/></style:style></office:styles>
@@ -591,7 +591,7 @@
     <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><textPropertyNames>fontSize</textPropertyNames></removedProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><textPropertyNames>fo:font-size</textPropertyNames></removedProperties></op>
   </ops>
   <after>
     <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
@@ -601,7 +601,7 @@
  <test name="UpdateParagraphStyleU_nothing_rightMargin4">
   <before><office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><paragraphProperties rightMargin="4"/></setProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><style:paragraph-properties fo:margin-right="4mm"/></setProperties></op>
   </ops>
   <after>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:paragraph-properties fo:margin-right="4mm"/></style:style></office:styles>
@@ -611,7 +611,7 @@
  <test name="UpdateParagraphStyleU_rightMargin2_rightMargin4">
   <before><office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:paragraph-properties fo:margin-right="2mm"/></style:style></office:styles><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><paragraphProperties rightMargin="4"/></setProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><style:paragraph-properties fo:margin-right="4mm"/></setProperties></op>
   </ops>
   <after>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:paragraph-properties fo:margin-right="4mm"/></style:style></office:styles>
@@ -621,7 +621,7 @@
  <test name="UpdateParagraphStyleU_rightMargin2_nothing">
   <before><office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:paragraph-properties fo:margin-right="2mm"/></style:style></office:styles><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><paragraphPropertyNames>rightMargin</paragraphPropertyNames></removedProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><paragraphPropertyNames>fo:margin-right</paragraphPropertyNames></removedProperties></op>
   </ops>
   <after>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>

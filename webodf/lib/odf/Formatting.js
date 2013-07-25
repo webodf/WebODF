@@ -268,18 +268,18 @@ odf.Formatting = function Formatting() {
     this.getStyleAttributes = getStyleAttributes;
 
     /**
-     * Maps attributes and elements in the info object over top of the node. Supports
+     * Maps attributes and elements in the properties object over top of the node. Supports
      * recursion and deep mapping. This is effectively the inverse of getStyleAttributes
      * @param {!Element} node
-     * @param {!Object} info
+     * @param {!Object} properties
      */
-    function mapObjOntoNode(node, info) {
-        Object.keys(info).forEach(function(key) {
+    function mapObjOntoNode(node, properties) {
+        Object.keys(properties).forEach(function(key) {
             var parts = key.split(":"),
                 prefix = parts[0],
                 localName = parts[1],
                 ns = odf.Namespaces.resolvePrefix(prefix),
-                value = info[key],
+                value = properties[key],
                 element;
 
             if (typeof value === "object" && Object.keys(value).length) {
@@ -511,17 +511,17 @@ odf.Formatting = function Formatting() {
     }
 
     /**
-     * Overrides the specific properties on the styleNode from the values in the supplied info Object.
+     * Overrides the specific properties on the styleNode from the values in the supplied properties Object.
      * If a newStylePrefix is supplied, this method will automatically generate a unique name for the style node
      * @param {!Element} styleNode
-     * @param {!Object} info
+     * @param {!Object} properties
      * @param {string=} newStylePrefix Prefix to put in front of new auto styles
      */
-    this.updateStyle = function(styleNode, info, newStylePrefix) {
+    this.updateStyle = function(styleNode, properties, newStylePrefix) {
         var name, existingNames, startIndex;
-        mapObjOntoNode(styleNode, info);
-        name = styleNode.getAttributeNS(stylens, "name");
+        mapObjOntoNode(styleNode, properties);
         if (newStylePrefix) {
+            name = styleNode.getAttributeNS(stylens, "name");
             existingNames = getAllStyleNames();
             startIndex = 0;
             do {

@@ -65,12 +65,90 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 deleteButton,
                 cloneTooltip,
                 cloneDropDown,
-                newStyleName = null;
+                newStyleName = null,
+                /**
+                * Mapping of the properties from edit pane properties to the attributes of style:text-properties
+                * @const@type{Array.<!{propertyName:string,attributeName:string,unit:string}>}
+                */
+                textPropertyMapping = [
+                {
+                    propertyName:  'fontSize',
+                    attributeName: 'fo:font-size',
+                    unit:          'pt'
+                }, {
+                    propertyName:  'fontName',
+                    attributeName: 'style:font-name'
+                }, {
+                    propertyName:  'color',
+                    attributeName: 'fo:color'
+                }, {
+                    propertyName:  'backgroundColor',
+                    attributeName: 'fo:background-color'
+                }, {
+                    propertyName:  'fontWeight',
+                    attributeName: 'fo:font-weight'
+                }, {
+                    propertyName:  'fontStyle',
+                    attributeName: 'fo:font-style'
+                }, {
+                    propertyName:  'underline',
+                    attributeName: 'style:text-underline-style'
+                }, {
+                    propertyName:  'strikethrough',
+                    attributeName: 'style:text-line-through-style'
+                }],
+                /**
+                * Mapping of the properties from edit pane properties to the attributes of style:paragraph-properties
+                * @const@type{Array.<!{propertyName:string,attributeName:string,unit:string}>}
+                */
+                paragraphPropertyMapping = [
+                {
+                    propertyName:  'topMargin',
+                    attributeName: 'fo:margin-top',
+                    unit:          'mm'
+                }, {
+                    propertyName:  'bottomMargin',
+                    attributeName: 'fo:margin-bottom',
+                    unit:          'mm'
+                }, {
+                    propertyName:  'leftMargin',
+                    attributeName: 'fo:margin-left',
+                    unit:          'mm'
+                }, {
+                    propertyName:  'rightMargin',
+                    attributeName: 'fo:margin-right',
+                    unit:          'mm'
+                }, {
+                    propertyName:  'textAlign',
+                    attributeName: 'fo:text-align'
+                }];
+
+            /**
+            * Sets attributes of a node by the properties of the object properties,
+            * based on the mapping defined in propertyMapping.
+            * @param {!Object} properties
+            * @param {!Array.<!{propertyName:string,attributeName:string,unit:string}>} propertyMapping
+            * @return {undefined}
+            */
+            function mappedProperties(properties, propertyMapping) {
+                var i, m, value,
+                    result = {};
+                for (i = 0; i < propertyMapping.length; i += 1) {
+                    m = propertyMapping[i];
+                    value = properties[m.propertyName];
+                    // Set a value as the attribute of a node, if that value is defined.
+                    // If there is a unit specified, it is suffixed to the value.
+                    if (value !== undefined) {
+                        result[m.attributeName] = (m.unit !== undefined) ? value + m.unit : value;
+                    }
+                }
+                return result;
+            }
 
             function accept() {
                 editorSession.updateParagraphStyle(stylePicker.value(), {
-                    paragraphProperties: alignmentPane.value(),
-                    textProperties: fontEffectsPane.value()
+                    "style:paragraph-properties": mappedProperties(alignmentPane.value(), paragraphPropertyMapping),
+                    "style:text-properties": mappedProperties(fontEffectsPane.value(), textPropertyMapping)
                 });
 
                 dialog.hide();
