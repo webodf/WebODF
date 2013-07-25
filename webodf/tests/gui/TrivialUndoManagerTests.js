@@ -177,6 +177,11 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         // And then undo it
         t.manager.moveBackward(1); // Should be back at origin
 
+        // Internally move operations are stored as object keys. This results in independent
+        // move operations being ordered unpredictably across implementations (e.g., this failed in qtruntime)
+        // As the timestamps are unique, and the order is irrelevant due to these being independent cursors,
+        // this can just be sorted to ensure a deterministic order.
+        t.ops.sort();
         r.shouldBe(t, "t.ops", "[1,4]");
     }
 
