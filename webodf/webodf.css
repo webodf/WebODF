@@ -220,6 +220,7 @@ cursor|cursor {
 cursor|cursor > span {
     display: inline;
     position: absolute;
+    top: 5%; /* push down the caret; 0px can do the job, 5% looks better, 10% is a bit over */
     height: 1em;
     border-left: 2px solid black;
     outline: none;
