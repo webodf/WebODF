@@ -37,14 +37,56 @@
 runtime.loadClass("gui.Caret");
 
 /**
- * The caret factory creates an caret as UI representation of a users's cursor.
- * If the caret is for the local user, then a handler is passed to the caret
- * to redirect the keystrokes received for the caret to the session controller.
+ * The caret manager is responsible for creating a caret as UI representation
+ * of a users's cursor.
+ * If the caret is for the local user, then the manager will control the caret's
+ * current focus, and ensure the caret stays visible after every local operation.
  * @constructor
  * @param {!gui.SessionController} sessionController
  */
-gui.CaretFactory = function CaretFactory(sessionController) {
+gui.CaretManager = function CaretManager(sessionController) {
     "use strict";
+    var carets = {};
+
+    function getCanvasElement() {
+        return sessionController.getSession().getOdtDocument().getOdfCanvas().getElement();
+    }
+
+    function removeCaret(memberId) {
+        if (memberId === sessionController.getInputMemberId()) {
+            getCanvasElement().removeAttribute("tabindex", 0);
+        }
+        delete carets[memberId];
+    }
+
+    function refreshCaret(info) {
+        var caret = carets[info.memberId];
+        if (caret) {
+            caret.refreshCursor();
+        }
+    }
+
+    function ensureLocalCaretVisible(info) {
+        var caret = carets[info.memberId];
+        if (info.memberId === sessionController.getInputMemberId() && caret) {
+            // on user edit actions ensure visibility of cursor
+            caret.ensureVisible();
+        }
+    }
+
+    function focusLocalCaret() {
+        var caret = carets[sessionController.getInputMemberId()];
+        if (caret) {
+            caret.setFocus();
+        }
+    }
+
+    function blurLocalCaret() {
+        var caret = carets[sessionController.getInputMemberId()];
+        if (caret) {
+            caret.removeFocus();
+        }
+    }
 
     /**
      * @param {ops.OdtCursor} cursor
@@ -52,40 +94,55 @@ gui.CaretFactory = function CaretFactory(sessionController) {
      * @param {boolean} blinkOnRangeSelect Specify that the caret should blink if a non-collapsed range is selected
      * @return {!gui.Caret}
      */
-    this.createCaret = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
+    this.registerCursor = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
         var memberid = cursor.getMemberId(),
-            session = sessionController.getSession(),
-            odtDocument = session.getOdtDocument(),
-            canvasElement = odtDocument.getOdfCanvas().getElement(),
+            canvasElement = getCanvasElement(),
             caret = new gui.Caret(cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect);
 
-        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, function (info) {
-            if (info.getMemberId() === memberid) {
-                caret.refreshCursor();
-            }
-        });
+        carets[memberid] = caret;
 
         // if local input user, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
             runtime.log("Starting to track input on new cursor of " + memberid);
-
-            // on user edit actions ensure visibility of cursor
-            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, function (info) {
-                if (info.memberId === memberid) {
-                    caret.ensureVisible();
-                }
-            });
 
             // wire up the cursor update to caret visibility update
             cursor.handleUpdate = caret.ensureVisible;
             // enable canvas to have focus
             canvasElement.setAttribute("tabindex", 0);
             // wire up focus on canvas to caret
-            canvasElement.onfocus = caret.setFocus;
-            canvasElement.onblur = caret.removeFocus;
             canvasElement.focus();
         }
 
         return caret;
     };
+
+    /**
+     * @param {!string} memberid
+     * @return {!gui.Caret}
+     */
+    this.getCaret = function(memberid) {
+        return carets[memberid];
+    };
+
+    /**
+     * @returns {!Array.<!gui.Caret>}
+     */
+    this.getCarets = function() {
+        return Object.keys(carets).map(function(memberid) { return carets[memberid]; });
+    };
+
+    function init() {
+        var session = sessionController.getSession(),
+            odtDocument = session.getOdtDocument(),
+            canvasElement = getCanvasElement();
+
+        odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
+        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, refreshCaret);
+        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
+
+        canvasElement.onfocus = focusLocalCaret;
+        canvasElement.onblur = blurLocalCaret;
+    }
+
+    init();
 };

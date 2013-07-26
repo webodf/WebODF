@@ -47,7 +47,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("ops.NowjsOperationRouter");
     runtime.loadClass("ops.NowjsUserModel");
     runtime.loadClass("odf.OdfCanvas");
-    runtime.loadClass("gui.CaretFactory");
+    runtime.loadClass("gui.CaretManager");
     runtime.loadClass("gui.Caret");
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
@@ -83,7 +83,7 @@ define("webodf/editor/EditorSession", [
 
 
         this.sessionController = new gui.SessionController(session, memberid);
-        this.sessionView = new gui.SessionView(config.viewOptions, session, new gui.CaretFactory(self.sessionController));
+        this.sessionView = new gui.SessionView(config.viewOptions, session, new gui.CaretManager(self.sessionController));
         this.availableFonts = [];
 
         /*

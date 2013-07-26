@@ -603,6 +603,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             memberid = cursor.getMemberId();
 
         runtime.assert(Boolean(memberid), "OdtDocument::addCursor has cursor without memberid");
+        runtime.assert(!cursors[memberid], "OdtDocument::addCursor is adding a duplicate cursor with memberid " + memberid);
         cursor.move(distanceToFirstTextNode);
 
         cursors[memberid] = cursor;

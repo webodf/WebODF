@@ -57,7 +57,7 @@
         "gui/Clipboard.js",
         "gui/PresenterUI.js",
         "gui/SessionController.js",
-        "gui/CaretFactory.js",
+        "gui/CaretManager.js",
         "gui/EditInfoHandle.js",
         "gui/EditInfoMarker.js",
         "gui/SessionView.js",

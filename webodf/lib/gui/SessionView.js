@@ -83,11 +83,10 @@ gui.SessionView = (function () {
      * @constructor
      * @param {gui.SessionViewOptions} viewOptions
      * @param {ops.Session} session
-     * @param {gui.CaretFactory} caretFactory
+     * @param {gui.CaretManager} caretManager
      */
-    function SessionView(viewOptions, session, caretFactory) {
-        var carets = {},
-            avatarInfoStyles,
+    function SessionView(viewOptions, session, caretManager) {
+        var avatarInfoStyles,
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {},
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
@@ -193,18 +192,13 @@ gui.SessionView = (function () {
          * @param {boolean} visible
          */
         function setCaretAvatarVisibility(visible) {
-            var caret, keyname;
-
-            for (keyname in carets) {
-                if (carets.hasOwnProperty(keyname)) {
-                    caret = carets[keyname];
-                    if (visible) {
-                        caret.showHandle();
-                    } else {
-                        caret.hideHandle();
-                    }
+            caretManager.getCarets().forEach(function(caret) {
+                if (visible) {
+                    caret.showHandle();
+                } else {
+                    caret.hideHandle();
                 }
-            }
+            });
         }
 
         /**
@@ -266,7 +260,7 @@ gui.SessionView = (function () {
          * @return {gui.Caret}
          */
         this.getCaret = function (memberid) {
-            return carets[memberid];
+            return caretManager.getCaret(memberid);
         };
 
         /**
@@ -277,7 +271,7 @@ gui.SessionView = (function () {
          * Setting userData to null will apply empty (bogus) user data.
          */
         function renderMemberData(memberId, userData) {
-            var caret = carets[memberId];
+            var caret = caretManager.getCaret(memberId);
 
             // this takes care of incorrectly implemented UserModels,
             // which might end up returning undefined user data
@@ -308,11 +302,11 @@ gui.SessionView = (function () {
          * @return {undefined}
          */
         function onCursorAdded(cursor) {
-            var caret = caretFactory.createCaret(cursor, showCaretAvatars, blinkOnRangeSelect),
-                memberId = cursor.getMemberId(),
+            var memberId = cursor.getMemberId(),
                 userModel = session.getUserModel();
 
-            carets[memberId] = caret;
+            caretManager.registerCursor(cursor, showCaretAvatars, blinkOnRangeSelect);
+
             // preset bogus data
             // TODO: indicate loading state
             // (instead of setting the final 'unknown identity' data)
@@ -329,8 +323,6 @@ gui.SessionView = (function () {
         function onCursorRemoved(memberid) {
             var /**@type{!boolean}*/ hasMemberEditInfo = false,
                 keyname;
-
-            delete carets[memberid];
 
             // check if there is any edit info with this member
             for (keyname in editInfoMap) {
