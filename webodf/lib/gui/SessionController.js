@@ -660,8 +660,13 @@ gui.SessionController = (function () {
         function maintainCursorSelection() {
             var cursor = odtDocument.getCursor(inputMemberId),
                 selection = runtime.getWindow().getSelection();
-            selection.removeAllRanges();
-            selection.addRange(cursor.getSelectedRange().cloneRange());
+
+            if (cursor) {
+                // May have just processed our own remove cursor operation...
+                // Probably not a good idea to try and update our selected range in this case ;-)
+                selection.removeAllRanges();
+                selection.addRange(cursor.getSelectedRange().cloneRange());
+            }
         }
 
         /**
