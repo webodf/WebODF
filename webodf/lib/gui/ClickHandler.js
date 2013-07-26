@@ -74,7 +74,7 @@ gui.ClickHandler = function ClickHandler() {
             clickCount += 1;
 
             if (clickCount === 1) {
-                eventNotifier.emit(gui.ClickHandler.signalSingleClick, undefined);
+                eventNotifier.emit(gui.ClickHandler.signalSingleClick, e);
             }
             else if (clickCount === 2) { // double click
                 eventNotifier.emit(gui.ClickHandler.signalDoubleClick, undefined);
@@ -85,7 +85,7 @@ gui.ClickHandler = function ClickHandler() {
                 resetClick();
             }
         } else {
-            eventNotifier.emit(gui.ClickHandler.signalSingleClick, undefined);
+            eventNotifier.emit(gui.ClickHandler.signalSingleClick, e);
 
             clickCount = 1;
             clickPosition = {x: e.screenX, y: e.screenY};

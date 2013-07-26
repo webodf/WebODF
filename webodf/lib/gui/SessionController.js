@@ -176,19 +176,57 @@ gui.SessionController = (function () {
             return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
         }
 
-        function select() {
-            var selection = runtime.getWindow().getSelection(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                stepsToAnchor,
-                stepsToFocus,
-                op;
+        function caretPositionFromPoint(x, y) {
+            var doc = odtDocument.getDOM(),
+                result;
 
-            stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
-            stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
-            if (stepsToFocus !== 0 || stepsToAnchor !== 0) {
-                op = createOpMoveCursor(oldPosition + stepsToAnchor, stepsToFocus - stepsToAnchor);
-                session.enqueue(op);
+            if (doc.caretRangeFromPoint) {
+                result = doc.caretRangeFromPoint(x, y);
+                return {
+                    container : result.startContainer,
+                    offset : result.startOffset
+                };
             }
+            if (doc.caretPositionFromPoint) {
+                result = doc.caretPositionFromPoint(x, y);
+                return {
+                    container : result.offsetNode,
+                    offset : result.offset
+                };
+            }
+            return null;
+        }
+
+        /*
+         * @param {!Event} e
+         */
+        function select(e) {
+            // When click somewhere within already selected text, call window.getSelection() straight away results
+            // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
+            // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
+            // out the caret position from two coordinates.
+            runtime.setTimeout(function () {
+                var selection = runtime.getWindow().getSelection(),
+                    oldPosition = odtDocument.getCursorPosition(inputMemberId),
+                    range, caretPos, stepsToAnchor, stepsToFocus, op;
+
+                if (selection.anchorNode === null && selection.focusNode === null) { // chrome & safari
+                    caretPos = caretPositionFromPoint(e.clientX, e.clientY);
+                    if (caretPos) {
+                        range = odtDocument.getDOM().createRange();
+                        range.setStart(caretPos.container, caretPos.offset);
+                        range.collapse(true);
+                        selection.addRange(range);
+                    }
+                }
+
+                stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
+                stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
+                if (stepsToFocus !== 0 || stepsToAnchor !== 0) {
+                    op = createOpMoveCursor(oldPosition + stepsToAnchor, stepsToFocus - stepsToAnchor);
+                    session.enqueue(op);
+                }
+            }, 0);
         }
 
         function selectWord() {
