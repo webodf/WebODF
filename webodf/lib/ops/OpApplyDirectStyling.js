@@ -42,10 +42,15 @@ runtime.loadClass("odf.OdfUtils");
  * @constructor
  * @implements ops.Operation
  */
-ops.OpApplyStyle = function OpApplyStyle() {
+ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
     "use strict";
 
-    var memberid, timestamp, position, length, info,
+    var memberid, timestamp,
+        /**@type {number}*/
+        position,
+        /**@type {number}*/
+        length,
+        setProperties,
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
@@ -53,9 +58,9 @@ ops.OpApplyStyle = function OpApplyStyle() {
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
-        position = data.position;
-        length = data.length;
-        info = data.info;
+        position = parseInt(data.position, 10);
+        length = parseInt(data.length, 10);
+        setProperties = data.setProperties;
     };
 
     function getRange(odtDocument) {
@@ -99,7 +104,7 @@ ops.OpApplyStyle = function OpApplyStyle() {
             impactedParagraphs = getImpactedParagraphs(range),
             styleHelper = new gui.StyleHelper(odtDocument.getFormatting());
 
-        styleHelper.applyStyle(memberid, range, info);
+        styleHelper.applyStyle(memberid, range, setProperties);
         range.detach();
         odtDocument.getOdfCanvas().refreshCSS();
 
@@ -115,12 +120,12 @@ ops.OpApplyStyle = function OpApplyStyle() {
 
     this.spec = function () {
         return {
-            optype: "ApplyStyle",
+            optype: "ApplyDirectStyling",
             memberid: memberid,
             timestamp: timestamp,
             position: position,
             length: length,
-            info: info
+            setProperties: setProperties
         };
     };
 

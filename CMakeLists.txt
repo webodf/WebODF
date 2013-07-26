@@ -280,7 +280,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/Operation.js
     lib/ops/OpAddCursor.js
     lib/gui/StyleHelper.js
-    lib/ops/OpApplyStyle.js
+    lib/ops/OpApplyDirectStyling.js
     lib/ops/OpRemoveCursor.js
     lib/ops/OpMoveCursor.js
     lib/ops/OpInsertTable.js

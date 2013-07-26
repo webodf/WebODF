@@ -693,14 +693,14 @@
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
  </test>
- <test name="ApplyStyle_UnstyledParagraph">
+ <test name="ApplyDirectStyling_UnstyledParagraph">
   <before>
    <office:automatic-styles/>
    <office:text><text:p>ABCD</text:p></office:text>
   </before>
   <ops>
-   <op optype="ApplyStyle" memberid="Alice" position="1" length="2">
-    <info><style:text-properties fo:font-weight="bold" /></info>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
    </op>
   </ops>
   <after>
@@ -708,14 +708,14 @@
    <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
   </after>
  </test>
- <test name="ApplyStyle_ExistingSpan">
+ <test name="ApplyDirectStyling_ExistingSpan">
   <before>
    <office:automatic-styles/>
    <office:text><text:p>A<text:span>BCDE</text:span>F</text:p></office:text>
   </before>
   <ops>
-   <op optype="ApplyStyle" memberid="Alice" position="3" length="2">
-    <info><style:text-properties fo:font-weight="bold" /></info>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
    </op>
   </ops>
   <after>

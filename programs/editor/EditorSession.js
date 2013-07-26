@@ -322,13 +322,13 @@ define("webodf/editor/EditorSession", [
         };
 
         this.formatSelection = function (value) {
-            var op = new ops.OpApplyStyle(),
+            var op = new ops.OpApplyDirectStyling(),
                 selection = self.getCursorSelection();
             op.init({
                 memberid: memberid,
                 position: selection.position,
                 length: selection.length,
-                info: value
+                setProperties: value
             });
             session.enqueue(op);
         };

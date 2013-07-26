@@ -40,7 +40,7 @@
  */
 
 runtime.loadClass("ops.OpAddCursor");
-runtime.loadClass("ops.OpApplyStyle");
+runtime.loadClass("ops.OpApplyDirectStyling");
 runtime.loadClass("ops.OpRemoveCursor");
 runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertTable");
@@ -97,7 +97,7 @@ ops.OperationFactory = function OperationFactory() {
     function init() {
         specs = {
             AddCursor : constructor(ops.OpAddCursor),
-            ApplyStyle : constructor(ops.OpApplyStyle),
+            ApplyDirectStyling : constructor(ops.OpApplyDirectStyling),
             InsertTable : constructor(ops.OpInsertTable),
             InsertText : constructor(ops.OpInsertText),
             RemoveText : constructor(ops.OpRemoveText),

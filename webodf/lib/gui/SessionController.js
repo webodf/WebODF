@@ -907,7 +907,7 @@ gui.SessionController = (function () {
          */
         function formatTextSelection(propertyName, propertyValue) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
-                op = new ops.OpApplyStyle(),
+                op = new ops.OpApplyDirectStyling(),
                 properties = {};
 
             properties[propertyName] = propertyValue;
@@ -915,7 +915,7 @@ gui.SessionController = (function () {
                 memberid: inputMemberId,
                 position: selection.position,
                 length: selection.length,
-                info: {'style:text-properties' : properties }
+                setProperties: {'style:text-properties' : properties }
             });
             session.enqueue(op);
         }
