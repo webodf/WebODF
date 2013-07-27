@@ -212,6 +212,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
+     * Returns the number of positions the given (step, filter) pair is 
+     * equivalent to in unfiltered space.
      * @param {!number} steps
      * @param {!core.PositionFilter} filter
      * @return {!number}
@@ -232,6 +234,59 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return count;
     }
+    /**
+     * Returns the number of positions to the right the (steps, filter1) pair
+     * is equivalent to in filter2 space.
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter1
+     * @param {!core.PositionFilter} filter2
+     * @return {!number}
+     */
+    function convertForwardStepsBetweenFilters(steps, filter1, filter2) {
+        var iterator = getIteratorAtCursor(),
+            watch = new core.LoopWatchDog(1000),
+            stepCount = 0,
+            count = 0;
+        while (steps > 0 && iterator.nextPosition()) {
+            watch.check();
+            if (filter2.acceptPosition(iterator) === 1) {
+                stepCount += 1;
+                if (filter1.acceptPosition(iterator) === 1) {
+                    count += stepCount;
+                    stepCount = 0;
+                    steps -= 1;
+                }
+            }
+        }
+        return count;
+    }
+    /**
+     * Returns the number of positions to the left the (steps, filter1) pair
+     * is equivalent to in filter2 space.
+     * @param {!number} steps
+     * @param {!core.PositionFilter} filter1
+     * @param {!core.PositionFilter} filter2
+     * @return {!number}
+     */
+    function convertBackwardStepsBetweenFilters(steps, filter1, filter2) {
+        var iterator = getIteratorAtCursor(),
+            watch = new core.LoopWatchDog(1000),
+            stepCount = 0,
+            count = 0;
+        while (steps > 0 && iterator.previousPosition()) {
+            watch.check();
+            if (filter2.acceptPosition(iterator) === 1) {
+                stepCount += 1;
+                if (filter1.acceptPosition(iterator) === 1) {
+                    count += stepCount;
+                    stepCount = 0;
+                    steps -= 1;
+                }
+            }
+        }
+        return count;
+    }
+ 
     /**
      * @param {!number} steps
      * @param {!core.PositionFilter} filter
@@ -521,6 +576,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         return {
             countForwardSteps: countForwardSteps,
             countBackwardSteps: countBackwardSteps,
+            convertForwardStepsBetweenFilters: convertForwardStepsBetweenFilters,
+            convertBackwardStepsBetweenFilters: convertBackwardStepsBetweenFilters,
             countLinesSteps: countLinesSteps,
             countStepsToLineBoundary: countStepsToLineBoundary,
             countStepsToPosition: countStepsToPosition,

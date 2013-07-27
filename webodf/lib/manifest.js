@@ -44,6 +44,7 @@
         "core/EventNotifier.js",
         "core/JSLint.js",
         "core/PositionFilter.js",
+        "core/PositionFilterChain.js",
         "core/LoopWatchDog.js",
         "core/PositionIterator.js",
         "core/RawDeflate.js",

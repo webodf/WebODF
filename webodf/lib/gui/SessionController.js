@@ -69,8 +69,13 @@ gui.SessionController = (function () {
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
+            keyboardMovementsFilter = new core.PositionFilterChain(),
+            baseFilter = odtDocument.getPositionFilter(),
             undoManager = null;
 
+        keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
+        keyboardMovementsFilter.addFilter('RootFilter', new odtDocument.Filters.RootFilter(inputMemberId));
+       
         /**
          * @param {!Element} eventTarget
          * @param {!string} eventType
@@ -324,9 +329,14 @@ gui.SessionController = (function () {
          */
         function extendCursorByAdjustment(lengthAdjust) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
+                stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter(),
                 newLength;
             if (lengthAdjust !== 0) {
-                newLength = selection.length + lengthAdjust;
+                newLength = selection.length + (
+                    (lengthAdjust > 0)
+                        ? stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter)
+                        : -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter)
+                );
                 session.enqueue(createOpMoveCursor(selection.position, newLength));
             }
         }
@@ -336,9 +346,14 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function moveCursorByAdjustment(positionAdjust) {
-            var position = odtDocument.getCursorPosition(inputMemberId);
+            var position = odtDocument.getCursorPosition(inputMemberId),
+                stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter();
             if (positionAdjust !== 0) {
-                position = position + positionAdjust;
+                position = position + (
+                    (positionAdjust > 0)
+                        ? stepCounter.convertForwardStepsBetweenFilters(positionAdjust, keyboardMovementsFilter, baseFilter)
+                        : -stepCounter.convertBackwardStepsBetweenFilters(-positionAdjust, keyboardMovementsFilter, baseFilter)
+                );
                 session.enqueue(createOpMoveCursor(position, 0));
             }
         }
@@ -385,7 +400,7 @@ gui.SessionController = (function () {
                 steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, odtDocument.getPositionFilter());
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, keyboardMovementsFilter);
             if (extend) {
                 extendCursorByAdjustment(steps);
             } else {
@@ -433,7 +448,7 @@ gui.SessionController = (function () {
         function moveCursorToLineBoundary(direction, extend) {
             var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
                 direction,
-                odtDocument.getPositionFilter()
+                keyboardMovementsFilter
             );
             if (extend) {
                 extendCursorByAdjustment(steps);

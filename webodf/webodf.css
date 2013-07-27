@@ -343,7 +343,9 @@ office|annotation {
 
 office|annotation > dc|creator {
     display: block;
-    font-size: 0.8em;
+    font-size: 10pt;
+    font-weight: normal;
+    font-style: normal;
     font-family: sans-serif;
     color: white;
     background-color: brown;
@@ -351,7 +353,9 @@ office|annotation > dc|creator {
 }
 office|annotation > dc|date {
     display: block;
-    font-size: 0.6em;
+    font-size: 10pt;
+    font-weight: normal;
+    font-style: normal;
     font-family: sans-serif;
     border: 4px solid transparent;
 }

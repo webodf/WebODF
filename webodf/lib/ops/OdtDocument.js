@@ -39,6 +39,7 @@ runtime.loadClass("core.EventNotifier");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("gui.StyleHelper");
+runtime.loadClass("core.PositionFilterChain");
 
 /**
  * A document that keeps all data related to the mapped document.
@@ -50,7 +51,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     var self = this,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        filter,
         odfUtils,
         /**Array.<!ops.OdtCursor>*/cursors = {},
         eventNotifier = new core.EventNotifier([
@@ -63,7 +63,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalStyleDeleted,
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted,
-            ops.OdtDocument.signalUndoStackChanged]);
+            ops.OdtDocument.signalUndoStackChanged]),
+        /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+        /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT,
+        filter = new core.PositionFilterChain();
 
     function getRootNode() {
         var element = odfCanvas.odfContainer().getContentElement(),
@@ -76,9 +79,50 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @constructor
      * @implements {core.PositionFilter}
      */
+    function RootFilter(localMemberId) {
+        /**
+         * @param {!Node} node
+         * @return {!boolean}
+         */
+        function isRoot(node) {
+            if ((node.namespaceURI === odf.Namespaces.officens && node.localName === 'text') ||
+                    (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation')) {
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * @param {!Node} node
+         * @return {!Node}
+         */
+        function getRoot(node) {
+            while (!isRoot(node)) {
+                node = /**@type{!Node}*/(node.parentNode);
+            }
+            return node;
+        }
+
+        /**
+         * @param {!core.PositionIterator} iterator
+         * @return {!core.PositionFilter.FilterResult}
+         */
+        this.acceptPosition = function (iterator) {
+            var node = iterator.container(),
+                cursorNode = cursors[localMemberId].getNode();
+
+            if (getRoot(node) === getRoot(cursorNode)) {
+                return accept;
+            }
+            return reject;
+        };
+    }
+
+    /**
+     * @constructor
+     * @implements {core.PositionFilter}
+     */
     function TextPositionFilter() {
-        var /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-            /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
        /**
          * @param {!Node} container
          * @param {?Node} leftNode
@@ -546,7 +590,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         };
     };
     /**
-     * @return {!core.PositionFilter}
+     * @return {!core.PositionFilterChain}
      */
     this.getPositionFilter = function () {
         return filter;
@@ -685,11 +729,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         eventNotifier.unsubscribe(eventid, cb);
     };
 
+    this.Filters = {
+        TextPositionFilter: TextPositionFilter,
+        RootFilter: RootFilter
+    };
+
     /**
      * @return {undefined}
      */
     function init() {
-        filter = new TextPositionFilter();
+        filter.addFilter('TextPositionFilter', new self.Filters.TextPositionFilter());
         odfUtils = new odf.OdfUtils();
     }
     init();
