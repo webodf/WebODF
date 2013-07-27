@@ -388,7 +388,17 @@ annotation|connector {
     z-index: 10;
     border-top: 1px dashed brown;
 }
-
+annotation|connector:before {
+    content: '';
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    border-width: 8.7px 5px 0 5px;
+    border-color: brown transparent transparent transparent;
+    top: -1px;
+    left: -5px;
+}
 annotation|span {
     background-color: yellow;
     position: relative;

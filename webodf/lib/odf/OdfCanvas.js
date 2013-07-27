@@ -582,7 +582,7 @@ odf.OdfCanvas = (function () {
             // Only do the highlighting if there is an annotation-end element
             if (annotation.annotationEnd) {
                 range = doc.createRange();
-                range.setStart(utils.nextNode(annotation.annotationNode), 0);
+                range.setStart(annotation.annotationNode, annotation.annotationNode.childNodes.length);
                 range.setEnd(annotation.annotationEnd, 0);
 
                 limits = {
@@ -593,15 +593,18 @@ odf.OdfCanvas = (function () {
                 };
                 textNodes = utils.getTextNodes(range, false);
 
-                formatting.applyGUIStyle(textNodes, limits, {
+                highlightSpan = formatting.applyGUIStyle(textNodes, limits, {
                     name: annotation.annotationNode.getAttributeNS(officens, 'name')
                 });
-
-                // We will insert a 'connector' node at the very beginning of the highlighting span
-                connector = doc.createElementNS(annotationns, 'annotation:connector');
-                highlightSpan = annotation.annotationNode.nextSibling;
-                highlightSpan.insertBefore(connector, highlightSpan.firstChild);
+            } else {
+                highlightSpan = doc.createElementNS(annotationns, 'annotation:span');
+                highlightSpan.setAttributeNS(annotationns, 'annotaiton:name', annotation.annotationNode.getAttributeNS(officens, 'name'));
+                annotation.annotationNode.parentNode.insertBefore(highlightSpan, annotation.annotationNode.nextSibling);
             }
+                // We will insert a 'connector' node at the very beginning of the highlighting span
+            connector = doc.createElementNS(annotationns, 'annotation:connector');
+            connector.setAttributeNS(officens, 'office:name', annotation.annotationNode.getAttributeNS(officens, 'name'));
+            highlightSpan.insertBefore(connector, highlightSpan.firstChild);
         }
 
         annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation');
