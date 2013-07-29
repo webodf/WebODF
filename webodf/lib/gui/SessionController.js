@@ -221,7 +221,7 @@ gui.SessionController = (function () {
          * @param {!Event} e
          * @return {undefined}
          */
-        function select(e) {
+        function selectRange(e) {
             // When click somewhere within already selected text, call window.getSelection() straight away results
             // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
@@ -1119,7 +1119,7 @@ gui.SessionController = (function () {
             });
             keyPressHandler.bind(keyCode.Enter, modifier.None, enqueueParagraphSplittingOps);
 
-            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, select);
+            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, selectRange);
             clickHandler.subscribe(gui.ClickHandler.signalDoubleClick, selectWord);
             clickHandler.subscribe(gui.ClickHandler.signalTripleClick, selectParagraph);
         }
