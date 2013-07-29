@@ -162,7 +162,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     /**
      * Subscribe to events related to the undo manager
      * @param {!string} signal
-     * @param {!function(*)} callback
+     * @param {!Function} callback
      */
     this.subscribe = function(signal, callback) {
         eventNotifier.subscribe(signal, callback);
@@ -171,7 +171,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     /**
      * Unsubscribe to events related to the undo manager
      * @param {!string} signal
-     * @param {!function(*)} callback
+     * @param {!Function} callback
      */
     this.unsubscribe = function(signal, callback) {
         eventNotifier.unsubscribe(signal, callback);

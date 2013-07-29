@@ -864,6 +864,10 @@ gui.SessionController = (function () {
             }
         }
 
+        /**
+         * @param {?Event} e
+         * @return {undefined}
+         */
         function forwardUndoStackChange(e) {
             odtDocument.emit(ops.OdtDocument.signalUndoStackChanged, e);
         }

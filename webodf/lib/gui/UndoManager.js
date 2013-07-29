@@ -44,14 +44,14 @@ gui.UndoManager = function UndoManager() {"use strict"; };
 /**
  * Subscribe to events related to the undo manager
  * @param {!string} signal
- * @param {!function(*)} callback
+ * @param {!Function} callback
  */
 gui.UndoManager.prototype.subscribe = function(signal, callback) {"use strict"; };
 
 /**
  * Unsubscribe to events related to the undo manager
  * @param {!string} signal
- * @param {!function(*)} callback
+ * @param {!Function} callback
  */
 gui.UndoManager.prototype.unsubscribe = function(signal, callback) {"use strict"; };
 

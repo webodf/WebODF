@@ -670,7 +670,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!string} eventid
-     * @param {!function(*)} cb
+     * @param {!Function} cb
      * @return {undefined}
      */
     this.subscribe = function (eventid, cb) {
@@ -679,7 +679,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!string} eventid
-     * @param {!function(*)} cb
+     * @param {!Function} cb
      * @return {undefined}
      */
     this.unsubscribe = function (eventid, cb) {

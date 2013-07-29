@@ -63,7 +63,7 @@ core.EventNotifier = function EventNotifier(eventIds) {
 
     /**
      * @param {!string} eventId
-     * @param {!function(*)} cb
+     * @param {!Function} cb
      * @return {undefined}
      */
     this.subscribe = function (eventId, cb) {
@@ -75,7 +75,7 @@ core.EventNotifier = function EventNotifier(eventIds) {
 
     /**
      * @param {!string} eventId
-     * @param {!function(*)} cb
+     * @param {!Function} cb
      * @return {undefined}
      */
     this.unsubscribe = function (eventId, cb) {
