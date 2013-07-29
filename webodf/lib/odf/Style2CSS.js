@@ -555,7 +555,7 @@ odf.Style2CSS = function Style2CSS() {
         if (lineHeight && lineHeight !== 'normal') {
             lineHeight = utils.parseFoLineHeight(lineHeight);
             if (lineHeight.unit !== '%') {
-                rule += 'line-height: ' + lineHeight.value + ';';
+                rule += 'line-height: ' + lineHeight.value + lineHeight.unit + ';';
             } else {
                 rule += 'line-height: ' + lineHeight.value / 100 + ';';
             }
