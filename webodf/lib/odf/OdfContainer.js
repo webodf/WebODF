@@ -120,6 +120,31 @@ odf.OdfContainer = (function () {
         };
     }
     /**
+     * Class that extends OdfStylesFilter
+     * Additionally, filter out ' ' within the <text:s> element and '\t' within the <text:tab> element
+     * @constructor
+     * @implements {xmldom.LSSerializerFilter}
+     * @param {!Element} styleUsingElementsRoot root element of tree of elements using styles
+     * @param {?Element=} automaticStyles root element of the automatic style definition tree
+     */
+    function OdfContentFilter(styleUsingElementsRoot, automaticStyles) {
+        var odfStylesFilter = new OdfStylesFilter(styleUsingElementsRoot, automaticStyles);
+
+        /**
+         * @param {!Node} node
+         * @return {!number}
+         */
+        this.acceptNode = function (node) {
+            var result = odfStylesFilter.acceptNode(node);
+            if (result === NodeFilter.FILTER_ACCEPT
+                && node.parentNode && node.parentNode.namespaceURI === odf.Namespaces.textns
+                && (node.parentNode.localName === 's' || node.parentNode.localName === 'tab')) {
+                result = NodeFilter.FILTER_REJECT;
+            }
+            return result;
+        };
+    }
+    /**
      * Put the element at the right position in the parent.
      * The right order is given by the value returned from getNodePosition.
      * @param {!Node} node
@@ -618,7 +643,7 @@ odf.OdfContainer = (function () {
                 serializer = new xmldom.LSSerializer(),
                 automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentContentScope),
                 /**@type{!string}*/ s = createDocumentElement("document-content");
-            serializer.filter = new OdfStylesFilter(self.rootElement.body, automaticStyles);
+            serializer.filter = new OdfContentFilter(self.rootElement.body, automaticStyles);
             // Until there is code to  determine if a font is referenced only
             // from all font declaratios will be stored in styles.xml
             s += serializer.writeToString(automaticStyles, nsmap);
