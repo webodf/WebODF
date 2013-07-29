@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,6 +31,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global runtime, core, gui, Node, ops, odf */
 
 runtime.loadClass("ops.OpAddCursor");
@@ -68,13 +69,14 @@ gui.SessionController = (function () {
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
-            undoManager;
+            undoManager = null;
 
         /**
          * @param {!Element} eventTarget
          * @param {!string} eventType
          * @param {function(!Event)|function()} eventHandler
          * @param {boolean=} includeDirect
+         * @return {undefined}
          */
         function listenEvent(eventTarget, eventType, eventHandler, includeDirect) {
             var onVariant = "on" + eventType,
@@ -92,6 +94,12 @@ gui.SessionController = (function () {
             }
         }
 
+        /**
+         * @param {!Element} eventTarget
+         * @param {!string} eventType
+         * @param {function(!Event)|function()} eventHandler
+         * @return {undefined}
+         */
         function removeEvent(eventTarget, eventType, eventHandler) {
             var onVariant = "on" + eventType;
             if (eventTarget.detachEvent) {
@@ -107,6 +115,7 @@ gui.SessionController = (function () {
 
         /**
          * @param {!Event} event
+         * @return {undefined}
          */
         function cancelEvent(event) {
             if (event.preventDefault) {
@@ -118,6 +127,7 @@ gui.SessionController = (function () {
 
         /**
          * @param {!Event} e
+         * @return {undefined}
          */
         function dummyHandler(e) {
             // runtime.log("ignore event " + e.type);
@@ -135,6 +145,11 @@ gui.SessionController = (function () {
             return op;
         }
 
+        /**
+         * @param {?Node} targetNode
+         * @param {!number} targetOffset
+         * @return {?number}
+         */
         function countStepsToNode(targetNode, targetOffset) {
             var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 canvasElement = odtDocument.getOdfCanvas().getElement(),
@@ -145,7 +160,7 @@ gui.SessionController = (function () {
             // avatarflag are.
             node = targetNode;
             if (!node) {
-                return;
+                return null;
             }
             while (node !== canvasElement) {
                 if ((node.namespaceURI === 'urn:webodf:names:cursor'
@@ -160,7 +175,7 @@ gui.SessionController = (function () {
                 // will never reach canvasElement, and the node will eventually become null. In that case,
                 // return.
                 if (!node) {
-                    return;
+                    return null;
                 }
             }
 
@@ -176,6 +191,11 @@ gui.SessionController = (function () {
             return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
         }
 
+        /**
+         * @param {!number} x
+         * @param {!number} y
+         * @return {?{container:!Object, offset:!number}}
+         */
         function caretPositionFromPoint(x, y) {
             var doc = odtDocument.getDOM(),
                 result;
@@ -197,8 +217,9 @@ gui.SessionController = (function () {
             return null;
         }
 
-        /*
+        /**
          * @param {!Event} e
+         * @return {undefined}
          */
         function select(e) {
             // When click somewhere within already selected text, call window.getSelection() straight away results
@@ -222,13 +243,17 @@ gui.SessionController = (function () {
 
                 stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
                 stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
-                if (stepsToFocus !== 0 || stepsToAnchor !== 0) {
+                if ((stepsToFocus !== null && stepsToFocus !== 0 ) ||
+                    (stepsToAnchor !== null && stepsToAnchor !== 0)) {
                     op = createOpMoveCursor(oldPosition + stepsToAnchor, stepsToFocus - stepsToAnchor);
                     session.enqueue(op);
                 }
             }, 0);
         }
 
+        /**
+         * @return {undefined}
+         */
         function selectWord() {
             var currentNode, i, c, op,
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
@@ -274,6 +299,9 @@ gui.SessionController = (function () {
             }
         }
 
+        /**
+         * @return {undefined}
+         */
         function selectParagraph() {
             var stepsToStart, stepsToEnd, op,
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
@@ -290,8 +318,9 @@ gui.SessionController = (function () {
             }
         }
 
-        /*
-         * {?ops.Operation} op
+        /**
+         * @param {?ops.Operation} op
+         * @return {undefined}
          */
         function sessionEnqueue(op) {
             if (op) {
@@ -352,6 +381,7 @@ gui.SessionController = (function () {
         /**
          * @param {!number} direction -1 for upwards 1 for downwards
          * @param {!boolean} extend
+         * @return {?ops.Operation}
          */
         function createOpMoveCursorDirection(direction, extend) {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
@@ -499,7 +529,8 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!number} direction -1 for beginning 1 for end
+         * @param {!number} direction -1 for beginning, 1 for end
+         * @param {!boolean=} extend
          * @return {?ops.Operation}
          */
         function createOpMoveCursorDocument(direction, extend) {
@@ -549,6 +580,9 @@ gui.SessionController = (function () {
             return true;
         }
 
+        /**
+         * @return {!boolean}
+         */
         function extendSelectionToEntireDocument() {
             var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 steps;
@@ -576,7 +610,7 @@ gui.SessionController = (function () {
 
         /**
          * Creates an operation to remove the provided selection
-         * @param {{position: number, length: number}} selection
+         * @param {!{position: number, length: number}} selection
          * @returns {!ops.OpRemoveText}
          */
         function createOpRemoveSelection(selection) {
@@ -636,8 +670,10 @@ gui.SessionController = (function () {
             return op !== null;
         }
 
-        /*
+        /**
          * Removes currently selected text (if any) before inserts the text.
+         * @param {!string} text
+         * @return {undefined}
          */
         function insertText(text) {
             var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
@@ -691,10 +727,13 @@ gui.SessionController = (function () {
 
             return true;
         }
-        // TODO: This method and associated event subscriptions really belong in SessionView
-        // As this implementation relies on the current browser selection, only a single
-        // cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
-        // implemented, this limitation will be eliminated
+        /**
+         * TODO: This method and associated event subscriptions really belong in SessionView
+         * As this implementation relies on the current browser selection, only a single
+         * cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
+         * implemented, this limitation will be eliminated
+         * @return {undefined}
+         */
         function maintainCursorSelection() {
             var cursor = odtDocument.getCursor(inputMemberId),
                 selection = runtime.getWindow().getSelection();
@@ -724,6 +763,7 @@ gui.SessionController = (function () {
         /**
          * Handle the cut operation request
          * @param {!Event} e
+         * @return {undefined}
          */
         function handleCut(e) {
             var cursor = odtDocument.getCursor(inputMemberId),
@@ -756,7 +796,7 @@ gui.SessionController = (function () {
 
         /**
          * Tell the browser that it's ok to perform a cut action on our read-only body
-         * @returns {boolean}
+         * @returns {!boolean}
          */
         function handleBeforeCut() {
             var cursor = odtDocument.getCursor(inputMemberId),
@@ -767,6 +807,7 @@ gui.SessionController = (function () {
         /**
          * Handle the copy operation request
          * @param {!Event} e
+         * @return {undefined}
          */
         function handleCopy(e) {
             var cursor = odtDocument.getCursor(inputMemberId),
@@ -787,6 +828,7 @@ gui.SessionController = (function () {
 
         /**
          * @param {!Event} e
+         * @return {undefined}
          */
         function handlePaste(e) {
             var plainText,
@@ -806,12 +848,16 @@ gui.SessionController = (function () {
 
         /**
          * Tell the browser that it's ok to perform a paste action on our read-only body
-         * @returns {boolean}
+         * @returns {!boolean}
          */
         function handleBeforePaste() {
             return false;
         }
 
+        /**
+         * @param {!ops.Operation} op
+         * @return {undefined}
+         */
         function updateUndoStack(op) {
             if (undoManager) {
                 undoManager.onOperationExecuted(op);
@@ -850,6 +896,11 @@ gui.SessionController = (function () {
 
         // duplicate of EditorSession.formatSelection method
         // TODO: find a better place for this method to live so it can be reused
+        /**
+         * @param {!string} propertyName
+         * @param {!string} propertyValue
+         * @return {undefined}
+         */
         function formatTextSelection(propertyName, propertyValue) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
                 op = new ops.OpApplyStyle(),
@@ -896,6 +947,7 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @return {undefined}
          */
         this.startEditing = function () {
             var canvasElement, op;
@@ -929,6 +981,7 @@ gui.SessionController = (function () {
         };
 
         /**
+         * @return {undefined}
          */
         this.endEditing = function () {
             var canvasElement, op;
@@ -957,21 +1010,22 @@ gui.SessionController = (function () {
         };
 
         /**
-         * @return {string}
+         * @return {!string}
          */
         this.getInputMemberId = function () {
             return inputMemberId;
         };
 
         /**
-         * @return {ops.Session}
+         * @return {!ops.Session}
          */
         this.getSession = function () {
             return session;
         };
 
         /**
-         * @param {gui.UndoManager} manager
+         * @param {?gui.UndoManager} manager
+         * @return {undefined}
          */
         this.setUndoManager = function (manager) {
             if (undoManager) {
@@ -991,7 +1045,7 @@ gui.SessionController = (function () {
         };
 
         /**
-         * @returns {gui.UndoManager}
+         * @returns {?gui.UndoManager}
          */
         this.getUndoManager = function () {
             return undoManager;
