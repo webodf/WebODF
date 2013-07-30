@@ -319,38 +319,26 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {?ops.Operation} op
-         * @return {undefined}
-         */
-        function sessionEnqueue(op) {
-            if (op) {
-                session.enqueue(op);
-            }
-        }
-
-        /**
          * @param {!number} posAdjust   position adjustment
          * @param {!number} lenAdjust   length adjustment
-         * @return {?ops.Operation}
+         * @return {undefined}
          */
-        function createOpMoveCursorByAdjustment(posAdjust, lenAdjust) {
+        function moveCursorByAdjustment(posAdjust, lenAdjust) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
                 newPos,
                 newLen;
-            if (posAdjust === 0 && lenAdjust === 0) {
-                return null;
+            if (posAdjust !== 0 && lenAdjust !== 0) {
+                newPos = selection.position + posAdjust;
+                newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
+                session.enqueue(createOpMoveCursor(newPos, newLen));
             }
-
-            newPos = selection.position + posAdjust;
-            newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
-            return createOpMoveCursor(newPos, newLen);
         }
 
         /**
          * @return {!boolean}
          */
         function moveCursorToLeft() {
-            sessionEnqueue(createOpMoveCursorByAdjustment(-1, 0));
+            moveCursorByAdjustment(-1, 0);
             return true;
         }
 
@@ -358,7 +346,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorToRight() {
-            sessionEnqueue(createOpMoveCursorByAdjustment(1, 0));
+            moveCursorByAdjustment(1, 0);
             return true;
         }
 
@@ -366,7 +354,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToLeft() {
-            sessionEnqueue(createOpMoveCursorByAdjustment(0, -1));
+            moveCursorByAdjustment(0, -1);
             return true;
         }
 
@@ -374,29 +362,33 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToRight() {
-            sessionEnqueue(createOpMoveCursorByAdjustment(0, 1));
+            moveCursorByAdjustment(0, 1);
             return true;
         }
 
         /**
          * @param {!number} direction -1 for upwards 1 for downwards
          * @param {!boolean} extend
-         * @return {?ops.Operation}
+         * @return {undefined}
          */
-        function createOpMoveCursorDirection(direction, extend) {
+        function moveCursorByLine(direction, extend) {
             var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
                 steps;
 
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, odtDocument.getPositionFilter());
-            return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
+            if (extend) {
+                moveCursorByAdjustment(0, steps);
+            } else {
+                moveCursorByAdjustment(steps, 0);
+            }
         }
 
         /**
          * @return {!boolean}
          */
         function moveCursorUp() {
-            sessionEnqueue(createOpMoveCursorDirection(-1, false));
+            moveCursorByLine(-1, false);
             return true;
         }
 
@@ -404,7 +396,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorDown() {
-            sessionEnqueue(createOpMoveCursorDirection(1, false));
+            moveCursorByLine(1, false);
             return true;
         }
 
@@ -412,7 +404,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionUp() {
-            sessionEnqueue(createOpMoveCursorDirection(-1, true));
+            moveCursorByLine(-1, true);
             return true;
         }
 
@@ -420,28 +412,32 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionDown() {
-            sessionEnqueue(createOpMoveCursorDirection(1, true));
+            moveCursorByLine(1, true);
             return true;
         }
 
         /**
          * @param {!number} direction -1 for beginning 1 for end
          * @param {!boolean} extend
-         * @return {?ops.Operation}
+         * @return {undefined}
          */
-        function createOpMoveCursorLineBoundary(direction, extend) {
+        function moveCursorToLineBoundary(direction, extend) {
             var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
                 direction,
                 odtDocument.getPositionFilter()
             );
-            return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
+            if (extend) {
+                moveCursorByAdjustment(0, steps);
+            } else {
+                moveCursorByAdjustment(steps, 0);
+            }
         }
 
         /**
          * @return {!boolean}
          */
         function moveCursorToLineStart() {
-            sessionEnqueue(createOpMoveCursorLineBoundary(-1, false));
+            moveCursorToLineBoundary(-1, false);
             return true;
         }
 
@@ -449,7 +445,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorToLineEnd() {
-            sessionEnqueue(createOpMoveCursorLineBoundary(1, false));
+            moveCursorToLineBoundary(1, false);
             return true;
         }
 
@@ -457,7 +453,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToLineStart() {
-            sessionEnqueue(createOpMoveCursorLineBoundary(-1, true));
+            moveCursorToLineBoundary(-1, true);
             return true;
         }
 
@@ -465,7 +461,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToLineEnd() {
-            sessionEnqueue(createOpMoveCursorLineBoundary(1, true));
+            moveCursorToLineBoundary(1, true);
             return true;
         }
 
@@ -490,7 +486,7 @@ gui.SessionController = (function () {
                     steps = odtDocument.getDistanceFromCursor(inputMemberId, node, 0);
                 }
             }
-            sessionEnqueue(createOpMoveCursorByAdjustment(0, steps));
+            moveCursorByAdjustment(0, steps);
             return true;
         }
 
@@ -524,16 +520,16 @@ gui.SessionController = (function () {
                     );
                 }
             }
-            sessionEnqueue(createOpMoveCursorByAdjustment(0, steps));
+            moveCursorByAdjustment(0, steps);
             return true;
         }
 
         /**
          * @param {!number} direction -1 for beginning, 1 for end
          * @param {!boolean=} extend
-         * @return {?ops.Operation}
+         * @return {undefined}
          */
-        function createOpMoveCursorDocument(direction, extend) {
+        function moveCursorToDocumentBoundary(direction, extend) {
             var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 steps;
             if (direction > 0) {
@@ -545,14 +541,18 @@ gui.SessionController = (function () {
                 iterator.container(),
                 iterator.unfilteredDomOffset()
             );
-            return extend ? createOpMoveCursorByAdjustment(0, steps) : createOpMoveCursorByAdjustment(steps, 0);
+            if (extend) {
+                moveCursorByAdjustment(0, steps);
+            } else {
+                moveCursorByAdjustment(steps, 0);
+            }
         }
 
         /**
          * @return {!boolean}
          */
         function moveCursorToDocumentStart() {
-            sessionEnqueue(createOpMoveCursorDocument(-1, false));
+            moveCursorToDocumentBoundary(-1, false);
             return true;
         }
 
@@ -560,7 +560,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorToDocumentEnd() {
-            sessionEnqueue(createOpMoveCursorDocument(1, false));
+            moveCursorToDocumentBoundary(1, false);
             return true;
         }
 
@@ -568,7 +568,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToDocumentStart() {
-            sessionEnqueue(createOpMoveCursorDocument(-1, true));
+            moveCursorToDocumentBoundary(-1, true);
             return true;
         }
 
@@ -576,7 +576,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToDocumentEnd() {
-            sessionEnqueue(createOpMoveCursorDocument(1, true));
+            moveCursorToDocumentBoundary(1, true);
             return true;
         }
 
@@ -591,7 +591,7 @@ gui.SessionController = (function () {
 
             iterator.moveToEnd();
             steps += odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-            sessionEnqueue(createOpMoveCursor(0, steps));
+            session.enqueue(createOpMoveCursor(0, steps));
             return true;
         }
 
@@ -639,11 +639,12 @@ gui.SessionController = (function () {
                         position: selection.position - 1,
                         length: 1
                     });
+                    session.enqueue(op);
                 }
             } else {
                 op = createOpRemoveSelection(selection);
+                session.enqueue(op);
             }
-            sessionEnqueue(op);
             return true;
         }
         /**
@@ -662,11 +663,12 @@ gui.SessionController = (function () {
                         position: selection.position,
                         length: 1
                     });
+                    session.enqueue(op);
                 }
             } else {
                 op = createOpRemoveSelection(selection);
+                session.enqueue(op);
             }
-            sessionEnqueue(op);
             return op !== null;
         }
 
