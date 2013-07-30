@@ -319,18 +319,27 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!number} posAdjust   position adjustment
-         * @param {!number} lenAdjust   length adjustment
+         * @param {!number} lengthAdjust   length adjustment
          * @return {undefined}
          */
-        function moveCursorByAdjustment(posAdjust, lenAdjust) {
+        function extendCursorByAdjustment(lengthAdjust) {
             var selection = odtDocument.getCursorSelection(inputMemberId),
-                newPos,
-                newLen;
-            if (posAdjust !== 0 && lenAdjust !== 0) {
-                newPos = selection.position + posAdjust;
-                newLen = lenAdjust !== 0 ? selection.length + lenAdjust : 0;
-                session.enqueue(createOpMoveCursor(newPos, newLen));
+                newLength;
+            if (lengthAdjust !== 0) {
+                newLength = selection.length + lengthAdjust;
+                session.enqueue(createOpMoveCursor(selection.position, newLength));
+            }
+        }
+
+        /**
+         * @param {!number} positionAdjust   position adjustment
+         * @return {undefined}
+         */
+        function moveCursorByAdjustment(positionAdjust) {
+            var position = odtDocument.getCursorPosition(inputMemberId);
+            if (positionAdjust !== 0) {
+                position = position + positionAdjust;
+                session.enqueue(createOpMoveCursor(position, 0));
             }
         }
 
@@ -338,7 +347,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorToLeft() {
-            moveCursorByAdjustment(-1, 0);
+            moveCursorByAdjustment(-1);
             return true;
         }
 
@@ -346,7 +355,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function moveCursorToRight() {
-            moveCursorByAdjustment(1, 0);
+            moveCursorByAdjustment(1);
             return true;
         }
 
@@ -354,7 +363,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToLeft() {
-            moveCursorByAdjustment(0, -1);
+            extendCursorByAdjustment(-1);
             return true;
         }
 
@@ -362,7 +371,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToRight() {
-            moveCursorByAdjustment(0, 1);
+            extendCursorByAdjustment(1);
             return true;
         }
 
@@ -378,9 +387,9 @@ gui.SessionController = (function () {
             runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
             steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, odtDocument.getPositionFilter());
             if (extend) {
-                moveCursorByAdjustment(0, steps);
+                extendCursorByAdjustment(steps);
             } else {
-                moveCursorByAdjustment(steps, 0);
+                moveCursorByAdjustment(steps);
             }
         }
 
@@ -427,9 +436,9 @@ gui.SessionController = (function () {
                 odtDocument.getPositionFilter()
             );
             if (extend) {
-                moveCursorByAdjustment(0, steps);
+                extendCursorByAdjustment(steps);
             } else {
-                moveCursorByAdjustment(steps, 0);
+                moveCursorByAdjustment(steps);
             }
         }
 
@@ -486,7 +495,7 @@ gui.SessionController = (function () {
                     steps = odtDocument.getDistanceFromCursor(inputMemberId, node, 0);
                 }
             }
-            moveCursorByAdjustment(0, steps);
+            extendCursorByAdjustment(steps);
             return true;
         }
 
@@ -520,7 +529,7 @@ gui.SessionController = (function () {
                     );
                 }
             }
-            moveCursorByAdjustment(0, steps);
+            extendCursorByAdjustment(steps);
             return true;
         }
 
@@ -542,9 +551,9 @@ gui.SessionController = (function () {
                 iterator.unfilteredDomOffset()
             );
             if (extend) {
-                moveCursorByAdjustment(0, steps);
+                extendCursorByAdjustment(steps);
             } else {
-                moveCursorByAdjustment(steps, 0);
+                moveCursorByAdjustment(steps);
             }
         }
 
