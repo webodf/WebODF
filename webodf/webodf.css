@@ -327,11 +327,17 @@ cursor|cursor > div:after {
     line-height: 12pt;
 }
 
-office|annotation {
+.annotationNote {
     width: 4cm;
-    right: -6cm;
     position: absolute;
+    display: inline;
     z-index: 10;
+}
+
+office|annotation {
+    width: 100%;
+    height: 100%;
+    display: block;
     background: rgb(130, 158, 255);
     background: -moz-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
     background: -webkit-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);

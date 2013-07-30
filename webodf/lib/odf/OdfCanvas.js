@@ -577,6 +577,8 @@ odf.OdfCanvas = (function () {
                 textNodes,
                 connector,
                 highlightSpan,
+                annotationWrapper,
+                rightOffset = 0,
                 doc = odffragment.ownerDocument;
 
             // Only do the highlighting if there is an annotation-end element
@@ -605,6 +607,15 @@ odf.OdfCanvas = (function () {
             connector = doc.createElementNS(annotationns, 'annotation:connector');
             connector.setAttributeNS(officens, 'office:name', annotation.annotationNode.getAttributeNS(officens, 'name'));
             highlightSpan.insertBefore(connector, highlightSpan.firstChild);
+
+            annotationWrapper = doc.createElement('div');
+            annotationWrapper.className = 'annotationNote';
+            annotation.annotationNode.parentNode.insertBefore(annotationWrapper, annotation.annotationNode);
+            annotationWrapper.appendChild(annotation.annotationNode);
+            rightOffset = (annotationWrapper.parentNode.offsetLeft + annotationWrapper.parentNode.offsetWidth)
+                        - (annotationsPane.offsetLeft + annotationsPane.offsetWidth) + 'px';
+
+            annotationWrapper.style.right = rightOffset;
         }
 
         annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation');
