@@ -144,6 +144,7 @@ gui.KeyboardHandler.Modifier = {
 gui.KeyboardHandler.KeyCode = {
     Backspace: 8,
     Tab: 9,
+    Clear: 12,
     Enter: 13,
     End: 35,
     Home: 36,

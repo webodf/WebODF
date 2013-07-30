@@ -695,7 +695,16 @@ gui.SessionController = (function () {
             }
             return op !== null;
         }
-
+        /**
+         * @return {!boolean}
+         */
+        function removeTextByClearKey() {
+            var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId));
+            if (selection.length !== 0) {
+                session.enqueue(createOpRemoveSelection(selection));
+            }
+            return true;
+        }
         /**
          * Removes currently selected text (if any) before inserts the text.
          * @param {!string} text
@@ -1113,6 +1122,7 @@ gui.SessionController = (function () {
             keyDownHandler.bind(keyCode.End, modifier.CtrlShift, extendSelectionToDocumentEnd);
 
             if (isMacOS) {
+                keyDownHandler.bind(keyCode.Clear, modifier.None, removeTextByClearKey);
                 keyDownHandler.bind(keyCode.Left, modifier.Meta, moveCursorToLineStart);
                 keyDownHandler.bind(keyCode.Right, modifier.Meta, moveCursorToLineEnd);
                 keyDownHandler.bind(keyCode.Home, modifier.Meta, moveCursorToDocumentStart);
