@@ -35,8 +35,6 @@
 
 /*global runtime, odf, ops*/
 
-runtime.loadClass("odf.Formatting");
-
 /**
  * @constructor
  * @implements ops.Operation
@@ -46,7 +44,6 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
     var memberid, timestamp, styleName,
         /**@type{Object}*/setProperties,
-        formatting = new odf.Formatting(),
         /**@type{{paragraphPropertyNames,textPropertyNames}}*/removedProperties,
         /**@const*/stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
         /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
@@ -75,9 +72,9 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     };
 
     this.execute = function (odtDocument) {
-        var styleNode, paragraphPropertiesNode, textPropertiesNode, fontFaceNode, fontName;
+        var styleNode, paragraphPropertiesNode, textPropertiesNode, fontFaceNode, fontName,
+            formatting = odtDocument.getFormatting();
 
-        formatting.setOdfContainer(odtDocument.getOdfCanvas().odfContainer());
         styleNode = odtDocument.getParagraphStyleElement(styleName);
 
         if (styleNode) {
@@ -106,7 +103,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
                     // Declare the requested font if it is not already declared
                     fontName = setProperties["style:text-properties"]["style:font-name"];
                     if (fontName &&
-                        !odtDocument.getOdfCanvas().getFormatting().getFontMap().hasOwnProperty(fontName)) {
+                        !formatting.getFontMap().hasOwnProperty(fontName)) {
 
                         fontFaceNode = odtDocument.getDOM().createElementNS(stylens, 'style:font-face');
                         fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
