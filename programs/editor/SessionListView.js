@@ -54,6 +54,7 @@ function SessionListView(sessionList, sessionListDiv, cb) {
 
             sessionDiv.appendChild(fullnameTextNode);
             sessionDiv.sessionId = sessionDetails.id; // TODO: namespace?
+            sessionDiv.style.cursor = "pointer"; // TODO: do not set on each element, use CSS
             sessionDiv.onclick = function () {
                 cb(sessionDetails.id);
             };
