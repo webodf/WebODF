@@ -89,7 +89,9 @@ function ODFViewerPlugin() {
                 root = odfCanvas.odfContainer().rootElement;
                 initialized = true;
                 documentType = odfCanvas.odfContainer().getDocumentType(root);
-
+                if (documentType === 'text') {
+                    odfCanvas.enableAnnotations(true);
+                }
                 self.onLoad();
             });
         });

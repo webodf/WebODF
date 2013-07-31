@@ -154,7 +154,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             timeStamp: timestamp
         });
 
-        odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
+        odtDocument.getOdfCanvas().rerenderAnnotations();
         return true;
     };
 

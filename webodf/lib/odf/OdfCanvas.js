@@ -307,6 +307,7 @@ odf.OdfCanvas = (function () {
         domUtils = new core.DomUtils(),
         shadowContent,
         annotationsPane,
+        allowAnnotations = false,
         annotationManager;
     /**
      * @param {!Element} element
@@ -1109,11 +1110,13 @@ odf.OdfCanvas = (function () {
             sizer = doc.createElementNS(element.namespaceURI, 'div');
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
-            sizer.style.paddingRight = "4cm";
             sizer.id = "sizer";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
 
+            // An annotations pane div. Will only be shown when annotations are enabled
+            annotationsPane = doc.createElementNS(element.namespaceURI, 'div');
+            annotationsPane.id = "annotationsPane";
             // A "Shadow Content" div. This will contain stuff like pages
             // extracted from <style:master-page>. These need to be nicely
             // styled, so we will populate this in the ODF body first. Once the
@@ -1139,19 +1142,33 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         }
 
+        /**
+         * This should create an annotations pane if non existent, and then populate it with annotations
+         * If annotations are disallowed, it should remove the pane and all annotations
+         * @param {!Element} odfnode
+         */
         function handleAnnotations(odfnode) {
-            if (!annotationsPane) {
-                annotationsPane = doc.createElementNS(element.namespaceURI, 'div');
-                annotationsPane.id = "annotationsPane";
-            }
-            
-            if (annotationManager) {
-                annotationManager.forgetAnnotations();
-            }
-            annotationManager = new gui.AnnotationManager(odfnode.body, annotationsPane);
+            var sizer = doc.getElementById('sizer');
 
-            doc.getElementById('sizer').appendChild(annotationsPane);
-            modifyAnnotations(odfnode.body);
+            if (allowAnnotations) {
+                if (!annotationsPane.parentNode) {
+                    sizer.appendChild(annotationsPane);
+                    sizer.style.paddingRight = window.getComputedStyle(annotationsPane).width;
+                    fixContainerSize();
+                }
+                if (annotationManager) {
+                    annotationManager.forgetAnnotations();
+                }
+                annotationManager = new gui.AnnotationManager(odfnode.body, annotationsPane);
+                modifyAnnotations(odfnode.body);
+            } else {
+                if (annotationsPane.parentNode) {
+                    sizer.removeChild(annotationsPane);
+                    sizer.style.paddingRight = 0;
+                    annotationManager.forgetAnnotations();
+                    fixContainerSize();
+                }
+            }
         }
 
         /**
@@ -1373,7 +1390,28 @@ odf.OdfCanvas = (function () {
             return annotationManager;
         };
         
+        /**
+         * Unstyles and untracks all annotations present in the document
+         * , and then tracks them again with fresh rendering
+         */
         this.refreshAnnotations = function () {
+            handleAnnotations(odfcontainer.rootElement);
+        };
+
+        /**
+         * Re-renders all annotations if enabled
+         */
+        this.rerenderAnnotations = function () {
+            if (annotationManager) {
+                annotationManager.rerenderAnnotations();
+            }
+        };
+
+        /** Allows / disallows annotations
+         * @param {boolean} allow
+         */
+        this.enableAnnotations = function (allow) {
+            allowAnnotations = allow;
             handleAnnotations(odfcontainer.rootElement);
         };
         /**

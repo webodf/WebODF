@@ -36,6 +36,11 @@
 /*global runtime, gui, core, odf*/
 
 /**
+ * TODO: There is currently brokenness in how annotations which overlap are handled.
+ * This needs to be fixed soon.
+ */
+
+/**
  * A GUI class for wrapping Annotation nodes inside html wrappers, positioning
  * them on the sidebar, drawing connectors, and highlighting comments.
  * @constructor
@@ -46,6 +51,10 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
         doc = odffragment.ownerDocument,
         odfUtils = new odf.OdfUtils();
 
+    /**
+     * Wraps an annotation with various HTML elements for styling, including connectors
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function wrapAnnotation(annotation) {
         var annotationWrapper = doc.createElement('div'),
             annotationNote = doc.createElement('div'),
@@ -67,6 +76,10 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
         annotationWrapper.appendChild(connectorAngular);
     }
 
+    /**
+     * Unwraps an annotation
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function unwrapAnnotation(annotation) {
         var annotationNode = annotation.node,
             annotationWrapper = annotationNode.parentNode.parentNode;
@@ -77,6 +90,10 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
         }
     }
 
+    /**
+     * Highlights the text between the annotation node and it's end
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function highlightAnnotation(annotation) {
         var annotationNode = annotation.node,
             annotationEnd = annotation.end,
@@ -98,8 +115,14 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
                 container.appendChild(n);
             });
         }
+
+        range.detach();
     }
 
+    /**
+     * Unhighlights the text between the annotation node and it's end
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function unhighlightAnnotation(annotation) {
         var annotationName = annotation.node.getAttributeNS(odf.Namespaces.officens, 'name'),
             highlightSpans = doc.querySelectorAll('span.annotationHighlight[annotation="' + annotationName + '"]'),
@@ -131,6 +154,11 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
         return Math.sqrt(xs + ys);
     }
 
+    /**
+     * Recalculates the positions, widths, and rotation angles of things like the annotation note and it's
+     * connectors. Can and should be called frequently to update the UI
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function renderAnnotation(annotation) {
         var annotationNote = annotation.node.parentNode,
             connectorHorizontal = annotationNote.nextSibling,
@@ -178,6 +206,11 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
         connectorAngular.style.msTransform = 'rotate(' + connectorAngle + 'rad)';
     }
     
+    /**
+     * Sorts the internal annotations array by order of occurence in the document.
+     * Useful for calculating the order of annotations in the sidebar, and positioning them
+     * accordingly
+     */
     function sortAnnotations() {
         annotations.sort(function (a, b) {
             if (a.node.compareDocumentPosition(b.node) === 4) {
@@ -187,6 +220,10 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
         });
     }
 
+    /**
+     * Adds an annotation to track, and wraps and highlights it
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function addAnnotation(annotation) {
         annotations.push({
             node: annotation.node,
@@ -202,6 +239,10 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     }
     this.addAnnotation = addAnnotation;
 
+    /**
+     * Unhighlights, unwraps, and ejects an annotation from the tracking
+     * @param {!{node: !Node, end: ?Node}} annotation
+     */
     function forgetAnnotation(annotation) {
         unwrapAnnotation(annotation);
         unhighlightAnnotation(annotation);
@@ -209,6 +250,9 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     }
     this.forgetAnnotation = forgetAnnotation;
 
+    /**
+     * Untracks, unwraps, and unhighlights all annotations
+     */
     function forgetAnnotations() {
         while (annotations.length) {
             forgetAnnotation(annotations[0]);
@@ -216,6 +260,10 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     }
     this.forgetAnnotations = forgetAnnotations;
 
+    /**
+     * Recalculates the rendering - positions, rotation angles for connectors, etc - 
+     * for all tracked annotations
+     */
     function rerenderAnnotations() {
         var i;
 

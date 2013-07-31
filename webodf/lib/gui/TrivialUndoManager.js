@@ -219,8 +219,12 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * in time the document can be rewound to.
      */
     this.saveInitialState = function() {
-        var odfContainer = odtDocument.getOdfCanvas().odfContainer();
-        odtDocument.getOdfCanvas().getAnnotationManager().forgetAnnotations();
+        var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
+            annotationManager = odtDocument.getOdfCanvas().getAnnotationManager();
+
+        if (annotationManager) {
+            annotationManager.forgetAnnotations();
+        }
         initialDoc = odfContainer.rootElement.cloneNode(true);
         odtDocument.getOdfCanvas().refreshAnnotations();
         // The current state may contain cursors if the initial state is modified whilst the document is in edit mode.

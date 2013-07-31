@@ -173,7 +173,7 @@ ops.OpInsertText = function OpInsertText() {
                 timeStamp: timestamp
             });
 
-            odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
+            odtDocument.getOdfCanvas().rerenderAnnotations();
             return true;
         }
         return false;

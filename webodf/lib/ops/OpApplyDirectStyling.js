@@ -90,7 +90,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
             });
         });
 
-        odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
+        odtDocument.getOdfCanvas().rerenderAnnotations();
         return true;
     };
 

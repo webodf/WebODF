@@ -232,7 +232,7 @@ ops.OpRemoveText = function OpRemoveText() {
         });
         odtDocument.emit(ops.OdtDocument.signalCursorMoved, odtDocument.getCursor(memberid));
 
-        odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
+        odtDocument.getOdfCanvas().rerenderAnnotations();
         return true;
     };
 

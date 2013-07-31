@@ -160,6 +160,8 @@ define("webodf/editor/Editor", [
                         editorSession.startEditing();
                         return;
                     }
+                    // Allow annotations
+                    odfCanvas.enableAnnotations(true);
 
                     if (!memberid) {
                         // legacy - memberid should be passed in the constructor

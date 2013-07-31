@@ -134,7 +134,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
             odtDocument.getOdfCanvas().refreshCSS();
             odtDocument.emit(ops.OdtDocument.signalParagraphStyleModified, styleName);
-            odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
+            odtDocument.getOdfCanvas().rerenderAnnotations();
             return true;
         }
         return false;

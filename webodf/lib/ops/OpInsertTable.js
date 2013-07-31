@@ -116,7 +116,7 @@ ops.OpInsertTable = function OpInsertTable() {
                 timeStamp: timestamp
             });
 
-            odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
+            odtDocument.getOdfCanvas().rerenderAnnotations();
             return true;
         }
         return false;
