@@ -265,6 +265,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/xmldom/RelaxNG2.js
     lib/xmldom/XPath.js
 
+    lib/gui/AnnotationManager.js
     lib/odf/OdfNodeFilter.js
     lib/odf/Namespaces.js
     lib/odf/StyleInfo.js

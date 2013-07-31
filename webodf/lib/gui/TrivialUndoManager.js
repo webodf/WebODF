@@ -220,7 +220,9 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      */
     this.saveInitialState = function() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer();
+        odtDocument.getOdfCanvas().getAnnotationManager().forgetAnnotations();
         initialDoc = odfContainer.rootElement.cloneNode(true);
+        odtDocument.getOdfCanvas().refreshAnnotations();
         // The current state may contain cursors if the initial state is modified whilst the document is in edit mode.
         // To prevent this issue, immediately purge all cursor nodes after cloning
         removeCursors(initialDoc);

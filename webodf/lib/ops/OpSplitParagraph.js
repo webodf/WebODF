@@ -153,6 +153,8 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             memberId: memberid,
             timeStamp: timestamp
         });
+
+        odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
         return true;
     };
 

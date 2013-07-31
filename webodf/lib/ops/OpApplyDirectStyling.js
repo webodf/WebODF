@@ -89,6 +89,8 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
                 timeStamp: timestamp
             });
         });
+
+        odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
         return true;
     };
 

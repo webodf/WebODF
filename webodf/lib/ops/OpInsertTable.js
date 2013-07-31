@@ -115,6 +115,8 @@ ops.OpInsertTable = function OpInsertTable() {
                 memberId: memberid,
                 timeStamp: timestamp
             });
+
+            odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
             return true;
         }
         return false;

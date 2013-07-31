@@ -72,6 +72,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
                     timeStamp: timestamp,
                     memberId: memberid
                 });
+
+                odtDocument.getOdfCanvas().getAnnotationManager().rerenderAnnotations();
                 return true;
             }
         }

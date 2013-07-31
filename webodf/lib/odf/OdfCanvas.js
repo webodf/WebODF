@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*jslint sub: true*/
-/*global runtime, odf, xmldom, webodf_css, core */
+/*global runtime, odf, xmldom, webodf_css, core, gui */
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
@@ -41,6 +41,7 @@ runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.FontLoader");
 runtime.loadClass("odf.Style2CSS");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("gui.AnnotationManager");
 
 /**
  * This class manages a loaded ODF document that is shown in an element.
@@ -301,13 +302,12 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
         /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@type{?Window}*/window = runtime.getWindow(),
-        /**@const@type {!string}*/annotationns = "urn:webodf:names:annotation",
         xpath = new xmldom.XPath(),
         utils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         shadowContent,
-        annotationsPane;
-
+        annotationsPane,
+        annotationManager;
     /**
      * @param {!Element} element
      * @return {undefined}
@@ -564,74 +564,25 @@ odf.OdfCanvas = (function () {
         }
     }
 
-    function modifyAnnotations(odffragment, formatting) {
-        var i,
-            annotations = [],
-            annotationNodes,
-            annotationEnds,
-            currentAnnotationNode;
-
-        function modifyAnnotation(annotation) {
-            var range,
-                limits,
-                textNodes,
-                connector,
-                highlightSpan,
-                annotationWrapper,
-                rightOffset = 0,
-                doc = odffragment.ownerDocument;
-
-            // Only do the highlighting if there is an annotation-end element
-            if (annotation.annotationEnd) {
-                range = doc.createRange();
-                range.setStart(annotation.annotationNode, annotation.annotationNode.childNodes.length);
-                range.setEnd(annotation.annotationEnd, 0);
-
-                limits = {
-                    startContainer: range.startContainer,
-                    startOffset: range.startOffset,
-                    endContainer: range.endContainer,
-                    endOffset: range.endOffset
-                };
-                textNodes = utils.getTextNodes(range, false);
-
-                highlightSpan = formatting.applyGUIStyle(textNodes, limits, {
-                    name: annotation.annotationNode.getAttributeNS(officens, 'name')
-                });
-            } else {
-                highlightSpan = doc.createElementNS(annotationns, 'annotation:span');
-                highlightSpan.setAttributeNS(annotationns, 'annotaiton:name', annotation.annotationNode.getAttributeNS(officens, 'name'));
-                annotation.annotationNode.parentNode.insertBefore(highlightSpan, annotation.annotationNode.nextSibling);
-            }
-                // We will insert a 'connector' node at the very beginning of the highlighting span
-            connector = doc.createElementNS(annotationns, 'annotation:connector');
-            connector.setAttributeNS(officens, 'office:name', annotation.annotationNode.getAttributeNS(officens, 'name'));
-            highlightSpan.insertBefore(connector, highlightSpan.firstChild);
-
-            annotationWrapper = doc.createElement('div');
-            annotationWrapper.className = 'annotationNote';
-            annotation.annotationNode.parentNode.insertBefore(annotationWrapper, annotation.annotationNode);
-            annotationWrapper.appendChild(annotation.annotationNode);
-            rightOffset = (annotationWrapper.parentNode.offsetLeft + annotationWrapper.parentNode.offsetWidth)
-                        - (annotationsPane.offsetLeft + annotationsPane.offsetWidth) + 'px';
-
-            annotationWrapper.style.right = rightOffset;
-        }
-
-        annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation');
-        annotationEnds = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation-end');
+    function modifyAnnotations(odffragment) {
+        var annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'),
+            annotationEnds = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation-end'),
+            currentAnnotationNode,
+            i;
 
         function matchAnnotationEnd(element) {
             return currentAnnotationNode.getAttributeNS(officens, 'name') === element.getAttributeNS(officens, 'name');
         }
+
         for (i = 0; i < annotationNodes.length; i += 1) {
             currentAnnotationNode = annotationNodes[i];
-            annotations.push({
-                annotationNode: annotationNodes[i],
-                annotationEnd: annotationEnds.filter(matchAnnotationEnd)[0]
+            annotationManager.addAnnotation({
+                node: annotationNodes[i],
+                end: annotationEnds.filter(matchAnnotationEnd)[0]
             });
-            modifyAnnotation(annotations[i]);
         }
+
+        annotationManager.rerenderAnnotations();
     }
 
     /**
@@ -1188,14 +1139,19 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         }
 
-        function handleAnnotations(formatting, odfnode) {
+        function handleAnnotations(odfnode) {
             if (!annotationsPane) {
                 annotationsPane = doc.createElementNS(element.namespaceURI, 'div');
                 annotationsPane.id = "annotationsPane";
             }
+            
+            if (annotationManager) {
+                annotationManager.forgetAnnotations();
+            }
+            annotationManager = new gui.AnnotationManager(odfnode.body, annotationsPane);
 
             doc.getElementById('sizer').appendChild(annotationsPane);
-            modifyAnnotations(odfnode.body, formatting);
+            modifyAnnotations(odfnode.body);
         }
 
         /**
@@ -1217,7 +1173,7 @@ odf.OdfCanvas = (function () {
                 // do content last, because otherwise the document is constantly
                 // updated whenever the css changes
                 handleContent(odfcontainer, odfnode);
-                handleAnnotations(formatting, odfnode);
+                handleAnnotations(odfnode);
 
                 if (!suppressEvent) {
                     fireEvent("statereadychange", [odfcontainer]);
@@ -1408,6 +1364,17 @@ odf.OdfCanvas = (function () {
          */
         this.getFormatting = function () {
             return formatting;
+        };
+
+        /**
+         * @return {!gui.AnnotationManager}
+         */
+        this.getAnnotationManager = function () {
+            return annotationManager;
+        };
+        
+        this.refreshAnnotations = function () {
+            handleAnnotations(odfcontainer.rootElement);
         };
         /**
          * @param {!number} zoom

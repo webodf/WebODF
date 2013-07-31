@@ -99,9 +99,10 @@ odf.OdfUtils = function OdfUtils() {
     function isGroupingElement(e) {
         var name = e && e.localName;
         if (((name === "span" || name === "p" || name === "h") && e.namespaceURI === textns)
-                || (name === "span" && e.namespaceURI === "urn:webodf:names:annotation")) {
+                || (name === "span" && e.className === "annotationHighlight")) {
             return true;
         }
+        return false;
     }
     this.isGroupingElement = isGroupingElement;
     /**
