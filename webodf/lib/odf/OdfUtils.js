@@ -446,8 +446,13 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.parseFoLineHeight = parseFoLineHeight;
 
+    /**
+     * Returns the paragraphs touched by the given range
+     * @param {!Range} range
+     * return {!Array.<Node>}
+     */
     function getImpactedParagraphs(range) {
-        var outerContainer = range.commonAncestorContainer,
+        var outerContainer = /**@type {!Element}*/(range.commonAncestorContainer),
             impactedParagraphs = [];
 
         if (outerContainer.nodeType === Node.ELEMENT_NODE) {
@@ -469,7 +474,7 @@ odf.OdfUtils = function OdfUtils() {
     /**
      * Adapted from instructions on how to generate plain text from an ODT document.
      * See algorithm at http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1415196_253892949
-     * @param node
+     * @param {!Node} node
      * @returns {boolean}
      */
     function isAcceptedNode(node) {
@@ -511,7 +516,7 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Returns a array of text nodes considered to be part of the supplied range.
-     * This will exclude elements that are not part of the ODT main text bot
+     * This will exclude elements that are not part of the ODT main text body
      * @param {!Range} range    Range to search for nodes within
      * @param {boolean} includePartial Include partially intersecting text nodes in the result
      * @returns {!Array.<Node>}

@@ -64,9 +64,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted,
             ops.OdtDocument.signalUndoStackChanged]),
-        /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-        /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT,
-        filter = new core.PositionFilterChain();
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+        /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
+        filter;
 
     function getRootNode() {
         var element = odfCanvas.odfContainer().getContentElement(),
@@ -80,9 +80,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * whitelisted root as the specified memberid's cursor
      * @constructor
      * @implements {core.PositionFilter}
-     * @param {!number} memberId
+     * @param {!string} memberId
      */
-    function RootFilter(localMemberId) {
+    function RootFilter(memberId) {
         /**
          * @param {!Node} node
          * @return {!boolean}
@@ -112,12 +112,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
          */
         this.acceptPosition = function (iterator) {
             var node = iterator.container(),
-                cursorNode = cursors[localMemberId].getNode();
+                cursorNode = cursors[memberId].getNode();
 
             if (getRoot(node) === getRoot(cursorNode)) {
-                return accept;
+                return FILTER_ACCEPT;
             }
-            return reject;
+            return FILTER_REJECT;
         };
     }
 
@@ -138,12 +138,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (leftNode) {
                 r = odfUtils.lookLeftForCharacter(leftNode);
                 if (r === 1) {// non-whitespace character or a character element
-                    return accept;
+                    return FILTER_ACCEPT;
                 }
                 if (r === 2 && (odfUtils.scanRightForAnyCharacter(rightNode)
                     || odfUtils.scanRightForAnyCharacter(odfUtils.nextNode(container)))) {
                     // significant whitespace is ok, if not in trailing whitesp
-                    return accept;
+                    return FILTER_ACCEPT;
                 }
             }
             // at this point, we know that the position is not directly to the
@@ -157,18 +157,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             rightOfChar = odfUtils.lookRightForCharacter(rightNode);
             if (firstPos) {
                 if (rightOfChar) {
-                    return accept;
+                    return FILTER_ACCEPT;
                 }
                 // position is first position in empty paragraph
-                return odfUtils.scanRightForAnyCharacter(rightNode) ? reject : accept;
+                return odfUtils.scanRightForAnyCharacter(rightNode) ? FILTER_REJECT : FILTER_ACCEPT;
             }
             // if not directly to the right of a character, reject
             if (!rightOfChar) {
-                return reject;
+                return FILTER_REJECT;
             }
             // accept if there is no character to the left
             leftNode = leftNode || odfUtils.previousNode(container);
-            return odfUtils.scanLeftForAnyCharacter(leftNode) ? reject : accept;
+            return odfUtils.scanLeftForAnyCharacter(leftNode) ? FILTER_REJECT : FILTER_ACCEPT;
         }
 
         /**
@@ -187,11 +187,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 r;
 
             if (nodeType !== Node.ELEMENT_NODE && nodeType !== Node.TEXT_NODE) {
-                return reject;
+                return FILTER_REJECT;
             }
             if (nodeType === Node.TEXT_NODE) {
                 if (!odfUtils.isGroupingElement(container.parentNode)) {
-                    return reject;
+                    return FILTER_REJECT;
                 }
                 // In a PositionIterator, the offset in a text node is never
                 // equal to the length of the text node.
@@ -203,7 +203,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     // character.
                     leftChar = text.substr(offset - 1, 1);
                     if (!odfUtils.isODFWhitespace(leftChar)) {
-                        return accept;
+                        return FILTER_ACCEPT;
                     }
                     // A whitespace to the left is ok, if
                     // * there is a non-whitespace character to the right and
@@ -214,36 +214,36 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     if (offset > 1) {
                         leftChar = text.substr(offset - 2, 1);
                         if (!odfUtils.isODFWhitespace(leftChar)) {
-                            r = accept;
+                            r = FILTER_ACCEPT;
                         } else if (!odfUtils.isODFWhitespace(text.substr(0, offset))) {
                             // check if this can be leading paragraph space
-                            return reject;
+                            return FILTER_REJECT;
                         }
                     } else {
                         // check if there is a non-whitespace character or
                         // character element in a preceding node
                         leftNode = odfUtils.previousNode(container);
                         if (odfUtils.scanLeftForNonWhitespace(leftNode)) {
-                            r = accept;
+                            r = FILTER_ACCEPT;
                         }
                     }
-                    if (r === accept) {
+                    if (r === FILTER_ACCEPT) {
                         return odfUtils.isTrailingWhitespace(container, offset)
-                            ? reject : accept;
+                            ? FILTER_REJECT : FILTER_ACCEPT;
                     }
                     rightChar = text.substr(offset, 1);
                     if (odfUtils.isODFWhitespace(rightChar)) {
-                        return reject;
+                        return FILTER_REJECT;
                     }
                     return odfUtils.scanLeftForAnyCharacter(odfUtils.previousNode(container))
-                        ? reject : accept;
+                        ? FILTER_REJECT : FILTER_ACCEPT;
                 }
                 leftNode = iterator.leftNode();
                 rightNode = container;
                 container = /**@type{!Node}*/(container.parentNode);
                 r = checkLeftRight(container, leftNode, rightNode);
             } else if (!odfUtils.isGroupingElement(container)) {
-                r = reject;
+                r = FILTER_REJECT;
             } else {
                 leftNode = iterator.leftNode();
                 rightNode = iterator.rightNode();
@@ -593,7 +593,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         };
     };
     /**
-     * @return {!core.PositionFilterChain}
+     * @return {!core.PositionFilter}
      */
     this.getPositionFilter = function () {
         return filter;
@@ -744,7 +744,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {undefined}
      */
     function init() {
-        filter.addFilter('TextPositionFilter', new TextPositionFilter());
+        filter = new TextPositionFilter();
         odfUtils = new odf.OdfUtils();
     }
     init();
