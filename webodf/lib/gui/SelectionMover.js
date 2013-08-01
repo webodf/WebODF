@@ -48,7 +48,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     var odfUtils,
         positionIterator,
         cachedXOffset,
-        timeoutHandle;
+        timeoutHandle,
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+
     function getOffset(el) {
         var x = 0, y = 0;
         while (el && el.nodeType === Node.ELEMENT_NODE) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
@@ -205,7 +207,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     function isPositionWalkable(filter) {
         var iterator = getIteratorAtCursor();
 
-        if (filter.acceptPosition(iterator) === 1) {
+        if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
             return true;
         }
         return false;
@@ -226,7 +228,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         while (steps > 0 && iterator.nextPosition()) {
             stepCount += 1;
             watch.check();
-            if (filter.acceptPosition(iterator) === 1) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 count += stepCount;
                 stepCount = 0;
                 steps -= 1;
@@ -249,9 +251,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             count = 0;
         while (steps > 0 && iterator.nextPosition()) {
             watch.check();
-            if (filter2.acceptPosition(iterator) === 1) {
+            if (filter2.acceptPosition(iterator) === FILTER_ACCEPT) {
                 stepCount += 1;
-                if (filter1.acceptPosition(iterator) === 1) {
+                if (filter1.acceptPosition(iterator) === FILTER_ACCEPT) {
                     count += stepCount;
                     stepCount = 0;
                     steps -= 1;
@@ -275,9 +277,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             count = 0;
         while (steps > 0 && iterator.previousPosition()) {
             watch.check();
-            if (filter2.acceptPosition(iterator) === 1) {
+            if (filter2.acceptPosition(iterator) === FILTER_ACCEPT) {
                 stepCount += 1;
-                if (filter1.acceptPosition(iterator) === 1) {
+                if (filter1.acceptPosition(iterator) === FILTER_ACCEPT) {
                     count += stepCount;
                     stepCount = 0;
                     steps -= 1;
@@ -300,7 +302,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         while (steps > 0 && iterator.previousPosition()) {
             stepCount += 1;
             watch.check();
-            if (filter.acceptPosition(iterator) === 1) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 count += stepCount;
                 stepCount = 0;
                 steps -= 1;
@@ -364,7 +366,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
 
         while ((direction < 0 ? iterator.previousPosition() : iterator.nextPosition()) === true) {
             watch.check();
-            if (filter.acceptPosition(iterator) === 1) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 count += 1;
 
                 c = iterator.container();
@@ -445,7 +447,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
 
         lastRect = getRect(iterator.container(), iterator.unfilteredDomOffset(), range);
         while (fnNextPos.call(iterator)) {
-            if (filter.acceptPosition(iterator) === NodeFilter.FILTER_ACCEPT) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 // hit another paragraph node, so won't be the same line
                 if (odfUtils.getParagraphElement(iterator.getCurrentNode()) !== paragraphNode) {
                     break;
@@ -547,7 +549,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         if (comparison < 0) {
             while (iterator.nextPosition()) {
                 watch.check();
-                if (filter.acceptPosition(iterator) === 1) {
+                if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                     steps += 1;
                 }
                 if (iterator.container() === posElement) {
@@ -559,7 +561,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         } else if (comparison > 0) {
             while (iterator.previousPosition()) {
                 watch.check();
-                if (filter.acceptPosition(iterator) === 1) {
+                if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                     steps -= 1;
                 }
                 if (iterator.container() === posElement) {
