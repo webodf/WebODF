@@ -256,6 +256,16 @@ gui.SessionController = (function () {
             }, 0);
         }
 
+        function handleContextMenu(e) {
+            // TODO Various browsers have different default behaviours on right click
+            // We can detect this at runtime without doing any kind of platform sniffing
+            // simply by observing what the browser has tried to do on right-click.
+            // - OSX: Safari/Chrome - Expand to word boundary
+            // - OSX: Firefox - No expansion
+            // - Windows: Safari/Chrome/Firefox - No expansion
+            selectRange(e);
+        }
+
         /**
          * @return {undefined}
          */
@@ -1004,6 +1014,7 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
             listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            listenEvent(canvasElement, "contextmenu", handleContextMenu);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
@@ -1038,6 +1049,7 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "paste", handlePaste);
             removeEvent(canvasElement, "beforepaste", handleBeforePaste);
             removeEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            removeEvent(canvasElement, "contextmenu", handleContextMenu);
 
             op = new ops.OpRemoveCursor();
             op.init({memberid: inputMemberId});
