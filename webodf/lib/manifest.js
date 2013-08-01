@@ -103,7 +103,7 @@
         "ops/OpSplitParagraph.js",
         "ops/OpSetParagraphStyle.js",
         "ops/OpUpdateParagraphStyle.js",
-        "ops/OpCloneParagraphStyle.js",
+        "ops/OpAddParagraphStyle.js",
         "ops/OpDeleteParagraphStyle.js",
         "ops/OperationFactory.js",
         "xmldom/LSSerializer.js",

@@ -406,14 +406,30 @@ define("webodf/editor/EditorSession", [
          */
         this.cloneParagraphStyle = function (styleName, newStyleDisplayName) {
             var newStyleName = uniqueParagraphStyleNCName(newStyleDisplayName),
-                op;
+                styleNode = odtDocument.getParagraphStyleElement(styleName),
+                formatting = odtDocument.getFormatting(),
+                op, setProperties, attributes, i;
 
-            op = new ops.OpCloneParagraphStyle();
+            setProperties = formatting.getStyleAttributes(styleNode);
+            // copy any attributes directly on the style
+            attributes = styleNode.attributes;
+            for (i = 0; i < attributes.length; i += 1) {
+                // skip...
+                // * style:display-name -> not copied, set to new string below
+                // * style:name         -> not copied, set from op by styleName property
+                // * style:family       -> "paragraph" always, set by op
+                if (!/^(style:display-name|style:name|style:family)/.test(attributes[i].name)) {
+                    setProperties[attributes[i].name] = attributes[i].value;
+                }
+            }
+
+            setProperties['style:display-name'] = newStyleDisplayName;
+
+            op = new ops.OpAddParagraphStyle();
             op.init({
                 memberid: memberid,
-                styleName: styleName,
-                newStyleName: newStyleName,
-                newStyleDisplayName: newStyleDisplayName
+                styleName: newStyleName,
+                setProperties: setProperties
             });
             session.enqueue(op);
 
