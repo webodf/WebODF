@@ -42,8 +42,8 @@ core.PositionFilterChain = function PositionFilterChain() {
     "use strict";
 
     var filterChain = {},
-        /**@const*/accept = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-        /**@const*/reject = core.PositionFilter.FilterResult.FILTER_REJECT;
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+        /**@const*/FILTER_REJECT  = core.PositionFilter.FilterResult.FILTER_REJECT;
 
     /**
      * Returns accept if all filters in the chain accept the position, else reject.
@@ -54,16 +54,17 @@ core.PositionFilterChain = function PositionFilterChain() {
         var filterName;
         for (filterName in filterChain) {
             if (filterChain.hasOwnProperty(filterName)) {
-                if (filterChain[filterName].acceptPosition(iterator) === reject) {
-                    return reject;
+                if (filterChain[filterName].acceptPosition(iterator) === FILTER_REJECT) {
+                    return FILTER_REJECT;
                 }
             }
         }
-        return accept;
+        return FILTER_ACCEPT;
     };
 
     /**
-     * Adds a filter with a given name and an instance of it to the filter chain
+     * Adds a filter with a given name and an instance of it to the filter chain.
+     * If a filter with the filterName already exists, it will be overwritten.
      * @param {!string} filterName
      * @param {!core.PositionFilter|!core.PositionFilterChain} filterInstance
      * @return {undefined}
