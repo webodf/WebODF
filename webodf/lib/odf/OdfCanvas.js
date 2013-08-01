@@ -565,18 +565,23 @@ odf.OdfCanvas = (function () {
         }
     }
 
+    /**
+     * Wraps all annotations and renders them using the Annotation View Manager.
+     * @param {!Element} odffragment
+     * @return {undefined}
+     */
     function modifyAnnotations(odffragment) {
         var annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'),
             annotationEnds = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation-end'),
-            currentAnnotationNode,
+            currentAnnotationName,
             i;
 
         function matchAnnotationEnd(element) {
-            return currentAnnotationNode.getAttributeNS(officens, 'name') === element.getAttributeNS(officens, 'name');
+            return currentAnnotationName === element.getAttributeNS(officens, 'name');
         }
 
         for (i = 0; i < annotationNodes.length; i += 1) {
-            currentAnnotationNode = annotationNodes[i];
+            currentAnnotationName = annotationNodes[i].getAttributeNS(officens, 'name');
             annotationManager.addAnnotation({
                 node: annotationNodes[i],
                 end: annotationEnds.filter(matchAnnotationEnd)[0] || null

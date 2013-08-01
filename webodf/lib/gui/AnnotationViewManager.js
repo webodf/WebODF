@@ -50,8 +50,8 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
     var annotations = [],
         doc = odfFragment.ownerDocument,
         odfUtils = new odf.OdfUtils(),
-        CONNECTOR_MARGIN = 30,
-        NOTE_MARGIN = 20;
+        /**@const*/CONNECTOR_MARGIN = 30,
+        /**@const*/NOTE_MARGIN = 20;
 
     /**
      * Wraps an annotation with various HTML elements for styling, including connectors

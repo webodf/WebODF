@@ -76,8 +76,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
+     * A filter that allows a position if it has the same closest
+     * whitelisted root as the specified memberid's cursor
      * @constructor
      * @implements {core.PositionFilter}
+     * @param {!number} memberId
      */
     function RootFilter(localMemberId) {
         /**
