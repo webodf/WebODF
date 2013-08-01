@@ -729,16 +729,19 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         eventNotifier.unsubscribe(eventid, cb);
     };
 
-    this.Filters = {
-        TextPositionFilter: TextPositionFilter,
-        RootFilter: RootFilter
+    /**
+     * @param {!string} inputMemberId
+     * @reurn {!RootFilter}
+     */
+    this.createRootFilter = function (inputMemberId) {
+        return new RootFilter(inputMemberId);
     };
 
     /**
      * @return {undefined}
      */
     function init() {
-        filter.addFilter('TextPositionFilter', new self.Filters.TextPositionFilter());
+        filter.addFilter('TextPositionFilter', new TextPositionFilter());
         odfUtils = new odf.OdfUtils();
     }
     init();

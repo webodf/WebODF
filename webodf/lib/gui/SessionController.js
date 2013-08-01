@@ -74,7 +74,7 @@ gui.SessionController = (function () {
             undoManager = null;
 
         keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
-        keyboardMovementsFilter.addFilter('RootFilter', new odtDocument.Filters.RootFilter(inputMemberId));
+        keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
        
         /**
          * @param {!Element} eventTarget
@@ -332,11 +332,11 @@ gui.SessionController = (function () {
                 stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter(),
                 newLength;
             if (lengthAdjust !== 0) {
-                newLength = selection.length + (
-                    (lengthAdjust > 0)
-                        ? stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter)
-                        : -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter)
-                );
+                lengthAdjust = (lengthAdjust > 0)
+                    ? stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter)
+                    : -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter);
+
+                newLength = selection.length + lengthAdjust;
                 session.enqueue(createOpMoveCursor(selection.position, newLength));
             }
         }
@@ -349,11 +349,11 @@ gui.SessionController = (function () {
             var position = odtDocument.getCursorPosition(inputMemberId),
                 stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter();
             if (positionAdjust !== 0) {
-                position = position + (
-                    (positionAdjust > 0)
-                        ? stepCounter.convertForwardStepsBetweenFilters(positionAdjust, keyboardMovementsFilter, baseFilter)
-                        : -stepCounter.convertBackwardStepsBetweenFilters(-positionAdjust, keyboardMovementsFilter, baseFilter)
-                );
+                positionAdjust = (positionAdjust > 0)
+                    ? stepCounter.convertForwardStepsBetweenFilters(positionAdjust, keyboardMovementsFilter, baseFilter)
+                    : -stepCounter.convertBackwardStepsBetweenFilters(-positionAdjust, keyboardMovementsFilter, baseFilter);
+
+                position = position + positionAdjust;
                 session.enqueue(createOpMoveCursor(position, 0));
             }
         }
