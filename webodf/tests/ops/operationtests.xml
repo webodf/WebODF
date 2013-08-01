@@ -1,4 +1,5 @@
 <tests
+    xmlns:html="http://www.w3.org/1999/xhtml"
     xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
     xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
     xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
@@ -699,6 +700,21 @@
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
    <office:text><text:p>A<text:span>BC</text:span><text:span text:style-name="auto63350368_0">DE</text:span>F</text:p></office:text>
+  </after>
+ </test>
+  <test name="ApplyDirectStyling_WithinNonSpanContainer">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p><html:span class="annotationHighlight">ABCD</html:span></text:p></office:text>
+  </before>
+  <ops>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </ops>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p><html:span class="annotationHighlight">A<text:span text:style-name="auto63350368_0">BC</text:span>D</html:span></text:p></office:text>
   </after>
  </test>
 </tests>

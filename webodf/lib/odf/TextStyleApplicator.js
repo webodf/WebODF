@@ -37,7 +37,6 @@
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.LoopWatchDog");
 runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.OdfUtils");
 
 /**
  * Class for applying a supplied text style to the given text nodes.
@@ -48,8 +47,7 @@ runtime.loadClass("odf.OdfUtils");
  */
 odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formatting, automaticStyles) {
     "use strict";
-    var odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+    var domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
         textProperties = "style:text-properties",
@@ -133,6 +131,15 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
     }
 
     /**
+     * Returns true if the passed in node is an ODT text span
+     * @param {!Node} node
+     * @returns {!boolean}
+     */
+    function isTextSpan(node) {
+        return node.localName === "span" && node.namespaceURI === textns;
+    }
+
+    /**
      * Moves the specified node and all further siblings within the outer range into a new standalone container
      * @param {!CharacterData} startNode Node to start movement to new container
      * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
@@ -140,7 +147,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
      */
     function moveToNewSpan(startNode, limits) {
         var document = startNode.ownerDocument,
-            originalContainer = startNode.parentNode,
+            originalContainer = /**@type{!Element}*/(startNode.parentNode),
             styledContainer,
             trailingContainer,
             moveTrailing,
@@ -149,7 +156,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
             loopGuard = new core.LoopWatchDog(1000);
 
         // Do we need a new style container?
-        if (odfUtils.isParagraph(originalContainer)) {
+        if (!isTextSpan(originalContainer)) {
             // Yes, text node has no wrapping span
             styledContainer = document.createElementNS(textns, "text:span");
             originalContainer.insertBefore(styledContainer, startNode);
