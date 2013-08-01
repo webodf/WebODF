@@ -41,7 +41,7 @@ runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.FontLoader");
 runtime.loadClass("odf.Style2CSS");
 runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("gui.AnnotationManager");
+runtime.loadClass("gui.AnnotationViewManager");
 
 /**
  * This class manages a loaded ODF document that is shown in an element.
@@ -579,7 +579,7 @@ odf.OdfCanvas = (function () {
             currentAnnotationNode = annotationNodes[i];
             annotationManager.addAnnotation({
                 node: annotationNodes[i],
-                end: annotationEnds.filter(matchAnnotationEnd)[0]
+                end: annotationEnds.filter(matchAnnotationEnd)[0] || null
             });
         }
 
@@ -1159,7 +1159,7 @@ odf.OdfCanvas = (function () {
                 if (annotationManager) {
                     annotationManager.forgetAnnotations();
                 }
-                annotationManager = new gui.AnnotationManager(odfnode.body, annotationsPane);
+                annotationManager = new gui.AnnotationViewManager(odfnode.body, annotationsPane);
                 modifyAnnotations(odfnode.body);
             } else {
                 if (annotationsPane.parentNode) {
@@ -1384,7 +1384,7 @@ odf.OdfCanvas = (function () {
         };
 
         /**
-         * @return {!gui.AnnotationManager}
+         * @return {!gui.AnnotationViewManager}
          */
         this.getAnnotationManager = function () {
             return annotationManager;

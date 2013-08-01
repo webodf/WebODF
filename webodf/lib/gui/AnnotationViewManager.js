@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*jslint sub: true*/
-/*global runtime, gui, core, odf*/
+/*global runtime, gui, core, odf, Node*/
 
 /**
  * TODO: There is currently brokenness in how annotations which overlap are handled.
@@ -45,15 +45,18 @@
  * them on the sidebar, drawing connectors, and highlighting comments.
  * @constructor
  */
-gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane) {
+gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotationsPane) {
     "use strict";
     var annotations = [],
-        doc = odffragment.ownerDocument,
-        odfUtils = new odf.OdfUtils();
+        doc = odfFragment.ownerDocument,
+        odfUtils = new odf.OdfUtils(),
+        CONNECTOR_MARGIN = 30,
+        NOTE_MARGIN = 20;
 
     /**
      * Wraps an annotation with various HTML elements for styling, including connectors
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function wrapAnnotation(annotation) {
         var annotationWrapper = doc.createElement('div'),
@@ -79,6 +82,7 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     /**
      * Unwraps an annotation
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function unwrapAnnotation(annotation) {
         var annotationNode = annotation.node,
@@ -93,6 +97,7 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     /**
      * Highlights the text between the annotation node and it's end
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function highlightAnnotation(annotation) {
         var annotationNode = annotation.node,
@@ -122,6 +127,7 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     /**
      * Unhighlights the text between the annotation node and it's end
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function unhighlightAnnotation(annotation) {
         var annotationName = annotation.node.getAttributeNS(odf.Namespaces.officens, 'name'),
@@ -158,6 +164,7 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
      * Recalculates the positions, widths, and rotation angles of things like the annotation note and it's
      * connectors. Can and should be called frequently to update the UI
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function renderAnnotation(annotation) {
         var annotationNote = annotation.node.parentNode,
@@ -175,12 +182,12 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
 
 
         connectorHorizontal.style.width = parseFloat(annotationNote.style.left)
-                                          - 30 + 'px';
+                                          - CONNECTOR_MARGIN + 'px';
 
         if (previousAnnotation) {
             previousRect = previousAnnotation.node.parentNode.getBoundingClientRect();
-            if ((annotationWrapper.getBoundingClientRect().top - previousRect.bottom) <= 20) {
-                annotationNote.style.top = Math.abs(annotationWrapper.getBoundingClientRect().top - previousRect.bottom) + 20 + 'px';
+            if ((annotationWrapper.getBoundingClientRect().top - previousRect.bottom) <= NOTE_MARGIN) {
+                annotationNote.style.top = Math.abs(annotationWrapper.getBoundingClientRect().top - previousRect.bottom) + NOTE_MARGIN + 'px';
             } else {
                 annotationNote.style.top = '0px';
             }
@@ -210,10 +217,11 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
      * Sorts the internal annotations array by order of occurence in the document.
      * Useful for calculating the order of annotations in the sidebar, and positioning them
      * accordingly
+     * @return {undefined}
      */
     function sortAnnotations() {
         annotations.sort(function (a, b) {
-            if (a.node.compareDocumentPosition(b.node) === 4) {
+            if (a.node.compareDocumentPosition(b.node) === Node.DOCUMENT_POSITION_FOLLOWING) {
                 return -1;
             }
             return 1;
@@ -223,11 +231,12 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     /**
      * Adds an annotation to track, and wraps and highlights it
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function addAnnotation(annotation) {
         annotations.push({
             node: annotation.node,
-            end: annotation.end || null
+            end: annotation.end
         });
 
         sortAnnotations();
@@ -242,16 +251,17 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     /**
      * Unhighlights, unwraps, and ejects an annotation from the tracking
      * @param {!{node: !Node, end: ?Node}} annotation
+     * @return {undefined}
      */
     function forgetAnnotation(annotation) {
         unwrapAnnotation(annotation);
         unhighlightAnnotation(annotation);
         annotations.splice(annotations.indexOf(annotation), 1);
     }
-    this.forgetAnnotation = forgetAnnotation;
 
     /**
      * Untracks, unwraps, and unhighlights all annotations
+     * @return {undefined}
      */
     function forgetAnnotations() {
         while (annotations.length) {
@@ -263,6 +273,7 @@ gui.AnnotationManager = function AnnotationManager(odffragment, annotationsPane)
     /**
      * Recalculates the rendering - positions, rotation angles for connectors, etc - 
      * for all tracked annotations
+     * @return {undefined}
      */
     function rerenderAnnotations() {
         var i;
