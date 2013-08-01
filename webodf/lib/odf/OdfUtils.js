@@ -97,9 +97,9 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function isGroupingElement(e) {
-        var name = e && e.localName;
-        if (((name === "span" || name === "p" || name === "h") && e.namespaceURI === textns)
-                || (name === "span" && e.className === "annotationHighlight")) {
+        var localName = e && e.localName;
+        if ((/^(span|p|h|a|meta)$/.test(localName) && e.namespaceURI === textns)
+                || (localName === "span" && e.className === "annotationHighlight")) {
             return true;
         }
         return false;
