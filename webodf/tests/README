@@ -17,3 +17,39 @@ TODO: each test case should be ideally run in a completely fresh setup, not usin
 by reusing the DOM and the global variables from the previous tests
 (defending that with "but it's fuzzying tests!" is just a nice try ;) )
 
+How to add a new test class
+===========================
+1. Create new test class
+2. Add an entry to this class in
+    - CMakeLists.txt (file path & name)
+    - webodf/tests/manifest.js (file path & name)
+    - webodf/tests/tests.html (file path & name)
+    - webodf/tests/tests.js (runtime.loadClass AND tests.push(...))
+
+The best way to ensure all these entries are correct is to run all three
+test types (node, qt & browser). In each of these (including the browser)
+there should be no classpath failures. The browser often masks these because
+the order loading is slightly more forgiving.
+
+Common issues
+-------------
+qtjsruntimetest throws a "undefined is not an object error"
+-----------------------------------------------
+- Ensure tests.js has the appropriate runtime.loadClass entry
+
+tests are not run / do not appear
+-----------------------------------------------
+- Ensure tests.js has the appropriate tests.push entry
+
+one or more tests throw "Cannot load class ..."
+-----------------------------------------------
+This is caused by the required class not being available when runtime.loadClass
+is called. This causes the runtime to attempt to dynamically load the class,
+which for tests is never expected to happen, hence the classpaths are all
+wildly incorrect. The fix is to ensure the required classes are listed in
+build/webodf/simplecompilex.js BEFORE any runtime.loadClass lines that use them.
+- Ensure the tests are listed *after* their dependencies in all files
+- Ensure any new classes are listed *after* their dependencies in all files
+
+
+

@@ -148,9 +148,4 @@ gui.StyleHelper = function StyleHelper(formatting) {
     this.hasStrikeThrough = function (range) {
         return hasTextPropertyValue(range, 'style:text-line-through-style', 'solid');
     };
-    // These should later go and from StyleHelperTests they should be split
-    // off into OdfUtilsTests
-    this.getTextNodes = odfUtils.getTextNodes;
-    this.getParagraphElements = odfUtils.getParagraphElements;
-    this.getTextElements = odfUtils.getTextElements;
 };

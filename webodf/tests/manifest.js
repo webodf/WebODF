@@ -45,6 +45,7 @@
         "gui/SelectionMoverTests.js",
         "gui/StyleHelperTests.js",
         "gui/XMLEditTests.js",
+        "odf/OdfUtilsTests.js",
         "odf/TextStyleApplicatorTests.js",
         "odf/FormattingTests.js",
         "odf/OdfContainerTests.js",
