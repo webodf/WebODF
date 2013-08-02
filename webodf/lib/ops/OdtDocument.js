@@ -697,8 +697,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return odfCanvas.getFormatting();
     };
 
-    this.getTextElements = function (range) {
-        return odfUtils.getTextElements(range);
+    this.getTextElements = function (range, includeInsignificantWhitespace) {
+        return odfUtils.getTextElements(range, includeInsignificantWhitespace);
     };
 
     this.getParagraphElements = function (range) {

@@ -63,12 +63,13 @@ odf.OdfUtils = function OdfUtils() {
      * @param {?Node} node
      * @return {?Node}
      */
-    this.getParagraphElement = function (node) {
+    function getParagraphElement(node) {
         while (node && !isParagraph(node)) {
             node = node.parentNode;
         }
         return node;
-    };
+    }
+    this.getParagraphElement = getParagraphElement;
 
     /**
      * Determine if the node is a text:list-item element.
@@ -515,8 +516,22 @@ odf.OdfUtils = function OdfUtils() {
     }
 
     /**
+     * Returns true if the text node is within a paragraph and contains either non-whitespace characters, or
+     * significant whitespace characters (as defined by the ODF standards).
+     * WARNING this method is likely to be quite slow, so should be used as little as possible
+     * @param {!Text} textNode
+     * @returns {!boolean}
+     */
+    function isSignificantTextContent(textNode) {
+        return Boolean(getParagraphElement(textNode)
+            && (!isODFWhitespace(textNode.textContent) || isSignificantWhitespace(textNode, 0)));
+    }
+
+
+    /**
      * Returns a array of text nodes considered to be part of the supplied range.
-     * This will exclude elements that are not part of the ODT main text body
+     * This will exclude elements that are not part of the ODT main text body, as well
+     * as insignificant whitespace text nodes.
      * @param {!Range} range    Range to search for nodes within
      * @param {boolean} includePartial Include partially intersecting text nodes in the result
      * @returns {!Array.<Node>}
@@ -530,11 +545,9 @@ odf.OdfUtils = function OdfUtils() {
             nodeRange.selectNodeContents(node);
 
             if (node.nodeType === Node.TEXT_NODE) {
-                if (includePartial && domUtils.rangesIntersect(range, nodeRange)) {
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-                if (domUtils.containsRange(range, nodeRange)) {
-                    return NodeFilter.FILTER_ACCEPT;
+                if ((includePartial && domUtils.rangesIntersect(range, nodeRange))
+                        || domUtils.containsRange(range, nodeRange)) {
+                    return isSignificantTextContent(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
             } else if (domUtils.rangesIntersect(range, nodeRange)) {
                 if (isAcceptedNode(node)) {
@@ -559,9 +572,12 @@ odf.OdfUtils = function OdfUtils() {
      * this function would return the following array:
      *      ["b", text:s, "c"]
      * @param {!Range} range
+     * @param {!boolean} includeInsignificantWhitespace Include whitespace only nodes that are not considered significant
+     *  text content. This includes whitespace only elements used in pretty-formatted xml as LibreOffice produces in
+     *  flat ODT files
      * @returns {!Array.<Node>}
      */
-    this.getTextElements = function (range) {
+    this.getTextElements = function (range, includeInsignificantWhitespace) {
         var document = range.startContainer.ownerDocument,
             nodeRange = document.createRange(),
             elements;
@@ -569,9 +585,15 @@ odf.OdfUtils = function OdfUtils() {
         function nodeFilter(node) {
             var nodeType = node.nodeType;
             nodeRange.selectNodeContents(node);
-            if (nodeType === Node.TEXT_NODE || isCharacterElement(node)) {
+            if (nodeType === Node.TEXT_NODE) {
+                if (domUtils.containsRange(range, nodeRange)
+                        && (includeInsignificantWhitespace || isSignificantTextContent(node))) {
+                    // text nodes should only be returned if they are fully contained within the range
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            } else if (isCharacterElement(node)) {
                 if (domUtils.containsRange(range, nodeRange)) {
-                    // text nodes and character elements should only be returned if they are fully contained within the range
+                    // character elements should only be returned if they are fully contained within the range
                     return NodeFilter.FILTER_ACCEPT;
                 }
             } else if (isAcceptedNode(node) || isGroupingElement(node)) {

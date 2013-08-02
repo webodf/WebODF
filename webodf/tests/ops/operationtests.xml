@@ -6,8 +6,9 @@
     xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
     xmlns:c="urn:webodf:names:cursor"
     xmlns:e="urn:webodf:names:editinfo"
-    xmlns:wo="urn:webodf:names:scope">
- <test name="AddCursor_Simple">
+    xmlns:wo="urn:webodf:names:scope"
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0">
+<test name="AddCursor_Simple">
   <before><office:text><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -702,7 +703,45 @@
    <office:text><text:p>A<text:span>BC</text:span><text:span text:style-name="auto63350368_0">DE</text:span>F</text:p></office:text>
   </after>
  </test>
-  <test name="ApplyDirectStyling_WithinNonSpanContainer">
+  <test name="ApplyDirectStyling_AroundImage_WithInsignificantWhitespace">
+  <before>
+   <office:automatic-styles/>
+   <office:text>
+    <text:p><text:span>A</text:span></text:p>
+    <text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p>
+    <text:p><text:span>B</text:span></text:p>
+   </office:text>
+  </before>
+  <ops>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="0" length="5">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </ops>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto63350368_0">A</text:span></text:p>
+    <text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p>
+    <text:p><text:span text:style-name="auto63350368_0">B</text:span></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStyling_AroundImage_WithNoWhitespace">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p><text:span>A</text:span></text:p><text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text>
+  </before>
+  <ops>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="0" length="5">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </ops>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p><text:span text:style-name="auto63350368_0">A</text:span></text:p><text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p><text:p><text:span text:style-name="auto63350368_0">B</text:span></text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStyling_WithinNonSpanContainer">
   <before>
    <office:automatic-styles/>
    <office:text><text:p><html:span class="annotationHighlight">ABCD</html:span></text:p></office:text>
