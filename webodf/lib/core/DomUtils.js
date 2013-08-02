@@ -32,13 +32,14 @@
  */
 
 /*global Node, core, ops, runtime, NodeFilter*/
-
+/*jslint bitwise: true*/
 /**
  * A collection of Dom utilities
  * @constructor
  */
 core.DomUtils = function DomUtils() {
     "use strict";
+    var self = this;
 
     /**
      * Find the inner-most child point that is equivalent
@@ -251,4 +252,38 @@ core.DomUtils = function DomUtils() {
         return range.comparePoint(node, 0) <= 0 && range.comparePoint(node, nodeLength) >= 0;
     }
     this.rangeIntersectsNode = rangeIntersectsNode;
+
+    /**
+     * Whether a node contains another node
+     * @param {!Node} parent The node that should contain the other node
+     * @param {!Node} descendant The node to test presence of
+     * @return {!boolean}
+     */
+    function containsNode(parent, descendant) {
+        return parent === descendant || parent.contains(descendant);
+    }
+    this.containsNode = containsNode;
+
+    function containsNodeForBrokenWebKit(parent, descendant) {
+        // the contains function is not reliable on safari/webkit so use compareDocumentPosition instead
+        return parent === descendant ||
+            Boolean(parent.compareDocumentPosition(descendant) & Node.DOCUMENT_POSITION_CONTAINED_BY);
+    }
+
+    function init() {
+        var /**@type{?Window}*/window = runtime.getWindow(),
+            appVersion, webKitOrSafari;
+        if (window === null) {
+            return;
+        }
+
+        appVersion = window.navigator.appVersion.toLowerCase();
+        webKitOrSafari = appVersion.indexOf('chrome') === -1
+            && (appVersion.indexOf('applewebkit') !== -1 || appVersion.indexOf('safari') !== -1);
+
+        if (webKitOrSafari) {
+            self.containsNode = containsNodeForBrokenWebKit;
+        }
+    }
+    init();
 };

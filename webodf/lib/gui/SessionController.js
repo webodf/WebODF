@@ -34,6 +34,7 @@
 
 /*global runtime, core, gui, Node, ops, odf */
 
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
@@ -65,6 +66,7 @@ gui.SessionController = (function () {
     gui.SessionController = function SessionController(session, inputMemberId) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
+            domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
             clickHandler = new gui.ClickHandler(),
@@ -82,7 +84,7 @@ gui.SessionController = (function () {
         keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
        
         /**
-         * @param {!Element} eventTarget
+         * @param {!Element|!Window} eventTarget
          * @param {!string} eventType
          * @param {function(!Event)|function()} eventHandler
          * @param {boolean=} includeDirect
@@ -105,7 +107,7 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!Element} eventTarget
+         * @param {!Element|!Window} eventTarget
          * @param {!string} eventType
          * @param {function(!Event)|function()} eventHandler
          * @return {undefined}
@@ -204,7 +206,7 @@ gui.SessionController = (function () {
         /**
          * @param {!number} x
          * @param {!number} y
-         * @return {?{container:!Object, offset:!number}}
+         * @return {?{container:!Node, offset:!number}}
          */
         function caretPositionFromPoint(x, y) {
             var doc = odtDocument.getDOM(),
@@ -228,13 +230,39 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {!Node} node
+         * @return {!{node:!Node, offset:!number}}
+         */
+        function findClosestPosition(node) {
+            var canvasElement = odtDocument.getOdfCanvas().getElement(),
+                newNode = odtDocument.getRootNode(),
+                newOffset = 0,
+                beforeCanvas, iterator;
+
+            /*jslint bitwise: true*/
+            beforeCanvas = canvasElement.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING;
+            /*jslint bitwise: false*/
+            if (!beforeCanvas) {
+                iterator = gui.SelectionMover.createPositionIterator(newNode);
+                iterator.moveToEnd();
+                newNode = iterator.container();
+                newOffset = iterator.unfilteredDomOffset();
+            }
+            return {
+                node: newNode,
+                offset: newOffset
+            };
+        }
+
+        /**
          * @param {!Event} e
          * @return {?{anchorNode:!Node, anchorOffset:!number, focusNode:!Node, focusOffset:!number}}
          */
         function getSelection (e) {
-            var selection = window.getSelection(),
+            var canvasElement = odtDocument.getOdfCanvas().getElement(),
+                selection = window.getSelection(),
                 anchorNode, anchorOffset, focusNode, focusOffset,
-                caretPos;
+                anchorNodeInsideCanvas, focusNodeInsideCanvas, caretPos, node;
 
             if (selection.anchorNode === null && selection.focusNode === null) { // chrome & safari
                 caretPos = caretPositionFromPoint(e.clientX, e.clientY);
@@ -242,24 +270,43 @@ gui.SessionController = (function () {
                     return null;
                 }
 
-                anchorNode = caretPos.container;
+                anchorNode = /**@type{!Node}*/(caretPos.container);
                 anchorOffset = caretPos.offset;
                 focusNode = anchorNode;
                 focusOffset = anchorOffset;
             } else {
-                anchorNode = selection.anchorNode;
+                anchorNode = /**@type{!Node}*/(selection.anchorNode);
                 anchorOffset = selection.anchorOffset;
-                focusNode = selection.focusNode;
+                focusNode = /**@type{!Node}*/(selection.focusNode);
                 focusOffset = selection.focusOffset;
             }
 
             runtime.assert(anchorNode !== null && focusNode !== null,
                 "anchorNode is null or focusNode is null");
 
+            anchorNodeInsideCanvas = domUtils.containsNode(canvasElement, anchorNode);
+            focusNodeInsideCanvas = domUtils.containsNode(canvasElement, focusNode);
+            if (!anchorNodeInsideCanvas && !focusNodeInsideCanvas) {
+                return null;
+            }
+            if (!anchorNodeInsideCanvas) {
+                node = findClosestPosition(anchorNode);
+                anchorNode = node.node;
+                anchorOffset = node.offset;
+            }
+            if (!focusNodeInsideCanvas) {
+                node = findClosestPosition(focusNode);
+                focusNode = node.node;
+                focusOffset = node.offset;
+            }
+            // canvas element won't have focus if user click somewhere outside the canvas then drag and
+            // release click inside the canvas.
+            canvasElement.focus();
+
             return {
-                anchorNode: /**@type{!Node}*/(anchorNode),
+                anchorNode: anchorNode,
                 anchorOffset: anchorOffset,
-                focusNode: /**@type{!Node}*/(focusNode),
+                focusNode: focusNode,
                 focusOffset: focusOffset
             };
         }
@@ -312,13 +359,18 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function selectWord() {
-            var currentNode, i, c, op,
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+            var canvasElement = odtDocument.getOdfCanvas().getElement(),
                 alphaNumeric = /[A-Za-z0-9]/,
                 stepsToStart = 0,
                 stepsToEnd = 0,
-                oldPosition;
+                iterator, cursorNode, oldPosition, currentNode, i, c, op;
+
+            if (!domUtils.containsNode(canvasElement, window.getSelection().focusNode)) {
+                return;
+            }
+
+            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
+            cursorNode = odtDocument.getCursor(inputMemberId).getNode();
 
             iterator.setUnfilteredPosition(cursorNode, 0);
             if (iterator.previousPosition()) {
@@ -359,12 +411,16 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function selectParagraph() {
-            var stepsToStart, stepsToEnd, op,
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                oldPosition;
+            var canvasElement = odtDocument.getOdfCanvas().getElement(),
+                iterator, paragraphNode, oldPosition, stepsToStart, stepsToEnd, op;
 
+            if (!domUtils.containsNode(canvasElement, window.getSelection().focusNode)) {
+                return;
+            }
+
+            paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
             stepsToStart = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
+            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
             iterator.moveToEndOfNode(paragraphNode);
             stepsToEnd = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.unfilteredDomOffset());
 
@@ -1054,7 +1110,7 @@ gui.SessionController = (function () {
             // Epiphany 3.6.1 requires this to allow the paste event to fire
             listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
             listenEvent(canvasElement, "paste", handlePaste);
-            listenEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            listenEvent(window, "mouseup", clickHandler.handleMouseUp);
             listenEvent(canvasElement, "contextmenu", handleContextMenu);
 
             // start maintaining the cursor selection now
@@ -1089,7 +1145,7 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "copy", handleCopy);
             removeEvent(canvasElement, "paste", handlePaste);
             removeEvent(canvasElement, "beforepaste", handleBeforePaste);
-            removeEvent(canvasElement, "mouseup", clickHandler.handleMouseUp);
+            removeEvent(window, "mouseup", clickHandler.handleMouseUp);
             removeEvent(canvasElement, "contextmenu", handleContextMenu);
 
             op = new ops.OpRemoveCursor();
