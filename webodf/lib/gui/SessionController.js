@@ -34,6 +34,7 @@
 
 /*global runtime, core, gui, Node, ops, odf */
 
+runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
 runtime.loadClass("ops.OpMoveCursor");
@@ -62,7 +63,8 @@ gui.SessionController = (function () {
      * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId) {
-        var odtDocument = session.getOdtDocument(),
+        var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
+            odtDocument = session.getOdtDocument(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
             clickHandler = new gui.ClickHandler(),
@@ -72,6 +74,9 @@ gui.SessionController = (function () {
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
             undoManager = null;
+
+        runtime.assert(window !== null,
+            "Expected to be run in an environment which has a global window, like a browser.");
 
         keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
         keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
@@ -224,6 +229,43 @@ gui.SessionController = (function () {
 
         /**
          * @param {!Event} e
+         * @return {?{anchorNode:!Node, anchorOffset:!number, focusNode:!Node, focusOffset:!number}}
+         */
+        function getSelection (e) {
+            var selection = window.getSelection(),
+                anchorNode, anchorOffset, focusNode, focusOffset,
+                caretPos;
+
+            if (selection.anchorNode === null && selection.focusNode === null) { // chrome & safari
+                caretPos = caretPositionFromPoint(e.clientX, e.clientY);
+                if (!caretPos) {
+                    return null;
+                }
+
+                anchorNode = caretPos.container;
+                anchorOffset = caretPos.offset;
+                focusNode = anchorNode;
+                focusOffset = anchorOffset;
+            } else {
+                anchorNode = selection.anchorNode;
+                anchorOffset = selection.anchorOffset;
+                focusNode = selection.focusNode;
+                focusOffset = selection.focusOffset;
+            }
+
+            runtime.assert(anchorNode !== null && focusNode !== null,
+                "anchorNode is null or focusNode is null");
+
+            return {
+                anchorNode: /**@type{!Node}*/(anchorNode),
+                anchorOffset: anchorOffset,
+                focusNode: /**@type{!Node}*/(focusNode),
+                focusOffset: focusOffset
+            };
+        }
+
+        /**
+         * @param {!Event} e
          * @return {undefined}
          */
         function selectRange(e) {
@@ -232,24 +274,24 @@ gui.SessionController = (function () {
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
             // out the caret position from two coordinates.
             runtime.setTimeout(function () {
-                var selection = runtime.getWindow().getSelection(),
-                    oldPosition = odtDocument.getCursorPosition(inputMemberId),
-                    range, caretPos, stepsToAnchor, stepsToFocus, op;
+                var selection = getSelection(e),
+                    oldPosition, stepsToAnchor, stepsToFocus, op;
 
-                if (selection.anchorNode === null && selection.focusNode === null) { // chrome & safari
-                    caretPos = caretPositionFromPoint(e.clientX, e.clientY);
-                    if (caretPos) {
-                        range = odtDocument.getDOM().createRange();
-                        range.setStart(caretPos.container, caretPos.offset);
-                        range.collapse(true);
-                        selection.addRange(range);
-                    }
+                if (selection === null) {
+                    return;
                 }
 
                 stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
-                stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
+                if (selection.focusNode === selection.anchorNode
+                    && selection.focusOffset === selection.anchorOffset) {
+                    stepsToFocus = stepsToAnchor;
+                } else {
+                    stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
+                }
+
                 if ((stepsToFocus !== null && stepsToFocus !== 0 ) ||
                     (stepsToAnchor !== null && stepsToAnchor !== 0)) {
+                    oldPosition = odtDocument.getCursorPosition(inputMemberId);
                     op = createOpMoveCursor(oldPosition + stepsToAnchor, stepsToFocus - stepsToAnchor);
                     session.enqueue(op);
                 }
@@ -273,10 +315,10 @@ gui.SessionController = (function () {
             var currentNode, i, c, op,
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId),
                 alphaNumeric = /[A-Za-z0-9]/,
                 stepsToStart = 0,
-                stepsToEnd = 0;
+                stepsToEnd = 0,
+                oldPosition;
 
             iterator.setUnfilteredPosition(cursorNode, 0);
             if (iterator.previousPosition()) {
@@ -284,11 +326,10 @@ gui.SessionController = (function () {
                 if (currentNode.nodeType === Node.TEXT_NODE) {
                     for (i = currentNode.data.length - 1; i >= 0; i -= 1) {
                         c = currentNode.data[i];
-                        if (alphaNumeric.test(c)) {
-                            stepsToStart -= 1;
-                        } else {
+                        if (!alphaNumeric.test(c)) {
                             break;
                         }
+                        stepsToStart -= 1;
                     }
                 }
             }
@@ -299,16 +340,16 @@ gui.SessionController = (function () {
                 if (currentNode.nodeType === Node.TEXT_NODE) {
                     for (i = 0; i < currentNode.data.length; i += 1) {
                         c = currentNode.data[i];
-                        if (alphaNumeric.test(c)) {
-                            stepsToEnd += 1;
-                        } else {
+                        if (!alphaNumeric.test(c)) {
                             break;
                         }
+                        stepsToEnd += 1;
                     }
                 }
             }
 
             if (stepsToStart !== 0 || stepsToEnd !== 0) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
                 op = createOpMoveCursor(oldPosition + stepsToStart, Math.abs(stepsToStart) + Math.abs(stepsToEnd));
                 session.enqueue(op);
             }
@@ -321,13 +362,14 @@ gui.SessionController = (function () {
             var stepsToStart, stepsToEnd, op,
                 iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                 paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
+                oldPosition;
 
             stepsToStart = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
             iterator.moveToEndOfNode(paragraphNode);
             stepsToEnd = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, iterator.unfilteredDomOffset());
 
             if (stepsToStart !== 0 || stepsToEnd !== 0) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
                 op = createOpMoveCursor(oldPosition + stepsToStart, Math.abs(stepsToStart) + Math.abs(stepsToEnd));
                 session.enqueue(op);
             }
@@ -781,7 +823,7 @@ gui.SessionController = (function () {
          */
         function maintainCursorSelection() {
             var cursor = odtDocument.getCursor(inputMemberId),
-                selection = runtime.getWindow().getSelection();
+                selection = window.getSelection();
 
             if (cursor) {
                 // May have just processed our own remove cursor operation...
@@ -876,8 +918,7 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function handlePaste(e) {
-            var plainText,
-                /**@type{?Window}*/window = runtime.getWindow();
+            var plainText;
 
             if (window.clipboardData && window.clipboardData.getData) { // IE
                 plainText = window.clipboardData.getData('Text');
@@ -1103,7 +1144,7 @@ gui.SessionController = (function () {
         };
 
         function init() {
-            var isMacOS = runtime.getWindow().navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
+            var isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
                 modifier = gui.KeyboardHandler.Modifier,
                 keyCode = gui.KeyboardHandler.KeyCode;
 
