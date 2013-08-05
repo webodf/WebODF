@@ -55,23 +55,27 @@ odf.Namespaces = (function () {
         /**@const@type {!string}*/ numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         /**@const@type {!string}*/ xlinkns = 'http://www.w3.org/1999/xlink',
         /**@const@type {!string}*/ xmlns = "http://www.w3.org/XML/1998/namespace",
+        /**@const@type {!string}*/ dcns = "http://purl.org/dc/elements/1.1/",
+        /**@const@type {!string}*/ webodfns = 'urn:webodf',
 
-    /** @const@type {!Object.<string,!string>} */
-    namespaceMap = {
-        "draw": drawns,
-        "fo": fons,
-        "office": officens,
-        "presentation": presentationns,
-        "style": stylens,
-        "svg": svgns,
-        "table": tablens,
-        "text": textns,
-        "dr3d": dr3dns,
-        "numberns": numberns,
-        "xlink": xlinkns,
-        "xml": xmlns
-    },
-    namespaces;
+        /** @const@type {!Object.<string,!string>} */
+        namespaceMap = {
+            "draw": drawns,
+            "fo": fons,
+            "office": officens,
+            "presentation": presentationns,
+            "style": stylens,
+            "svg": svgns,
+            "table": tablens,
+            "text": textns,
+            "dr3d": dr3dns,
+            "numberns": numberns,
+            "xlink": xlinkns,
+            "xml": xmlns,
+            "dc": dcns,
+            "webodf": webodfns
+        },
+        namespaces;
 
     /**
      * Calls the passed callback for all pairs of prefix and namespace
@@ -124,6 +128,8 @@ odf.Namespaces = (function () {
     /**@const@type {!string}*/ namespaces.numberns = numberns;
     /**@const@type {!string}*/ namespaces.xlinkns = xlinkns;
     /**@const@type {!string}*/ namespaces.xmlns = xmlns;
+    /**@const@type {!string}*/ namespaces.dcns = dcns;
+    /**@const@type {!string}*/ namespaces.webodfns = webodfns;
 
     return namespaces;
 }());
