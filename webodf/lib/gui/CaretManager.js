@@ -59,8 +59,8 @@ gui.CaretManager = function CaretManager(sessionController) {
         delete carets[memberId];
     }
 
-    function refreshCaret(info) {
-        var caret = carets[info.memberId];
+    function refreshCaret(cursor) {
+        var caret = carets[cursor.getMemberId()];
         if (caret) {
             caret.refreshCursor();
         }
