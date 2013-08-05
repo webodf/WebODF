@@ -38,6 +38,7 @@
         "core/Base64.js",
         "core/ByteArray.js",
         "core/ByteArrayWriter.js",
+        "core/Utils.js",
         "core/DomUtils.js",
         "core/Cursor.js",
         "core/CSSUnits.js",

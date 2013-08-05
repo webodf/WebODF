@@ -32,8 +32,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, odf, runtime, console, NodeFilter*/
+/*global Node, odf, runtime, console, core, NodeFilter*/
 
+runtime.loadClass("core.Utils");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
@@ -52,24 +53,8 @@ odf.Formatting = function Formatting() {
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ numberns = odf.Namespaces.numberns,
-        odfUtils = new odf.OdfUtils();
-
-    /**
-     * Simple string hash
-     * Based off http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
-     * @param {!string} value
-     * @returns {!number}
-     */
-    function hashString(value) {
-        var hash = 0, i, l;
-        for (i = 0, l = value.length; i < l; i += 1) {
-            /*jslint bitwise:true*/
-            hash  = ((hash<<5)-hash)+value.charCodeAt(i);
-            hash |= 0; // Convert to 32bit integer
-            /*jslint bitwise:false*/
-        }
-        return hash;
-    }
+        odfUtils = new odf.OdfUtils(),
+        utils = new core.Utils();
 
     /**
      * Recursively merge properties of two objects
@@ -482,7 +467,10 @@ odf.Formatting = function Formatting() {
      */
     this.applyStyle = function (memberId, textNodes, limits, info) {
         var textStyles = new odf.TextStyleApplicator(
-            "auto" + hashString(memberId) + "_", self, odfContainer.rootElement.automaticStyles);
+            "auto" + utils.hashString(memberId) + "_",
+            self,
+            odfContainer.rootElement.automaticStyles
+        );
         textStyles.applyStyle(textNodes, limits, info);
     };
 
