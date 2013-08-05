@@ -407,6 +407,18 @@ office|annotation > text|list {
     padding: 5px;
 }
 
+/* This is very temporary CSS. This must go once
+ * we start bundling webodf-default ODF styles for annotations.
+ */
+office|annotation text|p {
+    font-size: 10pt;
+    color: black;
+    font-weight: normal;
+    font-style: normal;
+    text-decoration: none;
+    font-family: sans-serif;
+}
+
 dc|*::selection {
     background: transparent;
 }
