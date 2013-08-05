@@ -375,12 +375,12 @@ office|annotation {
     width: 100%;
     height: 100%;
     display: none;
-    background: rgb(130, 158, 255);
-    background: -moz-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
-    background: -webkit-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
-    background: -o-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
-    background: -ms-linear-gradient(270deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
-    background: linear-gradient(0deg, rgb(130, 158, 255) 0%, rgb(188, 223, 250) 78%);
+    background: rgb(198, 238, 184);
+    background: -moz-linear-gradient(90deg, rgb(198, 238, 184) 30%, rgb(180, 196, 159) 100%);
+    background: -webkit-linear-gradient(90deg, rgb(198, 238, 184) 30%, rgb(180, 196, 159) 100%);
+    background: -o-linear-gradient(90deg, rgb(198, 238, 184) 30%, rgb(180, 196, 159) 100%);
+    background: -ms-linear-gradient(90deg, rgb(198, 238, 184) 30%, rgb(180, 196, 159) 100%);
+    background: linear-gradient(180deg, rgb(198, 238, 184) 30%, rgb(180, 196, 159) 100%);
     box-shadow: 0 3px 4px -3px #ccc;
 }
 
@@ -392,7 +392,7 @@ office|annotation > dc|creator {
     font-family: sans-serif;
     color: white;
     background-color: brown;
-    border: 4px solid brown;
+    padding: 4px;
 }
 office|annotation > dc|date {
     display: block;
