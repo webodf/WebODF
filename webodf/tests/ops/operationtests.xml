@@ -3,6 +3,7 @@
     xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
     xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
     xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
     xmlns:c="urn:webodf:names:cursor"
     xmlns:e="urn:webodf:names:editinfo"
@@ -754,6 +755,42 @@
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
    <office:text><text:p><html:span class="annotationHighlight">A<text:span text:style-name="auto63350368_0">BC</text:span>D</html:span></text:p></office:text>
+  </after>
+ </test>
+  <test name="AddAnnotation_simple">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <ops>
+   <op optype="AddAnnotation" memberid="Alice" position="2" length="0" name="alice_1" timestamp="1375706047061">
+   </op>
+  </ops>
+  <after>
+   <office:text><text:p>AB<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice"></dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>CD</text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotation_ranged">
+  <before>
+   <office:text><text:p>ABCD</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+  </before>
+  <ops>
+   <op optype="AddAnnotation" memberid="Alice" position="3" length="6" name="alice_2" timestamp="1375706047061">
+   </op>
+  </ops>
+  <after>
+   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"></dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>H<office:annotation-end office:name="alice_2"/>IJ</text:span></text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotation_rangedMultiple">
+  <before>
+   <office:text><text:p>ABCD</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+  </before>
+  <ops>
+   <op optype="AddAnnotation" memberid="Alice" position="3" length="6" name="alice_1" timestamp="1375706047061"/>
+   <op optype="AddAnnotation" memberid="Alice" position="3" length="0" name="alice_2" timestamp="1375706047061"/>
+  </ops>
+  <after>
+   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"></dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice"></dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>H<office:annotation-end office:name="alice_1"/>IJ</text:span></text:p></office:text>
   </after>
  </test>
 </tests>

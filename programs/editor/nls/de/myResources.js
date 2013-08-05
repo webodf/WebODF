@@ -40,6 +40,7 @@ define({
     save: "Speichern",
     edit: "Bearbeiten",
     view: "Ansicht",
+    annotate: "Kommentieren",
     insert: "Einfügen",
     format: "Formatieren",
     character_DDD: "Zeichen...",

@@ -333,6 +333,28 @@ define("webodf/editor/EditorSession", [
             session.enqueue(op);
         };
 
+        /**
+         * Adds an annotation to the document based on the current selection
+         * @return {undefined}
+         */
+        this.addAnnotation = function () {
+            var op = new ops.OpAddAnnotation(),
+                selection = self.getCursorSelection(),
+                length = selection.length,
+                position = selection.position;
+
+            position = length >= 0 ? position : position + length;
+            length = Math.abs(length);
+
+            op.init({
+                memberid: memberid,
+                position: position,
+                length: length,
+                name: memberid + Date.now()
+            });
+            session.enqueue(op);
+        };
+
         this.setCurrentParagraphStyle = function (value) {
             var op;
             if (currentNamedStyleName !== value) {

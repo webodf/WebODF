@@ -51,8 +51,11 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
         doc = odfFragment.ownerDocument,
         odfUtils = new odf.OdfUtils(),
         /**@const*/CONNECTOR_MARGIN = 30,
-        /**@const*/NOTE_MARGIN = 20;
+        /**@const*/NOTE_MARGIN = 20,
+        window = runtime.getWindow();
 
+    runtime.assert(Boolean(window),
+                   "Expected to be run in an environment which has a global window, like a browser.");
     /**
      * Wraps an annotation with various HTML elements for styling, including connectors
      * @param {!{node: !Node, end: ?Node}} annotation
@@ -173,7 +176,9 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
             annotationWrapper = annotationNote.parentNode,
             connectorAngle = 0,
             previousAnnotation = annotations[annotations.indexOf(annotation) - 1],
-            previousRect;
+            previousRect,
+            creatorNode = annotation.node.getElementsByTagNameNS(odf.Namespaces.dcns, 'creator')[0],
+            creatorName;
 
         annotationNote.style.left =
             annotationsPane.getBoundingClientRect().left
@@ -211,6 +216,22 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
         connectorAngular.style.MozTransform = 'rotate(' + connectorAngle + 'rad)';
         connectorAngular.style.WebkitTransform = 'rotate(' + connectorAngle + 'rad)';
         connectorAngular.style.msTransform = 'rotate(' + connectorAngle + 'rad)';
+
+        // Bad hack: Since we do not have a straightforward way to access user data here, we will read the computed style
+        // of dc:creator[editinfo|memberid]:before, always applied by SessionView, because that contains the creator name
+        // as the content, when an annotation is created by OpAddAnnotation.
+        if (creatorNode) {
+            creatorName = window.getComputedStyle(/**@type{!Element}*/(creatorNode), ':before').content;
+            if (creatorName) {
+                creatorName = creatorName.substring(1, creatorName.length - 1);
+                if (creatorNode.firstChild) {
+                    creatorNode.firstChild.nodeValue = creatorName;
+                } else {
+                    creatorNode.appendChild(doc.createTextNode(creatorName));
+                }
+            }
+        }
+
     }
     
     /**
@@ -229,6 +250,20 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
     }
 
     /**
+     * Recalculates the rendering - positions, rotation angles for connectors, etc - 
+     * for all tracked annotations
+     * @return {undefined}
+     */
+    function rerenderAnnotations() {
+        var i;
+
+        for (i = 0; i < annotations.length; i += 1) {
+            renderAnnotation(annotations[i]);
+        }
+    }
+    this.rerenderAnnotations = rerenderAnnotations;
+
+    /**
      * Adds an annotation to track, and wraps and highlights it
      * @param {!{node: !Node, end: ?Node}} annotation
      * @return {undefined}
@@ -245,6 +280,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
         if (annotation.end) {
             highlightAnnotation(annotation);
         }
+        rerenderAnnotations();
     }
     this.addAnnotation = addAnnotation;
 
@@ -269,18 +305,4 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
         }
     }
     this.forgetAnnotations = forgetAnnotations;
-
-    /**
-     * Recalculates the rendering - positions, rotation angles for connectors, etc - 
-     * for all tracked annotations
-     * @return {undefined}
-     */
-    function rerenderAnnotations() {
-        var i;
-
-        for (i = 0; i < annotations.length; i += 1) {
-            renderAnnotation(annotations[i]);
-        }
-    }
-    this.rerenderAnnotations = rerenderAnnotations;
 };

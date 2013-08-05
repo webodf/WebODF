@@ -93,20 +93,26 @@ gui.SessionView = (function () {
             showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true),
             blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true);
 
-        function createAvatarInfoNodeMatch(nodeName, className, memberId) {
+        /**
+         * @param {!string} nodeName
+         * @param {!string} memberId
+         * @param {string} pseudoClass
+         * @return {!string}
+         */
+        function createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) {
             var userId = memberId.split('___')[0];
-            return nodeName + '.' + className + '[editinfo|memberid^="' + userId + '"]';
+            return nodeName + '[editinfo|memberid^="' + userId + '"]' + pseudoClass;
         }
 
         /**
-         * @param {string} nodeName
-         * @param {string} className
-         * @param {string} memberId
+         * @param {!string} nodeName
+         * @param {!string} memberId
+         * @param {string} pseudoClass
          * @return {?Node}
          */
-        function getAvatarInfoStyle(nodeName, className, memberId) {
+        function getAvatarInfoStyle(nodeName, memberId, pseudoClass) {
             var node = avatarInfoStyles.firstChild,
-                nodeMatch = createAvatarInfoNodeMatch(nodeName, className, memberId);
+                nodeMatch = createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass);
 
             while (node) {
                 if ((node.nodeType === Node.TEXT_NODE) && (node.data.indexOf(nodeMatch) === 0)) {
@@ -123,9 +129,14 @@ gui.SessionView = (function () {
          * @param {string} color
          */
         function setAvatarInfoStyle(memberId, name, color) {
-            function setStyle(nodeName, className, rule) {
-                var styleRule = createAvatarInfoNodeMatch(nodeName, className, memberId) + rule,
-                    styleNode = getAvatarInfoStyle(nodeName, className, memberId);
+            /**
+             * @param {!string} nodeName
+             * @param {!string} rule
+             * @param {string} pseudoClass
+             */
+            function setStyle(nodeName, rule, pseudoClass) {
+                var styleRule = createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) + rule,
+                    styleNode = getAvatarInfoStyle(nodeName, memberId, pseudoClass);
 
                 // TODO: this does not work with Firefox 16.0.1, throws a HierarchyRequestError on first try.
                 // And Chromium a "SYNTAX_ERR: DOM Exception 12" now
@@ -138,9 +149,11 @@ gui.SessionView = (function () {
                 }
             }
 
-            setStyle('div', 'editInfoMarker', '{ background-color: ' + color + '; }');
-            setStyle('span', 'editInfoColor', '{ background-color: ' + color + '; }');
-            setStyle('span', 'editInfoAuthor', ':before { content: "' + name + '"; }');
+            setStyle('div.editInfoMarker', '{ background-color: ' + color + '; }', '');
+            setStyle('span.editInfoColor', '{ background-color: ' + color + '; }', '');
+            setStyle('span.editInfoAuthor', '{ content: "' + name + '"; }', ':before');
+            setStyle('dc|creator', '{ content: "' + name + '"; display: none;}', ':before');
+            setStyle('dc|creator', '{ background-color: ' + color + '; }', '');
         }
 
         /**
@@ -349,11 +362,12 @@ gui.SessionView = (function () {
             });
 
 
-            // Add a css sheet for avatar-edited styling
+            // Add a css sheet for user info-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');
             avatarInfoStyles.type = 'text/css';
             avatarInfoStyles.media = 'screen, print, handheld, projection';
             avatarInfoStyles.appendChild(document.createTextNode('@namespace editinfo url(urn:webodf:names:editinfo);'));
+            avatarInfoStyles.appendChild(document.createTextNode('@namespace dc url(http://purl.org/dc/elements/1.1/);'));
             head.appendChild(avatarInfoStyles);
         }
         init();

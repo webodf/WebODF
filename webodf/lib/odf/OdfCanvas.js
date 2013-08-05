@@ -1416,9 +1416,24 @@ odf.OdfCanvas = (function () {
          * @param {boolean} allow
          */
         this.enableAnnotations = function (allow) {
-            allowAnnotations = allow;
-            handleAnnotations(odfcontainer.rootElement);
+            if (allow !== allowAnnotations) {
+                allowAnnotations = allow;
+                handleAnnotations(odfcontainer.rootElement);
+            }
         };
+
+        /**
+         * Adds an annotation for the annotaiton manager to track
+         * and wraps and highlights it
+         * @param {!{node: !Node, end: ?Node}} annotation
+         * @return {undefined}
+         */
+        this.addAnnotation = function (annotation) {
+            if (annotationManager) {
+                annotationManager.addAnnotation(annotation);
+            }
+        };
+
         /**
          * @param {!number} zoom
          * @return {undefined}

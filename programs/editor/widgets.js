@@ -55,7 +55,7 @@ define("webodf/editor/widgets", [
             ], function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar) {
                 ready(function () {
                     var loadButton, saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider,
-                        undoRedoMenu;
+                        undoRedoMenu, annotateButton;
 
                     dropDownMenu = new DropDownMenu({});
                     paragraphStylesMenuItem = new MenuItem({
@@ -136,6 +136,16 @@ define("webodf/editor/widgets", [
                         }
                     });
                     menuButton.placeAt(toolbar);
+
+                    annotateButton = new Button({
+                        label: translator('annotate'),
+                        showLabel: false,
+                        iconClass: 'dijitIconBookmark',
+                        onClick: function () {
+                            editorSession.addAnnotation();
+                        }
+                    });
+                    annotateButton.placeAt(toolbar);
                 });
             });
         };

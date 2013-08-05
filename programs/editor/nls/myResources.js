@@ -39,6 +39,7 @@ define({
         save: "Save",
         edit: "Edit",
         view: "View",
+        annotate: "Annotate",
         insert: "Insert",
         format: "Format",
         character_DDD: "Character...",

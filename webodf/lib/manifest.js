@@ -95,6 +95,7 @@
         "ops/Session.js",
         "ops/SessionNodeFilter.js",
         "ops/OpAddCursor.js",
+        "ops/OpAddAnnotation.js",
         "ops/OpApplyDirectStyling.js",
         "ops/OpRemoveCursor.js",
         "ops/OpMoveCursor.js",
