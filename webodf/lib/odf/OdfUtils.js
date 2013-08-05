@@ -72,6 +72,23 @@ odf.OdfUtils = function OdfUtils() {
     this.getParagraphElement = getParagraphElement;
 
     /**
+     * Returns true if the specified node is contained within a text:tracked-changes parent
+     * @param {Node} node Node to start searching from
+     * @param {!Node} container Root container to stop searching at. This helps set the boundary of the current
+     *  search and will usually be the root level element node (e.g., office:text, office:presentation, etc.)
+     * @returns {!boolean}
+     */
+    this.isWithinTrackedChanges = function (node, container) {
+        while (node && node !== container) {
+            if (node.namespaceURI === textns && node.localName === 'tracked-changes') {
+                return true;
+            }
+            node = node.parentNode;
+        }
+        return false;
+    };
+
+    /**
      * Determine if the node is a text:list-item element.
      * @param {?Node} e
      * @return {!boolean}
