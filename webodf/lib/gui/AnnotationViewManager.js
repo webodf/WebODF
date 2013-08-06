@@ -222,7 +222,10 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
         // as the content, when an annotation is created by OpAddAnnotation.
         if (creatorNode) {
             creatorName = window.getComputedStyle(/**@type{!Element}*/(creatorNode), ':before').content;
-            if (creatorName) {
+            // The default `content: ` value for :before and :after pseudo-elements
+            // in webkit is '' and `none` in gecko.
+            if (creatorName && creatorName !== 'none') {
+                // Strip the opening and closing quotes
                 creatorName = creatorName.substring(1, creatorName.length - 1);
                 if (creatorNode.firstChild) {
                     creatorNode.firstChild.nodeValue = creatorName;
