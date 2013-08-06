@@ -51,16 +51,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         timeoutHandle,
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
-    function getOffset(el) {
-        var x = 0, y = 0;
-        while (el && el.nodeType === Node.ELEMENT_NODE) {//!isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
-            x += el.offsetLeft - el.scrollLeft;
-            y += el.offsetTop - el.scrollTop;
-            el = el.parentNode;//offsetParent;
-        }
-        return { top: y, left: x };
-    }
-
     /**
      * Resets the positionIterator back to the current cursor position and
      * returns the iterator.
@@ -77,58 +67,96 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
+     * Gets the maximum available offset for a given node. For a text node, this is text length,
+     * for element nodes, this will be childNodes.length
+     * @param {!Node} node
+     * @returns {!number}
+     */
+    function getMaximumNodePosition(node) {
+        return node.nodeType === Node.TEXT_NODE ? node.textContent.length : node.childNodes.length;
+    }
+
+    /**
+     * Get the first or last client rectangle based on the useRightEdge flag. If useRightEdge is
+     * set to true, this will return the right-most offset of the last available rectangle
+     * @param {ClientRectList} clientRectangles
+     * @param {!boolean} useRightEdge
+     * @returns {?{top: !number, left: !number, bottom: !number}}
+     */
+    function getClientRect(clientRectangles, useRightEdge) {
+        var rectangle,
+            simplifiedRectangle = null;
+
+        if (clientRectangles) {
+            rectangle = useRightEdge ? clientRectangles[clientRectangles.length - 1] : clientRectangles[0];
+        }
+
+        if (rectangle) {
+            simplifiedRectangle = {
+                top: rectangle.top,
+                left: useRightEdge ? rectangle.right : rectangle.left,
+                bottom: rectangle.bottom
+            };
+        }
+        return simplifiedRectangle;
+    }
+
+    /**
      * Gets the client rect of a position specified by the container and an
      * offset. If this is not possible with a range, then the last element's coordinates
      * are used to guesstimate the position.
      * @param {!Node} container
      * @param {!number} offset
      * @param {!Range} range
-     * @return {?{top: !number, left: !number}}
+     * @param {boolean=} useRightEdge Default value is false. Used when searching for the closest visually equivalent
+     *  rectangle, starting at the specified container offset. In these circumstances, the right-side of the last
+     *  client rectangle actually defines the visual position
+     * @return {{top: !number, left: !number, bottom: !number}}
      */
-    function getRect(container, offset, range) {
-        var rect,
-            containerOffset;
+    function getVisibleRect(container, offset, range, useRightEdge) {
+        var rectangle,
+            nodeType = container.nodeType;
 
+        // There are various places where the list of client rects will be empty:
+        // - Empty text nodes
+        // - Non-visible elements (e.g., collapsed or wrapped whitespace, hidden elements etc.)
+        // - Non-visible coordinates (e.g., the last position of a paragraph is a selection position, but not a rendered character)
+        // In each case, we need to find the visually equivalent rectangle just preceding this container+offset
+
+        // Step 1 - Select just the collapsed point
         range.setStart(container, offset);
-        rect = range.getClientRects()[0];
-        if (!rect) {
-            rect = {};
-            // There are various places where the list of client rects will be empty,
-            // for example in the last position of a paragraph, or when the range covers and empty text node.
-            // In that case, we need to handle these positions in a more special manner to get an equivalent
-            // clientRect
-            if (container.childNodes[offset - 1]) {
-                range.setStart(container, offset  - 1);
-                range.setEnd(container, offset);
-                containerOffset = range.getClientRects()[0];
-                if (!containerOffset) {
-                    containerOffset = getOffset(container);
-                }
-                rect.top = containerOffset.top;
-                rect.left = containerOffset.right;
-                rect.bottom = containerOffset.bottom;
-            } else if (container.nodeType === Node.TEXT_NODE) {
-                // If the container is a text node and we were not able to get the client rects for it,
-                // try using the client rects from it's previous sibling
-                if (container.previousSibling) {
-                    rect = container.previousSibling.getClientRects()[0];
-                }
-                // If even that did not work, extend the range over the textnode and try to get it's client rect
-                if (!rect) {
-                    range.setStart(container, 0);
-                    range.setEnd(container, offset);
-                    rect = range.getClientRects()[0];
-                }
+        range.collapse(!useRightEdge);
+        rectangle = getClientRect(range.getClientRects(), useRightEdge === true);
+
+        if (!rectangle && offset > 0) {
+            // Fallback 1 - Select the offset & preceding if available
+            range.setStart(container, offset - 1);
+            range.setEnd(container, offset);
+            rectangle = getClientRect(range.getClientRects(), true);
+        }
+
+        if (!rectangle) {
+            if (nodeType === Node.ELEMENT_NODE && container.childNodes[offset - 1]) {
+                // Fallback 2 - there are other child nodes directly preceding this offset. Try those
+                rectangle = getVisibleRect(container, offset - 1, range, true);
+            } else if (container.nodeType === Node.TEXT_NODE && offset > 0) {
+                // Fallback 3 - this is a text node, so is either in an invisible container, or is collapsed whitespace, see if an adjacent character is visible
+                rectangle = getVisibleRect(container, offset - 1, range, true);
+            } else if (container.previousSibling) {
+                // Fallback 4 - Has a previous sibling, try using that
+                rectangle = getVisibleRect(container.previousSibling, getMaximumNodePosition(container.previousSibling), range, true);
+            } else if (container.parentNode && container.parentNode !== rootNode) {
+                // Fallback 5 - try using the parent container. Had no previous siblings, so look for the first offset
+                rectangle = getVisibleRect(container.parentNode, 0, range, false);
             } else {
-                // finally, if none of the above cases were true, just get the client rect of the container itself
-                rect = container.getClientRects()[0];
+                // Fallback 6 - no previous siblings have been found, try and return the root node's bounding container
+                // Assert container === rootNode
+                range.selectNode(rootNode);
+                rectangle = getClientRect(range.getClientRects(), false);
             }
         }
-        return {
-            top: rect.top,
-            left: rect.left,
-            bottom: rect.bottom
-        };
+        runtime.assert(Boolean(rectangle), "No visible rectangle found");
+        return /**@type{{top: !number, left: !number, bottom: !number}}*/(rectangle);
     }
 
     function doMove(steps, extend, move) {
@@ -143,7 +171,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             isForwardSelection,
             /**@type{?Window}*/window = runtime.getWindow();
 
-        initialRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
+        initialRect = getVisibleRect(iterator.container(), iterator.unfilteredDomOffset(), range);
         while (left > 0 && move()) {
             left -= 1;
         }
@@ -163,7 +191,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         cursor.setSelectedRange(selectionRange, isForwardSelection);
 
-        newRect = getRect(/**@type{!Node}*/(cursor.getNode()), 0, range);
+        iterator = getIteratorAtCursor(); // Need to get the first walkable position at the cursor
+        // The cursor node itself is not a walkable position, and will cause strange behaviours if used
+        newRect = getVisibleRect(iterator.container(), iterator.unfilteredDomOffset(), range);
 
         horizontalMovement = (newRect.top === initialRect.top) ? true : false;
         if (horizontalMovement || cachedXOffset === undefined) {
@@ -189,6 +219,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     };
     /**
      * Move selection forward one position.
+     * @param {!number} steps
      * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
      * @return {!number}
@@ -354,7 +385,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             watch = new core.LoopWatchDog(1000);
 
         // Get the starting position
-        rect = getRect(c, iterator.unfilteredDomOffset(), range);
+        rect = getVisibleRect(c, iterator.unfilteredDomOffset(), range);
 
         top = rect.top;
         if (cachedXOffset === undefined) {
@@ -370,7 +401,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                 count += 1;
 
                 c = iterator.container();
-                rect = getRect(c, iterator.unfilteredDomOffset(), range);
+                rect = getVisibleRect(c, iterator.unfilteredDomOffset(), range);
 
                 if (rect.top !== top) { // Not on the initial line anymore
                     if (rect.top !== lastTop && lastTop !== top) { // Not even on the next line
@@ -445,7 +476,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             increment = 1;
         }
 
-        lastRect = getRect(iterator.container(), iterator.unfilteredDomOffset(), range);
+        lastRect = getVisibleRect(iterator.container(), iterator.unfilteredDomOffset(), range);
         while (fnNextPos.call(iterator)) {
             if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 // hit another paragraph node, so won't be the same line
@@ -453,7 +484,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                     break;
                 }
 
-                rect = getRect(iterator.container(), iterator.unfilteredDomOffset(), range);
+                rect = getVisibleRect(iterator.container(), iterator.unfilteredDomOffset(), range);
                 if (rect.bottom !== lastRect.bottom) { // most cases it means hit the line above/below
                     // if top and bottom overlaps, assume they are on the same line
                     onSameLine = (rect.top >= lastRect.top && rect.bottom < lastRect.bottom)

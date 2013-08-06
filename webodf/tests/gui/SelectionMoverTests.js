@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, core, gui*/
+/*global runtime, core, gui, Node, NodeFilter*/
 runtime.loadClass("gui.SelectionMover");
 /**
  * @constructor
@@ -65,6 +65,21 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         mover = new gui.SelectionMover(cursor, p);
         t = { doc: domDocument, p: p, mover: mover, cursor: cursor };
     }
+    function replaceParagraphsWithHtmlParagraphs(root) {
+        var child = root.firstChild, paragraph;
+        while (child) {
+            if (child.localName === "p") {
+                paragraph = root.ownerDocument.createElement("p");
+                root.insertBefore(paragraph, child);
+                while (child.firstChild) {
+                    paragraph.appendChild(child.firstChild);
+                }
+                root.removeChild(child);
+                child = paragraph;
+            }
+            child = child.nextSibling;
+        }
+    }
     function createDoc(xml) {
         var domDocument = testarea.ownerDocument,
             doc = runtime.parseXML(xml),
@@ -72,6 +87,9 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             cursor,
             node = /**@type{!Element}*/(domDocument.importNode(doc.documentElement, true));
         testarea.appendChild(node);
+        // Paragraph nodes can be styled, will properly line break etc.
+        // This makes writing boundary and line-related tests easier
+        replaceParagraphsWithHtmlParagraphs(node);
         cursor = new core.Cursor(domDocument, "Joe");
         mover = new gui.SelectionMover(cursor, node);
         t = { doc: doc, root: node, mover: mover, cursor: cursor };
@@ -177,6 +195,168 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         steps = counter.countStepsToPosition(emptyNode, 0, new AcceptAllPositionFilter());
         r.shouldBe(t, steps.toString(), "0");
     }
+    /**
+     * Simulate a valid cursor position
+     * Keeps logic behaving in a similar fashion to actual ODT counting... makes the tests less confusing
+     * Additionally, some bugs only exhibit themselves when a particular container & offset are returned
+     * @constructor
+     * @implements core.PositionFilter
+     */
+    function PretendOdfFilter() {
+        this.acceptPosition = function (iterator) {
+            var container = iterator.container();
+
+            if (container.nodeType === Node.TEXT_NODE
+                    && (container.parentNode.localName === "p" || iterator.unfilteredDomOffset() !== 0)) {
+                return NodeFilter.FILTER_ACCEPT;
+            }
+            if (container.localName === "p" && iterator.unfilteredDomOffset() !== 0) {
+
+                return NodeFilter.FILTER_ACCEPT;
+            }
+            return NodeFilter.FILTER_REJECT;
+        };
+    }
+    function setCursorPosition(startOffset) {
+        var range = t.root.ownerDocument.createRange(),
+            filter = new PretendOdfFilter(),
+            counter = t.mover.getStepCounter(),
+            firstParagraph = t.root.childNodes[1], // index-0 will be the cursor
+            stepsToStartOffset;
+        t.filter = filter;
+        t.counter = counter;
+        range.setStart(firstParagraph, 0);
+        range.collapse(true);
+        t.cursor.setSelectedRange(range);
+        stepsToStartOffset = counter.countForwardSteps(startOffset, filter);
+        t.mover.movePointForward(stepsToStartOffset, false);
+    }
+    function testCountLinesStepsDown_FromParagraphStart() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(0);
+        t.steps = t.counter.countLinesSteps(1, t.filter);
+        r.shouldBe(t, "t.steps", "5");
+    }
+    function testCountLinesStepsDown_FromParagraphEnd() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(4);
+        t.steps = t.counter.countLinesSteps(1, t.filter);
+        r.shouldBe(t, "t.steps", "6");
+    }
+    function testCountLinesStepsDown_FromJaggedParagraphEnd() {
+        createDoc("<t><p>ABCDE</p><p>FGHIJ</p></t>");
+        setCursorPosition(5);
+        t.steps = t.counter.countLinesSteps(1, t.filter);
+        r.shouldBe(t, "t.steps", "6");
+    }
+    function testCountLinesStepsDown_OverWrap() {
+        createDoc("<t><p>ABCD FGHIJ</p></t>");
+        t.root.getElementsByTagName('p')[0].style.width = "30px"; // first paragraph
+        setCursorPosition(4);
+        t.steps = t.counter.countLinesSteps(1, t.filter);
+        r.shouldBe(t, "t.steps", "6");
+    }
+    function testCountLinesStepsUp_FromParagraphStart() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(5);
+        t.steps = t.counter.countLinesSteps(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-5");
+    }
+    function testCountLinesStepsUp_FromParagraphEnd() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(10);
+        t.steps = t.counter.countLinesSteps(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-6");
+    }
+    function testCountLinesStepsUp_FromJaggedParagraphEnd() {
+        createDoc("<t><p>ABCDE</p><p>FGHIJ</p></t>");
+        setCursorPosition(11);
+        t.steps = t.counter.countLinesSteps(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-7");
+    }
+    function testCountStepsToLineBoundary_Forward_FromParagraphStart() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(0);
+        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
+        r.shouldBe(t, "t.steps", "4");
+    }
+    function testCountStepsToLineBoundary_Forward_StartingAtSpace() {
+        createDoc("<t><p> BCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(0);
+        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
+        r.shouldBe(t, "t.steps", "4");
+    }
+    function testCountStepsToLineBoundary_Forward_EndingAtSpace() {
+        createDoc("<t><p>ABC </p><p>FGHIJ</p></t>");
+        setCursorPosition(0);
+        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
+        r.shouldBe(t, "t.steps", "4");
+    }
+    function testCountStepsToLineBoundary_Forward_OverWrapping() {
+        createDoc("<t><p>ABC DEF</p></t>");
+        setCursorPosition(0);
+        t.root.getElementsByTagName('p')[0].style.width = "30px"; // first paragraph
+        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
+        r.shouldBe(t, "t.steps", "3");
+    }
+    function testCountStepsToLineBoundary_Backward_FromParagraphStart() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(0);
+        t.steps = Math.abs(t.counter.countStepsToLineBoundary(-1, t.filter)); // Chrome tells me this is -0. Er wat?
+        r.shouldBe(t, "t.steps", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace() {
+        createDoc("<t><p> BCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(4);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-4");
+    }
+    function testCountStepsToLineBoundary_Backward_FromParagraphEnd() {
+        createDoc("<t><p>ABCD</p><p>FGHIJ</p></t>");
+        setCursorPosition(4);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-4");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWhiteSpace() {
+        createDoc("<t><p>A <span> BC</span>D</p></t>");
+        setCursorPosition(6);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-6");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode() {
+        createDoc("<t><p>A <span>   </span>D</p></t>");
+        setCursorPosition(6);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-6");
+    }
+    function testCountStepsToLineBoundary_Backward_OverEmptyTextNodes() {
+        var span1, span2;
+        createDoc("<t><p>A <span/><span/> D </p></t>");
+        // Add an empty text node to the span element
+        span1 = t.root.childNodes[1].childNodes[1];
+        span2 = t.root.childNodes[1].childNodes[2];
+        span1.appendChild(t.root.ownerDocument.createTextNode(""));
+        span2.parentNode.insertBefore(t.root.ownerDocument.createTextNode(""), span1);
+        span2.appendChild(t.root.ownerDocument.createTextNode(""));
+        span2.parentNode.insertBefore(t.root.ownerDocument.createTextNode(""), span2);
+        setCursorPosition(6);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-6");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWrapping() {
+        createDoc("<t><p>ABC DEF</p></t>");
+        t.root.getElementsByTagName('p')[0].style.width = "30px"; // first paragraph
+        setCursorPosition(6);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-2");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWrapping2() {
+        createDoc("<t><p>ABC D <span>E</span>F</p></t>");
+        t.root.getElementsByTagName('p')[0].style.width = "40px"; // first paragraph
+        setCursorPosition(8);
+        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
+        r.shouldBe(t, "t.steps", "-4");
+    }
     this.setUp = function () {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
@@ -192,7 +372,30 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             testForthBack,
             testXMLsForthBack,
             testCountAndConfirm,
-            testCountStepsToNode
+            testCountStepsToNode,
+
+            testCountLinesStepsDown_FromParagraphStart,
+            testCountLinesStepsDown_FromParagraphEnd,
+            testCountLinesStepsDown_FromJaggedParagraphEnd,
+            testCountLinesStepsDown_OverWrap,
+
+            testCountLinesStepsUp_FromParagraphStart,
+            testCountLinesStepsUp_FromParagraphEnd,
+            testCountLinesStepsUp_FromJaggedParagraphEnd,
+
+            testCountStepsToLineBoundary_Forward_FromParagraphStart,
+            testCountStepsToLineBoundary_Forward_StartingAtSpace,
+            testCountStepsToLineBoundary_Forward_EndingAtSpace,
+            testCountStepsToLineBoundary_Forward_OverWrapping,
+
+            testCountStepsToLineBoundary_Backward_FromParagraphStart,
+            testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace,
+            testCountStepsToLineBoundary_Backward_FromParagraphEnd,
+            testCountStepsToLineBoundary_Backward_OverWhiteSpace,
+            testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode,
+            testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
+            testCountStepsToLineBoundary_Backward_OverWrapping,
+            testCountStepsToLineBoundary_Backward_OverWrapping2
         ];
     };
     this.asyncTests = function () {
