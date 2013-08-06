@@ -43,13 +43,13 @@ core.RuntimeTests = function RuntimeTests(runner) {
     var t, r = runner;
 
     function testRead(callback) {
-        runtime.read("tests.html", 27, 6, function (err, data) {
+        runtime.read("utf8.txt", 9, 5, function (err, data) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             if (data) {
                 t.data = runtime.byteArrayToString(data, "utf8");
             }
-            r.shouldBe(t, "t.data", "'WebODF'");
+            r.shouldBe(t, "t.data", "'world'");
             callback();
         });
     }
@@ -108,7 +108,7 @@ core.RuntimeTests = function RuntimeTests(runner) {
     }
 
     function testUtf8ByteArrayToString(callback) {
-        runtime.read("utf8.txt", 3, 4, function (err, data) {
+        runtime.read("utf8.txt", 14, 4, function (err, data) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             t.data = data;
