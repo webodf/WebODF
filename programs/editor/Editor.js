@@ -52,7 +52,7 @@ define("webodf/editor/Editor", [
         /**
          * @constructor
          * @param {{networked:boolean=,
-         *          memberid:string=,
+         *          memberid:!string,
          *          loadCallback:function()=,
          *          saveCallback:function()=,
          *          cursorAddedCallback:function(!string)=,
@@ -63,7 +63,6 @@ define("webodf/editor/Editor", [
 
             var self = this,
                 // Private
-                userid,
                 memberid = args.memberid,
                 session,
                 editorSession,
@@ -162,11 +161,6 @@ define("webodf/editor/Editor", [
                     }
                     // Allow annotations
                     odfCanvas.enableAnnotations(true);
-
-                    if (!memberid) {
-                        // legacy - memberid should be passed in the constructor
-                        memberid = (userid || 'undefined') + "___" + Date.now();
-                    }
 
                     session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, memberid, {
