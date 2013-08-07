@@ -55,10 +55,10 @@ define({
         paragraphStyles: "Paragraph Styles",
         // Collaboration pane
         collaborationPane: "Collaboration Pane",
-        people: "People",
+        members: "Members",
         chat: "Chat",
         typeYourName_DDD: "Type your name...",
-	    invitePeople: "Invite People",
+        inviteMembers: "Invite members",
         startTypingToChat_DDD: "Start typing to chat...",
         // Various
         left: "Left",

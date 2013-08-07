@@ -88,7 +88,7 @@ html, body, #mainContainer {
 
 }
 
-#people {
+#members {
     width: 70px;  
     padding: 2px;
     text-align: center;
@@ -121,14 +121,14 @@ html, body, #mainContainer {
     box-shadow: 0px 0px 15px red;
 }
 
-#people > #nameInfo {
+#members > #nameInfo {
     padding-top: 3px;
     padding-bottom: 3px;
     width: 100%;
     background-color: #eef;
 }
 
-#peopleList .userListButton {
+#memberList .memberListButton {
     margin-top: 5px;
     padding-top: 3px;
     margin-left: auto;
@@ -142,7 +142,7 @@ html, body, #mainContainer {
     cursor: pointer;
 }
 
-#peopleList .userListLabel {
+#memberList .memberListLabel {
     color: white;
     border-radius: 5px;
     padding: 2px;
@@ -150,11 +150,11 @@ html, body, #mainContainer {
     word-wrap: break-word;
     text-align: center justify;
 }
-div.userListLabel[fullname]:before {
+div.memberListLabel[fullname]:before {
     content: attr(fullname) "";
 }
 
-#peopleList img {
+#memberList img {
     box-shadow: 0px 0px 5px rgb(90, 90, 90) inset;
     background-color: rgb(200, 200, 200);
     border-radius: 5px;
@@ -165,7 +165,7 @@ div.userListLabel[fullname]:before {
     margin: auto;
 }
 
-#peopleList img:hover {
+#memberList img:hover {
     opacity: 0.9;
 }
 

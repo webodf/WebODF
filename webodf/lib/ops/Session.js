@@ -35,7 +35,7 @@
 
 /*global runtime, ops, odf*/
 
-runtime.loadClass("ops.TrivialUserModel");
+runtime.loadClass("ops.TrivialMemberModel");
 runtime.loadClass("ops.TrivialOperationRouter");
 runtime.loadClass("ops.OperationFactory");
 runtime.loadClass("ops.OdtDocument");
@@ -52,17 +52,17 @@ ops.Session = function Session(odfCanvas) {
         operationFactory = new ops.OperationFactory(),
         /**@type{!ops.OdtDocument}*/
         odtDocument = new ops.OdtDocument(odfCanvas),
-        /**@type{!ops.UserModel}*/
-        userModel = new ops.TrivialUserModel(),
+        /**@type{!ops.MemberModel}*/
+        memberModel = new ops.TrivialMemberModel(),
         /**@type{?ops.OperationRouter}*/
         operationRouter = null;
 
     /**
-     * @param {!ops.UserModel} uModel
+     * @param {!ops.MemberModel} uModel
      * @return {undefined}
      */
-    this.setUserModel = function (uModel) {
-        userModel = uModel;
+    this.setMemberModel = function (uModel) {
+        memberModel = uModel;
     };
 
     /**
@@ -89,10 +89,10 @@ ops.Session = function Session(odfCanvas) {
     };
 
     /**
-     * @return {!ops.UserModel}
+     * @return {!ops.MemberModel}
      */
-    this.getUserModel = function () {
-        return userModel;
+    this.getMemberModel = function () {
+        return memberModel;
     };
 
     /**

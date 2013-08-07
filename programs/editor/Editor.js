@@ -36,14 +36,14 @@
 define("webodf/editor/Editor", [
     "dojo/i18n!webodf/editor/nls/myResources",
     "webodf/editor/EditorSession",
-    "webodf/editor/UserList",
+    "webodf/editor/MemberList",
     "dijit/layout/BorderContainer",
     "dijit/layout/ContentPane",
     "webodf/editor/widgets"],
 
     function (myResources,
         EditorSession,
-        UserList,
+        MemberList,
         BorderContainer,
         ContentPane,
         loadWidgets) {
@@ -66,10 +66,10 @@ define("webodf/editor/Editor", [
                 memberid = args.memberid,
                 session,
                 editorSession,
-                userList,
+                memberList,
                 networked = args.networked === true,
                 opRouter,
-                userModel,
+                memberModel,
                 loadOdtFile = args.loadCallback,
                 saveOdtFile = args.saveCallback,
                 cursorAddedHandler = args.cursorAddedCallback,
@@ -103,17 +103,17 @@ define("webodf/editor/Editor", [
              */
             function initGuiAndDoc(initialDocumentUrl, editorReadyCallback) {
                 var odfElement, mainContainer,
-                    editorPane, peoplePane,
+                    editorPane, memberListPane,
                     inviteButton,
                     viewOptions = {
                         editInfoMarkersInitiallyVisible: networked,
                         caretAvatarsInitiallyVisible: networked,
                         caretBlinksOnRangeSelect: true
                     },
-                    peopleListDiv = document.getElementById('peopleList');
+                    memberListDiv = document.getElementById('memberList');
 
                 if (networked) {
-                    runtime.assert(peopleListDiv, "missing peopleList div in HTML");
+                    runtime.assert(memberListDiv, "missing memberList div in HTML");
                 }
 
                 runtime.loadClass('odf.OdfCanvas');
@@ -168,8 +168,8 @@ define("webodf/editor/Editor", [
                     });
                     editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
 
-                    if (peopleListDiv) {
-                        userList = new UserList(editorSession, peopleListDiv);
+                    if (memberListDiv) {
+                        memberList = new MemberList(editorSession, memberListDiv);
                     }
 
                     if (registerCallbackForShutdown) {
@@ -191,12 +191,12 @@ define("webodf/editor/Editor", [
                 }, 'editor');
                 mainContainer.addChild(editorPane);
 
-                if (networked && peopleListDiv) {
-                    peoplePane = new ContentPane({
+                if (networked && memberListDiv) {
+                    memberListPane = new ContentPane({
                         region: 'right',
-                        title: translator("people")
-                    }, 'people');
-                    mainContainer.addChild(peoplePane);
+                        title: translator("members")
+                    }, 'members');
+                    mainContainer.addChild(memberListPane);
                 }
 
                 mainContainer.startup();
@@ -204,7 +204,7 @@ define("webodf/editor/Editor", [
                 if (window.inviteButtonProxy) {
                     inviteButton = document.getElementById('inviteButton');
                     if (inviteButton) {
-                        inviteButton.innerText = translator("invitePeople");
+                        inviteButton.innerText = translator("inviteMembers");
                         inviteButton.style.display = "block";
                         inviteButton.onclick = window.inviteButtonProxy.clicked;
                     }
@@ -272,8 +272,8 @@ define("webodf/editor/Editor", [
                     opRouter = opRouter || new ops.NowjsOperationRouter(sessionId, memberid);
                     session.setOperationRouter(opRouter);
 
-                    userModel = userModel || new ops.NowjsUserModel();
-                    session.setUserModel(userModel);
+                    memberModel = memberModel || new ops.NowjsMemberModel();
+                    session.setMemberModel(memberModel);
 
                     opRouter.requestReplay(function done() {
                         var odtDocument = session.getOdtDocument();
@@ -294,9 +294,9 @@ define("webodf/editor/Editor", [
                 });
             };
 
-            // access to user model
-            self.getUserModel = function () {
-                return userModel;
+            // access to member model
+            self.getMemberModel = function () {
+                return memberModel;
             };
         }
         return Editor;

@@ -56,10 +56,10 @@ define({
     paragraphStyles: "Absatzstile",
     // Collaboration pane
     collaborationPane: "Zusammenarbeitsfeld",
-    people: "Leute",
+    members: "Teilnehmer",
     chat: "Chat",
     typeYourName_DDD: "Geben Sie Ihren Namen ein...",
-    invitePeople: "Leute einladen",
+    inviteMembers: "Teilnehmer einladen",
     startTypingToChat_DDD: "Eingabe beginnen für Chat...",
     // Various
     left: "Links",

@@ -38,8 +38,8 @@ runtime.loadClass("gui.Caret");
 
 /**
  * The caret manager is responsible for creating a caret as UI representation
- * of a users's cursor.
- * If the caret is for the local user, then the manager will control the caret's
+ * of a member's cursor.
+ * If the caret is for the local member, then the manager will control the caret's
  * current focus, and ensure the caret stays visible after every local operation.
  * @constructor
  * @param {!gui.SessionController} sessionController
@@ -69,7 +69,7 @@ gui.CaretManager = function CaretManager(sessionController) {
     function ensureLocalCaretVisible(info) {
         var caret = carets[info.memberId];
         if (info.memberId === sessionController.getInputMemberId() && caret) {
-            // on user edit actions ensure visibility of cursor
+            // on member edit actions ensure visibility of cursor
             caret.ensureVisible();
         }
     }
@@ -101,7 +101,7 @@ gui.CaretManager = function CaretManager(sessionController) {
 
         carets[memberid] = caret;
 
-        // if local input user, then let controller listen on caret span
+        // if local input member, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
             runtime.log("Starting to track input on new cursor of " + memberid);
 

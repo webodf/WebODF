@@ -217,7 +217,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
         connectorAngular.style.WebkitTransform = 'rotate(' + connectorAngle + 'rad)';
         connectorAngular.style.msTransform = 'rotate(' + connectorAngle + 'rad)';
 
-        // Bad hack: Since we do not have a straightforward way to access user data here, we will read the computed style
+        // Bad hack: Since we do not have a straightforward way to access member data here, we will read the computed style
         // of dc:creator[editinfo|memberid]:before, always applied by SessionView, because that contains the creator name
         // as the content, when an annotation is created by OpAddAnnotation.
         if (creatorNode) {

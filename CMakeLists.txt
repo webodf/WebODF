@@ -305,9 +305,9 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/KeyboardHandler.js
     lib/gui/Clipboard.js
     lib/gui/SessionController.js
-    lib/ops/UserModel.js
-    lib/ops/TrivialUserModel.js
-    lib/ops/NowjsUserModel.js
+    lib/ops/MemberModel.js
+    lib/ops/TrivialMemberModel.js
+    lib/ops/NowjsMemberModel.js
     lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
     lib/ops/NowjsOperationRouter.js

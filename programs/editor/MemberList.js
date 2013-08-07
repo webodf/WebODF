@@ -33,32 +33,33 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 /*global define,runtime */
-define("webodf/editor/UserList",
+
+define("webodf/editor/MemberList",
        ["webodf/editor/EditorSession"],
 
   function (EditorSession) {
     "use strict";
 
-    return function UserList(editorSession, userListDiv) {
+    return function MemberList(editorSession, memberListDiv) {
         var self = this;
 
-        editorSession.subscribe(EditorSession.signalUserAdded, function (memberId) {
-            self.addUser(memberId);
+        editorSession.subscribe(EditorSession.signalMemberAdded, function (memberId) {
+            self.addMember(memberId);
         });
 
-        editorSession.subscribe(EditorSession.signalUserRemoved, function (memberId) {
-            self.removeUser(memberId);
+        editorSession.subscribe(EditorSession.signalMemberRemoved, function (memberId) {
+            self.removeMember(memberId);
         });
 
         /**
          * @param {!string} memberId
          */
-        function updateAvatarButton(memberId, userDetails) {
-            var node = userListDiv.firstChild;
-            if (userDetails === null) {
-                // 'null' here means finally unknown user
+        function updateAvatarButton(memberId, memberDetails) {
+            var node = memberListDiv.firstChild;
+            if (memberDetails === null) {
+                // 'null' here means finally unknown member
                 // (and not that the data is still loading)
-                userDetails = {
+                memberDetails = {
                     memberid: memberId, fullname: "Unknown",
                     color: "black", imageurl: "avatar-joe.png"
                 };
@@ -69,11 +70,11 @@ define("webodf/editor/UserList",
                     while (node) {
                         if (node.localName === "img") {
                             // update avatar image
-                            node.src = userDetails.imageurl;
+                            node.src = memberDetails.imageurl;
                             // update border color
-                            node.style.borderColor = userDetails.color;
+                            node.style.borderColor = memberDetails.color;
                         } else if (node.localName === "div") {
-                            node.setAttribute('fullname', userDetails.fullname);
+                            node.setAttribute('fullname', memberDetails.fullname);
                         }
                         node = node.nextSibling;
                     }
@@ -87,15 +88,15 @@ define("webodf/editor/UserList",
          * @param {!string} memberId
          */
         function createAvatarButton(memberId) {
-            runtime.assert(userListDiv, "userListDiv unavailable");
-            var doc = userListDiv.ownerDocument,
+            runtime.assert(memberListDiv, "memberListDiv unavailable");
+            var doc = memberListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
                 avatarDiv = doc.createElementNS(htmlns, "div"),
                 imageElement = doc.createElement("img"),
                 fullnameNode = doc.createElement("div");
 
-            avatarDiv.className = "userListButton";
-            fullnameNode.className = "userListLabel";
+            avatarDiv.className = "memberListButton";
+            fullnameNode.className = "memberListLabel";
             avatarDiv.appendChild(imageElement);
             avatarDiv.appendChild(fullnameNode);
             avatarDiv.memberId = memberId; // TODO: namespace?
@@ -112,7 +113,7 @@ define("webodf/editor/UserList",
                     caret.toggleHandleVisibility();
                 }
             };
-            userListDiv.appendChild(avatarDiv);
+            memberListDiv.appendChild(avatarDiv);
 
             // preset bogus data
             // TODO: indicate loading state
@@ -124,10 +125,10 @@ define("webodf/editor/UserList",
          * @param {!string} memberId
          */
         function removeAvatarButton(memberId) {
-            var node = userListDiv.firstChild;
+            var node = memberListDiv.firstChild;
             while (node) {
                 if (node.memberId === memberId) {
-                    userListDiv.removeChild(node);
+                    memberListDiv.removeChild(node);
                     return;
                 }
                 node = node.nextSibling;
@@ -137,16 +138,16 @@ define("webodf/editor/UserList",
         /**
          * @param {!string} memberId
          */
-        this.addUser = function (memberId) {
+        this.addMember = function (memberId) {
             createAvatarButton(memberId);
-            editorSession.getUserDetailsAndUpdates(memberId, updateAvatarButton);
+            editorSession.getMemberDetailsAndUpdates(memberId, updateAvatarButton);
         };
 
         /**
          * @param {!string} memberId
          */
-        this.removeUser = function (memberId) {
-            editorSession.unsubscribeUserDetailsUpdates(memberId, updateAvatarButton);
+        this.removeMember = function (memberId) {
+            editorSession.unsubscribeMemberDetailsUpdates(memberId, updateAvatarButton);
             removeAvatarButton(memberId);
         };
     };

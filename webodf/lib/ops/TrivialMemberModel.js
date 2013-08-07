@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -32,50 +32,44 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global ops*/
 
 /*
  * this thing might feel a bit more at home in a namespaces
- * called "collab" or "users" or "editing" than here in "ops".
+ * called "collab" or "members" or "editing" than here in "ops".
  */
 
 /**
  * @constructor
- * @implements ops.UserModel
+ * @implements ops.MemberModel
  */
-ops.TrivialUserModel = function TrivialUserModel() {
+ops.TrivialMemberModel = function TrivialMemberModel() {
     "use strict";
 
-    var users = {};
-    users.bob = {memberid: "bob", fullname: "Bob Pigeon", color: "red", imageurl: "avatar-pigeon.png"};
-    users.alice = {memberid: "alice", fullname: "Alice Bee", color: "green", imageurl: "avatar-flower.png"};
-    users.you = {memberid: "you", fullname: "I, Robot", color: "blue", imageurl: "avatar-joe.png"};
-
     /**
-     * callback is called as soon as the userdata is available and after that
-     * on every userdata update.
-     * a parameter `null` passed to the callback means that the user is finally
+     * callback is called as soon as the memberdata is available and after that
+     * on every memberdata update.
+     * a parameter `null` passed to the callback means that the member is finally
      * not known.
      *
      * @param {!string} memberId
      * @param {function(!string, ?Object)} subscriber
      * @return {undefined}
      */
-    this.getUserDetailsAndUpdates = function (memberId, subscriber) {
-        var userid = memberId.split("___")[0];
-
-        subscriber(memberId, users[userid]||null);
+    this.getMemberDetailsAndUpdates = function (memberId, subscriber) {
+        subscriber(memberId, null);
     };
 
 /*jslint emptyblock: true, unparam: true*/
     /**
-     * getUserDetailsAndUpdates subscribes a callback for updates on user details.
+     * getMemberDetailsAndUpdates subscribes a callback for updates on member details.
      * this function undoes this subscription.
      *
      * @param {!string} memberId
      * @param {function(!string, ?Object)} subscriber
      * @return {undefined}
      */
-    this.unsubscribeUserDetailsUpdates = function (memberId, subscriber) {
+    this.unsubscribeMemberDetailsUpdates = function (memberId, subscriber) {
     };
 };

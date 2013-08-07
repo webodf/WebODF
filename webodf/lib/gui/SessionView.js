@@ -35,7 +35,7 @@
 /*global Node, document, runtime, gui, ops, core */
 
 runtime.loadClass("gui.Caret");
-runtime.loadClass("ops.TrivialUserModel");
+runtime.loadClass("ops.TrivialMemberModel");
 runtime.loadClass("ops.EditInfo");
 runtime.loadClass("gui.EditInfoMarker");
 
@@ -278,23 +278,23 @@ gui.SessionView = (function () {
 
         /**
          * @param {!string} memberId
-         * @param {Object|null} userData
+         * @param {Object|null} memberData
          * @return {undefined}
          *
-         * Setting userData to null will apply empty (bogus) user data.
+         * Setting memberData to null will apply empty (bogus) member data.
          */
-        function renderMemberData(memberId, userData) {
+        function renderMemberData(memberId, memberData) {
             var caret = caretManager.getCaret(memberId);
 
-            // this takes care of incorrectly implemented UserModels,
-            // which might end up returning undefined user data
-            if (userData === undefined) {
-                runtime.log("UserModel sent undefined data for member \"" + memberId + "\".");
+            // this takes care of incorrectly implemented MemberModels,
+            // which might end up returning undefined member data
+            if (memberData === undefined) {
+                runtime.log("MemberModel sent undefined data for member \"" + memberId + "\".");
                 return;
             }
 
-            if (userData === null) {
-                userData = {
+            if (memberData === null) {
+                memberData = {
                     memberid: memberId,
                     fullname: "Unknown Identity",
                     color: "black",
@@ -303,11 +303,11 @@ gui.SessionView = (function () {
             }
 
             if (caret) {
-                caret.setAvatarImageUrl(userData.imageurl);
-                caret.setColor(userData.color);
+                caret.setAvatarImageUrl(memberData.imageurl);
+                caret.setColor(memberData.color);
             }
 
-            setAvatarInfoStyle(memberId, userData.fullname, userData.color);
+            setAvatarInfoStyle(memberId, memberData.fullname, memberData.color);
         }
 
         /**
@@ -316,7 +316,7 @@ gui.SessionView = (function () {
          */
         function onCursorAdded(cursor) {
             var memberId = cursor.getMemberId(),
-                userModel = session.getUserModel();
+                memberModel = session.getMemberModel();
 
             caretManager.registerCursor(cursor, showCaretAvatars, blinkOnRangeSelect);
 
@@ -325,7 +325,7 @@ gui.SessionView = (function () {
             // (instead of setting the final 'unknown identity' data)
             renderMemberData(memberId, null);
             // subscribe to real updates
-            userModel.getUserDetailsAndUpdates(memberId, renderMemberData);
+            memberModel.getMemberDetailsAndUpdates(memberId, renderMemberData);
 
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
         }
@@ -347,7 +347,7 @@ gui.SessionView = (function () {
             }
 
             if (!hasMemberEditInfo) {
-                session.getUserModel().unsubscribeUserDetailsUpdates(memberid, renderMemberData);
+                session.getMemberModel().unsubscribeMemberDetailsUpdates(memberid, renderMemberData);
             }
         }
 

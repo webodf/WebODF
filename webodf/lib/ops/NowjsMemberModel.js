@@ -1,6 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -36,14 +37,14 @@
 
 /*
  * this thing might feel a bit more at home in a namespaces
- * called "collab" or "users" or "editing" than here in "ops".
+ * called "collab" or "members" or "editing" than here in "ops".
  */
 
 /**
  * @constructor
- * @implements ops.UserModel
+ * @implements ops.MemberModel
  */
-ops.NowjsUserModel = function NowjsUserModel() {
+ops.NowjsMemberModel = function NowjsMemberModel() {
     "use strict";
 
     var cachedUserData = {},
@@ -89,7 +90,7 @@ ops.NowjsUserModel = function NowjsUserModel() {
      * @param {!function(!string, ?Object)} subscriber
      * @return {undefined}
      */
-    this.getUserDetailsAndUpdates = function (memberId, subscriber) {
+    this.getMemberDetailsAndUpdates = function (memberId, subscriber) {
         // TODO: remove the ___ split.
         // FIXME: caching data by userid seems to be incorrect:
         // a user can have multiple members in a document,
@@ -121,7 +122,7 @@ ops.NowjsUserModel = function NowjsUserModel() {
         }
         if (i < subscribers.length) {
             // already subscribed
-            runtime.log("double subscription request for "+memberId+" in NowjsUserModel::getUserDetailsAndUpdates");
+            runtime.log("double subscription request for "+memberId+" in NowjsMemberModel::getMemberDetailsAndUpdates");
         } else {
             // subscribe
             subscribers.push({memberId: memberId, subscriber: subscriber});
@@ -139,14 +140,14 @@ ops.NowjsUserModel = function NowjsUserModel() {
     };
 
     /**
-     * getUserDetailsAndUpdates subscribes a callback for updates on user details.
+     * getMemberDetailsAndUpdates subscribes a callback for updates on user details.
      * this function undoes this subscription.
      *
      * @param {!string} memberId
      * @param {!function(!string, ?Object)} subscriber
      * @return {undefined}
      */
-    this.unsubscribeUserDetailsUpdates = function (memberId, subscriber) {
+    this.unsubscribeMemberDetailsUpdates = function (memberId, subscriber) {
         var i,
             userId = userIdFromMemberId(memberId),
             subscribers = memberDataSubscribers[userId];
@@ -177,7 +178,7 @@ ops.NowjsUserModel = function NowjsUserModel() {
         }
     };
 
-    net.updateUserDetails = function (userId, udata) {
+    net.updateMemberDetails = function (userId, udata) {
         // this will call all subscribers
         cacheUserDatum(userId, udata?{
             userid:   udata.uid,

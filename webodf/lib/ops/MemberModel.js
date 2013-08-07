@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -37,33 +38,33 @@
 
 /*
  * this thing might feel a bit more at home in a namespaces
- * called "collab" or "users" or "editing" than here in "ops".
+ * called "collab" or "members" or "editing" than here in "ops".
  */
 
 /**
- * A model which provides information about users which join a session as members.
+ * A model which provides information about members in a session.
  * @interface
  */
-ops.UserModel = function UserModel() {"use strict"; };
+ops.MemberModel = function MemberModel() {"use strict"; };
 
 /**
- * callback is called as soon as the userdata is available and after that
- * on every userdata update.
- * a parameter `null` passed to the callback means that the user is finally
+ * callback is called as soon as the memberdata is available and after that
+ * on every memberdata update.
+ * a parameter `null` passed to the callback means that the member is finally
  * not known.
  *
  * @param {!string} memberId
  * @param {function(!string, ?Object)} subscriber
  * @return {undefined}
  */
-ops.UserModel.prototype.getUserDetailsAndUpdates = function (memberId, subscriber) {"use strict"; };
+ops.MemberModel.prototype.getMemberDetailsAndUpdates = function (memberId, subscriber) {"use strict"; };
 
 /**
- * getUserDetailsAndUpdates subscribes a callback for updates on user details.
+ * getMemberDetailsAndUpdates subscribes a callback for updates on member details.
  * this function undoes this subscription.
  *
  * @param {!string} memberId
  * @param {function(!string, ?Object)} subscriber
  * @return {undefined}
  */
-ops.UserModel.prototype.unsubscribeUserDetailsUpdates = function (memberId, subscriber) {"use strict"; };
+ops.MemberModel.prototype.unsubscribeMemberDetailsUpdates = function (memberId, subscriber) {"use strict"; };

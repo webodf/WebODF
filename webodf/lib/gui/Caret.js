@@ -40,7 +40,7 @@ runtime.loadClass("ops.OdtCursor");
  * The caret is implemented by the left border of a span positioned absolutely
  * to the cursor element, with a width of 0 px and a height of 1em (CSS rules).
  * Blinking is done by switching the color of the border from transparent to
- * the user color and back.
+ * the member color and back.
  * @constructor
  * @param {!ops.OdtCursor} cursor
  * @param {boolean} avatarInitiallyVisible Sets the initial visibility of the caret's avatar
