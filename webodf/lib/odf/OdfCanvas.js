@@ -1525,6 +1525,9 @@ odf.OdfCanvas = (function () {
             fixContainerSize();
         };
 
+        /**
+         * @return {!Element}
+         */
         this.getElement = function () {
             return element;
         };

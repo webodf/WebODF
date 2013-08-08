@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -32,6 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global runtime, core, gui, ops*/
 
 runtime.loadClass("gui.Caret");
@@ -48,17 +49,28 @@ gui.CaretManager = function CaretManager(sessionController) {
     "use strict";
     var carets = {};
 
+    /**
+     * @return {!Element}
+     */
     function getCanvasElement() {
         return sessionController.getSession().getOdtDocument().getOdfCanvas().getElement();
     }
 
+    /**
+     * @param {!string} memberId
+     * @return {undefined}
+     */
     function removeCaret(memberId) {
         if (memberId === sessionController.getInputMemberId()) {
-            getCanvasElement().removeAttribute("tabindex", 0);
+            getCanvasElement().removeAttribute("tabindex");
         }
         delete carets[memberId];
     }
 
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
     function refreshCaret(cursor) {
         var caret = carets[cursor.getMemberId()];
         if (caret) {
@@ -66,6 +78,10 @@ gui.CaretManager = function CaretManager(sessionController) {
         }
     }
 
+    /**
+     * @param {!Object} info
+     * @return {undefined}
+     */
     function ensureLocalCaretVisible(info) {
         var caret = carets[info.memberId];
         if (info.memberId === sessionController.getInputMemberId() && caret) {
@@ -74,6 +90,9 @@ gui.CaretManager = function CaretManager(sessionController) {
         }
     }
 
+    /**
+     * @return {undefined}
+     */
     function focusLocalCaret() {
         var caret = carets[sessionController.getInputMemberId()];
         if (caret) {
@@ -81,6 +100,9 @@ gui.CaretManager = function CaretManager(sessionController) {
         }
     }
 
+    /**
+     * @return {undefined}
+     */
     function blurLocalCaret() {
         var caret = carets[sessionController.getInputMemberId()];
         if (caret) {
@@ -89,9 +111,9 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
-     * @param {ops.OdtCursor} cursor
-     * @param {boolean} caretAvatarInitiallyVisible Set to false to hide the associated avatar
-     * @param {boolean} blinkOnRangeSelect Specify that the caret should blink if a non-collapsed range is selected
+     * @param {!ops.OdtCursor} cursor
+     * @param {!boolean} caretAvatarInitiallyVisible  Set to false to hide the associated avatar
+     * @param {!boolean} blinkOnRangeSelect  Specify that the caret should blink if a non-collapsed range is selected
      * @return {!gui.Caret}
      */
     this.registerCursor = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
@@ -117,11 +139,11 @@ gui.CaretManager = function CaretManager(sessionController) {
     };
 
     /**
-     * @param {!string} memberid
-     * @return {!gui.Caret}
+     * @param {!string} memberId
+     * @return {?gui.Caret}
      */
-    this.getCaret = function(memberid) {
-        return carets[memberid];
+    this.getCaret = function(memberId) {
+        return carets.hasOwnProperty(memberId) ? carets[memberId] : null;
     };
 
     /**

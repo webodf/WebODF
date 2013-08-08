@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -32,6 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global Node, document, runtime, gui, ops, core */
 
 runtime.loadClass("gui.Caret");
@@ -71,19 +72,19 @@ gui.SessionView = (function () {
     /**
      * Return a user-specified option, or the default value if no user option
      * is provided
-     * @param {undefined|boolean} userValue
-     * @param {boolean} defaultValue
-     * @returns {boolean}
+     * @param {boolean} userValue
+     * @param {!boolean} defaultValue
+     * @returns {!boolean}
      */
     function configOption(userValue, defaultValue) {
-        return userValue !== undefined ? userValue : defaultValue;
+        return userValue !== undefined ? Boolean(userValue) : defaultValue;
     }
 
     /**
      * @constructor
-     * @param {gui.SessionViewOptions} viewOptions
-     * @param {ops.Session} session
-     * @param {gui.CaretManager} caretManager
+     * @param {!gui.SessionViewOptions} viewOptions
+     * @param {!ops.Session} session
+     * @param {!gui.CaretManager} caretManager
      */
     function SessionView(viewOptions, session, caretManager) {
         var avatarInfoStyles,
@@ -96,7 +97,7 @@ gui.SessionView = (function () {
         /**
          * @param {!string} nodeName
          * @param {!string} memberId
-         * @param {string} pseudoClass
+         * @param {!string} pseudoClass
          * @return {!string}
          */
         function createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) {
@@ -124,15 +125,16 @@ gui.SessionView = (function () {
         }
 
         /**
-         * @param {string} memberId
-         * @param {string} name
-         * @param {string} color
+         * @param {!string} memberId
+         * @param {!string} name
+         * @param {!string} color
+         * @return {undefined}
          */
         function setAvatarInfoStyle(memberId, name, color) {
             /**
              * @param {!string} nodeName
              * @param {!string} rule
-             * @param {string} pseudoClass
+             * @param {!string} pseudoClass
              */
             function setStyle(nodeName, rule, pseudoClass) {
                 var styleRule = createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) + rule,
@@ -157,7 +159,10 @@ gui.SessionView = (function () {
         }
 
         /**
+         * @param {!Element} element
          * @param {!string} memberId
+         * @param {!number} timestamp
+         * @return {undefined}
          */
         function highlightEdit(element, memberId, timestamp) {
             var editInfo,
@@ -183,7 +188,8 @@ gui.SessionView = (function () {
 
         /**
          * Updates the visibility on all existing editInfo entries
-         * @param {boolean} visible
+         * @param {!boolean} visible
+         * @return {undefined}
          */
         function setEditInfoMarkerVisbility(visible) {
             var editInfoMarker, keyname;
@@ -202,7 +208,8 @@ gui.SessionView = (function () {
 
         /**
          * Updates the visibility on all existing avatars
-         * @param {boolean} visible
+         * @param {!boolean} visible
+         * @return {undefined}
          */
         function setCaretAvatarVisibility(visible) {
             caretManager.getCarets().forEach(function(caret) {
@@ -216,6 +223,7 @@ gui.SessionView = (function () {
 
         /**
          * Show edit information markers displayed near edited paragraphs
+         * @return {undefined}
          */
         this.showEditInfoMarkers = function () {
             if (showEditInfoMarkers) {
@@ -228,6 +236,7 @@ gui.SessionView = (function () {
 
         /**
          * Hide edit information markers displayed near edited paragraphs
+         * @return {undefined}
          */
         this.hideEditInfoMarkers = function () {
             if (!showEditInfoMarkers) {
@@ -240,6 +249,7 @@ gui.SessionView = (function () {
 
         /**
          * Show member avatars above the cursor
+         * @return {undefined}
          */
         this.showCaretAvatars = function () {
             if (showCaretAvatars) {
@@ -252,6 +262,7 @@ gui.SessionView = (function () {
 
         /**
          * Hide member avatars above the cursor
+         * @return {undefined}
          */
         this.hideCaretAvatars = function () {
             if (!showCaretAvatars) {
@@ -263,14 +274,14 @@ gui.SessionView = (function () {
         };
 
         /**
-         * @return {ops.Session}
+         * @return {!ops.Session}
          */
         this.getSession = function () {
             return session;
         };
         /**
          * @param {!string} memberid
-         * @return {gui.Caret}
+         * @return {?gui.Caret}
          */
         this.getCaret = function (memberid) {
             return caretManager.getCaret(memberid);
@@ -278,7 +289,7 @@ gui.SessionView = (function () {
 
         /**
          * @param {!string} memberId
-         * @param {Object|null} memberData
+         * @param {?Object} memberData
          * @return {undefined}
          *
          * Setting memberData to null will apply empty (bogus) member data.
@@ -311,7 +322,7 @@ gui.SessionView = (function () {
         }
 
         /**
-         * @param {ops.OdtCursor} cursor
+         * @param {!ops.OdtCursor} cursor
          * @return {undefined}
          */
         function onCursorAdded(cursor) {
@@ -332,6 +343,7 @@ gui.SessionView = (function () {
 
         /**
          * @param {!string} memberid
+         * @return {undefined}
          */
         function onCursorRemoved(memberid) {
             var /**@type{!boolean}*/ hasMemberEditInfo = false,
