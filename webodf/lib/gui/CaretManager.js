@@ -79,11 +79,14 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @param {!ops.OdtCursor} cursor
      * @return {undefined}
      */
-    function refreshCaret(cursor) {
-        var caret = getCaret(cursor.getMemberId());
+    function refreshLocalCaretBlinking(cursor) {
+        var caret, memberId = cursor.getMemberId();
 
-        if (caret) {
-            caret.refreshCursor();
+        if (memberId === sessionController.getInputMemberId()) {
+            caret = getCaret(memberId);
+            if (caret) {
+                caret.refreshCursorBlinking();
+            }
         }
     }
 
@@ -170,7 +173,7 @@ gui.CaretManager = function CaretManager(sessionController) {
             canvasElement = getCanvasElement();
 
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, refreshCaret);
+        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
 
         canvasElement.onfocus = focusLocalCaret;

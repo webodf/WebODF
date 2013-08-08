@@ -244,7 +244,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         };
     }
 
-    this.refreshCursor = function() {
+    this.refreshCursorBlinking = function() {
         if (blinkOnRangeSelect || cursor.getSelectedRange().collapsed) {
             shouldBlink = true;
             blink(true);
