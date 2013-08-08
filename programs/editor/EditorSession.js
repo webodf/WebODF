@@ -460,7 +460,7 @@ define("webodf/editor/EditorSession", [
 
         this.deleteStyle = function (styleName) {
             var op;
-            op = new ops.OpDeleteParagraphStyle();
+            op = new ops.OpRemoveParagraphStyle();
             op.init({
                 memberid: memberid,
                 styleName: styleName
