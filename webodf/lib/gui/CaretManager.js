@@ -50,6 +50,14 @@ gui.CaretManager = function CaretManager(sessionController) {
     var carets = {};
 
     /**
+     * @param {!string} memberId
+     * @return {?gui.Caret}
+     */
+    function getCaret(memberId) {
+        return carets.hasOwnProperty(memberId) ? carets[memberId] : null;
+    }
+
+    /**
      * @return {!Element}
      */
     function getCanvasElement() {
@@ -72,7 +80,8 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @return {undefined}
      */
     function refreshCaret(cursor) {
-        var caret = carets[cursor.getMemberId()];
+        var caret = getCaret(cursor.getMemberId());
+
         if (caret) {
             caret.refreshCursor();
         }
@@ -83,10 +92,14 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @return {undefined}
      */
     function ensureLocalCaretVisible(info) {
-        var caret = carets[info.memberId];
-        if (info.memberId === sessionController.getInputMemberId() && caret) {
+        var caret;
+
+        if (info.memberId === sessionController.getInputMemberId()) {
             // on member edit actions ensure visibility of cursor
-            caret.ensureVisible();
+            caret = getCaret(info.memberId);
+            if (caret) {
+                caret.ensureVisible();
+            }
         }
     }
 
@@ -94,7 +107,7 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @return {undefined}
      */
     function focusLocalCaret() {
-        var caret = carets[sessionController.getInputMemberId()];
+        var caret = getCaret(sessionController.getInputMemberId());
         if (caret) {
             caret.setFocus();
         }
@@ -104,7 +117,7 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @return {undefined}
      */
     function blurLocalCaret() {
-        var caret = carets[sessionController.getInputMemberId()];
+        var caret = getCaret(sessionController.getInputMemberId());
         if (caret) {
             caret.removeFocus();
         }
@@ -142,9 +155,7 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @param {!string} memberId
      * @return {?gui.Caret}
      */
-    this.getCaret = function(memberId) {
-        return carets.hasOwnProperty(memberId) ? carets[memberId] : null;
-    };
+    this.getCaret = getCaret;
 
     /**
      * @returns {!Array.<!gui.Caret>}
