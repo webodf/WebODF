@@ -50,6 +50,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const@type{!string}*/ fons = odf.Namespaces.fons,
         /**@const@type{!string}*/ stylens = odf.Namespaces.stylens,
         /**@const@type{!string}*/ svgns = odf.Namespaces.svgns,
+        /**@const@type{!string}*/ tablens = odf.Namespaces.tablens,
         /**@const@type{!string}*/ textns = odf.Namespaces.textns,
         /**@const@type{!string}*/ xlinkns = odf.Namespaces.xlinkns,
         /**@const@type{!string}*/ presentationns = odf.Namespaces.presentationns,
@@ -208,6 +209,16 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'page-width', 'width' ],
             [ fons, 'page-height', 'height' ]
         ],
+
+        /**@const@type{!Object.<!boolean>}*/
+        borderPropertyMap = {
+            'border': true,
+            'border-left': true,
+            'border-right': true,
+            'border-top': true,
+            'border-bottom': true,
+            'stroke-width': true
+        },
 
         // A font-face declaration map, to be populated once style2css is called.
         /**@type{!Object.<string,string>}*/
@@ -412,6 +423,31 @@ odf.Style2CSS = function Style2CSS() {
         return null;
     }
     /**
+     * Make sure border width is no less than 1px wide; otherwise border is not rendered.
+     * Only have problems with point unit at the moment. Please add more rule if needed.
+     * @param {!string} value a string contains border attributes eg. 1pt solid black or 1px
+     * @return {!string}
+     */
+    function fixBorderWidth(value) {
+        var index = value.indexOf(' '),
+            width, theRestOfBorderAttributes;
+
+        if (index !== -1) {
+            width = value.substring(0, index);
+            theRestOfBorderAttributes = value.substring(index); // everything after the width attribute
+        } else {
+            width = value;
+            theRestOfBorderAttributes = '';
+        }
+
+        width = utils.parseLength(width);
+        // According to CSS 2.1, 1px is equal to 0.75pt http://www.w3.org/TR/CSS2/syndata.html#length-units
+        if (width && width.unit === 'pt' && width.value < 0.75) {
+            value = '0.75pt' + theRestOfBorderAttributes;
+        }
+        return value;
+    }
+    /**
      * @param {!Element} props
      * @param {!Object} mapping
      * @return {!string}
@@ -422,8 +458,16 @@ odf.Style2CSS = function Style2CSS() {
             if (mapping.hasOwnProperty(r)) {
                 r = mapping[r];
                 value = props.getAttributeNS(r[0], r[1]);
-                if (r[2] && value) {
-                    rule += r[2] + ':' + value + ';';
+
+                if (value) {
+                    value = value.trim();
+
+                    if (borderPropertyMap.hasOwnProperty(r[1])) {
+                        value = fixBorderWidth(value);
+                    }
+                    if (r[2]) {
+                        rule += r[2] + ':' + value + ';';
+                    }
                 }
             }
         }
@@ -667,8 +711,16 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getTableProperties(props) {
-        var rule = '';
+        var rule = '', borderModel;
         rule += applySimpleMapping(props, tablePropertySimpleMapping);
+        borderModel = props.getAttributeNS(tablens, 'border-model');
+
+        if (borderModel === 'collapsing') {
+            rule += 'border-collapse:collapse;';
+        } else if (borderModel === 'separating') {
+            rule += 'border-collapse:separate;';
+        }
+
         return rule;
     }
     /**
