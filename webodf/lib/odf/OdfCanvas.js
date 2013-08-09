@@ -963,7 +963,8 @@ odf.OdfCanvas = (function () {
     odf.OdfCanvas = function OdfCanvas(element) {
         runtime.assert((element !== null) && (element !== undefined),
             "odf.OdfCanvas constructor needs DOM element");
-        var doc = element.ownerDocument,
+        var self = this,
+            doc = element.ownerDocument,
             /**@type{!odf.OdfContainer}*/
             odfcontainer,
             /**@type{!odf.Formatting}*/
@@ -1164,7 +1165,7 @@ odf.OdfCanvas = (function () {
                 if (annotationManager) {
                     annotationManager.forgetAnnotations();
                 }
-                annotationManager = new gui.AnnotationViewManager(odfnode.body, annotationsPane);
+                annotationManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane);
                 modifyAnnotations(odfnode.body);
             } else {
                 if (annotationsPane.parentNode) {

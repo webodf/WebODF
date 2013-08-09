@@ -45,7 +45,7 @@
  * them on the sidebar, drawing connectors, and highlighting comments.
  * @constructor
  */
-gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotationsPane) {
+gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragment, annotationsPane) {
     "use strict";
     var annotations = [],
         doc = odfFragment.ownerDocument,
@@ -178,12 +178,13 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
             previousAnnotation = annotations[annotations.indexOf(annotation) - 1],
             previousRect,
             creatorNode = annotation.node.getElementsByTagNameNS(odf.Namespaces.dcns, 'creator')[0],
-            creatorName;
+            creatorName,
+            zoomLevel = odfCanvas.getZoomLevel();
 
         annotationNote.style.left =
-            annotationsPane.getBoundingClientRect().left
-            - annotationWrapper.getBoundingClientRect().left + 'px';
-        annotationNote.style.width = annotationsPane.getBoundingClientRect().width + 'px';
+            (annotationsPane.getBoundingClientRect().left
+            - annotationWrapper.getBoundingClientRect().left) / zoomLevel + 'px';
+        annotationNote.style.width = annotationsPane.getBoundingClientRect().width / zoomLevel + 'px';
 
 
         connectorHorizontal.style.width = parseFloat(annotationNote.style.left)
@@ -191,26 +192,26 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfFragment, annotati
 
         if (previousAnnotation) {
             previousRect = previousAnnotation.node.parentNode.getBoundingClientRect();
-            if ((annotationWrapper.getBoundingClientRect().top - previousRect.bottom) <= NOTE_MARGIN) {
-                annotationNote.style.top = Math.abs(annotationWrapper.getBoundingClientRect().top - previousRect.bottom) + NOTE_MARGIN + 'px';
+            if ((annotationWrapper.getBoundingClientRect().top - previousRect.bottom) / zoomLevel <= NOTE_MARGIN) {
+                annotationNote.style.top = Math.abs(annotationWrapper.getBoundingClientRect().top - previousRect.bottom) / zoomLevel + NOTE_MARGIN + 'px';
             } else {
                 annotationNote.style.top = '0px';
             }
         }
 
-        connectorAngular.style.left = connectorHorizontal.getBoundingClientRect().width + 'px';
+        connectorAngular.style.left = connectorHorizontal.getBoundingClientRect().width / zoomLevel + 'px';
         connectorAngular.style.width =
             lineDistance({
-                x: connectorAngular.getBoundingClientRect().left,
-                y: connectorAngular.getBoundingClientRect().top
+                x: connectorAngular.getBoundingClientRect().left / zoomLevel,
+                y: connectorAngular.getBoundingClientRect().top / zoomLevel
             }, {
-                x: annotationNote.getBoundingClientRect().left,
-                y: annotationNote.getBoundingClientRect().top
+                x: annotationNote.getBoundingClientRect().left / zoomLevel,
+                y: annotationNote.getBoundingClientRect().top / zoomLevel
             }) + 'px';
 
         connectorAngle = Math.asin(
             (annotationNote.getBoundingClientRect().top - connectorAngular.getBoundingClientRect().top)
-                / parseFloat(connectorAngular.style.width)
+                / (zoomLevel * parseFloat(connectorAngular.style.width))
         );
         connectorAngular.style.transform = 'rotate(' + connectorAngle + 'rad)';
         connectorAngular.style.MozTransform = 'rotate(' + connectorAngle + 'rad)';
