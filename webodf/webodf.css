@@ -333,6 +333,22 @@ cursor|cursor > div:after {
     position: relative;
 }
 
+.annotationRemoveButton {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.75);
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    z-index: 3;
+}
+.annotationRemoveButton:hover {
+    cursor: pointer;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 1);
+}
+
 .annotationNote {
     width: 4cm;
     position: absolute;
@@ -346,7 +362,7 @@ cursor|cursor > div:after {
 .annotationConnector {
     position: absolute;
     display: inline;
-    z-index: 10;
+    z-index: 2;
     border-top: 1px dashed brown;
 }
 .annotationConnector.angular {

@@ -66,6 +66,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
             annotationNote = doc.createElement('div'),
             connectorHorizontal = doc.createElement('div'),
             connectorAngular = doc.createElement('div'),
+            removeButton = doc.createElement('div'),
             annotationNode = annotation.node;
 
         annotationWrapper.className = 'annotationWrapper';
@@ -73,6 +74,8 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
 
         annotationNote.className = 'annotationNote';
         annotationNote.appendChild(annotationNode);
+        removeButton.className = 'annotationRemoveButton';
+        annotationNote.appendChild(removeButton);
 
         connectorHorizontal.className = 'annotationConnector horizontal';
         connectorAngular.className = 'annotationConnector angular';
@@ -136,15 +139,12 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
         var annotationName = annotation.node.getAttributeNS(odf.Namespaces.officens, 'name'),
             highlightSpans = doc.querySelectorAll('span.annotationHighlight[annotation="' + annotationName + '"]'),
             i,
-            j,
-            container,
-            children;
+            container;
 
         for (i = 0; i < highlightSpans.length; i += 1) {
             container = highlightSpans[i];
-            children = container.childNodes;
-            for (j = 0; j < children.length; j += 1) {
-                container.parentNode.insertBefore(children[j], container);
+            while (container.firstChild) {
+                container.parentNode.insertBefore(container.firstChild, container);
             }
             container.parentNode.removeChild(container);
         }
@@ -294,9 +294,12 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
      * @return {undefined}
      */
     function forgetAnnotation(annotation) {
+        var index = annotations.indexOf(annotation);
         unwrapAnnotation(annotation);
         unhighlightAnnotation(annotation);
-        annotations.splice(annotations.indexOf(annotation), 1);
+        if (index !== -1) {
+            annotations.splice(index, 1);
+        }
     }
 
     /**

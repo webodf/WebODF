@@ -1530,6 +1530,16 @@ odf.OdfCanvas = (function () {
         };
 
         /**
+         * Stops annotations and unwraps it
+         * @return {undefined}
+         */
+        this.forgetAnnotations = function () {
+            if (annotationManager) {
+                annotationManager.forgetAnnotations();
+            }
+        };
+
+        /**
          * @param {!number} zoom
          * @return {undefined}
          */

@@ -52,6 +52,7 @@ runtime.loadClass("ops.OpUpdateParagraphStyle");
 runtime.loadClass("ops.OpAddParagraphStyle");
 runtime.loadClass("ops.OpRemoveParagraphStyle");
 runtime.loadClass("ops.OpAddAnnotation");
+runtime.loadClass("ops.OpRemoveAnnotation");
 
 /**
  * @constructor
@@ -109,7 +110,8 @@ ops.OperationFactory = function OperationFactory() {
             RemoveParagraphStyle : constructor(ops.OpRemoveParagraphStyle),
             MoveCursor : constructor(ops.OpMoveCursor),
             RemoveCursor : constructor(ops.OpRemoveCursor),
-            AddAnnotation : constructor(ops.OpAddAnnotation)
+            AddAnnotation : constructor(ops.OpAddAnnotation),
+            RemoveAnnotation : constructor(ops.OpRemoveAnnotation)
         };
     }
 

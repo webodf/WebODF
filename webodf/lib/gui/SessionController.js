@@ -43,6 +43,7 @@ runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
+runtime.loadClass("ops.OpRemoveAnnotation");
 runtime.loadClass("gui.ClickHandler");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.KeyboardHandler");
@@ -309,6 +310,78 @@ gui.SessionController = (function () {
                 focusNode: focusNode,
                 focusOffset: focusOffset
             };
+        }
+
+        /**
+         * Returns the first filtered walkable position in the node
+         * @param {!Node} node
+         * @return {!number}
+         */
+        function getFirstWalkablePositionInNode(node) {
+            var position = 0,
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                watch = new core.LoopWatchDog(1000),
+                inside = false;
+
+            while (iterator.nextPosition()) {
+                watch.check();
+
+                /*jslint bitwise: true*/
+                inside = Boolean(node.compareDocumentPosition(iterator.container()) & Node.DOCUMENT_POSITION_CONTAINED_BY);
+
+                if (baseFilter.acceptPosition(iterator) === 1) {
+                    if (inside) {
+                        break;
+                    }
+                    position += 1;
+                }
+            }
+
+            return position;
+        }
+
+        /**
+         * Returns the walkable length of the node
+         * @param {!Node} node
+         * @return {!number}
+         */
+        function getWalkableNodeLength(node) {
+            var length = 0,
+                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                inside = false;
+
+            iterator.setUnfilteredPosition(node, 0);
+            do {
+                /*jslint bitwise: true*/
+                inside = Boolean(node.compareDocumentPosition(iterator.container()) & Node.DOCUMENT_POSITION_CONTAINED_BY);
+                if (!inside && node !== iterator.container()) {
+                    break;
+                }
+                if (baseFilter.acceptPosition(iterator) === 1) {
+                    length += 1;
+                }
+            } while (iterator.nextPosition());
+
+            return length;
+        }
+
+        /**
+         * @param {!Node} annotationNode
+         * @return {undefined}
+         */
+        function removeAnnotation(annotationNode) {
+            var position, length, op;
+
+            position = getFirstWalkablePositionInNode(annotationNode);
+            length = getWalkableNodeLength(annotationNode);
+
+            op = new ops.OpRemoveAnnotation();
+            op.init({
+                memberid: inputMemberId,
+                position: position,
+                length: length
+            });
+            session.enqueue(op);
         }
 
         /**
@@ -1268,7 +1341,16 @@ gui.SessionController = (function () {
             });
             keyPressHandler.bind(keyCode.Enter, modifier.None, enqueueParagraphSplittingOps);
 
-            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, selectRange);
+            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, function (event) {
+                var target = event.target,
+                    annotationNode = null;
+                if (target.className === "annotationRemoveButton") {
+                    annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
+                    removeAnnotation(annotationNode);
+                } else {
+                    selectRange(event);
+                }
+            });
             clickHandler.subscribe(gui.ClickHandler.signalDoubleClick, selectWord);
             clickHandler.subscribe(gui.ClickHandler.signalTripleClick, selectParagraph);
         }

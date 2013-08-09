@@ -107,6 +107,7 @@
         "ops/OpUpdateParagraphStyle.js",
         "ops/OpAddParagraphStyle.js",
         "ops/OpRemoveParagraphStyle.js",
+        "ops/OpRemoveAnnotation.js",
         "ops/OperationFactory.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",

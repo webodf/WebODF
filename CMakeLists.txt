@@ -295,6 +295,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpAddParagraphStyle.js
     lib/ops/OpRemoveParagraphStyle.js
     lib/ops/OpAddAnnotation.js
+    lib/ops/OpRemoveAnnotation.js
     lib/ops/OperationFactory.js
     lib/gui/SelectionMover.js
     lib/ops/OdtCursor.js
