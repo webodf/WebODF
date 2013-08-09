@@ -81,170 +81,24 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
-     * Turns the passed size into a number of pixels.
-     * If size is a string, it must be either empty or be a number plus the suffix "px".
-     * @param {!(string|number)} size
-     * @return {!number}
-     */
-    function pixelCount(size) {
-        var match;
-
-        if ((typeof size === "string")) {
-            if (size === "") {
-                return 0;
-            }
-            match = /^(\d+)(\.\d+)?px$/.exec(size);
-            runtime.assert((match !== null),
-                           "size [" + size + "] does not have unit px.");
-            return parseFloat(match[1]);
-        }
-        return size;
-    }
-
-    /**
-     * Returns the first element in the parent element chain which has the
-     * style attribute "display" set to "block".
-     * @param {!Element} element
-     * @return {?Element}
-     */
-    function getOffsetBaseElement(element) {
-        var anchorElement = element,
-            nodeStyle,
-            /**@type{?Window}*/window = runtime.getWindow();
-
-        runtime.assert(window !== null,
-                       "Expected to be run in an environment which has a global window, like a browser.");
-
-        do {
-            anchorElement = anchorElement.parentElement;
-            if (! anchorElement) {
-                break;
-            }
-            nodeStyle = window.getComputedStyle(anchorElement, null);
-        } while (nodeStyle.display !== "block");
-
-        return anchorElement;
-    }
-
-    /**
-     * Calculates offset to container element from sum of all margins, paddings
-     * and border widths of the elements in the chain from element to the
-     * container element
-     * @param {?Element} element
-     * @param {?Element} containerElement
-     * @return {!{x:!number,y:!number}}
-     */
-    function getRelativeOffsetTopLeftBySpacing(element, containerElement) {
-        var x = 0,
-            y = 0,
-            elementStyle,
-            /**@type{?Window}*/window = runtime.getWindow();
-
-        runtime.assert(window !== null,
-                       "Expected to be run in an environment which has a global window, like a browser.");
-
-        while (element && (element !== containerElement)) {
-            elementStyle = window.getComputedStyle(element, null);
-            // add offsets between elements
-            x += pixelCount(elementStyle.marginLeft) +
-                 pixelCount(elementStyle.borderLeftWidth) +
-                 pixelCount(elementStyle.paddingLeft);
-            y += pixelCount(elementStyle.marginTop) +
-                 pixelCount(elementStyle.borderTopWidth) +
-                 pixelCount(elementStyle.paddingTop);
-            // prepare next parent round
-            element = element.parentElement;
-        }
-
-        return {x: x, y: y};
-    }
-
-    /**
-     * Calculates the relative x,y offset of the given element to the given container element
-     * without any scrolling
-     * @param {?Element} element
-     * @param {?Element} containerElement
-     * @return {!{x:!number,y:!number}}
-     */
-    function getRelativeOffsetTopLeft(element, containerElement) {
-        var reachedContainerElement,
-            offsetParent,
-            e,
-            x = 0,
-            y = 0,
-            resultBySpacing;
-
-        // sanity check
-        if (!element || !containerElement) {
-            return {x: 0, y: 0};
-        }
-
-        // go through all offsetParents
-        reachedContainerElement = false;
-        do {
-            // TODO: offsetParent seems to fail in Firefox for non-HTML elements
-            // needs more investigations and then a work-around
-            offsetParent = element.offsetParent;
-            // now check if containerElement is in-between chain from current element to offset parent ,
-            // by looping through the chain until the node before the offset parent
-            e = element.parentNode;
-            while (e !== offsetParent) {
-                // is in-between?
-                if (e === containerElement) {
-                    // add the offset between the last offset parent by all spacings
-                    resultBySpacing = getRelativeOffsetTopLeftBySpacing(element, containerElement);
-                    x += resultBySpacing.x;
-                    y += resultBySpacing.y;
-                    reachedContainerElement = true;
-                    break;
-                }
-                e = e.parentNode;
-            }
-
-            if (reachedContainerElement) {
-                break;
-            }
-
-            // add offset between this element and the offset parent element
-            x += pixelCount(element.offsetLeft);
-            y += pixelCount(element.offsetTop);
-
-            // prepare next offsetParent round
-            element = offsetParent;
-        } while (element && (element !== containerElement));
-
-        return {x: x, y: y};
-    }
-
-    /**
-     * Calculates the position rect of the given element in the given container element
-     * without any scrolling
+     * Calculates the bounding client rect of the caret element,
+     * expanded with a specific margin
      * @param {!Element} caretElement
-     * @param {?Element} containerElement
      * @param {!number} margin
      * @return {!{left:!number,top:!number,right:!number,bottom:!number}}
      */
-    function getRelativeCaretOffsetRect(caretElement, containerElement, margin) {
-        var caretOffsetTopLeft,
-            offsetBaseNode;
-        // the caretElement left-top offset is relative to the closest parent
-        // element with display:block.
-        // (that is text:p/text:h, but e.g. not text:span which has display:inline)
-        offsetBaseNode = getOffsetBaseElement(caretElement);
-        caretOffsetTopLeft = getRelativeOffsetTopLeft(offsetBaseNode, containerElement);
-        // add to this the offset of the caret element to the offsetBaseNode
-        caretOffsetTopLeft.x += caretElement.offsetLeft;
-        caretOffsetTopLeft.y += caretElement.offsetTop;
+    function getCaretClientRectWithMargin(caretElement, margin) {
+        var caretRect = caretElement.getBoundingClientRect();
 
         return {
-            left:   caretOffsetTopLeft.x - margin,
-            top:    caretOffsetTopLeft.y - margin,
-            right:  caretOffsetTopLeft.x + caretElement.scrollWidth - 1 + margin,
-            bottom: caretOffsetTopLeft.y + caretElement.scrollHeight - 1 + margin
+            left:   caretRect.left - margin,
+            top:    caretRect.top - margin,
+            right:  caretRect.right + margin,
+            bottom: caretRect.bottom + margin
         };
     }
 
-    this.refreshCursorBlinking = function() {
+    this.refreshCursorBlinking = function () {
         if (blinkOnRangeSelect || cursor.getSelectedRange().collapsed) {
             shouldBlink = true;
             blink(true);
@@ -303,11 +157,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     this.ensureVisible = function () {
         var canvasElement = cursor.getOdtDocument().getOdfCanvas().getElement(),
             canvasContainerElement = canvasElement.parentNode,
-            caretOffsetRect,
+            caretRect,
+            canvasContainerRect,
             // margin around the caret when calculating the visibility,
             // to have the caret not stick directly to the containing border
-            // size in pixels
-            caretMargin = 5;
+            // size in pixels, and also to avoid it hiding below scrollbars.
+            // The scrollbar width is in most cases the offsetWidth - clientWidth.
+            // We assume a 5px distance from the boundary is A Good Thing.
+            caretMargin = canvasContainerElement.offsetWidth - canvasContainerElement.clientWidth + 5;
 
         // The visible part of the canvas is set by changing the
         // scrollLeft/scrollTop properties of the containing element
@@ -318,30 +175,21 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         // * size of the caret
         // * size of the canvas
 
-        caretOffsetRect = getRelativeCaretOffsetRect(span,
-                                                     canvasContainerElement,
-                                                     caretMargin);
+        caretRect = getCaretClientRectWithMargin(span, caretMargin);
+        canvasContainerRect = canvasContainerElement.getBoundingClientRect();
 
-        // check vertically
-        // not below upper side of visible part of the canvas?
-        if ((caretOffsetRect.top) < canvasContainerElement.scrollTop) {
-            canvasContainerElement.scrollTop = caretOffsetRect.top;
-        // not above lower side of visible part of the canvas?
-        } else if (caretOffsetRect.bottom >
-                   (canvasContainerElement.scrollTop + canvasContainerElement.clientHeight - 1)) {
-            canvasContainerElement.scrollTop =
-                caretOffsetRect.bottom - canvasContainerElement.clientHeight + 1;
+        // Vertical adjustment
+        if (caretRect.top < canvasContainerRect.top) {
+            canvasContainerElement.scrollTop -= canvasContainerRect.top - caretRect.top;
+        } else if (caretRect.bottom > canvasContainerRect.bottom) {
+            canvasContainerElement.scrollTop += caretRect.bottom - canvasContainerRect.bottom;
         }
 
-        // check horizontally
-        // not before left side of visible part of the canvas?
-        if (caretOffsetRect.left < canvasContainerElement.scrollLeft) {
-            canvasContainerElement.scrollLeft = caretOffsetRect.left;
-        // not behind right side of visible part of the canvas?
-        } else if (caretOffsetRect.right >
-                    (canvasContainerElement.scrollLeft + canvasContainerElement.clientWidth - 1)) {
-            canvasContainerElement.scrollLeft =
-                caretOffsetRect.right - canvasContainerElement.clientWidth + 1;
+        // Horizontal adjustment
+        if (caretRect.left < canvasContainerRect.left) {
+            canvasContainerElement.scrollLeft -= canvasContainerRect.left - caretRect.left;
+        } else if (caretRect.right > canvasContainerRect.right) {
+            canvasContainerElement.scrollLeft += caretRect.right - canvasContainerRect.right;
         }
     };
 
