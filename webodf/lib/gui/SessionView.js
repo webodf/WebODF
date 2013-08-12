@@ -101,8 +101,7 @@ gui.SessionView = (function () {
          * @return {!string}
          */
         function createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) {
-            var userId = memberId.split('___')[0];
-            return nodeName + '[editinfo|memberid^="' + userId + '"]' + pseudoClass;
+            return nodeName + '[editinfo|memberid^="' + memberId + '"]' + pseudoClass;
         }
 
         /**
