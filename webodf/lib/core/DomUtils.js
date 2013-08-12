@@ -39,7 +39,6 @@
  */
 core.DomUtils = function DomUtils() {
     "use strict";
-    var self = this;
 
     /**
      * Find the inner-most child point that is equivalent
@@ -256,7 +255,7 @@ core.DomUtils = function DomUtils() {
     /**
      * Whether a node contains another node
      * @param {!Node} parent The node that should contain the other node
-     * @param {!Node} descendant The node to test presence of
+     * @param {?Node} descendant The node to test presence of
      * @return {!boolean}
      */
     function containsNode(parent, descendant) {
@@ -264,6 +263,12 @@ core.DomUtils = function DomUtils() {
     }
     this.containsNode = containsNode;
 
+    /**
+     * Whether a node contains another node
+     * @param {!Node} parent The node that should contain the other node
+     * @param {?Node} descendant The node to test presence of
+     * @return {!boolean}
+     */
     function containsNodeForBrokenWebKit(parent, descendant) {
         // the contains function is not reliable on safari/webkit so use compareDocumentPosition instead
         return parent === descendant ||
@@ -282,7 +287,7 @@ core.DomUtils = function DomUtils() {
             && (appVersion.indexOf('applewebkit') !== -1 || appVersion.indexOf('safari') !== -1);
 
         if (webKitOrSafari) {
-            self.containsNode = containsNodeForBrokenWebKit;
+            this.containsNode = containsNodeForBrokenWebKit;
         }
     }
     init();
