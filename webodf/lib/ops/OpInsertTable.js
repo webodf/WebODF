@@ -24,6 +24,11 @@ ops.OpInsertTable = function OpInsertTable() {
         tableCellStyleMatrix = data.tableCellStyleMatrix;
     };
 
+    /**
+     * @param {!number} row
+     * @param {!number} column
+     * @return {!string|undefined}
+     */
     function getCellStyleName(row, column) {
         var rowStyles;
         if (tableCellStyleMatrix.length === 1) {
@@ -60,6 +65,10 @@ ops.OpInsertTable = function OpInsertTable() {
         return rowStyles[column];
     }
 
+    /**
+     * @param {!Document} document
+     * @return {!Element}
+     */
     function createTableNode(document) {
         var tableNode = document.createElementNS(tablens, "table:table"),
             columns = document.createElementNS(tablens, "table:table-column"),

@@ -68,6 +68,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter;
 
+    /**
+     * @return {!Element}
+     */
     function getRootNode() {
         var element = odfCanvas.odfContainer().getContentElement(),
             localName = element && element.localName;
@@ -288,6 +291,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     function getPositionInTextNode(position, memberid) {
         var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
+            /**@type{?Text}*/
             lastTextNode = null,
             node,
             nodeOffset = 0,
@@ -377,7 +381,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
             lastTextNode.previousSibling.appendData(lastTextNode.data);
             nodeOffset = lastTextNode.length + lastTextNode.previousSibling.length;
-            lastTextNode = lastTextNode.previousSibling;
+            lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
             lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
         }
 
@@ -617,7 +621,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!Document}
      */
     this.getDOM = function () {
-        return getRootNode().ownerDocument;
+        return /**@type{!Document}*/(getRootNode().ownerDocument);
     };
 
     /**
@@ -699,10 +703,19 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return odfCanvas.getFormatting();
     };
 
+    /**
+     * @param {!Range} range
+     * @param {!boolean} includeInsignificantWhitespace
+     * @returns {!Array.<Node>}
+     */
     this.getTextElements = function (range, includeInsignificantWhitespace) {
         return odfUtils.getTextElements(range, includeInsignificantWhitespace);
     };
 
+    /**
+     * @param {!Range} range
+     * @returns {!Array.<Node>}
+     */
     this.getParagraphElements = function (range) {
         return odfUtils.getParagraphElements(range);
     };
