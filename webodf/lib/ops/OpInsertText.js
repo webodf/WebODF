@@ -99,7 +99,7 @@ ops.OpInsertText = function OpInsertText() {
             previousNode,
             parent,
             refNode,
-            ownerDocument = odtDocument.getRootNode().ownerDocument,
+            ownerDocument = odtDocument.getDOM(),
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             space = " ",

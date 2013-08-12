@@ -62,7 +62,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
     function createAnnotationNode(odtDocument, date) {
         var annotationNode, creatorNode, dateNode,
             listNode, listItemNode, paragraphNode,
-            doc = odtDocument.getRootNode().ownerDocument;
+            doc = odtDocument.getDOM();
 
         // Create an office:annotation node with the calculated name, and an attribute with the memberid
         // for SessionView styling
@@ -99,7 +99,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
      */
     function createAnnotationEnd(odtDocument) {
         var annotationEnd,
-            doc = odtDocument.getRootNode().ownerDocument;
+            doc = odtDocument.getDOM();
 
         // Create an office:annotation-end node with the calculated name
         annotationEnd = doc.createElementNS(odf.Namespaces.officens, 'office:annotation-end');
