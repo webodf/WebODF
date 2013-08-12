@@ -1073,15 +1073,15 @@ function RhinoRuntime() {
 
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),
-            document;
+            xmlDocument;
         try {
-            document = builder.parse(file);
+            xmlDocument = builder.parse(file);
         } catch (err) {
             print(err);
             callback(err);
             return;
         }
-        callback(null, document);
+        callback(null, xmlDocument);
     }
     function runtimeReadFile(path, encoding, callback) {
         if (currentDirectory) {
