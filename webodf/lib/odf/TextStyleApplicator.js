@@ -207,6 +207,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
      * @param {!Array.<!CharacterData>} textNodes
      * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
+     * @return {undefined}
      */
     this.applyStyle = function(textNodes, limits, info) {
         var textPropsOnly = {},

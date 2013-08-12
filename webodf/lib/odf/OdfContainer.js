@@ -42,7 +42,7 @@ runtime.loadClass("odf.OdfNodeFilter");
  * document.
  * @constructor
  * @param {!string} url
- * @param {!Function|null} onstatereadychange
+ * @param {?Function} onstatereadychange
  * @return {?}
  **/
 odf.OdfContainer = (function () {
@@ -61,7 +61,6 @@ odf.OdfContainer = (function () {
      * @param {?Node} node
      * @param {!string} ns
      * @param {!string} name
-     * @return {?Element}
      */
     function getDirectChild(node, ns, name) {
         node = node ? node.firstChild : null;
@@ -219,6 +218,9 @@ odf.OdfContainer = (function () {
 
         // private functions
         // public functions
+        /**
+         * @return {undefined}
+         */
         this.load = function () {
             if (zip === null) {
                 return;
@@ -251,13 +253,15 @@ odf.OdfContainer = (function () {
     /**
      * @constructor
      * @param {!string} url
-     * @param {!Function|null} onstatereadychange
+     * @param {?Function} onstatereadychange
      * @return {?}
      */
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
         var self = this,
+            /**@type {!core.Zip}*/
             zip,
             partMimetypes = {},
+            /**@type {?Element}*/
             contentElement;
 
         // NOTE each instance of OdfContainer has a copy of the private functions
@@ -338,8 +342,8 @@ odf.OdfContainer = (function () {
          * Import the document elementnode into the DOM of OdfContainer.
          * Any processing instructions are removed, since importing them
          * gives an exception.
-         * @param {Document} xmldoc
-         * @return {!Node}
+         * @param {Document|undefined} xmldoc
+         * @return {Node|undefined}
          */
         function importRootNode(xmldoc) {
             var doc = self.rootElement.ownerDocument,
@@ -355,6 +359,10 @@ odf.OdfContainer = (function () {
             }
             return node;
         }
+        /**
+         * @param {!number} state
+         * @return {undefined}
+         */
         function setState(state) {
             self.state = state;
             if (self.onchange) {
@@ -364,6 +372,10 @@ odf.OdfContainer = (function () {
                 self.onstatereadychange(self);
             }
         }
+        /**
+         * @param {!Element} root
+         * @return {undefined}
+         */
         function setRootElement(root) {
             contentElement = null;
             self.rootElement = root;
@@ -375,7 +387,7 @@ odf.OdfContainer = (function () {
             root.meta = getDirectChild(root, officens, 'meta');
         }
         /**
-         * @param {Document} xmldoc
+         * @param {Document|undefined} xmldoc
          * @return {undefined}
          */
         function handleFlatXml(xmldoc) {
@@ -385,7 +397,7 @@ odf.OdfContainer = (function () {
                 setState(OdfContainer.INVALID);
                 return;
             }
-            setRootElement(root);
+            setRootElement(/**@type{!Element}*/(root));
             setState(OdfContainer.DONE);
         }
         /**
@@ -548,6 +560,10 @@ odf.OdfContainer = (function () {
             ];
             loadNextComponent(componentOrder);
         }
+        /**
+         * @param {!string} name
+         * @return {!string}
+         */
         function createDocumentElement(name) {
             var s = "";
 
@@ -665,6 +681,11 @@ odf.OdfContainer = (function () {
             }
             return original;
         }
+        /**
+         * @param {!string} url
+         * @param {!function((string)):undefined} callback
+         * @return {undefined}
+         */
         function loadFromXML(url, callback) {
             runtime.loadXML(url, function (err, dom) {
                 if (err) {
@@ -677,6 +698,9 @@ odf.OdfContainer = (function () {
         // public functions
         this.setRootElement = setRootElement;
 
+        /**
+         * @return {!Element}
+         */
         this.getContentElement = function () {
             var body;
             if (!contentElement) {
@@ -709,14 +733,17 @@ odf.OdfContainer = (function () {
             return new OdfPart(partname, partMimetypes[partname], self, zip);
         };
         /**
-        * @param {!string} url
-        * @param {!function(?string, ?Runtime.ByteArray)} callback receiving err and data
-        * @return {undefined}
-        */
+         * @param {!string} url
+         * @param {!function(?string, ?Runtime.ByteArray)} callback receiving err and data
+         * @return {undefined}
+         */
         this.getPartData = function (url, callback) {
             zip.load(url, callback);
         };
 
+        /**
+         * @return {!core.Zip}
+         */
         function createEmptyTextDocument() {
             var emptyzip = new core.Zip("", null),
                 data = runtime.byteArrayFromString(
@@ -807,6 +834,9 @@ odf.OdfContainer = (function () {
             saveAs(url, callback);
         };
 
+        /**
+         * @return {!string}
+         */
         this.getUrl = function () {
             // TODO: saveAs seems to not update the url, is that wanted?
             return url;

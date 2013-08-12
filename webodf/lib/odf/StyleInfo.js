@@ -318,7 +318,7 @@ odf.StyleInfo = function StyleInfo() {
      * @param {!Element} odfbody
      * @param {!Function} nsResolver
      * @param {!Node} styleElement
-     * @return {boolean}
+     * @return {!boolean}
      */
     function hasDerivedStyles(odfbody, nsResolver, styleElement) {
         var nodes,
@@ -397,6 +397,7 @@ odf.StyleInfo = function StyleInfo() {
      * @param {?Element} styleElementsRoot  root element with styles nodes as childs
      * @param {!string} prefix
      * @param {?Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @return {undefined}
      */
     function prefixStyleNames(styleElementsRoot, prefix, styleUsingElementsRoot) {
         var s;
@@ -580,6 +581,12 @@ odf.StyleInfo = function StyleInfo() {
         this.requires = {};
     }
 
+    /**
+     * @param {!string} stylename
+     * @param {!string} stylefamily
+     * @param {!Object.<string,StyleDefinition>} knownStyles  map of used stylesnames, grouped by keyname
+     * @return {!StyleDefinition}
+     */
     function getStyleDefinition(stylename, stylefamily, knownStyles) {
         var styleKey = stylename + '"' + stylefamily,
             styleDefinition = knownStyles[styleKey];
@@ -664,6 +671,7 @@ odf.StyleInfo = function StyleInfo() {
      * Merges the specified style, and style required to complete it into the usedStyles map
      * @param {!StyleDefinition} styleDependency Style to merge
      * @param {!Object.<string,Object.<string,number>>} usedStyles Styles map to merge data into
+     * @return {undefined}
      */
     function mergeRequiredStyles(styleDependency, usedStyles) {
         var family = usedStyles[styleDependency.family];
@@ -680,6 +688,7 @@ odf.StyleInfo = function StyleInfo() {
      * Marks all required styles as used for any automatic styles referenced within the existing usedStyles map
      * @param {!Element} automaticStylesRoot Automatic styles tree root
      * @param {!Object.<string,Object.<string,number>>} usedStyles Styles already referenced
+     * @return {undefined}
      */
     function mergeUsedAutomaticStyles(automaticStylesRoot, usedStyles) {
         var automaticStyles = determineDependentStyles(automaticStylesRoot, null, {});

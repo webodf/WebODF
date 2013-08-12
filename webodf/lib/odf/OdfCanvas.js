@@ -99,11 +99,14 @@ odf.OdfCanvas = (function () {
     }
     /**
      * @constructor
-     * @param css
+     * @param {!HTMLStyleElement} css
      */
     function PageSwitcher(css) {
         var sheet = css.sheet,
             position = 1;
+        /**
+         * @return {undefined}
+         */
         function updateCSS() {
             while (sheet.cssRules.length > 0) {
                 sheet.deleteRule(0);
@@ -118,6 +121,9 @@ odf.OdfCanvas = (function () {
             sheet.insertRule("office|presentation draw|page:nth-of-type(" +
                 position + ") {display:block;}", 3);
         }
+        /**
+         * @return {undefined}
+         */
         this.showFirstPage = function () {
             position = 1;
             updateCSS();
@@ -139,6 +145,10 @@ odf.OdfCanvas = (function () {
             }
         };
 
+        /**
+         * @param {!number} n  number of the page
+         * @return {undefined}
+         */
         this.showPage = function (n) {
             if (n > 0) {
                 position = n;
@@ -522,6 +532,10 @@ odf.OdfCanvas = (function () {
             callback(url);
         }
     }
+    /**
+     * @param {!Element} odfbody
+     * @return {undefined}
+     */
     function formatParagraphAnchors(odfbody) {
         var runtimens = "urn:webodf",
             n,
@@ -546,6 +560,10 @@ odf.OdfCanvas = (function () {
             tableCells,
             node;
 
+        /**
+         * @param {!Element} node
+         * @return {undefined}
+         */
         function modifyTableCell(node) {
             // If we have a cell which spans columns or rows,
             // then add col-span or row-span attributes.
@@ -576,6 +594,10 @@ odf.OdfCanvas = (function () {
             currentAnnotationName,
             i;
 
+        /**
+         * @param {!Node} element
+         * @return {!boolean}
+         */
         function matchAnnotationEnd(element) {
             return currentAnnotationName === element.getAttributeNS(officens, 'name');
         }
@@ -601,6 +623,10 @@ odf.OdfCanvas = (function () {
             links,
             node;
 
+        /**
+         * @param {!Element} node
+         * @return {undefined}
+         */
         function modifyLink(node) {
             var url, clickHandler;
             if (!node.hasAttributeNS(xlinkns, "href")) {
@@ -658,6 +684,10 @@ odf.OdfCanvas = (function () {
         var spaces,
             doc = odffragment.ownerDocument;
 
+        /**
+         * @param {!Node} space
+         * @return {undefined}
+         */
         function expandSpaceElement(space) {
             var j, count;
             // If the space has any children, remove them and put a " " text
@@ -740,6 +770,11 @@ odf.OdfCanvas = (function () {
 
         url = plugin.getAttributeNS(xlinkns, 'href');
 
+        /**
+         * @param {!string} url
+         * @param {!string} mimetype
+         * @return {undefined}
+         */
         function callback(url, mimetype) {
             var ns = doc.documentElement.namespaceURI;
             // test for video mimetypes
@@ -820,15 +855,21 @@ odf.OdfCanvas = (function () {
         return "content: '" + bulletChar + "';";
     }
 
+    /**
+     * @param {Element|undefined} node
+     * @return {string|undefined}
+     */
     function getBulletsRule(node) {
         var itemrule;
 
-        if (node.localName === "list-level-style-number") {
-            itemrule = getNumberRule(node);
-        } else if (node.localName === "list-level-style-image") {
-            itemrule = getImageRule();
-        } else if (node.localName === "list-level-style-bullet") {
-            itemrule = getBulletRule(node);
+        if (node) {
+            if (node.localName === "list-level-style-number") {
+                itemrule = getNumberRule(node);
+            } else if (node.localName === "list-level-style-image") {
+                itemrule = getImageRule();
+            } else if (node.localName === "list-level-style-bullet") {
+                itemrule = getBulletRule(node);
+            }
         }
 
         return itemrule;
@@ -878,7 +919,8 @@ odf.OdfCanvas = (function () {
                 styleName = node.getAttributeNS(textns, 'style-name');
                 if (styleName) {
                     node = listStyleMap[styleName];
-                    bulletRule = getBulletsRule(utils.getFirstNonWhitespaceChild(node));
+                    // TODO: getFirstNonWhitespaceChild() could also return a comment. Ensure the result is proper!
+                    bulletRule = getBulletsRule(/**@type{Element|undefined}*/(utils.getFirstNonWhitespaceChild(node)));
                 }
 
                 if (continueList) {
@@ -918,6 +960,10 @@ odf.OdfCanvas = (function () {
         }
     }
 
+    /**
+     * @param {!Document} document
+     * @return {!HTMLStyleElement}
+     */
     function addWebODFStyleSheet(document) {
         var head = document.getElementsByTagName('head')[0],
             style,
@@ -936,11 +982,13 @@ odf.OdfCanvas = (function () {
             style.setAttribute('rel', 'stylesheet');
         }
         style.setAttribute('type', 'text/css');
+        // TODO: make sure this is only added once per HTML document, e.g. in case of multiple odfCanvases
         head.appendChild(style);
-        return style;
+        return /**@type {!HTMLStyleElement}*/(style);
     }
     /**
-     * @param {Document} document Put and ODF Canvas inside this element.
+     * @param {!Document} document Put and ODF Canvas inside this element.
+     * @return {!HTMLStyleElement}
      */
     function addStyleSheet(document) {
         var head = document.getElementsByTagName('head')[0],
@@ -953,7 +1001,7 @@ odf.OdfCanvas = (function () {
         });
         style.appendChild(document.createTextNode(text));
         head.appendChild(style);
-        return style;
+        return /**@type {!HTMLStyleElement}*/(style);
     }
     /**
      * @constructor
@@ -963,8 +1011,10 @@ odf.OdfCanvas = (function () {
     odf.OdfCanvas = function OdfCanvas(element) {
         runtime.assert((element !== null) && (element !== undefined),
             "odf.OdfCanvas constructor needs DOM element");
+        runtime.assert((element.ownerDocument !== null) && (element.ownerDocument !== undefined),
+            "odf.OdfCanvas constructor needs DOM");
         var self = this,
-            doc = element.ownerDocument,
+            doc = /**@type{!Document}*/(element.ownerDocument),
             /**@type{!odf.OdfContainer}*/
             odfcontainer,
             /**@type{!odf.Formatting}*/
@@ -998,7 +1048,14 @@ odf.OdfCanvas = (function () {
             var i,
                 images,
                 node;
-            // do delayed loading for all the images
+            /**
+             * Do delayed loading for all the images
+             * @param {!string} name
+             * @param {!odf.OdfContainer} container
+             * @param {!Element} node
+             * @param {!StyleSheet} stylesheet
+             * @return {undefined}
+             */
             function loadImage(name, container, node, stylesheet) {
                 // load image with a small delay to give the html ui a chance to
                 // update
@@ -1014,7 +1071,7 @@ odf.OdfCanvas = (function () {
         }
         /**
          * Load all the video that are inside an odf element.
-         * @param {!Object} container
+         * @param {!odf.OdfContainer} container
          * @param {!Element} odffragment
          * @return {undefined}
          */
@@ -1022,7 +1079,12 @@ odf.OdfCanvas = (function () {
             var i,
                 plugins,
                 node;
-            // do delayed loading for all the videos
+            /**
+             * Do delayed loading for all the videos
+             * @param {!odf.OdfContainer} container
+             * @param {!Element} node
+             * @return {undefined}
+             */
             function loadVideo(container, node) {
                 // load video with a small delay to give the html ui a chance to
                 // update
@@ -1069,6 +1131,9 @@ odf.OdfCanvas = (function () {
             }
         }
 
+        /**
+         * @return {undefined}
+         */
         function fixContainerSize() {
             var sizer = element.firstChild,
                 odfdoc = sizer.firstChild;
@@ -1243,9 +1308,15 @@ odf.OdfCanvas = (function () {
         this.refreshSize = function () {
             fixContainerSize();
         };
+        /**
+         * @return {!odf.OdfContainer}
+         */
         this.odfContainer = function () {
             return odfcontainer;
         };
+        /**
+         * @return {!StyleSheet}
+         */
         this.slidevisibilitycss = function () {
             return pageSwitcher.css;
         };
@@ -1253,6 +1324,7 @@ odf.OdfCanvas = (function () {
          * Set a odfcontainer manually.
          * @param {!odf.OdfContainer} container
          * @param {boolean=} suppressEvent Default value is false
+         * @return {undefined}
          */
         this.setOdfContainer = function (container, suppressEvent) {
             odfcontainer = container;
@@ -1277,6 +1349,9 @@ odf.OdfCanvas = (function () {
         this["load"] = load;
         this.load = load;
 
+        /**
+         * @return {undefined}
+         */
         function stopEditing() {
             if (!editparagraph) {
                 return;
@@ -1288,11 +1363,19 @@ odf.OdfCanvas = (function () {
             editparagraph.parentNode.replaceChild(fragment, editparagraph);
         }
 
+        /**
+         * @param {function(?string):undefined} callback
+         * @return {undefined}
+         */
         this.save = function (callback) {
             stopEditing();
             odfcontainer.save(callback);
         };
 
+        /**
+         * @param {!Event} event
+         * @return {undefined}
+         */
         function cancelEvent(event) {
             if (event.preventDefault) {
                 event.preventDefault();
@@ -1303,6 +1386,10 @@ odf.OdfCanvas = (function () {
             }
         }
 
+        /**
+         * @param {!Event} evt
+         * @return {undefined}
+         */
         function processClick(evt) {
             evt = evt || window.event;
             // go up until we find a text:p, if we find it, wrap it in <p> and
@@ -1355,6 +1442,10 @@ odf.OdfCanvas = (function () {
             cancelEvent(evt);
         }
 
+        /**
+         * @param {!boolean} iseditable
+         * @return {undefined}
+         */
         this.setEditable = function (iseditable) {
             // We start listening to clicks on the canvas to enable editing.
             // If another process wants to listen to click events on the canvas
@@ -1395,10 +1486,11 @@ odf.OdfCanvas = (function () {
         this.getAnnotationManager = function () {
             return annotationManager;
         };
-        
+
         /**
-         * Unstyles and untracks all annotations present in the document
-         * , and then tracks them again with fresh rendering
+         * Unstyles and untracks all annotations present in the document,
+         * and then tracks them again with fresh rendering
+         * @return {undefined}
          */
         this.refreshAnnotations = function () {
             handleAnnotations(odfcontainer.rootElement);
@@ -1406,6 +1498,7 @@ odf.OdfCanvas = (function () {
 
         /**
          * Re-renders all annotations if enabled
+         * @return {undefined}
          */
         this.rerenderAnnotations = function () {
             if (annotationManager) {
@@ -1414,7 +1507,8 @@ odf.OdfCanvas = (function () {
         };
 
         /** Allows / disallows annotations
-         * @param {boolean} allow
+         * @param {!boolean} allow
+         * @return {undefined}
          */
         this.enableAnnotations = function (allow) {
             if (allow !== allowAnnotations) {
@@ -1503,6 +1597,9 @@ odf.OdfCanvas = (function () {
             zoomLevel = height / realHeight;
             fixContainerSize();
         };
+        /**
+         * @return {undefined}
+         */
         this.showFirstPage = function () {
             pageSwitcher.showFirstPage();
         };
@@ -1519,6 +1616,7 @@ odf.OdfCanvas = (function () {
             pageSwitcher.showPreviousPage();
         };
         /**
+         * @param {!number} n  number of the page
          * @return {undefined}
          */
         this.showPage = function (n) {

@@ -154,7 +154,7 @@ odf.Formatting = function Formatting() {
     /**
      * Returns if the given style is used anywhere in the document.
      * @param {!Element} styleElement
-     * @return {boolean}
+     * @return {!boolean}
      */
     this.isStyleUsed = function (styleElement) {
         var hasDerivedStyles, isUsed;
@@ -168,6 +168,10 @@ odf.Formatting = function Formatting() {
         return hasDerivedStyles || isUsed;
     };
 
+    /**
+     * @param {!string} family
+     * @return {?Node}
+     */
     function getDefaultStyleElement(family) {
         var node = odfContainer.rootElement.styles.firstChild;
 
@@ -185,8 +189,8 @@ odf.Formatting = function Formatting() {
 
     /**
      * Fetch style element associated with the requested name and family
-     * @param {string} styleName
-     * @param {string} family
+     * @param {!string} styleName
+     * @param {!string} family
      * @param {Array.<Element>=} styleElements Specific style trees to search. If unspecified will search both automatic
      *  and user-created styles
      * @returns {Element}

@@ -130,7 +130,7 @@ Runtime.prototype.readFile = function (path, encoding, callback) {"use strict"; 
 Runtime.prototype.readFileSync = function (path, encoding) {"use strict"; };
 /**
  * @param {!string} path
- * @param {!function((string|Document)):undefined} callback
+ * @param {!function(!string,(Document|undefined)=):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.loadXML = function (path, callback) {"use strict"; };

@@ -327,6 +327,20 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.isTrailingWhitespace = isTrailingWhitespace;
 
+    /**
+     * Takes a textNode and an offset, and returns true if the character
+     * at that offset is a significant whitespace.
+     *
+     * Significant whitespace is defined as:
+     * - Not part of the leading whitespace block in a paragraph
+     * - Not part of the trailing whitespace block in a paragraph
+     * - The first whitespace character after a text node or character
+     *
+     * All other whitespace elements are considered insignificant
+     * @param {!Text} textNode
+     * @param {!number} offset
+     * @returns {!boolean}
+     */
     function isSignificantWhitespace(textNode, offset) {
         var text = textNode.data,
             result;
@@ -358,29 +372,15 @@ odf.OdfUtils = function OdfUtils() {
         }
         return false;
     }
-    /**
-     * Takes a textNode and an offset, and returns true if the character
-     * at that offset is a significant whitespace.
-     *
-     * Significant whitespace is defined as:
-     * - Not part of the leading whitespace block in a paragraph
-     * - Not part of the trailing whitespace block in a paragraph
-     * - The first whitespace character after a text node or character
-     *
-     * All other whitespace elements are considered insignificant
-     * @param {!Text} textNode
-     * @param {!number} offset
-     * @returns {!boolean}
-     */
     this.isSignificantWhitespace = isSignificantWhitespace;
 
     /**
      * Returns the first non-whitespace-only child of a given node
-     * @param {Node} node
-     * @returns {Node|null}
+     * @param {Node|undefined} node
+     * @returns {Node|undefined}
      */
     function getFirstNonWhitespaceChild(node) {
-        var child = node.firstChild;
+        var child = node && node.firstChild;
         while (child && child.nodeType === Node.TEXT_NODE && whitespaceOnly.test(child.nodeValue)) {
             child = child.nextSibling;
         }
