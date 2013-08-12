@@ -84,17 +84,17 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * Calculates the bounding client rect of the caret element,
      * expanded with a specific margin
      * @param {!Element} caretElement
-     * @param {!number} margin
+     * @param {!{left:!number,top:!number,right:!number,bottom:!number}} margin
      * @return {!{left:!number,top:!number,right:!number,bottom:!number}}
      */
     function getCaretClientRectWithMargin(caretElement, margin) {
         var caretRect = caretElement.getBoundingClientRect();
 
         return {
-            left:   caretRect.left - margin,
-            top:    caretRect.top - margin,
-            right:  caretRect.right + margin,
-            bottom: caretRect.bottom + margin
+            left:   caretRect.left - margin.left,
+            top:    caretRect.top - margin.top,
+            right:  caretRect.right + margin.right,
+            bottom: caretRect.bottom + margin.bottom
         };
     }
 
@@ -164,7 +164,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // size in pixels, and also to avoid it hiding below scrollbars.
             // The scrollbar width is in most cases the offsetWidth - clientWidth.
             // We assume a 5px distance from the boundary is A Good Thing.
-            caretMargin = canvasContainerElement.offsetWidth - canvasContainerElement.clientWidth + 5;
+            horizontalMargin = canvasContainerElement.offsetWidth - canvasContainerElement.clientWidth + 5,
+            verticalMargin = canvasContainerElement.offsetHeight - canvasContainerElement.clientHeight + 5;
 
         // The visible part of the canvas is set by changing the
         // scrollLeft/scrollTop properties of the containing element
@@ -175,7 +176,12 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         // * size of the caret
         // * size of the canvas
 
-        caretRect = getCaretClientRectWithMargin(span, caretMargin);
+        caretRect = getCaretClientRectWithMargin(span, {
+            top: verticalMargin,
+            left: horizontalMargin,
+            bottom: verticalMargin,
+            right: horizontalMargin
+        });
         canvasContainerRect = canvasContainerElement.getBoundingClientRect();
 
         // Vertical adjustment
