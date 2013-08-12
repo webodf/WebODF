@@ -44,22 +44,25 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
     var memberid, timestamp, styleName,
         /**@type{Object}*/setProperties,
-        /**@type{{paragraphPropertyNames,textPropertyNames}}*/removedProperties,
+        /**@type{{attributes}}*/removedProperties,
+        /**@const*/paragraphPropertiesName = 'style:paragraph-properties',
+        /**@const*/textPropertiesName = 'style:text-properties',
         /**@const*/stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
         /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
 
     /**
-     * Removes attributes of a node by the names listed in removedPropertyNames.
+     * Removes attributes of a node by the names listed in removedAttributeNames.
      * @param {!Node} node
-     * @param {!Array.<!string>} removedPropertyNames
+     * @param {!string} removedAttributeNames
      */
-    function removePropertiesFromStyleNode(node, removedPropertyNames) {
-        var i, propertyNameParts;
+    function removedAttributesFromStyleNode(node, removedAttributeNames) {
+        var i, attributeNameParts,
+            attributeNameList = removedAttributeNames ? removedAttributeNames.split(',') : [];
 
-        for (i = 0; i < removedPropertyNames.length; i += 1) {
-            propertyNameParts = removedPropertyNames[i].split(":");
+        for (i = 0; i < attributeNameList.length; i += 1) {
+            attributeNameParts = attributeNameList[i].split(":");
             // TODO: ensure all used prefixes have a namespaces listed
-            node.removeAttributeNS(odf.Namespaces.resolvePrefix(propertyNameParts[0]), propertyNameParts[1]);
+            node.removeAttributeNS(odf.Namespaces.resolvePrefix(attributeNameParts[0]), attributeNameParts[1]);
         }
     }
 
@@ -72,8 +75,11 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     };
 
     this.execute = function (odtDocument) {
-        var styleNode, paragraphPropertiesNode, textPropertiesNode, fontFaceNode, fontName,
-            formatting = odtDocument.getFormatting();
+        var formatting = odtDocument.getFormatting(),
+            dom = odtDocument.getDOM(),
+            styleNode = dom.createElementNS(stylens, 'style:style'),
+            paragraphPropertiesNode, textPropertiesNode, fontFaceNode,
+            fontName, ns;
 
         styleNode = odtDocument.getParagraphStyleElement(styleName);
 
@@ -82,54 +88,69 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
 
             if (setProperties) {
-                // ensure nodes if needed
-                if ((paragraphPropertiesNode === undefined)
-                        && setProperties["style:paragraph-properties"]) {
-                    paragraphPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:paragraph-properties');
-                    styleNode.appendChild(paragraphPropertiesNode);
-                }
-                if ((textPropertiesNode === undefined)
-                        && setProperties["style:text-properties"]) {
-                    textPropertiesNode = odtDocument.getDOM().createElementNS(stylens, 'style:text-properties');
-                    styleNode.appendChild(textPropertiesNode);
-                }
+                Object.keys(setProperties).forEach(function (propertyName) {
+                    switch (propertyName) {
+                    case paragraphPropertiesName:
+                        // ensure node
+                        if (paragraphPropertiesNode === undefined) {
+                            paragraphPropertiesNode = dom.createElementNS(stylens, paragraphPropertiesName);
+                            styleNode.appendChild(paragraphPropertiesNode);
+                        }
 
-                // set attributes in the style nodes
-                if (setProperties["style:paragraph-properties"]) {
-                    formatting.updateStyle(paragraphPropertiesNode, setProperties["style:paragraph-properties"]);
-                }
+                        // set properties
+                        formatting.updateStyle(paragraphPropertiesNode, setProperties[paragraphPropertiesName]);
+                        break;
 
-                if (setProperties["style:text-properties"]) {
-                    // Declare the requested font if it is not already declared
-                    fontName = setProperties["style:text-properties"]["style:font-name"];
-                    if (fontName &&
-                        !formatting.getFontMap().hasOwnProperty(fontName)) {
+                    case textPropertiesName:
+                        // ensure node
+                        if (textPropertiesNode === undefined) {
+                            textPropertiesNode = dom.createElementNS(stylens, textPropertiesName);
+                            styleNode.appendChild(textPropertiesNode);
+                        }
 
-                        fontFaceNode = odtDocument.getDOM().createElementNS(stylens, 'style:font-face');
-                        fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
-                        fontFaceNode.setAttributeNS(svgns, 'svg:font-family', fontName);
-                        odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
+                        // Declare the requested font if it is not already declared
+                        fontName = setProperties[textPropertiesName]["style:font-name"];
+                        if (fontName &&
+                            !formatting.getFontMap().hasOwnProperty(fontName)) {
+
+                            fontFaceNode = dom.createElementNS(stylens, 'style:font-face');
+                            fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
+                            fontFaceNode.setAttributeNS(svgns, 'svg:font-family', fontName);
+                            odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
+                        }
+
+                        // set properties
+                        formatting.updateStyle(textPropertiesNode, setProperties[textPropertiesName]);
+                        break;
+
+                    default:
+                        // only normal attributes expected ATM
+                        if (typeof setProperties[propertyName] !== 'object') {
+                            ns = odf.Namespaces.resolvePrefix(propertyName.substr(0, propertyName.indexOf(':')));
+                            styleNode.setAttributeNS(ns, propertyName, setProperties[propertyName]);
+                        }
                     }
-                    formatting.updateStyle(textPropertiesNode, setProperties["style:text-properties"]);
-                }
+                });
             }
 
             // remove attributes in the style nodes
             if (removedProperties) {
-                if (removedProperties.paragraphPropertyNames) {
-                    removePropertiesFromStyleNode(paragraphPropertiesNode, removedProperties.paragraphPropertyNames);
+                if (removedProperties[paragraphPropertiesName]) {
+                    removedAttributesFromStyleNode(paragraphPropertiesNode, removedProperties[paragraphPropertiesName].attributes);
                     if (paragraphPropertiesNode.attributes.length === 0) {
                         styleNode.removeChild(paragraphPropertiesNode);
                     }
                 }
 
-                if (removedProperties.textPropertyNames) {
+                if (removedProperties[textPropertiesName]) {
                     // TODO: check if fontname can be removed from font-face-declaration
-                    removePropertiesFromStyleNode(textPropertiesNode, removedProperties.textPropertyNames);
+                    removedAttributesFromStyleNode(textPropertiesNode, removedProperties[textPropertiesName].attributes);
                     if (textPropertiesNode.attributes.length === 0) {
                         styleNode.removeChild(textPropertiesNode);
                     }
                 }
+
+                removedAttributesFromStyleNode(styleNode, removedProperties.attributes);
             }
 
             odtDocument.getOdfCanvas().refreshCSS();

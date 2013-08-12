@@ -572,7 +572,7 @@
     <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><textPropertyNames>fo:font-size</textPropertyNames></removedProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><style:text-properties attributes="fo:font-size"/></removedProperties></op>
   </ops>
   <after>
     <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
@@ -602,10 +602,49 @@
  <test name="UpdateParagraphStyleU_rightMargin2_nothing">
   <before><office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:paragraph-properties fo:margin-right="2mm"/></style:style></office:styles><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><paragraphPropertyNames>fo:margin-right</paragraphPropertyNames></removedProperties></op>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><removedProperties><style:paragraph-properties attributes="fo:margin-right"/></removedProperties></op>
   </ops>
   <after>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="UpdateParagraphStyle_nothing_nextStyle2">
+  <before>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/><style:style style:name="S2" style:family="paragraph" style:class="text"/></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S2"><setProperties style:next-style-name="S2"/></op>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/><style:style style:name="S2" style:family="paragraph" style:class="text" style:next-style-name="S2"/></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="UpdateParagraphStyle_nextStyle1_nextStyle2">
+  <before>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/><style:style style:name="S2" style:family="paragraph" style:class="text" style:next-style-name="S1"/></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S2"><setProperties style:next-style-name="S2"/></op>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/><style:style style:name="S2" style:family="paragraph" style:class="text" style:next-style-name="S2"/></office:styles>
+   <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="UpdateParagraphStyle_nextStyle1_nothing">
+  <before>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/><style:style style:name="S2" style:family="paragraph" style:class="text" style:next-style-name="S1"/></office:styles>
+   <office:text><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S2"><removedProperties attributes="style:next-style-name"/></op>
+  </ops>
+  <after>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/><style:style style:name="S2" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
   </after>
  </test>

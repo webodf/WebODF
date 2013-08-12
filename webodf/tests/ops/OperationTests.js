@@ -91,12 +91,7 @@ ops.OperationTests = function OperationTests(runner) {
         // read complex data by childs
         while(child) {
             if (child.nodeType === Node.ELEMENT_NODE) {
-                // list?
-                if (/paragraphPropertyNames|textPropertyNames/.test(child.localName)) {
-                    op[child.nodeName] = child.textContent.split(',');
-                } else {
-                    op[child.nodeName] = parseOperation(child);
-                }
+                op[child.nodeName] = parseOperation(child);
             }
             child = child.nextSibling;
         }
