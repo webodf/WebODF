@@ -83,7 +83,7 @@ ops.OperationTests = function OperationTests(runner) {
         for (i = 0; i < n; i += 1) {
             att = atts.item(i);
             value = att.value;
-            if (/length|number|position|fontSize|topMargin|bottomMargin|leftMargin|rightMargin/.test(att.localName)) {
+            if (/^(length|number|position|fo:font-size|fo:margin-right)$/.test(att.localName)) {
                 value = parseInt(value, 10);
             }
             op[att.nodeName] = value;
