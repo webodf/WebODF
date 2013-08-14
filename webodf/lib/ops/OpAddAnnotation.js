@@ -117,7 +117,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
      */
     function insertNodeAtPosition(odtDocument, node, insertPosition) {
         var previousNode,
-            domPosition = odtDocument.getPositionInTextNode(insertPosition);
+            domPosition = odtDocument.getPositionInTextNode(insertPosition, memberid);
 
         if (domPosition) {
             previousNode = domPosition.textNode;
