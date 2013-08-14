@@ -546,7 +546,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * This function calculates the steps in ODF world between the cursor of the
-     * member and the given position in the DOM.
+     * given member and the given position in the DOM. If the given position is
+     * not walkable, then it will be the number of steps to the last walkable position
+     * before the given position from the direction of the cursor.
      * @param {!string} memberid
      * @param {!Node} node
      * @param {!number} offset offset in filtered DOM world
