@@ -129,8 +129,25 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         }
     }
 
+    function countSteps(number, stepCounter, positionFilter) {
+        if (number > 0) {
+            return stepCounter.countForwardSteps(number, positionFilter);
+        }
+        if (number < 0) {
+            return -stepCounter.countBackwardSteps(-number, positionFilter);
+        }
+        return 0;
+    }
+
     this.execute = function (odtDocument) {
-        var annotation = {};
+        var annotation = {},
+            positionFilter = odtDocument.getPositionFilter(),
+            cursor = odtDocument.getCursor(memberid),
+            oldCursorPosition = odtDocument.getCursorPosition(memberid),
+            // The -1 is added because the cursor is always to the 'right' of the annotation node,
+            // and the target position is 1 step to the right of the annotation node
+            lengthToMove = position - oldCursorPosition - 1,
+            stepsToParagraph;
 
         annotation.node = createAnnotationNode(odtDocument, new Date(timestamp));
         if (!annotation.node) {
@@ -147,7 +164,16 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         }
         insertNodeAtPosition(odtDocument, annotation.node, position);
 
+        // Move the cursor inside the new annotation
+        if (cursor) {
+            stepsToParagraph = countSteps(lengthToMove, cursor.getStepCounter(), positionFilter);
+            cursor.move(stepsToParagraph);
+            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+        }
+        // Track this annotation
         odtDocument.getOdfCanvas().addAnnotation(annotation);
+
+
         return true;
     };
 
