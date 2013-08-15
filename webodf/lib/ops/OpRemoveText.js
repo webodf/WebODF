@@ -51,7 +51,6 @@ ops.OpRemoveText = function OpRemoveText() {
         position,
         /**@type {number}*/
         length,
-        text, 
         odfUtils,
         domUtils,
         editinfons = 'urn:webodf:names:editinfo';
@@ -62,7 +61,6 @@ ops.OpRemoveText = function OpRemoveText() {
         timestamp = data.timestamp;
         position = parseInt(data.position, 10);
         length = parseInt(data.length, 10);
-        text = data.text;
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
     };
@@ -242,8 +240,7 @@ ops.OpRemoveText = function OpRemoveText() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
-            length: length,
-            text: text
+            length: length
         };
     };
 
