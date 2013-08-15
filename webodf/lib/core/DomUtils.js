@@ -275,7 +275,7 @@ core.DomUtils = function DomUtils() {
             Boolean(parent.compareDocumentPosition(descendant) & Node.DOCUMENT_POSITION_CONTAINED_BY);
     }
 
-    function init() {
+    function init(self) {
         var /**@type{?Window}*/window = runtime.getWindow(),
             appVersion, webKitOrSafari;
         if (window === null) {
@@ -287,8 +287,8 @@ core.DomUtils = function DomUtils() {
             && (appVersion.indexOf('applewebkit') !== -1 || appVersion.indexOf('safari') !== -1);
 
         if (webKitOrSafari) {
-            this.containsNode = containsNodeForBrokenWebKit;
+            self.containsNode = containsNodeForBrokenWebKit;
         }
     }
-    init();
+    init(this);
 };
