@@ -501,19 +501,28 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * Iterates through all cursors and checks if they are in
      * walkable positions; if not, move the cursor 1 filtered step backward
-     * which guarantees walkable state for all cursors.
+     * which guarantees walkable state for all cursors,
+     * while keeping them inside the same root.
      * @param {?string} localMemberId An event will be raised for this cursor if it is moved
      */
     this.fixCursorPositions = function (localMemberId) {
-        var posfilter = self.getPositionFilter(),
-            memberId, cursor, stepCounter, steps;
+        var memberId,
+            cursor,
+            stepCounter,
+            steps,
+            rootConstrainedFilter = new core.PositionFilterChain();
+
+        rootConstrainedFilter.addFilter('BaseFilter', self.getPositionFilter());
 
         for (memberId in cursors) {
             if (cursors.hasOwnProperty(memberId)) {
+                // Equip a Root Filter for specifically this cursor
+                rootConstrainedFilter.addFilter('RootFilter', self.createRootFilter(memberId));
                 cursor = cursors[memberId];
                 stepCounter = cursor.getStepCounter();
-                if (!stepCounter.isPositionWalkable(posfilter)) {
-                    steps = stepCounter.countStepsToValidPosition(posfilter);
+
+                if (!stepCounter.isPositionWalkable(rootConstrainedFilter)) {
+                    steps = stepCounter.countStepsToValidPosition(rootConstrainedFilter);
                     cursor.move(steps);
                     if (memberId === localMemberId) {
                         self.emit(ops.OdtDocument.signalCursorMoved, cursor);
@@ -523,6 +532,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     // and remove the now-unnecessary anchor node
                     cursor.move(0);
                 }
+                // Un-equip the Root Filter for this cursor because we are done with it
+                rootConstrainedFilter.removeFilter('RootFilter');
             }
         }
     };
