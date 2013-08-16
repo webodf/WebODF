@@ -286,7 +286,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Optionally takes a memberid of a cursor, to specifically return the
      * text node positioned just behind that cursor.
      * @param {!number} position
-     * @param {!number=} memberid
+     * @param {!string=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
     function getPositionInTextNode(position, memberid) {
@@ -295,7 +295,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             lastTextNode = null,
             node,
             nodeOffset = 0,
-            cursorNode = null;
+            cursorNode = null,
+            originalPosition = position;
 
         runtime.assert(position >= 0, "position must be >= 0");
         // iterator should be at the start of getRootNode()
@@ -342,8 +343,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             return null;
         }
 
-        // Move the cursor with the current memberid after all adjacent cursors
-        if (memberid && cursors[memberid]) {
+        // Move the cursor with the current memberid after all adjacent cursors,
+        // ONLY if it is at the same position as the requested one
+        if (memberid
+                && cursors[memberid]
+                && self.getCursorPosition(memberid) === originalPosition) {
+
             cursorNode = cursors[memberid].getNode();
             while (nodeOffset === 0 && cursorNode.nextSibling
                     && cursorNode.nextSibling.localName === "cursor") {
@@ -488,7 +493,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * This function will return the Text node as well as the offset in that text node
      * of the cursor.
      * @param {!number} position
-     * @param {!number=} memberid
+     * @param {!string=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
     this.getPositionInTextNode = getPositionInTextNode;
