@@ -1,84 +1,85 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xml:lang="en" lang="en">
-	<!--
-	This HTML page is meant to host the client side of a collaborative
-	edit session. It also includes a div-element for listing members of
-	the editing session.
-	This page tries to connect-back to the nowjs enabled httpd
-	serving it. That server there is expected to provide a list of
-	sessions which are offered in a simple list and can be joined.
-	This page is meant to be served out of a webodf build directory.
-	-->
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+  <!--
+  This HTML page is meant to host the client side of a collaborative
+  edit session. It also includes a div-element for listing members of
+  the editing session.
+  This page tries to connect-back to the nowjs enabled httpd
+  serving it. That server there is expected to provide a list of
+  sessions which are offered in a simple list and can be joined.
+  This page is meant to be served out of a webodf build directory.
+  -->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
 
-  <title>Editor (collaborative)</title>
+    <title>Editor (collaborative)</title>
 
-  <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
 
-  <script type="text/javascript" charset="utf-8">
-    var usedLocale = "C";
-    if (navigator && navigator.language.match(/^(ru|de)/)) {
+    <script type="text/javascript" charset="utf-8">
+      var usedLocale = "C";
+      if (navigator && navigator.language.match(/^(ru|de)/)) {
         usedLocale = navigator.language.substr(0,2);
-    }
-
-    dojoConfig = {
-      locale: usedLocale,
-      paths: {
-        "webodf/editor": "/programs/editor",
-        "dijit": "/programs/editor/dijit",
-        "dojox": "/programs/editor/dojox",
-        "dojo": "/programs/editor/dojo",
-        "resources": "/programs/editor/resources"
       }
-    }
-  </script>
 
-  <!-- Dojo stuff (use src instead of dist for running from the source tree)-->
-  <script src="dojo-amalgamation.js" data-dojo-config="async: true"></script>
-  <link rel="stylesheet" type="text/css" href="app/resources/app.css"/>
+      dojoConfig = {
+        locale: usedLocale,
+        paths: {
+          "webodf/editor": "/programs/editor",
+          "dijit": "/programs/editor/dijit",
+          "dojox": "/programs/editor/dojox",
+          "dojo": "/programs/editor/dojo",
+          "resources": "/programs/editor/resources"
+        }
+      }
+    </script>
 
-  <!-- connect back to the server for nowjs based communication -->
-  <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Dojo stuff (use src instead of dist for running from the source tree)-->
+    <script src="dojo-amalgamation.js" data-dojo-config="async: true"></script>
+    <link rel="stylesheet" type="text/css" href="app/resources/app.css"/>
 
-  <!-- editor specific code -->
-  <link rel="stylesheet" type="text/css" href="editor.css"/>
+    <!-- connect back to the server for nowjs based communication -->
+    <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
 
-  <!-- Stuff for selecting a session -->
-  <script src="SessionList.js" type="text/javascript" charset="utf-8"></script>
-  <script src="SessionListView.js" type="text/javascript" charset="utf-8"></script>
+    <!-- editor specific code -->
+    <link rel="stylesheet" type="text/css" href="editor.css"/>
 
-  <!-- booting the editor -->
-  <script src="boot_editor.js" type="text/javascript" charset="utf-8"/></script>
- </head>
+    <!-- Stuff for selecting a session -->
+    <script src="SessionList.js" type="text/javascript" charset="utf-8"></script>
+    <script src="SessionListView.js" type="text/javascript" charset="utf-8"></script>
 
- <body onload="webodfEditor.boot();" class = "claro">
-  <div id = "loginContainer" style="display: none; text-align: center">
-   <form name="loginForm">
-    <p>Login:<br><input name="login" type="text" size="30" maxlength="30"></p>
-    <p>Password:<br><input name="password" type="password" size="30" maxlength="40"></p>
-    <input name="Submit"  type="submit" value="Let me!"/>
-   </form>
-  </div>
-  <div id = "sessionListContainer" style="display: none; text-align: center">
-   <h1>Sessions</h1>
-   <div id = "sessionList"></div>
-  </div>
-  <div id = "mainContainer" style="display: none;">
-    <div id = "editor">
-      <span id = "menubar"></span>
-      <span id = "toolbar"></span>
-      <div id = "container">
-        <div id="canvas"></div>
+    <!-- booting the editor -->
+    <script src="boot_editor.js" type="text/javascript" charset="utf-8"/></script>
+  </head>
+
+  <body onload="webodfEditor.boot();" class = "claro">
+    <div id = "loginContainer" style="display: none; text-align: center">
+      <form name="loginForm">
+        <p>Login:<br><input name="login" type="text" size="30" maxlength="30"></p>
+        <p>Password:<br><input name="password" type="password" size="30" maxlength="40"></p>
+        <input name="Submit"  type="submit" value="Let me!"/>
+      </form>
+    </div>
+    <div id = "sessionListContainer" style="display: none; text-align: center">
+      <h1>Sessions</h1>
+      <div id = "sessionList"></div>
+    </div>
+    <div id = "mainContainer" style="display: none;">
+      <div id = "editor">
+        <span id = "menubar"></span>
+        <span id = "toolbar"></span>
+        <div id = "container">
+          <div id="canvas"></div>
+        </div>
+      </div>
+      <div id = "collaboration">
+        <div id = "collabContainer">
+          <div id = "members">
+            <div id = "inviteButton"></div>
+            <div id = "memberList"></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div id = "collaboration">
-      <div id = "collabContainer">
-        <div id = "members">
-          <div id = "inviteButton"></div>
-          <div id = "memberList"></div>
-        </div>
-    </div>
-  </div>
- </body>
+  </body>
 </html>
