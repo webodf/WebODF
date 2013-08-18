@@ -32,10 +32,13 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global Node, define, runtime */
 
-function SessionListView(sessionList, sessionListDiv, cb) {
-        "use strict";
+define("webodf/editor/SessionListView", [], function () {
+    "use strict";
+
+    return function SessionListView(sessionList, sessionListDiv, cb) {
         var self = this,
             memberDataChangedHandler;
 
@@ -105,4 +108,5 @@ function SessionListView(sessionList, sessionListDiv, cb) {
         }
 
         init();
-}
+    };
+});

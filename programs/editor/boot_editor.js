@@ -47,7 +47,7 @@
  *
  */
 
-/*global runtime, require, document, alert, gui, window, SessionList, SessionListView, FileReader, Uint8Array */
+/*global runtime, require, document, alert, gui, window, SessionList, FileReader, Uint8Array */
 
 // define the namespace/object we want to provide
 // this is the first line of API, the user gets.
@@ -276,15 +276,19 @@ var webodfEditor = (function () {
         }
 
         function showSessions() {
-            var sessionListDiv = document.getElementById("sessionList"),
-                sessionList = new SessionList(net),
-                sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
+            require({ }, ["webodf/editor/SessionListView"],
+                function (SessionListView) {
+                    var sessionListDiv = document.getElementById("sessionList"),
+                        sessionList = new SessionList(net),
+                        sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
 
-            // hide login view
-            document.getElementById("loginContainer").style.display = "none";
+                    // hide login view
+                    document.getElementById("loginContainer").style.display = "none";
 
-            // show session list
-            document.getElementById("sessionListContainer").style.display = "";
+                    // show session list
+                    document.getElementById("sessionListContainer").style.display = "";
+                }
+            );
         }
 
         function loginSuccess(userData) {
