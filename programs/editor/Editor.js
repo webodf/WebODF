@@ -36,14 +36,14 @@
 define("webodf/editor/Editor", [
     "dojo/i18n!webodf/editor/nls/myResources",
     "webodf/editor/EditorSession",
-    "webodf/editor/MemberList",
+    "webodf/editor/MemberListView",
     "dijit/layout/BorderContainer",
     "dijit/layout/ContentPane",
     "webodf/editor/widgets"],
 
     function (myResources,
         EditorSession,
-        MemberList,
+        MemberListView,
         BorderContainer,
         ContentPane,
         loadWidgets) {
@@ -169,7 +169,7 @@ define("webodf/editor/Editor", [
                     editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
 
                     if (memberListDiv) {
-                        memberList = new MemberList(editorSession, memberListDiv);
+                        memberList = new MemberListView(editorSession, memberListDiv);
                     }
 
                     if (registerCallbackForShutdown) {

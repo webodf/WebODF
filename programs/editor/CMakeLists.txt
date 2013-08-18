@@ -12,7 +12,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     EditorSession.js
     SessionList.js
     SessionListView.js
-    MemberList.js
+    MemberListView.js
 )
 
 COPY_FILES(EDITORDEPS_webodf ${CMAKE_SOURCE_DIR}/webodf

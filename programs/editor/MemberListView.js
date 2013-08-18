@@ -34,22 +34,14 @@
  */
 /*global define,runtime */
 
-define("webodf/editor/MemberList",
+define("webodf/editor/MemberListView",
        ["webodf/editor/EditorSession"],
 
   function (EditorSession) {
     "use strict";
 
-    return function MemberList(editorSession, memberListDiv) {
-        var self = this;
-
-        editorSession.subscribe(EditorSession.signalMemberAdded, function (memberId) {
-            self.addMember(memberId);
-        });
-
-        editorSession.subscribe(EditorSession.signalMemberRemoved, function (memberId) {
-            self.removeMember(memberId);
-        });
+    return function MemberListView(editorSession, memberListDiv) {
+        runtime.assert(memberListDiv, "memberListDiv unavailable");
 
         /**
          * @param {!string} memberId
@@ -88,7 +80,6 @@ define("webodf/editor/MemberList",
          * @param {!string} memberId
          */
         function createAvatarButton(memberId) {
-            runtime.assert(memberListDiv, "memberListDiv unavailable");
             var doc = memberListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
                 avatarDiv = doc.createElementNS(htmlns, "div"),
@@ -138,17 +129,21 @@ define("webodf/editor/MemberList",
         /**
          * @param {!string} memberId
          */
-        this.addMember = function (memberId) {
+        function addMember(memberId) {
             createAvatarButton(memberId);
             editorSession.getMemberDetailsAndUpdates(memberId, updateAvatarButton);
-        };
+        }
 
         /**
          * @param {!string} memberId
          */
-        this.removeMember = function (memberId) {
+        function removeMember(memberId) {
             editorSession.unsubscribeMemberDetailsUpdates(memberId, updateAvatarButton);
             removeAvatarButton(memberId);
         };
+
+        // init
+        editorSession.subscribe(EditorSession.signalMemberAdded, addMember);
+        editorSession.subscribe(EditorSession.signalMemberRemoved, removeMember);
     };
 });
