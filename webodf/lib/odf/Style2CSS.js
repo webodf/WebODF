@@ -152,7 +152,12 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'min-height', 'min-height' ],
             [ drawns, 'stroke', 'border' ],
             [ svgns, 'stroke-color', 'border-color' ],
-            [ svgns, 'stroke-width', 'border-width' ]
+            [ svgns, 'stroke-width', 'border-width' ],
+            [ fons, 'border', 'border' ],
+            [ fons, 'border-left', 'border-left' ],
+            [ fons, 'border-right', 'border-right' ],
+            [ fons, 'border-top', 'border-top' ],
+            [ fons, 'border-bottom', 'border-bottom' ]
         ],
 
         /**@const@type{!Array.<!Array.<!string>>}*/
