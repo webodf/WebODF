@@ -62,7 +62,11 @@ office|text::selection {
      */
     background: transparent;
 }
-
+office|text * draw|text-box {
+    /** only for text documents */
+    display: block;
+    border: 1px solid #d3d3d3;
+}
 office|spreadsheet {
   display: block;
   border-collapse: collapse;
