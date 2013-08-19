@@ -104,6 +104,25 @@ define("webodf/editor/server/nowjs/SessionList", [], function () {
             subscribers.splice(i,1);
         };
 
+        this.setUpdatesEnabled = function (enabled) {
+            var nowObject = nowjsServer.getNowObject();
+
+            // no change?
+            if ((nowObject.onSessionAdded === onSessionData) === enabled) {
+                return;
+            }
+
+            if (enabled) {
+                nowObject.onSessionAdded = onSessionData;
+                nowObject.onSessionChanged = onSessionData;
+                nowObject.onSessionRemoved = onSessionRemoved;
+            } else {
+                delete nowObject.onSessionAdded;
+                delete nowObject.onSessionChanged;
+                delete nowObject.onSessionRemoved;
+            }
+        };
+
         function init() {
             var nowObject = nowjsServer.getNowObject();
             nowObject.onSessionAdded = onSessionData;
