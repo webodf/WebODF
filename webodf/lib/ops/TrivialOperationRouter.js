@@ -96,4 +96,13 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
     this.close = function (cb) {
         cb();
     };
+
+    this.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {
+        subscriber(false);
+    };
+
+    /*jslint emptyblock: true, unparam: true*/
+    this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
+    };
+    /*jslint emptyblock: false, unparam: false*/
 };

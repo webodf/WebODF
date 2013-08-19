@@ -82,3 +82,20 @@ ops.OperationRouter.prototype.push = function (operations) {"use strict"; };
  * @return {undefined}
  */
 ops.OperationRouter.prototype.close = function (callback) {"use strict"; };
+
+/**
+ * subscriber is called with the current state and after that
+ * on every state change.
+ *
+ * @param {function(!boolean)} subscriber
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {"use strict"; };
+
+/**
+ * Undoes the subscription done with getHasLocalUnsyncedOpsAndUpdates
+ *
+ * @param {function(!boolean)} subscriber
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {"use strict"; };

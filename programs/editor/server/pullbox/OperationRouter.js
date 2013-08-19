@@ -71,6 +71,8 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             unplayedServerOpspecQueue = [],
             /** @type {!Array.<!Function>} sync request callbacks which should be called after the received ops have been applied server */
             uncalledSyncRequestCallbacksQueue = [],
+            /** @type {!Array.<!function(!boolean):undefined>} ops created since the last sync call to the server */
+            hasLocalUnsyncedOpsStateSubscribers = [],
             /**@type{!boolean}*/
             hasLocalUnsyncedOps = false,
             /**@type{!boolean} tells if any local ops have been modifying ops */
@@ -84,7 +86,8 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
          * @return {undefined}
          */
         function updateHasLocalUnsyncedOpsState() {
-            var hasLocalUnsyncedOpsNow = (unsyncedClientOpspecQueue.length > 0);
+            var i,
+                hasLocalUnsyncedOpsNow = (unsyncedClientOpspecQueue.length > 0);
 
             // no change?
             if (hasLocalUnsyncedOps === hasLocalUnsyncedOpsNow) {
@@ -92,6 +95,9 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             }
 
             hasLocalUnsyncedOps = hasLocalUnsyncedOpsNow;
+            for (i=0; i<hasLocalUnsyncedOpsStateSubscribers.length; i+=1) {
+                hasLocalUnsyncedOpsStateSubscribers[i](hasLocalUnsyncedOps);
+            }
         }
 
         /**
@@ -454,5 +460,40 @@ runtime.log("OperationRouter: instant opsSync requested");
             }
         };
 
+        this.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {
+            var i;
+
+            // detect double subscription
+            for (i=0; i<hasLocalUnsyncedOpsStateSubscribers.length; i+=1) {
+                if (subscribers[i] === subscriber) {
+                    break;
+                }
+            }
+            if (i < hasLocalUnsyncedOpsStateSubscribers.length) {
+                // already subscribed
+                runtime.log("double subscription request in PullBoxMemberModel::getHasLocalUnsyncedOpsAndUpdates");
+            } else {
+                // subscribe
+                hasLocalUnsyncedOpsStateSubscribers.push(subscriber);
+            }
+
+            subscriber(hasLocalUnsyncedOps);
+        };
+
+        /*jslint emptyblock: true, unparam: true*/
+        this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
+            var i;
+
+            for (i=0; i<hasLocalUnsyncedOpsStateSubscribers.length; i+=1) {
+                if (hasLocalUnsyncedOpsStateSubscribers[i] === subscriber) {
+                    break;
+                }
+            }
+
+            runtime.assert((i < hasLocalUnsyncedOpsStateSubscribers.length),
+                            "tried to unsubscribe when not subscribed in PullBoxMemberModel::getHasLocalUnsyncedOpsAndUpdates");
+
+            hasLocalUnsyncedOpsStateSubscribers.splice(i,1);
+        };
     };
 });

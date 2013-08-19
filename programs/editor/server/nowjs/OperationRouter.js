@@ -177,5 +177,14 @@ define("webodf/editor/server/nowjs/OperationRouter", [], function () {
             cb();
         };
         /*jslint emptyblock: false, unparam: false*/
+
+        this.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {
+            subscriber(false);
+        };
+
+        /*jslint emptyblock: true, unparam: true*/
+        this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
+        };
+        /*jslint emptyblock: false, unparam: false*/
     };
 });
