@@ -53,6 +53,7 @@ define("webodf/editor/Editor", [
          * @constructor
          * @param {{networked:boolean=,
          *          memberid:!string,
+         *          unstableFeaturesEnabled:boolean=,
          *          loadCallback:function()=,
          *          saveCallback:function()=,
          *          cursorAddedCallback:function(!string)=,
@@ -161,7 +162,7 @@ define("webodf/editor/Editor", [
                         return;
                     }
                     // Allow annotations
-                    odfCanvas.enableAnnotations(true);
+                    odfCanvas.enableAnnotations((! server) || args.unstableFeaturesEnabled);
 
                     session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, memberid, {
@@ -180,7 +181,16 @@ define("webodf/editor/Editor", [
                         registerCallbackForShutdown(editorSession.endEditing);
                     }
 
-                    tools = new Tools(loadOdtFile, saveOdtFile, undoRedoEnabled);
+                    tools = new Tools({
+                        loadOdtFile:loadOdtFile,
+                        saveOdtFile: saveOdtFile,
+                        // undo manager is not yet integrated with collaboration
+                        undoRedoEnabled: undoRedoEnabled,
+                        // direct styling not yet properly supported for OT
+                        directStylingEnabled: (! server) || args.unstableFeaturesEnabled,
+                        // annotations not yet properly supported for OT
+                        annotationsEnabled: (! server) || args.unstableFeaturesEnabled
+                    });
                     tools.setEditorSession(editorSession);
 
                     editorReadyCallback();

@@ -49,8 +49,10 @@ define("webodf/editor/Tools", [
     function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, SimpleStyles, UndoRedoMenu, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
-        return function Tools(loadOdtFile, saveOdtFile, undoRedoEnabled) {
+        return function Tools(args) {
             var translator = document.translator,
+                loadOdtFile = args.loadOdtFile,
+                saveOdtFile = args.saveOdtFile,
                 toolbar,
                 loadButton, saveButton, annotateButton,
                 formatDropDownMenu, formatMenuButton,
@@ -93,7 +95,7 @@ define("webodf/editor/Tools", [
                 toolbar = new Toolbar({}, "toolbar");
 
                 // Undo/Redo
-                if (undoRedoEnabled) {
+                if (args.undoRedoEnabled) {
                     undoRedoMenu = new UndoRedoMenu(function (widget) {
                         widget.placeAt(toolbar);
                         widget.startup();
@@ -102,11 +104,13 @@ define("webodf/editor/Tools", [
                 }
 
                 // Simple Style Selector [B, I, U, S]
-                simpleStyles = new SimpleStyles(function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
-                simpleStyles.setEditorSession(editorSession);
+                if (args.directStylingEnabled) {
+                    simpleStyles = new SimpleStyles(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    simpleStyles.setEditorSession(editorSession);
+                }
 
                 // Paragraph Style Selector
                 currentStyle = new CurrentStyle(function (widget) {
@@ -182,17 +186,19 @@ define("webodf/editor/Tools", [
                 formatMenuButton.placeAt(toolbar);
 
                 // Add annotation
-                annotateButton = new Button({
-                    label: translator('annotate'),
-                    showLabel: false,
-                    iconClass: 'dijitIconBookmark',
-                    onClick: function () {
-                        if (editorSession) {
-                            editorSession.addAnnotation();
+                if (args.annotationsEnabled) {
+                    annotateButton = new Button({
+                        label: translator('annotate'),
+                        showLabel: false,
+                        iconClass: 'dijitIconBookmark',
+                        onClick: function () {
+                            if (editorSession) {
+                                editorSession.addAnnotation();
+                            }
                         }
-                    }
-                });
-                annotateButton.placeAt(toolbar);
+                    });
+                    annotateButton.placeAt(toolbar);
+                }
             });
         };
 
