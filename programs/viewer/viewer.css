@@ -637,7 +637,7 @@ html[dir='rtl'] .dropdownToolbarButton {
         opacity: 1;
         height: 100px;
     }
-    #next, #previous, #fullscreen, #download {
+    #next, #previous {
         display: none;
     }
 }
