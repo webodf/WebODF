@@ -427,7 +427,13 @@ gui.SessionController = (function () {
             // - Windows: Safari/Chrome/Firefox - No expansion
             selectRange(e);
         }
-
+        /**
+         * @param {!Node} node
+         * @return {!boolean}
+         */
+        function isTextSpan(node) {
+            return node.namespaceURI === odf.Namespaces.textns && node.localName === 'span';
+        }
         /**
          * @return {undefined}
          */
@@ -436,7 +442,7 @@ gui.SessionController = (function () {
                 alphaNumeric = /[A-Za-z0-9]/,
                 stepsToStart = 0,
                 stepsToEnd = 0,
-                iterator, cursorNode, oldPosition, currentNode, i, c, op;
+                iterator, cursorNode, oldPosition, currentNode, c, op;
 
             if (!domUtils.containsNode(canvasElement, window.getSelection().focusNode)) {
                 return;
@@ -446,32 +452,32 @@ gui.SessionController = (function () {
             cursorNode = odtDocument.getCursor(inputMemberId).getNode();
 
             iterator.setUnfilteredPosition(cursorNode, 0);
-            if (iterator.previousPosition()) {
+            while (iterator.previousPosition()) {
                 currentNode = iterator.getCurrentNode();
                 if (currentNode.nodeType === Node.TEXT_NODE) {
-                    for (i = currentNode.data.length - 1; i >= 0; i -= 1) {
-                        c = currentNode.data[i];
-                        if (!alphaNumeric.test(c)) {
-                            break;
-                        }
-                        stepsToStart -= 1;
+                    c = currentNode.data[iterator.unfilteredDomOffset()];
+                    if (!alphaNumeric.test(c)) {
+                        break;
                     }
+                    stepsToStart -= 1;
+                } else if (!isTextSpan(currentNode)) {
+                    break;
                 }
             }
 
             iterator.setUnfilteredPosition(cursorNode, 0);
-            if (iterator.nextPosition()) {
+            do {
                 currentNode = iterator.getCurrentNode();
                 if (currentNode.nodeType === Node.TEXT_NODE) {
-                    for (i = 0; i < currentNode.data.length; i += 1) {
-                        c = currentNode.data[i];
-                        if (!alphaNumeric.test(c)) {
-                            break;
-                        }
-                        stepsToEnd += 1;
+                    c = currentNode.data[iterator.unfilteredDomOffset()];
+                    if (!alphaNumeric.test(c)) {
+                        break;
                     }
+                    stepsToEnd += 1;
+                } else if (!isTextSpan(currentNode)) {
+                    break;
                 }
-            }
+            } while (iterator.nextPosition());
 
             if (stepsToStart !== 0 || stepsToEnd !== 0) {
                 oldPosition = odtDocument.getCursorPosition(inputMemberId);
