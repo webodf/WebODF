@@ -23,12 +23,6 @@ html, body, #mainContainer {
     z-index: 4;
 }
 
-#menubar {
-    border: none;
-    overflow: hidden;
-    background-color: #E6E6E7;
-}
-
 #toolbar {
     overflow: hidden;
 }

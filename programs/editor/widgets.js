@@ -31,7 +31,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define,document,require */
+
 define("webodf/editor/widgets", [
     "webodf/editor/widgets/simpleStyles",
     "webodf/editor/widgets/undoRedoMenu",
@@ -44,7 +46,7 @@ define("webodf/editor/widgets", [
         return function loadWidgets(editorSession, loadOdtFile, saveOdtFile) {
             var translator = document.translator;
 
-            // Menubar
+            // Toolbar
             require([
                 "dojo/ready",
                 "dijit/MenuItem",
@@ -54,25 +56,12 @@ define("webodf/editor/widgets", [
                 "dijit/Toolbar"
             ], function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar) {
                 ready(function () {
-                    var loadButton, saveButton, dropDownMenu, menuButton, paragraphStylesMenuItem, dialog, toolbar, simpleStyles, currentStyle, zoomSlider,
+                    var loadButton, saveButton, formatDropDownMenu, formatMenuButton, paragraphStylesMenuItem, paragraphStylesDialog, toolbar, simpleStyles, currentStyle, zoomSlider,
                         undoRedoMenu, annotateButton;
 
-                    dropDownMenu = new DropDownMenu({});
-                    paragraphStylesMenuItem = new MenuItem({
-                        label: translator("paragraph_DDD")
-                    });
-                    dropDownMenu.addChild(paragraphStylesMenuItem);
-
-                    dialog = new ParagraphStylesDialog(editorSession, function (dialog) {
-                        paragraphStylesMenuItem.onClick = function () {
-                            dialog.startup();
-                            dialog.show();
-                        };
-                    });
-
-                    // Toolbar
                     toolbar = new Toolbar({}, "toolbar");
 
+                    // Undo/Redo
                     if (editorSession.hasUndoManager()) {
                         undoRedoMenu = new UndoRedoMenu(editorSession, function (widget) {
                             widget.placeAt(toolbar);
@@ -98,6 +87,7 @@ define("webodf/editor/widgets", [
                         widget.startup();
                     });
 
+                    // Load
                     if (loadOdtFile) {
                         loadButton = new Button({
                             label: translator('open'),
@@ -112,6 +102,8 @@ define("webodf/editor/widgets", [
                         });
                         loadButton.placeAt(toolbar);
                     }
+
+                    // Save
                     if (saveOdtFile) {
                         saveButton = new Button({
                             label: translator('save'),
@@ -127,16 +119,31 @@ define("webodf/editor/widgets", [
                         saveButton.placeAt(toolbar);
                     }
 
-                    menuButton = new DropDownButton({
-                        dropDown: dropDownMenu,
+                    // Format menu
+                    formatDropDownMenu = new DropDownMenu({});
+                    paragraphStylesMenuItem = new MenuItem({
+                        label: translator("paragraph_DDD")
+                    });
+                    formatDropDownMenu.addChild(paragraphStylesMenuItem);
+
+                    paragraphStylesDialog = new ParagraphStylesDialog(editorSession, function (dialog) {
+                        paragraphStylesMenuItem.onClick = function () {
+                            dialog.startup();
+                            dialog.show();
+                        };
+                    });
+
+                    formatMenuButton = new DropDownButton({
+                        dropDown: formatDropDownMenu,
                         label: translator('format'),
                         iconClass: "dijitIconEditTask",
                         style: {
                             float: 'left'
                         }
                     });
-                    menuButton.placeAt(toolbar);
+                    formatMenuButton.placeAt(toolbar);
 
+                    // Add annotation
                     annotateButton = new Button({
                         label: translator('annotate'),
                         showLabel: false,
