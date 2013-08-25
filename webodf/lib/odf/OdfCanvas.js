@@ -1219,7 +1219,7 @@ odf.OdfCanvas = (function () {
          * @param {!Element} odfnode
          */
         function handleAnnotations(odfnode) {
-            var sizer = doc.getElementById('sizer');
+            var sizer = element.firstChild;
 
             if (allowAnnotations) {
                 if (!annotationsPane.parentNode) {
