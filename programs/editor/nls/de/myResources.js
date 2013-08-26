@@ -57,10 +57,7 @@ define({
     // Collaboration pane
     collaborationPane: "Zusammenarbeitsfeld",
     members: "Teilnehmer",
-    chat: "Chat",
-    typeYourName_DDD: "Geben Sie Ihren Namen ein...",
     inviteMembers: "Teilnehmer einladen",
-    startTypingToChat_DDD: "Eingabe beginnen für Chat...",
     // Various
     left: "Links",
     right: "Rechts",

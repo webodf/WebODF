@@ -56,10 +56,7 @@ define({
         // Collaboration pane
         collaborationPane: "Collaboration Pane",
         members: "Members",
-        chat: "Chat",
-        typeYourName_DDD: "Type your name...",
         inviteMembers: "Invite members",
-        startTypingToChat_DDD: "Start typing to chat...",
         // Various
         left: "Left",
         right: "Right",
