@@ -56,6 +56,7 @@ define("webodf/editor/Editor", [
          *          unstableFeaturesEnabled:boolean=,
          *          loadCallback:function()=,
          *          saveCallback:function()=,
+         *          closeCallback:function()=,
          *          cursorAddedCallback:function(!string)=,
          *          cursorRemovedCallback:function(!string)=,
          *          registerCallbackForShutdown:function(!function())= }} args
@@ -76,6 +77,7 @@ define("webodf/editor/Editor", [
                 memberModel,
                 loadOdtFile = args.loadCallback,
                 saveOdtFile = args.saveCallback,
+                close = args.closeCallback,
                 cursorAddedHandler = args.cursorAddedCallback,
                 cursorRemovedHandler = args.cursorRemovedCallback,
                 registerCallbackForShutdown = args.registerCallbackForShutdown,
@@ -184,6 +186,7 @@ define("webodf/editor/Editor", [
                     tools = new Tools({
                         loadOdtFile:loadOdtFile,
                         saveOdtFile: saveOdtFile,
+                        close: close,
                         // undo manager is not yet integrated with collaboration
                         undoRedoEnabled: undoRedoEnabled,
                         // direct styling not yet properly supported for OT

@@ -53,8 +53,9 @@ define("webodf/editor/Tools", [
             var translator = document.translator,
                 loadOdtFile = args.loadOdtFile,
                 saveOdtFile = args.saveOdtFile,
+                close = args.close,
                 toolbar,
-                loadButton, saveButton, annotateButton,
+                loadButton, saveButton, annotateButton, closeButton,
                 formatDropDownMenu, formatMenuButton,
                 paragraphStylesMenuItem, paragraphStylesDialog, simpleStyles, currentStyle,
                 zoomSlider,
@@ -198,6 +199,21 @@ define("webodf/editor/Tools", [
                         }
                     });
                     annotateButton.placeAt(toolbar);
+                }
+
+                if (close) {
+                    closeButton = new Button({
+                        label: translator('close'),
+                        showLabel: false,
+                        iconClass: 'dijitEditorIcon dijitEditorIconCancel',
+                        style: {
+                            float: 'right'
+                        },
+                        onClick: function () {
+                            close();
+                        }
+                    });
+                    closeButton.placeAt(toolbar);
                 }
             });
         };

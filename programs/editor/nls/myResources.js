@@ -45,6 +45,7 @@ define({
         delete: "Delete",
         insert: "Insert",
         format: "Format",
+        close: "Close",
         character_DDD: "Character...",
         paragraph_DDD: "Paragraph...",
 	    // dialogs

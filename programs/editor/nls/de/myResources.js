@@ -46,6 +46,7 @@ define({
     delete: "Entferne",
     insert: "Einfügen",
     format: "Formatieren",
+    close: "Schließe",
     character_DDD: "Zeichen...",
     paragraph_DDD: "Absatz...",
     // dialogs
