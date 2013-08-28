@@ -41,6 +41,9 @@ define({
     edit: "Bearbeiten",
     view: "Ansicht",
     annotate: "Kommentieren",
+    clone: "Kopiere",
+    create: "Erzeuge",
+    delete: "Entferne",
     insert: "Einfügen",
     format: "Formatieren",
     character_DDD: "Zeichen...",
@@ -54,6 +57,8 @@ define({
     textFlow: "Textfluß",
     character: "Zeichen",
     paragraphStyles: "Absatzstile",
+    cloneThisStyle: "Kopiere diesen Stil",
+    newName_C: "Neuer Name:",
     // Collaboration pane
     collaborationPane: "Zusammenarbeitsfeld",
     members: "Teilnehmer",

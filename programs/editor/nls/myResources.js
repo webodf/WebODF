@@ -40,6 +40,9 @@ define({
         edit: "Edit",
         view: "View",
         annotate: "Annotate",
+        clone: "Clone",
+        create: "Create",
+        delete: "Delete",
         insert: "Insert",
         format: "Format",
         character_DDD: "Character...",
@@ -53,6 +56,8 @@ define({
         textFlow: "Text Flow",
         character: "Character",
         paragraphStyles: "Paragraph Styles",
+        cloneThisStyle: "Clone this style",
+        newName_C: "New name:",
         // Collaboration pane
         collaborationPane: "Collaboration Pane",
         members: "Members",

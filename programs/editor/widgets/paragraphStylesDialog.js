@@ -179,12 +179,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
 
             cloneTooltip = new TooltipDialog({
                 content:
-                    '<h2 style="margin: 0;">Clone this style</h2><br/>' +
-                    '<label for="name">New name </label><input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>',
+                    '<h2 style="margin: 0;">'+translator("cloneThisStyle")+'</h2><br/>' +
+                    '<label for="name">'+translator("newName_C")+'</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>',
                 style: "width: 300px;"
             });
             cloneButton = new Button({
-                label: 'Create',
+                label: translator("create"),
                 onClick: function () {
                     cloneStyle(stylePicker.value(), cloneTooltip.get('value').name);
                     cloneTooltip.reset();
@@ -193,7 +193,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             });
             cloneTooltip.addChild(cloneButton);
             cloneDropDown = new DropDownButton({
-                label: 'Clone',
+                label: translator("clone"),
                 showLabel: false,
                 iconClass: 'dijitEditorIcon dijitEditorIconCopy',
                 dropDown: cloneTooltip,
@@ -202,7 +202,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
             dialog.addChild(cloneDropDown, 1);
 
             deleteButton = new Button({
-                label: 'Delete',
+                label: translator("delete"),
                 showLabel: false,
                 iconClass: 'dijitEditorIcon dijitEditorIconDelete',
                 style: "float: right; margin-bottom: 5px;",
