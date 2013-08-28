@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -772,13 +772,6 @@ function BrowserRuntime(logoutput) {
     this.getWindow = function () {
         return window;
     };
-    this.getNetwork = function () {
-        var now = this.getVariable("now");
-        if (now === undefined) {
-            return {networkStatus:"unavailable"};
-        }
-        return now;
-    };
 }
 
 /**
@@ -983,9 +976,6 @@ function NodeJSRuntime() {
     this.exit = process.exit;
     this.getWindow = function () {
         return null;
-    };
-    this.getNetwork = function () {
-        return {networkStatus:"unavailable"};
     };
     function init() {
         var DOMParser = require('xmldom').DOMParser;
@@ -1245,9 +1235,6 @@ function RhinoRuntime() {
     this.exit = quit;
     this.getWindow = function () {
         return null;
-    };
-    this.getNetwork = function () {
-        return {networkStatus:"unavailable"};
     };
 }
 

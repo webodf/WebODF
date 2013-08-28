@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -33,26 +33,49 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime */
+/*global ops*/
+/*jslint emptyblock: true, unparam: true*/
 
 /**
- * A model which provides information about sessions.
+ * Network status has three possible values: "unavailable", "timeout", "ready"
  * @interface
  */
-SessionList = function SessionList() {"use strict"; };
+ops.Server = function Server() {"use strict"; };
+
 
 /**
- * @param {{onCreated:function(!Object),
- *          onUpdated:function(!Object),
- *          onRemoved:function(!string) }} subscriber
+ * @param {!number} timeout in milliseconds
+ * @param {!function(!string)} cb reports the state: "unavailable", "timeout", "ready"
  * @return {undefined}
  */
-SessionList.prototype.getSessions = function (subscriber) {"use strict"; };
+ops.Server.prototype.connect = function (timeout, cb) {"use strict"; };
 
 /**
- * @param {{onCreated:function(!Object),
- *          onUpdated:function(!Object),
- *          onRemoved:function(!string) }} subscriber
+ * @return {!string}
+ */
+ops.Server.prototype.networkStatus = function () {"use strict"; };
+
+/**
+ * @param {!string} login
+ * @param {!string} password
+ * @param {function(!Object)} successCb
+ * @param {function(!string)} failCb
  * @return {undefined}
  */
-SessionList.prototype.unsubscribe = function (subscriber) {"use strict"; };
+ops.Server.prototype.login = function (login, password, successCb, failCb) {"use strict"; };
+
+/**
+ * @param {!string} userId  TODO: should the server not rather cache that info after login as property?
+ * @param {!string} sessionId
+ * @param {!function(!string)} successCb
+ * @param {function()=} failCb
+ * @return {undefined}
+ */
+ops.Server.prototype.joinSession = function (userId, sessionId, successCb, failCb) {"use strict"; };
+
+/**
+ * TODO: move to SessionModel or elsewhere
+ * @param {!string} sessionId
+ * @return {!string}
+ */
+ops.Server.prototype.getGenesisUrl = function (sessionId) {"use strict"; };

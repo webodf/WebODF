@@ -44,14 +44,11 @@
     <!-- editor specific code -->
     <link rel="stylesheet" type="text/css" href="editor.css"/>
 
-    <!-- Stuff for selecting a session -->
-    <script src="SessionListView.js" type="text/javascript" charset="utf-8"></script>
-
     <!-- booting the editor -->
     <script src="boot_editor.js" type="text/javascript" charset="utf-8"/></script>
   </head>
 
-  <body onload="webodfEditor.boot();" class = "claro">
+  <body onload="webodfEditor.boot({collaborative:'auto'});" class = "claro">
     <div id = "loginContainer" style="display: none; text-align: center">
       <form name="loginForm">
         <p>Login:<br><input name="login" type="text" size="30" maxlength="30"></p>

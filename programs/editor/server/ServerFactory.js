@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -33,26 +33,35 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime */
+/*global ops, SessionList*/
 
 /**
- * A model which provides information about sessions.
  * @interface
  */
-SessionList = function SessionList() {"use strict"; };
+ServerFactory = function Server() {"use strict"; };
 
 /**
- * @param {{onCreated:function(!Object),
- *          onUpdated:function(!Object),
- *          onRemoved:function(!string) }} subscriber
- * @return {undefined}
+ * @return {!ops.Server}
  */
-SessionList.prototype.getSessions = function (subscriber) {"use strict"; };
+ServerFactory.prototype.createServer = function () {"use strict"; };
 
 /**
- * @param {{onCreated:function(!Object),
- *          onUpdated:function(!Object),
- *          onRemoved:function(!string) }} subscriber
- * @return {undefined}
+ * @param {!string} sessionId
+ * @param {!string} memberId
+ * @param {!ops.Server} server
+ * @return {!ops.OperationRouter}
  */
-SessionList.prototype.unsubscribe = function (subscriber) {"use strict"; };
+ServerFactory.prototype.createOperationRouter = function (sessionId, memberId, server) {"use strict"; };
+
+/**
+ * @param {!string} sessionId
+ * @param {!ops.Server} server
+ * @return {!ops.MemberModel}
+ */
+ServerFactory.prototype.createMemberModel = function (sessionId, server) {"use strict"; };
+
+/**
+ * @param {!ops.Server} server
+ * @return {!SessionList}
+ */
+ServerFactory.prototype.createSessionList = function (server) {"use strict"; };

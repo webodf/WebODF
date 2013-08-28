@@ -10,7 +10,6 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     widgets.js
     avatar-joe.png
     EditorSession.js
-    SessionList.js
     SessionListView.js
     MemberListView.js
 )
@@ -24,6 +23,7 @@ add_custom_command(
     OUTPUT dojo-amalgamation.js
 
     # from our sources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/nls/ nls/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/

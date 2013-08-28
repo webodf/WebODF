@@ -47,14 +47,23 @@
  *
  */
 
-/*global runtime, require, document, alert, gui, window, SessionList, FileReader, Uint8Array */
+/*global runtime, require, document, alert, gui, window, FileReader, Uint8Array */
 
 // define the namespace/object we want to provide
 // this is the first line of API, the user gets.
 var webodfEditor = (function () {
     "use strict";
 
+    runtime.currentDirectory = function () {
+        return "../../webodf/lib";
+    };
+    runtime.libraryPaths = function () {
+        return [ runtime.currentDirectory() ];
+    };
+
     var editorInstance = null,
+        serverFactory = null,
+        server = null,
         booting = false,
         loadedFilename;
 
@@ -69,29 +78,33 @@ var webodfEditor = (function () {
      * @param {!function(!string)} callback
      * @return {undefined}
      */
-    function waitForNetwork(callback) {
-        var net = runtime.getNetwork(), accumulated_waiting_time = 0;
-        function later_cb() {
-            if (net.networkStatus === "unavailable") {
-                runtime.log("connection to server unavailable.");
-                callback("unavailable");
-                return;
-            }
-            if (net.networkStatus !== "ready") {
-                if (accumulated_waiting_time > 8000) {
-                    // game over
-                    runtime.log("connection to server timed out.");
-                    callback("timeout");
-                    return;
-                }
-                accumulated_waiting_time += 100;
-                runtime.getWindow().setTimeout(later_cb, 100);
-            } else {
-                runtime.log("connection to collaboration server established.");
-                callback("ready");
-            }
+    function connectNetwork(backend, callback) {
+        function createServer(ServerFactory) {
+            serverFactory = new ServerFactory();
+            server = serverFactory.createServer();
+            server.connect(8000, callback);
         }
-        later_cb();
+
+        switch (backend) {
+            case "nowjs":
+                require({ }, ["webodf/editor/server/nowjs/ServerFactory"], createServer);
+                break;
+            default:
+                callback("unavailable");
+        }
+    }
+
+    /**
+     * try to auto-sense the server-backend.
+     *
+     * NOT IMPLEMENTED / MIGHT BE NICE TO HAVE...
+     * for now: try to connect to nowjs backend
+     *
+     * @param {!function(!string)} callback
+     * @return {undefined}
+     */
+    function detectNetwork(callback) {
+        connectNetwork("nowjs", callback);
     }
 
     /**
@@ -198,7 +211,10 @@ var webodfEditor = (function () {
         editorOptions.loadCallback = load;
         editorOptions.saveCallback = save;
 
-        runtime.assert(docUrl, "docUrl needs to be specified");
+		if (docUrl === undefined) {
+			docUrl = guessDocUrl();
+		}
+		runtime.assert(docUrl, "docUrl needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
         document.getElementById("mainContainer").style.display = "";
@@ -219,18 +235,19 @@ var webodfEditor = (function () {
      * and start the editor on the network.
      *
      * @param {!string} sessionId
-     * @param {!string} userid
+     * @param {!string} memberId
      * @param {?string} token
      * @param {?Object} editorOptions
      * @param {?function(!Object)} editorReadyCallback
      */
-    function createNetworkedEditor(sessionId, userid, token, editorOptions, editorReadyCallback) {
+    function createNetworkedEditor(sessionId, memberId, token, editorOptions, editorReadyCallback) {
 
         runtime.assert(sessionId, "sessionId needs to be specified");
+        runtime.assert(memberId, "memberId needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
         editorOptions = editorOptions || {};
-        editorOptions.memberid = userid + "___" + Date.now();
+        editorOptions.memberid = memberId;
         editorOptions.networked = true;
         editorOptions.networkSecurityToken = token;
 
@@ -238,7 +255,7 @@ var webodfEditor = (function () {
             function (Editor) {
                 // TODO: the networkSecurityToken needs to be retrieved via now.login
                 // (but this is to be implemented later)
-                editorInstance = new Editor(editorOptions);
+                editorInstance = new Editor(editorOptions, server, serverFactory);
 
                 // load the document and get called back when it's live
                 editorInstance.loadSession(sessionId, function (editorSession) {
@@ -246,7 +263,7 @@ var webodfEditor = (function () {
                     editorReadyCallback(editorInstance);
                 });
             }
-            );
+        );
     }
 
 
@@ -261,8 +278,7 @@ var webodfEditor = (function () {
      * @returns {undefined}
      */
     function startLoginProcess(callback) {
-        var userid, token,
-            net = runtime.getNetwork();
+        var userid, token;
 
         booting = true;
 
@@ -279,7 +295,7 @@ var webodfEditor = (function () {
             require({ }, ["webodf/editor/SessionListView"],
                 function (SessionListView) {
                     var sessionListDiv = document.getElementById("sessionList"),
-                        sessionList = new SessionList(net),
+                        sessionList = new serverFactory.createSessionList(server),
                         sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
 
                     // hide login view
@@ -304,7 +320,7 @@ var webodfEditor = (function () {
         }
 
         function onLoginSubmit() {
-            net.login(document.loginForm.login.value, document.loginForm.password.value, loginSuccess, loginFail);
+            server.login(document.loginForm.login.value, document.loginForm.password.value, loginSuccess, loginFail);
 
             // block the submit button, we already dealt with the input
             return false;
@@ -336,18 +352,16 @@ var webodfEditor = (function () {
      *
      */
     function boot(args) {
-        var editorOptions = {}, loginProcedure = startLoginProcess;
+        var editorOptions = {},
+            loginProcedure = startLoginProcess;
         runtime.assert(!booting, "editor creation already in progress");
 
         args = args || {};
 
         if (args.collaborative === undefined) {
-            args.collaborative = "auto";
+            args.collaborative = "standalone";
         } else {
             args.collaborative = String(args.collaborative).toLowerCase();
-        }
-        if (args.docUrl === undefined) {
-            args.docUrl = guessDocUrl();
         }
 
         if (args.saveCallback) {
@@ -373,13 +387,25 @@ var webodfEditor = (function () {
 
         // start the editor with network
         function handleNetworkedSituation() {
-            loginProcedure(function (sessionId, userid, token) {
-                createNetworkedEditor(sessionId, userid, token, editorOptions, function (ed) {
-                    if (args.callback) {
-                        args.callback(ed);
-                    }
+            var joinSession = server.joinSession;
+
+            if (args.joinSession) {
+                joinSession = args.joinSession;
+            }
+
+            loginProcedure(function (sessionId, userId, token) {
+                // if pre-authentication has happened:
+                if (token) {
+                    server.setToken(token);
                 }
-                    );
+
+                joinSession(userId, sessionId, function(memberId) {
+                    createNetworkedEditor(sessionId, memberId, token, editorOptions, function (ed) {
+                        if (args.callback) {
+                            args.callback(ed);
+                        }
+                    });
+                });
             });
         }
 
@@ -394,7 +420,7 @@ var webodfEditor = (function () {
 
         if (args.collaborative === "auto") {
             runtime.log("detecting network...");
-            waitForNetwork(function (state) {
+            detectNetwork(function (state) {
                 if (state === "ready") {
                     runtime.log("... network available.");
                     handleNetworkedSituation();
@@ -403,11 +429,9 @@ var webodfEditor = (function () {
                     handleNonNetworkedSituation();
                 }
             });
-        } else if ((args.collaborative === "true") ||
-                   (args.collaborative === "1") ||
-                   (args.collaborative === "yes")) {
-            runtime.log("starting collaborative editor.");
-            waitForNetwork(function (state) {
+        } else if ((args.collaborative === "nowjs")) {
+            runtime.log("starting collaborative editor for ["+args.collaborative+"].");
+            connectNetwork(args.collaborative, function (state) {
                 if (state === "ready") {
                     handleNetworkedSituation();
                 }

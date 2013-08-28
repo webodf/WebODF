@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -44,8 +44,6 @@ define("webodf/editor/EditorSession", [
 
     runtime.loadClass("ops.OdtDocument");
     runtime.loadClass("ops.Session");
-    runtime.loadClass("ops.NowjsOperationRouter");
-    runtime.loadClass("ops.NowjsMemberModel");
     runtime.loadClass("odf.OdfCanvas");
     runtime.loadClass("gui.CaretManager");
     runtime.loadClass("gui.Caret");

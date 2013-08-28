@@ -280,6 +280,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
 
+    lib/ops/Server.js
     lib/ops/Operation.js
     lib/ops/OpAddCursor.js
     lib/gui/StyleHelper.js
@@ -308,10 +309,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/SessionController.js
     lib/ops/MemberModel.js
     lib/ops/TrivialMemberModel.js
-    lib/ops/NowjsMemberModel.js
     lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
-    lib/ops/NowjsOperationRouter.js
     lib/gui/EditInfoHandle.js
     lib/gui/EditInfoMarker.js
     lib/gui/SessionView.js

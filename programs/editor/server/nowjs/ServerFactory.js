@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -33,26 +33,32 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime */
+/*global define */
 
-/**
- * A model which provides information about sessions.
- * @interface
- */
-SessionList = function SessionList() {"use strict"; };
+define("webodf/editor/server/nowjs/ServerFactory", [
+    "webodf/editor/server/nowjs/Server",
+    "webodf/editor/server/nowjs/MemberModel",
+    "webodf/editor/server/nowjs/OperationRouter",
+    "webodf/editor/server/nowjs/SessionList"],
+    function (NowjsServer, NowjsMemberModel, NowjsOperationRouter, NowjsSessionList) {
+        "use strict";
 
-/**
- * @param {{onCreated:function(!Object),
- *          onUpdated:function(!Object),
- *          onRemoved:function(!string) }} subscriber
- * @return {undefined}
- */
-SessionList.prototype.getSessions = function (subscriber) {"use strict"; };
-
-/**
- * @param {{onCreated:function(!Object),
- *          onUpdated:function(!Object),
- *          onRemoved:function(!string) }} subscriber
- * @return {undefined}
- */
-SessionList.prototype.unsubscribe = function (subscriber) {"use strict"; };
+        /**
+        * @constructor
+        * @implements ServerFactory
+        */
+        return function NowjsServerFactory() {
+            this.createServer = function (args) {
+                return new NowjsServer();
+            };
+            this.createOperationRouter = function (sid, mid, server) {
+                return new NowjsOperationRouter(sid, mid, server);
+            };
+            this.createMemberModel = function (sid, server) {
+                return new NowjsMemberModel(server);
+            };
+            this.createSessionList = function (server) {
+                return new NowjsSessionList(server);
+            };
+        };
+});

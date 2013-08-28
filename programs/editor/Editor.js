@@ -58,8 +58,10 @@ define("webodf/editor/Editor", [
          *          cursorAddedCallback:function(!string)=,
          *          cursorRemovedCallback:function(!string)=,
          *          registerCallbackForShutdown:function(!function())= }} args
+         * @param {!ops.Server=} server
+         * @param {!ServerFactory=} serverFactory
          */
-        function Editor(args) {
+        function Editor(args, server, serverFactory) {
 
             var self = this,
                 // Private
@@ -84,13 +86,6 @@ define("webodf/editor/Editor", [
                 }
                 return myResources[key];
             }
-
-            runtime.currentDirectory = function () {
-                return "../../webodf/lib";
-            };
-            runtime.libraryPaths = function () {
-                return [ runtime.currentDirectory() ];
-            };
 
             /**
              * prepare all gui elements and load the given document.
@@ -155,7 +150,10 @@ define("webodf/editor/Editor", [
                 odfCanvas.addListener("statereadychange", function () {
                     if (!editorReadyCallback) {
                         // already called once, restart session and return
-                        editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                        // undo manager is not yet integrated with collaboration
+                        if (! server) {
+                            editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                        }
                         editorSession.startEditing();
                         return;
                     }
@@ -166,7 +164,10 @@ define("webodf/editor/Editor", [
                     editorSession = new EditorSession(session, memberid, {
                         viewOptions: viewOptions
                     });
-                    editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                    // undo manager is not yet integrated with collaboration
+                    if (! server) {
+                        editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                    }
 
                     if (memberListDiv) {
                         memberList = new MemberListView(editorSession, memberListDiv);
@@ -267,12 +268,12 @@ define("webodf/editor/Editor", [
              * @param {?function()} editorReadyCallback
              */
             self.loadSession = function (sessionId, editorReadyCallback) {
-                initGuiAndDoc("/session/" + sessionId + "/genesis", function () {
-                    // use the nowjs op-router when connected
-                    opRouter = opRouter || new ops.NowjsOperationRouter(sessionId, memberid);
+                initGuiAndDoc(server.getGenesisUrl(sessionId), function () {
+                    // get router and member model
+                    opRouter = opRouter || serverFactory.createOperationRouter(sessionId, memberid, server);
                     session.setOperationRouter(opRouter);
 
-                    memberModel = memberModel || new ops.NowjsMemberModel();
+                    memberModel = memberModel  || serverFactory.createMemberModel(sessionId, server);
                     session.setMemberModel(memberModel);
 
                     opRouter.requestReplay(function done() {
