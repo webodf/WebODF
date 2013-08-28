@@ -47,6 +47,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${VIEWERBUILDDIR}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/images ${VIEWERBUILDDIR}/images
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/viewer.css ${VIEWERBUILDDIR}/viewer.css
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/example.local.css ${VIEWERBUILDDIR}/example.local.css
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/../../webodf/webodf.js ${VIEWERBUILDDIR}/webodf.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js ${VIEWERBUILDDIR}/viewer.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/index.html ${VIEWERBUILDDIR}/index.html
@@ -55,6 +56,7 @@ add_custom_command(
     DEPENDS
         ${VIEWER_IMAGES}
         viewer.css
+        example.local.css
         index.html
         PluginLoader.js
         ODFViewerPlugin.js
