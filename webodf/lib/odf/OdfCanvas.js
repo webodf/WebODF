@@ -1224,7 +1224,6 @@ odf.OdfCanvas = (function () {
             if (allowAnnotations) {
                 if (!annotationsPane.parentNode) {
                     sizer.appendChild(annotationsPane);
-                    sizer.style.paddingRight = window.getComputedStyle(annotationsPane).width;
                     fixContainerSize();
                 }
                 if (annotationManager) {
@@ -1235,7 +1234,6 @@ odf.OdfCanvas = (function () {
             } else {
                 if (annotationsPane.parentNode) {
                     sizer.removeChild(annotationsPane);
-                    sizer.style.paddingRight = 0;
                     annotationManager.forgetAnnotations();
                     fixContainerSize();
                 }

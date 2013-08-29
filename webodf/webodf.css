@@ -463,7 +463,7 @@ dc|*::-moz-selection {
     background-color: #EAEAEA;
     width: 4cm;
     height: 100%;
-    display: inline-block;
+    display: none;
     position: absolute;
     outline: 1px solid #ccc;
 }

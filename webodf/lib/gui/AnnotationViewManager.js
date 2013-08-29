@@ -237,7 +237,25 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
         }
 
     }
-    
+
+    /**
+     * Show or hide annotations pane
+     * @param {!boolean} show
+     * @return {undefined}
+     */
+    function showAnnotationsPane(show) {
+        var sizer = doc.getElementById('sizer');
+
+        if (show) {
+            annotationsPane.style.display = 'inline-block';
+            sizer.style.paddingRight = window.getComputedStyle(annotationsPane).width;
+        } else {
+            annotationsPane.style.display = 'none';
+            sizer.style.paddingRight = 0;
+        }
+        odfCanvas.refreshSize();
+    }
+
     /**
      * Sorts the internal annotations array by order of occurence in the document.
      * Useful for calculating the order of annotations in the sidebar, and positioning them
@@ -273,6 +291,8 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
      * @return {undefined}
      */
     function addAnnotation(annotation) {
+        showAnnotationsPane(true);
+
         annotations.push({
             node: annotation.node,
             end: annotation.end
@@ -299,6 +319,9 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
         unhighlightAnnotation(annotation);
         if (index !== -1) {
             annotations.splice(index, 1);
+        }
+        if (annotations.length === 0) {
+            showAnnotationsPane(false);
         }
     }
 
