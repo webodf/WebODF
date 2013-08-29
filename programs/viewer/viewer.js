@@ -474,10 +474,12 @@ function Viewer(viewerPlugin) {
                 shiftKey = evt.shiftKey;
 
             switch (key) {
+            case 33: // pageUp
             case 38: // up
             case 37: // left
                 self.showPreviousPage();
                 break;
+            case 34: // pageDown
             case 40: // down
             case 39: // right
                 self.showNextPage();
