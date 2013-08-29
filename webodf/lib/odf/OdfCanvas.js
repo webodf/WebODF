@@ -316,6 +316,7 @@ odf.OdfCanvas = (function () {
         utils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         shadowContent,
+        sizer,
         annotationsPane,
         allowAnnotations = false,
         annotationManager;
@@ -1135,8 +1136,7 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         function fixContainerSize() {
-            var sizer = element.firstChild,
-                odfdoc = sizer.firstChild;
+            var odfdoc = sizer.firstChild;
             if (!odfdoc) {
                 return;
             }
@@ -1174,14 +1174,13 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          **/
         function handleContent(container, odfnode) {
-            var css = positioncss.sheet, sizer;
+            var css = positioncss.sheet;
             // only append the content at the end
             clear(element);
 
             sizer = doc.createElementNS(element.namespaceURI, 'div');
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
-            sizer.id = "sizer";
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
 
@@ -1219,8 +1218,6 @@ odf.OdfCanvas = (function () {
          * @param {!Element} odfnode
          */
         function handleAnnotations(odfnode) {
-            var sizer = element.firstChild;
-
             if (allowAnnotations) {
                 if (!annotationsPane.parentNode) {
                     sizer.appendChild(annotationsPane);
@@ -1502,6 +1499,15 @@ odf.OdfCanvas = (function () {
             if (annotationManager) {
                 annotationManager.rerenderAnnotations();
             }
+        };
+
+        /**
+         * This returns the element inside the canvas which can be zoomed with CSS
+         * and which contains the ODF document and the annotation sidebar
+         * @return {!Element}
+         */
+        this.getSizer = function ();
+            return sizer;
         };
 
         /** Allows / disallows annotations

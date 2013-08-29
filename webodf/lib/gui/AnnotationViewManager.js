@@ -244,7 +244,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
      * @return {undefined}
      */
     function showAnnotationsPane(show) {
-        var sizer = doc.getElementById('sizer');
+        var sizer = odfCanvas.getSizer();
 
         if (show) {
             annotationsPane.style.display = 'inline-block';
