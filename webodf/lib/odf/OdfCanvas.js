@@ -1506,7 +1506,7 @@ odf.OdfCanvas = (function () {
          * and which contains the ODF document and the annotation sidebar
          * @return {!Element}
          */
-        this.getSizer = function ();
+        this.getSizer = function () {
             return sizer;
         };
 
