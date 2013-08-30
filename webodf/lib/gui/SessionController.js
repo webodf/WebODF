@@ -76,6 +76,7 @@ gui.SessionController = (function () {
             styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
+            clickStartedWithinContainer = false,
             undoManager = null;
 
         runtime.assert(window !== null,
@@ -389,6 +390,10 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function selectRange(e) {
+            if (!clickStartedWithinContainer) {
+                return;
+            }
+
             // When click somewhere within already selected text, call window.getSelection() straight away results
             // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
@@ -1172,6 +1177,17 @@ gui.SessionController = (function () {
         }
 
         /**
+         * Updates a flag indicating whether the mouse down event occurred within the OdfCanvas element.
+         * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
+         * events that occur when the user releases the mouse button outside the canvas.
+         * This filter limits selection changes to mouse down events that start inside the canvas
+         * @param e
+         */
+        function filterMouseClicks(e) {
+            clickStartedWithinContainer = e.target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), e.target);
+        }
+
+        /**
          * @return {undefined}
          */
         this.startEditing = function () {
@@ -1189,6 +1205,7 @@ gui.SessionController = (function () {
             // Epiphany 3.6.1 requires this to allow the paste event to fire
             listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
             listenEvent(canvasElement, "paste", handlePaste);
+            listenEvent(window, "mousedown", filterMouseClicks);
             listenEvent(window, "mouseup", clickHandler.handleMouseUp);
             listenEvent(canvasElement, "contextmenu", handleContextMenu);
 
@@ -1224,6 +1241,7 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "copy", handleCopy);
             removeEvent(canvasElement, "paste", handlePaste);
             removeEvent(canvasElement, "beforepaste", handleBeforePaste);
+            removeEvent(window, "mousedown", filterMouseClicks);
             removeEvent(window, "mouseup", clickHandler.handleMouseUp);
             removeEvent(canvasElement, "contextmenu", handleContextMenu);
 
