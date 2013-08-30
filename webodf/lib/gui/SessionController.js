@@ -45,7 +45,6 @@ runtime.loadClass("ops.OpRemoveText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("ops.OpRemoveAnnotation");
-runtime.loadClass("gui.ClickHandler");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.StyleHelper");
@@ -71,7 +70,6 @@ gui.SessionController = (function () {
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
-            clickHandler = new gui.ClickHandler(),
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
@@ -393,10 +391,6 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function selectRange(e) {
-            if (!clickStartedWithinContainer) {
-                return;
-            }
-
             // When click somewhere within already selected text, call window.getSelection() straight away results
             // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
@@ -1190,6 +1184,25 @@ gui.SessionController = (function () {
             clickStartedWithinContainer = e.target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), e.target);
         }
 
+        function handleMouseUp(event) {
+            var target = event.target,
+                clickCount = event.detail, // See http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseup
+                annotationNode = null;
+            if (target.className === "annotationRemoveButton") {
+                annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
+                removeAnnotation(annotationNode);
+            } else if (clickStartedWithinContainer) {
+                if (clickCount === 1) { // Single click
+                    selectRange(event);
+                } else if (clickCount === 2) { // Double click
+                    selectWord();
+                } else if (clickCount === 3) { // Triple click
+                    selectParagraph();
+                }
+            }
+            // Expect that each mouse-up event is preceded by a mouse down that will update clickStartedWithinContainer
+        }
+
         /**
          *
          * @param {!function(!Object) : !Object} applyDirectStyling
@@ -1295,7 +1308,7 @@ gui.SessionController = (function () {
             listenEvent(canvasElement, "beforepaste", handleBeforePaste, true);
             listenEvent(canvasElement, "paste", handlePaste);
             listenEvent(window, "mousedown", filterMouseClicks);
-            listenEvent(window, "mouseup", clickHandler.handleMouseUp);
+            listenEvent(window, "mouseup", handleMouseUp);
             listenEvent(canvasElement, "contextmenu", handleContextMenu);
 
             // start maintaining the cursor selection now
@@ -1331,7 +1344,7 @@ gui.SessionController = (function () {
             removeEvent(canvasElement, "paste", handlePaste);
             removeEvent(canvasElement, "beforepaste", handleBeforePaste);
             removeEvent(window, "mousedown", filterMouseClicks);
-            removeEvent(window, "mouseup", clickHandler.handleMouseUp);
+            removeEvent(window, "mouseup", handleMouseUp);
             removeEvent(canvasElement, "contextmenu", handleContextMenu);
 
             op = new ops.OpRemoveCursor();
@@ -1485,19 +1498,6 @@ gui.SessionController = (function () {
                 return false;
             });
             keyPressHandler.bind(keyCode.Enter, modifier.None, enqueueParagraphSplittingOps);
-
-            clickHandler.subscribe(gui.ClickHandler.signalSingleClick, function (event) {
-                var target = event.target,
-                    annotationNode = null;
-                if (target.className === "annotationRemoveButton") {
-                    annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
-                    removeAnnotation(annotationNode);
-                } else {
-                    selectRange(event);
-                }
-            });
-            clickHandler.subscribe(gui.ClickHandler.signalDoubleClick, selectWord);
-            clickHandler.subscribe(gui.ClickHandler.signalTripleClick, selectParagraph);
         }
 
         init();

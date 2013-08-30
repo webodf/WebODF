@@ -55,7 +55,6 @@
         "gui/AnnotationViewManager.js",
         "gui/Avatar.js",
         "gui/Caret.js",
-        "gui/ClickHandler.js",
         "gui/KeyboardHandler.js",
         "gui/Clipboard.js",
         "gui/PresenterUI.js",
