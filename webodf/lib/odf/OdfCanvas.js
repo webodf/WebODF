@@ -301,6 +301,8 @@ odf.OdfCanvas = (function () {
         listenEvent(element, "keyup", checkSelection);
         listenEvent(element, "keydown", checkSelection);
     }
+
+    // variables per class (so not per instance!)
     var /**@const@type {!string}*/drawns  = odf.Namespaces.drawns,
         /**@const@type {!string}*/fons    = odf.Namespaces.fons,
         /**@const@type {!string}*/officens = odf.Namespaces.officens,
@@ -315,10 +317,7 @@ odf.OdfCanvas = (function () {
         xpath = new xmldom.XPath(),
         utils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
-        shadowContent,
-        annotationsPane,
-        allowAnnotations = false,
-        annotationManager;
+        shadowContent;
     /**
      * @param {!Element} element
      * @return {undefined}
@@ -581,36 +580,6 @@ odf.OdfCanvas = (function () {
             node = /**@type{!Element}*/(tableCells.item(i));
             modifyTableCell(node);
         }
-    }
-
-    /**
-     * Wraps all annotations and renders them using the Annotation View Manager.
-     * @param {!Element} odffragment
-     * @return {undefined}
-     */
-    function modifyAnnotations(odffragment) {
-        var annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'),
-            annotationEnds = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation-end'),
-            currentAnnotationName,
-            i;
-
-        /**
-         * @param {!Node} element
-         * @return {!boolean}
-         */
-        function matchAnnotationEnd(element) {
-            return currentAnnotationName === element.getAttributeNS(officens, 'name');
-        }
-
-        for (i = 0; i < annotationNodes.length; i += 1) {
-            currentAnnotationName = annotationNodes[i].getAttributeNS(officens, 'name');
-            annotationManager.addAnnotation({
-                node: annotationNodes[i],
-                end: annotationEnds.filter(matchAnnotationEnd)[0] || null
-            });
-        }
-
-        annotationManager.rerenderAnnotations();
     }
 
     /**
@@ -1022,6 +991,9 @@ odf.OdfCanvas = (function () {
             selectionWatcher = new SelectionWatcher(element),
             pageSwitcher,
             sizer,
+            annotationsPane,
+            allowAnnotations = false,
+            annotationManager,
             fontcss,
             stylesxmlcss,
             positioncss,
@@ -1210,6 +1182,36 @@ odf.OdfCanvas = (function () {
 
             sizer.insertBefore(shadowContent, sizer.firstChild);
             fixContainerSize();
+        }
+
+        /**
+        * Wraps all annotations and renders them using the Annotation View Manager.
+        * @param {!Element} odffragment
+        * @return {undefined}
+        */
+        function modifyAnnotations(odffragment) {
+            var annotationNodes = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'),
+                annotationEnds = domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation-end'),
+                currentAnnotationName,
+                i;
+
+            /**
+            * @param {!Node} element
+            * @return {!boolean}
+            */
+            function matchAnnotationEnd(element) {
+                return currentAnnotationName === element.getAttributeNS(officens, 'name');
+            }
+
+            for (i = 0; i < annotationNodes.length; i += 1) {
+                currentAnnotationName = annotationNodes[i].getAttributeNS(officens, 'name');
+                annotationManager.addAnnotation({
+                    node: annotationNodes[i],
+                    end: annotationEnds.filter(matchAnnotationEnd)[0] || null
+                });
+            }
+
+            annotationManager.rerenderAnnotations();
         }
 
         /**
