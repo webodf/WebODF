@@ -316,7 +316,6 @@ odf.OdfCanvas = (function () {
         utils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         shadowContent,
-        sizer,
         annotationsPane,
         allowAnnotations = false,
         annotationManager;
@@ -1022,6 +1021,7 @@ odf.OdfCanvas = (function () {
             formatting = new odf.Formatting(),
             selectionWatcher = new SelectionWatcher(element),
             pageSwitcher,
+            sizer,
             fontcss,
             stylesxmlcss,
             positioncss,
