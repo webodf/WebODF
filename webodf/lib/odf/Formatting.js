@@ -92,7 +92,7 @@ odf.Formatting = function Formatting() {
      * the value is the svg:font-family or null, if none set but a svg:font-face-uri
      * @return {!Object.<string,string>}
      */
-    this.getFontMap = function () {
+     function getFontMap() {
         var fontFaceDecls = odfContainer.rootElement.fontFaceDecls,
             /**@type {!Object.<string,string>}*/
             fontFaceDeclsMap = {},
@@ -117,7 +117,9 @@ odf.Formatting = function Formatting() {
         }
 
         return fontFaceDeclsMap;
-    };
+    }
+    this.getFontMap = getFontMap;
+
     /**
      * Loop over the <style:style> elements and place the attributes
      * style:name and style:display-name in an array.
@@ -278,7 +280,6 @@ odf.Formatting = function Formatting() {
                 mapObjOntoNode(element, value);
             } else {
                 node.setAttributeNS(ns, key, value);
-
             }
         });
     }
@@ -510,8 +511,19 @@ odf.Formatting = function Formatting() {
      * @param {string=} newStylePrefix Prefix to put in front of new auto styles
      */
     this.updateStyle = function(styleNode, properties, newStylePrefix) {
-        var name, existingNames, startIndex;
+        var name, existingNames, startIndex, fontName, fontFaceNode;
         mapObjOntoNode(styleNode, properties);
+
+        fontName = properties["style:text-properties"] && properties["style:text-properties"]["style:font-name"];
+        if (fontName &&
+            !getFontMap().hasOwnProperty(fontName)) {
+
+            fontFaceNode = styleNode.ownerDocument.createElementNS(stylens, 'style:font-face');
+            fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
+            fontFaceNode.setAttributeNS(svgns, 'svg:font-family', fontName);
+            odfContainer.rootElement.fontFaceDecls.appendChild(fontFaceNode);
+        }
+
         if (newStylePrefix) {
             name = styleNode.getAttributeNS(stylens, "name");
             existingNames = getAllStyleNames();

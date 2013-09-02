@@ -138,7 +138,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBeNull(t, "t.element");
     }
 
-    function applyStyle_UpdatesStyleElement() {
+    function updateStyle_UpdatesStyleElement() {
         createDocument("<text:p/>");
         t.element = t.formatting.getStyleElement("P1", "paragraph");
 
@@ -156,7 +156,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-name')", "'P1 Font'");
     }
-    function applyStyle_UpdatesStyleElement_WithGeneratedName() {
+    function updateStyle_UpdatesStyleElement_WithGeneratedName() {
         createDocument("<text:p/>");
         t.element = t.formatting.getStyleElement("P1", "paragraph");
 
@@ -174,8 +174,8 @@ odf.FormattingTests = function FormattingTests(runner) {
             getStyleElement_ListStyle,
             getStyleElement_MismatchedFamily_ReturnsNull,
 
-            applyStyle_UpdatesStyleElement,
-            applyStyle_UpdatesStyleElement_WithGeneratedName
+            updateStyle_UpdatesStyleElement,
+            updateStyle_UpdatesStyleElement_WithGeneratedName
         ];
     };
     this.asyncTests = function () {

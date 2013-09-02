@@ -35,6 +35,8 @@
 
 /*global runtime, odf, ops*/
 
+runtime.loadClass("odf.Namespaces");
+
 /**
  * @constructor
  * @implements ops.Operation
@@ -47,8 +49,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         /**@type{{attributes}}*/removedProperties,
         /**@const*/paragraphPropertiesName = 'style:paragraph-properties',
         /**@const*/textPropertiesName = 'style:text-properties',
-        /**@const*/stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        /**@const*/svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+        /**@const*/stylens = odf.Namespaces.stylens;
 
     /**
      * Removes attributes of a node by the names listed in removedAttributeNames.
@@ -76,10 +77,8 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
     this.execute = function (odtDocument) {
         var formatting = odtDocument.getFormatting(),
-            dom = odtDocument.getDOM(),
-            styleNode = dom.createElementNS(stylens, 'style:style'),
-            paragraphPropertiesNode, textPropertiesNode, fontFaceNode,
-            fontName, ns;
+            styleNode,
+            paragraphPropertiesNode, textPropertiesNode;
 
         styleNode = odtDocument.getParagraphStyleElement(styleName);
 
@@ -88,49 +87,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
 
             if (setProperties) {
-                Object.keys(setProperties).forEach(function (propertyName) {
-                    switch (propertyName) {
-                    case paragraphPropertiesName:
-                        // ensure node
-                        if (paragraphPropertiesNode === undefined) {
-                            paragraphPropertiesNode = dom.createElementNS(stylens, paragraphPropertiesName);
-                            styleNode.appendChild(paragraphPropertiesNode);
-                        }
-
-                        // set properties
-                        formatting.updateStyle(paragraphPropertiesNode, setProperties[paragraphPropertiesName]);
-                        break;
-
-                    case textPropertiesName:
-                        // ensure node
-                        if (textPropertiesNode === undefined) {
-                            textPropertiesNode = dom.createElementNS(stylens, textPropertiesName);
-                            styleNode.appendChild(textPropertiesNode);
-                        }
-
-                        // Declare the requested font if it is not already declared
-                        fontName = setProperties[textPropertiesName]["style:font-name"];
-                        if (fontName &&
-                            !formatting.getFontMap().hasOwnProperty(fontName)) {
-
-                            fontFaceNode = dom.createElementNS(stylens, 'style:font-face');
-                            fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
-                            fontFaceNode.setAttributeNS(svgns, 'svg:font-family', fontName);
-                            odtDocument.getOdfCanvas().odfContainer().rootElement.fontFaceDecls.appendChild(fontFaceNode);
-                        }
-
-                        // set properties
-                        formatting.updateStyle(textPropertiesNode, setProperties[textPropertiesName]);
-                        break;
-
-                    default:
-                        // only normal attributes expected ATM
-                        if (typeof setProperties[propertyName] !== 'object') {
-                            ns = odf.Namespaces.resolvePrefix(propertyName.substr(0, propertyName.indexOf(':')));
-                            styleNode.setAttributeNS(ns, propertyName, setProperties[propertyName]);
-                        }
-                    }
-                });
+                formatting.updateStyle(styleNode, setProperties);
             }
 
             // remove attributes in the style nodes

@@ -47,9 +47,6 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
     var memberid, timestamp,
         styleName,
         /**@type{Object}*/setProperties,
-        /** @const */paragraphPropertiesName = 'style:paragraph-properties',
-        /** @const */textPropertiesName = 'style:text-properties',
-        /** @const */svgns = odf.Namespaces.svgns,
         /** @const */stylens = odf.Namespaces.stylens;
 
     this.init = function (data) {
@@ -63,9 +60,7 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             formatting = odtDocument.getFormatting(),
             dom = odtDocument.getDOM(),
-            styleNode = dom.createElementNS(stylens, 'style:style'),
-            paragraphPropertiesNode, textPropertiesNode, fontFaceNode,
-            fontName, ns;
+            styleNode = dom.createElementNS(stylens, 'style:style');
 
         if (!styleNode) {
             return false;
@@ -75,45 +70,7 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
         styleNode.setAttributeNS(stylens, 'style:name', styleName);
 
         if (setProperties) {
-            Object.keys(setProperties).forEach(function (propertyName) {
-                switch (propertyName) {
-                    case paragraphPropertiesName:
-                        // add node
-                        paragraphPropertiesNode = dom.createElementNS(stylens, paragraphPropertiesName);
-                        styleNode.appendChild(paragraphPropertiesNode);
-
-                        // set properties
-                        formatting.updateStyle(paragraphPropertiesNode, setProperties[paragraphPropertiesName]);
-                        break;
-
-                    case textPropertiesName:
-                        // add node
-                        textPropertiesNode = dom.createElementNS(stylens, textPropertiesName);
-                        styleNode.appendChild(textPropertiesNode);
-
-                        // Declare the requested font if it is not already declared
-                        fontName = setProperties[textPropertiesName]["style:font-name"];
-                        if (fontName &&
-                            !formatting.getFontMap().hasOwnProperty(fontName)) {
-
-                            fontFaceNode = dom.createElementNS(stylens, 'style:font-face');
-                            fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
-                            fontFaceNode.setAttributeNS(svgns, 'svg:font-family', fontName);
-                            odfContainer.rootElement.fontFaceDecls.appendChild(fontFaceNode);
-                        }
-
-                        // set properties
-                        formatting.updateStyle(textPropertiesNode, setProperties[textPropertiesName]);
-                        break;
-
-                    default:
-                        // only normal attributes expected ATM
-                        if (typeof setProperties[propertyName] !== 'object') {
-                            ns = odf.Namespaces.resolvePrefix(propertyName.substr(0, propertyName.indexOf(':')));
-                            styleNode.setAttributeNS(ns, propertyName, setProperties[propertyName]);
-                        }
-                }
-            });
+            formatting.updateStyle(styleNode, setProperties);
         }
 
         odfContainer.rootElement.styles.appendChild(styleNode);
