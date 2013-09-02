@@ -35,6 +35,7 @@
 /*global runtime, core, gui, Node, ops, odf */
 
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("core.Utils");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
@@ -77,7 +78,9 @@ gui.SessionController = (function () {
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
-            undoManager = null;
+            undoManager = null,
+            utils = new core.Utils(),
+            styleNameGenerator = new odf.StyleNameGenerator("auto" + utils.hashString(inputMemberId) + "_", odtDocument.getFormatting());
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -1188,6 +1191,92 @@ gui.SessionController = (function () {
         }
 
         /**
+         *
+         * @param {!function(!Object) : !Object} applyDirectStyling
+         */
+        function applyParagraphDirectStyling(applyDirectStyling) {
+            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+                position = odtDocument.getCursorPosition(inputMemberId),
+                paragraphs = odfUtils.getParagraphElements(range),
+                formatting = odtDocument.getFormatting();
+
+            paragraphs.forEach(function(paragraph) {
+                var paragraphStartPoint = position + odtDocument.getDistanceFromCursor(inputMemberId, paragraph, 0),
+                    paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
+                    newParagraphStyleName = styleNameGenerator.generateName(),
+                    opAddParagraphStyle,
+                    opSetParagraphStyle,
+                    paragraphProperties;
+
+                // getDistanceFromCursor returns the last position before the node & offset
+                // The first index of the paragraph may not be walkable
+                paragraphStartPoint += 1;
+
+                if (paragraphStyleName) {
+                    paragraphProperties = formatting.createDerivedStyleObject(paragraphStyleName, "paragraph", {});
+                }
+                paragraphProperties = applyDirectStyling(paragraphProperties || {});
+                opAddParagraphStyle = new ops.OpAddParagraphStyle();
+                opAddParagraphStyle.init({
+                    memberid: inputMemberId,
+                    styleName: newParagraphStyleName,
+                    isAutomaticStyle: true,
+                    setProperties: paragraphProperties
+                });
+                session.enqueue(opAddParagraphStyle);
+
+                opSetParagraphStyle = new ops.OpSetParagraphStyle();
+                opSetParagraphStyle.init({
+                    memberid: inputMemberId,
+                    styleName: newParagraphStyleName,
+                    position: paragraphStartPoint
+                });
+                session.enqueue(opSetParagraphStyle);
+            });
+        }
+
+        function applySimpleParagraphDirectStyling(styleOverrides) {
+            applyParagraphDirectStyling(function(paragraphStyle) { return utils.mergeObjects(paragraphStyle, styleOverrides); });
+        }
+
+        function alignParagraphLeft() {
+            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'left'}});
+            return true;
+        }
+
+        function alignParagraphCenter() {
+            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'center'}});
+            return true;
+        }
+
+        function alignParagraphRight() {
+            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'right'}});
+            return true;
+        }
+
+        function alignParagraphJustified() {
+            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'justify'}});
+            return true;
+        }
+
+        function modifyParagraphIndent(direction, paragraphStyle) {
+            var tabStopDistance = odtDocument.getFormatting().getDefaultTabStopDistance(),
+                paragraphProperties = paragraphStyle["style:paragraph-properties"],
+                indentValue = paragraphProperties && paragraphProperties["fo:margin-left"],
+                indent = indentValue && odfUtils.parseLength(indentValue),
+                newIndent;
+
+            if (indent && indent.unit === tabStopDistance.unit) {
+                newIndent = (indent.value + (direction * tabStopDistance.value)) + indent.unit;
+            } else {
+                // TODO unit-conversion would allow indent to work irrespective of the paragraph's indent type
+                newIndent = (direction * tabStopDistance.value) + tabStopDistance.unit;
+            }
+
+            return utils.mergeObjects(paragraphStyle, {"style:paragraph-properties" : {"fo:margin-left" : newIndent}});
+        }
+
+        /**
          * @return {undefined}
          */
         this.startEditing = function () {
@@ -1252,6 +1341,21 @@ gui.SessionController = (function () {
             if (undoManager) {
                 undoManager.resetInitialState();
             }
+        };
+
+        this.alignParagraphLeft = alignParagraphLeft;
+        this.alignParagraphCenter = alignParagraphCenter;
+        this.alignParagraphRight = alignParagraphRight;
+        this.alignParagraphJustified = alignParagraphJustified;
+
+        this.indent = function() {
+            applyParagraphDirectStyling(modifyParagraphIndent.bind(null, 1));
+            return true;
+        };
+
+        this.outdent = function() {
+            applyParagraphDirectStyling(modifyParagraphIndent.bind(null, -1));
+            return true;
         };
 
         /**
@@ -1352,6 +1456,10 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.B, modifier.Meta, toggleBold);
                 keyDownHandler.bind(keyCode.I, modifier.Meta, toggleItalic);
                 keyDownHandler.bind(keyCode.U, modifier.Meta, toggleUnderline);
+                keyDownHandler.bind(keyCode.L, modifier.MetaShift, alignParagraphLeft);
+                keyDownHandler.bind(keyCode.E, modifier.MetaShift, alignParagraphCenter);
+                keyDownHandler.bind(keyCode.R, modifier.MetaShift, alignParagraphRight);
+                keyDownHandler.bind(keyCode.J, modifier.MetaShift, alignParagraphJustified);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
@@ -1359,6 +1467,10 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.B, modifier.Ctrl, toggleBold);
                 keyDownHandler.bind(keyCode.I, modifier.Ctrl, toggleItalic);
                 keyDownHandler.bind(keyCode.U, modifier.Ctrl, toggleUnderline);
+                keyDownHandler.bind(keyCode.L, modifier.CtrlShift, alignParagraphLeft);
+                keyDownHandler.bind(keyCode.E, modifier.CtrlShift, alignParagraphCenter);
+                keyDownHandler.bind(keyCode.R, modifier.CtrlShift, alignParagraphRight);
+                keyDownHandler.bind(keyCode.J, modifier.CtrlShift, alignParagraphJustified);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }

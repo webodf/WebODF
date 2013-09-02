@@ -374,6 +374,7 @@ cursor|cursor > div:after {
 }
 .annotationNote > office|annotation {
     display: block;
+    text-align: left;
 }
 
 .annotationConnector {

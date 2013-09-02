@@ -394,7 +394,7 @@ odf.OdfUtils = function OdfUtils() {
      * @return {?{value:!number,unit:!string}}
      */
     function parseLength(length) {
-        var re = /-?([0-9]*[0-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px)|(%))/,
+        var re = /(-?[0-9]*[0-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px)|(%))/,
             m = re.exec(length);
         if (!m) {
             return null;
@@ -428,6 +428,7 @@ odf.OdfUtils = function OdfUtils() {
         }
         return result;
     }
+    this.parseNonNegativeLength = parseNonNegativeLength;
 
     /**
      * Returns the value and unit(%) of the length, if it is specified in %age

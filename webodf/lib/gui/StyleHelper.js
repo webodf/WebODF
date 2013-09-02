@@ -36,6 +36,7 @@
 /*global core, Node, runtime, gui, odf, NodeFilter*/
 
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
 
 /**
@@ -44,7 +45,8 @@ runtime.loadClass("odf.OdfUtils");
 gui.StyleHelper = function StyleHelper(formatting) {
     "use strict";
     var domUtils = new core.DomUtils(),
-        odfUtils = new odf.OdfUtils();
+        odfUtils = new odf.OdfUtils(),
+        /** @const */ textns = odf.Namespaces.textns;
 
     /**
      * Returns an array of all unique styles in a given range for each text node
@@ -147,5 +149,79 @@ gui.StyleHelper = function StyleHelper(formatting) {
      */
     this.hasStrikeThrough = function (range) {
         return hasTextPropertyValue(range, 'style:text-line-through-style', 'solid');
+    };
+
+    /**
+     * Returns true if all the node within given range have the same value for
+     * the property; otherwise false.
+     * @param {!Range} range
+     * @param {!string} propertyName
+     * @param {Array.<!string>} propertyValues
+     * @return {!boolean}
+     */
+    function hasParagraphPropertyValue(range, propertyName, propertyValues) {
+        var nodes = odfUtils.getParagraphElements(range),
+            isStyleChecked = {},
+            isDefaultParagraphStyleChecked = false,
+            paragraphStyleName, paragraphStyleElement, paragraphStyleAttributes, properties;
+
+        while (nodes.length > 0) {
+            paragraphStyleName = nodes[0].getAttributeNS(textns, 'style-name');
+            if (paragraphStyleName) {
+                if (!isStyleChecked[paragraphStyleName]) {
+                    paragraphStyleElement = formatting.getStyleElement(paragraphStyleName, 'paragraph') ;
+                    isStyleChecked[paragraphStyleName] = true;
+                }
+            } else if(!isDefaultParagraphStyleChecked) {
+                isDefaultParagraphStyleChecked = true;
+                paragraphStyleElement = formatting.getDefaultStyleElement('paragraph');
+            }
+
+            if (paragraphStyleElement) {
+                paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type {!Element}*/(paragraphStyleElement));
+                properties = paragraphStyleAttributes['style:paragraph-properties'];
+                if (properties && propertyValues.indexOf(properties[propertyName]) === -1) {
+                    return false;
+                }
+            }
+            nodes.pop();
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if all the text within the range is left aligned; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.isAlignedLeft = function(range) {
+        return hasParagraphPropertyValue(range, 'fo:text-align', ['left', 'start']);
+    };
+
+    /**
+     * Returns true if all the text within the range is center aligned; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.isAlignedCenter = function(range) {
+        return hasParagraphPropertyValue(range, 'fo:text-align', ['center']);
+    };
+
+    /**
+     * Returns true if all the text within the range is right aligned; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.isAlignedRight = function(range) {
+        return hasParagraphPropertyValue(range, 'fo:text-align', ['right', 'end']);
+    };
+
+    /**
+     * Returns true if all the text within the range is justified; otherwise false.
+     * @param {!Range} range
+     * @return {!boolean}
+     */
+    this.isAlignedJustified = function(range) {
+        return hasParagraphPropertyValue(range, 'fo:text-align', ['justify']);
     };
 };

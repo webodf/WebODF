@@ -166,6 +166,7 @@ odf.Formatting = function Formatting() {
         }
         return null;
     }
+    this.getDefaultStyleElement = getDefaultStyleElement;
 
     /**
      * Fetch style element associated with the requested name and family
@@ -538,5 +539,21 @@ odf.Formatting = function Formatting() {
         newStyleObject["style:family"] =  family;
         utils.mergeObjects(newStyleObject, overrides);
         return newStyleObject;
+    };
+
+    /**
+     * Get the default tab-stop distance defined for this document
+     * See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#property-style_tab-stop-distance
+     * @returns {?{value: !number, unit: !string}}
+     */
+    this.getDefaultTabStopDistance = function () {
+        var defaultParagraph = getDefaultStyleElement('paragraph'),
+            paragraphProperties = defaultParagraph && defaultParagraph.getAttributeNS(stylens, "paragraph-properties"),
+            tabStopDistance = paragraphProperties && paragraphProperties.getAttributeNS(stylens, "tab-stop-distance");
+
+        if (!tabStopDistance) {
+            tabStopDistance =  "1.25cm" ; // What is the default value for tab stops? Pulled this from LO 4.1.1
+        }
+        return odfUtils.parseNonNegativeLength(tabStopDistance);
     };
 };
