@@ -83,6 +83,15 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
         handle.style.display = 'none';
     };
 
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        parentElement.removeChild(handle);
+        callback();
+    };
+
     function init() {
         handle = document.createElementNS(htmlns, "div");
         handle.setAttribute('class', 'editInfoHandle');

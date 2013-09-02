@@ -774,6 +774,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        callback();
+    };
+
+    /**
      * @return {undefined}
      */
     function init() {

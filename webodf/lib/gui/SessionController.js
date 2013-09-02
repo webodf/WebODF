@@ -84,7 +84,7 @@ gui.SessionController = (function () {
 
         keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
         keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
-       
+
         /**
          * @param {!Element|!Window} eventTarget
          * @param {!string} eventType
@@ -1294,6 +1294,15 @@ gui.SessionController = (function () {
          */
         this.getUndoManager = function () {
             return undoManager;
+        };
+
+        /**
+         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function(callback) {
+            // TODO: check if anything needs to be cleaned up
+            callback();
         };
 
         function init() {

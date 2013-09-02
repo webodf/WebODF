@@ -118,6 +118,15 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
         editHistory = {};
     };
 
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        container.removeChild(editInfoNode);
+        callback();
+    };
+
     function init() {
         var editInfons = 'urn:webodf:names:editinfo',
             dom = odtDocument.getDOM();

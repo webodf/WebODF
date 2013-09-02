@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <aditya.bhattkogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,6 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global core, gui, runtime*/
 
 runtime.loadClass("ops.EditInfo");
@@ -37,7 +40,7 @@ runtime.loadClass("gui.EditInfoHandle");
 
 /**
  * @constructor
- * @param {!ops.EditInfo} editInfo
+ * @param {!ops.EditInfo} editInfo  marker takes ownership
  * @param {boolean} initialVisibility Sets the initial edit info marker visibility
  */
 gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
@@ -146,6 +149,21 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
 
     this.hideHandle = function () {
         handle.hide();
+    };
+
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        editInfoNode.removeChild(marker);
+        handle.destroy(function(err) {
+            if (err) {
+                callback(err);
+            } else {
+                editInfo.destroy(callback);
+            }
+        });
     };
 
     function init() {

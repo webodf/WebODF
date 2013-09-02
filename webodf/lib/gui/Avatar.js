@@ -77,6 +77,16 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
         handle.className = (isFocussed ? "active" : "");
     };
 
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        parentElement.removeChild(handle);
+        callback();
+    };
+
+
     function init() {
         var document = /**@type{!Document}*/(parentElement.ownerDocument),
             htmlns = document.documentElement.namespaceURI;

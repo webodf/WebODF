@@ -32,8 +32,10 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*jslint sub: true*/
 /*global runtime, odf, xmldom, webodf_css, core, gui */
+
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.Formatting");
@@ -157,6 +159,15 @@ odf.OdfCanvas = (function () {
         };
 
         this.css = css;
+
+        /**
+         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function(callback) {
+            css.parentNode.removeChild(css);
+            callback();
+        };
     }
     /**
      * Register event listener on DOM element.
@@ -175,6 +186,23 @@ odf.OdfCanvas = (function () {
             eventTarget["on" + eventType] = eventHandler;
         }
     }
+    /**
+     * @param {!Element} eventTarget
+     * @param {!string} eventType
+     * @param {!Function} eventHandler
+     * @return {undefined}
+     */
+    function removeEvent(eventTarget, eventType, eventHandler) {
+        var onVariant = "on" + eventType;
+        if (eventTarget.removeEventListener) {
+            eventTarget.removeEventListener(eventType, eventHandler, false);
+        } else if (eventTarget.detachEvent) {
+            eventTarget.detachEvent(onVariant, eventHandler);
+        } else if (eventTarget[onVariant] === eventHandler) {
+            eventTarget[onVariant] = null;
+        }
+    }
+
     /**
      * Class that listens to events and sends a signal if the selection changes.
      * @constructor
@@ -297,6 +325,18 @@ odf.OdfCanvas = (function () {
             listeners.push(handler);
         };
 /*jslint unparam: false*/
+        /**
+         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function(callback) {
+            removeEvent(element, "mouseup", checkSelection);
+            removeEvent(element, "keyup", checkSelection);
+            removeEvent(element, "keydown", checkSelection);
+            callback();
+        };
+
+        // init
         listenEvent(element, "mouseup", checkSelection);
         listenEvent(element, "keyup", checkSelection);
         listenEvent(element, "keydown", checkSelection);
@@ -995,6 +1035,7 @@ odf.OdfCanvas = (function () {
             annotationsPane,
             allowAnnotations = false,
             annotationManager,
+            webodfcss,
             fontcss,
             stylesxmlcss,
             positioncss,
@@ -1004,12 +1045,6 @@ odf.OdfCanvas = (function () {
             eventHandlers = {},
             editparagraph,
             loadingQueue = new LoadingQueue();
-
-        addWebODFStyleSheet(doc);
-        pageSwitcher = new PageSwitcher(addStyleSheet(doc));
-        fontcss = addStyleSheet(doc);
-        stylesxmlcss = addStyleSheet(doc);
-        positioncss = addStyleSheet(doc);
 
         /**
          * Load all the images that are inside an odf element.
@@ -1520,7 +1555,9 @@ odf.OdfCanvas = (function () {
         this.enableAnnotations = function (allow) {
             if (allow !== allowAnnotations) {
                 allowAnnotations = allow;
-                handleAnnotations(odfcontainer.rootElement);
+                if (odfcontainer) {
+                    handleAnnotations(odfcontainer.rootElement);
+                }
             }
         };
 
@@ -1648,10 +1685,47 @@ odf.OdfCanvas = (function () {
             return element;
         };
 
+        /**
+         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function(callback) {
+            var head = doc.getElementsByTagName('head')[0];
+            // TODO: anything to clean with annotationManager?
+            if (annotationsPane.parentNode) {
+                annotationsPane.parentNode.removeChild(annotationsPane);
+            }
+            element.removeChild(sizer);
+            // remove all styles
+            head.removeChild(webodfcss);
+            head.removeChild(fontcss);
+            head.removeChild(stylesxmlcss);
+            head.removeChild(positioncss);
+
+            // TODO: loadingQueue, make sure it is empty
+
+            selectionWatcher.destroy(function (err) {
+                if (err) {
+                    callback(err);
+                } else {
+                    pageSwitcher.destroy(callback);
+                }
+            });
+        };
+
+        function init() {
+            webodfcss = addWebODFStyleSheet(doc);
+            pageSwitcher = new PageSwitcher(addStyleSheet(doc));
+            fontcss = addStyleSheet(doc);
+            stylesxmlcss = addStyleSheet(doc);
+            positioncss = addStyleSheet(doc);
 // TODO: where are all these event listeners used? this one gets in the way for SessionController
 // perhaps all the event listening in this class currently could be factored out to another class
 // which then can be created and attached for the current use cases with that event listening?
 //         listenEvent(element, "click", processClick);
+        }
+
+        init();
     };
     return odf.OdfCanvas;
 }());

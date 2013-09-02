@@ -362,16 +362,53 @@ gui.SessionView = (function () {
             }
         }
 
+        /**
+         * @param {!Object} info
+         * @return {undefined}
+         */
+        function onParagraphChanged(info) {
+            highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
+        }
+
+        /**
+         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function(callback) {
+            var odtDocument = session.getOdtDocument(),
+                memberModel = session.getMemberModel(),
+                editInfoArray = Object.keys(editInfoMap).map(function(keyname) { return editInfoMap[keyname]; });
+
+            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
+
+            caretManager.getCarets().forEach(function(caret) {
+                memberModel.unsubscribeMemberDetailsUpdates(caret.getCursor().getMemberId(), renderMemberData);
+            });
+
+            avatarInfoStyles.parentNode.removeChild(avatarInfoStyles);
+
+            (function destroyEditInfo(i, err){
+                if (err) {
+                    callback(err);
+                } else {
+                    if(i < editInfoArray.length) {
+                        editInfoArray[i].destroy(function(err){ destroyEditInfo(i+1, err);});
+                    } else {
+                        callback();
+                    }
+                }
+            }(0, undefined));
+        };
+
         function init() {
             var odtDocument = session.getOdtDocument(),
                 head = document.getElementsByTagName('head')[0];
 
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, function (info) {
-                highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
-            });
-
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
 
             // Add a css sheet for user info-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');

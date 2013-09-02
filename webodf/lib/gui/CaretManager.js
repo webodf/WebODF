@@ -58,6 +58,13 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
+     * @returns {!Array.<!gui.Caret>}
+     */
+    function getCarets() {
+        return Object.keys(carets).map(function(memberid) { return carets[memberid]; });
+    }
+
+    /**
      * @return {!Element}
      */
     function getCanvasElement() {
@@ -163,13 +170,39 @@ gui.CaretManager = function CaretManager(sessionController) {
     /**
      * @returns {!Array.<!gui.Caret>}
      */
-    this.getCarets = function() {
-        return Object.keys(carets).map(function(memberid) { return carets[memberid]; });
+    this.getCarets = getCarets;
+
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        var odtDocument = sessionController.getSession().getOdtDocument(),
+            canvasElement = getCanvasElement(),
+            caretArray = getCarets();
+
+        odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
+        odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
+        odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
+
+        canvasElement.onfocus = null;
+        canvasElement.onblur = null;
+
+        (function destroyCaret(i, err){
+            if (err) {
+                callback(err);
+            } else {
+                if(i < caretArray.length) {
+                    caretArray[i].destroy(function(err){ destroyCaret(i+1, err);});
+                } else {
+                    callback();
+                }
+            }
+        }(0, undefined));
     };
 
     function init() {
-        var session = sessionController.getSession(),
-            odtDocument = session.getOdtDocument(),
+        var odtDocument = sessionController.getSession().getOdtDocument(),
             canvasElement = getCanvasElement();
 
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);

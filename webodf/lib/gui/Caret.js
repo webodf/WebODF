@@ -199,6 +199,21 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         }
     };
 
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function(callback) {
+        avatar.destroy(function(err) {
+            if (err) {
+                callback(err);
+            } else {
+                cursorNode.removeChild(span);
+                callback();
+            }
+        });
+    };
+
     function init() {
         var dom = cursor.getOdtDocument().getDOM(),
             htmlns = dom.documentElement.namespaceURI;
