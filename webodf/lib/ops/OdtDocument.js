@@ -777,6 +777,15 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
+    this.close = function(callback) {
+        // TODO: check if anything needs to be cleaned up
+        callback();
+    };
+
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
     this.destroy = function(callback) {
         callback();
     };

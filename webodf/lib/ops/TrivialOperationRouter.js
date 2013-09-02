@@ -87,4 +87,8 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
 
         playbackFunction(timedOp);
     };
+
+    this.close = function (cb) {
+        cb();
+    };
 };

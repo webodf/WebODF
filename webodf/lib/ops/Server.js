@@ -74,6 +74,15 @@ ops.Server.prototype.login = function (login, password, successCb, failCb) {"use
 ops.Server.prototype.joinSession = function (userId, sessionId, successCb, failCb) {"use strict"; };
 
 /**
+ * @param {!string} sessionId
+ * @param {!string} memberId
+ * @param {!function(!string)} successCb
+ * @param {function()=} failCb
+ * @return {undefined}
+ */
+ops.Server.prototype.leaveSession = function (sessionId, memberId, successCb, failCb) {"use strict"; };
+
+/**
  * TODO: move to SessionModel or elsewhere
  * @param {!string} sessionId
  * @return {!string}

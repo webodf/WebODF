@@ -175,6 +175,14 @@ define("webodf/editor/server/nowjs/MemberModel", [], function () {
             }
         };
 
+    /*jslint emptyblock: true*/
+        this.close = function (cb) {
+            // TODO: stop timers...
+            // (or in other words: implement this thing...)
+            cb();
+        };
+    /*jslint emptyblock: false*/
+
         nowObject.updateUserDetails = function (userId, udata) {
             // this will call all subscribers
             cacheUserDatum(userId, udata?{

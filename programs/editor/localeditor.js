@@ -62,7 +62,15 @@ var webodfEditor = (function () {
 
     var editorInstance = null,
         booting = false,
+        localMemberId = "localuser",
         loadedFilename;
+
+    /**
+     * @return {undefined}
+     */
+     function startEditing() {
+         editorInstance.startEditing();
+     }
 
     /**
      * extract document url from the url-fragment
@@ -85,18 +93,20 @@ var webodfEditor = (function () {
         var file, files, reader;
         files = (evt.target && evt.target.files) ||
             (evt.dataTransfer && evt.dataTransfer.files);
-        function onloadend() {
+        function onLoadEnd() {
             if (reader.readyState === 2) {
                 runtime.registerFile(file.name, reader.result);
                 loadedFilename = file.name;
-                editorInstance.loadDocument(file.name);
+                editorInstance.openDocument(loadedFilename, localMemberId, startEditing);
             }
         }
         if (files && files.length === 1) {
-            file = files[0];
-            reader = new FileReader();
-            reader.onloadend = onloadend;
-            reader.readAsArrayBuffer(file);
+            editorInstance.close(function() {
+                file = files[0];
+                reader = new FileReader();
+                reader.onloadend = onLoadEnd;
+                reader.readAsArrayBuffer(file);
+            });
         } else {
             alert("File could not be opened in this browser.");
         }
@@ -162,8 +172,6 @@ var webodfEditor = (function () {
      *
      * docUrl:        if given it is used as the url to the document to load
      *
-     * callback:      callback to be called as soon as the document is loaded
-     *
      */
     function boot(args) {
         var editorOptions = {};
@@ -174,24 +182,14 @@ var webodfEditor = (function () {
         if (args.saveCallback) {
             editorOptions.saveCallback = args.saveCallback;
         }
-        if (args.cursorAddedCallback) {
-            editorOptions.cursorAddedCallback = args.cursorAddedCallback;
-        }
-        if (args.cursorRemovedCallback) {
-            editorOptions.cursorRemovedCallback = args.cursorRemovedCallback;
-        }
-        if (args.registerCallbackForShutdown) {
-            editorOptions.registerCallbackForShutdown = args.registerCallbackForShutdown;
-        } else {
-            editorOptions.registerCallbackForShutdown = function (callback) {
-                window.onunload = callback;
-            };
-        }
+        // TODO:
+//             editorOptions.registerCallbackForShutdown = function (callback) {
+//                 window.onunload = callback;
+//             };
 
         // start the editor
         booting = true;
         editorOptions = editorOptions || {};
-        editorOptions.memberid = "localuser";
         editorOptions.loadCallback = load;
         editorOptions.saveCallback = save;
 
@@ -204,12 +202,7 @@ var webodfEditor = (function () {
         require({ }, ["webodf/editor/Editor"],
             function (Editor) {
                 editorInstance = new Editor(editorOptions);
-                editorInstance.initAndLoadDocument(args.docUrl, function (editorSession) {
-                    editorSession.startEditing();
-                    if (args.callback) {
-                        args.callback(editorInstance);
-                    }
-                });
+                editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
             }
         );
     }

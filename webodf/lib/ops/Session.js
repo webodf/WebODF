@@ -123,6 +123,26 @@ ops.Session = function Session(odfCanvas) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
+    this.close = function(callback) {
+        operationRouter.close(function(err) {
+            if (err) {
+                callback(err);
+            } else {
+                memberModel.close(function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        odtDocument.close(callback);
+                    }
+                });
+            }
+        });
+    };
+
+    /**
+     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
     this.destroy = function(callback) {
         /*
         operationRouter.destroy(function(err) {

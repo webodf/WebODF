@@ -67,3 +67,13 @@ ops.OperationRouter.prototype.setPlaybackFunction = function (playback_func) {"u
  * @return {undefined}
  */
 ops.OperationRouter.prototype.push = function (op) {"use strict"; };
+
+/**
+ * Requests a gracefull shutdown of the Operation Router.
+ * Buffered operations shall be sent to the server.
+ * A callback is called, getting passed an error object in case of error.
+ *
+ * @param {!function(!Object=)} callback
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.close = function (callback) {"use strict"; };

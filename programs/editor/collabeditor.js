@@ -64,7 +64,76 @@ var webodfEditor = (function () {
     var editorInstance = null,
         serverFactory = null,
         server = null,
+        editorOptions = {},
+        currentPageId = null,
+        sessionList,
+        userId, token,
         booting = false;
+
+    /**
+     * Switches the pages by hiding the old one and unhiding the new
+     * @param {!string} pageId
+     * @returns {undefined}
+     */
+    function switchToPage(pageId) {
+        if (currentPageId) {
+            document.getElementById(currentPageId).style.display = "none";
+        }
+        currentPageId = pageId;
+        document.getElementById(pageId).style.display = "";
+    }
+
+    /**
+     * @return {undefined}
+     */
+     function startEditing() {
+         editorInstance.startEditing();
+     }
+
+    /**
+     * @returns {undefined}
+     */
+    function showSessions() {
+        switchToPage("sessionListContainer");
+
+        sessionList.setUpdatesEnabled(true);
+    }
+
+    /**
+     * @param {!string} sessionId
+     * @returns {undefined}
+     */
+    function enterSession(sessionId) {
+        switchToPage("mainContainer");
+
+        sessionList.setUpdatesEnabled(false);
+
+        server.joinSession(userId, sessionId, function(memberId) {
+            if (!editorInstance) {
+                require({ }, ["webodf/editor/Editor"],
+                    function (Editor) {
+                        editorOptions = editorOptions || {}; // TODO: cleanup
+                        editorOptions.networkSecurityToken = token;
+                        editorOptions.closeCallback = function() {
+                            editorInstance.endEditing();
+                            editorInstance.close(function() {
+                                server.leaveSession(sessionId, memberId, function() {
+                                    showSessions();
+                                });
+                            });
+                        };
+
+                        editorInstance = new Editor(editorOptions, server, serverFactory);
+
+                        // load the document and get called back when it's live
+                        editorInstance.openSession(sessionId, memberId, startEditing);
+                    }
+                );
+            } else {
+                editorInstance.openSession(sessionId, memberId, startEditing);
+            }
+        });
+    }
 
     /**
      * start the login process by offering a login/password prompt.
@@ -76,54 +145,39 @@ var webodfEditor = (function () {
      * @returns {undefined}
      */
     function startLoginProcess(callback) {
-        var userid, token;
-
         booting = true;
 
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
-        /**
-         * Switches the pages by hiding the old one and unhiding the new
-         * @param {?string} fromPageId
-         * @param {!string} toPageId
-         */
-        function switchPage(fromPageId, toPageId) {
-            if (fromPageId) {
-                document.getElementById(fromPageId).style.display = "none";
-            }
-            document.getElementById(toPageId).style.display = "";
-        }
-
-        function enterSession(selectedSessionId) {
-            switchPage("sessionListContainer", "mainContainer");
-
-            callback(selectedSessionId, userid, token);
-        }
-
-        function showSessions() {
+        function showSessionsAfterLogin() {
             require({ }, ["webodf/editor/SessionListView"],
                 function (SessionListView) {
                     var sessionListDiv = document.getElementById("sessionList"),
-                        sessionList = new serverFactory.createSessionList(server),
-                        sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
+                        sessionListView;
 
-                    switchPage("loginContainer", "sessionListContainer");
+                    sessionList = new serverFactory.createSessionList(server);
+                    sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
+
+                    switchToPage("sessionListContainer");
                 }
             );
         }
 
         function loginSuccess(userData) {
             runtime.log("connected:" + userData.full_name);
-            userid = userData.uid;
+            userId = userData.uid;
             token = userData.securityToken || null;
 
-            showSessions();
+            showSessionsAfterLogin();
         }
 
         function loginFail(result) {
             alert("Login failed: " + result);
         }
 
+        /**
+         * @returns {!boolean}
+         */
         function onLoginSubmit() {
             server.login(document.loginForm.login.value, document.loginForm.password.value, loginSuccess, loginFail);
 
@@ -133,7 +187,7 @@ var webodfEditor = (function () {
 
         // bring up the login form
         document.loginForm.Submit.onclick = onLoginSubmit;
-        switchPage(null, "loginContainer");
+        switchToPage("loginContainer");
     }
 
     /**
@@ -145,31 +199,13 @@ var webodfEditor = (function () {
      *
      * callback:  callback to be called as soon as the document is loaded
      *
+     * @returns {undefined}
      */
     function boot(args) {
-        var editorOptions = {},
-            loginProcedure = startLoginProcess;
         runtime.assert(!booting, "editor creation already in progress");
 
         if (args.saveCallback) {
             editorOptions.saveCallback = args.saveCallback;
-        }
-        if (args.cursorAddedCallback) {
-            editorOptions.cursorAddedCallback = args.cursorAddedCallback;
-        }
-        if (args.cursorRemovedCallback) {
-            editorOptions.cursorRemovedCallback = args.cursorRemovedCallback;
-        }
-        if (args.registerCallbackForShutdown) {
-            editorOptions.registerCallbackForShutdown = args.registerCallbackForShutdown;
-        } else {
-            editorOptions.registerCallbackForShutdown = function (callback) {
-                window.onunload = callback;
-            };
-        }
-
-        if (args.loginProcedure) {
-            loginProcedure = args.loginProcedure;
         }
 
         // start the editor with network
@@ -183,44 +219,8 @@ var webodfEditor = (function () {
             // the parameter to the callback is a string with the possible
             // values: "unavailable", "timeout", "ready"
             server.connect(8000, function (state) {
-                var joinSession = server.joinSession;
-
                 if (state === "ready") {
-                    if (args.joinSession) {
-                        joinSession = args.joinSession;
-                    }
-
-                    loginProcedure(function (sessionId, userId, token) {
-                        // if pre-authentication has happened:
-                        if (token) {
-                            server.setToken(token);
-                        }
-
-                        joinSession(userId, sessionId, function(memberId) {
-                            runtime.assert(sessionId, "sessionId needs to be specified");
-                            runtime.assert(memberId, "memberId needs to be specified");
-                            runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
-
-                            editorOptions = editorOptions || {};
-                            editorOptions.memberid = memberId;
-                            editorOptions.networked = true;
-                            editorOptions.networkSecurityToken = token;
-
-                            require({ }, ["webodf/editor/Editor"],
-                                function (Editor) {
-                                    editorInstance = new Editor(editorOptions, server, serverFactory);
-
-                                    // load the document and get called back when it's live
-                                    editorInstance.loadSession(sessionId, function (editorSession) {
-                                        editorSession.startEditing();
-                                        if (args.callback) {
-                                            args.callback(editorInstance);
-                                        }
-                                    });
-                                }
-                            );
-                        });
-                    });
+                    startLoginProcess();
                 }
             });
         });

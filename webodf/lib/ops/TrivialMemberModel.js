@@ -72,4 +72,8 @@ ops.TrivialMemberModel = function TrivialMemberModel() {
      */
     this.unsubscribeMemberDetailsUpdates = function (memberId, subscriber) {
     };
+
+    this.close = function (cb) {
+        cb();
+    };
 };

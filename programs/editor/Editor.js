@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -31,6 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global runtime, define, document, odf, ops, window, gui, alert, saveAs, Blob */
 
 define("webodf/editor/Editor", [
@@ -49,17 +51,14 @@ define("webodf/editor/Editor", [
         Tools) {
         "use strict";
 
+        runtime.loadClass('odf.OdfCanvas');
+
         /**
          * @constructor
-         * @param {{networked:boolean=,
-         *          memberid:!string,
-         *          unstableFeaturesEnabled:boolean=,
+         * @param {{unstableFeaturesEnabled:boolean=,
          *          loadCallback:function()=,
          *          saveCallback:function()=,
          *          closeCallback:function()=,
-         *          cursorAddedCallback:function(!string)=,
-         *          cursorRemovedCallback:function(!string)=,
-         *          registerCallbackForShutdown:function(!function())= }} args
          * @param {!ops.Server=} server
          * @param {!ServerFactory=} serverFactory
          */
@@ -67,28 +66,26 @@ define("webodf/editor/Editor", [
 
             var self = this,
                 // Private
-                memberid = args.memberid,
                 session,
                 editorSession,
-                memberList,
+                mainContainer,
+                memberListView,
                 tools,
-                networked = args.networked === true,
-                opRouter,
-                memberModel,
                 loadOdtFile = args.loadCallback,
                 saveOdtFile = args.saveCallback,
                 close = args.closeCallback,
-                cursorAddedHandler = args.cursorAddedCallback,
-                cursorRemovedHandler = args.cursorRemovedCallback,
-                registerCallbackForShutdown = args.registerCallbackForShutdown,
-                documentUrl,
-                odfCanvas;
+                odfCanvas,
+                pendingMemberId,
+                pendingEditorReadyCallback;
 
-            function translator(key, context) {
-                if (undefined === myResources[key]) {
-                    return "translation missing: " + key;
+            function getFileBlob(cbSuccess, cbError) {
+                var odfContainer = odfCanvas.odfContainer();
+
+                if (odfContainer) {
+                    odfContainer.createByteArray(cbSuccess, cbError);
+                } else {
+                    cbError("No odfContainer!");
                 }
-                return myResources[key];
             }
 
             /**
@@ -98,37 +95,224 @@ define("webodf/editor/Editor", [
              * which will insert the the cursor.
              *
              * @param {!string} initialDocumentUrl
+             * @param {!string} memberId
              * @param {!function()} editorReadyCallback
+             * @return {undefined}
              */
-            function initGuiAndDoc(initialDocumentUrl, editorReadyCallback) {
-                var odfElement, mainContainer,
-                    editorPane, memberListPane,
-                    inviteButton,
-                    viewOptions = {
-                        editInfoMarkersInitiallyVisible: networked,
-                        caretAvatarsInitiallyVisible: networked,
-                        caretBlinksOnRangeSelect: true
-                    },
-                    memberListDiv = document.getElementById('memberList');
+            function initDocLoading(initialDocumentUrl, memberId, editorReadyCallback) {
+                runtime.assert(initialDocumentUrl, "document should be defined here.");
+                runtime.assert(memberId !== undefined, "memberId should be defined here.");
+                runtime.assert(!pendingEditorReadyCallback, "pendingEditorReadyCallback should not exist here.");
+                runtime.assert(!editorSession, "editorSession should not exist here.");
+                runtime.assert(!session, "session should not exist here.");
 
-                if (networked) {
-                    runtime.assert(memberListDiv, "missing memberList div in HTML");
+                pendingMemberId = memberId;
+                pendingEditorReadyCallback = editorReadyCallback;
+
+                odfCanvas.load(initialDocumentUrl);
+                odfCanvas.setEditable(false);
+            }
+
+
+            /**
+             * open the document,
+             * call editorReadyCallback once everything is done.
+             *
+             * @param {!string} docUrl
+             * @param {!string} memberId
+             * @param {!function()} editorReadyCallback
+             * @return {undefined}
+             */
+            this.openDocument = function (docUrl, memberId, editorReadyCallback) {
+                initDocLoading(docUrl, memberId, editorReadyCallback);
+            };
+
+            /**
+             * @param {!string} filename
+             * @param {?function()} callback
+             * @return {undefined}
+             */
+            this.saveDocument = function (filename, callback) {
+                function onsuccess(data) {
+                    var mimebase = "application/vnd.oasis.opendocument.",
+                        mimetype = mimebase + "text",
+                        blob;
+                    filename = filename || "doc.odt";
+                    if (filename.substr(-4) === ".odp") {
+                        mimetype = mimebase + "presentation";
+                    } else if (filename.substr(-4) === ".ods") {
+                        mimetype = mimebase + "spreadsheet";
+                    }
+                    blob = new Blob([data.buffer], {type: mimetype});
+                    saveAs(blob, filename);
+                }
+                function onerror(error) {
+                    alert(error);
                 }
 
-                runtime.loadClass('odf.OdfCanvas');
+                getFileBlob(onsuccess, onerror);
+            };
 
-                // we might need it later
-                documentUrl = initialDocumentUrl;
-                runtime.assert(documentUrl, "document should be defined here.");
+            /**
+             * open the initial document of an editing-session,
+             * request a replay of previous operations, call
+             * editorReadyCallback once everything is done.
+             *
+             * @param {!string} sessionId
+             * @param {!string} memberId
+             * @param {!function()} editorReadyCallback
+             * @return {undefined}
+             */
+            this.openSession = function (sessionId, memberId, editorReadyCallback) {
+                initDocLoading(server.getGenesisUrl(sessionId), memberId, function () {
+                    var opRouter, memberModel;
+                    // overwrite router and member model
+                    // TODO: serverFactory should be a backendFactory,
+                    // and there should be a backendFactory for local editing
+                    opRouter = serverFactory.createOperationRouter(sessionId, memberId, server);
+                    session.setOperationRouter(opRouter);
 
-                runtime.assert(memberid !== undefined, "memberid should be defined here.");
+                    memberModel = serverFactory.createMemberModel(sessionId, server);
+                    session.setMemberModel(memberModel);
 
-                odfElement = document.getElementById("canvas");
-                runtime.assert(odfElement, "initGuiAndDoc failed to get odf canvas from html");
-                odfCanvas = new odf.OdfCanvas(odfElement);
-                // make the canvas accessible to users of editor.js
-                self.odfCanvas = odfCanvas;
+                    opRouter.requestReplay(function done() {
+                        editorReadyCallback();
+                    });
 
+                });
+            };
+
+            /**
+             * Closes the current editing running editing (polling-timer),
+             * cleanup.
+             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @return {undefined}
+             */
+            this.close = function (callback) {
+                runtime.assert(session, "session should exist here.");
+                // TODO: there is a better pattern for this instead of unrolling
+                editorSession.close(function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        session.close(function(err) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                // now also destroy session, will not be reused for new document
+                                if (memberListView) {
+                                    memberListView.setEditorSession(undefined);
+                                }
+                                editorSession.destroy(function(err) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        editorSession = undefined;
+                                        session.destroy(function(err) {
+                                            if (err) {
+                                                callback(err);
+                                            } else {
+                                                session = undefined;
+                                                callback();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            };
+
+            /**
+             * Adds a cursor and enables the tools and allows modifications.
+             * Should be called inside/after editorReadyCallback.
+             * TODO: turn this and endEditing() into readonly switch
+             * @return {undefined}
+             */
+            this.startEditing = function () {
+                runtime.assert(editorSession, "editorSession should exist here.");
+
+                tools.setEditorSession(editorSession);
+                editorSession.sessionController.startEditing();
+            };
+
+            /**
+             * Removes the cursor and disables the tools and allows modifications.
+             * Should be called before closeDocument, if startEditing was called before
+             * @return {undefined}
+             */
+            this.endEditing = function () {
+                runtime.assert(editorSession, "editorSession should exist here.");
+
+                tools.setEditorSession(undefined);
+                editorSession.sessionController.endEditing();
+            };
+
+            /**
+             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @return {undefined}
+             */
+            this.destroy = function (callback) {
+                var destroyMemberListView = memberListView ? memberListView.destroy : function(cb) { cb(); };
+
+                // TODO: decide if some forced close should be done here instead of enforcing proper API usage
+                runtime.assert(!session, "session should not exist here.");
+
+                // TODO: investigate what else needs to be done
+                mainContainer.destroyRecursive(true);
+
+                destroyMemberListView(function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        tools.destroy(function(err) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                odfCanvas.destroy(function(err) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        document.translator = null;
+                                        document.translateContent = null;
+                                        callback();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            };
+
+            // init
+            function init() {
+                var editorPane, memberListPane,
+                    inviteButton,
+                    canvasElement = document.getElementById("canvas"),
+                    memberListElement = document.getElementById('memberList'),
+                    collabEditing = Boolean(server),
+                    directStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
+                    // annotations not yet properly supported for OT
+                    annotationsEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
+                     // undo manager is not yet integrated with collaboration
+                    undoRedoEnabled = (! collabEditing),
+                    closeCallback;
+
+                if (collabEditing) {
+                    runtime.assert(memberListElement, 'missing "memberList" div in HTML');
+                }
+
+                runtime.assert(canvasElement, 'missing "canvas" div in HTML');
+
+                // setup translations
+                // TODO: move from document instance into webodf namespace
+                function translator(key, context) {
+                    if (undefined === myResources[key]) {
+                        return "translation missing: " + key;
+                    }
+                    return myResources[key];
+                }
                 document.translator = translator;
 
                 function translateContent(node) {
@@ -151,57 +335,6 @@ define("webodf/editor/Editor", [
                 }
                 document.translateContent = translateContent;
 
-                odfCanvas.addListener("statereadychange", function () {
-                    var undoRedoEnabled = Boolean(! server);
-
-                    if (!editorReadyCallback) {
-                        // already called once, restart session and return
-                        // undo manager is not yet integrated with collaboration
-                        if (undoRedoEnabled) {
-                            editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
-                        }
-                        editorSession.startEditing();
-                        return;
-                    }
-                    // Allow annotations
-                    odfCanvas.enableAnnotations((! server) || args.unstableFeaturesEnabled);
-
-                    session = new ops.Session(odfCanvas);
-                    editorSession = new EditorSession(session, memberid, {
-                        viewOptions: viewOptions
-                    });
-                    // undo manager is not yet integrated with collaboration
-                    if (undoRedoEnabled) {
-                        editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
-                    }
-
-                    if (memberListDiv) {
-                        memberList = new MemberListView(editorSession, memberListDiv);
-                    }
-
-                    if (registerCallbackForShutdown) {
-                        registerCallbackForShutdown(editorSession.endEditing);
-                    }
-
-                    tools = new Tools({
-                        loadOdtFile:loadOdtFile,
-                        saveOdtFile: saveOdtFile,
-                        close: close,
-                        // undo manager is not yet integrated with collaboration
-                        undoRedoEnabled: undoRedoEnabled,
-                        // direct styling not yet properly supported for OT
-                        directStylingEnabled: (! server) || args.unstableFeaturesEnabled,
-                        // annotations not yet properly supported for OT
-                        annotationsEnabled: (! server) || args.unstableFeaturesEnabled
-                    });
-                    tools.setEditorSession(editorSession);
-
-                    editorReadyCallback();
-                    editorReadyCallback = null;
-                });
-                odfCanvas.load(initialDocumentUrl);
-                odfCanvas.setEditable(false);
-
                 // App Widgets
                 mainContainer = new BorderContainer({}, 'mainContainer');
 
@@ -210,113 +343,66 @@ define("webodf/editor/Editor", [
                 }, 'editor');
                 mainContainer.addChild(editorPane);
 
-                if (networked && memberListDiv) {
+                if (collabEditing) {
                     memberListPane = new ContentPane({
                         region: 'right',
                         title: translator("members")
                     }, 'members');
                     mainContainer.addChild(memberListPane);
+                    memberListView = new MemberListView(memberListElement);
                 }
 
                 mainContainer.startup();
 
                 if (window.inviteButtonProxy) {
                     inviteButton = document.getElementById('inviteButton');
-                    if (inviteButton) {
-                        inviteButton.innerText = translator("inviteMembers");
-                        inviteButton.style.display = "block";
-                        inviteButton.onclick = window.inviteButtonProxy.clicked;
-                    }
+                    runtime.assert(inviteButton, 'missing "inviteButton" div in HTML');
+                    inviteButton.innerText = translator("inviteMembers");
+                    inviteButton.style.display = "block";
+                    inviteButton.onclick = window.inviteButtonProxy.clicked;
                 }
-            }
 
-            /**
-             * create the editor, load the starting document,
-             * call editorReadyCallback once everything is done.
-             *
-             * @param {!string} docUrl
-             * @param {!function()} editorReadyCallback
-             * @return {undefined}
-             */
-            self.initAndLoadDocument = function (docUrl, editorReadyCallback) {
-                initGuiAndDoc(docUrl, function () {
-                    editorReadyCallback(editorSession);
-                });
-            };
-
-            /**
-             * Load a document in an editor that has already been initialized.
-             */
-            self.loadDocument = function (docUrl) {
-                editorSession.endEditing();
-                odfCanvas.load(docUrl);
-            };
-
-            /**
-             * @param {?function()} callback
-             * @return {undefined}
-             */
-            self.saveDocument = function (filename, callback) {
-                function onsuccess(data) {
-                    var mimebase = "application/vnd.oasis.opendocument.",
-                        mimetype = mimebase + "text",
-                        blob;
-                    filename = filename || "doc.odt";
-                    if (filename.substr(-4) === ".odp") {
-                        mimetype = mimebase + "presentation";
-                    } else if (filename.substr(-4) === ".ods") {
-                        mimetype = mimebase + "spreadsheet";
-                    }
-                    blob = new Blob([data.buffer], {type: mimetype});
-                    saveAs(blob, filename);
-                }
-                function onerror(error) {
-                    alert(error);
-                }
-                var doc = odfCanvas.odfContainer();
-                doc.createByteArray(onsuccess, onerror);
-            };
-
-            /**
-             * create the editor, load the starting document of an
-             * editing-session, request a replay of previous operations, call
-             * editorReadyCallback once everything is done.
-             *
-             * @param {!string} sessionId
-             * @param {?function()} editorReadyCallback
-             */
-            self.loadSession = function (sessionId, editorReadyCallback) {
-                initGuiAndDoc(server.getGenesisUrl(sessionId), function () {
-                    // get router and member model
-                    opRouter = opRouter || serverFactory.createOperationRouter(sessionId, memberid, server);
-                    session.setOperationRouter(opRouter);
-
-                    memberModel = memberModel  || serverFactory.createMemberModel(sessionId, server);
-                    session.setMemberModel(memberModel);
-
-                    opRouter.requestReplay(function done() {
-                        var odtDocument = session.getOdtDocument();
-                        if (cursorAddedHandler) {
-                            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, function (cursor) {
-                                cursorAddedHandler(cursor.getMemberId());
-                            });
-                        }
-                        if (cursorRemovedHandler) {
-                            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, function (memberId) {
-                                cursorRemovedHandler(memberId);
-                            });
-                        }
-
-                        editorReadyCallback(editorSession);
+                tools = new Tools({
+                        loadOdtFile: loadOdtFile,
+                        saveOdtFile: saveOdtFile,
+                        close: close,
+                        directStylingEnabled: directStylingEnabled,
+                        annotationsEnabled: annotationsEnabled,
+                        undoRedoEnabled: undoRedoEnabled
                     });
 
-                });
-            };
+                odfCanvas = new odf.OdfCanvas(canvasElement);
+                odfCanvas.enableAnnotations(annotationsEnabled);
 
-            // access to member model
-            self.getMemberModel = function () {
-                return memberModel;
-            };
+                odfCanvas.addListener("statereadychange", function () {
+                    var viewOptions = {
+                            editInfoMarkersInitiallyVisible: collabEditing,
+                            caretAvatarsInitiallyVisible: collabEditing,
+                            caretBlinksOnRangeSelect: true
+                        };
+
+                    // create session around loaded document
+                    session = new ops.Session(odfCanvas);
+                    editorSession = new EditorSession(session, pendingMemberId, {
+                        viewOptions: viewOptions
+                    });
+                    if (undoRedoEnabled) {
+                        editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
+                    }
+
+                    if (memberListView) {
+                        memberListView.setEditorSession(editorSession);
+                    }
+
+                    // and report back to caller
+                    pendingEditorReadyCallback();
+                    // reset
+                    pendingEditorReadyCallback = null;
+                    pendingMemberId = null;
+                });
+            }
+
+            init();
         }
         return Editor;
     });

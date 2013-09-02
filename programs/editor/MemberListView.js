@@ -32,6 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define,runtime */
 
 define("webodf/editor/MemberListView",
@@ -40,11 +41,18 @@ define("webodf/editor/MemberListView",
   function (EditorSession) {
     "use strict";
 
-    return function MemberListView(editorSession, memberListDiv) {
+    /**
+     * @param {!Element} memberListDiv
+     * @constructor
+     */
+    return function MemberListView(memberListDiv) {
+        var editorSession = null;
+
         runtime.assert(memberListDiv, "memberListDiv unavailable");
 
         /**
          * @param {!string} memberId
+         * @return {undefined}
          */
         function updateAvatarButton(memberId, memberDetails) {
             var node = memberListDiv.firstChild;
@@ -78,6 +86,7 @@ define("webodf/editor/MemberListView",
 
         /**
          * @param {!string} memberId
+         * @return {undefined}
          */
         function createAvatarButton(memberId) {
             var doc = memberListDiv.ownerDocument,
@@ -114,6 +123,7 @@ define("webodf/editor/MemberListView",
 
         /**
          * @param {!string} memberId
+         * @return {undefined}
          */
         function removeAvatarButton(memberId) {
             var node = memberListDiv.firstChild;
@@ -128,6 +138,7 @@ define("webodf/editor/MemberListView",
 
         /**
          * @param {!string} memberId
+         * @return {undefined}
          */
         function addMember(memberId) {
             createAvatarButton(memberId);
@@ -136,14 +147,54 @@ define("webodf/editor/MemberListView",
 
         /**
          * @param {!string} memberId
+         * @return {undefined}
          */
         function removeMember(memberId) {
             editorSession.unsubscribeMemberDetailsUpdates(memberId, updateAvatarButton);
             removeAvatarButton(memberId);
+        }
+
+        function disconnectFromEditorSession() {
+            var node, nextNode;
+
+            if (editorSession) {
+                // unsubscribe from editorSession
+                editorSession.unsubscribe(EditorSession.signalMemberAdded, addMember);
+                editorSession.unsubscribe(EditorSession.signalMemberRemoved, removeMember);
+                // remove all current avatars
+                node = memberListDiv.firstChild;
+                while (node) {
+                    nextNode = node.nextSibling;
+                    if (node.memberId) {
+                        editorSession.unsubscribeMemberDetailsUpdates(node.memberId, updateAvatarButton);
+                    }
+                    memberListDiv.removeChild(node);
+                    node = nextNode;
+                }
+            }
+        }
+
+        /**
+         * @param {!EditorSession} session
+         * @return {undefined}
+         */
+        this.setEditorSession = function(session) {
+            disconnectFromEditorSession();
+
+            editorSession = session;
+            if (editorSession) {
+                editorSession.subscribe(EditorSession.signalMemberAdded, addMember);
+                editorSession.subscribe(EditorSession.signalMemberRemoved, removeMember);
+            }
         };
 
-        // init
-        editorSession.subscribe(EditorSession.signalMemberAdded, addMember);
-        editorSession.subscribe(EditorSession.signalMemberRemoved, removeMember);
+        /**
+         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function (callback) {
+            disconnectFromEditorSession();
+            callback();
+        };
     };
 });

@@ -68,3 +68,13 @@ ops.MemberModel.prototype.getMemberDetailsAndUpdates = function (memberId, subsc
  * @return {undefined}
  */
 ops.MemberModel.prototype.unsubscribeMemberDetailsUpdates = function (memberId, subscriber) {"use strict"; };
+
+/**
+ * Requests a gracefull shutdown of the Member Model
+ * No more network activity is necessary.
+ * A callback is called, getting passed an error object in case of error.
+ *
+ * @param {!function(!Object=)} callback
+ * @return {undefined}
+ */
+ops.MemberModel.prototype.close = function (callback) {"use strict"; };

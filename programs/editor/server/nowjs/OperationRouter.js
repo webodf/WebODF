@@ -165,5 +165,12 @@ define("webodf/editor/server/nowjs/OperationRouter", [], function () {
                 }
             );
         };
+
+        /*jslint emptyblock: true, unparam: true*/
+        this.close = function (cb) {
+            // TODO: implement this.
+            cb();
+        };
+        /*jslint emptyblock: false, unparam: false*/
     };
 });

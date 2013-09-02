@@ -127,5 +127,16 @@ define("webodf/editor/server/nowjs/Server", [], function () {
         this.joinSession = function (userId, sessionId, successCb, failCb) {
             nowObject.joinSession(userId, sessionId, function(memberId) { nowObject.memberid = memberId; successCb(memberId);}, failCb);
         };
+
+        /**
+         * @param {!string} sessionId
+         * @param {!string} memberId
+         * @param {!function()} successCb
+         * @param {function()=} failCb
+         * @return {undefined}
+         */
+        this.leaveSession = function (sessionId, memberId, successCb, failCb) {
+            nowObject.leaveSession(sessionId, memberId, function() { delete nowObject.memberid; successCb(); }, failCb);
+        };
     };
 });
