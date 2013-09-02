@@ -45,7 +45,7 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
     "use strict";
 
     var memberid, timestamp,
-        styleName,
+        styleName, isAutomaticStyle,
         /**@type{Object}*/setProperties,
         /** @const */stylens = odf.Namespaces.stylens;
 
@@ -53,6 +53,10 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
         memberid = data.memberid;
         timestamp = data.timestamp;
         styleName = data.styleName;
+        // Input is either from an xml doc or potentially a manually created op
+        // This means isAutomaticStyles is either a raw string of 'true', or a a native bool
+        // Can't use Boolean(...) as Boolean('false') === true
+        isAutomaticStyle = data.isAutomaticStyle === 'true' || data.isAutomaticStyle === true;
         setProperties = data.setProperties;
      };
 
@@ -66,14 +70,18 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
             return false;
         }
 
-        styleNode.setAttributeNS(stylens, 'style:family', 'paragraph');
-        styleNode.setAttributeNS(stylens, 'style:name', styleName);
-
         if (setProperties) {
             formatting.updateStyle(styleNode, setProperties);
         }
 
-        odfContainer.rootElement.styles.appendChild(styleNode);
+        styleNode.setAttributeNS(stylens, 'style:family', 'paragraph');
+        styleNode.setAttributeNS(stylens, 'style:name', styleName);
+
+        if (isAutomaticStyle) {
+            odfContainer.rootElement.automaticStyles.appendChild(styleNode);
+        } else {
+            odfContainer.rootElement.styles.appendChild(styleNode);
+        }
 
         odtDocument.getOdfCanvas().refreshCSS();
         odtDocument.emit(ops.OdtDocument.signalStyleCreated, styleName);
@@ -86,6 +94,7 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
             memberid: memberid,
             timestamp: timestamp,
             styleName: styleName,
+            isAutomaticStyle: isAutomaticStyle,
             setProperties: setProperties
         };
     };
