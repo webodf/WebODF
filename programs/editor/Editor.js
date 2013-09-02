@@ -39,14 +39,14 @@ define("webodf/editor/Editor", [
     "webodf/editor/MemberListView",
     "dijit/layout/BorderContainer",
     "dijit/layout/ContentPane",
-    "webodf/editor/widgets"],
+    "webodf/editor/Tools"],
 
     function (myResources,
         EditorSession,
         MemberListView,
         BorderContainer,
         ContentPane,
-        loadWidgets) {
+        Tools) {
         "use strict";
 
         /**
@@ -69,6 +69,7 @@ define("webodf/editor/Editor", [
                 session,
                 editorSession,
                 memberList,
+                tools,
                 networked = args.networked === true,
                 opRouter,
                 memberModel,
@@ -148,10 +149,12 @@ define("webodf/editor/Editor", [
                 document.translateContent = translateContent;
 
                 odfCanvas.addListener("statereadychange", function () {
+                    var undoRedoEnabled = Boolean(! server);
+
                     if (!editorReadyCallback) {
                         // already called once, restart session and return
                         // undo manager is not yet integrated with collaboration
-                        if (! server) {
+                        if (undoRedoEnabled) {
                             editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
                         }
                         editorSession.startEditing();
@@ -165,7 +168,7 @@ define("webodf/editor/Editor", [
                         viewOptions: viewOptions
                     });
                     // undo manager is not yet integrated with collaboration
-                    if (! server) {
+                    if (undoRedoEnabled) {
                         editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
                     }
 
@@ -177,7 +180,9 @@ define("webodf/editor/Editor", [
                         registerCallbackForShutdown(editorSession.endEditing);
                     }
 
-                    loadWidgets(editorSession, loadOdtFile, saveOdtFile);
+                    tools = new Tools(loadOdtFile, saveOdtFile, undoRedoEnabled);
+                    tools.setEditorSession(editorSession);
+
                     editorReadyCallback();
                     editorReadyCallback = null;
                 });

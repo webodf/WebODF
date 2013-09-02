@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,7 +32,9 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define,require */
+
 define("webodf/editor/widgets/paragraphStyles",
        ["webodf/editor/EditorSession"],
 
@@ -40,8 +43,9 @@ define("webodf/editor/widgets/paragraphStyles",
     /**
      * @constructor
      */
-    var ParagraphStyles = function (editorSession, callback) {
+    var ParagraphStyles = function (callback) {
         var self = this,
+            editorSession,
             select;
 
         this.widget = function () {
@@ -61,9 +65,14 @@ define("webodf/editor/widgets/paragraphStyles",
         this.onRemove = null;
 
         function populateStyles() {
-            var i, availableStyles, selectionList;
+            var i, selectionList, availableStyles;
+
+            if (! select) {
+                return;
+            }
+
             selectionList = [];
-            availableStyles = editorSession.getAvailableParagraphStyles();
+            availableStyles = editorSession ? editorSession.getAvailableParagraphStyles() : [];
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
@@ -76,10 +85,34 @@ define("webodf/editor/widgets/paragraphStyles",
             select.addOption(selectionList);
         }
 
+        function addStyle(newStyleName) {
+            var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+                newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
+
+            if (select) {
+                select.addOption({
+                    value: newStyleName,
+                    label: newStyleElement.getAttributeNS(stylens, 'display-name')
+                });
+            }
+
+            if (self.onAdd) {
+                self.onAdd(newStyleName);
+            }
+        }
+
+        function removeStyle(styleName) {
+            if (select) {
+                select.removeOption(styleName);
+            }
+
+            if (self.onRemove) {
+                self.onRemove(styleName);
+            }
+        }
+
         function init(cb) {
             require(["dijit/form/Select"], function (Select) {
-                var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-
                 select = new Select({
                     name: 'ParagraphStyles',
                     maxHeight: 200,
@@ -90,29 +123,24 @@ define("webodf/editor/widgets/paragraphStyles",
 
                 populateStyles();
 
-                editorSession.subscribe(EditorSession.signalStyleCreated, function (newStyleName) {
-                    var newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
-                    select.addOption({
-                        value: newStyleName,
-                        label: newStyleElement.getAttributeNS(stylens, 'display-name')
-                    });
-
-                    if (self.onAdd) {
-                        self.onAdd(newStyleName);
-                    }
-                });
-
-                editorSession.subscribe(EditorSession.signalStyleDeleted, function (styleName) {
-                    select.removeOption(styleName);
-
-                    if (self.onRemove) {
-                        self.onRemove(styleName);
-                    }
-                });
                 return cb();
             });
         }
 
+        this.setEditorSession = function(session) {
+            if (editorSession) {
+                editorSession.unsubscribe(EditorSession.signalStyleCreated, addStyle);
+                editorSession.unsubscribe(EditorSession.signalStyleDeleted, removeStyle);
+            }
+            editorSession = session;
+            if (editorSession) {
+                editorSession.subscribe(EditorSession.signalStyleCreated, addStyle);
+                editorSession.subscribe(EditorSession.signalStyleDeleted, removeStyle);
+                populateStyles();
+            }
+        };
+
+        // init
         init(function () {
             return callback(self);
         });

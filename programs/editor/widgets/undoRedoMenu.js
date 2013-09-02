@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,66 +32,88 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define,require,document */
+
 define("webodf/editor/widgets/undoRedoMenu",
     ["webodf/editor/EditorSession"],
 
     function (EditorSession) {
         "use strict";
 
-        function makeWidget(editorSession, callback) {
-            require(["dijit/form/Button"], function (Button) {
-                var widget = {},
-                    undoButton,
-                    redoButton;
+        return function UndoRedoMenu(callback) {
+            var editorSession,
+                undoButton,
+                redoButton;
 
-                undoButton = new Button({
-                    label: document.translator('undo'),
-                    showLabel: false,
-                    disabled: true,
-                    iconClass: "dijitEditorIcon dijitEditorIconUndo",
-                    onClick: function () {
-                        editorSession.undo();
-                    }
+            function makeWidget(callback) {
+                require(["dijit/form/Button"], function (Button) {
+                    var widget = {};
+
+                    undoButton = new Button({
+                        label: document.translator('undo'),
+                        showLabel: false,
+                        disabled: true, // TODO: get current session state
+                        iconClass: "dijitEditorIcon dijitEditorIconUndo",
+                        onClick: function () {
+                            if (editorSession) {
+                                editorSession.undo();
+                            }
+                        }
+                    });
+
+                    redoButton = new Button({
+                        label: document.translator('redo'),
+                        showLabel: false,
+                        disabled: true, // TODO: get current session state
+                        iconClass: "dijitEditorIcon dijitEditorIconRedo",
+                        onClick: function () {
+                            if (editorSession) {
+                                editorSession.redo();
+                            }
+                        }
+                    });
+
+                    widget.children = [undoButton, redoButton];
+                    widget.startup = function () {
+                        widget.children.forEach(function (element) {
+                            element.startup();
+                        });
+                    };
+
+                    widget.placeAt = function (container) {
+                        widget.children.forEach(function (element) {
+                            element.placeAt(container);
+                        });
+                        return widget;
+                    };
+
+                    return callback(widget);
                 });
+            }
 
-                redoButton = new Button({
-                    label: document.translator('redo'),
-                    showLabel: false,
-                    disabled: true,
-                    iconClass: "dijitEditorIcon dijitEditorIconRedo",
-                    onClick: function () {
-                        editorSession.redo();
-                    }
-                });
-
-                function checkUndoButtons(e) {
+            function checkUndoButtons(e) {
+                if (undoButton) {
                     undoButton.set('disabled', e.undoAvailable === false);
+                }
+                if (redoButton) {
                     redoButton.set('disabled', e.redoAvailable === false);
                 }
+            }
 
-                editorSession.subscribe(EditorSession.signalUndoStackChanged, checkUndoButtons);
+            this.setEditorSession = function(session) {
+                if (editorSession) {
+                    editorSession.unsubscribe(EditorSession.signalUndoStackChanged, checkUndoButtons);
+                }
+                editorSession = session;
+                if (editorSession) {
+                    editorSession.subscribe(EditorSession.signalUndoStackChanged, checkUndoButtons);
+                    // TODO: checkUndoButtons(editorSession.getundoredoavailablalalo());
+                }
+            };
 
-                widget.children = [undoButton, redoButton];
-                widget.startup = function () {
-                    widget.children.forEach(function (element) {
-                        element.startup();
-                    });
-                };
-
-                widget.placeAt = function (container) {
-                    widget.children.forEach(function (element) {
-                        element.placeAt(container);
-                    });
-                    return widget;
-                };
-
-                return callback(widget);
-            });
-        }
-
-        return function UndoRedoMenu(editorSession, callback) {
-            makeWidget(editorSession, function (widget) {
+            // init
+            makeWidget(function (widget) {
                 return callback(widget);
             });
         };

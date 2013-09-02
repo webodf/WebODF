@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,35 +32,63 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define, require */
+
 define("webodf/editor/widgets/toolbarWidgets/currentStyle",
        ["webodf/editor/EditorSession"],
 
   function (EditorSession) {
     "use strict";
-    function makeWidget(editorSession, callback) {
-        require(["webodf/editor/widgets/paragraphStyles"], function (ParagraphStyles) {
-            var paragraphStyles, widget;
 
-            paragraphStyles = new ParagraphStyles(editorSession, function (pStyles) {
-                // if the current paragraph style changes, update the widget
-                editorSession.subscribe(EditorSession.signalParagraphChanged, function (info) {
-                    if (info.type === 'style') {
-                        pStyles.widget().set("value", info.styleName);
-                    }
+    return function CurrentStyle(callback) {
+        var editorSession,
+            paragraphStyles;
+
+        function selectParagraphStyle(info) {
+            if (paragraphStyles) {
+                if (info.type === 'style') {
+                    paragraphStyles.widget().set("value", info.styleName);
+                }
+            }
+        }
+
+        function setParagraphStyle(value) {
+            if (editorSession) {
+                editorSession.setCurrentParagraphStyle(value);
+            }
+        }
+
+        function makeWidget(callback) {
+            require(["webodf/editor/widgets/paragraphStyles"], function (ParagraphStyles) {
+                var p;
+
+                p = new ParagraphStyles(function (pStyles) {
+                    paragraphStyles = pStyles;
+
+                    paragraphStyles.widget().onChange = setParagraphStyle;
+
+                    paragraphStyles.setEditorSession(editorSession);
+                    return callback(paragraphStyles.widget());
                 });
-
-                pStyles.widget().onChange = function (value) {
-                    editorSession.setCurrentParagraphStyle(value);
-                };
-
-                return callback(pStyles.widget());
             });
-        });
-    }
+        }
 
-    return function CurrentStyle(editorSession, callback) {
-        makeWidget(editorSession, function (widget) {
+        this.setEditorSession = function(session) {
+            if (editorSession) {
+                editorSession.unsubscribe(EditorSession.signalParagraphChanged, selectParagraphStyle);
+            }
+            editorSession = session;
+            if (paragraphStyles) {
+                paragraphStyles.setEditorSession(editorSession);
+            }
+            if (editorSession) {
+                editorSession.subscribe(EditorSession.signalParagraphChanged, selectParagraphStyle);
+                // TODO: selectParagraphStyle(editorSession.getCurrentParagraphStyle());
+            }
+        };
+
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };

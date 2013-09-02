@@ -1,5 +1,7 @@
 /**
+ * @license
  * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,14 +32,16 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global runtime,core,define,require,document,dijit */
 
 runtime.loadClass("core.CSSUnits");
 
 define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
     "use strict";
-    var AlignmentPane = function (editorSession, callback) {
+    var AlignmentPane = function (callback) {
         var self = this,
+            editorSession,
             contentPane,
             form;
 
@@ -81,6 +85,10 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                     textAlign: 'left'
                 });
             }
+        };
+
+        this.setEditorSession = function(session) {
+            editorSession = session;
         };
 
         function init(cb) {

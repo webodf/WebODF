@@ -1,6 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
-
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -31,39 +32,51 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define,require,document */
+
 define("webodf/editor/widgets/zoomSlider", [], function () {
     "use strict";
-    function makeWidget(editorSession, callback) {
-        require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
-            var widget = {},
-                canvas;
 
-            widget = new HorizontalSlider({
-                name: 'zoomSlider',
-                value: 100,
-                minimum: 30,
-                maximum: 150,
-                discreteValues: 100,
-                intermediateChanges: true,
-                style: {
-                    width: '150px',
-                    height: '25px',
-                    float: 'right'
-                }
+    return function ZoomSlider(callback) {
+        var editorSession,
+            slider;
+
+        function makeWidget(callback) {
+            require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
+                var widget = {};
+
+                slider = new HorizontalSlider({
+                    name: 'zoomSlider',
+                    value: 100,
+                    minimum: 30,
+                    maximum: 150,
+                    discreteValues: 100,
+                    intermediateChanges: true,
+                    style: {
+                        width: '150px',
+                        height: '25px',
+                        float: 'right'
+                    }
+                });
+
+                slider.onChange = function (value) {
+                    if (editorSession) {
+                        editorSession.getOdfCanvas().setZoomLevel(value / 100.0);
+                    }
+                };
+
+                return callback(slider);
             });
+        }
 
-            canvas = dojo.byId('canvas');
-            widget.onChange = function (value) {
-                editorSession.getOdfCanvas().setZoomLevel(value / 100.0);
-            };
+        this.setEditorSession = function(session) {
+            editorSession = session;
+//             if (slider) { slider.setValue(editorSession.getOdfCanvas().getZoomLevel() ); TODO!
+        };
 
-            return callback(widget);
-        });
-    }
-
-    return function ZoomSlider(editorSession, callback) {
-        makeWidget(editorSession, function (widget) {
+        // init
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };

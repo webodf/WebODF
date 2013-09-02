@@ -1,5 +1,7 @@
 /**
+ * @license
  * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,12 +32,15 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global runtime,define,require,document,dijit */
+
 define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
     "use strict";
 
-    var FontEffectsPane = function (editorSession, callback) {
+    var FontEffectsPane = function (callback) {
         var self = this,
+            editorSession,
             contentPane,
             form,
             preview,
@@ -148,10 +153,11 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             backgroundColorTB.set('value', value);
                         };
 
-                        fontPicker = new FontPicker(editorSession, function (picker) {
+                        fontPicker = new FontPicker(function (picker) {
                             picker.widget().startup();
                             document.getElementById('fontPicker').appendChild(picker.widget().domNode);
                             picker.widget().name = 'fontName';
+                            picker.setEditorSession(editorSession);
                         });
 
                         // Automatically update preview when selections change
@@ -183,6 +189,13 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 });
             });
         }
+
+        this.setEditorSession = function(session) {
+            editorSession = session;
+            if (fontPicker) {
+                fontPicker.setEditorSession(editorSession);
+            }
+        };
 
         init(function () {
             return callback(self);

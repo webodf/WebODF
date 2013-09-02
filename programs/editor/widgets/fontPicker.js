@@ -37,8 +37,9 @@ define("webodf/editor/widgets/fontPicker", [], function () {
     /**
      * @constructor
      */
-    var FontPicker = function (editorSession, callback) {
+    var FontPicker = function (callback) {
         var self = this,
+            editorSession,
             select,
             editorFonts = [],
             documentFonts = [],
@@ -77,8 +78,8 @@ define("webodf/editor/widgets/fontPicker", [], function () {
 
         function populateFonts() {
             var i, name, family;
-            editorFonts = editorSession.availableFonts;
-            documentFonts = editorSession.getDeclaredFonts();
+            editorFonts = editorSession ? editorSession.availableFonts : [];
+            documentFonts = editorSession ? editorSession.getDeclaredFonts() : [];
 
             // First populate the fonts used in the document
             for (i = 0; i < documentFonts.length; i += 1) {
@@ -106,6 +107,12 @@ define("webodf/editor/widgets/fontPicker", [], function () {
             select.removeOption(select.getOptions());
             select.addOption(selectionList);
         }
+
+        this.setEditorSession = function(session) {
+            editorSession = session;
+            populateFonts();
+        };
+
 
         function init(cb) {
             require(["dijit/form/Select"], function (Select) {

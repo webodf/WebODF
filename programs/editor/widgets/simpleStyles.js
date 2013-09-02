@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -31,113 +32,145 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global define,require,document */
+
 define("webodf/editor/widgets/simpleStyles",
        ["webodf/editor/EditorSession"],
 
   function (EditorSession) {
     "use strict";
 
-    function makeWidget(editorSession, callback) {
-        require(["dijit/form/ToggleButton"], function (ToggleButton) {
-            var i,
-                widget = {},
-                boldButton,
-                italicButton,
-                underlineButton,
-                strikethroughButton;
+    return function SimpleStyles(callback) {
+        var editorSession,
+            boldButton,
+            italicButton,
+            underlineButton,
+            strikethroughButton;
 
-            boldButton = new ToggleButton({
-                label: document.translator('bold'),
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconBold",
-                onChange: function (checked) {
-                    var value = checked ? 'bold' : 'normal';
-                    editorSession.formatSelection({
-                        'style:text-properties': {
-                            'fo:font-weight' : value
-                        }
-                    });
-                }
-            });
+        function makeWidget(callback) {
+            require(["dijit/form/ToggleButton"], function (ToggleButton) {
+                var i,
+                    widget = {};
 
-            italicButton = new ToggleButton({
-                label: document.translator('italic'),
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconItalic",
-                onChange: function (checked) {
-                    var value = checked ? 'italic' : 'normal';
-                    editorSession.formatSelection({
-                        'style:text-properties': {
-                            'fo:font-style' : value
+                boldButton = new ToggleButton({
+                    label: document.translator('bold'),
+                    showLabel: false,
+                    checked: editorSession ? editorSession.isBold(): false,
+                    iconClass: "dijitEditorIcon dijitEditorIconBold",
+                    onChange: function (checked) {
+                        var value = checked ? 'bold' : 'normal';
+                        if (editorSession) {
+                            editorSession.formatSelection({
+                                'style:text-properties': {
+                                    'fo:font-weight' : value
+                                }
+                            });
                         }
-                    });
-                }
-            });
-            underlineButton = new ToggleButton({
-                label: document.translator('underline'),
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconUnderline",
-                onChange: function (checked) {
-                    var value = checked ? 'solid' : 'none';
-                    editorSession.formatSelection({
-                        'style:text-properties': {
-                            'style:text-underline-style' : value
+                    }
+                });
+
+                italicButton = new ToggleButton({
+                    label: document.translator('italic'),
+                    showLabel: false,
+                    checked: editorSession ? editorSession.isItalic(): false,
+                    iconClass: "dijitEditorIcon dijitEditorIconItalic",
+                    onChange: function (checked) {
+                        var value = checked ? 'italic' : 'normal';
+                        if (editorSession) {
+                            editorSession.formatSelection({
+                                'style:text-properties': {
+                                    'fo:font-style' : value
+                                }
+                            });
                         }
-                    });
-                }
-            });
-            strikethroughButton = new ToggleButton({
-                label: document.translator('strikethrough'),
-                showLabel: false,
-                checked: false,
-                iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
-                onChange: function (checked) {
-                    var value = checked ? 'solid' : 'none';
-                    editorSession.formatSelection({
-                        'style:text-properties': {
-                            'style:text-line-through-style' : value
+                    }
+                });
+                underlineButton = new ToggleButton({
+                    label: document.translator('underline'),
+                    showLabel: false,
+                    checked: editorSession ? editorSession.hasUnderline(): false,
+                    iconClass: "dijitEditorIcon dijitEditorIconUnderline",
+                    onChange: function (checked) {
+                        var value = checked ? 'solid' : 'none';
+                        if (editorSession) {
+                            editorSession.formatSelection({
+                                'style:text-properties': {
+                                    'style:text-underline-style' : value
+                                }
+                            });
                         }
+                    }
+                });
+                strikethroughButton = new ToggleButton({
+                    label: document.translator('strikethrough'),
+                    showLabel: false,
+                    checked: editorSession ? editorSession.hasStrikeThrough(): false,
+                    iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
+                    onChange: function (checked) {
+                        var value = checked ? 'solid' : 'none';
+                        if (editorSession) {
+                            editorSession.formatSelection({
+                                'style:text-properties': {
+                                    'style:text-line-through-style' : value
+                                }
+                            });
+                        }
+                    }
+                });
+
+                widget.children = [boldButton, italicButton, underlineButton, strikethroughButton];
+                widget.startup = function () {
+                    widget.children.forEach(function (element) {
+                        element.startup();
                     });
-                }
+                };
+
+                widget.placeAt = function (container) {
+                    widget.children.forEach(function (element) {
+                        element.placeAt(container);
+                    });
+                    return widget;
+                };
+
+                return callback(widget);
             });
-            
-            function checkStyleButtons() {
-                // The 3rd parameter is false to avoid firing onChange when setting the value
-                // programmatically.
+        }
+
+        function checkStyleButtons() {
+            // The 3rd parameter is false to avoid firing onChange when setting the value
+            // programmatically.
+            if (boldButton) {
                 boldButton.set('checked', editorSession.isBold(), false);
+            }
+            if (italicButton) {
                 italicButton.set('checked', editorSession.isItalic(), false);
+            }
+            if (underlineButton) {
                 underlineButton.set('checked', editorSession.hasUnderline(), false);
+            }
+            if (strikethroughButton) {
                 strikethroughButton.set('checked', editorSession.hasStrikeThrough(), false);
             }
+        }
 
-            editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);
-            editorSession.subscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
-            editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+        this.setEditorSession = function(session) {
+            if (editorSession) {
+                editorSession.unsubscribe(EditorSession.signalCursorMoved, checkStyleButtons);
+                editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
+                editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+            }
+            editorSession = session;
+            if (editorSession) {
+                editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);
+                editorSession.subscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
+                editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+                checkStyleButtons();
+            }
+        };
 
-            widget.children = [boldButton, italicButton, underlineButton, strikethroughButton];
-            widget.startup = function () {
-                widget.children.forEach(function (element) {
-                    element.startup();
-                });
-            };
-
-            widget.placeAt = function (container) {
-                widget.children.forEach(function (element) {
-                    element.placeAt(container);
-                });
-                return widget;
-            };
-
-            return callback(widget);
-        });
-    }
-
-    return function SimpleStyles(editorSession, callback) {
-        makeWidget(editorSession, function (widget) {
+            // init
+        makeWidget(function (widget) {
             return callback(widget);
         });
     };

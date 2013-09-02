@@ -7,7 +7,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     FileSaver.js
     Editor.js
     editor.css
-    widgets.js
+    Tools.js
     avatar-joe.png
     EditorSession.js
     SessionListView.js
