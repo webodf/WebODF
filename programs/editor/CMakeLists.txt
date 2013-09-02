@@ -1,10 +1,12 @@
 COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    index.html
-    collab-index.html
+    collabeditor.html
+    collabeditor.js
     welcome.odt
-    boot_editor.js
     FileSaver.js
+    localeditor.js
+    localeditor.html
+    index.html
     Editor.js
     editor.css
     Tools.js

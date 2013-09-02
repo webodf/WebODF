@@ -4,18 +4,16 @@
     <!--
     This HTML page is meant to provide a starting point for testing
     out of a source-tree. It does not require a dojo-amalgamation
-    but uses dojo directly from CDN.
+    but uses dojo directly from Google's CDN (content delivery networks).
     Currently it has all the collaborative editing gadgets included,
-    but will fallback to non-collaborative editing if the server does
-    not provide the nowjs namespace.
+    and requires pullbox functionality in the server.
     This page is meant to be served out of a webodf source directory.
     -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
 
-    <title>Editor (CDN)</title>
+    <title>Collaborate Editor (CDN)</title>
 
-    <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
-
+    <!-- dojo setup: start -->
     <script type="text/javascript" charset="utf-8">
       var basedir = window.location.pathname;
       basedir = basedir.substr(0, basedir.lastIndexOf("/"));
@@ -36,48 +34,59 @@
     <link rel="stylesheet"
     href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/widget/ColorPicker/ColorPicker.css"/>
 
-    <script src="FileSaver.js"></script>
-
     <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
       data-dojo-config="async: true"></script>
+    <!-- dojo setup: end -->
 
     <!-- connect back to the server for nowjs based communication -->
+    <!-- do not include nowjs.js, as pullbox is the standard servernow
     <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
+    -->
 
-    <!-- editor specific code -->
+    <!-- editor: start -->
     <link rel="stylesheet" type="text/css" href="editor.css"/>
-
-    <!-- booting the editor -->
-    <script src="boot_editor.js" type="text/javascript" charset="utf-8"/></script>
+    <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="collabeditor.js" type="text/javascript" charset="utf-8"/></script>
+    <!-- editor: end -->
   </head>
 
-  <body onload="webodfEditor.boot();" class = "claro">
-    <div id = "loginContainer" style="display: none; text-align: center">
+  <body onload="webodfEditor.boot({backend: 'pullbox'});" class = "claro">
+    <!-- 3 pages, switching between them is controlled by setting the style's display value -->
+
+    <!-- Login page: start -->
+    <div id="loginContainer" style="display: none; text-align: center">
       <form name="loginForm">
         <p>Login:<br><input name="login" type="text" size="30" maxlength="30"></p>
         <p>Password:<br><input name="password" type="password" size="30" maxlength="40"></p>
         <input name="Submit"  type="submit" value="Let me!"/>
       </form>
     </div>
+    <!-- Login page: start -->
+
+    <!-- Session list page: start -->
     <div id = "sessionListContainer" style="display: none; text-align: center">
       <h1>Sessions</h1>
-      <div id = "sessionList"></div>
+      <div id="sessionList"></div>
     </div>
-    <div id = "mainContainer" style="display: none;">
-      <div id = "editor">
-        <span id = "toolbar"></span>
-        <div id = "container">
+    <!-- Session list page: end -->
+
+    <!-- Editor page: start -->
+    <div id="mainContainer" style="display: none;">
+      <div id="editor">
+        <span id="toolbar"></span>
+        <div id="container">
           <div id="canvas"></div>
         </div>
       </div>
-      <div id = "collaboration">
-        <div id = "collabContainer">
-          <div id = "members">
-            <div id = "inviteButton"></div>
-            <div id = "memberList"></div>
+      <div id="collaboration">
+        <div id="collabContainer">
+          <div id="members">
+            <div id="inviteButton"></div>
+            <div id="memberList"></div>
           </div>
         </div>
       </div>
     </div>
+    <!-- Editor page: end -->
   </body>
 </html>

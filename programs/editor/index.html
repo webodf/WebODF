@@ -1,57 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xml:lang="en" lang="en">
-<head>
-	<!--
-	This HTML page is meant to bootstrap the webodf based ODF editor. This
-	is not the HTML page hosting any collaborative editing.
-	It will run on a standard HTTP server and as usual the webodf magic
-	happens client-side in your browser.
-	This page is meant to be served out of a webodf build directory.
-	-->
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
-  
-  <title>Editor</title>
+  <head>
+    <!-- Please, make me more pretty! -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+    <title>WebODF Editor example selection</title>
+  </head>
 
-  <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
-  <script src="FileSaver.js"></script>
-
-  <script type="text/javascript" charset="utf-8">
-    var usedLocale = "C";
-    if (navigator && navigator.language.match(/^(ru|de)/)) {
-        usedLocale = navigator.language.substr(0,2);
-    }
-
-    dojoConfig = {
-      locale: usedLocale,
-      paths: {
-        "webodf/editor": "dijit/..",
-        "dijit": "dijit",
-        "dojox": "dojox",
-        "dojo": "dojo",
-        "resources": "resources"
-      }
-    }
-  </script>
-
-  <!-- Dojo stuff (use src instead of dist for running from the source tree)-->
-  <script src="dojo-amalgamation.js" data-dojo-config="async: true"></script>
-  <link rel="stylesheet" type="text/css" href="app/resources/app.css"/>
-
-  <!-- editor specific code -->
-  <link rel="stylesheet" type="text/css" href="editor.css"/>
-
-  <!-- booting the editor -->
-  <script src="boot_editor.js" type="text/javascript" charset="utf-8"/></script>
- </head>
-
- <body onload="webodfEditor.boot();" class = "claro">
-  <div id = "mainContainer" style="display: none;">
-    <div id = "editor">
-      <span id = "toolbar"></span>
-      <div id = "container">
-        <div id="canvas"></div>
-      </div>
-    </div>
-  </div>
- </body>
+  <body>
+    <h1 style="text-align: center"><a href="localeditor.html">Local Editor</a></h1>
+    <h1 style="text-align: center"><a href="collabeditor.html">Collab Editor</a></h1>
+  </body>
 </html>

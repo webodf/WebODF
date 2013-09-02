@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xml:lang="en" lang="en">
+  <head>
+    <!--
+    This HTML page is meant to provide a starting point for testing
+    out of a source-tree. It does not require a dojo-amalgamation
+    but uses dojo directly from Google's CDN (content delivery networks).
+    This page is meant to be served out of a webodf source directory.
+    -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+
+    <title>Local Editor (CDN)</title>
+
+    <!-- dojo setup: start -->
+    <script type="text/javascript" charset="utf-8">
+      var basedir = window.location.pathname;
+      basedir = basedir.substr(0, basedir.lastIndexOf("/"));
+      dojoConfig = {
+        paths: {
+          "webodf/editor": basedir,
+          "resources": basedir + "/resources"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/resources/dojo.css"/>
+    <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dijit/themes/claro/claro.css"/>
+    <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/layout/resources/ExpandoPane.css"/>
+    <link rel="stylesheet"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojox/widget/ColorPicker/ColorPicker.css"/>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"
+      data-dojo-config="async: true"></script>
+    <!-- dojo setup: end -->
+
+    <!-- editor: start -->
+    <link rel="stylesheet" type="text/css" href="editor.css"/>
+    <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="FileSaver.js" type="text/javascript" charset="utf-8"></script>
+    <script src="localeditor.js" type="text/javascript" charset="utf-8"/></script>
+    <!-- editor: end -->
+  </head>
+
+  <body onload="webodfEditor.boot();" class="claro">
+    <div id="mainContainer">
+      <div id="editor">
+        <span id="menubar"></span>
+        <span id="toolbar"></span>
+        <div id="container">
+          <div id="canvas"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
