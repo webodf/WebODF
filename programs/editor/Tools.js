@@ -41,12 +41,13 @@ define("webodf/editor/Tools", [
     "dijit/form/Button",
     "dijit/form/DropDownButton",
     "dijit/Toolbar",
+    "webodf/editor/widgets/paragraphAlignment",
     "webodf/editor/widgets/simpleStyles",
     "webodf/editor/widgets/undoRedoMenu",
     "webodf/editor/widgets/toolbarWidgets/currentStyle",
     "webodf/editor/widgets/paragraphStylesDialog",
     "webodf/editor/widgets/zoomSlider"],
-    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, SimpleStyles, UndoRedoMenu, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
+    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, ParagraphStylesDialog, ZoomSlider) {
         "use strict";
 
         return function Tools(args) {
@@ -60,26 +61,18 @@ define("webodf/editor/Tools", [
                 paragraphStylesMenuItem, paragraphStylesDialog, simpleStyles, currentStyle,
                 zoomSlider,
                 undoRedoMenu,
-                editorSession;
+                editorSession,
+                paragraphAlignment,
+                sessionSubscribers = [];
 
-            this.setEditorSession = function(session) {
+            function setEditorSession(session) {
                 editorSession = session;
-                if (undoRedoMenu) {
-                    undoRedoMenu.setEditorSession(session);
-                }
-                if (simpleStyles) {
-                    simpleStyles.setEditorSession(session);
-                }
-                if (currentStyle) {
-                    currentStyle.setEditorSession(session);
-                }
-                if (zoomSlider) {
-                    zoomSlider.setEditorSession(session);
-                }
-                if (paragraphStylesDialog) {
-                    paragraphStylesDialog.setEditorSession(session);
-                }
-            };
+                sessionSubscribers.forEach(function (subscriber) {
+                    subscriber.setEditorSession(editorSession);
+                });
+            }
+
+            this.setEditorSession = setEditorSession;
 
             /**
              * @param {!function(!Object=)} callback, passing an error object in case of error
@@ -101,7 +94,7 @@ define("webodf/editor/Tools", [
                         widget.placeAt(toolbar);
                         widget.startup();
                     });
-                    undoRedoMenu.setEditorSession(editorSession);
+                    sessionSubscribers.push(undoRedoMenu);
                 }
 
                 // Simple Style Selector [B, I, U, S]
@@ -110,22 +103,30 @@ define("webodf/editor/Tools", [
                         widget.placeAt(toolbar);
                         widget.startup();
                     });
-                    simpleStyles.setEditorSession(editorSession);
+                    sessionSubscribers.push(simpleStyles);
                 }
+
+                // Paragraph direct alignment buttons
+                paragraphAlignment = new ParagraphAlignment(function (widget) {
+                    widget.placeAt(toolbar);
+                    widget.startup();
+                });
+                sessionSubscribers.push(paragraphAlignment);
+
 
                 // Paragraph Style Selector
                 currentStyle = new CurrentStyle(function (widget) {
                     widget.placeAt(toolbar);
                     widget.startup();
                 });
-                currentStyle.setEditorSession(editorSession);
+                sessionSubscribers.push(currentStyle);
 
                 // Zoom Level Selector
                 zoomSlider = new ZoomSlider(function (widget) {
                     widget.placeAt(toolbar);
                     widget.startup();
                 });
-                zoomSlider.setEditorSession(editorSession);
+                sessionSubscribers.push(zoomSlider);
 
                 // Load
                 if (loadOdtFile) {
@@ -174,7 +175,7 @@ define("webodf/editor/Tools", [
                         }
                     };
                 });
-                paragraphStylesDialog.setEditorSession(editorSession);
+                sessionSubscribers.push(paragraphStylesDialog);
 
                 formatMenuButton = new DropDownButton({
                     dropDown: formatDropDownMenu,
@@ -215,6 +216,8 @@ define("webodf/editor/Tools", [
                     });
                     closeButton.placeAt(toolbar);
                 }
+
+                setEditorSession(editorSession);
             });
         };
 
