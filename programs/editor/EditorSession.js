@@ -327,7 +327,7 @@ define("webodf/editor/EditorSession", [
             var op = new ops.OpApplyDirectStyling(),
                 selection = self.getCursorSelection();
             op.init({
-                memberId: localMemberId,
+                memberid: localMemberId,
                 position: selection.position,
                 length: selection.length,
                 setProperties: value
@@ -349,7 +349,7 @@ define("webodf/editor/EditorSession", [
             length = Math.abs(length);
 
             op.init({
-                memberId: localMemberId,
+                memberid: localMemberId,
                 position: position,
                 length: length,
                 name: localMemberId + Date.now()
@@ -362,7 +362,7 @@ define("webodf/editor/EditorSession", [
             if (currentNamedStyleName !== value) {
                 op = new ops.OpSetParagraphStyle();
                 op.init({
-                    memberId: localMemberId,
+                    memberid: localMemberId,
                     position: self.getCursorPosition(),
                     styleName: value
                 });
@@ -373,7 +373,7 @@ define("webodf/editor/EditorSession", [
         this.insertTable = function (initialRows, initialColumns, tableStyleName, tableColumnStyleName, tableCellStyleMatrix) {
             var op = new ops.OpInsertTable();
             op.init({
-                memberId: localMemberId,
+                memberid: localMemberId,
                 position: self.getCursorPosition(),
                 initialRows: initialRows,
                 initialColumns: initialColumns,
@@ -413,7 +413,7 @@ define("webodf/editor/EditorSession", [
             var op;
             op = new ops.OpUpdateParagraphStyle();
             op.init({
-                memberId: localMemberId,
+                memberid: localMemberId,
                 styleName: styleName,
                 setProperties: setProperties,
                 removedProperties: (!removedProperties) ? {} : removedProperties
@@ -451,7 +451,7 @@ define("webodf/editor/EditorSession", [
 
             op = new ops.OpAddParagraphStyle();
             op.init({
-                memberId: localMemberId,
+                memberid: localMemberId,
                 styleName: newStyleName,
                 setProperties: setProperties
             });
@@ -464,7 +464,7 @@ define("webodf/editor/EditorSession", [
             var op;
             op = new ops.OpRemoveParagraphStyle();
             op.init({
-                memberId: localMemberId,
+                memberid: localMemberId,
                 styleName: styleName
             });
             session.enqueue(op);
