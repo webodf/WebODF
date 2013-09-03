@@ -90,6 +90,12 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "    <text:list-style style:name='L2' style:display-name='L2 Display'>";
         xml += "        <text:list-level-style-number text:level='1' text:num-format='1' />";
         xml += "    </text:list-style>";
+        xml += "    <style:style style:name='autoWithInherit' style:parent-style-name='S1' style:family='text'>";
+        xml += "        <style:text-properties fo:font-weight='bold'/>";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='autoWithoutInherit' style:family='text'>";
+        xml += "        <style:text-properties fo:font-weight='bold'/>";
+        xml += "    </style:style>";
         xml += "</office:automatic-styles>";
 
 
@@ -137,7 +143,6 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBeNull(t, "t.element");
     }
-
     function updateStyle_UpdatesStyleElement() {
         createDocument("<text:p/>");
         t.element = t.formatting.getStyleElement("P1", "paragraph");
@@ -156,12 +161,50 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-name')", "'P1 Font'");
     }
+    function createDerivedStyleObject_Style() {
+        createDocument("<text:p/>");
+
+        t.newStyle = t.formatting.createDerivedStyleObject("P1", "paragraph", {"derived" : true});
+
+        r.shouldBe(t, "t.newStyle['style:parent-style-name']", "'P1'");
+        r.shouldBe(t, "t.newStyle['style:family']", "'paragraph'");
+        r.shouldBe(t, "t.newStyle['derived']", "true");
+    }
+    function createDerivedStyleObject_AutomaticStyle_Inherited() {
+        createDocument("<text:p/>");
+
+        t.newStyle = t.formatting.createDerivedStyleObject("autoWithInherit", "text", {"derived" : true});
+
+        r.shouldBe(t, "t.newStyle['style:parent-style-name']", "'S1'");
+        r.shouldBe(t, "t.newStyle['style:family']", "'text'");
+        r.shouldBe(t, "t.newStyle['style:text-properties']", "({ 'fo:font-weight' : 'bold' })");
+    }
+    function createDerivedStyleObject_AutomaticStyle_NonInherited() {
+        createDocument("<text:p/>");
+
+        t.newStyle = t.formatting.createDerivedStyleObject("autoWithoutInherit", "text", {"derived" : true});
+
+        r.shouldBe(t, "t.newStyle.hasOwnProperty('style:parent-style-name')", "false");
+        r.shouldBe(t, "t.newStyle['style:family']", "'text'");
+        r.shouldBe(t, "t.newStyle['style:text-properties']", "({ 'fo:font-weight' : 'bold' })");
+    }
     function getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements() {
         createDocument("<text:p/>");
 
         t.styleNames = t.formatting.getAllStyleNames();
 
-        r.shouldBe(t, "t.styleNames", "['L1','L2','P1','S1','S2']");
+        r.shouldBe(t, "t.styleNames", "['L1','L2','autoWithInherit','autoWithoutInherit','P1','S1','S2']");
+    }
+    function getStyleAttributes_ReturnsAllStyleAttributes() {
+        createDocument("<text:p/>");
+        t.styleElement = t.formatting.getStyleElement('P1', 'paragraph');
+
+        t.styleAttributes = t.formatting.getStyleAttributes(t.styleElement);
+
+        r.shouldBe(t, "t.styleAttributes['style:name']", "'P1'");
+        r.shouldBe(t, "t.styleAttributes['style:display-name']", "'P1 Display'");
+        r.shouldBe(t, "t.styleAttributes['style:family']", "'paragraph'");
+        r.shouldBe(t, "t.styleAttributes['style:text-properties']", "({'fo:font-name':'P1 Font'})");
     }
     this.tests = function () {
         return [
@@ -172,7 +215,13 @@ odf.FormattingTests = function FormattingTests(runner) {
 
             updateStyle_UpdatesStyleElement,
 
-            getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements
+            createDerivedStyleObject_Style,
+            createDerivedStyleObject_AutomaticStyle_Inherited,
+            createDerivedStyleObject_AutomaticStyle_NonInherited,
+
+            getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements,
+
+            getStyleAttributes_ReturnsAllStyleAttributes
         ];
     };
     this.asyncTests = function () {

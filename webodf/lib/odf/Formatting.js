@@ -232,6 +232,10 @@ odf.Formatting = function Formatting() {
             }
             propertiesNode = propertiesNode.nextSibling;
         }
+        for (i = 0; i < styleNode.attributes.length; i += 1) {
+            propertiesMap[styleNode.attributes[i].name] = styleNode.attributes[i].value;
+        }
+
         return propertiesMap;
     }
     this.getStyleAttributes = getStyleAttributes;
@@ -529,11 +533,9 @@ odf.Formatting = function Formatting() {
             // Automatic styles cannot be inherited from. The way to create a derived style is to clone it entirely
             newStyleObject = getStyleAttributes(originalStyleElement);
         } else {
-            newStyleObject = {
-                "style:parent-style-name" : parentStyleName,
-                "style:family" : family
-            };
+            newStyleObject = { "style:parent-style-name" : parentStyleName };
         }
+        newStyleObject["style:family"] =  family;
         utils.mergeObjects(newStyleObject, overrides);
         return newStyleObject;
     };

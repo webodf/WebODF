@@ -295,7 +295,12 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
 
         r.shouldBe(t, "t.autoStyles.length", "2");
         t.autoStyle = t.formatting.getStyleAttributes(t.formatting.getStyleElement(t.autoStyles[1], "text"));
-        t.expectedAutoStyle = {'style:text-properties':{'fo:font-weight':'bold'}};
+        t.expectedAutoStyle = {
+            'style:name': 'auto-893758051_1',
+            'style:parent-style-name': 'SUnderline',
+            'style:family': 'text',
+            'scope': 'document-content','style:text-properties':{'fo:font-weight':'bold'}
+        };
         r.shouldBe(t, "t.autoStyle", "t.expectedAutoStyle");
     }
     function apply_AutoStyle_ClonesProperties() {
@@ -312,7 +317,12 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
 
         r.shouldBe(t, "t.autoStyles.length", "2");
         t.autoStyle = t.formatting.getStyleAttributes(t.formatting.getStyleElement(t.autoStyles[1], "text"));
-        t.expectedAutoStyle = {'style:text-properties':{'fo:font-weight':'bold', 'style:text-underline-style':'solid'}};
+        t.expectedAutoStyle = {
+            'style:name': 'auto-893758051_1',
+            'style:family': 'text',
+            'scope': 'document-content',
+            'style:text-properties':{'fo:font-weight':'bold', 'style:text-underline-style':'solid'}
+        };
         r.shouldBe(t, "t.autoStyle", "t.expectedAutoStyle");
     }
     this.tests = function () {
