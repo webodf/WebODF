@@ -35,143 +35,214 @@
 
 /*global define,require,document */
 
-define("webodf/editor/widgets/simpleStyles",
-       ["webodf/editor/EditorSession"],
+define("webodf/editor/widgets/simpleStyles", [
+    "webodf/editor/EditorSession",
+    "webodf/editor/widgets/fontPicker",
+    "dijit/form/ToggleButton",
+    "dijit/form/NumberSpinner"],
 
-  function (EditorSession) {
-    "use strict";
+    function (EditorSession, FontPicker, ToggleButton, NumberSpinner) {
+        "use strict";
 
-    return function SimpleStyles(callback) {
-        var editorSession,
-            boldButton,
-            italicButton,
-            underlineButton,
-            strikethroughButton;
+        /**
+         * Returns the value for a hierarchy of keys.
+         * E.g., get( { a: { b : 10 } }, ["a", "b"] ) will return the value 10
+         * If any keys are not found, this function will return undefined
+         * @param {!Object} obj
+         * @param {!Array.<!string>} keys
+         * @returns {*}
+         */
+        function get(obj, keys) {
+            var i = 0,
+                key = keys[i];
+            while (key && obj) {
+                obj = obj[key];
+                i += 1;
+                key = keys[i];
+            }
+            return keys.length === i ? obj : undefined;
+        }
 
-        function makeWidget(callback) {
-            require(["dijit/form/ToggleButton"], function (ToggleButton) {
-                var i,
-                    widget = {};
+        /**
+         * Returns the common value found at the specified key hierarchy. If one or more
+         * objects in the supplied array have a different value to the first object, this
+         * function will return "undefined" instead
+         * @param {!Array.<!Object>} objArray
+         * @param {...!string} key Key hierarchy to
+         * @returns {*}
+         */
+        function getCommonValue(objArray, key) {
+            var keys = Array.prototype.slice.call(arguments, 1),
+                value = get(objArray[0], keys);
 
-                boldButton = new ToggleButton({
-                    label: document.translator('bold'),
-                    showLabel: false,
-                    checked: editorSession ? editorSession.isBold(): false,
-                    iconClass: "dijitEditorIcon dijitEditorIconBold",
-                    onChange: function (checked) {
-                        var value = checked ? 'bold' : 'normal';
-                        if (editorSession) {
-                            editorSession.formatSelection({
-                                'style:text-properties': {
-                                    'fo:font-weight' : value
-                                }
-                            });
-                        }
+            return objArray.every(function(obj) { return value === get(obj, keys)}) ? value : undefined;
+        }
+
+        var SimpleStyles = function(callback) {
+            var widget = {},
+                editorSession,
+                boldButton,
+                italicButton,
+                underlineButton,
+                strikethroughButton,
+                fontSize,
+                fontPickerModel,
+                fontPickerWidget;
+
+            boldButton = new ToggleButton({
+                label: document.translator('bold'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconBold",
+                onChange: function (checked) {
+                    var value = checked ? 'bold' : 'normal';
+                    if (editorSession) {
+                        editorSession.formatSelection({
+                            'style:text-properties': {
+                                'fo:font-weight' : value
+                            }
+                        });
                     }
-                });
-
-                italicButton = new ToggleButton({
-                    label: document.translator('italic'),
-                    showLabel: false,
-                    checked: editorSession ? editorSession.isItalic(): false,
-                    iconClass: "dijitEditorIcon dijitEditorIconItalic",
-                    onChange: function (checked) {
-                        var value = checked ? 'italic' : 'normal';
-                        if (editorSession) {
-                            editorSession.formatSelection({
-                                'style:text-properties': {
-                                    'fo:font-style' : value
-                                }
-                            });
-                        }
-                    }
-                });
-                underlineButton = new ToggleButton({
-                    label: document.translator('underline'),
-                    showLabel: false,
-                    checked: editorSession ? editorSession.hasUnderline(): false,
-                    iconClass: "dijitEditorIcon dijitEditorIconUnderline",
-                    onChange: function (checked) {
-                        var value = checked ? 'solid' : 'none';
-                        if (editorSession) {
-                            editorSession.formatSelection({
-                                'style:text-properties': {
-                                    'style:text-underline-style' : value
-                                }
-                            });
-                        }
-                    }
-                });
-                strikethroughButton = new ToggleButton({
-                    label: document.translator('strikethrough'),
-                    showLabel: false,
-                    checked: editorSession ? editorSession.hasStrikeThrough(): false,
-                    iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
-                    onChange: function (checked) {
-                        var value = checked ? 'solid' : 'none';
-                        if (editorSession) {
-                            editorSession.formatSelection({
-                                'style:text-properties': {
-                                    'style:text-line-through-style' : value
-                                }
-                            });
-                        }
-                    }
-                });
-
-                widget.children = [boldButton, italicButton, underlineButton, strikethroughButton];
-                widget.startup = function () {
-                    widget.children.forEach(function (element) {
-                        element.startup();
-                    });
-                };
-
-                widget.placeAt = function (container) {
-                    widget.children.forEach(function (element) {
-                        element.placeAt(container);
-                    });
-                    return widget;
-                };
-
-                return callback(widget);
+                }
             });
-        }
 
-        function checkStyleButtons() {
-            // The 3rd parameter is false to avoid firing onChange when setting the value
-            // programmatically.
-            if (boldButton) {
-                boldButton.set('checked', editorSession.isBold(), false);
-            }
-            if (italicButton) {
-                italicButton.set('checked', editorSession.isItalic(), false);
-            }
-            if (underlineButton) {
-                underlineButton.set('checked', editorSession.hasUnderline(), false);
-            }
-            if (strikethroughButton) {
-                strikethroughButton.set('checked', editorSession.hasStrikeThrough(), false);
-            }
-        }
+            italicButton = new ToggleButton({
+                label: document.translator('italic'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconItalic",
+                onChange: function (checked) {
+                    var value = checked ? 'italic' : 'normal';
+                    if (editorSession) {
+                        editorSession.formatSelection({
+                            'style:text-properties': {
+                                'fo:font-style' : value
+                            }
+                        });
+                    }
+                }
+            });
 
-        this.setEditorSession = function(session) {
-            if (editorSession) {
-                editorSession.unsubscribe(EditorSession.signalCursorMoved, checkStyleButtons);
-                editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
-                editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+            underlineButton = new ToggleButton({
+                label: document.translator('underline'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconUnderline",
+                onChange: function (checked) {
+                    var value = checked ? 'solid' : 'none';
+                    if (editorSession) {
+                        editorSession.formatSelection({
+                            'style:text-properties': {
+                                'style:text-underline-style' : value
+                            }
+                        });
+                    }
+                }
+            });
+
+            strikethroughButton = new ToggleButton({
+                label: document.translator('strikethrough'),
+                showLabel: false,
+                checked: false,
+                iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
+                onChange: function (checked) {
+                    var value = checked ? 'solid' : 'none';
+                    if (editorSession) {
+                        editorSession.formatSelection({
+                            'style:text-properties': {
+                                'style:text-line-through-style' : value
+                            }
+                        });
+                    }
+                }
+            });
+
+            fontSize = new NumberSpinner({
+                label: document.translator('size'),
+                showLabel: false,
+                value: 12,
+                smallDelta: 1,
+                constraints: {min:6, max:96},
+                intermediateChanges: true,
+                onChange: function(value) {
+                    if (editorSession) {
+                        editorSession.formatSelection({
+                            'style:text-properties': {
+                                'fo:font-size' : value + "pt"
+                            }
+                        });
+                    }
+                }
+            });
+
+            fontPickerModel = new FontPicker(function () {});
+            fontPickerWidget = fontPickerModel.widget();
+            fontPickerWidget.onChange = function(value) {
+                if (editorSession) {
+                    editorSession.formatSelection({
+                        'style:text-properties': {
+                            'style:font-name' : value
+                        }
+                    });
+                }
+            };
+
+            widget.children = [boldButton, italicButton, underlineButton, strikethroughButton, fontPickerWidget, fontSize];
+            widget.startup = function () {
+                widget.children.forEach(function (element) {
+                    element.startup();
+                });
+            };
+
+            widget.placeAt = function (container) {
+                widget.children.forEach(function (element) {
+                    element.placeAt(container);
+                });
+                return widget;
+            };
+
+            function checkStyleButtons() {
+                var currentSelectionStyles,
+                    foFontSize, parsedFontSize,
+                    foFontFamily;
+                // The 3rd parameter is false to avoid firing onChange when setting the value programmatically.
+                if (editorSession) {
+                    boldButton.set('checked', editorSession.isBold(), false);
+                    italicButton.set('checked', editorSession.isItalic(), false);
+                    underlineButton.set('checked', editorSession.hasUnderline(), false);
+                    strikethroughButton.set('checked', editorSession.hasStrikeThrough(), false);
+
+                    currentSelectionStyles = editorSession.getCurrentSelectionStyles();
+
+                    foFontSize = currentSelectionStyles && getCommonValue(currentSelectionStyles, 'style:text-properties', 'fo:font-size');
+                    parsedFontSize = foFontSize && parseInt(foFontSize);
+                    fontSize.set('intermediateChanges', false); // Necessary due to https://bugs.dojotoolkit.org/ticket/11588
+                    fontSize.set('value', parsedFontSize, false);
+                    fontSize.set('intermediateChanges', true);
+
+                    foFontFamily = currentSelectionStyles && getCommonValue(currentSelectionStyles, 'style:text-properties', 'style:font-name');
+                    fontPickerWidget.set('value', foFontFamily, false);
+                }
             }
-            editorSession = session;
-            if (editorSession) {
-                editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);
-                editorSession.subscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
-                editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
-                checkStyleButtons();
-            }
+
+            this.setEditorSession = function(session) {
+                if (editorSession) {
+                    editorSession.unsubscribe(EditorSession.signalCursorMoved, checkStyleButtons);
+                    editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
+                    editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+                }
+                editorSession = session;
+                fontPickerModel.setEditorSession(session);
+                if (editorSession) {
+                    editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);
+                    editorSession.subscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
+                    editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+                    checkStyleButtons();
+                }
+            };
+
+            callback(widget);
         };
 
-            // init
-        makeWidget(function (widget) {
-            return callback(widget);
-        });
-    };
+        return SimpleStyles;
 });

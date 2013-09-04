@@ -502,6 +502,12 @@ define("webodf/editor/EditorSession", [
             return array;
         };
 
+        this.getCurrentSelectionStyles = function() {
+            var cursor = odtDocument.getCursor(localMemberId),
+                range = cursor && cursor.getSelectedRange();
+            return range && styleHelper.getAppliedStyles(range);
+        };
+
         function undoStackModified(e) {
             self.emit(EditorSession.signalUndoStackChanged, e);
         }

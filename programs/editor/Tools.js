@@ -97,6 +97,21 @@ define("webodf/editor/Tools", [
                     sessionSubscribers.push(undoRedoMenu);
                 }
 
+                // Add annotation
+                if (args.annotationsEnabled) {
+                    annotateButton = new Button({
+                        label: translator('annotate'),
+                        showLabel: false,
+                        iconClass: 'dijitIconBookmark',
+                        onClick: function () {
+                            if (editorSession) {
+                                editorSession.addAnnotation();
+                            }
+                        }
+                    });
+                    annotateButton.placeAt(toolbar);
+                }
+
                 // Simple Style Selector [B, I, U, S]
                 if (args.directStylingEnabled) {
                     simpleStyles = new SimpleStyles(function (widget) {
@@ -188,21 +203,6 @@ define("webodf/editor/Tools", [
                     }
                 });
                 formatMenuButton.placeAt(toolbar);
-
-                // Add annotation
-                if (args.annotationsEnabled) {
-                    annotateButton = new Button({
-                        label: translator('annotate'),
-                        showLabel: false,
-                        iconClass: 'dijitIconBookmark',
-                        onClick: function () {
-                            if (editorSession) {
-                                editorSession.addAnnotation();
-                            }
-                        }
-                    });
-                    annotateButton.placeAt(toolbar);
-                }
 
                 if (close) {
                     closeButton = new Button({

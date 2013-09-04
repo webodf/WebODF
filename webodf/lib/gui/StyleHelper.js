@@ -48,15 +48,28 @@ gui.StyleHelper = function StyleHelper(formatting) {
         odfUtils = new odf.OdfUtils(),
         /** @const */ textns = odf.Namespaces.textns;
 
+    function getAppliedStyles(range) {
+        var container, nodes;
+
+        if (range.collapsed) {
+            container = range.startContainer;
+            if (container.hasChildNodes() && range.startOffset < container.childNodes.length) {
+                container = container.childNodes[range.startOffset];
+            }
+            nodes = [container];
+        } else {
+            nodes = odfUtils.getTextNodes(range, true);
+        }
+
+        return formatting.getAppliedStyles(nodes);
+    }
+
     /**
      * Returns an array of all unique styles in a given range for each text node
      * @param {!Range} range
      * @returns {Array.<Object>}
      */
-    this.getAppliedStyles = function (range) {
-        var textNodes = odfUtils.getTextNodes(range, true);
-        return formatting.getAppliedStyles(textNodes);
-    };
+    this.getAppliedStyles = getAppliedStyles;
 
     /**
      * Apply the specified style properties to all elements within the given range.
@@ -92,19 +105,9 @@ gui.StyleHelper = function StyleHelper(formatting) {
      */
     function hasTextPropertyValue(range, propertyName, propertyValue) {
         var hasOtherValue = true,
-            nodes, styles, properties, container, i;
+            styles, properties, i;
 
-        if (range.collapsed) {
-            container = range.startContainer;
-            if (container.hasChildNodes() && range.startOffset < container.childNodes.length) {
-                container = container.childNodes[range.startOffset];
-            }
-            nodes = [container];
-        } else {
-            nodes = odfUtils.getTextNodes(range, true);
-        }
-
-        styles = formatting.getAppliedStyles(nodes);
+        styles = getAppliedStyles(range);
         for (i = 0; i < styles.length; i += 1) {
             properties = styles[i]['style:text-properties'];
             hasOtherValue = !properties || properties[propertyName] !== propertyValue;
