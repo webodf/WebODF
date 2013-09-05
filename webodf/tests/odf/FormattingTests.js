@@ -156,16 +156,12 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-name')", "'P1 Font'");
     }
-    function updateStyle_UpdatesStyleElement_WithGeneratedName() {
+    function getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements() {
         createDocument("<text:p/>");
-        t.element = t.formatting.getStyleElement("P1", "paragraph");
 
-        t.formatting.updateStyle(t.element, { "style:text-properties": { "fo:font-size" : "12pt" } }, "fTest");
+        t.styleNames = t.formatting.getAllStyleNames();
 
-        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'name')", "'fTest0'");
-
-        t.textProperties = t.element.getElementsByTagNameNS(t.ns.style, 'text-properties')[0];
-        r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
+        r.shouldBe(t, "t.styleNames", "['L1','L2','P1','S1','S2']");
     }
     this.tests = function () {
         return [
@@ -175,7 +171,8 @@ odf.FormattingTests = function FormattingTests(runner) {
             getStyleElement_MismatchedFamily_ReturnsNull,
 
             updateStyle_UpdatesStyleElement,
-            updateStyle_UpdatesStyleElement_WithGeneratedName
+
+            getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements
         ];
     };
     this.asyncTests = function () {

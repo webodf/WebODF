@@ -35,6 +35,7 @@
 /*global Node, odf, runtime, console, core, NodeFilter*/
 
 runtime.loadClass("core.Utils");
+runtime.loadClass("odf.StyleNameGenerator");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
@@ -55,29 +56,6 @@ odf.Formatting = function Formatting() {
         /**@const@type {!string}*/ numberns = odf.Namespaces.numberns,
         odfUtils = new odf.OdfUtils(),
         utils = new core.Utils();
-
-    /**
-     * Recursively merge properties of two objects
-     * @param {!Object} destination
-     * @param {!Object} source
-     * @return {!Object}
-     */
-    function mergeRecursive(destination, source) {
-        Object.keys(source).forEach(function (p) {
-            try {
-                // Property in destination object set; update its value.
-                if (source[p].constructor === Object) {
-                    destination[p] = mergeRecursive(destination[p], source[p]);
-                } else {
-                    destination[p] = source[p];
-                }
-            } catch (e) {
-                // Property in destination object not set; create it and set its value.
-                destination[p] = source[p];
-            }
-        });
-        return destination;
-    }
 
     /**
      * @param {!odf.OdfContainer} odfcontainer
@@ -301,7 +279,7 @@ odf.Formatting = function Formatting() {
         while (node) {
             propertiesMap = getStyleAttributes(node);
             // All child properties should override any matching parent properties
-            inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
+            inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
 
             parentStyleName = node.getAttributeNS(stylens, 'parent-style-name');
             if (parentStyleName) {
@@ -316,7 +294,7 @@ odf.Formatting = function Formatting() {
         if (node) {
             propertiesMap = getStyleAttributes(node);
             // All child properties should override any matching parent properties
-            inheritedPropertiesMap = mergeRecursive(propertiesMap, inheritedPropertiesMap);
+            inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
         }
         return inheritedPropertiesMap;
     }
@@ -417,7 +395,7 @@ odf.Formatting = function Formatting() {
                 styleElement = getStyleElement(styleName, styleFamily);
                 if (styleElement) {
                     parentStyle = getInheritedStyleAttributes(/**@type {!Element}*/(styleElement));
-                    mergedChildStyle = mergeRecursive(parentStyle, mergedChildStyle);
+                    mergedChildStyle = utils.mergeObjects(parentStyle, mergedChildStyle);
                     displayName = styleElement.getAttributeNS(stylens, 'display-name');
                 } else {
                     runtime.log("No style element found for '" + styleName + "' of family '" + styleFamily + "'");
@@ -472,7 +450,7 @@ odf.Formatting = function Formatting() {
      */
     this.applyStyle = function (memberId, textNodes, limits, info) {
         var textStyles = new odf.TextStyleApplicator(
-            "auto" + utils.hashString(memberId) + "_",
+            new odf.StyleNameGenerator("auto" + utils.hashString(memberId) + "_", self),
             self,
             odfContainer.rootElement.automaticStyles
         );
@@ -480,7 +458,7 @@ odf.Formatting = function Formatting() {
     };
 
     /**
-     * Get an exhaustive list of all style names in the current document
+     * Get an list of all the defined style names in the current document including automatic styles
      * @returns {!Array.<string>}
      */
     function getAllStyleNames() {
@@ -502,16 +480,16 @@ odf.Formatting = function Formatting() {
         });
         return styleNames;
     }
+    this.getAllStyleNames = getAllStyleNames;
 
     /**
      * Overrides the specific properties on the styleNode from the values in the supplied properties Object.
      * If a newStylePrefix is supplied, this method will automatically generate a unique name for the style node
      * @param {!Element} styleNode
-     * @param {!Object} properties
-     * @param {string=} newStylePrefix Prefix to put in front of new auto styles
+     * @param {!Object} properties Prefix to put in front of new auto styles
      */
-    this.updateStyle = function(styleNode, properties, newStylePrefix) {
-        var name, existingNames, startIndex, fontName, fontFaceNode;
+    this.updateStyle = function (styleNode, properties) {
+        var fontName, fontFaceNode;
         mapObjOntoNode(styleNode, properties);
 
         fontName = properties["style:text-properties"] && properties["style:text-properties"]["style:font-name"];
@@ -523,16 +501,40 @@ odf.Formatting = function Formatting() {
             fontFaceNode.setAttributeNS(svgns, 'svg:font-family', fontName);
             odfContainer.rootElement.fontFaceDecls.appendChild(fontFaceNode);
         }
+    };
 
-        if (newStylePrefix) {
-            name = styleNode.getAttributeNS(stylens, "name");
-            existingNames = getAllStyleNames();
-            startIndex = 0;
-            do {
-                name = newStylePrefix + startIndex;
-                startIndex += 1;
-            } while(existingNames.indexOf(name) !== -1);
-            styleNode.setAttributeNS(stylens, "style:name", name);
+    /**
+     * Returns true if the supplied style node is an automatic style
+     * @param {!Node} styleNode
+     * @returns {!boolean}
+     */
+    function isAutomaticStyleElement(styleNode) {
+        return styleNode.parentNode === odfContainer.rootElement.automaticStyles;
+    }
+
+    /**
+     * Create a style object (JSON-equivalent) that is equivalent to inheriting from the parent
+     * style and family, and applying the specified overrides.
+     * This contains logic for simulating inheritance for automatic styles
+     * @param {!string} parentStyleName
+     * @param {!string} family
+     * @param {!Object} overrides
+     * @return {!Object}
+     */
+    this.createDerivedStyleObject = function(parentStyleName, family, overrides) {
+        var originalStyleElement = /**@type{!Element}*/(getStyleElement(parentStyleName, family)),
+            newStyleObject;
+        runtime.assert(Boolean(originalStyleElement), "No style element found for '" + parentStyleName + "' of family '" + family + "'");
+        if (isAutomaticStyleElement(originalStyleElement)) {
+            // Automatic styles cannot be inherited from. The way to create a derived style is to clone it entirely
+            newStyleObject = getStyleAttributes(originalStyleElement);
+        } else {
+            newStyleObject = {
+                "style:parent-style-name" : parentStyleName,
+                "style:family" : family
+            };
         }
+        utils.mergeObjects(newStyleObject, overrides);
+        return newStyleObject;
     };
 };

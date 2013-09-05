@@ -41,11 +41,11 @@ runtime.loadClass("odf.Namespaces");
 /**
  * Class for applying a supplied text style to the given text nodes.
  * @constructor
- * @param {!string} newStylePrefix Prefix to put in front of new auto styles
+ * @param {!odf.StyleNameGenerator} styleNameGenerator Source for generating unique automatic style names
  * @param {!odf.Formatting} formatting Formatting retrieval and computation store
  * @param {!Node} automaticStyles Root element for automatic styles
  */
-odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formatting, automaticStyles) {
+odf.TextStyleApplicator = function TextStyleApplicator(styleNameGenerator, formatting, automaticStyles) {
     "use strict";
     var domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
@@ -86,29 +86,16 @@ odf.TextStyleApplicator = function TextStyleApplicator(newStylePrefix, formattin
         var createdStyles = {};
 
         function createDirectFormat(existingStyleName, document) {
-            var existingStyleNode,
-                styleNode;
+            var derivedStyleInfo, derivedStyleNode;
 
-            if (existingStyleName) {
-                existingStyleNode = formatting.getStyleElement(existingStyleName, "text");
-                if (existingStyleNode.parentNode === automaticStyles) {
-                    // This is an automatic style, clone the properties and combine into a new automatic style
-                    styleNode = existingStyleNode.cloneNode(true);
-                } else {
-                    // This is a named style. Create a new automatic style that inherits from the parent style
-                    styleNode = document.createElementNS(stylens, "style:style");
-                    styleNode.setAttributeNS(stylens, "style:parent-style-name", existingStyleName);
-                    styleNode.setAttributeNS(stylens, "style:family", "text");
-                    styleNode.setAttributeNS(webodfns, "scope", "document-content");
-                }
-            } else {
-                styleNode = document.createElementNS(stylens, "style:style");
-                styleNode.setAttributeNS(stylens, "style:family", "text");
-                styleNode.setAttributeNS(webodfns, "scope", "document-content");
-            }
-            formatting.updateStyle(styleNode, info, newStylePrefix);
-            automaticStyles.appendChild(styleNode);
-            return styleNode;
+            derivedStyleInfo = existingStyleName ? formatting.createDerivedStyleObject(existingStyleName, "text", info) : info;
+            derivedStyleNode = document.createElementNS(stylens, "style:style");
+            formatting.updateStyle(derivedStyleNode, derivedStyleInfo);
+            derivedStyleNode.setAttributeNS(stylens, "style:name", styleNameGenerator.generateName());
+            derivedStyleNode.setAttributeNS(stylens, "style:family", "text"); // The family will not have been specified if just using info
+            derivedStyleNode.setAttributeNS(webodfns, "scope", "document-content");
+            automaticStyles.appendChild(derivedStyleNode);
+            return derivedStyleNode;
         }
 
         function getDirectStyle(existingStyleName, document) {

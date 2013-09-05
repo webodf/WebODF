@@ -48,6 +48,7 @@ runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.SessionTests");
 runtime.loadClass("ops.OperationTests");
 runtime.loadClass("odf.OdfUtilsTests");
+runtime.loadClass("odf.StyleNameGeneratorTests");
 runtime.loadClass("odf.FormattingTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("odf.StyleInfoTests");
@@ -76,6 +77,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(gui.SelectionMoverTests);
     tests.push(gui.StyleHelperTests);
     tests.push(odf.OdfUtilsTests);
+    tests.push(odf.StyleNameGeneratorTests);
     tests.push(odf.FormattingTests);
     tests.push(odf.OdfContainerTests);
     tests.push(odf.StyleInfoTests);

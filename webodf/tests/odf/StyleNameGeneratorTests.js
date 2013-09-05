@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012 KO GmbH <aditya.bhatt@kogmbh.com>
+ * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,56 +30,58 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-
-/*global core*/
-
+/*global runtime, core, odf*/
+runtime.loadClass("odf.StyleNameGenerator");
 /**
- * A collection of useful utility functions
  * @constructor
+ * @param {core.UnitTestRunner} runner
+ * @implements {core.UnitTest}
  */
-core.Utils = function Utils() {
+odf.StyleNameGeneratorTests = function StyleNameGeneratorTests(runner) {
     "use strict";
+    var t,
+        r = runner,
+        namespace = {
+            "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+            "style":"urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+            "fo":"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+        };
 
-    /**
-     * Simple string hash
-     * Based off http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
-     * @param {!string} value
-     * @returns {!number}
-     */
-    function hashString(value) {
-        var hash = 0, i, l;
-        for (i = 0, l = value.length; i < l; i += 1) {
-            /*jslint bitwise:true*/
-            hash = ((hash << 5) - hash) + value.charCodeAt(i);
-            hash |= 0; // Convert to 32bit integer
-            /*jslint bitwise:false*/
-        }
-        return hash;
-    }
-    this.hashString = hashString;
+    this.setUp = function () {
+        t = {
+            ns : namespace,
+            existingNames : ['test_3', 'test_4', 'test_5', 'test_2'],
+            formattingMock : { getAllStyleNames : function() { return t.existingNames; }}
+        };
+        t.generator = new odf.StyleNameGenerator("test_", t.formattingMock);
+    };
+    this.tearDown = function () {
+        t = {};
+    };
+    function generateName_ReturnsUniqueName() {
+        t.result0 = t.generator.generateName();
+        t.result1 = t.generator.generateName();
+        t.result2 = t.generator.generateName();
 
-    /**
-     * Recursively merge properties of two objects
-     * @param {!Object} destination
-     * @param {!Object} source
-     * @return {!Object}
-     */
-    function mergeObjects(destination, source) {
-        Object.keys(source).forEach(function (p) {
-            try {
-                // Property in destination object set; update its value.
-                if (source[p].constructor === Object) {
-                    destination[p] = mergeObjects(destination[p], source[p]);
-                } else {
-                    destination[p] = source[p];
-                }
-            } catch (e) {
-                // Property in destination object not set; create it and set its value.
-                destination[p] = source[p];
-            }
-        });
-        return destination;
+        r.shouldBe(t, "t.result0", "'test_0'");
+        r.shouldBe(t, "t.result1", "'test_1'");
+        r.shouldBe(t, "t.result2", "'test_6'");
     }
-    this.mergeObjects = mergeObjects;
+    this.tests = function () {
+        return [
+            generateName_ReturnsUniqueName
+        ];
+    };
+    this.asyncTests = function () {
+        return [];
+    };
 };
-
+odf.StyleNameGeneratorTests.prototype.description = function () {
+    "use strict";
+    return "Test the StyleNameGenerator class.";
+};
+(function () {
+    "use strict";
+    return odf.StyleNameGeneratorTests;
+}());
