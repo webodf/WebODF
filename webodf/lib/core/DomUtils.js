@@ -178,9 +178,8 @@ core.DomUtils = function DomUtils() {
             if (node1.length === 0) {
                 node1.parentNode.removeChild(node1);
             } else if (node2.nodeType === Node.TEXT_NODE) {
-                node2.insertData(0, node1.data);
-                node1.parentNode.removeChild(node1);
-                return node2;
+                node1.appendData(node2.data);
+                node2.parentNode.removeChild(node2);
             }
         }
         return node1;
