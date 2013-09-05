@@ -44,6 +44,7 @@ define("webodf/editor/EditorSession", [
         return [ "../../webodf/lib" ];
     };
 
+    runtime.loadClass("core.DomUtils");
     runtime.loadClass("ops.OdtDocument");
     runtime.loadClass("ops.Session");
     runtime.loadClass("odf.Namespaces");
@@ -74,6 +75,7 @@ define("webodf/editor/EditorSession", [
             fontStyles = document.createElement('style'),
             formatting = odtDocument.getFormatting(),
             styleHelper = new gui.StyleHelper(formatting),
+            domUtils = new core.DomUtils(),
             eventNotifier = new core.EventNotifier([
                 EditorSession.signalMemberAdded,
                 EditorSession.signalMemberRemoved,
@@ -202,11 +204,15 @@ define("webodf/editor/EditorSession", [
         }
 
         function trackCurrentParagraph(info) {
-            if (info.paragraphElement !== currentParagraphNode) {
-                return;
+            var cursor = odtDocument.getCursor(localMemberId),
+                range = cursor && cursor.getSelectedRange(),
+                paragraphRange = odtDocument.getDOM().createRange();
+            paragraphRange.selectNode(info.paragraphElement);
+            if ((range && domUtils.rangesIntersect(range, paragraphRange)) || info.paragraphElement === currentParagraphNode) {
+                self.emit(EditorSession.signalParagraphChanged, info);
+                checkParagraphStyleName();
             }
-            self.emit(EditorSession.signalParagraphChanged, info);
-            checkParagraphStyleName();
+            paragraphRange.detach();
         }
 
         function onCursorAdded(cursor) {
