@@ -180,7 +180,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
             }
 
             if (paragraphStyleElement) {
-                paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type {!Element}*/(paragraphStyleElement));
+                paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type {!Element}*/(paragraphStyleElement), true);
                 properties = paragraphStyleAttributes['style:paragraph-properties'];
                 if (properties && propertyValues.indexOf(properties[propertyName]) === -1) {
                     return false;

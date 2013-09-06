@@ -55,7 +55,38 @@ odf.Formatting = function Formatting() {
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ numberns = odf.Namespaces.numberns,
         odfUtils = new odf.OdfUtils(),
-        utils = new core.Utils();
+        utils = new core.Utils(),
+        // TODO: needs to be extended. Possibly created together with CSS from sone default description?
+        /** @const */ builtInDefaultStyleAttributesByFamily = {
+            'paragraph' : {
+                'style:paragraph-properties': {
+                    'fo:text-align': 'left'
+                }
+            }
+        };
+
+    /**
+     * Returns a JSON representation of the built-in default style attributes
+     * of a given style family.
+     * Creates a deep copy, so the result can be modified by the callee.
+     * If there are no such attributes, null is returned.
+     * @param {!string} styleFamily
+     * @return {?Object}
+     */
+    function getBuiltInDefaultStyleAttributes(styleFamily) {
+        var i,
+            result,
+            builtInDefaultStyleAttributes = builtInDefaultStyleAttributesByFamily[styleFamily];
+
+        if (builtInDefaultStyleAttributes) {
+            // reusing mergeObjects to copy builtInDefaultStyleAttributes into the result
+            result = utils.mergeObjects({}, builtInDefaultStyleAttributes);
+        } else {
+            result = null;
+        }
+
+        return result;
+    }
 
     /**
      * @param {!odf.OdfContainer} odfcontainer
@@ -271,13 +302,15 @@ odf.Formatting = function Formatting() {
      * Returns a JSON representation of the style attributes of a given style element, also containing attributes
      * inherited from it's ancestry - up to and including the default style for the family.
      * @param {!Element} styleNode
+     * @param {!boolean=} includeSystemDefault
      * @return {!Object}
      */
-    function getInheritedStyleAttributes(styleNode) {
+    function getInheritedStyleAttributes(styleNode, includeSystemDefault) {
         var styleListElement = odfContainer.rootElement.styles,
             parentStyleName,
-            propertiesMap = {},
+            propertiesMap,
             inheritedPropertiesMap = {},
+            styleFamily = styleNode.getAttributeNS(stylens, 'family'),
             node = styleNode;
 
         // Iterate through the style ancestry
@@ -288,19 +321,29 @@ odf.Formatting = function Formatting() {
 
             parentStyleName = node.getAttributeNS(stylens, 'parent-style-name');
             if (parentStyleName) {
-                node = getStyleElement(parentStyleName, styleNode.getAttributeNS(stylens, 'family'), [styleListElement]);
+                node = getStyleElement(parentStyleName, styleFamily, [styleListElement]);
             } else {
                 node = null;
             }
         }
 
-        // Now incorporate attributes from the default style
-        node = getDefaultStyleElement(styleNode.getAttributeNS(stylens, 'family'));
+        // Next incorporate attributes from the default style
+        node = getDefaultStyleElement(styleFamily);
         if (node) {
             propertiesMap = getStyleAttributes(node);
             // All child properties should override any matching parent properties
             inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
         }
+
+        // Last incorporate attributes from the built-in default style
+        if (includeSystemDefault) {
+            propertiesMap = getBuiltInDefaultStyleAttributes(styleFamily);
+            if (propertiesMap) {
+                // All child properties should override any matching parent properties
+                inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
+            }
+        }
+
         return inheritedPropertiesMap;
     }
     this.getInheritedStyleAttributes = getInheritedStyleAttributes;
