@@ -175,6 +175,8 @@ gui.StyleHelper = function StyleHelper(formatting) {
             } else if(!isDefaultParagraphStyleChecked) {
                 isDefaultParagraphStyleChecked = true;
                 paragraphStyleElement = formatting.getDefaultStyleElement('paragraph');
+            } else {
+                paragraphStyleElement = undefined;
             }
 
             if (paragraphStyleElement) {
