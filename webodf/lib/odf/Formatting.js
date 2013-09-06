@@ -74,8 +74,7 @@ odf.Formatting = function Formatting() {
      * @return {?Object}
      */
     function getBuiltInDefaultStyleAttributes(styleFamily) {
-        var i,
-            result,
+        var result,
             builtInDefaultStyleAttributes = builtInDefaultStyleAttributesByFamily[styleFamily];
 
         if (builtInDefaultStyleAttributes) {
