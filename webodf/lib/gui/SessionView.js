@@ -298,18 +298,9 @@ gui.SessionView = (function () {
 
             // this takes care of incorrectly implemented MemberModels,
             // which might end up returning undefined member data
-            if (memberData === undefined) {
+            if (!memberData) {
                 runtime.log("MemberModel sent undefined data for member \"" + memberId + "\".");
                 return;
-            }
-
-            if (memberData === null) {
-                memberData = {
-                    memberid: memberId,
-                    fullname: "Unknown Identity",
-                    color: "black",
-                    imageurl: "avatar-joe.png"
-                };
             }
 
             if (caret) {

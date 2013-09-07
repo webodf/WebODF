@@ -133,6 +133,14 @@ define("webodf/editor/server/nowjs/MemberModel", [], function () {
             if (userData) {
                 // data available from cache
                 subscriber(memberId, userData);
+            } else {
+                // pass temporary data
+                subscriber(memberId, {
+                    memberid: memberId,
+                    fullname: "Unknown",
+                    color:    "black",
+                    imageurl: "avatar-joe.png"
+                });
             }
         };
 

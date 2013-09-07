@@ -58,7 +58,14 @@ ops.TrivialMemberModel = function TrivialMemberModel() {
      * @return {undefined}
      */
     this.getMemberDetailsAndUpdates = function (memberId, subscriber) {
-        subscriber(memberId, null);
+        // pass some dummy data
+        subscriber(memberId, {
+            memberid: memberId,
+            fullname: "Unknown",
+            color:    "black",
+            imageurl: "avatar-joe.png"
+        });
+        // no need to note the subscriber, as there will never be updates
     };
 
 /*jslint emptyblock: true, unparam: true*/

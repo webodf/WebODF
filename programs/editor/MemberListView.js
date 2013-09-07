@@ -56,14 +56,14 @@ define("webodf/editor/MemberListView",
          */
         function updateAvatarButton(memberId, memberDetails) {
             var node = memberListDiv.firstChild;
-            if (memberDetails === null) {
-                // 'null' here means finally unknown member
-                // (and not that the data is still loading)
-                memberDetails = {
-                    memberid: memberId, fullname: "Unknown",
-                    color: "black", imageurl: "avatar-joe.png"
-                };
+
+           // this takes care of incorrectly implemented MemberModels,
+           // which might end up returning undefined member data
+           if (!memberDetails) {
+                runtime.log("MemberModel sent undefined data for member \"" + memberId + "\".");
+                return;
             }
+
             while (node) {
                 if (node.memberId === memberId) {
                     node = node.firstChild;
