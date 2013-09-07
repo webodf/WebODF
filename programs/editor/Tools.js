@@ -107,11 +107,13 @@ define("webodf/editor/Tools", [
                 }
 
                 // Paragraph direct alignment buttons
-                paragraphAlignment = new ParagraphAlignment(function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
-                sessionSubscribers.push(paragraphAlignment);
+                if (args.directStylingEnabled) {
+                    paragraphAlignment = new ParagraphAlignment(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    sessionSubscribers.push(paragraphAlignment);
+                }
 
 
                 // Paragraph Style Selector
