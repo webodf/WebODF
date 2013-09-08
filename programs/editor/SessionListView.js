@@ -43,7 +43,7 @@ define("webodf/editor/SessionListView", [], function () {
             memberDataChangedHandler;
 
         function createSessionDescription(sessionDetails) {
-            return sessionDetails.title + " ("+sessionDetails.cursors.length+" members)";
+            return " ("+sessionDetails.cursors.length+" members) ";
         }
 
         /**
@@ -53,14 +53,26 @@ define("webodf/editor/SessionListView", [], function () {
             var doc = sessionListDiv.ownerDocument,
                 htmlns = doc.documentElement.namespaceURI,
                 sessionDiv = doc.createElementNS(htmlns, "div"),
-                fullnameTextNode = doc.createTextNode(createSessionDescription(sessionDetails));
+                sessionDescriptionDiv = doc.createElementNS(htmlns, "span"),
+                sessionDownloadDiv;
 
-            sessionDiv.appendChild(fullnameTextNode);
             sessionDiv.sessionId = sessionDetails.id; // TODO: namespace?
-            sessionDiv.style.cursor = "pointer"; // TODO: do not set on each element, use CSS
-            sessionDiv.onclick = function () {
+            sessionDiv.appendChild(sessionDescriptionDiv);
+            sessionDiv.appendChild(doc.createTextNode(createSessionDescription(sessionDetails)));
+
+            sessionDescriptionDiv.appendChild(doc.createTextNode(sessionDetails.title));
+            sessionDescriptionDiv.style.cursor = "pointer"; // TODO: do not set on each element, use CSS
+            sessionDescriptionDiv.style.fontWeight = "bold";
+            sessionDescriptionDiv.onclick = function () {
                 cb(sessionDetails.id);
             };
+
+            if (sessionDetails.fileUrl) {
+                sessionDownloadDiv = doc.createElementNS(htmlns, "a");
+                sessionDownloadDiv.appendChild(doc.createTextNode("Download"));
+                sessionDownloadDiv.setAttribute("href", sessionDetails.fileUrl);
+                sessionDiv.appendChild(sessionDownloadDiv);
+            }
 
             sessionListDiv.appendChild(sessionDiv);
         }
@@ -69,13 +81,7 @@ define("webodf/editor/SessionListView", [], function () {
             var node = sessionListDiv.firstChild;
             while (node) {
                 if (node.sessionId === sessionDetails.id) {
-                    node = node.firstChild;
-                    while (node) {
-                        if (node.nodeType == Node.TEXT_NODE) {
-                            node.data = createSessionDescription(sessionDetails);
-                        }
-                        node = node.nextSibling;
-                    }
+                    node.firstChild.nextSibling.data = createSessionDescription(sessionDetails);
                     return;
                 }
                 node = node.nextSibling;
