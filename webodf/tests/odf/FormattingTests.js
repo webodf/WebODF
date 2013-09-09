@@ -161,6 +161,22 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-name')", "'P1 Font'");
     }
+    function updateStyle_IgnoresUnknownElementPrefixes() {
+        var i;
+        createDocument("<text:p/>");
+        t.element = t.formatting.getStyleElement("P1", "paragraph");
+
+        t.formatting.updateStyle(t.element, {
+            "custom:item" : "custom-value",
+            "style:family" : "frog"
+        });
+
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'family')", "'frog'");
+        for (i = 0; i < t.element.attributes.length; i += 1) {
+            t.attribute = t.element.attributes[i];
+            r.shouldBe(t, "t.attribute.value === 'custom-value'", "false");
+        }
+    }
     function createDerivedStyleObject_Style() {
         createDocument("<text:p/>");
 
@@ -214,6 +230,7 @@ odf.FormattingTests = function FormattingTests(runner) {
             getStyleElement_MismatchedFamily_ReturnsNull,
 
             updateStyle_UpdatesStyleElement,
+            updateStyle_IgnoresUnknownElementPrefixes,
 
             createDerivedStyleObject_Style,
             createDerivedStyleObject_AutomaticStyle_Inherited,

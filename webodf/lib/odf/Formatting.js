@@ -291,7 +291,8 @@ odf.Formatting = function Formatting() {
                     || node.ownerDocument.createElementNS(ns, key);
                 node.appendChild(element);
                 mapObjOntoNode(element, value);
-            } else {
+            } else if (ns) {
+                // If the prefix is unknown or unsupported, simply ignore it for now
                 node.setAttributeNS(ns, key, value);
             }
         });
