@@ -33,43 +33,73 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops*/
+/*global runtime, odf, ops*/
+
+runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor
  * @implements ops.Operation
  */
-ops.OpRemoveParagraphStyle = function OpRemoveParagraphStyle() {
+ops.OpAddStyle = function OpAddStyle() {
     "use strict";
 
-    var memberid, timestamp, styleName;
+    var memberid, timestamp,
+        styleName, styleFamily, isAutomaticStyle,
+        /**@type{Object}*/setProperties,
+        /** @const */stylens = odf.Namespaces.stylens;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         styleName = data.styleName;
-    };
+        styleFamily = data.styleFamily;
+        // Input is either from an xml doc or potentially a manually created op
+        // This means isAutomaticStyles is either a raw string of 'true', or a a native bool
+        // Can't use Boolean(...) as Boolean('false') === true
+        isAutomaticStyle = data.isAutomaticStyle === 'true' || data.isAutomaticStyle === true;
+        setProperties = data.setProperties;
+     };
 
     this.execute = function (odtDocument) {
-        var styleNode = odtDocument.getParagraphStyleElement(styleName);
+        var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
+            formatting = odtDocument.getFormatting(),
+            dom = odtDocument.getDOM(),
+            styleNode = dom.createElementNS(stylens, 'style:style');
 
         if (!styleNode) {
             return false;
         }
 
-        styleNode.parentNode.removeChild(styleNode);
+        if (setProperties) {
+            formatting.updateStyle(styleNode, setProperties);
+        }
+
+        styleNode.setAttributeNS(stylens, 'style:family', styleFamily);
+        styleNode.setAttributeNS(stylens, 'style:name', styleName);
+
+        if (isAutomaticStyle) {
+            odfContainer.rootElement.automaticStyles.appendChild(styleNode);
+        } else {
+            odfContainer.rootElement.styles.appendChild(styleNode);
+        }
 
         odtDocument.getOdfCanvas().refreshCSS();
-        odtDocument.emit(ops.OdtDocument.signalCommonParagraphStyleDeleted, styleName);
+        if (!isAutomaticStyle) {
+            odtDocument.emit(ops.OdtDocument.signalCommonStyleCreated, {name: styleName, family: styleFamily});
+        }
         return true;
     };
 
     this.spec = function () {
         return {
-            optype: "RemoveParagraphStyle",
+            optype: "AddStyle",
             memberid: memberid,
             timestamp: timestamp,
-            styleName: styleName
+            styleName: styleName,
+            styleFamily: styleFamily,
+            isAutomaticStyle: isAutomaticStyle,
+            setProperties: setProperties
         };
     };
 };

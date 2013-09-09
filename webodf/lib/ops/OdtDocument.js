@@ -61,8 +61,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalCursorMoved,
             ops.OdtDocument.signalParagraphChanged,
             ops.OdtDocument.signalParagraphStyleModified,
-            ops.OdtDocument.signalCommonParagraphStyleCreated,
-            ops.OdtDocument.signalCommonParagraphStyleDeleted,
+            ops.OdtDocument.signalCommonStyleCreated,
+            ops.OdtDocument.signalCommonStyleDeleted,
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted,
             ops.OdtDocument.signalUndoStackChanged]),
@@ -405,12 +405,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!string} styleName
+     * @param {!string} styleFamily
+     * @returns {Element}
+     */
+    function getStyleElement(styleName, styleFamily) {
+        return odfCanvas.getFormatting().getStyleElement(styleName, styleFamily);
+    }
+    this.getStyleElement = getStyleElement;
+
+    /**
+     * @param {!string} styleName
      * @return {Element}
      */
     function getParagraphStyleElement(styleName) {
-        var node;
-        node = odfCanvas.getFormatting().getStyleElement(styleName, 'paragraph');
-        return node;
+        return getStyleElement(styleName, 'paragraph');
     }
 
     /**
@@ -848,8 +856,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalCursorMoved =   "cursor/moved";
 /**@const*/ops.OdtDocument.signalParagraphChanged = "paragraph/changed";
 /**@const*/ops.OdtDocument.signalTableAdded = "table/added";
-/**@const*/ops.OdtDocument.signalCommonParagraphStyleCreated = "style/created";
-/**@const*/ops.OdtDocument.signalCommonParagraphStyleDeleted = "style/deleted";
+/**@const*/ops.OdtDocument.signalCommonStyleCreated = "style/created";
+/**@const*/ops.OdtDocument.signalCommonStyleDeleted = "style/deleted";
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
 /**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
 /**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";

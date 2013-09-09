@@ -8,7 +8,8 @@
     xmlns:c="urn:webodf:names:cursor"
     xmlns:e="urn:webodf:names:editinfo"
     xmlns:wo="urn:webodf:names:scope"
-    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0">
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
 <test name="AddCursor_Simple">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -633,13 +634,13 @@
   <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
 
- <test name="AddParagraphStyle_firstStyle">
+ <test name="AddStyle_firstStyle">
   <before>
-   <office:styles></office:styles>
+   <office:styles/>
    <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="AddParagraphStyle" memberid="Alice" styleName="S" isAutomaticStyle="false">
+   <op optype="AddStyle" memberid="Alice" styleName="S" styleFamily="paragraph" isAutomaticStyle="false">
     <setProperties style:class="text"/>
    </op>
   </ops>
@@ -648,13 +649,13 @@
    <office:text><text:p/></office:text>
   </after>
  </test>
- <test name="AddParagraphStyle_secondStyle">
+ <test name="AddStyle_secondStyle">
   <before>
-   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:styles><style:style style:name="S1" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="AddParagraphStyle" memberid="Alice" styleName="S2" isAutomaticStyle="false">
+   <op optype="AddStyle" memberid="Alice" styleName="S2" styleFamily="paragraph" isAutomaticStyle="false">
     <setProperties style:class="text" style:display-name="Style2" style:parent-style-name="S1" style:next-style-name="S1"><style:paragraph-properties fo:margin-right="4mm"/></setProperties>
    </op>
   </ops>
@@ -663,45 +664,45 @@
    <office:text><text:p/></office:text>
   </after>
  </test>
- <test name="AddParagraphStyle_automaticStyle">
+ <test name="AddStyle_automaticStyle">
   <before>
-   <office:automatic-styles></office:automatic-styles>
+   <office:automatic-styles/>
    <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="AddParagraphStyle" memberid="Alice" styleName="S" isAutomaticStyle="true">
-    <setProperties style:class="text"/>
+   <op optype="AddStyle" memberid="Alice" styleName="S" styleFamily="graphic" isAutomaticStyle="true">
+    <setProperties style:parent-style-name="Graphics"/>
    </op>
   </ops>
   <after>
-   <office:automatic-styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:automatic-styles>
+   <office:automatic-styles><style:style style:name="S" style:family="graphic" style:parent-style-name="Graphics"/></office:automatic-styles>
    <office:text><text:p/></office:text>
   </after>
  </test>
- <test name="RemoveParagraphStyle">
+ <test name="RemoveStyle">
   <before>
-   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+   <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
   </before>
   <ops>
-   <op optype="RemoveParagraphStyle" memberid="Alice" styleName="S"/>
+   <op optype="RemoveStyle" memberid="Alice" styleName="S" styleFamily="paragraph"/>
   </ops>
   <after>
-   <office:styles></office:styles>
+   <office:styles/>
    <office:text><text:p/></office:text>
   </after>
  </test>
 
  <test name="UpdateParagraphStyle_nothing_fontSize">
   <before>
-    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"></style:style></office:styles>
+    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
     <office:text><text:p/></office:text>
   </before>
   <ops>
    <op optype="UpdateParagraphStyle" memberid="Alice" styleName="S"><setProperties><style:text-properties fo:font-size="8pt"/></setProperties></op>
   </ops>
   <after>
-    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="8pt"></style:text-properties></style:style></office:styles>
+    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="8pt"/></style:style></office:styles>
     <office:text><text:p/></office:text>
   </after>
  </test>

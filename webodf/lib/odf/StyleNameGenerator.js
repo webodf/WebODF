@@ -47,8 +47,8 @@
  * the lifetime of this object.
  *
  * Failure to do this could result in a situation like the following
- * 1. SessionController generates new OpAddParagraphStyle & adds to session's queue
- * 2. SessionController generates another OpAddParagraphStyle & adds to session's queue
+ * 1. SessionController generates new OpAddStyle & adds to session's queue
+ * 2. SessionController generates another OpAddStyle & adds to session's queue
  *
  * At step 2, as the session's queue implementation has no requirement that it immediately executes the operation from
  * step 1, it is likely that the style created in step 1 is not yet present in the document DOM.

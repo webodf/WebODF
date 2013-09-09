@@ -106,29 +106,38 @@ define("webodf/editor/widgets/paragraphStyles",
             select.addOption(selectionList);
         }
 
-        function addStyle(newStyleName) {
+        function addStyle(styleInfo) {
             var stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-                newStyleElement = editorSession.getParagraphStyleElement(newStyleName);
+                newStyleElement;
 
+            if (styleInfo.family !== 'paragraph') {
+                return;
+            }
+
+            newStyleElement = editorSession.getParagraphStyleElement(styleInfo.name);
             if (select) {
                 select.addOption({
-                    value: newStyleName,
+                    value: styleInfo.name,
                     label: newStyleElement.getAttributeNS(stylens, 'display-name')
                 });
             }
 
             if (self.onAdd) {
-                self.onAdd(newStyleName);
+                self.onAdd(styleInfo.name);
             }
         }
 
-        function removeStyle(styleName) {
+        function removeStyle(styleInfo) {
+            if (styleInfo.family !== 'paragraph') {
+                return;
+            }
+
             if (select) {
-                select.removeOption(styleName);
+                select.removeOption(styleInfo.name);
             }
 
             if (self.onRemove) {
-                self.onRemove(styleName);
+                self.onRemove(styleInfo.name);
             }
         }
 
@@ -159,13 +168,13 @@ define("webodf/editor/widgets/paragraphStyles",
 
         this.setEditorSession = function(session) {
             if (editorSession) {
-                editorSession.unsubscribe(EditorSession.signalCommonParagraphStyleCreated, addStyle);
-                editorSession.unsubscribe(EditorSession.signalCommonParagraphStyleDeleted, removeStyle);
+                editorSession.unsubscribe(EditorSession.signalCommonStyleCreated, addStyle);
+                editorSession.unsubscribe(EditorSession.signalCommonStyleDeleted, removeStyle);
             }
             editorSession = session;
             if (editorSession) {
-                editorSession.subscribe(EditorSession.signalCommonParagraphStyleCreated, addStyle);
-                editorSession.subscribe(EditorSession.signalCommonParagraphStyleDeleted, removeStyle);
+                editorSession.subscribe(EditorSession.signalCommonStyleCreated, addStyle);
+                editorSession.subscribe(EditorSession.signalCommonStyleDeleted, removeStyle);
                 populateStyles();
             }
         };

@@ -38,7 +38,7 @@
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.Utils");
 runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("ops.OpAddParagraphStyle");
+runtime.loadClass("ops.OpAddStyle");
 runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("gui.StyleHelper");
 
@@ -183,7 +183,7 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
             var paragraphStartPoint = position + odtDocument.getDistanceFromCursor(inputMemberId, paragraph, 0),
                 paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
                 newParagraphStyleName = styleNameGenerator.generateName(),
-                opAddParagraphStyle,
+                opAddStyle,
                 opSetParagraphStyle,
                 paragraphProperties;
 
@@ -195,8 +195,8 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
                 paragraphProperties = formatting.createDerivedStyleObject(paragraphStyleName, "paragraph", {});
             }
             paragraphProperties = applyDirectStyling(paragraphProperties || {});
-            opAddParagraphStyle = new ops.OpAddParagraphStyle();
-            opAddParagraphStyle.init({
+            opAddStyle = new ops.OpAddStyle();
+            opAddStyle.init({
                 memberid: inputMemberId,
                 styleName: newParagraphStyleName,
                 isAutomaticStyle: true,
@@ -210,7 +210,7 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
                 position: paragraphStartPoint
             });
 
-            session.enqueue(opAddParagraphStyle);
+            session.enqueue(opAddStyle);
             session.enqueue(opSetParagraphStyle);
         });
     }

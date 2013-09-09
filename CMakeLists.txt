@@ -294,8 +294,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpSplitParagraph.js
     lib/ops/OpSetParagraphStyle.js
     lib/ops/OpUpdateParagraphStyle.js
-    lib/ops/OpAddParagraphStyle.js
-    lib/ops/OpRemoveParagraphStyle.js
+    lib/ops/OpAddStyle.js
+    lib/ops/OpRemoveStyle.js
     lib/ops/OpAddAnnotation.js
     lib/ops/OpRemoveAnnotation.js
     lib/ops/OperationFactory.js
