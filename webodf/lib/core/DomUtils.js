@@ -178,6 +178,8 @@ core.DomUtils = function DomUtils() {
             if (node1.length === 0) {
                 node1.parentNode.removeChild(node1);
             } else if (node2.nodeType === Node.TEXT_NODE) {
+                // in chrome it is important to add node1 to node2. doing it the
+                // other way around causes random whitespace to appear
                 node1.appendData(node2.data);
                 node2.parentNode.removeChild(node2);
             }
