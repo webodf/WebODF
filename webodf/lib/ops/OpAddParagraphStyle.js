@@ -84,7 +84,9 @@ ops.OpAddParagraphStyle = function OpAddParagraphStyle() {
         }
 
         odtDocument.getOdfCanvas().refreshCSS();
-        odtDocument.emit(ops.OdtDocument.signalStyleCreated, styleName);
+        if (!isAutomaticStyle) {
+            odtDocument.emit(ops.OdtDocument.signalCommonParagraphStyleCreated, styleName);
+        }
         return true;
     };
 

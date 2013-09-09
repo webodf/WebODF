@@ -81,8 +81,8 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalMemberRemoved,
                 EditorSession.signalCursorMoved,
                 EditorSession.signalParagraphChanged,
-                EditorSession.signalStyleCreated,
-                EditorSession.signalStyleDeleted,
+                EditorSession.signalCommonParagraphStyleCreated,
+                EditorSession.signalCommonParagraphStyleDeleted,
                 EditorSession.signalParagraphStyleModified,
                 EditorSession.signalUndoStackChanged]);
 
@@ -233,11 +233,11 @@ define("webodf/editor/EditorSession", [
         }
 
         function onStyleCreated(newStyleName) {
-            self.emit(EditorSession.signalStyleCreated, newStyleName);
+            self.emit(EditorSession.signalCommonParagraphStyleCreated, newStyleName);
         }
 
         function onStyleDeleted(styleName) {
-            self.emit(EditorSession.signalStyleDeleted, styleName);
+            self.emit(EditorSession.signalCommonParagraphStyleDeleted, styleName);
         }
 
         function onParagraphStyleModified(styleName) {
@@ -561,8 +561,8 @@ define("webodf/editor/EditorSession", [
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
-            odtDocument.unsubscribe(ops.OdtDocument.signalStyleCreated, onStyleCreated);
-            odtDocument.unsubscribe(ops.OdtDocument.signalStyleDeleted, onStyleDeleted);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCommonParagraphStyleCreated, onStyleCreated);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCommonParagraphStyleDeleted, onStyleDeleted);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, trackCurrentParagraph);
             odtDocument.unsubscribe(ops.OdtDocument.signalUndoStackChanged, undoStackModified);
@@ -603,8 +603,8 @@ define("webodf/editor/EditorSession", [
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
-            odtDocument.subscribe(ops.OdtDocument.signalStyleCreated, onStyleCreated);
-            odtDocument.subscribe(ops.OdtDocument.signalStyleDeleted, onStyleDeleted);
+            odtDocument.subscribe(ops.OdtDocument.signalCommonParagraphStyleCreated, onStyleCreated);
+            odtDocument.subscribe(ops.OdtDocument.signalCommonParagraphStyleDeleted, onStyleDeleted);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, trackCurrentParagraph);
             odtDocument.subscribe(ops.OdtDocument.signalUndoStackChanged, undoStackModified);
@@ -617,8 +617,8 @@ define("webodf/editor/EditorSession", [
     /**@const*/EditorSession.signalMemberRemoved =          "memberRemoved";
     /**@const*/EditorSession.signalCursorMoved =            "cursorMoved";
     /**@const*/EditorSession.signalParagraphChanged =       "paragraphChanged";
-    /**@const*/EditorSession.signalStyleCreated =           "styleCreated";
-    /**@const*/EditorSession.signalStyleDeleted =           "styleDeleted";
+    /**@const*/EditorSession.signalCommonParagraphStyleCreated =           "styleCreated";
+    /**@const*/EditorSession.signalCommonParagraphStyleDeleted =           "styleDeleted";
     /**@const*/EditorSession.signalParagraphStyleModified = "paragraphStyleModified";
     /**@const*/EditorSession.signalUndoStackChanged =       "signalUndoStackChanged";
 

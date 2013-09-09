@@ -129,13 +129,13 @@ define("webodf/editor/widgets/paragraphStyles",
 
         this.setEditorSession = function(session) {
             if (editorSession) {
-                editorSession.unsubscribe(EditorSession.signalStyleCreated, addStyle);
-                editorSession.unsubscribe(EditorSession.signalStyleDeleted, removeStyle);
+                editorSession.unsubscribe(EditorSession.signalCommonParagraphStyleCreated, addStyle);
+                editorSession.unsubscribe(EditorSession.signalCommonParagraphStyleDeleted, removeStyle);
             }
             editorSession = session;
             if (editorSession) {
-                editorSession.subscribe(EditorSession.signalStyleCreated, addStyle);
-                editorSession.subscribe(EditorSession.signalStyleDeleted, removeStyle);
+                editorSession.subscribe(EditorSession.signalCommonParagraphStyleCreated, addStyle);
+                editorSession.subscribe(EditorSession.signalCommonParagraphStyleDeleted, removeStyle);
                 populateStyles();
             }
         };

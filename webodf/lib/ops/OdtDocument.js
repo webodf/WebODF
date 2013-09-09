@@ -59,8 +59,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalCursorMoved,
             ops.OdtDocument.signalParagraphChanged,
             ops.OdtDocument.signalParagraphStyleModified,
-            ops.OdtDocument.signalStyleCreated,
-            ops.OdtDocument.signalStyleDeleted,
+            ops.OdtDocument.signalCommonParagraphStyleCreated,
+            ops.OdtDocument.signalCommonParagraphStyleDeleted,
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted,
             ops.OdtDocument.signalUndoStackChanged]),
@@ -805,8 +805,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalCursorMoved =   "cursor/moved";
 /**@const*/ops.OdtDocument.signalParagraphChanged = "paragraph/changed";
 /**@const*/ops.OdtDocument.signalTableAdded = "table/added";
-/**@const*/ops.OdtDocument.signalStyleCreated = "style/created";
-/**@const*/ops.OdtDocument.signalStyleDeleted = "style/deleted";
+/**@const*/ops.OdtDocument.signalCommonParagraphStyleCreated = "style/created";
+/**@const*/ops.OdtDocument.signalCommonParagraphStyleDeleted = "style/deleted";
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
 /**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
 /**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";

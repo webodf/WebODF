@@ -60,7 +60,7 @@ ops.OpRemoveParagraphStyle = function OpRemoveParagraphStyle() {
         styleNode.parentNode.removeChild(styleNode);
 
         odtDocument.getOdfCanvas().refreshCSS();
-        odtDocument.emit(ops.OdtDocument.signalStyleDeleted, styleName);
+        odtDocument.emit(ops.OdtDocument.signalCommonParagraphStyleDeleted, styleName);
         return true;
     };
 
