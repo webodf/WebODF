@@ -384,7 +384,8 @@ define("webodf/editor/Editor", [
                     // create session around loaded document
                     session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, pendingMemberId, {
-                        viewOptions: viewOptions
+                        viewOptions: viewOptions,
+                        directStylingEnabled: directStylingEnabled
                     });
                     if (undoRedoEnabled) {
                         editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());

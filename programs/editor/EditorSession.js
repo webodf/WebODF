@@ -61,7 +61,7 @@ define("webodf/editor/EditorSession", [
      * Instantiate a new editor session attached to an existing operation session
      * @param {!ops.Session} session
      * @param {!string} localMemberId
-     * @param {{viewOptions:gui.SessionViewOptions}} config
+     * @param {{viewOptions:gui.SessionViewOptions,directStylingEnabled:boolean}} config
      * @constructor
      */
     var EditorSession = function EditorSession(session, localMemberId, config) {
@@ -87,7 +87,7 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalUndoStackChanged]);
 
 
-        this.sessionController = new gui.SessionController(session, localMemberId);
+        this.sessionController = new gui.SessionController(session, localMemberId, {directStylingEnabled: config.directStylingEnabled});
         caretManager = new gui.CaretManager(self.sessionController);
         this.sessionView = new gui.SessionView(config.viewOptions, session, caretManager);
         this.availableFonts = [];
@@ -299,11 +299,6 @@ define("webodf/editor/EditorSession", [
             return formatting.getAvailableParagraphStyles();
         };
 
-        this.isBold = isTrueForSelection.bind(self, styleHelper.isBold);
-        this.isItalic = isTrueForSelection.bind(self, styleHelper.isItalic);
-        this.hasUnderline = isTrueForSelection.bind(self, styleHelper.hasUnderline);
-        this.hasStrikeThrough = isTrueForSelection.bind(self, styleHelper.hasStrikeThrough);
-
         this.isAlignedLeft = isTrueForSelection.bind(self, styleHelper.isAlignedLeft);
         this.isAlignedCenter = isTrueForSelection.bind(self, styleHelper.isAlignedCenter);
         this.isAlignedRight = isTrueForSelection.bind(self, styleHelper.isAlignedRight);
@@ -311,18 +306,6 @@ define("webodf/editor/EditorSession", [
 
         this.getCurrentParagraphStyle = function () {
             return currentNamedStyleName;
-        };
-
-        this.formatSelection = function (value) {
-            var op = new ops.OpApplyDirectStyling(),
-                selection = self.getCursorSelection();
-            op.init({
-                memberid: localMemberId,
-                position: selection.position,
-                length: selection.length,
-                setProperties: value
-            });
-            session.enqueue(op);
         };
 
         /**

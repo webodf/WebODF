@@ -47,12 +47,13 @@ runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("ops.OpRemoveAnnotation");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.KeyboardHandler");
-runtime.loadClass("gui.StyleHelper");
+runtime.loadClass("gui.DirectTextStyler");
 
 /**
  * @constructor
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
+ * @param {!{directStylingEnabled:boolean}=} args
  * @return {?}
  */
 gui.SessionController = (function () {
@@ -62,9 +63,10 @@ gui.SessionController = (function () {
      * @constructor
      * @param {!ops.Session} session
      * @param {!string} inputMemberId
+     * @param {!{directStylingEnabled:boolean}=} args
      * @return {?}
      */
-    gui.SessionController = function SessionController(session, inputMemberId) {
+    gui.SessionController = function SessionController(session, inputMemberId, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
             domUtils = new core.DomUtils(),
@@ -72,11 +74,11 @@ gui.SessionController = (function () {
             clipboard = new gui.Clipboard(),
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
-            styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
             undoManager = null,
+            directTextStyler = args && args.directStylingEnabled ? new gui.DirectTextStyler(session, inputMemberId) : null,
             utils = new core.Utils(),
             styleNameGenerator = new odf.StyleNameGenerator("auto" + utils.hashString(inputMemberId) + "_", odtDocument.getFormatting());
 
@@ -1121,58 +1123,6 @@ gui.SessionController = (function () {
             return false;
         }
 
-        // duplicate of EditorSession.formatSelection method
-        // TODO: find a better place for this method to live so it can be reused
-        /**
-         * @param {!string} propertyName
-         * @param {!string} propertyValue
-         * @return {undefined}
-         */
-        function formatTextSelection(propertyName, propertyValue) {
-            var selection = odtDocument.getCursorSelection(inputMemberId),
-                op = new ops.OpApplyDirectStyling(),
-                properties = {};
-
-            properties[propertyName] = propertyValue;
-            op.init({
-                memberid: inputMemberId,
-                position: selection.position,
-                length: selection.length,
-                setProperties: {'style:text-properties' : properties }
-            });
-            session.enqueue(op);
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function toggleBold() {
-            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
-                value = styleHelper.isBold(range) ? 'normal' : 'bold';
-            formatTextSelection('fo:font-weight', value);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function toggleItalic() {
-            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
-                value = styleHelper.isItalic(range) ? 'normal' : 'italic';
-            formatTextSelection('fo:font-style', value);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function toggleUnderline() {
-            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
-                value = styleHelper.hasUnderline(range) ? 'none' : 'solid';
-            formatTextSelection('style:text-underline-style', value);
-            return true;
-        }
-
         /**
          * Updates a flag indicating whether the mouse down event occurred within the OdfCanvas element.
          * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
@@ -1413,13 +1363,25 @@ gui.SessionController = (function () {
             return undoManager;
         };
 
+
+        /**
+         * @returns {?gui.DirectTextStyler}
+         */
+        this.getDirectTextStyler = function () {
+            return directTextStyler;
+        };
+
         /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
         this.destroy = function(callback) {
-            // TODO: check if anything needs to be cleaned up
-            callback();
+            // TODO: check if anything else needs to be cleaned up
+            if (directTextStyler) {
+                directTextStyler.destroy(callback);
+            } else {
+                callback();
+            }
         };
 
         function init() {
@@ -1466,9 +1428,11 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Up, modifier.MetaShift, extendSelectionToDocumentStart);
                 keyDownHandler.bind(keyCode.Down, modifier.MetaShift, extendSelectionToDocumentEnd);
                 keyDownHandler.bind(keyCode.A, modifier.Meta, extendSelectionToEntireDocument);
-                keyDownHandler.bind(keyCode.B, modifier.Meta, toggleBold);
-                keyDownHandler.bind(keyCode.I, modifier.Meta, toggleItalic);
-                keyDownHandler.bind(keyCode.U, modifier.Meta, toggleUnderline);
+                if (directTextStyler) {
+                    keyDownHandler.bind(keyCode.B, modifier.Meta, directTextStyler.toggleBold);
+                    keyDownHandler.bind(keyCode.I, modifier.Meta, directTextStyler.toggleItalic);
+                    keyDownHandler.bind(keyCode.U, modifier.Meta, directTextStyler.toggleUnderline);
+                }
                 keyDownHandler.bind(keyCode.L, modifier.MetaShift, alignParagraphLeft);
                 keyDownHandler.bind(keyCode.E, modifier.MetaShift, alignParagraphCenter);
                 keyDownHandler.bind(keyCode.R, modifier.MetaShift, alignParagraphRight);
@@ -1477,9 +1441,11 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, extendSelectionToEntireDocument);
-                keyDownHandler.bind(keyCode.B, modifier.Ctrl, toggleBold);
-                keyDownHandler.bind(keyCode.I, modifier.Ctrl, toggleItalic);
-                keyDownHandler.bind(keyCode.U, modifier.Ctrl, toggleUnderline);
+                if (directTextStyler) {
+                    keyDownHandler.bind(keyCode.B, modifier.Ctrl, directTextStyler.toggleBold);
+                    keyDownHandler.bind(keyCode.I, modifier.Ctrl, directTextStyler.toggleItalic);
+                    keyDownHandler.bind(keyCode.U, modifier.Ctrl, directTextStyler.toggleUnderline);
+                }
                 keyDownHandler.bind(keyCode.L, modifier.CtrlShift, alignParagraphLeft);
                 keyDownHandler.bind(keyCode.E, modifier.CtrlShift, alignParagraphCenter);
                 keyDownHandler.bind(keyCode.R, modifier.CtrlShift, alignParagraphRight);

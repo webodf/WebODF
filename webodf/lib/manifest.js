@@ -58,6 +58,7 @@
         "gui/KeyboardHandler.js",
         "gui/Clipboard.js",
         "gui/PresenterUI.js",
+        "gui/DirectTextStyler.js",
         "gui/SessionController.js",
         "gui/CaretManager.js",
         "gui/EditInfoHandle.js",

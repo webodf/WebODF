@@ -306,6 +306,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/Caret.js
     lib/gui/KeyboardHandler.js
     lib/gui/Clipboard.js
+    lib/gui/DirectTextStyler.js
     lib/gui/SessionController.js
     lib/ops/MemberModel.js
     lib/ops/TrivialMemberModel.js
