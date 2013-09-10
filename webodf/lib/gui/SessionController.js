@@ -48,6 +48,7 @@ runtime.loadClass("ops.OpRemoveAnnotation");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.DirectTextStyler");
+runtime.loadClass("gui.DirectParagraphStyler");
 
 /**
  * @constructor
@@ -69,6 +70,7 @@ gui.SessionController = (function () {
     gui.SessionController = function SessionController(session, inputMemberId, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
+            utils = new core.Utils(),
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
@@ -77,10 +79,10 @@ gui.SessionController = (function () {
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
+            styleNameGenerator = new odf.StyleNameGenerator("auto" + utils.hashString(inputMemberId) + "_", odtDocument.getFormatting()),
             undoManager = null,
             directTextStyler = args && args.directStylingEnabled ? new gui.DirectTextStyler(session, inputMemberId) : null,
-            utils = new core.Utils(),
-            styleNameGenerator = new odf.StyleNameGenerator("auto" + utils.hashString(inputMemberId) + "_", odtDocument.getFormatting());
+            directParagraphStyler = args && args.directStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, styleNameGenerator) : null;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -1154,92 +1156,6 @@ gui.SessionController = (function () {
         }
 
         /**
-         *
-         * @param {!function(!Object) : !Object} applyDirectStyling
-         */
-        function applyParagraphDirectStyling(applyDirectStyling) {
-            var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
-                position = odtDocument.getCursorPosition(inputMemberId),
-                paragraphs = odfUtils.getParagraphElements(range),
-                formatting = odtDocument.getFormatting();
-
-            paragraphs.forEach(function(paragraph) {
-                var paragraphStartPoint = position + odtDocument.getDistanceFromCursor(inputMemberId, paragraph, 0),
-                    paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
-                    newParagraphStyleName = styleNameGenerator.generateName(),
-                    opAddParagraphStyle,
-                    opSetParagraphStyle,
-                    paragraphProperties;
-
-                // getDistanceFromCursor returns the last position before the node & offset
-                // The first index of the paragraph may not be walkable
-                paragraphStartPoint += 1;
-
-                if (paragraphStyleName) {
-                    paragraphProperties = formatting.createDerivedStyleObject(paragraphStyleName, "paragraph", {});
-                }
-                paragraphProperties = applyDirectStyling(paragraphProperties || {});
-                opAddParagraphStyle = new ops.OpAddParagraphStyle();
-                opAddParagraphStyle.init({
-                    memberid: inputMemberId,
-                    styleName: newParagraphStyleName,
-                    isAutomaticStyle: true,
-                    setProperties: paragraphProperties
-                });
-                session.enqueue(opAddParagraphStyle);
-
-                opSetParagraphStyle = new ops.OpSetParagraphStyle();
-                opSetParagraphStyle.init({
-                    memberid: inputMemberId,
-                    styleName: newParagraphStyleName,
-                    position: paragraphStartPoint
-                });
-                session.enqueue(opSetParagraphStyle);
-            });
-        }
-
-        function applySimpleParagraphDirectStyling(styleOverrides) {
-            applyParagraphDirectStyling(function(paragraphStyle) { return utils.mergeObjects(paragraphStyle, styleOverrides); });
-        }
-
-        function alignParagraphLeft() {
-            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'left'}});
-            return true;
-        }
-
-        function alignParagraphCenter() {
-            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'center'}});
-            return true;
-        }
-
-        function alignParagraphRight() {
-            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'right'}});
-            return true;
-        }
-
-        function alignParagraphJustified() {
-            applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : 'justify'}});
-            return true;
-        }
-
-        function modifyParagraphIndent(direction, paragraphStyle) {
-            var tabStopDistance = odtDocument.getFormatting().getDefaultTabStopDistance(),
-                paragraphProperties = paragraphStyle["style:paragraph-properties"],
-                indentValue = paragraphProperties && paragraphProperties["fo:margin-left"],
-                indent = indentValue && odfUtils.parseLength(indentValue),
-                newIndent;
-
-            if (indent && indent.unit === tabStopDistance.unit) {
-                newIndent = (indent.value + (direction * tabStopDistance.value)) + indent.unit;
-            } else {
-                // TODO unit-conversion would allow indent to work irrespective of the paragraph's indent type
-                newIndent = (direction * tabStopDistance.value) + tabStopDistance.unit;
-            }
-
-            return utils.mergeObjects(paragraphStyle, {"style:paragraph-properties" : {"fo:margin-left" : newIndent}});
-        }
-
-        /**
          * @return {undefined}
          */
         this.startEditing = function () {
@@ -1306,21 +1222,6 @@ gui.SessionController = (function () {
             }
         };
 
-        this.alignParagraphLeft = alignParagraphLeft;
-        this.alignParagraphCenter = alignParagraphCenter;
-        this.alignParagraphRight = alignParagraphRight;
-        this.alignParagraphJustified = alignParagraphJustified;
-
-        this.indent = function() {
-            applyParagraphDirectStyling(modifyParagraphIndent.bind(null, 1));
-            return true;
-        };
-
-        this.outdent = function() {
-            applyParagraphDirectStyling(modifyParagraphIndent.bind(null, -1));
-            return true;
-        };
-
         /**
          * @return {!string}
          */
@@ -1372,16 +1273,27 @@ gui.SessionController = (function () {
         };
 
         /**
+         * @returns {?gui.DirectParagraphStyler}
+         */
+        this.getDirectParagraphStyler = function () {
+            return directParagraphStyler;
+        };
+
+        /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
         this.destroy = function(callback) {
+            var destroyDirectTextStyler = directTextStyler ? directTextStyler.destroy : function(cb) { cb(); },
+                destroyDirectParagraphStyler = directParagraphStyler ? directParagraphStyler.destroy : function(cb) { cb(); };
             // TODO: check if anything else needs to be cleaned up
-            if (directTextStyler) {
-                directTextStyler.destroy(callback);
-            } else {
-                callback();
-            }
+            destroyDirectTextStyler(function(err) {
+                if (err) {
+                    callback(err);
+                } else {
+                    destroyDirectParagraphStyler(callback);
+                }
+            });
         };
 
         function init() {
@@ -1433,10 +1345,12 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.I, modifier.Meta, directTextStyler.toggleItalic);
                     keyDownHandler.bind(keyCode.U, modifier.Meta, directTextStyler.toggleUnderline);
                 }
-                keyDownHandler.bind(keyCode.L, modifier.MetaShift, alignParagraphLeft);
-                keyDownHandler.bind(keyCode.E, modifier.MetaShift, alignParagraphCenter);
-                keyDownHandler.bind(keyCode.R, modifier.MetaShift, alignParagraphRight);
-                keyDownHandler.bind(keyCode.J, modifier.MetaShift, alignParagraphJustified);
+                if (directParagraphStyler) {
+                    keyDownHandler.bind(keyCode.L, modifier.MetaShift, directParagraphStyler.alignParagraphLeft);
+                    keyDownHandler.bind(keyCode.E, modifier.MetaShift, directParagraphStyler.alignParagraphCenter);
+                    keyDownHandler.bind(keyCode.R, modifier.MetaShift, directParagraphStyler.alignParagraphRight);
+                    keyDownHandler.bind(keyCode.J, modifier.MetaShift, directParagraphStyler.alignParagraphJustified);
+                }
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
@@ -1446,10 +1360,12 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.I, modifier.Ctrl, directTextStyler.toggleItalic);
                     keyDownHandler.bind(keyCode.U, modifier.Ctrl, directTextStyler.toggleUnderline);
                 }
-                keyDownHandler.bind(keyCode.L, modifier.CtrlShift, alignParagraphLeft);
-                keyDownHandler.bind(keyCode.E, modifier.CtrlShift, alignParagraphCenter);
-                keyDownHandler.bind(keyCode.R, modifier.CtrlShift, alignParagraphRight);
-                keyDownHandler.bind(keyCode.J, modifier.CtrlShift, alignParagraphJustified);
+                if (directParagraphStyler) {
+                    keyDownHandler.bind(keyCode.L, modifier.CtrlShift, directParagraphStyler.alignParagraphLeft);
+                    keyDownHandler.bind(keyCode.E, modifier.CtrlShift, directParagraphStyler.alignParagraphCenter);
+                    keyDownHandler.bind(keyCode.R, modifier.CtrlShift, directParagraphStyler.alignParagraphRight);
+                    keyDownHandler.bind(keyCode.J, modifier.CtrlShift, directParagraphStyler.alignParagraphJustified);
+                }
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }

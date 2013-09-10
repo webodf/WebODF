@@ -36,16 +36,15 @@
 /*global define,require,document */
 
 define("webodf/editor/widgets/paragraphAlignment", [
-    "webodf/editor/EditorSession",
     "dijit/form/ToggleButton",
     "dijit/form/Button"],
 
-    function (EditorSession, ToggleButton, Button) {
+    function (ToggleButton, Button) {
         "use strict";
 
         var ParagraphAlignment = function (callback) {
             var widget = {},
-                editorSession,
+                directParagraphStyler,
                 justifyLeft,
                 justifyCenter,
                 justifyRight,
@@ -55,74 +54,67 @@ define("webodf/editor/widgets/paragraphAlignment", [
 
             justifyLeft = new ToggleButton({
                 label: document.translator('justifyLeft'),
+                disabled: true,
                 showLabel: false,
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyLeft",
                 onChange: function () {
-                    editorSession.sessionController.alignParagraphLeft();
+                    directParagraphStyler.alignParagraphLeft();
                 }
             });
 
             justifyCenter = new ToggleButton({
                 label: document.translator('justifyCenter'),
+                disabled: true,
                 showLabel: false,
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyCenter",
                 onChange: function () {
-                    editorSession.sessionController.alignParagraphCenter();
+                    directParagraphStyler.alignParagraphCenter();
                 }
             });
 
             justifyRight = new ToggleButton({
                 label: document.translator('justifyRight'),
+                disabled: true,
                 showLabel: false,
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyRight",
                 onChange: function () {
-                    editorSession.sessionController.alignParagraphRight();
+                    directParagraphStyler.alignParagraphRight();
                 }
             });
 
             justifyFull = new ToggleButton({
                 label: document.translator('justifyFull'),
+                disabled: true,
                 showLabel: false,
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyFull",
                 onChange: function () {
-                    editorSession.sessionController.alignParagraphJustified();
+                    directParagraphStyler.alignParagraphJustified();
                 }
             });
 
             outdent = new Button({
                 label: document.translator('outdent'),
+                disabled: true,
                 showLabel: false,
-                disabled: false,
                 iconClass: "dijitEditorIcon dijitEditorIconOutdent",
                 onClick: function () {
-                    editorSession.sessionController.outdent();
+                    directParagraphStyler.outdent();
                 }
             });
 
             indent = new Button({
                 label: document.translator('indent'),
+                disabled: true,
                 showLabel: false,
-                disabled: false,
                 iconClass: "dijitEditorIcon dijitEditorIconIndent",
                 onClick: function () {
-                    editorSession.sessionController.indent();
+                    directParagraphStyler.indent();
                 }
             });
-
-            function checkStyleButtons() {
-                // The 3rd parameter is false to avoid firing onChange when setting the value
-                // programmatically.
-                justifyLeft.set('checked', editorSession.isAlignedLeft(), false);
-                justifyCenter.set('checked', editorSession.isAlignedCenter(), false);
-                justifyRight.set('checked', editorSession.isAlignedRight(), false);
-                justifyFull.set('checked', editorSession.isAlignedJustified(), false);
-            }
-
-
 
             widget.children = [justifyLeft,
                 justifyCenter,
@@ -145,19 +137,40 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 return widget;
             };
 
+            function updateStyleButtons(changes) {
+                var buttons = {
+                    isAlignedLeft: justifyLeft,
+                    isAlignedCenter: justifyCenter,
+                    isAlignedRight: justifyRight,
+                    isAlignedJustified: justifyFull
+                };
+
+                Object.keys(changes).forEach(function (key) {
+                    var button = buttons[key];
+                    if (button) {
+                        // The 3rd parameter to set(...) is false to avoid firing onChange when setting the value programmatically.
+                        button.set('checked', changes[key], false);
+                    }
+                });
+            }
+
             this.setEditorSession = function(session) {
-                if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, checkStyleButtons);
-                    editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
-                    editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
+                if (directParagraphStyler) {
+                    directParagraphStyler.unsubscribe(gui.DirectParagraphStyler.paragraphStylingChanged, updateStyleButtons);
                 }
-                editorSession = session;
-                if (editorSession) {
-                    editorSession.subscribe(EditorSession.signalCursorMoved, checkStyleButtons);
-                    editorSession.subscribe(EditorSession.signalParagraphChanged, checkStyleButtons);
-                    editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkStyleButtons);
-                    checkStyleButtons();
+                directParagraphStyler = session && session.sessionController.getDirectParagraphStyler();
+                if (directParagraphStyler) {
+                    directParagraphStyler.subscribe(gui.DirectParagraphStyler.paragraphStylingChanged, updateStyleButtons);
                 }
+                widget.children.forEach(function (element) {
+                    element.setAttribute('disabled', !directParagraphStyler);
+                });
+                updateStyleButtons({
+                    isAlignedLeft:      directParagraphStyler ? directParagraphStyler.isAlignedLeft() :      false,
+                    isAlignedCenter:    directParagraphStyler ? directParagraphStyler.isAlignedCenter() :    false,
+                    isAlignedRight:     directParagraphStyler ? directParagraphStyler.isAlignedRight() :     false,
+                    isAlignedJustified: directParagraphStyler ? directParagraphStyler.isAlignedJustified() : false
+                });
             };
 
             callback(widget);

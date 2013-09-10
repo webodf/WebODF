@@ -54,7 +54,6 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.TrivialUndoManager");
-    runtime.loadClass("gui.StyleHelper");
     runtime.loadClass("core.EventNotifier");
 
     /**
@@ -74,7 +73,6 @@ define("webodf/editor/EditorSession", [
             textns = odf.Namespaces.textns,
             fontStyles = document.createElement('style'),
             formatting = odtDocument.getFormatting(),
-            styleHelper = new gui.StyleHelper(formatting),
             domUtils = new core.DomUtils(),
             eventNotifier = new core.EventNotifier([
                 EditorSession.signalMemberAdded,
@@ -91,15 +89,6 @@ define("webodf/editor/EditorSession", [
         caretManager = new gui.CaretManager(self.sessionController);
         this.sessionView = new gui.SessionView(config.viewOptions, session, caretManager);
         this.availableFonts = [];
-
-        function isTrueForSelection(predicate) {
-            var cursor = odtDocument.getCursor(localMemberId);
-            // no own cursor yet/currently added?
-            if (!cursor) {
-                return false;
-            }
-            return predicate(cursor.getSelectedRange());
-        }
 
         /*
          * @return {Array.{!string}}
@@ -299,11 +288,6 @@ define("webodf/editor/EditorSession", [
             return formatting.getAvailableParagraphStyles();
         };
 
-        this.isAlignedLeft = isTrueForSelection.bind(self, styleHelper.isAlignedLeft);
-        this.isAlignedCenter = isTrueForSelection.bind(self, styleHelper.isAlignedCenter);
-        this.isAlignedRight = isTrueForSelection.bind(self, styleHelper.isAlignedRight);
-        this.isAlignedJustified = isTrueForSelection.bind(self, styleHelper.isAlignedJustified);
-
         this.getCurrentParagraphStyle = function () {
             return currentNamedStyleName;
         };
@@ -483,12 +467,6 @@ define("webodf/editor/EditorSession", [
             }
 
             return array;
-        };
-
-        this.getCurrentSelectionStyles = function() {
-            var cursor = odtDocument.getCursor(localMemberId),
-                range = cursor && cursor.getSelectedRange();
-            return range && styleHelper.getAppliedStyles(range);
         };
 
         function undoStackModified(e) {
