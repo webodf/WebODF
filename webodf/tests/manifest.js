@@ -52,6 +52,7 @@
         "odf/OdfContainerTests.js",
         "odf/StyleInfoTests.js",
         "ops/OdtCursorTests.js",
+        "ops/OdtDocumentTests.js",
         "ops/OperationTests.js",
         "ops/SessionTests.js",
         "tests.js",

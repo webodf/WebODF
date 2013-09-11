@@ -45,6 +45,7 @@ runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("gui.StyleHelperTests");
 runtime.loadClass("ops.OdtCursorTests");
+runtime.loadClass("ops.OdtDocumentTests");
 runtime.loadClass("ops.SessionTests");
 runtime.loadClass("ops.OperationTests");
 runtime.loadClass("odf.OdfUtilsTests");
@@ -83,6 +84,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(odf.StyleInfoTests);
     tests.push(odf.TextStyleApplicatorTests);
     tests.push(ops.OdtCursorTests);
+    tests.push(ops.OdtDocumentTests);
 }
 // add tests depending on browser runtime
 if (runtime.type() === "BrowserRuntime") {
