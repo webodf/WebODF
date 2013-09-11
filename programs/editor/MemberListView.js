@@ -114,11 +114,6 @@ define("webodf/editor/MemberListView",
                 }
             };
             memberListDiv.appendChild(avatarDiv);
-
-            // preset bogus data
-            // TODO: indicate loading state
-            // (instead of setting the final 'unknown identity' data)
-            updateAvatarButton(memberId, null);
         }
 
         /**
