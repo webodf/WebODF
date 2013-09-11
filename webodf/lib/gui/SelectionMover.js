@@ -551,6 +551,17 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         return comparison;
     }
     /**
+     * Returns the position difference between the cursor and the supplied point (element + offset). Note, this is NOT
+     * the same as the number of valid positions between the cursor and supplied point.
+     * Computationally, this is equivalent to: (# steps from root to point) - (# steps from root to cursor)
+     *
+     * Example scenario:
+     *      <p>|A|B|<span>C|D|</span></p>
+     * Assuming the cursor is at the 4th vertical bar (position = 3, just after C), countStepsToPosition(span, 0)
+     * should return 1. If it returns 0, consumers would incorrectly assume that the cursor is at the same position
+     * as the passed in point. This is clearly not the case as can be seen by counting from the start of the
+     * document to each point. The span starts at position 2, meaning there is actually 1 step difference
+     * between the cursor and the supplied point
      * @param {!Element} posElement
      * @param {!number} posOffset  offset in filtered DOM world
      * @param {!core.PositionFilter} filter
@@ -594,10 +605,16 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                 watch.check();
                 if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                     steps -= 1;
-                }
-                if (iterator.container() === posElement) {
-                    if (iterator.unfilteredDomOffset() === posOffset) {
-                        return steps;
+                    // Every point from the root node to the *first* valid position is effectively position = 0
+                    // Therefore, when counting steps backwards we need to count to the earliest position preceding (or equal)
+                    // to the supplied point
+                    if (comparePoints(posElement, posOffset, iterator.container(), iterator.unfilteredDomOffset()) <= 0) {
+                        // Note, comparePoints(...) <= 0 is required because this loop is only allowed to be broken on a
+                        // valid position. There is no requirement however that the passed in posElement + posOffset
+                        // correspond to a position that is accepted by the supplied filter.
+                        // So rather than simply being able to check using equality as the (comparison < 0) branch do,
+                        // this actually needs to see if the target point has been passed.
+                        break;
                     }
                 }
             }

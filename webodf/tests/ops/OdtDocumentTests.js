@@ -222,6 +222,23 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
         r.shouldBe(t, "t.steps", "-4");
     }
+    function testcountStepsToPosition_CursorNearBeginningOfSpan() {
+        var span;
+        createOdtDocument("<text:p>A<text:span>BCD</text:span></text:p>");
+        span = t.root.getElementsByTagNameNS(odf.Namespaces.textns, "span")[0];
+        setCursorPosition(2);
+        t.steps = t.counter.countStepsToPosition(span, 0, t.filter);
+        r.shouldBe(t, "t.steps", "-1");
+    }
+    function testcountStepsToPosition_CursorNearEndOfSpan() {
+        var span;
+        createOdtDocument("<text:p>A<text:span>BCD</text:span></text:p>");
+        span = t.root.getElementsByTagNameNS(odf.Namespaces.textns, "span")[0];
+        setCursorPosition(3);
+        t.steps = t.counter.countStepsToPosition(span, span.childNodes.length, t.filter);
+        r.shouldBe(t, "t.steps", "1");
+    }
+
     this.setUp = function () {
         var doc, stylesElement;
         testarea = core.UnitTest.provideTestAreaDiv();
@@ -266,7 +283,10 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode,
             testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
             testCountStepsToLineBoundary_Backward_OverWrapping,
-            testCountStepsToLineBoundary_Backward_OverWrapping2
+            testCountStepsToLineBoundary_Backward_OverWrapping2,
+
+            testcountStepsToPosition_CursorNearBeginningOfSpan,
+            testcountStepsToPosition_CursorNearEndOfSpan
         ];
     };
     this.asyncTests = function () {
