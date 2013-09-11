@@ -81,6 +81,27 @@ core.UnitTest.cleanupTestAreaDiv = function () {
 };
 
 /**
+ * Creates and returns a simple ODT document
+ * @param {!string} xml Xml fragment to insert in the document between the <office:document>..</office:document> tags
+ * @param {!Object.<string, string>} namespaceMap Name-value pairs that map the prefix onto the appropriate uri namespace
+ * @returns {?Document}
+ */
+core.UnitTest.createOdtDocument = function(xml, namespaceMap) {
+    "use strict";
+    var xmlDoc = "<?xml version='1.0' encoding='UTF-8'?>";
+
+    xmlDoc += "<office:document";
+    Object.keys(namespaceMap).forEach(function(key) {
+        xmlDoc += " xmlns:" + key + '="' + namespaceMap[key] + '"';
+    });
+    xmlDoc += ">";
+    xmlDoc += xml;
+    xmlDoc += "</office:document>";
+
+    return runtime.parseXML(xmlDoc);
+};
+
+/**
  * @constructor
  */
 core.UnitTestRunner = function UnitTestRunner() {

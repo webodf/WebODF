@@ -64,18 +64,9 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
     function createDocument(dom) {
-        var xml = "<?xml version='1.0' encoding='UTF-8'?>",
-            fragment;
+        var fragment;
 
-        xml += "<office:document";
-        Object.keys(namespace).forEach(function(key) {
-            xml += " xmlns:" + key + '="' + namespace[key] + '"';
-        });
-        xml += ">";
-        xml += "<office:text>" + dom + "</office:text>";
-        xml += "</office:document>";
-
-        fragment = runtime.parseXML(xml);
+        fragment = core.UnitTest.createOdtDocument("<office:text>" + dom + "</office:text>", namespace);
         t.testArea.appendChild(fragment.documentElement);
         t.range = t.testArea.ownerDocument.createRange();
         return t.testArea.firstChild.firstChild.childNodes.length === 1

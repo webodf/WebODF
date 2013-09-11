@@ -68,16 +68,9 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
     function createDocument(dom) {
-        var xml = "<?xml version='1.0' encoding='UTF-8'?>",
-            container, fragment;
+        var xml, container, fragment;
 
-        xml += "<office:document";
-        Object.keys(namespace).forEach(function(key) {
-            xml += " xmlns:" + key + '="' + namespace[key] + '"';
-        });
-        xml += ">";
-
-        xml += "<office:styles>";
+        xml = "<office:styles>";
         xml += "    <style:style style:name='P1' style:display-name='P1 Display' style:family='paragraph'>";
         xml += "        <style:text-properties fo:font-name='P1 Font' />";
         xml += "    </style:style>";
@@ -108,11 +101,9 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         xml += "    </text:list-style>";
         xml += "</office:automatic-styles>";
 
-
         xml += "<office:text>" + dom + "</office:text>";
-        xml += "</office:document>";
 
-        fragment = runtime.parseXML(xml);
+        fragment = core.UnitTest.createOdtDocument(xml, namespace);
         t.testArea.appendChild(fragment.documentElement);
         container = { rootElement : {
             styles : t.testArea.firstChild.childNodes[0],
