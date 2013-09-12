@@ -35,8 +35,8 @@
 /*global runtime, core, gui, Node, ops, odf */
 
 runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.Utils");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("odf.ObjectNameGenerator");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
 runtime.loadClass("ops.OpMoveCursor");
@@ -73,7 +73,6 @@ gui.SessionController = (function () {
     gui.SessionController = function SessionController(session, inputMemberId, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
-            utils = new core.Utils(),
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
@@ -82,11 +81,11 @@ gui.SessionController = (function () {
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
-            styleNameGenerator = new odf.StyleNameGenerator("auto" + utils.hashString(inputMemberId) + "_", odtDocument.getFormatting()),
+            objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             undoManager = null,
             textManipulator = new gui.TextManipulator(session, inputMemberId),
             directTextStyler = args && args.directStylingEnabled ? new gui.DirectTextStyler(session, inputMemberId) : null,
-            directParagraphStyler = args && args.directStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, styleNameGenerator) : null;
+            directParagraphStyler = args && args.directStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");

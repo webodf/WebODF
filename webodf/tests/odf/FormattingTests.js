@@ -194,13 +194,6 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.newStyle['style:family']", "'text'");
         r.shouldBe(t, "t.newStyle['style:text-properties']", "({ 'fo:font-weight' : 'bold' })");
     }
-    function getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements() {
-        createDocument("<text:p/>");
-
-        t.styleNames = t.formatting.getAllStyleNames();
-
-        r.shouldBe(t, "t.styleNames", "['L1','L2','autoWithInherit','autoWithoutInherit','P1','S1','S2']");
-    }
     function getStyleAttributes_ReturnsAllStyleAttributes() {
         createDocument("<text:p/>");
         t.styleElement = t.formatting.getStyleElement('P1', 'paragraph');
@@ -225,8 +218,6 @@ odf.FormattingTests = function FormattingTests(runner) {
             createDerivedStyleObject_Style,
             createDerivedStyleObject_AutomaticStyle_Inherited,
             createDerivedStyleObject_AutomaticStyle_NonInherited,
-
-            getAllStyleNames_ReturnsAllStyle_AndListStyle_Elements,
 
             getStyleAttributes_ReturnsAllStyleAttributes
         ];

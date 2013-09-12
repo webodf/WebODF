@@ -35,7 +35,7 @@
 /*global Node, odf, runtime, console, core, NodeFilter*/
 
 runtime.loadClass("core.Utils");
-runtime.loadClass("odf.StyleNameGenerator");
+runtime.loadClass("odf.ObjectNameGenerator");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
@@ -498,37 +498,12 @@ odf.Formatting = function Formatting() {
      */
     this.applyStyle = function (memberId, textNodes, limits, info) {
         var textStyles = new odf.TextStyleApplicator(
-            new odf.StyleNameGenerator("auto" + utils.hashString(memberId) + "_", self),
+            new odf.ObjectNameGenerator(/**@type{!odf.OdfContainer}*/(odfContainer), memberId), // TODO: use the instance in SessionController
             self,
             odfContainer.rootElement.automaticStyles
         );
         textStyles.applyStyle(textNodes, limits, info);
     };
-
-    /**
-     * Get an list of all the defined style names in the current document including automatic styles
-     * @returns {!Array.<string>}
-     */
-    function getAllStyleNames() {
-        var styleElements = [odfContainer.rootElement.automaticStyles, odfContainer.rootElement.styles],
-            node,
-            styleNames = [];
-
-        styleElements.forEach(function(styleListElement) {
-            node = styleListElement.firstChild;
-            while (node) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    if ((node.namespaceURI === stylens && node.localName === "style")
-                        || (node.namespaceURI === textns && node.localName === "list-style")) {
-                        styleNames.push(node.getAttributeNS(stylens, 'name'));
-                    }
-                }
-                node = node.nextSibling;
-            }
-        });
-        return styleNames;
-    }
-    this.getAllStyleNames = getAllStyleNames;
 
     /**
      * Overrides the specific properties on the styleNode from the values in the supplied properties Object.

@@ -77,7 +77,7 @@
         "odf/FontLoader.js",
         "odf/TextStyleApplicator.js",
         "odf/Namespaces.js",
-        "odf/StyleNameGenerator.js",
+        "odf/ObjectNameGenerator.js",
         "odf/Formatting.js",
         "odf/OdfCanvas.js",
         "odf/OdfContainer.js",

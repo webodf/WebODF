@@ -47,7 +47,7 @@
         "gui/XMLEditTests.js",
         "odf/OdfUtilsTests.js",
         "odf/TextStyleApplicatorTests.js",
-        "odf/StyleNameGeneratorTests.js",
+        "odf/ObjectNameGeneratorTests.js",
         "odf/FormattingTests.js",
         "odf/OdfContainerTests.js",
         "odf/StyleInfoTests.js",
