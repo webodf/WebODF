@@ -29,7 +29,7 @@ html, body, #mainContainer {
 
 #container {
     text-align: center;
-    background-color: #FAFAFA;
+    background-color: #ddd;
     overflow: auto;
 
     position: absolute;
