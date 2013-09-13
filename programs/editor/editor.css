@@ -17,7 +17,7 @@ html, body, #mainContainer {
 
 #editor {
     border: none;
-    box-shadow: 0px 0px 14px black;
+    box-shadow: 0px 0px 14px #555;
     overflow: hidden;
     padding: 0px !important;
     z-index: 4;
