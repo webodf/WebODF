@@ -1692,10 +1692,12 @@ odf.OdfCanvas = (function () {
         this.destroy = function(callback) {
             var head = doc.getElementsByTagName('head')[0];
             // TODO: anything to clean with annotationManager?
-            if (annotationsPane.parentNode) {
+            if (annotationsPane && annotationsPane.parentNode) {
                 annotationsPane.parentNode.removeChild(annotationsPane);
             }
-            element.removeChild(sizer);
+            if (sizer) {
+                element.removeChild(sizer);
+            }
             // remove all styles
             head.removeChild(webodfcss);
             head.removeChild(fontcss);

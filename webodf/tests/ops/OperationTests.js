@@ -292,16 +292,16 @@ ops.OperationTests = function OperationTests(runner) {
     }
 
     this.setUp = function () {
-        var testarea,
-            odfcanvas;
+        var testarea;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
-        odfcanvas = new odf.OdfCanvas(testarea);
+        t.odfcanvas = new odf.OdfCanvas(testarea);
         t.odfContainer = new odf.OdfContainer("", null);
-        odfcanvas.setOdfContainer(t.odfContainer);
-        t.odtDocument = new ops.OdtDocument(odfcanvas);
+        t.odfcanvas.setOdfContainer(t.odfContainer);
+        t.odtDocument = new ops.OdtDocument(t.odfcanvas);
     };
     this.tearDown = function () {
+        t.odfcanvas.destroy(function() { return; });
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };

@@ -51,6 +51,7 @@ ops.SessionTests = function SessionTests(runner) {
         t.odf = odfcanvas.odfContainer();
     };
     this.tearDown = function () {
+        odfcanvas.destroy(function() { return; });
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
