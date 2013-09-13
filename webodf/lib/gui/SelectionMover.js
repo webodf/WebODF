@@ -562,13 +562,14 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * as the passed in point. This is clearly not the case as can be seen by counting from the start of the
      * document to each point. The span starts at position 2, meaning there is actually 1 step difference
      * between the cursor and the supplied point
-     * @param {!Element} posElement
-     * @param {!number} posOffset  offset in filtered DOM world
+     *
+     * @param {!Node} targetNode    Target node to iterate to
+     * @param {!number} targetOffset  offset in unfiltered DOM world
      * @param {!core.PositionFilter} filter
      * @return {!number}
      */
-    function countStepsToPosition(posElement, posOffset, filter) {
-        runtime.assert(posElement !== null, "SelectionMover.countStepsToPosition called with element===null");
+    function countStepsToPosition(targetNode, targetOffset, filter) {
+        runtime.assert(targetNode !== null, "SelectionMover.countStepsToPosition called with element===null");
         // first figure out how to get to the element
         // really dumb/inefficient implementation
         var iterator = getIteratorAtCursor(),
@@ -581,21 +582,21 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         // the iterator may interpret the positions as given by the range
         // differently than the dom positions, so we normalize them by calling
         // setPosition with these values
-        iterator.setUnfilteredPosition(posElement, posOffset);
-        posElement = /**@type{!Element}*/(iterator.container());
-        runtime.assert(Boolean(posElement), "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
-        posOffset = iterator.unfilteredDomOffset();
+        iterator.setUnfilteredPosition(targetNode, targetOffset);
+        targetNode = iterator.container();
+        runtime.assert(Boolean(targetNode), "SelectionMover.countStepsToPosition: positionIterator.container() returned null");
+        targetOffset = iterator.unfilteredDomOffset();
         iterator.setUnfilteredPosition(c, o);
 
-        comparison = comparePoints(posElement, posOffset, iterator.container(), iterator.unfilteredDomOffset());
+        comparison = comparePoints(targetNode, targetOffset, iterator.container(), iterator.unfilteredDomOffset());
         if (comparison < 0) {
             while (iterator.nextPosition()) {
                 watch.check();
                 if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                     steps += 1;
                 }
-                if (iterator.container() === posElement) {
-                    if (iterator.unfilteredDomOffset() === posOffset) {
+                if (iterator.container() === targetNode) {
+                    if (iterator.unfilteredDomOffset() === targetOffset) {
                         return steps;
                     }
                 }
@@ -608,7 +609,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
                     // Every point from the root node to the *first* valid position is effectively position = 0
                     // Therefore, when counting steps backwards we need to count to the earliest position preceding (or equal)
                     // to the supplied point
-                    if (comparePoints(posElement, posOffset, iterator.container(), iterator.unfilteredDomOffset()) <= 0) {
+                    if (comparePoints(targetNode, targetOffset, iterator.container(), iterator.unfilteredDomOffset()) <= 0) {
                         // Note, comparePoints(...) <= 0 is required because this loop is only allowed to be broken on a
                         // valid position. There is no requirement however that the passed in posElement + posOffset
                         // correspond to a position that is accepted by the supplied filter.
