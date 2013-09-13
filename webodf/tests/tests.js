@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global window, runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops*/
+/*global window, runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
 
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.DomUtilsTests");
@@ -56,6 +56,13 @@ runtime.loadClass("odf.StyleInfoTests");
 runtime.loadClass("odf.TextStyleApplicatorTests");
 runtime.loadClass("xmldom.LSSerializerTests");
 runtime.loadClass("xmldom.XPathTests");
+
+// qtjsruntimetest tests break if OdfCanvas is allowed to insert a dynamic <link/> element.
+// If a dynamic link is inserted, subsequent dynamic style sheets (document.createElement(...)) fail to result in
+// new entries being added to document.styleSheets.
+// This can easily be seen by commenting out the following and running ops.OdtCursorTests followed by ops.OdtDocumentTests.
+// As ops.OdtDocumentTests is the only test suite to rely on style behaviour functioning correctly and will report failures.
+webodf_css = "/* Need to prevent OdfCanvas from inserting it's own <link/> element. See tests.js for more information */";
 
 /**
  * Holds the unit tests to run.

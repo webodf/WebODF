@@ -233,8 +233,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         doc.getElementsByTagName("head")[0].appendChild(stylesElement);
         t = {
             doc: doc,
-            styles: doc.styleSheets[doc.styleSheets.length - 1],
-            stylesElement: stylesElement
+            stylesElement: stylesElement,
+            styles: stylesElement.sheet
         };
     };
     this.tearDown = function () {
