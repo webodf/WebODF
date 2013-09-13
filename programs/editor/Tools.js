@@ -52,6 +52,7 @@ define("webodf/editor/Tools", [
 
         return function Tools(args) {
             var translator = document.translator,
+                onToolDone = args.onToolDone,
                 loadOdtFile = args.loadOdtFile,
                 saveOdtFile = args.saveOdtFile,
                 close = args.close,
@@ -106,6 +107,7 @@ define("webodf/editor/Tools", [
                         onClick: function () {
                             if (editorSession) {
                                 editorSession.addAnnotation();
+                                onToolDone();
                             }
                         }
                     });
@@ -114,7 +116,7 @@ define("webodf/editor/Tools", [
 
                 // Simple Style Selector [B, I, U, S]
                 if (args.directStylingEnabled) {
-                    simpleStyles = new SimpleStyles(function (widget) {
+                    simpleStyles = new SimpleStyles(onToolDone, function (widget) {
                         widget.placeAt(toolbar);
                         widget.startup();
                     });
@@ -123,7 +125,7 @@ define("webodf/editor/Tools", [
 
                 // Paragraph direct alignment buttons
                 if (args.directStylingEnabled) {
-                    paragraphAlignment = new ParagraphAlignment(function (widget) {
+                    paragraphAlignment = new ParagraphAlignment(onToolDone, function (widget) {
                         widget.placeAt(toolbar);
                         widget.startup();
                     });
@@ -132,7 +134,7 @@ define("webodf/editor/Tools", [
 
 
                 // Paragraph Style Selector
-                currentStyle = new CurrentStyle(function (widget) {
+                currentStyle = new CurrentStyle(onToolDone, function (widget) {
                     widget.placeAt(toolbar);
                     widget.startup();
                 });

@@ -42,7 +42,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
     function (ToggleButton, Button) {
         "use strict";
 
-        var ParagraphAlignment = function (callback) {
+        var ParagraphAlignment = function (onToolDone, callback) {
             var widget = {},
                 directParagraphStyler,
                 justifyLeft,
@@ -60,6 +60,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyLeft",
                 onChange: function () {
                     directParagraphStyler.alignParagraphLeft();
+                    onToolDone();
                 }
             });
 
@@ -71,6 +72,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyCenter",
                 onChange: function () {
                     directParagraphStyler.alignParagraphCenter();
+                    onToolDone();
                 }
             });
 
@@ -82,6 +84,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyRight",
                 onChange: function () {
                     directParagraphStyler.alignParagraphRight();
+                    onToolDone();
                 }
             });
 
@@ -93,6 +96,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyFull",
                 onChange: function () {
                     directParagraphStyler.alignParagraphJustified();
+                    onToolDone();
                 }
             });
 
@@ -103,6 +107,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 iconClass: "dijitEditorIcon dijitEditorIconOutdent",
                 onClick: function () {
                     directParagraphStyler.outdent();
+                    onToolDone();
                 }
             });
 
@@ -113,6 +118,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 iconClass: "dijitEditorIcon dijitEditorIconIndent",
                 onClick: function () {
                     directParagraphStyler.indent();
+                    onToolDone();
                 }
             });
 

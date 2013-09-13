@@ -43,7 +43,7 @@ define("webodf/editor/widgets/simpleStyles", [
     function (FontPicker, ToggleButton, NumberSpinner) {
         "use strict";
 
-        var SimpleStyles = function(callback) {
+        var SimpleStyles = function(onToolDone, callback) {
             var widget = {},
                 directTextStyler,
                 boldButton,
@@ -62,6 +62,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 iconClass: "dijitEditorIcon dijitEditorIconBold",
                 onChange: function (checked) {
                     directTextStyler.setBold(checked);
+                    onToolDone();
                 }
             });
 
@@ -73,6 +74,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 iconClass: "dijitEditorIcon dijitEditorIconItalic",
                 onChange: function (checked) {
                     directTextStyler.setItalic(checked);
+                    onToolDone();
                 }
             });
 
@@ -84,6 +86,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 iconClass: "dijitEditorIcon dijitEditorIconUnderline",
                 onChange: function (checked) {
                     directTextStyler.setHasUnderline(checked);
+                    onToolDone();
                 }
             });
 
@@ -95,6 +98,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
                 onChange: function (checked) {
                     directTextStyler.setHasStrikethrough(checked);
+                    onToolDone();
                 }
             });
 
@@ -116,6 +120,7 @@ define("webodf/editor/widgets/simpleStyles", [
             fontPickerWidget.setAttribute('disabled', true);
             fontPickerWidget.onChange = function(value) {
                 directTextStyler.setFontName(value);
+                onToolDone();
             };
 
             widget.children = [boldButton, italicButton, underlineButton, strikethroughButton, fontPickerWidget, fontSizeSpinner];

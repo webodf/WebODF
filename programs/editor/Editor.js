@@ -285,6 +285,12 @@ define("webodf/editor/Editor", [
                 });
             };
 
+            function setFocusToOdfCanvas() {
+                if (odfCanvas) {
+                    odfCanvas.getElement().focus();
+                }
+            }
+
             // init
             function init() {
                 var editorPane, memberListPane,
@@ -363,6 +369,7 @@ define("webodf/editor/Editor", [
                 }
 
                 tools = new Tools({
+                        onToolDone: setFocusToOdfCanvas,
                         loadOdtFile: loadOdtFile,
                         saveOdtFile: saveOdtFile,
                         close: close,
