@@ -92,6 +92,9 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         return objArray.every(function(obj) { return value === get(obj, keys);}) ? value : undefined;
     }
 
+    /**
+     * @return {undefined}
+     */
     function updatedCachedValues() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
@@ -122,29 +125,48 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         }
     }
 
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
     function onCursorAdded(cursor) {
         if (cursor.getMemberId() === inputMemberId) {
             updatedCachedValues();
         }
     }
 
+    /**
+     * @param {!string} memberId
+     * @return {undefined}
+     */
     function onCursorRemoved(memberId) {
         if (memberId === inputMemberId) {
             updatedCachedValues();
         }
     }
 
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
     function onCursorMoved(cursor) {
         if (cursor.getMemberId() === inputMemberId) {
             updatedCachedValues();
         }
     }
 
+    /**
+     * @return {undefined}
+     */
     function onParagraphStyleModified() {
         // TODO: check if the cursor (selection) is actually affected
         updatedCachedValues();
     }
 
+    /**
+     * @param {!Object} args
+     * @return {undefined}
+     */
     function onParagraphChanged(args) {
         var cursor = odtDocument.getCursor(inputMemberId);
 
@@ -153,6 +175,11 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         }
     }
 
+    /**
+     * @param {!function(!Range):boolean} predicate
+     * @param {!function(!boolean):undefined} toggleMethod
+     * @return {!boolean}
+     */
     function toggle(predicate, toggleMethod) {
         var cursor = odtDocument.getCursor(inputMemberId);
         // no own cursor yet/currently added?
@@ -183,35 +210,59 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         session.enqueue(op);
     }
 
+    /**
+     * @param {!boolean} checked
+     * @return {undefined}
+     */
     function setBold(checked) {
         var value = checked ? 'bold' : 'normal';
         formatTextSelection('fo:font-weight', value);
     }
     this.setBold = setBold;
 
+    /**
+     * @param {!boolean} checked
+     * @return {undefined}
+     */
     function setItalic(checked) {
         var value = checked ? 'italic' : 'normal';
         formatTextSelection('fo:font-style', value);
     }
     this.setItalic = setItalic;
 
+    /**
+     * @param {!boolean} checked
+     * @return {undefined}
+     */
     function setHasUnderline(checked) {
         var value = checked ? 'solid' : 'none';
         formatTextSelection('style:text-underline-style', value);
     }
     this.setHasUnderline = setHasUnderline;
 
+    /**
+     * @param {!boolean} checked
+     * @return {undefined}
+     */
     function setHasStrikethrough(checked) {
         var value = checked ? 'solid' : 'none';
         formatTextSelection('style:text-line-through-style', value);
     }
     this.setHasStrikethrough = setHasStrikethrough;
 
+    /**
+     * @param {!number} value
+     * @return {undefined}
+     */
     function setFontSize(value) {
         formatTextSelection('fo:font-size', value + "pt");
     }
     this.setFontSize = setFontSize;
 
+    /**
+     * @param {!string} value
+     * @return {undefined}
+     */
     function setFontName(value) {
         formatTextSelection('style:font-name', value);
     }
@@ -238,26 +289,44 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      */
     this.toggleStrikethrough = toggle.bind(self, styleHelper.hasStrikeThrough, setHasStrikethrough);
 
+    /**
+     * @return {!boolean}
+     */
     this.isBold = function() {
         return isBoldValue;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.isItalic = function() {
         return isItalicValue;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.hasUnderline = function() {
         return hasUnderlineValue;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.hasStrikeThrough = function() {
         return hasStrikeThroughValue;
     };
 
+    /**
+     * @return {!number}
+     */
     this.fontSize = function() {
         return fontSizeValue;
     };
 
+    /**
+     * @return {!string}
+     */
     this.fontName = function() {
         return fontNameValue;
     };

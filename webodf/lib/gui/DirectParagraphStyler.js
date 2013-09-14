@@ -62,6 +62,9 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
         isAlignedRightValue,
         isAlignedJustifiedValue;
 
+    /**
+     * @return {undefined}
+     */
     function updatedCachedValues() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
@@ -88,29 +91,48 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
         }
     }
 
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
     function onCursorAdded(cursor) {
         if (cursor.getMemberId() === inputMemberId) {
             updatedCachedValues();
         }
     }
 
+    /**
+     * @param {!string} memberId
+     * @return {undefined}
+     */
     function onCursorRemoved(memberId) {
         if (memberId === inputMemberId) {
             updatedCachedValues();
         }
     }
 
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
     function onCursorMoved(cursor) {
         if (cursor.getMemberId() === inputMemberId) {
             updatedCachedValues();
         }
     }
 
+    /**
+     * @return {undefined}
+     */
     function onParagraphStyleModified() {
         // TODO: check if the cursor (selection) is actually affected
         updatedCachedValues();
     }
 
+    /**
+     * @param {!Object} args
+     * @return {undefined}
+     */
     function onParagraphChanged(args) {
         var cursor = odtDocument.getCursor(inputMemberId);
 
@@ -119,24 +141,37 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
         }
     }
 
+    /**
+     * @return {!boolean}
+     */
     this.isAlignedLeft = function() {
         return isAlignedLeftValue;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.isAlignedCenter = function() {
         return isAlignedCenterValue;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.isAlignedRight = function() {
         return isAlignedRightValue;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.isAlignedJustified = function() {
         return isAlignedJustifiedValue;
     };
 
     /**
      * @param {!function(!Object) : !Object} applyDirectStyling
+     * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
@@ -180,34 +215,59 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
         });
     }
 
+    /**
+     * @param {!Object} styleOverrides
+     * @return {undefined}
+     */
     function applySimpleParagraphDirectStyling(styleOverrides) {
         applyParagraphDirectStyling(function(paragraphStyle) { return utils.mergeObjects(paragraphStyle, styleOverrides); });
     }
 
+    /**
+     * @param {!string} alignment
+     * @return {undefined}
+     */
     function alignParagraph(alignment) {
         applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : alignment}});
     }
 
+    /**
+     * @return {!boolean}
+     */
     this.alignParagraphLeft = function() {
         alignParagraph('left');
         return true;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.alignParagraphCenter = function() {
         alignParagraph('center');
         return true;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.alignParagraphRight = function() {
         alignParagraph('right');
         return true;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.alignParagraphJustified = function() {
         alignParagraph('justify');
         return true;
     };
 
+    /**
+     * @param {!number} direction
+     * @param {!Object} paragraphStyle
+     * @return {!Object}
+     */
     function modifyParagraphIndent(direction, paragraphStyle) {
         var tabStopDistance = odtDocument.getFormatting().getDefaultTabStopDistance(),
             paragraphProperties = paragraphStyle["style:paragraph-properties"],
@@ -225,11 +285,17 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
         return utils.mergeObjects(paragraphStyle, {"style:paragraph-properties" : {"fo:margin-left" : newIndent}});
     }
 
+    /**
+     * @return {!boolean}
+     */
     this.indent = function() {
         applyParagraphDirectStyling(modifyParagraphIndent.bind(null, 1));
         return true;
     };
 
+    /**
+     * @return {!boolean}
+     */
     this.outdent = function() {
         applyParagraphDirectStyling(modifyParagraphIndent.bind(null, -1));
         return true;
