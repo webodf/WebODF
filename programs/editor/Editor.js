@@ -110,7 +110,6 @@ define("webodf/editor/Editor", [
                 pendingEditorReadyCallback = editorReadyCallback;
 
                 odfCanvas.load(initialDocumentUrl);
-                odfCanvas.setEditable(false);
             }
 
 

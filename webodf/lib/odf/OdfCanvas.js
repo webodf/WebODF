@@ -1039,11 +1039,9 @@ odf.OdfCanvas = (function () {
             fontcss,
             stylesxmlcss,
             positioncss,
-            editable = false,
             zoomLevel = 1,
             /**@const@type{!Object.<!string,!Array.<!Function>>}*/
             eventHandlers = {},
-            editparagraph,
             loadingQueue = new LoadingQueue();
 
         /**
@@ -1383,111 +1381,11 @@ odf.OdfCanvas = (function () {
         this.load = load;
 
         /**
-         * @return {undefined}
-         */
-        function stopEditing() {
-            if (!editparagraph) {
-                return;
-            }
-            var fragment = editparagraph.ownerDocument.createDocumentFragment();
-            while (editparagraph.firstChild) {
-                fragment.insertBefore(editparagraph.firstChild, null);
-            }
-            editparagraph.parentNode.replaceChild(fragment, editparagraph);
-        }
-
-        /**
          * @param {function(?string):undefined} callback
          * @return {undefined}
          */
         this.save = function (callback) {
-            stopEditing();
             odfcontainer.save(callback);
-        };
-
-        /**
-         * @param {!Event} event
-         * @return {undefined}
-         */
-        function cancelEvent(event) {
-            if (event.preventDefault) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                event.returnValue = false;
-                event.cancelBubble = true;
-            }
-        }
-
-        /**
-         * @param {!Event} evt
-         * @return {undefined}
-         */
-        function processClick(evt) {
-            evt = evt || window.event;
-            // go up until we find a text:p, if we find it, wrap it in <p> and
-            // make that editable
-            var e = evt.target, selection = window.getSelection(),
-                range = ((selection.rangeCount > 0)
-                     ? selection.getRangeAt(0) : null),
-                startContainer = range && range.startContainer,
-                startOffset = range && range.startOffset,
-                endContainer = range && range.endContainer,
-                endOffset = range && range.endOffset,
-                clickdoc,
-                ns;
-
-            while (e && !((e.localName === "p" || e.localName === "h") &&
-                    e.namespaceURI === textns)) {
-                e = e.parentNode;
-            }
-            if (!editable) {
-                return;
-            }
-            // test code for enabling editing
-            if (!e || e.parentNode === editparagraph) {
-                return;
-            }
-            clickdoc = e.ownerDocument;
-            ns = clickdoc.documentElement.namespaceURI;
-
-            if (!editparagraph) {
-                editparagraph = clickdoc.createElementNS(ns, "p");
-                editparagraph.style.margin = "0px";
-                editparagraph.style.padding = "0px";
-                editparagraph.style.border = "0px";
-                editparagraph.setAttribute("contenteditable", true);
-            } else if (editparagraph.parentNode) {
-                stopEditing();
-            }
-            e.parentNode.replaceChild(editparagraph, e);
-            editparagraph.appendChild(e);
-
-            // set the cursor or selection at the right position
-            editparagraph.focus(); // needed in FF to show cursor in the paragraph
-            if (range) {
-                selection.removeAllRanges();
-                range = e.ownerDocument.createRange();
-                range.setStart(startContainer, startOffset);
-                range.setEnd(endContainer, endOffset);
-                selection.addRange(range);
-            }
-            cancelEvent(evt);
-        }
-
-        /**
-         * @param {!boolean} iseditable
-         * @return {undefined}
-         */
-        this.setEditable = function (iseditable) {
-            // We start listening to clicks on the canvas to enable editing.
-            // If another process wants to listen to click events on the canvas
-            // setEditable should not be called on that canvas.
-            listenEvent(element, "click", processClick);
-            editable = iseditable;
-            if (!editable) {
-                stopEditing();
-            }
         };
 
         /**
@@ -1721,10 +1619,6 @@ odf.OdfCanvas = (function () {
             fontcss = addStyleSheet(doc);
             stylesxmlcss = addStyleSheet(doc);
             positioncss = addStyleSheet(doc);
-// TODO: where are all these event listeners used? this one gets in the way for SessionController
-// perhaps all the event listening in this class currently could be factored out to another class
-// which then can be created and attached for the current use cases with that event listening?
-//         listenEvent(element, "click", processClick);
         }
 
         init();
