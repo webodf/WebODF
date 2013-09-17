@@ -46,23 +46,40 @@ define("webodf/editor/widgets/paragraphStyles",
     var ParagraphStyles = function (callback) {
         var self = this,
             editorSession,
-            select;
+            select,
+            translator = document.translator,
+            defaultStyleUIId = ":default";
 
         this.widget = function () {
             return select;
         };
 
+        /*
+         * In this widget, we name the default style
+         * (which is referred to as "" in webodf) as
+         * ":default". The ":" is disallowed in an NCName, so this
+         * avoids clashes with other styles.
+         */
+
         this.value = function () {
-            return select.get('value');
+            var value = select.get('value');
+            if (value === defaultStyleUIId) {
+                value = "";
+            }
+            return value;
         };
 
         this.setValue = function (value) {
+            if (value === "") {
+                value = defaultStyleUIId;
+            }
             select.set('value', value);
         };
 
         // events
         this.onAdd = null;
         this.onRemove = null;
+        this.onChange = function () {};
 
         function populateStyles() {
             var i, selectionList, availableStyles;
@@ -71,7 +88,11 @@ define("webodf/editor/widgets/paragraphStyles",
                 return;
             }
 
-            selectionList = [];
+            // Populate the Default Style always 
+            selectionList = [{
+                label: translator("defaultStyle"),
+                value: defaultStyleUIId
+            }];
             availableStyles = editorSession ? editorSession.getAvailableParagraphStyles() : [];
 
             for (i = 0; i < availableStyles.length; i += 1) {
@@ -122,6 +143,15 @@ define("webodf/editor/widgets/paragraphStyles",
                 });
 
                 populateStyles();
+
+                // Call ParagraphStyles's onChange handler every time
+                // the select's onchange is called, and pass the value
+                // as reported by ParagraphStyles.value(), because we do not
+                // want to expose the internal naming like ":default" outside this
+                // class.
+                select.onChange = function () {
+                    self.onChange(self.value());
+                };
 
                 return cb();
             });

@@ -246,7 +246,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     function openStyle(value) {
                         alignmentPane.setStyle(value);
                         fontEffectsPane.setStyle(value);
-                        if (editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
+                        // If it is a default (nameless) style or is used, make it undeletable.
+                        if (value === "" || editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
                             deleteButton.domNode.style.display = 'none';
                         } else {
                             deleteButton.domNode.style.display = 'block';
@@ -273,7 +274,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                             stylePicker.setValue(stylePicker.widget().getOptions(0));
                         };
 
-                        stylePicker.widget().onChange = openStyle;
+                        stylePicker.onChange = openStyle;
                         stylePicker.setEditorSession(editorSession);
                     });
                     a = new AlignmentPane(function (pane) {

@@ -48,14 +48,14 @@ define("webodf/editor/widgets/toolbarWidgets/currentStyle",
         function selectParagraphStyle(info) {
             if (paragraphStyles) {
                 if (info.type === 'style') {
-                    paragraphStyles.widget().set("value", info.styleName);
+                    paragraphStyles.setValue(info.styleName);
                 }
             }
         }
 
-        function setParagraphStyle(value) {
+        function setParagraphStyle() {
             if (editorSession) {
-                editorSession.setCurrentParagraphStyle(value);
+                editorSession.setCurrentParagraphStyle(paragraphStyles.value());
                 onToolDone();
             }
         }

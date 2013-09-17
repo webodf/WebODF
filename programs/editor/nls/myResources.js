@@ -90,7 +90,8 @@ define({
         size: "Size",
         color: "Color",
         text: "Text",
-        background: "Background"
+        background: "Background",
+        defaultStyle: "Default Style"
     },
 
     de: true,

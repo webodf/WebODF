@@ -91,5 +91,6 @@ define({
     size: "Größe",
     color: "Farbe",
     text: "Text",
-    background: "Hintergrund"
+    background: "Hintergrund",
+    defaultStyle: "Grundstil"
 });
