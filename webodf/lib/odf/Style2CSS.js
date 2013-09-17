@@ -371,14 +371,14 @@ odf.Style2CSS = function Style2CSS() {
         if (name) {
             namepart = '[' + prefix + '|style-name="' + name + '"]';
         } else {
-            namepart = '[' + prefix + '|style-name]';
+            namepart = '';
         }
         if (prefix === 'presentation') {
             prefix = 'draw';
             if (name) {
                 namepart = '[presentation|style-name="' + name + '"]';
             } else {
-                namepart = '[presentation|style-name]';
+                namepart = '';
             }
         }
         selector = prefix + '|' + familytagnames[family].join(
