@@ -270,7 +270,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         position += 1;
 
         while (position > 0 && iterator.nextPosition()) {
-            if (filter.acceptPosition(iterator) === 1) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 position -= 1;
             }
         }
@@ -300,7 +300,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
         runtime.assert(position >= 0, "position must be >= 0");
         // iterator should be at the start of getRootNode()
-        if (filter.acceptPosition(iterator) === 1) {
+        if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
             node = iterator.container();
             if (node.nodeType === Node.TEXT_NODE) {
                 lastTextNode = /**@type{!Text}*/(node);
@@ -315,7 +315,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 // the desired position cannot be found
                 return null;
             }
-            if (filter.acceptPosition(iterator) === 1) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 position -= 1;
                 node = iterator.container();
                 if (node.nodeType === Node.TEXT_NODE) {
@@ -552,7 +552,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             if (getParagraphElement(iterator.container()) !== paragraph) {
                 return length;
             }
-            if (filter.acceptPosition(iterator) === 1) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 length += 1;
             }
         } while (iterator.nextPosition());

@@ -60,6 +60,8 @@ runtime.loadClass("gui.DirectParagraphStyler");
 gui.SessionController = (function () {
     "use strict";
 
+    var /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+
     /**
      * @constructor
      * @param {!ops.Session} session
@@ -335,7 +337,7 @@ gui.SessionController = (function () {
                 /*jslint bitwise: true*/
                 inside = Boolean(node.compareDocumentPosition(iterator.container()) & Node.DOCUMENT_POSITION_CONTAINED_BY);
 
-                if (baseFilter.acceptPosition(iterator) === 1) {
+                if (baseFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
                     if (inside) {
                         break;
                     }
@@ -363,7 +365,7 @@ gui.SessionController = (function () {
                 if (!inside && node !== iterator.container()) {
                     break;
                 }
-                if (baseFilter.acceptPosition(iterator) === 1) {
+                if (baseFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
                     length += 1;
                 }
             } while (iterator.nextPosition());
