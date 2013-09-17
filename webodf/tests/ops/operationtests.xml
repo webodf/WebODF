@@ -158,7 +158,7 @@
   <ops>
    <op optype="InsertText" position="2" text="b"/>
   </ops>
-  <after><office:text><text:p>a<text:s> </text:s>b</text:p></office:text></after>
+  <after><office:text><text:p>a b</text:p></office:text></after>
  </test>
  <test name="InsertTextWithCursor_AfterSpace2">
   <before><office:text><text:p>a<text:s> </text:s></text:p><text:p/></office:text></before>
@@ -167,7 +167,7 @@
    <op optype="MoveCursor" memberid="Joe" position="2"/>
    <op optype="InsertText" position="2" text="b"/>
   </ops>
-  <after><office:text><text:p>a<text:s> </text:s>b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+  <after><office:text><text:p>a b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
  </test>
  <test name="InsertText_BeforeSpan">
   <before><office:text><text:p>a<text:span>b</text:span></text:p><text:p/></office:text></before>
@@ -214,7 +214,7 @@
    <op optype="InsertText" position="1" text="  "/>
    <op optype="RemoveText" position="1" length="1"/>
   </ops>
-  <after><office:text><text:p>a<text:s> </text:s>b</text:p></office:text></after>
+  <after><office:text><text:p>a b</text:p></office:text></after>
  </test>
  <test name="InsertTab">
   <before><office:text><text:p/></office:text></before>
@@ -256,7 +256,7 @@
    <ops>
     <op optype="InsertText" position="2" text="bc"/>
    </ops>
-  <after><office:text><text:p>a<text:s> </text:s>bcd</text:p></office:text></after>
+  <after><office:text><text:p>a bcd</text:p></office:text></after>
  </test>
  <test name="InsertText_MultipleSpaceChar">
   <before><office:text><text:p/></office:text></before>
@@ -265,12 +265,40 @@
    </ops>
   <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s>bc</text:p></office:text></after>
  </test>
+ <test name="InsertText_DowngradeLeadingSpaces">
+  <before><office:text><text:p>a</text:p></office:text></before>
+   <ops>
+    <op optype="InsertText" position="1" text=" bc"/>
+   </ops>
+  <after><office:text><text:p>a bc</text:p></office:text></after>
+ </test>
+ <test name="InsertText_DowngradeTrailingSpaces">
+  <before><office:text><text:p>a <text:s> </text:s>d</text:p></office:text></before>
+   <ops>
+    <op optype="InsertText" position="2" text="bc"/>
+   </ops>
+  <after><office:text><text:p>a bc d</text:p></office:text></after>
+ </test>
+ <test name="InsertText_UpgradesTrailingSpace">
+  <before><office:text><text:p>a d</text:p></office:text></before>
+   <ops>
+    <op optype="InsertText" position="1" text="bc "/>
+   </ops>
+  <after><office:text><text:p>abc <text:s> </text:s>d</text:p></office:text></after>
+ </test>
  <test name="RemoveCharacter">
   <before><office:text><text:p>A</text:p></office:text></before>
   <ops>
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
   <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="RemoveCharacter_DowngradesWhiteSpace">
+  <before><office:text><text:p>A <text:s> </text:s>B</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="1" length="1"/>
+  </ops>
+  <after><office:text><text:p>A B</text:p></office:text></after>
  </test>
  <test name="InsertRemoveText_Simple_Backwards">
   <before><office:text><text:p/></office:text></before>
@@ -424,7 +452,7 @@
    <op optype="MoveCursor" memberid="Joe" position="11"/>
    <op optype="MoveCursor" memberid="Joe" position="10"/>
   </ops>
-  <after><office:text><text:p>20130517_A<c:cursor c:memberId="Joe"/><text:s> </text:s><text:s> </text:s>split_text_2space</text:p></office:text></after>
+  <after><office:text><text:p>20130517_A<c:cursor c:memberId="Joe"/> <text:s> </text:s>split_text_2space</text:p></office:text></after>
  </test>
  <test name="InsertText_multiCursors">
   <before><office:text><text:p>abcdefgh</text:p></office:text></before>

@@ -95,6 +95,7 @@ ops.OpInsertText = function OpInsertText() {
             node,
             i;
 
+        odtDocument.upgradeWhitespacesAtPosition(position);
         domPosition = odtDocument.getPositionInTextNode(position, memberid);
         if (domPosition) {
             previousNode = domPosition.textNode;
@@ -141,6 +142,14 @@ ops.OpInsertText = function OpInsertText() {
             if (previousNode.length === 0) {
                 previousNode.parentNode.removeChild(previousNode);
             }
+
+            if (position > 0) {
+                // Necessary to match upgradeWhitespaces behaviour which searches the preceding positions as well
+                odtDocument.downgradeWhitespacesAtPosition(position - 1);
+            }
+            odtDocument.downgradeWhitespacesAtPosition(position);
+            odtDocument.downgradeWhitespacesAtPosition(position + text.length);
+
             // FIXME care must be taken regarding the cursor positions
             // the new text must appear in front of the (own) cursor.
             // if there are/were other cursors at the same address,

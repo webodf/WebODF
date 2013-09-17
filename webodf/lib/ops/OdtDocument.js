@@ -36,6 +36,7 @@
 /*global Node, runtime, core, gui, ops, odf*/
 
 runtime.loadClass("core.EventNotifier");
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("gui.StyleHelper");
@@ -52,6 +53,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     var self = this,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         odfUtils,
+        domUtils,
         /**Array.<!ops.OdtCursor>*/cursors = {},
         eventNotifier = new core.EventNotifier([
             ops.OdtDocument.signalCursorAdded,
@@ -477,6 +479,35 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     this.upgradeWhitespacesAtPosition = upgradeWhitespacesAtPosition;
 
+    /**
+     * Downgrades white space elements to normal spaces at the specified position if possible
+     * @param {!number} position
+     */
+    this.downgradeWhitespacesAtPosition = function (position) {
+        var iterator = getIteratorAtPosition(position),
+            container,
+            offset;
+
+        container = iterator.container();
+        offset = iterator.unfilteredDomOffset();
+        while (!odfUtils.isCharacterElement(container) && container.childNodes[offset]) {
+            // iterator.container will likely return a paragraph element with a non-zero offset
+            // easiest way to translate this is to keep diving into child nodes until the either
+            // an odf character element is encountered, or there are no more children
+            container = container.childNodes[offset];
+            offset = 0;
+        }
+        if (container.nodeType === Node.TEXT_NODE) {
+            // a space element cannot be a text node. Perhaps it's parent is
+            // this would be hit if iterator.container returns a text node or the previous loop dives
+            // all the way down without finding any odf character elements
+            container = container.parentNode;
+        }
+        if (odfUtils.isDowngradableSpaceElement(container)) {
+            domUtils.mergeIntoParent(container);
+        }
+    };
+
     this.getParagraphStyleElement = getParagraphStyleElement;
 
     this.getParagraphElement = getParagraphElement;
@@ -796,6 +827,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function init() {
         filter = new TextPositionFilter();
         odfUtils = new odf.OdfUtils();
+        domUtils = new core.DomUtils();
     }
     init();
 };

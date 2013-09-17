@@ -375,6 +375,21 @@ odf.OdfUtils = function OdfUtils() {
     this.isSignificantWhitespace = isSignificantWhitespace;
 
     /**
+     * Returns true if the supplied node is a downgradeable space element.
+     * As per http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-text_s
+     * a downgradeable whitespace element is a space element that is immediately preceded by something other than a space
+     * and has at least one non-space character after it
+     * @param {!Node} node
+     * @returns {!boolean}
+     */
+    this.isDowngradableSpaceElement = function(node) {
+        if (node.namespaceURI === textns && node.localName === "s") {
+            return scanLeftForNonWhitespace(previousNode(node)) && scanRightForAnyCharacter(nextNode(node));
+        }
+        return false;
+    };
+
+    /**
      * Returns the first non-whitespace-only child of a given node
      * @param {Node|undefined} node
      * @returns {Node|undefined}

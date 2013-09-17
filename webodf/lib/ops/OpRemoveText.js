@@ -221,6 +221,7 @@ ops.OpRemoveText = function OpRemoveText() {
             return mergeParagraphs(destination, paragraph, collapseRules);
         });
 
+        odtDocument.downgradeWhitespacesAtPosition(position);
         odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();
         odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
