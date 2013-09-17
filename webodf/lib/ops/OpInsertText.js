@@ -42,7 +42,9 @@
 ops.OpInsertText = function OpInsertText() {
     "use strict";
 
-    var memberid, timestamp, position, text;
+    var space = " ",
+        tab = "\t",
+        memberid, timestamp, position, text;
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -66,6 +68,18 @@ ops.OpInsertText = function OpInsertText() {
         parent.insertBefore(textNode, next);
     }
 
+    /**
+     * Returns true if the particular character in the text string is a space character that is immediately
+     * preceded by another space character (or is the first space in the text block).
+     * Logic is based on http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-text_s
+     * @param {!string} text
+     * @param {!number} index
+     * @returns {boolean}
+     */
+    function requiresSpaceElement(text, index) {
+        return text[index] === space && (index === 0 || text[index - 1] === space);
+    }
+
     this.execute = function (odtDocument) {
         var domPosition,
             previousNode,
@@ -74,8 +88,6 @@ ops.OpInsertText = function OpInsertText() {
             ownerDocument = odtDocument.getDOM(),
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            space = " ",
-            tab = "\t",
             append = true,
             startIndex = 0,
             textToInsert,
@@ -95,7 +107,7 @@ ops.OpInsertText = function OpInsertText() {
             }
 
             for (i = 0; i < text.length; i += 1) {
-                if (text[i] === space || text[i] === tab) {
+                if (requiresSpaceElement(text, i) || text[i] === tab) {
                     if (startIndex < i) {
                         textToInsert = text.substring(startIndex, i);
                         if (append) {

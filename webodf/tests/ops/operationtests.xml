@@ -223,12 +223,47 @@
    </ops>
   <after><office:text><text:p><text:tab>&#09;</text:tab></text:p></office:text></after>
  </test>
- <test name="InsertText_TabSpaceChars">
+ <test name="InsertText_TabChars">
   <before><office:text><text:p/></office:text></before>
    <ops>
-    <op optype="InsertText" position="0" text="a b&#x9;c"/>
+    <op optype="InsertText" position="0" text="ab&#x9;c"/>
    </ops>
-  <after><office:text><text:p>a<text:s> </text:s>b<text:tab>&#09;</text:tab>c</text:p></office:text></after>
+  <after><office:text><text:p>ab<text:tab>&#09;</text:tab>c</text:p></office:text></after>
+ </test>
+ <test name="InsertText_SingleSpaceChar">
+  <before><office:text><text:p/></office:text></before>
+   <ops>
+    <op optype="InsertText" position="0" text="a bc"/>
+   </ops>
+  <after><office:text><text:p>a bc</text:p></office:text></after>
+ </test>
+ <test name="InsertText_TextWithLeadingSpaceAfterSpace">
+  <before><office:text><text:p>a d</text:p></office:text></before>
+   <ops>
+    <op optype="InsertText" position="2" text=" bc"/>
+   </ops>
+  <after><office:text><text:p>a <text:s> </text:s>bcd</text:p></office:text></after>
+ </test>
+ <test name="InsertText_TextAfterUnexpandedSpace">
+  <before><office:text><text:p>a d</text:p></office:text></before>
+   <ops>
+    <op optype="InsertText" position="2" text="bc"/>
+   </ops>
+  <after><office:text><text:p>a bcd</text:p></office:text></after>
+ </test>
+ <test name="InsertText_TextAfterExpandedSpace">
+  <before><office:text><text:p>a<text:s> </text:s>d</text:p></office:text></before>
+   <ops>
+    <op optype="InsertText" position="2" text="bc"/>
+   </ops>
+  <after><office:text><text:p>a<text:s> </text:s>bcd</text:p></office:text></after>
+ </test>
+ <test name="InsertText_MultipleSpaceChar">
+  <before><office:text><text:p/></office:text></before>
+   <ops>
+    <op optype="InsertText" position="0" text="a   bc"/>
+   </ops>
+  <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s>bc</text:p></office:text></after>
  </test>
  <test name="RemoveCharacter">
   <before><office:text><text:p>A</text:p></office:text></before>
