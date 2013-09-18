@@ -136,6 +136,17 @@ var webodfEditor = (function () {
     }
 
     /**
+     * extract session id from the url-fragment
+     *
+     * @return {?string}
+     */
+    function extractSessionId() {
+        var sessionId = String(document.location),
+            pos = sessionId.indexOf('#');
+        return (pos !== -1) ? sessionId.substr(pos + 1) : null;
+    }
+
+    /**
      * start the login process by offering a login/password prompt.
      * on success a list of sessions is offered.
      * when the user selects a session the callback is called
@@ -149,26 +160,29 @@ var webodfEditor = (function () {
 
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
-        function showSessionsAfterLogin() {
+        function loginSuccess(userData) {
             require({ }, ["webodf/editor/SessionListView"],
                 function (SessionListView) {
                     var sessionListDiv = document.getElementById("sessionList"),
+                        sessionId = extractSessionId(),
                         sessionListView;
 
+                    runtime.log("connected:" + userData.full_name);
+                    userId = userData.uid;
+                    token = userData.securityToken || null;
+
+                    // add session listing
                     sessionList = new serverFactory.createSessionList(server);
                     sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
 
-                    switchToPage("sessionListContainer");
+                    if (sessionId) {
+                        // TODO: check if session exists
+                        enterSession(sessionId);
+                    } else {
+                        switchToPage("sessionListContainer");
+                    }
                 }
             );
-        }
-
-        function loginSuccess(userData) {
-            runtime.log("connected:" + userData.full_name);
-            userId = userData.uid;
-            token = userData.securityToken || null;
-
-            showSessionsAfterLogin();
         }
 
         function loginFail(result) {
