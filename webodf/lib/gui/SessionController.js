@@ -927,13 +927,18 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function enqueueParagraphSplittingOps() {
-            var position = odtDocument.getCursorPosition(inputMemberId),
+            var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
                 op;
+
+            if (selection.length > 0) {
+                op = createOpRemoveSelection(selection);
+                session.enqueue(op);
+            }
 
             op = new ops.OpSplitParagraph();
             op.init({
                 memberid: inputMemberId,
-                position: position
+                position: selection.position
             });
             session.enqueue(op);
 
