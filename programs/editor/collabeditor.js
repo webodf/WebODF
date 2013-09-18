@@ -202,6 +202,7 @@ var webodfEditor = (function () {
         // bring up the login form
         document.loginForm.Submit.onclick = onLoginSubmit;
         switchToPage("loginContainer");
+        document.loginForm.login.focus();
     }
 
     /**
