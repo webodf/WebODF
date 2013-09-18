@@ -83,62 +83,71 @@ ops.OpInsertText = function OpInsertText() {
     this.execute = function (odtDocument) {
         var domPosition,
             previousNode,
-            parent,
-            refNode,
+            parentElement,
+            nextNode,
             ownerDocument = odtDocument.getDOM(),
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            append = true,
-            startIndex = 0,
-            textToInsert,
+            toInsertIndex = 0,
             spaceTag,
-            node,
+            spaceElement,
             i;
+
+        function insertTextNode(toInsertText) {
+            parentElement.insertBefore(ownerDocument.createTextNode(toInsertText), nextNode);
+        }
 
         odtDocument.upgradeWhitespacesAtPosition(position);
         domPosition = odtDocument.getPositionInTextNode(position, memberid);
+
         if (domPosition) {
             previousNode = domPosition.textNode;
-            parent = previousNode.parentNode;
-            refNode = previousNode.nextSibling;
+            nextNode = previousNode.nextSibling;
+            parentElement = previousNode.parentNode;
             paragraphElement = odtDocument.getParagraphElement(previousNode);
 
-            if (domPosition.offset !== previousNode.length) {
-                refNode = previousNode.splitText(domPosition.offset);
-            }
-
+            // first do the insertion with any contained tabs or spaces
             for (i = 0; i < text.length; i += 1) {
                 if (requiresSpaceElement(text, i) || text[i] === tab) {
-                    if (startIndex < i) {
-                        textToInsert = text.substring(startIndex, i);
-                        if (append) {
-                            previousNode.appendData(textToInsert);
-                        } else {
-                            parent.insertBefore(ownerDocument.createTextNode(textToInsert), refNode);
+                    // no nodes inserted yet?
+                    if (toInsertIndex === 0) {
+                        // if inserting in the middle the given text node needs to be split up
+                        // if previousNode becomes empty, it will be cleaned up on finishing
+                        if (domPosition.offset !== previousNode.length) {
+                            nextNode = previousNode.splitText(domPosition.offset);
+                        }
+                        // normal text to insert before this space?
+                        if (0 < i) {
+                            previousNode.appendData(text.substring(0, i));
+                        }
+                    } else {
+                        // normal text to insert before this space?
+                        if (toInsertIndex < i) {
+                            insertTextNode(text.substring(toInsertIndex, i));
                         }
                     }
-                    startIndex = i + 1;
-                    append = false;
+                    toInsertIndex = i + 1;
 
+                    // insert space element
                     spaceTag = text[i] === space ? "text:s" : "text:tab";
-                    node = ownerDocument.createElementNS(textns, spaceTag);
-                    node.appendChild(ownerDocument.createTextNode(text[i]));
-                    parent.insertBefore(node, refNode);
+                    spaceElement = ownerDocument.createElementNS(textns, spaceTag);
+                    spaceElement.appendChild(ownerDocument.createTextNode(text[i]));
+                    parentElement.insertBefore(spaceElement, nextNode);
                 }
             }
-            textToInsert = text.substring(startIndex);
-            if (textToInsert.length > 0) {
-                if (append) {
-                    previousNode.appendData(textToInsert);
-                } else {
-                    parent.insertBefore(ownerDocument.createTextNode(textToInsert), refNode);
-                }
+
+            // then insert rest
+            // text can be completely inserted, no spaces/tabs?
+            if (toInsertIndex === 0) {
+                previousNode.insertData(domPosition.offset, text);
+            } else if (toInsertIndex < text.length) {
+                insertTextNode(text.substring(toInsertIndex));
             }
 
             // FIXME A workaround.
             triggerLayoutInWebkit(previousNode);
 
-            // If the last text node happens to be an empty text node, clean up.
+            // Clean up the possibly created empty text node
             if (previousNode.length === 0) {
                 previousNode.parentNode.removeChild(previousNode);
             }
@@ -153,14 +162,6 @@ ops.OpInsertText = function OpInsertText() {
             odtDocument.downgradeWhitespacesAtPosition(position);
             odtDocument.downgradeWhitespacesAtPosition(position + text.length);
 
-            // FIXME care must be taken regarding the cursor positions
-            // the new text must appear in front of the (own) cursor.
-            // if there are/were other cursors at the same address,
-            // those must not move along.
-            // conclusion: insert text BEHIND ALL CURSORS, then move
-            // the `memberid`-cursor behind new text; alternatively
-            // move `memberid`-cursor behind all cursors at the same
-            // position. then insert text before `memberid`-cursor.
 
             odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {

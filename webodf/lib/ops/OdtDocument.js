@@ -301,6 +301,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             originalPosition = position;
 
         runtime.assert(position >= 0, "position must be >= 0");
+
+        // first prepare things
         // iterator should be at the start of getRootNode()
         if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
             node = iterator.container();
@@ -312,11 +314,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // add 1 to move into an acceptable position
             position += 1;
         }
+        // now iterate over as many positions as given
+        // loop as long as there is another position to reach
+        // or the text node in the final destination has not been reached yet
         while (position > 0 || lastTextNode === null) {
+            // reaching end of document too early?
             if (!iterator.nextPosition()) {
                 // the desired position cannot be found
                 return null;
             }
+            // iterator at a text position?
             if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 position -= 1;
                 node = iterator.container();
@@ -329,11 +336,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                     }
                 } else if (lastTextNode !== null) {
                     if (position === 0) {
+                        // position is at end of text node
                         nodeOffset = lastTextNode.length;
                         break;
                     }
                     lastTextNode = null;
                 } else if (position === 0) {
+                    // position is without any text node currently, so add an empty one
                     lastTextNode = getRootNode().ownerDocument.createTextNode('');
                     node.insertBefore(lastTextNode, iterator.rightNode());
                     nodeOffset = 0;
@@ -360,25 +369,25 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // We definitely need ephemeral empty text nodes instead of a lastTextNode representing
             // all the previous text, to prevent insertion by one cursor causing movement of the other
             // cursors at the same position.
-            if (cursorNode && lastTextNode.length > 0) {
+            if (lastTextNode.length > 0) {
                 lastTextNode = getRootNode().ownerDocument.createTextNode('');
                 nodeOffset = 0;
                 cursorNode.parentNode.insertBefore(lastTextNode, cursorNode.nextSibling);
             }
-        }
 
-        // if the position is just after a cursor, then move in front of that
-        // cursor. Give preference to the cursor with the optionally specified memberid
-        while (nodeOffset === 0 && lastTextNode.previousSibling &&
-                lastTextNode.previousSibling.localName === "cursor") {
-            node = lastTextNode.previousSibling;
-            if (lastTextNode.length > 0) {
-                lastTextNode = getRootNode().ownerDocument.createTextNode('');
-            }
-            node.parentNode.insertBefore(lastTextNode, node);
+            // if the position is just after a cursor, then move in front of that
+            // cursor. Give preference to the cursor with the optionally specified memberid
+            while (nodeOffset === 0 && lastTextNode.previousSibling &&
+                    lastTextNode.previousSibling.localName === "cursor") {
+                node = lastTextNode.previousSibling;
+                if (lastTextNode.length > 0) {
+                    lastTextNode = getRootNode().ownerDocument.createTextNode('');
+                }
+                node.parentNode.insertBefore(lastTextNode, node);
 
-            if (cursorNode === node) {
-                break;
+                if (cursorNode === node) {
+                    break;
+                }
             }
         }
 
