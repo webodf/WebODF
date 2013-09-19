@@ -38,7 +38,8 @@
 define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
     "use strict";
     return function ParagraphStylesDialog(callback) {
-        var editorSession,
+        var self = this,
+            editorSession,
             dialog,
             stylePicker, alignmentPane, fontEffectsPane;
 
@@ -301,6 +302,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                             stylePicker.setValue(currentStyle);
                         }
                     };
+
+                    dialog.onHide = self.onToolDone;
                 });
 
                 tabContainer.startup();
@@ -324,6 +327,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 dialog.hide();
             }
         };
+
+        this.onToolDone = function () {};
 
         // init
         makeWidget(function (dialog) {

@@ -41,8 +41,9 @@ define("webodf/editor/widgets/toolbarWidgets/currentStyle",
   function (EditorSession) {
     "use strict";
 
-    return function CurrentStyle(onToolDone, callback) {
-        var editorSession,
+    return function CurrentStyle(callback) {
+        var self = this,
+            editorSession,
             paragraphStyles;
 
         function selectParagraphStyle(info) {
@@ -56,8 +57,8 @@ define("webodf/editor/widgets/toolbarWidgets/currentStyle",
         function setParagraphStyle() {
             if (editorSession) {
                 editorSession.setCurrentParagraphStyle(paragraphStyles.value());
-                onToolDone();
             }
+            self.onToolDone();
         }
 
         function makeWidget(callback) {
@@ -88,6 +89,8 @@ define("webodf/editor/widgets/toolbarWidgets/currentStyle",
                 // TODO: selectParagraphStyle(editorSession.getCurrentParagraphStyle());
             }
         };
+
+        this.onToolDone = function () {};
 
         makeWidget(function (widget) {
             return callback(widget);

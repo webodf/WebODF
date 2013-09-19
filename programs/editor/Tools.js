@@ -116,29 +116,32 @@ define("webodf/editor/Tools", [
 
                 // Simple Style Selector [B, I, U, S]
                 if (args.directStylingEnabled) {
-                    simpleStyles = new SimpleStyles(onToolDone, function (widget) {
+                    simpleStyles = new SimpleStyles(function (widget) {
                         widget.placeAt(toolbar);
                         widget.startup();
                     });
                     sessionSubscribers.push(simpleStyles);
+                    simpleStyles.onToolDone = onToolDone;
                 }
 
                 // Paragraph direct alignment buttons
                 if (args.directStylingEnabled) {
-                    paragraphAlignment = new ParagraphAlignment(onToolDone, function (widget) {
+                    paragraphAlignment = new ParagraphAlignment(function (widget) {
                         widget.placeAt(toolbar);
                         widget.startup();
                     });
                     sessionSubscribers.push(paragraphAlignment);
+                    paragraphAlignment.onToolDone = onToolDone;
                 }
 
 
                 // Paragraph Style Selector
-                currentStyle = new CurrentStyle(onToolDone, function (widget) {
+                currentStyle = new CurrentStyle(function (widget) {
                     widget.placeAt(toolbar);
                     widget.startup();
                 });
                 sessionSubscribers.push(currentStyle);
+                currentStyle.onToolDone = onToolDone;
 
                 // Zoom Level Selector
                 zoomSlider = new ZoomSlider(function (widget) {
@@ -146,6 +149,7 @@ define("webodf/editor/Tools", [
                     widget.startup();
                 });
                 sessionSubscribers.push(zoomSlider);
+                zoomSlider.onToolDone = onToolDone;
 
                 // Load
                 if (loadOdtFile) {
@@ -174,6 +178,7 @@ define("webodf/editor/Tools", [
                         },
                         onClick: function () {
                             saveOdtFile();
+                            onToolDone();
                         }
                     });
                     saveButton.placeAt(toolbar);
@@ -195,6 +200,7 @@ define("webodf/editor/Tools", [
                     };
                 });
                 sessionSubscribers.push(paragraphStylesDialog);
+                paragraphStylesDialog.onToolDone = onToolDone;
 
                 formatMenuButton = new DropDownButton({
                     dropDown: formatDropDownMenu,

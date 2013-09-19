@@ -39,7 +39,8 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
     "use strict";
 
     return function ZoomSlider(callback) {
-        var editorSession,
+        var self = this,
+            editorSession,
             slider;
 
         function makeWidget(callback) {
@@ -64,8 +65,9 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
                     if (editorSession) {
                         editorSession.getOdfCanvas().setZoomLevel(value / 100.0);
                     }
+                    self.onToolDone();
                 };
-
+ 
                 return callback(slider);
             });
         }
@@ -74,6 +76,8 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
             editorSession = session;
 //             if (slider) { slider.setValue(editorSession.getOdfCanvas().getZoomLevel() ); TODO!
         };
+
+        this.onToolDone = function () {};
 
         // init
         makeWidget(function (widget) {
