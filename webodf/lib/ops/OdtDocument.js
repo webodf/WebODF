@@ -323,7 +323,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     if (node !== lastTextNode) {
                         lastTextNode = /**@type{!Text}*/(node);
-                        nodeOffset = iterator.domOffset();
+                        nodeOffset = iterator.unfilteredDomOffset();
                     } else {
                         nodeOffset += 1;
                     }

@@ -193,32 +193,9 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     this.getCurrentNode = function () {
         return walker.currentNode;
     };
+
     /**
-     * The same as offset(), except that adjacent text nodes are counted
-     * separately.
-     * @return {!number}
-     */
-    this.domOffset = function () {
-        if (walker.currentNode.nodeType === Node.TEXT_NODE) {
-            return currentPos;
-        }
-        var c = 0,
-            startNode = walker.currentNode,
-            n;
-        if (currentPos === 1) {
-            n = walker.lastChild();
-        } else {
-            n = walker.previousSibling();
-        }
-        while (n) {
-            c += 1;
-            n = walker.previousSibling();
-        }
-        walker.currentNode = startNode;
-        return c;
-    };
-    /**
-     * The same as domOffset(), except that all nodes are counted.
+     * Returns the current position within the container of the iterator..
      * This function is useful for communication iterator position with
      * components that do not use a filter.
      * @return {!number}
