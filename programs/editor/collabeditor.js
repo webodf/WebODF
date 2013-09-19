@@ -84,6 +84,22 @@ var webodfEditor = (function () {
     }
 
     /**
+     * @param {!string}
+     * @return {undefined}
+     */
+    function updateLocationWithSessionId(sessionId) {
+        var location = String(document.location),
+            pos = location.indexOf('#');
+        if (pos != -1) {
+            location = location.substr(0, pos);
+        }
+        if (sessionId) {
+            location = location + '#' + sessionId;
+        }
+        history.replaceState( {}, "", location);
+    }
+
+    /**
      * @return {undefined}
      */
      function startEditing() {
@@ -97,6 +113,8 @@ var webodfEditor = (function () {
         switchToPage("sessionListContainer");
 
         sessionList.setUpdatesEnabled(true);
+
+        updateLocationWithSessionId("");
     }
 
     /**
@@ -107,6 +125,8 @@ var webodfEditor = (function () {
         switchToPage("mainContainer");
 
         sessionList.setUpdatesEnabled(false);
+
+        updateLocationWithSessionId(sessionId);
 
         server.joinSession(userId, sessionId, function(memberId) {
             if (!editorInstance) {
