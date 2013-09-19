@@ -141,11 +141,19 @@ var webodfEditor = (function () {
     function createFileLoadForm() {
         var form = document.createElement("form"),
             input = document.createElement("input");
+
+        function internalHandler(evt) {
+            if (input.value !== "") {
+                fileSelectHandler(evt);
+            }
+            // reset to "", so selecting the same file next time still trigger the change handler
+            input.value = "";
+        }
         form.appendChild(input);
         form.style.display = "none";
         input.id = "fileloader";
         input.setAttribute("type", "file");
-        input.addEventListener("change", fileSelectHandler, false);
+        input.addEventListener("change", internalHandler, false);
         document.body.appendChild(form);
     }
 
