@@ -47,7 +47,8 @@ runtime.loadClass("gui.Caret");
  */
 gui.CaretManager = function CaretManager(sessionController) {
     "use strict";
-    var carets = {};
+    var carets = {},
+        window = runtime.getWindow();
 
     /**
      * @param {!string} memberId
@@ -134,6 +135,26 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
+     * @return {undefined}
+     */
+    function showLocalCaret() {
+        var caret = getCaret(sessionController.getInputMemberId());
+        if (caret) {
+            caret.show();
+        }
+    }
+
+    /**
+     * @return {undefined}
+     */
+    function hideLocalCaret() {
+        var caret = getCaret(sessionController.getInputMemberId());
+        if (caret) {
+            caret.hide();
+        }
+    }
+
+    /**
      * @param {!ops.OdtCursor} cursor
      * @param {!boolean} caretAvatarInitiallyVisible  Set to false to hide the associated avatar
      * @param {!boolean} blinkOnRangeSelect  Specify that the caret should blink if a non-collapsed range is selected
@@ -185,8 +206,10 @@ gui.CaretManager = function CaretManager(sessionController) {
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
 
-        canvasElement.onfocus = null;
-        canvasElement.onblur = null;
+        canvasElement.removeEventListener("focus", focusLocalCaret, false);
+        canvasElement.removeEventListener("blur", blurLocalCaret, false);
+        window.removeEventListener("focus", showLocalCaret, false);
+        window.removeEventListener("blur", hideLocalCaret, false);
 
         (function destroyCaret(i, err){
             if (err) {
@@ -209,8 +232,10 @@ gui.CaretManager = function CaretManager(sessionController) {
         odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
 
-        canvasElement.onfocus = focusLocalCaret;
-        canvasElement.onblur = blurLocalCaret;
+        canvasElement.addEventListener("focus", focusLocalCaret, false);
+        canvasElement.addEventListener("blur", blurLocalCaret, false);
+        window.addEventListener("focus", showLocalCaret, false);
+        window.addEventListener("blur", hideLocalCaret, false);
     }
 
     init();

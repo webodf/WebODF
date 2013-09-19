@@ -118,6 +118,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         avatar.markAsFocussed(false);
         span.style.opacity = "1";
     };
+    this.show = function () {
+        span.style.visibility = "visible";
+        avatar.markAsFocussed(true);
+    };
+    this.hide = function () {
+        span.style.visibility = "hidden";
+        avatar.markAsFocussed(false);
+    };
     this.setAvatarImageUrl = function (url) {
         avatar.setImageUrl(url);
     };
