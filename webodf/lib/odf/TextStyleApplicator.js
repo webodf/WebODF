@@ -149,7 +149,8 @@ odf.TextStyleApplicator = function TextStyleApplicator(styleNameGenerator, forma
             styledContainer = document.createElementNS(textns, "text:span");
             originalContainer.insertBefore(styledContainer, startNode);
             moveTrailing = false;
-        } else if (startNode.previousSibling && !domUtils.rangeContainsNode(limits, startNode.previousSibling)) {
+        } else if (startNode.previousSibling
+            && !domUtils.rangeContainsNode(limits, /**@type{!Element}*/(originalContainer.firstChild))) {
             // Yes, text node has prior siblings that are not styled
             // TODO what elements should be stripped when the clone occurs?
             styledContainer = originalContainer.cloneNode(false);

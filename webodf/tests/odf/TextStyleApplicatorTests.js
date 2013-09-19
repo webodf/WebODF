@@ -210,6 +210,20 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             "<text:span>E</text:span></text:p>");
         r.shouldBe(t, "t.doc", "t.expected.firstChild");
     }
+    function apply_ContainerInsertion_SpanContainsMixedContent() {
+        t.doc = createDocument("<text:p><text:span>A<text:a>B</text:a><text:a/>CD</text:span></text:p>");
+        t.range.setStart(t.doc.childNodes[0].childNodes[1], 0);
+        t.range.setEnd(t.doc.childNodes[0].childNodes[3], 1);
+
+        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+
+        simplifyAutoStyleNames(t.doc);
+        t.expected = parseXML("<text:p>" +
+            "<text:span>A<text:a><text:span text:style-name='auto0'>B</text:span></text:a><text:a/></text:span>" +
+            "<text:span text:style-name='auto0'>C</text:span>" +
+            "<text:span>D</text:span></text:p>");
+        r.shouldBe(t, "t.doc", "t.expected.firstChild");
+    }
     function apply_ContainerInsertion_SurroundedBySpans_EndsAfterText() {
         t.doc = createDocument("<text:p><text:span>AB</text:span>C<text:span>D</text:span></text:p>");
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
@@ -359,6 +373,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             apply_ContainerInsertion_SimpleSpan,
             apply_ContainerInsertion_SimpleSpans,
             apply_ContainerInsertion_SpanBracketingLink,
+            apply_ContainerInsertion_SpanContainsMixedContent,
             apply_ContainerInsertion_SurroundedBySpans_EndsAfterText,
             apply_ContainerInsertion_SurroundedBySpans_BeforeText,
             apply_ContainerInsertion_SurroundedBySpans_StartsAfterText,
