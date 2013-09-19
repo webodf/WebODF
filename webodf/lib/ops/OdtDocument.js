@@ -387,7 +387,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         while (lastTextNode.previousSibling
                 && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
             lastTextNode.previousSibling.appendData(lastTextNode.data);
-            nodeOffset = lastTextNode.length + lastTextNode.previousSibling.length;
+            nodeOffset = lastTextNode.previousSibling.length;
             lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
             lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
         }

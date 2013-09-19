@@ -201,6 +201,16 @@
   </ops>
   <after><office:text><text:p><text:s> </text:s></text:p></office:text></after>
  </test>
+ <test name="InsertSpaceAndCharacters">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="a"/>
+   <op optype="InsertText" position="1" text=" "/>
+   <op optype="InsertText" position="2" text="b"/>
+   <op optype="InsertText" position="3" text="c"/>
+  </ops>
+  <after><office:text><text:p>a bc</text:p></office:text></after>
+ </test>
  <test name="RemoveSpace">
   <before><office:text><text:p><text:s> </text:s></text:p></office:text></before>
   <ops>

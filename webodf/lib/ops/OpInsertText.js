@@ -146,6 +146,9 @@ ops.OpInsertText = function OpInsertText() {
             if (position > 0) {
                 // Necessary to match upgradeWhitespaces behaviour which searches the preceding positions as well
                 odtDocument.downgradeWhitespacesAtPosition(position - 1);
+                if (position > 1) {
+                    odtDocument.downgradeWhitespacesAtPosition(position - 2);
+                }
             }
             odtDocument.downgradeWhitespacesAtPosition(position);
             odtDocument.downgradeWhitespacesAtPosition(position + text.length);
