@@ -6,3 +6,5 @@ It makes it easy to add Open Document Format (ODF) support to your website and t
 
 * Visit the project homepage at: [WebODF](http://webodf.org)
 * Want a live demo? Visit: [WebODF Demo](http://webodf.org/demo/)
+
+WebODF repository is moving over to GitHub...
