@@ -159,6 +159,17 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
 
         r.shouldBe(t, "t.doc.childNodes[2].textContent", "'D'");
     }
+    function apply_ContainerInsertion_TextBracketingLink() {
+        t.doc = createDocument("<text:p>AB<text:a>C</text:a>DE</text:p>");
+        t.range.setStart(t.doc.childNodes[0], 1);
+        t.range.setEnd(t.doc.childNodes[2], 1);
+
+        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+
+        simplifyAutoStyleNames(t.doc);
+        t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B<text:a>C</text:a>D</text:span>E</text:p>");
+        r.shouldBe(t, "t.doc", "t.expected.firstChild");
+    }
     function apply_ContainerInsertion_SimpleSpan() {
         t.doc = createDocument("<text:p><text:span>ABCD</text:span></text:p>");
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
@@ -167,7 +178,9 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
-        t.expected = parseXML("<text:p><text:span>A</text:span><text:span text:style-name='auto0'>BC</text:span><text:span>D</text:span></text:p>");
+        t.expected = parseXML("<text:p><text:span>A</text:span>" +
+            "<text:span text:style-name='auto0'>BC</text:span>" +
+            "<text:span>D</text:span></text:p>");
         r.shouldBe(t, "t.doc", "t.expected.firstChild");
     }
     function apply_ContainerInsertion_SimpleSpans() {
@@ -182,6 +195,19 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             "<text:span text:style-name='auto0'>B</text:span>" +
             "<text:span text:style-name='auto0'>C</text:span>" +
             "<text:span>D</text:span></text:p>");
+        r.shouldBe(t, "t.doc", "t.expected.firstChild");
+    }
+    function apply_ContainerInsertion_SpanBracketingLink() {
+        t.doc = createDocument("<text:p><text:span>AB<text:a>C</text:a>DE</text:span></text:p>");
+        t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
+        t.range.setEnd(t.doc.childNodes[0].childNodes[2], 1);
+
+        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+
+        simplifyAutoStyleNames(t.doc);
+        t.expected = parseXML("<text:p><text:span>A</text:span>" +
+            "<text:span text:style-name='auto0'>B<text:a>C</text:a>D</text:span>" +
+            "<text:span>E</text:span></text:p>");
         r.shouldBe(t, "t.doc", "t.expected.firstChild");
     }
     function apply_ContainerInsertion_SurroundedBySpans_EndsAfterText() {
@@ -329,8 +355,10 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         return [
             apply_ContainerInsertion_SimpleTextRange,
             apply_ContainerInsertion_SimpleTextRange_EndsAtNodeBeginning,
+            apply_ContainerInsertion_TextBracketingLink,
             apply_ContainerInsertion_SimpleSpan,
             apply_ContainerInsertion_SimpleSpans,
+            apply_ContainerInsertion_SpanBracketingLink,
             apply_ContainerInsertion_SurroundedBySpans_EndsAfterText,
             apply_ContainerInsertion_SurroundedBySpans_BeforeText,
             apply_ContainerInsertion_SurroundedBySpans_StartsAfterText,

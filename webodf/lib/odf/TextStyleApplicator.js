@@ -138,9 +138,10 @@ odf.TextStyleApplicator = function TextStyleApplicator(styleNameGenerator, forma
             styledContainer,
             trailingContainer,
             moveTrailing,
-            node = startNode,
+            node,
             nextNode,
-            loopGuard = new core.LoopWatchDog(1000);
+            loopGuard = new core.LoopWatchDog(1000),
+            styledNodes = [];
 
         // Do we need a new style container?
         if (!isTextSpan(originalContainer)) {
@@ -161,14 +162,20 @@ odf.TextStyleApplicator = function TextStyleApplicator(styleNameGenerator, forma
         }
 
         // Starting at the startNode, iterate forward until leaving the affected range
-        while (node && (node === startNode || domUtils.rangeContainsNode(limits, node))) {
+        styledNodes.push(startNode);
+        node = startNode.nextSibling;
+        // Need to fetch all nodes to move before starting to move any, in case
+        // the limits actually reference one of the nodes this loop is about to relocate
+        while (node && domUtils.rangeContainsNode(limits, node)) {
             loopGuard.check();
-            nextNode = node.nextSibling;
+            styledNodes.push(node);
+            node = node.nextSibling;
+        }
+        styledNodes.forEach(function(node) {
             if (node.parentNode !== styledContainer) {
                 styledContainer.appendChild(node);
             }
-            node = nextNode;
-        }
+        });
 
         // Any trailing nodes?
         if (node && moveTrailing) {
