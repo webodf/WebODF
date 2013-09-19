@@ -168,6 +168,47 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.range.toString()", "'bcd'");
     }
 
+    function rangeContainsNode_ForFullyBracketedSpan_ReturnsTrue() {
+        var start = document.createTextNode("before"),
+            target = document.createElement("span"),
+            end = document.createTextNode("after");
+        t.doc.appendChild(start);
+        t.doc.appendChild(target);
+        t.doc.appendChild(end);
+
+        t.result = t.utils.rangeContainsNode({startContainer: start, startOffset: 0, endContainer: end, endOffset: 0}, target);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeContainsNode_ForDifferentDepths_ReturnsTrue() {
+        var start = document.createTextNode("before"),
+            startContainer = document.createElement("span"),
+            target = document.createElement("span"),
+            end = document.createTextNode("after");
+        startContainer.appendChild(start);
+        t.doc.appendChild(startContainer);
+        t.doc.appendChild(target);
+        t.doc.appendChild(end);
+
+        t.result = t.utils.rangeContainsNode({startContainer: start, startOffset: 0, endContainer: end, endOffset: 0}, target);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeContainsNode_ForAdjacentSpan_ReturnsFalse() {
+        var start = document.createTextNode("before"),
+            target = document.createElement("span"),
+            end = document.createTextNode("after");
+        t.doc.appendChild(start);
+        t.doc.appendChild(end);
+        t.doc.appendChild(target);
+
+        t.result = t.utils.rangeContainsNode({startContainer: start, startOffset: 0, endContainer: end, endOffset: 0}, target);
+
+        r.shouldBe(t, "t.result", "false");
+    }
+
     this.tests = function () {
         return [
             splitBoundaries_StartAndEnd_SameTextNodes,
@@ -175,7 +216,11 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             splitBoundaries_StartInTextNode_EndAtParagraph,
             splitBoundaries_StartAndEnd_AlreadySplit,
             splitBoundaries_StartRequiresSplitting_EndAlreadySplit,
-            splitBoundaries_StartAlreadySplit_EndRequiresSplitting
+            splitBoundaries_StartAlreadySplit_EndRequiresSplitting,
+
+            rangeContainsNode_ForFullyBracketedSpan_ReturnsTrue,
+            rangeContainsNode_ForDifferentDepths_ReturnsTrue,
+            rangeContainsNode_ForAdjacentSpan_ReturnsFalse
         ];
     };
     this.asyncTests = function () {
