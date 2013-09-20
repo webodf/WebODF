@@ -486,7 +486,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.downgradeWhitespacesAtPosition = function (position) {
         var iterator = getIteratorAtPosition(position),
             container,
-            offset;
+            offset,
+            firstSpaceElementChild, lastSpaceElementChild;
 
         container = iterator.container();
         offset = iterator.unfilteredDomOffset();
@@ -504,7 +505,17 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             container = container.parentNode;
         }
         if (odfUtils.isDowngradableSpaceElement(container)) {
+            firstSpaceElementChild = container.firstChild;
+            lastSpaceElementChild = container.lastChild;
+
             domUtils.mergeIntoParent(container);
+
+            // merge any now neighbouring textnodes
+            // usually there was just one child node, " "
+            if (lastSpaceElementChild !== firstSpaceElementChild) {
+                domUtils.normalizeTextNodes(lastSpaceElementChild);
+            }
+            domUtils.normalizeTextNodes(firstSpaceElementChild);
         }
     };
 
