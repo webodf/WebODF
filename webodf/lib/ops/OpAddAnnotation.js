@@ -117,15 +117,22 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
      */
     function insertNodeAtPosition(odtDocument, node, insertPosition) {
         var previousNode,
+            parentNode,
             domPosition = odtDocument.getPositionInTextNode(insertPosition, memberid);
 
         if (domPosition) {
             previousNode = domPosition.textNode;
+            parentNode = previousNode.parentNode;
+
             if (domPosition.offset !== previousNode.length) {
                 previousNode.splitText(domPosition.offset);
             }
 
-            previousNode.parentNode.insertBefore(node, previousNode.nextSibling);
+            parentNode.insertBefore(node, previousNode.nextSibling);
+            // clean up any empty text node which was created by odtDocument.getPositionInTextNode or previousNode.splitText
+            if (previousNode.length === 0) {
+                parentNode.removeChild(previousNode);
+            }
         }
     }
 
