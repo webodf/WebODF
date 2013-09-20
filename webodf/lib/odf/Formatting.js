@@ -349,12 +349,12 @@ odf.Formatting = function Formatting() {
     this.getInheritedStyleAttributes = getInheritedStyleAttributes;
 
     /**
-     * Get the name of the first named style in the parent style chain.
+     * Get the name of the first common style in the parent style chain.
      * If none is found, null is returned and you should assume the Default style.
      * @param {!string} styleName
      * @return {!string|null}
      */
-    this.getFirstNamedParentStyleNameOrSelf = function (styleName) {
+    this.getFirstCommonParentStyleNameOrSelf = function (styleName) {
         var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
             styleElementList = odfContainer.rootElement.styles,
             styleElement;
@@ -365,7 +365,7 @@ odf.Formatting = function Formatting() {
             styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
             styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList]);
         }
-        // then see if that style is in named styles
+        // then see if that style is in common styles
         styleElement = getStyleElement(styleName, "paragraph", [styleElementList]);
         if (!styleElement) {
             return null;
@@ -374,7 +374,7 @@ odf.Formatting = function Formatting() {
     };
 
     /**
-     * Returns if there is an automatic or named paragraph style with the given name.
+     * Returns if there is an automatic or common paragraph style with the given name.
      * @param {!string} styleName
      * @return {!boolean}
      */

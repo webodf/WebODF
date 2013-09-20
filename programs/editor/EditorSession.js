@@ -66,7 +66,7 @@ define("webodf/editor/EditorSession", [
     var EditorSession = function EditorSession(session, localMemberId, config) {
         var self = this,
             currentParagraphNode = null,
-            currentNamedStyleName = null,
+            currentCommonStyleName = null,
             currentStyleName = null,
             caretManager,
             odtDocument = session.getOdtDocument(),
@@ -113,31 +113,31 @@ define("webodf/editor/EditorSession", [
 
         function checkParagraphStyleName() {
             var newStyleName,
-                newNamedStyleName;
+                newCommonStyleName;
 
             newStyleName = currentParagraphNode.getAttributeNS(textns, 'style-name');
 
             if (newStyleName !== currentStyleName) {
                 currentStyleName = newStyleName;
-                // check if named style is still the same
-                newNamedStyleName = formatting.getFirstNamedParentStyleNameOrSelf(newStyleName);
-                if (!newNamedStyleName) {
+                // check if common style is still the same
+                newCommonStyleName = formatting.getFirstCommonParentStyleNameOrSelf(newStyleName);
+                if (!newCommonStyleName) {
                     // Default style, empty-string name
-                    currentNamedStyleName = newStyleName = currentStyleName = "";
+                    currentCommonStyleName = newStyleName = currentStyleName = "";
                     self.emit(EditorSession.signalParagraphChanged, {
                         type: 'style',
                         node: currentParagraphNode,
-                        styleName: currentNamedStyleName
+                        styleName: currentCommonStyleName
                     });
                     return;
                 }
-                // a named style
-                if (newNamedStyleName !== currentNamedStyleName) {
-                    currentNamedStyleName = newNamedStyleName;
+                // a common style
+                if (newCommonStyleName !== currentCommonStyleName) {
+                    currentCommonStyleName = newCommonStyleName;
                     self.emit(EditorSession.signalParagraphChanged, {
                         type: 'style',
                         node: currentParagraphNode,
-                        styleName: currentNamedStyleName
+                        styleName: currentCommonStyleName
                     });
                 }
             }
@@ -296,7 +296,7 @@ define("webodf/editor/EditorSession", [
         };
 
         this.getCurrentParagraphStyle = function () {
-            return currentNamedStyleName;
+            return currentCommonStyleName;
         };
 
         /**
@@ -323,7 +323,7 @@ define("webodf/editor/EditorSession", [
 
         this.setCurrentParagraphStyle = function (value) {
             var op;
-            if (currentNamedStyleName !== value) {
+            if (currentCommonStyleName !== value) {
                 op = new ops.OpSetParagraphStyle();
                 op.init({
                     memberid: localMemberId,

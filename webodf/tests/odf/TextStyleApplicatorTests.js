@@ -321,7 +321,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B</text:span><text:span text:style-name='ABold'>CD</text:span></text:p>");
         r.shouldBe(t, "t.doc", "t.expected.firstChild");
     }
-    function apply_NamedStyle_LinksParentStyle() {
+    function apply_CommonStyle_LinksParentStyle() {
         t.doc = createDocument("<text:p>AB<text:span text:style-name='SUnderline'>CD</text:span></text:p>");
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1].childNodes[0], 1);
@@ -384,7 +384,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             apply_StyleDetection_SpanAlreadyAutoStyled,
             apply_StyleDetection_PartialSpanStyled,
 
-            apply_NamedStyle_LinksParentStyle,
+            apply_CommonStyle_LinksParentStyle,
             apply_AutoStyle_ClonesProperties
         ];
     };

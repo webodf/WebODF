@@ -4,8 +4,8 @@ About loading & saving of styles
 General information about styles
 --------------------------------
 
-There can be automatic styles and named/common styles:
-named/common ones are offered to the user, automatic ones are internal styles
+There can be automatic styles and common styles:
+common ones are offered to the user, automatic ones are internal styles
 for implementation of direct formatting.
 
 Common styles are stored in styles.xml, while automatic styles are stored in
