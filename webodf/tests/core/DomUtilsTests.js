@@ -56,6 +56,93 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
 
+    function normalizeTextNodes_TextWithTextSilblings() {
+        t.doc.appendChild(document.createTextNode("a"));
+        t.doc.appendChild(document.createTextNode("b"));
+        t.doc.appendChild(document.createTextNode("c"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "1");
+        r.shouldBe(t, "t.doc.childNodes[0].textContent", "'abc'");
+    }
+
+    function normalizeTextNodes_EmptyTextWithTextSilblings() {
+        t.doc.appendChild(document.createTextNode("a"));
+        t.doc.appendChild(document.createTextNode(""));
+        t.doc.appendChild(document.createTextNode("c"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "1");
+        r.shouldBe(t, "t.doc.childNodes[0].textContent", "'ac'");
+    }
+
+    function normalizeTextNodes_TextWithPreviousTextSilbling() {
+        t.doc.appendChild(document.createTextNode("a"));
+        t.doc.appendChild(document.createTextNode("b"));
+        t.doc.appendChild(document.createElement("span"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "2");
+        r.shouldBe(t, "t.doc.childNodes[0].textContent", "'ab'");
+    }
+
+    function normalizeTextNodes_EmptyTextWithPreviousTextSilbling() {
+        t.doc.appendChild(document.createTextNode("a"));
+        t.doc.appendChild(document.createTextNode(""));
+        t.doc.appendChild(document.createElement("span"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "2");
+        r.shouldBe(t, "t.doc.childNodes[0].textContent", "'a'");
+    }
+
+    function normalizeTextNodes_TextWithNextTextSilbling() {
+        t.doc.appendChild(document.createElement("span"));
+        t.doc.appendChild(document.createTextNode("b"));
+        t.doc.appendChild(document.createTextNode("c"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "2");
+        r.shouldBe(t, "t.doc.childNodes[1].textContent", "'bc'");
+    }
+
+    function normalizeTextNodes_EmptyTextWithNextTextSilbling() {
+        t.doc.appendChild(document.createElement("span"));
+        t.doc.appendChild(document.createTextNode(""));
+        t.doc.appendChild(document.createTextNode("c"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "2");
+        r.shouldBe(t, "t.doc.childNodes[1].textContent", "'c'");
+    }
+
+    function normalizeTextNodes_TextWithNoTextSilblings() {
+        t.doc.appendChild(document.createElement("span"));
+        t.doc.appendChild(document.createTextNode("b"));
+        t.doc.appendChild(document.createElement("span"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "3");
+        r.shouldBe(t, "t.doc.childNodes[1].textContent", "'b'");
+    }
+
+    function normalizeTextNodes_EmptyTextWithNoTextSilblings() {
+        t.doc.appendChild(document.createElement("span"));
+        t.doc.appendChild(document.createTextNode(""));
+        t.doc.appendChild(document.createElement("span"));
+
+        t.utils.normalizeTextNodes(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.doc.childNodes.length", "2");
+    }
+
     function splitBoundaries_StartAndEnd_SameTextNodes() {
         t.doc.appendChild(document.createTextNode("abcdef"));
         t.range.setStart(t.doc.firstChild, 1);
@@ -211,6 +298,14 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
 
     this.tests = function () {
         return [
+            normalizeTextNodes_TextWithTextSilblings,
+            normalizeTextNodes_EmptyTextWithTextSilblings,
+            normalizeTextNodes_TextWithPreviousTextSilbling,
+            normalizeTextNodes_EmptyTextWithPreviousTextSilbling,
+            normalizeTextNodes_TextWithNextTextSilbling,
+            normalizeTextNodes_EmptyTextWithNextTextSilbling,
+            normalizeTextNodes_TextWithNoTextSilblings,
+            normalizeTextNodes_EmptyTextWithNoTextSilblings,
             splitBoundaries_StartAndEnd_SameTextNodes,
             splitBoundaries_StartAndEnd_SameTextNodes_EndAtTextNode,
             splitBoundaries_StartInTextNode_EndAtParagraph,

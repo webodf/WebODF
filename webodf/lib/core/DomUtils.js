@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -168,23 +170,34 @@ core.DomUtils = function DomUtils() {
     this.getNodesInRange = getNodesInRange;
 
     /**
-     * Merges the content of node1 into node2 if node2 exists.
-     * If node1 is an empty text node, it will be removed
-     * @param {!Node} node1
-     * @param {!Node} node2
+     * Merges the content of node with nextNode.
+     * If node is an empty text node, it will be removed in any case.
+     * If nextNode is an empty text node, it will be only removed if node is a text node.
+     * @param {!Node} node
+     * @param {!Node} nextNode
+     * @return {?Node} merged text node or null if there is no text node as result
      */
-    function mergeTextNodes(node1, node2) {
-        if (node1.nodeType === Node.TEXT_NODE) {
-            if (node1.length === 0) {
-                node1.parentNode.removeChild(node1);
-            } else if (node2.nodeType === Node.TEXT_NODE) {
-                // in chrome it is important to add node1 to node2. doing it the
-                // other way around causes random whitespace to appear
-                node1.appendData(node2.data);
-                node2.parentNode.removeChild(node2);
+    function mergeTextNodes(node, nextNode) {
+        var mergedNode = null;
+
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (node.length === 0) {
+                node.parentNode.removeChild(node);
+                if (nextNode.nodeType === Node.TEXT_NODE) {
+                    mergedNode = nextNode;
+                }
+            } else {
+                if (nextNode.nodeType === Node.TEXT_NODE) {
+                    // in chrome it is important to add nextNode to node. doing it the
+                    // other way around causes random whitespace to appear
+                    node.appendData(nextNode.data);
+                    nextNode.parentNode.removeChild(nextNode);
+                }
+                mergedNode = node;
             }
         }
-        return node1;
+
+        return mergedNode;
     }
 
     /**
@@ -192,6 +205,7 @@ core.DomUtils = function DomUtils() {
      * actions are performed if the node is undefined, has no siblings, or
      * is not a text node
      * @param {Node} node
+     * @return {undefined}
      */
     function normalizeTextNodes(node) {
         if (node && node.nextSibling) {
