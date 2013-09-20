@@ -202,6 +202,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             span.style.top = DEFAULT_CARET_TOP;
         }
     }
+    this.updateVerticalCaretAlignment = updateVerticalCaretAlignment;
     
     this.refreshCursorBlinking = function () {
         if (blinkOnRangeSelect || cursor.getSelectedRange().collapsed) {
