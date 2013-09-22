@@ -1,4 +1,4 @@
- /**
+/**
  * @license
  * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
  *
@@ -36,6 +36,7 @@
 /*global Node, runtime, odf, NodeFilter, core*/
 
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor
@@ -43,9 +44,9 @@ runtime.loadClass("core.DomUtils");
 odf.OdfUtils = function OdfUtils() {
     "use strict";
 
-    var textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        whitespaceOnly = /^\s*$/,
+    var /**@const @type{!string}*/ textns = odf.Namespaces.textns,
+        /**@const @type{!string}*/ drawns = odf.Namespaces.drawns,
+        /**@const @type{!RegExp}*/ whitespaceOnly = /^\s*$/,
         domUtils = new core.DomUtils();
 
     /**

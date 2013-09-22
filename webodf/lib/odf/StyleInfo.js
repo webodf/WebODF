@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,29 +32,29 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global Node, odf, runtime, xmldom*/
 
 runtime.loadClass("xmldom.XPath");
+runtime.loadClass("odf.Namespaces");
+
 /**
  * @constructor
  */
 odf.StyleInfo = function StyleInfo() {
     "use strict";
     // helper constants
-    var chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
-        dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
-        dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
-        drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        //fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-        formns = "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
-        numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
-        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
-        stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        //svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-        tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        //xmlns = "http://www.w3.org/XML/1998/namespace",
+    var /**@const@type{!string}*/ chartns = odf.Namespaces.chartns,
+        /**@const@type{!string}*/ dbns = odf.Namespaces.dbns,
+        /**@const@type{!string}*/ dr3dns = odf.Namespaces.dr3dns,
+        /**@const@type{!string}*/ drawns = odf.Namespaces.drawns,
+        /**@const@type{!string}*/ formns = odf.Namespaces.formns,
+        /**@const@type{!string}*/ numberns = odf.Namespaces.numberns,
+        /**@const@type{!string}*/ officens = odf.Namespaces.officens,
+        /**@const@type{!string}*/ presentationns = odf.Namespaces.presentationns,
+        /**@const@type{!string}*/ stylens = odf.Namespaces.stylens,
+        /**@const@type{!string}*/ tablens = odf.Namespaces.tablens,
+        /**@const@type{!string}*/ textns = odf.Namespaces.textns,
         /**@const@type{!Object.<string,string>}*/ nsprefixes = {
             "urn:oasis:names:tc:opendocument:xmlns:chart:1.0": "chart:",
             "urn:oasis:names:tc:opendocument:xmlns:database:1.0": "db:",

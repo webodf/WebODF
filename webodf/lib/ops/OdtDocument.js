@@ -38,6 +38,7 @@
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("odf.Namespaces");
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("gui.StyleHelper");
 runtime.loadClass("core.PositionFilterChain");
@@ -51,7 +52,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     "use strict";
 
     var self = this,
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
         odfUtils,
         domUtils,
         /**Array.<!ops.OdtCursor>*/cursors = {},
@@ -445,7 +445,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function upgradeWhitespaceToElement(textNode, offset) {
         runtime.assert(textNode.data[offset] === ' ', "upgradeWhitespaceToElement: textNode.data[offset] should be a literal space");
 
-        var space = textNode.ownerDocument.createElementNS(textns, 'text:s');
+        var space = textNode.ownerDocument.createElementNS(odf.Namespaces.textns, 'text:s');
         space.appendChild(textNode.ownerDocument.createTextNode(' '));
 
         textNode.deleteData(offset, 1);

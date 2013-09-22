@@ -50,8 +50,8 @@ odf.TextStyleApplicator = function TextStyleApplicator(styleNameGenerator, forma
     var domUtils = new core.DomUtils(),
         /**@const@type {!string}*/ textns = odf.Namespaces.textns,
         /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
-        textProperties = "style:text-properties",
-        webodfns = "urn:webodf:names:scope";
+        /**@const@type {!string}*/ textProperties = "style:text-properties",
+        /**@const@type {!string}*/ webodfns = "urn:webodf:names:scope";
 
     /**
      * @param {!Object} info Style information

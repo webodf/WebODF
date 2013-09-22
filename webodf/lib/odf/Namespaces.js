@@ -43,36 +43,42 @@
 odf.Namespaces = (function () {
     "use strict";
 
-    var /**@const@type {!string}*/ drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+    var /**@const@type {!string}*/ dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
+        /**@const@type {!string}*/ dcns = "http://purl.org/dc/elements/1.1/",
+        /**@const@type {!string}*/ dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
+        /**@const@type {!string}*/ drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+        /**@const@type {!string}*/ chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
         /**@const@type {!string}*/ fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        /**@const@type {!string}*/ formns = "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+        /**@const@type {!string}*/ numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         /**@const@type {!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         /**@const@type {!string}*/ presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
         /**@const@type {!string}*/ stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
         /**@const@type {!string}*/ svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         /**@const@type {!string}*/ tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        /**@const@type {!string}*/ dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
-        /**@const@type {!string}*/ numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         /**@const@type {!string}*/ xlinkns = 'http://www.w3.org/1999/xlink',
         /**@const@type {!string}*/ xmlns = "http://www.w3.org/XML/1998/namespace",
-        /**@const@type {!string}*/ dcns = "http://purl.org/dc/elements/1.1/",
         /**@const@type {!string}*/ webodfns = 'urn:webodf',
 
         /** @const@type {!Object.<string,!string>} */
         namespaceMap = {
+            "db": dbns,
+            "dc": dcns,
+            "dr3d": dr3dns,
             "draw": drawns,
+            "chart": chartns,
             "fo": fons,
+            "form": formns,
+            "numberns": numberns,
             "office": officens,
             "presentation": presentationns,
             "style": stylens,
             "svg": svgns,
             "table": tablens,
             "text": textns,
-            "dr3d": dr3dns,
-            "numberns": numberns,
             "xlink": xlinkns,
             "xml": xmlns,
-            "dc": dcns,
             "webodf": webodfns
         },
         namespaces;
@@ -116,19 +122,22 @@ odf.Namespaces = (function () {
     namespaces.namespaceMap = namespaceMap;
 
     // add all namespaces
+    /**@const@type {!string}*/ namespaces.dbns = dbns;
+    /**@const@type {!string}*/ namespaces.dcns = dcns;
+    /**@const@type {!string}*/ namespaces.dr3dns = dr3dns;
     /**@const@type {!string}*/ namespaces.drawns = drawns;
+    /**@const@type {!string}*/ namespaces.chartns = chartns;
     /**@const@type {!string}*/ namespaces.fons = fons;
+    /**@const@type {!string}*/ namespaces.formns = formns;
+    /**@const@type {!string}*/ namespaces.numberns = numberns;
     /**@const@type {!string}*/ namespaces.officens = officens;
     /**@const@type {!string}*/ namespaces.presentationns = presentationns;
     /**@const@type {!string}*/ namespaces.stylens = stylens;
     /**@const@type {!string}*/ namespaces.svgns = svgns;
     /**@const@type {!string}*/ namespaces.tablens = tablens;
     /**@const@type {!string}*/ namespaces.textns = textns;
-    /**@const@type {!string}*/ namespaces.dr3dns = dr3dns;
-    /**@const@type {!string}*/ namespaces.numberns = numberns;
     /**@const@type {!string}*/ namespaces.xlinkns = xlinkns;
     /**@const@type {!string}*/ namespaces.xmlns = xmlns;
-    /**@const@type {!string}*/ namespaces.dcns = dcns;
     /**@const@type {!string}*/ namespaces.webodfns = webodfns;
 
     return namespaces;

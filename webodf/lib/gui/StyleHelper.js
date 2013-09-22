@@ -46,7 +46,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
     "use strict";
     var domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils(),
-        /** @const */ textns = odf.Namespaces.textns;
+        /**@const @type{!string}*/ textns = odf.Namespaces.textns;
 
     function getAppliedStyles(range) {
         var container, nodes;

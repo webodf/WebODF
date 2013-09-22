@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,13 +32,16 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document*/
+
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
 runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfNodeFilter");
+
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
  * document.
@@ -48,15 +53,16 @@ runtime.loadClass("odf.OdfNodeFilter");
 odf.OdfContainer = (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
-        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
-        webodfns = "urn:webodf:names:scope",
-        nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
+        /**@const @type{!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        /**@const @type{!string}*/ manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
+        /**@const @type{!string}*/ webodfns = "urn:webodf:names:scope",
+        /**@const @type{!Array.<!string>}*/ nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
-        automaticStylePrefix = (new Date()).getTime() + "_webodf_",
+        /**@const @type{!string}*/ automaticStylePrefix = (new Date()).getTime() + "_webodf_",
         base64 = new core.Base64(),
-        /** @const */ documentStylesScope = "document-styles",
-        /** @const */ documentContentScope = "document-content";
+        /**@const @type{!string}*/ documentStylesScope = "document-styles",
+        /**@const @type{!string}*/ documentContentScope = "document-content";
+
     /**
      * @param {?Node} node
      * @param {!string} ns
