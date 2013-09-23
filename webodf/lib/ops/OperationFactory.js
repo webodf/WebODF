@@ -45,6 +45,7 @@ runtime.loadClass("ops.OpRemoveCursor");
 runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpSetBlob");
 runtime.loadClass("ops.OpRemoveBlob");
+runtime.loadClass("ops.OpInsertImage");
 runtime.loadClass("ops.OpInsertTable");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpRemoveText");
@@ -104,6 +105,7 @@ ops.OperationFactory = function OperationFactory() {
             ApplyDirectStyling : constructor(ops.OpApplyDirectStyling),
             SetBlob : constructor(ops.OpSetBlob),
             RemoveBlob : constructor(ops.OpRemoveBlob),
+            InsertImage : constructor(ops.OpInsertImage),
             InsertTable : constructor(ops.OpInsertTable),
             InsertText : constructor(ops.OpInsertText),
             RemoveText : constructor(ops.OpRemoveText),

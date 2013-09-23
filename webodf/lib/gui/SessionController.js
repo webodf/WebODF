@@ -49,6 +49,7 @@ runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.DirectTextStyler");
 runtime.loadClass("gui.DirectParagraphStyler");
+runtime.loadClass("gui.ImageManager");
 runtime.loadClass("gui.TextManipulator");
 
 /**
@@ -83,6 +84,7 @@ gui.SessionController = (function () {
             clickStartedWithinContainer = false,
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             undoManager = null,
+            imageManager = new gui.ImageManager(session, inputMemberId, objectNameGenerator),
             textManipulator = new gui.TextManipulator(session, inputMemberId),
             directTextStyler = args && args.directStylingEnabled ? new gui.DirectTextStyler(session, inputMemberId) : null,
             directParagraphStyler = args && args.directStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null;
@@ -1135,6 +1137,13 @@ gui.SessionController = (function () {
          */
         this.getDirectParagraphStyler = function () {
             return directParagraphStyler;
+        };
+
+        /**
+         * @returns {!gui.ImageManager}
+         */
+        this.getImageManager = function () {
+            return imageManager;
         };
 
         /**
