@@ -53,29 +53,26 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     };
 
     this.execute = function (odtDocument) {
-        var domPosition, paragraphNode;
+        var iterator, paragraphNode;
 
-        // TODO: reusing getPositionInTextNode and getParagraphElement, not an optimized solution
-        domPosition = odtDocument.getPositionInTextNode(position);
-        if (domPosition) {
-            paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
-            if (paragraphNode) {
-                if (styleName !== "") {
-                    paragraphNode.setAttributeNS(textns, 'text:style-name', styleName);
-                } else {
-                    paragraphNode.removeAttributeNS(textns, 'style-name');
-                }
-
-                odtDocument.getOdfCanvas().refreshSize();
-                odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
-                    paragraphElement: paragraphNode,
-                    timeStamp: timestamp,
-                    memberId: memberid
-                });
-
-                odtDocument.getOdfCanvas().rerenderAnnotations();
-                return true;
+        iterator = odtDocument.getIteratorAtPosition(position);
+        paragraphNode = odtDocument.getParagraphElement(iterator.container());
+        if (paragraphNode) {
+            if (styleName !== "") {
+                paragraphNode.setAttributeNS(textns, 'text:style-name', styleName);
+            } else {
+                paragraphNode.removeAttributeNS(textns, 'style-name');
             }
+
+            odtDocument.getOdfCanvas().refreshSize();
+            odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
+                paragraphElement: paragraphNode,
+                timeStamp: timestamp,
+                memberId: memberid
+            });
+
+            odtDocument.getOdfCanvas().rerenderAnnotations();
+            return true;
         }
         return false;
     };
