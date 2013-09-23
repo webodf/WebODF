@@ -101,6 +101,8 @@
         "ops/OpApplyDirectStyling.js",
         "ops/OpRemoveCursor.js",
         "ops/OpMoveCursor.js",
+        "ops/OpSetBlob.js",
+        "ops/OpRemoveBlob.js",
         "ops/OpInsertTable.js",
         "ops/OpInsertText.js",
         "ops/OpRemoveText.js",
