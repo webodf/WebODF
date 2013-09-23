@@ -199,6 +199,7 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
             opAddStyle.init({
                 memberid: inputMemberId,
                 styleName: newParagraphStyleName,
+                styleFamily: 'paragraph',
                 isAutomaticStyle: true,
                 setProperties: paragraphProperties
             });
