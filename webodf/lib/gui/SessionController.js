@@ -1151,7 +1151,10 @@ gui.SessionController = (function () {
                 annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
                 removeAnnotation(annotationNode);
             } else if (clickStartedWithinContainer) {
-                if (clickCount === 1) { // Single click
+                if (clickCount === 0 || clickCount === 1) { // Single click
+                    // "If the user moves the mouse between the mousedown and mouseup the value will be set to 0,
+                    // indicating that no click is occurring."
+                    // http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-MouseEvent
                     selectRange(event);
                 } else if (clickCount === 2) { // Double click
                     selectWord();
