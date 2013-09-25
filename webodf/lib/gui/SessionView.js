@@ -190,7 +190,7 @@ gui.SessionView = (function () {
          * @param {!boolean} visible
          * @return {undefined}
          */
-        function setEditInfoMarkerVisbility(visible) {
+        function setEditInfoMarkerVisibility(visible) {
             var editInfoMarker, keyname;
 
             for (keyname in editInfoMap) {
@@ -230,7 +230,7 @@ gui.SessionView = (function () {
             }
 
             showEditInfoMarkers = true;
-            setEditInfoMarkerVisbility(showEditInfoMarkers);
+            setEditInfoMarkerVisibility(showEditInfoMarkers);
         };
 
         /**
@@ -243,7 +243,7 @@ gui.SessionView = (function () {
             }
 
             showEditInfoMarkers = false;
-            setEditInfoMarkerVisbility(showEditInfoMarkers);
+            setEditInfoMarkerVisibility(showEditInfoMarkers);
         };
 
         /**
