@@ -48,7 +48,7 @@ runtime.loadClass("ops.OdtCursor");
  */
 gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
-    var /**@const*/MIN_CARET_HEIGHT = 10,
+    var /**@const*/MIN_CARET_HEIGHT_PX = 8, /** 8px = 6pt font size */
         /**@const*/DEFAULT_CARET_TOP = "5%",
         /**@const*/DEFAULT_CARET_HEIGHT = "1em",
         span,
@@ -198,11 +198,11 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             span.style.top = "0";
             caretRect = span.getBoundingClientRect();
 
-            if (selectionRect.height < MIN_CARET_HEIGHT) {
+            if (selectionRect.height < MIN_CARET_HEIGHT_PX) {
                 // ClientRect's are read-only, so a whole new object is necessary to modify these values
                 selectionRect = {
-                    top: selectionRect.top - ((MIN_CARET_HEIGHT - selectionRect.height) / 2),
-                    height: MIN_CARET_HEIGHT
+                    top: selectionRect.top - ((MIN_CARET_HEIGHT_PX - selectionRect.height) / 2),
+                    height: MIN_CARET_HEIGHT_PX
                 };
             }
             span.style.height = selectionRect.height + 'px';
