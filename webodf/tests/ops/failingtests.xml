@@ -1,12 +1,4 @@
 <tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
- <test name="InsertText_OneByOneBeforeExisting">
-  <before><office:text><text:p>T</text:p></office:text></before>
-  <ops>
-   <op optype="InsertText" position="0" text="a"/>
-   <op optype="InsertText" position="1" text="b"/>
-  </ops>
-  <after><office:text><text:p>abT</text:p></office:text></after>
- </test>
  <test name="AddAnnotationInsertText_startPosSameAtStartOfParagraph">
   <!-- text inserted at the position of a start of an annotation at the start of a paragraph should be added to the annotated area -->
   <before><office:text><text:p>abcd</text:p></office:text></before>
