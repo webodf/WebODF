@@ -370,9 +370,9 @@ gui.SessionView = (function () {
                 memberModel = session.getMemberModel(),
                 editInfoArray = Object.keys(editInfoMap).map(function(keyname) { return editInfoMap[keyname]; });
 
-            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
+            odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
 
             caretManager.getCarets().forEach(function(caret) {
                 memberModel.unsubscribeMemberDetailsUpdates(caret.getCursor().getMemberId(), renderMemberData);
