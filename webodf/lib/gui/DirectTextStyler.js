@@ -113,10 +113,10 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
             }
             return newValue;
         }
-        isBoldValue = noteChange(isBoldValue, range ? styleHelper.isBold(range) : false, 'isBold');
-        isItalicValue = noteChange(isItalicValue, range ? styleHelper.isItalic(range) : false, 'isItalic');
-        hasUnderlineValue = noteChange(hasUnderlineValue, range ? styleHelper.hasUnderline(range) : false, 'hasUnderline');
-        hasStrikeThroughValue = noteChange(hasStrikeThroughValue, range ? styleHelper.hasStrikeThrough(range) : false, 'hasStrikeThrough');
+        isBoldValue = noteChange(isBoldValue, currentSelectionStyles ? styleHelper.isBold(currentSelectionStyles) : false, 'isBold');
+        isItalicValue = noteChange(isItalicValue, currentSelectionStyles ? styleHelper.isItalic(currentSelectionStyles) : false, 'isItalic');
+        hasUnderlineValue = noteChange(hasUnderlineValue, currentSelectionStyles ? styleHelper.hasUnderline(currentSelectionStyles) : false, 'hasUnderline');
+        hasStrikeThroughValue = noteChange(hasStrikeThroughValue, currentSelectionStyles ? styleHelper.hasStrikeThrough(currentSelectionStyles) : false, 'hasStrikeThrough');
 
         fontSize = currentSelectionStyles && getCommonValue(currentSelectionStyles, ['style:text-properties', 'fo:font-size']);
         fontSizeValue = noteChange(fontSizeValue, fontSize && parseFloat(fontSize), 'fontSize'); // TODO: support other units besides pt!
@@ -179,17 +179,19 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     }
 
     /**
-     * @param {!function(!Range):boolean} predicate
+     * @param {!function(!Array.<Object>):boolean} predicate
      * @param {!function(!boolean):undefined} toggleMethod
      * @return {!boolean}
      */
     function toggle(predicate, toggleMethod) {
-        var cursor = odtDocument.getCursor(inputMemberId);
+        var cursor = odtDocument.getCursor(inputMemberId),
+            appliedStyles;
         // no own cursor yet/currently added?
         if (!cursor) {
             return false;
         }
-        toggleMethod(!predicate(cursor.getSelectedRange()));
+        appliedStyles = styleHelper.getAppliedStyles(cursor.getSelectedRange());
+        toggleMethod(!predicate(appliedStyles));
         return true;
     }
 
