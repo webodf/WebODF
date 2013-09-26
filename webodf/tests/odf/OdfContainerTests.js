@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -30,8 +32,11 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
+
 /*global runtime, core, odf*/
+
 runtime.loadClass("odf.OdfContainer");
+
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
@@ -50,8 +55,16 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         r.shouldBeNonNull(t, "t.odf.rootElement");
-        r.shouldBeNonNull(t, "t.odf.rootElement.firstChild");
+        r.shouldBeNonNull(t, "t.odf.rootElement.meta");
+        r.shouldBeNonNull(t, "t.odf.rootElement.settings");
+        r.shouldBeNonNull(t, "t.odf.rootElement.scripts");
+        r.shouldBeNonNull(t, "t.odf.rootElement.fontFaceDecls");
+        r.shouldBeNonNull(t, "t.odf.rootElement.styles");
+        r.shouldBeNonNull(t, "t.odf.rootElement.automaticStyles");
+        r.shouldBeNonNull(t, "t.odf.rootElement.masterStyles");
+        r.shouldBeNonNull(t, "t.odf.rootElement.body");
     }
+
     function createNewSaveAsAndLoad(callback) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
