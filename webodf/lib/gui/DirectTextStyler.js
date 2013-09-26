@@ -53,7 +53,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         odtDocument = session.getOdtDocument(),
         styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
         eventNotifier = new core.EventNotifier([gui.DirectTextStyler.textStylingChanged]),
-        cursorStyleTextProperties,
+        directCursorStyleProperties,
         // cached values
         isBoldValue = false,
         isItalicValue = false,
@@ -101,8 +101,14 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     function updatedCachedValues() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
-            currentSelectionStyles = range && styleHelper.getAppliedStyles(range),
+            currentSelectionStyles = (range && styleHelper.getAppliedStyles(range)) || [],
             fontSize, diffMap;
+
+        if (currentSelectionStyles[0] && directCursorStyleProperties) {
+            // direct cursor styles add to the style of the existing range, overriding where defined
+            currentSelectionStyles[0] = utils.mergeObjects(currentSelectionStyles[0],
+                /**@type {!Object}*/(directCursorStyleProperties));
+        }
 
         function noteChange(oldValue, newValue, id) {
             if (oldValue !== newValue) {
@@ -203,8 +209,9 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     function formatTextSelection(propertyName, propertyValue) {
         var selection = odtDocument.getCursorSelection(inputMemberId),
             op,
-            properties = {};
-        properties[propertyName] = propertyValue;
+            textProperties = {},
+            properties = {'style:text-properties' : textProperties};
+        textProperties[propertyName] = propertyValue;
 
         if (selection.length !== 0) {
             op = new ops.OpApplyDirectStyling();
@@ -212,11 +219,14 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
                 memberid: inputMemberId,
                 position: selection.position,
                 length: selection.length,
-                setProperties: {'style:text-properties' : properties }
+                setProperties: properties
             });
             session.enqueue([op]);
         } else {
-            cursorStyleTextProperties = utils.mergeObjects(cursorStyleTextProperties || {}, properties);
+            // Direct styling is additive. E.g., if the user selects bold and then italic, the intent is to produce
+            // bold & italic text
+            directCursorStyleProperties = utils.mergeObjects(directCursorStyleProperties || {}, properties);
+            updatedCachedValues();
         }
     }
 
@@ -227,14 +237,14 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     function applyCursorStyle(op) {
         var spec = op.spec(),
             styleOp;
-        if (cursorStyleTextProperties && spec.memberid === inputMemberId) {
+        if (directCursorStyleProperties && spec.memberid === inputMemberId) {
             if (spec.optype === "InsertText") {
                 styleOp = new ops.OpApplyDirectStyling();
                 styleOp.init({
                     memberid: inputMemberId,
                     position: spec.position,
                     length: spec.text.length,
-                    setProperties: {'style:text-properties' : cursorStyleTextProperties }
+                    setProperties: directCursorStyleProperties
                 });
                 session.enqueue([styleOp]);
             }
@@ -243,7 +253,8 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
                 // SplitParagraph is an exception because at the time the split occurs, there has been no element
                 // added to apply the style to. Even after a split, the cursor should still style the next inserted
                 // character
-                cursorStyleTextProperties = null;
+                directCursorStyleProperties = null;
+                updatedCachedValues();
             }
         }
     }
