@@ -335,6 +335,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/UndoManager.js
     lib/gui/UndoStateRules.js
     lib/gui/TrivialUndoManager.js
+    lib/gui/SelectionView.js
+    lib/gui/SelectionViewManager.js
 
     lib/ops/OdtDocument.js
     lib/ops/Session.js

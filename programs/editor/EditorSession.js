@@ -54,8 +54,8 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.TrivialUndoManager");
+    runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("core.EventNotifier");
-
     /**
      * Instantiate a new editor session attached to an existing operation session
      * @param {!ops.Session} session
@@ -69,6 +69,7 @@ define("webodf/editor/EditorSession", [
             currentCommonStyleName = null,
             currentStyleName = null,
             caretManager,
+            selectionViewManager,
             odtDocument = session.getOdtDocument(),
             textns = odf.Namespaces.textns,
             fontStyles = document.createElement('style'),
@@ -82,13 +83,8 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalCommonStyleCreated,
                 EditorSession.signalCommonStyleDeleted,
                 EditorSession.signalParagraphStyleModified,
-                EditorSession.signalUndoStackChanged]);
-
-
-        this.sessionController = new gui.SessionController(session, localMemberId, {directStylingEnabled: config.directStylingEnabled});
-        caretManager = new gui.CaretManager(self.sessionController);
-        this.sessionView = new gui.SessionView(config.viewOptions, session, caretManager);
-        this.availableFonts = [];
+                EditorSession.signalUndoStackChanged]),
+            shadowCursor = new ops.OdtCursor("", odtDocument); // Shadow cursor has an empty memberid
 
         /**
          * @return {Array.<!string>}
@@ -584,12 +580,18 @@ define("webodf/editor/EditorSession", [
                         if (err) {
                             callback(err);
                         } else {
-                            self.sessionController.destroy(function(err) {
+                            selectionViewManager.destroy(function(err) {
                                 if (err) {
                                     callback(err);
                                 } else {
-                                    delete self.sessionController;
-                                    callback();
+                                    self.sessionController.destroy(function(err) {
+                                        if (err) {
+                                            callback(err);
+                                        } else {
+                                            delete self.sessionController;
+                                            callback();
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -607,6 +609,14 @@ define("webodf/editor/EditorSession", [
             fontStyles.appendChild(document.createTextNode(fontsCSS));
             head.appendChild(fontStyles);
 
+            self.sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {
+                directStylingEnabled: config.directStylingEnabled
+            });
+            caretManager = new gui.CaretManager(self.sessionController);
+            selectionViewManager = new gui.SelectionViewManager();
+            self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, caretManager, selectionViewManager);
+            self.availableFonts = [];
+            selectionViewManager.registerCursor(shadowCursor, true);
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);

@@ -81,12 +81,16 @@ gui.SessionView = (function () {
     }
 
     /**
+     * TODO: We really don't want to let SessionView be aware of localMemberId,
+     * so eventually we'll need to refactor this. It is only here so that the id can
+     * be matched with the memberids for which CSS is generated, to generate the same CSS
+     * for shadow cursors.
      * @constructor
      * @param {!gui.SessionViewOptions} viewOptions
      * @param {!ops.Session} session
      * @param {!gui.CaretManager} caretManager
      */
-    function SessionView(viewOptions, session, caretManager) {
+    function SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager) {
         var avatarInfoStyles,
             editInfons = 'urn:webodf:names:editinfo',
             editInfoMap = {},
@@ -101,7 +105,7 @@ gui.SessionView = (function () {
          * @return {!string}
          */
         function createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) {
-            return nodeName + '[editinfo|memberid^="' + memberId + '"]' + pseudoClass;
+            return nodeName + '[editinfo|memberid="' + memberId + '"]' + pseudoClass;
         }
 
         /**
@@ -155,6 +159,7 @@ gui.SessionView = (function () {
             setStyle('span.editInfoAuthor', '{ content: "' + name + '"; }', ':before');
             setStyle('dc|creator', '{ content: "' + name + '"; display: none;}', ':before');
             setStyle('dc|creator', '{ background-color: ' + color + '; }', '');
+            setStyle('div.selectionOverlay', '{ background-color: ' + color + ';}', '');
         }
 
         /**
@@ -309,6 +314,10 @@ gui.SessionView = (function () {
             }
 
             setAvatarInfoStyle(memberId, memberData.fullname, memberData.color);
+            if (localMemberId === memberId) {
+                // Shadow cursor has an empty member ID
+                setAvatarInfoStyle("", memberData.fullname, memberData.color);
+            }
         }
 
         /**
@@ -320,6 +329,7 @@ gui.SessionView = (function () {
                 memberModel = session.getMemberModel();
 
             caretManager.registerCursor(cursor, showCaretAvatars, blinkOnRangeSelect);
+            selectionViewManager.registerCursor(cursor, true);
 
             // preset bogus data
             // TODO: indicate loading state
@@ -329,6 +339,22 @@ gui.SessionView = (function () {
             memberModel.getMemberDetailsAndUpdates(memberId, renderMemberData);
 
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
+        }
+
+        function onCursorMoved(cursor) {
+            var memberId = cursor.getMemberId(),
+                localSelectionView = selectionViewManager.getSelectionView(localMemberId),
+                shadowSelectionView = selectionViewManager.getSelectionView("");
+
+            if (memberId === localMemberId) {
+                // If our actual cursor moved, then hide the shadow cursor's selection
+                shadowSelectionView.hide();
+                localSelectionView.show();
+            } else if (memberId === "") {
+                // If the shadow cursor moved, then hide the current cursor's selection
+                shadowSelectionView.show();
+                localSelectionView.hide();
+            }
         }
 
         /**
@@ -347,6 +373,8 @@ gui.SessionView = (function () {
                     break;
                 }
             }
+
+            selectionViewManager.removeSelectionView(memberid);
 
             if (!hasMemberEditInfo) {
                 session.getMemberModel().unsubscribeMemberDetailsUpdates(memberid, renderMemberData);
@@ -373,6 +401,7 @@ gui.SessionView = (function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
 
             caretManager.getCarets().forEach(function(caret) {
                 memberModel.unsubscribeMemberDetailsUpdates(caret.getCursor().getMemberId(), renderMemberData);
@@ -400,6 +429,7 @@ gui.SessionView = (function () {
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
 
             // Add a css sheet for user info-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');

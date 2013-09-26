@@ -86,6 +86,8 @@
         "odf/Style2CSS.js",
         "odf/StyleInfo.js",
         "odf/OdfUtils.js",
+        "gui/SelectionView.js",
+        "gui/SelectionViewManager.js",
         "odf/TextSerializer.js",
         "ops/Server.js",
         "ops/EditInfo.js",
