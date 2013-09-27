@@ -17,7 +17,7 @@
     <!-- dojo setup: start -->
     <script type="text/javascript" charset="utf-8">
       var usedLocale = "C";
-      if (navigator && navigator.language.match(/^(ru|de)/)) {
+      if (navigator && navigator.language && navigator.language.match(/^(ru|de)/)) {
         usedLocale = navigator.language.substr(0,2);
       }
 
