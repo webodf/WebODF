@@ -87,7 +87,7 @@ ops.OpInsertText = function OpInsertText() {
         var domPosition,
             previousNode,
             parentElement,
-            nextNode,
+            nextNode = null,
             ownerDocument = odtDocument.getDOM(),
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
