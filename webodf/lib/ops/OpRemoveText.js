@@ -167,7 +167,7 @@ ops.OpRemoveText = function OpRemoveText() {
      */
     function mergeParagraphs(first, second, collapseRules) {
         var child,
-            mergeForward,
+            mergeForward = false,
             destination = first,
             source = second,
             secondParent,
