@@ -101,8 +101,8 @@ ops.OpRemoveText = function OpRemoveText() {
 
         /**
          * Returns true if the supplied node contains no text or ODF elements
-         * @param {Node} node
-         * @returns {boolean}
+         * @param {!Node} node
+         * @returns {!boolean}
          */
         function isEmpty(node) {
             var childNode;
@@ -127,8 +127,8 @@ ops.OpRemoveText = function OpRemoveText() {
          * Returns true if the supplied node should be automatically collapsed (i.e., removed) if it contains no
          * text or ODF character elements. The only element that should always be kept is a paragraph element.
          * Paragraph elements can only be deleted through merging
-         * @param node
-         * @returns {boolean}
+         * @param {!Node} node
+         * @returns {!boolean}
          */
         function isCollapsibleContainer(node) {
             return !odfUtils.isParagraph(node) && node !== rootNode && isEmpty(node);
@@ -136,7 +136,7 @@ ops.OpRemoveText = function OpRemoveText() {
 
         /**
          * Merge all child nodes into the node's parent and remove the node entirely
-         * @param {Node} targetNode Node to merge into parent
+         * @param {!Node} targetNode Node to merge into parent
          * @return {!Node} Final parent node collapsing ended at
          */
         function mergeChildrenIntoParent(targetNode) {
@@ -162,7 +162,7 @@ ops.OpRemoveText = function OpRemoveText() {
      * paragraph instead (all non-odt elements will be migrated however).
      * @param {!Node} first Paragraph to merge content into
      * @param {!Node} second Paragraph to merge content from
-     * @param collapseRules
+     * @param {!CollapsingRules} collapseRules
      * @return {!Node} Destination paragraph
      */
     function mergeParagraphs(first, second, collapseRules) {
@@ -204,6 +204,10 @@ ops.OpRemoveText = function OpRemoveText() {
         return destination;
     }
 
+    /**
+     * @param {!ops.OdtDocument} odtDocument
+     * @return {!Range}
+     */
     function stepsToRange(odtDocument) {
         var iterator,
             filter = odtDocument.getPositionFilter(),
