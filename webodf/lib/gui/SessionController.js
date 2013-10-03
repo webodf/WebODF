@@ -1142,6 +1142,19 @@ gui.SessionController = (function () {
             });
         };
 
+        /**
+         * Executes the provided function and returns true
+         * Used to swallow events regardless of whether an operation was created
+         * @param {!Function} fn
+         * @returns {!Function}
+         */
+        function returnTrue(fn) {
+            return function() {
+                fn();
+                return true;
+            };
+        }
+
         function init() {
             var isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
                 modifier = gui.KeyboardHandler.Modifier,
@@ -1155,7 +1168,9 @@ gui.SessionController = (function () {
             keyDownHandler.bind(keyCode.Right, modifier.None, moveCursorToRight);
             keyDownHandler.bind(keyCode.Up, modifier.None, moveCursorUp);
             keyDownHandler.bind(keyCode.Down, modifier.None, moveCursorDown);
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, textManipulator.removeTextByBackspaceKey);
+            // Most browsers will go back one page when given an unhandled backspace press
+            // To prevent this, the event handler for this key should always return true
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey));
             keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
             keyDownHandler.bind(keyCode.Left, modifier.Shift, extendSelectionToLeft);
             keyDownHandler.bind(keyCode.Right, modifier.Shift, extendSelectionToRight);
