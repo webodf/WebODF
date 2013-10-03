@@ -1126,6 +1126,17 @@ gui.SessionController = (function () {
         };
 
         /**
+         * Return the keyboard event handlers
+         * @returns {{keydown: gui.KeyboardHandler, keypress: gui.KeyboardHandler}}
+         */
+        this.getKeyboardHandlers = function() {
+            return {
+                keydown: keyDownHandler,
+                keypress: keyPressHandler
+            };
+        };
+
+        /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
