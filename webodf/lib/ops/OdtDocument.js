@@ -581,7 +581,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 stepCounter = cursor.getStepCounter();
 
                 if (!stepCounter.isPositionWalkable(rootConstrainedFilter)) {
-                    steps = stepCounter.countStepsToValidPosition(rootConstrainedFilter);
+                    steps = stepCounter.countPositionsToNearestStep(rootConstrainedFilter);
                     cursor.move(steps);
                     if (memberId === localMemberId) {
                         self.emit(ops.OdtDocument.signalCursorMoved, cursor);
