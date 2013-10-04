@@ -88,11 +88,11 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         if (selectionLength) {
             t.cursor.move(selectionLength, true);
         } else {
-        // workaround for SelectionMover cachedXOffset "feature"
-        // Failure to do this will leave SelectionMover incorrectly assuming countLineSteps wants to get
-        // to left = 8px due to the fact setCursorPosition moved over multiple lines in a single command
+            // workaround for SelectionMover cachedXOffset "feature"
+            // Failure to do this will leave SelectionMover incorrectly assuming countLineSteps wants to get
+            // to left = 8px due to the fact setCursorPosition moved over multiple lines in a single command
             t.cursor.move(0, false);
-    }
+        }
     }
 
     /**
@@ -280,6 +280,72 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.steps = t.counter.countStepsToPosition(span, span.childNodes.length, t.filter);
         r.shouldBe(t, "t.steps", "1");
     }
+
+    /**
+     * Wraps the supplied node in a parent div
+     * @param {!Node} node
+     */
+    function wrapInDiv(node) {
+        var container = t.root.ownerDocument.createElement("div");
+        node.parentNode.insertBefore(container, node);
+        container.appendChild(node);
+    }
+    function testFixCursorPositions_AnchorInInvalidPlace() {
+        createOdtDocument("<text:p>ABCD</text:p>");
+        setCursorPosition(1, 2);
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.stepsToAnchor", "-2");
+        r.shouldBe(t, "t.stepsToRoot", "-3");
+    }
+    function testFixCursorPositions_Range_CursorInInvalidPlace() {
+        createOdtDocument("<text:p>ABCD</text:p>");
+        setCursorPosition(1, 2);
+        wrapInDiv(t.cursor.getNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.stepsToAnchor", "-2");
+        r.shouldBe(t, "t.stepsToRoot", "-3");
+    }
+    function testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace() {
+        createOdtDocument("<text:p>ABCD</text:p>");
+        setCursorPosition(1, 2);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.stepsToAnchor", "-2");
+        r.shouldBe(t, "t.stepsToRoot", "-3");
+    }
+    function testFixCursorPositions_Collapsed_CursorInInvalidPlace() {
+        createOdtDocument("<text:p>ABCD</text:p>");
+        setCursorPosition(1);
+        wrapInDiv(t.cursor.getNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.stepsToRoot", "-1");
+    }
+
     function testAvailablePositions_EmptyParagraph() {
         // Examples from README_cursorpositions.txt
         testCursorPositions("<text:p>|</text:p>");
@@ -380,6 +446,11 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
             testcountStepsToPosition_CursorNearBeginningOfSpan,
             testcountStepsToPosition_CursorNearEndOfSpan,
+
+            testFixCursorPositions_AnchorInInvalidPlace,
+            testFixCursorPositions_Range_CursorInInvalidPlace,
+            testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace,
+            testFixCursorPositions_Collapsed_CursorInInvalidPlace,
 
             testAvailablePositions_EmptyParagraph,
             testAvailablePositions_SimpleTextNodes,
