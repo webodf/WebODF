@@ -161,7 +161,7 @@ gui.EventManager = function EventManager(odtDocument) {
         if (delegatedEvent) {
             removeIndex = delegatedEvent.handlers.indexOf(handler);
             if (removeIndex !== -1) {
-                delegatedEvent.splice(removeIndex, 1);
+                delegatedEvent.handlers.splice(removeIndex, 1);
             }
         }
     };
