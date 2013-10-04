@@ -561,10 +561,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Iterates through all cursors and checks if they are in
      * walkable positions; if not, move the cursor 1 filtered step backward
      * which guarantees walkable state for all cursors,
-     * while keeping them inside the same root.
-     * @param {?string} localMemberId An event will be raised for this cursor if it is moved
+     * while keeping them inside the same root. An event will be raised for this cursor if it is moved
      */
-    this.fixCursorPositions = function (localMemberId) {
+    this.fixCursorPositions = function () {
         var memberId,
             cursor,
             stepCounter,
@@ -583,9 +582,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 if (!stepCounter.isPositionWalkable(rootConstrainedFilter)) {
                     steps = stepCounter.countPositionsToNearestStep(rootConstrainedFilter);
                     cursor.move(steps);
-                    if (memberId === localMemberId) {
-                        self.emit(ops.OdtDocument.signalCursorMoved, cursor);
-                    }
+                    self.emit(ops.OdtDocument.signalCursorMoved, cursor);
                 } else if (self.getCursorSelection(memberId).length === 0) {
                     // call move(0) here to force the cursor to reset its selection to collapsed
                     // and remove the now-unnecessary anchor node
