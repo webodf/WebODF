@@ -19,23 +19,30 @@ endif (ProcessorCountFound)
 # folder. If the current folder has a name that matches "webodf-\d+.\d+.\d+"
 # then that version number is used. If not, the folder should be a git folder
 # and have ability to get a tag.
+# The third option is to accept the version as cmake-parameter from the
+# outside, which overwrites the other two alternatives.
 
-string(REGEX MATCH "^.*/webodf-([0-9]+.[0-9]+.[0-9]+)$" WEBODF_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
-if (CMAKE_MATCH_1)
-  set(WEBODF_VERSION ${CMAKE_MATCH_1})
-else (CMAKE_MATCH_1)
-  # get version number from git
-  exec_program(git ${CMAKE_CURRENT_SOURCE_DIR}
-    ARGS describe --tags --dirty --match "v[0-9]*"
-    OUTPUT_VARIABLE GIT_WEBODF_VERSION)
-  # check version number from git
-  string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+(-[0-9]+-[0-9a-z]+(-dirty)?)?)$" CHECKED_WEBODF_VERSION "${GIT_WEBODF_VERSION}")
+SET(OVERRULED_WEBODF_VERSION "" CACHE STRING "WebODF Version to overrule what WebODF would calclulate")
+if (OVERRULED_WEBODF_VERSION)
+  set(WEBODF_VERSION ${OVERRULED_WEBODF_VERSION})
+else (OVERRULED_WEBODF_VERSION)
+  string(REGEX MATCH "^.*/webodf-([0-9]+.[0-9]+.[0-9]+)$" WEBODF_VERSION "${CMAKE_CURRENT_SOURCE_DIR}")
   if (CMAKE_MATCH_1)
     set(WEBODF_VERSION ${CMAKE_MATCH_1})
   else (CMAKE_MATCH_1)
-    message(FATAL_ERROR "No valid version number found via git: ${GIT_WEBODF_VERSION}")
+    # get version number from git
+    exec_program(git ${CMAKE_CURRENT_SOURCE_DIR}
+      ARGS describe --tags --dirty --match "v[0-9]*"
+      OUTPUT_VARIABLE GIT_WEBODF_VERSION)
+    # check version number from git
+    string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+(-[0-9]+-[0-9a-z]+(-dirty)?)?)$" CHECKED_WEBODF_VERSION "${GIT_WEBODF_VERSION}")
+    if (CMAKE_MATCH_1)
+      set(WEBODF_VERSION ${CMAKE_MATCH_1})
+    else (CMAKE_MATCH_1)
+      message(FATAL_ERROR "No valid version number found via git: ${GIT_WEBODF_VERSION}")
+    endif (CMAKE_MATCH_1)
   endif (CMAKE_MATCH_1)
-endif (CMAKE_MATCH_1)
+endif (OVERRULED_WEBODF_VERSION)
 message(STATUS "WebODF version " ${WEBODF_VERSION})
 
 # This makefile 'compiles' WebODF using various tools, instruments the code and
