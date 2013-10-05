@@ -357,7 +357,7 @@ odf.OdfCanvas = (function () {
         xpath = new xmldom.XPath(),
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
-        /** FIXME: shadowContent needs to be part of OdfCanvas instance, not class */
+        /* FIXME: shadowContent needs to be part of OdfCanvas instance, not class */
         shadowContent;
     /**
      * @param {!Element} element

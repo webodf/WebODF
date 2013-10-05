@@ -54,7 +54,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     var self = this,
         odfUtils,
         domUtils,
-        /**Array.<!ops.OdtCursor>*/cursors = {},
+        /**Object.<!ops.OdtCursor>*/cursors = {},
         eventNotifier = new core.EventNotifier([
             ops.OdtDocument.signalCursorAdded,
             ops.OdtDocument.signalCursorRemoved,
