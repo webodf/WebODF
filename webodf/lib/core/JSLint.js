@@ -1,5 +1,5 @@
 // jslint.js
-// 2013-07-22
+// 2013-09-22
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -172,7 +172,7 @@
 // For example:
 
 /*jslint
-    es5: true, evil: true, nomen: true, regexp: true, todo: true
+    evil: true, nomen: true, regexp: true, todo: true
 */
 
 // The current option set is
@@ -187,7 +187,6 @@
 //     devel      true, if logging should be allowed (console, alert, etc.)
 //     emptyblock true, if empty blocks should be allowed
 //     eqeq       true, if == should be allowed
-//     es5        true, if ES5 syntax should be allowed
 //     evil       true, if eval should be allowed
 //     forin      true, if for in statements need not filter
 //     indent     the indentation factor
@@ -202,11 +201,11 @@
 //     regexp     true, if the . should be allowed in regexp literals
 //     rhino      true, if the Rhino environment globals should be predefined
 //     unparam    true, if unused parameters should be tolerated
-//     unvar      true, if unused variables should be tolerated
 //     sloppy     true, if the 'use strict'; pragma is optional
 //     stupid     true, if really stupid practices are tolerated
 //     sub        true, if all forms of subscript notation are tolerated
 //     todo       true, if TODO comments are tolerated
+//     unvar      true, if unused variables should be tolerated
 //     vars       true, if multiple var statements per function should be allowed
 //     white      true, if sloppy whitespace is tolerated
 
@@ -227,7 +226,7 @@
     conditional_assignment, confusing_a, confusing_regexp, constructor_name_a,
     continue, control_a, couch, create, d, dangling_a, data, dead, debug,
     deleted, devel, disrupt, duplicate_a, edge, edition, else, empty_block,
-    empty_case, empty_class, entityify, eqeq, error_report, errors, es5,
+    empty_case, empty_class, entityify, eqeq, error_report, errors,
     evidence, evil, exception, exec, expected_a_at_b_c, expected_a_b,
     expected_a_b_from_c_d, expected_id_a, expected_identifier_a,
     expected_identifier_a_reserved, expected_number_a, expected_operator_a,
@@ -246,13 +245,13 @@
     parameter, parameter_a_get_b, parameter_arguments_a, parameter_set_a,
     params, paren, passfail, plusplus, postscript, predef, properties,
     properties_report, property, prototype, push, quote, r, radix, raw,
-    read_only, reason, regexp, relation, replace, report, reserved, reserved_a,
-    rhino, right, scanned_a_b, scope, search, second, shift, slash_equal, slice,
-    sloppy, sort, split, statement, statement_block, stop, stopping,
-    strange_loop, strict, string, stupid, sub, subscript, substr, supplant,
-    sync_a, t, tag_a_in_b, test, third, thru, toString, todo, todo_comment,
-    token, tokens, too_long, too_many, trailing_decimal_a, tree, unclosed,
-    unclosed_comment, unclosed_regexp, unescaped_a, unexpected_a,
+    read_only, reason, redefinition_a_b, regexp, relation, replace, report,
+    reserved, reserved_a, rhino, right, scanned_a_b, scope, search, second,
+    shift, slash_equal, slice, sloppy, sort, split, statement, statement_block,
+    stop, stopping, strange_loop, strict, string, stupid, sub, subscript,
+    substr, supplant, sync_a, t, tag_a_in_b, test, third, thru, toString, todo,
+    todo_comment, token, tokens, too_long, too_many, trailing_decimal_a, tree,
+    unclosed, unclosed_comment, unclosed_regexp, unescaped_a, unexpected_a,
     unexpected_char_a, unexpected_comment, unexpected_label_a,
     unexpected_property_a, unexpected_space_a_b, unexpected_typeof_a,
     uninitialized_a, unnecessary_else, unnecessary_initialize, unnecessary_use,
@@ -300,7 +299,6 @@ var JSLINT = (function () {
             devel     : true,
             emptyblock: true,
             eqeq      : true,
-            es5       : true,
             evil      : true,
             forin     : true,
             indent    :   10,
@@ -315,11 +313,11 @@ var JSLINT = (function () {
             regexp    : true,
             rhino     : true,
             unparam   : true,
-            unvar     : true,
             sloppy    : true,
             stupid    : true,
             sub       : true,
             todo      : true,
+            unvar     : true,
             vars      : true,
             white     : true
         },
@@ -389,7 +387,6 @@ var JSLINT = (function () {
             empty_block: "Empty block.",
             empty_case: "Empty case.",
             empty_class: "Empty class.",
-            es5: "This is an ES5 feature.",
             evil: "eval is evil.",
             expected_a_b: "Expected '{a}' and instead saw '{b}'.",
             expected_a_b_from_c_d: "Expected '{a}' to match '{b}' from line " +
@@ -446,6 +443,7 @@ var JSLINT = (function () {
             parameter_set_a: "Expected parameter (value) in set {a} function.",
             radix: "Missing radix parameter.",
             read_only: "Read only.",
+            redefinition_a_b: "Redefinition of '{a}' from line {b}.",
             reserved_a: "Reserved name '{a}'.",
             scanned_a_b: "{a} ({b}% scanned).",
             slash_equal: "A regular expression literal can be confused with '/='.",
@@ -589,9 +587,11 @@ var JSLINT = (function () {
         standard = array_to_object([
             'Array', 'Boolean', 'Date', 'decodeURI', 'decodeURIComponent',
             'encodeURI', 'encodeURIComponent', 'Error', 'eval', 'EvalError',
-            'Function', 'isFinite', 'isNaN', 'JSON', 'Math', 'Number',
-            'Object', 'parseInt', 'parseFloat', 'RangeError', 'ReferenceError',
-            'RegExp', 'String', 'SyntaxError', 'TypeError', 'URIError'
+            'Function', 'isFinite', 'isNaN', 'JSON', 'Map', 'Math', 'Number',
+            'Object', 'parseInt', 'parseFloat', 'Promise', 'Proxy',
+            'RangeError', 'ReferenceError', 'Reflect', 'RegExp', 'Set',
+            'String', 'Symbol', 'SyntaxError', 'System', 'TypeError',
+            'URIError', 'WeakMap', 'WeakSet'
         ], false),
 
         strict_mode,
@@ -683,7 +683,6 @@ var JSLINT = (function () {
         if (option.couch) {
             add_to_predefined(couch);
             option.couch = false;
-            option.es5 = true;
         }
         if (option.devel) {
             add_to_predefined(devel);
@@ -692,7 +691,6 @@ var JSLINT = (function () {
         if (option.node) {
             add_to_predefined(node);
             option.node = false;
-            option.es5 = true;
             node_js = true;
         }
         if (option.rhino) {
@@ -911,9 +909,7 @@ var JSLINT = (function () {
                     ch = source_row.charAt(at);
                     switch (ch) {
                     case '':
-                        if (!option.es5) {
-                            warn('es5', line, character);
-                        }
+                        warn('unexpected_a', line, character, '\\');
                         next_line();
                         at = -1;
                         break;
@@ -1339,7 +1335,7 @@ klass:              do {
         token.kind = kind;
         token.master = master;
         token.used = 0;
-        token.writeable = false;
+        token.writeable = true;
 
 // Global variables are a little weird. They can be defined multiple times.
 // Some predefined global vars are (or should) not be writeable.
@@ -1364,7 +1360,7 @@ klass:              do {
                     }
                 } else if (master.function !== global_funct) {
                     if (kind === 'var') {
-                        token.warn('already_defined', name);
+                        token.warn('redefinition_a_b', name, master.line);
                     }
                 }
             }
@@ -2247,7 +2243,7 @@ klass:              do {
     function optional_identifier(variable) {
         if (next_token.identifier) {
             advance();
-            if (token.reserved && (!option.es5 || variable)) {
+            if (token.reserved && variable) {
                 token.warn('expected_identifier_a_reserved');
             }
             return token.string;
@@ -2594,11 +2590,7 @@ klass:              do {
 
     prefix('void', function (that) {
         that.first = expression(0);
-        if (option.es5 || strict_mode) {
-            that.warn('expected_a_b', 'undefined', 'void');
-        } else if (that.first.number !== 0) {
-            that.first.warn('expected_a_b', '0', artifact(that.first));
-        }
+        that.warn('expected_a_b', 'undefined', 'void');
         return that;
     });
 
@@ -3062,7 +3054,7 @@ klass:              do {
             that.first.push(expression(10));
             if (next_token.id === ',') {
                 comma();
-                if (next_token.id === ']' && !option.es5) {
+                if (next_token.id === ']') {
                     token.warn('unexpected_a');
                     break;
                 }
@@ -3176,7 +3168,7 @@ klass:              do {
     }
 
     prefix('{', function (that) {
-        var get, i, j, name, p, set, seen = Object.create(null);
+        var get, i, j, name, set, seen = Object.create(null);
         that.first = [];
         step_in();
         while (next_token.id !== '}') {
@@ -3187,9 +3179,6 @@ klass:              do {
 
             edge();
             if (next_token.string === 'get' && peek().id !== ':') {
-                if (!option.es5) {
-                    next_token.warn('es5');
-                }
                 get = next_token;
                 advance('get');
                 one_space_only();
@@ -3203,9 +3192,8 @@ klass:              do {
                 if (funct.loopage) {
                     get.warn('function_loop');
                 }
-                p = get.first;
-                if (p && p.length) {
-                    p[0].warn('parameter_a_get_b', p[0].string, i);
+                if (get.function.parameter.length) {
+                    get.warn('parameter_a_get_b', get.function.parameter[0], i);
                 }
                 comma();
                 set = next_token;
@@ -3222,11 +3210,11 @@ klass:              do {
                 if (set.block.length === 0) {
                     token.warn('missing_a', 'throw');
                 }
-                p = set.first;
-                if (!p || p.length !== 1) {
+                if (set.function.parameter.length === 0) {
                     set.stop('parameter_set_a', 'value');
-                } else if (p[0].string !== 'value') {
-                    p[0].stop('expected_a_b', 'value', p[0].string);
+                } else if (set.function.parameter[0] !== 'value') {
+                    set.stop('expected_a_b', 'value',
+                        set.function.parameter[0]);
                 }
                 name.first = [get, set];
             } else {
@@ -3255,7 +3243,7 @@ klass:              do {
                 }
                 next_token.warn('unexpected_a');
             }
-            if (next_token.id === '}' && !option.es5) {
+            if (next_token.id === '}') {
                 token.warn('unexpected_a');
             }
         }
@@ -3307,6 +3295,9 @@ klass:              do {
             define('var', name);
             name.dead = funct;
             if (next_token.id === '=') {
+                if (funct === global_funct && !name.writeable) {
+                    name.warn('read_only');
+                }
                 assign = next_token;
                 assign.first = name;
                 spaces();
@@ -3354,6 +3345,9 @@ klass:              do {
         var name = next_token,
             id = identifier(true);
         define('var', name);
+        if (!name.writeable) {
+            name.warn('read_only');
+        }
         name.init = true;
         name.statement = true;
         no_space();
@@ -3389,6 +3383,7 @@ klass:              do {
         case ']':
         case '}':
         case ':':
+        case '(end)':
             break;
         case '.':
             if (peek().string !== 'bind' || peek(1).id !== '(') {
@@ -4180,8 +4175,7 @@ klass:              do {
                 }
                 output.push('<dl class=level' + the_function.level +
                     '><address>line ' + String(the_function.line) +
-                    '</address>' + the_function.name.entityify() + '(' +
-                    names.join(', ') + ')');
+                    '</address>' + the_function.name.entityify());
                 detail('parameter', the_function.parameter);
                 detail('variable', the_function.var);
                 detail('exception', the_function.exception);
@@ -4259,11 +4253,10 @@ klass:              do {
 
     itself.jslint = itself;
 
-    itself.edition = '2013-07-22';
+    itself.edition = '2013-09-22';
 
     return itself;
 }());
 core.JSLint = function JSLint() {
     this.JSLINT = JSLINT;
 };
-

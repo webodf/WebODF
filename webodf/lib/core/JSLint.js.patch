@@ -1,0 +1,69 @@
+--- jslint.js	2013-10-05 10:30:54.993804055 +0200
++++ lib/core/JSLint.js	2013-10-05 10:41:16.467599086 +0200
+@@ -183,7 +183,9 @@
+ //     closure    true, if Google Closure idioms should be tolerated
+ //     continue   true, if the continuation statement should be tolerated
+ //     debug      true, if debugger statements should be allowed
++//     defined    true, if already defined variables are allowed
+ //     devel      true, if logging should be allowed (console, alert, etc.)
++//     emptyblock true, if empty blocks should be allowed
+ //     eqeq       true, if == should be allowed
+ //     evil       true, if eval should be allowed
+ //     forin      true, if for in statements need not filter
+@@ -203,6 +205,7 @@
+ //     stupid     true, if really stupid practices are tolerated
+ //     sub        true, if all forms of subscript notation are tolerated
+ //     todo       true, if TODO comments are tolerated
++//     unvar      true, if unused variables should be tolerated
+ //     vars       true, if multiple var statements per function should be allowed
+ //     white      true, if sloppy whitespace is tolerated
+ 
+@@ -292,7 +295,9 @@
+             continue  : true,
+             couch     : true,
+             debug     : true,
++            defined   : true,
+             devel     : true,
++            emptyblock: true,
+             eqeq      : true,
+             evil      : true,
+             forin     : true,
+@@ -312,6 +317,7 @@
+             stupid    : true,
+             sub       : true,
+             todo      : true,
++            unvar     : true,
+             vars      : true,
+             white     : true
+         },
+@@ -1346,7 +1352,7 @@
+ // It is an error if the name has already been defined in this scope, except
+ // when reusing an exception variable name.
+ 
+-            if (master) {
++            if (master && !option.defined) {
+                 if (master.function === funct) {
+                     if (master.kind !== 'exception' || kind !== 'exception' ||
+                             !master.dead) {
+@@ -2403,7 +2409,7 @@
+             array = [statement()];
+             array.disrupt = array[0].disrupt;
+         }
+-        if (kind !== 'catch' && array.length === 0) {
++        if (!option.emptyblock && (kind !== 'catch' && array.length === 0)) {
+             curly.warn('empty_block');
+         }
+         block_var.forEach(function (name) {
+@@ -3149,9 +3155,10 @@
+         Object.keys(scope).forEach(function (name) {
+             var master = scope[name];
+             if (!master.used && master.kind !== 'exception' &&
+-                    (master.kind !== 'parameter' || !option.unparam)) {
++                    ((master.kind === 'var' && !option.unvar)
++                    || (master.kind === 'parameter' && !option.unparam))) {
+                 master.warn('unused_a');
+-            } else if (!master.init) {
++            } else if (!master.init && (master.kind !== 'var' || !option.unvar)) {
+                 master.warn('uninitialized_a');
+             }
+         });
