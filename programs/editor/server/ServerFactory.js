@@ -38,7 +38,7 @@
 /**
  * @interface
  */
-ServerFactory = function Server() {"use strict"; };
+function ServerFactory() {"use strict"; };
 
 /**
  * @return {!ops.Server}

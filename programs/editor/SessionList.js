@@ -39,7 +39,7 @@
  * A model which provides information about sessions.
  * @interface
  */
-SessionList = function SessionList() {"use strict"; };
+function SessionList() {"use strict"; };
 
 /**
  * @param {{onCreated:function(!Object),

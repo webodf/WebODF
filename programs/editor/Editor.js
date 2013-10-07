@@ -55,11 +55,11 @@ define("webodf/editor/Editor", [
 
         /**
          * @constructor
-         * @param {{unstableFeaturesEnabled:boolean=,
-         *          loadCallback:function()=,
-         *          saveCallback:function()=,
-         *          closeCallback:function()=,
-         * @param {!ops.Server=} server
+         * @param {{unstableFeaturesEnabled:boolean,
+         *          loadCallback:function(),
+         *          saveCallback:function(),
+         *          closeCallback:function()}}
+         * param {!ops.Server=} server
          * @param {!ServerFactory=} serverFactory
          */
         function Editor(args, server, serverFactory) {

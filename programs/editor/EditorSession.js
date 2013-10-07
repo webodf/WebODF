@@ -90,8 +90,8 @@ define("webodf/editor/EditorSession", [
         this.sessionView = new gui.SessionView(config.viewOptions, session, caretManager);
         this.availableFonts = [];
 
-        /*
-         * @return {Array.{!string}}
+        /**
+         * @return {Array.<!string>}
          */
         function getAvailableFonts() {
             var availableFonts, regex, matches;
@@ -469,7 +469,7 @@ define("webodf/editor/EditorSession", [
          * first font name for any given family is kept.
          * The elements of the array are objects containing the font's name and
          * the family.
-         * @return {Array.{Object}}
+         * @return {Array.<!Object>}
          */
         this.getDeclaredFonts = function () {
             var fontMap = formatting.getFontMap(),
