@@ -74,13 +74,10 @@ Here is a list of more examples. It is a good excersize to apply the above rule 
 <p>|a| |<s/>|<s/>|b|</p>
 <p> <span>|a| |</span> <s/>| <span><s/>|b|</span> </p>
 
-TODO: rewrite list below in terms of character elements, group elements and ghost elements
+In the above rule for allowed cursor positions, the elements are placed in categories. A list that puts the ODF elements in the character, grouping and ghost categories is given here. Together, the three categories should contain all elements that are allowed in <text:h/> and <text:p/>.
+If an element is not a character element or a ghost element, it is considered to be on a grouping element.
 
-In the above rule for allowed cursor positions, a whitelist is referenced. This list is given here. It is complemented by a blacklist. Together, the whitelist and blacklist contain all elements that are allowed in <text:h/> and <text:p/>.
-There is a graylist too. The graylist contains graphical elements with the attribute @text:anchor-type. These elements are only in the whitelist if the value of text:anchor-type is 'as-char'.
-If an element is not in the graylist, whitelist or blacklist, it is considered to be on the blacklist and it does not result in a valid position.
-
-The whitelist contains these elements:
+These elements are character elements:
 <presentation:date-time/>
 <presentation:footer/>
 <presentation:header/>
@@ -100,7 +97,7 @@ The whitelist contains these elements:
 <text:time/>
 <text:title/>
 
-The graylist contains these elements:
+These elements are character elements if the attribute @text:anchor-type has the value 'as-char'. Otherwise these elements are ghost elements.
 <dr3d:scene/>
 <draw:caption/>
 <draw:circle/>
@@ -119,7 +116,7 @@ The graylist contains these elements:
 <draw:rect/>
 <draw:regular-polygon/>
 
-The blacklist contains these elements:
+These elements are grouping elements:
 <draw:a/>
 <text:a/>
 <office:annotation-end/>
