@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+  <style type="text/css" media="screen, print">
+    body, html, div {
+      padding: 0px;
+      margin: 0px;
+      border: 0px;
+    }
+    body, html {
+      height: 100%;
+      background-color: #ddd;
+    }
+    html > body {
+    }
+    dl {
+      display: table;
+    }
+    dt, dd {
+      display: table-cell;
+    }
+  </style>
+  <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
+<script src="lib/packages.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/xmled/ValidationModel.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/xmled/XmlCanvas.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/xmled/XmlEditor.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+var xsdurl = "op-xsd-2012-05-24_comments.xsd",
+    xmlurl = "GVOP-2013-629.xml", //h-tk-20112012-9-23.xml",
+    styleurl = "opxml.css";
+function init() {
+console.log("HELLO");
+    var xmlelement = document.getElementById("xml"),
+        xmlEditor = new xmled.XmlEditor(xmlelement, xsdurl, styleurl);
+    xmlEditor.load(xmlurl);
+}
+window.setTimeout(init, 1);
+console.log("HELLO");
+  </script>
+  <title></title>
+</head>
+ 
+<body>
+  <div id="xml"/>
+</body>
+</html>
