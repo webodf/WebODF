@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, odf, runtime, console, core, NodeFilter*/
+/*global Node, odf, runtime, console, core*/
 
 runtime.loadClass("core.Utils");
 runtime.loadClass("odf.ObjectNameGenerator");

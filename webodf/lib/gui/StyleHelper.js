@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global core, Node, runtime, gui, odf, NodeFilter*/
+/*global core, runtime, gui, odf*/
 
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.Namespaces");

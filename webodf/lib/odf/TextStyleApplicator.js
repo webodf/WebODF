@@ -32,7 +32,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global Node, odf, runtime, console, NodeFilter, core*/
+/*global Node, odf, runtime, console, core*/
 
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.LoopWatchDog");
