@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global ops, runtime, odf, core, Node, NodeFilter*/
+/*global ops, runtime, odf, core, Node*/
 
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
@@ -54,6 +54,7 @@ ops.OpRemoveText = function OpRemoveText() {
         odfUtils,
         domUtils,
         editinfons = 'urn:webodf:names:editinfo',
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@type {!Object.<!string, !boolean>}*/
         odfNodeNamespaceMap = {};
 
@@ -222,7 +223,7 @@ ops.OpRemoveText = function OpRemoveText() {
         while (remainingLength && iterator.nextPosition()) {
             endContainer = iterator.container();
             endOffset = iterator.unfilteredDomOffset();
-            if (filter.acceptPosition(iterator) === NodeFilter.FILTER_ACCEPT) {
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                 remainingLength -= 1;
             }
         }
