@@ -11,7 +11,7 @@
     }
     body, html {
       height: 100%;
-      background-color: #ddd;
+      background-color: #d8dbe0;
     }
     html > body {
     }
@@ -20,6 +20,11 @@
     }
     dt, dd {
       display: table-cell;
+    }
+    i, b {
+      display: block;
+      background: white;
+      border-bottom: 1px solid #ff8a00;
     }
   </style>
   <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
@@ -32,13 +37,11 @@ var xsdurl = "op-xsd-2012-05-24_comments.xsd",
     xmlurl = "GVOP-2013-629.xml", //h-tk-20112012-9-23.xml",
     styleurl = "opxml.css";
 function init() {
-console.log("HELLO");
     var xmlelement = document.getElementById("xml"),
         xmlEditor = new xmled.XmlEditor(xmlelement, xsdurl, styleurl);
     xmlEditor.load(xmlurl);
 }
 window.setTimeout(init, 1);
-console.log("HELLO");
   </script>
   <title></title>
 </head>
