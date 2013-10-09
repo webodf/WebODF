@@ -101,6 +101,15 @@ ops.OpRemoveText = function OpRemoveText() {
         }
 
         /**
+         * Returns true if a given node is odf node or a text node that has a odf parent.
+         * @param {!Node} node
+         * @returns {!boolean}
+         */
+        function shouldRemove(node) {
+            return isOdfNode(node) || (node.nodeType === Node.TEXT_NODE && isOdfNode(/** @type {!Node}*/(node.parentNode)));
+        }
+
+        /**
          * Returns true if the supplied node contains no text or ODF elements
          * @param {!Node} node
          * @returns {!boolean}
@@ -147,7 +156,7 @@ ops.OpRemoveText = function OpRemoveText() {
                 parent.removeChild(targetNode);
             } else {
                 // removes all odf nodes
-                parent = domUtils.removeUnwantedNodes(targetNode, isOdfNode);
+                parent = domUtils.removeUnwantedNodes(targetNode, shouldRemove);
             }
             if (isCollapsibleContainer(parent)) {
                 return mergeChildrenIntoParent(parent);
