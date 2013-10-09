@@ -199,7 +199,10 @@ gui.SelectionView = function SelectionView(cursor) {
 
         currentSibling = firstNode;
         while (currentSibling !== lastNode.nextSibling) {
-            if (currentSibling.nodeType !== Node.TEXT_NODE) {
+            // If the sibling for which we want the bounding rect is a paragraph,
+            // then we desire to have it's full width at our access. Therefore,
+            // directly use gBCR (works fine for just paragraphs).
+            if (odfUtils.isParagraph(currentSibling) {
                 currentRect = currentSibling.getBoundingClientRect();
             } else {
                 range.selectNode(currentSibling);
