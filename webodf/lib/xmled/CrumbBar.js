@@ -50,17 +50,22 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root) {
             htmlelement.removeChild(htmlelement.firstChild);
         }
     }
-    function createCrumb(element) {
-        var span = doc.createElementNS(htmlns, "span"),
-            crumb = doc.createElementNS(htmlns, "span");
+    function createArrow() {
+        var span = doc.createElementNS(htmlns, "span");
         span.appendChild(doc.createTextNode(" ▸ "));
+        span.style.color = "#FF8A00";
+        span.style.padding = "2px";
+        span.style.fontFamily = "sans";
+        return span;
+    }
+        
+    function createCrumb(element) {
+        var span = createArrow(),
+            crumb = doc.createElementNS(htmlns, "span");
         span.appendChild(crumb);
         crumb.setAttribute("tabindex", "1");
         crumb.appendChild(doc.createTextNode(element.localName));
-        span.style.color = "#FF8A00";
-        span.style.padding = "2px";
         crumb.style.color = "#FFFFFF";
-        span.style.fontFamily = "sans";
 //        crumb.style.color = "#000000";
 /*
         crumb.onfocus = function () {
@@ -70,15 +75,27 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root) {
 */
         return span;
     }
+    this.setDocumentRoot = function (newRoot) {
+        root = newRoot;
+    };
     /**
      * @param {!Element} element in which to draw the crumbs
      */
     this.setElement = function (element) {
         clean();
-        var e = element;
-        while (e && e.namespaceURI !== htmlns && e !== root && e.parentNode !== e) {
+        if (!root || !root.contains(element)) {
+            return;
+        }
+        var e = element,
+            empty = true;
+        while (e && e !== root.parentNode) {
             htmlelement.insertBefore(createCrumb(e), htmlelement.firstChild);
+            empty = false;
             e = e.parentNode;
         }
+        if (empty) {
+            htmlelement.appendChild(createArrow());
+        }
     };
+    htmlelement.appendChild(createArrow());
 };

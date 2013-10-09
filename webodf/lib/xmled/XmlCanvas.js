@@ -36,6 +36,7 @@
 /*global runtime, xmled */
 
 runtime.loadClass("xmled.ValidationModel");
+runtime.loadClass("xmled.XmlCaret");
 
 /**
  * This class manages a loaded ODF document that is shown in an element.
@@ -54,7 +55,8 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
         styleElement,
         state = xmled.XmlCanvas.State.LOADING,
         error,
-        root;
+        root,
+        caret;
     validationModel.getState();
 /*
     function enrich(element) {
@@ -92,6 +94,9 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
         callback();
     };
     function init() {
+        if (!doc) {
+            throw "No document!";
+        }
         var head = doc.getElementsByTagName('head')[0],
             ns = element.namespaceURI;
         styleElement = doc.createElementNS(ns, 'link');
@@ -100,6 +105,8 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
         styleElement.setAttribute("media", "screen, print, handheld, projection");
         styleElement.setAttribute("href", styleurl);
         head.appendChild(styleElement);
+
+        caret = new xmled.XmlCaret(doc);
     }
     /**
      * @param {!string} url
@@ -134,6 +141,9 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
      */
     this.getDocumentRoot = function () {
         return root;
+    };
+    this.getCaret = function () {
+        return caret;
     };
     init();
 };/**

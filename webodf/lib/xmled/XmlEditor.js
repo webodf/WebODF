@@ -33,16 +33,13 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, xmled */
+/*global runtime, core, xmled */
 
 runtime.loadClass("xmled.XmlCanvas");
 runtime.loadClass("xmled.CrumbBar");
 runtime.loadClass("xmled.AttributeEditor");
 
 /**
- * This class manages a loaded ODF document that is shown in an element.
- * It takes care of giving visual feedback on loading, ensures that the
- * stylesheets are loaded.
  * @constructor
  * @param {!Element} element element to put the editor in
  * @param {!string} grammarurl
@@ -61,6 +58,14 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         attributeEditor = new xmled.AttributeEditor(attributeEditorElement),
         canvas,
         crumbBar;
+    function fixSize() {
+        var height = element.parentNode.clientHeight - crumbElement.clientHeight
+                     - 10;
+        height += "px";
+        canvasElement.style.height = height;
+        contextInfoElement.style.height = height;
+        attributeEditorElement.style.height = height;
+    }
     /**
      * @return {undefined}
      */
@@ -80,12 +85,12 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         canvasElement.style.marginTop = "0.3em";
         canvasElement.style.display = "inline-block";
         canvasElement.style.width = "40em";
-        canvasElement.style.height = "400px";
         canvasElement.style.overflow = "auto";
         canvasElement.style.whiteSpace = 'normal';
         canvasElement.setAttribute('id', 'xmlcanvas');
         canvasElement.style.boxShadow = '0px 0px 20px #aaa';
         canvasElement.style.background = 'white';
+        canvasElement.setAttribute("tabindex", "1");
 		contextInfoElement.style.marginTop = "0.3em";
         contextInfoElement.style.display = "inline-block";
         contextInfoElement.style.width = "12em";
@@ -100,7 +105,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
 		attributeEditorElement.style.marginTop = "0.3em";
         attributeEditorElement.style.verticalAlign = 'top';
         attributeEditorElement.style.padding = '0.2em';
-        attributeEditorElement.style.height = "400px";
         attributeEditorElement.style.overflow = "auto";
         attributeEditorElement.style.whiteSpace = 'normal';
         attributeEditorElement.style.fontFamily = 'sans';
@@ -110,12 +114,22 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         crumbBar = new xmled.CrumbBar(crumbElement, root);
 
         canvasElement.onmouseup = function (evt) {
+            crumbBar.setDocumentRoot(canvas.getDocumentRoot());
+            if (!canvas.getDocumentRoot().contains(evt.target)) {
+                return;
+            }
             crumbBar.setElement(evt.target);
             var info = validationModel.getElementInfo(evt.target),
                 defs = validationModel.getAttributeDefinitions(evt.target);
             contextInfoElement.innerHTML = info;
             attributeEditor.setAttributeDefinitions(defs, evt.target);
+            canvas.getCaret().handleClick();
         };
+        canvasElement.onkeyup = function () {
+            runtime.log("onkeyup");
+        };
+        runtime.getWindow().onresize = fixSize;
+        fixSize();
     }
     /**
      * @param {!string} url
