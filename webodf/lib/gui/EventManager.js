@@ -62,6 +62,43 @@ gui.EventManager = function EventManager(odtDocument) {
         };
 
     /**
+     * @param {!Window} window
+     * @constructor
+     */
+    function WindowScrollState(window) {
+        var x = window.scrollX,
+            y = window.scrollY;
+
+        /**
+         * Restore the scroll state captured on construction
+         */
+        this.restore = function() {
+            if (window.scrollX !== x || window.scrollY !== y) {
+                window.scrollTo(x, y);
+            }
+        };
+    }
+
+    /**
+     * @param {!HTMLElement} element
+     * @constructor
+     */
+    function ElementScrollState(element) {
+        var top = element.scrollTop,
+            left = element.scrollLeft;
+
+        /**
+         * Restore the scroll state captured on construction
+         */
+        this.restore = function() {
+            if (element.scrollTop !== top || element.scrollLeft !== left) {
+                element.scrollTop = top;
+                element.scrollLeft = left;
+            }
+        };
+    }
+
+    /**
      * @param {!Element|!Window} eventTarget
      * @param {!string} eventType
      * @param {function(!Event)|function()} eventHandler
@@ -137,15 +174,38 @@ gui.EventManager = function EventManager(odtDocument) {
     this.hasFocus = hasFocus;
 
     /**
+     * Find the closest scrolled ancestor to the specified element
+     * @param {HTMLElement} element
+     * @returns {*}
+     */
+    function findScrollableParent(element) {
+        // If a scrollable parent exists with a non-0 top or left scroll then return this as the container to restore
+        while (element && !element.scrollTop && !element.scrollLeft) {
+            element = /**@type {HTMLElement}*/(element.parentNode);
+        }
+        if (element) {
+            return new ElementScrollState(element);
+        }
+        if (window) {
+            return new WindowScrollState(window);
+        }
+        return null;
+    }
+
+    /**
      * Return event focus back to the event manager
      */
     this.focus = function() {
+        var scrollParent;
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
             // Passing focus back to an element that did not previously have it will also
             // cause the element to attempt to recentre back into scroll view
-            // The scroll will be reset by the CaretManager however
+            scrollParent = findScrollableParent(canvasElement);
             canvasElement.focus();
+            if (scrollParent) {
+                scrollParent.restore();
+            }
         }
     };
 
