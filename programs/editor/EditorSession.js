@@ -56,6 +56,8 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.TrivialUndoManager");
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("core.EventNotifier");
+    runtime.loadClass("gui.ShadowCursor");
+
     /**
      * Instantiate a new editor session attached to an existing operation session
      * @param {!ops.Session} session
@@ -84,7 +86,7 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalCommonStyleDeleted,
                 EditorSession.signalParagraphStyleModified,
                 EditorSession.signalUndoStackChanged]),
-            shadowCursor = new ops.OdtCursor("", odtDocument); // Shadow cursor has an empty memberid
+            shadowCursor = new gui.ShadowCursor("", odtDocument); // Shadow cursor has an empty memberid
 
         /**
          * @return {Array.<!string>}

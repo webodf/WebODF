@@ -312,6 +312,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/SelectionMover.js
     lib/ops/OdtCursor.js
     lib/ops/EditInfo.js
+    lib/gui/ShadowCursor.js
     lib/gui/Avatar.js
     lib/gui/Caret.js
     lib/gui/KeyboardHandler.js

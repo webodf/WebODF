@@ -1025,10 +1025,11 @@ gui.SessionController = (function () {
                     iterator.setUnfilteredPosition(position.container, position.offset);
                     if (mouseDownRootFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
                         selection =  window.getSelection();
-                        shadowCursor.setSelectedRange(/**@type{!Range}*/(selection.getRangeAt(0)), true);
+                        shadowCursor.setSelectedRange(/**@type{!Range}*/(selection.getRangeAt(0).cloneRange()), false);
                         odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
+                    } else {
+                        maintainShadowSelection();
                     }
-                    maintainShadowSelection();
                 }, 0);
             }
         }
@@ -1038,8 +1039,6 @@ gui.SessionController = (function () {
          */
         this.startEditing = function () {
             var op;
-
-            odtDocument.addCursor(shadowCursor);
 
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);
             eventManager.subscribe("keypress", keyPressHandler.handleEvent);

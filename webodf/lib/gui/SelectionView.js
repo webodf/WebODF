@@ -113,25 +113,40 @@ gui.SelectionView = function SelectionView(cursor) {
      * @return {null|!{firstRange: !Range, lastRange: !Range, fillerRange: !Range}}
      */
     function getExtremeRanges(range) {
-        var textNodes = odfUtils.getTextNodes(range, false),
+        var textNodes = odfUtils.getTextNodes(range, true),
             firstRange = doc.createRange(),
             lastRange = doc.createRange(),
             fillerRange = doc.createRange(),
             firstTextNode,
-            lastTextNode;
+            firstTextOffset,
+            lastTextNode,
+            lastTextOffset;
 
         if (!textNodes.length) {
             return null;
         }
 
-        firstTextNode = textNodes[0];
-        lastTextNode = textNodes[textNodes.length - 1];
+        if (range.startContainer.nodeType === Node.TEXT_NODE) {
+            firstTextNode = range.startContainer;
+            firstTextOffset = range.startOffset;
+        } else {
+            firstTextNode = textNodes[0];
+            firstTextOffset = 0;
+        }
 
-        firstRange.setStart(firstTextNode, 0);
-        lastRange.setStart(lastTextNode, lastTextNode.length);
+        if (range.endContainer.nodeType === Node.TEXT_NODE) {
+            lastTextNode = range.endContainer;
+            lastTextOffset = range.endOffset;
+        } else {
+            lastTextNode = textNodes[textNodes.length - 1];
+            lastTextOffset = lastTextNode.length;
+        }
 
-        fillerRange.setStart(textNodes[0], 0);
-        fillerRange.setEnd(lastTextNode, lastTextNode.length);
+        firstRange.setStart(firstTextNode, firstTextOffset);
+        lastRange.setStart(lastTextNode, lastTextOffset);
+
+        fillerRange.setStart(firstTextNode, firstTextOffset);
+        fillerRange.setEnd(lastTextNode, lastTextOffset);
 
         return {
             firstRange: firstRange,
@@ -173,20 +188,22 @@ gui.SelectionView = function SelectionView(cursor) {
      * it computes the bounding rects of the paragraph nodes between the two ends, instead of the
      * bounding rect of the *range*. This means that unlike gBCR, the bounding rect will not cover absolutely
      * positioned children such as annotation nodes.
-     * @param {!Range} range
+     * @param {!Range} fillerRange
      * @return {ClientRect|{top: number, left: number, bottom: number, right: number, width: number, height: number}}
      */
-    function getFillerRect(range) {
-        var containerNode = range.commonAncestorContainer,
-            firstNode = range.startContainer,
-            lastNode = range.endContainer,
+    function getFillerRect(fillerRange) {
+        var containerNode = fillerRange.commonAncestorContainer,
+            firstNode = fillerRange.startContainer,
+            lastNode = fillerRange.endContainer,
             currentSibling,
             grownRect = null,
-            currentRect;
+            currentRect,
+            range = doc.createRange();
 
         if (firstNode === containerNode || lastNode === containerNode) {
-            range.selectNode(containerNode);
+            range = fillerRange.cloneRange();
             grownRect = range.getBoundingClientRect();
+            range.detach();
             return grownRect;
         }
 
@@ -202,7 +219,7 @@ gui.SelectionView = function SelectionView(cursor) {
             // If the sibling for which we want the bounding rect is a paragraph,
             // then we desire to have it's full width at our access. Therefore,
             // directly use gBCR (works fine for just paragraphs).
-            if (odfUtils.isParagraph(currentSibling) {
+            if (odfUtils.isParagraph(currentSibling)) {
                 currentRect = currentSibling.getBoundingClientRect();
             } else {
                 range.selectNode(currentSibling);
@@ -217,6 +234,7 @@ gui.SelectionView = function SelectionView(cursor) {
             }
             currentSibling = currentSibling.nextSibling;
         }
+        range.detach();
         return grownRect;
     }
 
@@ -226,7 +244,7 @@ gui.SelectionView = function SelectionView(cursor) {
      * @return {undefined}
      */
     function repositionOverlays(selectedRange) {
-        var range = selectedRange,
+        var range = /**@type{!Range}*/(selectedRange.cloneRange()),
             extremes = getExtremeRanges(range),
             firstRange,
             lastRange,
@@ -249,6 +267,7 @@ gui.SelectionView = function SelectionView(cursor) {
             firstRect = translateRect(firstRange.getClientRects()[0]);
             lastRect = translateRect(lastRange.getClientRects()[0]);
             fillerRect = getFillerRect(fillerRange);
+
             if (!fillerRect) {
                 fillerRect = getBoundingRect(firstRect, lastRect);
             } else {
@@ -273,7 +292,12 @@ gui.SelectionView = function SelectionView(cursor) {
                 width: Math.max(0, parseFloat(overlayTop.style.left) + parseFloat(overlayTop.style.width) - parseFloat(overlayBottom.style.left)),
                 height: Math.max(0, lastRect.top - firstRect.bottom)
             });
+
+            firstRange.detach();
+            lastRange.detach();
+            fillerRange.detach();
         }
+        range.detach();
     }
 
     /**
