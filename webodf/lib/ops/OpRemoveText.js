@@ -247,8 +247,8 @@ ops.OpRemoveText = function OpRemoveText() {
 
         range = stepsToRange(odtDocument);
         paragraphElement = odtDocument.getParagraphElement(range.startContainer);
-        textNodes = odtDocument.getTextElements(range, true);
-        paragraphs = odtDocument.getParagraphElements(range);
+        textNodes = odfUtils.getTextElements(range, true);
+        paragraphs = odfUtils.getParagraphElements(range);
         range.detach();
 
         // Each character element is fully contained within the range, so will be completely removed
