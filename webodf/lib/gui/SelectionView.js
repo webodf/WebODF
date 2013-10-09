@@ -280,18 +280,24 @@ gui.SelectionView = function SelectionView(cursor) {
                 width: Math.max(0, fillerRect.width - (firstRect.left - fillerRect.left)),
                 height: firstRect.height
             });
-            setRect(overlayBottom, {
-                left: fillerRect.left,
-                top: lastRect.top,
-                width: Math.max(0, lastRect.right - fillerRect.left),
-                height: lastRect.height
-            });
-            setRect(overlayMiddle, {
-                left: fillerRect.left,
-                top: firstRect.top + firstRect.height,
-                width: Math.max(0, parseFloat(overlayTop.style.left) + parseFloat(overlayTop.style.width) - parseFloat(overlayBottom.style.left)),
-                height: Math.max(0, lastRect.top - firstRect.bottom)
-            });
+            // If the first and last rect are on the same line, they coincide. Therefore
+            // show only the first rect.
+            if (lastRect.top === firstRect.top || lastRect.bottom === firstRect.bottom) {
+                overlayMiddle.style.display = overlayBottom.style.display = 'none';
+            } else {
+                setRect(overlayBottom, {
+                    left: fillerRect.left,
+                    top: lastRect.top,
+                    width: Math.max(0, lastRect.right - fillerRect.left),
+                    height: lastRect.height
+                });
+                setRect(overlayMiddle, {
+                    left: fillerRect.left,
+                    top: firstRect.top + firstRect.height,
+                    width: Math.max(0, parseFloat(overlayTop.style.left) + parseFloat(overlayTop.style.width) - parseFloat(overlayBottom.style.left)),
+                    height: Math.max(0, lastRect.top - firstRect.bottom)
+                });
+            }
 
             firstRange.detach();
             lastRange.detach();
