@@ -301,6 +301,14 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     /**
+     * Rerender the selection overlays
+     * @return {undefined}
+     */
+    this.rerender = function () {
+        repositionOverlays(cursor.getSelectedRange());
+    };
+
+    /**
      * Show selection overlays
      * @return {undefined}
      */
@@ -316,6 +324,12 @@ gui.SelectionView = function SelectionView(cursor) {
         showOverlays(false);
     };
     /**
+     * Returns if the selection view is visible or hidden
+     */
+    this.visible = function() {
+        return isVisible;
+    };
+    /**
      * @param movedCursor {!gui.ShadowCursor|ops.OdtCursor}
      * @return {undefined}
      */
@@ -324,7 +338,6 @@ gui.SelectionView = function SelectionView(cursor) {
             repositionOverlays(cursor.getSelectedRange());
         }
     }
-
     /**
      * Clear all overlays from the DOM
      */

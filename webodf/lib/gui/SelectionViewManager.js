@@ -96,6 +96,18 @@ gui.SelectionViewManager = function SelectionViewManager() {
     }
     this.showSelectionView = showSelectionView;
 
+    /**
+     * Rerenders the selection views that are already visible
+     * @return {undefined}
+     */
+    this.rerenderSelectionViews = function () {
+        Object.keys(selectionViews).forEach(function (memberId) {
+            if(selectionViews[memberId].visible()) {
+                selectionViews[memberId].rerender();
+            }
+        });
+    };
+
     this.registerCursor = function (cursor, virtualSelectionsInitiallyVisible) {
         var memberId = cursor.getMemberId(),
             selectionView = new gui.SelectionView(cursor);

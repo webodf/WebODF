@@ -390,6 +390,13 @@ gui.SessionView = (function () {
         }
 
         /**
+         * @return {undefined}
+         */
+        function rerenderSelectionViews() {
+            selectionViewManager.rerenderSelectionViews();
+        }
+
+        /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
@@ -430,6 +437,10 @@ gui.SessionView = (function () {
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
             odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, rerenderSelectionViews);
+            odtDocument.subscribe(ops.OdtDocument.signalTableAdded, rerenderSelectionViews);
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, rerenderSelectionViews);
 
             // Add a css sheet for user info-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');
