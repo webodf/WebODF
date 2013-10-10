@@ -1,0 +1,75 @@
+@namespace cursor url(urn:webodf:names:cursor);
+#xmlcanvas * {
+    display: block;
+    margin: 1px;
+    padding: 1px;
+    border: 1px solid transparent;
+    background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
+}
+#xmlcanvas spreker *, #xmlcanvas alineaitem *, #xmlcanvas al *, #xmlcanvas considerans\.al * {
+    display: inline;
+}
+#xmlcanvas nadruk[type='ondlijn'] {
+    text-decoration: underline;
+}
+#xmlcanvas nadruk[type='vet'], #xmlcanvas nadruk[type='vetcur'] {
+    font-weight: bold;
+}
+#xmlcanvas nadruk[type='cur'], #xmlcanvas nadruk[type='vetcur'] {
+    font-style: italic;
+}
+#xmlcanvas li > *:first-child, #xmlcanvas entry {
+    display: table-cell;
+}
+#xmlcanvas entry {
+    border: 1px solid black;
+}
+#xmlcanvas li, #xmlcanvas row {
+    display: table-row;
+}
+#xmlcanvas lijst, #xmlcanvas table {
+    display: table;
+}
+#xmlcanvas *:hover {
+    border: 1px solid rgb(127, 127, 127);
+    border: 1px solid rgba(255, 138, 0, .2);
+    background-color: rgba(255, 255, 255, 0.025);
+    box-shadow: 0px 0px 10px #aaa;
+}
+#xmlcanvas *[cursor|active], #xmlcanvas *[cursor|active]:hover {
+    background-color: rgba(255, 138, 0, .2);;
+}
+#xmlcanvas *[cursor|caret], #xmlcanvas *[cursor|caret]:hover {
+    border: 1px solid green;
+}
+
+
+/*
+#xmlcanvas *:hover > * {
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+*/
+/* below set up the cursor */
+#xmlcanvas cursor|*, #xmlcanvas cursor|*:hover {
+    display: inline;
+    border: 0px;
+    padding: 0px;
+    margin: 0px;
+    width: 0px;
+    height: 1em;
+    /* making the position relative enables the avatar to use
+       the cursor as reference for its absolute position */
+    position: relative;
+    z-index: 1;
+}
+#xmlcanvas cursor|* > span, #xmlcanvas cursor|* > span:hover {
+    /* IMPORTANT: when changing these values ensure DEFAULT_CARET_TOP and DEFAULT_CARET_HEIGHT
+        in Caret.js remain in sync */
+    display: inline;
+    position: absolute;
+    top: 5%; /* push down the caret; 0px can do the job, 5% looks better, 10% is a bit over */
+    height: 1em;
+    border-left: 2px solid black;
+    outline: none;
+}
+
