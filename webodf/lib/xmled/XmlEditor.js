@@ -293,7 +293,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         crumbBar = new xmled.CrumbBar(crumbElement, root);
 
         canvasElement.onmouseup = function (evt) {
-            crumbBar.setDocumentRoot(canvas.getDocumentRoot());
             if (!canvas.getDocumentRoot().contains(evt.target)) {
                 return;
             }
@@ -347,6 +346,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
      */
     this.load = function (url) {
         canvas.load(url, function () {
+            crumbBar.setDocumentRoot(canvas.getDocumentRoot());
             // hack to select start of doc
             var e = canvas.getDocumentRoot().getElementsByTagNameNS("", "titel")[0],
                 sel = runtime.getWindow().getSelection(),
