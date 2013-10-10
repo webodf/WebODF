@@ -365,7 +365,8 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                 }
             }
             function waitForModel() {
-                if (validationModel.getState() === xmled.ValidationModel.LOADING) {
+                var state = validationModel.getState();
+                if (state === xmled.ValidationModel.State.LOADING) {
                     runtime.getWindow().setTimeout(waitForModel, 10);
                 } else {
                     setup();

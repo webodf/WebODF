@@ -238,6 +238,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl) {
                 state = xmled.ValidationModel.State.ERROR;
                 return;
             }
+            state = xmled.ValidationModel.State.READY;
             xsd = dom;
             runtime.log(err);
 //            console.log(dom);
