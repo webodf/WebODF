@@ -142,8 +142,22 @@ gui.SelectionView = function SelectionView(cursor) {
             lastTextOffset = lastTextNode.length;
         }
 
-        firstRange.setStart(firstTextNode, firstTextOffset);
-        lastRange.setStart(lastTextNode, lastTextOffset);
+        // Webkit/blink bug: collapsed ranges at the ends of textnodes
+        // have no clientrects. Therefore we must encapsulate the
+        // last character of that textNode for the firstRange or lastRange and use
+        // it's right edge when computing the rect.
+        if (firstTextOffset > 0 && firstTextOffset === firstTextNode.length) {
+            firstRange.setStart(firstTextNode, firstTextOffset - 1);
+            firstRange.setEnd(firstTextNode, firstTextOffset);
+        } else {
+            firstRange.setStart(firstTextNode, firstTextOffset);
+        }
+        if (lastTextOffset > 0 && lastTextOffset === lastTextNode.length) {
+            lastRange.setStart(lastTextNode, lastTextOffset - 1);
+            lastRange.setEnd(lastTextNode, lastTextOffset);
+        } else {
+            lastRange.setStart(lastTextNode, lastTextOffset);
+        }
 
         fillerRange.setStart(firstTextNode, firstTextOffset);
         fillerRange.setEnd(lastTextNode, lastTextOffset);
@@ -239,6 +253,24 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     /**
+     * Gets the clientRect of a range within a textNode, and
+     * collapses the rect to the left or right edge, and returns it
+     * @param {!Range} range
+     * @param {boolean} useRightEdge
+     */
+    function getCollapsedRectOfTextRange(range, useRightEdge) {
+        var clientRect = range.getClientRects()[0],
+            collapsedRect = {};
+
+        collapsedRect.width = 0;
+        collapsedRect.top = clientRect.top;
+        collapsedRect.bottom = clientRect.bottom;
+        collapsedRect.height = clientRect.height;
+        collapsedRect.left = collapsedRect.right = useRightEdge ? clientRect.right : clientRect.left;
+        return collapsedRect;
+    }
+
+    /**
      * Repositions overlays over the given selected range of the cursor
      * @param {!Range} selectedRange
      * @return {undefined}
@@ -264,8 +296,8 @@ gui.SelectionView = function SelectionView(cursor) {
             lastRange = extremes.lastRange;
             fillerRange = extremes.fillerRange;
 
-            firstRect = translateRect(firstRange.getClientRects()[0]);
-            lastRect = translateRect(lastRange.getClientRects()[0]);
+            firstRect= translateRect(getCollapsedRectOfTextRange(firstRange, true));
+            lastRect = translateRect(getCollapsedRectOfTextRange(lastRange, true));
             fillerRect = getFillerRect(fillerRange);
 
             if (!fillerRect) {
