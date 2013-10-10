@@ -33,11 +33,13 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, xmled */
+/*global runtime, core, xmled, xmldom, XSLTProcessor, XMLHttpRequest, NodeFilter */
 
+runtime.loadClass("core.Base64");
 runtime.loadClass("xmled.XmlCanvas");
 runtime.loadClass("xmled.CrumbBar");
 runtime.loadClass("xmled.AttributeEditor");
+runtime.loadClass("xmldom.LSSerializer");
 
 /**
  * @constructor
@@ -57,27 +59,189 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         validationModel = new xmled.ValidationModel(grammarurl),
         attributeEditor = new xmled.AttributeEditor(attributeEditorElement),
         canvas,
-        crumbBar;
+        crumbBar,
+        viewButtons,
+        xmlSerializer = new xmldom.LSSerializer(),
+        base64 = new core.Base64(),
+        editdiv = doc.createElementNS(htmlns, "div"),
+        xmlframe = doc.createElementNS(htmlns, "iframe"),
+        pdfframe = doc.createElementNS(htmlns, "iframe"),
+        htmlframe = doc.createElementNS(htmlns, "iframe"),
+        htmlXslt,
+        xslfoXslt,
+        pdfcount = 0;
     function fixSize() {
-        var height = element.parentNode.clientHeight - crumbElement.clientHeight
-                     - 10;
+        var height = element.parentNode.clientHeight
+                     - viewButtons.clientHeight - 10,
+            width = element.parentNode.clientWidth - 20;
+        xmlframe.height = height;
+        xmlframe.width = "98%";
+        pdfframe.height = height;
+        pdfframe.width = "98%";
+        htmlframe.height = height;
+        htmlframe.width = "98%";
+        height -= crumbElement.clientHeight;
         height += "px";
         canvasElement.style.height = height;
         contextInfoElement.style.height = height;
         attributeEditorElement.style.height = height;
     }
+    function loadXSLTs() {
+        htmlXslt = new XSLTProcessor();
+        runtime.loadXML("opxml2html.xsl", function (err, dom) {
+            if (err) {
+                runtime.log(err);
+            } else {
+                runtime.log("loading xslt " + dom.documentElement.localName);
+                htmlXslt.importStylesheet(dom);
+            }
+        });
+        xslfoXslt = new XSLTProcessor();
+        runtime.loadXML("opxml2xslfo.xsl", function (err, dom) {
+            if (err) {
+                runtime.log(err);
+            } else {
+                runtime.log("loading xslt " + dom.documentElement.localName);
+                xslfoXslt.importStylesheet(dom);
+            }
+        });
+    }
+    function show(element) {
+        editdiv.style.display = (element === editdiv) ? "block" : "none";
+        xmlframe.style.display = (element === xmlframe) ? "block" : "none";
+        htmlframe.style.display = (element === htmlframe) ? "block" : "none";
+        pdfframe.style.display = (element === pdfframe) ? "block" : "none";
+    }
+    function cleanNode() {
+        var xml = xmlSerializer.writeToString(canvas.getDocumentRoot(), {});
+        return runtime.parseXML(xml).documentElement;
+    }
+    function toxml() {
+        show(xmlframe);
+        var node = cleanNode(),
+            c;
+        c = xmlframe.contentDocument.importNode(node, true);
+console.log(c.namespaceURI);
+        xmlframe.contentDocument.replaceChild(c, xmlframe.contentDocument.documentElement);
+    }
+    function toedit() {
+        show(editdiv);
+    }
+    function tohtml() {
+        var html, frame;
+        frame = doc.createElementNS(htmlns, "iframe");
+        htmlframe.parentNode.replaceChild(frame, htmlframe);
+        htmlframe = frame;
+        fixSize();
+        show(htmlframe);
+        try {
+            html = htmlXslt.transformToDocument(cleanNode());
+        } catch (e) {
+            runtime.log(e.message);
+            return;
+        }
+        html = htmlframe.contentDocument.importNode(html.documentElement, true);
+        htmlframe.contentDocument.replaceChild(html, htmlframe.contentDocument.documentElement);
+        runtime.log("transforming to html");
+        console.log(html);
+    }
+    function topdf() {
+        show(pdfframe);
+        var xslfo, xhr = new XMLHttpRequest();
+        try {
+            xslfo = xslfoXslt.transformToDocument(cleanNode());
+        } catch (e) {
+            runtime.log(e.message);
+            return;
+        }
+        
+        runtime.log("transforming to pdf");
+        function handleResult() {
+            var data;
+            if (xhr.readyState === 4) {
+                if (xhr.status === 0 && !xhr.responseText) {
+                    runtime.log(xhr.responseText || xhr.statusText);
+                } else if (xhr.status === 200 || xhr.status === 0) {
+                    runtime.log(xhr.responseText || xhr.statusText);
+                } else {
+                    runtime.log(xhr.responseText || xhr.statusText);
+                }
+                pdfframe.setAttribute("src", "Viewer.js/?" + pdfcount + "#../out.pdf?" + pdfcount + ".pdf");
+                pdfcount += 1;
+            }
+        }
+        xhr.open('POST', 'in.fo', true);
+        xhr.onreadystatechange = handleResult;
+        xhr.setRequestHeader("Content-Type", "text/xml");
+        try {
+            xhr.send(xslfo);
+        } catch (ex) {
+            runtime.log(ex);
+        }
+    }
+    function createViewButton(text, onclick) {
+        var button = doc.createElementNS(htmlns, "span");
+        button.appendChild(doc.createTextNode(text));
+        button.style.margin = "3px";
+        button.style.cursor = "pointer";
+        button.style.fontFamily = "sans";
+        button.onclick = onclick;
+        viewButtons.appendChild(button);
+        return button;
+    }
+    function createViewButtons() {
+        viewButtons = doc.createElementNS(htmlns, "div");
+        var editButton = createViewButton("edit", toedit),
+            xmlButton = createViewButton("xml", toxml),
+            htmlButton = createViewButton("html", tohtml),
+            pdfButton = createViewButton("pdf", topdf);
+    }
+    /**
+     * @constructor
+     * @implements {xmldom.LSSerializerFilter}
+     */
+    function LSFilter() {
+        /**
+         * @param {!Node} node
+         * @return {!number}
+         */
+        this.acceptNode = function (node) {
+            var result;
+            if (node.namespaceURI && node.namespaceURI.match(/^urn:webodf:/)) {
+                // skip all webodf nodes incl. child nodes
+                result = NodeFilter.FILTER_REJECT;
+            } else {
+                result = NodeFilter.FILTER_ACCEPT;
+            }
+            return result;
+        };
+    }
     /**
      * @return {undefined}
      */
     function init() {
-        element.appendChild(crumbElement);
-        element.appendChild(contextInfoElement);
-        element.appendChild(canvasElement);
-        element.appendChild(attributeEditorElement);
-        element.style.verticalAlign = 'top';
+        xmlSerializer.filter = new LSFilter();
+
+        loadXSLTs();
+
+        createViewButtons();
+        element.appendChild(viewButtons);
+        element.appendChild(editdiv);
+        element.appendChild(xmlframe);
+        element.appendChild(pdfframe);
+        element.appendChild(htmlframe);
+        editdiv.appendChild(crumbElement);
+        editdiv.appendChild(contextInfoElement);
+        editdiv.appendChild(canvasElement);
+        editdiv.appendChild(attributeEditorElement);
+//        xmlframe.setAttribute("src", grammarurl);
+//
+        toedit();
+
+        editdiv.style.verticalAlign = 'top';
         //element.style.width = '66em';
-        element.style.width = "100%";
-        element.style.whiteSpace = 'nowrap';
+        editdiv.style.width = "100%";
+        editdiv.style.whiteSpace = 'nowrap';
         crumbElement.style.height = "auto";
         crumbElement.style.paddingBottom = "0.1em";
         crumbElement.style.backgroundColor = '#000000';
@@ -101,7 +265,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         contextInfoElement.style.fontSize = 'smaller';
         attributeEditorElement.style.fontSize = 'smaller';
         attributeEditorElement.style.display = "inline-block";
-//        attributeEditorElement.style.width = "12em";
 		attributeEditorElement.style.marginTop = "0.3em";
         attributeEditorElement.style.verticalAlign = 'top';
         attributeEditorElement.style.padding = '0.2em';

@@ -42,7 +42,7 @@ runtime.loadClass("core.Cursor");
  * @param {!Document} doc document to put the editor in
  * @return {?}
  **/
-xmled.XmlCaret = function XmlEditor(doc) {
+xmled.XmlCaret = function XmlCaret(doc) {
     "use strict";
     var cursor = new core.Cursor(doc, "me");
     this.handleClick = function () {

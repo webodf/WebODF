@@ -66,6 +66,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root) {
         crumb.setAttribute("tabindex", "1");
         crumb.appendChild(doc.createTextNode(element.localName));
         crumb.style.color = "#FFFFFF";
+        crumb.style.cursor = "pointer";
 //        crumb.style.color = "#000000";
 /*
         crumb.onfocus = function () {
