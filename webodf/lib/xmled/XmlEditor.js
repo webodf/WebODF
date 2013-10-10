@@ -211,6 +211,17 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         };
     }
     /**
+     * @param {!Event} event
+     * @return {undefined}
+     */
+    function cancelEvent(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            event.returnValue = false;
+        }
+    }
+    /**
      * @return {undefined}
      */
     function init() {
@@ -292,10 +303,17 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
             setActiveElement(evt.target);
         };
         canvasElement.onkeypress = function (evt) {
-            var str = String.fromCharCode(evt.keyCode || evt.charCode);
-            canvas.getCaret().leftText().appendData(str);
+            var str;
+            if (evt.charCode) {
+                str = String.fromCharCode(evt.charCode);
+                canvas.getCaret().leftText().appendData(str);
+                cancelEvent(evt);
+            }
         };
         canvasElement.onkeydown = function (evt) {
+            if (evt.charCode) {
+                return;
+            }
             var key = evt.keyCode,
                 caret = canvas.getCaret(),
                 t;
