@@ -331,9 +331,14 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                     caret.right();
                 } else if (key === 8) { // backspace
                     t = caret.leftText();
-                    t.deleteData(t.length - 1, 1);
+                    if (t.length) {
+                        t.deleteData(t.length - 1, 1);
+                    }
                 } else if (key === 46) { // delete
-                    caret.rightText().deleteData(0, 1);
+                    t = caret.rightText();
+                    if (t.length) {
+                        t.deleteData(0, 1);
+                    }
                 }
             }
         };

@@ -109,7 +109,7 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
     }
     /**
      * @param {!string} url
-     * @param {!function} callback
+     * @param {!function():undefined} callback
      * @return {undefined}
      */
     this.load = function (url, callback) {

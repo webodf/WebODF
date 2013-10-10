@@ -229,7 +229,7 @@ xmled.XmlCaret = function XmlCaret(root) {
         var node = cursor.getNode(), p, t;
         node.parentNode.normalize();
         p = node.previousSibling;
-        if (p.nodeType === 3) {
+        if (p && p.nodeType === 3) {
             t = p.splitText(p.length - 1);
             node.parentNode.insertBefore(t, node.nextSibling);
         }
@@ -239,7 +239,7 @@ xmled.XmlCaret = function XmlCaret(root) {
             p = node.parentNode;
         p.normalize();
         n = node.nextSibling;
-        if (n.nodeType === 3) {
+        if (n && n.nodeType === 3) {
             t = n.splitText(1);
             p.insertBefore(node, t);
         }
@@ -252,7 +252,7 @@ xmled.XmlCaret = function XmlCaret(root) {
         t = node.previousSibling;
         if (!t || t.nodeType !== 3) {
             t = doc.createTextNode("");
-            p.insertBefore(node, t);
+            p.insertBefore(t, node);
         }
         return t;
     };
@@ -264,7 +264,7 @@ xmled.XmlCaret = function XmlCaret(root) {
         t = node.nextSibling;
         if (!t || t.nodeType !== 3) {
             t = doc.createTextNode("");
-            p.insertBefore(node.nextSibling, t);
+            p.insertBefore(t, node.nextSibling);
         }
         return t;
     };
