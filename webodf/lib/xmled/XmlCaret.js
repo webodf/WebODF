@@ -212,8 +212,9 @@ xmled.XmlCaret = function XmlCaret(root) {
             makeActive(history[i - 1]);
             return;
         }
-        if (activeElement.firstElementChild) {
-            makeActive(activeElement.firstElementChild);
+        i = activeElement.firstElementChild;
+        if (i && i.namespaceURI !== cursorns) {
+            makeActive(i);
         }
     };
     this.getActiveElement = function () {
