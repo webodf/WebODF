@@ -291,9 +291,14 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
             }
             setActiveElement(evt.target);
         };
-        canvasElement.onkeyup = function (evt) {
+        canvasElement.onkeypress = function (evt) {
+            var str = String.fromCharCode(evt.keyCode || evt.charCode);
+            canvas.getCaret().leftText().appendData(str);
+        };
+        canvasElement.onkeydown = function (evt) {
             var key = evt.keyCode,
-                caret = canvas.getCaret();
+                caret = canvas.getCaret(),
+                t;
             if (evt.ctrlKey) {
                 if (key === 40) { // down
                     caret.nextSibling();
@@ -304,8 +309,19 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                 } else if (key === 39) { // right
                     caret.down();
                 }
+                setActiveElement(caret.getActiveElement());
+            } else {
+                if (key === 37) { // left
+                    caret.left();
+                } else if (key === 39) { // right
+                    caret.right();
+                } else if (key === 8) { // backspace
+                    t = caret.leftText();
+                    t.deleteData(t.length - 1, 1);
+                } else if (key === 46) { // delete
+                    caret.rightText().deleteData(0, 1);
+                }
             }
-            setActiveElement(caret.getActiveElement());
         };
         runtime.getWindow().onresize = fixSize;
         fixSize();

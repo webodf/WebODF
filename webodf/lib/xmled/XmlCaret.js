@@ -219,6 +219,52 @@ xmled.XmlCaret = function XmlCaret(root) {
     this.getActiveElement = function () {
         return activeElement;
     };
+    this.getCursor = function () {
+        return cursor;
+    };
+    this.left = function () {
+        var node = cursor.getNode(), p, t;
+        node.parentNode.normalize();
+        p = node.previousSibling;
+        if (p.nodeType === 3) {
+            t = p.splitText(p.length - 1);
+            node.parentNode.insertBefore(t, node.nextSibling);
+        }
+    };
+    this.right = function () {
+        var node = cursor.getNode(), n, t,
+            p = node.parentNode;
+        p.normalize();
+        n = node.nextSibling;
+        if (n.nodeType === 3) {
+            t = n.splitText(1);
+            p.insertBefore(node, t);
+        }
+    };
+    this.leftText = function () {
+        var node = cursor.getNode(),
+            p = node.parentNode,
+            t;
+        p.normalize();
+        t = node.previousSibling;
+        if (!t || t.nodeType !== 3) {
+            t = doc.createTextNode("");
+            p.insertBefore(node, t);
+        }
+        return t;
+    };
+    this.rightText = function () {
+        var node = cursor.getNode(),
+            p = node.parentNode,
+            t;
+        p.normalize();
+        t = node.nextSibling;
+        if (!t || t.nodeType !== 3) {
+            t = doc.createTextNode("");
+            p.insertBefore(node.nextSibling, t);
+        }
+        return t;
+    };
     function init() {
         if (!doc) {
             return;
