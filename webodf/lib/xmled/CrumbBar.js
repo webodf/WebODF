@@ -39,9 +39,10 @@
  * @constructor
  * @param {!Element} htmlelement in which to draw the crumbs 
  * @param {?Element} root root element of document
+ * @param {!xmled.ValidationModel} validationModel
  * @return {?}
  **/
-xmled.CrumbBar = function CrumbBar(htmlelement, root) {
+xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
     "use strict";
     var doc = htmlelement.ownerDocument,
         htmlns = htmlelement.namespaceURI,
@@ -59,28 +60,68 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root) {
         span.style.fontFamily = "sans";
         return span;
     }
-        
+
+    function createMenuItem(menu, text) {
+        var item = doc.createElementNS(htmlns, "div");
+        item.appendChild(doc.createTextNode(text));
+        item.style.position = "relative";
+        menu.appendChild(item);
+//        item.setAttribute("tabindex", "1");
+    }
+
+    function createMenu(element) {
+        var menu = doc.createElementNS(htmlns, "div"),
+            allowed = validationModel.getAllowedElements(element),
+            i;
+        for (i = 0; i < allowed.length; i += 1) {
+            createMenuItem(menu, "Insert " + allowed[i]);
+        }
+        menu.style.display = "none";
+        menu.style.position = "absolute";
+        menu.style.background = "black";
+        menu.style.color = "white";
+        menu.style.whiteSpace = "nowrap";
+        menu.style.padding = "5px";
+        menu.style.minWidth = "100%";
+        menu.style.top = "100%";
+//        menu.style.height = "100%";
+//        menu.setAttribute("tabindex", "1");
+        return menu;
+    }
+
+    function hideMenus(e) {
+        e = e.firstElementChild;
+        while (e) {
+            if (e.style.display === "none") {
+                e.style.display = "none";
+            }
+            hideMenus(e);
+            e = e.nextElementSibling;
+        }
+    }
+ 
     function createCrumb(element) {
         var span = createArrow(),
-            crumb = doc.createElementNS(htmlns, "span");
+            crumb = doc.createElementNS(htmlns, "span"),
+            menu = createMenu(element);
         span.appendChild(crumb);
-        crumb.setAttribute("tabindex", "1");
+        //crumb.setAttribute("tabindex", "1");
         crumb.appendChild(doc.createTextNode(element.localName));
         crumb.style.color = "#FFFFFF";
         crumb.style.cursor = "pointer";
+        crumb.style.position = "relative";
         crumb.onmouseover = function () {
             element.setAttributeNS(cursorns, "hover", "1");
         };
         crumb.onmouseout = function () {
             element.removeAttributeNS(cursorns, "hover");
         };
-//        crumb.style.color = "#000000";
-/*
-        crumb.onfocus = function () {
+        crumb.appendChild(menu);
+        crumb.onclick = function (evt) {
+            var d = menu.style.display;
+            hideMenus(crumb.parentNode.parentNode);
+            menu.style.display = d === "none" ? "block" : "none";
         };
-        crumb.onblur = function () {
-        };
-*/
         return span;
     }
     this.setDocumentRoot = function (newRoot) {

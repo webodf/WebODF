@@ -290,7 +290,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         attributeEditorElement.style.fontSize = 'smaller';
         canvas = new xmled.XmlCanvas(canvasElement, validationModel, styleurl);
         var root = canvas.getDocumentRoot();
-        crumbBar = new xmled.CrumbBar(crumbElement, root);
+        crumbBar = new xmled.CrumbBar(crumbElement, root, validationModel);
 
         canvasElement.onmouseup = function (evt) {
             if (!canvas.getDocumentRoot().contains(evt.target)) {

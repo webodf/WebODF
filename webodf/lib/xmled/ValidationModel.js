@@ -199,6 +199,38 @@ xmled.ValidationModel = function ValidationModel(grammarurl) {
         }
         return a;
     };
+    function getAllowedElements(e, allowed) {
+        e = e.firstElementChild;
+        while (e) {
+            if (e.localName === "element") {
+                if (e.hasAttribute("name")) {
+                    allowed[e.getAttribute("name")] = 1;
+                } else if (e.hasAttribute("ref")) {
+                    allowed[e.getAttribute("ref")] = 1;
+                }
+            } else {
+                getAllowedElements(e, allowed);
+            }
+            e = e.nextElementSibling;
+        }
+    }
+    this.getAllowedElements = function (element) {
+        var e = findElement(element.localName),
+            allowed = {},
+            complexType;
+        if (!e) {
+            return Object.keys(allowed);
+        }
+        complexType = e.firstChild;
+        while (complexType && complexType.localName !== "complexType") {
+            complexType = complexType.nextSibling;
+        }
+        if (!complexType) {
+            return Object.keys(allowed);
+        }
+        getAllowedElements(complexType, allowed);
+        return Object.keys(allowed);
+    };
     function init() {
         runtime.loadXML(grammarurl, function (err, dom) {
             if (err) {
