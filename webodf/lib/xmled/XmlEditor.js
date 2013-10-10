@@ -351,17 +351,27 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
      */
     this.load = function (url) {
         canvas.load(url, function () {
-            crumbBar.setDocumentRoot(canvas.getDocumentRoot());
-            // hack to select start of doc
-            var e = canvas.getDocumentRoot().getElementsByTagNameNS("", "titel")[0],
-                sel = runtime.getWindow().getSelection(),
-                r = doc.createRange();
-            r.setStart(e, 0);
-            r.setEnd(e, 0);
-            sel.addRange(r);
-            if (e) {
-                setActiveElement(e);
+            function setup() {
+                crumbBar.setDocumentRoot(canvas.getDocumentRoot());
+                // hack to select start of doc
+                var e = canvas.getDocumentRoot().getElementsByTagNameNS("", "titel")[0],
+                    sel = runtime.getWindow().getSelection(),
+                    r = doc.createRange();
+                r.setStart(e, 0);
+                r.setEnd(e, 0);
+                sel.addRange(r);
+                if (e) {
+                    setActiveElement(e);
+                }
             }
+            function waitForModel() {
+                if (validationModel.getState() === xmled.ValidationModel.LOADING) {
+                    runtime.getWindow().setTimeout(waitForModel, 10);
+                } else {
+                    setup();
+                }
+            }
+            runtime.getWindow().setTimeout(waitForModel, 10);
         });
     };
     /**
