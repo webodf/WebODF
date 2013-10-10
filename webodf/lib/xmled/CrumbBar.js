@@ -44,7 +44,8 @@
 xmled.CrumbBar = function CrumbBar(htmlelement, root) {
     "use strict";
     var doc = htmlelement.ownerDocument,
-        htmlns = htmlelement.namespaceURI;
+        htmlns = htmlelement.namespaceURI,
+        cursorns = "urn:webodf:names:cursor";
     function clean() {
         while (htmlelement.firstChild) {
             htmlelement.removeChild(htmlelement.firstChild);
@@ -67,6 +68,12 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root) {
         crumb.appendChild(doc.createTextNode(element.localName));
         crumb.style.color = "#FFFFFF";
         crumb.style.cursor = "pointer";
+        crumb.onmouseover = function () {
+            element.setAttributeNS(cursorns, "hover", "1");
+        };
+        crumb.onmouseout = function () {
+            element.removeAttributeNS(cursorns, "hover");
+        };
 //        crumb.style.color = "#000000";
 /*
         crumb.onfocus = function () {

@@ -40,15 +40,13 @@
     background-color: rgba(255, 138, 0, .2);;
 }
 #xmlcanvas *[cursor|caret], #xmlcanvas *[cursor|caret]:hover {
-    border: 1px solid green;
+    border: 1px solid lightgreen;
+}
+#xmlcanvas *[cursor|hover], #xmlcanvas *[cursor|hover]:hover {
+    border: 1px dashed black;
+    box-shadow: 0px 0px 10px #aaa;
 }
 
-
-/*
-#xmlcanvas *:hover > * {
-    border: 1px solid rgba(0, 0, 0, .2);
-}
-*/
 /* below set up the cursor */
 #xmlcanvas cursor|*, #xmlcanvas cursor|*:hover {
     display: inline;

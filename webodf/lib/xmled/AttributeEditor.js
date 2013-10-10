@@ -43,7 +43,8 @@
 xmled.AttributeEditor = function AttributeEditor(element) {
     "use strict";
     var doc = element.ownerDocument,
-        htmlns = element.namespaceURI;
+        htmlns = element.namespaceURI,
+        cursorns = "urn:webodf:names:cursor";
     /**
      * @param {!function(!Object=)} callback, passing an error object in case of
      *                              error
@@ -102,6 +103,14 @@ xmled.AttributeEditor = function AttributeEditor(element) {
         field.value = att.value;
         return span;
     }
+    function addHoverBehaviour(e, element) {
+        e.onmouseover = function () {
+            element.setAttributeNS(cursorns, "hover", "1");
+        };
+        e.onmouseout = function () {
+            element.removeAttributeNS(cursorns, "hover");
+        };
+    }
     /**
      * @param {!Array} attributesDefinitions
      * @param {!Element} target
@@ -115,6 +124,8 @@ xmled.AttributeEditor = function AttributeEditor(element) {
             element.appendChild(e);
             a = attributesDefinitions[i];
             table = doc.createElementNS(htmlns, "table");
+            addHoverBehaviour(e, t);
+            addHoverBehaviour(table, t);
             element.appendChild(table);
             for (j = 0; j < a.atts.length; j += 1) {
                 att = a.atts[j];
