@@ -145,8 +145,10 @@ xmled.XmlCaret = function XmlCaret(root) {
      * @param {!Element} element
      */
     this.handleClick = function (element) {
-        var range = runtime.getWindow().getSelection().getRangeAt(0);
-        if (range) {
+        var sel = runtime.getWindow().getSelection(),
+            range;
+        if (sel.rangeCount) {
+            range = runtime.getWindow().getSelection().getRangeAt(0);
             cursor.setSelectedRange(range);
         }
         makeActive(element);

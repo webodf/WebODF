@@ -221,6 +221,20 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
             event.returnValue = false;
         }
     }
+    function setActiveElement(element) {
+        crumbBar.setElement(element);
+        var info = validationModel.getElementInfo(element),
+            defs = validationModel.getAttributeDefinitions(element),
+            y;
+        contextInfoElement.innerHTML = info;
+        attributeEditor.setAttributeDefinitions(defs, element);
+        canvas.getCaret().handleClick(element);
+        y = element.offsetTop - canvasElement.scrollTop - canvasElement.offsetTop;
+        if (y < 0 || y + element.clientHeight > canvasElement.clientHeight) {
+            element.scrollIntoView(true);
+        }
+    }
+
     /**
      * @return {undefined}
      */
@@ -239,12 +253,9 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         editdiv.appendChild(contextInfoElement);
         editdiv.appendChild(canvasElement);
         editdiv.appendChild(attributeEditorElement);
-//        xmlframe.setAttribute("src", grammarurl);
-//
         toedit();
 
         editdiv.style.verticalAlign = 'top';
-        //element.style.width = '66em';
         editdiv.style.width = "100%";
         editdiv.style.whiteSpace = 'nowrap';
         crumbElement.style.height = "auto";
@@ -280,20 +291,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         canvas = new xmled.XmlCanvas(canvasElement, validationModel, styleurl);
         var root = canvas.getDocumentRoot();
         crumbBar = new xmled.CrumbBar(crumbElement, root);
-
-        function setActiveElement(element) {
-            crumbBar.setElement(element);
-            var info = validationModel.getElementInfo(element),
-                defs = validationModel.getAttributeDefinitions(element),
-                y;
-            contextInfoElement.innerHTML = info;
-            attributeEditor.setAttributeDefinitions(defs, element);
-            canvas.getCaret().handleClick(element);
-            y = element.offsetTop - canvasElement.scrollTop - canvasElement.offsetTop;
-            if (y < 0 || y + element.clientHeight > canvasElement.clientHeight) {
-                element.scrollIntoView(true);
-            }
-        }
 
         canvasElement.onmouseup = function (evt) {
             crumbBar.setDocumentRoot(canvas.getDocumentRoot());
@@ -349,7 +346,18 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
      * @return {undefined}
      */
     this.load = function (url) {
-        canvas.load(url);
+        canvas.load(url, function () {
+            // hack to select start of doc
+            var e = canvas.getDocumentRoot().getElementsByTagNameNS("", "titel")[0],
+                sel = runtime.getWindow().getSelection(),
+                r = doc.createRange();
+            r.setStart(e, 0);
+            r.setEnd(e, 0);
+            sel.addRange(r);
+            if (e) {
+                setActiveElement(e);
+            }
+        });
     };
     /**
      * @param {function(?string):undefined} callback

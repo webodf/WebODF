@@ -109,9 +109,10 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
     }
     /**
      * @param {!string} url
+     * @param {!function} callback
      * @return {undefined}
      */
-    this.load = function (url) {
+    this.load = function (url, callback) {
         self.destroy(function () {
             init();
             runtime.loadXML(url, function (err, dom) {
@@ -125,6 +126,7 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
                 //enrich(e);
                 element.appendChild(root);
                 caret = new xmled.XmlCaret(root);
+                callback();
             });
         });
     };
