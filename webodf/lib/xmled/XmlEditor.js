@@ -35,7 +35,6 @@
 
 /*global runtime, core, xmled, xmldom, XSLTProcessor, XMLHttpRequest, NodeFilter */
 
-runtime.loadClass("core.Base64");
 runtime.loadClass("xmled.XmlCanvas");
 runtime.loadClass("xmled.CrumbBar");
 runtime.loadClass("xmled.AttributeEditor");
@@ -62,7 +61,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         crumbBar,
         viewButtons,
         xmlSerializer = new xmldom.LSSerializer(),
-        base64 = new core.Base64(),
         editdiv = doc.createElementNS(htmlns, "div"),
         xmlframe = doc.createElementNS(htmlns, "iframe"),
         pdfframe = doc.createElementNS(htmlns, "iframe"),
@@ -72,8 +70,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         pdfcount = 0;
     function fixSize() {
         var height = element.parentNode.clientHeight
-                     - viewButtons.clientHeight - 10,
-            width = element.parentNode.clientWidth - 20;
+                     - viewButtons.clientHeight - 10;
         xmlframe.height = height;
         xmlframe.width = "98%";
         pdfframe.height = height;
@@ -121,7 +118,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         var node = cleanNode(),
             c;
         c = xmlframe.contentDocument.importNode(node, true);
-console.log(c.namespaceURI);
         xmlframe.contentDocument.replaceChild(c, xmlframe.contentDocument.documentElement);
     }
     function toedit() {
@@ -143,7 +139,6 @@ console.log(c.namespaceURI);
         html = htmlframe.contentDocument.importNode(html.documentElement, true);
         htmlframe.contentDocument.replaceChild(html, htmlframe.contentDocument.documentElement);
         runtime.log("transforming to html");
-        console.log(html);
     }
     function topdf() {
         show(pdfframe);
@@ -157,7 +152,6 @@ console.log(c.namespaceURI);
         
         runtime.log("transforming to pdf");
         function handleResult() {
-            var data;
             if (xhr.readyState === 4) {
                 if (xhr.status === 0 && !xhr.responseText) {
                     runtime.log(xhr.responseText || xhr.statusText);
@@ -191,10 +185,10 @@ console.log(c.namespaceURI);
     }
     function createViewButtons() {
         viewButtons = doc.createElementNS(htmlns, "div");
-        var editButton = createViewButton("edit", toedit),
-            xmlButton = createViewButton("xml", toxml),
-            htmlButton = createViewButton("html", tohtml),
-            pdfButton = createViewButton("pdf", topdf);
+        createViewButton("edit", toedit);
+        createViewButton("xml", toxml);
+        createViewButton("html", tohtml);
+        createViewButton("pdf", topdf);
     }
     /**
      * @constructor
@@ -276,20 +270,42 @@ console.log(c.namespaceURI);
         var root = canvas.getDocumentRoot();
         crumbBar = new xmled.CrumbBar(crumbElement, root);
 
+        function setActiveElement(element) {
+            crumbBar.setElement(element);
+            var info = validationModel.getElementInfo(element),
+                defs = validationModel.getAttributeDefinitions(element),
+                y;
+            contextInfoElement.innerHTML = info;
+            attributeEditor.setAttributeDefinitions(defs, element);
+            canvas.getCaret().handleClick(element);
+            y = element.offsetTop - canvasElement.scrollTop - canvasElement.offsetTop;
+            if (y < 0 || y + element.clientHeight > canvasElement.clientHeight) {
+                element.scrollIntoView(true);
+            }
+        }
+
         canvasElement.onmouseup = function (evt) {
             crumbBar.setDocumentRoot(canvas.getDocumentRoot());
             if (!canvas.getDocumentRoot().contains(evt.target)) {
                 return;
             }
-            crumbBar.setElement(evt.target);
-            var info = validationModel.getElementInfo(evt.target),
-                defs = validationModel.getAttributeDefinitions(evt.target);
-            contextInfoElement.innerHTML = info;
-            attributeEditor.setAttributeDefinitions(defs, evt.target);
-            canvas.getCaret().handleClick();
+            setActiveElement(evt.target);
         };
-        canvasElement.onkeyup = function () {
-            runtime.log("onkeyup");
+        canvasElement.onkeyup = function (evt) {
+            var key = evt.keyCode,
+                caret = canvas.getCaret();
+            if (evt.ctrlKey) {
+                if (key === 40) { // down
+                    caret.nextSibling();
+                } else if (key === 38) { // up
+                    caret.previousSibling();
+                } else if (key === 37) { // left
+                    caret.up();
+                } else if (key === 39) { // right
+                    caret.down();
+                }
+            }
+            setActiveElement(caret.getActiveElement());
         };
         runtime.getWindow().onresize = fixSize;
         fixSize();

@@ -106,7 +106,6 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
         styleElement.setAttribute("href", styleurl);
         head.appendChild(styleElement);
 
-        caret = new xmled.XmlCaret(doc);
     }
     /**
      * @param {!string} url
@@ -125,6 +124,7 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
                 root = /**@type{!Element}*/(doc.importNode(dom.documentElement, true));
                 //enrich(e);
                 element.appendChild(root);
+                caret = new xmled.XmlCaret(root);
             });
         });
     };

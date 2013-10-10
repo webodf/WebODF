@@ -33,22 +33,202 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, xmled */
+/*global runtime, core, xmled, NodeFilter */
 
 runtime.loadClass("core.Cursor");
 
 /**
  * @constructor
- * @param {!Document} doc document to put the editor in
+ * @param {!Element} root
  * @return {?}
  **/
-xmled.XmlCaret = function XmlCaret(doc) {
+xmled.XmlCaret = function XmlCaret(root) {
     "use strict";
-    var cursor = new core.Cursor(doc, "me");
-    this.handleClick = function () {
+    function acceptAll(node) {
+        return node ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+    var doc = root.ownerDocument,
+        htmlns = doc.documentElement.namespaceURI,
+        cursor,
+        //leafNode,
+        activeElement,
+        cursorns = "urn:webodf:names:cursor",
+        history = [],
+        walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT,
+                acceptAll, false),
+        /**@const*/DEFAULT_CARET_TOP = "5%",
+        shouldBlink = true,
+        blinking = false,
+        cursorSpan,
+        cursorNode,
+        blinkTimeout;
+
+    function blink(reset) {
+        if (!shouldBlink || !cursorNode.parentNode) {
+            // stop blinking when removed from the document
+            return;
+        }
+
+        if (!blinking || reset) {
+            if (reset && blinkTimeout !== undefined) {
+                runtime.clearTimeout(blinkTimeout);
+            }
+
+            blinking = true;
+            // switch between transparent and color
+            cursorSpan.style.opacity =
+                (reset || cursorSpan.style.opacity === "0")
+                ? "1"
+                : "0";
+
+            blinkTimeout = runtime.setTimeout(function () {
+                blinking = false;
+                blink(false);
+            }, 500);
+        }
+    }
+
+    function getCommonParent(a, b) {
+        var pa = [], i, l;
+        while (a && a !== root) {
+            pa[pa.length] = a;
+            a = a.parentNode;
+        }
+        l = pa.length;
+        while (b) {  
+            for (i = 0; i < l; i += 1) {
+                if (pa[i] === b) {
+                    return b;
+                }
+            }
+            b = b.parentNode;
+        }
+    }
+
+    function updateHistory() {
+        if (history.indexOf(activeElement) !== -1) {
+            return;
+        }
+        var e = activeElement;
+        history = [];
+        while (e && e !== root) {
+            history.push(e);
+            e = e.parentNode;
+        }
+        history.push(root);
+    }
+
+    function makeActive(element) {
+        if (activeElement) {
+            activeElement.removeAttributeNS(cursorns, "active");
+        }
+        if (element) {
+            element.setAttributeNS(cursorns, "active", "1");
+        }
+        var commonParent = getCommonParent(activeElement, element),
+            e = activeElement;
+        while (e && e.nodeType === 1 && e !== commonParent) {
+            e.removeAttributeNS(cursorns, "caret");
+            e = e.parentNode;
+        }
+        e = element;
+        while (e && e.nodeType === 1 && e !== commonParent) {
+            e.setAttributeNS(cursorns, "caret", "1");
+            e = e.parentNode;
+        }
+        activeElement = element;
+        updateHistory();
+        blink(true);
+    }
+
+    /**
+     * @param {!Element} element
+     */
+    this.handleClick = function (element) {
         var range = runtime.getWindow().getSelection().getRangeAt(0);
         if (range) {
             cursor.setSelectedRange(range);
         }
+        makeActive(element);
     };
+    function getDepth(e) {
+        var depth = 0;
+        while (e && e !== root) {
+            depth += 1;
+            e = e.parentNode;
+        }
+        return depth;
+    }
+    this.nextSibling = function () {
+        if (!activeElement) {
+            return;
+        }
+        var d;
+        if (activeElement.nextElementSibling) {
+            makeActive(activeElement.nextElementSibling);
+        } else {
+            d = getDepth(activeElement);
+            walker.currentNode = activeElement;
+            while (walker.nextNode()) {
+                if (d === getDepth(walker.currentNode)) {
+                    makeActive(walker.currentNode);
+                    break;
+                }
+            }
+        }
+    };
+    this.previousSibling = function () {
+        if (!activeElement) {
+            return;
+        }
+        var d;
+        if (activeElement.previousElementSibling) {
+            makeActive(activeElement.previousElementSibling);
+        } else {
+            d = getDepth(activeElement);
+            walker.currentNode = activeElement;
+            while (walker.previousNode()) {
+                if (d === getDepth(walker.currentNode)) {
+                    makeActive(walker.currentNode);
+                    break;
+                }
+            }
+        }
+    };
+    this.up = function () {
+        if (!activeElement) {
+            return;
+        }
+        if (activeElement !== root) {
+            makeActive(activeElement.parentNode);
+        }
+    };
+    this.down = function () {
+        if (!activeElement) {
+            return;
+        }
+        var i = history.indexOf(activeElement);
+        if (i > 0) {
+            makeActive(history[i - 1]);
+            return;
+        }
+        if (activeElement.firstElementChild) {
+            makeActive(activeElement.firstElementChild);
+        }
+    };
+    this.getActiveElement = function () {
+        return activeElement;
+    };
+    function init() {
+        if (!doc) {
+            return;
+        }
+        cursor = new core.Cursor(doc, "me");
+        cursorSpan = doc.createElementNS(htmlns, "span");
+        cursorSpan.style.top = DEFAULT_CARET_TOP;
+        cursorNode = cursor.getNode();
+        cursorNode.appendChild(cursorSpan);
+        blink(true);
+    }
+    init();
 };
