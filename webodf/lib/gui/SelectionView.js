@@ -33,6 +33,8 @@
 /*global Node, NodeFilter, gui, odf, ops, runtime*/
 
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("odf.OdfNodeFilter");
+runtime.loadClass("gui.SelectionMover");
 
 /**
  * A GUI class that attaches to a cursor and renders it's selection
@@ -44,13 +46,17 @@ runtime.loadClass("odf.OdfUtils");
 gui.SelectionView = function SelectionView(cursor) {
     "use strict";
 
-        var root = cursor.getOdtDocument().getRootNode().parentNode.parentNode,
-        doc = cursor.getOdtDocument().getDOM(),
+        var odtDocument = cursor.getOdtDocument(),
+        root = odtDocument.getRootNode().parentNode.parentNode,
+        doc = odtDocument.getDOM(),
         overlayTop = doc.createElement('div'),
         overlayMiddle = doc.createElement('div'),
         overlayBottom = doc.createElement('div'),
         odfUtils = new odf.OdfUtils(),
-        isVisible = true;
+        isVisible = true,
+        positionIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+        /**@const*/FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
+        /**@const*/FILTER_REJECT = NodeFilter.FILTER_REJECT;
 
     /**
      * Takes a rect with the fields `left, top, width, height`
@@ -110,7 +116,7 @@ gui.SelectionView = function SelectionView(cursor) {
      * and the fillerRange starts at the start of firstRange and ends at the end of
      * lastRange.
      * @param {!Range} range
-     * @return {null|!{firstRange: !Range, lastRange: !Range, fillerRange: !Range}}
+     * @return {?{firstRange: !Range, lastRange: !Range, fillerRange: !Range}}
      */
     function getExtremeRanges(range) {
         var textNodes = odfUtils.getTextNodes(range, true),
@@ -187,6 +193,26 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     /**
+     * Checks if the newRect is a collapsed rect, and if it is not,
+     * returns the bounding rect of the originalRect and the newRect.
+     * If it is collapsed, returns the originalRect.
+     * Bad ad-hoc function, but I want to keep the size of the code smaller
+     * @param {ClientRect|{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}} originalRect 
+     * @param {ClientRect|{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}} newRect
+     * @return {?ClientRect|{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}}
+     */
+    function checkAndGrowOrCreateRect(originalRect, newRect) {
+        if (newRect && newRect.width > 0 && newRect.height > 0) {
+            if (!originalRect) {
+                originalRect = newRect;
+            } else {
+                originalRect = getBoundingRect(originalRect, newRect);
+            }
+        }
+        return originalRect;
+    }
+
+    /**
      * Chrome's implementation of getBoundingClientRect is buggy in that it sometimes
      * includes the ClientRect of a partially covered parent in the bounding rect.
      * Therefore, instead of simply using getBoundingClientRect on the fillerRange,
@@ -209,11 +235,63 @@ gui.SelectionView = function SelectionView(cursor) {
         var containerNode = fillerRange.commonAncestorContainer,
             firstNode = fillerRange.startContainer,
             lastNode = fillerRange.endContainer,
-            currentSibling,
+            firstOffset = fillerRange.startOffset,
+            lastOffset = fillerRange.endOffset,
+            currentNode,
+            lastMeasuredNode,
+            firstSibling,
+            lastSibling,
             grownRect = null,
             currentRect,
-            range = doc.createRange();
+            range = doc.createRange(),
+            rootFilter,
+            odfNodeFilter = new odf.OdfNodeFilter(),
+            treeWalker;
 
+        /**
+         * This checks if the node is allowed by the odf filter and the root filter.
+         * @param {!Node} node
+         * @return {!number}
+         */
+        function acceptNode(node) {
+            positionIterator.setUnfilteredPosition(node, 0);
+            if (odfNodeFilter.acceptNode(node) === FILTER_ACCEPT
+                    && rootFilter.acceptPosition(positionIterator) === FILTER_ACCEPT) {
+                return FILTER_ACCEPT;
+            }
+            return FILTER_REJECT;
+        }
+
+        /**
+         * If the node is acceptable, check if the node is a grouping element.
+         * If yes, then get it's complete bounding rect (we should use the
+         *getBoundingClientRect call on nodes whenever possible, since it is
+         * extremely buggy on ranges. This has the added good side-effect of
+         * not taking annotations' rects into the bounding rect.
+         * @param {!Node} node
+         * @return {?ClientRect}
+         */
+        function getRectFromNodeAfterFiltering(node) {
+            var rect = null;
+            // If the sibling is acceptable by the odfNodeFilter and the rootFilter,
+            // only then take into account it's dimensions
+            if (acceptNode(node) === FILTER_ACCEPT) {
+                // If the sibling for which we want the bounding rect is a grouping element,
+                // then we desire to have it's full width at our access. Therefore,
+                // directly use gBCR (works fine for just paragraphs).
+                if (odfUtils.isGroupingElement(node)) {
+                    rect = node.getBoundingClientRect();
+                } else {
+                    range.selectNode(node);
+                    rect = range.getBoundingClientRect();
+                }
+            }
+            return rect;
+        }
+
+
+        // If the entire range is for just one node
+        // then we can get the bounding rect for the range and be done with it
         if (firstNode === containerNode || lastNode === containerNode) {
             range = fillerRange.cloneRange();
             grownRect = range.getBoundingClientRect();
@@ -221,34 +299,102 @@ gui.SelectionView = function SelectionView(cursor) {
             return grownRect;
         }
 
-        while (firstNode.parentNode !== containerNode) {
-            firstNode = firstNode.parentNode;
+        // Compute the firstSibling and lastSibling,
+        // which are top-level siblings just below the common ancestor node
+        firstSibling = firstNode;
+        while (firstSibling.parentNode !== containerNode) {
+            firstSibling = firstSibling.parentNode;
         }
-        while (lastNode.parentNode !== containerNode) {
-            lastNode = lastNode.parentNode;
+        lastSibling = lastNode;
+        while (lastSibling.parentNode !== containerNode) {
+            lastSibling = lastSibling.parentNode;
         }
 
-        currentSibling = firstNode;
-        while (currentSibling !== lastNode.nextSibling) {
-            // If the sibling for which we want the bounding rect is a paragraph,
-            // then we desire to have it's full width at our access. Therefore,
-            // directly use gBCR (works fine for just paragraphs).
-            if (odfUtils.isParagraph(currentSibling)) {
-                currentRect = currentSibling.getBoundingClientRect();
-            } else {
-                range.selectNode(currentSibling);
+        // We use a root filter to avoid taking any rects of nodes in other roots
+        // into the bounding rect, should it happen that the selection contains
+        // nodes from more than one root. Example: Paragraphs containing annotations
+        rootFilter = odtDocument.createRootFilter(firstNode);
+
+        // Now since this function is called a lot of times,
+        // we need to iterate between and not including the
+        // first and last top-level siblings (below the common
+        // ancestor), and grow our rect from their bounding rects.
+        // This is cheap technique, compared to actually iterating
+        // over each node in the range.
+        currentNode = firstSibling.nextSibling;
+        while (currentNode && currentNode !== lastSibling) {
+            currentRect = getRectFromNodeAfterFiltering(currentNode);
+            grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
+            currentNode = currentNode.nextSibling;
+        }
+
+        // If the first top-level sibling is a paragraph, then use it's
+        // bounding rect for growing. This is actually not very necessary, but
+        // makes our selections look more intuitive and more native-ish.
+        // Case in point: If you draw a selection starting on the last (half-full) line of
+        // text in a paragraph and ending somewhere in the middle of the first line of
+        // the next paragraph, the selection will be only as wide as the distance between
+        // the start and end of the selection.
+        // This is where we'd prefer full-width selections, therefore using the paragraph
+        // width is nicer.
+        // We don't need to look deeper into the node, so this is very cheap.
+        if (odfUtils.isParagraph(firstSibling)) {
+            grownRect = checkAndGrowOrCreateRect(grownRect, firstSibling.getBoundingClientRect());
+        } else {
+            // The first top-level sibling was not a paragraph, so we now need to
+            // Grow the rect in a detailed manner using the selected area *inside* the first sibling.
+            // For that, we start walking over textNodes within the firstSibling,
+            // and grow using the the rects of all textnodes that lie including and after the
+            // firstNode (the startContainer of the original fillerRange), and stop
+            // when either the firstSibling ends or we encounter the lastNode.
+            treeWalker = doc.createTreeWalker(firstSibling, NodeFilter.SHOW_TEXT, acceptNode);
+            currentNode = treeWalker.currentNode = firstNode;
+            while (currentNode && currentNode !== lastNode) {
+                range.setStart(currentNode, firstOffset);
+                range.setEnd(currentNode, currentNode.length);
+
                 currentRect = range.getBoundingClientRect();
+                grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
+
+                // We keep track of the lastMeasuredNode, so that the next block where
+                // we iterate backwards can know when to stop.
+                lastMeasuredNode = currentNode;
+                firstOffset = 0;
+                currentNode = treeWalker.nextNode();
             }
-            if (currentRect.width > 0 && currentRect.height > 0) {
-                if (!grownRect) {
-                    grownRect = currentRect; 
-                } else {
-                    grownRect = getBoundingRect(grownRect, currentRect); 
+        }
+
+        // If there was no lastMeasuredNode, it means that even the firstNode
+        // was not iterated over.
+        if (!lastMeasuredNode) {
+            lastMeasuredNode = firstNode;
+        }
+
+        // Just like before, a cheap way to avoid looking deeper into the listSibling
+        // if it is a paragraph.
+        if (odfUtils.isParagraph(lastSibling)) {
+            grownRect = checkAndGrowOrCreateRect(grownRect, firstSibling.getBoundingClientRect());
+        } else {
+            // Grow the rect using the selected area inside
+            // the last sibling, iterating backwards from the lastNode
+            // till we reach either the beginning of the lastSibling
+            // or encounter the lastMeasuredNode
+            treeWalker = doc.createTreeWalker(lastSibling, NodeFilter.SHOW_TEXT, acceptNode);
+            currentNode = treeWalker.currentNode = lastNode;
+            while (currentNode && currentNode !== lastMeasuredNode) {
+                range.setStart(currentNode, 0);
+                range.setEnd(currentNode, lastOffset);
+
+                currentRect = range.getBoundingClientRect();
+                grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
+
+                currentNode = treeWalker.previousNode();
+                if (currentNode) {
+                    lastOffset = currentNode.length;
                 }
             }
-            currentSibling = currentSibling.nextSibling;
         }
-        range.detach();
+
         return grownRect;
     }
 
