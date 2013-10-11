@@ -70,4 +70,6 @@
     border-left: 2px solid black;
     outline: none;
 }
-
+.hoveropaque:hover {
+    background-color: rgba(128,128,128,0.2);
+}

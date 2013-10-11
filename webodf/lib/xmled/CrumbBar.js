@@ -65,6 +65,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         var item = doc.createElementNS(htmlns, "div");
         item.appendChild(doc.createTextNode(text));
         item.style.position = "relative";
+        item.className = 'hoveropaque';
         menu.appendChild(item);
 //        item.setAttribute("tabindex", "1");
     }
@@ -92,7 +93,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
     function hideMenus(e) {
         e = e.firstElementChild;
         while (e) {
-            if (e.style.display === "none") {
+            if (e.style.display === "block") {
                 e.style.display = "none";
             }
             hideMenus(e);
