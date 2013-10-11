@@ -71,5 +71,5 @@
     outline: none;
 }
 .hoveropaque:hover {
-    background-color: rgba(128,128,128,0.2);
+    background-color: rgba(128,128,128,0.5);
 }

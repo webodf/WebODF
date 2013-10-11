@@ -85,6 +85,8 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         menu.style.padding = "5px";
         menu.style.minWidth = "100%";
         menu.style.top = "100%";
+console.log(element.offsetLeft);
+        menu.style.left = "-1em";//element.offsetLeft + "px";
 //        menu.style.height = "100%";
 //        menu.setAttribute("tabindex", "1");
         return menu;
@@ -105,20 +107,21 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         var span = createArrow(),
             crumb = doc.createElementNS(htmlns, "span"),
             menu = createMenu(element);
+        span.className = 'hoveropaque';
         span.appendChild(crumb);
         //crumb.setAttribute("tabindex", "1");
         crumb.appendChild(doc.createTextNode(element.localName));
         crumb.style.color = "#FFFFFF";
         crumb.style.cursor = "pointer";
         crumb.style.position = "relative";
-        crumb.onmouseover = function () {
+        span.onmouseover = function () {
             element.setAttributeNS(cursorns, "hover", "1");
         };
-        crumb.onmouseout = function () {
+        span.onmouseout = function () {
             element.removeAttributeNS(cursorns, "hover");
         };
         crumb.appendChild(menu);
-        crumb.onclick = function (evt) {
+        span.onclick = function (evt) {
             var d = menu.style.display;
             hideMenus(crumb.parentNode.parentNode);
             menu.style.display = d === "none" ? "block" : "none";
