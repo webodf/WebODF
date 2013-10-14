@@ -96,7 +96,10 @@ gui.SessionView = (function () {
             editInfoMap = {},
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
             showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true),
-            blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true);
+            blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true),
+            rerenderIntervalId,
+            rerenderSelectionViews = false,
+            /**@const*/RERENDER_INTERVAL = 200; // milliseconds
 
         /**
          * @param {!string} nodeName
@@ -392,8 +395,28 @@ gui.SessionView = (function () {
         /**
          * @return {undefined}
          */
-        function rerenderSelectionViews() {
-            selectionViewManager.rerenderSelectionViews();
+        function requestRerenderOfSelectionViews() {
+            rerenderSelectionViews = true;
+        }
+
+        /**
+         * Starts an interval loop that rerenders selection views and whatever else
+         * needs refreshing every RERENDER_INTERVAL milliseconds.
+         * @return {undefined}
+         */
+        function startRerenderLoop() {
+            rerenderIntervalId = runtime.getWindow().setInterval(function () {
+                if (rerenderSelectionViews) {
+                    selectionViewManager.rerenderSelectionViews();
+                    rerenderSelectionViews = false;
+                }
+            }, RERENDER_INTERVAL);
+        }
+        /**
+         * Stops the rerender loop.
+         */
+        function stopRerenderLoop() {
+            runtime.getWindow().clearInterval(rerenderIntervalId);
         }
 
         /**
@@ -409,6 +432,12 @@ gui.SessionView = (function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+
+            odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, requestRerenderOfSelectionViews);
+            odtDocument.unsubscribe(ops.OdtDocument.signalTableAdded, requestRerenderOfSelectionViews);
+            odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, requestRerenderOfSelectionViews);
+
+            stopRerenderLoop();
 
             caretManager.getCarets().forEach(function(caret) {
                 memberModel.unsubscribeMemberDetailsUpdates(caret.getCursor().getMemberId(), renderMemberData);
@@ -438,9 +467,11 @@ gui.SessionView = (function () {
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
             odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
 
-            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, rerenderSelectionViews);
-            odtDocument.subscribe(ops.OdtDocument.signalTableAdded, rerenderSelectionViews);
-            odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, rerenderSelectionViews);
+            startRerenderLoop();
+
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, requestRerenderOfSelectionViews);
+            odtDocument.subscribe(ops.OdtDocument.signalTableAdded, requestRerenderOfSelectionViews);
+            odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, requestRerenderOfSelectionViews);
 
             // Add a css sheet for user info-edited styling
             avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');
