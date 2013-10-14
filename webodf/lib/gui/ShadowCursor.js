@@ -51,27 +51,48 @@ gui.ShadowCursor = function ShadowCursor(memberId, odtDocument) {
 
     /*jslint emptyblock: true*/
     this.removeFromOdtDocument = function () {};
-    this.handleUpdate = function () {};
-    this.remove = function () {};
     /*jslint emptyblock: false*/
 
+    /**
+     * Obtain the memberid the cursor is assigned to.
+     * @return {string}
+     */
     this.getMemberId = function () {
         return memberId;
     };
 
+    /**
+     * Obtain the currently selected range to which the cursor corresponds.
+     * @return {Range}
+     */
     this.getSelectedRange = function () {
         return selectedRange;
     };
 
+    /**
+     * Set the given range as the selected range for this cursor
+     * @param {!Range} range,
+     * @param {boolean=} isForwardSelection Assumed to be true by default
+     * @return {undefined}
+     */
     this.setSelectedRange = function (range, isForwardSelection) {
         selectedRange = range;
-        forwardSelection = isForwardSelection ? true : false;
+        forwardSelection = isForwardSelection !== false;
     };
 
+    /**
+     * Returns if the selection of this cursor has the
+     * same direction as the direction of the range
+     * @return {boolean}
+     */
     this.hasForwardSelection = function () {
         return forwardSelection;
     };
 
+    /**
+     * Obtain the odtDocument to which the cursor corresponds.
+     * @return {!ops.OdtDocument}
+     */
     this.getOdtDocument = function () {
         return odtDocument;
     };
