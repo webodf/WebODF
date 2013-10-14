@@ -347,16 +347,23 @@ gui.SessionView = (function () {
         function onCursorMoved(cursor) {
             var memberId = cursor.getMemberId(),
                 localSelectionView = selectionViewManager.getSelectionView(localMemberId),
-                shadowSelectionView = selectionViewManager.getSelectionView("");
+                shadowSelectionView = selectionViewManager.getSelectionView(""),
+                localCaret = caretManager.getCaret(localMemberId);
 
             if (memberId === localMemberId) {
                 // If our actual cursor moved, then hide the shadow cursor's selection
                 shadowSelectionView.hide();
                 localSelectionView.show();
+                if (localCaret) {
+                    localCaret.show();
+                }
             } else if (memberId === "") {
                 // If the shadow cursor moved, then hide the current cursor's selection
                 shadowSelectionView.show();
                 localSelectionView.hide();
+                if (localCaret) {
+                    localCaret.hide();
+                }
             }
         }
 
