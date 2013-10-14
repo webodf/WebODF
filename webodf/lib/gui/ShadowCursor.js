@@ -46,7 +46,8 @@ runtime.loadClass("gui.SelectionMover");
  */
 gui.ShadowCursor = function ShadowCursor(memberId, odtDocument) {
     "use strict";
-    var selectedRange = odtDocument.getDOM().createRange();
+    var selectedRange = odtDocument.getDOM().createRange(),
+        forwardSelection = true;
 
     /*jslint emptyblock: true*/
     this.removeFromOdtDocument = function () {};
@@ -62,8 +63,13 @@ gui.ShadowCursor = function ShadowCursor(memberId, odtDocument) {
         return selectedRange;
     };
 
-    this.setSelectedRange = function (range) {
+    this.setSelectedRange = function (range, isForwardSelection) {
         selectedRange = range;
+        forwardSelection = isForwardSelection ? true : false;
+    };
+
+    this.hasForwardSelection = function () {
+        return forwardSelection;
     };
 
     this.getOdtDocument = function () {

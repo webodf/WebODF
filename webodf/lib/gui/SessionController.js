@@ -974,9 +974,16 @@ gui.SessionController = (function () {
         }
 
         function maintainShadowSelection() {
-            var selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(shadowCursor.getSelectedRange());
+            var selection = window.getSelection(),
+                range = shadowCursor.getSelectedRange();
+
+            if (shadowCursor.hasForwardSelection()) {
+                selection.collapse(range.startContainer, range.startOffset);
+                selection.extend(range.endContainer, range.endOffset);
+            } else {
+                selection.collapse(range.endContainer, range.endOffset);
+                selection.extend(range.startContainer, range.startOffset);
+            }
         }
 
         /**
@@ -1020,12 +1027,19 @@ gui.SessionController = (function () {
             if (isMouseDown) {
                 isMouseMoved = true;
                 runtime.setTimeout(function () {
-                    var selection, position, iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
-                    position = caretPositionFromPoint(event.clientX, event.clientY);
+                    var selection,
+                        position = caretPositionFromPoint(event.clientX, event.clientY),
+                        iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+                        selectionRange,
+                        isForwardSelection;
+
                     iterator.setUnfilteredPosition(position.container, position.offset);
+
                     if (mouseDownRootFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                        selection =  window.getSelection();
-                        shadowCursor.setSelectedRange(/**@type{!Range}*/(selection.getRangeAt(0).cloneRange()), false);
+                        selection = window.getSelection();
+                        selectionRange = selection.getRangeAt(0);
+                        isForwardSelection = (selection.anchorNode === selectionRange.startContainer) && (selection.anchorOffset === selectionRange.startOffset);
+                        shadowCursor.setSelectedRange(/**@type{!Range}*/(selection.getRangeAt(0).cloneRange()), isForwardSelection);
                         odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
                     } else {
                         maintainShadowSelection();

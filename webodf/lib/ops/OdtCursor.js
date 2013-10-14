@@ -149,7 +149,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      * same direction as the direction of the range
      * @return {boolean}
      */
-    this.hasForwardSelection = function() {
+    this.hasForwardSelection = function () {
         return cursor.hasForwardSelection();
     };
     /**
