@@ -587,8 +587,7 @@ odf.OdfCanvas = (function () {
      * @return {undefined}
      */
     function formatParagraphAnchors(odfbody) {
-        var runtimens = "urn:webodf",
-            n,
+        var n,
             i,
             nodes = xpath.getODFElementsWithXPath(odfbody,
                 ".//*[*[@text:anchor-type='paragraph']]",
@@ -596,7 +595,7 @@ odf.OdfCanvas = (function () {
         for (i = 0; i < nodes.length; i += 1) {
             n = nodes[i];
             if (n.setAttributeNS) {
-                n.setAttributeNS(runtimens, "containsparagraphanchor", true);
+                n.setAttributeNS(webodfhelperns, "containsparagraphanchor", true);
             }
         }
     }
