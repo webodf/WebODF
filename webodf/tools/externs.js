@@ -415,8 +415,8 @@ Document.prototype.createTreeWalker = function (root, whatToShow, filter, entity
 /**
  * @param {!Node} root
  * @param {!number} whatToShow
- * @param {function(!Node):number=} filter
- * @param {boolean=} entityReferenceExpansion
+ * @param {function(!Node):number} filter
+ * @param {boolean} entityReferenceExpansion
  * @return {!NodeIterator}
  */
 Document.prototype.createNodeIterator = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };
