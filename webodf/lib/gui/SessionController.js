@@ -1055,7 +1055,7 @@ gui.SessionController = (function () {
             if (isMouseDown) {
                 isMouseMoved = true;
                 runtime.setTimeout(function () {
-                    var selection,
+                    var selection = window.getSelection(),
                         position = caretPositionFromPoint(event.clientX, event.clientY),
                         iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                         selectionRange,
@@ -1063,8 +1063,7 @@ gui.SessionController = (function () {
 
                     iterator.setUnfilteredPosition(position.container, position.offset);
 
-                    if (mouseDownRootFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                        selection = window.getSelection();
+                    if (mouseDownRootFilter.acceptPosition(iterator) === FILTER_ACCEPT && selection.rangeCount > 0) {
                         selectionRange = selection.getRangeAt(0);
                         isForwardSelection = (selection.anchorNode === selectionRange.startContainer) && (selection.anchorOffset === selectionRange.startOffset);
                         shadowCursor.setSelectedRange(/**@type{!Range}*/(selection.getRangeAt(0).cloneRange()), isForwardSelection);
