@@ -1061,8 +1061,8 @@ gui.SessionController = (function () {
                         selectionRange,
                         isForwardSelection;
 
+                    imageSelector.clearSelection();
                     iterator.setUnfilteredPosition(position.container, position.offset);
-
                     if (mouseDownRootFilter.acceptPosition(iterator) === FILTER_ACCEPT && selection.rangeCount > 0) {
                         selectionRange = selection.getRangeAt(0);
                         isForwardSelection = (selection.anchorNode === selectionRange.startContainer) && (selection.anchorOffset === selectionRange.startOffset);

@@ -51,7 +51,8 @@ gui.ImageSelector = function ImageSelector(odfCanvas) {
         squareClassNames = [
             "topLeft", "topRight", "bottomRight", "bottomLeft", "topMiddle", "rightMiddle", "bottomMiddle", "leftMiddle"
         ],
-        document = odfCanvas.getElement().ownerDocument;
+        document = odfCanvas.getElement().ownerDocument,
+        hasSelection = false;
 
     /**
      * @return {!Element}
@@ -103,6 +104,7 @@ gui.ImageSelector = function ImageSelector(odfCanvas) {
             selectorElement = createSelectorElement();
         }
 
+        hasSelection = true;
         position = getPosition(frameElement, /** @type {!Element}*/(selectorElement.parentNode));
         selectorElement.style.display = "block";
         selectorElement.style.left = position.left + "px";
@@ -116,10 +118,14 @@ gui.ImageSelector = function ImageSelector(odfCanvas) {
      * @return {undefined}
      */
     this.clearSelection = function () {
-        var selectorElement = document.getElementById(imageSelectorId);
-        if (selectorElement) {
-            selectorElement.style.display = "none";
+        var selectorElement;
+        if (hasSelection) {
+            selectorElement = document.getElementById(imageSelectorId);
+            if (selectorElement) {
+                selectorElement.style.display = "none";
+            }
         }
+        hasSelection = false;
     };
 
     /**
