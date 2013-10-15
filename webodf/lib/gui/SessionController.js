@@ -337,7 +337,7 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!UIEvent} e
+         * @param {!{detail: !number, clientX: !number, clientY: !number}} e
          * @return {?{anchorNode:!Node, anchorOffset:!number, focusNode:!Node, focusOffset:!number}}
          */
         function getSelection(e) {
@@ -396,12 +396,19 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function selectRange(e) {
+            var capturedDetails = {
+                detail: e.detail,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                target: getTarget(e)
+            };
+
             // When click somewhere within already selected text, call window.getSelection() straight away results
             // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
             // out the caret position from two coordinates.
             runtime.setTimeout(function () {
-                var targetNode = /**@type {?Node}*/(getTarget(e)),
+                var /** @type {?Node} */targetNode = /** @type {?Node} */(capturedDetails.target),
                     parentNode = targetNode.parentNode,
                     selection, selectionType, stepsToAnchor, stepsToFocus, oldPosition, op;
 
@@ -414,7 +421,7 @@ gui.SessionController = (function () {
                     stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null;
                     selectionType = ops.OdtCursor.RegionSelection;
                 } else {
-                    selection = getSelection(e);
+                    selection = getSelection(capturedDetails);
                     if (selection === null) {
                         return;
                     }
@@ -996,11 +1003,15 @@ gui.SessionController = (function () {
         }
 
         function handleMouseMove(event) {
+            var capturedDetails = {
+                clientX: event.clientX,
+                clientY: event.clientY
+            };
             if (isMouseDown) {
                 isMouseMoved = true;
                 runtime.setTimeout(function () {
                     var selection = window.getSelection(),
-                        position = caretPositionFromPoint(event.clientX, event.clientY),
+                        position = caretPositionFromPoint(capturedDetails.clientX, capturedDetails.clientY),
                         iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                         selectionRange,
                         isForwardSelection;
