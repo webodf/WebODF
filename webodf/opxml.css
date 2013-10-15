@@ -1,54 +1,54 @@
 @namespace cursor url(urn:webodf:names:cursor);
-#xmlcanvas * {
+.canvas * {
     display: block;
     margin: 1px;
     padding: 1px;
     border: 1px solid transparent;
     background-clip: padding-box; /* for IE9+, Firefox 4+, Opera, Chrome */
 }
-#xmlcanvas spreker *, #xmlcanvas alineaitem *, #xmlcanvas al *, #xmlcanvas considerans\.al * {
+.canvas spreker *, .canvas alineaitem *, .canvas al *, .canvas considerans\.al * {
     display: inline;
 }
-#xmlcanvas nadruk[type='ondlijn'] {
+.canvas nadruk[type='ondlijn'] {
     text-decoration: underline;
 }
-#xmlcanvas nadruk[type='vet'], #xmlcanvas nadruk[type='vetcur'] {
+.canvas nadruk[type='vet'], .canvas nadruk[type='vetcur'] {
     font-weight: bold;
 }
-#xmlcanvas nadruk[type='cur'], #xmlcanvas nadruk[type='vetcur'] {
+.canvas nadruk[type='cur'], .canvas nadruk[type='vetcur'] {
     font-style: italic;
 }
-#xmlcanvas li > *:first-child, #xmlcanvas entry {
+.canvas li > *:first-child, .canvas entry {
     display: table-cell;
 }
-#xmlcanvas entry {
+.canvas entry {
     border: 1px solid black;
 }
-#xmlcanvas li, #xmlcanvas row {
+.canvas li, .canvas row {
     display: table-row;
 }
-#xmlcanvas lijst, #xmlcanvas table {
+.canvas lijst, .canvas table {
     display: table;
 }
-#xmlcanvas *:hover {
+.canvas *:hover {
     border: 1px solid rgb(127, 127, 127);
     border: 1px solid rgba(255, 138, 0, .2);
     background-color: rgba(255, 255, 255, 0.025);
     box-shadow: 0px 0px 10px #aaa;
 }
-#xmlcanvas *[cursor|active], #xmlcanvas *[cursor|active]:hover {
+.canvas *[cursor|active], .canvas *[cursor|active]:hover {
     background-color: rgba(255, 138, 0, .2);;
 }
-#xmlcanvas *[cursor|caret], #xmlcanvas *[cursor|caret]:hover {
+.canvas *[cursor|caret], .canvas *[cursor|caret]:hover {
     border: 1px solid lightgreen;
 }
-#xmlcanvas *[cursor|hover], #xmlcanvas *[cursor|hover]:hover {
+.canvas *[cursor|hover], .canvas *[cursor|hover]:hover {
     border: 1px dashed black;
     box-shadow: 0px 0px 10px #aaa;
 }
 
 /* below set up the cursor */
-#xmlcanvas cursor|*, #xmlcanvas cursor|*:hover {
+.canvas cursor|*, .canvas cursor|*:hover {
     display: inline;
     border: 0px;
     padding: 0px;
@@ -60,7 +60,7 @@
     position: relative;
     z-index: 1;
 }
-#xmlcanvas cursor|* > span, #xmlcanvas cursor|* > span:hover {
+.canvas cursor|* > span, .canvas cursor|* > span:hover {
     /* IMPORTANT: when changing these values ensure DEFAULT_CARET_TOP and DEFAULT_CARET_HEIGHT
         in Caret.js remain in sync */
     display: inline;
@@ -83,4 +83,22 @@
  *              */
    -ms-user-select: none;
    user-select: none;
+}
+cursor|t:before, cursor|o:before {
+    content: '<';
+}
+cursor|c:before {
+    content: '</';
+}
+cursor|o:after, cursor|c:after {
+    content: '>';
+}
+cursor|t:after {
+    content: '/>';
+}
+cursor|t, cursor|o, cursor|c {
+    display: block;
+    width: 100%;
+    font-family: sans-serif;
+    color: blue;
 }

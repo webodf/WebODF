@@ -51,6 +51,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
     "use strict";
     var doc = element.ownerDocument,
         htmlns = element.namespaceURI,
+        cursorns = "urn:webodf:names:cursor",
         canvasElement = doc.createElementNS(htmlns, "div"),
         crumbElement = doc.createElementNS(htmlns, "div"),
         attributeEditorElement = doc.createElementNS(htmlns, "div"),
@@ -62,7 +63,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         viewButtons,
         xmlSerializer = new xmldom.LSSerializer(),
         editdiv = doc.createElementNS(htmlns, "div"),
-        xmlframe = doc.createElementNS(htmlns, "iframe"),
+        xmldiv = doc.createElementNS(htmlns, "div"),
         pdfframe = doc.createElementNS(htmlns, "iframe"),
         htmlframe = doc.createElementNS(htmlns, "iframe"),
         htmlXslt,
@@ -71,8 +72,8 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
     function fixSize() {
         var height = element.parentNode.clientHeight
                      - viewButtons.clientHeight - 10;
-        xmlframe.height = height;
-        xmlframe.width = "98%";
+        xmldiv.height = height;
+        xmldiv.width = "98%";
         pdfframe.height = height;
         pdfframe.width = "98%";
         htmlframe.height = height;
@@ -105,7 +106,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
     }
     function show(element) {
         editdiv.style.display = (element === editdiv) ? "block" : "none";
-        xmlframe.style.display = (element === xmlframe) ? "block" : "none";
+        xmldiv.style.display = (element === xmldiv) ? "block" : "none";
         htmlframe.style.display = (element === htmlframe) ? "block" : "none";
         pdfframe.style.display = (element === pdfframe) ? "block" : "none";
     }
@@ -113,13 +114,88 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         var xml = xmlSerializer.writeToString(canvas.getDocumentRoot(), {});
         return runtime.parseXML(xml).documentElement;
     }
+    function createXmlView(src, tgt) {
+    }
+    function addNameAttributes(e) {
+        if (e.namespaceURI === cursorns) {
+            return;
+        }
+        var fc = e.firstElementChild,
+            before,
+            tag,
+            after;
+        if (fc && fc.namespaceURI === cursorns) {
+            return;
+        }
+        if (e.prefix) {
+            tag = e.prefix + ':' + e.localName;
+        } else {
+            tag = e.localName;
+        }
+        if (e.firstChild) {
+            before = doc.createElementNS(cursorns, "o");
+            after = doc.createElementNS(cursorns, "c");
+            after.appendChild(doc.createTextNode(tag));
+            e.insertBefore(after, null);
+        } else {
+            before = doc.createElementNS(cursorns, "t");
+        }
+        before.appendChild(doc.createTextNode(tag));
+        e.insertBefore(before, e.firstChild);
+        e = e.firstElementChild;
+        while (e) {
+            addNameAttributes(e);
+            e = e.nextElementSibling;
+        }
+    }
+    function getClasses(element) {
+        var classes = element.getAttribute("class"),
+            c = {},
+            i;
+        if (classes) {
+            classes = classes.split(" ");
+            for (i = 0; i < classes.length; i += 1) {
+                c[classes[i]] = 1;
+            }
+        }
+        return c;
+    }
+    function addClass(element, value) {
+        var classes = getClasses(element);
+        classes[value] = 1;
+        element.setAttribute("class", Object.keys(classes).join(" "));
+    }
+    function removeClass(element, value) {
+        var classes = getClasses(element);
+        delete classes[value];
+        element.setAttribute("class", Object.keys(classes).join(" "));
+    }
+    function changeClasses(element, toAdd, toRemove) {
+        var classes = getClasses(element);
+        toAdd.forEach(function (v) {
+            classes[v] = 1;
+        });
+        toRemove.forEach(function (v) {
+            delete classes[v];
+        });
+        element.setAttribute("class", Object.keys(classes).join(" "));
+    }
     function toxml() {
+        show(xmldiv);
+        var n = xmldiv;
+        while (n.firstChild) {
+            n.parentNode.removeNode(n.firstChild);
+        }
+        createXmlView(canvas.getDocumentRoot(), xmldiv);
+//        addNameAttributes(canvas.getDocumentRoot());
+    }
+/*
         show(xmlframe);
         var node = cleanNode(),
             c;
         c = xmlframe.contentDocument.importNode(node, true);
         xmlframe.contentDocument.replaceChild(c, xmlframe.contentDocument.documentElement);
-    }
+*/
     function toedit() {
         show(editdiv);
     }
@@ -246,13 +322,14 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         createViewButtons();
         element.appendChild(viewButtons);
         element.appendChild(editdiv);
-        element.appendChild(xmlframe);
+        element.appendChild(xmldiv);
         element.appendChild(pdfframe);
         element.appendChild(htmlframe);
         editdiv.appendChild(crumbElement);
         editdiv.appendChild(contextInfoElement);
         editdiv.appendChild(canvasElement);
         editdiv.appendChild(attributeEditorElement);
+        changeClasses(canvasElement, ["canvas"], ["xmlcanvas"]);
         toedit();
 
         editdiv.style.verticalAlign = 'top';
@@ -296,14 +373,18 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         crumbBar = new xmled.CrumbBar(crumbElement, root, validationModel);
 
         canvasElement.onmouseup = function (evt) {
-            if (!canvas.getDocumentRoot().contains(evt.target)) {
+            var target = evt.target;
+            if (target.namespaceURI === cursorns) {
+                target = target.parentNode;
+            }
+            if (!canvas.getDocumentRoot().contains(target)) {
                 return;
             }
             setActiveElement(evt.target);
         };
         canvasElement.onkeypress = function (evt) {
             var str;
-            if (evt.charCode) {
+            if (evt.charCode && !evt.ctrlKey) {
                 str = String.fromCharCode(evt.charCode);
                 canvas.getCaret().leftText().appendData(str);
                 cancelEvent(evt);
@@ -355,17 +436,19 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
     this.load = function (url) {
         canvas.load(url, function () {
             function setup() {
-                crumbBar.setDocumentRoot(canvas.getDocumentRoot());
-                // hack to select start of doc
-                var e = canvas.getDocumentRoot().getElementsByTagNameNS("", "titel")[0],
+                var root = canvas.getDocumentRoot(),
+                    e = root.getElementsByTagNameNS("", "titel")[0],
                     sel = runtime.getWindow().getSelection(),
                     r = doc.createRange();
+                crumbBar.setDocumentRoot(root);
+                // hack to select start of doc
                 r.setStart(e, 0);
                 r.setEnd(e, 0);
                 sel.addRange(r);
                 if (e) {
                     setActiveElement(e);
                 }
+                toxml();
             }
             function waitForModel() {
                 var state = validationModel.getState();
