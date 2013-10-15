@@ -370,7 +370,7 @@ core.DomUtils = function DomUtils() {
 
     function init(self) {
         var /**@type{?Window}*/window = runtime.getWindow(),
-            appVersion, webKitOrSafari;
+            appVersion, webKitOrSafari, ie;
         if (window === null) {
             return;
         }
@@ -378,8 +378,8 @@ core.DomUtils = function DomUtils() {
         appVersion = window.navigator.appVersion.toLowerCase();
         webKitOrSafari = appVersion.indexOf('chrome') === -1
             && (appVersion.indexOf('applewebkit') !== -1 || appVersion.indexOf('safari') !== -1);
-
-        if (webKitOrSafari) {
+        ie = appVersion.indexOf('msie'); // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
+        if (webKitOrSafari || ie) {
             self.containsNode = containsNodeForBrokenWebKit;
         }
     }
