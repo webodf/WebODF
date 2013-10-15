@@ -803,7 +803,7 @@ gui.SessionController = (function () {
          * @return {?string}
          */
         function stringFromKeyPress(event) {
-            if (event.which === null) {
+            if (event.which === null || event.which === undefined) {
                 return String.fromCharCode(event.keyCode); // IE
             }
             if (event.which !== 0 && event.charCode !== 0) {
