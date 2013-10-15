@@ -231,23 +231,35 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     }
 
     /**
-     * Listen for text insertion operations and apply the local cursor styling if applicable
+     * Generate an operation that would apply the current direct cursor styling to the specified
+     * position and length
+     * @param {!number} position
+     * @param {!number} length
+     * @return {ops.Operation}
+     */
+    this.createCursorStyleOp = function (position, length) {
+        var styleOp = null;
+        if (directCursorStyleProperties) {
+            styleOp = new ops.OpApplyDirectStyling();
+            styleOp.init({
+                memberid: inputMemberId,
+                position: position,
+                length: length,
+                setProperties: directCursorStyleProperties
+            });
+            directCursorStyleProperties = null;
+            updatedCachedValues();
+        }
+        return styleOp;
+    };
+
+    /**
+     * Listen for local operations and clear the local cursor styling if necessary
      * @param {!ops.Operation} op
      */
-    function applyCursorStyle(op) {
-        var spec = op.spec(),
-            styleOp;
+    function clearCursorStyle(op) {
+        var spec = op.spec();
         if (directCursorStyleProperties && spec.memberid === inputMemberId) {
-            if (spec.optype === "InsertText") {
-                styleOp = new ops.OpApplyDirectStyling();
-                styleOp.init({
-                    memberid: inputMemberId,
-                    position: spec.position,
-                    length: spec.text.length,
-                    setProperties: directCursorStyleProperties
-                });
-                session.enqueue([styleOp]);
-            }
             if (spec.optype !== "SplitParagraph") {
                 // Most operations by the local user should clear the current cursor style
                 // SplitParagraph is an exception because at the time the split occurs, there has been no element
@@ -408,7 +420,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
-        odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, applyCursorStyle);
+        odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, clearCursorStyle);
         callback();
     };
 
@@ -418,7 +430,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
-        odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, applyCursorStyle);
+        odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, clearCursorStyle);
         updatedCachedValues();
     }
 
