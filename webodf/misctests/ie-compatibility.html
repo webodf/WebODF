@@ -35,6 +35,11 @@
         var newNode = document.createElement("span");
         area.insertBefore(newNode, undefined);
     });
+
+    test("Selection.extend support", function(area) {
+        window.getSelection().collapse(area, 0);
+        window.getSelection().extend(area, 0);
+    });
 </script>
 </body>
 </html>

@@ -768,12 +768,19 @@ gui.SessionController = (function () {
                 if (eventManager.hasFocus()) {
                     // Only recapture the browser selection if focus is currently on the canvas
                     range = cursor.getSelectedRange();
-                    if (cursor.hasForwardSelection()) {
-                        selection.collapse(range.startContainer, range.startOffset);
-                        selection.extend(range.endContainer, range.endOffset);
+                    if (selection.extend) {
+                        if (cursor.hasForwardSelection()) {
+                            selection.collapse(range.startContainer, range.startOffset);
+                            selection.extend(range.endContainer, range.endOffset);
+                        } else {
+                            selection.collapse(range.endContainer, range.endOffset);
+                            selection.extend(range.startContainer, range.startOffset);
+                        }
                     } else {
-                        selection.collapse(range.endContainer, range.endOffset);
-                        selection.extend(range.startContainer, range.startOffset);
+                        // Internet explorer does provide any method for preserving the range direction
+                        // See http://msdn.microsoft.com/en-us/library/ie/ff974359%28v=vs.85%29.aspx
+                        selection.removeAllRanges();
+                        selection.addRange(range.cloneRange());
                     }
                 }
             } else {
