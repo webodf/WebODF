@@ -105,6 +105,11 @@ gui.SessionController = (function () {
         keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
         keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
 
+        function getTarget(e) {
+            // e.srcElement because IE10 likes to be different...
+            return e.target || e.srcElement;
+        }
+
         /**
          * @param {!Event} event
          * @return {undefined}
@@ -396,7 +401,7 @@ gui.SessionController = (function () {
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
             // out the caret position from two coordinates.
             runtime.setTimeout(function () {
-                var /** @type {?Node} */targetNode = /** @type {?Node} */(e.target),
+                var targetNode = /**@type {?Node}*/(getTarget(e)),
                     parentNode = targetNode.parentNode,
                     selection, selectionType, stepsToAnchor, stepsToFocus, oldPosition, op;
 
@@ -961,7 +966,7 @@ gui.SessionController = (function () {
          * @param e
          */
         function filterMouseClicks(e) {
-            clickStartedWithinContainer = e.target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), e.target);
+            clickStartedWithinContainer = getTarget(e) && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), getTarget(e));
             if (clickStartedWithinContainer) {
                 isMouseDown = true;
                 isMouseMoved = false;
@@ -970,7 +975,7 @@ gui.SessionController = (function () {
         }
 
         function handleMouseUp(event) {
-            var target = event.target,
+            var target = getTarget(event),
                 annotationNode = null;
             if (target.className === "annotationRemoveButton") {
                 annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
