@@ -1267,6 +1267,9 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.R, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
                     keyDownHandler.bind(keyCode.J, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
                 }
+                if (annotationManager) {
+                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationManager.addAnnotation);
+                }
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
@@ -1281,6 +1284,9 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.E, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
                     keyDownHandler.bind(keyCode.R, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
                     keyDownHandler.bind(keyCode.J, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
+                }
+                if (annotationManager) {
+                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationManager.addAnnotation);
                 }
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
