@@ -106,7 +106,9 @@ ops.OpRemoveText = function OpRemoveText() {
          * @returns {!boolean}
          */
         function shouldRemove(node) {
-            return isOdfNode(node) || (node.nodeType === Node.TEXT_NODE && isOdfNode(/** @type {!Node}*/(node.parentNode)));
+            return isOdfNode(node)
+                || (node.localName === "br" && odfUtils.isLineBreak(node.parentNode))
+                || (node.nodeType === Node.TEXT_NODE && isOdfNode(/** @type {!Node}*/(node.parentNode)));
         }
 
         /**

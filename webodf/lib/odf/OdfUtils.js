@@ -132,6 +132,16 @@ odf.OdfUtils = function OdfUtils() {
     };
 
     /**
+     * Determine if the node is a text:line-break element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    this.isLineBreak = function (e) {
+        var name = e && e.localName;
+        return name === "line-break" && e.namespaceURI === textns;
+    };
+
+    /**
      * Determine if the text consists entirely of whitespace characters.
      * At least one whitespace is required.
      * @param {!string} text
