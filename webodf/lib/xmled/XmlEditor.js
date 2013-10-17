@@ -114,39 +114,62 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         var xml = xmlSerializer.writeToString(canvas.getDocumentRoot(), {});
         return runtime.parseXML(xml).documentElement;
     }
-    function createXmlView(src, tgt) {
+    function addAttributes(src, tgt) {
+        var as = src.attributes,
+            l = as.length,
+            i,
+            a,
+            an,
+            av;
+        for (i = 0; i < l; i += 1) {
+            a = as.item(i);
+            if (a.namespaceURI !== cursorns) {
+                an = doc.createElementNS(cursorns, "an");
+                av = doc.createElementNS(cursorns, "av");
+                an.textContent = a.localName;
+                av.textContent = a.nodeValue;
+                tgt.appendChild(an);
+                tgt.appendChild(av);
+            }
+        }
     }
-    function addNameAttributes(e) {
-        if (e.namespaceURI === cursorns) {
+    function createXmlView(src, tgt) {
+        if (src.namespaceURI === cursorns) {
             return;
         }
-        var fc = e.firstElementChild,
+        var e,
             before,
             tag,
             after;
-        if (fc && fc.namespaceURI === cursorns) {
-            return;
-        }
-        if (e.prefix) {
-            tag = e.prefix + ':' + e.localName;
+        if (src.prefix) {
+            tag = src.prefix + ':' + src.localName;
         } else {
-            tag = e.localName;
+            tag = src.localName;
         }
-        if (e.firstChild) {
+        e = doc.createElementNS(cursorns, "e");
+        if (src.firstChild) {
             before = doc.createElementNS(cursorns, "o");
             after = doc.createElementNS(cursorns, "c");
             after.appendChild(doc.createTextNode(tag));
-            e.insertBefore(after, null);
         } else {
             before = doc.createElementNS(cursorns, "t");
         }
         before.appendChild(doc.createTextNode(tag));
-        e.insertBefore(before, e.firstChild);
-        e = e.firstElementChild;
-        while (e) {
-            addNameAttributes(e);
-            e = e.nextElementSibling;
+        addAttributes(src, before);
+        e.appendChild(before);
+        src = src.firstChild;
+        while (src) {
+            if (src.nodeType === 1) {
+                createXmlView(src, e);
+            } else {
+                e.appendChild(src.cloneNode(false));
+            }
+            src = src.nextSibling;
         }
+        if (after) {
+            e.appendChild(after);
+        }
+        tgt.appendChild(e);
     }
     function getClasses(element) {
         var classes = element.getAttribute("class"),
@@ -160,6 +183,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         }
         return c;
     }
+/*
     function addClass(element, value) {
         var classes = getClasses(element);
         classes[value] = 1;
@@ -170,6 +194,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         delete classes[value];
         element.setAttribute("class", Object.keys(classes).join(" "));
     }
+*/
     function changeClasses(element, toAdd, toRemove) {
         var classes = getClasses(element);
         toAdd.forEach(function (v) {
@@ -184,9 +209,10 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         show(xmldiv);
         var n = xmldiv;
         while (n.firstChild) {
-            n.parentNode.removeNode(n.firstChild);
+            n.removeChild(n.firstChild);
         }
         createXmlView(canvas.getDocumentRoot(), xmldiv);
+        xmldiv.style.background = 'white';
 //        addNameAttributes(canvas.getDocumentRoot());
     }
 /*
@@ -448,7 +474,6 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                 if (e) {
                     setActiveElement(e);
                 }
-                toxml();
             }
             function waitForModel() {
                 var state = validationModel.getState();

@@ -85,7 +85,6 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         menu.style.padding = "5px";
         menu.style.minWidth = "100%";
         menu.style.top = "100%";
-console.log(element.offsetLeft);
         menu.style.left = "-1em";//element.offsetLeft + "px";
 //        menu.style.height = "100%";
 //        menu.setAttribute("tabindex", "1");
@@ -121,7 +120,7 @@ console.log(element.offsetLeft);
             element.removeAttributeNS(cursorns, "hover");
         };
         crumb.appendChild(menu);
-        span.onclick = function (evt) {
+        span.onclick = function () {
             var d = menu.style.display;
             hideMenus(crumb.parentNode.parentNode);
             menu.style.display = d === "none" ? "block" : "none";

@@ -100,5 +100,27 @@ cursor|t, cursor|o, cursor|c {
     display: block;
     width: 100%;
     font-family: sans-serif;
-    color: blue;
+    color: rgb(136, 18, 128);
+    margin-left: -1em;
+}
+cursor|e {
+    display: block;
+    margin-left: 1em;
+}
+cursor|an {
+    color: rgb(153, 69, 0);
+}
+cursor|an:before {
+    content: " ";
+}
+cursor|an:after {
+    content: "=";
+    color: rgb(136, 18, 128);
+}
+cursor|av:before, cursor|av:after {
+    content: "\"";
+    color: rgb(136, 18, 128);
+}
+cursor|av {
+    color: rgb(26, 26, 166);
 }
