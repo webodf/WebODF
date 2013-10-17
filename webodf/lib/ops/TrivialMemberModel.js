@@ -61,7 +61,7 @@ ops.TrivialMemberModel = function TrivialMemberModel() {
         // pass some dummy data
         subscriber(memberId, {
             memberid: memberId,
-            fullname: "Unknown",
+            fullname: "Unknown Author",
             color:    "black",
             imageurl: "avatar-joe.png"
         });
