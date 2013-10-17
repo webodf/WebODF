@@ -119,7 +119,8 @@ gui.SessionView = (function () {
          */
         function getAvatarInfoStyle(nodeName, memberId, pseudoClass) {
             var node = avatarInfoStyles.firstChild,
-                nodeMatch = createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass);
+                // adding "{" to make sure indexOf(nodeMatch) === 0 does not match longer selectors with same start
+                nodeMatch = createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) + "{";
 
             while (node) {
                 if ((node.nodeType === Node.TEXT_NODE) && (node.data.indexOf(nodeMatch) === 0)) {
@@ -156,7 +157,7 @@ gui.SessionView = (function () {
                     avatarInfoStyles.appendChild(document.createTextNode(styleRule));
                 }
             }
-
+            // WARNING: nodeMatch relies on that there is no space before the starting "{"
             setStyle('div.editInfoMarker', '{ background-color: ' + color + '; }', '');
             setStyle('span.editInfoColor', '{ background-color: ' + color + '; }', '');
             setStyle('span.editInfoAuthor', '{ content: "' + name + '"; }', ':before');
