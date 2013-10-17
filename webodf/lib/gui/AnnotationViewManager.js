@@ -226,8 +226,10 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
             // The default `content: ` value for :before and :after pseudo-elements
             // in webkit is '' and `none` in gecko.
             if (creatorName && creatorName !== 'none') {
-                // Strip the opening and closing quotes
-                creatorName = creatorName.substring(1, creatorName.length - 1);
+                // Strip possible opening and closing quotes
+                if (/^["'].*["']$/.test(creatorName)) {
+                    creatorName = creatorName.substring(1, creatorName.length - 1);
+                }
                 if (creatorNode.firstChild) {
                     creatorNode.firstChild.nodeValue = creatorName;
                 } else {
