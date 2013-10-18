@@ -227,9 +227,11 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
             // in webkit is '' and `none` in gecko.
             if (creatorName && creatorName !== 'none') {
                 // Strip possible opening and closing quotes
+/*jslint regexp: true*/ // jslint complains otherwise about "Insecure '.'"
                 if (/^["'].*["']$/.test(creatorName)) {
                     creatorName = creatorName.substring(1, creatorName.length - 1);
                 }
+/*jslint regexp: false*/
                 if (creatorNode.firstChild) {
                     creatorNode.firstChild.nodeValue = creatorName;
                 } else {
