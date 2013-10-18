@@ -693,6 +693,22 @@ odf.OdfCanvas = (function () {
     }
 
     /**
+     * Make the text:line-break elements behave like html br element.
+     * @param {!Element} odffragment
+     * @return {undefined}
+     */
+    function modifyLineBreakElements(odffragment) {
+        var document = odffragment.ownerDocument,
+            lineBreakElements = domUtils.getElementsByTagNameNS(odffragment, textns, "line-break");
+        lineBreakElements.forEach(function (lineBreak) {
+            // Make sure we don't add br more than once as this method is executed whenever user undo an operation.
+            if (!lineBreak.hasChildNodes()) {
+                lineBreak.appendChild(document.createElement("br"));
+            }
+        });
+    }
+
+    /**
      * Expand ODF spaces of the form <text:s text:c=N/> to N consecutive
      * <text:s/> elements. This makes things simpler for WebODF during
      * handling of spaces, in particular during editing.
@@ -1296,6 +1312,7 @@ odf.OdfCanvas = (function () {
             cloneMasterPages(container, shadowContent, odfnode.body, css);
             modifyTables(odfnode.body);
             modifyLinks(odfnode.body);
+            modifyLineBreakElements(odfnode.body);
             expandSpaceElements(odfnode.body);
             expandTabElements(odfnode.body);
             loadImages(container, odfnode.body, css);

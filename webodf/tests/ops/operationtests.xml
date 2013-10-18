@@ -461,6 +461,13 @@
   </ops>
   <after><office:text><text:p><text:span>a<text:tab>&#09;</text:tab><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
  </test>
+ <test name="Remove_DeleteLineBreak">
+  <before><office:text><text:p><text:span>a<text:line-break/>b</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="2"/>
+  </ops>
+  <after><office:text><text:p><text:span>b</text:span></text:p></office:text></after>
+ </test>
  <test name="Remove_DeleteImageWithText">
   <before><office:text><text:p><draw:frame draw:name="graphics1" draw:style-name="fr1" text:anchor-type="as-char" svg:width="5cm" svg:height="6cm"><draw:image xlink:href="Pictures/helloworld.jpg" xlink:type="simple" xlink:actuate="onLoad" xlink:show="embed" /></draw:frame><text:span>hello</text:span></text:p></office:text></before>
   <ops>
