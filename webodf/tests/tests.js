@@ -42,7 +42,6 @@ runtime.loadClass("core.ZipTests");
 runtime.loadClass("gui.UndoStateRulesTests");
 runtime.loadClass("gui.TrivialUndoManagerTests");
 runtime.loadClass("gui.SelectionMoverTests");
-runtime.loadClass("gui.XMLEditTests");
 runtime.loadClass("gui.StyleHelperTests");
 runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.OdtDocumentTests");
@@ -99,7 +98,6 @@ if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.XPathTests);
     tests.push(ops.SessionTests);
     tests.push(ops.OperationTests);
-//    tests.push(gui.XMLEditTests);
 }
 
 var tester = new core.UnitTester();
