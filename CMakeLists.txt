@@ -333,7 +333,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/EditInfoMarker.js
     lib/gui/SessionView.js
     lib/gui/CaretManager.js
-    lib/gui/PresenterUI.js
     lib/gui/XMLEdit.js
     lib/gui/UndoManager.js
     lib/gui/UndoStateRules.js
