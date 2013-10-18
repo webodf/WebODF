@@ -735,7 +735,7 @@ odf.OdfContainer = (function () {
          */
         function serializeManifestXml() {
             var header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n',
-                xml = '<manifest:manifest xmlns:manifest="' + manifestns + '"></manifest:manifest>',
+                xml = '<manifest:manifest xmlns:manifest="' + manifestns + '" manifest:version="1.2"></manifest:manifest>',
                 manifest = /**@type{!Document}*/(runtime.parseXML(xml)),
                 manifestRoot = getDirectChild(manifest, manifestns, 'manifest'),
                 serializer = new xmldom.LSSerializer(),
