@@ -1,0 +1,29 @@
+What's needed for the XML editor?
+
+simple
+- loading any xml into the browser
+- saving xml from the browser
+- have styling for it (start with simple css)
+- show a toolbar with the names of the elements of the currenty hierarchy for the cursor
+- validation of the xml with xsd (use emscripten version)
+- validation of the xml with relax ng (use webodf validator)
+
+medium
+- show ui elements in sidebar for setting values of attributes or non-styled subelements
+
+complicated
+- have a cursor that can move around by clicking and cursor keys
+- determine what operations are allowed at a certain position from a validation model
+- modify the model and store information for allowing an undo operation
+- fill in temporary information from the validation model if some information is still missing when inserting an item
+- swapping out a choice at a certain position in the xml model
+- xml view mode
+
+
+
+
+-- unrelated --
+
+How can we use xslt and keep identifiers in the transformed document without having our own xslt implementation?
+
+The provided xslt would need to be adapted to insert / keep the identifiers without 

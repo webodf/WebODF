@@ -27,15 +27,19 @@
       border-bottom: 1px solid #ff8a00;
     }
   </style>
-  <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
-<script src="lib/packages.js" type="text/javascript" charset="utf-8"></script>
-  <script src="lib/xmled/ValidationModel.js" type="text/javascript" charset="utf-8"></script>
-  <script src="lib/xmled/XmlCaret.js" type="text/javascript" charset="utf-8"></script>
-  <script src="lib/xmled/XmlCanvas.js" type="text/javascript" charset="utf-8"></script>
-  <script src="lib/xmled/XmlEditor.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../webodf/lib/runtime.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../webodf/lib/packages.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
-var xsdurl = "op-xsd-2012-05-24_comments.xsd",
-    xmlurl = "GVOP-2013-629.xml", //h-tk-20112012-9-23.xml",
+    runtime.currentDirectory = function () {
+        return "../../webodf/lib";
+    };
+    runtime.libraryPaths = function () {
+        return [ runtime.currentDirectory() ];
+    };
+runtime.loadClass("xmled.XmlEditor");
+
+var xsdurl = "XMLSchema.xsd",
+    xmlurl = "XMLSchema.xsd", //h-tk-20112012-9-23.xml",
     styleurl = "opxml.css";
 function init() {
     var xmlelement = document.getElementById("xml"),

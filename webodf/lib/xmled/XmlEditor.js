@@ -468,10 +468,10 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                     r = doc.createRange();
                 crumbBar.setDocumentRoot(root);
                 // hack to select start of doc
-                r.setStart(e, 0);
-                r.setEnd(e, 0);
-                sel.addRange(r);
                 if (e) {
+                    r.setStart(e, 0);
+                    r.setEnd(e, 0);
+                    sel.addRange(r);
                     setActiveElement(e);
                 }
             }
