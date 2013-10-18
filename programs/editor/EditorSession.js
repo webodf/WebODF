@@ -107,7 +107,6 @@ define("webodf/editor/EditorSession", [
 
             return availableFonts;
         }
-        this.availableFonts = getAvailableFonts();
 
         function checkParagraphStyleName() {
             var newStyleName,
@@ -595,7 +594,7 @@ define("webodf/editor/EditorSession", [
             caretManager = new gui.CaretManager(self.sessionController);
             selectionViewManager = new gui.SelectionViewManager();
             self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, caretManager, selectionViewManager);
-            self.availableFonts = [];
+            self.availableFonts = getAvailableFonts();
             selectionViewManager.registerCursor(shadowCursor, true);
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
