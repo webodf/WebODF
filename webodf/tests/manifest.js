@@ -44,7 +44,6 @@
         "gui/TrivialUndoManagerTests.js",
         "gui/SelectionMoverTests.js",
         "gui/StyleHelperTests.js",
-        "gui/XMLEditTests.js",
         "odf/OdfUtilsTests.js",
         "odf/TextStyleApplicatorTests.js",
         "odf/ObjectNameGeneratorTests.js",

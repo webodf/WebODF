@@ -13,7 +13,6 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/gui/UndoStateRulesTests.js
     tests/gui/TrivialUndoManagerTests.js
     tests/gui/SelectionMoverTests.js
-    tests/gui/XMLEditTests.js
     tests/gui/StyleHelperTests.js
     tests/odf/OdfUtilsTests.js
     tests/odf/ObjectNameGeneratorTests.js
