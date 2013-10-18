@@ -56,7 +56,6 @@
         "gui/Avatar.js",
         "gui/Caret.js",
         "gui/Clipboard.js",
-        "gui/PresenterUI.js",
         "gui/DirectTextStyler.js",
         "gui/DirectParagraphStyler.js",
         "gui/KeyboardHandler.js",
