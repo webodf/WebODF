@@ -35,8 +35,9 @@
 /**
  * @constructor
  * @param {!string} grammarurl
+ * @param {function(?string):undefined=} onready
  */
-xmled.ValidationModel = function ValidationModel(grammarurl) {
+xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     "use strict";
     var state = xmled.ValidationModel.State.LOADING,
         xsdns = "http://www.w3.org/2001/XMLSchema",
@@ -132,6 +133,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl) {
         return null;
     }
     /**
+     * Return a description for the given element.
      * @param {!Element} element
      * @return {!string}
      */
@@ -214,6 +216,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl) {
             e = e.nextElementSibling;
         }
     }
+    /**
+     * Return the localNames of the elements that are allowed at this position.
+     * @param {!Element} element
+     * @return {!Array.<!string>}
+     */
     this.getAllowedElements = function (element) {
         var e = findElement(element.localName),
             allowed = {},
@@ -231,17 +238,32 @@ xmled.ValidationModel = function ValidationModel(grammarurl) {
         getAllowedElements(complexType, allowed);
         return Object.keys(allowed);
     };
+    /**
+     * Return array of possible replacements.
+     * @param {!Node} documentNode
+     * @param {!Range=} range
+     * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
+     */
+    this.getPossibleReplacements = function (documentNode, range) {
+        var doc = documentNode.ownerDocument || documentNode,
+            r = [],
+            f;
+        if (!range) {
+            f = doc.createDocumentFragment();
+            r = [{desc: '', range: {}, dom: f}];
+        }
+        return r;
+    };
     function init() {
         runtime.loadXML(grammarurl, function (err, dom) {
             if (err) {
                 error = err;
                 state = xmled.ValidationModel.State.ERROR;
-                return;
+                return onready && onready(error);
             }
             state = xmled.ValidationModel.State.READY;
             xsd = dom;
-            runtime.log(err);
-//            console.log(dom);
+            return onready && onready(null);
         });
     }
     init();
