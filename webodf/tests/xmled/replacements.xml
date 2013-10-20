@@ -1,0 +1,7 @@
+<replacements xmlns:e="http://example.org/">
+  <replacement id="a"><e:a/></replacement>
+  <replacement id="b"><e:b/></replacement>
+  <replacement id="c"><e:c/></replacement>
+  <replacement id="d"><e:d><e:a/></e:d></replacement>
+  <replacement id="e"><e:e num="1"/></replacement>
+</replacements>

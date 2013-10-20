@@ -42,7 +42,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     var state = xmled.ValidationModel.State.LOADING,
         xsdns = "http://www.w3.org/2001/XMLSchema",
         error,
-        xsd;
+        xsd,
+        targetNamespace;
     /**
      * @return {!xmled.ValidationModel.State}
      */
@@ -238,19 +239,105 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         getAllowedElements(complexType, allowed);
         return Object.keys(allowed);
     };
+    function forEachElement(element, ns, localName, f) {
+        var e = element.firstElementChild;
+        while (e) {
+            if (e.namespaceURI === ns && e.localName === localName) {
+                f(e);
+            }
+            e = e.nextElementSibling;
+        }
+    }
+    function createDefaultAttributeValue(att) {
+        return att ? "1" : "0";
+    }
+    function getMinOccurs(element) {
+        return (element.hasAttribute("minOccurs"))
+            ? parseInt(element.getAttribute("minOccurs"), 10) : 1;
+    }
+    function addGroup(instance, group) {
+        if (group.namespaceURI !== xsdns) {
+            return;
+        }
+        var doc = instance.ownerDocument,
+            e;
+        if (group.localName === "element") {
+            e = doc.createElementNS(targetNamespace,
+                group.getAttribute("name"));
+            instance.appendChild(e);
+        }
+    }
+    function addSequence(instance, sequence) {
+        var minOccurs = getMinOccurs(sequence),
+            i,
+            e;
+        for (i = 0; i < minOccurs; i += 1) {
+            e = sequence.firstElementChild;
+            while (e) {
+                addGroup(instance, e);
+                e = e.nextElementSibling;
+            }
+        }
+    }
+    function fillElementWithDefaults(instance, definition) {
+        forEachElement(definition, xsdns, "complexType", function (type) {
+            forEachElement(type, xsdns, "attribute", function (att) {
+                if (att.getAttribute("use") === "required") {
+                    if (att.hasAttribute("name")) {
+                        instance.setAttribute(att.getAttribute("name"),
+                            createDefaultAttributeValue(att));
+                    }
+                }
+            });
+            forEachElement(type, xsdns, "sequence", function (seq) {
+                addSequence(instance, seq);
+            });
+        });
+    }
+    function getPossibleDocument(documentNode, topLevelElement) {
+        var doc = documentNode.ownerDocument || documentNode,
+            f = doc.createDocumentFragment(),
+            e = doc.createElementNS(targetNamespace,
+                topLevelElement.getAttribute("name"));
+        f.appendChild(e);
+        fillElementWithDefaults(e, topLevelElement);
+        return {desc: '', range: {}, dom: f};
+    }
+    function getPossibleDocuments(documentNode) {
+        // for each xsd:element can lead to a document
+        var r = [], e;
+        e = xsd && xsd.firstElementChild;
+        while (e) {
+            if (e.namespaceURI === xsdns && e.localName === "element") {
+                r.push(getPossibleDocument(documentNode, e));
+            }
+            e = e.nextElementSibling;
+        }
+        return r;
+    }
     /**
      * Return array of possible replacements.
+     * The documentNode is the node that contains the documentElement. It does
+     * not have to be a Document node.
+     * The range indicates the start and end points of the range that is being
+     * replaced.
+     * The returned array contains a textual description, a range that contains
+     * the corresponding points in the created fragment and the dom fragment
+     * that can be the replacement for the input range. This range is owned by
+     * the same document as the documentNode.
+     *
      * @param {!Node} documentNode
      * @param {!Range=} range
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
     this.getPossibleReplacements = function (documentNode, range) {
-        var doc = documentNode.ownerDocument || documentNode,
-            r = [],
-            f;
+        var r;
         if (!range) {
-            f = doc.createDocumentFragment();
-            r = [{desc: '', range: {}, dom: f}];
+            r = getPossibleDocuments(documentNode);
+//        } else if (range.collapsed) {
+//            throw "Not implemented";
+        } else {
+            throw "Not implemented";
         }
         return r;
     };
@@ -262,7 +349,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 return onready && onready(error);
             }
             state = xmled.ValidationModel.State.READY;
-            xsd = dom;
+            xsd = dom.documentElement;
+            targetNamespace = null;
+            if (xsd.hasAttribute("targetNamespace")) {
+                targetNamespace = xsd.getAttribute("targetNamespace");
+            }
             return onready && onready(null);
         });
     }

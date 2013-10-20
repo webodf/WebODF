@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, xmled, document*/
+/*global runtime, xmled, document, xmldom*/
 runtime.loadClass("xmled.ValidationModel");
 
 /**
@@ -41,25 +41,70 @@ runtime.loadClass("xmled.ValidationModel");
 xmled.ValidationModelTests = function ValidationModelTests(runner) {
     "use strict";
     var r = runner,
-        t;
+        t,
+        replacements;
+    function serialize(element) {
+        var serializer = new xmldom.LSSerializer();
+        return serializer.writeToString(element, {});
+    }
 
-    function testSimpleRoot(callback) {
-        var model = new xmled.ValidationModel("xmled/simple.xsd", function (e) {
-            t.err = e;
+    function loadReplacements(callback) {
+        if (replacements) {
+            return callback();
+        }
+        runtime.loadXML("xmled/replacements.xml", function (err, dom) {
+            t.err = err;
+            t.dom = dom;
             r.shouldBeNull(t, "t.err");
-            t.reps = model.getPossibleReplacements(document);
-            r.shouldBe(t, "t.reps.length", "1");
+            r.shouldBeNonNull(t, "t.dom");
+            replacements = {};
+            var f, e;
+            e = dom.documentElement.firstElementChild;
+            while (e) {
+                f = dom.createDocumentFragment();
+                while (e.firstChild) {
+                    f.appendChild(e.firstChild);
+                }
+                replacements[e.getAttribute("id")] = f;
+                e = e.nextElementSibling;
+            }
             callback();
         });
     }
-    function testLoadXML(callback) {
-        runtime.loadXML("tests.html", function (err, xml) {
-            t.err = err || null;
-            t.xml = xml || null;
-            r.shouldBeNull(t, "t.err");
-            r.shouldBeNonNull(t, "t.xml");
+
+    function checkReplacement(rep, ref) {
+        if (!r.areNodesEqual(rep, ref)) {
+            t.rep = serialize(rep);
+            t.ref = serialize(ref);
+        } else {
+            t.rep = t.ref = "OK";
+        }
+        r.shouldBe(t, "t.rep", "t.ref");
+    }
+
+    function checkReplacements(reps, ids, callback) {
+        loadReplacements(function () {
+            t.reps = reps;
+            r.shouldBe(t, "t.reps.length", String(ids.length));
+            var i, length = Math.min(ids.length, reps.length);
+            for (i = 0; i < length; i += 1) {
+                checkReplacement(reps[i].dom, replacements[ids[i]]);
+            }
             callback();
         });
+    }
+
+    function testRoot(xsd, replacementIds) {
+        var f = function (callback) {
+            var model = new xmled.ValidationModel(xsd, function (e) {
+                t.err = e;
+                r.shouldBeNull(t, "t.err");
+                t.reps = model.getPossibleReplacements(document);
+                checkReplacements(t.reps, replacementIds, callback);
+            });
+        };
+        f.functionName = xsd;
+        return f;
     }
 
     this.setUp = function () {
@@ -73,8 +118,9 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
     };
     this.asyncTests = function () {
         return [
-            testSimpleRoot,
-            testLoadXML
+            testRoot("xmled/empty.xsd", []),
+            testRoot("xmled/simple.xsd", ["a", "b", "c"]),
+            testRoot("xmled/complex01.xsd", ["a", "d", "e"])
         ];
     };
 };

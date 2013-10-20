@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.org/" >
-
-	<xs:element name="a">
-		<xs:simpleType>
-	  		<xs:list itemType="xs:string"/>
-		</xs:simpleType>
-	</xs:element>
-
+  <xs:element name="a">
+    <xs:simpleType>
+      <xs:list itemType="xs:integer"/>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="b">
+    <xs:simpleType>
+      <xs:union/>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="c">
+    <xs:simpleType>
+      <xs:restriction/>
+    </xs:simpleType>
+  </xs:element>
 </xs:schema>
