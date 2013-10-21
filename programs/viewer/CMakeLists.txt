@@ -53,6 +53,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/index.html ${VIEWERBUILDDIR}/index.html
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ODFViewerPlugin.js ${VIEWERBUILDDIR}/ODFViewerPlugin.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PluginLoader.js ${VIEWERBUILDDIR}/PluginLoader.js
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${VIEWERBUILDDIR}
     DEPENDS
         ${VIEWER_IMAGES}
         viewer.css
