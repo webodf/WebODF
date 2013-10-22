@@ -98,21 +98,6 @@ core.Cursor = function Cursor(document, memberId) {
         }
     }
     /**
-     * @param {!Node} node
-     * @param {!Element} container
-     * @param {!number} offset
-     * @return {undefined}
-     */
-    function putIntoContainer(node, container, offset) {
-        runtime.assert(Boolean(container), "putCursorIntoContainer: invalid container");
-        var n = container.firstChild;
-        while (n !== null && offset > 0) {
-            n = n.nextSibling;
-            offset -= 1;
-        }
-        container.insertBefore(node, n);
-    }
-    /**
      * Remove the cursor from the tree.
      * @param {!Element} node
      */
@@ -132,13 +117,10 @@ core.Cursor = function Cursor(document, memberId) {
      * @return {undefined}
      */
     function putNode(node, container, offset) {
-        var text, element;
         if (container.nodeType === Node.TEXT_NODE) {
-            text = /**@type{!Text}*/(container);
-            putIntoTextNode(node, text, offset);
+            putIntoTextNode(node, /**@type{!Text}*/(container), offset);
         } else if (container.nodeType === Node.ELEMENT_NODE) {
-            element = /**@type{!Element}*/(container);
-            putIntoContainer(node, element, offset);
+            container.insertBefore(node, container.childNodes[offset]);
         }
         recentlyModifiedNodes.push(node.previousSibling);
         recentlyModifiedNodes.push(node.nextSibling);
