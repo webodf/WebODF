@@ -247,6 +247,8 @@ if (NOT ANDROID_SDK_DIR)
   endif()
 endif(NOT ANDROID_SDK_DIR)
 
+set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
+
 set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/core/RawDeflate.js
@@ -402,6 +404,7 @@ add_custom_command(
     OUTPUT ${WEBODFZIP}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBODFZIPDIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${WEBODFZIPDIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/viewer/README-viewer.odt ${WEBODFZIPDIR}/README.odt
     # viewer
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${VIEWERBUILDDIR} ${WEBODFZIPDIR}/viewer
