@@ -135,7 +135,7 @@ function init() {
     });
     addSpacer(toolbar);
     addButton(toolbar, "get the source code", function onclick() {
-        document.location.href = "http://gitorious.org/webodf/";
+        document.location.href = "https://github.com/kogmbh/WebODF/";
     });
     loadODF();
 }
