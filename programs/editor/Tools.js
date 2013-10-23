@@ -102,8 +102,18 @@ define("webodf/editor/Tools", [
              * @return {undefined}
              */
             this.destroy = function (callback) {
-                // TODO: investigate what else needs to be done
-                toolbar.destroyRecursive(true);
+                // TODO:
+                // 1. We don't want to use `document`
+                // 2. We would like to avoid deleting all widgets
+                // under document.body because this might interfere with
+                // other apps that use the editor not-in-an-iframe,
+                // but dojo always puts its dialogs below the body,
+                // so this works for now. Perhaps will be obsoleted
+                // once we move to a better widget toolkit
+                var widgets = dijit.findWidgets(document.body);
+                dojo.forEach(widgets, function(w) {
+                    w.destroyRecursive(false);
+                });
                 callback();
             };
 
