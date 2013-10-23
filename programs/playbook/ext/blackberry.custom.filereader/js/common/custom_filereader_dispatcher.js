@@ -32,7 +32,7 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/webodf/webodf/
+ * @source: https://github.com/kogmbh/WebODF/
  */
 (function () {
 	var CUSTOM_FILEREADER_API_URL = "blackberry/custom/filereader";

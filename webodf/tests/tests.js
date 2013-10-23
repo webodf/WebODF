@@ -31,7 +31,7 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/webodf/webodf/
+ * @source: https://github.com/kogmbh/WebODF/
  */
 /*global window, runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
 

@@ -31,7 +31,7 @@
  * This license applies to this entire compilation.
  * @licend
  * @source: http://www.webodf.org/
- * @source: http://gitorious.org/webodf/webodf/
+ * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, Runtime, core, Node, Element*/
 /*jslint evil: true, continue: true, emptyblock: true, unparam: true*/
