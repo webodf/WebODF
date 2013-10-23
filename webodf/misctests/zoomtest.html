@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<div id="zoomed" style="position: absolute">
+    <div id="container" style="position: absolute; top: 10px; left: 20px; width: 200px; height: 20px; background-color: red">
+    </div>
+</div>
+<pre style="position: absolute; top: 50px">
+<script>
+    var zoomed = document.getElementById("zoomed"),
+        container = document.getElementById("container"),
+        range = document.createRange();
+    range.selectNode(container);
+
+    function toString(rect) {
+        return "top: " + rect.top + ", left: " + rect.left + ", height: " + rect.height;
+    }
+
+    document.writeln("Before transform");
+    document.writeln("================");
+    document.writeln("container.getBoundingClientRect: " + toString(container.getBoundingClientRect()));
+    document.writeln("range.getBoundingClientRect: " + toString(range.getBoundingClientRect()));
+
+    zoomed.style["transform"] = "scale(1.5)";
+    zoomed.style["transform-origin"] = "left top 0px";
+    zoomed.style["-webkit-transform"] = "scale(1.5)";
+    zoomed.style["-webkit-transform-origin"] = "50% 0%";
+
+    document.writeln("");
+    document.writeln("After transform");
+    document.writeln("================");
+    document.writeln("container.getBoundingClientRect: " + toString(container.getBoundingClientRect()));
+    document.writeln("range.getBoundingClientRect: " + toString(range.getBoundingClientRect()));
+</script>
+</pre>
+</body>
+</html>
