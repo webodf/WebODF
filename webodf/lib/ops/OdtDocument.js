@@ -579,31 +579,43 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         Object.keys(cursors).forEach(function(memberId) {
             var cursor = cursors[memberId],
                 stepCounter = cursor.getStepCounter(),
-                stepsToAnchor,
-                positionsToAdjustFocus = 0,
-                positionsToAnchor = 0,
+                stepsSelectionLength,
+                positionsToAdjustFocus,
+                positionsToAdjustAnchor,
+                positionsToAnchor,
                 cursorMoved = false;
 
             // Equip a Root Filter for specifically this cursor
             rootConstrainedFilter.addFilter('RootFilter', self.createRootFilter(memberId));
-            stepsToAnchor =  stepCounter.countStepsToPosition(cursor.getAnchorNode(), 0, rootConstrainedFilter);
+            stepsSelectionLength = stepCounter.countStepsToPosition(cursor.getAnchorNode(), 0, rootConstrainedFilter);
 
             if (!stepCounter.isPositionWalkable(rootConstrainedFilter)) {
                 cursorMoved = true;
-                positionsToAdjustFocus = stepCounter.countPositionsToNearestStep(rootConstrainedFilter);
-                cursor.move(positionsToAdjustFocus);
+                // Record how far off each end of the selection is from an accepted position
+                positionsToAdjustFocus = stepCounter.countPositionsToNearestStep(cursor.getNode(), 0, rootConstrainedFilter);
+                positionsToAdjustAnchor = stepCounter.countPositionsToNearestStep(cursor.getAnchorNode(), 0, rootConstrainedFilter);
+                cursor.move(positionsToAdjustFocus); // Need to move into a valid position before extending the selection
 
-                if (stepsToAnchor !== 0) {
-                    positionsToAnchor = stepsToAnchor < 0
-                        ? -stepCounter.countBackwardSteps(-stepsToAnchor, rootConstrainedFilter)
-                        : stepCounter.countForwardSteps(stepsToAnchor, rootConstrainedFilter);
+                if (stepsSelectionLength !== 0) {
+                    // Normally the step is rounded down, meaning the position adjustment will be negative
+                    // The only circumstance in which the position adjust is positive is when either the node appears
+                    // before the first valid position in a document, or, the rounded down position would move the node
+                    // to a previous paragraph (something that is never desired)
+                    // In this case, the selection is lengthened or shortened when the anchor and focus are adjusted
+                    if (positionsToAdjustAnchor > 0) {
+                        stepsSelectionLength += 1;
+                    }
+                    if (positionsToAdjustFocus > 0) {
+                        stepsSelectionLength -= 1;
+                    }
+                    positionsToAnchor = stepCounter.countSteps(stepsSelectionLength, rootConstrainedFilter);
                     // Cursor extension implicitly goes anchor-to-focus. As such, the cursor needs to be navigated
                     // first to the anchor position, then extended to the focus node to ensure the focus ends up at the
                     // correct end of the selection
                     cursor.move(positionsToAnchor);
                     cursor.move(-positionsToAnchor, true);
                 }
-            } else if (stepsToAnchor === 0) {
+            } else if (stepsSelectionLength === 0) {
                 cursorMoved = true;
                 // call move(0) here to force the cursor to reset its selection to collapsed
                 // and remove the now-unnecessary anchor node

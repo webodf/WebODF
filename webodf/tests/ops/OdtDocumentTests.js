@@ -302,9 +302,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
     }
@@ -316,9 +320,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
     }
@@ -331,9 +339,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
     }
@@ -346,11 +358,78 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-4");
         r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
+    function testFixCursorPositions_CursorAndAnchorNearParagraphStart() {
+        createOdtDocument("<text:p>A</text:p><text:p>BC</text:p><text:p>DE</text:p>");
+        setCursorPosition(2, 3);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.selectedText = t.cursor.getSelectedRange().toString();
+        r.shouldBe(t, "t.selectedText", "'BC'");
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "-3");
+        r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
+    function testFixCursorPositions_CursorNearParagraphStart_ForwardSelection() {
+        createOdtDocument("<text:p>A</text:p><text:p>BCD</text:p><text:p>E</text:p>");
+        setCursorPosition(2, 3);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.selectedText = t.cursor.getSelectedRange().toString();
+        r.shouldBe(t, "t.selectedText", "'BCD'");
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "-3");
+        r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
+    function testFixCursorPositions_CursorNearParagraphStart_ReverseSelection() {
+        createOdtDocument("<text:p>A</text:p><text:p>BCD</text:p><text:p>E</text:p>");
+        setCursorPosition(5, -3);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.selectedText = t.cursor.getSelectedRange().toString();
+        r.shouldBe(t, "t.selectedText", "'BCD'");
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "3");
+        r.shouldBe(t, "t.stepsToRoot", "-2");
     }
     function testFixCursorPositions_Collapsed_CursorInInvalidPlace() {
         createOdtDocument("<text:p>ABCD</text:p>");
@@ -360,8 +439,12 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToRoot", "-1");
     }
 
@@ -471,6 +554,9 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace,
             testFixCursorPositions_Collapsed_CursorInInvalidPlace,
             testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace_OverAnnotation,
+            testFixCursorPositions_CursorAndAnchorNearParagraphStart,
+            testFixCursorPositions_CursorNearParagraphStart_ForwardSelection,
+            testFixCursorPositions_CursorNearParagraphStart_ReverseSelection,
 
             testAvailablePositions_EmptyParagraph,
             testAvailablePositions_SimpleTextNodes,
