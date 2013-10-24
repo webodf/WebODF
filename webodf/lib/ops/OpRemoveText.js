@@ -186,7 +186,7 @@ ops.OpRemoveText = function OpRemoveText() {
             destination = first,
             source = second,
             secondParent,
-            insertionPoint;
+            insertionPoint = null;
 
         if (collapseRules.isEmpty(first)) {
             mergeForward = true;

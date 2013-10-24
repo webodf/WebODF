@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internet Explorer Behaviours</title>
+    <style>
+        .success { font-weight: bold; color: green }
+        .fail { font-weight: bold; color: red }
+    </style>
+    <script type="text/javascript">
+        function performTest(delegate, area) {
+            try {
+                delegate(area);
+                return "<span class='success'>success</span>";
+            } catch(e) {
+                return "<span class='fail'>failed</span> - " + e.message;
+            }
+        }
+
+        function test(name, delegate) {
+            var testArea = document.getElementById("testArea");
+            document.writeln("<div>" + name + ": " + performTest(delegate, testArea) + "</div>");
+            while (testArea.firstChild) {
+                testArea.removeChild(testArea.firstChild);
+            }
+
+        }
+    </script>
+</head>
+<body>
+<div id="testArea">
+
+</div>
+<script type="text/javascript">
+    test("Node.insertBefore with undefined", function(area) {
+        var newNode = document.createElement("span");
+        area.insertBefore(newNode, undefined);
+    });
+
+    test("Selection.extend support", function(area) {
+        window.getSelection().collapse(area, 0);
+        window.getSelection().extend(area, 0);
+    });
+</script>
+</body>
+</html>

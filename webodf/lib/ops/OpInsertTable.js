@@ -154,7 +154,7 @@ ops.OpInsertTable = function OpInsertTable() {
             // For now assume the table should be inserted after the current paragraph
             // or failing that, as the first element in the root node
             previousSibling = odtDocument.getParagraphElement(domPosition.textNode);
-            rootNode.insertBefore(tableNode, previousSibling ? previousSibling.nextSibling : undefined);
+            rootNode.insertBefore(tableNode, previousSibling.nextSibling);
 
             odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalTableAdded, {
