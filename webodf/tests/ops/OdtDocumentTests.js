@@ -337,6 +337,21 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
     }
+    function testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace_OverAnnotation() {
+        createOdtDocument("<text:p>AB<office:annotation><text:p>#</text:p></office:annotation>CD</text:p>");
+        setCursorPosition(1, 4);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.stepsToAnchor", "-4");
+        r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
     function testFixCursorPositions_Collapsed_CursorInInvalidPlace() {
         createOdtDocument("<text:p>ABCD</text:p>");
         setCursorPosition(1);
@@ -455,6 +470,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testFixCursorPositions_Range_CursorInInvalidPlace,
             testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace,
             testFixCursorPositions_Collapsed_CursorInInvalidPlace,
+            testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace_OverAnnotation,
 
             testAvailablePositions_EmptyParagraph,
             testAvailablePositions_SimpleTextNodes,

@@ -579,13 +579,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         Object.keys(cursors).forEach(function(memberId) {
             var cursor = cursors[memberId],
                 stepCounter = cursor.getStepCounter(),
-                stepsToAnchor = stepCounter.countStepsToPosition(cursor.getAnchorNode(), 0, filter),
+                stepsToAnchor,
                 positionsToAdjustFocus = 0,
                 positionsToAnchor = 0,
                 cursorMoved = false;
 
             // Equip a Root Filter for specifically this cursor
             rootConstrainedFilter.addFilter('RootFilter', self.createRootFilter(memberId));
+            stepsToAnchor =  stepCounter.countStepsToPosition(cursor.getAnchorNode(), 0, rootConstrainedFilter);
 
             if (!stepCounter.isPositionWalkable(rootConstrainedFilter)) {
                 cursorMoved = true;
