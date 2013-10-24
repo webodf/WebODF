@@ -761,7 +761,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     this.addCursor = function (cursor) {
         runtime.assert(Boolean(cursor), "OdtDocument::addCursor without cursor");
-        var distanceToFirstTextNode = cursor.getStepCounter().countForwardSteps(1, filter),
+        var distanceToFirstTextNode = cursor.getStepCounter().countSteps(1, filter),
             memberid = cursor.getMemberId();
 
         runtime.assert(typeof memberid === "string", "OdtDocument::addCursor has cursor without memberid");

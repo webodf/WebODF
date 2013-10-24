@@ -86,7 +86,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
      */
     function setCursorPosition(stepsToStart, stepsToEnd) {
         var positions;
-        positions = t.counter.countForwardSteps(stepsToStart, t.filter);
+        positions = t.counter.countSteps(stepsToStart, t.filter);
         t.cursor.move(positions, false);
         if (stepsToEnd) {
             positions = t.counter.countSteps(stepsToEnd, t.filter);
@@ -123,7 +123,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             t.result = serializer.writeToString(t.root.firstChild, odf.Namespaces.namespaceMap);
             t.result = t.result.replace(cursorSerialized, "|");
             r.shouldBe(t, "t.result", "t.expected");
-            t.stepsToNextPosition = t.counter.countForwardSteps(1, t.filter);
+            t.stepsToNextPosition = t.counter.countSteps(1, t.filter);
             t.cursor.move(t.stepsToNextPosition, false);
         }
         // Ensure there are no other walkable positions in the document
@@ -137,8 +137,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             t.result = serializer.writeToString(t.root.firstChild, odf.Namespaces.namespaceMap);
             t.result = t.result.replace(cursorSerialized, "|");
             r.shouldBe(t, "t.result", "t.expected");
-            t.stepsToNextPosition = t.counter.countBackwardSteps(1, t.filter);
-            t.cursor.move(-t.stepsToNextPosition, false);
+            t.stepsToNextPosition = t.counter.countSteps(-1, t.filter);
+            t.cursor.move(t.stepsToNextPosition, false);
         }
         // Ensure there are no other walkable positions in the document
         r.shouldBe(t, "t.stepsToNextPosition", "0");

@@ -139,16 +139,6 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         }
     }
 
-    function countSteps(number, stepCounter, positionFilter) {
-        if (number > 0) {
-            return stepCounter.countForwardSteps(number, positionFilter);
-        }
-        if (number < 0) {
-            return -stepCounter.countBackwardSteps(-number, positionFilter);
-        }
-        return 0;
-    }
-
     this.execute = function (odtDocument) {
         var annotation = {},
             positionFilter = odtDocument.getPositionFilter(),
@@ -176,7 +166,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
 
         // Move the cursor inside the new annotation
         if (cursor) {
-            stepsToParagraph = countSteps(lengthToMove, cursor.getStepCounter(), positionFilter);
+            stepsToParagraph = cursor.getStepCounter().countSteps(lengthToMove , positionFilter);
             cursor.move(stepsToParagraph);
             cursor.resetSelectionType();
             odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);

@@ -140,13 +140,13 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     function countAndConfirm(xml, n, filter) {
         createDoc(xml);
         var counter = t.mover.getStepCounter(),
-            steps = counter.countForwardSteps(1, filter),
+            steps = counter.countSteps(1, filter),
             sum = 0,
             stepped = 0;
         while (steps > 0) {
             stepped += t.mover.movePointForward(steps);
             sum += steps;
-            steps = counter.countForwardSteps(1, filter);
+            steps = counter.countSteps(1, filter);
         }
         t.totalSteps = counter.countStepsToPosition(t.root, 0,filter);
         r.shouldBe(t, stepped.toString(), (n - 1).toString());

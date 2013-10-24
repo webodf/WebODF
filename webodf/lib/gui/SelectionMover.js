@@ -341,22 +341,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return stepsFilter2;
     }
- 
-    /**
-     * Return the number of positions moved to pass the requested number of filtered steps.
-     * The return value is always greater than or equal to the number of filtered steps, as
-     * each position can be at most one step (and it may take multiple positions to reach the
-     * next accepted step)
-     * @param {!number} steps
-     * @param {!core.PositionFilter} filter
-     * @return {!number} Number of positions required to move the requested number of filtered steps
-     */
-    function countBackwardSteps(steps, filter) {
-        var iterator = getIteratorAtCursor(),
-            positions = countSteps(iterator, -steps, filter);
-        // Chrome has some entertaining behaviour where it returns "-0" for an answer here...
-        return positions === 0 ? 0 : -positions;
-    }
 
     /**
      * Return the number of positions moved to pass the requested number of filtered steps.
@@ -619,8 +603,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
 
     this.getStepCounter = function () {
         return {
-            countForwardSteps: countStepsPublic,
-            countBackwardSteps: countBackwardSteps,
             countSteps: countStepsPublic,
             convertForwardStepsBetweenFilters: convertForwardStepsBetweenFilters,
             convertBackwardStepsBetweenFilters: convertBackwardStepsBetweenFilters,
