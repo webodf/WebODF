@@ -81,15 +81,16 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.styles.insertRule(rule, t.styles.cssRules.length);
     }
     /**
-     * @param {!number} startOffset
-     * @param {!number=} selectionLength
+     * @param {!number} stepsToStart Number of steps to advance the cursor
+     * @param {!number=} stepsToEnd
      */
-    function setCursorPosition(startOffset, selectionLength) {
-        var stepsToStartOffset;
-        stepsToStartOffset = t.counter.countForwardSteps(startOffset, t.filter);
-        t.cursor.move(stepsToStartOffset, false);
-        if (selectionLength) {
-            t.cursor.move(selectionLength, true);
+    function setCursorPosition(stepsToStart, stepsToEnd) {
+        var positions;
+        positions = t.counter.countForwardSteps(stepsToStart, t.filter);
+        t.cursor.move(positions, false);
+        if (stepsToEnd) {
+            positions = t.counter.countSteps(stepsToEnd, t.filter);
+            t.cursor.move(positions, true);
         } else {
             // workaround for SelectionMover cachedXOffset "feature"
             // Failure to do this will leave SelectionMover incorrectly assuming countLineSteps wants to get
