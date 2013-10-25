@@ -33,8 +33,9 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global Node, NodeFilter, gui, odf, ops, runtime*/
+/*global Node, NodeFilter, gui, odf, ops, runtime, core*/
 
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("odf.OdfNodeFilter");
 runtime.loadClass("gui.SelectionMover");
@@ -56,10 +57,34 @@ gui.SelectionView = function SelectionView(cursor) {
         overlayMiddle = doc.createElement('div'),
         overlayBottom = doc.createElement('div'),
         odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
         isVisible = true,
+        clientRectRange = doc.createRange(),
         positionIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+        areRangeClientRectsScaled = domUtils.areRangeRectanglesTransformed(doc),
         /**@const*/FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = NodeFilter.FILTER_REJECT;
+
+    /**
+     * The the span's BoundingClientRect using a range rather than from the element directly. Some browsers apply
+     * different transforms to a range ClientRect vs. an element ClientRect.
+     * See DomUtils, areRangeClientRectsTransformed() for more details
+     * @param {!Node} node
+     * @returns {!ClientRect}
+     */
+    function getBoundingClientRect(node) {
+        // If the sibling for which we want the bounding rect is a grouping element,
+        // then we desire to have it's full width at our access. Therefore,
+        // directly use gBCR (works fine for just paragraphs).
+        if (areRangeClientRectsScaled && node.nodeType === Node.ELEMENT_NODE) {
+            // Range & element client rectangles can only be mixed if both are transformed in the same way.
+            // Due to bugs like https://bugzilla.mozilla.org/show_bug.cgi?id=863618, this may not always be
+            // the case
+            return node.getBoundingClientRect();
+        }
+        clientRectRange.selectNode(node);
+        return clientRectRange.getBoundingClientRect();
+    }
 
     /**
      * Takes a rect with the fields `left, top, width, height`
@@ -97,16 +122,16 @@ gui.SelectionView = function SelectionView(cursor) {
      * @return {!{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}}
      */
     function translateRect(rect) {
-        var rootRect = root.getBoundingClientRect(),
+        var rootRect = getBoundingClientRect(root),
             zoomLevel = odtDocument.getOdfCanvas().getZoomLevel(),
             resultRect = {};
 
-        resultRect.top = (rect.top - rootRect.top) / zoomLevel;
-        resultRect.left = (rect.left  - rootRect.left) / zoomLevel;
-        resultRect.bottom = (rect.bottom - rootRect.top) / zoomLevel;
-        resultRect.right = (rect.right - rootRect.left) / zoomLevel;
-        resultRect.width = rect.width / zoomLevel;
-        resultRect.height = rect.height / zoomLevel;
+        resultRect.top = domUtils.adaptRangeDifferenceToZoomLevel(rect.top - rootRect.top, zoomLevel);
+        resultRect.left = domUtils.adaptRangeDifferenceToZoomLevel(rect.left  - rootRect.left, zoomLevel);
+        resultRect.bottom = domUtils.adaptRangeDifferenceToZoomLevel(rect.bottom - rootRect.top, zoomLevel);
+        resultRect.right = domUtils.adaptRangeDifferenceToZoomLevel(rect.right - rootRect.left, zoomLevel);
+        resultRect.width = domUtils.adaptRangeDifferenceToZoomLevel(rect.width, zoomLevel);
+        resultRect.height = domUtils.adaptRangeDifferenceToZoomLevel(rect.height, zoomLevel);
 
         return resultRect;
     }
@@ -279,15 +304,7 @@ gui.SelectionView = function SelectionView(cursor) {
             // If the sibling is acceptable by the odfNodeFilter and the rootFilter,
             // only then take into account it's dimensions
             if (acceptNode(node) === FILTER_ACCEPT) {
-                // If the sibling for which we want the bounding rect is a grouping element,
-                // then we desire to have it's full width at our access. Therefore,
-                // directly use gBCR (works fine for just paragraphs).
-                if (odfUtils.isGroupingElement(node)) {
-                    rect = node.getBoundingClientRect();
-                } else {
-                    range.selectNode(node);
-                    rect = range.getBoundingClientRect();
-                }
+                rect = getBoundingClientRect(node);
             }
             return rect;
         }
@@ -342,7 +359,7 @@ gui.SelectionView = function SelectionView(cursor) {
         // width is nicer.
         // We don't need to look deeper into the node, so this is very cheap.
         if (odfUtils.isParagraph(firstSibling)) {
-            grownRect = checkAndGrowOrCreateRect(grownRect, firstSibling.getBoundingClientRect());
+            grownRect = checkAndGrowOrCreateRect(grownRect, getBoundingClientRect(firstSibling));
         } else {
             // The first top-level sibling was not a paragraph, so we now need to
             // Grow the rect in a detailed manner using the selected area *inside* the first sibling.
@@ -376,7 +393,7 @@ gui.SelectionView = function SelectionView(cursor) {
         // Just like before, a cheap way to avoid looking deeper into the listSibling
         // if it is a paragraph.
         if (odfUtils.isParagraph(lastSibling)) {
-            grownRect = checkAndGrowOrCreateRect(grownRect, firstSibling.getBoundingClientRect());
+            grownRect = checkAndGrowOrCreateRect(grownRect, getBoundingClientRect(firstSibling));
         } else {
             // Grow the rect using the selected area inside
             // the last sibling, iterating backwards from the lastNode

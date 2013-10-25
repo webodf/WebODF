@@ -411,6 +411,15 @@
         }
 
         /**
+         * Detect browsers exhibiting bug found at https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+         * @param {!Document} document
+         * @returns {!boolean}
+         */
+        this.areRangeRectanglesTransformed = function(document) {
+            return !rangeClientRectsUntransformedBug(document);
+        };
+
+        /**
          * Scale the supplied number by the specified zoom transformation if the browser does not transform range client
          * rectangles correctly.
          * In firefox, the span rectangle will be affected by the zoom, but the range is not.
