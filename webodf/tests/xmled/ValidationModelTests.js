@@ -103,7 +103,65 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
                 checkReplacements(t.reps, replacementIds, callback);
             });
         };
-        f.functionName = xsd;
+        f.functionName = "init-" + xsd;
+        return f;
+    }
+
+    /**
+     * @param {!Node} node
+     * @param {!Array.<!number>} list
+     * @return {{node:!Node, offset: !number }}
+     */
+    function getPosition(node, list) {
+        var i, j, l = list.length - 1, p, n = node;
+        runtime.assert(l >= 0, "Position array must have at least one entry.");
+        for (i = 0; i < l; i += 1) {
+            n = n.firstChild;
+            p = list[i];
+            for (j = 0; j < p; j += 1) {
+                n = n.nextSibling;
+            }
+        }
+        return {node: /**@type{!Node}*/(n), offset: list[l]};
+    }
+
+    /**
+     * @param {!Node} node
+     * @param {!Array.<!number>} start
+     * @param {!Array.<!number>} end
+     * @return {!Range}
+     */
+    function createRange(node, start, end) {
+        var range = node.ownerDocument.createRange(),
+            pos = getPosition(node, start);
+        range.setStart(pos.node, pos.offset);
+        pos = getPosition(node, end);
+        range.setEnd(pos.node, pos.offset);
+        return range;
+    }
+
+    /**
+     * @param {!string} xsd
+     * @param {!string} initId
+     * @param {!Array.<!number>} start
+     * @param {!Array.<!number>} end
+     * @param {!Array.<!number>} replacementIds
+     * @return {!function(!function():undefined):undefined} callback
+     */
+    function testReplace(xsd, initId, start, end, replacementIds) {
+        var f = function (callback) {
+            var model = new xmled.ValidationModel(xsd, function (e) {
+                t.err = e;
+                r.shouldBeNull(t, "t.err");
+                loadReplacements(function () {
+                    var initial = replacements[initId],
+                        range = createRange(initial, start, end);
+                    t.reps = model.getPossibleReplacements(initial, range);
+                    checkReplacements(t.reps, replacementIds, callback);
+                });
+            });
+        };
+        f.functionName = "replace-" + xsd;
         return f;
     }
 
@@ -120,7 +178,9 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
         return [
             testRoot("xmled/empty.xsd", []),
             testRoot("xmled/simple.xsd", ["a", "b", "c"]),
-            testRoot("xmled/complex01.xsd", ["a", "d", "e"])
+            testRoot("xmled/complex01.xsd", ["a", "d", "e"]),
+            testReplace("xmled/simple.xsd", "a", [0], [1], ["a", "b", "c"]),
+            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], ["a"])
         ];
     };
 };
