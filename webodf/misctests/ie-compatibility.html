@@ -8,12 +8,17 @@
     </style>
     <script type="text/javascript">
         function performTest(delegate, area) {
+            var result, summary = "";
             try {
-                delegate(area);
-                return "<span class='success'>success</span>";
+                result = delegate(area);
             } catch(e) {
-                return "<span class='fail'>failed</span> - " + e.message;
+                result = false;
+                summary = " - " + e.message;
             }
+            if (result !== false) {
+                return "<span class='success'>success</span>" + summary;
+            }
+            return "<span class='fail'>failed</span>" + summary;
         }
 
         function test(name, delegate) {
@@ -39,6 +44,12 @@
     test("Selection.extend support", function(area) {
         window.getSelection().collapse(area, 0);
         window.getSelection().extend(area, 0);
+    });
+
+    test("Node.contains impl", function(area) {
+        var newNode = document.createTextNode("really IE?");
+        area.appendChild(newNode);
+        return area.contains(newNode) === true;
     });
 </script>
 </body>

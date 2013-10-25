@@ -105,6 +105,11 @@ gui.SessionController = (function () {
         keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
         keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
 
+        function getTarget(e) {
+            // e.srcElement because IE10 likes to be different...
+            return e.target || e.srcElement;
+        }
+
         /**
          * @param {!Event} event
          * @return {undefined}
@@ -332,7 +337,7 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!UIEvent} e
+         * @param {!{detail: !number, clientX: !number, clientY: !number}} e
          * @return {?{anchorNode:!Node, anchorOffset:!number, focusNode:!Node, focusOffset:!number}}
          */
         function getSelection(e) {
@@ -391,12 +396,19 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         function selectRange(e) {
+            var capturedDetails = {
+                detail: e.detail,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                target: getTarget(e)
+            };
+
             // When click somewhere within already selected text, call window.getSelection() straight away results
             // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
             // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
             // out the caret position from two coordinates.
             runtime.setTimeout(function () {
-                var /** @type {?Node} */targetNode = /** @type {?Node} */(e.target),
+                var /** @type {?Node} */targetNode = /** @type {?Node} */(capturedDetails.target),
                     parentNode = targetNode.parentNode,
                     selection, selectionType, stepsToAnchor, stepsToFocus, oldPosition, op;
 
@@ -409,7 +421,7 @@ gui.SessionController = (function () {
                     stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null;
                     selectionType = ops.OdtCursor.RegionSelection;
                 } else {
-                    selection = getSelection(e);
+                    selection = getSelection(capturedDetails);
                     if (selection === null) {
                         return;
                     }
@@ -803,7 +815,7 @@ gui.SessionController = (function () {
          * @return {?string}
          */
         function stringFromKeyPress(event) {
-            if (event.which === null) {
+            if (event.which === null || event.which === undefined) {
                 return String.fromCharCode(event.keyCode); // IE
             }
             if (event.which !== 0 && event.charCode !== 0) {
@@ -961,7 +973,7 @@ gui.SessionController = (function () {
          * @param e
          */
         function filterMouseClicks(e) {
-            clickStartedWithinContainer = e.target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), e.target);
+            clickStartedWithinContainer = getTarget(e) && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), getTarget(e));
             if (clickStartedWithinContainer) {
                 isMouseDown = true;
                 isMouseMoved = false;
@@ -970,7 +982,7 @@ gui.SessionController = (function () {
         }
 
         function handleMouseUp(event) {
-            var target = event.target,
+            var target = getTarget(event),
                 annotationNode = null;
             if (target.className === "annotationRemoveButton") {
                 annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
@@ -991,11 +1003,15 @@ gui.SessionController = (function () {
         }
 
         function handleMouseMove(event) {
+            var capturedDetails = {
+                clientX: event.clientX,
+                clientY: event.clientY
+            };
             if (isMouseDown) {
                 isMouseMoved = true;
                 runtime.setTimeout(function () {
                     var selection = window.getSelection(),
-                        position = caretPositionFromPoint(event.clientX, event.clientY),
+                        position = caretPositionFromPoint(capturedDetails.clientX, capturedDetails.clientY),
                         iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
                         selectionRange,
                         isForwardSelection;
