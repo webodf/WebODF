@@ -66,7 +66,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
      * @return {!number}
      */
     function applyDecay(opacity, delay) {
-        return runtime.getWindow().setTimeout(function () {
+        return runtime.setTimeout(function () {
             marker.style.opacity = opacity;
         }, delay);
     }
@@ -76,7 +76,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
      * @param {number} timer
      */
     function deleteDecay(timer) {
-        runtime.getWindow().clearTimeout(timer);
+        runtime.clearTimeout(timer);
     }
 
     function setLastAuthor(memberid) {

@@ -1,5 +1,7 @@
 /**
- * Copyright (C) 2012 KO GmbH <jos.van.den.oever@kogmbh.com>
+ * @license
+ * Copyright (C) 2012-2013 KO GmbH <copyright@kogmbh.com>
+ *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -33,7 +35,9 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global Node, NodeFilter, runtime, core, gui, odf, XMLSerializer*/
+
+/*global Node, NodeFilter, runtime, core, gui, odf*/
+
 runtime.loadClass("core.Cursor");
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.PositionIterator");
@@ -180,8 +184,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             newRect,
             horizontalMovement,
             o, c,
-            isForwardSelection,
-            /**@type{?Window}*/window = runtime.getWindow();
+            isForwardSelection;
 
         initialRect = getVisibleRect(iterator.container(), iterator.unfilteredDomOffset(), range);
         while (left > 0 && move()) {
@@ -211,8 +214,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         if (horizontalMovement || cachedXOffset === undefined) {
             cachedXOffset = newRect.left;
         }
-        window.clearTimeout(timeoutHandle);
-        timeoutHandle = window.setTimeout(function () {
+        runtime.clearTimeout(timeoutHandle);
+        timeoutHandle = runtime.setTimeout(function () {
             cachedXOffset = undefined;
         }, 2000);
 
