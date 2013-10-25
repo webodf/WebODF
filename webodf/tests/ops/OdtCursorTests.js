@@ -340,7 +340,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         t.startContainer = s.startContainer;
         t.text = s.startContainer.data;
 
-        steps = t.counter.countForwardSteps(n, filter);
+        steps = t.counter.countSteps(n, filter);
         r.shouldBe(t, steps.toString(), m.toString());
 
         s = t.cursor.getSelectedRange();
@@ -357,7 +357,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         t.startContainer = s.startContainer;
         t.text = s.startContainer.data;
 
-        steps = t.counter.countBackwardSteps(n, filter);
+        steps = -t.counter.countSteps(-n, filter);
         r.shouldBe(t, steps.toString(), m.toString());
         s = t.cursor.getSelectedRange();
         t.startOffset2 = s.startOffset;
@@ -399,19 +399,19 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         t.counter = t.cursor.getStepCounter();
 
         // move to a valid position
-        steps = t.counter.countForwardSteps(1, filter);
+        steps = t.counter.countSteps(1, filter);
         t.cursor.move(steps);
-        steps = t.counter.countBackwardSteps(1, filter);
+        steps = -t.counter.countSteps(-1, filter);
         t.cursor.move(-steps);
         t.pos = [];
         t.stepsSum = 0;
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
-            steps = t.counter.countForwardSteps(1, filter);
+            steps = t.counter.countSteps(1, filter);
             t.stepsSum += Math.abs(steps);
             t.moveSum += Math.abs(t.cursor.move(steps));
         }
-        r.shouldBe(t, "t.counter.countForwardSteps(1, t.filter)", "0");
+        r.shouldBe(t, "t.counter.countSteps(1, t.filter)", "0");
         r.shouldBe(t, "t.pos.length", m.toString());
         r.shouldBe(t, "t.stepsSum", n.toString());
         r.shouldBe(t, "t.moveSum", n.toString());
@@ -420,11 +420,11 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         t.stepsSum = 0;
         t.moveSum = 0;
         for (i = 1; i <= m; i += 1) {
-            steps = t.counter.countBackwardSteps(1, filter);
+            steps = -t.counter.countSteps(-1, filter);
             t.stepsSum += Math.abs(steps);
             t.moveSum += Math.abs(t.cursor.move(-steps));
         }
-        r.shouldBe(t, "t.counter.countBackwardSteps(1, t.filter)", "0");
+        r.shouldBe(t, "t.counter.countSteps(-1, t.filter)", "0");
         r.shouldBe(t, "t.pos.length", m.toString());
         r.shouldBe(t, "t.stepsSum", n.toString());
         r.shouldBe(t, "t.moveSum", n.toString());

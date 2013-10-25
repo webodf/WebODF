@@ -81,15 +81,16 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.styles.insertRule(rule, t.styles.cssRules.length);
     }
     /**
-     * @param {!number} startOffset
-     * @param {!number=} selectionLength
+     * @param {!number} stepsToStart Number of steps to advance the cursor
+     * @param {!number=} stepsToEnd
      */
-    function setCursorPosition(startOffset, selectionLength) {
-        var stepsToStartOffset;
-        stepsToStartOffset = t.counter.countForwardSteps(startOffset, t.filter);
-        t.cursor.move(stepsToStartOffset, false);
-        if (selectionLength) {
-            t.cursor.move(selectionLength, true);
+    function setCursorPosition(stepsToStart, stepsToEnd) {
+        var positions;
+        positions = t.counter.countSteps(stepsToStart, t.filter);
+        t.cursor.move(positions, false);
+        if (stepsToEnd) {
+            positions = t.counter.countSteps(stepsToEnd, t.filter);
+            t.cursor.move(positions, true);
         } else {
             // workaround for SelectionMover cachedXOffset "feature"
             // Failure to do this will leave SelectionMover incorrectly assuming countLineSteps wants to get
@@ -122,7 +123,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             t.result = serializer.writeToString(t.root.firstChild, odf.Namespaces.namespaceMap);
             t.result = t.result.replace(cursorSerialized, "|");
             r.shouldBe(t, "t.result", "t.expected");
-            t.stepsToNextPosition = t.counter.countForwardSteps(1, t.filter);
+            t.stepsToNextPosition = t.counter.countSteps(1, t.filter);
             t.cursor.move(t.stepsToNextPosition, false);
         }
         // Ensure there are no other walkable positions in the document
@@ -136,8 +137,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             t.result = serializer.writeToString(t.root.firstChild, odf.Namespaces.namespaceMap);
             t.result = t.result.replace(cursorSerialized, "|");
             r.shouldBe(t, "t.result", "t.expected");
-            t.stepsToNextPosition = t.counter.countBackwardSteps(1, t.filter);
-            t.cursor.move(-t.stepsToNextPosition, false);
+            t.stepsToNextPosition = t.counter.countSteps(-1, t.filter);
+            t.cursor.move(t.stepsToNextPosition, false);
         }
         // Ensure there are no other walkable positions in the document
         r.shouldBe(t, "t.stepsToNextPosition", "0");
@@ -301,9 +302,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
     }
@@ -315,9 +320,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
     }
@@ -330,11 +339,97 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToAnchor", "-2");
         r.shouldBe(t, "t.stepsToRoot", "-3");
+    }
+    function testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace_OverAnnotation() {
+        createOdtDocument("<text:p>AB<office:annotation><text:p>#</text:p></office:annotation>CD</text:p>");
+        setCursorPosition(1, 4);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "-4");
+        r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
+    function testFixCursorPositions_CursorAndAnchorNearParagraphStart() {
+        createOdtDocument("<text:p>A</text:p><text:p>BC</text:p><text:p>DE</text:p>");
+        setCursorPosition(2, 3);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.selectedText = t.cursor.getSelectedRange().toString();
+        r.shouldBe(t, "t.selectedText", "'BC'");
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "-3");
+        r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
+    function testFixCursorPositions_CursorNearParagraphStart_ForwardSelection() {
+        createOdtDocument("<text:p>A</text:p><text:p>BCD</text:p><text:p>E</text:p>");
+        setCursorPosition(2, 3);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.selectedText = t.cursor.getSelectedRange().toString();
+        r.shouldBe(t, "t.selectedText", "'BCD'");
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "-3");
+        r.shouldBe(t, "t.stepsToRoot", "-5");
+    }
+    function testFixCursorPositions_CursorNearParagraphStart_ReverseSelection() {
+        createOdtDocument("<text:p>A</text:p><text:p>BCD</text:p><text:p>E</text:p>");
+        setCursorPosition(5, -3);
+        wrapInDiv(t.cursor.getNode());
+        wrapInDiv(t.cursor.getAnchorNode());
+
+        t.odtDocument.fixCursorPositions();
+
+        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
+        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
+        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.selectedText = t.cursor.getSelectedRange().toString();
+        r.shouldBe(t, "t.selectedText", "'BCD'");
+        r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
+        r.shouldBe(t, "t.stepsToAnchor", "3");
+        r.shouldBe(t, "t.stepsToRoot", "-2");
     }
     function testFixCursorPositions_Collapsed_CursorInInvalidPlace() {
         createOdtDocument("<text:p>ABCD</text:p>");
@@ -344,8 +439,12 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument.fixCursorPositions();
 
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
+        t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
         r.shouldBe(t, "t.isWalkable", "true");
+        r.shouldBe(t, "t.anchorInDiv", "false");
+        r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.stepsToRoot", "-1");
     }
 
@@ -454,6 +553,10 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testFixCursorPositions_Range_CursorInInvalidPlace,
             testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace,
             testFixCursorPositions_Collapsed_CursorInInvalidPlace,
+            testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace_OverAnnotation,
+            testFixCursorPositions_CursorAndAnchorNearParagraphStart,
+            testFixCursorPositions_CursorNearParagraphStart_ForwardSelection,
+            testFixCursorPositions_CursorNearParagraphStart_ReverseSelection,
 
             testAvailablePositions_EmptyParagraph,
             testAvailablePositions_SimpleTextNodes,

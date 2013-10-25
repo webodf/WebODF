@@ -253,34 +253,42 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         var iterator = getIteratorAtCursor();
 
         if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-            return true;
+            iterator.setUnfilteredPosition(cursor.getAnchorNode(), 0);
+            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                return true;
+            }
         }
         return false;
     }
 
     /**
-     * Returns the number of positions the given (step, filter) pair is 
+     * Returns the number of positions the given (step, filter) pair is
      * equivalent to in unfiltered space.
+     * @param {!core.PositionIterator} iterator
      * @param {!number} steps
      * @param {!core.PositionFilter} filter
      * @return {!number} Number of positions required to move the requested number of filtered steps
      */
-    function countForwardSteps(steps, filter) {
-        var iterator = getIteratorAtCursor(),
-            watch = new core.LoopWatchDog(1000),
-            positionCount = 0,
-            positions = 0;
-        while (steps > 0 && iterator.nextPosition()) {
-            positionCount += 1;
+    function countSteps(iterator, steps, filter) {
+        var watch = new core.LoopWatchDog(1000),
+            positions = 0,
+            positionsCount = 0,
+            increment = steps >= 0 ? 1 : -1,
+            delegate = steps >= 0 ? iterator.nextPosition.bind(iterator) : iterator.previousPosition.bind(iterator);
+
+        while (steps !== 0 && delegate()) {
             watch.check();
+            positionsCount += increment;
             if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                positions += positionCount;
-                positionCount = 0;
-                steps -= 1;
+                steps -= increment;
+                positions += positionsCount;
+                positionsCount = 0;
             }
         }
+
         return positions;
     }
+
     /**
      * Returns the number of positions to the right the (steps, filter1) pair
      * is equivalent to in filter2 space.
@@ -333,7 +341,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
         return stepsFilter2;
     }
- 
+
     /**
      * Return the number of positions moved to pass the requested number of filtered steps.
      * The return value is always greater than or equal to the number of filtered steps, as
@@ -343,38 +351,32 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * @param {!core.PositionFilter} filter
      * @return {!number} Number of positions required to move the requested number of filtered steps
      */
-    function countBackwardSteps(steps, filter) {
-        var iterator = getIteratorAtCursor(),
-            watch = new core.LoopWatchDog(1000),
-            positionCount = 0,
-            positions = 0;
-        while (steps > 0 && iterator.previousPosition()) {
-            positionCount += 1;
-            watch.check();
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                positions += positionCount;
-                positionCount = 0;
-                steps -= 1;
-            }
-        }
-        return positions;
+    function countStepsPublic(steps, filter) {
+        var iterator = getIteratorAtCursor();
+        return countSteps(iterator, steps, filter);
     }
 
     /**
      * Finds the most appropriate valid position to move the cursor to. Attempts to keep
      * the cursor within the same paragraph, so that cursors near the front or end of a paragraph do not
      * incorrectly jump to the next or previous paragraph.
+     * @param {!Node} container
+     * @param {!number} offset
      * @param {!core.PositionFilter} filter
      * @returns {!number} positions Number of positions to the nearest step
      */
-    function countPositionsToClosestStep(filter) {
+    function countPositionsToClosestStep(container, offset, filter) {
         var iterator = getIteratorAtCursor(),
             paragraphNode = odfUtils.getParagraphElement(iterator.getCurrentNode()),
-            count;
+            count = 0;
 
-        count = -countBackwardSteps(1, filter);
-        if (count === 0 || (paragraphNode && paragraphNode !== odfUtils.getParagraphElement(iterator.getCurrentNode()))) {
-            count = countForwardSteps(1, filter);
+        iterator.setUnfilteredPosition(container, offset);
+        if (filter.acceptPosition(iterator) !== FILTER_ACCEPT) {
+            count = countSteps(iterator, -1, filter);
+            if (count === 0 || (paragraphNode && paragraphNode !== odfUtils.getParagraphElement(iterator.getCurrentNode()))) {
+                iterator.setUnfilteredPosition(container, offset);
+                count = countSteps(iterator, 1, filter);
+            }
         }
         return count;
     }
@@ -601,8 +603,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
 
     this.getStepCounter = function () {
         return {
-            countForwardSteps: countForwardSteps,
-            countBackwardSteps: countBackwardSteps,
+            countSteps: countStepsPublic,
             convertForwardStepsBetweenFilters: convertForwardStepsBetweenFilters,
             convertBackwardStepsBetweenFilters: convertBackwardStepsBetweenFilters,
             countLinesSteps: countLinesSteps,
