@@ -415,7 +415,7 @@ Document.prototype.createTreeWalker = function (root, whatToShow, filter, entity
 /**
  * @param {!Node} root
  * @param {!number} whatToShow
- * @param {function(!Node):number} filter
+ * @param {?function(!Node):number} filter
  * @param {boolean} entityReferenceExpansion
  * @return {!NodeIterator}
  */
