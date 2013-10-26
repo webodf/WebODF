@@ -277,7 +277,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             positions = 0,
             positionsCount = 0,
             increment = steps >= 0 ? 1 : -1,
-            delegate = steps >= 0 ? iterator.nextPosition.bind(iterator) : iterator.previousPosition.bind(iterator);
+            delegate = /**@type {!function():boolean}*/(steps >= 0 ? iterator.nextPosition : iterator.previousPosition);
 
         while (steps !== 0 && delegate()) {
             watch.check();
