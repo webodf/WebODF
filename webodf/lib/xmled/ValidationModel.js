@@ -433,7 +433,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         var doc = documentNode.ownerDocument || documentNode,
             f = doc.createDocumentFragment(),
             e = doc.createElementNS(targetNamespace,
-                topLevelElement.getAttribute("name"));
+                    topLevelElement.getAttribute("name"));
         f.appendChild(e);
         fillElementWithDefaults(e, topLevelElement);
         return {desc: '', range: {}, dom: f};
@@ -467,15 +467,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function validateElementUpToNode(state) {
         var def = state.topDef();
         if (def.hasAttribute("name")) {
-/*
             if (def.getAttribute("name") === state.currentNode.localName) {
-                //r = valState(def, 0, currentNode);
+                // do some stuff
+                state.error = null;//r = valState(def, 0, currentNode);
             } else {
-//console.log(currentNode.localName);
-  //              r = errorState("Unexpected element " + currentNode.localName);
+                state.error = "Unexpected element " + state.currentNode.localName;
             }
         } else {
-*/
             throw "Not implemented";
         }
    //     return r;
@@ -490,13 +488,14 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         while (e) {
             if (e.localName === "sequence" || e.localName === "choice"
                     || e.localName === "element") {
+                state.push(e);
                 validateGroupUpToNode(state);
+                state.pop();
             } else {
                 throw "Not implemented";
             }
             e = e.nextElementSibling;
         }
-        console.log(def);
 //        return {done: false, currentNode: currentNode};
     }
     /**
@@ -554,15 +553,18 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return false;
     }
     /**
+     * Validate state.currentNode to be of type cdef.
+     * The top element in the state is of type cdef.
+     * @param {!Element} cdef definition for element complexType
      * @param {!xmled.ValidationState} state
      * @return {undefined}
      */
-    function validateComplexTypeUpToNode(state) {
-        var def = state.topDef(),
-            e = def.firstElementChild,
+    function validateComplexTypeUpToNode(cdef, state) {
+        var e = cdef.firstElementChild,
+            node = state.currentNode,
             oldMixed = state.mixed;
-        if (def.hasAttribute("mixed")) {
-            state.mixed = def.getAttribute("mixed") === "true";
+        if (cdef.hasAttribute("mixed")) {
+            state.mixed = cdef.getAttribute("mixed") === "true";
         }
         if (!state.mixed && hasNonWhitespaceSiblings(state.currentNode)) {
             state.error = "Text is not allowed here.";
@@ -570,8 +572,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             return;
         }
         state.topPosReset();
-        while (e && !state.error && state.currentNode !== state.targetNode) {
+        while (e) {
             if (e.localName === "sequence" || e.localName === "choice") {
+                state.currentNode = node.firstChild;
                 state.push(e);
                 validateGroupUpToNode(state);
                 state.pop();
@@ -579,6 +582,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 throw "Not implemented";
             }
             e = e.nextElementSibling;
+        }
+        if (!state.done()) {
+            state.currentNode = node;
         }
         state.mixed = oldMixed;
     }
@@ -614,17 +620,29 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         runtime.assert(def.localName === "simpleType"
                 || def.localName === "complexType", "Unexpected element");
+        state.currentNode = documentElement;
         if (def.localName === "simpleType") {
             validateSimpleTypeUpToNode(state);
         } else {
-            validateComplexTypeUpToNode(state);
+            validateComplexTypeUpToNode(def, state);
         }
         state.pop();
     }
     /**
+     * @param {!xmled.ValidationState} state
+     * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
+     */
+    function findAlternatives(state) {
+        var doc = state.documentNode.ownerDocument || state.documentNode,
+            f = doc.createDocumentFragment();
+        f.appendChild(state.currentNode.cloneNode(true));
+        state.error = null;
+        return [{desc: '', range: {}, dom: f}];
+    }
+    /**
      * @param {!Node} documentNode
      * @param {!Element} node
-     * @return {?Array}
+     * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
     function getPossibleNodeReplacements(documentNode, node) {
         var vstate = new xmled.ValidationState(documentNode, node);
@@ -632,21 +650,25 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (vstate.error) {
             throw vstate.error;
         }
-        //if (vstate.def.localName === "sequence") {
-        //}
-console.log(vstate);
-        return vstate ? [] : null;
+        return findAlternatives(vstate);
     }
+    /**
+     * @param {!Node} documentNode
+     * @param {!Range} range
+     * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
+     */
     function getPossibleReplacements(documentNode, range) {
         if (range.startContainer !== range.endContainer ||
                 range.endOffset - range.startOffset !== 1) {
             throw "Not implemented";
         }
-        var node = range.startContainer.childNodes.item(range.startOffset);
+        var node = range.startContainer.childNodes.item(range.startOffset),
+            e;
         if (!node || node.nodeType !== 1) {
             throw "Not implemented";
         }
-        return getPossibleNodeReplacements(documentNode, node);
+        e = /**@type{!Element}*/(node);
+        return getPossibleNodeReplacements(documentNode, e);
     }
     /**
      * Return array of possible replacements.
