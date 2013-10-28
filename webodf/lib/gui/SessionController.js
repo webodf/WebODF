@@ -149,52 +149,6 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {?Node} targetNode
-         * @param {!number} targetOffset
-         * @return {?number}
-         */
-        function countStepsToNode(targetNode, targetOffset) {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                canvasElement = odtDocument.getOdfCanvas().getElement(),
-                node;
-
-            // check that the node or one of its parent nodes til the canvas are
-            // not belonging to a cursor, like e.g. the caret and the cursor
-            // avatarflag are.
-            node = targetNode;
-            if (!node) {
-                return null;
-            }
-            while (node !== canvasElement) {
-                if ((node.namespaceURI === 'urn:webodf:names:cursor'
-                     && node.localName === 'cursor')
-                        || (node.namespaceURI === 'urn:webodf:names:editinfo'
-                            && node.localName === 'editinfo')) {
-                    break;
-                }
-                node = node.parentNode;
-
-                // Sometimes when we click outside the canvasElement, the ancestry
-                // will never reach canvasElement, and the node will eventually become null. In that case,
-                // return.
-                if (!node) {
-                    return null;
-                }
-            }
-
-            if (node !== canvasElement && targetNode !== node) {
-                // This happens when the click event has been captured by a cursor or editinfo.
-                // In that case, put the cursor in the capturer's container, just after it.
-                targetNode = node.parentNode;
-                targetOffset = Array.prototype.indexOf.call(targetNode.childNodes, node);
-            }
-
-            // create a move op with the distance to that position
-            iterator.setUnfilteredPosition(targetNode, targetOffset);
-            return odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-        }
-
-        /**
          * @param {!number} x
          * @param {!number} y
          * @return {?{container:!Node, offset:!number}}
@@ -417,7 +371,7 @@ gui.SessionController = (function () {
                 }
 
                 if (odfUtils.isImage(targetNode) && odfUtils.isCharacterFrame(parentNode)) {
-                    stepsToAnchor = countStepsToNode(parentNode, 0);
+                    stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, parentNode, 0);
                     stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null;
                     selectionType = ops.OdtCursor.RegionSelection;
                 } else {
@@ -426,12 +380,12 @@ gui.SessionController = (function () {
                         return;
                     }
 
-                    stepsToAnchor = countStepsToNode(selection.anchorNode, selection.anchorOffset);
+                    stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, selection.anchorNode, selection.anchorOffset);
                     if (selection.focusNode === selection.anchorNode
                             && selection.focusOffset === selection.anchorOffset) {
                         stepsToFocus = stepsToAnchor;
                     } else {
-                        stepsToFocus = countStepsToNode(selection.focusNode, selection.focusOffset);
+                        stepsToFocus = odtDocument.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
                     }
                 }
 
