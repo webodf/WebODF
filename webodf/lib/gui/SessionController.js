@@ -97,7 +97,8 @@ gui.SessionController = (function () {
             createCursorStyleOp = /**@type {function (!number, !number):ops.Operation}*/ (directTextStyler && directTextStyler.createCursorStyleOp),
             textManipulator = new gui.TextManipulator(session, inputMemberId, createCursorStyleOp),
             imageManager = new gui.ImageManager(session, inputMemberId, objectNameGenerator),
-            imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas());
+            imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
+            shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -956,31 +957,23 @@ gui.SessionController = (function () {
             isMouseMoved = false;
         }
 
-        function handleMouseMove(event) {
-            var capturedDetails = {
-                clientX: event.clientX,
-                clientY: event.clientY
-            };
-            if (isMouseDown) {
-                isMouseMoved = true;
-                runtime.setTimeout(function () {
-                    var selection = window.getSelection(),
-                        position = caretPositionFromPoint(capturedDetails.clientX, capturedDetails.clientY),
-                        iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                        selectionRange,
-                        isForwardSelection;
+        function handleMouseMove() {
+            var selection = window.getSelection(),
+                selectionRange,
+                isForwardSelection;
 
-                    imageSelector.clearSelection();
-                    iterator.setUnfilteredPosition(position.container, position.offset);
-                    if (mouseDownRootFilter.acceptPosition(iterator) === FILTER_ACCEPT && selection.rangeCount > 0) {
-                        selectionRange = selection.getRangeAt(0);
-                        isForwardSelection = (selection.anchorNode === selectionRange.startContainer) && (selection.anchorOffset === selectionRange.startOffset);
-                        shadowCursor.setSelectedRange(/**@type{!Range}*/(selection.getRangeAt(0).cloneRange()), isForwardSelection);
-                        odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
-                    } else {
-                        maintainShadowSelection();
-                    }
-                }, 0);
+            if (isMouseDown && selection.rangeCount > 0) {
+                isMouseMoved = true;
+
+                imageSelector.clearSelection();
+                shadowCursorIterator.setUnfilteredPosition(/**@type {!Node}*/(selection.focusNode), selection.focusOffset);
+                if (mouseDownRootFilter.acceptPosition(shadowCursorIterator) === FILTER_ACCEPT) {
+                    selectionRange = selection.getRangeAt(0).cloneRange();
+                    isForwardSelection = (selection.anchorNode === selectionRange.startContainer)
+                                            && (selection.anchorOffset === selectionRange.startOffset);
+                    shadowCursor.setSelectedRange(selectionRange, isForwardSelection);
+                    odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
+                }
             }
         }
 
