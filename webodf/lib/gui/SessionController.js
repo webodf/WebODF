@@ -86,7 +86,6 @@ gui.SessionController = (function () {
             baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
-            isMouseDown = false,
             isMouseMoved = false,
             mouseDownRootFilter = null,
             undoManager = null,
@@ -282,29 +281,52 @@ gui.SessionController = (function () {
             }
         }
 
-        function mutableSelection(selection) {
-            return {
-                anchorNode: selection.anchorNode,
-                anchorOffset: selection.anchorOffset,
-                focusNode: selection.focusNode,
-                focusOffset: selection.focusOffset
-            };
+        /**
+         * @param {!Node} frameNode
+         */
+        function selectImage(frameNode) {
+            var stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, frameNode, 0),
+                stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null,
+                oldPosition,
+                op;
+
+            if (stepsToFocus || stepsToAnchor) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
+                op = createOpMoveCursor(
+                    oldPosition + stepsToAnchor,
+                    stepsToFocus - stepsToAnchor,
+                    ops.OdtCursor.RegionSelection
+                );
+                session.enqueue([op]);
+            }
+
+            // canvas element won't have focus if user click somewhere outside the canvas then drag and
+            // release click inside the canvas.
+            eventManager.focus();
         }
 
         /**
-         * @param {!{detail: !number, clientX: !number, clientY: !number}} e
-         * @return {?{anchorNode:!Node, anchorOffset:!number, focusNode:!Node, focusOffset:!number}}
+         * @param {?{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}} selection
+         * @param {{detail: !number, clientX: !number, clientY: !number}} capturedDetails
          */
-        function getSelection(e) {
+        function selectRange(selection, capturedDetails) {
             var canvasElement = odtDocument.getOdfCanvas().getElement(),
-                selection = mutableSelection(window.getSelection()),
-                clickCount = e.detail, // See http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseup,
-                caretPos, anchorNodeInsideCanvas, focusNodeInsideCanvas, position;
+                validSelection,
+                clickCount = capturedDetails.detail, // See http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseup,
+                caretPos, anchorNodeInsideCanvas, focusNodeInsideCanvas, position,
+                stepsToAnchor,
+                stepsToFocus,
+                oldPosition,
+                op;
 
-            if (selection.anchorNode === null && selection.focusNode === null) { // chrome & safari
-                caretPos = caretPositionFromPoint(e.clientX, e.clientY);
+            if (!selection) {
+                return;
+            }
+
+            if (!selection.anchorNode && !selection.focusNode) { // chrome & safari
+                caretPos = caretPositionFromPoint(capturedDetails.clientX, capturedDetails.clientY);
                 if (!caretPos) {
-                    return null;
+                    return;
                 }
 
                 selection.anchorNode = /**@type{!Node}*/(caretPos.container);
@@ -313,104 +335,53 @@ gui.SessionController = (function () {
                 selection.focusOffset = selection.anchorOffset;
             }
 
-            runtime.assert(selection.anchorNode !== null && selection.focusNode !== null,
-                "anchorNode is null or focusNode is null");
+            runtime.assert(selection.anchorNode !== null && selection.focusNode !== null, "anchorNode or focusNode is null");
+            validSelection = /**@type {{anchorNode: !Node, anchorOffset: !number,
+                                        focusNode: !Node, focusOffset: !number}}*/(selection);
 
-            anchorNodeInsideCanvas = domUtils.containsNode(canvasElement, selection.anchorNode);
-            focusNodeInsideCanvas = domUtils.containsNode(canvasElement, selection.focusNode);
+            anchorNodeInsideCanvas = domUtils.containsNode(canvasElement, validSelection.anchorNode);
+            focusNodeInsideCanvas = domUtils.containsNode(canvasElement, validSelection.focusNode);
             if (!anchorNodeInsideCanvas && !focusNodeInsideCanvas) {
-                return null;
+                return;
             }
             if (!anchorNodeInsideCanvas) {
-                position = findClosestPosition(selection.anchorNode);
-                selection.anchorNode = position.node;
-                selection.anchorOffset = position.offset;
+                position = findClosestPosition(validSelection.anchorNode);
+                validSelection.anchorNode = position.node;
+                validSelection.anchorOffset = position.offset;
             }
             if (!focusNodeInsideCanvas) {
-                position = findClosestPosition(selection.focusNode);
-                selection.focusNode = position.node;
-                selection.focusOffset = position.offset;
+                position = findClosestPosition(validSelection.focusNode);
+                validSelection.focusNode = position.node;
+                validSelection.focusOffset = position.offset;
             }
 
             if (clickCount === 2) {
-                expandToWordBoundaries(selection);
+                expandToWordBoundaries(validSelection);
             } else if (clickCount === 3) {
-                expandToParagraphBoundaries(selection);
+                expandToParagraphBoundaries(validSelection);
+            }
+
+            stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, validSelection.anchorNode, validSelection.anchorOffset);
+            if (validSelection.focusNode === validSelection.anchorNode
+                && validSelection.focusOffset === validSelection.anchorOffset) {
+                stepsToFocus = stepsToAnchor;
+            } else {
+                stepsToFocus = odtDocument.getDistanceFromCursor(inputMemberId, validSelection.focusNode, validSelection.focusOffset);
+            }
+
+            if (stepsToFocus || stepsToAnchor) {
+                oldPosition = odtDocument.getCursorPosition(inputMemberId);
+                op = createOpMoveCursor(
+                    oldPosition + stepsToAnchor,
+                    stepsToFocus - stepsToAnchor,
+                    ops.OdtCursor.RangeSelection
+                );
+                session.enqueue([op]);
             }
 
             // canvas element won't have focus if user click somewhere outside the canvas then drag and
             // release click inside the canvas.
             eventManager.focus();
-
-            return selection;
-        }
-
-
-        /**
-         * @param {!UIEvent} e
-         * @return {undefined}
-         */
-        function selectRange(e) {
-            var capturedDetails = {
-                detail: e.detail,
-                clientX: e.clientX,
-                clientY: e.clientY,
-                target: getTarget(e)
-            };
-
-            // When click somewhere within already selected text, call window.getSelection() straight away results
-            // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
-            // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
-            // out the caret position from two coordinates.
-            runtime.setTimeout(function () {
-                var /** @type {?Node} */targetNode = /** @type {?Node} */(capturedDetails.target),
-                    parentNode = targetNode.parentNode,
-                    selection, selectionType, stepsToAnchor, stepsToFocus, oldPosition, op;
-
-                if (imageSelector.isSelectorElement(targetNode)) {
-                    return;
-                }
-
-                if (odfUtils.isImage(targetNode) && odfUtils.isCharacterFrame(parentNode)) {
-                    stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, parentNode, 0);
-                    stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null;
-                    selectionType = ops.OdtCursor.RegionSelection;
-                } else {
-                    selection = getSelection(capturedDetails);
-                    if (selection === null) {
-                        return;
-                    }
-
-                    stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, selection.anchorNode, selection.anchorOffset);
-                    if (selection.focusNode === selection.anchorNode
-                            && selection.focusOffset === selection.anchorOffset) {
-                        stepsToFocus = stepsToAnchor;
-                    } else {
-                        stepsToFocus = odtDocument.getDistanceFromCursor(inputMemberId, selection.focusNode, selection.focusOffset);
-                    }
-                }
-
-                if ((stepsToFocus !== null && stepsToFocus !== 0) ||
-                        (stepsToAnchor !== null && stepsToAnchor !== 0)) {
-                    oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                    op = createOpMoveCursor(
-                        oldPosition + stepsToAnchor,
-                        stepsToFocus - stepsToAnchor,
-                        selectionType
-                    );
-                    session.enqueue([op]);
-                }
-            }, 0);
-        }
-
-        function handleContextMenu(e) {
-            // TODO Various browsers have different default behaviours on right click
-            // We can detect this at runtime without doing any kind of platform sniffing
-            // simply by observing what the browser has tried to do on right-click.
-            // - OSX: Safari/Chrome - Expand to word boundary
-            // - OSX: Firefox - No expansion
-            // - Windows: Safari/Chrome/Firefox - No expansion
-            selectRange(e);
         }
 
         /**
@@ -907,19 +878,6 @@ gui.SessionController = (function () {
             return false;
         }
 
-        function maintainShadowSelection() {
-            var selection = window.getSelection(),
-                range = shadowCursor.getSelectedRange();
-
-            if (shadowCursor.hasForwardSelection()) {
-                selection.collapse(range.startContainer, range.startOffset);
-                selection.extend(range.endContainer, range.endOffset);
-            } else {
-                selection.collapse(range.endContainer, range.endOffset);
-                selection.extend(range.startContainer, range.startOffset);
-            }
-        }
-
         /**
          * Updates a flag indicating whether the mouse down event occurred within the OdfCanvas element.
          * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
@@ -928,33 +886,101 @@ gui.SessionController = (function () {
          * @param e
          */
         function filterMouseClicks(e) {
-            clickStartedWithinContainer = getTarget(e) && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), getTarget(e));
+            var target = getTarget(e);
+            clickStartedWithinContainer = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
             if (clickStartedWithinContainer) {
-                isMouseDown = true;
                 isMouseMoved = false;
-                mouseDownRootFilter = odtDocument.createRootFilter(caretPositionFromPoint(e.clientX, e.clientY).container);
+                mouseDownRootFilter = odtDocument.createRootFilter(target);
             }
+        }
+
+        /**
+         * Derive a selection-type object from the provided cursor
+         * @param {!gui.ShadowCursor|!ops.OdtCursor} cursor
+         * @returns {!{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}}
+         */
+        function cursorToSelection(cursor) {
+            var range = cursor.getSelectedRange();
+            if (cursor.hasForwardSelection()) {
+                return {
+                    anchorNode: range.startContainer,
+                    anchorOffset: range.startOffset,
+                    focusNode: range.endContainer,
+                    focusOffset: range.endOffset
+                };
+            }
+            return {
+                anchorNode: range.endContainer,
+                anchorOffset: range.endOffset,
+                focusNode: range.startContainer,
+                focusOffset: range.startOffset
+            };
+        }
+
+        /**
+         * Return a mutable version of a selection-type object.
+         * @param {?Selection} selection
+         * @returns {?{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}}
+         */
+        function mutableSelection(selection) {
+            if (selection) {
+                return {
+                    anchorNode: selection.anchorNode,
+                    anchorOffset: selection.anchorOffset,
+                    focusNode: selection.focusNode,
+                    focusOffset: selection.focusOffset
+                };
+            }
+            return null;
+        }
+
+        function handleMouseClickEvent(event) {
+            var target = getTarget(event),
+                eventDetails = {
+                    detail: event.detail,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    target: target
+                };
+            if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
+                selectImage(target.parentNode);
+            } else if (clickStartedWithinContainer && !imageSelector.isSelectorElement(target)) {
+                if (isMouseMoved) {
+                    selectRange(cursorToSelection(shadowCursor), event);
+                } else {
+                    // When click somewhere within already selected text, call window.getSelection() straight away results
+                    // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
+                    // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
+                    // out the caret position from two coordinates.
+                    runtime.setTimeout(function() {
+                        selectRange(mutableSelection(window.getSelection()), eventDetails);
+                    }, 0);
+                }
+            }
+            clickStartedWithinContainer = false;
+            isMouseMoved = false;
+        }
+
+        function handleContextMenu(e) {
+            // TODO Various browsers have different default behaviours on right click
+            // We can detect this at runtime without doing any kind of platform sniffing
+            // simply by observing what the browser has tried to do on right-click.
+            // - OSX: Safari/Chrome - Expand to word boundary
+            // - OSX: Firefox - No expansion
+            // - Windows: Safari/Chrome/Firefox - No expansion
+            handleMouseClickEvent(e);
         }
 
         function handleMouseUp(event) {
             var target = getTarget(event),
                 annotationNode = null;
+
             if (target.className === "annotationRemoveButton") {
                 annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
                 annotationManager.removeAnnotation(annotationNode);
-            } else if (clickStartedWithinContainer) {
-                // If a selection was being drawn, then call maintainShadowSelection
-                // to save the state of the shadow cursor's selection into the actual
-                // browser selection, to work around a quirk wherein the selection would
-                // revert to an unmanaged browser selection after mouseup.
-                if (isMouseDown && isMouseMoved) {
-                    maintainShadowSelection();
-                }
-                selectRange(event);
+            } else {
+                handleMouseClickEvent(event);
             }
-            // Expect that each mouse-up event is preceded by a mouse down that will update clickStartedWithinContainer
-            isMouseDown = false;
-            isMouseMoved = false;
         }
 
         function handleMouseMove() {
@@ -962,7 +988,7 @@ gui.SessionController = (function () {
                 selectionRange,
                 isForwardSelection;
 
-            if (isMouseDown && selection.rangeCount > 0) {
+            if (clickStartedWithinContainer && selection.rangeCount > 0) {
                 isMouseMoved = true;
 
                 imageSelector.clearSelection();
