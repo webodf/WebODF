@@ -34,7 +34,7 @@
 
 /**
  * @constructor
- * @param {!Node} documentNode
+ * @param {!Document|!Element} documentNode
  * @param {?Node} targetNode
  */
 xmled.ValidationState = function ValidationState(documentNode, targetNode) {
@@ -43,7 +43,8 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
         xsdns = "http://www.w3.org/2001/XMLSchema",
         defs = [],
         poss = [],
-        occs = [];
+        occs = [],
+        isDone = false;
     /**
      * @const @type {!Node}
      */
@@ -81,10 +82,16 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
         occs.push(1);
     };
     /**
+     * @return {undefined}
+     */
+    this.checkDone = function () {
+        isDone = isDone || targetNode === self.currentNode;
+    };
+    /**
      * @return {!boolean}
      */
     function done() {
-        return self.error !== null || targetNode === self.currentNode;
+        return isDone || self.error !== null;//targetNode === self.currentNode;
     }
     this.done = done;
     /**
@@ -162,7 +169,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         xsdns = "http://www.w3.org/2001/XMLSchema",
         error,
         xsd,
-        targetNamespace,
+        targetNamespace = null,
         validateGroupUpToNode;
     /**
      * @return {!xmled.ValidationModel.State}
@@ -397,8 +404,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         var doc = instance.ownerDocument,
             e;
         if (group.localName === "element") {
+            if (!group.hasAttribute("name")) {
+                group = findElement(group.getAttribute("ref"));
+            }
             e = doc.createElementNS(targetNamespace,
-                group.getAttribute("name"));
+                    group.getAttribute("name"));
             instance.appendChild(e);
         }
     }
@@ -411,6 +421,17 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             while (e) {
                 addGroup(instance, e);
                 e = e.nextElementSibling;
+            }
+        }
+    }
+    function addChoice(instance, choice) {
+        var minOccurs = getMinOccurs(choice),
+            i,
+            e;
+        for (i = 0; i < minOccurs; i += 1) {
+            e = choice.firstElementChild;
+            if (e) {
+                addGroup(instance, e);
             }
         }
     }
@@ -427,24 +448,40 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             forEachElement(type, xsdns, "sequence", function (seq) {
                 addSequence(instance, seq);
             });
+            forEachElement(type, xsdns, "choice", function (seq) {
+                addChoice(instance, seq);
+            });
         });
     }
-    function getPossibleDocument(documentNode, topLevelElement) {
-        var doc = documentNode.ownerDocument || documentNode,
-            f = doc.createDocumentFragment(),
-            e = doc.createElementNS(targetNamespace,
-                    topLevelElement.getAttribute("name"));
+    /**
+     * @param {!Document} doc
+     * @param {!Element} elementDef
+     * @return {!{desc:!string,range:?Range,dom:!DocumentFragment}}
+     */
+    function getPossibleElement(doc, elementDef) {
+        var f = doc.createDocumentFragment(),
+            e;
+        if (targetNamespace) {
+            e = doc.createElementNS(targetNamespace, elementDef.getAttribute("name"));
+        } else {
+            e = doc.createElement(elementDef.getAttribute("name"));
+        }
         f.appendChild(e);
-        fillElementWithDefaults(e, topLevelElement);
-        return {desc: '', range: {}, dom: f};
+        fillElementWithDefaults(e, elementDef);
+        return {desc: '', range: null, dom: f};
     }
+    /**
+     * @param {!Document|!Element} documentNode
+     * @return {!Array.<!{desc:!string,range:?Range,dom:!DocumentFragment}>}
+     */
     function getPossibleDocuments(documentNode) {
         // for each xsd:element can lead to a document
-        var r = [], e;
+        var r = [], e,
+            doc = /**@type{!Document}*/(documentNode.ownerDocument || documentNode);
         e = xsd && xsd.firstElementChild;
         while (e) {
             if (e.namespaceURI === xsdns && e.localName === "element") {
-                r.push(getPossibleDocument(documentNode, e));
+                r.push(getPossibleElement(doc, e));
             }
             e = e.nextElementSibling;
         }
@@ -458,7 +495,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (state) {
             throw "Not implemented";
         }
-//        return errorState("Not implemented");
     }
     /**
      * @param {!xmled.ValidationState} state
@@ -466,17 +502,16 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function validateElementUpToNode(state) {
         var def = state.topDef();
-        if (def.hasAttribute("name")) {
-            if (def.getAttribute("name") === state.currentNode.localName) {
-                // do some stuff
-                state.error = null;//r = valState(def, 0, currentNode);
-            } else {
-                state.error = "Unexpected element " + state.currentNode.localName;
-            }
-        } else {
-            throw "Not implemented";
+        if (!def.hasAttribute("name")) {
+            def = findElement(def.getAttribute("ref"));
         }
-   //     return r;
+        if (def.getAttribute("name") === state.currentNode.localName) {
+            // do some stuff
+            state.error = null;//r = valState(def, 0, currentNode);
+        } else {
+            state.error = "Unexpected element "
+                + state.currentNode.localName;
+        }
     }
     /**
      * @param {!xmled.ValidationState} state
@@ -490,13 +525,41 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                     || e.localName === "element") {
                 state.push(e);
                 validateGroupUpToNode(state);
+                if (!e.nextElementSibling) {
+                    state.checkDone();
+                }
                 state.pop();
             } else {
                 throw "Not implemented";
             }
             e = e.nextElementSibling;
         }
-//        return {done: false, currentNode: currentNode};
+    }
+    /**
+     * @param {!xmled.ValidationState} state
+     * @return {undefined}
+     */
+    function validateChoiceUpToNode(state) {
+        var def = state.topDef(),
+            e = def.firstElementChild;
+        while (e && !state.done()) {
+            if (e.localName === "sequence" || e.localName === "choice"
+                    || e.localName === "element") {
+                state.push(e);
+                validateGroupUpToNode(state);
+                if (!state.error) {
+                    state.checkDone();
+                    state.pop();
+                    break;
+                }
+                state.error = null;
+                state.pop();
+            } else {
+                throw "Not implemented";
+            }
+            e = e.nextElementSibling;
+        }
+//console.log(state.done() + " " + state.currentNode.localName);
     }
     /**
      * @param {!xmled.ValidationState} state
@@ -521,18 +584,20 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 validateSequenceUpToNode(state);
             } else if (def.localName === "element") {
                 validateElementUpToNode(state);
+            } else if (def.localName === "choice") {
+                validateChoiceUpToNode(state);
             } else {
                 throw "Not implemented";
             }
             if (state.error) {
-                if (state.topOccurrence() >= minOccurs) {
+                if (state.topOccurrence() > minOccurs) {
                     // roll back one loop
                     state.error = null;
                     state.currentNode = lastElement;
                 }
-            } else {
-                currentElement = state.currentNode;
+                break;
             }
+            currentElement = state.currentNode;
             state.topNextOccurrence();
         }
         if (state.topOccurrence() < minOccurs) {
@@ -585,6 +650,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         if (!state.done()) {
             state.currentNode = node;
+            state.checkDone();
         }
         state.mixed = oldMixed;
     }
@@ -632,15 +698,29 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @param {!xmled.ValidationState} state
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
-    function findAlternatives(state) {
-        var doc = state.documentNode.ownerDocument || state.documentNode,
-            f = doc.createDocumentFragment();
-        f.appendChild(state.currentNode.cloneNode(true));
-        state.error = null;
-        return [{desc: '', range: {}, dom: f}];
+    function findAlternativeElements(state) {
+        var doc = /**@type{!Document}*/(state.documentNode.ownerDocument || state.documentNode),
+            f = doc.createDocumentFragment(),
+            a = [],
+            p,
+            e;
+        if (state.length() <= 1) {
+            f.appendChild(state.currentNode.cloneNode(true));
+            a.push({desc: '', range: {}, dom: f});
+            return a; // there are no other options
+        }
+        p = state.def(state.length() - 2);
+        e = p.firstElementChild;
+        while (e) {
+            a.push(getPossibleElement(doc, e));
+            e = e.nextElementSibling;
+        }
+        console.log(p);
+        console.log(state.length());
+        return a;
     }
     /**
-     * @param {!Node} documentNode
+     * @param {!Document|!Element} documentNode
      * @param {!Element} node
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
@@ -650,10 +730,12 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (vstate.error) {
             throw vstate.error;
         }
-        return findAlternatives(vstate);
+        runtime.assert(vstate.topDef().localName === "element",
+            "Top definition must be an element definition.");
+        return findAlternativeElements(vstate);
     }
     /**
-     * @param {!Node} documentNode
+     * @param {!Document|!Element} documentNode
      * @param {!Range} range
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
@@ -681,9 +763,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * that can be the replacement for the input range. This range is owned by
      * the same document as the documentNode.
      *
-     * @param {!Node} documentNode
+     * @param {!Document|!Element} documentNode
      * @param {!Range=} range
-     * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
+     * @return {!Array.<{desc:!string,range:?Range,dom:!DocumentFragment}>}
      */
     this.getPossibleReplacements = function (documentNode, range) {
         var r;
@@ -707,7 +789,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
             state = xmled.ValidationModel.State.READY;
             xsd = dom.documentElement;
-            targetNamespace = null;
             if (xsd.hasAttribute("targetNamespace")) {
                 targetNamespace = xsd.getAttribute("targetNamespace");
             }

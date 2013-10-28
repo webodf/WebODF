@@ -16,5 +16,21 @@
       <xs:attribute name="num" type="xs:integer" use="required"/>
     </xs:complexType>
   </xs:element>
+  <xs:element name="f">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="a"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="g">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element name="a"/>
+        <xs:element name="b"/>
+        <xs:element name="c"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>
 

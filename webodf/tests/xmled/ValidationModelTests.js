@@ -161,7 +161,7 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
                 });
             });
         };
-        f.functionName = "replace-" + xsd;
+        f.functionName = "replace-" + xsd + "-" + initId;
         return f;
     }
 
@@ -178,9 +178,10 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
         return [
             testRoot("xmled/empty.xsd", []),
             testRoot("xmled/simple.xsd", ["a", "b", "c"]),
-            testRoot("xmled/complex01.xsd", ["a", "d", "e"]),
+            testRoot("xmled/complex01.xsd", ["a", "d", "e", "f", "ga"]),
             testReplace("xmled/simple.xsd", "a", [0], [1], ["a", "b", "c"]),
-            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], ["a"])
+            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], ["a"]),
+            testReplace("xmled/complex01.xsd", "g", [0, 0], [0, 1], ["a", "b", "c"])
         ];
     };
 };
