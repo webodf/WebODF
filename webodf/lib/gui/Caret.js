@@ -35,6 +35,7 @@
  */
 /*global core, gui, ops, runtime, Node*/
 
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("gui.Avatar");
 runtime.loadClass("ops.OdtCursor");
 
@@ -60,7 +61,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         isShown = true,
         shouldBlink = false,
         blinking = false,
-        blinkTimeout;
+        blinkTimeout,
+        domUtils = new core.DomUtils();
 
     function blink(reset) {
         if (!shouldBlink || !cursorNode.parentNode) {
@@ -183,6 +185,23 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
+     * The the span's BoundingClientRect using a range rather than from the element directly. Some browsers apply
+     * different transforms to a range ClientRect vs. an element ClientRect.
+     * See DomUtils, areRangeClientRectsTransformed() for more details
+     * @returns {!ClientRect}
+     */
+    function getSpanBoundingClientRect() {
+        var range,
+            rangeRect;
+
+        range = span.ownerDocument.createRange();
+        range.selectNode(span);
+        rangeRect = range.getBoundingClientRect();
+        range.detach();
+        return rangeRect;
+    }
+
+    /**
      * Tweak the height and top offset of the caret to display closely inline in the text block.
      * This uses ranges to account for line-height and text offsets
      *
@@ -193,6 +212,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     function handleUpdate() {
         var selectionRect = getSelectionRect(),
+            zoomLevel = cursor.getOdtDocument().getOdfCanvas().getZoomLevel(),
             caretRect;
 
         if (isShown && cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
@@ -206,7 +226,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // If this isn't done, the existing span's top setting would need to be taken into
             // account (and converted if not in pixels) when calculating the new top value
             span.style.top = "0";
-            caretRect = span.getBoundingClientRect();
+            caretRect = getSpanBoundingClientRect();
 
             if (selectionRect.height < MIN_CARET_HEIGHT_PX) {
                 // ClientRect's are read-only, so a whole new object is necessary to modify these values
@@ -215,8 +235,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
                     height: MIN_CARET_HEIGHT_PX
                 };
             }
-            span.style.height = selectionRect.height + 'px';
-            span.style.top = (selectionRect.top - caretRect.top) + 'px';
+            span.style.height = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.height, zoomLevel) + 'px';
+            span.style.top = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.top - caretRect.top, zoomLevel) + 'px';
         } else {
             // fallback to a relatively safe set of values
             // This can happen if the caret is not currently visible, or is in the middle
