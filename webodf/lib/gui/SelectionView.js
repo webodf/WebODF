@@ -137,6 +137,77 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     /**
+     * Returns true if the supplied range has 1 or more visible client rectangles.
+     * A range might not be visible if it:
+     * - contains only hidden nodes
+     * - contains only collapsed whitespace (e.g., multiple whitespace characters will only display as 1 character)
+     *
+     * @param {!Range} range
+     * @returns {!boolean}
+     */
+    function isRangeVisible(range) {
+        return Boolean(range.getClientRects()[0]);
+    }
+
+    /**
+     * Set the range to the last visible selection in the text nodes array
+     * @param {!number} textOffset
+     * @param {!Array.<!Node>} textNodes
+     * @param {!Range} range
+     * @returns {!boolean}
+     */
+    function lastVisibleRect(textOffset, textNodes, range) {
+        var nextNodeIndex = textNodes.length - 1,
+            textNode = textNodes[nextNodeIndex];
+        range.setStart(textNode, textOffset);
+        range.setEnd(textNode, textOffset);
+        while (!isRangeVisible(range)) {
+            if (textOffset > 0) {
+                textOffset -= 1;
+                range.setStart(textNode, textOffset);
+            } else if(textNodes[nextNodeIndex]) {
+                textNode = textNodes[nextNodeIndex];
+                nextNodeIndex -= 1;
+                textOffset = textNode.length;
+                range.setStart(textNode, textOffset);
+                range.setEnd(textNode, textOffset);
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Set the range to the first visible selection in the text nodes array
+     * @param {!number} textOffset
+     * @param {!Array.<!Node>} textNodes
+     * @param {!Range} range
+     * @returns {!boolean}
+     */
+    function firstVisibleRect(textOffset, textNodes, range) {
+        var nextNodeIndex = 0,
+            textNode = textNodes[nextNodeIndex];
+        range.setStart(textNode, textOffset);
+        range.setEnd(textNode, textOffset);
+        while (!isRangeVisible(range)) {
+            if (textOffset < textNode.length) {
+                textOffset += 1;
+                range.setEnd(textNode, textOffset);
+            } else if(textNodes[nextNodeIndex]) {
+                textNode = textNodes[nextNodeIndex];
+                nextNodeIndex += 1;
+                textOffset = 0;
+                range.setStart(textNode, textOffset);
+                range.setEnd(textNode, textOffset);
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns the 'extreme' ranges for a range.
      * This returns 3 ranges, where the firstRange is attached to the first
      * position in the first text node in the original range,
@@ -151,9 +222,7 @@ gui.SelectionView = function SelectionView(cursor) {
             firstRange = doc.createRange(),
             lastRange = doc.createRange(),
             fillerRange = doc.createRange(),
-            firstTextNode,
             firstTextOffset,
-            lastTextNode,
             lastTextOffset;
 
         if (!textNodes.length) {
@@ -161,40 +230,25 @@ gui.SelectionView = function SelectionView(cursor) {
         }
 
         if (range.startContainer.nodeType === Node.TEXT_NODE) {
-            firstTextNode = range.startContainer;
             firstTextOffset = range.startOffset;
         } else {
-            firstTextNode = textNodes[0];
             firstTextOffset = 0;
+        }
+        if (!firstVisibleRect(firstTextOffset, textNodes, firstRange)) {
+            return null;
         }
 
         if (range.endContainer.nodeType === Node.TEXT_NODE) {
-            lastTextNode = range.endContainer;
             lastTextOffset = range.endOffset;
         } else {
-            lastTextNode = textNodes[textNodes.length - 1];
-            lastTextOffset = lastTextNode.length;
+            lastTextOffset = textNodes[textNodes.length - 1].length;
+        }
+        if (!lastVisibleRect(lastTextOffset, textNodes, lastRange)) {
+            return null;
         }
 
-        // Webkit/blink bug: collapsed ranges at the ends of textnodes
-        // have no clientrects. Therefore we must encapsulate the
-        // last character of that textNode for the firstRange or lastRange and use
-        // it's right edge when computing the rect.
-        if (firstTextOffset > 0 && firstTextOffset === firstTextNode.length) {
-            firstRange.setStart(firstTextNode, firstTextOffset - 1);
-            firstRange.setEnd(firstTextNode, firstTextOffset);
-        } else {
-            firstRange.setStart(firstTextNode, firstTextOffset);
-        }
-        if (lastTextOffset > 0 && lastTextOffset === lastTextNode.length) {
-            lastRange.setStart(lastTextNode, lastTextOffset - 1);
-            lastRange.setEnd(lastTextNode, lastTextOffset);
-        } else {
-            lastRange.setStart(lastTextNode, lastTextOffset);
-        }
-
-        fillerRange.setStart(firstTextNode, firstTextOffset);
-        fillerRange.setEnd(lastTextNode, lastTextOffset);
+        fillerRange.setStart(firstRange.startContainer, firstRange.startOffset);
+        fillerRange.setEnd(lastRange.endContainer, lastRange.endOffset);
 
         return {
             firstRange: firstRange,
