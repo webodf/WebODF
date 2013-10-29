@@ -107,7 +107,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.range.setEnd(t.doc.childNodes[2], 0);
 
         t.paragraphs = t.odfUtils.getParagraphElements(t.range);
-        t.textElements = t.odfUtils.getTextElements(t.range, false);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
 
         r.shouldBe(t, "t.paragraphs.length", "1");
         r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
@@ -122,7 +122,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.range.setEnd(t.doc.childNodes[2], 0);
 
         t.paragraphs = t.odfUtils.getParagraphElements(t.range);
-        t.textElements = t.odfUtils.getTextElements(t.range, false);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
 
         r.shouldBe(t, "t.paragraphs.length", "1");
         r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
@@ -138,7 +138,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.range.setEnd(t.doc.childNodes[2], 0);
 
         t.paragraphs = t.odfUtils.getParagraphElements(t.range);
-        t.textElements = t.odfUtils.getTextElements(t.range, false);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
 
         r.shouldBe(t, "t.paragraphs.length", "1");
         r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
@@ -153,7 +153,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.range.setEnd(t.doc.childNodes[1].childNodes[1], 0);
 
         t.paragraphs = t.odfUtils.getParagraphElements(t.range);
-        t.textElements = t.odfUtils.getTextElements(t.range, false);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
 
         r.shouldBe(t, "t.paragraphs.length", "2");
         r.shouldBe(t, "t.paragraphs.shift()", "t.doc.childNodes[0]");
@@ -172,7 +172,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.range.setEnd(t.doc.childNodes[2].childNodes[1], 0);
 
         t.paragraphs = t.odfUtils.getParagraphElements(t.range);
-        t.textElements = t.odfUtils.getTextElements(t.range, true);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, true);
 
         r.shouldBe(t, "t.paragraphs.length", "2");
         r.shouldBe(t, "t.paragraphs.shift()", "t.doc.childNodes[0]");
@@ -192,7 +192,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.range.setEnd(t.doc.childNodes[2].childNodes[1], 0);
 
         t.paragraphs = t.odfUtils.getParagraphElements(t.range);
-        t.textElements = t.odfUtils.getTextElements(t.range, false);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
 
         r.shouldBe(t, "t.paragraphs.length", "2");
         r.shouldBe(t, "t.paragraphs.shift()", "t.doc.childNodes[0]");
@@ -209,7 +209,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.doc = createDocument("<text:p><text:s> </text:s><text:tab>	</text:tab><text:line-break>\n</text:line-break><draw:frame text:anchor-type='as-char'><draw:image/></draw:frame></text:p>");
         t.range.selectNode(t.doc);
 
-        t.textElements = t.odfUtils.getTextElements(t.range, true);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, true);
 
         r.shouldBe(t, "t.textElements.length", "4");
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]"); // text:s

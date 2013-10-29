@@ -262,7 +262,7 @@ ops.OpRemoveText = function OpRemoveText() {
 
         range = stepsToRange(odtDocument);
         paragraphElement = odtDocument.getParagraphElement(range.startContainer);
-        textNodes = odfUtils.getTextElements(range, true);
+        textNodes = odfUtils.getTextElements(range, false, true);
         paragraphs = odfUtils.getParagraphElements(range);
         range.detach();
 
