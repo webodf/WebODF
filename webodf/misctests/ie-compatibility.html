@@ -27,7 +27,6 @@
             while (testArea.firstChild) {
                 testArea.removeChild(testArea.firstChild);
             }
-
         }
     </script>
 </head>
@@ -66,6 +65,24 @@
         }
         treeWalker = document.createTreeWalker(newNode, NodeFilter.SHOW_ALL, noopFilter, false);
         treeWalker.nextNode();
+    });
+
+    test("Changing selection preserves focus", function(area) {
+        var newNode = document.createTextNode("really IE?"),
+                range = document.createRange(),
+                result;
+        area.appendChild(newNode);
+        area.tabIndex = -1;
+        area.focus();
+        result = document.activeElement === area;
+
+        window.getSelection().removeAllRanges();
+        range.selectNodeContents(newNode);
+        window.getSelection().addRange(range);
+        result = result && document.activeElement === area;
+
+        area.tabIndex = undefined;
+        return result;
     });
 </script>
 </body>
