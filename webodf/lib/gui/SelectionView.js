@@ -415,6 +415,12 @@ gui.SelectionView = function SelectionView(cursor) {
         // We don't need to look deeper into the node, so this is very cheap.
         if (odfUtils.isParagraph(firstSibling)) {
             grownRect = checkAndGrowOrCreateRect(grownRect, getBoundingClientRect(firstSibling));
+        } else if (firstSibling.nodeType === Node.TEXT_NODE) {
+            currentNode = firstSibling;
+            range.setStart(currentNode, firstOffset);
+            range.setEnd(currentNode, currentNode === lastSibling ? lastOffset : currentNode.length);
+            currentRect = range.getBoundingClientRect();
+            grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
         } else {
             // The first top-level sibling was not a paragraph, so we now need to
             // Grow the rect in a detailed manner using the selected area *inside* the first sibling.
@@ -448,7 +454,13 @@ gui.SelectionView = function SelectionView(cursor) {
         // Just like before, a cheap way to avoid looking deeper into the listSibling
         // if it is a paragraph.
         if (odfUtils.isParagraph(lastSibling)) {
-            grownRect = checkAndGrowOrCreateRect(grownRect, getBoundingClientRect(firstSibling));
+            grownRect = checkAndGrowOrCreateRect(grownRect, getBoundingClientRect(lastSibling));
+        } else if (lastSibling.nodeType === Node.TEXT_NODE) {
+            currentNode = lastSibling;
+            range.setStart(currentNode, currentNode === firstSibling ? firstOffset : 0);
+            range.setEnd(currentNode, lastOffset);
+            currentRect = range.getBoundingClientRect();
+            grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
         } else {
             // Grow the rect using the selected area inside
             // the last sibling, iterating backwards from the lastNode

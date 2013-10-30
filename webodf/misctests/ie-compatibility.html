@@ -56,6 +56,17 @@
         var range = document.createRange();
         range.comparePoint(area, 0);
     });
+
+    test("TreeWalker with text node root", function(area) {
+        var newNode = document.createTextNode("span"),
+            treeWalker;
+        area.appendChild(newNode);
+        function noopFilter () {
+            return NodeFilter.FILTER_ACCEPT;
+        }
+        treeWalker = document.createTreeWalker(newNode, NodeFilter.SHOW_ALL, noopFilter, false);
+        treeWalker.nextNode();
+    });
 </script>
 </body>
 </html>

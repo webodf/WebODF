@@ -188,7 +188,8 @@
         function getNodesInRange(range, nodeFilter) {
             var document = range.startContainer.ownerDocument,
                 elements = [],
-                root = /**@type{!Node}*/(range.commonAncestorContainer),
+                rangeRoot = range.commonAncestorContainer,
+                root = /**@type{!Node}*/(rangeRoot.nodeType === Node.TEXT_NODE ? rangeRoot.parentNode : rangeRoot),
                 n,
                 filterResult,
                 treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, nodeFilter, false);
