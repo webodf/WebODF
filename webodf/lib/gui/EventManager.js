@@ -147,11 +147,10 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.subscribe = function(eventName, handler) {
-        var element = canvasElement;
         if (bindToWindow[eventName] && window) {
-            element = window;
+            listenEvent(window, eventName, handler);
         }
-        listenEvent(element, eventName, handler);
+        listenEvent(canvasElement, eventName, handler);
     };
 
     /**
@@ -159,11 +158,10 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.unsubscribe = function(eventName, handler) {
-        var element = canvasElement;
         if (bindToWindow[eventName] && window) {
-            element = window;
+            removeEvent(window, eventName, handler);
         }
-        removeEvent(element, eventName, handler);
+        removeEvent(canvasElement, eventName, handler);
     };
 
     /**
