@@ -272,12 +272,15 @@
          */
         function rangeContainsNode(limits, node) {
             var range = node.ownerDocument.createRange(),
-                nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length,
+                nodeRange = node.ownerDocument.createRange(),
                 result;
             range.setStart(limits.startContainer, limits.startOffset);
             range.setEnd(limits.endContainer, limits.endOffset);
-            result = range.comparePoint(node, 0) === 0 && range.comparePoint(node, nodeLength) === 0;
+            nodeRange.selectNodeContents(node);
+            result = range.compareBoundaryPoints(range.START_TO_START, nodeRange) <= 0
+                        && range.compareBoundaryPoints(range.END_TO_END, nodeRange) >= 0;
             range.detach();
+            nodeRange.detach();
             return result;
         }
         this.rangeContainsNode = rangeContainsNode;
@@ -332,8 +335,12 @@
         this.getElementsByTagNameNS = getElementsByTagNameNS;
 
         function rangeIntersectsNode(range, node) {
-            var nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length;
-            return range.comparePoint(node, 0) <= 0 && range.comparePoint(node, nodeLength) >= 0;
+            var nodeRange = node.ownerDocument.createRange(),
+                intersects;
+            nodeRange.selectNodeContents(node);
+            intersects = range.compareBoundaryPoints(range.START_TO_END, nodeRange) <= 0
+                            && range.compareBoundaryPoints(range.END_TO_START, nodeRange) >= 0;
+            return intersects;
         }
         this.rangeIntersectsNode = rangeIntersectsNode;
 

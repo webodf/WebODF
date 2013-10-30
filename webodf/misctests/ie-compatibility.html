@@ -51,6 +51,11 @@
         area.appendChild(newNode);
         return area.contains(newNode) === true;
     });
+
+    test("Range.comparePoint", function(area) {
+        var range = document.createRange();
+        range.comparePoint(area, 0);
+    });
 </script>
 </body>
 </html>

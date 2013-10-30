@@ -299,6 +299,15 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.result", "false");
     }
 
+    function rangeContainsNode_IdenticalBoundaries_ReturnsTrue() {
+        var target = document.createElement("span");
+        t.doc.appendChild(target);
+
+        t.result = t.utils.rangeContainsNode({startContainer: target, startOffset: 0, endContainer: target, endOffset: 0}, target);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
     function removeUnwantedNodes_DiscardAll() {
         var p = document.createElement("p"),
             span1 = document.createElement("span"),
@@ -365,6 +374,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             rangeContainsNode_ForFullyBracketedSpan_ReturnsTrue,
             rangeContainsNode_ForDifferentDepths_ReturnsTrue,
             rangeContainsNode_ForAdjacentSpan_ReturnsFalse,
+            rangeContainsNode_IdenticalBoundaries_ReturnsTrue,
 
             removeUnwantedNodes_DiscardAll,
             removeUnwantedNodes_DiscardSpanOnly
