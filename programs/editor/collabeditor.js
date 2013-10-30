@@ -133,23 +133,30 @@ var webodfEditor = (function () {
 
         server.joinSession(userId, sessionId, function(memberId) {
             if (!editorInstance) {
-                require({ }, ["webodf/editor/Editor"],
-                    function (Editor) {
-                        editorOptions = editorOptions || {}; // TODO: cleanup
-                        editorOptions.networkSecurityToken = token;
-                        editorOptions.closeCallback = function() {
-                            editorInstance.endEditing();
-                            editorInstance.close(function() {
-                                server.leaveSession(sessionId, memberId, function() {
-                                    showSessions();
-                                });
+                require({ }, [
+                "webodf/editor/Translator",
+                "webodf/editor/Editor"],
+                    function (Translator, Editor) {
+                        var locale = navigator.language || "en-US",
+                            t = new Translator(locale, function (editorTranslator) {
+                                runtime.setTranslator(editorTranslator.translate);
+
+                                editorOptions = editorOptions || {}; // TODO: cleanup
+                                editorOptions.networkSecurityToken = token;
+                                editorOptions.closeCallback = function() {
+                                    editorInstance.endEditing();
+                                    editorInstance.close(function() {
+                                        server.leaveSession(sessionId, memberId, function() {
+                                            showSessions();
+                                        });
+                                    });
+                                };
+
+                                editorInstance = new Editor(editorOptions, server, serverFactory);
+
+                                // load the document and get called back when it's live
+                                editorInstance.openSession(sessionId, memberId, startEditing);
                             });
-                        };
-
-                        editorInstance = new Editor(editorOptions, server, serverFactory);
-
-                        // load the document and get called back when it's live
-                        editorInstance.openSession(sessionId, memberId, startEditing);
                     }
                 );
             } else {

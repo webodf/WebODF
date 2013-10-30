@@ -211,10 +211,16 @@ var webodfEditor = (function () {
         runtime.assert(args.docUrl, "docUrl needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
 
-        require({ }, ["webodf/editor/Editor"],
-            function (Editor) {
-                editorInstance = new Editor(editorOptions);
-                editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
+        require({ }, [
+            "webodf/editor/Translator",
+            "webodf/editor/Editor"],
+            function (Translator, Editor) {
+                var locale = navigator.language || "en-US",
+                    t = new Translator(locale, function (editorTranslator) {
+                        runtime.setTranslator(editorTranslator.translate);
+                        editorInstance = new Editor(editorOptions);
+                        editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
+                    });
             }
         );
     }

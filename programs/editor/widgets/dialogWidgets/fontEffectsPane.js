@@ -126,13 +126,12 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                 "dojox/widget/ColorPicker",
                 "webodf/editor/widgets/fontPicker"
             ], function (dojo, ready, domConstruct, ContentPane, ColorPicker, FontPicker) {
-                var translator = document.translator,
-                    editorBase = dojo.config && dojo.config.paths &&
+                var editorBase = dojo.config && dojo.config.paths &&
                             dojo.config.paths['webodf/editor'];
                 runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
-                        title: translator("fontEffects"),
+                        title: runtime.tr("Font Effects"),
                         href: editorBase+"/widgets/dialogWidgets/fontEffectsPane.html",
                         preload: true
                     });
@@ -142,7 +141,7 @@ define("webodf/editor/widgets/dialogWidgets/fontEffectsPane", [], function () {
                             backgroundColorTB = dijit.byId('backgroundColorTB');
 
                         form = dijit.byId('fontEffectsPaneForm');
-                        document.translateContent(form.domNode);
+                        runtime.translateContent(form.domNode);
 
                         preview = document.getElementById('previewText');
                         textColorPicker = dijit.byId('textColorPicker');

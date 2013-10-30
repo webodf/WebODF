@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,require,document,ops,gui */
+/*global define,require,ops,gui */
 
 define("webodf/editor/widgets/paragraphAlignment", [
     "dijit/form/ToggleButton",
@@ -59,7 +59,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 outdent;
 
             justifyLeft = new ToggleButton({
-                label: document.translator('justifyLeft'),
+                label: runtime.tr('Align Left'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -71,7 +71,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
             });
 
             justifyCenter = new ToggleButton({
-                label: document.translator('justifyCenter'),
+                label: runtime.tr('Center'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -83,7 +83,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
             });
 
             justifyRight = new ToggleButton({
-                label: document.translator('justifyRight'),
+                label: runtime.tr('Align Right'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -95,7 +95,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
             });
 
             justifyFull = new ToggleButton({
-                label: document.translator('justifyFull'),
+                label: runtime.tr('Justify'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -107,7 +107,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
             });
 
             outdent = new Button({
-                label: document.translator('outdent'),
+                label: runtime.tr('Decrease Indent'),
                 disabled: true,
                 showLabel: false,
                 iconClass: "dijitEditorIcon dijitEditorIconOutdent",
@@ -118,7 +118,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
             });
 
             indent = new Button({
-                label: document.translator('indent'),
+                label: runtime.tr('Increase Indent'),
                 disabled: true,
                 showLabel: false,
                 iconClass: "dijitEditorIcon dijitEditorIconIndent",

@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops*/
+/*global ops, runtime*/
 
 /*
  * this thing might feel a bit more at home in a namespaces
@@ -64,7 +64,7 @@ ops.TrivialMemberModel = function TrivialMemberModel() {
         // pass some dummy data
         subscriber(memberId, {
             memberid: memberId,
-            fullname: "Unknown Author",
+            fullname: runtime.tr("Unknown Author"),
             color:    "black",
             imageurl: "avatar-joe.png"
         });

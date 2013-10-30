@@ -50,7 +50,6 @@ define("webodf/editor/widgets/paragraphStyles",
         var self = this,
             editorSession,
             select,
-            translator = document.translator,
             defaultStyleUIId = ":default";
 
         this.widget = function () {
@@ -93,7 +92,7 @@ define("webodf/editor/widgets/paragraphStyles",
 
             // Populate the Default Style always 
             selectionList = [{
-                label: translator("defaultStyle"),
+                label: runtime.tr("Default Style"),
                 value: defaultStyleUIId
             }];
             availableStyles = editorSession ? editorSession.getAvailableParagraphStyles() : [];

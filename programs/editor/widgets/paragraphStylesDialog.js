@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,require,document,dojo,dijit */
+/*global define,require,dojo,dijit */
 
 define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
     "use strict";
@@ -57,7 +57,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 "dijit/form/DropDownButton",
                 "dijit/form/RadioButton"], function (Dialog, TooltipDialog, popup, TabContainer, ContentPane, Button, DropDownButton, RadioButton) {
                 var i,
-                    translator = document.translator,
+                    tr = runtime.tr,
                     tabContainer,
                     flowPane,
                     numberingPane,
@@ -182,17 +182,17 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 }
                 // Dialog
                 dialog = new Dialog({
-                    title: translator("paragraphStyles")
+                    title: tr("Paragraph Styles")
                 });
 
                 cloneTooltip = new TooltipDialog({
                     content:
-                        '<h2 style="margin: 0;">'+translator("cloneThisStyle")+'</h2><br/>' +
-                        '<label for="name">'+translator("newName_C")+'</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>',
+                        '<h2 style="margin: 0;">'+tr("Clone this Style")+'</h2><br/>' +
+                        '<label for="name">'+tr("New Name:")+'</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>',
                     style: "width: 300px;"
                 });
                 cloneButton = new Button({
-                    label: translator("create"),
+                    label: tr("Create"),
                     onClick: function () {
                         cloneStyle(stylePicker.value(), cloneTooltip.get('value').name);
                         cloneTooltip.reset();
@@ -201,7 +201,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 });
                 cloneTooltip.addChild(cloneButton);
                 cloneDropDown = new DropDownButton({
-                    label: translator("clone"),
+                    label: tr("Clone"),
                     showLabel: false,
                     iconClass: 'dijitEditorIcon dijitEditorIconCopy',
                     dropDown: cloneTooltip,
@@ -210,7 +210,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 dialog.addChild(cloneDropDown, 1);
 
                 deleteButton = new Button({
-                    label: translator("delete"),
+                    label: tr("Delete"),
                     showLabel: false,
                     iconClass: 'dijitEditorIcon dijitEditorIconDelete',
                     style: "float: right; margin-bottom: 5px;",
@@ -230,11 +230,11 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     "class": "dijitDialogPaneActionBar"
                 });
                 okButton = new dijit.form.Button({
-                    label: translator("ok"),
+                    label: tr("OK"),
                     onClick: accept
                 }).placeAt(actionBar);
                 cancelButton = new dijit.form.Button({
-                    label: translator("cancel"),
+                    label: tr("Cancel"),
                     onClick: cancel
                 }).placeAt(actionBar);
                 dialog.domNode.appendChild(actionBar);

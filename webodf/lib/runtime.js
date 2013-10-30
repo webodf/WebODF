@@ -1369,6 +1369,44 @@ var runtime = (function () {
         cache[classpath] = true;
     };
 }());
+
+(function () {
+    /*jslint emptyblock: true*/
+    var translator = function () {};
+    /*jslint emptyblock: false*/
+
+    /**
+     * Translator function. Takes the original string
+     * and returns the translation if it exists, else
+     * returns the original.
+     * @param {!string} original
+     * @return {!string}
+     */
+    function tr(original) {
+        var result = translator(original);
+        if (!result || (String(typeof result) !== "string")) {
+            return original;
+        }
+        return result;
+    }
+
+    /**
+     * Gets the custom translator function
+     * @return {!function(!string):!string}
+     */
+    runtime.getTranslator = function() {
+        return translator;
+    };
+    /**
+     * Set an external translator function
+     * @param {!function(!string):!string} translatorFunction
+     * @return {undefined}
+     */
+    runtime.setTranslator = function(translatorFunction) {
+        translator = translatorFunction;
+    };
+    runtime.tr = tr;
+}());
 (function (args) {
     if (args) {
         args = Array.prototype.slice.call(/**@type{{length:number}}*/(args));

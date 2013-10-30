@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime,core,define,require,document,dijit */
+/*global runtime,core,define,require,dijit */
 
 runtime.loadClass("core.CSSUnits");
 
@@ -106,13 +106,13 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                 runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
-                        title: document.translator("alignment"),
+                        title: runtime.tr("Alignment"),
                         href: editorBase+"/widgets/dialogWidgets/alignmentPane.html",
                         preload: true
                     });
                     contentPane.onLoad = function () {
                         form = dijit.byId('alignmentPaneForm');
-                        document.translateContent(form.domNode);
+                        runtime.translateContent(form.domNode);
                     };
                     return cb();
                 });

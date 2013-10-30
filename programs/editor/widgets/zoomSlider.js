@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,require,document */
+/*global define,require*/
 
 define("webodf/editor/widgets/zoomSlider", [], function () {
     "use strict";

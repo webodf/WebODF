@@ -1,5 +1,6 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * The JavaScript code in this page is free software: you can redistribute it
@@ -34,7 +35,53 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-define({
-    file: 'досье',
-    format: 'Формат'
+
+/*global define, runtime, XMLHTTPRequest */
+
+define("webodf/editor/Translator", [], function () {
+    "use strict";
+
+    return function Translator(locale, callback) {
+        var self = this,
+            dictionary = {};
+
+        function translate(key) {
+            return dictionary[key];
+        }
+        function setLocale(newLocale, cb) {
+            // TODO: Add smarter locale resolution at some point
+            if (newLocale.split('-')[0] === "de" || newLocale.split('_')[0] === "de") {
+                newLocale = "de-DE";
+            } else if (newLocale.split('-')[0] === "en" || newLocale.split('_')[0] === "en") {
+                newLocale = "en-US";
+            } else {
+                newLocale = "en-US";
+            }
+
+            var xhr = new XMLHttpRequest(),
+                path = "translations/" + newLocale + ".json";
+            xhr.open("GET", path);
+            xhr.onload = function () {
+                if (xhr.status === 200) {// HTTP OK
+                    dictionary = JSON.parse(xhr.response);
+                    locale = newLocale;
+                }
+                cb();
+            };
+            xhr.send(null);
+        }
+        function getLocale() {
+            return locale;
+        }
+
+        this.translate = translate;
+        this.getLocale = getLocale;
+
+        function init() {
+            setLocale(locale, function () {
+                callback(self);
+            });
+        }
+        init();
+    };
 });

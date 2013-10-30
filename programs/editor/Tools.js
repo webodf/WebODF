@@ -57,7 +57,7 @@ define("webodf/editor/Tools", [
         "use strict";
 
         return function Tools(args) {
-            var translator = document.translator,
+            var tr = runtime.tr,
                 onToolDone = args.onToolDone,
                 loadOdtFile = args.loadOdtFile,
                 saveOdtFile = args.saveOdtFile,
@@ -180,7 +180,7 @@ define("webodf/editor/Tools", [
                 // Load
                 if (loadOdtFile) {
                     loadButton = new Button({
-                        label: translator('open'),
+                        label: tr('Open'),
                         showLabel: false,
                         iconClass: 'dijitIcon dijitIconFolderOpen',
                         style: {
@@ -196,7 +196,7 @@ define("webodf/editor/Tools", [
                 // Save
                 if (saveOdtFile) {
                     saveButton = new Button({
-                        label: translator('save'),
+                        label: tr('Save'),
                         showLabel: false,
                         iconClass: 'dijitEditorIcon dijitEditorIconSave',
                         style: {
@@ -213,7 +213,7 @@ define("webodf/editor/Tools", [
                 // Format menu
                 formatDropDownMenu = new DropDownMenu({});
                 paragraphStylesMenuItem = new MenuItem({
-                    label: translator("paragraph_DDD")
+                    label: tr("Paragraph...")
                 });
                 formatDropDownMenu.addChild(paragraphStylesMenuItem);
 
@@ -230,7 +230,7 @@ define("webodf/editor/Tools", [
 
                 formatMenuButton = new DropDownButton({
                     dropDown: formatDropDownMenu,
-                    label: translator('format'),
+                    label: tr('Format'),
                     iconClass: "dijitIconEditTask",
                     style: {
                         float: 'left'
@@ -249,7 +249,7 @@ define("webodf/editor/Tools", [
 
                 if (close) {
                     closeButton = new Button({
-                        label: translator('close'),
+                        label: tr('Close'),
                         showLabel: false,
                         iconClass: 'dijitEditorIcon dijitEditorIconCancel',
                         style: {
