@@ -428,7 +428,7 @@ gui.SelectionView = function SelectionView(cursor) {
             // and grow using the the rects of all textnodes that lie including and after the
             // firstNode (the startContainer of the original fillerRange), and stop
             // when either the firstSibling ends or we encounter the lastNode.
-            treeWalker = doc.createTreeWalker(firstSibling, NodeFilter.SHOW_TEXT, acceptNode);
+            treeWalker = doc.createTreeWalker(firstSibling, NodeFilter.SHOW_TEXT, acceptNode, false);
             currentNode = treeWalker.currentNode = firstNode;
             while (currentNode && currentNode !== lastNode) {
                 range.setStart(currentNode, firstOffset);
@@ -466,7 +466,7 @@ gui.SelectionView = function SelectionView(cursor) {
             // the last sibling, iterating backwards from the lastNode
             // till we reach either the beginning of the lastSibling
             // or encounter the lastMeasuredNode
-            treeWalker = doc.createTreeWalker(lastSibling, NodeFilter.SHOW_TEXT, acceptNode);
+            treeWalker = doc.createTreeWalker(lastSibling, NodeFilter.SHOW_TEXT, acceptNode, false);
             currentNode = treeWalker.currentNode = lastNode;
             while (currentNode && currentNode !== lastMeasuredNode) {
                 range.setStart(currentNode, 0);
