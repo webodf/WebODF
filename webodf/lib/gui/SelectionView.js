@@ -61,7 +61,7 @@ gui.SelectionView = function SelectionView(cursor) {
         isVisible = true,
         clientRectRange = doc.createRange(),
         positionIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-        areRangeClientRectsScaled = domUtils.areRangeRectanglesTransformed(doc),
+        areRangeClientRectsScaled = domUtils.getBrowserQuirks(doc).unscaledRangeClientRects === false,
         /**@const*/FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = NodeFilter.FILTER_REJECT;
 

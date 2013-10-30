@@ -41,23 +41,25 @@
 
 (function() {
     "use strict";
-    var rangeClientRectsBug;
+    var quirks;
 
     /**
-     * Firefox does not apply parent transforms to the range's BoundingClientRect.
-     * See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+     * Detect various browser quirks
+     * unscaledRangeClientRects - Firefox doesn't apply parent css transforms to any range client rectangles
+     * rangeBCRIgnoresElementBCR - Internet explorer returns 0 client rects for an empty element that has fixed dimensions
      * @param {!Document} document
-     * @returns {!boolean}
+     * @returns {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
      */
-    function rangeClientRectsUntransformedBug(document) {
+    function getBrowserQuirks(document) {
         var range,
             directBoundingRect,
             rangeBoundingRect,
             testContainer,
-            testElement;
+            testElement,
+            detectedQuirks;
 
-        if (rangeClientRectsBug === undefined) {
-
+        if (quirks === undefined) {
+            quirks = {rangeBCRIgnoresElementBCR: false, unscaledRangeClientRects: false};
             testContainer = document.createElement("div");
             testContainer.style.position = "absolute";
             testContainer.style.left = "-99999px";
@@ -65,21 +67,27 @@
             testContainer.style["-webkit-transform"] = "scale(2)";
 
             testElement = document.createElement("div");
-            testElement.style.width = "10px";
-            testElement.style.height = "10px";
             testContainer.appendChild(testElement);
             document.body.appendChild(testContainer);
-
-            range = testElement.ownerDocument.createRange();
-            directBoundingRect = testElement.getBoundingClientRect();
+            range = document.createRange();
             range.selectNode(testElement);
-            rangeBoundingRect = range.getBoundingClientRect();
-            rangeClientRectsBug = directBoundingRect.height !== rangeBoundingRect.height;
+            // Internet explorer (v10 and others?) will omit the element's own client rect from
+            // the returned client rects list for the range
+            quirks.rangeBCRIgnoresElementBCR = range.getClientRects().length === 0;
+
+            testElement.appendChild(document.createTextNode("Rect transform test"));
+            directBoundingRect = testElement.getBoundingClientRect();
+            rangeBoundingRect = range.getClientRects()[0];
+            // Firefox doesn't apply parent css transforms to any range client rectangles
+            // See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+            quirks.unscaledRangeClientRects = directBoundingRect.height !== rangeBoundingRect.height;
             range.detach();
 
             document.body.removeChild(testContainer);
+            detectedQuirks = Object.keys(quirks).map(function(quirk) { return quirk + ":" + quirks[quirk];}).join(", ");
+            runtime.log("Detected browser quirks - " + detectedQuirks);
         }
-        return rangeClientRectsBug;
+        return quirks;
     }
 
     /**
@@ -419,15 +427,6 @@
         }
 
         /**
-         * Detect browsers exhibiting bug found at https://bugzilla.mozilla.org/show_bug.cgi?id=863618
-         * @param {!Document} document
-         * @returns {!boolean}
-         */
-        this.areRangeRectanglesTransformed = function(document) {
-            return !rangeClientRectsUntransformedBug(document);
-        };
-
-        /**
          * Scale the supplied number by the specified zoom transformation if the browser does not transform range client
          * rectangles correctly.
          * In firefox, the span rectangle will be affected by the zoom, but the range is not.
@@ -444,12 +443,21 @@
         function adaptRangeDifferenceToZoomLevel(inputNumber, zoomLevel) {
             var window = runtime.getWindow(),
                 document = window && window.document;
-            if (document && rangeClientRectsUntransformedBug(document)) {
+            if (document && getBrowserQuirks(document).unscaledRangeClientRects) {
                 return inputNumber;
             }
             return inputNumber / zoomLevel;
         }
         this.adaptRangeDifferenceToZoomLevel = adaptRangeDifferenceToZoomLevel;
+
+        /**
+         * Get detected browser quirks
+         * @param {!Document} document
+         * @returns {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
+         */
+        this.getBrowserQuirks = function(document) {
+            return getBrowserQuirks(document);
+        };
 
         function init(self) {
             var /**@type{?Window}*/window = runtime.getWindow(),

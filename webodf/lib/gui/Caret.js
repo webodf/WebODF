@@ -62,7 +62,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         shouldBlink = false,
         blinking = false,
         blinkTimeout,
-        domUtils = new core.DomUtils();
+        domUtils = new core.DomUtils(),
+        rangeBCRIgnoresElementBCR;
 
     function blink(reset) {
         if (!shouldBlink || !cursorNode.parentNode) {
@@ -194,10 +195,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         var range,
             rangeRect;
 
-        range = span.ownerDocument.createRange();
-        range.selectNode(span);
-        rangeRect = range.getBoundingClientRect();
-        range.detach();
+        if (rangeBCRIgnoresElementBCR) {
+            rangeRect = span.getBoundingClientRect();
+        } else {
+            range = span.ownerDocument.createRange();
+            range.selectNode(span);
+            rangeRect = range.getClientRects()[0];
+            range.detach();
+        }
         return rangeRect;
     }
 
@@ -383,6 +388,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
         avatar = new gui.Avatar(cursorNode, avatarInitiallyVisible);
+        rangeBCRIgnoresElementBCR = domUtils.getBrowserQuirks(dom).rangeBCRIgnoresElementBCR;
         handleUpdate();
     }
     init();
