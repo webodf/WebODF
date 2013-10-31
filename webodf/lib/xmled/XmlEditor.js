@@ -323,8 +323,23 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
             event.returnValue = false;
         }
     }
+    /**
+     * @return {!boolean}
+     */
+    function initCrumbBar() {
+        if (crumbBar) {
+            return true;
+        }
+        var root = canvas.getDocumentRoot();
+        if (root) {
+            crumbBar = new xmled.CrumbBar(crumbElement, root, validationModel);
+        }
+        return crumbBar !== null;
+    }
     function setActiveElement(element) {
-        crumbBar.setElement(element);
+        if (initCrumbBar()) {
+            crumbBar.setElement(element);
+        }
         var info = validationModel.getElementInfo(element),
             defs = validationModel.getAttributeDefinitions(element),
             y;
@@ -395,8 +410,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         attributeEditorElement.className = 'unselectable';
         viewButtons.className = 'unselectable';
         canvas = new xmled.XmlCanvas(canvasElement, validationModel, styleurl);
-        var root = canvas.getDocumentRoot();
-        crumbBar = new xmled.CrumbBar(crumbElement, root, validationModel);
+        initCrumbBar();
 
         canvasElement.onmouseup = function (evt) {
             var target = evt.target;
@@ -466,7 +480,9 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                     e = root.getElementsByTagNameNS("", "titel")[0],
                     sel = runtime.getWindow().getSelection(),
                     r = doc.createRange();
-                crumbBar.setDocumentRoot(root);
+                if (initCrumbBar()) {
+                    crumbBar.setDocumentRoot(root);
+                }
                 // hack to select start of doc
                 if (e) {
                     r.setStart(e, 0);

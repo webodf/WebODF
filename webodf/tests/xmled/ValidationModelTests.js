@@ -155,7 +155,11 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
                 r.shouldBeNull(t, "t.err");
                 loadReplacements(function () {
                     var initial = replacements[initId],
-                        range = createRange(initial, start, end);
+                        range,
+                        de = initial.ownerDocument.createElement("doc");
+                    de.appendChild(initial.cloneNode(true));
+                    initial = de;
+                    range = createRange(initial, start, end);
                     t.reps = model.getPossibleReplacements(initial, range);
                     checkReplacements(t.reps, replacementIds, callback);
                 });

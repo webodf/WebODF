@@ -38,7 +38,7 @@
 /**
  * @constructor
  * @param {!Element} htmlelement in which to draw the crumbs 
- * @param {?Element} root root element of document
+ * @param {!Element} root root element of document
  * @param {!xmled.ValidationModel} validationModel
  * @return {?}
  **/
@@ -70,10 +70,30 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
 //        item.setAttribute("tabindex", "1");
     }
 
+    function getElementPosition(element) {
+        var e = element.parentNode.firstChild,
+            pos = 0;
+        while (e !== element) {
+            pos += 1;
+            e = e.nextSibling;
+        }
+        return pos;
+    }
+
+    function getRangeAroundElement(element) {
+        var range = element.ownerDocument.createRange(),
+            pos = getElementPosition(element);
+        range.setStart(element.parentNode, pos);
+        range.setEnd(element.parentNode, pos + 1);
+        return range;
+    }
+
     function createMenu(element) {
         var menu = doc.createElementNS(htmlns, "div"),
-            allowed = validationModel.getAllowedElements(element),
+            range = getRangeAroundElement(element),
+            allowed = validationModel.getPossibleReplacements(root, range),
             i;
+        range.detach();
         for (i = 0; i < allowed.length; i += 1) {
             createMenuItem(menu, "Insert " + allowed[i]);
         }
@@ -127,6 +147,10 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         };
         return span;
     }
+    /**
+     * @param {!Element} newRoot
+     * @return {undefined}
+     */
     this.setDocumentRoot = function (newRoot) {
         root = newRoot;
     };

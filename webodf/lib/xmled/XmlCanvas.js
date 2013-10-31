@@ -139,7 +139,7 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
         callback(null);
     };
     /**
-     * @return {?Element}
+     * @return {!Element}
      */
     this.getDocumentRoot = function () {
         return root;
