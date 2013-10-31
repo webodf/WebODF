@@ -264,6 +264,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/PositionIterator.js
     lib/core/PositionFilter.js
     lib/core/PositionFilterChain.js
+    lib/core/ScheduledTask.js
     lib/core/Async.js
     lib/core/Zip.js
     lib/core/CSSUnits.js

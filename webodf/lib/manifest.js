@@ -53,6 +53,7 @@
         "core/PositionIterator.js",
         "core/RawDeflate.js",
         "core/RawInflate.js",
+        "core/ScheduledTask.js",
         "core/UnitTester.js",
         "core/Zip.js",
         "gui/AnnotationViewManager.js",
