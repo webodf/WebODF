@@ -38,6 +38,8 @@
 /*global runtime, core, gui, Node, ops, odf */
 
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("core.Async");
+runtime.loadClass("core.ScheduledTask");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("odf.ObjectNameGenerator");
 runtime.loadClass("ops.OdtCursor");
@@ -77,6 +79,7 @@ gui.SessionController = (function () {
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
+            async = new core.Async(),
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
             clipboard = new gui.Clipboard(),
@@ -97,7 +100,8 @@ gui.SessionController = (function () {
             textManipulator = new gui.TextManipulator(session, inputMemberId, createCursorStyleOp),
             imageManager = new gui.ImageManager(session, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
-            shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
+            shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            drawShadowCursorTask;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -942,6 +946,7 @@ gui.SessionController = (function () {
                     clientY: event.clientY,
                     target: target
                 };
+            drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
             if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
                 selectImage(target.parentNode);
             } else if (clickStartedWithinContainer && !imageSelector.isSelectorElement(target)) {
@@ -983,7 +988,7 @@ gui.SessionController = (function () {
             }
         }
 
-        function handleMouseMove() {
+        function updateShadowCursor() {
             var selection = window.getSelection(),
                 selectionRange,
                 isForwardSelection;
@@ -1019,7 +1024,7 @@ gui.SessionController = (function () {
             eventManager.subscribe("beforepaste", handleBeforePaste);
             eventManager.subscribe("paste", handlePaste);
             eventManager.subscribe("mousedown", filterMouseClicks);
-            eventManager.subscribe("mousemove", handleMouseMove);
+            eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
             eventManager.subscribe("mouseup", handleMouseUp);
             eventManager.subscribe("contextmenu", handleContextMenu);
             eventManager.subscribe("focus", delayedMaintainCursor);
@@ -1063,6 +1068,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("copy", handleCopy);
             eventManager.unsubscribe("paste", handlePaste);
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
+            eventManager.unsubscribe("mousemove", drawShadowCursorTask.trigger);
             eventManager.unsubscribe("mousedown", filterMouseClicks);
             eventManager.unsubscribe("mouseup", handleMouseUp);
             eventManager.unsubscribe("contextmenu", handleContextMenu);
@@ -1167,20 +1173,18 @@ gui.SessionController = (function () {
         };
 
         /**
-         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @param {!function(!Object=)} callback passing an error object in case of error
          * @return {undefined}
          */
         this.destroy = function(callback) {
-            var destroyDirectTextStyler = directTextStyler ? directTextStyler.destroy : function(cb) { cb(); },
-                destroyDirectParagraphStyler = directParagraphStyler ? directParagraphStyler.destroy : function(cb) { cb(); };
-            // TODO: check if anything else needs to be cleaned up
-            destroyDirectTextStyler(function(err) {
-                if (err) {
-                    callback(err);
-                } else {
-                    destroyDirectParagraphStyler(callback);
-                }
-            });
+            var destroyCallbacks = [drawShadowCursorTask.destroy];
+            if (directTextStyler) {
+                destroyCallbacks.push(directTextStyler.destroy);
+            }
+            if (directParagraphStyler) {
+                destroyCallbacks.push(directParagraphStyler.destroy);
+            }
+            async.destroyAll(destroyCallbacks, callback);
         };
 
         /**
@@ -1215,6 +1219,8 @@ gui.SessionController = (function () {
             var isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
                 modifier = gui.KeyboardHandler.Modifier,
                 keyCode = gui.KeyboardHandler.KeyCode;
+
+            drawShadowCursorTask = new core.ScheduledTask(updateShadowCursor, 0);
 
             // TODO: deselect the currently selected image when press Esc
             // TODO: move the image selection box to next image/frame when press tab on selected image

@@ -33,55 +33,77 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global core*/
+/*global Node, core, runtime*/
 
 /**
+ * @class
+ * A scheduled task allows multiple requests for the same function to
+ * be aggregated into a single call at a future time. This is useful for
+ * batching up draw requests or other lower-priority or high-volume calls
+ *
  * @constructor
+ * @param {!Function} fn The function to execute for this task
+ * @param {!number} delay The number of ms to wait after the first call to trigger
  */
-core.Async = function Async() {
+core.ScheduledTask = function ScheduledTask(fn, delay) {
     "use strict";
-    /**
-     * @param {!Array.<*>} items
-     * @param {function(*, !function(!string):undefined):undefined} f
-     * @param {function(?string)} callback
-     * @return {undefined}
-     */
-    this.forEach = function (items, f, callback) {
-        var i, l = items.length, itemsDone = 0;
-        function end(err) {
-            if (itemsDone !== l) {
-                if (err) {
-                    itemsDone = l;
-                    callback(err);
-                } else {
-                    itemsDone += 1;
-                    if (itemsDone === l) {
-                        callback(null);
-                    }
-                }
-            }
+    var timeoutId,
+        scheduled = false;
+
+    function execute() {
+        fn();
+        scheduled = false;
+    }
+
+    function cancel() {
+        if (scheduled) {
+            runtime.clearTimeout(timeoutId);
+            scheduled = false;
         }
-        for (i = 0; i < l; i += 1) {
-            f(items[i], end);
+    }
+
+    /**
+     * Schedule this task to execute. If one has already been requested,
+     * this call will have no impact
+     */
+    this.trigger = function() {
+        if (!scheduled) {
+            timeoutId = runtime.setTimeout(execute, delay);
         }
     };
 
     /**
-     * @param {!Array.<!function(!function(!Object=))>} items
+     * Immediately trigger this task and clear any pending requests.
+     */
+    this.triggerImmediate = function() {
+        cancel();
+        execute();
+    };
+
+    /**
+     * Execute any pending requests, but do not start any new ones.
+     * If there are no pending requests, this call will do nothing.
+     */
+    this.processRequests = function() {
+        if (scheduled) {
+            cancel();
+            execute();
+        }
+    };
+
+    /**
+     * Cancel any current pending requests
+     * @type {Function}
+     */
+    this.cancel = cancel;
+
+    /**
+     * Cancel any pending requests
      * @param {!function(!Object=)} callback
      */
-    this.destroyAll = function(items, callback) {
-        function destroy(itemIndex, err) {
-            if (err) {
-                callback(err);
-            } else {
-                if (itemIndex < items.length) {
-                    items[itemIndex](function(err) { destroy(itemIndex+1, err); });
-                } else {
-                    callback();
-                }
-            }
-        }
-        destroy(0, undefined);
+    this.destroy = function(callback) {
+        cancel();
+        callback();
     };
+
 };
