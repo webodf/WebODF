@@ -91,7 +91,8 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
     function createMenu(element) {
         var menu = doc.createElementNS(htmlns, "div"),
             range = getRangeAroundElement(element),
-            allowed = validationModel.getPossibleReplacements(root, range),
+            docel = /**@type{!Element}*/(root.parentNode),
+            allowed = validationModel.getPossibleReplacements(docel, range),
             i;
         range.detach();
         for (i = 0; i < allowed.length; i += 1) {

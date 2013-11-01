@@ -32,5 +32,12 @@
       </xs:choice>
     </xs:complexType>
   </xs:element>
+  <xs:element name="h">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="e:g" maxOccurs="3"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>
 

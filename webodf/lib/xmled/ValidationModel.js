@@ -172,7 +172,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         xsd,
         targetNamespace = null,
         validateGroupUpToNode,
-        validateComplexTypeUpToNode;
+        validateComplexTypeUpToNode,
+        fillElementWithDefaults;
     /**
      * @return {!xmled.ValidationModel.State}
      */
@@ -424,6 +425,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
             e = doc.createElementNS(targetNamespace,
                     group.getAttribute("name"));
+            fillElementWithDefaults(e, group);
             instance.appendChild(e);
         }
     }
@@ -450,7 +452,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
         }
     }
-    function fillElementWithDefaults(instance, definition) {
+    fillElementWithDefaults = function (instance, definition) {
         forEachElement(definition, xsdns, "complexType", function (type) {
             forEachElement(type, xsdns, "attribute", function (att) {
                 if (att.getAttribute("use") === "required") {
@@ -467,7 +469,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 addChoice(instance, seq);
             });
         });
-    }
+    };
     /**
      * @param {!Document} doc
      * @param {!Element} elementDef
@@ -533,14 +535,23 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (!def.hasAttribute("name")) {
             def = findElement(def.getAttribute("ref"));
         }
-        if (def.getAttribute("name") === n.localName) {
-            // do some stuff
-            state.error = null;//r = valState(def, 0, currentNode);
-            if (!state.checkDone()) {
-                state.currentNode = n.nextElementSibling;
-            }
-        } else {
+        if (def.getAttribute("name") !== n.localName) {
             state.error = "Unexpected element " + n.localName;
+            return;
+        }
+        def = def.firstElementChild;
+        if (def && def.localName === "annotation") {
+            def = def.nextElementSibling;
+        }
+        if (def) {
+            if (def.localName === "simpleType") {
+                validateSimpleTypeUpToNode(state);
+            } else {
+                validateComplexTypeUpToNode(def, state);
+            }
+        }
+        if (!state.checkDone()) {
+            state.currentNode = n.nextElementSibling;
         }
     }
     /**
@@ -710,7 +721,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 state.pop();
             } else if (e.localName === "complexContent") {
                 validateComplexContentUpToNode(e, state);
-            } else if (e.localName !== "attribute") {
+            } else if (e.localName !== "attribute" && e.localName !== "anyAttribute") {
                 throw "Not implemented";
             }
             e = e.nextElementSibling;
@@ -740,7 +751,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             return;
         }
         state.push(def);
+        state.currentNode = documentElement;
         if (state.documentNode === state.targetNode) {
+            state.checkDone();
             return;
         }
         def = def.firstElementChild;
@@ -753,7 +766,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         runtime.assert(def.localName === "simpleType"
                 || def.localName === "complexType", "Unexpected element");
-        state.currentNode = documentElement;
         if (def.localName === "simpleType") {
             validateSimpleTypeUpToNode(state);
         } else {
