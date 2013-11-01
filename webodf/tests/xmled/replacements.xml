@@ -1,4 +1,5 @@
 <replacements xmlns:e="http://example.org/">
+  <replacement id="empty"><e:a/></replacement>
   <replacement id="a"><e:a/></replacement>
   <replacement id="b"><e:b/></replacement>
   <replacement id="c"><e:c/></replacement>
@@ -7,4 +8,6 @@
   <replacement id="f"><e:f><e:a/></e:f></replacement>
   <replacement id="g"><e:g><e:b/></e:g></replacement>
   <replacement id="ga"><e:g><e:a/></e:g></replacement>
+  <replacement id="gb"><e:g><e:b/></e:g></replacement>
+  <replacement id="gbb"><e:g><e:b/><e:b/></e:g></replacement>
 </replacements>

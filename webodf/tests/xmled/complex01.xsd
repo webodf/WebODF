@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.org/" >
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.org/" xmlns:e="http://example.org/">
   <xs:element name="a">
     <xs:complexType>
     </xs:complexType>
@@ -19,7 +19,7 @@
   <xs:element name="f">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="a"/>
+        <xs:element ref="e:a"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -27,7 +27,7 @@
     <xs:complexType>
       <xs:choice>
         <xs:element name="a"/>
-        <xs:element name="b"/>
+        <xs:element name="b" form="qualified" maxOccurs="2"/>
         <xs:element name="c"/>
       </xs:choice>
     </xs:complexType>

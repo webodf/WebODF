@@ -82,10 +82,11 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
         occs.push(1);
     };
     /**
-     * @return {undefined}
+     * @return {!boolean}
      */
     this.checkDone = function () {
         isDone = isDone || targetNode === self.currentNode;
+        return isDone;
     };
     /**
      * @return {!boolean}
@@ -205,13 +206,20 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return e;
     }
     /**
-     * @param {!string} localName
+     * @param {!string} qname
      * @return {?Element}
      */
-    function findElement(localName) {
-        var es = xsd.getElementsByTagNameNS(xsdns, "element"),
+    function findElement(qname) {
+        var localName,
+            es = xsd.getElementsByTagNameNS(xsdns, "element"),
             e,
             i;
+        i = qname.indexOf(':');
+        if (i !== -1) {
+            localName = qname.substr(i + 1);
+        } else {
+            localName = qname;
+        }
         for (i = 0; i < es.length; i += 1) {
             e = es.item(i);
             if (e.getAttribute("name") === localName) {
@@ -467,11 +475,14 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function getPossibleElement(doc, elementDef) {
         var f = doc.createDocumentFragment(),
-            e;
+            e = elementDef;
+        if (!e.hasAttribute("name")) {
+            e = findElement(e.getAttribute("ref"));
+        }
         if (targetNamespace) {
-            e = doc.createElementNS(targetNamespace, elementDef.getAttribute("name"));
+            e = doc.createElementNS(targetNamespace, e.getAttribute("name"));
         } else {
-            e = doc.createElement(elementDef.getAttribute("name"));
+            e = doc.createElement(e.getAttribute("name"));
         }
         f.appendChild(e);
         fillElementWithDefaults(e, elementDef);
@@ -508,16 +519,28 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {undefined}
      */
     function validateElementUpToNode(state) {
-        var def = state.topDef();
+        var def = state.topDef(),
+            n = state.currentNode;
+        while (n && n.nodeType !== 1) {
+            n = n.nextSibling;
+        }
+        if (!n) {
+            state.error = "No element was found.";
+            return;
+        }
+        state.error = null;
+        state.currentNode = n;
         if (!def.hasAttribute("name")) {
             def = findElement(def.getAttribute("ref"));
         }
-        if (def.getAttribute("name") === state.currentNode.localName) {
+        if (def.getAttribute("name") === n.localName) {
             // do some stuff
             state.error = null;//r = valState(def, 0, currentNode);
+            if (!state.checkDone()) {
+                state.currentNode = n.nextElementSibling;
+            }
         } else {
-            state.error = "Unexpected element "
-                + state.currentNode.localName;
+            state.error = "Unexpected element " + n.localName;
         }
     }
     /**
@@ -548,7 +571,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function validateChoiceUpToNode(state) {
         var def = state.topDef(),
-            e = def.firstElementChild;
+            e = def.firstElementChild,
+            n = state.currentNode;
         while (e && !state.done()) {
             if (e.localName === "sequence" || e.localName === "choice"
                     || e.localName === "element") {
@@ -559,6 +583,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                     state.pop();
                     break;
                 }
+                state.currentNode = n;
                 state.error = null;
                 state.pop();
             } else {
@@ -576,24 +601,34 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             minOccurs = getMinOccurs(def),
             maxOccurs = getMaxOccurs(def),
             currentElement = null,
-            lastElement;
+            lastElement,
+            to;
         if (state.currentNode) {
             if (state.currentNode.nodeType === 1) {
                 currentElement = /**@type{?Element}*/(state.currentNode);
             } else {
                 currentElement = state.currentNode.parentNode.firstElementChild;
+                state.currentNode = currentElement;
             }
         }
-        while (state.topOccurrence() <= maxOccurs) {
+        to = state.topOccurrence();
+        while (currentElement && to <= maxOccurs) {
+            runtime.assert(to < 100, "looping");
             lastElement = currentElement;
             if (def.localName === "sequence") {
                 validateSequenceUpToNode(state);
             } else if (def.localName === "element") {
                 validateElementUpToNode(state);
+                runtime.assert(state.currentNode !== currentElement
+                    || state.error === null || state.done(),
+                    "No progress after checking element.");
             } else if (def.localName === "choice") {
                 validateChoiceUpToNode(state);
             } else {
                 throw "Not implemented";
+            }
+            if (state.done()) {
+                break;
             }
             if (state.error) {
                 if (state.topOccurrence() > minOccurs) {
@@ -605,6 +640,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
             currentElement = state.currentNode;
             state.topNextOccurrence();
+            to = state.topOccurrence();
         }
         if (state.topOccurrence() < minOccurs) {
             state.error = "Not enough elements.";
@@ -730,7 +766,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
     function findAlternativeElements(state) {
-        var doc = /**@type{!Document}*/(state.documentNode.ownerDocument || state.documentNode),
+        var doc = /**@type{!Document}*/(state.documentNode.ownerDocument
+                || state.documentNode),
             f = doc.createDocumentFragment(),
             a = [],
             p,
@@ -759,6 +796,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (vstate.error) {
             throw vstate.error;
         }
+        runtime.assert(vstate.currentNode !== null, "No element found.");
+        runtime.assert(vstate.length() > 0, "No definitions in state.");
         runtime.assert(vstate.topDef().localName === "element",
             "Top definition must be an element definition.");
         return findAlternativeElements(vstate);
