@@ -171,7 +171,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         error,
         xsd,
         targetNamespace = null,
-        validateGroupUpToNode,
+        validateCollectionUpToNode,
         validateComplexTypeUpToNode,
         fillElementWithDefaults;
     /**
@@ -201,7 +201,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function findRootElement(localName) {
         var e = xsd.firstElementChild;
-        while (e && e.getAttribute("name") !== localName) {
+        while (e && !(e.localName === "element"
+                && e.getAttribute("name") === localName)) {
             e = e.nextElementSibling;
         }
         return e;
@@ -228,6 +229,38 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
         }
         return null;
+    }
+    /**
+     * @param {!Element} groupRef
+     * @return {!Element}
+     */
+    function findGroup(groupRef) {
+        var qname = groupRef.getAttribute("ref"),
+            localName,
+            es = xsd.getElementsByTagNameNS(xsdns, "group"),
+            e,
+            i;
+        i = qname.indexOf(':');
+        if (i !== -1) {
+            localName = qname.substr(i + 1);
+        } else {
+            localName = qname;
+        }
+        for (i = 0; i < es.length; i += 1) {
+            e = es.item(i);
+            if (e.getAttribute("name") === localName) {
+                return e;
+            }
+        }
+        throw "Group not found.";
+    }
+    /**
+     * @param {!Element} groupRef
+     * @return {!Element}
+     */
+    function findGroupCollection(groupRef) {
+        var e = /**@type{!Element}*/(findGroup(groupRef).lastElementChild);
+        return e;
     }
     function findAttributeGroup(name) {
         var es = xsd.getElementsByTagNameNS(xsdns, "attributeGroup"),
@@ -413,19 +446,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return parseInt(maxOccurs, 10);
     }
-    function addGroup(instance, group) {
-        if (group.namespaceURI !== xsdns) {
+    function addCollection(instance, coll) {
+        if (coll.namespaceURI !== xsdns) {
             return;
         }
         var doc = instance.ownerDocument,
             e;
-        if (group.localName === "element") {
-            if (!group.hasAttribute("name")) {
-                group = findElement(group.getAttribute("ref"));
+        if (coll.localName === "element") {
+            if (!coll.hasAttribute("name")) {
+                coll = findElement(coll.getAttribute("ref"));
             }
             e = doc.createElementNS(targetNamespace,
-                    group.getAttribute("name"));
-            fillElementWithDefaults(e, group);
+                    coll.getAttribute("name"));
+            fillElementWithDefaults(e, coll);
             instance.appendChild(e);
         }
     }
@@ -436,7 +469,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         for (i = 0; i < minOccurs; i += 1) {
             e = sequence.firstElementChild;
             while (e) {
-                addGroup(instance, e);
+                addCollection(instance, e);
                 e = e.nextElementSibling;
             }
         }
@@ -448,8 +481,18 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         for (i = 0; i < minOccurs; i += 1) {
             e = choice.firstElementChild;
             if (e) {
-                addGroup(instance, e);
+                addCollection(instance, e);
             }
+        }
+    }
+    function addGroup(instance, group) {
+        group = findGroupCollection(group);
+        if (group.localName === "sequence") {
+            addSequence(instance, group);
+        } else if (group.localName === "choice") {
+            addChoice(instance, group);
+        } else {
+            throw "Not implemented";
         }
     }
     fillElementWithDefaults = function (instance, definition) {
@@ -467,6 +510,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             });
             forEachElement(type, xsdns, "choice", function (seq) {
                 addChoice(instance, seq);
+            });
+            forEachElement(type, xsdns, "group", function (seq) {
+                addGroup(instance, seq);
             });
         });
     };
@@ -565,7 +611,14 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             if (e.localName === "sequence" || e.localName === "choice"
                     || e.localName === "element") {
                 state.push(e);
-                validateGroupUpToNode(state);
+                validateCollectionUpToNode(state);
+                if (!e.nextElementSibling) {
+                    state.checkDone();
+                }
+                state.pop();
+            } else if (e.localName === "group") {
+                state.push(findGroupCollection(e));
+                validateCollectionUpToNode(state);
                 if (!e.nextElementSibling) {
                     state.checkDone();
                 }
@@ -588,7 +641,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             if (e.localName === "sequence" || e.localName === "choice"
                     || e.localName === "element") {
                 state.push(e);
-                validateGroupUpToNode(state);
+                validateCollectionUpToNode(state);
                 if (!state.error) {
                     state.checkDone();
                     state.pop();
@@ -607,7 +660,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @param {!xmled.ValidationState} state
      * @return {undefined}
      */
-    validateGroupUpToNode = function (state) {
+    validateCollectionUpToNode = function (state) {
         var def = state.topDef(),
             minOccurs = getMinOccurs(def),
             maxOccurs = getMaxOccurs(def),
@@ -717,7 +770,12 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             if (e.localName === "sequence" || e.localName === "choice") {
                 state.currentNode = node.firstChild;
                 state.push(e);
-                validateGroupUpToNode(state);
+                validateCollectionUpToNode(state);
+                state.pop();
+            } else if (e.localName === "group") {
+                state.currentNode = node.firstChild;
+                state.push(findGroupCollection(e));
+                validateCollectionUpToNode(state);
                 state.pop();
             } else if (e.localName === "complexContent") {
                 validateComplexContentUpToNode(e, state);

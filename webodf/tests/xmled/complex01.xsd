@@ -23,13 +23,16 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:group name="g">
+    <xs:choice>
+      <xs:element name="a"/>
+      <xs:element name="b" form="qualified" maxOccurs="2"/>
+      <xs:element name="c"/>
+    </xs:choice>
+  </xs:group>
   <xs:element name="g">
     <xs:complexType>
-      <xs:choice>
-        <xs:element name="a"/>
-        <xs:element name="b" form="qualified" maxOccurs="2"/>
-        <xs:element name="c"/>
-      </xs:choice>
+      <xs:group ref="e:g"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="h">
