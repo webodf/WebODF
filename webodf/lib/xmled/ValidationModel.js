@@ -32,6 +32,8 @@
  */
 /*global xmled, runtime, console*/
 
+runtime.loadClass("xmled.XsdChecker");
+
 /**
  * @constructor
  * @param {!Document|!Element} documentNode
@@ -76,7 +78,8 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
             || (name === "element" && def.parentNode.localName === "schema"),
             "First element should be top level element");
         runtime.assert(name === "sequence" || name === "choice"
-            || name === "element", "Invalide definition pushed.");
+            || name === "element" || name === "any",
+            "Invalide definition pushed.");
         defs.push(def);
         poss.push(0);
         occs.push(1);
@@ -171,6 +174,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         error,
         xsd,
         targetNamespace = null,
+        checker = new xmled.XsdChecker(),
         validateCollectionUpToNode,
         validateComplexTypeUpToNode,
         fillElementWithDefaults;
@@ -522,6 +526,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {!{desc:!string,range:?Range,dom:!DocumentFragment}}
      */
     function getPossibleElement(doc, elementDef) {
+        runtime.assert(elementDef.localName === "element",
+                "The definition is not for an element.");
         var f = doc.createDocumentFragment(),
             e = elementDef;
         if (!e.hasAttribute("name")) {
@@ -560,6 +566,25 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function validateSimpleTypeUpToNode(state) {
         if (state) {
             throw "Not implemented";
+        }
+    }
+    /**
+     * @param {!xmled.ValidationState} state
+     * @return {undefined}
+     */
+    function validateAnyUpToNode(state) {
+        var n = state.currentNode;
+        while (n && n.nodeType !== 1) {
+            n = n.nextSibling;
+        }
+        if (!n) {
+            state.error = "No element was found.";
+            return;
+        }
+        state.error = null;
+        state.currentNode = n;
+        if (!state.checkDone()) {
+            state.currentNode = n.nextElementSibling;
         }
     }
     /**
@@ -607,9 +632,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function validateSequenceUpToNode(state) {
         var def = state.topDef(),
             e = def.firstElementChild;
-        while (e) {
+        while (e && !state.done()) {
             if (e.localName === "sequence" || e.localName === "choice"
-                    || e.localName === "element") {
+                    || e.localName === "element" || e.localName === "any") {
                 state.push(e);
                 validateCollectionUpToNode(state);
                 if (!e.nextElementSibling) {
@@ -681,18 +706,20 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             lastElement = currentElement;
             if (def.localName === "sequence") {
                 validateSequenceUpToNode(state);
+            } else if (def.localName === "choice") {
+                validateChoiceUpToNode(state);
             } else if (def.localName === "element") {
                 validateElementUpToNode(state);
                 runtime.assert(state.currentNode !== currentElement
                     || state.error === null || state.done(),
                     "No progress after checking element.");
-            } else if (def.localName === "choice") {
-                validateChoiceUpToNode(state);
+            } else if (def.localName === "any") {
+                validateAnyUpToNode(state);
+                runtime.assert(state.currentNode !== currentElement
+                    || state.error === null || state.done(),
+                    "No progress after checking any element.");
             } else {
                 throw "Not implemented";
-            }
-            if (state.done()) {
-                break;
             }
             if (state.error) {
                 if (state.topOccurrence() > minOccurs) {
@@ -700,6 +727,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                     state.error = null;
                     state.currentNode = lastElement;
                 }
+                break;
+            }
+            if (state.done()) {
                 break;
             }
             currentElement = state.currentNode;
@@ -850,7 +880,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         p = state.def(state.length() - 2);
         e = p.firstElementChild;
         while (e) {
-            a.push(getPossibleElement(doc, e));
+            if (e.localName === "element") {
+                a.push(getPossibleElement(doc, e));
+            }
             e = e.nextElementSibling;
         }
         return a;
@@ -869,7 +901,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         runtime.assert(vstate.currentNode !== null, "No element found.");
         runtime.assert(vstate.length() > 0, "No definitions in state.");
         runtime.assert(vstate.topDef().localName === "element",
-            "Top definition must be an element definition.");
+            "Top definition must be an element definition, not "
+            + vstate.topDef().localName + ".");
         return findAlternativeElements(vstate);
     }
     /**
@@ -920,7 +953,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     };
     function init() {
         runtime.loadXML(grammarurl, function (err, dom) {
-            if (err) {
+            if (dom) {
+                err = err || checker.check(dom);
+            }
+            if (err || !dom) {
                 error = err;
                 state = xmled.ValidationModel.State.ERROR;
                 return onready && onready(error);
