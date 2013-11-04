@@ -115,6 +115,12 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
         poss[poss.length - 1] = 0;
     };
     /**
+     * @return {!Array.<!Element>}
+     */
+    this.defs = function () {
+        return defs;
+    };
+    /**
      * @return {!number}
      */
     this.length = function () {
@@ -161,7 +167,79 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
         occs[occs.length - 1] += 1;
     };
 };
-
+/**
+ * @constructor
+ * @param {!number} id
+ * @param {!Element} element
+ * @param {!number=} offset
+ * @param {!xmled.Particle=} parent
+ */
+xmled.Particle = function Particle(id, element, offset, parent) {
+    "use strict";
+    this.id = function () {
+        return id;
+    };
+    this.element = function () {
+        return element;
+    };
+    this.offset = function () {
+        return offset;
+    };
+    this.parent = function () {
+        return parent;
+    };
+};
+/**
+ * @constructor
+ */
+xmled.ParticleCache = function ParticleCache() {
+    "use strict";
+    var rootParticles = {},
+        particles = [];
+    /**
+     * @param {!Element} element
+     * @param {!number=} offset
+     * @param {!xmled.Particle=} parent
+     * @return {!xmled.Particle}
+     */
+    this.getParticle = function (element, offset, parent) {
+        var p, ps;
+        if (!parent) { // asking for a root particle
+            p = rootParticles[element.localName];
+            if (!p) {
+                p = new xmled.Particle(particles.length, element);
+                particles.push([]);
+                rootParticles[element.localName] = p;
+            }
+        } else {
+            ps = particles[parent.id()];
+            if (ps.length > offset) {
+                p = ps[offset];
+            } else {
+                p = new xmled.Particle(particles.length, element, offset,
+                        parent);
+                particles.push([]);
+            }
+        }
+        return p;
+    };
+};
+/**
+ * @constructor
+ * @param {!Array.<!Element>} def
+ * @param {!Element} parent
+ */
+xmled.ParticleSearchState = function ParticleSearchState(def, parent) {
+    "use strict";
+    var cache = [];
+    function init() {
+        if (def && parent) {
+            cache = [];
+        }
+        return cache;
+    }
+    init();
+};
 /**
  * @constructor
  * @param {!string} grammarurl
@@ -175,6 +253,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         xsd,
         targetNamespace = null,
         checker = new xmled.XsdChecker(),
+        particles = new xmled.ParticleCache(),
         validateCollectionUpToNode,
         validateComplexTypeUpToNode,
         fillElementWithDefaults;
@@ -862,6 +941,68 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         state.pop();
     }
     /**
+     * @param {!Element} element
+     * @return {!number}
+     */
+    function getPosition(element) {
+        var position = 0,
+            e = element.parentNode.firstElementChild;
+        while (e !== element) {
+            position += 1;
+            e = e.nextElementSibling;
+        }
+        return position;
+    }
+    /**
+     * @param {!xmled.Particle} particle
+     * @param {!Element} element
+     * @return {!Array.<!xmled.Particle>}
+     */
+    function findParticles(particle, element) {
+        var ps = [];
+        if (particle || element) {
+            ps.length = element.childElementCount;
+        }
+        return ps;
+    }
+    /**
+     * @param {!Element} element
+     * @return {!xmled.Particle}
+     */
+    function getRootParticle(element) {
+        var def = findRootElement(element.localName);
+        if (!def) {
+            throw "No definition for " + element.localName;
+        }
+        return particles.getParticle(def);
+    }
+    /**
+     * @param {!Element} documentElement
+     * @param {!Element} element
+     * @return {!Array.<!Array.<!xmled.Particle>>}
+     */
+    function findAllParticles(documentElement, element) {
+        var parents = [element],
+            parentParticle,
+            e = element,
+            ps = [],
+            i;
+        while (e && documentElement !== e) {
+            e = /**@type{!Element}*/(e.parentNode);
+            parents.push(e);
+        }
+        parents.reverse();
+        ps.length = parents.length;
+        ps[0] = [getRootParticle(documentElement)];
+        e = parents[0];
+        for (i = 1; i < parents.length; i += 1) {
+            parentParticle = ps[i - 1][getPosition(e)];
+            ps[i] = findParticles(parentParticle, e);
+            e = parents[i];
+        }
+        return ps;
+    }
+    /**
      * @param {!xmled.ValidationState} state
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
@@ -888,12 +1029,31 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return a;
     }
     /**
+     * @param {?Node} n
+     * @return {?Element}
+     */
+    function firstElementChild(n) {
+        n = n && n.firstChild;
+        var e = null;
+        while (n && !e) {
+            if (n.nodeType === 1) {
+                e = /**@type{!Element}*/(n);
+            }
+            n = n.nextSibling;
+        }
+        return e;
+    }
+    /**
      * @param {!Document|!Element} documentNode
      * @param {!Element} node
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
     function getPossibleNodeReplacements(documentNode, node) {
-        var vstate = new xmled.ValidationState(documentNode, node);
+        var documentElement = firstElementChild(documentNode),
+            vstate = new xmled.ValidationState(documentNode, node);
+        if (documentElement) {
+            findAllParticles(documentElement, node);
+        }
         validateDocumentUpToNode(vstate);
         if (vstate.error) {
             throw vstate.error;
