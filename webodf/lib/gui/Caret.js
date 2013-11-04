@@ -147,8 +147,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         var range = cursor.getSelectedRange().cloneRange(),
             node = cursor.getNode(),
             nextRectangle,
-            rectangles,
-            selectionRectangle,
+            selectionRectangle = null,
             nodeLength;
 
         // TODO this might be able to use OdfUtils.scanLeft & scanRight behaviours to find the next odf element
@@ -158,17 +157,18 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             nodeLength = length(node.previousSibling);
             range.setStart(node.previousSibling, nodeLength > 0 ? nodeLength - 1 : 0);
             range.setEnd(node.previousSibling, nodeLength);
-            rectangles = range.getClientRects();
-            selectionRectangle = rectangles && rectangles[rectangles.length - 1];
+            nextRectangle = range.getBoundingClientRect();
+            if (nextRectangle && nextRectangle.height) {
+                selectionRectangle = nextRectangle;
+            }
         }
         // Under some circumstances (either no previous sibling, or whitespace wrapping) the client rect of the next
         // sibling will actually be a more accurate visual representation.
         if (node.nextSibling) {
             range.setStart(node.nextSibling, 0);
             range.setEnd(node.nextSibling, length(node.nextSibling) > 0 ? 1 : 0);
-            rectangles = range.getClientRects();
-            nextRectangle = rectangles && rectangles[0];
-            if (nextRectangle) {
+            nextRectangle = range.getBoundingClientRect();
+            if (nextRectangle && nextRectangle.height) {
                 // The nextSibling's rectangle should take precedence if
                 // 1. There is no previousSibling
                 // or 2. The nextSibling's rectangle has more vertical overlap with the cursor node's bounding rectangle

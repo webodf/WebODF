@@ -146,7 +146,8 @@ gui.SelectionView = function SelectionView(cursor) {
      * @returns {!boolean}
      */
     function isRangeVisible(range) {
-        return Boolean(range.getClientRects()[0]);
+        var bcr = range.getBoundingClientRect();
+        return Boolean(bcr && bcr.height !== 0);
     }
 
     /**
@@ -479,7 +480,7 @@ gui.SelectionView = function SelectionView(cursor) {
      * @param {boolean} useRightEdge
      */
     function getCollapsedRectOfTextRange(range, useRightEdge) {
-        var clientRect = range.getClientRects()[0],
+        var clientRect = range.getBoundingClientRect(),
             collapsedRect = {};
 
         collapsedRect.width = 0;
@@ -515,7 +516,7 @@ gui.SelectionView = function SelectionView(cursor) {
             lastRange = extremes.lastRange;
             fillerRange = extremes.fillerRange;
 
-            firstRect = translateRect(getCollapsedRectOfTextRange(firstRange, true));
+            firstRect = translateRect(getCollapsedRectOfTextRange(firstRange, false));
             lastRect = translateRect(getCollapsedRectOfTextRange(lastRange, true));
             fillerRect = getFillerRect(fillerRange);
 
