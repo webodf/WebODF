@@ -101,7 +101,6 @@
 		} catch (e2) {
 			log("skipping ["+args[0]+"] as non-existent.");
 		}
-		args.shift();
 	}
 
 	log("merging ["+mergees.join(",")+"] into "+dojo_build);
