@@ -146,44 +146,6 @@ if (Java_JAVA_EXECUTABLE)
   )
   add_custom_target(webodf-debug.js-target DEPENDS webodf-debug.js)
 
-  add_custom_command(
-      OUTPUT odfedit.js
-      COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
-         --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
-         --js ${CMAKE_CURRENT_SOURCE_DIR}/odfedit.js
-         --compilation_level ADVANCED_OPTIMIZATIONS
-         --formatting PRETTY_PRINT
-         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
-         --js_output_file odfedit.js-
-      COMMAND ${CMAKE_COMMAND} ARGS -E rename odfedit.js- odfedit.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES}
-          tools/externs.js tools/extjsexterns.js odfedit.js webodf.css.js-target
-  )
-  add_custom_target(odfedit.js-target DEPENDS odfedit.js)
-
-  add_custom_command(
-      OUTPUT gui.js
-      COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
-         --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
-         --js ${CMAKE_CURRENT_SOURCE_DIR}/filelister.js
-         --js ${CMAKE_CURRENT_SOURCE_DIR}/gui.js
-         --compilation_level ADVANCED_OPTIMIZATIONS
-         --formatting PRETTY_PRINT
-         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/extjsexterns.js
-         --js_output_file gui.js-
-      COMMAND ${CMAKE_COMMAND} ARGS -E gui.js- gui.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} ${APPJSFILES}
-        tools/externs.js tools/extjsexterns.js webodf.css.js-target
-        filelister.js gui.js
-  )
-  add_custom_target(gui.js-target DEPENDS gui.js)
-
   add_custom_target(syntaxcheck ALL
       DEPENDS simplecompiled.js-target webodf.js-target webodf-debug.js-target
           compiled.js-target
