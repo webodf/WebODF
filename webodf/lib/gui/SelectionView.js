@@ -557,22 +557,26 @@ gui.SelectionView = function SelectionView(cursor) {
         }
     }
 
+    function rerender() {
+        if (cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
+            showOverlays(true);
+            repositionOverlays(cursor.getSelectedRange());
+        } else {
+            showOverlays(false);
+        }
+    }
+
     /**
      * Rerender the selection overlays
      * @return {undefined}
      */
-    this.rerender = function () {
-        repositionOverlays(cursor.getSelectedRange());
-    };
+    this.rerender = rerender;
 
     /**
      * Show selection overlays
      * @return {undefined}
      */
-    this.show = function () {
-        showOverlays(true);
-        repositionOverlays(cursor.getSelectedRange());
-    };
+    this.show = rerender;
     /**
      * Hide selection overlays
      * @return {undefined}
@@ -592,7 +596,7 @@ gui.SelectionView = function SelectionView(cursor) {
      */
     function handleCursorMove(movedCursor) {
         if (movedCursor === cursor) {
-            repositionOverlays(cursor.getSelectedRange());
+            rerender();
         }
     }
     /**

@@ -100,6 +100,15 @@ gui.ShadowCursor = function ShadowCursor(odtDocument) {
         return odtDocument;
     };
 
+    /**
+     * Gets the current selection type. For a shadow cursor, this value is always
+     * ops.OdtCursor.RangeSelection
+     * @returns {!string}
+     */
+    this.getSelectionType = function () {
+        return ops.OdtCursor.RangeSelection;
+    };
+
     function init() {
         selectedRange.setStart(odtDocument.getRootNode(), 0);
     }
