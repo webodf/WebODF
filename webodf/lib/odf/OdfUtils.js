@@ -190,6 +190,24 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.isCharacterElement = isCharacterElement;
     /**
+     * Determine if the node is a whitespace character element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isWhitespaceElement(e) {
+        var n = e && e.localName,
+            ns,
+            r = false;
+        if (n) {
+            ns = e.namespaceURI;
+            if (ns === textns) {
+                r = n === "s" || n === "tab";
+            }
+        }
+        return r;
+    }
+    this.isWhitespaceElement = isWhitespaceElement;
+    /**
      * @param {!Node} node
      * @return {!Node}
      */
@@ -236,8 +254,8 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Walk to the left along the DOM and return true if the first thing
-     * encountered is either a non-whitespace character or a character
-     * element. Walking goes through grouping elements.
+     * encountered is either a non-whitespace character or a non-whitespace
+     * character element. Walking goes through grouping elements.
      * @param {?Node} node the first node to scan
      * @return {!boolean}
      */
@@ -253,7 +271,7 @@ odf.OdfUtils = function OdfUtils() {
                     );
                 }
             } else if (isCharacterElement(node)) {
-                r = true;
+                r = isWhitespaceElement(node) === false;
                 node = null;
             } else {
                 node = previousNode(node);
