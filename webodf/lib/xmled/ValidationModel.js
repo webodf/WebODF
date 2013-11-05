@@ -297,7 +297,12 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {?Element}
      */
     function findRootElement(localName) {
-        var e = xsd.firstElementChild;
+        var e = xsd.firstElementChild,
+            i;
+        i = localName.indexOf(':');
+        if (i !== -1) {
+            localName = localName.substr(i + 1);
+        }
         while (e && !(e.localName === "element"
                 && e.getAttribute("name") === localName)) {
             e = e.nextElementSibling;
@@ -967,6 +972,15 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return position;
     }
+    function findCollectionDefinition(def) {
+        if (def.localName === "complexContent") {
+            def = def.firstElementChild.firstElementChild;
+        }
+        if (def.localName === "group") {
+            def = findGroupCollection(def);
+        }
+        return def;
+    }
     /**
      * @param {!xmled.ParticleSearchState} state
      * @return {undefined}
@@ -974,11 +988,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function findParticlesInSequence(state) {
         var particle = state.particle,
             def = particle.element,
-            e = def.firstElementChild,
+            e,
             offset = 0;
-        if (def.localName === "group") {
-            def = findGroupCollection(def);
-        }
+        def = findCollectionDefinition(def);
+        e = def.firstElementChild;
         runtime.assert(def.localName === "sequence", "Sequence expected.");
         while (e && !state.done()) {
             if (e.localName === "sequence" || e.localName === "choice"
@@ -1000,12 +1013,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function findParticlesInChoice(state) {
         var particle = state.particle,
             def = particle.element,
-            e = def.firstElementChild,
+            e,
             n = state.element,
             offset = 0;
-        if (def.localName === "group") {
-            def = findGroupCollection(def);
-        }
+        def = findCollectionDefinition(def);
+        e = def.firstElementChild;
         runtime.assert(def.localName === "choice", "Choice expected.");
         while (e && !state.done()) {
             if (e.localName === "sequence" || e.localName === "choice"
@@ -1024,6 +1036,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e = e.nextElementSibling;
             offset += 1;
         }
+        if (e) {
+            state.error = "No choice option was chosen.";
+        }
     }
     /**
      * @param {!xmled.ParticleSearchState} state
@@ -1032,11 +1047,16 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function findParticlesInElement(state) {
         var particle = state.particle,
             def = particle.element,
-            name;
+            name,
+            i;
         if (def.hasAttribute("name")) {
             name = def.getAttribute("name");
         } else {
             name = def.getAttribute("ref");
+            i = name.indexOf(':');
+            if (i !== -1) {
+                name = name.substr(i + 1);
+            }
         }
         if (state.element.localName !== name) {
             state.error = "Expected " + name + " instead of "
@@ -1063,29 +1083,30 @@ console.log(def.getAttribute("ref"));
      * @return {undefined}
      */
     findParticlesInCollection = function findParticlesInCollection(state) {
-        var def = state.particle.element,
+        var particle = state.particle,
+            def = particle.element,
             minOccurs = getMinOccurs(def),
             maxOccurs = getMaxOccurs(def),
             currentElement = state.element,
             lastElement,
+            localName,
             occurrence = 1;
-        if (def.localName === "group") {
-            def = findGroupCollection(def);
-        }
-        console.log(def.localName);
+        localName = findCollectionDefinition(def).localName;
+        console.log(localName);
         while (currentElement && occurrence <= maxOccurs) {
             runtime.assert(occurrence < 100, "looping");
+            state.particle = particle;
             lastElement = currentElement;
-            if (def.localName === "sequence") {
+            if (localName === "sequence") {
                 findParticlesInSequence(state);
-            } else if (def.localName === "choice") {
+            } else if (localName === "choice") {
                 findParticlesInChoice(state);
-            } else if (def.localName === "element") {
+            } else if (localName === "element") {
                 findParticlesInElement(state);
                 runtime.assert(state.element !== currentElement
                     || state.error === null || state.done(),
                     "No progress after checking element.");
-            } else if (def.localName === "any") {
+            } else if (localName === "any") {
                 findParticlesInAny(state);
                 runtime.assert(state.element !== currentElement
                     || state.error === null || state.done(),
@@ -1126,11 +1147,14 @@ console.log(def.getAttribute("ref"));
         runtime.assert(def.localName === "element",
                 "findParticles requires element.");
         if (def.hasAttribute("ref")) {
-            def = findRootElement(def.localName);
+            def = findRootElement(def.getAttribute("ref"));
         }
         runtime.assert(def !== null,
                 "findParticles requires an element definition.");
-        def = def.lastElementChild;
+        def = def.firstElementChild;
+        if (def.localName === "annotation") {
+            def = def.nextElementSibling;
+        }
         if (def.localName === "simpleType") {
             if (state.element !== null) {
                 throw "Element of simpleType may not contain elements.";
@@ -1185,6 +1209,7 @@ console.log(def.getAttribute("ref"));
             state.set(parentParticle, e, 0);
             findParticles(state);
             ps[i] = state.particles;
+            runtime.assert(state.done(), "Not done!");
             e = parents[i];
         }
         return ps;
