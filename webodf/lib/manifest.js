@@ -99,6 +99,8 @@
         "ops/MemberModel.js",
         "ops/TrivialMemberModel.js",
         "ops/Operation.js",
+        "ops/OperationTransformMatrix.js",
+        "ops/OperationTransformer.js",
         "ops/OperationRouter.js",
         "ops/TrivialOperationRouter.js",
         "ops/OdtCursor.js",
