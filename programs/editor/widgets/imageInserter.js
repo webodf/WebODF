@@ -110,7 +110,7 @@ define("webodf/editor/widgets/imageInserter", [
             }
 
             insertImageButton = new Button({
-                label: document.translator("insertImage"),
+                label: runtime.tr("Insert Image"),
                 disabled: true,
                 showLabel: false,
                 iconClass: "dijitEditorIcon dijitEditorIconInsertImage",

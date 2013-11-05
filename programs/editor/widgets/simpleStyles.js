@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,require,document,gui,ops */
+/*global define,require,gui,ops */
 
 define("webodf/editor/widgets/simpleStyles", [
     "webodf/editor/widgets/fontPicker",
@@ -61,7 +61,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 fontPickerWidget;
 
             boldButton = new ToggleButton({
-                label: document.translator('bold'),
+                label: runtime.tr('Bold'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -73,7 +73,7 @@ define("webodf/editor/widgets/simpleStyles", [
             });
 
             italicButton = new ToggleButton({
-                label: document.translator('italic'),
+                label: runtime.tr('Italic'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -85,7 +85,7 @@ define("webodf/editor/widgets/simpleStyles", [
             });
 
             underlineButton = new ToggleButton({
-                label: document.translator('underline'),
+                label: runtime.tr('Underline'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -97,7 +97,7 @@ define("webodf/editor/widgets/simpleStyles", [
             });
 
             strikethroughButton = new ToggleButton({
-                label: document.translator('strikethrough'),
+                label: runtime.tr('Strikethrough'),
                 disabled: true,
                 showLabel: false,
                 checked: false,
@@ -109,7 +109,7 @@ define("webodf/editor/widgets/simpleStyles", [
             });
 
             fontSizeSpinner = new NumberSpinner({
-                label: document.translator('size'),
+                label: runtime.tr('Size'),
                 disabled: true,
                 showLabel: false,
                 value: 12,

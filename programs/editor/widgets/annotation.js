@@ -52,7 +52,7 @@ define("webodf/editor/widgets/annotation", [
 
 
             addAnnotationButton = new Button({
-                label: document.translator('annotate'),
+                label: runtime.tr('Annotate'),
                 disabled: true,
                 showLabel: false,
                 iconClass: 'dijitIconBookmark',

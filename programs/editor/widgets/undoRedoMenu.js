@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,require,document */
+/*global define,require*/
 
 define("webodf/editor/widgets/undoRedoMenu",
     ["webodf/editor/EditorSession"],
@@ -54,7 +54,7 @@ define("webodf/editor/widgets/undoRedoMenu",
                     var widget = {};
 
                     undoButton = new Button({
-                        label: document.translator('undo'),
+                        label: runtime.tr('Undo'),
                         showLabel: false,
                         disabled: true, // TODO: get current session state
                         iconClass: "dijitEditorIcon dijitEditorIconUndo",
@@ -66,7 +66,7 @@ define("webodf/editor/widgets/undoRedoMenu",
                     });
 
                     redoButton = new Button({
-                        label: document.translator('redo'),
+                        label: runtime.tr('Redo'),
                         showLabel: false,
                         disabled: true, // TODO: get current session state
                         iconClass: "dijitEditorIcon dijitEditorIconRedo",

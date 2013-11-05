@@ -39,15 +39,13 @@
 /*global runtime, define, document, odf, ops, window, gui, alert, saveAs, Blob */
 
 define("webodf/editor/Editor", [
-    "dojo/i18n!webodf/editor/nls/myResources",
     "webodf/editor/EditorSession",
     "webodf/editor/MemberListView",
     "dijit/layout/BorderContainer",
     "dijit/layout/ContentPane",
     "webodf/editor/Tools"],
 
-    function (myResources,
-        EditorSession,
+    function (EditorSession,
         MemberListView,
         BorderContainer,
         ContentPane,
@@ -276,8 +274,6 @@ define("webodf/editor/Editor", [
                                     if (err) {
                                         callback(err);
                                     } else {
-                                        document.translator = null;
-                                        document.translateContent = null;
                                         callback();
                                     }
                                 });
@@ -306,23 +302,8 @@ define("webodf/editor/Editor", [
                     undoRedoEnabled = (! collabEditing),
                     closeCallback;
 
-                if (collabEditing) {
-                    runtime.assert(memberListElement, 'missing "memberList" div in HTML');
-                }
-
-                runtime.assert(canvasElement, 'missing "canvas" div in HTML');
-
-                // setup translations
-                // TODO: move from document instance into webodf namespace
-                function translator(key, context) {
-                    if (undefined === myResources[key]) {
-                        return "translation missing: " + key;
-                    }
-                    return myResources[key];
-                }
-                document.translator = translator;
-
-                function translateContent(node) {
+                // Extend runtime with a convenient translation function
+                runtime.translateContent = function (node) {
                     var i,
                         element,
                         tag,
@@ -336,11 +317,16 @@ define("webodf/editor/Editor", [
                         if (tag === "label"
                                 || tag === "span"
                                 || /h\d/i.test(tag)) {
-                            element.textContent = document.translator(placeholder);
+                            element.textContent = runtime.tr(placeholder);
                         }
                     }
+                };
+
+                if (collabEditing) {
+                    runtime.assert(memberListElement, 'missing "memberList" div in HTML');
                 }
-                document.translateContent = translateContent;
+
+                runtime.assert(canvasElement, 'missing "canvas" div in HTML');
 
                 // App Widgets
                 mainContainer = new BorderContainer({}, 'mainContainer');
@@ -353,7 +339,7 @@ define("webodf/editor/Editor", [
                 if (collabEditing) {
                     memberListPane = new ContentPane({
                         region: 'right',
-                        title: translator("members")
+                        title: runtime.tr("Members")
                     }, 'members');
                     mainContainer.addChild(memberListPane);
                     memberListView = new MemberListView(memberListElement);
@@ -364,7 +350,7 @@ define("webodf/editor/Editor", [
                 if (window.inviteButtonProxy) {
                     inviteButton = document.getElementById('inviteButton');
                     runtime.assert(inviteButton, 'missing "inviteButton" div in HTML');
-                    inviteButton.innerText = translator("inviteMembers");
+                    inviteButton.innerText = runtime.tr("Invite Members");
                     inviteButton.style.display = "block";
                     inviteButton.onclick = window.inviteButtonProxy.clicked;
                 }

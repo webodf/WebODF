@@ -14,6 +14,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     EditorSession.js
     SessionListView.js
     MemberListView.js
+    Translator.js
 )
 
 COPY_FILES(EDITORDEPS_webodf ${CMAKE_SOURCE_DIR}/webodf
@@ -27,7 +28,7 @@ add_custom_command(
     # from our sources
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/nls/ nls/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/translations/ translations/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/dojo-deps/ dojo-deps/
 
@@ -62,10 +63,10 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ dojox/layout/resources/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ dojox/widget/ColorPicker/
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory nls/
-    COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > nls/dojobundle.js
+    COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > dojobundle.js
+    COMMAND ${CMAKE_COMMAND} -E make_directory translations/
 
-    COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/libexec/mergeIntoDojo.js dojobuild=${DOJO_DEPS}/dist/dojo/dojo.js nls/dojobundle.js > dojo-amalgamation.js
+    COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/libexec/mergeIntoDojo.js dojobuild=${DOJO_DEPS}/dist/dojo/dojo.js dojobundle.js > dojo-amalgamation.js
 
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
