@@ -56,6 +56,7 @@
         "ops/OdtCursorTests.js",
         "ops/OdtDocumentTests.js",
         "ops/OperationTests.js",
+        "ops/TransformationTests.js",
         "ops/SessionTests.js",
         "tests.js",
         "xmldom/LSSerializerTests.js",
