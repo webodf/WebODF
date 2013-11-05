@@ -32,7 +32,7 @@
   </xs:group>
   <xs:element name="g">
     <xs:complexType>
-      <xs:group ref="e:g"/>
+      <xs:group ref="e:g" minOccurs="1" maxOccurs="1"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="h">

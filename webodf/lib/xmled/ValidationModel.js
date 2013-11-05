@@ -176,18 +176,10 @@ xmled.ValidationState = function ValidationState(documentNode, targetNode) {
  */
 xmled.Particle = function Particle(id, element, offset, parent) {
     "use strict";
-    this.id = function () {
-        return id;
-    };
-    this.element = function () {
-        return element;
-    };
-    this.offset = function () {
-        return offset;
-    };
-    this.parent = function () {
-        return parent;
-    };
+    this.id = id;
+    this.element = element;
+    this.offset = offset;
+    this.parent = parent;
 };
 /**
  * @constructor
@@ -212,7 +204,7 @@ xmled.ParticleCache = function ParticleCache() {
                 rootParticles[element.localName] = p;
             }
         } else {
-            ps = particles[parent.id()];
+            ps = particles[parent.id];
             if (ps.length > offset) {
                 p = ps[offset];
             } else {
@@ -226,19 +218,40 @@ xmled.ParticleCache = function ParticleCache() {
 };
 /**
  * @constructor
- * @param {!Array.<!Element>} def
- * @param {!Element} parent
+ * @param {!xmled.Particle} particle
  */
-xmled.ParticleSearchState = function ParticleSearchState(def, parent) {
+xmled.ParticleSearchState = function ParticleSearchState(particle) {
     "use strict";
-    var cache = [];
-    function init() {
-        if (def && parent) {
-            cache = [];
-        }
-        return cache;
-    }
-    init();
+    var self = this;
+    /**@type{!xmled.Particle}*/
+    this.particle = particle;
+    /**@type{!number}*/
+    this.offset = 0;
+    /**@type{?Element}*/
+    this.element = null;
+    /**@type{!Array.<!xmled.Particle>}*/
+    this.particles = [];
+    /**@type{?string}*/
+    this.error = null;
+    /**
+     * @param {!xmled.Particle} particle
+     * @param {?Element} element
+     * @param {!number} offset
+     * @return {undefined}
+     */
+    this.set = function (particle, element, offset) {
+        self.offset = offset;
+        self.particle = particle;
+        self.element = element.firstElementChild;
+        self.particles = [];
+        self.particles.length = element.childElementCount;
+    };
+    /**
+     * @return {!boolean}
+     */
+    this.done = function () {
+        return self.offset === self.particles.length || self.error !== null;
+    };
 };
 /**
  * @constructor
@@ -247,7 +260,7 @@ xmled.ParticleSearchState = function ParticleSearchState(def, parent) {
  */
 xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     "use strict";
-    var state = xmled.ValidationModel.State.LOADING,
+    var modelState = xmled.ValidationModel.State.LOADING,
         xsdns = "http://www.w3.org/2001/XMLSchema",
         error,
         xsd,
@@ -256,12 +269,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         particles = new xmled.ParticleCache(),
         validateCollectionUpToNode,
         validateComplexTypeUpToNode,
-        fillElementWithDefaults;
+        fillElementWithDefaults,
+        findParticlesInCollection;
     /**
      * @return {!xmled.ValidationModel.State}
      */
     this.getState = function () {
-        return state;
+        return modelState;
     };
     /**
      * @return {?string}
@@ -954,16 +968,184 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return position;
     }
     /**
-     * @param {!xmled.Particle} particle
-     * @param {!Element} element
-     * @return {!Array.<!xmled.Particle>}
+     * @param {!xmled.ParticleSearchState} state
+     * @return {undefined}
      */
-    function findParticles(particle, element) {
-        var ps = [];
-        if (particle || element) {
-            ps.length = element.childElementCount;
+    function findParticlesInSequence(state) {
+        var particle = state.particle,
+            def = particle.element,
+            e = def.firstElementChild,
+            offset = 0;
+        if (def.localName === "group") {
+            def = findGroupCollection(def);
         }
-        return ps;
+        runtime.assert(def.localName === "sequence", "Sequence expected.");
+        while (e && !state.done()) {
+            if (e.localName === "sequence" || e.localName === "choice"
+                    || e.localName === "element" || e.localName === "any"
+                    || e.localName === "group") {
+                state.particle = particles.getParticle(e, offset, particle);
+                findParticlesInCollection(state);
+            } else {
+                throw "Not implemented";
+            }
+            e = e.nextElementSibling;
+            offset += 1;
+        }
+    }
+    /**
+     * @param {!xmled.ParticleSearchState} state
+     * @return {undefined}
+     */
+    function findParticlesInChoice(state) {
+        var particle = state.particle,
+            def = particle.element,
+            e = def.firstElementChild,
+            n = state.element,
+            offset = 0;
+        if (def.localName === "group") {
+            def = findGroupCollection(def);
+        }
+        runtime.assert(def.localName === "choice", "Choice expected.");
+        while (e && !state.done()) {
+            if (e.localName === "sequence" || e.localName === "choice"
+                    || e.localName === "element" || e.localName === "any"
+                    || e.localName === "group") {
+                state.particle = particles.getParticle(e, offset, particle);
+                findParticlesInCollection(state);
+                if (!state.error) {
+                    break;
+                }
+                state.element = n;
+                state.error = null;
+            } else {
+                throw "Not implemented";
+            }
+            e = e.nextElementSibling;
+            offset += 1;
+        }
+    }
+    /**
+     * @param {!xmled.ParticleSearchState} state
+     * @return {undefined}
+     */
+    function findParticlesInElement(state) {
+        var particle = state.particle,
+            def = particle.element,
+            name;
+        if (def.hasAttribute("name")) {
+            name = def.getAttribute("name");
+        } else {
+            name = def.getAttribute("ref");
+        }
+        if (state.element.localName !== name) {
+            state.error = "Expected " + name + " instead of "
+                + state.element.localName + ".";
+        } else {
+            state.particles[state.offset] = particle;
+            state.offset += 1;
+            state.element = state.element.nextElementSibling;
+        }
+console.log(def.getAttribute("name"));
+console.log(def.getAttribute("ref"));
+    }
+    /**
+     * @param {!xmled.ParticleSearchState} state
+     * @return {undefined}
+     */
+    function findParticlesInAny(state) {
+        state.particles[state.offset] = state.particle;
+        state.offset += 1;
+        state.element = state.element.nextElementSibling;
+    }
+    /**
+     * @param {!xmled.ParticleSearchState} state
+     * @return {undefined}
+     */
+    findParticlesInCollection = function findParticlesInCollection(state) {
+        var def = state.particle.element,
+            minOccurs = getMinOccurs(def),
+            maxOccurs = getMaxOccurs(def),
+            currentElement = state.element,
+            lastElement,
+            occurrence = 1;
+        if (def.localName === "group") {
+            def = findGroupCollection(def);
+        }
+        console.log(def.localName);
+        while (currentElement && occurrence <= maxOccurs) {
+            runtime.assert(occurrence < 100, "looping");
+            lastElement = currentElement;
+            if (def.localName === "sequence") {
+                findParticlesInSequence(state);
+            } else if (def.localName === "choice") {
+                findParticlesInChoice(state);
+            } else if (def.localName === "element") {
+                findParticlesInElement(state);
+                runtime.assert(state.element !== currentElement
+                    || state.error === null || state.done(),
+                    "No progress after checking element.");
+            } else if (def.localName === "any") {
+                findParticlesInAny(state);
+                runtime.assert(state.element !== currentElement
+                    || state.error === null || state.done(),
+                    "No progress after checking any element.");
+            } else {
+                throw "Not implemented";
+            }
+            if (state.error) {
+                if (occurrence > minOccurs) {
+                    // roll back one loop
+                    state.error = null;
+                    state.element = lastElement;
+                }
+                break;
+            }
+            if (state.done()) {
+                break;
+            }
+            currentElement = state.element;
+            occurrence += 1;
+        }
+        if (occurrence < minOccurs) {
+            throw "Not enough elements.";
+        }
+    };
+    /**
+     * Create an array with a particles.
+     * Each particle corresponds to the element at the same position in the
+     * input element.
+     * @param {!xmled.ParticleSearchState} state
+     * @return {undefined}
+     */
+    function findParticles(state) {
+        if (!state.particle) { // temporary code
+            return;
+        }
+        var def = state.particle.element;
+        runtime.assert(def.localName === "element",
+                "findParticles requires element.");
+        if (def.hasAttribute("ref")) {
+            def = findRootElement(def.localName);
+        }
+        runtime.assert(def !== null,
+                "findParticles requires an element definition.");
+        def = def.lastElementChild;
+        if (def.localName === "simpleType") {
+            if (state.element !== null) {
+                throw "Element of simpleType may not contain elements.";
+            }
+        }
+        if (def.localName !== "complexType") {
+            throw "Not implemented";
+        }
+        def = def.lastElementChild;
+        if (!def) {
+            throw "Missing definition.";
+        }
+        state.particle = particles.getParticle(def, 0, state.particle);
+        findParticlesInCollection(state);
+        console.log(state.error);
     }
     /**
      * @param {!Element} element
@@ -986,6 +1168,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             parentParticle,
             e = element,
             ps = [],
+            state,
             i;
         while (e && documentElement !== e) {
             e = /**@type{!Element}*/(e.parentNode);
@@ -993,11 +1176,15 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         parents.reverse();
         ps.length = parents.length;
-        ps[0] = [getRootParticle(documentElement)];
-        e = parents[0];
+        parentParticle = getRootParticle(documentElement);
+        state = new xmled.ParticleSearchState(parentParticle);
+        ps[0] = [parentParticle];
+        e = documentElement;
         for (i = 1; i < parents.length; i += 1) {
             parentParticle = ps[i - 1][getPosition(e)];
-            ps[i] = findParticles(parentParticle, e);
+            state.set(parentParticle, e, 0);
+            findParticles(state);
+            ps[i] = state.particles;
             e = parents[i];
         }
         return ps;
@@ -1050,20 +1237,20 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function getPossibleNodeReplacements(documentNode, node) {
         var documentElement = firstElementChild(documentNode),
-            vstate = new xmled.ValidationState(documentNode, node);
+            state = new xmled.ValidationState(documentNode, node);
         if (documentElement) {
             findAllParticles(documentElement, node);
         }
-        validateDocumentUpToNode(vstate);
-        if (vstate.error) {
-            throw vstate.error;
+        validateDocumentUpToNode(state);
+        if (state.error) {
+            throw state.error;
         }
-        runtime.assert(vstate.currentNode !== null, "No element found.");
-        runtime.assert(vstate.length() > 0, "No definitions in state.");
-        runtime.assert(vstate.topDef().localName === "element",
+        runtime.assert(state.currentNode !== null, "No element found.");
+        runtime.assert(state.length() > 0, "No definitions in state.");
+        runtime.assert(state.topDef().localName === "element",
             "Top definition must be an element definition, not "
-            + vstate.topDef().localName + ".");
-        return findAlternativeElements(vstate);
+            + state.topDef().localName + ".");
+        return findAlternativeElements(state);
     }
     /**
      * @param {!Document|!Element} documentNode
@@ -1118,10 +1305,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
             if (err || !dom) {
                 error = err;
-                state = xmled.ValidationModel.State.ERROR;
+                modelState = xmled.ValidationModel.State.ERROR;
                 return onready && onready(error);
             }
-            state = xmled.ValidationModel.State.READY;
+            modelState = xmled.ValidationModel.State.READY;
             xsd = dom.documentElement;
             if (xsd.hasAttribute("targetNamespace")) {
                 targetNamespace = xsd.getAttribute("targetNamespace");
