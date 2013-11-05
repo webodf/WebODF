@@ -37,9 +37,6 @@
     <link rel="stylesheet" type="text/css" href="app/resources/app.css"/>
     <!-- dojo setup: end -->
 
-    <!-- connect back to the server for nowjs based communication -->
-    <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
-
     <!-- editor: start -->
     <link rel="stylesheet" type="text/css" href="editor.css"/>
     <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
@@ -47,7 +44,7 @@
     <!-- editor: end -->
   </head>
 
-  <body onload="webodfEditor.boot({backend: 'nowjs'});" class = "claro">
+  <body onload="webodfEditor.boot({backend: 'pullbox'});" class = "claro">
     <!-- 3 pages, switching between them is controlled by setting the style's display value -->
 
     <!-- Login page: start -->
