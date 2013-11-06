@@ -723,7 +723,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * @return {!Node}
+     * @return {!Element}
      */
     this.getRootNode = getRootNode;
 
