@@ -387,6 +387,8 @@ gui.SessionController = (function () {
             // release click inside the canvas.
             eventManager.focus();
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.selectRange = selectRange;
 
         /**
          * @param {!number} lengthAdjust   length adjustment
@@ -430,6 +432,8 @@ gui.SessionController = (function () {
             moveCursorByAdjustment(-1);
             return true;
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.moveCursorToLeft = moveCursorToLeft;
 
         /**
          * @return {!boolean}
@@ -636,6 +640,8 @@ gui.SessionController = (function () {
                 moveCursorByAdjustment(steps);
             }
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.moveCursorToDocumentBoundary = moveCursorToDocumentBoundary;
 
         /**
          * @return {!boolean}
@@ -683,6 +689,8 @@ gui.SessionController = (function () {
             session.enqueue([createOpMoveCursor(0, steps)]);
             return true;
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.extendSelectionToEntireDocument = extendSelectionToEntireDocument;
 
         /**
          * TODO: This method and associated event subscriptions really belong in SessionView
