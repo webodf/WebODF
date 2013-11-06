@@ -146,63 +146,76 @@ gui.SelectionView = function SelectionView(cursor) {
      * @returns {!boolean}
      */
     function isRangeVisible(range) {
-        return Boolean(range.getClientRects()[0]);
+        var bcr = range.getBoundingClientRect();
+        return Boolean(bcr && bcr.height !== 0);
     }
 
     /**
      * Set the range to the last visible selection in the text nodes array
-     * @param {!number} textOffset
-     * @param {!Array.<!Node>} textNodes
      * @param {!Range} range
+     * @param {!Array.<!Node>} nodes
      * @returns {!boolean}
      */
-    function lastVisibleRect(textOffset, textNodes, range) {
-        var nextNodeIndex = textNodes.length - 1,
-            textNode = textNodes[nextNodeIndex];
-        range.setStart(textNode, textOffset);
-        range.setEnd(textNode, textOffset);
+    function lastVisibleRect(range, nodes) {
+        var nextNodeIndex = nodes.length - 1,
+            node = nodes[nextNodeIndex],
+            startOffset = range.endContainer === node ? range.endOffset : (node.length || node.childNodes.length),
+            endOffset = startOffset;
+        range.setStart(node, startOffset);
+        range.setEnd(node, endOffset);
         while (!isRangeVisible(range)) {
-            if (textOffset > 0) {
-                textOffset -= 1;
-                range.setStart(textNode, textOffset);
-            } else if(textNodes[nextNodeIndex]) {
-                textNode = textNodes[nextNodeIndex];
+            if (node.nodeType === Node.ELEMENT_NODE && startOffset > 0) {
+                // Extending start to cover character node. End offset remains unchanged
+                startOffset = 0;
+            } else if (node.nodeType === Node.TEXT_NODE && startOffset > 0) {
+                // Extending start to include one more text char. End offset remains unchanged
+                startOffset -= 1;
+            } else if(nodes[nextNodeIndex]) {
+                // Moving range to a new node. Start collapsed at last available point
+                node = nodes[nextNodeIndex];
                 nextNodeIndex -= 1;
-                textOffset = textNode.length;
-                range.setStart(textNode, textOffset);
-                range.setEnd(textNode, textOffset);
+                startOffset = endOffset = node.length || node.childNodes.length;
             } else {
+                // Iteration complete. No more nodes left to explore
                 return false;
             }
+            range.setStart(node, startOffset);
+            range.setEnd(node, endOffset);
         }
         return true;
     }
 
     /**
      * Set the range to the first visible selection in the text nodes array
-     * @param {!number} textOffset
-     * @param {!Array.<!Node>} textNodes
      * @param {!Range} range
+     * @param {!Array.<!Node>} nodes
      * @returns {!boolean}
      */
-    function firstVisibleRect(textOffset, textNodes, range) {
+    function firstVisibleRect(range, nodes) {
         var nextNodeIndex = 0,
-            textNode = textNodes[nextNodeIndex];
-        range.setStart(textNode, textOffset);
-        range.setEnd(textNode, textOffset);
+            node = nodes[nextNodeIndex],
+            startOffset = range.startContainer === node ? range.startOffset : 0,
+            endOffset = startOffset;
+        range.setStart(node, startOffset);
+        range.setEnd(node, endOffset);
         while (!isRangeVisible(range)) {
-            if (textOffset < textNode.length) {
-                textOffset += 1;
-                range.setEnd(textNode, textOffset);
-            } else if(textNodes[nextNodeIndex]) {
-                textNode = textNodes[nextNodeIndex];
+            if (node.nodeType === Node.ELEMENT_NODE && endOffset < node.childNodes.length) {
+                // Extending end to cover character node. Start offset remains unchanged
+                endOffset = node.childNodes.length;
+            } else if (node.nodeType === Node.TEXT_NODE && endOffset < node.length) {
+                // Extending end to include one more text char. Start offset remains unchanged
+                endOffset += 1;
+            } else if(nodes[nextNodeIndex]) {
+                // Moving range to a new node. Start collapsed at first available point
+                node = nodes[nextNodeIndex];
                 nextNodeIndex += 1;
-                textOffset = 0;
-                range.setStart(textNode, textOffset);
-                range.setEnd(textNode, textOffset);
+                startOffset = endOffset = 0;
             } else {
+                // Iteration complete. No more nodes left to explore
                 return false;
             }
+            range.setStart(node, startOffset);
+            range.setEnd(node, endOffset);
         }
         return true;
     }
@@ -218,32 +231,20 @@ gui.SelectionView = function SelectionView(cursor) {
      * @return {?{firstRange: !Range, lastRange: !Range, fillerRange: !Range}}
      */
     function getExtremeRanges(range) {
-        var textNodes = odfUtils.getTextNodes(range, true),
-            firstRange = doc.createRange(),
-            lastRange = doc.createRange(),
-            fillerRange = doc.createRange(),
-            firstTextOffset,
-            lastTextOffset;
+        var nodes = odfUtils.getTextElements(range, true, false),
+            firstRange = /**@type {!Range}*/(range.cloneRange()),
+            lastRange = /**@type {!Range}*/(range.cloneRange()),
+            fillerRange = range.cloneRange();
 
-        if (!textNodes.length) {
+        if (!nodes.length) {
             return null;
         }
 
-        if (range.startContainer.nodeType === Node.TEXT_NODE) {
-            firstTextOffset = range.startOffset;
-        } else {
-            firstTextOffset = 0;
-        }
-        if (!firstVisibleRect(firstTextOffset, textNodes, firstRange)) {
+        if (!firstVisibleRect(firstRange, nodes)) {
             return null;
         }
 
-        if (range.endContainer.nodeType === Node.TEXT_NODE) {
-            lastTextOffset = range.endOffset;
-        } else {
-            lastTextOffset = textNodes[textNodes.length - 1].length;
-        }
-        if (!lastVisibleRect(lastTextOffset, textNodes, lastRange)) {
+        if (!lastVisibleRect(lastRange, nodes)) {
             return null;
         }
 
@@ -479,7 +480,7 @@ gui.SelectionView = function SelectionView(cursor) {
      * @param {boolean} useRightEdge
      */
     function getCollapsedRectOfTextRange(range, useRightEdge) {
-        var clientRect = range.getClientRects()[0],
+        var clientRect = range.getBoundingClientRect(),
             collapsedRect = {};
 
         collapsedRect.width = 0;
@@ -496,8 +497,7 @@ gui.SelectionView = function SelectionView(cursor) {
      * @return {undefined}
      */
     function repositionOverlays(selectedRange) {
-        var range = /**@type{!Range}*/(selectedRange.cloneRange()),
-            extremes = getExtremeRanges(range),
+        var extremes = getExtremeRanges(selectedRange),
             firstRange,
             lastRange,
             fillerRange,
@@ -507,7 +507,7 @@ gui.SelectionView = function SelectionView(cursor) {
 
         // If the range is collapsed (no selection) or no extremes were found, do not show
         // any virtual selections.
-        if (range.collapsed || !extremes) {
+        if (selectedRange.collapsed || !extremes) {
             showOverlays(false);
         } else {
             showOverlays(true);
@@ -516,7 +516,7 @@ gui.SelectionView = function SelectionView(cursor) {
             lastRange = extremes.lastRange;
             fillerRange = extremes.fillerRange;
 
-            firstRect= translateRect(getCollapsedRectOfTextRange(firstRange, true));
+            firstRect = translateRect(getCollapsedRectOfTextRange(firstRange, false));
             lastRect = translateRect(getCollapsedRectOfTextRange(lastRange, true));
             fillerRect = getFillerRect(fillerRange);
 
@@ -555,25 +555,28 @@ gui.SelectionView = function SelectionView(cursor) {
             lastRange.detach();
             fillerRange.detach();
         }
-        range.detach();
+    }
+
+    function rerender() {
+        if (cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
+            showOverlays(true);
+            repositionOverlays(cursor.getSelectedRange());
+        } else {
+            showOverlays(false);
+        }
     }
 
     /**
      * Rerender the selection overlays
      * @return {undefined}
      */
-    this.rerender = function () {
-        repositionOverlays(cursor.getSelectedRange());
-    };
+    this.rerender = rerender;
 
     /**
      * Show selection overlays
      * @return {undefined}
      */
-    this.show = function () {
-        showOverlays(true);
-        repositionOverlays(cursor.getSelectedRange());
-    };
+    this.show = rerender;
     /**
      * Hide selection overlays
      * @return {undefined}
@@ -593,7 +596,7 @@ gui.SelectionView = function SelectionView(cursor) {
      */
     function handleCursorMove(movedCursor) {
         if (movedCursor === cursor) {
-            repositionOverlays(cursor.getSelectedRange());
+            rerender();
         }
     }
     /**

@@ -190,6 +190,24 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.isCharacterElement = isCharacterElement;
     /**
+     * Determine if the node is a whitespace character element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isWhitespaceElement(e) {
+        var n = e && e.localName,
+            ns,
+            r = false;
+        if (n) {
+            ns = e.namespaceURI;
+            if (ns === textns) {
+                r = n === "s" || n === "tab";
+            }
+        }
+        return r;
+    }
+    this.isWhitespaceElement = isWhitespaceElement;
+    /**
      * @param {!Node} node
      * @return {!Node}
      */
@@ -236,8 +254,8 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Walk to the left along the DOM and return true if the first thing
-     * encountered is either a non-whitespace character or a character
-     * element. Walking goes through grouping elements.
+     * encountered is either a non-whitespace character or a non-whitespace
+     * character element. Walking goes through grouping elements.
      * @param {?Node} node the first node to scan
      * @return {!boolean}
      */
@@ -253,7 +271,7 @@ odf.OdfUtils = function OdfUtils() {
                     );
                 }
             } else if (isCharacterElement(node)) {
-                r = true;
+                r = isWhitespaceElement(node) === false;
                 node = null;
             } else {
                 node = previousNode(node);
@@ -606,6 +624,18 @@ odf.OdfUtils = function OdfUtils() {
             && (!isODFWhitespace(textNode.textContent) || isSignificantWhitespace(textNode, 0)));
     }
 
+    /**
+     * Returns true if the supplied nodeRange should be included in the parent range according
+     * to the setting of the includePartial flag.
+     * @param {!Range} range Selection range
+     * @param {!Range} nodeRange Node character range
+     * @param {!boolean} includePartial flag indicating whether partial intersections are acceptable
+     * @returns {!boolean}
+     */
+    function includeNode(range, nodeRange, includePartial) {
+        return (includePartial && domUtils.rangesIntersect(range, nodeRange))
+                    || domUtils.containsRange(range, nodeRange);
+    }
 
     /**
      * Returns a array of text nodes considered to be part of the supplied range.
@@ -624,8 +654,7 @@ odf.OdfUtils = function OdfUtils() {
             nodeRange.selectNodeContents(node);
 
             if (node.nodeType === Node.TEXT_NODE) {
-                if ((includePartial && domUtils.rangesIntersect(range, nodeRange))
-                        || domUtils.containsRange(range, nodeRange)) {
+                if (includeNode(range, nodeRange, includePartial)) {
                     return isSignificantTextContent(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
             } else if (domUtils.rangesIntersect(range, nodeRange)) {
@@ -651,12 +680,13 @@ odf.OdfUtils = function OdfUtils() {
      * this function would return the following array:
      *      ["b", text:s, "c"]
      * @param {!Range} range
+     * @param {!boolean} includePartial Include partially intersecting text & character nodes in the result
      * @param {!boolean} includeInsignificantWhitespace Include whitespace only nodes that are not considered significant
      *  text content. This includes whitespace only elements used in pretty-formatted xml as LibreOffice produces in
      *  flat ODT files
      * @returns {!Array.<Node>}
      */
-    this.getTextElements = function (range, includeInsignificantWhitespace) {
+    this.getTextElements = function (range, includePartial, includeInsignificantWhitespace) {
         var document = range.startContainer.ownerDocument,
             nodeRange = document.createRange(),
             elements;
@@ -669,13 +699,14 @@ odf.OdfUtils = function OdfUtils() {
             }
 
             if (node.nodeType === Node.TEXT_NODE) {
-                if (domUtils.containsRange(range, nodeRange)
-                        && (includeInsignificantWhitespace || isSignificantTextContent(node))) {
-                    // text nodes should only be returned if they are fully contained within the range
-                    return NodeFilter.FILTER_ACCEPT;
+                if (includeNode(range, nodeRange, includePartial)) {
+                    if (includeInsignificantWhitespace || isSignificantTextContent(node)) {
+                            // text nodes should only be returned if they are fully contained within the range
+                            return NodeFilter.FILTER_ACCEPT;
+                    }
                 }
             } else if (isCharacterElement(node)) {
-                if (domUtils.containsRange(range, nodeRange)) {
+                if (includeNode(range, nodeRange, includePartial)) {
                     // character elements should only be returned if they are fully contained within the range
                     return NodeFilter.FILTER_ACCEPT;
                 }

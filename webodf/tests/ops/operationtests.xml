@@ -241,7 +241,6 @@
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Joe"/>db c</text:p><text:p/></office:text></after>
  </test>
-
  <test name="InsertSpace">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -249,11 +248,41 @@
   </ops>
   <after><office:text><text:p><text:s> </text:s></text:p></office:text></after>
  </test>
+ <test name="InsertSpace_IntoExistingSpaceBlock">
+  <before><office:text><text:p>a <text:s> </text:s><text:s> </text:s>b</text:p></office:text></before>
+  <ops>
+   <op optype="InsertText" position="2" text=" "/>
+  </ops>
+  <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s><text:s> </text:s>b</text:p></office:text></after>
+ </test>
  <test name="InsertSpaceAndCharacters">
   <before><office:text><text:p/></office:text></before>
   <ops>
    <op optype="InsertText" position="0" text="a"/>
    <op optype="InsertText" position="1" text=" "/>
+   <op optype="InsertText" position="2" text="b"/>
+   <op optype="InsertText" position="3" text="c"/>
+  </ops>
+  <after><office:text><text:p>a bc</text:p></office:text></after>
+ </test>
+ <test name="InsertMultipleSpaces">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="a    b"/>
+  </ops>
+  <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s><text:s> </text:s>b</text:p></office:text></after>
+ </test>
+ <test name="InsertWithTrailingSpace">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="a "/>
+  </ops>
+  <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
+ </test>
+ <test name="InsertSpaceAndCharacters2">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="InsertText" position="0" text="a "/>
    <op optype="InsertText" position="2" text="b"/>
    <op optype="InsertText" position="3" text="c"/>
   </ops>
@@ -689,13 +718,22 @@
   <after><office:text><text:p>hello</text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
  <test name="SplitParagraph_InSpaceBlock_LeadingSpace">
-  <before><office:text><text:p>hello  world</text:p></office:text></before>
+  <before><office:text><text:p>hello <text:s> </text:s>world</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="6"/>
    <op optype="SplitParagraph" memberid="Bob" position="6"/>
   </ops>
   <after><office:text><text:p>hello<text:s> </text:s></text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
+ </test>
+ <test name="SplitParagraph_ExtraneousWhiteSpace_DiscardsUnneededSpace">
+  <before><office:text><text:p>hello world</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6"/>
+   <op optype="SplitParagraph" memberid="Bob" position="6"/>
+  </ops>
+  <after><office:text><text:p>hello<text:s> </text:s></text:p><text:p><c:cursor c:memberId="Bob"/>world</text:p></office:text></after>
  </test>
  <test name="SplitParagraph_InStyledSpan_PreservesStyling">
   <before><office:text><text:p>hell<text:span text:style-name="bold">ow</text:span>orld</text:p></office:text></before>

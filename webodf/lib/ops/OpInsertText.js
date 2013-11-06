@@ -73,14 +73,14 @@ ops.OpInsertText = function OpInsertText() {
 
     /**
      * Returns true if the particular character in the text string is a space character that is immediately
-     * preceded by another space character (or is the first space in the text block).
+     * preceded by another space character (or is the first or last space in the text block).
      * Logic is based on http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-text_s
      * @param {!string} text
      * @param {!number} index
      * @returns {boolean}
      */
     function requiresSpaceElement(text, index) {
-        return text[index] === space && (index === 0 || text[index - 1] === space);
+        return text[index] === space && (index === 0 || index === text.length - 1 || text[index - 1] === space);
     }
 
     this.execute = function (odtDocument) {
@@ -157,12 +157,16 @@ ops.OpInsertText = function OpInsertText() {
 
             if (position > 0) {
                 // Necessary to match upgradeWhitespaces behaviour which searches the preceding positions as well
-                odtDocument.downgradeWhitespacesAtPosition(position - 1);
                 if (position > 1) {
                     odtDocument.downgradeWhitespacesAtPosition(position - 2);
                 }
+                odtDocument.downgradeWhitespacesAtPosition(position - 1);
             }
+            // Try and downgrade first position in the added text
             odtDocument.downgradeWhitespacesAtPosition(position);
+            // Try and downgrade last position in the added text
+            odtDocument.downgradeWhitespacesAtPosition(position + text.length - 1);
+            // Try and downgrade the next position just *after* the added text
             odtDocument.downgradeWhitespacesAtPosition(position + text.length);
 
 

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chrome Client Rect behaviours</title>
+</head>
+<body>
+<div id="demo" style="margin-left: 13.591px">
+A D  B
+</div>
+This page is demonstrating two interesting differences in Chrome vs. Firefox:
+<ol>
+    <li>Collapsed ranges in Chrome have a width of 1px, which shifts the left side of the rect</li>
+    <li>Individual client rectangles are truncated to the nearest pixel in Chrome, but the corresponding bounding client rect is not</li>
+</ol>
+<pre>
+<script type="text/javascript">
+    var node = document.getElementById("demo").firstChild,
+        range = document.createRange(),
+        bIndex = node.length - 1;
+
+    function toString(rect) {
+        return "top: " + rect.top + ", left: " + rect.left + ", right: " + rect.right
+                    + ", height: " + rect.height + ", width: " + rect.width;
+    }
+
+    range.setStart(node, bIndex);
+    range.setEnd(node, bIndex);
+    document.writeln("Selection after 'B'");
+    document.writeln("        (BCR) " + toString(range.getBoundingClientRect()));
+    document.writeln("(client rect) " + toString(range.getClientRects()[0]));
+
+    range.setStart(node, bIndex - 1);
+    range.setEnd(node, bIndex);
+    document.writeln("Selection over 'B'");
+    document.writeln("        (BCR) " + toString(range.getBoundingClientRect()));
+    document.writeln("(client rect) " + toString(range.getClientRects()[0]));
+</script>
+</pre>
+</body>
+</html>
