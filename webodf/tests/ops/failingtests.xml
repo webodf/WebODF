@@ -1,4 +1,9 @@
-<tests xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:c="urn:webodf:names:cursor">
+<tests
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:c="urn:webodf:names:cursor">
  <test name="AddAnnotationInsertText_startPosSameAtStartOfParagraph">
   <!-- text inserted at the position of a start of an annotation at the start of a paragraph should be added to the annotated area -->
   <before><office:text><text:p>abcd</text:p></office:text></before>
@@ -20,5 +25,31 @@
    <op optype="SplitParagraph" memberid="Bob" position="5"/>
   </ops>
   <after><office:text><text:p><text:span text:style-name="bold">hello</text:span></text:p><text:p><text:span text:style-name="bold"><c:cursor c:memberId="Bob"/></text:span></text:p></office:text></after>
+ </test>
+  <test name="MoveCursor_OverImageAnchoredAsCharInStyle">
+  <before>
+   <office:automatic-styles>
+    <style:style style:name="Graphics" style:family="graphic">
+     <style:graphic-properties text:anchor-type="as-char"/>
+    </style:style>
+   </office:automatic-styles>
+   <office:text>
+    <text:p><draw:frame draw:style-name="Graphics"/></text:p>
+   </office:text>
+  </before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="1"/>
+  </ops>
+  <after>
+   <office:automatic-styles>
+    <style:style style:name="Graphics" style:family="graphic">
+     <style:graphic-properties text:anchor-type="as-char"/>
+    </style:style>
+   </office:automatic-styles>
+   <office:text>
+    <text:p><draw:frame draw:style-name="Graphics"/><c:cursor c:memberId="Joe"/></text:p>
+   </office:text>
+  </after>
  </test>
 </tests>

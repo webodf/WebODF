@@ -1049,7 +1049,7 @@
    <office:automatic-styles/>
    <office:text>
     <text:p><text:span>A</text:span></text:p>
-    <text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p>
+    <text:p><text:span><draw:frame text:anchor-type="as-char"><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p>
     <text:p><text:span>B</text:span></text:p>
    </office:text>
   </before>
@@ -1062,7 +1062,7 @@
    <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
    <office:text>
     <text:p><text:span text:style-name="auto63350368_0">A</text:span></text:p>
-    <text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p>
+    <text:p><text:span><draw:frame text:anchor-type="as-char"><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p>
     <text:p><text:span text:style-name="auto63350368_0">B</text:span></text:p>
    </office:text>
   </after>
@@ -1070,7 +1070,7 @@
  <test name="ApplyDirectStyling_AroundImage_WithNoWhitespace">
   <before>
    <office:automatic-styles/>
-   <office:text><text:p><text:span>A</text:span></text:p><text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text>
+   <office:text><text:p><text:span>A</text:span></text:p><text:p><text:span><draw:frame text:anchor-type="as-char"><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text>
   </before>
   <ops>
    <op optype="ApplyDirectStyling" memberid="Alice" position="0" length="5">
@@ -1079,7 +1079,7 @@
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
-   <office:text><text:p><text:span text:style-name="auto63350368_0">A</text:span></text:p><text:p><text:span><draw:frame><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p><text:p><text:span text:style-name="auto63350368_0">B</text:span></text:p></office:text>
+   <office:text><text:p><text:span text:style-name="auto63350368_0">A</text:span></text:p><text:p><text:span><draw:frame text:anchor-type="as-char"><draw:image><office:binary-data>fake inline image</office:binary-data></draw:image></draw:frame></text:span></text:p><text:p><text:span text:style-name="auto63350368_0">B</text:span></text:p></office:text>
   </after>
  </test>
  <test name="ApplyDirectStyling_WithinNonSpanContainer">

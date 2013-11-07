@@ -70,6 +70,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     function isCharacterFrame(e) {
         var name = e && e.localName;
+        // TODO the anchor-type can be defined on any style associated with the frame
         return name === "frame" && e.namespaceURI === drawns && e.getAttributeNS(textns, "anchor-type") === "as-char";
     }
     this.isCharacterFrame = isCharacterFrame;
