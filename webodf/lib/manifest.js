@@ -96,6 +96,7 @@
         "odf/TextSerializer.js",
         "ops/Server.js",
         "ops/EditInfo.js",
+        "ops/StepsTranslator.js",
         "ops/MemberModel.js",
         "ops/TrivialMemberModel.js",
         "ops/Operation.js",

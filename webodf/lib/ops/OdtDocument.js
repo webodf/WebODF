@@ -44,6 +44,7 @@ runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("core.PositionFilterChain");
+runtime.loadClass("ops.StepsTranslator");
 runtime.loadClass("ops.TextPositionFilter");
 
 /**
@@ -71,7 +72,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalUndoStackChanged]),
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
-        filter;
+        filter,
+        stepsTranslator;
 
     /**
      * @return {!Element}
@@ -145,15 +147,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!core.PositionIterator}
      */
     function getIteratorAtPosition(position) {
-        var iterator = gui.SelectionMover.createPositionIterator(getRootNode());
+        var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
+            point = stepsTranslator.convertStepsToDomPoint(position);
 
-        position += 1;
-
-        while (position > 0 && iterator.nextPosition()) {
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                position -= 1;
-            }
-        }
+        iterator.setUnfilteredPosition(point.node, point.offset);
         return iterator;
     }
     this.getIteratorAtPosition = getIteratorAtPosition;
@@ -170,6 +167,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {?{textNode: !Text, offset: !number}}
      */
     function getPositionInTextNode(position, memberid) {
+        // TODO adapt to use StepsTranslator
         var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
             /**@type{?Text}*/
             lastTextNode = null,
@@ -500,28 +498,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * Returns the number of walkable positions of a paragraph node
-     * @param {!Node} paragraph
-     * @return {!number}
-     */
-    this.getWalkableParagraphLength = function (paragraph) {
-        var iterator = getIteratorAtPosition(0),
-            length = 0;
-        iterator.setUnfilteredPosition(paragraph, 0);
-
-        do {
-            if (getParagraphElement(iterator.container()) !== paragraph) {
-                return length;
-            }
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                length += 1;
-            }
-        } while (iterator.nextPosition());
-
-        return length;
-    };
-
-    /**
      * This function calculates the steps in ODF world between the cursor of the
      * given member and the given position in the DOM. If the given position is
      * not walkable, then it will be the number of steps to the last walkable position
@@ -532,16 +508,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!number}
      */
     this.getDistanceFromCursor = function (memberid, node, offset) {
-        var counter,
-            cursor = cursors[memberid],
-            steps = 0;
+        var cursor = cursors[memberid],
+            focusPosition,
+            targetPosition;
         runtime.assert((node !== null) && (node !== undefined),
             "OdtDocument.getDistanceFromCursor called without node");
         if (cursor) {
-            counter = cursor.getStepCounter().countStepsToPosition;
-            steps = counter(node, offset, filter);
+            focusPosition = stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0);
+            targetPosition = stepsTranslator.convertDomPointToSteps(node, offset);
         }
-        return steps;
+        return targetPosition - focusPosition;
     };
     /**
      * This function returns the position in ODF world of the cursor of the member.
@@ -549,7 +525,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!number}
      */
     this.getCursorPosition = function (memberid) {
-        return -self.getDistanceFromCursor(memberid, getRootNode(), 0);
+        var cursor = cursors[memberid];
+        return cursor ? stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0) : 0;
     };
 
     /**
@@ -563,18 +540,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @returns {{position: !number, length: !number}}
      */
     this.getCursorSelection = function(memberid) {
-        var counter,
-            cursor = cursors[memberid],
+        var cursor = cursors[memberid],
             focusPosition = 0,
-            stepsToAnchor = 0;
+            anchorPosition = 0;
         if (cursor) {
-            counter = cursor.getStepCounter().countStepsToPosition;
-            focusPosition = -counter(getRootNode(), 0, filter);
-            stepsToAnchor = counter(cursor.getAnchorNode(), 0, filter);
+            focusPosition = stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0);
+            anchorPosition = stepsTranslator.convertDomPointToSteps(cursor.getAnchorNode(), 0);
         }
         return {
-            position: focusPosition + stepsToAnchor,
-            length: -stepsToAnchor
+            position: anchorPosition,
+            length: focusPosition - anchorPosition
         };
     };
     /**
@@ -741,6 +716,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         filter = new ops.TextPositionFilter(getRootNode);
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
+        stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter);
     }
     init();
 };

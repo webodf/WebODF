@@ -127,6 +127,7 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
             iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             inside = false;
 
+        // TODO refactor into a utility class somewhere
         iterator.setUnfilteredPosition(node, 0);
         do {
             /*jslint bitwise: true*/
@@ -153,6 +154,7 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
             watch = new core.LoopWatchDog(10000),
             inside = false;
 
+        // TODO Adapt to use StepsTranslator
         while (iterator.nextPosition()) {
             watch.check();
 

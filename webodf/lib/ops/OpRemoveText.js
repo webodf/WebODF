@@ -223,6 +223,7 @@ ops.OpRemoveText = function OpRemoveText() {
      * @param {!ops.OdtDocument} odtDocument
      * @return {!Range}
      */
+    // TODO adapt to common code somewhere
     function stepsToRange(odtDocument) {
         var iterator,
             filter = odtDocument.getPositionFilter(),
@@ -234,6 +235,7 @@ ops.OpRemoveText = function OpRemoveText() {
         iterator = odtDocument.getIteratorAtPosition(position);
         startContainer = iterator.container();
         startOffset = iterator.unfilteredDomOffset();
+        // TODO rewrite to use StepsTranslator
         while (remainingLength && iterator.nextPosition()) {
             endContainer = iterator.container();
             endOffset = iterator.unfilteredDomOffset();
