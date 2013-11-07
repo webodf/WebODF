@@ -33,7 +33,9 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
+
 /*global runtime, Runtime, core, Node, Element*/
+
 /*jslint evil: true, continue: true, emptyblock: true, unparam: true*/
 /**
  * @interface
@@ -61,6 +63,9 @@ core.UnitTest.prototype.tests = function () {"use strict"; };
 core.UnitTest.prototype.asyncTests = function () {"use strict"; };
 
 
+/**
+ * @return {!Element}
+ */
 core.UnitTest.provideTestAreaDiv = function () {
     "use strict";
     var maindoc = runtime.getWindow().document,
@@ -74,6 +79,9 @@ core.UnitTest.provideTestAreaDiv = function () {
     return testarea;
 };
 
+/**
+ * @return {undefined}
+ */
 core.UnitTest.cleanupTestAreaDiv = function () {
     "use strict";
     var maindoc = runtime.getWindow().document,
@@ -111,16 +119,33 @@ core.UnitTestRunner = function UnitTestRunner() {
     "use strict";
     var failedTests = 0,
         areObjectsEqual;
+    /**
+     * @param {!string} msg
+     * @return {undefined}
+     */
     function debug(msg) {
         runtime.log(msg);
     }
+    /**
+     * @param {!string} msg
+     * @return {undefined}
+     */
     function testFailed(msg) {
         failedTests += 1;
         runtime.log("fail", msg);
     }
+    /**
+     * @param {!string} msg
+     * @return {undefined}
+     */
     function testPassed(msg) {
         runtime.log("pass", msg);
     }
+    /**
+     * @param {!Array} a
+     * @param {!Array} b
+     * @return {!boolean}
+     */
     function areArraysEqual(a, b) {
         var i;
         try {
@@ -139,6 +164,12 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
         return true;
     }
+    /**
+     * @param {!Element} a
+     * @param {!Element} b
+     * @param {!boolean} skipReverseCheck
+     * @return {!boolean}
+     */
     function areAttributesEqual(a, b, skipReverseCheck) {
         var aatts = a.attributes,
             n = aatts.length,
@@ -161,6 +192,11 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
         return skipReverseCheck ? true : areAttributesEqual(b, a, true);
     }
+    /**
+     * @param {!Node} a
+     * @param {!Node} b
+     * @return {!boolean}
+     */
     function areNodesEqual(a, b) {
         if (a.nodeType !== b.nodeType) {
             testFailed(a.nodeType + " should be " + b.nodeType);
@@ -174,7 +210,7 @@ core.UnitTestRunner = function UnitTestRunner() {
             testFailed(a.namespaceURI + " should be " + b.namespaceURI);
             return false;
         }
-        if (!areAttributesEqual(a, b, false)) {
+        if (!areAttributesEqual(/**@type{!Element}*/(a), /**@type{!Element}*/(b), false)) {
             return false;
         }
         var an = a.firstChild,
@@ -194,6 +230,11 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
         return true;
     }
+    /**
+     * @param {!*} actual
+     * @param {!*} expected
+     * @return {!boolean}
+     */
     function isResultCorrect(actual, expected) {
         if (expected === 0) {
             return actual === expected && (1 / actual) === (1 / expected);
@@ -206,16 +247,20 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
         if (Object.prototype.toString.call(expected) ===
                 Object.prototype.toString.call([])) {
-            return areArraysEqual(actual, expected);
+            return areArraysEqual(/**@type{!Array}*/(actual), /**@type{!Array}*/(expected));
         }
         if (typeof expected === "object" && typeof actual === "object") {
             if (expected.constructor === Element || expected.constructor === Node) {
-                return areNodesEqual(expected, actual);
+                return areNodesEqual(/**@type{!Node}*/(expected), /**@type{!Node}*/(actual));
             }
             return areObjectsEqual(expected, actual);
         }
         return false;
     }
+    /**
+     * @param {*} v
+     * @return {!string}
+     */
     function stringify(v) {
         if (v === 0 && 1 / v < 0) {
             return "-0";
@@ -302,6 +347,9 @@ core.UnitTestRunner = function UnitTestRunner() {
     this.shouldBeNull = shouldBeNull;
     this.shouldBeNonNull = shouldBeNonNull;
     this.shouldBe = shouldBe;
+    /**
+     * @return {!number}
+     */
     this.countFailedTests = function () {
         return failedTests;
     };
@@ -314,6 +362,11 @@ core.UnitTester = function UnitTester() {
     "use strict";
     var failedTests = 0,
         results = {};
+    /**
+     * @param {!string} text
+     * @param {!string} code
+     * @return {!string}
+     **/
     function link(text, code) {
         return "<span style='color:blue;cursor:pointer' onclick='" + code + "'>"
             + text + "</span>";
