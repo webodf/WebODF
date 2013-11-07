@@ -69,7 +69,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalCommonStyleDeleted,
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted,
-            ops.OdtDocument.signalUndoStackChanged]),
+            ops.OdtDocument.signalUndoStackChanged,
+            ops.OdtDocument.signalStepsInserted,
+            ops.OdtDocument.signalStepsRemoved
+        ]),
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter,
@@ -717,6 +720,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
         stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter);
+        eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
+        eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
     }
     init();
 };
@@ -731,6 +736,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
 /**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
 /**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";
+/**@const*/ops.OdtDocument.signalStepsInserted = "steps/inserted";
+/**@const*/ops.OdtDocument.signalStepsRemoved = "steps/removed";
 
 (function () {
     "use strict";

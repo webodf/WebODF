@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops*/
+/*global ops, runtime*/
 
 /**
  * @constructor
@@ -155,6 +155,8 @@ ops.OpInsertTable = function OpInsertTable() {
             // or failing that, as the first element in the root node
             previousSibling = odtDocument.getParagraphElement(domPosition.textNode);
             rootNode.insertBefore(tableNode, previousSibling.nextSibling);
+            // The parent table counts for 1 position, and 1 paragraph is added per cell
+            odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: (initialColumns * initialRows) + 1});
 
             odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalTableAdded, {

@@ -155,6 +155,7 @@ ops.OpInsertText = function OpInsertText() {
                 previousNode.parentNode.removeChild(previousNode);
             }
 
+            odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: text.length});
             if (position > 0) {
                 // Necessary to match upgradeWhitespaces behaviour which searches the preceding positions as well
                 if (position > 1) {

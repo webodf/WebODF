@@ -122,4 +122,24 @@ ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter)
         } while (iterator.previousPosition());
         return steps;
     };
+
+    /**
+     * @param {!{position: !number, length: !number}} eventArgs
+     */
+    /*jslint emptyblock: true, unparam: true*/
+    this.handleStepsInserted = function(eventArgs) {
+        // Old position = position
+        // New position = position + length
+        // E.g., {position: 10, length: 1} indicates 10 => 10, New => 11, 11 => 12, 12 => 13
+    };
+
+    /**
+     * @param {!{position: !number, length: !number}} eventArgs
+     */
+    this.handleStepsRemoved = function(eventArgs) {
+        // Old position = position + length
+        // New position = position
+        // E.g., {position: 10, length: 1} indicates 10 => 10, 11 => 10, 12 => 11
+    };
+    /*jslint emptyblock: false, unparam: false*/
 };

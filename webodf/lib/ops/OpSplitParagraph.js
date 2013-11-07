@@ -147,6 +147,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         if (domPosition.textNode.length === 0) {
             domPosition.textNode.parentNode.removeChild(domPosition.textNode);
         }
+        odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: 1});
 
         odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();

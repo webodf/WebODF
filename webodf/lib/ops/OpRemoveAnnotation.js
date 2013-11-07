@@ -61,8 +61,8 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         var iterator = odtDocument.getIteratorAtPosition(position),
             container = iterator.container(),
             annotationName,
-            annotationNode = null,
-            annotationEnd = null,
+            annotationNode,
+            annotationEnd,
             cursors;
 
         while (!(container.namespaceURI === odf.Namespaces.officens
@@ -95,6 +95,7 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         if (annotationEnd) {
             annotationEnd.parentNode.removeChild(annotationEnd);
         }
+        odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position, length: length});
 
         odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshAnnotations();

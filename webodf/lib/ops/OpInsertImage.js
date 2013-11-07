@@ -100,6 +100,7 @@ ops.OpInsertImage = function OpInsertImage() {
             textNode.splitText(domPosition.offset) : textNode.nextSibling;
         frameElement = createFrameElement(odtDocument.getDOM());
         textNode.parentNode.insertBefore(frameElement, refNode);
+        odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: 1});
 
         // clean up any empty text node which was created by odtDocument.getPositionInTextNode
         if (textNode.length === 0) {

@@ -163,6 +163,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
             insertNodeAtPosition(odtDocument, annotation.end, position + length);
         }
         insertNodeAtPosition(odtDocument, annotation.node, position);
+        odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: length});
 
         // Move the cursor inside the new annotation
         if (cursor) {
