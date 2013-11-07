@@ -322,6 +322,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return e;
     }
     /**
+     * Return the top level complexType or simpleType definition.
      * @param {!string} qname
      * @return {!Element}
      */
@@ -709,16 +710,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
     }
     /**
-     * @param {!Element} parent
-     * @return {!Element}
+     * @param {?Element} parent
+     * @return {?Element}
      */
     function firstNonAnnotationChild(parent) {
-        var e = parent.firstElementChild;
-        if (e.localName === "annotation") {
+        var e = parent && parent.firstElementChild;
+        if (e && e.localName === "annotation") {
             e = e.nextElementSibling;
-        }
-        if (!e) {
-            throw "Expected another element.";
         }
         return e;
     }
@@ -1018,7 +1016,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e,
             offset = 0;
         def = findCollectionDefinition(def);
-        e = def.firstElementChild;
+        e = firstNonAnnotationChild(def);
         runtime.assert(def.localName === "sequence", "Sequence expected.");
         while (e && !state.done()) {
             if (e.localName === "sequence" || e.localName === "choice"
@@ -1044,7 +1042,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             n = state.element,
             offset = 0;
         def = findCollectionDefinition(def);
-        e = def.firstElementChild;
+        e = firstNonAnnotationChild(def);
         runtime.assert(def.localName === "choice", "Choice expected.");
         while (e && !state.done()) {
             if (e.localName === "sequence" || e.localName === "choice"
@@ -1063,7 +1061,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e = e.nextElementSibling;
             offset += 1;
         }
-        if (e) {
+        if (offset === def.childElementCount) {
             state.error = "No choice option was chosen.";
         }
     }
@@ -1093,7 +1091,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             state.offset += 1;
             state.element = state.element.nextElementSibling;
         }
-console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
     }
     /**
      * @param {!xmled.ParticleSearchState} state
@@ -1118,9 +1115,8 @@ console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
             localName,
             occurrence = 1;
         localName = findCollectionDefinition(def).localName;
-        console.log(localName);
         while (currentElement && occurrence <= maxOccurs) {
-            runtime.assert(occurrence < 100, "looping");
+            runtime.assert(occurrence < 1000, "looping");
             state.particle = particle;
             state.error = null;
             lastElement = currentElement;
@@ -1160,16 +1156,46 @@ console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
         }
     };
     /**
-     * @param {!Element} type
+     * @param {?Element} element
+     * @return {!boolean}
+     */
+    function isTypeDefParticle(element) {
+        if (!element) {
+            return false;
+        }
+        var name = element.localName;
+        return name === "all" || name === "sequence" || name === "choice"
+            || name === "group";
+    }
+    function findParticlesInExtensionTypes(types, state) {
+        var particle = state.particle,
+            type,
+            i;
+        // now all types are all, sequence, choice or group
+        for (i = 0; i < types.length; i += 1) {
+            type = types[i];
+            runtime.assert(isTypeDefParticle(type), "Unexpected element.");
+            state.particle = particles.getParticle(type, i, particle);
+            findParticlesInCollection(state);
+            if (state.error) {
+                break;
+            }
+        }
+    }
+    /**
+     * @param {!Element} extension
      * @param {!xmled.ParticleSearchState} state
      * @return {undefined}
      */
-    function findParticlesInExtension(type, state) {
-        runtime.assert(type.localName === "extension", "Expected extension");
+    function findParticlesInExtension(extension, state) {
+        runtime.assert(extension.localName === "extension",
+                "Expected extension");
         var types = [],
-            base = findType(type.getAttribute("base"));
-        type = firstNonAnnotationChild(type);
-        types.push(type);
+            base = findType(extension.getAttribute("base")),
+            type = firstNonAnnotationChild(extension);
+        if (isTypeDefParticle(type)) {
+            types.push(type);
+        }
         do {
             if (base.localName === "simpleType") {
                 break;
@@ -1179,23 +1205,24 @@ console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
                 break;
             }
             if (base.localName !== "complexContent") {
-                types.push(base);
+                if (isTypeDefParticle(base)) {
+                    types.push(base);
+                }
                 break;
             }
             base = firstNonAnnotationChild(base); // extension or restriction
-            types.push(firstNonAnnotationChild(base));
+            type = firstNonAnnotationChild(base);
+            if (isTypeDefParticle(type)) {
+                types.push(type);
+            }
             if (base.localName === "extension") {
-                base = findType(type.getAttribute("base"));
+                base = findType(base.getAttribute("base"));
             } else { // restriction
                 break;
             }
         } while (base);
-        // now all types are all, sequence, choice or group
         types.reverse();
-        // TODO: convert types to particles 
-        if (state) {
-            types.reverse();
-        }
+        findParticlesInExtensionTypes(types, state);
     }
     /**
      * Create an array with a particles.
@@ -1249,10 +1276,16 @@ console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
                 return;
             }
         }
+        if (!type || !isTypeDefParticle(type)) {
+            // only attributes
+            if (state.element !== null) {
+                throw "No child elements allowed.";
+            }
+            return;
+        }
         // type is now 'all', 'sequence', 'choice' or 'group'
         state.particle = particles.getParticle(type, 0, state.particle);
         findParticlesInCollection(state);
-        console.log(state.error);
     }
     /**
      * @param {!Element} element
@@ -1288,9 +1321,13 @@ console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
         ps[0] = [parentParticle];
         e = documentElement;
         for (i = 1; i < parents.length; i += 1) {
-            state.set(parentParticle, e, 0);
-            findParticles(state);
-            ps[i] = state.particles;
+            if (e.firstElementChild.localName === "any") {
+                ps[i] = [];
+            } else {
+                state.set(parentParticle, e, 0);
+                findParticles(state);
+                ps[i] = state.particles;
+            }
             runtime.assert(state.error === null, state.error || "");
             runtime.assert(state.done(), "Not done!");
             e = parents[i];
@@ -1299,6 +1336,44 @@ console.log(def.getAttribute("name") + " " + def.getAttribute("ref"));
         return ps;
     }
     this.findAllParticles = findAllParticles;
+    /**
+     * @param {!Element} element
+     * @param {!xmled.ParticleSearchState} state
+     * @return {?string}
+     */
+    function validateElement(element, state) {
+        var e,
+            ps,
+            l = element.childElementCount,
+            i;
+        findParticles(state);
+        ps = state.particles;
+        runtime.assert(state.error === null, state.error || "");
+        runtime.assert(state.done(), "Not done!");
+        e = element.firstElementChild;
+        for (i = 0; i < l; i += 1) {
+            runtime.assert((ps[i] || null) !== null, "Particle is missing.");
+            if (e.firstElementChild && e.firstElementChild.localName !== "any") {
+                state.set(ps[i], e, 0);
+                validateElement(e, state);
+                if (state.error) {
+                    return state.error;
+                }
+            }
+            e = e.nextElementSibling;
+        }
+        return null;
+    }
+    /**
+     * @param {!Element} documentElement
+     * @return {?string}
+     */
+    this.validate = function (documentElement) {
+        var particle = getRootParticle(documentElement),
+            state = new xmled.ParticleSearchState(particle);
+        state.set(particle, documentElement, 0);
+        return validateElement(documentElement, state);
+    };
     /**
      * @param {!xmled.ValidationState} state
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
