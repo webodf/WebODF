@@ -169,7 +169,7 @@ define("webodf/editor/Editor", [
                     // overwrite router and member model
                     // TODO: serverFactory should be a backendFactory,
                     // and there should be a backendFactory for local editing
-                    opRouter = serverFactory.createOperationRouter(sessionId, memberId, server);
+                    opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer());
                     session.setOperationRouter(opRouter);
 
                     memberModel = serverFactory.createMemberModel(sessionId, server);

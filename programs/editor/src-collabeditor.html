@@ -6,7 +6,7 @@
     out of a source-tree. It does not require a dojo-amalgamation
     but uses dojo directly from Google's CDN (content delivery networks).
     Currently it has all the collaborative editing gadgets included,
-    and requires nowjs functionality in the server.
+    and requires pullbox functionality in the server.
     This page is meant to be served out of a webodf source directory.
     -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
@@ -38,9 +38,6 @@
       data-dojo-config="async: true"></script>
     <!-- dojo setup: end -->
 
-    <!-- connect back to the server for nowjs based communication -->
-    <script src="/nowjs/now.js" type="text/javascript" charset="utf-8"></script>
-
     <!-- editor: start -->
     <link rel="stylesheet" type="text/css" href="editor.css"/>
     <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
@@ -48,7 +45,7 @@
     <!-- editor: end -->
   </head>
 
-  <body onload="webodfEditor.boot({backend: 'nowjs'});" class = "claro">
+  <body onload="webodfEditor.boot({backend: 'pullbox'});" class = "claro">
     <!-- 3 pages, switching between them is controlled by setting the style's display value -->
 
     <!-- Login page: start -->

@@ -54,7 +54,7 @@ define("webodf/editor/server/nowjs/ServerFactory", [
             this.createServer = function (args) {
                 return new NowjsServer();
             };
-            this.createOperationRouter = function (sid, mid, server) {
+            this.createOperationRouter = function (sid, mid, server, odfContainer) {
                 return new NowjsOperationRouter(sid, mid, server);
             };
             this.createMemberModel = function (sid, server) {

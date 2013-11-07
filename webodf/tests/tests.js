@@ -52,6 +52,7 @@ runtime.loadClass("ops.SessionTests");
 runtime.loadClass("ops.OperationTests");
 runtime.loadClass("odf.OdfUtilsTests");
 runtime.loadClass("odf.ObjectNameGeneratorTests");
+runtime.loadClass("ops.TransformationTests");
 runtime.loadClass("odf.FormattingTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("odf.StyleInfoTests");
@@ -101,6 +102,7 @@ if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.XPathTests);
     tests.push(ops.SessionTests);
     tests.push(ops.OperationTests);
+    tests.push(ops.TransformationTests);
 }
 
 var tester = new core.UnitTester();
