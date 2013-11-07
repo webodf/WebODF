@@ -125,6 +125,7 @@
         "ops/OpRemoveStyle.js",
         "ops/OpRemoveAnnotation.js",
         "ops/OperationFactory.js",
+        "ops/TextPositionFilter.js",
         "xmldom/LSSerializer.js",
         "xmldom/LSSerializerFilter.js",
         "xmldom/RelaxNG.js",
