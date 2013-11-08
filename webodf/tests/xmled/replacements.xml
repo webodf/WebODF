@@ -1,5 +1,5 @@
 <replacements xmlns:e="http://example.org/">
-  <replacement id="empty"><e:a/></replacement>
+  <replacement id="empty"></replacement>
   <replacement id="a"><e:a/></replacement>
   <replacement id="b"><e:b/></replacement>
   <replacement id="c"><e:c/></replacement>

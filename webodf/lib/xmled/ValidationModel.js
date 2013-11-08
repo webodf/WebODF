@@ -1083,6 +1083,27 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return validateElement(documentElement, state);
     };
     /**
+     * Return the number of instance of particlular particle are present
+     * @param {!Array.<!xmled.Particle>} particles
+     * @param {!number} position
+     * @return {!number}
+     */
+    function countParticleInstances(particles, position) {
+        var p = particles[position],
+            count = 1,
+            i = position - 1;
+        while (i >= 0 && particles[i] === p) {
+            i -= 1;
+            count += 1;
+        }
+        i = position + 1;
+        while (i < particles.length && particles[i] === p) {
+            i += 1;
+            count += 1;
+        }
+        return count;
+    }
+    /**
      * @param {!Array.<!Array.<!xmled.Particle>>} particles
      * @param {!Element} documentElement
      * @param {!Element} element
@@ -1092,8 +1113,18 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         var doc = documentElement.ownerDocument,
             f = doc.createDocumentFragment(),
             a = [],
-            p,
+            pos = getPosition(element),
+            p = particles[particles.length - 1],
+            particleInstanceCount = countParticleInstances(p, pos),
             e;
+        // check if the particle can be removed completely
+        if (particleInstanceCount > 1) {
+            a.push({desc: '', range: {}, dom: f});
+            f = doc.createDocumentFragment();
+            f.appendChild(element.cloneNode(true));
+            a.push({desc: '', range: {}, dom: f});
+            return a;
+        }
         p = particles[particles.length - 1][0].parent;
         if (p.element.childElementCount === 1) {
             f.appendChild(element.cloneNode(true));
