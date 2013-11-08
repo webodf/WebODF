@@ -143,7 +143,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             moveTrailing,
             node,
             nextNode,
-            loopGuard = new core.LoopWatchDog(1000),
+            loopGuard = new core.LoopWatchDog(10000),
             styledNodes = [];
 
         // Do we need a new style container?
