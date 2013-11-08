@@ -272,8 +272,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         targetNamespace = null,
         checker = new xmled.XsdChecker(),
         particles = new xmled.ParticleCache(),
-        validateCollectionUpToNode,
-        validateComplexTypeUpToNode,
         fillElementWithDefaults,
         findParticlesInCollection;
     /**
@@ -682,34 +680,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return r;
     }
     /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    function validateSimpleTypeUpToNode(state) {
-        if (state) {
-            throw "Not implemented";
-        }
-    }
-    /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    function validateAnyUpToNode(state) {
-        var n = state.currentNode;
-        while (n && n.nodeType !== 1) {
-            n = n.nextSibling;
-        }
-        if (!n) {
-            state.error = "No element was found.";
-            return;
-        }
-        state.error = null;
-        state.currentNode = n;
-        if (!state.checkDone()) {
-            state.currentNode = n.nextElementSibling;
-        }
-    }
-    /**
      * @param {?Element} parent
      * @return {?Element}
      */
@@ -719,270 +689,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e = e.nextElementSibling;
         }
         return e;
-    }
-    /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    function validateElementUpToNode(state) {
-        var def = state.topDef(),
-            n = state.currentNode;
-        while (n && n.nodeType !== 1) {
-            n = n.nextSibling;
-        }
-        if (!n) {
-            state.error = "No element was found.";
-            return;
-        }
-        state.error = null;
-        state.currentNode = n;
-        if (!def.hasAttribute("name")) {
-            def = findElement(def.getAttribute("ref"));
-        }
-        if (def.getAttribute("name") !== n.localName) {
-            state.error = "Unexpected element " + n.localName;
-            return;
-        }
-        def = def.firstElementChild;
-        if (def && def.localName === "annotation") {
-            def = def.nextElementSibling;
-        }
-        if (def) {
-            if (def.localName === "simpleType") {
-                validateSimpleTypeUpToNode(state);
-            } else {
-                validateComplexTypeUpToNode(def, state);
-            }
-        }
-        if (!state.checkDone()) {
-            state.currentNode = n.nextElementSibling;
-        }
-    }
-    /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    function validateSequenceUpToNode(state) {
-        var def = state.topDef(),
-            e = def.firstElementChild;
-        while (e && !state.done()) {
-            if (e.localName === "sequence" || e.localName === "choice"
-                    || e.localName === "element" || e.localName === "any") {
-                state.push(e);
-                validateCollectionUpToNode(state);
-                if (!e.nextElementSibling) {
-                    state.checkDone();
-                }
-                state.pop();
-            } else if (e.localName === "group") {
-                state.push(findGroupCollection(e));
-                validateCollectionUpToNode(state);
-                if (!e.nextElementSibling) {
-                    state.checkDone();
-                }
-                state.pop();
-            } else {
-                throw "Not implemented";
-            }
-            e = e.nextElementSibling;
-        }
-    }
-    /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    function validateChoiceUpToNode(state) {
-        var def = state.topDef(),
-            e = def.firstElementChild,
-            n = state.currentNode;
-        while (e && !state.done()) {
-            if (e.localName === "sequence" || e.localName === "choice"
-                    || e.localName === "element") {
-                state.push(e);
-                validateCollectionUpToNode(state);
-                if (!state.error) {
-                    state.checkDone();
-                    state.pop();
-                    break;
-                }
-                state.currentNode = n;
-                state.error = null;
-                state.pop();
-            } else {
-                throw "Not implemented";
-            }
-            e = e.nextElementSibling;
-        }
-    }
-    /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    validateCollectionUpToNode = function (state) {
-        var def = state.topDef(),
-            minOccurs = getMinOccurs(def),
-            maxOccurs = getMaxOccurs(def),
-            currentElement = null,
-            lastElement,
-            to;
-        if (state.currentNode) {
-            if (state.currentNode.nodeType === 1) {
-                currentElement = /**@type{?Element}*/(state.currentNode);
-            } else {
-                currentElement = state.currentNode.parentNode.firstElementChild;
-                state.currentNode = currentElement;
-            }
-        }
-        to = state.topOccurrence();
-        while (currentElement && to <= maxOccurs) {
-            runtime.assert(to < 100, "looping");
-            lastElement = currentElement;
-            if (def.localName === "sequence") {
-                validateSequenceUpToNode(state);
-            } else if (def.localName === "choice") {
-                validateChoiceUpToNode(state);
-            } else if (def.localName === "element") {
-                validateElementUpToNode(state);
-                runtime.assert(state.currentNode !== currentElement
-                    || state.error === null || state.done(),
-                    "No progress after checking element.");
-            } else if (def.localName === "any") {
-                validateAnyUpToNode(state);
-                runtime.assert(state.currentNode !== currentElement
-                    || state.error === null || state.done(),
-                    "No progress after checking any element.");
-            } else {
-                throw "Not implemented";
-            }
-            if (state.error) {
-                if (state.topOccurrence() > minOccurs) {
-                    // roll back one loop
-                    state.error = null;
-                    state.currentNode = lastElement;
-                }
-                break;
-            }
-            if (state.done()) {
-                break;
-            }
-            currentElement = state.currentNode;
-            state.topNextOccurrence();
-            to = state.topOccurrence();
-        }
-        if (state.topOccurrence() < minOccurs) {
-            state.error = "Not enough elements.";
-        }
-    };
-    /**
-     * @param {?Node} node
-     * @return {!boolean}
-     */
-    function hasNonWhitespaceSiblings(node) {
-        while (node) {
-            if (node.nodeType === 3 && !/^[ \n\t\r]*$/.test(node.data)) {
-                return true;
-            }
-            node = node.nextSibling;
-        }
-        return false;
-    }
-    /**
-     * @param {?Node} node
-     * @return {!boolean}
-     */
-    function hasNonWhitespaceChildren(node) {
-        return node !== null && hasNonWhitespaceSiblings(node.firstChild);
-    }
-    function validateComplexContentUpToNode(cdef, state) {
-        var e = firstNonAnnotationChild(cdef);
-        if (e.localName === "restriction") {
-            throw "Not implemented";
-        }
-        // e.localName === "extension"
-        // ignore the base of the extension for now and simply treat it as
-        // a complexType
-        validateComplexTypeUpToNode(e, state);
-    }
-    /**
-     * Validate state.currentNode to be of type cdef.
-     * The top element in the state is of type cdef.
-     * @param {!Element} cdef definition for element complexType
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    validateComplexTypeUpToNode = function (cdef, state) {
-        var e = cdef.firstElementChild,
-            node = state.currentNode,
-            oldMixed = state.mixed;
-//        if (e.localName === "annotation") {
-//            e = e.nextElementSibling;
-//        }
-        if (cdef.hasAttribute("mixed")) {
-            state.mixed = cdef.getAttribute("mixed") === "true";
-        }
-        if (!state.mixed && hasNonWhitespaceChildren(state.currentNode)) {
-            state.error = "Text is not allowed here.";
-            state.mixed = oldMixed;
-            return;
-        }
-        state.topPosReset();
-        while (e) {
-            if (e.localName === "sequence" || e.localName === "choice") {
-                state.currentNode = node.firstChild;
-                state.push(e);
-                validateCollectionUpToNode(state);
-                state.pop();
-            } else if (e.localName === "group") {
-                state.currentNode = node.firstChild;
-                state.push(findGroupCollection(e));
-                validateCollectionUpToNode(state);
-                state.pop();
-            } else if (e.localName === "complexContent") {
-                validateComplexContentUpToNode(e, state);
-            } else if (e.localName !== "attribute" && e.localName !== "anyAttribute") {
-                throw "Not implemented";
-            }
-            e = e.nextElementSibling;
-        }
-        if (!state.done()) {
-            state.currentNode = node;
-            state.checkDone();
-        }
-        state.mixed = oldMixed;
-    };
-    /**
-     * @param {!xmled.ValidationState} state
-     * @return {undefined}
-     */
-    function validateDocumentUpToNode(state) {
-        var documentElement = state.documentNode.firstElementChild,
-            localName,
-            def;
-        if (documentElement.namespaceURI !== targetNamespace) {
-            state.error = "Invalid root element.";
-            return;
-        }
-        localName = documentElement.localName;
-        def = findRootElement(localName);
-        if (!def) {
-            state.error = "Invalid root element.";
-            return;
-        }
-        state.push(def);
-        state.currentNode = documentElement;
-        if (state.documentNode === state.targetNode) {
-            state.checkDone();
-            return;
-        }
-        def = firstNonAnnotationChild(def);
-        runtime.assert(def.localName === "simpleType"
-                || def.localName === "complexType", "Unexpected element");
-        if (def.localName === "simpleType") {
-            validateSimpleTypeUpToNode(state);
-        } else {
-            validateComplexTypeUpToNode(def, state);
-        }
-        state.pop();
     }
     /**
      * @param {!Element} element
@@ -1359,6 +1065,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 if (state.error) {
                     return state.error;
                 }
+                runtime.assert(state.error === null, state.error || "");
+                runtime.assert(state.done(), "Not done!");
             }
             e = e.nextElementSibling;
         }
@@ -1375,23 +1083,25 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return validateElement(documentElement, state);
     };
     /**
-     * @param {!xmled.ValidationState} state
+     * @param {!Array.<!Array.<!xmled.Particle>>} particles
+     * @param {!Element} documentElement
+     * @param {!Element} element
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
-    function findAlternativeElements(state) {
-        var doc = /**@type{!Document}*/(state.documentNode.ownerDocument
-                || state.documentNode),
+    function findAlternativeElements(particles, documentElement, element) {
+        var doc = documentElement.ownerDocument,
             f = doc.createDocumentFragment(),
             a = [],
             p,
             e;
-        if (state.length() <= 1) {
-            f.appendChild(state.currentNode.cloneNode(true));
+        p = particles[particles.length - 1][0].parent;
+        if (p.element.childElementCount === 1) {
+            f.appendChild(element.cloneNode(true));
             a.push({desc: '', range: {}, dom: f});
             return a; // there are no other options
         }
-        p = state.def(state.length() - 2);
-        e = p.firstElementChild;
+        e = findCollectionDefinition(p.element);
+        e = e.firstElementChild;
         while (e) {
             if (e.localName === "element") {
                 a.push(getPossibleElement(doc, e));
@@ -1422,20 +1132,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function getPossibleNodeReplacements(documentNode, node) {
         var documentElement = firstElementChild(documentNode),
-            state = new xmled.ValidationState(documentNode, node);
-        if (documentElement) {
-            findAllParticles(documentElement, node);
+            ps;
+        if (!documentElement) {
+            throw "Missing document element.";
         }
-        validateDocumentUpToNode(state);
-        if (state.error) {
-            throw state.error;
-        }
+        ps = findAllParticles(documentElement, node);
+/*
         runtime.assert(state.currentNode !== null, "No element found.");
         runtime.assert(state.length() > 0, "No definitions in state.");
         runtime.assert(state.topDef().localName === "element",
             "Top definition must be an element definition, not "
             + state.topDef().localName + ".");
-        return findAlternativeElements(state);
+*/
+        return findAlternativeElements(ps, documentElement, node);
     }
     /**
      * @param {!Document|!Element} documentNode
