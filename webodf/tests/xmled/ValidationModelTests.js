@@ -94,6 +94,28 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
         });
     }
 
+    function testValidation(xsdfile, xmlfile) {
+        var f = function (callback) {
+            var model = new xmled.ValidationModel(xsdfile, function (e) {
+                t.err = e;
+                r.shouldBeNull(t, "t.err");
+                runtime.loadXML(xmlfile, function (err, dom) {
+                    t.err = err;
+                    r.shouldBeNull(t, "t.err");
+                    var e = dom.firstChild;
+                    while (e && e.nodeType !== 1) {
+                        e = e.nextSibling;
+                    }
+                    t.err = model.validate(e);
+                    r.shouldBeNull(t, "t.err");
+                    callback();
+                });
+            });
+        };
+        f.functionName = "validation-" + xsdfile + "-" + xmlfile;
+        return f;
+    }
+
     function testRoot(xsd, replacementIds) {
         var f = function (callback) {
             var model = new xmled.ValidationModel(xsd, function (e) {
@@ -180,6 +202,7 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
     };
     this.asyncTests = function () {
         return [
+            testValidation("xmled/XMLSchema.xsd", "xmled/XMLSchema.xsd"),
             testRoot("xmled/empty.xsd", []),
             testRoot("xmled/simple.xsd", ["a", "b", "c"]),
             testRoot("xmled/complex01.xsd", ["a", "d", "e", "f", "ga", "ha"]),
