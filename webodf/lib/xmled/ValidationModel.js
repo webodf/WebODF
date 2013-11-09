@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global xmled, runtime, console*/
+/*global xmled, runtime, console, NodeFilter*/
 
 runtime.loadClass("xmled.XsdChecker");
 
@@ -224,8 +224,9 @@ xmled.ParticleCache = function ParticleCache() {
 /**
  * @constructor
  * @param {!xmled.Particle} particle
+ * @param {!NodeFilter=} filter
  */
-xmled.ParticleSearchState = function ParticleSearchState(particle) {
+xmled.ParticleSearchState = function ParticleSearchState(particle, filter) {
     "use strict";
     var self = this;
     /**@type{!xmled.Particle}*/
@@ -238,6 +239,36 @@ xmled.ParticleSearchState = function ParticleSearchState(particle) {
     this.particles = [];
     /**@type{?string}*/
     this.error = null;
+    /**@type{?NodeFilter}*/
+    this.filter = filter || null;
+    /**
+     * @param {?Element} e
+     * @return {?Element}
+     */
+    function getAcceptableSibling(e) {
+        while (e && filter
+                && filter.acceptNode(e) !== NodeFilter.FILTER_ACCEPT) {
+            e = e.nextElementSibling;
+        }
+        return e;
+    }
+    this.getAcceptableSibling = getAcceptableSibling;
+    /**
+     * @param {!Element} element
+     * @return {!number}
+     */
+    function childElementCount(element) {
+        var e = element.firstElementChild,
+            count = 0;
+        while (e) {
+            if (!filter || filter.acceptNode(e) === NodeFilter.FILTER_ACCEPT) {
+                count += 1;
+            }
+            e = e.nextElementSibling;
+        }
+        return count;
+    }
+    this.childElementCount = childElementCount;
     /**
      * @param {!xmled.Particle} particle
      * @param {?Element} element
@@ -247,15 +278,20 @@ xmled.ParticleSearchState = function ParticleSearchState(particle) {
     this.set = function (particle, element, offset) {
         self.offset = offset;
         self.particle = particle;
-        self.element = element.firstElementChild;
+        self.element = getAcceptableSibling(element.firstElementChild);
         self.particles = [];
-        self.particles.length = element.childElementCount;
+        self.particles.length = childElementCount(element);
     };
     /**
      * @return {!boolean}
      */
     this.done = function () {
         return self.offset === self.particles.length || self.error !== null;
+    };
+    this.nextElementSibling = function () {
+        self.particles[self.offset] = self.particle;
+        self.offset += 1;
+        self.element = getAcceptableSibling(self.element.nextElementSibling);
     };
 };
 /**
@@ -811,9 +847,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             state.error = "Expected " + name + " instead of "
                 + state.element.localName + ".";
         } else {
-            state.particles[state.offset] = particle;
-            state.offset += 1;
-            state.element = state.element.nextElementSibling;
+            state.nextElementSibling();
         }
     }
     /**
@@ -821,9 +855,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {undefined}
      */
     function findParticlesInAny(state) {
-        state.particles[state.offset] = state.particle;
-        state.offset += 1;
-        state.element = state.element.nextElementSibling;
+        state.nextElementSibling();
     }
     /**
      * @param {!xmled.ParticleSearchState} state
@@ -1068,16 +1100,18 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function validateElement(element, state) {
         var e,
             ps,
-            l = element.childElementCount,
-            i;
+            l = state.childElementCount(element),
+            i,
+            ec;
         findParticles(state);
         ps = state.particles;
         runtime.assert(state.error === null, state.error || "");
         runtime.assert(state.done(), "Not done!");
-        e = element.firstElementChild;
+        e = state.getAcceptableSibling(element.firstElementChild);
         for (i = 0; i < l; i += 1) {
             runtime.assert((ps[i] || null) !== null, "Particle is missing.");
-            if (e.firstElementChild && e.firstElementChild.localName !== "any") {
+            ec = state.getAcceptableSibling(e.firstElementChild);
+            if (ec && ec.localName !== "any") {
                 state.set(ps[i], e, 0);
                 validateElement(e, state);
                 if (state.error) {
@@ -1086,17 +1120,18 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 runtime.assert(state.error === null, state.error || "");
                 runtime.assert(state.done(), "Not done!");
             }
-            e = e.nextElementSibling;
+            e = state.getAcceptableSibling(e.nextElementSibling);
         }
         return null;
     }
     /**
      * @param {!Element} documentElement
+     * @param {!NodeFilter=} filter
      * @return {?string}
      */
-    this.validate = function (documentElement) {
+    this.validate = function (documentElement, filter) {
         var particle = getRootParticle(documentElement),
-            state = new xmled.ParticleSearchState(particle);
+            state = new xmled.ParticleSearchState(particle, filter);
         state.set(particle, documentElement, 0);
         return validateElement(documentElement, state);
     };
@@ -1187,7 +1222,6 @@ console.log(p);
         var doc = documentElement.ownerDocument,
             f,
             is = [],
-            a = doc.createElementNS("http://example.org/", "a"),
             ps,
             e = getElementAfterPosition(container, offset),
             particle,

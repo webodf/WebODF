@@ -30,7 +30,7 @@
  * @source: http://www.webodf.org/
  * @source: http://gitorious.org/webodf/webodf/
  */
-/*global runtime, xmled, document, xmldom*/
+/*global runtime, xmled, document, xmldom, NodeFilter*/
 runtime.loadClass("xmled.ValidationModel");
 
 /**
@@ -94,20 +94,90 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
         });
     }
 
+    /**
+     * @param {!Element} element
+     * @param {!string} ns
+     * @param {!string} localName
+     * @return {undefined}
+     */
+    function addNodes(element, ns, localName) {
+        var doc = element.ownerDocument,
+            ne = doc.createElementNS(ns, localName),
+            e = element.firstElementChild;
+        while (e) {
+            addNodes(e, ns, localName);
+            e = e.nextElementSibling;
+        }
+        element.appendChild(ne);
+    }
+
+    /**
+     * @param {!xmled.ValidationModel} model
+     * @param {!Element} documentElement
+     * @return {undefined}
+     */
+    function validateWithIgnoredNodes(model, documentElement) {
+        var ns = "http://test.com/",
+            filter;
+        addNodes(documentElement, ns, "test");
+        /**
+         * @constructor
+         * @extends NodeFilter
+         */
+        function TestFilter(ns) {
+            this.acceptNode = function (node) {
+                if (node.namespaceURI === ns) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            };
+        }
+        filter = new TestFilter(ns);
+        try {
+            t.err = model.validate(documentElement, filter);
+        } catch (e) {
+            t.err = e;
+        }
+        r.shouldBeNull(t, "t.err");
+    }
+
+    /**
+     * @param {?Node} n
+     * @return {?Element}
+     */
+    function firstElementChild(n) {
+        n = n && n.firstChild;
+        var e = null;
+        while (n && !e) {
+            if (n.nodeType === 1) {
+                e = /**@type{!Element}*/(n);
+            }
+            n = n.nextSibling;
+        }
+        return e;
+    }
+
+    /**
+     * @param {!string} xsdfile
+     * @param {!string} xmlfile
+     * @return {!function(!function():undefined):undefined} callback
+     */
     function testValidation(xsdfile, xmlfile) {
         var f = function (callback) {
-            var model = new xmled.ValidationModel(xsdfile, function (e) {
-                t.err = e;
+            var model = new xmled.ValidationModel(xsdfile, function (err) {
+                t.err = err;
                 r.shouldBeNull(t, "t.err");
                 runtime.loadXML(xmlfile, function (err, dom) {
                     t.err = err;
                     r.shouldBeNull(t, "t.err");
-                    var e = dom.firstChild;
-                    while (e && e.nodeType !== 1) {
-                        e = e.nextSibling;
+                    var e = firstElementChild(dom || null);
+                    t.documentElement = e;
+                    r.shouldBeNonNull(t, "t.documentElement");
+                    if (e) {
+                        t.err = model.validate(e);
+                        r.shouldBeNull(t, "t.err");
+                        validateWithIgnoredNodes(model, e);
                     }
-                    t.err = model.validate(e);
-                    r.shouldBeNull(t, "t.err");
                     callback();
                 });
             });
