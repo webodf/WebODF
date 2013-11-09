@@ -1,0 +1,19 @@
+<meeting xmlns="http://example.com/" start="2013-11-10T12:00:00" end="2013-11-10T13:00:00">
+ <attendees>
+  <attendee id="1">Bob</attendee>
+  <attendee id="2">Alice</attendee>
+ </attendees>
+ <agenda>
+  <item></item>
+ </agenda>
+ <item>
+  <title></title>
+  <p></p>
+ </item>
+ <item>
+  <title></title>
+  <p></p>
+  <p></p>
+  <p></p>
+ </item>
+</meeting>

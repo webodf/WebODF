@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema targetNamespace="http://example.com/" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:e="http://example.com/" elementFormDefault="qualified">
+  <xs:complexType name="attendee" mixed="true">
+    <xs:attribute name="id" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="agenda">
+    <xs:sequence>
+      <xs:element name="item" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="item">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string"/>
+      <xs:element name="p" maxOccurs="unbounded">
+        <xs:complexType mixed="true">
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="b" type="xs:string"/>
+            <xs:element name="i" type="xs:string"/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="meeting">
+    <xs:sequence>
+      <xs:element name="attendees">
+        <xs:annotation>
+          <xs:documentation>The list of attendees.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="attendee" type="e:attendee" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>The list of attendees.</xs:documentation>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="agenda" type="e:agenda"/>
+      <xs:element name="item" type="e:item" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="start" type="xs:dateTime" use="required">
+      <xs:annotation>
+        <xs:documentation>The start time of the meeting.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="end" type="xs:dateTime" use="required">
+      <xs:annotation>
+        <xs:documentation>The end time of the meeting.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:element name="meeting" type="e:meeting">
+    <xs:annotation>
+      <xs:documentation>The root element of the meeting document.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+</xs:schema>
