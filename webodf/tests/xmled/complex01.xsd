@@ -7,7 +7,7 @@
   <xs:element name="d">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="a"/>
+        <xs:element name="a" maxOccurs="10"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

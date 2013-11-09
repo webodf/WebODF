@@ -183,13 +183,16 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             testRoot("xmled/empty.xsd", []),
             testRoot("xmled/simple.xsd", ["a", "b", "c"]),
             testRoot("xmled/complex01.xsd", ["a", "d", "e", "f", "ga", "ha"]),
+            // replace
             testReplace("xmled/simple.xsd", "a", [0], [1], ["a", "b", "c"]),
-            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], ["a"]),
-            testReplace("xmled/complex01.xsd", "g", [0, 0], [0, 1], ["a", "b", "c"]),
-            testReplace("xmled/complex01.xsd", "gb", [0, 0], [0, 1], ["a", "b", "c"]),
-            testReplace("xmled/complex01.xsd", "gbb", [0, 0], [0, 1], ["empty", "b"]),
-            testReplace("xmled/complex01.xsd", "gbb", [0, 1], [0, 2], ["empty", "b"]),
-            testReplace("xmled/complex01.xsd", "h", [0, 1, 0], [0, 1, 1], ["a", "b", "c"])
+            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], []),
+            testReplace("xmled/complex01.xsd", "g", [0, 0], [0, 1], ["a", "c"]),
+            testReplace("xmled/complex01.xsd", "gb", [0, 0], [0, 1], ["a", "c"]),
+            testReplace("xmled/complex01.xsd", "gbb", [0, 0], [0, 1], ["empty"]),
+            testReplace("xmled/complex01.xsd", "gbb", [0, 1], [0, 2], ["empty"]),
+            testReplace("xmled/complex01.xsd", "h", [0, 1, 0], [0, 1, 1], ["b", "c"]),
+            // prepend
+            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 0], ["a"])
         ];
     };
 };

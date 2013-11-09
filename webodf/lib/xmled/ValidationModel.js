@@ -660,7 +660,22 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         f.appendChild(e);
         fillElementWithDefaults(e, elementDef);
-        return {desc: '', range: null, dom: f};
+        return {desc: e.localName, range: null, dom: f};
+    }
+    /**
+     * @param {?Node} n
+     * @return {?Element}
+     */
+    function firstElementChild(n) {
+        n = n && n.firstChild;
+        var e = null;
+        while (n && !e) {
+            if (n.nodeType === 1) {
+                e = /**@type{!Element}*/(n);
+            }
+            n = n.nextSibling;
+        }
+        return e;
     }
     /**
      * @param {!Document|!Element} documentNode
@@ -669,11 +684,14 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function getPossibleDocuments(documentNode) {
         // for each xsd:element can lead to a document
         var r = [], e,
-            doc = /**@type{!Document}*/(documentNode.ownerDocument || documentNode);
+            doc = /**@type{!Document}*/(documentNode.ownerDocument || documentNode),
+            current = firstElementChild(doc);
         e = xsd && xsd.firstElementChild;
         while (e) {
             if (e.namespaceURI === xsdns && e.localName === "element") {
-                r.push(getPossibleElement(doc, e));
+                if (!current || current.localName !== e.getAttribute("name")) {
+                    r.push(getPossibleElement(doc, e));
+                }
             }
             e = e.nextElementSibling;
         }
@@ -1110,51 +1128,85 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
     function findAlternativeElements(particles, documentElement, element) {
-        var doc = documentElement.ownerDocument,
-            f = doc.createDocumentFragment(),
+        var doc = /**@type{!Document}*/(documentElement.ownerDocument),
+            f,
             a = [],
             pos = getPosition(element),
             p = particles[particles.length - 1],
+            particle = p[pos],
             particleInstanceCount = countParticleInstances(p, pos),
+            minOccurs = getMinOccurs(particle.element),
             e;
-        // check if the particle can be removed completely
-        if (particleInstanceCount > 1) {
-            a.push({desc: '', range: {}, dom: f});
+        // check if the particle instance may be removed
+        if (particleInstanceCount > minOccurs) {
             f = doc.createDocumentFragment();
-            f.appendChild(element.cloneNode(true));
-            a.push({desc: '', range: {}, dom: f});
-            return a;
+            a.push({desc: 'Remove element', range: {}, dom: f});
         }
-        p = particles[particles.length - 1][0].parent;
+        p = p[pos].parent;
+console.log(p);
         if (p.element.childElementCount === 1) {
-            f.appendChild(element.cloneNode(true));
-            a.push({desc: '', range: {}, dom: f});
             return a; // there are no other options
         }
         e = findCollectionDefinition(p.element);
-        e = e.firstElementChild;
-        while (e) {
-            if (e.localName === "element") {
-                a.push(getPossibleElement(doc, e));
+        if (e.localName === "choice" && particleInstanceCount === 1) {
+            e = e.firstElementChild;
+            while (e) {
+                if (e.localName === "element" && e !== particle.element) {
+                    a.push(getPossibleElement(doc, e));
+                }
+                e = e.nextElementSibling;
             }
-            e = e.nextElementSibling;
         }
         return a;
     }
     /**
-     * @param {?Node} n
+     * @param {!Element} container
+     * @param {!number} offset
      * @return {?Element}
      */
-    function firstElementChild(n) {
-        n = n && n.firstChild;
-        var e = null;
-        while (n && !e) {
-            if (n.nodeType === 1) {
-                e = /**@type{!Element}*/(n);
-            }
+    function getElementAfterPosition(container, offset) {
+        var n = container.firstChild,
+            e;
+        while (offset && n) {
+            n = n.nextSibling;
+            offset -= 1;
+        }
+        while (n && n.nodeType !== 1) {
             n = n.nextSibling;
         }
+        e = /**@type{?Element}*/(n);
         return e;
+    }
+    /**
+     * @param {!Element} documentElement
+     * @param {!Element} container
+     * @param {!number} offset
+     * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
+     */
+    function getPossibleInsertions(documentElement, container, offset) {
+        var doc = documentElement.ownerDocument,
+            f,
+            is = [],
+            a = doc.createElementNS("http://example.org/", "a"),
+            ps,
+            e = getElementAfterPosition(container, offset),
+            particle,
+            occurs,
+            maxOccurs;
+        if (!e) {
+            return [];
+        }
+        ps = findAllParticles(documentElement, e);
+        particle = ps[ps.length - 1][0];
+        occurs = countParticleInstances(ps[ps.length - 1], 0);
+        maxOccurs = getMaxOccurs(particle.element);
+        if (occurs < maxOccurs) {
+            f = doc.createDocumentFragment();
+            e = doc.createElementNS(e.namespaceURI, e.localName);
+            f.appendChild(e);
+            is.push({ dom: f, desc: e.localName, range: {}});
+        }
+        return is;
     }
     /**
      * @param {!Document|!Element} documentNode
@@ -1219,7 +1271,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         } else if (!range.collapsed) {
             r = getPossibleReplacements(documentNode, range);
         } else {
-            throw "Not implemented";
+            r = getPossibleInsertions(/**@type{!Element}*/
+                (firstElementChild(documentNode)),
+                /**@type{!Element}*/
+                (range.startContainer),
+                range.startOffset
+            );
+//            throw "Not implemented";
         }
         return r;
     };

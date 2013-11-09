@@ -4,6 +4,7 @@
   <replacement id="b"><e:b/></replacement>
   <replacement id="c"><e:c/></replacement>
   <replacement id="d"><e:d><e:a/></e:d></replacement>
+  <replacement id="daa"><e:d><e:a/><e:a/><e:a/></e:d></replacement>
   <replacement id="e"><e:e num="1"/></replacement>
   <replacement id="f"><e:f><e:a/></e:f></replacement>
   <replacement id="g"><e:g><e:b/></e:g></replacement>

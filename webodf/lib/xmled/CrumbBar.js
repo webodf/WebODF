@@ -88,16 +88,42 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         return range;
     }
 
+    function getRangeAtStartOfElement(element) {
+        var range = element.ownerDocument.createRange();
+        range.setStart(element, 0);
+        range.setEnd(element, 0);
+        return range;
+    }
+
+    function getRangeAtEndOfElement(element) {
+        var range = element.ownerDocument.createRange(),
+            count = element.childNodes.length;
+        range.setStart(element, count);
+        range.setEnd(element, count);
+        return range;
+    }
+
     function createMenu(element) {
         var menu = doc.createElementNS(htmlns, "div"),
             range = getRangeAroundElement(element),
+            range2,
             docel = /**@type{!Element}*/(root.parentNode),
             allowed = validationModel.getPossibleReplacements(docel, range),
             i;
         range.detach();
+        // replace
         for (i = 0; i < allowed.length; i += 1) {
-            createMenuItem(menu, "Insert " + allowed[i]);
+            createMenuItem(menu, 'Replace with ' + allowed[i].desc);
         }
+        // prepend
+        range = getRangeAtStartOfElement(element);
+        allowed = validationModel.getPossibleReplacements(docel, range);
+        range.detach();
+        for (i = 0; i < allowed.length; i += 1) {
+            createMenuItem(menu, 'Prepend ' + allowed[i].desc);
+        }
+        range2 = getRangeAtEndOfElement(element);
+        range2.detach();
         menu.style.display = "none";
         menu.style.position = "absolute";
         menu.style.background = "black";
