@@ -33,16 +33,17 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, xmled */
+/*global runtime, xmled, NodeFilter */
 
 /**
  * @constructor
  * @param {!Element} htmlelement in which to draw the crumbs 
  * @param {!Element} root root element of document
  * @param {!xmled.ValidationModel} validationModel
+ * @param {?NodeFilter} filter
  * @return {?}
  **/
-xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
+xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
     "use strict";
     var doc = htmlelement.ownerDocument,
         htmlns = htmlelement.namespaceURI,
@@ -107,7 +108,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         var menu = doc.createElementNS(htmlns, "div"),
             range = getRangeAroundElement(element),
             range2,
-            allowed = validationModel.getPossibleReplacements(root, range),
+            allowed = validationModel.getPossibleReplacements(root, range, filter),
             i;
         range.detach();
         // replace
@@ -116,7 +117,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         }
         // prepend
         range = getRangeAtStartOfElement(element);
-        allowed = validationModel.getPossibleReplacements(root, range);
+        allowed = validationModel.getPossibleReplacements(root, range, filter);
         range.detach();
         for (i = 0; i < allowed.length; i += 1) {
             createMenuItem(menu, 'Prepend ' + allowed[i].desc);

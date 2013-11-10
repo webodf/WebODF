@@ -49,9 +49,22 @@ runtime.loadClass("xmldom.LSSerializer");
  **/
 xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
     "use strict";
+    /**
+     * @constructor
+     * @extends NodeFilter
+     */
+    function Filter(ns) {
+        this.acceptNode = function (node) {
+            if (node.namespaceURI === ns) {
+                return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+        };
+    }
     var doc = element.ownerDocument,
         htmlns = element.namespaceURI,
         cursorns = "urn:webodf:names:cursor",
+        filter = new Filter(cursorns),
         canvasElement = doc.createElementNS(htmlns, "div"),
         crumbElement = doc.createElementNS(htmlns, "div"),
         attributeEditorElement = doc.createElementNS(htmlns, "div"),
@@ -332,7 +345,9 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         }
         var root = canvas.getDocumentRoot();
         if (root) {
-            crumbBar = new xmled.CrumbBar(crumbElement, root, validationModel);
+            crumbBar = new xmled.CrumbBar(crumbElement, root, validationModel, filter);
+            // validate just to test the validation code
+            validationModel.validate(root);
         }
         return crumbBar !== null;
     }
@@ -414,13 +429,14 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
 
         canvasElement.onmouseup = function (evt) {
             var target = evt.target;
-            if (target.namespaceURI === cursorns) {
+            while (target.namespaceURI === cursorns
+                    || target.parentNode.namespaceURI === cursorns) {
                 target = target.parentNode;
             }
             if (!canvas.getDocumentRoot().contains(target)) {
                 return;
             }
-            setActiveElement(evt.target);
+            setActiveElement(target);
         };
         canvasElement.onkeypress = function (evt) {
             var str;

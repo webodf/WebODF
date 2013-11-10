@@ -1334,7 +1334,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      *
      * @param {!Element} documentElement
      * @param {!Range=} range
-     * @param {!NodeFilter=} filter
+     * @param {?NodeFilter=} filter
      * @return {!Array.<{desc:!string,range:?Range,dom:!DocumentFragment}>}
      */
     this.getPossibleReplacements = function (documentElement, range, filter) {
