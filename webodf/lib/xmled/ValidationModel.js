@@ -224,7 +224,7 @@ xmled.ParticleCache = function ParticleCache() {
 /**
  * @constructor
  * @param {!xmled.Particle} particle
- * @param {!NodeFilter=} filter
+ * @param {?NodeFilter} filter
  */
 xmled.ParticleSearchState = function ParticleSearchState(particle, filter) {
     "use strict";
@@ -240,7 +240,7 @@ xmled.ParticleSearchState = function ParticleSearchState(particle, filter) {
     /**@type{?string}*/
     this.error = null;
     /**@type{?NodeFilter}*/
-    this.filter = filter || null;
+    this.filter = filter;
     /**
      * @param {?Element} e
      * @return {?Element}
@@ -700,13 +700,16 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     }
     /**
      * @param {?Node} n
+     * @param {?NodeFilter=} filter
      * @return {?Element}
      */
-    function firstElementChild(n) {
+    function firstElementChild(n, filter) {
         n = n && n.firstChild;
         var e = null;
         while (n && !e) {
-            if (n.nodeType === 1) {
+            if (n.nodeType === 1 &&
+                    (!filter
+                     || filter.acceptNode(n) === NodeFilter.FILTER_ACCEPT)) {
                 e = /**@type{!Element}*/(n);
             }
             n = n.nextSibling;
@@ -714,14 +717,17 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return e;
     }
     /**
-     * @param {!Document|!Element} documentNode
+     * @param {!Element} documentElement
      * @return {!Array.<!{desc:!string,range:?Range,dom:!DocumentFragment}>}
      */
-    function getPossibleDocuments(documentNode) {
+    function getPossibleDocuments(documentElement) {
         // for each xsd:element can lead to a document
         var r = [], e,
-            doc = /**@type{!Document}*/(documentNode.ownerDocument || documentNode),
+            doc = documentElement.ownerDocument,
             current = firstElementChild(doc);
+        if (!doc) {
+            throw "Missing owner document.";
+        }
         e = xsd && xsd.firstElementChild;
         while (e) {
             if (e.namespaceURI === xsdns && e.localName === "element") {
@@ -746,13 +752,16 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     }
     /**
      * @param {!Element} element
+     * @param {?NodeFilter} filter
      * @return {!number}
      */
-    function getPosition(element) {
+    function getPosition(element, filter) {
         var position = 0,
             e = element.parentNode.firstElementChild;
         while (e !== element) {
-            position += 1;
+            if (!filter || filter.acceptNode(e) === NodeFilter.FILTER_ACCEPT) {
+                position += 1;
+            }
             e = e.nextElementSibling;
         }
         return position;
@@ -1057,9 +1066,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     /**
      * @param {!Element} documentElement
      * @param {!Element} element
+     * @param {?NodeFilter} filter
      * @return {!Array.<!Array.<!xmled.Particle>>}
      */
-    function findAllParticles(documentElement, element) {
+    function findAllParticles(documentElement, element, filter) {
         var parents = [element],
             parentParticle,
             e = element,
@@ -1073,7 +1083,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         parents.reverse();
         ps.length = parents.length;
         parentParticle = getRootParticle(documentElement);
-        state = new xmled.ParticleSearchState(parentParticle);
+        state = new xmled.ParticleSearchState(parentParticle, filter);
         ps[0] = [parentParticle];
         e = documentElement;
         for (i = 1; i < parents.length; i += 1) {
@@ -1087,11 +1097,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             runtime.assert(state.error === null, state.error || "");
             runtime.assert(state.done(), "Not done!");
             e = parents[i];
-            parentParticle = ps[i][getPosition(e)];
+            parentParticle = ps[i][getPosition(e, filter)];
         }
         return ps;
     }
-    this.findAllParticles = findAllParticles;
     /**
      * @param {!Element} element
      * @param {!xmled.ParticleSearchState} state
@@ -1131,7 +1140,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     this.validate = function (documentElement, filter) {
         var particle = getRootParticle(documentElement),
-            state = new xmled.ParticleSearchState(particle, filter);
+            state = new xmled.ParticleSearchState(particle, filter || null);
         state.set(particle, documentElement, 0);
         return validateElement(documentElement, state);
     };
@@ -1160,13 +1169,15 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @param {!Array.<!Array.<!xmled.Particle>>} particles
      * @param {!Element} documentElement
      * @param {!Element} element
+     * @param {?NodeFilter} filter
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
-    function findAlternativeElements(particles, documentElement, element) {
+    function findAlternativeElements(particles, documentElement, element,
+            filter) {
         var doc = /**@type{!Document}*/(documentElement.ownerDocument),
             f,
             a = [],
-            pos = getPosition(element),
+            pos = getPosition(element, filter),
             p = particles[particles.length - 1],
             particle = p[pos],
             particleInstanceCount = countParticleInstances(p, pos),
@@ -1178,7 +1189,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             a.push({desc: 'Remove element', range: {}, dom: f});
         }
         p = p[pos].parent;
-console.log(p);
         if (p.element.childElementCount === 1) {
             return a; // there are no other options
         }
@@ -1197,16 +1207,17 @@ console.log(p);
     /**
      * @param {!Element} container
      * @param {!number} offset
+     * @param {?NodeFilter} filter
      * @return {?Element}
      */
-    function getElementAfterPosition(container, offset) {
+    function getElementAfterPosition(container, offset, filter) {
         var n = container.firstChild,
             e;
         while (offset && n) {
             n = n.nextSibling;
             offset -= 1;
         }
-        while (n && n.nodeType !== 1) {
+        while (n && (n.nodeType !== 1 || (filter && filter.acceptNode(n) !== NodeFilter.FILTER_ACCEPT))) {
             n = n.nextSibling;
         }
         e = /**@type{?Element}*/(n);
@@ -1216,21 +1227,22 @@ console.log(p);
      * @param {!Element} documentElement
      * @param {!Element} container
      * @param {!number} offset
+     * @param {?NodeFilter} filter
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
-    function getPossibleInsertions(documentElement, container, offset) {
+    function getPossibleInsertions(documentElement, container, offset, filter) {
         var doc = documentElement.ownerDocument,
             f,
             is = [],
             ps,
-            e = getElementAfterPosition(container, offset),
+            e = getElementAfterPosition(container, offset, filter),
             particle,
             occurs,
             maxOccurs;
         if (!e) {
             return [];
         }
-        ps = findAllParticles(documentElement, e);
+        ps = findAllParticles(documentElement, e, filter);
         particle = ps[ps.length - 1][0];
         occurs = countParticleInstances(ps[ps.length - 1], 0);
         maxOccurs = getMaxOccurs(particle.element);
@@ -1243,17 +1255,14 @@ console.log(p);
         return is;
     }
     /**
-     * @param {!Document|!Element} documentNode
+     * @param {!Element} documentElement
      * @param {!Element} node
+     * @param {?NodeFilter} filter
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
-    function getPossibleNodeReplacements(documentNode, node) {
-        var documentElement = firstElementChild(documentNode),
-            ps;
-        if (!documentElement) {
-            throw "Missing document element.";
-        }
-        ps = findAllParticles(documentElement, node);
+    function getPossibleNodeReplacements(documentElement, node, filter) {
+        var ps;
+        ps = findAllParticles(documentElement, node, filter);
 /*
         runtime.assert(state.currentNode !== null, "No element found.");
         runtime.assert(state.length() > 0, "No definitions in state.");
@@ -1261,57 +1270,89 @@ console.log(p);
             "Top definition must be an element definition, not "
             + state.topDef().localName + ".");
 */
-        return findAlternativeElements(ps, documentElement, node);
+        return findAlternativeElements(ps, documentElement, node, filter);
+    }
+    function getNode(container, offset) {
+        var n = container.firstChild;
+        while (offset > 0) {
+            n = n.nextSibling;
+            offset -= 1;
+        }
+        return n;
     }
     /**
-     * @param {!Document|!Element} documentNode
      * @param {!Range} range
+     * @param {?NodeFilter} filter
+     * @return {!number}
+     */
+    function countElementsInRange(range, filter) {
+        if (range.startContainer !== range.endContainer) {
+            return 0;
+        }
+        var n1 = getNode(range.startContainer, range.startOffset),
+            n2 = getNode(range.endContainer, range.endOffset),
+            c = 0;
+        while (n1 !== n2) {
+            if (!filter || filter.acceptNode(n1) === NodeFilter.FILTER_ACCEPT) {
+                c += 1;
+            }
+            n1 = n1.nextSibling;
+        }
+        return c;
+    }
+    /**
+     * @param {!Element} documentElement
+     * @param {!Range} range
+     * @param {?NodeFilter} filter
      * @return {!Array.<{desc:!string,range:!Range,dom:!DocumentFragment}>}
      */
-    function getPossibleReplacements(documentNode, range) {
-        if (range.startContainer !== range.endContainer ||
-                range.endOffset - range.startOffset !== 1) {
+    function getPossibleReplacements(documentElement, range, filter) {
+        var count = countElementsInRange(range, filter),
+            node = range.startContainer.childNodes.item(range.startOffset),
+            e;
+        if (count !== 1) {
             throw "Not implemented";
         }
-        var node = range.startContainer.childNodes.item(range.startOffset),
-            e;
+        while (filter && node
+                && filter.acceptNode(node) !== NodeFilter.FILTER_ACCEPT) {
+            node = node.nextSibling;
+        }
         if (!node || node.nodeType !== 1) {
             throw "Not implemented";
         }
         e = /**@type{!Element}*/(node);
-        return getPossibleNodeReplacements(documentNode, e);
+        return getPossibleNodeReplacements(documentElement, e, filter);
     }
     /**
      * Return array of possible replacements.
-     * The documentNode is the node that contains the documentElement. It does
-     * not have to be a Document node.
      * The range indicates the start and end points of the range that is being
      * replaced.
      * The returned array contains a textual description, a range that contains
      * the corresponding points in the created fragment and the dom fragment
      * that can be the replacement for the input range. This range is owned by
-     * the same document as the documentNode.
+     * the same document as the documentElement.
      *
-     * @param {!Document|!Element} documentNode
+     * @param {!Element} documentElement
      * @param {!Range=} range
+     * @param {!NodeFilter=} filter
      * @return {!Array.<{desc:!string,range:?Range,dom:!DocumentFragment}>}
      */
-    this.getPossibleReplacements = function (documentNode, range) {
-        var r;
-        if (!range || (range.startContainer === documentNode
-                && range.startOffset === 0 && range.endOffset === 1
-                && range.endContainer === documentNode)) {
-            r = getPossibleDocuments(documentNode);
+    this.getPossibleReplacements = function (documentElement, range, filter) {
+        var r,
+            documentNode = documentElement.parentNode,
+            count = range && countElementsInRange(range, filter || null);
+        if (!range || (count === 1 && range.endContainer === documentNode)) {
+            r = getPossibleDocuments(documentElement);
         } else if (!range.collapsed) {
-            r = getPossibleReplacements(documentNode, range);
+            r = getPossibleReplacements(documentElement, range, filter || null);
         } else {
-            r = getPossibleInsertions(/**@type{!Element}*/
-                (firstElementChild(documentNode)),
+            r = getPossibleInsertions(
+                documentElement,
                 /**@type{!Element}*/
                 (range.startContainer),
-                range.startOffset
+                range.startOffset,
+                filter || null
             );
-//            throw "Not implemented";
         }
         return r;
     };

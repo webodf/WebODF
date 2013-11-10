@@ -107,8 +107,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         var menu = doc.createElementNS(htmlns, "div"),
             range = getRangeAroundElement(element),
             range2,
-            docel = /**@type{!Element}*/(root.parentNode),
-            allowed = validationModel.getPossibleReplacements(docel, range),
+            allowed = validationModel.getPossibleReplacements(root, range),
             i;
         range.detach();
         // replace
@@ -117,7 +116,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel) {
         }
         // prepend
         range = getRangeAtStartOfElement(element);
-        allowed = validationModel.getPossibleReplacements(docel, range);
+        allowed = validationModel.getPossibleReplacements(root, range);
         range.detach();
         for (i = 0; i < allowed.length; i += 1) {
             createMenuItem(menu, 'Prepend ' + allowed[i].desc);

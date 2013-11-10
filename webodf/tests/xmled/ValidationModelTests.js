@@ -40,9 +40,35 @@ runtime.loadClass("xmled.ValidationModel");
  */
 xmled.ValidationModelTests = function ValidationModelTests(runner) {
     "use strict";
+    /**
+     * @constructor
+     * @extends NodeFilter
+     */
+    function TestFilter(ns) {
+        this.acceptNode = function (node) {
+            if (node.namespaceURI === ns) {
+                return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+        };
+    }
     var r = runner,
         t,
-        replacements;
+        replacements,
+        testns = "http://test.com/",
+        filter = new TestFilter(testns);
+
+    /**
+     * @param {?NodeFilter} filter
+     * @param {?Node} node
+     * @return {!boolean}
+     */
+    function accept(filter, node) {
+        return node !== null
+            && (!filter
+                || filter.acceptNode(node) === NodeFilter.FILTER_ACCEPT);
+    }
+
     function serialize(element) {
         var serializer = new xmldom.LSSerializer();
         return serializer.writeToString(element, {});
@@ -82,16 +108,13 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
         r.shouldBe(t, "t.rep", "t.ref");
     }
 
-    function checkReplacements(reps, ids, callback) {
-        loadReplacements(function () {
-            t.reps = reps;
-            r.shouldBe(t, "t.reps.length", String(ids.length));
-            var i, length = Math.min(ids.length, reps.length);
-            for (i = 0; i < length; i += 1) {
-                checkReplacement(reps[i].dom, replacements[ids[i]]);
-            }
-            callback();
-        });
+    function checkReplacements(reps, ids) {
+        t.reps = reps;
+        r.shouldBe(t, "t.reps.length", String(ids.length));
+        var i, length = Math.min(ids.length, reps.length);
+        for (i = 0; i < length; i += 1) {
+            checkReplacement(reps[i].dom, replacements[ids[i]]);
+        }
     }
 
     /**
@@ -105,6 +128,8 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             ne = doc.createElementNS(ns, localName),
             e = element.firstElementChild;
         while (e) {
+            element.insertBefore(ne, e);
+            ne = doc.createElementNS(ns, localName);
             addNodes(e, ns, localName);
             e = e.nextElementSibling;
         }
@@ -117,22 +142,7 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
      * @return {undefined}
      */
     function validateWithIgnoredNodes(model, documentElement) {
-        var ns = "http://test.com/",
-            filter;
-        addNodes(documentElement, ns, "test");
-        /**
-         * @constructor
-         * @extends NodeFilter
-         */
-        function TestFilter(ns) {
-            this.acceptNode = function (node) {
-                if (node.namespaceURI === ns) {
-                    return NodeFilter.FILTER_REJECT;
-                }
-                return NodeFilter.FILTER_ACCEPT;
-            };
-        }
-        filter = new TestFilter(ns);
+        addNodes(documentElement, testns, "test");
         try {
             t.err = model.validate(documentElement, filter);
         } catch (e) {
@@ -191,8 +201,11 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             var model = new xmled.ValidationModel(xsd, function (e) {
                 t.err = e;
                 r.shouldBeNull(t, "t.err");
-                t.reps = model.getPossibleReplacements(document);
-                checkReplacements(t.reps, replacementIds, callback);
+                t.reps = model.getPossibleReplacements(document.documentElement);
+                loadReplacements(function () {
+                    checkReplacements(t.reps, replacementIds);
+                    callback();
+                });
             });
         };
         f.functionName = "init-" + xsd;
@@ -202,32 +215,59 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
     /**
      * @param {!Node} node
      * @param {!Array.<!number>} list
+     * @param {?NodeFilter=} filter
      * @return {{node:!Node, offset: !number }}
      */
-    function getPosition(node, list) {
-        var i, j, l = list.length - 1, p, n = node;
+    function getPosition(node, list, filter) {
+        var i, j, l = list.length - 1, p, n = node, m;
+        filter = filter || null;
         runtime.assert(l >= 0, "Position array must have at least one entry.");
         for (i = 0; i < l; i += 1) {
             n = n.firstChild;
-            p = list[i];
-            for (j = 0; j < p; j += 1) {
+            while (!accept(filter, n)) {
                 n = n.nextSibling;
             }
+            p = list[i];
+            for (j = 0; j < p; j += 1) {
+                do {
+                    n = n.nextSibling;
+                } while (!accept(filter, n));
+            }
         }
-        return {node: /**@type{!Node}*/(n), offset: list[l]};
+        p = list[l];
+        if (filter) {
+            // adapt offset to take into account the junk elements
+            m = n.firstChild;
+            while (!accept(filter, m)) {
+                m = m.nextSibling;
+            }
+            for (j = 0; j < p; j += 1) {
+                do {
+                    m = m.nextSibling;
+                } while (m && !accept(filter, m));
+            }
+            j = n.firstChild;
+            p = 0;
+            while (j !== m) {
+                p += 1;
+                j = j.nextSibling;
+            }
+        }
+        return {node: /**@type{!Node}*/(n), offset: p};
     }
 
     /**
      * @param {!Node} node
      * @param {!Array.<!number>} start
      * @param {!Array.<!number>} end
+     * @param {!NodeFilter=} filter
      * @return {!Range}
      */
-    function createRange(node, start, end) {
+    function createRange(node, start, end, filter) {
         var range = node.ownerDocument.createRange(),
-            pos = getPosition(node, start);
+            pos = getPosition(node, start, filter);
         range.setStart(pos.node, pos.offset);
-        pos = getPosition(node, end);
+        pos = getPosition(node, end, filter);
         range.setEnd(pos.node, pos.offset);
         return range;
     }
@@ -249,11 +289,17 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
                     var initial = replacements[initId],
                         range,
                         de = initial.ownerDocument.createElement("doc");
-                    de.appendChild(initial.cloneNode(true));
-                    initial = de;
-                    range = createRange(initial, start, end);
+                    initial = initial.cloneNode(true);
+                    de.appendChild(initial);
+                    initial = de.firstElementChild;
+                    range = createRange(de, start, end);
                     t.reps = model.getPossibleReplacements(initial, range);
-                    checkReplacements(t.reps, replacementIds, callback);
+                    checkReplacements(t.reps, replacementIds);
+                    addNodes(de, testns, "test");
+                    range = createRange(de, start, end, filter);
+                    t.reps = model.getPossibleReplacements(initial, range, filter);
+                    checkReplacements(t.reps, replacementIds);
+                    callback();
                 });
             });
         };
