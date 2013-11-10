@@ -13,4 +13,6 @@
   <replacement id="gbb"><e:g><e:b/><e:b/></e:g></replacement>
   <replacement id="h"><e:h><e:g><e:a/></e:g><e:g><e:a/></e:g></e:h></replacement>
   <replacement id="ha"><e:h><e:g><e:a/></e:g></e:h></replacement>
+  <replacement id="j"><e:j/></replacement>
+  <replacement id="k"><e:k><e:j/></e:k></replacement>
 </replacements>

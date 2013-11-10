@@ -606,6 +606,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return parseInt(maxOccurs, 10);
     }
+    function getInstanceOfSubstitutionGroup(abstract) {
+        var name = abstract.getAttribute("name"),
+            e = xsd.firstElementChild,
+            sg;
+        while (e) {
+            sg = e.getAttribute("substitutionGroup");
+            if (sg && getLocalName(sg) === name) {
+                return e;
+            }
+            e = e.nextElementSibling;
+        }
+        return e;
+    }
     function addCollection(instance, coll) {
         if (coll.namespaceURI !== xsdns) {
             return;
@@ -615,6 +628,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (coll.localName === "element") {
             if (!coll.hasAttribute("name")) {
                 coll = findElement(coll.getAttribute("ref"));
+            }
+            if (coll.getAttribute("abstract") === "true") {
+                coll = getInstanceOfSubstitutionGroup(coll);
             }
             e = doc.createElementNS(targetNamespace,
                     coll.getAttribute("name"));
@@ -730,7 +746,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         e = xsd && xsd.firstElementChild;
         while (e) {
-            if (e.namespaceURI === xsdns && e.localName === "element") {
+            if (e.namespaceURI === xsdns && e.localName === "element"
+                    && e.getAttribute("abstract") !== "true") {
                 if (!current || current.localName !== e.getAttribute("name")) {
                     r.push(getPossibleElement(doc, e));
                 }

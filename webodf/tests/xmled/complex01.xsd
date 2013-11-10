@@ -42,5 +42,16 @@
       </xs:choice>
     </xs:complexType>
   </xs:element>
+  <xs:element name="i" abstract="true"/>
+  <xs:element name="j" substitutionGroup="e:i">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="k">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="e:i"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>
 

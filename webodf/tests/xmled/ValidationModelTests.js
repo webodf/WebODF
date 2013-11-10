@@ -321,7 +321,7 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             testValidation("xmled/XMLSchema.xsd", "xmled/XMLSchema.xsd"),
             testRoot("xmled/empty.xsd", []),
             testRoot("xmled/simple.xsd", ["a", "b", "c"]),
-            testRoot("xmled/complex01.xsd", ["a", "d", "e", "f", "ga", "ha"]),
+            testRoot("xmled/complex01.xsd", ["a", "d", "e", "f", "ga", "ha", "j", "k"]),
             // replace
             testReplace("xmled/simple.xsd", "a", [0], [1], ["a", "b", "c"]),
             testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], []),
