@@ -31,19 +31,7 @@
 ops.OperationTransformMatrix = function OperationTransformMatrix() {
     "use strict";
 
-    /**
-     * Does an OT on the two passed opspecs, where they are not modified at all,
-     * and so simply returns them in the result arrays.
-     * @param {!Object} opSpecA
-     * @param {!Object} opSpecB
-     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
-     */
-    function passUnchanged(opSpecA, opSpecB) {
-        return {
-            opSpecsA:  [opSpecA],
-            opSpecsB:  [opSpecB]
-        };
-    }
+    /* Utility methods */
 
     /**
      * Returns a list with all attributes in setProperties that refer to styleName
@@ -76,6 +64,122 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             });
         }
     }
+
+    /**
+     * @param {?Object} properties
+     * @param {?Object} removedProperties
+     * @param {?Object} shadowingProperties
+     * @param {?Object} shadowingRemovedProperties
+     * @return {undefined}
+     */
+    function dropShadowedAttributes(properties, removedProperties, shadowingProperties, shadowingRemovedProperties) {
+        var value, i, name,
+            removedPropertyNames,
+            shadowingRemovedPropertyNames =
+                shadowingRemovedProperties && shadowingRemovedProperties.attributes ?
+                    shadowingRemovedProperties.attributes.split(',') : [];
+
+        // iterate over all properties and see which get overwritten or deleted
+        // by the shadowing, so they have to be dropped
+        if (properties && (shadowingProperties || shadowingRemovedPropertyNames.length > 0)) {
+            Object.keys(properties).forEach(function(key) {
+                value = properties[key];
+                if ((shadowingProperties && shadowingProperties[key] !== undefined) ||
+                    (shadowingRemovedPropertyNames && shadowingRemovedPropertyNames.indexOf(key) !== -1)) {
+                    // TODO: support more than one level
+                    if (typeof value !== "object") {
+                        // drop
+                        delete properties[key];
+                    }
+                }
+            });
+        }
+
+        // iterate over all shadowing removed properties and drop any duplicates from
+        // the removed property names
+        if (removedProperties && removedProperties.attributes && (shadowingProperties || shadowingRemovedPropertyNames.length > 0)) {
+            removedPropertyNames = removedProperties.attributes.split(',');
+            for (i = 0; i < removedPropertyNames.length; i += 1) {
+                name = removedPropertyNames[i];
+                if ((shadowingProperties && shadowingProperties[name] !== undefined) ||
+                    (shadowingRemovedPropertyNames && shadowingRemovedPropertyNames.indexOf(name) !== -1)) {
+                    // drop
+                    removedPropertyNames.splice(i, 1);
+                    i -= 1;
+                }
+            }
+            // set back
+            if (removedPropertyNames.length > 0) {
+                removedProperties.attributes = removedPropertyNames.join(',');
+            } else {
+                delete removedProperties.attributes;
+            }
+        }
+    }
+
+    /**
+     * Estimates if there are any properties set in the given properties object.
+     * @param {!Object} properties
+     * @return {!boolean}
+     */
+    function hasProperties(properties) {
+        var key;
+
+        for (key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Estimates if there are any properties set in the given properties object.
+     * @param {!Object} properties
+     * @return {!boolean}
+     */
+    function hasRemovedProperties(properties) {
+        var key;
+
+        for (key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                // handle empty 'attribute' as not existing
+                if (key !== 'attributes' || properties.attributes.length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param {!Object} targetOpspec
+     * @param {!Object} shadowingOpspec
+     * @param {!string} propertiesName
+     * @return {undefined}
+     */
+    function dropShadowedProperties(targetOpspec, shadowingOpspec, propertiesName) {
+        var sp = targetOpspec.setProperties ? targetOpspec.setProperties[propertiesName] : null,
+            rp = targetOpspec.removedProperties ? targetOpspec.removedProperties[propertiesName] : null;
+
+        dropShadowedAttributes(sp,
+                               rp,
+                               shadowingOpspec.setProperties ? shadowingOpspec.setProperties[propertiesName] : null,
+                               shadowingOpspec.removedProperties ? shadowingOpspec.removedProperties[propertiesName] : null);
+
+        // remove empty setProperties
+        if (sp && !hasProperties(sp)) {
+            delete targetOpspec.setProperties[propertiesName];
+        }
+        // remove empty removedProperties
+        if (rp && !hasRemovedProperties(rp)) {
+            delete targetOpspec.removedProperties[propertiesName];
+        }
+    }
+
+
+
+    /* Transformation methods */
 
     /**
      * @param {!Object} addStyleSpec
@@ -224,118 +328,6 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             opSpecsA:  [insertTextSpec],
             opSpecsB:  [splitParagraphSpec]
         };
-    }
-
-    /**
-     * @param {?Object} properties
-     * @param {?Object} removedProperties
-     * @param {?Object} shadowingProperties
-     * @param {?Object} shadowingRemovedProperties
-     * @return {undefined}
-     */
-    function dropShadowedAttributes(properties, removedProperties, shadowingProperties, shadowingRemovedProperties) {
-        var value, i, name,
-            removedPropertyNames,
-            shadowingRemovedPropertyNames =
-                shadowingRemovedProperties && shadowingRemovedProperties.attributes ?
-                    shadowingRemovedProperties.attributes.split(',') : [];
-
-        // iterate over all properties and see which get overwritten or deleted
-        // by the shadowing, so they have to be dropped
-        if (properties && (shadowingProperties || shadowingRemovedPropertyNames.length > 0)) {
-            Object.keys(properties).forEach(function(key) {
-                value = properties[key];
-                if ((shadowingProperties && shadowingProperties[key] !== undefined) ||
-                    (shadowingRemovedPropertyNames && shadowingRemovedPropertyNames.indexOf(key) !== -1)) {
-                    // TODO: support more than one level
-                    if (typeof value !== "object") {
-                        // drop
-                        delete properties[key];
-                    }
-                }
-            });
-        }
-
-        // iterate over all shadowing removed properties and drop any duplicates from
-        // the removed property names
-        if (removedProperties && removedProperties.attributes && (shadowingProperties || shadowingRemovedPropertyNames.length > 0)) {
-            removedPropertyNames = removedProperties.attributes.split(',');
-            for (i = 0; i < removedPropertyNames.length; i += 1) {
-                name = removedPropertyNames[i];
-                if ((shadowingProperties && shadowingProperties[name] !== undefined) ||
-                    (shadowingRemovedPropertyNames && shadowingRemovedPropertyNames.indexOf(name) !== -1)) {
-                    // drop
-                    removedPropertyNames.splice(i, 1);
-                    i -= 1;
-                }
-            }
-            // set back
-            if (removedPropertyNames.length > 0) {
-                removedProperties.attributes = removedPropertyNames.join(',');
-            } else {
-                delete removedProperties.attributes;
-            }
-        }
-    }
-
-    /**
-     * Estimates if there are any properties set in the given properties object.
-     * @param {!Object} properties
-     * @return {!boolean}
-     */
-    function hasProperties(properties) {
-        var key;
-
-        for (key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Estimates if there are any properties set in the given properties object.
-     * @param {!Object} properties
-     * @return {!boolean}
-     */
-    function hasRemovedProperties(properties) {
-        var key;
-
-        for (key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                // handle empty 'attribute' as not existing
-                if (key !== 'attributes' || properties.attributes.length > 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param {!Object} targetOpspec
-     * @param {!Object} shadowingOpspec
-     * @param {!string} propertiesName
-     * @return {undefined}
-     */
-    function dropShadowedProperties(targetOpspec, shadowingOpspec, propertiesName) {
-        var sp = targetOpspec.setProperties ? targetOpspec.setProperties[propertiesName] : null,
-            rp = targetOpspec.removedProperties ? targetOpspec.removedProperties[propertiesName] : null;
-
-        dropShadowedAttributes(sp,
-                               rp,
-                               shadowingOpspec.setProperties ? shadowingOpspec.setProperties[propertiesName] : null,
-                               shadowingOpspec.removedProperties ? shadowingOpspec.removedProperties[propertiesName] : null);
-
-        // remove empty setProperties
-        if (sp && !hasProperties(sp)) {
-            delete targetOpspec.setProperties[propertiesName];
-        }
-        // remove empty removedProperties
-        if (rp && !hasRemovedProperties(rp)) {
-            delete targetOpspec.removedProperties[propertiesName];
-        }
     }
 
     /**
@@ -694,6 +686,20 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  removeTextSpecResult,
             opSpecsB:  splitParagraphSpecResult
+        };
+    }
+
+    /**
+     * Does an OT on the two passed opspecs, where they are not modified at all,
+     * and so simply returns them in the result arrays.
+     * @param {!Object} opSpecA
+     * @param {!Object} opSpecB
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function passUnchanged(opSpecA, opSpecB) {
+        return {
+            opSpecsA:  [opSpecA],
+            opSpecsB:  [opSpecB]
         };
     }
 
