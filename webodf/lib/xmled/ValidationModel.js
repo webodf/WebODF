@@ -968,7 +968,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             occurrence = 1;
         localName = findCollectionDefinition(def).localName;
         while (currentElement && occurrence <= maxOccurs) {
-            runtime.assert(occurrence < 200, "looping");
+            runtime.assert(occurrence < 10000, "looping");
             state.particle = particle;
             state.error = null;
             lastElement = currentElement;
