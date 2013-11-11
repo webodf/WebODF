@@ -33,7 +33,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, xmled, xmldom, XSLTProcessor, XMLHttpRequest, NodeFilter */
+/*global runtime, core, xmled, xmldom, XSLTProcessor, XMLHttpRequest, NodeFilter, document */
 
 runtime.loadClass("xmled.XmlCanvas");
 runtime.loadClass("xmled.CrumbBar");
@@ -469,6 +469,10 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                     caret.left();
                 } else if (key === 39) { // right
                     caret.right();
+                } else if (key === 40) { // down
+                    caret.nextSibling();
+                } else if (key === 38) { // up
+                    caret.previousSibling();
                 } else if (key === 8) { // backspace
                     t = caret.leftText();
                     if (t.length) {
@@ -482,6 +486,15 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
                 }
             }
         };
+        document.body.onblur = canvasElement.onblur = function () {
+            var caret = canvas.getCaret();
+            caret.removeFocus();
+        };
+        document.body.onfocus = canvasElement.onfocus = function () {
+            var caret = canvas.getCaret();
+            caret.setFocus();
+        };
+ 
         runtime.getWindow().onresize = fixSize;
         fixSize();
     }
