@@ -141,17 +141,15 @@ define("webodf/editor/Tools", [
                 }
 
                 // Simple Style Selector [B, I, U, S]
-                if (args.directStylingEnabled) {
-                    simpleStyles = new SimpleStyles(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(simpleStyles);
-                    simpleStyles.onToolDone = onToolDone;
-                }
+                simpleStyles = new SimpleStyles(function (widget) {
+                    widget.placeAt(toolbar);
+                    widget.startup();
+                });
+                sessionSubscribers.push(simpleStyles);
+                simpleStyles.onToolDone = onToolDone;
 
                 // Paragraph direct alignment buttons
-                if (args.directStylingEnabled) {
+                if (args.directParagraphStylingEnabled) {
                     paragraphAlignment = new ParagraphAlignment(function (widget) {
                         widget.placeAt(toolbar);
                         widget.startup();

@@ -61,7 +61,7 @@ runtime.loadClass("gui.PlainTextPasteboard");
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  * @param {!ops.OdtCursor} shadowCursor
- * @param {!{directStylingEnabled:boolean}=} args
+ * @param {!{directParagraphStylingEnabled:boolean}=} args
  * @return {?}
  */
 gui.SessionController = (function () {
@@ -74,7 +74,7 @@ gui.SessionController = (function () {
      * @param {!ops.Session} session
      * @param {!string} inputMemberId
      * @param {!ops.OdtCursor} shadowCursor
-     * @param {!{directStylingEnabled:boolean}=} args
+     * @param {!{directParagraphStylingEnabled:boolean}=} args
      * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
@@ -95,9 +95,9 @@ gui.SessionController = (function () {
             undoManager = null,
             eventManager = new gui.EventManager(odtDocument),
             annotationManager = new gui.AnnotationManager(session, inputMemberId),
-            directTextStyler = args && args.directStylingEnabled ? new gui.DirectTextStyler(session, inputMemberId) : null,
-            directParagraphStyler = args && args.directStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null,
-            createCursorStyleOp = /**@type {function (!number, !number):ops.Operation}*/ (directTextStyler && directTextStyler.createCursorStyleOp),
+            directTextStyler = new gui.DirectTextStyler(session, inputMemberId),
+            directParagraphStyler = args && args.directParagraphStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null,
+            createCursorStyleOp = /**@type {function (!number, !number):ops.Operation}*/ (directTextStyler.createCursorStyleOp),
             textManipulator = new gui.TextManipulator(session, inputMemberId, createCursorStyleOp),
             imageManager = new gui.ImageManager(session, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
@@ -1143,10 +1143,7 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         this.destroy = function(callback) {
-            var destroyCallbacks = [drawShadowCursorTask.destroy];
-            if (directTextStyler) {
-                destroyCallbacks.push(directTextStyler.destroy);
-            }
+            var destroyCallbacks = [drawShadowCursorTask.destroy, directTextStyler.destroy];
             if (directParagraphStyler) {
                 destroyCallbacks.push(directParagraphStyler.destroy);
             }
@@ -1231,11 +1228,9 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Up, modifier.MetaShift, rangeSelectionOnly(extendSelectionToDocumentStart));
                 keyDownHandler.bind(keyCode.Down, modifier.MetaShift, rangeSelectionOnly(extendSelectionToDocumentEnd));
                 keyDownHandler.bind(keyCode.A, modifier.Meta, rangeSelectionOnly(extendSelectionToEntireDocument));
-                if (directTextStyler) {
-                    keyDownHandler.bind(keyCode.B, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleBold));
-                    keyDownHandler.bind(keyCode.I, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleItalic));
-                    keyDownHandler.bind(keyCode.U, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleUnderline));
-                }
+                keyDownHandler.bind(keyCode.B, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleBold));
+                keyDownHandler.bind(keyCode.I, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleItalic));
+                keyDownHandler.bind(keyCode.U, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleUnderline));
                 if (directParagraphStyler) {
                     keyDownHandler.bind(keyCode.L, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphLeft));
                     keyDownHandler.bind(keyCode.E, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
@@ -1249,11 +1244,9 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(extendSelectionToEntireDocument));
-                if (directTextStyler) {
-                    keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleBold));
-                    keyDownHandler.bind(keyCode.I, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleItalic));
-                    keyDownHandler.bind(keyCode.U, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleUnderline));
-                }
+                keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleBold));
+                keyDownHandler.bind(keyCode.I, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleItalic));
+                keyDownHandler.bind(keyCode.U, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleUnderline));
                 if (directParagraphStyler) {
                     keyDownHandler.bind(keyCode.L, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphLeft));
                     keyDownHandler.bind(keyCode.E, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
