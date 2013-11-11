@@ -606,8 +606,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return parseInt(maxOccurs, 10);
     }
-    function getInstanceOfSubstitutionGroup(abstract) {
-        var name = abstract.getAttribute("name"),
+    function getInstanceOfSubstitutionGroup(abstrct) {
+        var name = abstrct.getAttribute("name"),
             e = xsd.firstElementChild,
             sg;
         while (e) {
@@ -619,25 +619,63 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return e;
     }
+    /**
+     * @param {!string} groupName
+     * @param {!string} name
+     * @return {?Element}
+     */
+    function findElementInstance(groupName, name) {
+        var e = xsd.firstElementChild,
+            sg;
+        while (e) {
+            sg = e.getAttribute("substitutionGroup");
+            if (sg && getLocalName(sg) === groupName) {
+                if (e.getAttribute("name") === name) {
+                    return e;
+                }
+                sg = findElementInstance(e.getAttribute("name"), name);
+                if (sg) {
+                    return sg;
+                }
+            }
+            e = e.nextElementSibling;
+        }
+        return e;
+    }
+    /**
+     * @param {!Element} instance
+     * @param {!Element} coll
+     * @return {undefined}
+     */
     function addCollection(instance, coll) {
         if (coll.namespaceURI !== xsdns) {
             return;
         }
         var doc = instance.ownerDocument,
+            def = coll,
             e;
-        if (coll.localName === "element") {
-            if (!coll.hasAttribute("name")) {
-                coll = findElement(coll.getAttribute("ref"));
+        if (def.localName === "element") {
+            if (!def.hasAttribute("name")) {
+                def = findElement(def.getAttribute("ref"));
             }
-            if (coll.getAttribute("abstract") === "true") {
-                coll = getInstanceOfSubstitutionGroup(coll);
+            if (def.getAttribute("abstract") === "true") {
+                def = getInstanceOfSubstitutionGroup(def);
             }
-            e = doc.createElementNS(targetNamespace,
-                    coll.getAttribute("name"));
-            fillElementWithDefaults(e, coll);
+            if (targetNamespace) {
+                e = doc.createElementNS(targetNamespace,
+                    def.getAttribute("name"));
+            } else {
+                e = doc.createElement(def.getAttribute("name"));
+            }
+            fillElementWithDefaults(e, def);
             instance.appendChild(e);
         }
     }
+    /**
+     * @param {!Element} instance
+     * @param {!Element} sequence
+     * @return {undefined}
+     */
     function addSequence(instance, sequence) {
         var minOccurs = getMinOccurs(sequence),
             i,
@@ -650,17 +688,34 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
         }
     }
+    /**
+     * @param {!Element} instance
+     * @param {!Element} choice
+     * @return {undefined}
+     */
     function addChoice(instance, choice) {
         var minOccurs = getMinOccurs(choice),
+            name,
             i,
             e;
         for (i = 0; i < minOccurs; i += 1) {
             e = choice.firstElementChild;
-            if (e) {
-                addCollection(instance, e);
+            while (e) {
+                // avoid nesting an element in another one with the same name
+                name = e.getAttribute("name") || e.getAttribute("ref");
+                if (name !== instance.localName) {
+                    addCollection(instance, e);
+                    break;
+                }
+                e = e.nextElementSibling;
             }
         }
     }
+    /**
+     * @param {!Element} instance
+     * @param {!Element} group
+     * @return {undefined}
+     */
     function addGroup(instance, group) {
         group = findGroupCollection(group);
         if (group.localName === "sequence") {
@@ -671,6 +726,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             throw "Not implemented";
         }
     }
+    /**
+     * @param {!Element} instance
+     * @param {!Element} definition
+     * @return {undefined}
+     */
     fillElementWithDefaults = function (instance, definition) {
         forEachElement(definition, xsdns, "complexType", function (type) {
             forEachElement(type, xsdns, "attribute", function (att) {
@@ -826,7 +886,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             def = particle.element,
             e,
             n = state.element,
-            offset = 0;
+            offset = 0,
+            emptyok = false;
         def = findCollectionDefinition(def);
         e = firstNonAnnotationChild(def);
         runtime.assert(def.localName === "choice", "Choice expected.");
@@ -837,7 +898,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 state.particle = particles.getParticle(e, offset, particle);
                 findParticlesInCollection(state);
                 if (!state.error) {
-                    break;
+                    if (state.element === n) {
+                        emptyok = true;
+                    } else {
+                        break;
+                    }
                 }
                 state.element = n;
                 state.error = null;
@@ -846,6 +911,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
             e = e.nextElementSibling;
             offset += 1;
+        }
+        if (emptyok) {
+            state.error = null;
         }
         if (offset === def.childElementCount) {
             state.error = "No choice option was chosen.";
@@ -858,18 +926,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     function findParticlesInElement(state) {
         var particle = state.particle,
             def = particle.element,
-            name,
-            i;
-        if (def.hasAttribute("name")) {
-            name = def.getAttribute("name");
-        } else {
-            name = def.getAttribute("ref");
-            i = name.indexOf(':');
-            if (i !== -1) {
-                name = name.substr(i + 1);
-            }
+            name;
+        if (def.hasAttribute("ref")) {
+            def = findElement(def.getAttribute("ref"));
         }
-        if (state.element.localName !== name) {
+        name = def.getAttribute("name");
+        if (def.getAttribute("abstract") === "true") {
+            def = findElementInstance(name, state.element.localName);
+            if (!def) {
+                state.error = "Instance is not part of substitution group.";
+                return;
+            }
+            state.nextElementSibling();
+        } else if (state.element.localName !== name) {
             state.error = "Expected " + name + " instead of "
                 + state.element.localName + ".";
         } else {
@@ -898,7 +967,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             occurrence = 1;
         localName = findCollectionDefinition(def).localName;
         while (currentElement && occurrence <= maxOccurs) {
-            runtime.assert(occurrence < 1000, "looping");
+            runtime.assert(occurrence < 200, "looping");
             state.particle = particle;
             state.error = null;
             lastElement = currentElement;
@@ -1024,6 +1093,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         runtime.assert(def !== null,
                 "findParticles requires an element definition.");
+        if (def.getAttribute("abstract") === "true") {
+            def = findElementInstance(def.getAttribute("name"), state.element.localName);
+        }
         // find the type
         if (def.hasAttribute("type")) {
             type = findType(def.getAttribute("type"));
