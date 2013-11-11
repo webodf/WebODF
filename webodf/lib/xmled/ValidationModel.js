@@ -309,6 +309,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         checker = new xmled.XsdChecker(),
         particles = new xmled.ParticleCache(),
         topLevelElements = {},
+        substitutionGroups = {},
+        abstractSubstitutionGroups = {},
         fillElementWithDefaults,
         findParticlesInCollection;
     /**
@@ -594,14 +596,14 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return att ? "1" : "0";
     }
     function getMinOccurs(element) {
-        return (element.hasAttribute("minOccurs"))
-            ? parseInt(element.getAttribute("minOccurs"), 10) : 1;
+        var minOccurs = element.getAttribute("minOccurs");
+        return (minOccurs !== null) ? parseInt(minOccurs, 10) : 1;
     }
     function getMaxOccurs(element) {
-        if (!element.hasAttribute("maxOccurs")) {
+        var maxOccurs = element.getAttribute("maxOccurs");
+        if (maxOccurs === null) {
             return 1;
         }
-        var maxOccurs = element.getAttribute("maxOccurs");
         if (maxOccurs === "unbounded") {
             return 100000;
         }
@@ -626,22 +628,25 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {?Element}
      */
     function findElementInstance(groupName, name) {
-        var e = xsd.firstElementChild,
-            sg;
-        while (e) {
-            sg = e.getAttribute("substitutionGroup");
-            if (sg && getLocalName(sg) === groupName) {
-                if (e.getAttribute("name") === name) {
-                    return e;
-                }
-                sg = findElementInstance(e.getAttribute("name"), name);
-                if (sg) {
-                    return sg;
+        var sg = substitutionGroups[groupName],
+            e,
+            a,
+            key;
+        if (sg && sg.hasOwnProperty(name)) {
+            return sg[name];
+        }
+        if (abstractSubstitutionGroups.hasOwnProperty(groupName)) {
+            a = abstractSubstitutionGroups[groupName];
+            for (key in a) {
+                if (a.hasOwnProperty(key)) {
+                    e = findElementInstance(key, name);
+                    if (e) {
+                        return e;
+                    }
                 }
             }
-            e = e.nextElementSibling;
         }
-        return e;
+        return null;
     }
     /**
      * @param {!Element} instance
@@ -1459,6 +1464,26 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e = e.nextElementSibling;
         }
     }
+    function indexSubstitutionGroups() {
+        var e = xsd.firstElementChild,
+            sg;
+        while (e) {
+            if (e.localName === "element") {
+                sg = e.getAttribute("substitutionGroup");
+                if (sg) {
+                    if (e.getAttribute("abstract") === "true") {
+                        sg = abstractSubstitutionGroups[sg]
+                            = abstractSubstitutionGroups[sg] || {};
+                    } else {
+                        sg = substitutionGroups[sg]
+                            = substitutionGroups[sg] || {};
+                    }
+                    sg[e.getAttribute("name")] = e;
+                }
+            }
+            e = e.nextElementSibling;
+        }
+    }
     function init() {
         runtime.loadXML(grammarurl, function (err, dom) {
             if (dom) {
@@ -1475,6 +1500,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 targetNamespace = xsd.getAttribute("targetNamespace");
             }
             indexTopLevelElements();
+            indexSubstitutionGroups();
             return onready && onready(null);
         });
     }
