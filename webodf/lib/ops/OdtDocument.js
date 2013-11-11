@@ -719,7 +719,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         filter = new ops.TextPositionFilter(getRootNode);
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
-        stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter);
+        stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
     }

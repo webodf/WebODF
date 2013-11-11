@@ -34,6 +34,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf, ops, gui*/
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("ops.StepsTranslator");
 runtime.loadClass("gui.SelectionMover");
@@ -45,6 +46,8 @@ runtime.loadClass("gui.SelectionMover");
 ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
     "use strict";
     var t,
+        domUtils = new core.DomUtils(),
+        textns = odf.Namespaces.textns,
         r = runner,
         testarea;
 
@@ -62,6 +65,60 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             self.acceptPositionCalls += 1;
             return filter.acceptPosition.apply(filter, arguments);
         };
+
+        this.popCallCount = function() {
+            var existingCount = self.acceptPositionCalls;
+            self.acceptPositionCalls = 0;
+            return existingCount;
+        };
+    }
+
+    /**
+     * @param {!Node} paragraphNode
+     * @returns {!{node: !Node, start: !number, length: !number}}
+     */
+    function createParagraphBoundary(paragraphNode) {
+        var start = t.translator.convertDomPointToSteps(paragraphNode, 0, true),
+            end = t.translator.convertDomPointToSteps(paragraphNode, paragraphNode.childNodes.length);
+        return {
+            node: paragraphNode,
+            start: start,
+            length: end - start
+        };
+    }
+
+    /**
+     * @param {!HTMLElement} node
+     * @returns {!Array.<!{node: !Node, start: !number, length: !number}>}
+     */
+    function extractParagraphBoundaries(node) {
+        return domUtils.getElementsByTagNameNS(node, textns, "p").map(createParagraphBoundary);
+    }
+
+    /**
+     * Verify each expected boundary matches the current paragraph node boundary
+     * @param {!Array.<!{node: !Node, start: !number, length: !number}>} expectedBoundaries
+     * @param {?number=} cycleCount
+     */
+    function verifyParagraphBoundaries(expectedBoundaries, cycleCount) {
+        expectedBoundaries.forEach(function(paragraph, index) {
+            var cycleDescription = (cycleCount !== undefined ? "Cycle " + cycleCount + ": " : "" );
+            runtime.log(cycleDescription + "comparing p[" + index + "]");
+            t.paragraph = paragraph;
+            t.paragraphStartPoint = t.translator.convertStepsToDomPoint(paragraph.start);
+            r.shouldBe(t, "t.paragraphStartPoint.node", "t.paragraph.node.firstChild || t.paragraph.node");
+            r.shouldBe(t, "t.paragraphStartPoint.offset", "0");
+
+            t.paragraphStartStep = t.translator.convertDomPointToSteps(paragraph.node, 0, true);
+            r.shouldBe(t, "t.paragraphStartStep", "t.paragraph.start");
+
+            t.paragraphEndPoint = t.translator.convertStepsToDomPoint(paragraph.start + paragraph.length);
+            r.shouldBe(t, "t.paragraphEndPoint.node", "t.paragraph.node");
+            r.shouldBe(t, "t.paragraphEndPoint.offset", "t.paragraph.node.childNodes.length");
+
+            t.paragraphEndStep = t.translator.convertDomPointToSteps(paragraph.node, paragraph.node.childNodes.length);
+            r.shouldBe(t, "t.paragraphEndStep", "t.paragraph.start + t.paragraph.length");
+        });
     }
 
     function createDoc(xml) {
@@ -80,7 +137,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         };
         t.translator = new ops.StepsTranslator(function() { return testarea; },
             gui.SelectionMover.createPositionIterator,
-            t.filter);
+            t.filter, 5);
     };
     this.tearDown = function () {
         t = {};
@@ -137,6 +194,97 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         t.position = t.translator.convertStepsToDomPoint(100);
         r.shouldBe(t, "t.position.node", "t.expected.node");
         r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+    
+    function convertStepsToDomPoint_Prime_PrimesCache() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
+            p = doc.getElementsByTagName("p")[1];
+
+        t.translator.prime();
+        t.filter.popCallCount();
+        t.expected = {node: p.firstChild, offset: 0};
+
+        t.position = t.translator.convertStepsToDomPoint(5);
+        t.cachedCallCount = t.filter.popCallCount();
+        r.shouldBe(t, "t.cachedCallCount", "2");
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
+    function convertStepsToDomPoint_Cached_SpeedsUpSecondCall() {
+        createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>");
+
+        t.expected = t.translator.convertStepsToDomPoint(5);
+        t.uncachedCallCount = t.filter.popCallCount();
+        t.position = t.translator.convertStepsToDomPoint(5);
+        t.cachedCallCount = t.filter.popCallCount();
+        r.shouldBe(t, "t.cachedCallCount < t.uncachedCallCount", "true");
+        r.shouldBe(t, "t.cachedCallCount", "2");
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
+    function convertStepsToDomPoint_Cached_UsesClosestPointForCalculations() {
+        createDoc("<text:p>A</text:p><text:p>BC</text:p><text:p>EF</text:p>");
+        t.expected = t.translator.convertStepsToDomPoint(5);
+        t.uncachedCallCount = t.filter.popCallCount();
+
+        t.position = t.translator.convertStepsToDomPoint(5);
+        t.cachedCallCount = t.filter.popCallCount();
+        r.shouldBe(t, "t.cachedCallCount < t.uncachedCallCount", "true");
+        r.shouldBe(t, "t.cachedCallCount", "2");
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
+    function convertStepsToDomPoint_Cached_HasContentBeforeWalkablePosition() {
+        createDoc("<text:p>ABCD</text:p><text:p><text:span>EF</text:p>");
+
+        t.expected = t.translator.convertStepsToDomPoint(5);
+        t.uncachedCallCount = t.filter.popCallCount();
+
+        t.position = t.translator.convertStepsToDomPoint(5);
+        t.cachedCallCount = t.filter.popCallCount();
+        r.shouldBe(t, "t.cachedCallCount < t.uncachedCallCount", "true");
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
+    function convertStepsToDomPoint_Cached_ContentAddedBeforeWalkablePosition() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
+            p = doc.getElementsByTagName("p")[1];
+
+        t.expected = t.translator.convertStepsToDomPoint(5);
+        t.uncachedCallCount = t.filter.popCallCount();
+        p.insertBefore(p.ownerDocument.createElement('span'), p.firstChild);
+
+        t.position = t.translator.convertStepsToDomPoint(5);
+        t.cachedCallCount = t.filter.popCallCount();
+        r.shouldBe(t, "t.cachedCallCount < t.uncachedCallCount", "true");
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
+    function convertStepsToDomPoint_Cached_CopesWithClonedNode() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EFGH</text:p>"),
+            originalParagraph = createParagraphBoundary(doc.getElementsByTagNameNS(textns, "p")[1]),
+            body = originalParagraph.node.parentNode,
+            cloneParagraph = originalParagraph.node.cloneNode(true);
+
+        t.cloneParagraph = cloneParagraph;
+        t.originalParagraph = originalParagraph.node;
+        t.translator.prime(); // Should already be primed, but just in case!
+
+        body.insertBefore(cloneParagraph, originalParagraph.node);
+        t.translator.handleStepsInserted({position: originalParagraph.start - 1, length: originalParagraph.length + 1});
+
+        t.actualCloneDomPoint = t.translator.convertStepsToDomPoint(5); // First position in new p
+        r.shouldBe(t, "t.actualCloneDomPoint.node", "t.cloneParagraph.firstChild");
+        r.shouldBe(t, "t.actualCloneDomPoint.offset", "0");
+
+        t.actualOriginalDomPoint = t.translator.convertStepsToDomPoint(10); // First position in original p
+        r.shouldBe(t, "t.actualOriginalDomPoint.node", "t.originalParagraph.firstChild");
+        r.shouldBe(t, "t.actualOriginalDomPoint.offset", "0");
     }
 
     function convertDomPointsToSteps_At0() {
@@ -217,6 +365,168 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.steps", "2");
     }
 
+    function convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>C</text:p>"),
+            p = doc.getElementsByTagName("p")[1];
+
+        t.steps = t.translator.convertDomPointToSteps(p, 0);
+        t.stepsCached = t.translator.convertDomPointToSteps(p, 0);
+        r.shouldBe(t, "t.steps", "5");
+        r.shouldBe(t, "t.stepsCached", "5");
+    }
+
+    function convertDomPointsToSteps_Cached_SpeedsUpSecondCall() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
+            p = doc.getElementsByTagName("p")[1];
+
+        t.expected = t.translator.convertDomPointToSteps(p.firstChild, 0);
+        t.uncachedCallCount = t.filter.popCallCount();
+
+        t.steps = t.translator.convertDomPointToSteps(p.firstChild, 0);
+        t.cachedCallCount = t.filter.popCallCount();
+        r.shouldBe(t, "t.cachedCallCount < t.uncachedCallCount", "true");
+        r.shouldBe(t, "t.cachedCallCount", "2");
+        r.shouldBe(t, "t.steps", "5");
+    }
+
+    function convertDomPointsToSteps_Cached_CopesWithClonedNode() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EFGH</text:p>"),
+            originalParagraph = createParagraphBoundary(doc.getElementsByTagNameNS(textns, "p")[1]),
+            body = originalParagraph.node.parentNode,
+            cloneParagraph;
+
+        t.translator.prime(); // Should already be primed, but just in case!
+
+        cloneParagraph = originalParagraph.node.cloneNode(true);
+        body.insertBefore(cloneParagraph, originalParagraph.node);
+        t.translator.handleStepsInserted({position: originalParagraph.start - 1, length: originalParagraph.length + 1});
+
+        t.actualOriginalSteps = t.translator.convertDomPointToSteps(originalParagraph.node, 0, true);
+        r.shouldBe(t, "t.actualOriginalSteps", "10");
+        t.actualCloneSteps = t.translator.convertDomPointToSteps(cloneParagraph, 0, true);
+        r.shouldBe(t, "t.actualCloneSteps", "5");
+    }
+
+    function handleStepsInserted_InsertMultipleStepsIndividually() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>IJKL</text:p>"),
+            paragraphs = extractParagraphBoundaries(doc),
+            step = 0;
+
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        while (paragraphs[1].length < 10) {
+            paragraphs[1].node.firstChild.appendData("e");
+            t.translator.handleStepsInserted({position: paragraphs[1].start + paragraphs[1].length, length: 1});
+            paragraphs[1].length += 1;
+            paragraphs[2].start += 1;
+            verifyParagraphBoundaries(paragraphs, step);
+            step += 1;
+        }
+    }
+
+    function handleStepsInserted_InsertMultipleParagraphsIndividually() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>IJKL</text:p>"),
+            dom = doc.ownerDocument,
+            body,
+            paragraphs = extractParagraphBoundaries(doc),
+            step;
+
+        body = paragraphs[0].node.parentNode;
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        for(step = 0; step < 10; step += 1) {
+            body.insertBefore(dom.createElementNS(textns, "p"), paragraphs[2].node);
+            t.translator.handleStepsInserted({position: paragraphs[2].start-1, length: 1});
+            paragraphs[2].start += 1;
+            verifyParagraphBoundaries(paragraphs, step);
+        }
+    }
+
+    function handleStepsInserted_InsertParagraphAtDocumentEnd() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p>"),
+            dom = doc.ownerDocument,
+            body,
+            newParagraph,
+            paragraphs = extractParagraphBoundaries(doc);
+
+        body = paragraphs[0].node.parentNode;
+        t.translator.prime();
+        t.filter.popCallCount();
+        newParagraph = dom.createElementNS(textns, "p");
+
+        body.appendChild(newParagraph);
+        t.translator.handleStepsInserted({position: paragraphs[1].start + paragraphs[1].length, length: 1});
+
+        paragraphs.push({node: newParagraph, start: paragraphs[1].start + paragraphs[1].length + 1, length: 0});
+        verifyParagraphBoundaries(paragraphs);
+    }
+
+    function handleStepsRemoved_RemoveMultipleStepsIndividually() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>Eeeeeeeeee</text:p><text:p>IJKL</text:p>"),
+            paragraphs = extractParagraphBoundaries(doc),
+            step = 0;
+
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        while (paragraphs[1].length > 0) {
+            paragraphs[1].node.firstChild.deleteData(paragraphs[1].length - 1, 1);
+            if (paragraphs[1].node.firstChild.length === 0) {
+                paragraphs[1].node.removeChild(paragraphs[1].node.firstChild);
+            }
+            t.translator.handleStepsRemoved({position: paragraphs[1].start + paragraphs[1].length - 1, length: 1});
+            paragraphs[1].length -= 1;
+            paragraphs[2].start -= 1;
+            verifyParagraphBoundaries(paragraphs, step);
+            step += 1;
+        }
+    }
+
+    function handleStepsRemoved_RemoveMultipleParagraphsIndividually() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>IJKL</text:p>"),
+            dom = doc.ownerDocument,
+            originalParagraphs = domUtils.getElementsByTagNameNS(doc, textns, "p"),
+            insertionPoint = originalParagraphs[2],
+            body,
+            paragraphs,
+            step;
+
+        body = originalParagraphs[0].parentNode;
+        for(step = 0; step < 10; step += 1) {
+            body.insertBefore(dom.createElementNS(textns, "p"), insertionPoint);
+        }
+        paragraphs = originalParagraphs.map(createParagraphBoundary);
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        for(step = 0; step < 10; step += 1) {
+            body.removeChild(insertionPoint.previousSibling);
+            t.translator.handleStepsRemoved({position: paragraphs[2].start-1, length: 1});
+            paragraphs[2].start -= 1;
+            verifyParagraphBoundaries(paragraphs, step);
+        }
+    }
+
+    function handleStepsRemoved_AtDocumentStart() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EFG</text:p>"),
+            removedParagraph = doc.getElementsByTagName("p")[0],
+            paragraphs = [];
+
+        paragraphs.push(createParagraphBoundary(doc.getElementsByTagName("p")[1]));
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        removedParagraph.parentNode.removeChild(removedParagraph);
+        paragraphs[0].node.firstChild.deleteData(0, 2);
+        t.translator.handleStepsRemoved({position: 0, length: 7});
+        paragraphs[0].start = 0;
+        paragraphs[0].length = 1;
+
+        verifyParagraphBoundaries(paragraphs);
+    }
+
     this.tests = function () {
         return [
             convertStepsToDomPoint_At0,
@@ -224,6 +534,13 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertStepsToDomPoint_At5,
             convertStepsToDomPoint_LessThan0_Returns0,
             convertStepsToDomPoint_BeyondMaxSteps_ReturnsMaxSteps,
+            convertStepsToDomPoint_Prime_PrimesCache,
+            convertStepsToDomPoint_Cached_SpeedsUpSecondCall,
+            convertStepsToDomPoint_Cached_UsesClosestPointForCalculations,
+            convertStepsToDomPoint_Cached_HasContentBeforeWalkablePosition,
+            convertStepsToDomPoint_Cached_ContentAddedBeforeWalkablePosition,
+            convertStepsToDomPoint_Cached_CopesWithClonedNode,
+
             convertDomPointsToSteps_At0,
             convertDomPointsToSteps_Before0,
             convertDomPointsToSteps_BeforeRootNode_Returns0,
@@ -232,7 +549,17 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertDomPointsToSteps_At1,
             convertDomPointsToSteps_BetweenPositions_RoundsDown,
             convertDomPointsToSteps_At5,
-            convertDomPointsToSteps_WithinParagraph_BeforeFirstWalkablePosition_RoundsDown
+            convertDomPointsToSteps_WithinParagraph_BeforeFirstWalkablePosition_RoundsDown,
+            convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached,
+            convertDomPointsToSteps_Cached_SpeedsUpSecondCall,
+            convertDomPointsToSteps_Cached_CopesWithClonedNode,
+
+            handleStepsInserted_InsertMultipleStepsIndividually,
+            handleStepsInserted_InsertMultipleParagraphsIndividually,
+            handleStepsInserted_InsertParagraphAtDocumentEnd,
+            handleStepsRemoved_RemoveMultipleStepsIndividually,
+            handleStepsRemoved_RemoveMultipleParagraphsIndividually,
+            handleStepsRemoved_AtDocumentStart
         ];
     };
     this.asyncTests = function () {
