@@ -308,6 +308,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         targetNamespace = null,
         checker = new xmled.XsdChecker(),
         particles = new xmled.ParticleCache(),
+        topLevelElements = {},
         fillElementWithDefaults,
         findParticlesInCollection;
     /**
@@ -343,13 +344,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @param {!string} qname
      * @return {!Element}
      */
-    function findRootElement(qname) {
-        var e = xsd.firstElementChild,
-            localName = getLocalName(qname);
-        while (e && !(e.localName === "element"
-                && e.getAttribute("name") === localName)) {
-            e = e.nextElementSibling;
+    function findTopLevelElement(qname) {
+        var name = getLocalName(qname),
+            e;
+        if (targetNamespace) {
+            name = '{' + targetNamespace + '}' + name;
         }
+        e = topLevelElements[name];
         if (!e) {
             throw "Element not found.";
         }
@@ -656,7 +657,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e;
         if (def.localName === "element") {
             if (!def.hasAttribute("name")) {
-                def = findElement(def.getAttribute("ref"));
+                def = findTopLevelElement(def.getAttribute("ref"));
             }
             if (def.getAttribute("abstract") === "true") {
                 def = getInstanceOfSubstitutionGroup(def);
@@ -763,7 +764,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         var f = doc.createDocumentFragment(),
             e = elementDef;
         if (!e.hasAttribute("name")) {
-            e = findElement(e.getAttribute("ref"));
+            e = findTopLevelElement(e.getAttribute("ref"));
         }
         if (targetNamespace) {
             e = doc.createElementNS(targetNamespace, e.getAttribute("name"));
@@ -928,7 +929,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             def = particle.element,
             name;
         if (def.hasAttribute("ref")) {
-            def = findElement(def.getAttribute("ref"));
+            def = findTopLevelElement(def.getAttribute("ref"));
         }
         name = def.getAttribute("name");
         if (def.getAttribute("abstract") === "true") {
@@ -1089,7 +1090,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                 "findParticles requires element.");
         // dereference the element definition
         if (def.hasAttribute("ref")) {
-            def = findRootElement(def.getAttribute("ref"));
+            def = findTopLevelElement(def.getAttribute("ref"));
         }
         runtime.assert(def !== null,
                 "findParticles requires an element definition.");
@@ -1146,7 +1147,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {!xmled.Particle}
      */
     function getRootParticle(element) {
-        var def = findRootElement(element.localName);
+        var def = findTopLevelElement(element.localName);
         if (!def) {
             throw "No definition for " + element.localName;
         }
@@ -1445,6 +1446,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return r;
     };
+    function indexTopLevelElements() {
+        var e = xsd.firstElementChild,
+            pre = "";
+        if (targetNamespace) {
+            pre = '{' + targetNamespace + '}';
+        }
+        while (e) {
+            if (e.localName === "element") {
+                topLevelElements[pre + e.getAttribute("name")] = e;
+            }
+            e = e.nextElementSibling;
+        }
+    }
     function init() {
         runtime.loadXML(grammarurl, function (err, dom) {
             if (dom) {
@@ -1460,6 +1474,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             if (xsd.hasAttribute("targetNamespace")) {
                 targetNamespace = xsd.getAttribute("targetNamespace");
             }
+            indexTopLevelElements();
             return onready && onready(null);
         });
     }
