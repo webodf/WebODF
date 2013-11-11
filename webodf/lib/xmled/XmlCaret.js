@@ -268,6 +268,14 @@ xmled.XmlCaret = function XmlCaret(root) {
         }
         return t;
     };
+    this.setFocus = function () {
+        shouldBlink = true;
+        blink(true);
+    };
+    this.removeFocus = function () {
+        shouldBlink = false;
+        blink(true);
+    };
     function init() {
         if (!doc) {
             return;
