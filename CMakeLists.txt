@@ -322,6 +322,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/ShadowCursor.js
     lib/gui/Avatar.js
     lib/gui/Caret.js
+    lib/gui/PlainTextPasteboard.js
     lib/gui/Clipboard.js
     lib/gui/DirectTextStyler.js
     lib/gui/DirectParagraphStyler.js

@@ -54,6 +54,7 @@ runtime.loadClass("gui.ImageSelector");
 runtime.loadClass("gui.TextManipulator");
 runtime.loadClass("gui.AnnotationManager");
 runtime.loadClass("gui.EventManager");
+runtime.loadClass("gui.PlainTextPasteboard");
 
 /**
  * @constructor
@@ -101,7 +102,8 @@ gui.SessionController = (function () {
             imageManager = new gui.ImageManager(session, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-            drawShadowCursorTask;
+            drawShadowCursorTask,
+            pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId);
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -788,7 +790,7 @@ gui.SessionController = (function () {
             }
 
             if (plainText) {
-                textManipulator.insertText(plainText);
+                session.enqueue(pasteHandler.paste(plainText));
                 cancelEvent(e);
             }
         }
