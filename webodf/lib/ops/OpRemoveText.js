@@ -57,7 +57,6 @@ ops.OpRemoveText = function OpRemoveText() {
         odfUtils,
         domUtils,
         editinfons = 'urn:webodf:names:editinfo',
-        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@type {!Object.<!string, !boolean>}*/
         odfNodeNamespaceMap = {};
 
@@ -219,37 +218,6 @@ ops.OpRemoveText = function OpRemoveText() {
         return destination;
     }
 
-    /**
-     * @param {!ops.OdtDocument} odtDocument
-     * @return {!Range}
-     */
-    // TODO adapt to common code somewhere
-    function stepsToRange(odtDocument) {
-        var iterator,
-            filter = odtDocument.getPositionFilter(),
-            startContainer, startOffset,
-            endContainer, endOffset,
-            remainingLength = length,
-            range = odtDocument.getDOM().createRange();
-
-        iterator = odtDocument.getIteratorAtPosition(position);
-        startContainer = iterator.container();
-        startOffset = iterator.unfilteredDomOffset();
-        // TODO rewrite to use StepsTranslator
-        while (remainingLength && iterator.nextPosition()) {
-            endContainer = iterator.container();
-            endOffset = iterator.unfilteredDomOffset();
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                remainingLength -= 1;
-            }
-        }
-
-        range.setStart(startContainer, startOffset);
-        range.setEnd(endContainer, endOffset);
-        domUtils.splitBoundaries(range);
-        return range;
-    }
-
     this.execute = function (odtDocument) {
         var paragraphElement,
             destinationParagraph,
@@ -262,7 +230,8 @@ ops.OpRemoveText = function OpRemoveText() {
         odtDocument.upgradeWhitespacesAtPosition(position);
         odtDocument.upgradeWhitespacesAtPosition(position + length);
 
-        range = stepsToRange(odtDocument);
+        range = odtDocument.convertCursorToDomRange(position, length);
+        domUtils.splitBoundaries(range);
         paragraphElement = odtDocument.getParagraphElement(range.startContainer);
         textNodes = odfUtils.getTextElements(range, false, true);
         paragraphs = odfUtils.getParagraphElements(range);
