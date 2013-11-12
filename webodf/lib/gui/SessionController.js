@@ -638,14 +638,10 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToEntireDocument() {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                steps;
-            // The root node is always before the cursor, therefore the returned number of steps is always negative
-            steps = -odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-
-            iterator.moveToEnd();
-            steps += odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-            session.enqueue([createOpMoveCursor(0, steps)]);
+            var rootNode = odtDocument.getRootNode(),
+                lastWalkableStep = odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length);
+            // TODO this needs to respect roots
+            session.enqueue([createOpMoveCursor(0, lastWalkableStep)]);
             return true;
         }
         // TODO Extract selection functions into a standalone SelectionManipulator

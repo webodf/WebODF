@@ -168,6 +168,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      *
+     * @param {!Node} node
+     * @param {!number} offset
+     * @returns {!number}
+     */
+    this.convertDomPointToCursorStep = function(node, offset) {
+        return stepsTranslator.convertDomPointToSteps(node, offset);
+    };
+
+    /**
+     *
      * @param {!Node} anchorNode
      * @param {!number} anchorOffset
      * @param {!Node} focusNode
