@@ -396,18 +396,67 @@ xmled.parseSchema = function (dom, doms) {
         parseTopLevelElement(def, e);
         return er;
     }
+    function merge(a, b) {
+        return a === b;
+    }
+    function getAlternateGroupElements(group) {
+        var e = xsd.firstElementChild,
+            n,
+            sg,
+            nm,
+            es = {};
+        while (e) {
+            n = xsdname(e);
+            if (n === "element") {
+                nm = e.getAttribute("name");
+                sg = e.getAttribute("substitutionGroup");
+                sg = sg && getLocalName(sg);
+                if (group === sg) {
+                    if (e.getAttribute("abstract") === "true") {
+                        merge(es, getAlternateGroupElements(nm));
+                    } else {
+                        es[nm] = getElement(targetNamespace, nm);
+                    }
+                }
+            }
+            e = e.nextElementSibling;
+        }
+        return es;
+    }
+    function createChoiceFromAbstractElement(def) {
+        var els = [],
+            i,
+            e,
+            a = getAlternateGroupElements(getLocalName(def.getAttribute("name")));
+        for (i in a) {
+            if (a.hasOwnProperty(i)) {
+                e = a[i];
+                a[i] = els.length;
+                els.push(e);
+            }
+        }
+        a = new xmled.Choice(a);
+        a.choices = els;
+        return a;
+    }
     /**
      * @param {!Element} def
-     * @return {!xmled.ElementRef}
+     * @return {!xmled.ElementRef|!xmled.Choice}
      */
     function parseElementRef(def) {
         var ref = def.getAttribute("ref"),
             name = def.getAttribute("name"),
             el,
-            eref;
+            eref,
+            e;
         ref = ref && getLocalName(ref);
         if (ref) {
-            eref = getElement(targetNamespace, ref);
+            e = findElement(ref);
+            if (e.getAttribute("abstract") !== "true") {
+                eref = getElement(targetNamespace, ref);
+            } else {
+                return createChoiceFromAbstractElement(e);
+            }
         } else {
             el = new xmled.Element(targetNamespace, name);
             eref = new xmled.ElementRef(el);
@@ -471,14 +520,13 @@ xmled.parseSchema = function (dom, doms) {
             for (i = 0; i < e.seq.length; i += 1) {
                 getPossibleElements(offset, e.seq[i], els);
             }
-            console.log(def);
         } else if (def.type === xmled.ParticleType.CHOICE) {
             e = /**@type{!xmled.Choice}*/(def);
             for (i = 0; i < e.choices.length; i += 1) {
                 getPossibleElements(offset, e.choices[i], els);
             }
         } else {
-            console.log(def);
+            throw "Not implemented.";
         }
     }
     /**
@@ -496,7 +544,6 @@ xmled.parseSchema = function (dom, doms) {
         }
         ch = new xmled.Choice(els);
         parseOccurrance(def, ch);
-console.log(els);
         ch.choices = seq;
         return ch;
     };
@@ -897,47 +944,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         return (i === -1) ? qname : qname.substr(i + 1);
     }
     /**
-     * @param {!string} qname
-     * @return {!Element}
-     */
-    function findTopLevelElement(qname) {
-        var name = getLocalName(qname),
-            e;
-        if (targetNamespace) {
-            name = '{' + targetNamespace + '}' + name;
-        }
-        e = topLevelElements[name];
-        if (!e) {
-            throw "Element not found.";
-        }
-        return e;
-    }
-    /**
-     * @param {!Element} groupRef
-     * @return {!Element}
-     */
-    function findGroup(groupRef) {
-        var e = xsd.firstElementChild,
-            qname = groupRef.getAttribute("ref"),
-            localName = getLocalName(qname);
-        while (e && !(e.localName === "group"
-                && e.getAttribute("name") === localName)) {
-            e = e.nextElementSibling;
-        }
-        if (!e) {
-            throw "Group not found.";
-        }
-        return e;
-    }
-    /**
-     * @param {!Element} groupRef
-     * @return {!Element}
-     */
-    function findGroupCollection(groupRef) {
-        var e = /**@type{!Element}*/(findGroup(groupRef).lastElementChild);
-        return e;
-    }
-    /**
      * @param {!NodeList} list
      * @param {!string} name
      * @return {?Element}
@@ -1119,117 +1125,66 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         getAllowedElements(complexType, allowed);
         return Object.keys(allowed);
     };
-    function forEachElement(element, ns, localName, f) {
-        var e = element.firstElementChild;
-        while (e) {
-            if (e.namespaceURI === ns && e.localName === localName) {
-                f(e);
-            }
-            e = e.nextElementSibling;
-        }
-    }
-    function createDefaultAttributeValue(att) {
-        return att ? "1" : "0";
-    }
-    function getMinOccurs(element) {
-        var minOccurs = element.getAttribute("minOccurs");
-        return (minOccurs !== null) ? parseInt(minOccurs, 10) : 1;
-    }
-    function getInstanceOfSubstitutionGroup(abstrct) {
-        var name = abstrct.getAttribute("name"),
-            e = xsd.firstElementChild,
-            sg;
-        while (e) {
-            sg = e.getAttribute("substitutionGroup");
-            if (sg && getLocalName(sg) === name) {
-                return e;
-            }
-            e = e.nextElementSibling;
-        }
-        return e;
-    }
     /**
      * @param {!Element} instance
-     * @param {!Element} coll
+     * @param {!xmled.ParticleDefinition} def
      * @return {undefined}
      */
-    function addCollection(instance, coll) {
-        if (coll.namespaceURI !== xsdns) {
-            return;
-        }
+    function addCollection(instance, def) {
         var doc = instance.ownerDocument,
-            def = coll,
+            er,
+            el,
             e;
-        if (def.localName === "element") {
-            if (!def.hasAttribute("name")) {
-                def = findTopLevelElement(def.getAttribute("ref"));
-            }
-            if (def.getAttribute("abstract") === "true") {
-                def = getInstanceOfSubstitutionGroup(def);
-            }
-            if (targetNamespace) {
-                e = doc.createElementNS(targetNamespace,
-                    def.getAttribute("name"));
+        if (def.type === xmled.ParticleType.ELEMENT) {
+            er = /**@type{!xmled.ElementRef}*/(def);
+            el = er.element;
+            if (el.ns) {
+                e = doc.createElementNS(el.ns, el.name);
             } else {
-                e = doc.createElement(def.getAttribute("name"));
+                e = doc.createElement(el.name);
             }
-            fillElementWithDefaults(e, def);
+            fillElementWithDefaults(e, er);
             instance.appendChild(e);
         }
     }
     /**
      * @param {!Element} instance
-     * @param {!Element} sequence
+     * @param {!xmled.Sequence} sequence
      * @return {undefined}
      */
     function addSequence(instance, sequence) {
-        var minOccurs = getMinOccurs(sequence),
+        var minOccurs = sequence.minOccurs,
             i,
-            e;
+            j;
         for (i = 0; i < minOccurs; i += 1) {
-            e = sequence.firstElementChild;
-            while (e) {
-                addCollection(instance, e);
-                e = e.nextElementSibling;
+            for (j = 0; j < sequence.seq.length; j += 1) {
+                addCollection(instance, sequence.seq[j]);
             }
         }
     }
     /**
      * @param {!Element} instance
-     * @param {!Element} choice
+     * @param {!xmled.Choice} choice
      * @return {undefined}
      */
     function addChoice(instance, choice) {
-        var minOccurs = getMinOccurs(choice),
-            name,
+        var minOccurs = choice.minOccurs,
+            c,
             i,
+            j,
             e;
         for (i = 0; i < minOccurs; i += 1) {
-            e = choice.firstElementChild;
-            while (e) {
+            for (j = 0; j < choice.choices.length; j += 1) {
+                c = choice.choices[j];
                 // avoid nesting an element in another one with the same name
-                name = e.getAttribute("name") || e.getAttribute("ref");
-                if (name !== instance.localName) {
-                    addCollection(instance, e);
-                    break;
+                if (c.type === xmled.ParticleType.ELEMENT) {
+                    e = /**@type{xmled.ElementRef}*/(c);
+                    if (e.element.name !== instance.localName) {
+                        addCollection(instance, e);
+                        break;
+                    }
                 }
-                e = e.nextElementSibling;
             }
-        }
-    }
-    /**
-     * @param {!Element} instance
-     * @param {!Element} group
-     * @return {undefined}
-     */
-    function addGroup(instance, group) {
-        group = findGroupCollection(group);
-        if (group.localName === "sequence") {
-            addSequence(instance, group);
-        } else if (group.localName === "choice") {
-            addChoice(instance, group);
-        } else {
-            throw "Not implemented";
         }
     }
     /**
@@ -1238,7 +1193,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {undefined}
      */
     fillElementWithDefaults = function (instance, definition) {
-        forEachElement(definition, xsdns, "complexType", function (type) {
+        var particle = definition.element.particle,
+            e;
+        if (!particle) {
+            return;
+        }
+        if (particle.type === xmled.ParticleType.SEQUENCE) {
+            e = /**@type{!xmled.Sequence}*/(particle);
+            addSequence(instance, e);
+        } else if (particle.type === xmled.ParticleType.CHOICE) {
+            e = /**@type{!xmled.Choice}*/(particle);
+            addChoice(instance, e);
+        }
+/*
             forEachElement(type, xsdns, "attribute", function (att) {
                 if (att.getAttribute("use") === "required") {
                     if (att.hasAttribute("name")) {
@@ -1247,16 +1214,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
                     }
                 }
             });
-            forEachElement(type, xsdns, "sequence", function (seq) {
-                addSequence(instance, seq);
-            });
-            forEachElement(type, xsdns, "choice", function (seq) {
-                addChoice(instance, seq);
-            });
-            forEachElement(type, xsdns, "group", function (seq) {
-                addGroup(instance, seq);
-            });
-        });
+*/
     };
     /**
      * @param {!Document} doc
@@ -1278,24 +1236,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         f.appendChild(e);
         fillElementWithDefaults(e, edef);
         return {desc: e.localName, range: null, dom: f};
-    }
-    /**
-     * @param {?Node} n
-     * @param {?NodeFilter=} filter
-     * @return {?Element}
-     */
-    function firstElementChild(n, filter) {
-        n = n && n.firstChild;
-        var e = null;
-        while (n && !e) {
-            if (n.nodeType === 1 &&
-                    (!filter
-                     || filter.acceptNode(n) === NodeFilter.FILTER_ACCEPT)) {
-                e = /**@type{!Element}*/(n);
-            }
-            n = n.nextSibling;
-        }
-        return e;
     }
     /**
      * @param {!Element} documentElement

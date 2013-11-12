@@ -318,12 +318,11 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
     };
     this.asyncTests = function () {
         return [
-            testValidation("xmled/XMLSchema.xsd", "xmled/XMLSchema.xsd"),
             testRoot("xmled/empty.xsd", []),
             testRoot("xmled/simple.xsd", ["a", "b", "c"]),
             testRoot("xmled/complex01.xsd", ["a", "d", "e", "f", "ga", "ha", "j", "k"]),
             // replace
-            testReplace("xmled/simple.xsd", "a", [0], [1], ["a", "b", "c"]),
+            testReplace("xmled/simple.xsd", "a", [0], [1], ["b", "c"]),
             testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 1], []),
             testReplace("xmled/complex01.xsd", "g", [0, 0], [0, 1], ["a", "c"]),
             testReplace("xmled/complex01.xsd", "gb", [0, 0], [0, 1], ["a", "c"]),
@@ -331,7 +330,8 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             testReplace("xmled/complex01.xsd", "gbb", [0, 1], [0, 2], ["empty"]),
             testReplace("xmled/complex01.xsd", "h", [0, 1, 0], [0, 1, 1], ["b", "c"]),
             // prepend
-            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 0], ["a"])
+            testReplace("xmled/complex01.xsd", "d", [0, 0], [0, 0], ["a"]),
+            testValidation("xmled/XMLSchema.xsd", "xmled/XMLSchema.xsd")
         ];
     };
 };
