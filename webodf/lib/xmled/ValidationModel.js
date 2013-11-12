@@ -36,6 +36,566 @@ runtime.loadClass("xmled.XsdChecker");
 
 /**
  * @constructor
+ * @struct
+ */
+xmled.Sequence = function Sequence() {
+    "use strict";
+    /**@type{!number}*/
+    this.minOccurs = 1;
+    /**@type{!number}*/
+    this.maxOccurs = 1;
+    this.seq = [];
+};
+
+/**
+ * @constructor
+ * @struct
+ */
+xmled.Choice = function Choice() {
+    "use strict";
+    /**@type{!number}*/
+    this.minOccurs = 1;
+    /**@type{!number}*/
+    this.maxOccurs = 1;
+    this.choices = [];
+};
+
+/**
+ * @constructor
+ * @struct
+ */
+xmled.All = function All() {
+    "use strict";
+    /**@type{!number}*/
+    this.minOccurs = 1;
+    /**@type{!number}*/
+    this.maxOccurs = 1;
+};
+
+/**
+ * @constructor
+ * @struct
+ */
+xmled.Attribute = function Attribute() {
+    "use strict";
+    this.a = 0;
+};
+
+/**
+ * @constructor
+ * @struct
+ */
+xmled.Type = function Type() {
+    "use strict";
+    /**@type{!boolean}*/
+    this.mixed = false;
+    /**@type{!boolean}*/
+    this.simple = false;
+    /**@type{?xmled.Sequence|?xmled.Choice|?xmled.All}*/
+    this.particle = null;
+};
+/**
+ * @constructor
+ * @struct
+ * @param {?string} ns
+ * @param {!string} name
+ */
+xmled.Element = function Element(ns, name) {
+    "use strict";
+    /**@type{?string}*/
+    this.ns = ns;
+    /**@type{!string}*/
+    this.name = name;
+    /**@type{!boolean}*/
+    this.mixed = false;
+    /**@type{!boolean}*/
+    this.simple = false;
+    /**@type{?Element}*/
+    this.annotation = null;
+    /**@type{?xmled.Sequence|?xmled.Choice|?xmled.All}*/
+    this.particle = null;
+};
+/**
+ * @constructor
+ * @struct
+ * @param {!xmled.Element} element
+ */
+xmled.ElementRef = function ElementRef(element) {
+    "use strict";
+    /**@type{!xmled.Element}*/
+    this.element = element;
+    this.minOccurs = 1;
+    this.maxOccurs = 1;
+};
+/**
+ * @constructor
+ * @struct
+ */
+xmled.Any = function Any() {
+    "use strict";
+    this.minOccurs = 1;
+    this.maxOccurs = 1;
+};
+/**
+ * @constructor
+ * @struct
+ */
+xmled.QName = function QName(ns, name) {
+    "use strict";
+    /**@type{?string}*/
+    this.ns = ns;
+    /**@type{!string}*/
+    this.name = name;
+};
+/**
+ * @constructor
+ * @struct
+ * @param {!Object.<?String,!Object.<!String,!xmled.Element>>} elements
+ */
+xmled.ParsedSchema = function ParsedSchema(elements) {
+    "use strict";
+    this.element = function (namespaceURI, localName) {
+        var ns = elements[namespaceURI];
+        return ns ? ns[localName] : null;
+    };
+};
+/**
+ * @param {!Document} dom
+ * @param {!Object} doms
+ * @return {!Object.<?String,!Object.<!String,!xmled.Element>>}
+ */
+xmled.parseSchema = function (dom, doms) {
+    "use strict";
+    var xsd = dom.documentElement,
+        targetNamespace = xsd.getAttribute("targetNamespace"),
+        xsdns = "http://www.w3.org/2001/XMLSchema",
+        /**@type{!Object.<?String,!Object.<!String,!xmled.Element>>}*/
+        topElements = {},
+        types = {},
+        parseChoice,
+        parseLocalComplexType,
+        parseTopLevelElement;
+    function unexpected(e) {
+        throw "Unexpected element " + e.namespaceURI + " " + e.localName;
+    }
+    function xsdname(e) {
+        if (!e) {
+            return null;
+        }
+        if (e.namespaceURI !== xsdns) {
+            unexpected(e);
+        }
+        return e.localName;
+    }
+    /**
+     * @param {!string} qname
+     * @param {!Element} element
+     * @return {!xmled.QName}
+     */
+    function splitName(qname, element) {
+        var i = qname.indexOf(':');
+        if (i === -1) {
+            return new xmled.QName(null, qname);
+        }
+        return new xmled.QName(
+            element.lookupNamespaceURI(qname.substr(0, i)),
+            (i === -1) ? qname : qname.substr(i + 1)
+        );
+    }
+    /**
+     * @param {?Element} e
+     * @return {?Element}
+     */
+    function skipOptionalAnnotation(e) {
+        var name = xsdname(e);
+        if (name === "annotation") {
+            e = e.nextElementSibling;
+        }
+        return e;
+    }
+    /**
+     * Return the top level complexType or simpleType definition.
+     * @param {!xmled.QName} qname
+     * @return {!Element}
+     */
+    function findType(qname) {
+        var e = xsd.firstElementChild,
+            name;
+        while (e) {
+            name = xsdname(e);
+            if (name === "simpleType" || name === "complexType") {
+                if (e.getAttribute("name") === qname.name) {
+                    break;
+                }
+            }
+            e = e.nextElementSibling;
+        }
+        if (!e) {
+            throw "Type not found.";
+        }
+        return e;
+    }
+    /**
+     * @param {!string} name
+     * @return {!Element}
+     */
+    function findElement(name) {
+        var e = xsd.firstElementChild,
+            n;
+        while (e) {
+            n = xsdname(e);
+            if (n === "element") {
+                if (e.getAttribute("name") === name) {
+                    break;
+                }
+            }
+            e = e.nextElementSibling;
+        }
+        if (!e) {
+            throw "Type not found.";
+        }
+        return e;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Type}
+     */
+    function parseComplexType(def) {
+        var el = parseLocalComplexType(def);
+        el.mixed = def.getAttribute("mixed") === "true";
+        return el;
+    }
+    /**
+     * @param {!xmled.QName} qname
+     * @return {!xmled.Type}
+     */
+    function getType(qname) {
+        var ns,
+            name,
+            def,
+            e;
+        ns = types[qname.ns] = types[qname.ns] || {};
+        if (ns.hasOwnProperty(qname.name)) {
+            return ns[qname.name];
+        }
+        def = findType(qname);
+        name = def.localName;
+        if (name === "simpleType") {
+            e = new xmled.Type();
+        } else if (name === "complexType") {
+            e = parseComplexType(def);
+        } else {
+            throw unexpected(e);
+        }
+        ns[qname.name] = e;
+        return e;
+    }
+    function setType(element, type) {
+        element.mixed = type.mixed;
+        element.particle = type.particle;
+    }
+    function getMinOccurs(element) {
+        var minOccurs = element.getAttribute("minOccurs");
+        return (minOccurs !== null) ? parseInt(minOccurs, 10) : 1;
+    }
+    function getMaxOccurs(element) {
+        var maxOccurs = element.getAttribute("maxOccurs");
+        if (maxOccurs === null) {
+            return 1;
+        }
+        if (maxOccurs === "unbounded") {
+            return 100000;
+        }
+        return parseInt(maxOccurs, 10);
+    }
+    function parseOccurrance(def, particle) {
+        particle.minOccur = getMinOccurs(def);
+        particle.maxOccur = getMaxOccurs(def);
+    }
+    /**
+     * @param {!string} qname
+     * @return {!string}
+     */
+    function getLocalName(qname) {
+        var i = qname.indexOf(':');
+        return (i === -1) ? qname : qname.substr(i + 1);
+    }
+    function getElement(ns, name) {
+        var map, e, def;
+        map = topElements[ns] = topElements[ns] || {};
+        if (map.hasOwnProperty(name)) {
+            return map[name];
+        }
+        def = findElement(name);
+        e = map[name] = new xmled.Element(ns, name);
+        parseTopLevelElement(def, e);
+        return e;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.ElementRef}
+     */
+    function parseElementRef(def) {
+        var ref = getLocalName(def.getAttribute("ref")),
+            name = def.getAttribute("name"),
+            el,
+            eref;
+        if (ref) {
+            el = getElement(targetNamespace, ref);
+        } else {
+            el = new xmled.Element(targetNamespace, name);
+        }
+        eref = new xmled.ElementRef(el);
+        parseOccurrance(def, eref);
+        return eref;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Any}
+     */
+    function parseAny(def) {
+        var a = new xmled.Any();
+        parseOccurrance(def, a);
+        return a;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Sequence}
+     */
+    function parseSequence(def) {
+        var seq = new xmled.Sequence(),
+            e = def.firstElementChild,
+            name = xsdname(e);
+        parseOccurrance(def, seq);
+        if (name === "annotation") {
+            e = e.nextElementSibling;
+        }
+        while (e) {
+            name = xsdname(e);
+            if (name === "sequence") {
+                seq.seq.push(parseSequence(e));
+            } else if (name === "choice") {
+                seq.seq.push(parseChoice(e));
+            } else if (name === "element") {
+                seq.seq.push(parseElementRef(e));
+            } else if (name === "any") {
+                seq.seq.push(parseAny(e));
+            } else {
+                unexpected(e);
+            }
+            e = e.getElementSibling;
+        }
+        return seq;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Choice}
+     */
+    parseChoice = function parseChoice(def) {
+        var ch = new xmled.Choice(),
+            seq = parseSequence(def);
+        parseOccurrance(def, ch);
+        ch.choices = seq.seq;
+        return ch;
+    };
+    /**
+     * @param {!Element} def
+     * @return {!xmled.All}
+     */
+    function parseAll(def) {
+        var all = new xmled.All();
+        parseOccurrance(def, all);
+        return all;
+    }
+    /**
+     * @param {!Element} groupRef
+     * @return {!Element}
+     */
+    function findGroup(groupRef) {
+        var e = xsd.firstElementChild,
+            qname = groupRef.getAttribute("ref"),
+            localName = getLocalName(qname);
+        while (e && !(e.localName === "group"
+                && e.getAttribute("name") === localName)) {
+            e = e.nextElementSibling;
+        }
+        if (!e) {
+            throw "Group not found.";
+        }
+        return e;
+    }
+    /**
+     * @param {!Element} groupRef
+     * @return {!Element}
+     */
+    function findGroupCollection(groupRef) {
+        var e = /**@type{!Element}*/(findGroup(groupRef).lastElementChild);
+        return e;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.All|!xmled.Choice|!xmled.Sequence}
+     */
+    function parseDefinitionGroup(def) {
+        var e = findGroupCollection(def),
+            name = xsdname(e),
+            r;
+        if (name === "sequence") {
+            r = parseSequence(e);
+        } else if (e && name === "choice") {
+            r = parseChoice(e);
+        } else if (e && name === "all") {
+            r = parseAll(e);
+        } else {
+            throw unexpected(e);
+        }
+        return r;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Type}
+     */
+    function parseExtension(def) {
+        var base = getType(splitName(def.getAttribute("base"), def));
+        return base;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Type}
+     */
+    function parseRestriction(def) {
+        return parseLocalComplexType(def);
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Type}
+     */
+    function parseComplexContent(def) {
+        var e = skipOptionalAnnotation(def.firstElementChild),
+            name = xsdname(e),
+            el;
+        if (e && name === "extension") {
+            el = parseExtension(e);
+        } else if (e && name === "restriction") {
+            el = parseRestriction(e);
+        } else {
+            throw unexpected(e);
+        }
+        return el;
+    }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Type}
+     */
+    parseLocalComplexType = function parseLocalComplexType(def) {
+        var type = new xmled.Type(),
+            e = skipOptionalAnnotation(def.firstElementChild),
+            name = xsdname(e);
+        type.mixed = def.getAttribute("mixed") === "true";
+        if (name === "simpleContent") {
+            type.simple = true;
+        } else if (e && name === "complexContent") {
+            type = parseComplexContent(e);
+        } else if (e && name === "sequence") {
+            type.particle = parseSequence(e);
+        } else if (e && name === "choice") {
+            type.particle = parseChoice(e);
+        } else if (e && name === "all") {
+            type.particle = parseAll(e);
+        } else if (e && name === "group") {
+            type.particle = parseDefinitionGroup(e);
+        } else if (name !== "anyAttribute") {
+            unexpected(e);
+        }
+        return type;
+    };
+    function parseLocalSimpleType(def) {
+        return def;
+    }
+    /**
+     * @param {?Element} e
+     * @return {undefined}
+     */
+    function parseIdentityConstraint(e) {
+        var name;
+        while (e) {
+            name = xsdname(e);
+            if (name !== "unique" && name !== "key" && name !== "keyref") {
+                unexpected(e);
+            }
+            e = e.nextElementSibling;
+        }
+    }
+    parseTopLevelElement = function parseTopLevelElement(def, element) {
+        var e = def.firstElementChild,
+            name = xsdname(e),
+            type;
+        if (name === "annotation") {
+            element.annotation = e;
+            e = e.nextElementSibling;
+            name = xsdname(e);
+        }
+        if (def.hasAttribute("type")) {
+            type = getType(splitName(def.getAttribute("type"), def));
+            setType(element, type);
+            if (e !== null) {
+                unexpected(e);
+            }
+            return;
+        }
+        if (name === "complexType") {
+            type = parseLocalComplexType(e);
+            setType(element, type);
+            e = e.nextElementSibling;
+            parseIdentityConstraint(e);
+            return;
+        }
+        if (name === "simpleType") {
+            type = parseLocalSimpleType(e);
+            setType(element, type);
+            e = e.nextElementSibling;
+            parseIdentityConstraint(e);
+        } else {
+            unexpected(e);
+        }
+    };
+    function parse() {
+        var e = xsd.firstElementChild,
+            name,
+            schemaLocation;
+        // parse header
+        while (e) {
+            name = xsdname(e);
+            schemaLocation = e.getAttribute("schemaLocation");
+            if (name === "include" || name === "import" || name === "redefime") {
+                if (!doms[schemaLocation]) {
+                    throw "Schema " + schemaLocation + " not found.";
+                }
+            } else if (name !== "annotation") {
+                break;
+            }
+            e = e.nextElementSibling;
+        }
+        // parse body
+        while (e) {
+            name = xsdname(e);
+            if (name === "element") {
+                if (e.getAttribute("abstract") !== "true") {
+                    name = e.getAttribute("name");
+                    getElement(targetNamespace, e.getAttribute("name"));
+                }
+            } else if (!(name === "attribute" || name === "annotation" || name === "attribute" || name === "attributeGroup" || name === "complexType" || name === "group" || name === "simpleType" || name === "notation")) {
+                throw "Unexpected element " + e.namespaceURI + " " + name;
+            }
+            e = e.nextElementSibling;
+        }
+    }
+    parse();
+    return topElements;
+};
+
+/**
+ * @constructor
  * @param {!number} id
  * @param {!Element} element
  * @param {!number=} offset
@@ -1318,6 +1878,20 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return r;
     };
+    /**
+     * @param {!Element} documentElement
+     * @param {!Element} element
+     * @param {?NodeFilter=} filter
+     * @return {!boolean}
+     */
+    this.allowsText = function (documentElement, element, filter) {
+        var ps = findAllParticles(documentElement, element, filter || null),
+            i;
+        for (i = 0; i < ps.length; i += 1) {
+            console.log(ps[i][0].element);
+        }
+        return ps === null;
+    };
     function indexTopLevelElements() {
         var e = xsd.firstElementChild,
             pre = "";
@@ -1368,6 +1942,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
             indexTopLevelElements();
             indexSubstitutionGroups();
+            xmled.parseSchema(dom, {
+                "xml.xsd": 1,
+                "http://www.w3.org/2001/xml.xsd": 1
+            });
             return onready && onready(null);
         });
     }
