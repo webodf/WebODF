@@ -292,10 +292,11 @@ gui.SessionController = (function () {
             var canvasElement = odtDocument.getOdfCanvas().getElement(),
                 validSelection,
                 clickCount = capturedDetails.detail, // See http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseup,
-                caretPos, anchorNodeInsideCanvas, focusNodeInsideCanvas,
-                stepsToAnchor,
-                stepsToFocus,
-                oldPosition,
+                caretPos,
+                anchorNodeInsideCanvas,
+                focusNodeInsideCanvas,
+                existingSelection,
+                newSelection,
                 op;
 
             if (!selection) {
@@ -333,21 +334,11 @@ gui.SessionController = (function () {
                 }
             }
 
-            stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, validSelection.anchorNode, validSelection.anchorOffset);
-            if (validSelection.focusNode === validSelection.anchorNode
-                && validSelection.focusOffset === validSelection.anchorOffset) {
-                stepsToFocus = stepsToAnchor;
-            } else {
-                stepsToFocus = odtDocument.getDistanceFromCursor(inputMemberId, validSelection.focusNode, validSelection.focusOffset);
-            }
-
-            if (stepsToFocus || stepsToAnchor) {
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                op = createOpMoveCursor(
-                    oldPosition + stepsToAnchor,
-                    stepsToFocus - stepsToAnchor,
-                    ops.OdtCursor.RangeSelection
-                );
+            newSelection = odtDocument.convertDomToCursorRange(validSelection.anchorNode, validSelection.anchorOffset,
+                validSelection.focusNode, validSelection.focusOffset);
+            existingSelection = odtDocument.getCursorSelection(inputMemberId);
+            if (newSelection.position !== existingSelection.position || newSelection.length !== existingSelection.length) {
+                op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RangeSelection);
                 session.enqueue([op]);
             }
 

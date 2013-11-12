@@ -89,6 +89,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
+     * @return {!Document}
+     */
+    function getDOM() {
+        return /**@type{!Document}*/(getRootNode().ownerDocument);
+    }
+    this.getDOM = getDOM;
+    
+    /**
      * @param {!Node} node
      * @return {!boolean}
      */
@@ -157,6 +165,58 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return iterator;
     }
     this.getIteratorAtPosition = getIteratorAtPosition;
+
+    /**
+     *
+     * @param {!Node} anchorNode
+     * @param {!number} anchorOffset
+     * @param {!Node} focusNode
+     * @param {!number} focusOffset
+     * @returns {{position: !number, length: number}}
+     */
+    this.convertDomToCursorRange = function(anchorNode, anchorOffset, focusNode, focusOffset) {
+        var point1,
+            point2;
+
+        point1 = stepsTranslator.convertDomPointToSteps(anchorNode, anchorOffset);
+        if (anchorNode === focusNode && anchorOffset === focusOffset) {
+            point2 = point1;
+        } else {
+            point2 = stepsTranslator.convertDomPointToSteps(focusNode, focusOffset);
+        }
+
+        return {
+            position: point1,
+            length: point2 - point1
+        };
+    };
+
+    /**
+     * Convert a cursor range to a DOM range
+     * @param {!number} position
+     * @param {!number} length
+     * @returns {Range}
+     */
+    this.convertCursorToDomRange = function(position, length) {
+        var range = getDOM().createRange(),
+            point1,
+            point2;
+
+        point1 = stepsTranslator.convertStepsToDomPoint(position);
+        if (length) {
+            point2 = stepsTranslator.convertStepsToDomPoint(position + length);
+            if (length > 0) {
+                range.setStart(point1.node, point1.offset);
+                range.setEnd(point2.node, point2.offset);
+            } else {
+                range.setStart(point2.node, point2.offset);
+                range.setEnd(point1.node, point1.offset);
+            }
+        } else {
+            range.setStart(point1.node, point1.offset);
+        }
+        return range;
+    };
 
     /**
      * This function will iterate through positions allowed by the position
@@ -573,13 +633,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!Element}
      */
     this.getRootNode = getRootNode;
-
-    /**
-     * @return {!Document}
-     */
-    this.getDOM = function () {
-        return /**@type{!Document}*/(getRootNode().ownerDocument);
-    };
 
     /**
      * @param {!string} memberid
