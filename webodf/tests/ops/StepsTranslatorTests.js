@@ -34,6 +34,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf, ops, gui*/
+runtime.loadClass("odf.Namespaces");
 runtime.loadClass("ops.StepsTranslator");
 runtime.loadClass("gui.SelectionMover");
 /**
@@ -156,6 +157,29 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.steps", "0");
     }
 
+    function convertDomPointsToSteps_BeforeRootNode_Returns0() {
+        createDoc("<text:p>AB</text:p>");
+
+        t.steps = t.translator.convertDomPointToSteps(testarea.parentNode, 0);
+        r.shouldBe(t, "t.steps", "0");
+    }
+
+    function convertDomPointsToSteps_AfterRootNode_ReturnsMaxLength() {
+        var doc = createDoc("<text:p>AB</text:p>"),
+            afterRoot = doc.ownerDocument.createElement("span");
+
+        testarea.parentNode.insertBefore(afterRoot, testarea.nextSibling);
+        t.steps = t.translator.convertDomPointToSteps(afterRoot, 0);
+        r.shouldBe(t, "t.steps", "2");
+    }
+
+    function convertDomPointsToSteps_AfterRootNode_LastPositionInParent_ReturnsMaxLength() {
+        createDoc("<text:p>AB</text:p>");
+
+        t.steps = t.translator.convertDomPointToSteps(testarea.parentNode, testarea.parentNode.childNodes.length);
+        r.shouldBe(t, "t.steps", "2");
+    }
+
     function convertDomPointsToSteps_At1() {
         var doc = createDoc("<text:p>AB</text:p>"),
             p = doc.getElementsByTagName("p")[0];
@@ -202,6 +226,9 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertStepsToDomPoint_BeyondMaxSteps_ReturnsMaxSteps,
             convertDomPointsToSteps_At0,
             convertDomPointsToSteps_Before0,
+            convertDomPointsToSteps_BeforeRootNode_Returns0,
+            convertDomPointsToSteps_AfterRootNode_ReturnsMaxLength,
+            convertDomPointsToSteps_AfterRootNode_LastPositionInParent_ReturnsMaxLength,
             convertDomPointsToSteps_At1,
             convertDomPointsToSteps_BetweenPositions_RoundsDown,
             convertDomPointsToSteps_At5,

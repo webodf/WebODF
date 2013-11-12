@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, core, ops*/
+/*global runtime, core, ops, Node*/
 
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.PositionFilter");
@@ -50,7 +50,8 @@ runtime.loadClass("core.PositionFilter");
  */
 ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter) {
     "use strict";
-    var /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+    var domUtils = new core.DomUtils(),
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
     /**
      * Convert the requested steps from root into the equivalent DOM node & offset pair
@@ -97,7 +98,16 @@ ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter)
     this.convertDomPointToSteps = function(node, offset) {
         var steps = 0,
             iterator = newIterator(getRootNode()),
-            firstPosition = true;
+            firstPosition = true,
+            beforeRoot,
+            rootNode = getRootNode();
+
+        if (!domUtils.containsNode(rootNode, node)) {
+            beforeRoot = domUtils.comparePoints(rootNode, 0, node, offset) < 0;
+            node = rootNode;
+            offset = beforeRoot ? 0 : rootNode.childNodes.length;
+        }
+
 
         iterator.setUnfilteredPosition(node, offset);
         do {
