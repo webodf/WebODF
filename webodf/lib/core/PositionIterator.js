@@ -112,20 +112,27 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
     }
     /**
+     * @returns {!boolean}
+     */
+    function previousNode() {
+        if (walker.previousSibling() === null) {
+            if (!walker.parentNode() || walker.currentNode === root) {
+                walker.firstChild();
+                return false;
+            }
+            currentPos = 0;
+        } else {
+            setAtEnd();
+        }
+        return true;
+    }
+    /**
      * @return {!boolean}
      */
     this.previousPosition = function () {
         var moved = true;
         if (currentPos === 0) {
-            if (walker.previousSibling() === null) {
-                if (!walker.parentNode() || walker.currentNode === root) {
-                    walker.firstChild();
-                    return false;
-                }
-                currentPos = 0;
-            } else {
-                setAtEnd();
-            }
+            moved = previousNode();
         } else if (walker.currentNode.nodeType === Node.TEXT_NODE) {
             currentPos -= 1;
         } else if (walker.lastChild() !== null) {
@@ -137,6 +144,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         return moved;
     };
+    this.previousNode = previousNode;
     /**
      * @return {!Element|!Text}
      */

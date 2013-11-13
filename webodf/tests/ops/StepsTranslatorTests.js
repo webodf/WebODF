@@ -238,7 +238,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
     }
 
     function convertStepsToDomPoint_Cached_HasContentBeforeWalkablePosition() {
-        createDoc("<text:p>ABCD</text:p><text:p><text:span>EF</text:p>");
+        createDoc("<text:p>ABCD</text:p><text:p><text:span/>EF</text:p>");
 
         t.expected = t.translator.convertStepsToDomPoint(5);
         t.uncachedCallCount = t.filter.popCallCount();
@@ -407,6 +407,18 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.actualCloneSteps", "5");
     }
 
+    function convertDomPointsToSteps_Cached_FindsNearestKnownPosition() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>EFGH</text:p><text:custom/>"),
+            frame = doc.getElementsByTagNameNS(textns, "custom")[0];
+
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        t.steps = t.translator.convertDomPointToSteps(frame, 0);
+        r.shouldBe(t, "t.filter.acceptPositionCalls", "8");
+        r.shouldBe(t, "t.steps", "9");
+    }
+
     function handleStepsInserted_InsertMultipleStepsIndividually() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>IJKL</text:p>"),
             paragraphs = extractParagraphBoundaries(doc),
@@ -553,6 +565,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached,
             convertDomPointsToSteps_Cached_SpeedsUpSecondCall,
             convertDomPointsToSteps_Cached_CopesWithClonedNode,
+            convertDomPointsToSteps_Cached_FindsNearestKnownPosition,
 
             handleStepsInserted_InsertMultipleStepsIndividually,
             handleStepsInserted_InsertMultipleParagraphsIndividually,

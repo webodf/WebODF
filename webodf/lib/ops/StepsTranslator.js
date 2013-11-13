@@ -291,7 +291,6 @@ runtime.loadClass("odf.OdfUtils");
         this.setToClosestDomPoint = function(node, offset, iterator) {
             var bookmark;
 
-            // TODO search for nearby bookmarks more intelligently
             if (node === rootNode && offset === 0) {
                 bookmark = basePoint;
             } else if (node === rootNode && offset === rootNode.childNodes.length) {
@@ -302,6 +301,13 @@ runtime.loadClass("odf.OdfUtils");
                     }, basePoint);
             } else {
                 bookmark = findBookmarkedAncestor(node, offset);
+                if (!bookmark) {
+                    // No immediate bookmark was found, so crawl backwards using the iterator and try and find a known position
+                    iterator.setUnfilteredPosition(node, offset);
+                    while (!bookmark && iterator.previousNode()) {
+                        bookmark = findBookmarkedAncestor(iterator.container(), iterator.unfilteredDomOffset());
+                    }
+                }
             }
 
             bookmark = bookmark || basePoint;
