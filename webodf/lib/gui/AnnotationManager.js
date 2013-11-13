@@ -150,7 +150,7 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
     function getFirstWalkablePositionInNode(node) {
         var position = 0,
             iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-            watch = new core.LoopWatchDog(1000),
+            watch = new core.LoopWatchDog(10000),
             inside = false;
 
         while (iterator.nextPosition()) {

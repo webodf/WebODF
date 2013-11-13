@@ -273,7 +273,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * @return {!number} Number of positions required to move the requested number of filtered steps
      */
     function countSteps(iterator, steps, filter) {
-        var watch = new core.LoopWatchDog(1000),
+        var watch = new core.LoopWatchDog(10000),
             positions = 0,
             positionsCount = 0,
             increment = steps >= 0 ? 1 : -1,
@@ -302,7 +302,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      */
     function convertForwardStepsBetweenFilters(stepsFilter1, filter1, filter2) {
         var iterator = getIteratorAtCursor(),
-            watch = new core.LoopWatchDog(1000),
+            watch = new core.LoopWatchDog(10000),
             pendingStepsFilter2 = 0,
             stepsFilter2 = 0;
         while (stepsFilter1 > 0 && iterator.nextPosition()) {
@@ -328,7 +328,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      */
     function convertBackwardStepsBetweenFilters(stepsFilter1, filter1, filter2) {
         var iterator = getIteratorAtCursor(),
-            watch = new core.LoopWatchDog(1000),
+            watch = new core.LoopWatchDog(10000),
             pendingStepsFilter2 = 0,
             stepsFilter2 = 0;
         while (stepsFilter1 > 0 && iterator.previousPosition()) {
@@ -405,7 +405,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             lastTop,
             rect,
             range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
-            watch = new core.LoopWatchDog(1000);
+            watch = new core.LoopWatchDog(10000);
 
         // Get the starting position
         rect = getVisibleRect(c, iterator.unfilteredDomOffset(), range);
@@ -552,7 +552,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             c = iterator.container(),
             o = iterator.unfilteredDomOffset(),
             steps = 0,
-            watch = new core.LoopWatchDog(1000),
+            watch = new core.LoopWatchDog(10000),
             comparison;
 
         // the iterator may interpret the positions as given by the range
