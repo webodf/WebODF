@@ -53,11 +53,9 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        baseFilter = odtDocument.getPositionFilter(),
         isAnnotatable = false,
         eventNotifier = new core.EventNotifier([gui.AnnotationManager.annotatableChanged]),
-        /**@const @type {!string}*/officens = odf.Namespaces.officens,
-        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+        /**@const @type {!string}*/officens = odf.Namespaces.officens;
 
     /**
      * @param {?Node} node  Node to start searching with
@@ -117,60 +115,6 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
             updatedCachedValues();
         }
     }
-    /**
-     * Returns the walkable length of the node
-     * @param {!Node} node
-     * @return {!number}
-     */
-    function getWalkableNodeLength(node) {
-        var length = 0,
-            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-            inside = false;
-
-        // TODO refactor into a utility class somewhere
-        iterator.setUnfilteredPosition(node, 0);
-        do {
-            /*jslint bitwise: true*/
-            inside = Boolean(node.compareDocumentPosition(iterator.container()) & Node.DOCUMENT_POSITION_CONTAINED_BY);
-            if (!inside && node !== iterator.container()) {
-                break;
-            }
-            if (baseFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                length += 1;
-            }
-        } while (iterator.nextPosition());
-
-        return length;
-    }
-
-    /**
-     * Returns the first filtered walkable position in the node
-     * @param {!Node} node
-     * @return {!number}
-     */
-    function getFirstWalkablePositionInNode(node) {
-        var position = 0,
-            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-            watch = new core.LoopWatchDog(10000),
-            inside = false;
-
-        // TODO Adapt to use StepsTranslator
-        while (iterator.nextPosition()) {
-            watch.check();
-
-            /*jslint bitwise: true*/
-            inside = Boolean(node.compareDocumentPosition(iterator.container()) & Node.DOCUMENT_POSITION_CONTAINED_BY);
-
-            if (baseFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                if (inside) {
-                    break;
-                }
-                position += 1;
-            }
-        }
-
-        return position;
-    }
 
     /**
      * @return {!boolean}
@@ -211,21 +155,24 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
      * @return {undefined}
      */
     this.removeAnnotation = function(annotationNode) {
-        var position, length, op, moveCursor;
+        var startStep, endStep, op, moveCursor;
 
-        position = getFirstWalkablePositionInNode(annotationNode);
-        length = getWalkableNodeLength(annotationNode);
+        // (annotationNode, 0) will report as the step just before the first step in the annotation node
+        // Add 1 to this to actually get *within* the annotation
+        startStep = odtDocument.convertDomPointToCursorStep(annotationNode, 0) + 1;
+        // Will report the last walkable step within the annotation
+        endStep = odtDocument.convertDomPointToCursorStep(annotationNode, annotationNode.childNodes.length);
 
         op = new ops.OpRemoveAnnotation();
         op.init({
             memberid: inputMemberId,
-            position: position,
-            length: length
+            position: startStep,
+            length: endStep - startStep
         });
         moveCursor = new ops.OpMoveCursor();
         moveCursor.init({
             memberid: inputMemberId,
-            position: position > 0 ? position-1 : position, // Last position just before the annotation starts
+            position: startStep > 0 ? startStep - 1 : startStep, // Last position just before the annotation starts
             length: 0
         });
         session.enqueue([op, moveCursor]);
