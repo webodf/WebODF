@@ -194,7 +194,7 @@ xmled.QName = function QName(ns, name) {
 /**
  * @constructor
  * @struct
- * @param {!Object.<?string,!Object.<!string,!xmled.ElementRef>>} elements
+ * @param {!Object.<?string,!Object.<!string,!xmled.Element>>} elements
  */
 xmled.ParsedSchema = function ParsedSchema(elements) {
     "use strict";
@@ -220,20 +220,25 @@ xmled.ParsedSchema = function ParsedSchema(elements) {
 /**
  * @param {!Document} dom
  * @param {!Object} doms
- * @return {!Object.<?string,!Object.<!string,!xmled.ElementRef>>}
+ * @return {!Object.<?string,!Object.<!string,!xmled.Element>>}
  */
 xmled.parseSchema = function (dom, doms) {
     "use strict";
     var xsd = dom.documentElement,
         targetNamespace = xsd.getAttribute("targetNamespace"),
         xsdns = "http://www.w3.org/2001/XMLSchema",
-        /**@type{!Object.<?string,!Object.<!string,!xmled.ElementRef>>}*/
+        /**@type{!Object.<?string,!Object.<!string,!xmled.Element>>}*/
         topElements = {},
-        types = {},
         parseChoice,
         parseLocalComplexType,
         parseTopLevelElement,
-        parseGroup;
+        parseGroup,
+        simpleXsdTypes = {
+            "string": 1,
+            "dateTime": 1,
+            "boolean": 1,
+            "unsignedByte": 1
+        };
     function unexpected(e) {
         throw "Unexpected element " + e.namespaceURI + " " + e.localName;
     }
@@ -329,24 +334,22 @@ xmled.parseSchema = function (dom, doms) {
      * @return {!xmled.Type}
      */
     function getType(qname) {
-        var ns,
-            name,
+        var name,
             def,
             e;
-        ns = types[qname.ns] = types[qname.ns] || {};
-        if (ns.hasOwnProperty(qname.name)) {
-            return ns[qname.name];
-        }
-        def = findType(qname);
-        name = def.localName;
-        if (name === "simpleType") {
+        if (qname.ns === xsdns && simpleXsdTypes.hasOwnProperty(qname.name)) {
             e = new xmled.Type();
-        } else if (name === "complexType") {
-            e = parseComplexType(def);
         } else {
-            throw unexpected(e);
+            def = findType(qname);
+            name = def.localName;
+            if (name === "simpleType") {
+                e = new xmled.Type();
+            } else if (name === "complexType") {
+                e = parseComplexType(def);
+            } else {
+                throw unexpected(e);
+            }
         }
-        ns[qname.name] = e;
         return e;
     }
     function setType(element, type) {
@@ -372,7 +375,7 @@ xmled.parseSchema = function (dom, doms) {
      * @param {!xmled.ParticleDefinition} particle
      * @return {undefined}
      */
-    function parseOccurrance(def, particle) {
+    function parseOccurrence(def, particle) {
         particle.minOccurs = getMinOccurs(def);
         particle.maxOccurs = getMaxOccurs(def);
     }
@@ -384,19 +387,30 @@ xmled.parseSchema = function (dom, doms) {
         var i = qname.indexOf(':');
         return (i === -1) ? qname : qname.substr(i + 1);
     }
+    /**
+     * @param {?string} ns
+     * @param {!string} name
+     * @return {!xmled.ElementRef}
+     */
     function getElement(ns, name) {
-        var map, e, def, er;
+        var map, element, def;
         map = topElements[ns] = topElements[ns] || {};
         if (map.hasOwnProperty(name)) {
-            return map[name];
+            element = map[name];
+        } else {
+            def = findElement(name);
+            element = map[name] = new xmled.Element(ns, name);
+            parseTopLevelElement(def, element);
         }
-        def = findElement(name);
-        e = new xmled.Element(ns, name);
-        er = map[name] = new xmled.ElementRef(e);
-        parseTopLevelElement(def, e);
-        return er;
+        return new xmled.ElementRef(element);
     }
     function merge(a, b) {
+        var i;
+        for (i in b) {
+            if (b.hasOwnProperty(i)) {
+                a[i] = b[i];
+            }
+        }
         return a === b;
     }
     function getAlternateGroupElements(group) {
@@ -441,6 +455,14 @@ xmled.parseSchema = function (dom, doms) {
     }
     /**
      * @param {!Element} def
+     * @param {!xmled.Element} element
+     * @return {undefined}
+     */
+    function parseElement(def, element) {
+        parseTopLevelElement(def, element);
+    }
+    /**
+     * @param {!Element} def
      * @return {!xmled.ElementRef|!xmled.Choice}
      */
     function parseElementRef(def) {
@@ -455,13 +477,14 @@ xmled.parseSchema = function (dom, doms) {
             if (e.getAttribute("abstract") !== "true") {
                 eref = getElement(targetNamespace, ref);
             } else {
-                return createChoiceFromAbstractElement(e);
+                eref = createChoiceFromAbstractElement(e);
             }
         } else {
             el = new xmled.Element(targetNamespace, name);
+            parseElement(def, el);
             eref = new xmled.ElementRef(el);
         }
-        parseOccurrance(def, eref);
+        parseOccurrence(def, eref);
         return eref;
     }
     /**
@@ -470,7 +493,7 @@ xmled.parseSchema = function (dom, doms) {
      */
     function parseAny(def) {
         var a = new xmled.Any();
-        parseOccurrance(def, a);
+        parseOccurrence(def, a);
         return a;
     }
     /**
@@ -481,7 +504,7 @@ xmled.parseSchema = function (dom, doms) {
         var seq = new xmled.Sequence(),
             e = def.firstElementChild,
             name = xsdname(e);
-        parseOccurrance(def, seq);
+        parseOccurrence(def, seq);
         if (name === "annotation") {
             e = e.nextElementSibling;
         }
@@ -543,7 +566,7 @@ xmled.parseSchema = function (dom, doms) {
             getPossibleElements(i, seq[i], els);
         }
         ch = new xmled.Choice(els);
-        parseOccurrance(def, ch);
+        parseOccurrence(def, ch);
         ch.choices = seq;
         return ch;
     };
@@ -553,7 +576,7 @@ xmled.parseSchema = function (dom, doms) {
      */
     function parseAll(def) {
         var all = new xmled.All();
-        parseOccurrance(def, all);
+        parseOccurrence(def, all);
         return all;
     }
     /**
@@ -561,6 +584,7 @@ xmled.parseSchema = function (dom, doms) {
      * @return {!Element}
      */
     function findGroup(groupRef) {
+        runtime.assert(groupRef.localName === "group", "");
         var e = xsd.firstElementChild,
             qname = groupRef.getAttribute("ref"),
             localName = getLocalName(qname);
@@ -598,6 +622,7 @@ xmled.parseSchema = function (dom, doms) {
         } else {
             throw unexpected(e);
         }
+        parseOccurrence(def, r);
         return r;
     };
     /**
@@ -625,11 +650,18 @@ xmled.parseSchema = function (dom, doms) {
      */
     function parseExtension(def) {
         var base = getType(splitName(def.getAttribute("base"), def)),
-            ext = parseLocalComplexType(def);
-        if (ext.particle) {
-            base.particle = ext.particle;
+            ext = parseLocalComplexType(def),
+            type = ext,
+            seq;
+        if (base.particle && ext.particle) {
+            seq = new xmled.Sequence();
+            seq.seq = [base.particle, ext.particle];
+            type = new xmled.Type();
+            type.particle = seq;
+        } else if (base.particle) {
+            type = base;
         }
-        return base;
+        return type;
     }
     /**
      * @param {!Element} def
@@ -701,6 +733,11 @@ xmled.parseSchema = function (dom, doms) {
             e = e.nextElementSibling;
         }
     }
+    /**
+     * @param {!Element} def
+     * @param {!xmled.Element} element
+     * @return {undefined}
+     */
     parseTopLevelElement = function parseTopLevelElement(def, element) {
         var e = def.firstElementChild,
             name = xsdname(e),
@@ -718,7 +755,7 @@ xmled.parseSchema = function (dom, doms) {
             }
             return;
         }
-        if (name === "complexType") {
+        if (e && name === "complexType") {
             type = parseLocalComplexType(e);
             setType(element, type);
             e = e.nextElementSibling;
@@ -908,9 +945,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         targetNamespace = null,
         checker = new xmled.XsdChecker(),
         particles = new xmled.ParticleCache(),
-        topLevelElements = {},
-        substitutionGroups = {},
-        abstractSubstitutionGroups = {},
         fillElementWithDefaults,
         findParticlesInCollection,
         schema;
@@ -1132,18 +1166,16 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function addCollection(instance, def) {
         var doc = instance.ownerDocument,
-            er,
             el,
             e;
         if (def.type === xmled.ParticleType.ELEMENT) {
-            er = /**@type{!xmled.ElementRef}*/(def);
-            el = er.element;
+            el = /**@type{!xmled.ElementRef}*/(def).element;
             if (el.ns) {
                 e = doc.createElementNS(el.ns, el.name);
             } else {
                 e = doc.createElement(el.name);
             }
-            fillElementWithDefaults(e, er);
+            fillElementWithDefaults(e, el);
             instance.appendChild(e);
         }
     }
@@ -1189,11 +1221,11 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     }
     /**
      * @param {!Element} instance
-     * @param {!xmled.ElementRef} definition
+     * @param {!xmled.Element} definition
      * @return {undefined}
      */
     fillElementWithDefaults = function (instance, definition) {
-        var particle = definition.element.particle,
+        var particle = definition.particle,
             e;
         if (!particle) {
             return;
@@ -1218,23 +1250,19 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     };
     /**
      * @param {!Document} doc
-     * @param {!xmled.ParticleDefinition} def
+     * @param {!xmled.Element} def
      * @return {!{desc:!string,range:?Range,dom:!DocumentFragment}}
      */
     function getPossibleElement(doc, def) {
-        runtime.assert(def.type === xmled.ParticleType.ELEMENT,
-                "The definition is not for an element.");
         var f = doc.createDocumentFragment(),
-            edef = /**@type{!xmled.ElementRef}*/(def),
-            el = edef.element,
             e;
-        if (el.ns) {
-            e = doc.createElementNS(el.ns, el.name);
+        if (def.ns) {
+            e = doc.createElementNS(def.ns, def.name);
         } else {
-            e = doc.createElement(el.name);
+            e = doc.createElement(def.name);
         }
         f.appendChild(e);
-        fillElementWithDefaults(e, edef);
+        fillElementWithDefaults(e, def);
         return {desc: e.localName, range: null, dom: f};
     }
     /**
@@ -1253,7 +1281,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         for (i = 0; i < es.length; i += 1) {
             e = es[i];
-            if (e.element.name !== current.localName) {
+            if (e.name !== current.localName) {
                 r.push(getPossibleElement(doc, e));
             }
         }
@@ -1406,6 +1434,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         var def = /**@type{!xmled.ElementRef}*/(state.particle.def);
         runtime.assert(def.type === xmled.ParticleType.ELEMENT,
                 "findParticles requires element.");
+        runtime.assert(def.element !== null, "element is null.");
         // if the element is simpleType, no child elements are allowed
         if (def.element.simple) {
             if (state.element !== null) {
@@ -1433,7 +1462,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (!def) {
             throw "No definition for " + element.localName;
         }
-        return particles.getParticle(def);
+        return particles.getParticle(new xmled.ElementRef(def));
     }
     /**
      * @param {!Element} documentElement
@@ -1473,6 +1502,26 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return ps;
     }
+/*
+    function print(particle) {
+        var t = "",
+            p = particle;
+        while (p) {
+            if (p.def.element) {
+                t = p.def.element.name + " " + t;
+            }
+            p = p.parent;
+        }
+        console.log("> " + t);
+    }
+    function prints(particles) {
+        console.log(particles.length);
+        var i;
+        for (i = 0; i < particles.length; i += 1) {
+            print(particles[i]);
+        }
+    }
+*/
     /**
      * @param {!Element} element
      * @param {!xmled.ParticleSearchState} state
@@ -1484,6 +1533,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             l = state.childElementCount(element),
             i,
             ec;
+
         findParticles(state);
         ps = state.particles;
         runtime.assert(state.error === null, state.error || "");
@@ -1572,8 +1622,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             for (i = 0; i < def.choices.length; i += 1) {
                 c = def.choices[i];
                 if (c.type === xmled.ParticleType.ELEMENT) {
-                    e = /**@type{!xmled.ElementRef}*/(c);
-                    if (e.element.name !== element.localName) {
+                    e = /**@type{!xmled.ElementRef}*/(c).element;
+                    if (e.name !== element.localName) {
                         a.push(getPossibleElement(doc, e));
                     }
                 }
@@ -1747,39 +1797,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return ps === null;
     };
-    function indexTopLevelElements() {
-        var e = xsd.firstElementChild,
-            pre = "";
-        if (targetNamespace) {
-            pre = '{' + targetNamespace + '}';
-        }
-        while (e) {
-            if (e.localName === "element") {
-                topLevelElements[pre + e.getAttribute("name")] = e;
-            }
-            e = e.nextElementSibling;
-        }
-    }
-    function indexSubstitutionGroups() {
-        var e = xsd.firstElementChild,
-            sg;
-        while (e) {
-            if (e.localName === "element") {
-                sg = e.getAttribute("substitutionGroup");
-                if (sg) {
-                    if (e.getAttribute("abstract") === "true") {
-                        sg = abstractSubstitutionGroups[sg]
-                            = abstractSubstitutionGroups[sg] || {};
-                    } else {
-                        sg = substitutionGroups[sg]
-                            = substitutionGroups[sg] || {};
-                    }
-                    sg[e.getAttribute("name")] = e;
-                }
-            }
-            e = e.nextElementSibling;
-        }
-    }
     function init() {
         runtime.loadXML(grammarurl, function (err, dom) {
             if (dom) {
@@ -1795,8 +1812,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             if (xsd.hasAttribute("targetNamespace")) {
                 targetNamespace = xsd.getAttribute("targetNamespace");
             }
-            indexTopLevelElements();
-            indexSubstitutionGroups();
             schema = xmled.parseSchema(dom, {
                 "xml.xsd": 1,
                 "http://www.w3.org/2001/xml.xsd": 1
