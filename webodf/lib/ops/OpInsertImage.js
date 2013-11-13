@@ -87,7 +87,7 @@ ops.OpInsertImage = function OpInsertImage() {
 
     this.execute = function (odtDocument) {
         var odfCanvas = odtDocument.getOdfCanvas(),
-            domPosition = odtDocument.getPositionInTextNode(position, memberid),
+            domPosition = odtDocument.getTextNodeAtStep(position, memberid),
             textNode, refNode, paragraphElement, frameElement;
 
         if (!domPosition) {
@@ -102,7 +102,7 @@ ops.OpInsertImage = function OpInsertImage() {
         textNode.parentNode.insertBefore(frameElement, refNode);
         odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: 1});
 
-        // clean up any empty text node which was created by odtDocument.getPositionInTextNode
+        // clean up any empty text node which was created by odtDocument.getTextNodeAtStep
         if (textNode.length === 0) {
             textNode.parentNode.removeChild(textNode);
         }

@@ -101,7 +101,7 @@ ops.OpInsertText = function OpInsertText() {
         }
 
         odtDocument.upgradeWhitespacesAtPosition(position);
-        domPosition = odtDocument.getPositionInTextNode(position, memberid);
+        domPosition = odtDocument.getTextNodeAtStep(position, memberid);
 
         if (domPosition) {
             previousNode = domPosition.textNode;

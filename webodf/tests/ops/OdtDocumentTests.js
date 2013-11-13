@@ -47,7 +47,9 @@ runtime.loadClass("ops.OdtCursor");
 ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     "use strict";
     var r = runner,
-        t, testarea;
+        t,
+        testarea,
+        inputMemberId = "Joe";
 
     /**
      * Trying to avoid having to load a complete document for these tests. Mocking ODF
@@ -70,12 +72,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.root = node;
         t.odtDocument = new ops.OdtDocument(new OdfCanvasAdapter(t.root));
-        t.cursor = new ops.OdtCursor("Joe", t.odtDocument);
+        t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
         t.counter = t.cursor.getStepCounter();
 
         t.range = t.root.ownerDocument.createRange();
         t.filter = t.odtDocument.getPositionFilter();
+        return node;
     }
     function appendCssRule(rule) {
         t.styles.insertRule(rule, t.styles.cssRules.length);
@@ -506,6 +509,124 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>');
     }
 
+    function getTextNodeAtStep_BeginningOfTextNode() {
+        var doc = createOdtDocument("<text:p>ABCD</text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(0);
+
+        // paragraph children are: <cursor>, #text
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[1]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "'ABCD'");
+        r.shouldBe(t, "t.domPosition.offset", "0");
+    }
+
+    function getTextNodeAtStep_EndOfTextNode() {
+        var doc = createOdtDocument("<text:p>ABCD</text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(4);
+
+        // paragraph children are: <cursor>, #text
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[1]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "'ABCD'");
+        r.shouldBe(t, "t.domPosition.offset", "4");
+    }
+
+    function getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Front() {
+        var doc = createOdtDocument("<text:p><text:s> </text:s></text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(0);
+
+        // paragraph children are: <cursor>, #text, <s>
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[1]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "''");
+        r.shouldBe(t, "t.domPosition.offset", "0");
+    }
+
+    function getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Back() {
+        var doc = createOdtDocument("<text:p><text:s> </text:s></text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(1);
+
+        // paragraph children are: <cursor>, <s>, #text
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[2]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "''");
+        r.shouldBe(t, "t.domPosition.offset", "0");
+    }
+
+    function getTextNodeAtStep_At0_PutsTargetMemberCursor_AfterTextNode() {
+        var doc = createOdtDocument("<text:p>ABCD</text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(0, inputMemberId);
+
+        // paragraph children are: #text, <cursor>, #text
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[0]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "''");
+        r.shouldBe(t, "t.domPosition.offset", "0");
+        r.shouldBe(t, "t.cursor.getNode().previousSibling", "t.domPosition.textNode");
+    }
+
+    function getTextNodeAtStep_At1_PutsTargetMemberCursor_AfterTextNode() {
+        var doc = createOdtDocument("<text:p>ABCD</text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+        setCursorPosition(1);
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(1, inputMemberId);
+
+        // paragraph children are: #text, <cursor>, #text
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[0]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "'A'");
+        r.shouldBe(t, "t.domPosition.offset", "1");
+        r.shouldBe(t, "t.cursor.getNode().previousSibling", "t.domPosition.textNode");
+    }
+
+    function getTextNodeAtStep_At4_PutsTargetMemberCursor_AfterTextNode() {
+        var doc = createOdtDocument("<text:p>ABCD</text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+        setCursorPosition(4);
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(4, inputMemberId);
+
+        // paragraph children are: #text, <cursor>
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[0]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "'ABCD'");
+        r.shouldBe(t, "t.domPosition.offset", "4");
+        r.shouldBe(t, "t.cursor.getNode().previousSibling", "t.domPosition.textNode");
+    }
+
+    function getTextNodeAtStep_AfterNonText_PutsTargetMemberCursor_AfterTextNode() {
+        var doc = createOdtDocument("<text:p>ABC<text:s> </text:s></text:p>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+        setCursorPosition(4);
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(4, inputMemberId);
+
+        // paragraph children are: #text, <s>, #text, <cursor>
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[2]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "''");
+        r.shouldBe(t, "t.domPosition.offset", "0");
+        r.shouldBe(t, "t.cursor.getNode().previousSibling", "t.domPosition.textNode");
+    }
+
+    function getTextNodeAtStep_RearrangesExistingCursors_MovesMemberAfterTextNode() {
+        var doc = createOdtDocument("<text:p/>");
+        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.odtDocument.addCursor(new ops.OdtCursor("new 1", t.odtDocument));
+        t.odtDocument.addCursor(new ops.OdtCursor("new 2", t.odtDocument));
+
+        t.domPosition = t.odtDocument.getTextNodeAtStep(0, inputMemberId);
+
+        // paragraph children are: <cursor>, <cursor>, #text, <cursor member="Joe">
+        r.shouldBe(t, "t.domPosition.textNode", "t.paragraph.childNodes[2]");
+        r.shouldBe(t, "t.domPosition.textNode.textContent", "''");
+        r.shouldBe(t, "t.domPosition.offset", "0");
+        r.shouldBe(t, "t.cursor.getNode().previousSibling", "t.domPosition.textNode");
+    }
+
     this.setUp = function () {
         var doc, stylesElement;
         testarea = core.UnitTest.provideTestAreaDiv();
@@ -570,7 +691,17 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testAvailablePositions_Whitespace,
             testAvailablePositions_SpaceElements,
             testAvailablePositions_DrawElements,
-            testAvailablePositions_Annotations
+            testAvailablePositions_Annotations,
+
+            getTextNodeAtStep_BeginningOfTextNode,
+            getTextNodeAtStep_EndOfTextNode,
+            getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Front,
+            getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Back,
+            getTextNodeAtStep_At0_PutsTargetMemberCursor_AfterTextNode,
+            getTextNodeAtStep_At1_PutsTargetMemberCursor_AfterTextNode,
+            getTextNodeAtStep_At4_PutsTargetMemberCursor_AfterTextNode,
+            getTextNodeAtStep_AfterNonText_PutsTargetMemberCursor_AfterTextNode,
+            getTextNodeAtStep_RearrangesExistingCursors_MovesMemberAfterTextNode
         ];
     };
     this.asyncTests = function () {

@@ -60,7 +60,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             node, splitNode, splitChildNode, keptChildNode;
 
         odtDocument.upgradeWhitespacesAtPosition(position);
-        domPosition = odtDocument.getPositionInTextNode(position, memberid);
+        domPosition = odtDocument.getTextNodeAtStep(position, memberid);
         if (!domPosition) {
             return false;
         }
@@ -143,7 +143,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             splitChildNode = splitChildNode.childNodes[0];
         }
 
-        // clean up any empty text node which was created by odtDocument.getPositionInTextNode
+        // clean up any empty text node which was created by odtDocument.getTextNodeAtStep
         if (domPosition.textNode.length === 0) {
             domPosition.textNode.parentNode.removeChild(domPosition.textNode);
         }

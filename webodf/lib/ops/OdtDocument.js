@@ -235,115 +235,54 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * as well as the offset in that text node.
      * Optionally takes a memberid of a cursor, to specifically return the
      * text node positioned just behind that cursor.
-     * @param {!number} position
+     * @param {!number} steps
      * @param {!string=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
-    function getPositionInTextNode(position, memberid) {
-        // TODO adapt to use StepsTranslator
-        var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
-            /**@type{?Text}*/
-            lastTextNode = null,
-            node,
+    function getTextNodeAtStep(steps, memberid) {
+        var iterator = getIteratorAtPosition(steps),
+            node = iterator.container(),
+            lastTextNode,
             nodeOffset = 0,
-            cursorNode = null,
-            originalPosition = position;
+            cursorNode = null;
 
-        runtime.assert(position >= 0, "position must be >= 0");
-
-        // first prepare things
-        // iterator should be at the start of getRootNode()
-        if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-            node = iterator.container();
-            if (node.nodeType === Node.TEXT_NODE) {
-                lastTextNode = /**@type{!Text}*/(node);
-                nodeOffset = 0;
-            }
+        if (node.nodeType === Node.TEXT_NODE) {
+            // Iterator has stopped within an existing text node, to put that up as a possible target node
+            lastTextNode = /**@type{!Text}*/(node);
+            nodeOffset = iterator.unfilteredDomOffset();
         } else {
-            // add 1 to move into an acceptable position
-            position += 1;
-        }
-        // now iterate over as many positions as given
-        // loop as long as there is another position to reach
-        // or the text node in the final destination has not been reached yet
-        while (position > 0 || lastTextNode === null) {
-            // reaching end of document too early?
-            if (!iterator.nextPosition()) {
-                // the desired position cannot be found
-                return null;
-            }
-            // iterator at a text position?
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                position -= 1;
-                node = iterator.container();
-                if (node.nodeType === Node.TEXT_NODE) {
-                    if (node !== lastTextNode) {
-                        lastTextNode = /**@type{!Text}*/(node);
-                        nodeOffset = iterator.unfilteredDomOffset();
-                    } else {
-                        nodeOffset += 1;
-                    }
-                } else if (lastTextNode !== null) {
-                    if (position === 0) {
-                        // position is at end of text node
-                        nodeOffset = lastTextNode.length;
-                        break;
-                    }
-                    lastTextNode = null;
-                } else if (position === 0) {
-                    // position is without any text node currently, so add an empty one
-                    lastTextNode = getRootNode().ownerDocument.createTextNode('');
-                    node.insertBefore(lastTextNode, iterator.rightNode());
-                    nodeOffset = 0;
-                    break;
-                }
-            }
-        }
-        if (lastTextNode === null) {
-            return null;
+            // There is no text node at the current position, so insert a new one at the current position
+            lastTextNode = getDOM().createTextNode("");
+            nodeOffset = 0;
+            node.insertBefore(lastTextNode, iterator.rightNode());
         }
 
-        // Move the cursor with the current memberid after all adjacent cursors,
-        // ONLY if it is at the same position as the requested one
-        if (memberid
-                && cursors[memberid]
-                && self.getCursorPosition(memberid) === originalPosition) {
 
+        // If the member cursor is as the requested position
+        if (memberid && cursors[memberid] && self.getCursorPosition(memberid) === steps) {
             cursorNode = cursors[memberid].getNode();
-            while (nodeOffset === 0 && cursorNode.nextSibling
-                    && cursorNode.nextSibling.localName === "cursor") {
-                cursorNode.parentNode.insertBefore(cursorNode, cursorNode.nextSibling.nextSibling);
+            // Then move the member's cursor after all adjacent cursors
+            while (cursorNode.nextSibling && cursorNode.nextSibling.localName === "cursor") {
+                // TODO this re-arrange logic will break if there are non-cursor elements in the way
+                // E.g., cursors occupy the same "step", but are on different sides of a span boundary
+                // This is currently avoided by calling fixCursorPositions after (almost) every op
+                // to re-arrange cursors together again
+                cursorNode.parentNode.insertBefore(cursorNode.nextSibling, cursorNode);
             }
-            // The lastTextNode is not "" if the position is at the end of a paragraph.
-            // We definitely need ephemeral empty text nodes instead of a lastTextNode representing
-            // all the previous text, to prevent insertion by one cursor causing movement of the other
-            // cursors at the same position.
-            if (lastTextNode.length > 0) {
-                lastTextNode = getRootNode().ownerDocument.createTextNode('');
+            if (lastTextNode.length > 0 && lastTextNode.nextSibling !== cursorNode) {
+                // The last text node contains content but is not adjacent to the cursor
+                // This can't be moved, as moving it would move the text content around as well. Yikes!
+                // So, create a new text node to insert data into
+                lastTextNode = getDOM().createTextNode('');
                 nodeOffset = 0;
-                cursorNode.parentNode.insertBefore(lastTextNode, cursorNode.nextSibling);
             }
-
-            // if the position is just after a cursor, then move in front of that
-            // cursor. Give preference to the cursor with the optionally specified memberid
-            while (nodeOffset === 0 && lastTextNode.previousSibling &&
-                    lastTextNode.previousSibling.localName === "cursor") {
-                node = lastTextNode.previousSibling;
-                if (lastTextNode.length > 0) {
-                    lastTextNode = getRootNode().ownerDocument.createTextNode('');
-                }
-                node.parentNode.insertBefore(lastTextNode, node);
-
-                if (cursorNode === node) {
-                    break;
-                }
-            }
+            // Keep the destination text node right next to the member's cursor, so inserted text pushes the cursor over
+            cursorNode.parentNode.insertBefore(lastTextNode, cursorNode);
         }
 
         // After the above cursor-specific adjustment, if the lastTextNode
         // has a text node previousSibling, merge them and make the result the lastTextNode
-        while (lastTextNode.previousSibling
-                && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
+        while (lastTextNode.previousSibling && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
             lastTextNode.previousSibling.appendData(lastTextNode.data);
             nodeOffset = lastTextNode.previousSibling.length;
             lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
@@ -504,7 +443,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
-    this.getPositionInTextNode = getPositionInTextNode;
+    this.getTextNodeAtStep = getTextNodeAtStep;
 
     /**
      * Iterates through all cursors and checks if they are in

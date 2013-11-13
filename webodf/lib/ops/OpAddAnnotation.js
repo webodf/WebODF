@@ -121,7 +121,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
     function insertNodeAtPosition(odtDocument, node, insertPosition) {
         var previousNode,
             parentNode,
-            domPosition = odtDocument.getPositionInTextNode(insertPosition, memberid);
+            domPosition = odtDocument.getTextNodeAtStep(insertPosition, memberid);
 
         if (domPosition) {
             previousNode = domPosition.textNode;
@@ -132,7 +132,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
             }
 
             parentNode.insertBefore(node, previousNode.nextSibling);
-            // clean up any empty text node which was created by odtDocument.getPositionInTextNode or previousNode.splitText
+            // clean up any empty text node which was created by odtDocument.getTextNodeAtStep or previousNode.splitText
             if (previousNode.length === 0) {
                 parentNode.removeChild(previousNode);
             }

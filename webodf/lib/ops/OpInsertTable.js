@@ -144,7 +144,7 @@ ops.OpInsertTable = function OpInsertTable() {
     }
 
     this.execute = function (odtDocument) {
-        var domPosition = odtDocument.getPositionInTextNode(position),
+        var domPosition = odtDocument.getTextNodeAtStep(position),
             rootNode = odtDocument.getRootNode(),
             previousSibling,
             tableNode;
