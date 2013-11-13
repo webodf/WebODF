@@ -51,17 +51,18 @@ runtime.loadClass("odf.OdfUtils");
 
     /**
      * Implementation of a step to DOM point lookup cache
-     * @param {!function():!Node} getRootNode
+     * @param {!Node} rootNode
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
      * @constructor
      */
-    function StepsCache(getRootNode, filter, bucketSize) {
+    function StepsCache(rootNode, filter, bucketSize) {
         var coordinatens = "urn:webodf:names:steps",
             /**@type {!Object.<(!string|!number), !ParagraphBookmark>}*/ stepToDomPoint = {},
             /**@type {!Object.<!string, !ParagraphBookmark>}*/ nodeToBookmark = {},
             odfUtils = new odf.OdfUtils(),
             domUtils = new core.DomUtils(),
+            basePoint,
             /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
         /**
@@ -111,10 +112,6 @@ runtime.loadClass("odf.OdfUtils");
                     }
                 } while(iterator.nextPosition());
             };
-        }
-
-        function getBasePoint() {
-            return new RootBookmark(0, getRootNode());
         }
 
         /**
@@ -250,7 +247,7 @@ runtime.loadClass("odf.OdfUtils");
                 cacheBucket -= bucketSize;
             }
 
-            cachePoint = cachePoint || getBasePoint();
+            cachePoint = cachePoint || basePoint;
             cachePoint.setIteratorPosition(iterator);
             return cachePoint.steps;
         };
@@ -263,7 +260,6 @@ runtime.loadClass("odf.OdfUtils");
          */
         function findBookmarkedAncestor(node, offset) {
             var nodeId,
-                rootNode = getRootNode(),
                 bookmark = null;
 
             node = node.childNodes[offset] || node;
@@ -293,23 +289,22 @@ runtime.loadClass("odf.OdfUtils");
          * @returns {!number} Corresponding step for the current iterator position
          */
         this.setToClosestDomPoint = function(node, offset, iterator) {
-            var rootNode = getRootNode(),
-                bookmark;
+            var bookmark;
 
             // TODO search for nearby bookmarks more intelligently
             if (node === rootNode && offset === 0) {
-                bookmark = getBasePoint();
+                bookmark = basePoint;
             } else if (node === rootNode && offset === rootNode.childNodes.length) {
                 bookmark = Object.keys(stepToDomPoint)
                     .map(function(cacheBucket) { return stepToDomPoint[cacheBucket]; })
                     .reduce(function(largestBookmark, bookmark) {
                         return bookmark.steps > largestBookmark.steps ? bookmark : largestBookmark;
-                    }, getBasePoint());
+                    }, basePoint);
             } else {
                 bookmark = findBookmarkedAncestor(node, offset);
             }
 
-            bookmark = bookmark || getBasePoint();
+            bookmark = bookmark || basePoint;
             bookmark.setIteratorPosition(iterator);
             return bookmark.steps;
         };
@@ -321,8 +316,7 @@ runtime.loadClass("odf.OdfUtils");
          */
         this.updateBookmarks = function(inflectionStep, doUpdate) {
             var affectedBookmarks,
-                updatedBuckets = {},
-                rootNode = getRootNode();
+                updatedBuckets = {};
 
             // Each node bookmark *may* appear up to once in the stepToDomPoint cache
             affectedBookmarks = Object.keys(nodeToBookmark)
@@ -357,6 +351,11 @@ runtime.loadClass("odf.OdfUtils");
                 stepToDomPoint[cacheBucket] = updatedBuckets[cacheBucket];
             });
         };
+
+        function init() {
+            basePoint = new RootBookmark(0, rootNode);
+        }
+        init();
     }
 
     /**
@@ -368,10 +367,30 @@ runtime.loadClass("odf.OdfUtils");
      * @constructor
      */
     ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter, bucketSize) {
-        var stepsCache = new StepsCache(getRootNode, filter, bucketSize),
+        var rootNode = getRootNode(),
+            stepsCache = new StepsCache(rootNode, filter, bucketSize),
             domUtils = new core.DomUtils(),
             iterator = newIterator(getRootNode()),
             /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+
+        /**
+         * This evil little check is necessary because someone, not mentioning any names *cough*
+         * added an extremely hacky undo manager that replaces the root node in order to go back
+         * to a prior document state.
+         * This makes things very sad, and kills baby kittens.
+         * Unfortunately, no-one has had time yet to write a *real* undo stack... so we just need
+         * to cope with it for now.
+         */
+        function verifyRootNode() {
+            // TODO Remove when a proper undo manager arrives
+            var currentRootNode = getRootNode();
+            if (currentRootNode !== rootNode) {
+                runtime.log("Undo detected. Resetting steps cache");
+                rootNode = currentRootNode;
+                stepsCache = new StepsCache(rootNode, filter, bucketSize);
+                iterator = newIterator(rootNode);
+            }
+        }
 
         /**
          * Convert the requested steps from root into the equivalent DOM node & offset pair
@@ -386,6 +405,7 @@ runtime.loadClass("odf.OdfUtils");
                 runtime.log("warn", "Requested steps were negative (" + steps + ")");
                 steps = 0;
             }
+            verifyRootNode();
             stepsFromRoot = stepsCache.setToClosestStep(steps, iterator);
             
             while (stepsFromRoot < steps && iterator.nextPosition()) {
@@ -417,10 +437,10 @@ runtime.loadClass("odf.OdfUtils");
                 beforeRoot,
                 destinationNode,
                 destinationOffset,
-                rootNode = getRootNode(),
                 rounding = 0,
                 isWalkable;
 
+            verifyRootNode();
             if (!domUtils.containsNode(rootNode, node)) {
                 beforeRoot = domUtils.comparePoints(rootNode, 0, node, offset) < 0;
                 node = rootNode;
@@ -457,8 +477,11 @@ runtime.loadClass("odf.OdfUtils");
          * Iterates over all available positions starting at the root node and primes the cache
          */
         this.prime = function() {
-            var stepsFromRoot = stepsCache.setToClosestStep(0, iterator),
+            var stepsFromRoot,
                 isWalkable;
+
+            verifyRootNode();
+            stepsFromRoot = stepsCache.setToClosestStep(0, iterator);
             while (iterator.nextPosition()) {
                 isWalkable = filter.acceptPosition(iterator) === FILTER_ACCEPT;
                 if (isWalkable) {
@@ -472,6 +495,7 @@ runtime.loadClass("odf.OdfUtils");
          * @param {!{position: !number, length: !number}} eventArgs
          */
         this.handleStepsInserted = function(eventArgs) {
+            verifyRootNode();
             // Old position = position
             // New position = position + length
             // E.g., {position: 10, length: 1} indicates 10 => 10, New => 11, 11 => 12, 12 => 13
@@ -484,6 +508,7 @@ runtime.loadClass("odf.OdfUtils");
          * @param {!{position: !number, length: !number}} eventArgs
          */
         this.handleStepsRemoved = function(eventArgs) {
+            verifyRootNode();
             // Old position = position + length
             // New position = position
             // E.g., {position: 10, length: 1} indicates 10 => 10, 11 => 10, 12 => 11
