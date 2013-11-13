@@ -60,6 +60,12 @@ ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter)
     this.convertStepsToDomPoint = function(steps) {
         var stepsFromRoot = 0,
             iterator = newIterator(getRootNode());
+        
+        if (steps < 0) {
+            runtime.log("warn", "Requested steps were negative (" + steps + ")");
+            steps = 0;
+        }
+
         iterator.setUnfilteredPosition(getRootNode(), 0);
         do {
             // Fast-forward to position 0 before starting to count
@@ -73,7 +79,9 @@ ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter)
                 stepsFromRoot += 1;
             }
         }
-        runtime.assert(stepsFromRoot === steps, "Requested " + steps + " steps but only " + stepsFromRoot + " are available");
+        if (stepsFromRoot !== steps) {
+            runtime.log("warn", "Requested " + steps + " steps but only " + stepsFromRoot + " are available");
+        }
         return {
             node: iterator.container(),
             offset: iterator.unfilteredDomOffset()

@@ -119,6 +119,25 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.position.offset", "t.expected.offset");
     }
 
+    function convertStepsToDomPoint_LessThan0_Returns0() {
+        var doc = createDoc("<text:p>AB</text:p>"),
+            p = doc.getElementsByTagName("p")[0];
+
+        t.expected = {node: p.firstChild, offset: 0};
+        t.position = t.translator.convertStepsToDomPoint(-1);
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
+    function convertStepsToDomPoint_BeyondMaxSteps_ReturnsMaxSteps() {
+        createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>");
+
+        t.expected = {node: testarea, offset: testarea.childNodes.length};
+        t.position = t.translator.convertStepsToDomPoint(100);
+        r.shouldBe(t, "t.position.node", "t.expected.node");
+        r.shouldBe(t, "t.position.offset", "t.expected.offset");
+    }
+
     function convertDomPointsToSteps_At0() {
         var doc = createDoc("<text:p>AB</text:p>"),
             p = doc.getElementsByTagName("p")[0];
@@ -179,6 +198,8 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertStepsToDomPoint_At0,
             convertStepsToDomPoint_At1,
             convertStepsToDomPoint_At5,
+            convertStepsToDomPoint_LessThan0_Returns0,
+            convertStepsToDomPoint_BeyondMaxSteps_ReturnsMaxSteps,
             convertDomPointsToSteps_At0,
             convertDomPointsToSteps_Before0,
             convertDomPointsToSteps_At1,
