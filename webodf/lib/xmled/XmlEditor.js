@@ -99,7 +99,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
     }
     function loadXSLTs() {
         htmlXslt = new XSLTProcessor();
-        runtime.loadXML("opxml2html.xsl", function (err, dom) {
+        runtime.loadXML("xsd/opxml2html.xsl", function (err, dom) {
             if (err) {
                 runtime.log(err);
             } else {
@@ -108,7 +108,7 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
             }
         });
         xslfoXslt = new XSLTProcessor();
-        runtime.loadXML("opxml2xslfo.xsl", function (err, dom) {
+        runtime.loadXML("xsd/opxml2xslfo.xsl", function (err, dom) {
             if (err) {
                 runtime.log(err);
             } else {
@@ -355,8 +355,9 @@ xmled.XmlEditor = function XmlEditor(element, grammarurl, styleurl) {
         if (initCrumbBar()) {
             crumbBar.setElement(element);
         }
-        var info = validationModel.getElementInfo(element),
-            defs = validationModel.getAttributeDefinitions(element),
+        var root = canvas.getDocumentRoot(),
+            info = validationModel.getElementInfo(root, element, filter),
+            defs = validationModel.getAttributeDefinitions(root, element, filter),
             y;
         contextInfoElement.innerHTML = info;
         attributeEditor.setAttributeDefinitions(defs, element);

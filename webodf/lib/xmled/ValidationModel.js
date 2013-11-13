@@ -45,6 +45,14 @@ xmled.ParticleType = {
     ELEMENT:  5
 };
 /**
+ * @enum {number}
+ */
+xmled.AttributeUse = {
+    OPTIONAL:   1,
+    REQUIRED:   2,
+    PROHIBITED: 3
+};
+/**
  * @constructor
  * @struct
  */
@@ -145,7 +153,22 @@ xmled.ElementRef = function ElementRef(element) {
     /**@type{!xmled.Element}*/
     this.element = element;
 };
-
+/**
+ * @constructor
+ * @struct
+ * @param {?string} ns
+ * @param {!string} name
+ */
+xmled.Attribute = function Attribute(ns, name) {
+    "use strict";
+    /**@type{?string}*/
+    this.ns = ns;
+    /**@type{!string}*/
+    this.name = name;
+    this.type = null;
+    /**@type{!xmled.AttributeUse}*/
+    this.use = xmled.AttributeUse.OPTIONAL;
+};
 /**
  * @constructor
  * @struct
@@ -158,6 +181,10 @@ xmled.Type = function Type() {
     this.simple = false;
     /**@type{?xmled.Sequence|?xmled.Choice|?xmled.All}*/
     this.particle = null;
+    /**@type{!Array.<!xmled.Attribute>}*/
+    this.attributes = [];
+    /**@type{!boolean}*/
+    this.anyAttribute = false;
 };
 /**
  * @constructor
@@ -175,10 +202,14 @@ xmled.Element = function Element(ns, name) {
     this.mixed = false;
     /**@type{!boolean}*/
     this.simple = false;
-    /**@type{?Element}*/
-    this.annotation = null;
+    /**@type{!string}*/
+    this.annotation = "";
     /**@type{?xmled.Sequence|?xmled.Choice|?xmled.All}*/
     this.particle = null;
+    /**@type{!Array.<!xmled.Attribute>}*/
+    this.attributes = [];
+    /**@type{!boolean}*/
+    this.anyAttribute = false;
 };
 /**
  * @constructor
@@ -229,10 +260,17 @@ xmled.parseSchema = function (dom, doms) {
         xsdns = "http://www.w3.org/2001/XMLSchema",
         /**@type{!Object.<?string,!Object.<!string,!xmled.Element>>}*/
         topElements = {},
+        elements = {},
+        attributes = {},
+        groups = {},
+        attributeGroups = {},
+        simpleTypes = {},
+        complexTypes = {},
         parseChoice,
         parseLocalComplexType,
         parseTopLevelElement,
         parseGroup,
+        addAttributes,
         simpleXsdTypes = {
             "string": 1,
             "dateTime": 1,
@@ -283,17 +321,7 @@ xmled.parseSchema = function (dom, doms) {
      * @return {!Element}
      */
     function findType(qname) {
-        var e = xsd.firstElementChild,
-            name;
-        while (e) {
-            name = xsdname(e);
-            if (name === "simpleType" || name === "complexType") {
-                if (e.getAttribute("name") === qname.name) {
-                    break;
-                }
-            }
-            e = e.nextElementSibling;
-        }
+        var e = simpleTypes[qname.name] || complexTypes[qname.name];
         if (!e) {
             throw "Type not found.";
         }
@@ -304,17 +332,7 @@ xmled.parseSchema = function (dom, doms) {
      * @return {!Element}
      */
     function findElement(name) {
-        var e = xsd.firstElementChild,
-            n;
-        while (e) {
-            n = xsdname(e);
-            if (n === "element") {
-                if (e.getAttribute("name") === name) {
-                    break;
-                }
-            }
-            e = e.nextElementSibling;
-        }
+        var e = elements[name];
         if (!e) {
             throw "Type not found.";
         }
@@ -355,6 +373,8 @@ xmled.parseSchema = function (dom, doms) {
     function setType(element, type) {
         element.mixed = type.mixed;
         element.particle = type.particle;
+        element.attributes = type.attributes;
+        element.anyAttribute = type.anyAttribute;
     }
     function getMinOccurs(element) {
         var minOccurs = element.getAttribute("minOccurs");
@@ -414,26 +434,23 @@ xmled.parseSchema = function (dom, doms) {
         return a === b;
     }
     function getAlternateGroupElements(group) {
-        var e = xsd.firstElementChild,
-            n,
+        var e,
+            name,
             sg,
-            nm,
             es = {};
-        while (e) {
-            n = xsdname(e);
-            if (n === "element") {
-                nm = e.getAttribute("name");
+        for (name in elements) {
+            if (elements.hasOwnProperty(name)) {
+                e = elements[name];
                 sg = e.getAttribute("substitutionGroup");
                 sg = sg && getLocalName(sg);
                 if (group === sg) {
                     if (e.getAttribute("abstract") === "true") {
-                        merge(es, getAlternateGroupElements(nm));
+                        merge(es, getAlternateGroupElements(name));
                     } else {
-                        es[nm] = getElement(targetNamespace, nm);
+                        es[name] = getElement(targetNamespace, name);
                     }
                 }
             }
-            e = e.nextElementSibling;
         }
         return es;
     }
@@ -584,14 +601,9 @@ xmled.parseSchema = function (dom, doms) {
      * @return {!Element}
      */
     function findGroup(groupRef) {
-        runtime.assert(groupRef.localName === "group", "");
-        var e = xsd.firstElementChild,
-            qname = groupRef.getAttribute("ref"),
-            localName = getLocalName(qname);
-        while (e && !(e.localName === "group"
-                && e.getAttribute("name") === localName)) {
-            e = e.nextElementSibling;
-        }
+        var qname = groupRef.getAttribute("ref"),
+            localName = getLocalName(qname),
+            e = groups[localName];
         if (!e) {
             throw "Group not found.";
         }
@@ -687,6 +699,101 @@ xmled.parseSchema = function (dom, doms) {
         }
         return el;
     }
+    function getAttributeType(attribute) {
+        if (!attribute) {
+            return null;
+        }
+        var e = attribute.firstChild,
+            enumeration = []; 
+        while (e && e.localName !== "simpleType") {
+            e = e.nextSibling;
+        }
+        e = e && e.firstChild;
+        while (e && e.localName !== "restriction") {
+            e = e.nextSibling;
+        }
+        if (!e) {
+            return null;
+        }
+        e = e.firstChild;
+        while (e) {
+            if (e.localName === "enumeration") {
+                enumeration.push(e.getAttribute("value"));
+            }
+            e = e.nextSibling;
+        }
+        if (enumeration.length) {
+            return { name: "enumeration", values: enumeration };
+        }
+        return null;
+    }
+    /**
+     * @param {!Element} att
+     * @return {!xmled.Attribute}
+     */
+    function getAttribute(att) {
+        var ref = att.getAttribute("ref"),
+            qname,
+            a,
+            use;
+        if (ref) {
+            qname = splitName(ref, att);
+            att = attributes[qname.name] || att;
+        } else {
+            qname = new xmled.QName(targetNamespace, att.getAttribute("name"));
+        }
+        a = new xmled.Attribute(qname.ns, qname.name);
+        a.type = getAttributeType(att);
+        use = att.getAttribute("use");
+        if (use === "required") {
+            a.use = xmled.AttributeUse.REQUIRED;
+        } else if (use === "prohibited") {
+            a.use = xmled.AttributeUse.PROHIBITED;
+        }
+        return a;
+    }
+    /**
+     * @param {!Element} att
+     * @param {!xmled.Type} type
+     * @return {undefined}
+     */
+    function addAttributeGroup(att, type) {
+        var ref = att.getAttribute("ref"),
+            qname = splitName(ref, att),
+            group = attributeGroups[qname.name];
+        if (group) {
+            group = skipOptionalAnnotation(group.firstElementChild);
+            addAttributes(group, type);
+        }
+    }
+    /**
+     * @param {?Element} att
+     * @param {!xmled.Type} type
+     * @return {undefined}
+     */
+    addAttributes = function addAttributes(att, type) {
+        var name;
+        while (att) {
+            name = xsdname(att);
+            if (name === "attribute") {
+                type.attributes.push(getAttribute(att));
+            } else if (name === "attributeGroup") {
+                addAttributeGroup(att, type);
+            } else if (name !== "anyAttribute") {
+                unexpected(att);
+            } else {
+                break;
+            }
+            att = att.nextElementSibling;
+        }
+        if (att && name === "anyAttribute") {
+            type.anyAttribute = true;
+            att = att.nextElementSibling;
+            if (att) {
+                unexpected(att);
+            }
+        }
+    };
     /**
      * @param {!Element} def
      * @return {!xmled.Type}
@@ -700,20 +807,27 @@ xmled.parseSchema = function (dom, doms) {
             type.particle = null;
         } else if (name === "simpleContent") {
             type.simple = true;
+            e = e.nextElementSibling;
         } else if (name === "complexContent") {
             type = parseComplexContent(e);
+            e = e.nextElementSibling;
         } else if (name === "sequence") {
             type.particle = parseSequence(e);
+            e = e.nextElementSibling;
         } else if (name === "choice") {
             type.particle = parseChoice(e);
+            e = e.nextElementSibling;
         } else if (name === "all") {
             type.particle = parseAll(e);
+            e = e.nextElementSibling;
         } else if (name === "group") {
             type.particle = parseDefinitionGroup(e);
-        } else if (name !== "anyAttribute" && name !== "attribute"
-                && name !== "attributeGroup") {
+            e = e.nextElementSibling;
+        } else if (name !== "anyAttribute" && name !== "attributeGroup"
+                && name !== "attribute") {
             unexpected(e);
         }
+        addAttributes(e, type);
         return type;
     };
     function parseLocalSimpleType(def) {
@@ -743,7 +857,7 @@ xmled.parseSchema = function (dom, doms) {
             name = xsdname(e),
             type;
         if (name === "annotation") {
-            element.annotation = e;
+            element.annotation = e.textContent;
             e = e.nextElementSibling;
             name = xsdname(e);
         }
@@ -771,7 +885,29 @@ xmled.parseSchema = function (dom, doms) {
             unexpected(e);
         }
     };
+    function indexTopLevelElements() {
+        var e = xsd.firstElementChild,
+            name;
+        while (e) {
+            name = xsdname(e);
+            if (name === "element") {
+                elements[e.getAttribute("name")] = e;
+            } else if (name === "attribute") {
+                attributes[e.getAttribute("name")] = e;
+            } else if (name === "group") {
+                groups[e.getAttribute("name")] = e;
+            } else if (name === "attributeGroup") {
+                attributeGroups[e.getAttribute("name")] = e;
+            } else if (name === "simpleType") {
+                simpleTypes[e.getAttribute("name")] = e;
+            } else if (name === "complexType") {
+                complexTypes[e.getAttribute("name")] = e;
+            }
+            e = e.nextElementSibling;
+        }
+    }
     function parse() {
+        indexTopLevelElements();
         var e = xsd.firstElementChild,
             name,
             schemaLocation;
@@ -789,17 +925,10 @@ xmled.parseSchema = function (dom, doms) {
             e = e.nextElementSibling;
         }
         // parse body
-        while (e) {
-            name = xsdname(e);
-            if (name === "element") {
-                if (e.getAttribute("abstract") !== "true") {
-                    name = e.getAttribute("name");
-                    getElement(targetNamespace, e.getAttribute("name"));
-                }
-            } else if (!(name === "attribute" || name === "annotation" || name === "attribute" || name === "attributeGroup" || name === "complexType" || name === "group" || name === "simpleType" || name === "notation")) {
-                throw "Unexpected element " + e.namespaceURI + " " + name;
+        for (name in elements) {
+            if (elements.hasOwnProperty(name)) {
+                getElement(targetNamespace, name);
             }
-            e = e.nextElementSibling;
         }
     }
     parse();
@@ -960,15 +1089,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     this.getError = function () {
         return error;
     };
-    function getDocumentation(e) {
-        var es = e.getElementsByTagNameNS(xsdns, "documentation"),
-            doc = "",
-            i;
-        for (i = 0; i < es.length; i += 1) {
-            doc += es.item(i).textContent + "<br/>";
-        }
-        return doc;
-    }
     /**
      * @param {!string} qname
      * @return {!string}
@@ -1001,127 +1121,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             es = xsd.getElementsByTagNameNS(xsdns, "element");
         return getElementWithName(es, localName);
     }
-    function findAttributeGroup(name) {
-        var es = xsd.getElementsByTagNameNS(xsdns, "attributeGroup"),
-            e,
-            i;
-        for (i = 0; i < es.length; i += 1) {
-            e = es.item(i);
-            if (e.getAttribute("name") === name) {
-                return e;
-            }
-        }
-        return null;
-    }
-    function findAttribute(name) {
-        var es = xsd.getElementsByTagNameNS(xsdns, "attribute"),
-            e,
-            i;
-        for (i = 0; i < es.length; i += 1) {
-            e = es.item(i);
-            if (e.getAttribute("name") === name) {
-                return e;
-            }
-        }
-        return null;
-    }
-    function getType(attribute) {
-        if (!attribute) {
-            return null;
-        }
-        var e = attribute.firstChild,
-            enumeration = []; 
-        while (e && e.localName !== "simpleType") {
-            e = e.nextSibling;
-        }
-        e = e && e.firstChild;
-        while (e && e.localName !== "restriction") {
-            e = e.nextSibling;
-        }
-        if (!e) {
-            return null;
-        }
-        e = e.firstChild;
-        while (e) {
-            if (e.localName === "enumeration") {
-                enumeration.push(e.getAttribute("value"));
-            }
-            e = e.nextSibling;
-        }
-        if (enumeration.length) {
-            return { name: "enumeration", values: enumeration };
-        }
-        return null;
-    }
-    /**
-     * Return a description for the given element.
-     * @param {!Element} element
-     * @return {!string}
-     */
-    this.getElementInfo = function (element) {
-        var e = findElement(element.localName),
-            doc = "<i>" + element.localName + "</i>";
-        if (e) {
-            doc += "<br/>" + getDocumentation(e);
-        }
-        return doc;
-    };
-    function collectAttributeDefinitions(e, atts, element) {
-        e = e && e.firstChild;
-        var localName, value, att;
-        while (e) {
-            if (e.localName === "attribute") {
-                att = e;
-                if (!e.hasAttribute("name")) {
-                    att = findAttribute(e.getAttribute("ref"));
-                }
-                localName = att ? att.getAttribute("name") : null;
-                value = (element.hasAttribute(localName)) ? element.getAttribute(localName) : null;
-                atts.push({
-                    localName: localName,
-                    value: value,
-                    type: getType(att)
-                });
-            } else if (e.localName === "attributeGroup") {
-                collectAttributeDefinitions(
-                    findAttributeGroup(e.getAttribute("ref")),
-                    atts,
-                    element
-                );
-            }
-            e = e.nextSibling;
-        }
-    }
-    function getAttributeDefinitions(element) {
-        var e = findElement(element.localName),
-            atts = [],
-            complexType;
-        if (!e) {
-            return atts;
-        }
-        complexType = e.firstChild;
-        while (complexType && complexType.localName !== "complexType") {
-            complexType = complexType.nextSibling;
-        }
-        if (!complexType) {
-            return atts;
-        }
-        collectAttributeDefinitions(complexType, atts, element);
-        return atts;
-    }
-    /**
-     * @param {!Element} element
-     * @return {!Array}
-     */
-    this.getAttributeDefinitions = function (element) {
-        var a = [], e = element, ns = element.namespaceURI, atts;
-        while (e && e.namespaceURI === ns && e.parentNode !== e) {
-            atts = getAttributeDefinitions(e);
-            a.push({name: e.localName, atts: atts});
-            e = e.parentNode;
-        }
-        return a;
-    };
     function getAllowedElements(e, allowed) {
         e = e.firstElementChild;
         while (e) {
@@ -1219,6 +1218,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
         }
     }
+    function createDefaultAttributeValue(att) {
+        return att ? "1" : "0";
+    }
     /**
      * @param {!Element} instance
      * @param {!xmled.Element} definition
@@ -1226,7 +1228,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     fillElementWithDefaults = function (instance, definition) {
         var particle = definition.particle,
-            e;
+            e,
+            i,
+            att;
         if (!particle) {
             return;
         }
@@ -1237,16 +1241,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e = /**@type{!xmled.Choice}*/(particle);
             addChoice(instance, e);
         }
-/*
-            forEachElement(type, xsdns, "attribute", function (att) {
-                if (att.getAttribute("use") === "required") {
-                    if (att.hasAttribute("name")) {
-                        instance.setAttribute(att.getAttribute("name"),
+        for (i = 0; i < definition.attributes.length; i += 1) {
+            att = definition.attributes[i];
+            if (att.use === xmled.AttributeUse.REQUIRED) {
+                instance.setAttribute(att.name,
                             createDefaultAttributeValue(att));
-                    }
-                }
-            });
-*/
+            }
+        }
     };
     /**
      * @param {!Document} doc
@@ -1502,6 +1503,44 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         }
         return ps;
     }
+    /**
+     * @param {!Element} documentElement
+     * @param {!Element} element
+     * @param {?NodeFilter} filter
+     * @return {!Array}
+     */
+    this.getAttributeDefinitions = function (documentElement, element, filter) {
+        var ps = findAllParticles(documentElement, element, filter),
+            e,
+            ed,
+            p,
+            a = [],
+            i;
+        a.length = ps.length;
+        e = element;
+        for (i = a.length - 1; i >= 0; i -= 1) {
+            p = ps[i];
+            ed = /**@type{!xmled.ElementRef}*/(p[getPosition(e, filter)].def);
+            a[i] = {name: ed.element.name, atts: ed.element.attributes};
+            e = /**@type{!Element}*/(e.parentNode);
+        }
+        a.reverse();
+        return a;
+    };
+    /**
+     * Return a description for the given element.
+     * @param {!Element} documentElement
+     * @param {!Element} element
+     * @param {?NodeFilter} filter
+     * @return {!string}
+     */
+    this.getElementInfo = function (documentElement, element, filter) {
+        var ps = findAllParticles(documentElement, element, filter),
+            pd = ps[ps.length - 1][getPosition(element, filter)].def,
+            e = /**@type{!xmled.ElementRef}*/(pd).element,
+            doc = "<i>" + e.name + "</i><br/>" + e.annotation;
+        return doc;
+    };
 /*
     function print(particle) {
         var t = "",

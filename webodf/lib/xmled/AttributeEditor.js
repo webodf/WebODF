@@ -87,20 +87,22 @@ xmled.AttributeEditor = function AttributeEditor(element) {
         } else {
             field = doc.createElementNS(htmlns, "input");
         }
-        toggle.checked = target.hasAttribute(att.localName);
+        toggle.checked = target.hasAttribute(att.name);
         field.disabled = !toggle.checked;
         toggle.onchange = field.onchange = function () {
-            var has = target.hasAttribute(att.localName);
+            var has = target.hasAttribute(att.name);
             field.disabled = !toggle.checked;
             if (has && !toggle.checked) {
-                target.removeAttribute(att.localName);
+                target.removeAttribute(att.name);
             } else if (toggle.checked) {
-                target.setAttribute(att.localName, field.value);
+                target.setAttribute(att.name, field.value);
             }
         };
-        span.appendChild(toggle);
+        if (att.use === xmled.AttributeUse.OPTIONAL) {
+            span.appendChild(toggle);
+        }
         span.appendChild(field);
-        field.value = att.value;
+        field.value = target.getAttribute(att.name);
         return span;
     }
     function addHoverBehaviour(e, element) {
@@ -120,23 +122,24 @@ xmled.AttributeEditor = function AttributeEditor(element) {
         var i, e, a, att, j, table, tr, td, t = target;
         for (i = 0; i < attributesDefinitions.length; i += 1) {
             e = doc.createElementNS(htmlns, "b");
-            e.appendChild(doc.createTextNode(attributesDefinitions[i].name));
-            element.appendChild(e);
             a = attributesDefinitions[i];
+            e.appendChild(doc.createTextNode(a.name));
+            a = a.atts;
+            element.appendChild(e);
             table = doc.createElementNS(htmlns, "table");
             addHoverBehaviour(e, t);
             addHoverBehaviour(table, t);
             element.appendChild(table);
-            for (j = 0; j < a.atts.length; j += 1) {
-                att = a.atts[j];
-                tr = doc.createElementNS(htmlns, "tr");
-                td = doc.createElementNS(htmlns, "td");
-                td.appendChild(doc.createTextNode(att.localName));
-                tr.appendChild(td);
-                td = doc.createElementNS(htmlns, "td");
-                td.appendChild(createAttributeEditor(att, t));
-                tr.appendChild(td);
-                if (att.localName) {
+            for (j = 0; j < a.length; j += 1) {
+                att = a[j];
+                if (att.use !== xmled.AttributeUse.PROHIBITED) {
+                    tr = doc.createElementNS(htmlns, "tr");
+                    td = doc.createElementNS(htmlns, "td");
+                    td.appendChild(doc.createTextNode(att.name));
+                    tr.appendChild(td);
+                    td = doc.createElementNS(htmlns, "td");
+                    td.appendChild(createAttributeEditor(att, t));
+                    tr.appendChild(td);
                     table.appendChild(tr);
                 }
             }
