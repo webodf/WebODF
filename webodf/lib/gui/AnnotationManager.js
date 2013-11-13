@@ -223,7 +223,7 @@ gui.AnnotationManager = function AnnotationManager(session, inputMemberId) {
         moveCursor = new ops.OpMoveCursor();
         moveCursor.init({
             memberid: inputMemberId,
-            position: position-1, // Last position just before the annotation starts
+            position: position > 0 ? position-1 : position, // Last position just before the annotation starts
             length: 0
         });
         session.enqueue([op, moveCursor]);
