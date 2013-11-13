@@ -419,7 +419,10 @@ xmled.parseSchema = function (dom, doms) {
             element = map[name];
         } else {
             def = findElement(name);
-            element = map[name] = new xmled.Element(ns, name);
+            element = new xmled.Element(ns, name);
+            if (def.getAttribute("abstract") !== "true") {
+                map[name] = element;
+            }
             parseTopLevelElement(def, element);
         }
         return new xmled.ElementRef(element);
@@ -1076,7 +1079,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         particles = new xmled.ParticleCache(),
         fillElementWithDefaults,
         findParticlesInCollection,
-        schema;
+        schema,
+        addCollection;
     /**
      * @return {!xmled.ValidationModel.State}
      */
@@ -1160,26 +1164,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     };
     /**
      * @param {!Element} instance
-     * @param {!xmled.ParticleDefinition} def
-     * @return {undefined}
-     */
-    function addCollection(instance, def) {
-        var doc = instance.ownerDocument,
-            el,
-            e;
-        if (def.type === xmled.ParticleType.ELEMENT) {
-            el = /**@type{!xmled.ElementRef}*/(def).element;
-            if (el.ns) {
-                e = doc.createElementNS(el.ns, el.name);
-            } else {
-                e = doc.createElement(el.name);
-            }
-            fillElementWithDefaults(e, el);
-            instance.appendChild(e);
-        }
-    }
-    /**
-     * @param {!Element} instance
      * @param {!xmled.Sequence} sequence
      * @return {undefined}
      */
@@ -1218,6 +1202,29 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             }
         }
     }
+    /**
+     * @param {!Element} instance
+     * @param {!xmled.ParticleDefinition} def
+     * @return {undefined}
+     */
+    addCollection = function addCollection(instance, def) {
+        var doc = instance.ownerDocument,
+            el,
+            e;
+        if (def.type === xmled.ParticleType.ELEMENT) {
+            el = /**@type{!xmled.ElementRef}*/(def).element;
+            if (el.ns) {
+                e = doc.createElementNS(el.ns, el.name);
+            } else {
+                e = doc.createElement(el.name);
+            }
+            fillElementWithDefaults(e, el);
+            instance.appendChild(e);
+        } else if (def.type === xmled.ParticleType.CHOICE) {
+            el = /**@type{!xmled.Choice}*/(def);
+            addChoice(instance, el);
+        }
+    };
     function createDefaultAttributeValue(att) {
         return att ? "1" : "0";
     }
@@ -1231,6 +1238,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             e,
             i,
             att;
+        for (i = 0; i < definition.attributes.length; i += 1) {
+            att = definition.attributes[i];
+            if (att.use === xmled.AttributeUse.REQUIRED) {
+                instance.setAttribute(att.name,
+                            createDefaultAttributeValue(att));
+            }
+        }
         if (!particle) {
             return;
         }
@@ -1240,13 +1254,6 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         } else if (particle.type === xmled.ParticleType.CHOICE) {
             e = /**@type{!xmled.Choice}*/(particle);
             addChoice(instance, e);
-        }
-        for (i = 0; i < definition.attributes.length; i += 1) {
-            att = definition.attributes[i];
-            if (att.use === xmled.AttributeUse.REQUIRED) {
-                instance.setAttribute(att.name,
-                            createDefaultAttributeValue(att));
-            }
         }
     };
     /**
