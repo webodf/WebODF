@@ -36,7 +36,9 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global core, ops, gui*/
+/*global core, ops, gui, runtime*/
+
+runtime.loadClass("core.PositionFilter");
 
 /**
  * @constructor
@@ -47,7 +49,8 @@
 gui.TextManipulator = function TextManipulator(session, inputMemberId, directStyleOp) {
     "use strict";
 
-    var odtDocument = session.getOdtDocument();
+    var odtDocument = session.getOdtDocument(),
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
     /**
      * Creates an operation to remove the provided selection
@@ -120,17 +123,47 @@ gui.TextManipulator = function TextManipulator(session, inputMemberId, directSty
     };
 
     /**
+     * Checks if there are any walkable positions in the specified direction within
+     * the current root, starting at the specified node.
+     * The iterator is constrained within the root element for the current cursor position so
+     * iteration will stop once the root is entirely walked in the requested direction
+     * @param cursorNode
+     * @param forward
+     * @returns {boolean}
+     */
+    function hasPositionInDirection(cursorNode, forward) {
+        var rootConstrainedFilter = new core.PositionFilterChain(),
+            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootElement(cursorNode)),
+            nextPosition = /**@type {!function():!boolean}*/(forward ? iterator.nextPosition : iterator.previousPosition);
+
+        // TODO Performance could be improved by allowing iteration to skip child roots
+        // Even though the iterator is bounded to the root, iteration will still go over
+        // child elements that are part of a different root. Therefore, a combined filter
+        // is still necessary
+        rootConstrainedFilter.addFilter('BaseFilter', odtDocument.getPositionFilter());
+        rootConstrainedFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
+        iterator.setUnfilteredPosition(cursorNode, 0);
+        while (nextPosition()) {
+            if (rootConstrainedFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Removes the currently selected content. If no content is selected and there is at least
      * one character to the left of the current selection, that character will be removed instead.
      * @return {!boolean}
      */
     this.removeTextByBackspaceKey = function() {
-        var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+        var cursor = odtDocument.getCursor(inputMemberId),
+            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op = null;
 
         if (selection.length === 0) {
             // position-1 must exist for backspace to be valid
-            if (selection.position > 0 && odtDocument.getPositionInTextNode(selection.position - 1)) {
+            if (hasPositionInDirection(cursor.getNode(), false)) {
                 op = new ops.OpRemoveText();
                 op.init({
                     memberid: inputMemberId,
@@ -146,18 +179,21 @@ gui.TextManipulator = function TextManipulator(session, inputMemberId, directSty
         return op !== null;
     };
 
+
+
     /**
      * Removes the currently selected content. If no content is selected and there is at least
      * one character to the right of the current selection, that character will be removed instead.
      * @return {!boolean}
      */
     this.removeTextByDeleteKey = function() {
-        var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+        var cursor = odtDocument.getCursor(inputMemberId),
+            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op = null;
 
         if (selection.length === 0) {
             // position+1 must exist for delete to be valid
-            if (odtDocument.getPositionInTextNode(selection.position + 1)) {
+            if (hasPositionInDirection(cursor.getNode(), true)) {
                 op = new ops.OpRemoveText();
                 op.init({
                     memberid: inputMemberId,

@@ -83,6 +83,30 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
+     * @param {!Node} node
+     * @return {!boolean}
+     */
+    function isRoot(node) {
+        if ((node.namespaceURI === odf.Namespaces.officens && node.localName === 'text') ||
+            (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param {!Node} node
+     * @return {!Node}
+     */
+    function getRoot(node) {
+        while (node && !isRoot(node)) {
+            node = /**@type{!Node}*/(node.parentNode);
+        }
+        return node;
+    }
+    this.getRootElement = getRoot;
+
+    /**
      * A filter that allows a position if it has the same closest
      * whitelisted root as the specified 'anchor', which can be the cursor
      * of the given memberid, or a given node
@@ -91,28 +115,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string|!Node} anchor 
      */
     function RootFilter(anchor) {
-        /**
-         * @param {!Node} node
-         * @return {!boolean}
-         */
-        function isRoot(node) {
-            if ((node.namespaceURI === odf.Namespaces.officens && node.localName === 'text') ||
-                    (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation')) {
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * @param {!Node} node
-         * @return {!Node}
-         */
-        function getRoot(node) {
-            while (node && !isRoot(node)) {
-                node = /**@type{!Node}*/(node.parentNode);
-            }
-            return node;
-        }
 
         /**
          * @param {!core.PositionIterator} iterator
