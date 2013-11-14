@@ -67,33 +67,6 @@
 core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         expandEntityReferences) {
     "use strict";
-    /**
-     * Empty text nodes are not considered to be a valid position for the
-     * positioniterator. They should be filtered out in all cases.
-     * @constructor
-     * @extends NodeFilter
-     */
-    function EmptyTextNodeFilter() {
-        this.acceptNode = function (node) {
-            if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
-                return NodeFilter.FILTER_REJECT;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-        };
-    }
-    /**
-     * @constructor
-     * @extends NodeFilter
-     * @param {!NodeFilter} filter
-     */
-    function FilteredEmptyTextNodeFilter(filter) {
-        this.acceptNode = function (node) {
-            if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
-                return NodeFilter.FILTER_REJECT;
-            }
-            return filter.acceptNode(node);
-        };
-    }
     /*
      * Implementation notes.
      * The position of the positioniterator is defined by two internal
@@ -114,21 +87,56 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         /**@type{!number}*/
         currentPos,
         /**@type{!function(?Node):!number}*/
-        nodeFilter;
+        nodeFilter,
+        TEXT_NODE = Node.TEXT_NODE,
+        ELEMENT_NODE = Node.ELEMENT_NODE,
+        FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
+        FILTER_REJECT = NodeFilter.FILTER_REJECT;
+
+    /**
+     * Empty text nodes are not considered to be a valid position for the
+     * positioniterator. They should be filtered out in all cases.
+     * @constructor
+     * @extends NodeFilter
+     */
+    function EmptyTextNodeFilter() {
+        this.acceptNode = function (node) {
+            if (node.nodeType === TEXT_NODE && node.length === 0) {
+                return FILTER_REJECT;
+            }
+            return FILTER_ACCEPT;
+        };
+    }
+    /**
+     * @constructor
+     * @extends NodeFilter
+     * @param {!NodeFilter} filter
+     */
+    function FilteredEmptyTextNodeFilter(filter) {
+        this.acceptNode = function (node) {
+            if (node.nodeType === TEXT_NODE && node.length === 0) {
+                return FILTER_REJECT;
+            }
+            return filter.acceptNode(node);
+        };
+    }
+
     /**
      * @return {!boolean}
      */
     this.nextPosition = function () {
-        if (walker.currentNode === root) {
+        var currentNode = walker.currentNode,
+            nodeType = currentNode.nodeType;
+        if (currentNode === root) {
             return false;
         }
-        if (currentPos === 0 && walker.currentNode.nodeType === Node.ELEMENT_NODE) {
+        if (currentPos === 0 && nodeType === ELEMENT_NODE) {
             // step inside an element
             if (walker.firstChild() === null) {
                 currentPos = 1;
             }
-        } else if (walker.currentNode.nodeType === Node.TEXT_NODE
-                && currentPos + 1 < walker.currentNode.length) {
+        } else if (nodeType === TEXT_NODE
+                && currentPos + 1 < currentNode.length) {
             // advance inside a text node
             currentPos += 1;
         } else {
@@ -144,10 +152,10 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     };
     function setAtEnd() {
         var type = walker.currentNode.nodeType;
-        if (type === Node.TEXT_NODE) {
+        if (type === TEXT_NODE) {
             currentPos = walker.currentNode.length - 1;
         } else {
-            currentPos = (type === Node.ELEMENT_NODE) ? 1 : 0;
+            currentPos = (type === ELEMENT_NODE) ? 1 : 0;
         }
     }
     /**
@@ -172,14 +180,15 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!boolean}
      */
     this.previousPosition = function () {
-        var moved = true;
+        var moved = true,
+            currentNode = walker.currentNode;
         if (currentPos === 0) {
             moved = previousNode();
-        } else if (walker.currentNode.nodeType === Node.TEXT_NODE) {
+        } else if (currentNode.nodeType === TEXT_NODE) {
             currentPos -= 1;
         } else if (walker.lastChild() !== null) {
             setAtEnd();
-        } else if (walker.currentNode === root) {
+        } else if (currentNode === root) {
             moved = false;
         } else {
             currentPos = 0;
@@ -197,7 +206,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     this.container = function () {
         var n = /**@type{!Element|!Text}*/(walker.currentNode),
             t = n.nodeType;
-        if (currentPos === 0 && t !== Node.TEXT_NODE) {
+        if (currentPos === 0 && t !== TEXT_NODE) {
             n = /**@type{!Element|!Text}*/(n.parentNode);
         }
         return n;
@@ -214,12 +223,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     this.rightNode = function () {
         var n = walker.currentNode,
             nodeType = n.nodeType;
-        if (nodeType === Node.TEXT_NODE && currentPos === n.length) {
+        if (nodeType === TEXT_NODE && currentPos === n.length) {
             n = n.nextSibling;
-            while (n && nodeFilter(n) !== 1) {
+            while (n && nodeFilter(n) !== FILTER_ACCEPT) {
                 n = n.nextSibling;
             }
-        } else if (nodeType === Node.ELEMENT_NODE && currentPos === 1) {
+        } else if (nodeType === ELEMENT_NODE && currentPos === 1) {
             n = null;
         }
         return n;
@@ -233,12 +242,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         var n = walker.currentNode;
         if (currentPos === 0) {
             n = n.previousSibling;
-            while (n && nodeFilter(n) !== 1) {
+            while (n && nodeFilter(n) !== FILTER_ACCEPT) {
                 n = n.previousSibling;
             }
-        } else if (n.nodeType === Node.ELEMENT_NODE) {
+        } else if (n.nodeType === ELEMENT_NODE) {
             n = n.lastChild;
-            while (n && nodeFilter(n) !== 1) {
+            while (n && nodeFilter(n) !== FILTER_ACCEPT) {
                 n = n.previousSibling;
             }
         }
@@ -259,7 +268,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {!number}
      */
     this.unfilteredDomOffset = function () {
-        if (walker.currentNode.nodeType === Node.TEXT_NODE) {
+        if (walker.currentNode.nodeType === TEXT_NODE) {
             return currentPos;
         }
         var c = 0,
@@ -314,7 +323,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         runtime.assert((container !== null) && (container !== undefined),
             "PositionIterator.setUnfilteredPosition called without container");
         walker.currentNode = container;
-        if (container.nodeType === Node.TEXT_NODE) {
+        if (container.nodeType === TEXT_NODE) {
             currentPos = offset;
             runtime.assert(offset <= container.length, "Error in setPosition: " +
                 offset + " > " + container.length);
@@ -334,9 +343,9 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
 
         filterResult = nodeFilter(container);
         node = container.parentNode;
-        while (node && node !== root && filterResult === NodeFilter.FILTER_ACCEPT) {
+        while (node && node !== root && filterResult === FILTER_ACCEPT) {
             filterResult = nodeFilter(node);
-            if (filterResult !== NodeFilter.FILTER_ACCEPT) {
+            if (filterResult !== FILTER_ACCEPT) {
                 walker.currentNode = node;
             }
             node = node.parentNode;
@@ -363,11 +372,11 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             // available sibling or parent
             currentPos = 1;
         }
-        if (filterResult !== NodeFilter.FILTER_ACCEPT) {
+        if (filterResult !== FILTER_ACCEPT) {
             // The current position is not valid! Move along to the next one that is
             return self.nextPosition();
         }
-        runtime.assert(nodeFilter(walker.currentNode) === NodeFilter.FILTER_ACCEPT,
+        runtime.assert(nodeFilter(walker.currentNode) === FILTER_ACCEPT,
             "PositionIterater.setUnfilteredPosition call resulted in an non-visible node being set");
         return true;
     };
@@ -387,7 +396,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * @return {undefined}
      */
     this.moveToEndOfNode = function (node) {
-        if (node.nodeType === Node.TEXT_NODE) {
+        if (node.nodeType === TEXT_NODE) {
             self.setUnfilteredPosition(node, node.length);
         } else {
             walker.currentNode = node;

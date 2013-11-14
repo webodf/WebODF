@@ -49,6 +49,8 @@ runtime.loadClass("odf.OdfUtils");
 ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
     "use strict";
     var odfUtils = new odf.OdfUtils(),
+        ELEMENT_NODE = Node.ELEMENT_NODE,
+        TEXT_NODE = Node.TEXT_NODE,
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT;
 
@@ -112,10 +114,10 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
             rightNode,
             r;
 
-        if (nodeType !== Node.ELEMENT_NODE && nodeType !== Node.TEXT_NODE) {
+        if (nodeType !== ELEMENT_NODE && nodeType !== TEXT_NODE) {
             return FILTER_REJECT;
         }
-        if (nodeType === Node.TEXT_NODE) {
+        if (nodeType === TEXT_NODE) {
             if (!odfUtils.isGroupingElement(container.parentNode)
                 || odfUtils.isWithinTrackedChanges(container.parentNode, getRootNode())) {
                 return FILTER_REJECT;
@@ -128,7 +130,7 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
             if (offset > 0) {
                 // The cursor may be placed to the right of a non-whitespace
                 // character.
-                leftChar = text.substr(offset - 1, 1);
+                leftChar = text[offset - 1];
                 if (!odfUtils.isODFWhitespace(leftChar)) {
                     return FILTER_ACCEPT;
                 }
@@ -139,7 +141,7 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
                 // * there is not another whitespace character in front of
                 //   it.
                 if (offset > 1) {
-                    leftChar = text.substr(offset - 2, 1);
+                    leftChar = text[offset - 2];
                     if (!odfUtils.isODFWhitespace(leftChar)) {
                         r = FILTER_ACCEPT;
                     } else if (!odfUtils.isODFWhitespace(text.substr(0, offset))) {
@@ -158,7 +160,7 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
                     return odfUtils.isTrailingWhitespace(container, offset)
                         ? FILTER_REJECT : FILTER_ACCEPT;
                 }
-                rightChar = text.substr(offset, 1);
+                rightChar = text[offset];
                 if (odfUtils.isODFWhitespace(rightChar)) {
                     return FILTER_REJECT;
                 }
