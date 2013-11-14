@@ -50,7 +50,39 @@ runtime.loadClass("odf.OdfUtils");
     var nextNodeId = 0;
 
     /**
-     * Implementation of a step to DOM point lookup cache
+     * Implementation of a step to DOM point lookup cache.
+     *
+     * A cache point is created for each passed paragraph, saving the number of steps from the root node to the first
+     * walkable position in the paragraph. This cached point is linked to the paragraph node via a unique identifier
+     * per node.
+     *
+     * This cache depends on StepsTranslator.handleStepsInserted & handleStepsRemoved is called at the step of change,
+     * along with information about how many steps have been changed. The cache is able to cope with paragraph nodes being
+     * cloned, as long as the position of change and reported number of steps changed is correctly reported.
+     *
+     * However, this implementation will NOT cope with paragraphs being re-ordered, even if a change event is reported.
+     * This is because the cache relies on the paragraph order remaining fixed as long as they are in the DOM.
+     * If paragraph reordering is desired, it can be achieved through either:
+     * a) cloning the paragraph into the new position and removing the original paragraph (the clone will be detected and rectified)
+     * b) removing the original paragraph from the DOM, calling updateCache (to purge the original bookmark) then re-adding
+     *      the paragraph into the new position and calling updateCache a second time (add a brand new bookmark for the paragraph)
+     *
+     * When updateCacheAtPoint is called, the cache will refresh all bookmarks trailing the removal/insertion step. Note,
+     * the exact step of change is not affected. For example, inserting 2 steps after position 9 results in the following
+     * changes to existing points:
+     * 9 => 9
+     * 10 => 12
+     * 11 => 13
+     * ...
+     *
+     * Removing 2 steps from after position 9 results in the following:
+     * 9 => 9
+     * 10 => x
+     * 11 => x
+     * 12 => 10
+     * 13 => 11
+     * ...
+     *
      * @param {!Node} rootNode
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
@@ -320,13 +352,15 @@ runtime.loadClass("odf.OdfUtils");
          * @param {!number} inflectionStep Step beyond which the changes occurs. Bookmarks beyond step+1 will be updated
          * @param {!function(!ParagraphBookmark)} doUpdate Callback to update the bookmark
          */
-        this.updateBookmarks = function(inflectionStep, doUpdate) {
+        this.updateCacheAtPoint = function(inflectionStep, doUpdate) {
             var affectedBookmarks,
                 updatedBuckets = {};
 
-            // Each node bookmark *may* appear up to once in the stepToDomPoint cache
+            // Key concept: on step removal, the inflectionStep is replaced by the following step.
+            // In the case of paragraph removal, this means the bookmark at exactly the point of inflection might be replaced.
+
             affectedBookmarks = Object.keys(nodeToBookmark)
-                .map(function(step) { return nodeToBookmark[step]; })
+                .map(function(nodeId) { return nodeToBookmark[nodeId]; })
                 .filter(function(bookmark) { return bookmark.steps > inflectionStep; });
 
             affectedBookmarks.forEach(function(bookmark) {
@@ -505,7 +539,7 @@ runtime.loadClass("odf.OdfUtils");
             // Old position = position
             // New position = position + length
             // E.g., {position: 10, length: 1} indicates 10 => 10, New => 11, 11 => 12, 12 => 13
-            stepsCache.updateBookmarks(eventArgs.position, function(bucket) {
+            stepsCache.updateCacheAtPoint(eventArgs.position, function(bucket) {
                 bucket.steps += eventArgs.length;
             });
         };
@@ -518,7 +552,7 @@ runtime.loadClass("odf.OdfUtils");
             // Old position = position + length
             // New position = position
             // E.g., {position: 10, length: 1} indicates 10 => 10, 11 => 10, 12 => 11
-            stepsCache.updateBookmarks(eventArgs.position, function(bucket) {
+            stepsCache.updateCacheAtPoint(eventArgs.position, function(bucket) {
                 bucket.steps -= eventArgs.length;
                 if (bucket.steps < 0) {
                     // Obviously, there can't be negative steps in a document

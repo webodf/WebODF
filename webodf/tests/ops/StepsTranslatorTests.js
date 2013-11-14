@@ -195,7 +195,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.position.node", "t.expected.node");
         r.shouldBe(t, "t.position.offset", "t.expected.offset");
     }
-    
+
     function convertStepsToDomPoint_Prime_PrimesCache() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
             p = doc.getElementsByTagName("p")[1];
@@ -407,6 +407,29 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.actualCloneSteps", "5");
     }
 
+    /**
+     * See OpRemoveText. Paragraph merging behaviour may choose to remove the first paragraph
+     * and directly place the second paragraph in this position. This results in a change
+     * occurring at the step of modification (i.e., step 9's node changes, but it is still step 9)
+     */
+    function convertDomPointsToSteps_Cached_CopesWithBookmarkedNodeBeingRemoved() {
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p/><text:p/>"),
+            bookmarkedParagraph = createParagraphBoundary(doc.getElementsByTagNameNS(textns, "p")[1]),
+            trailingParagraph = doc.getElementsByTagNameNS(textns, "p")[2],
+            lastParagraph = doc.getElementsByTagNameNS(textns, "p")[3],
+            body = bookmarkedParagraph.node.parentNode;
+
+        t.translator.prime(); // Should already be primed, but just in case!
+
+        body.removeChild(bookmarkedParagraph.node);
+        t.translator.handleStepsRemoved({position: bookmarkedParagraph.start, length: 2});
+
+        t.trailingParagraphSteps = t.translator.convertDomPointToSteps(trailingParagraph, 0);
+        r.shouldBe(t, "t.trailingParagraphSteps", "5");
+        t.lastParagraphSteps = t.translator.convertDomPointToSteps(lastParagraph, 0);
+        r.shouldBe(t, "t.lastParagraphSteps", "6");
+    }
+
     function convertDomPointsToSteps_Cached_FindsNearestKnownPosition() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EFGH</text:p><text:custom/>"),
             frame = doc.getElementsByTagNameNS(textns, "custom")[0];
@@ -565,6 +588,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached,
             convertDomPointsToSteps_Cached_SpeedsUpSecondCall,
             convertDomPointsToSteps_Cached_CopesWithClonedNode,
+            convertDomPointsToSteps_Cached_CopesWithBookmarkedNodeBeingRemoved,
             convertDomPointsToSteps_Cached_FindsNearestKnownPosition,
 
             handleStepsInserted_InsertMultipleStepsIndividually,
