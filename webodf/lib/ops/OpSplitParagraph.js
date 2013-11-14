@@ -113,30 +113,26 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             // split off the node copy
             // TODO: handle unique attributes, e.g. xml:id
             splitNode = node.cloneNode(false);
-            // if the existing node will be completely empty,
-            // just switch roles and insert the empty clone as old node
-            if (! keptChildNode) {
-                node.parentNode.insertBefore(splitNode, node);
-
-                // prepare next level
-                keptChildNode = splitNode;
-                splitChildNode = node;
-            } else {
-                // add the split child node
-                if (splitChildNode) {
-                    splitNode.appendChild(splitChildNode);
-                }
-                // and move all child nodes behind the split to the node copy,
-                // by using n.nextSibling as automatically updated queue head
-                while (keptChildNode.nextSibling) {
+            // add the split child node
+            if (splitChildNode) {
+                splitNode.appendChild(splitChildNode);
+            }
+            if (keptChildNode) {
+                // Move all child nodes that should appear after the split to the new node
+                while (keptChildNode && keptChildNode.nextSibling) {
                     splitNode.appendChild(keptChildNode.nextSibling);
                 }
-                node.parentNode.insertBefore(splitNode, node.nextSibling);
-
-                // prepare next level
-                keptChildNode = node;
-                splitChildNode = splitNode;
+            } else {
+                // All children of the original node should be moved after the split
+                while (node.firstChild) {
+                    splitNode.appendChild(node.firstChild);
+                }
             }
+            node.parentNode.insertBefore(splitNode, node.nextSibling);
+
+            // prepare next level
+            keptChildNode = node;
+            splitChildNode = splitNode;
         }
 
         if (odfUtils.isListItem(splitChildNode)) {
