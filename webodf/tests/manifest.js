@@ -58,6 +58,7 @@
         "ops/OperationTests.js",
         "ops/TransformationTests.js",
         "ops/SessionTests.js",
+        "ops/StepsTranslatorTests.js",
         "tests.js",
         "xmldom/LSSerializerTests.js",
         "xmldom/XPathTests.js"

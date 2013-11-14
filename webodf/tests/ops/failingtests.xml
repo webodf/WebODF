@@ -3,7 +3,8 @@
     xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
     xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
     xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
-    xmlns:c="urn:webodf:names:cursor">
+    xmlns:c="urn:webodf:names:cursor"
+    xmlns:foreign="urn:operationtests:foreign">
  <test name="AddAnnotationInsertText_startPosSameAtStartOfParagraph">
   <!-- text inserted at the position of a start of an annotation at the start of a paragraph should be added to the annotated area -->
   <before><office:text><text:p>abcd</text:p></office:text></before>
@@ -50,6 +51,18 @@
    <office:text>
     <text:p><draw:frame draw:style-name="Graphics"/><c:cursor c:memberId="Joe"/></text:p>
    </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotation_preservesForeignElements">
+  <before>
+   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"/><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><foreign:text/></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+  </before>
+  <ops>
+   <op optype="RemoveAnnotation" memberid="Alice" position="4" length="0">
+   </op>
+  </ops>
+  <after>
+   <office:text><text:p>ABC<foreign:text/>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
   </after>
  </test>
 </tests>

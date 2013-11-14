@@ -178,7 +178,7 @@ core.UnitTestRunner = function UnitTestRunner() {
             v;
         for (i = 0; i < n; i += 1) {
             att = aatts.item(i);
-            if (att.prefix !== "xmlns") {
+            if (att.prefix !== "xmlns" && att.namespaceURI !== "urn:webodf:names:steps") {
                 v = b.getAttributeNS(att.namespaceURI, att.localName);
                 if (!b.hasAttributeNS(att.namespaceURI, att.localName)) {
                     testFailed("Attribute " + att.localName + " with value " + att.value + " was not present");

@@ -55,31 +55,16 @@ ops.OpMoveCursor = function OpMoveCursor() {
         selectionType = data.selectionType || ops.OdtCursor.RangeSelection;
     };
 
-    // TODO: instead of calling odtDocument.getCursorPosition(...) and calculating the difference
-    // get the position directly and reinsert the cursor there
     this.execute = function (odtDocument) {
         var cursor = odtDocument.getCursor(memberid),
-            oldPosition = odtDocument.getCursorPosition(memberid),
-            positionFilter = odtDocument.getPositionFilter(),
-            number = position - oldPosition,
-            stepsToSelectionStart,
-            stepsToSelectionEnd,
-            stepCounter;
+            selectedRange;
 
         if (!cursor) {
             return false;
         }
 
-        stepCounter = cursor.getStepCounter();
-        stepsToSelectionStart = stepCounter.countSteps(number, positionFilter);
-        cursor.move(stepsToSelectionStart);
-        if (length) {
-            // if the length is non-zero (either positive or negative), this indicates that a range of nodes is
-            // being selected.
-            stepsToSelectionEnd = stepCounter.countSteps(length, positionFilter);
-            cursor.move(stepsToSelectionEnd, true);
-        }
-
+        selectedRange = odtDocument.convertCursorToDomRange(position, length);
+        cursor.setSelectedRange(selectedRange, length >= 0);
         cursor.setSelectionType(selectionType);
         odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
         return true;

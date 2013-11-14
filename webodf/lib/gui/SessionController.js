@@ -179,31 +179,6 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!Node} node
-         * @return {!{node:!Node, offset:!number}}
-         */
-        function findClosestPosition(node) {
-            var canvasElement = odtDocument.getOdfCanvas().getElement(),
-                newNode = odtDocument.getRootNode(),
-                newOffset = 0,
-                beforeCanvas, iterator;
-
-            /*jslint bitwise: true*/
-            beforeCanvas = canvasElement.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING;
-            /*jslint bitwise: false*/
-            if (!beforeCanvas) {
-                iterator = gui.SelectionMover.createPositionIterator(newNode);
-                iterator.moveToEnd();
-                newNode = iterator.container();
-                newOffset = iterator.unfilteredDomOffset();
-            }
-            return {
-                node: newNode,
-                offset: newOffset
-            };
-        }
-
-        /**
          * Expands the supplied selection to the nearest word boundaries
          * @param {{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}} selection
          */
@@ -317,10 +292,11 @@ gui.SessionController = (function () {
             var canvasElement = odtDocument.getOdfCanvas().getElement(),
                 validSelection,
                 clickCount = capturedDetails.detail, // See http://www.w3.org/TR/DOM-Level-3-Events/#event-type-mouseup,
-                caretPos, anchorNodeInsideCanvas, focusNodeInsideCanvas, position,
-                stepsToAnchor,
-                stepsToFocus,
-                oldPosition,
+                caretPos,
+                anchorNodeInsideCanvas,
+                focusNodeInsideCanvas,
+                existingSelection,
+                newSelection,
                 op;
 
             if (!selection) {
@@ -348,38 +324,21 @@ gui.SessionController = (function () {
             if (!anchorNodeInsideCanvas && !focusNodeInsideCanvas) {
                 return;
             }
-            if (!anchorNodeInsideCanvas) {
-                position = findClosestPosition(validSelection.anchorNode);
-                validSelection.anchorNode = position.node;
-                validSelection.anchorOffset = position.offset;
-            }
-            if (!focusNodeInsideCanvas) {
-                position = findClosestPosition(validSelection.focusNode);
-                validSelection.focusNode = position.node;
-                validSelection.focusOffset = position.offset;
+
+            if (anchorNodeInsideCanvas && focusNodeInsideCanvas) {
+                // Expansion behaviour should only occur when double & triple clicking is inside the canvas
+                if (clickCount === 2) {
+                    expandToWordBoundaries(validSelection);
+                } else if (clickCount >= 3) {
+                    expandToParagraphBoundaries(validSelection);
+                }
             }
 
-            if (clickCount === 2) {
-                expandToWordBoundaries(validSelection);
-            } else if (clickCount === 3) {
-                expandToParagraphBoundaries(validSelection);
-            }
-
-            stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, validSelection.anchorNode, validSelection.anchorOffset);
-            if (validSelection.focusNode === validSelection.anchorNode
-                && validSelection.focusOffset === validSelection.anchorOffset) {
-                stepsToFocus = stepsToAnchor;
-            } else {
-                stepsToFocus = odtDocument.getDistanceFromCursor(inputMemberId, validSelection.focusNode, validSelection.focusOffset);
-            }
-
-            if (stepsToFocus || stepsToAnchor) {
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                op = createOpMoveCursor(
-                    oldPosition + stepsToAnchor,
-                    stepsToFocus - stepsToAnchor,
-                    ops.OdtCursor.RangeSelection
-                );
+            newSelection = odtDocument.convertDomToCursorRange(validSelection.anchorNode, validSelection.anchorOffset,
+                validSelection.focusNode, validSelection.focusOffset);
+            existingSelection = odtDocument.getCursorSelection(inputMemberId);
+            if (newSelection.position !== existingSelection.position || newSelection.length !== existingSelection.length) {
+                op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RangeSelection);
                 session.enqueue([op]);
             }
 
@@ -679,14 +638,10 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToEntireDocument() {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                steps;
-            // The root node is always before the cursor, therefore the returned number of steps is always negative
-            steps = -odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-
-            iterator.moveToEnd();
-            steps += odtDocument.getDistanceFromCursor(inputMemberId, iterator.container(), iterator.unfilteredDomOffset());
-            session.enqueue([createOpMoveCursor(0, steps)]);
+            var rootNode = odtDocument.getRootNode(),
+                lastWalkableStep = odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length);
+            // TODO this needs to respect roots
+            session.enqueue([createOpMoveCursor(0, lastWalkableStep)]);
             return true;
         }
         // TODO Extract selection functions into a standalone SelectionManipulator

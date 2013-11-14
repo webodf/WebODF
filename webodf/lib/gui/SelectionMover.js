@@ -279,6 +279,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             increment = steps >= 0 ? 1 : -1,
             delegate = /**@type {!function():boolean}*/(steps >= 0 ? iterator.nextPosition : iterator.previousPosition);
 
+        // TODO rewrite to use StepsTranslator
         while (steps !== 0 && delegate()) {
             watch.check();
             positionsCount += increment;
@@ -555,6 +556,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             watch = new core.LoopWatchDog(10000),
             comparison;
 
+        // TODO rewrite to use StepsTranslator
         // the iterator may interpret the positions as given by the range
         // differently than the dom positions, so we normalize them by calling
         // setPosition with these values

@@ -61,8 +61,8 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         var iterator = odtDocument.getIteratorAtPosition(position),
             container = iterator.container(),
             annotationName,
-            annotationNode = null,
-            annotationEnd = null,
+            annotationNode,
+            annotationEnd,
             cursors;
 
         while (!(container.namespaceURI === odf.Namespaces.officens
@@ -95,6 +95,8 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         if (annotationEnd) {
             annotationEnd.parentNode.removeChild(annotationEnd);
         }
+        // The specified position is the first walkable step in the annotation. The position is always just before the first point of change
+        odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position > 0 ? position - 1 : position, length: length});
 
         odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshAnnotations();

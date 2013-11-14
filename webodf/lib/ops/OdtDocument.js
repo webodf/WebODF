@@ -44,6 +44,8 @@ runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("core.PositionFilterChain");
+runtime.loadClass("ops.StepsTranslator");
+runtime.loadClass("ops.TextPositionFilter");
 
 /**
  * A document that keeps all data related to the mapped document.
@@ -67,10 +69,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalCommonStyleDeleted,
             ops.OdtDocument.signalTableAdded,
             ops.OdtDocument.signalOperationExecuted,
-            ops.OdtDocument.signalUndoStackChanged]),
+            ops.OdtDocument.signalUndoStackChanged,
+            ops.OdtDocument.signalStepsInserted,
+            ops.OdtDocument.signalStepsRemoved
+        ]),
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
-        filter;
+        filter,
+        stepsTranslator;
 
     /**
      * @return {!Element}
@@ -78,9 +84,41 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function getRootNode() {
         var element = odfCanvas.odfContainer().getContentElement(),
             localName = element && element.localName;
-        runtime.assert(localName === "text", "Unsupported content element type '" + localName + "'for OdtDocument");
+        runtime.assert(localName === "text", "Unsupported content element type '" + localName + "' for OdtDocument");
         return element;
     }
+
+    /**
+     * @return {!Document}
+     */
+    function getDOM() {
+        return /**@type{!Document}*/(getRootNode().ownerDocument);
+    }
+    this.getDOM = getDOM;
+    
+    /**
+     * @param {!Node} node
+     * @return {!boolean}
+     */
+    function isRoot(node) {
+        if ((node.namespaceURI === odf.Namespaces.officens && node.localName === 'text') ||
+            (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param {!Node} node
+     * @return {!Node}
+     */
+    function getRoot(node) {
+        while (node && !isRoot(node)) {
+            node = /**@type{!Node}*/(node.parentNode);
+        }
+        return node;
+    }
+    this.getRootElement = getRoot;
 
     /**
      * A filter that allows a position if it has the same closest
@@ -91,28 +129,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string|!Node} anchor 
      */
     function RootFilter(anchor) {
-        /**
-         * @param {!Node} node
-         * @return {!boolean}
-         */
-        function isRoot(node) {
-            if ((node.namespaceURI === odf.Namespaces.officens && node.localName === 'text') ||
-                    (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation')) {
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * @param {!Node} node
-         * @return {!Node}
-         */
-        function getRoot(node) {
-            while (node && !isRoot(node)) {
-                node = /**@type{!Node}*/(node.parentNode);
-            }
-            return node;
-        }
 
         /**
          * @param {!core.PositionIterator} iterator
@@ -136,158 +152,81 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
-     * @constructor
-     * @implements {core.PositionFilter}
-     */
-    function TextPositionFilter() {
-       /**
-         * @param {!Node} container
-         * @param {?Node} leftNode
-         * @param {?Node} rightNode
-         * @return {!core.PositionFilter.FilterResult}
-         */
-        function checkLeftRight(container, leftNode, rightNode) {
-            var r, firstPos, rightOfChar;
-            // accept if there is a character immediately to the left
-            if (leftNode) {
-                r = odfUtils.lookLeftForCharacter(leftNode);
-                if (r === 1) {// non-whitespace character or a character element
-                    return FILTER_ACCEPT;
-                }
-                if (r === 2 && (odfUtils.scanRightForAnyCharacter(rightNode)
-                    || odfUtils.scanRightForAnyCharacter(odfUtils.nextNode(container)))) {
-                    // significant whitespace is ok, if not in trailing whitesp
-                    return FILTER_ACCEPT;
-                }
-            }
-            // at this point, we know that the position is not directly to the
-            // right of a significant character or element. so the position is
-            // only acceptable if it is the first in an empty p or h or if it
-            // is to the left of the first significant character or element.
-
-            // accept if this is the first position in p or h and there is no
-            // character in the p or h
-            firstPos = leftNode === null && odfUtils.isParagraph(container);
-            rightOfChar = odfUtils.lookRightForCharacter(rightNode);
-            if (firstPos) {
-                if (rightOfChar) {
-                    return FILTER_ACCEPT;
-                }
-                // position is first position in empty paragraph
-                return odfUtils.scanRightForAnyCharacter(rightNode) ? FILTER_REJECT : FILTER_ACCEPT;
-            }
-            // if not directly to the right of a character, reject
-            if (!rightOfChar) {
-                return FILTER_REJECT;
-            }
-            // accept if there is no character to the left
-            leftNode = leftNode || odfUtils.previousNode(container);
-            return odfUtils.scanLeftForAnyCharacter(leftNode) ? FILTER_REJECT : FILTER_ACCEPT;
-        }
-
-        /**
-         * @param {!core.PositionIterator} iterator
-         * @return {!core.PositionFilter.FilterResult}
-         */
-        this.acceptPosition = function (iterator) {
-            var container = iterator.container(),
-                nodeType = container.nodeType,
-                offset,
-                text,
-                leftChar,
-                rightChar,
-                leftNode,
-                rightNode,
-                r;
-
-            if (nodeType !== Node.ELEMENT_NODE && nodeType !== Node.TEXT_NODE) {
-                return FILTER_REJECT;
-            }
-            if (nodeType === Node.TEXT_NODE) {
-                if (!odfUtils.isGroupingElement(container.parentNode)
-                        || odfUtils.isWithinTrackedChanges(container.parentNode, getRootNode())) {
-                    return FILTER_REJECT;
-                }
-                // In a PositionIterator, the offset in a text node is never
-                // equal to the length of the text node.
-                offset = iterator.unfilteredDomOffset();
-                text = container.data;
-                runtime.assert(offset !== text.length, "Unexpected offset.");
-                if (offset > 0) {
-                    // The cursor may be placed to the right of a non-whitespace
-                    // character.
-                    leftChar = text.substr(offset - 1, 1);
-                    if (!odfUtils.isODFWhitespace(leftChar)) {
-                        return FILTER_ACCEPT;
-                    }
-                    // A whitespace to the left is ok, if
-                    // * there is a non-whitespace character to the right and
-                    //   that is the first non-whitespace character or character
-                    //   element or
-                    // * there is not another whitespace character in front of
-                    //   it.
-                    if (offset > 1) {
-                        leftChar = text.substr(offset - 2, 1);
-                        if (!odfUtils.isODFWhitespace(leftChar)) {
-                            r = FILTER_ACCEPT;
-                        } else if (!odfUtils.isODFWhitespace(text.substr(0, offset))) {
-                            // check if this can be leading paragraph space
-                            return FILTER_REJECT;
-                        }
-                    } else {
-                        // check if there is a non-whitespace character or
-                        // character element in a preceding node
-                        leftNode = odfUtils.previousNode(container);
-                        if (odfUtils.scanLeftForNonWhitespace(leftNode)) {
-                            r = FILTER_ACCEPT;
-                        }
-                    }
-                    if (r === FILTER_ACCEPT) {
-                        return odfUtils.isTrailingWhitespace(container, offset)
-                            ? FILTER_REJECT : FILTER_ACCEPT;
-                    }
-                    rightChar = text.substr(offset, 1);
-                    if (odfUtils.isODFWhitespace(rightChar)) {
-                        return FILTER_REJECT;
-                    }
-                    return odfUtils.scanLeftForAnyCharacter(odfUtils.previousNode(container))
-                        ? FILTER_REJECT : FILTER_ACCEPT;
-                }
-                leftNode = iterator.leftNode();
-                rightNode = container;
-                container = /**@type{!Node}*/(container.parentNode);
-                r = checkLeftRight(container, leftNode, rightNode);
-            } else if (!odfUtils.isGroupingElement(container)
-                        || odfUtils.isWithinTrackedChanges(container, getRootNode())) {
-                r = FILTER_REJECT;
-            } else {
-                leftNode = iterator.leftNode();
-                rightNode = iterator.rightNode();
-                r = checkLeftRight(container, leftNode, rightNode);
-            }
-            return r;
-        };
-    }
-
-    /**
      * Returns a PositionIterator instance at the
      * specified starting position
      * @param {!number} position
      * @return {!core.PositionIterator}
      */
     function getIteratorAtPosition(position) {
-        var iterator = gui.SelectionMover.createPositionIterator(getRootNode());
+        var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
+            point = stepsTranslator.convertStepsToDomPoint(position);
 
-        position += 1;
-
-        while (position > 0 && iterator.nextPosition()) {
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                position -= 1;
-            }
-        }
+        iterator.setUnfilteredPosition(point.node, point.offset);
         return iterator;
     }
     this.getIteratorAtPosition = getIteratorAtPosition;
+
+    /**
+     *
+     * @param {!Node} node
+     * @param {!number} offset
+     * @returns {!number}
+     */
+    this.convertDomPointToCursorStep = function(node, offset) {
+        return stepsTranslator.convertDomPointToSteps(node, offset);
+    };
+
+    /**
+     *
+     * @param {!Node} anchorNode
+     * @param {!number} anchorOffset
+     * @param {!Node} focusNode
+     * @param {!number} focusOffset
+     * @returns {{position: !number, length: number}}
+     */
+    this.convertDomToCursorRange = function(anchorNode, anchorOffset, focusNode, focusOffset) {
+        var point1,
+            point2;
+
+        point1 = stepsTranslator.convertDomPointToSteps(anchorNode, anchorOffset);
+        if (anchorNode === focusNode && anchorOffset === focusOffset) {
+            point2 = point1;
+        } else {
+            point2 = stepsTranslator.convertDomPointToSteps(focusNode, focusOffset);
+        }
+
+        return {
+            position: point1,
+            length: point2 - point1
+        };
+    };
+
+    /**
+     * Convert a cursor range to a DOM range
+     * @param {!number} position
+     * @param {!number} length
+     * @returns {Range}
+     */
+    this.convertCursorToDomRange = function(position, length) {
+        var range = getDOM().createRange(),
+            point1,
+            point2;
+
+        point1 = stepsTranslator.convertStepsToDomPoint(position);
+        if (length) {
+            point2 = stepsTranslator.convertStepsToDomPoint(position + length);
+            if (length > 0) {
+                range.setStart(point1.node, point1.offset);
+                range.setEnd(point2.node, point2.offset);
+            } else {
+                range.setStart(point2.node, point2.offset);
+                range.setEnd(point1.node, point1.offset);
+            }
+        } else {
+            range.setStart(point1.node, point1.offset);
+        }
+        return range;
+    };
 
     /**
      * This function will iterate through positions allowed by the position
@@ -296,114 +235,54 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * as well as the offset in that text node.
      * Optionally takes a memberid of a cursor, to specifically return the
      * text node positioned just behind that cursor.
-     * @param {!number} position
+     * @param {!number} steps
      * @param {!string=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
-    function getPositionInTextNode(position, memberid) {
-        var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
-            /**@type{?Text}*/
-            lastTextNode = null,
-            node,
+    function getTextNodeAtStep(steps, memberid) {
+        var iterator = getIteratorAtPosition(steps),
+            node = iterator.container(),
+            lastTextNode,
             nodeOffset = 0,
-            cursorNode = null,
-            originalPosition = position;
+            cursorNode = null;
 
-        runtime.assert(position >= 0, "position must be >= 0");
-
-        // first prepare things
-        // iterator should be at the start of getRootNode()
-        if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-            node = iterator.container();
-            if (node.nodeType === Node.TEXT_NODE) {
-                lastTextNode = /**@type{!Text}*/(node);
-                nodeOffset = 0;
-            }
+        if (node.nodeType === Node.TEXT_NODE) {
+            // Iterator has stopped within an existing text node, to put that up as a possible target node
+            lastTextNode = /**@type{!Text}*/(node);
+            nodeOffset = iterator.unfilteredDomOffset();
         } else {
-            // add 1 to move into an acceptable position
-            position += 1;
-        }
-        // now iterate over as many positions as given
-        // loop as long as there is another position to reach
-        // or the text node in the final destination has not been reached yet
-        while (position > 0 || lastTextNode === null) {
-            // reaching end of document too early?
-            if (!iterator.nextPosition()) {
-                // the desired position cannot be found
-                return null;
-            }
-            // iterator at a text position?
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                position -= 1;
-                node = iterator.container();
-                if (node.nodeType === Node.TEXT_NODE) {
-                    if (node !== lastTextNode) {
-                        lastTextNode = /**@type{!Text}*/(node);
-                        nodeOffset = iterator.unfilteredDomOffset();
-                    } else {
-                        nodeOffset += 1;
-                    }
-                } else if (lastTextNode !== null) {
-                    if (position === 0) {
-                        // position is at end of text node
-                        nodeOffset = lastTextNode.length;
-                        break;
-                    }
-                    lastTextNode = null;
-                } else if (position === 0) {
-                    // position is without any text node currently, so add an empty one
-                    lastTextNode = getRootNode().ownerDocument.createTextNode('');
-                    node.insertBefore(lastTextNode, iterator.rightNode());
-                    nodeOffset = 0;
-                    break;
-                }
-            }
-        }
-        if (lastTextNode === null) {
-            return null;
+            // There is no text node at the current position, so insert a new one at the current position
+            lastTextNode = getDOM().createTextNode("");
+            nodeOffset = 0;
+            node.insertBefore(lastTextNode, iterator.rightNode());
         }
 
-        // Move the cursor with the current memberid after all adjacent cursors,
-        // ONLY if it is at the same position as the requested one
-        if (memberid
-                && cursors[memberid]
-                && self.getCursorPosition(memberid) === originalPosition) {
 
+        // If the member cursor is as the requested position
+        if (memberid && cursors[memberid] && self.getCursorPosition(memberid) === steps) {
             cursorNode = cursors[memberid].getNode();
-            while (nodeOffset === 0 && cursorNode.nextSibling
-                    && cursorNode.nextSibling.localName === "cursor") {
-                cursorNode.parentNode.insertBefore(cursorNode, cursorNode.nextSibling.nextSibling);
+            // Then move the member's cursor after all adjacent cursors
+            while (cursorNode.nextSibling && cursorNode.nextSibling.localName === "cursor") {
+                // TODO this re-arrange logic will break if there are non-cursor elements in the way
+                // E.g., cursors occupy the same "step", but are on different sides of a span boundary
+                // This is currently avoided by calling fixCursorPositions after (almost) every op
+                // to re-arrange cursors together again
+                cursorNode.parentNode.insertBefore(cursorNode.nextSibling, cursorNode);
             }
-            // The lastTextNode is not "" if the position is at the end of a paragraph.
-            // We definitely need ephemeral empty text nodes instead of a lastTextNode representing
-            // all the previous text, to prevent insertion by one cursor causing movement of the other
-            // cursors at the same position.
-            if (lastTextNode.length > 0) {
-                lastTextNode = getRootNode().ownerDocument.createTextNode('');
+            if (lastTextNode.length > 0 && lastTextNode.nextSibling !== cursorNode) {
+                // The last text node contains content but is not adjacent to the cursor
+                // This can't be moved, as moving it would move the text content around as well. Yikes!
+                // So, create a new text node to insert data into
+                lastTextNode = getDOM().createTextNode('');
                 nodeOffset = 0;
-                cursorNode.parentNode.insertBefore(lastTextNode, cursorNode.nextSibling);
             }
-
-            // if the position is just after a cursor, then move in front of that
-            // cursor. Give preference to the cursor with the optionally specified memberid
-            while (nodeOffset === 0 && lastTextNode.previousSibling &&
-                    lastTextNode.previousSibling.localName === "cursor") {
-                node = lastTextNode.previousSibling;
-                if (lastTextNode.length > 0) {
-                    lastTextNode = getRootNode().ownerDocument.createTextNode('');
-                }
-                node.parentNode.insertBefore(lastTextNode, node);
-
-                if (cursorNode === node) {
-                    break;
-                }
-            }
+            // Keep the destination text node right next to the member's cursor, so inserted text pushes the cursor over
+            cursorNode.parentNode.insertBefore(lastTextNode, cursorNode);
         }
 
         // After the above cursor-specific adjustment, if the lastTextNode
         // has a text node previousSibling, merge them and make the result the lastTextNode
-        while (lastTextNode.previousSibling
-                && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
+        while (lastTextNode.previousSibling && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
             lastTextNode.previousSibling.appendData(lastTextNode.data);
             nodeOffset = lastTextNode.previousSibling.length;
             lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
@@ -564,7 +443,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string=} memberid
      * @return {?{textNode: !Text, offset: !number}}
      */
-    this.getPositionInTextNode = getPositionInTextNode;
+    this.getTextNodeAtStep = getTextNodeAtStep;
 
     /**
      * Iterates through all cursors and checks if they are in
@@ -631,28 +510,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * Returns the number of walkable positions of a paragraph node
-     * @param {!Node} paragraph
-     * @return {!number}
-     */
-    this.getWalkableParagraphLength = function (paragraph) {
-        var iterator = getIteratorAtPosition(0),
-            length = 0;
-        iterator.setUnfilteredPosition(paragraph, 0);
-
-        do {
-            if (getParagraphElement(iterator.container()) !== paragraph) {
-                return length;
-            }
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                length += 1;
-            }
-        } while (iterator.nextPosition());
-
-        return length;
-    };
-
-    /**
      * This function calculates the steps in ODF world between the cursor of the
      * given member and the given position in the DOM. If the given position is
      * not walkable, then it will be the number of steps to the last walkable position
@@ -663,16 +520,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!number}
      */
     this.getDistanceFromCursor = function (memberid, node, offset) {
-        var counter,
-            cursor = cursors[memberid],
-            steps = 0;
+        var cursor = cursors[memberid],
+            focusPosition,
+            targetPosition;
         runtime.assert((node !== null) && (node !== undefined),
             "OdtDocument.getDistanceFromCursor called without node");
         if (cursor) {
-            counter = cursor.getStepCounter().countStepsToPosition;
-            steps = counter(node, offset, filter);
+            focusPosition = stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0);
+            targetPosition = stepsTranslator.convertDomPointToSteps(node, offset);
         }
-        return steps;
+        return targetPosition - focusPosition;
     };
     /**
      * This function returns the position in ODF world of the cursor of the member.
@@ -680,7 +537,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!number}
      */
     this.getCursorPosition = function (memberid) {
-        return -self.getDistanceFromCursor(memberid, getRootNode(), 0);
+        var cursor = cursors[memberid];
+        return cursor ? stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0) : 0;
     };
 
     /**
@@ -694,18 +552,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @returns {{position: !number, length: !number}}
      */
     this.getCursorSelection = function(memberid) {
-        var counter,
-            cursor = cursors[memberid],
+        var cursor = cursors[memberid],
             focusPosition = 0,
-            stepsToAnchor = 0;
+            anchorPosition = 0;
         if (cursor) {
-            counter = cursor.getStepCounter().countStepsToPosition;
-            focusPosition = -counter(getRootNode(), 0, filter);
-            stepsToAnchor = counter(cursor.getAnchorNode(), 0, filter);
+            focusPosition = stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0);
+            anchorPosition = stepsTranslator.convertDomPointToSteps(cursor.getAnchorNode(), 0);
         }
         return {
-            position: focusPosition + stepsToAnchor,
-            length: -stepsToAnchor
+            position: anchorPosition,
+            length: focusPosition - anchorPosition
         };
     };
     /**
@@ -726,13 +582,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!Element}
      */
     this.getRootNode = getRootNode;
-
-    /**
-     * @return {!Document}
-     */
-    this.getDOM = function () {
-        return /**@type{!Document}*/(getRootNode().ownerDocument);
-    };
 
     /**
      * @param {!string} memberid
@@ -869,9 +718,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {undefined}
      */
     function init() {
-        filter = new TextPositionFilter();
+        filter = new ops.TextPositionFilter(getRootNode);
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
+        stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
+        eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
+        eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
     }
     init();
 };
@@ -886,6 +738,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
 /**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
 /**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";
+/**@const*/ops.OdtDocument.signalStepsInserted = "steps/inserted";
+/**@const*/ops.OdtDocument.signalStepsRemoved = "steps/removed";
 
 (function () {
     "use strict";

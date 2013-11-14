@@ -148,6 +148,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      */
     this.setSelectedRange = function (range, isForwardSelection) {
         cursor.setSelectedRange(range, isForwardSelection);
+        self.handleUpdate();
     };
     /**
      * Returns if the selection of this cursor has the
