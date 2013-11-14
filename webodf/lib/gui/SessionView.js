@@ -39,7 +39,6 @@
 /*global Node, document, runtime, gui, ops, core */
 
 runtime.loadClass("gui.Caret");
-runtime.loadClass("ops.TrivialMemberModel");
 runtime.loadClass("ops.EditInfo");
 runtime.loadClass("gui.EditInfoMarker");
 
@@ -299,31 +298,17 @@ gui.SessionView = (function () {
         };
 
         /**
-         * @param {!string} memberId
-         * @param {?Object} memberData
+         * @param {!ops.Member} member
          * @return {undefined}
-         *
-         * Setting memberData to null will apply empty (bogus) member data.
          */
-        function renderMemberData(memberId, memberData) {
-            var caret = caretManager.getCaret(memberId);
+        function renderMemberData(member) {
+            var memberId = member.getMemberId(),
+                properties = member.getProperties();
 
-            // this takes care of incorrectly implemented MemberModels,
-            // which might end up returning undefined member data
-            if (!memberData) {
-                runtime.log("MemberModel sent undefined data for member \"" + memberId + "\".");
-                return;
-            }
-
-            if (caret) {
-                caret.setAvatarImageUrl(memberData.imageurl);
-                caret.setColor(memberData.color);
-            }
-
-            setAvatarInfoStyle(memberId, memberData.fullname, memberData.color);
+            setAvatarInfoStyle(memberId, properties.fullName, properties.color);
             if (localMemberId === memberId) {
                 // Shadow cursor has an empty member ID
-                setAvatarInfoStyle("", memberData.fullname, memberData.color);
+                setAvatarInfoStyle("", "", properties.color);
             }
         }
 
@@ -333,18 +318,17 @@ gui.SessionView = (function () {
          */
         function onCursorAdded(cursor) {
             var memberId = cursor.getMemberId(),
-                memberModel = session.getMemberModel();
+                properties = session.getOdtDocument().getMember(memberId).getProperties(),
+                caret;
 
             caretManager.registerCursor(cursor, showCaretAvatars, blinkOnRangeSelect);
             selectionViewManager.registerCursor(cursor, true);
 
-            // preset bogus data
-            // TODO: indicate loading state
-            // (instead of setting the final 'unknown identity' data)
-            renderMemberData(memberId, null);
-            // subscribe to real updates
-            memberModel.getMemberDetailsAndUpdates(memberId, renderMemberData);
-
+            caret = caretManager.getCaret(memberId);
+            if (caret) {
+                caret.setAvatarImageUrl(properties.imageUrl);
+                caret.setColor(properties.color);
+            }
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
         }
 
@@ -376,23 +360,7 @@ gui.SessionView = (function () {
          * @return {undefined}
          */
         function onCursorRemoved(memberid) {
-            var /**@type{!boolean}*/ hasMemberEditInfo = false,
-                keyname;
-
-            // check if there is any edit info with this member
-            for (keyname in editInfoMap) {
-                if (editInfoMap.hasOwnProperty(keyname) &&
-                        editInfoMap[keyname].getEditInfo().getEdits().hasOwnProperty(memberid)) {
-                    hasMemberEditInfo = true;
-                    break;
-                }
-            }
-
             selectionViewManager.removeSelectionView(memberid);
-
-            if (!hasMemberEditInfo) {
-                session.getMemberModel().unsubscribeMemberDetailsUpdates(memberid, renderMemberData);
-            }
         }
 
         /**
@@ -436,9 +404,10 @@ gui.SessionView = (function () {
          */
         this.destroy = function(callback) {
             var odtDocument = session.getOdtDocument(),
-                memberModel = session.getMemberModel(),
                 editInfoArray = Object.keys(editInfoMap).map(function(keyname) { return editInfoMap[keyname]; });
 
+            odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
+            odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
@@ -449,10 +418,6 @@ gui.SessionView = (function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, requestRerenderOfSelectionViews);
 
             stopRerenderLoop();
-
-            caretManager.getCarets().forEach(function(caret) {
-                memberModel.unsubscribeMemberDetailsUpdates(caret.getCursor().getMemberId(), renderMemberData);
-            });
 
             avatarInfoStyles.parentNode.removeChild(avatarInfoStyles);
 
@@ -473,6 +438,8 @@ gui.SessionView = (function () {
             var odtDocument = session.getOdtDocument(),
                 head = document.getElementsByTagName('head')[0];
 
+            odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
+            odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);

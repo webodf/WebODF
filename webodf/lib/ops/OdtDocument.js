@@ -46,6 +46,7 @@ runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("core.PositionFilterChain");
 runtime.loadClass("ops.StepsTranslator");
 runtime.loadClass("ops.TextPositionFilter");
+runtime.loadClass("ops.Member");
 
 /**
  * A document that keeps all data related to the mapped document.
@@ -59,7 +60,11 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         odfUtils,
         domUtils,
         /**!Object.<!ops.OdtCursor>*/cursors = {},
+        /**!Object.<!ops.Member>*/members = {},
         eventNotifier = new core.EventNotifier([
+            ops.OdtDocument.signalMemberAdded,
+            ops.OdtDocument.signalMemberUpdated,
+            ops.OdtDocument.signalMemberRemoved,
             ops.OdtDocument.signalCursorAdded,
             ops.OdtDocument.signalCursorRemoved,
             ops.OdtDocument.signalCursorMoved,
@@ -584,6 +589,31 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getRootNode = getRootNode;
 
     /**
+     * @param {!ops.Member} member
+     * @return {undefined}
+     */
+    this.addMember = function (member) {
+        runtime.assert(members[member.getMemberId()] === undefined, "This member already exists");
+        members[member.getMemberId()] = member;
+    };
+
+    /**
+     * @param {!string} memberId
+     * @return {?ops.Member}
+     */
+    this.getMember = function (memberId) {
+        return members.hasOwnProperty(memberId) ? members[memberId] : null;
+    };
+
+    /**
+     * @param {!string} memberId
+     * @return {undefined}
+     */
+    this.removeMember = function (memberId) {
+        delete members[memberId];
+    };
+
+    /**
      * @param {!string} memberid
      * @return {ops.OdtCursor}
      */
@@ -728,6 +758,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     init();
 };
 
+/**@const*/ops.OdtDocument.signalMemberAdded =   "member/added";
+/**@const*/ops.OdtDocument.signalMemberUpdated =   "member/updated";
+/**@const*/ops.OdtDocument.signalMemberRemoved =   "member/removed";
 /**@const*/ops.OdtDocument.signalCursorAdded =   "cursor/added";
 /**@const*/ops.OdtDocument.signalCursorRemoved = "cursor/removed";
 /**@const*/ops.OdtDocument.signalCursorMoved =   "cursor/moved";

@@ -42,6 +42,9 @@
  * create specific operation instances.
  */
 
+runtime.loadClass("ops.OpAddMember");
+runtime.loadClass("ops.OpUpdateMember");
+runtime.loadClass("ops.OpRemoveMember");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpApplyDirectStyling");
 runtime.loadClass("ops.OpRemoveCursor");
@@ -104,6 +107,9 @@ ops.OperationFactory = function OperationFactory() {
 
     function init() {
         specs = {
+            AddMember: constructor(ops.OpAddMember),
+            UpdateMember: constructor(ops.OpUpdateMember),
+            RemoveMember: constructor(ops.OpRemoveMember),
             AddCursor : constructor(ops.OpAddCursor),
             ApplyDirectStyling : constructor(ops.OpApplyDirectStyling),
             SetBlob : constructor(ops.OpSetBlob),

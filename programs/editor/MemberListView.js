@@ -73,11 +73,11 @@ define("webodf/editor/MemberListView",
                     while (node) {
                         if (node.localName === "img") {
                             // update avatar image
-                            node.src = memberDetails.imageurl;
+                            node.src = memberDetails.imageUrl;
                             // update border color
                             node.style.borderColor = memberDetails.color;
                         } else if (node.localName === "div") {
-                            node.setAttribute('fullname', memberDetails.fullname);
+                            node.setAttribute('fullname', memberDetails.fullName);
                         }
                         node = node.nextSibling;
                     }
@@ -139,8 +139,21 @@ define("webodf/editor/MemberListView",
          * @return {undefined}
          */
         function addMember(memberId) {
+            var member = editorSession.getMember(memberId),
+                properties = member.getProperties();
             createAvatarButton(memberId);
-            editorSession.getMemberDetailsAndUpdates(memberId, updateAvatarButton);
+            updateAvatarButton(memberId, properties);
+        }
+
+        /**
+         * @param {!string} memberId
+         * @return {undefined}
+         */
+        function updateMember(memberId) {
+            var member = editorSession.getMember(memberId),
+                properties = member.getProperties();
+
+            updateAvatarButton(memberId, properties);
         }
 
         /**
@@ -148,7 +161,6 @@ define("webodf/editor/MemberListView",
          * @return {undefined}
          */
         function removeMember(memberId) {
-            editorSession.unsubscribeMemberDetailsUpdates(memberId, updateAvatarButton);
             removeAvatarButton(memberId);
         }
 
@@ -158,14 +170,12 @@ define("webodf/editor/MemberListView",
             if (editorSession) {
                 // unsubscribe from editorSession
                 editorSession.unsubscribe(EditorSession.signalMemberAdded, addMember);
+                editorSession.unsubscribe(EditorSession.signalMemberUpdated, updateMember);
                 editorSession.unsubscribe(EditorSession.signalMemberRemoved, removeMember);
                 // remove all current avatars
                 node = memberListDiv.firstChild;
                 while (node) {
                     nextNode = node.nextSibling;
-                    if (node.memberId) {
-                        editorSession.unsubscribeMemberDetailsUpdates(node.memberId, updateAvatarButton);
-                    }
                     memberListDiv.removeChild(node);
                     node = nextNode;
                 }
@@ -182,6 +192,7 @@ define("webodf/editor/MemberListView",
             editorSession = session;
             if (editorSession) {
                 editorSession.subscribe(EditorSession.signalMemberAdded, addMember);
+                editorSession.subscribe(EditorSession.signalMemberUpdated, updateMember);
                 editorSession.subscribe(EditorSession.signalMemberRemoved, removeMember);
             }
         };
