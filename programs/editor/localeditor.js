@@ -105,7 +105,7 @@ var webodfEditor = (function () {
         }
         if (files && files.length === 1) {
             editorInstance.endEditing();
-            editorInstance.close(function() {
+            editorInstance.closeDocument(function() {
                 file = files[0];
                 reader = new FileReader();
                 reader.onloadend = onLoadEnd;

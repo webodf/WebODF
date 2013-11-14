@@ -512,28 +512,6 @@ define("webodf/editor/EditorSession", [
             self.sessionController.getTextManipulator().removeCurrentSelection();
             self.sessionController.getImageManager().insertImage(mimetype, content, width, height);
         };
-        /**
-         * @param {!function(!Object=)} callback, passing an error object in case of error
-         * @return {undefined}
-         */
-        this.close = function (callback) {
-            callback();
-            /*
-            self.sessionView.close(function(err) {
-                if (err) {
-                    callback(err);
-                } else {
-                    caretManager.close(function(err) {
-                        if (err) {
-                            callback(err);
-                        } else {
-                            self.sessionController.close(callback);
-                        }
-                    });
-                }
-            });
-            */
-        };
 
         /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
