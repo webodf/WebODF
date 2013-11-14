@@ -145,7 +145,7 @@ var webodfEditor = (function () {
                                 editorOptions.networkSecurityToken = token;
                                 editorOptions.closeCallback = function() {
                                     editorInstance.endEditing();
-                                    editorInstance.close(function() {
+                                    editorInstance.closeSession(function() {
                                         server.leaveSession(sessionId, memberId, function() {
                                             showSessions();
                                         });

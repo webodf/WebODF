@@ -128,6 +128,36 @@ define("webodf/editor/Editor", [
             };
 
             /**
+             * Closes a single-user document, and does cleanup.
+             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @return undefined;
+             */
+            this.closeDocument = function (callback) {
+                runtime.assert(session, "session should exist here.");
+                session.close(function (err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        editorSession.destroy(function (err) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                editorSession = undefined;
+                                session.destroy(function (err) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        session = undefined;
+                                        callback();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            };
+
+            /**
              * @param {!string} filename
              * @param {?function()} callback
              * @return {undefined}
@@ -188,34 +218,26 @@ define("webodf/editor/Editor", [
              * @param {!function(!Object=)} callback, passing an error object in case of error
              * @return {undefined}
              */
-            this.close = function (callback) {
+            this.closeSession = function (callback) {
                 runtime.assert(session, "session should exist here.");
                 // TODO: there is a better pattern for this instead of unrolling
-                editorSession.close(function(err) {
+                session.close(function(err) {
                     if (err) {
                         callback(err);
                     } else {
-                        session.close(function(err) {
+                        // now also destroy session, will not be reused for new document
+                        memberListView.setEditorSession(undefined);
+                        editorSession.destroy(function(err) {
                             if (err) {
                                 callback(err);
                             } else {
-                                // now also destroy session, will not be reused for new document
-                                if (memberListView) {
-                                    memberListView.setEditorSession(undefined);
-                                }
-                                editorSession.destroy(function(err) {
+                                editorSession = undefined;
+                                session.destroy(function(err) {
                                     if (err) {
                                         callback(err);
                                     } else {
-                                        editorSession = undefined;
-                                        session.destroy(function(err) {
-                                            if (err) {
-                                                callback(err);
-                                            } else {
-                                                session = undefined;
-                                                callback();
-                                            }
-                                        });
+                                        session = undefined;
+                                        callback();
                                     }
                                 });
                             }
