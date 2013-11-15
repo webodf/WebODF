@@ -29,7 +29,8 @@
     xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:c="urn:webodf:names:cursor"
-    xmlns:e="urn:webodf:names:editinfo">
+    xmlns:e="urn:webodf:names:editinfo"
+    xmlns:ws="urn:webodf:names:scope">
  <test name="AddCursor_00">
   <before><office:text><text:p>ab</text:p></office:text></before>
   <opsA>
@@ -52,6 +53,283 @@
   </opsB>
   <after><office:text><text:p>ab</text:p></office:text></after>
  </test>
+
+ <test name="ApplyDirectStylingInsertText_[V__]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>AV<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingInsertText_V_[__]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>VA<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingInsertText_[_V_]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BVC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingInsertText_[__V]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="3" text="V"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BCV</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingInsertText_[__]_V">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="4" text="V"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>DV</text:p></office:text>
+  </after>
+ </test>
+
+ <test name="ApplyDirectStylingRemoveText_X[__]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p><text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingRemoveText_[X_]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">C</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingRemoveText_[_X]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">B</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingRemoveText_X[X_]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p><text:span text:style-name="auto63350368_0">C</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingRemoveText_[_X]X">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">B</text:span></text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingRemoveText_[__]X">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="3" length="1"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span></text:p></office:text>
+  </after>
+ </test>
+ <!-- TODO: Empty spans are not yet cleaned up
+ <test name="ApplyDirectStylingRemoveText_[XX]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>AD</text:p></office:text>
+  </after>
+ </test>
+ -->
+
+ <test name="ApplyDirectStylingSplitParagraph_[V__]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="1"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A</text:p><text:p><text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingSplitParagraph_[_V_]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="2"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">B</text:span></text:p><text:p><text:span text:style-name="auto63350368_0">C</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <!-- TODO: SplitParagraph needs to be fixed to not also split text:span ending at the pos
+ <test name="ApplyDirectStylingSplitParagraph_[__V]">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="3"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span></text:p><text:p>D</text:p></office:text>
+  </after>
+ </test>
+ -->
 
  <test name="MoveCursor_00">
   <before><office:text><text:p>ab</text:p></office:text></before>

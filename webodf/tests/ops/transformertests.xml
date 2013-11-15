@@ -1,0 +1,577 @@
+<!--
+ * @license
+ * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ *
+ * @licstart
+ * This file is part of WebODF.
+ *
+ * WebODF is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License (GNU AGPL)
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * WebODF is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with WebODF.  If not, see <http://www.gnu.org/licenses/>.
+ * @licend
+ *
+ * @source: http://www.webodf.org/
+ * @source: https://github.com/kogmbh/WebODF/
+-->
+<tests
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+ <test name="ApplyDirectStylingApplyDirectStyling_{[__]}_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{_[__]_}_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="4" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{[__]_}_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{_[__]}_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="3">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[_{__}_]_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="4" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[{__}_]_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="3">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="4" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[_{__}]_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="3">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[_{_]_}_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="3" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{_[_}_]_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{__}[__]_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[__]{__}_sameStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{[__]}_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{_[__]_}_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{[__]_}_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{_[__]}_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="3">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="3">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[_{__}_]_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="4">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="4" length="1">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[{__}_]_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="3">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="4" length="1">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[_{__}]_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="3">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[_{_]_}_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="1">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{_[_}_]_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="1">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_{__}[__]_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+ <test name="ApplyDirectStylingApplyDirectStyling_[__]{__}_oppositeStyling">
+  <in>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </in>
+  <out>
+   <opsA>
+    <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="2">
+     <setProperties><style:text-properties fo:font-weight="normal" /></setProperties>
+    </op>
+   </opsA>
+   <opsB>
+    <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="2">
+     <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+    </op>
+   </opsB>
+  </out>
+ </test>
+</tests>

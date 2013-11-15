@@ -31,19 +31,7 @@
 ops.OperationTransformMatrix = function OperationTransformMatrix() {
     "use strict";
 
-    /**
-     * Does an OT on the two passed opspecs, where they are not modified at all,
-     * and so simply returns them in the result arrays.
-     * @param {!Object} opSpecA
-     * @param {!Object} opSpecB
-     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
-     */
-    function passUnchanged(opSpecA, opSpecB) {
-        return {
-            opSpecsA:  [opSpecA],
-            opSpecsB:  [opSpecB]
-        };
-    }
+    /* Utility methods */
 
     /**
      * Returns a list with all attributes in setProperties that refer to styleName
@@ -78,6 +66,172 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * Creates a deep copy of the opspec
+     * @param {!Object} opspec
+     * @return {!Object}
+     */
+    function cloneOpspec(opspec) {
+        var result = {};
+
+        Object.keys(opspec).forEach(function (key) {
+            if (typeof opspec[key] === 'object') {
+                result[key] = cloneOpspec(opspec[key]);
+            } else {
+                result[key] = opspec[key];
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * @param {?Object} minorSetProperties
+     * @param {?Object} minorRemovedProperties
+     * @param {?Object} majorSetProperties
+     * @param {?Object} majorRemovedProperties
+     * @return {!{majorChanged:boolean,minorChanged:boolean}}
+     */
+    function dropShadowedAttributes(minorSetProperties, minorRemovedProperties, majorSetProperties, majorRemovedProperties) {
+        var value, i, name,
+            majorChanged = false, minorChanged = false,
+            shadowingPropertyValue,
+            removedPropertyNames,
+            majorRemovedPropertyNames =
+                majorRemovedProperties && majorRemovedProperties.attributes ?
+                    majorRemovedProperties.attributes.split(',') : [];
+
+        // iterate over all properties and see which get overwritten or deleted
+        // by the shadowing, so they have to be dropped
+        if (minorSetProperties && (majorSetProperties || majorRemovedPropertyNames.length > 0)) {
+            Object.keys(minorSetProperties).forEach(function(key) {
+                value = minorSetProperties[key];
+                // TODO: support more than one level
+                if (typeof value !== "object") {
+                    shadowingPropertyValue = majorSetProperties && majorSetProperties[key];
+                    if (shadowingPropertyValue !== undefined) {
+                        // drop shadowed
+                        delete minorSetProperties[key];
+                        minorChanged = true;
+
+                        // major sets to same value?
+                        if (shadowingPropertyValue === value) {
+                            // drop major as well
+                            delete majorSetProperties[key];
+                            majorChanged = true;
+                        }
+                    } else if (majorRemovedPropertyNames && majorRemovedPropertyNames.indexOf(key) !== -1) {
+                        // drop shadowed
+                        delete minorSetProperties[key];
+                        minorChanged = true;
+                    }
+                }
+            });
+        }
+
+        // iterate over all shadowing removed properties and drop any duplicates from
+        // the removed property names
+        if (minorRemovedProperties && minorRemovedProperties.attributes && (majorSetProperties || majorRemovedPropertyNames.length > 0)) {
+            removedPropertyNames = minorRemovedProperties.attributes.split(',');
+            for (i = 0; i < removedPropertyNames.length; i += 1) {
+                name = removedPropertyNames[i];
+                if ((majorSetProperties && majorSetProperties[name] !== undefined) ||
+                    (majorRemovedPropertyNames && majorRemovedPropertyNames.indexOf(name) !== -1)) {
+                    // drop
+                    removedPropertyNames.splice(i, 1);
+                    i -= 1;
+                    minorChanged = true;
+                }
+            }
+            // set back
+            if (removedPropertyNames.length > 0) {
+                minorRemovedProperties.attributes = removedPropertyNames.join(',');
+            } else {
+                delete minorRemovedProperties.attributes;
+            }
+        }
+
+        return {
+            majorChanged: majorChanged,
+            minorChanged: minorChanged
+        };
+    }
+
+    /**
+     * Estimates if there are any properties set in the given properties object.
+     * @param {!Object} properties
+     * @return {!boolean}
+     */
+    function hasProperties(properties) {
+        var key;
+
+        for (key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Estimates if there are any properties set in the given properties object.
+     * @param {!Object} properties
+     * @return {!boolean}
+     */
+    function hasRemovedProperties(properties) {
+        var key;
+
+        for (key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                // handle empty 'attribute' as not existing
+                if (key !== 'attributes' || properties.attributes.length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param {!Object} minorOpspec
+     * @param {!Object} majorOpspec
+     * @param {!string} propertiesName
+     * @return {?{majorChanged:boolean,minorChanged:boolean}}
+     */
+    function dropShadowedProperties(minorOpspec, majorOpspec, propertiesName) {
+        var minorSP = minorOpspec.setProperties ? minorOpspec.setProperties[propertiesName] : null,
+            minorRP = minorOpspec.removedProperties ? minorOpspec.removedProperties[propertiesName] : null,
+            majorSP = majorOpspec.setProperties ? majorOpspec.setProperties[propertiesName] : null,
+            majorRP = majorOpspec.removedProperties ? majorOpspec.removedProperties[propertiesName] : null,
+            result;
+
+        result = dropShadowedAttributes(minorSP, minorRP, majorSP, majorRP);
+
+        // remove empty setProperties
+        if (minorSP && !hasProperties(minorSP)) {
+            delete minorOpspec.setProperties[propertiesName];
+        }
+        // remove empty removedProperties
+        if (minorRP && !hasRemovedProperties(minorRP)) {
+            delete minorOpspec.removedProperties[propertiesName];
+        }
+
+        // remove empty setProperties
+        if (majorSP && !hasProperties(majorSP)) {
+            delete majorOpspec.setProperties[propertiesName];
+        }
+        // remove empty removedProperties
+        if (majorRP && !hasRemovedProperties(majorRP)) {
+            delete majorOpspec.removedProperties[propertiesName];
+        }
+
+        return result;
+    }
+
+
+
+    /* Transformation methods */
+
+    /**
      * @param {!Object} addStyleSpec
      * @param {!Object} removeStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -109,6 +263,197 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  addStyleSpecResult,
             opSpecsB:  removeStyleSpecResult
+        };
+    }
+
+    /**
+     * @param {!Object} applyDirectStylingSpecA
+     * @param {!Object} applyDirectStylingSpecB
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingApplyDirectStyling(applyDirectStylingSpecA, applyDirectStylingSpecB, hasAPriority) {
+        var majorSpec, minorSpec, majorSpecResult, minorSpecResult,
+            majorSpecEnd, minorSpecEnd, dropResult,
+            originalMajorSpec, originalMinorSpec,
+            helperOpspecBefore, helperOpspecAfter,
+            applyDirectStylingSpecAResult = [applyDirectStylingSpecA],
+            applyDirectStylingSpecBResult = [applyDirectStylingSpecB];
+
+        // overlapping and any conflicting attributes?
+        if (!(applyDirectStylingSpecA.position + applyDirectStylingSpecA.length <= applyDirectStylingSpecB.position ||
+              applyDirectStylingSpecA.position >= applyDirectStylingSpecB.position + applyDirectStylingSpecB.length)) {
+            // adapt to priority
+            majorSpec = hasAPriority ? applyDirectStylingSpecA : applyDirectStylingSpecB;
+            minorSpec = hasAPriority ? applyDirectStylingSpecB : applyDirectStylingSpecA;
+
+            // might need original opspecs?
+            if (applyDirectStylingSpecA.position !== applyDirectStylingSpecB.position ||
+                applyDirectStylingSpecA.length !== applyDirectStylingSpecB.length) {
+                originalMajorSpec = cloneOpspec(majorSpec);
+                originalMinorSpec = cloneOpspec(minorSpec);
+            }
+
+            // for the part that is overlapping reduce setProperties by the shadowed properties
+            dropResult = dropShadowedProperties(minorSpec, majorSpec, 'style:text-properties');
+
+            if (dropResult.majorChanged || dropResult.minorChanged) {
+                // split the less-priority op into several ops for the overlapping and non-overlapping ranges
+                majorSpecResult = [];
+                minorSpecResult = [];
+
+                majorSpecEnd = majorSpec.position + majorSpec.length;
+                minorSpecEnd = minorSpec.position + minorSpec.length;
+
+                // find if there is a part before and if there is a part behind,
+                // create range-adapted copies of the original opspec, if the spec has changed
+                if (minorSpec.position < majorSpec.position) {
+                    if (dropResult.minorChanged) {
+                        helperOpspecBefore = cloneOpspec(/**@type{!Object}*/(originalMinorSpec));
+                        helperOpspecBefore.length = majorSpec.position - minorSpec.position;
+                        minorSpecResult.push(helperOpspecBefore);
+
+                        minorSpec.position = majorSpec.position;
+                        minorSpec.length = minorSpecEnd - minorSpec.position;
+                    }
+                } else if (majorSpec.position < minorSpec.position) {
+                    if (dropResult.majorChanged) {
+                        helperOpspecBefore = cloneOpspec(/**@type{!Object}*/(originalMajorSpec));
+                        helperOpspecBefore.length = minorSpec.position - majorSpec.position;
+                        majorSpecResult.push(helperOpspecBefore);
+
+                        majorSpec.position = minorSpec.position;
+                        majorSpec.length = majorSpecEnd - majorSpec.position;
+                    }
+                }
+                if (minorSpecEnd > majorSpecEnd) {
+                    if (dropResult.minorChanged) {
+                        helperOpspecAfter = originalMinorSpec;
+                        helperOpspecAfter.position = majorSpecEnd;
+                        helperOpspecAfter.length = minorSpecEnd - majorSpecEnd;
+                        minorSpecResult.push(helperOpspecAfter);
+
+                        minorSpec.length = majorSpecEnd - minorSpec.position;
+                    }
+                } else if (majorSpecEnd > minorSpecEnd) {
+                    if (dropResult.majorChanged) {
+                        helperOpspecAfter = originalMajorSpec;
+                        helperOpspecAfter.position = minorSpecEnd;
+                        helperOpspecAfter.length = majorSpecEnd - minorSpecEnd;
+                        majorSpecResult.push(helperOpspecAfter);
+
+                        majorSpec.length = minorSpecEnd - majorSpec.position;
+                    }
+                }
+
+                // check if there are any changes left and this op has not become a noop
+                if (majorSpec.setProperties && hasProperties(majorSpec.setProperties)) {
+                    majorSpecResult.push(majorSpec);
+                }
+                // check if there are any changes left and this op has not become a noop
+                if (minorSpec.setProperties && hasProperties(minorSpec.setProperties)) {
+                    minorSpecResult.push(minorSpec);
+                }
+
+                if (hasAPriority) {
+                    applyDirectStylingSpecAResult = majorSpecResult;
+                    applyDirectStylingSpecBResult = minorSpecResult;
+                } else {
+                    applyDirectStylingSpecAResult = minorSpecResult;
+                    applyDirectStylingSpecBResult = majorSpecResult;
+                }
+            }
+        }
+
+        return {
+            opSpecsA:  applyDirectStylingSpecAResult,
+            opSpecsB:  applyDirectStylingSpecBResult
+        };
+    }
+
+    /**
+     * @param {!Object} applyDirectStylingSpec
+     * @param {!Object} insertTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingInsertText(applyDirectStylingSpec, insertTextSpec) {
+        // adapt applyDirectStyling spec to inserted positions
+        if (insertTextSpec.position <= applyDirectStylingSpec.position) {
+            applyDirectStylingSpec.position += insertTextSpec.text.length;
+        } else if (insertTextSpec.position <= applyDirectStylingSpec.position + applyDirectStylingSpec.length) {
+            applyDirectStylingSpec.length += insertTextSpec.text.length;
+        }
+
+        return {
+            opSpecsA:  [applyDirectStylingSpec],
+            opSpecsB:  [insertTextSpec]
+        };
+    }
+
+    /**
+     * @param {!Object} applyDirectStylingSpec
+     * @param {!Object} removeTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingRemoveText(applyDirectStylingSpec, removeTextSpec) {
+        var applyDirectStylingSpecEnd = applyDirectStylingSpec.position + applyDirectStylingSpec.length,
+            removeTextSpecEnd = removeTextSpec.position + removeTextSpec.length,
+            applyDirectStylingSpecResult = [applyDirectStylingSpec],
+            removeTextSpecResult = [removeTextSpec];
+
+        // transform applyDirectStylingSpec
+        // removed positions by object up to move cursor position?
+        if (removeTextSpecEnd <= applyDirectStylingSpec.position) {
+            // adapt by removed position
+            applyDirectStylingSpec.position -= removeTextSpec.length;
+        // overlapping?
+        } else if (removeTextSpec.position < applyDirectStylingSpecEnd) {
+            // still to select range starting at cursor position?
+            if (applyDirectStylingSpec.position < removeTextSpec.position) {
+                // still to select range ending at selection?
+                if (removeTextSpecEnd < applyDirectStylingSpecEnd) {
+                    applyDirectStylingSpec.length -= removeTextSpec.length;
+                } else {
+                    applyDirectStylingSpec.length = removeTextSpec.position - applyDirectStylingSpec.position;
+                }
+            // remove overlapping section
+            } else {
+                // fall at start of removed section
+                applyDirectStylingSpec.position = removeTextSpec.position;
+                // still to select range at selection end?
+                if (removeTextSpecEnd < applyDirectStylingSpecEnd) {
+                    applyDirectStylingSpec.length = applyDirectStylingSpecEnd - removeTextSpecEnd;
+                } else {
+                    // completely overlapped by other, so becomes no-op
+                    // TODO: once we can address spans, removeTextSpec would need to get a helper op
+                    // to remove the empty span left over
+                    applyDirectStylingSpecResult = [];
+                }
+            }
+        }
+
+        return {
+            opSpecsA:  applyDirectStylingSpecResult,
+            opSpecsB:  removeTextSpecResult
+        };
+    }
+
+    /**
+     * @param {!Object} applyDirectStylingSpec
+     * @param {!Object} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingSplitParagraph(applyDirectStylingSpec, splitParagraphSpec) {
+        // transform applyDirectStylingSpec
+        if (splitParagraphSpec.position < applyDirectStylingSpec.position) {
+            applyDirectStylingSpec.position += 1;
+        } else if (splitParagraphSpec.position < applyDirectStylingSpec.position + applyDirectStylingSpec.length) {
+            applyDirectStylingSpec.length += 1;
+        }
+
+        return {
+            opSpecsA:  [applyDirectStylingSpec],
+            opSpecsB:  [splitParagraphSpec]
         };
     }
 
@@ -227,118 +572,6 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {?Object} properties
-     * @param {?Object} removedProperties
-     * @param {?Object} shadowingProperties
-     * @param {?Object} shadowingRemovedProperties
-     * @return {undefined}
-     */
-    function dropShadowedAttributes(properties, removedProperties, shadowingProperties, shadowingRemovedProperties) {
-        var value, i, name,
-            removedPropertyNames,
-            shadowingRemovedPropertyNames =
-                shadowingRemovedProperties && shadowingRemovedProperties.attributes ?
-                    shadowingRemovedProperties.attributes.split(',') : [];
-
-        // iterate over all properties and see which get overwritten or deleted
-        // by the shadowing, so they have to be dropped
-        if (properties && (shadowingProperties || shadowingRemovedPropertyNames.length > 0)) {
-            Object.keys(properties).forEach(function(key) {
-                value = properties[key];
-                if ((shadowingProperties && shadowingProperties[key] !== undefined) ||
-                    (shadowingRemovedPropertyNames && shadowingRemovedPropertyNames.indexOf(key) !== -1)) {
-                    // TODO: support more than one level
-                    if (typeof value !== "object") {
-                        // drop
-                        delete properties[key];
-                    }
-                }
-            });
-        }
-
-        // iterate over all shadowing removed properties and drop any duplicates from
-        // the removed property names
-        if (removedProperties && removedProperties.attributes && (shadowingProperties || shadowingRemovedPropertyNames.length > 0)) {
-            removedPropertyNames = removedProperties.attributes.split(',');
-            for (i = 0; i < removedPropertyNames.length; i += 1) {
-                name = removedPropertyNames[i];
-                if ((shadowingProperties && shadowingProperties[name] !== undefined) ||
-                    (shadowingRemovedPropertyNames && shadowingRemovedPropertyNames.indexOf(name) !== -1)) {
-                    // drop
-                    removedPropertyNames.splice(i, 1);
-                    i -= 1;
-                }
-            }
-            // set back
-            if (removedPropertyNames.length > 0) {
-                removedProperties.attributes = removedPropertyNames.join(',');
-            } else {
-                delete removedProperties.attributes;
-            }
-        }
-    }
-
-    /**
-     * Estimates if there are any properties set in the given properties object.
-     * @param {!Object} properties
-     * @return {!boolean}
-     */
-    function hasProperties(properties) {
-        var key;
-
-        for (key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Estimates if there are any properties set in the given properties object.
-     * @param {!Object} properties
-     * @return {!boolean}
-     */
-    function hasRemovedProperties(properties) {
-        var key;
-
-        for (key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                // handle empty 'attribute' as not existing
-                if (key !== 'attributes' || properties.attributes.length > 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param {!Object} targetOpspec
-     * @param {!Object} shadowingOpspec
-     * @param {!string} propertiesName
-     * @return {undefined}
-     */
-    function dropShadowedProperties(targetOpspec, shadowingOpspec, propertiesName) {
-        var sp = targetOpspec.setProperties ? targetOpspec.setProperties[propertiesName] : null,
-            rp = targetOpspec.removedProperties ? targetOpspec.removedProperties[propertiesName] : null;
-
-        dropShadowedAttributes(sp,
-                               rp,
-                               shadowingOpspec.setProperties ? shadowingOpspec.setProperties[propertiesName] : null,
-                               shadowingOpspec.removedProperties ? shadowingOpspec.removedProperties[propertiesName] : null);
-
-        // remove empty setProperties
-        if (sp && !hasProperties(sp)) {
-            delete targetOpspec.setProperties[propertiesName];
-        }
-        // remove empty removedProperties
-        if (rp && !hasRemovedProperties(rp)) {
-            delete targetOpspec.removedProperties[propertiesName];
-        }
-    }
-
-    /**
      * @param {!Object} updateParagraphStyleSpecA
      * @param {!Object} updateParagraphStyleSpecB
      * @param {!boolean} hasAPriority
@@ -362,7 +595,17 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
                                 majorSpec.setProperties || null,
                                 majorSpec.removedProperties || null);
 
-            // check if there are any changes left and this op has not become a noop
+            // check if there are any changes left and the major op has not become a noop
+            if (!(majorSpec.setProperties && hasProperties(majorSpec.setProperties)) &&
+                !(majorSpec.removedProperties && hasRemovedProperties(majorSpec.removedProperties))) {
+                // set major spec to noop
+                if (hasAPriority) {
+                    updateParagraphStyleSpecAResult = [];
+                } else {
+                    updateParagraphStyleSpecBResult = [];
+                }
+            }
+            // check if there are any changes left and the minor op has not become a noop
             if (!(minorSpec.setProperties && hasProperties(minorSpec.setProperties)) &&
                 !(minorSpec.removedProperties && hasRemovedProperties(minorSpec.removedProperties))) {
                 // set minor spec to noop 
@@ -697,6 +940,20 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         };
     }
 
+    /**
+     * Does an OT on the two passed opspecs, where they are not modified at all,
+     * and so simply returns them in the result arrays.
+     * @param {!Object} opSpecA
+     * @param {!Object} opSpecB
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function passUnchanged(opSpecA, opSpecB) {
+        return {
+            opSpecsA:  [opSpecA],
+            opSpecsB:  [opSpecB]
+        };
+    }
+
 
     var /**
          * This is the lower-left half of the sparse NxN matrix with all the
@@ -730,6 +987,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         "AddCursor": {
             "AddCursor":            passUnchanged,
             "AddStyle":             passUnchanged,
+            "ApplyDirectStyling":   passUnchanged,
             "InsertText":           passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
@@ -741,6 +999,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "AddStyle": {
             "AddStyle":             passUnchanged,
+            "ApplyDirectStyling":   passUnchanged,
             "InsertText":           passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
@@ -748,6 +1007,17 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveText":           passUnchanged,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
+        "ApplyDirectStyling": {
+            "ApplyDirectStyling":   transformApplyDirectStylingApplyDirectStyling,
+            "InsertText":           transformApplyDirectStylingInsertText,
+            "MoveCursor":           passUnchanged,
+            "RemoveCursor":         passUnchanged,
+            "RemoveStyle":          passUnchanged,
+            "RemoveText":           transformApplyDirectStylingRemoveText,
+            "SetParagraphStyle":    passUnchanged,
+            "SplitParagraph":       transformApplyDirectStylingSplitParagraph,
             "UpdateParagraphStyle": passUnchanged
         },
         "InsertText": {

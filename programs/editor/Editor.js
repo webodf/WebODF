@@ -316,7 +316,7 @@ define("webodf/editor/Editor", [
                     canvasElement = document.getElementById("canvas"),
                     memberListElement = document.getElementById('memberList'),
                     collabEditing = Boolean(server),
-                    directStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
+                    directParagraphStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                     imageInsertingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                     // annotations not yet properly supported for OT
                     annotationsEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
@@ -382,7 +382,7 @@ define("webodf/editor/Editor", [
                         loadOdtFile: loadOdtFile,
                         saveOdtFile: saveOdtFile,
                         close: close,
-                        directStylingEnabled: directStylingEnabled,
+                        directParagraphStylingEnabled: directParagraphStylingEnabled,
                         imageInsertingEnabled: imageInsertingEnabled,
                         annotationsEnabled: annotationsEnabled,
                         undoRedoEnabled: undoRedoEnabled
@@ -402,7 +402,7 @@ define("webodf/editor/Editor", [
                     session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, pendingMemberId, {
                         viewOptions: viewOptions,
-                        directStylingEnabled: directStylingEnabled,
+                        directParagraphStylingEnabled: directParagraphStylingEnabled,
                         imageInsertingEnabled: imageInsertingEnabled
                     });
                     if (undoRedoEnabled) {
