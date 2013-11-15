@@ -34,6 +34,32 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /* Utility methods */
 
     /**
+     * Inverts the range spanned up by the spec's parameter position and length,
+     * so that position is at the other end of the range and length relative to that.
+     * @param {!Object} moveCursorSpec
+     * @return {undefined}
+     */
+    function invertMoveCursorSpecRange(moveCursorSpec) {
+        moveCursorSpec.position = moveCursorSpec.position + moveCursorSpec.length;
+        moveCursorSpec.length *= -1;
+    }
+
+    /**
+     * Inverts the range spanned up by position and length if the length is negative.
+     * Returns true if an inversion was done, false otherwise.
+     * @param {!Object} moveCursorSpec
+     * @return {!boolean}
+     */
+    function invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec) {
+        var isBackwards = (moveCursorSpec.length < 0);
+
+        if (isBackwards) {
+            invertMoveCursorSpecRange(moveCursorSpec);
+        }
+        return isBackwards;
+    }
+
+    /**
      * Returns a list with all attributes in setProperties that refer to styleName
      * @param {?Object|undefined} setProperties
      * @param {!string} styleName
@@ -490,11 +516,17 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformInsertTextMoveCursor(insertTextSpec, moveCursorSpec) {
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec);
+
         // adapt movecursor spec to inserted positions
         if (insertTextSpec.position < moveCursorSpec.position) {
             moveCursorSpec.position += insertTextSpec.text.length;
-        } else if (insertTextSpec.position <= moveCursorSpec.position + moveCursorSpec.length) {
+        } else if (insertTextSpec.position < moveCursorSpec.position + moveCursorSpec.length) {
             moveCursorSpec.length += insertTextSpec.text.length;
+        }
+
+        if (isMoveCursorSpecRangeInverted) {
+            invertMoveCursorSpecRange(moveCursorSpec);
         }
 
         return {
@@ -670,7 +702,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformMoveCursorRemoveText(moveCursorSpec, removeTextSpec) {
-        var moveCursorSpecEnd = moveCursorSpec.position + moveCursorSpec.length,
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec),
+            moveCursorSpecEnd = moveCursorSpec.position + moveCursorSpec.length,
             removeTextSpecEnd = removeTextSpec.position + removeTextSpec.length;
 
         // transform moveCursorSpec
@@ -702,6 +735,10 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             }
         }
 
+        if (isMoveCursorSpecRangeInverted) {
+            invertMoveCursorSpecRange(moveCursorSpec);
+        }
+
         return {
             opSpecsA:  [moveCursorSpec],
             opSpecsB:  [removeTextSpec]
@@ -714,11 +751,17 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformMoveCursorSplitParagraph(moveCursorSpec, splitParagraphSpec) {
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec);
+
         // transform moveCursorSpec
         if (splitParagraphSpec.position < moveCursorSpec.position) {
             moveCursorSpec.position += 1;
-        } else if (splitParagraphSpec.position <= moveCursorSpec.position + moveCursorSpec.length) {
+        } else if (splitParagraphSpec.position < moveCursorSpec.position + moveCursorSpec.length) {
             moveCursorSpec.length += 1;
+        }
+
+        if (isMoveCursorSpecRangeInverted) {
+            invertMoveCursorSpecRange(moveCursorSpec);
         }
 
         return {
