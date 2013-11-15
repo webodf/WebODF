@@ -59,6 +59,7 @@
         "gui/AnnotationViewManager.js",
         "gui/Avatar.js",
         "gui/Caret.js",
+        "gui/PlainTextPasteboard.js",
         "gui/Clipboard.js",
         "gui/DirectTextStyler.js",
         "gui/DirectParagraphStyler.js",

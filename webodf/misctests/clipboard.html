@@ -20,8 +20,9 @@
         var logNode;
 
         function dumpTypes(clipboard) {
-            var typesTable = $("<table/>");
-            clipboard.types.forEach(function(type) {
+            var i, typesTable = $("<table/>");
+
+            function addType(type) {
                 var row = $("<tr/>"),
                     nameCell = $("<td/>"),
                     valueCell =  $("<td/>");
@@ -32,7 +33,11 @@
                 row.append(nameCell);
                 row.append(valueCell);
                 typesTable.append(row);
-            });
+            }
+
+            for(i = 0; i < clipboard.types.length; i++) {
+                addType(clipboard.types[i]);
+            }
             return typesTable;
         }
 
@@ -91,16 +96,41 @@
             };
         }
 
+        function onCopy(e) {
+            recordEvent("copy", e);
+            if (e.clipboardData) {
+                log("adding custom data: " + e.clipboardData.setData('custom/data', 'Copy - clipboard.html ' + new Date()));
+            }
+        }
+
+        function onCut(e) {
+            recordEvent("cut", e);
+            if (e.clipboardData) {
+                log("adding custom data: " + e.clipboardData.setData('custom/data', 'Cut - clipboard.html ' + new Date()));
+            }
+        }
+
         function onPaste(e) {
             var clipboardTable = $("#clipboardData"),
+                keys = ["types", "files", "items"],
                 capturedRow = $("<tr/>"),
                 capturedName = $("<td/>"),
                 capturedHtml = $("<td/>");
 
             clipboardTable.empty();
-            log("paste");
+            recordEvent("paste", e);
             if (e.clipboardData) {
-                Object.keys(e.clipboardData).forEach(function(key) {
+                if (Object.keys(e.clipboardData).length > 0) {
+                    keys = Object.keys(e.clipboardData);
+                } else {
+                    // We only want properties on the clipboard such as types or files.
+                    // FF does not report these in the keys array however (potentially they are
+                    // specified higher up the prototype).
+                    // In this case, see if any of the keys we *know* we want are available on
+                    // the clipboard object.
+                    keys = keys.filter(function(key) { return key in e.clipboardData; });
+                }
+                keys.forEach(function(key) {
                     var row = $("<tr/>"),
                         nameCell = $("<td/>"),
                         valueCell =  $("<td/>");
@@ -135,13 +165,16 @@
 
             $("#content").empty();
             setTimeout(captureHtml(capturedHtml), 500);
-//            e.preventDefault();
+        }
+
+        function recordEvent(name, e) {
+            log(name + (e.clipboardData ? " (clipboardData accessible)" : ""));
         }
 
         function record(msg, result) {
             return function(e) {
                 e.preventDefault();
-                log(msg);
+                log(msg + (e.clipboardData ? " (clipboardData accessible)" : ""));
                 return result;
             };
         }
@@ -166,9 +199,9 @@
         $(function() {
             var content = $('body');
             logNode = $("#log");
-            listenEvent(content[0], "cut", record("cut"));
+            listenEvent(content[0], "cut", onCut);
             listenEvent(content[0], "beforecut", record("beforecut", false));
-            listenEvent(content[0], "copy", record("copy"));
+            listenEvent(content[0], "copy", onCopy);
             listenEvent(content[0], "beforecopy", record("beforecopy"));
             listenEvent(content[0], "paste", onPaste);
             listenEvent(content[0], "beforepaste", record("beforepaste", false));
