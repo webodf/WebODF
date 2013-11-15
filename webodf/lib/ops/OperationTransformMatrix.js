@@ -117,36 +117,36 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @param {?Object} majorRemovedProperties
      * @return {!{majorChanged:boolean,minorChanged:boolean}}
      */
-    function dropShadowedAttributes(minorSetProperties, minorRemovedProperties, majorSetProperties, majorRemovedProperties) {
+    function dropOverruledAndUnneededAttributes(minorSetProperties, minorRemovedProperties, majorSetProperties, majorRemovedProperties) {
         var value, i, name,
             majorChanged = false, minorChanged = false,
-            shadowingPropertyValue,
+            overrulingPropertyValue,
             removedPropertyNames,
             majorRemovedPropertyNames =
                 majorRemovedProperties && majorRemovedProperties.attributes ?
                     majorRemovedProperties.attributes.split(',') : [];
 
         // iterate over all properties and see which get overwritten or deleted
-        // by the shadowing, so they have to be dropped
+        // by the overruling, so they have to be dropped
         if (minorSetProperties && (majorSetProperties || majorRemovedPropertyNames.length > 0)) {
             Object.keys(minorSetProperties).forEach(function(key) {
                 value = minorSetProperties[key];
                 // TODO: support more than one level
                 if (typeof value !== "object") {
-                    shadowingPropertyValue = majorSetProperties && majorSetProperties[key];
-                    if (shadowingPropertyValue !== undefined) {
-                        // drop shadowed
+                    overrulingPropertyValue = majorSetProperties && majorSetProperties[key];
+                    if (overrulingPropertyValue !== undefined) {
+                        // drop overruled
                         delete minorSetProperties[key];
                         minorChanged = true;
 
                         // major sets to same value?
-                        if (shadowingPropertyValue === value) {
+                        if (overrulingPropertyValue === value) {
                             // drop major as well
                             delete majorSetProperties[key];
                             majorChanged = true;
                         }
                     } else if (majorRemovedPropertyNames && majorRemovedPropertyNames.indexOf(key) !== -1) {
-                        // drop shadowed
+                        // drop overruled
                         delete minorSetProperties[key];
                         minorChanged = true;
                     }
@@ -154,7 +154,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             });
         }
 
-        // iterate over all shadowing removed properties and drop any duplicates from
+        // iterate over all overruling removed properties and drop any duplicates from
         // the removed property names
         if (minorRemovedProperties && minorRemovedProperties.attributes && (majorSetProperties || majorRemovedPropertyNames.length > 0)) {
             removedPropertyNames = minorRemovedProperties.attributes.split(',');
@@ -223,14 +223,14 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @param {!string} propertiesName
      * @return {?{majorChanged:boolean,minorChanged:boolean}}
      */
-    function dropShadowedProperties(minorOpspec, majorOpspec, propertiesName) {
+    function dropOverruledAndUnneededProperties(minorOpspec, majorOpspec, propertiesName) {
         var minorSP = minorOpspec.setProperties ? minorOpspec.setProperties[propertiesName] : null,
             minorRP = minorOpspec.removedProperties ? minorOpspec.removedProperties[propertiesName] : null,
             majorSP = majorOpspec.setProperties ? majorOpspec.setProperties[propertiesName] : null,
             majorRP = majorOpspec.removedProperties ? majorOpspec.removedProperties[propertiesName] : null,
             result;
 
-        result = dropShadowedAttributes(minorSP, minorRP, majorSP, majorRP);
+        result = dropOverruledAndUnneededAttributes(minorSP, minorRP, majorSP, majorRP);
 
         // remove empty setProperties
         if (minorSP && !hasProperties(minorSP)) {
@@ -320,8 +320,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
                 originalMinorSpec = cloneOpspec(minorSpec);
             }
 
-            // for the part that is overlapping reduce setProperties by the shadowed properties
-            dropResult = dropShadowedProperties(minorSpec, majorSpec, 'style:text-properties');
+            // for the part that is overlapping reduce setProperties by the overruled properties
+            dropResult = dropOverruledAndUnneededProperties(minorSpec, majorSpec, 'style:text-properties');
 
             if (dropResult.majorChanged || dropResult.minorChanged) {
                 // split the less-priority op into several ops for the overlapping and non-overlapping ranges
@@ -620,9 +620,9 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             minorSpec = hasAPriority ? updateParagraphStyleSpecB : updateParagraphStyleSpecA;
 
             // any properties which are set by other update op need to be dropped
-            dropShadowedProperties(minorSpec, majorSpec, 'style:paragraph-properties');
-            dropShadowedProperties(minorSpec, majorSpec, 'style:text-properties');
-            dropShadowedAttributes(minorSpec.setProperties || null,
+            dropOverruledAndUnneededProperties(minorSpec, majorSpec, 'style:paragraph-properties');
+            dropOverruledAndUnneededProperties(minorSpec, majorSpec, 'style:text-properties');
+            dropOverruledAndUnneededAttributes(minorSpec.setProperties || null,
                                 minorSpec.removedProperties || null,
                                 majorSpec.setProperties || null,
                                 majorSpec.removedProperties || null);
