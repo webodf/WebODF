@@ -791,7 +791,7 @@ gui.SessionController = (function () {
 
             if (plainText) {
                 textManipulator.removeCurrentSelection();
-                session.enqueue(pasteHandler.paste(plainText));
+                session.enqueue(pasteHandler.createPasteOps(plainText));
                 cancelEvent(e);
             }
         }

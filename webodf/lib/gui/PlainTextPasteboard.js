@@ -56,7 +56,7 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
      * @param {!string} data
      * @return {!Array.<!ops.Operation>}
      */
-    this.paste = function(data) {
+    this.createPasteOps = function(data) {
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
             cursorPosition = originalCursorPosition,
             operations = [],
