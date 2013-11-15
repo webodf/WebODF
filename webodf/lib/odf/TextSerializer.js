@@ -88,9 +88,18 @@ odf.TextSerializer = function TextSerializer() {
      * @return {!string}
      */
     this.writeToString = function (node) {
+        var plainText;
         if (!node) {
             return "";
         }
-        return serializeNode(node);
+        plainText = serializeNode(node);
+        if (plainText[plainText.length - 1] === "\n") {
+            // By the serializing logic, the selection  <p>text</p> would generate "text\n"
+            // This is slightly unexpected though, as partially selecting two paragraphs (<p>p1</p><p>p2</p>)
+            // the user would expect the text to be "p1\np2"
+            // Easiest way to meet this expectation is to throw away the last new line (if present)
+            plainText = plainText.substr(0, plainText.length - 1);
+        }
+        return plainText;
     };
 };

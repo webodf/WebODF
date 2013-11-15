@@ -62,10 +62,6 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
             operations = [],
             paragraphs;
 
-        if (data[data.length - 1] === "\n") {
-            // Most snippets end in a new-line even if the selection ended mid-word. Trim this new line off
-            data = data.substr(0, data.length - 1);
-        }
         paragraphs = data.split("\n");
         paragraphs.forEach(function(text) {
             operations.push(createOp(new ops.OpSplitParagraph(), {
