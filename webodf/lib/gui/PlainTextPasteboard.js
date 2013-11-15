@@ -62,7 +62,7 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
             operations = [],
             paragraphs;
 
-        paragraphs = data.split("\n");
+        paragraphs = data.replace(/\\r/g, "").split("\n");
         paragraphs.forEach(function(text) {
             operations.push(createOp(new ops.OpSplitParagraph(), {
                 memberid: inputMemberId,
