@@ -199,15 +199,23 @@ core.UnitTestRunner = function UnitTestRunner() {
      */
     function areNodesEqual(a, b) {
         if (a.nodeType !== b.nodeType) {
-            testFailed(a.nodeType + " should be " + b.nodeType);
+            testFailed("Nodetype '" + a.nodeType + "' should be '" + b.nodeType + "'");
             return false;
         }
         if (a.nodeType === Node.TEXT_NODE) {
-            return a.data === b.data;
+            if (a.data === b.data) {
+                return true;
+            }
+            testFailed("Textnode data '" + a.data+ "' should be '" + b.data + "'");
+            return false;
         }
         runtime.assert(a.nodeType === Node.ELEMENT_NODE, "Only textnodes and elements supported.");
-        if (a.namespaceURI !== b.namespaceURI || a.localName !== b.localName) {
-            testFailed(a.namespaceURI + " should be " + b.namespaceURI);
+        if (a.namespaceURI !== b.namespaceURI) {
+            testFailed("namespace '" + a.namespaceURI + "' should be '" + b.namespaceURI + "'");
+            return false;
+        }
+        if (a.localName !== b.localName) {
+            testFailed("localName '" + a.localName + "' should be '" + b.localName+"'");
             return false;
         }
         if (!areAttributesEqual(/**@type{!Element}*/(a), /**@type{!Element}*/(b), false)) {
@@ -217,6 +225,7 @@ core.UnitTestRunner = function UnitTestRunner() {
             bn = b.firstChild;
         while (an) {
             if (!bn) {
+                testFailed("Nodetype '" + an.nodeType + "' is unexpected here.");
                 return false;
             }
             if (!areNodesEqual(an, bn)) {
@@ -226,6 +235,7 @@ core.UnitTestRunner = function UnitTestRunner() {
             bn = bn.nextSibling;
         }
         if (bn) {
+            testFailed("Nodetype '" + bn.nodeType + "' is missing here.");
             return false;
         }
         return true;
