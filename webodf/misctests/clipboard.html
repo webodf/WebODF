@@ -123,6 +123,11 @@
                 if (Object.keys(e.clipboardData).length > 0) {
                     keys = Object.keys(e.clipboardData);
                 } else {
+                    // We only want properties on the clipboard such as types or files.
+                    // FF does not report these in the keys array however (potentially they are
+                    // specified higher up the prototype).
+                    // In this case, see if any of the keys we *know* we want are available on
+                    // the clipboard object.
                     keys = keys.filter(function(key) { return key in e.clipboardData; });
                 }
                 keys.forEach(function(key) {
