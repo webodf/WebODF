@@ -343,7 +343,7 @@
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/>ab</text:p></office:text></after>
  </test>
-<test name="MoveCursor_11">
+ <test name="MoveCursor_11">
   <before><office:text><text:p>ab</text:p></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
@@ -355,7 +355,7 @@
   </opsB>
   <after><office:text><text:p>a<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/>b</text:p></office:text></after>
  </test>
-<test name="MoveCursor_22">
+ <test name="MoveCursor_22">
   <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
@@ -367,7 +367,7 @@
   </opsB>
   <after><office:text><text:p>ab<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/></text:p><text:p/></office:text></after>
  </test>
-<test name="MoveCursor_02">
+ <test name="MoveCursor_02">
   <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
@@ -378,6 +378,73 @@
    <op optype="MoveCursor" memberid="Bob" position="2" length="0"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>ab<c:cursor c:memberId="Bob"/></text:p><text:p/></office:text></after>
+ </test>
+
+ <test name="InsertTextMoveCursor_A__CV">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+  </opsB>
+  <after><office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/>V</text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertTextMoveCursor_AV__C">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+  </opsB>
+  <after><office:text><text:p><c:anchor c:memberId="Alice"/>Vab<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertTextMoveCursor_A_V_C">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+  </opsB>
+  <after><office:text><text:p><c:anchor c:memberId="Alice"/>aVb<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertTextMoveCursor_C__AV">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/>ab<c:anchor c:memberId="Alice"/>V</text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertTextMoveCursor_CV__A">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/>Vab<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertTextMoveCursor_C_V_A">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/>aVb<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
 
  <test name="InsertText_aTb">
@@ -815,5 +882,284 @@
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
   </after>
+ </test>
+
+ <test name="MoveCursorRemoveText_XA__C">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>BC<c:cursor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_AX_C">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:anchor c:memberId="Alice"/>C<c:cursor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_A_XC">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:anchor c:memberId="Alice"/>B<c:cursor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_XAX_C">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>C<c:cursor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_A_XCX">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:anchor c:memberId="Alice"/>B<c:cursor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_A__CX">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="3" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:anchor c:memberId="Alice"/>BC<c:cursor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_AXXC">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:cursor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+
+ <test name="MoveCursorRemoveText_XC__A">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:cursor c:memberId="Alice"/>BC<c:anchor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_CX_A">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:cursor c:memberId="Alice"/>C<c:anchor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_C_XA">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:cursor c:memberId="Alice"/>B<c:anchor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_XCX_A">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:cursor c:memberId="Alice"/>C<c:anchor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_C_XAX">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:cursor c:memberId="Alice"/>B<c:anchor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_C__AX">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="3" length="1"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:cursor c:memberId="Alice"/>BC<c:anchor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MoveCursorRemoveText_CXXA">
+  <before>
+   <office:text><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A<c:cursor c:memberId="Alice"/>D</text:p></office:text>
+  </after>
+ </test>
+
+ <test name="MoveCursorSplitParagraph_A__CV">
+  <before><office:text><text:p>ab</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="2"/>
+  </opsB>
+  <after><office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/></text:p><text:p></text:p></office:text></after>
+ </test>
+ <test name="MoveCursorSplitParagraph_AV__C">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="0"/>
+  </opsB>
+  <after><office:text><text:p><c:anchor c:memberId="Alice"/></text:p><text:p>ab<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursorSplitParagraph_A_V_C">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="1"/>
+  </opsB>
+  <after><office:text><text:p><c:anchor c:memberId="Alice"/>a</text:p><text:p>b<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursorSplitParagraph_C__AV">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="2"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/>ab<c:anchor c:memberId="Alice"/></text:p><text:p></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursorSplitParagraph_CV__A">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="0"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/></text:p><text:p>ab<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="MoveCursorSplitParagraph_C_V_A">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="1"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/>a</text:p><text:p>b<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
 </tests>

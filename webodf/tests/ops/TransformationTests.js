@@ -114,16 +114,23 @@ ops.TransformationTests = function TransformationTests(runner) {
      * @param {!Node} node
      * @return {undefined}
      */
-    function normalizeCursors(node) {
-        var cursors, i,
+    function normalizeCursorsAndAnchors(node) {
+        var i,
             child = node.firstChild,
             cursorNs = "urn:webodf:names:cursor",
             cursorLocalName = "cursor",
-            memberIdLocalName = "memberId";
+            anchorLocalName = "anchor",
+            memberIdLocalName = "memberId",
+            collections;
 
-        function compareMemberId(cursorA, cursorB) {
-            var memberIdA = cursorA.getAttributeNS(cursorNs, memberIdLocalName),
-                memberIdB = cursorB.getAttributeNS(cursorNs, memberIdLocalName);
+        /**
+         * @param {!Element} elementA
+         * @param {!Element} elementB
+         * @return {!number}
+         */
+        function compareMemberId(elementA, elementB) {
+            var memberIdA = elementA.getAttributeNS(cursorNs, memberIdLocalName),
+                memberIdB = elementB.getAttributeNS(cursorNs, memberIdLocalName);
 
             if (memberIdA < memberIdB) {
                 return -1;
@@ -135,31 +142,39 @@ ops.TransformationTests = function TransformationTests(runner) {
         }
 
         while (child) {
-            if (child.nodeType === Node.ELEMENT_NODE && child.localName === cursorLocalName && child.namespaceURI === cursorNs) {
-                cursors = [child];
+            if (child.nodeType === Node.ELEMENT_NODE && child.namespaceURI === cursorNs &&
+                (child.localName === cursorLocalName || child.localName === anchorLocalName)) {
+                collections = {
+                    "cursor": [],
+                    "anchor": []
+                };
+                collections[child.localName].push(child);
+
                 // collect any next cursors
                 child = child.nextSibling;
-                while (child && child.nodeType === Node.ELEMENT_NODE && child.localName === cursorLocalName && child.namespaceURI === cursorNs) {
-                    cursors.push(child);
+                while (child && child.nodeType === Node.ELEMENT_NODE && child.namespaceURI === cursorNs &&
+                       (child.localName === cursorLocalName || child.localName === anchorLocalName)) {
+                    collections[child.localName].push(child);
                     child = child.nextSibling;
                 }
+                // at this point "child" is behind the last anchor/cursor or undefined
                 // if more than 1, reinsert them sorted
-                if (cursors.length > 1) {
+                if (collections[cursorLocalName].length + collections[anchorLocalName].length > 1) {
                     // sort
-                    cursors.sort(compareMemberId);
-                    // remove
-                    for (i = 0; i < cursors.length; i += 1) {
-                        node.removeChild(cursors[i]);
+                    collections[cursorLocalName].sort(compareMemberId);
+                    collections[anchorLocalName].sort(compareMemberId);
+                    // remove and reinsert sorted
+                    for (i = 0; i < collections[cursorLocalName].length; i += 1) {
+                        node.insertBefore(collections[cursorLocalName][i], child);
                     }
-                    // reinsert sorted
-                    for (i = 0; i < cursors.length; i += 1) {
-                        node.insertBefore(cursors[i], child);
+                    for (i = 0; i < collections[anchorLocalName].length; i += 1) {
+                        node.insertBefore(collections[anchorLocalName][i], child);
                     }
                 }
             }
             if (child) {
                 if (child.nodeType === Node.ELEMENT_NODE) {
-                    normalizeCursors(child);
+                    normalizeCursorsAndAnchors(child);
                 }
                 child = child.nextSibling;
             }
@@ -370,9 +385,9 @@ ops.TransformationTests = function TransformationTests(runner) {
         }
 
         textafter.normalize();
-        normalizeCursors(textafter);
+        normalizeCursorsAndAnchors(textafter);
         text.normalize();
-        normalizeCursors(text);
+        normalizeCursorsAndAnchors(text);
         if (!r.areNodesEqual(textafter, text)) {
             t.text = serialize(text);
             t.after = serialize(textafter);
