@@ -41,7 +41,21 @@
  * PositionIterator.
  * In the following example '|' designates positions that an unfiltered
  * PositionIterator would visit.
+ *
  *  <a>|<b>|<c>|a|b|</c>|a|<a>|</a>|</b>|</a>
+ *
+ * Certain positions are considered equivalent in by the PositionIterator.
+ * Position 0 in a Text node is the same as the position preceding the Text node
+ * in the parent node. The last position in a Text node is considered equal to
+ * the subsequent position in the parent node. As such, these two Text node
+ * positions are ommitted from the PositionIterator's traversal throught the
+ * DOM. If the PositionIterator is set to a first or last position in a Text
+ * node, it is instead set the equivalent position in the parent node.
+ * Omitting the first and last Text node positions serves two functions:
+ *  - It ensures that the number of iterated steps is independent of how
+ *    characters are split up over text nodes.
+ *  - The iterator avoids positions that not distinguised by the API for
+ *    range and selections purposes.
  *
  *
  * @constructor
@@ -86,7 +100,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * variables: walker and currentPos. The walker is an instance of TreeWalker
      * which has a member called currentNode of type Node.
      * Since the implementation uses a Node and an offset, it is comparable to
-     * the parameters that go into Range and Selecation related functions.
+     * the parameters that go into Range and Selection related functions.
      * If the currentNode is a Text node, the variable currentPos gives the
      * offset in the node.
      * If the currentNode is an Element node, the variable currentPos can only
@@ -99,7 +113,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         walker,
         /**@type{!number}*/
         currentPos,
-        /**@type{function(Node):!number}*/
+        /**@type{!function(?Node):!number}*/
         nodeFilter;
     /**
      * @return {!boolean}
@@ -152,6 +166,9 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return true;
     }
     /**
+     * Move the iterator to the previous position.
+     * If the iterator is already at the first position, it is not moved and
+     * false is returned instead of true.
      * @return {!boolean}
      */
     this.previousPosition = function () {
@@ -169,8 +186,12 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         return moved;
     };
+    /**
+     * This function exposes class internals and should be avoided.
+     */
     this.previousNode = previousNode;
     /**
+     * Return the container for the current position.
      * @return {!Element|!Text}
      */
     this.container = function () {
@@ -224,15 +245,15 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return n;
     };
     /**
+     * This function exposes class internals and should be avoided.
      * @return {!Element|!Text}
      */
     this.getCurrentNode = function () {
         var n = /**@type{!Element|!Text}*/(walker.currentNode);
         return n;
     };
-
     /**
-     * Returns the current position within the container of the iterator..
+     * Returns the current position within the container of the iterator.
      * This function is useful for communication iterator position with
      * components that do not use a filter.
      * @return {!number}
@@ -351,6 +372,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         return true;
     };
     /**
+     * Move the iterator to its last possible position.
+     * This is at the last position in the root node if the iterator.
      * @return {undefined}
      */
     this.moveToEnd = function () {
@@ -372,6 +395,10 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
     };
 
+    /**
+     * Return the filter that is used in this iterator.
+     * @return {!function(?Node):!number}
+     */
     this.getNodeFilter = function () {
         return nodeFilter;
     };
@@ -387,7 +414,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
         // workaround for versions of createTreeWalker that need a function
         // instead of an object with a function such as IE 9 and older webkits
-        nodeFilter = /**@type {function(Node):number}*/(f.acceptNode);
+        nodeFilter = /**@type {!function(?Node):!number}*/(f.acceptNode);
         nodeFilter.acceptNode = nodeFilter;
         whatToShow = whatToShow || 0xFFFFFFFF;
         walker = root.ownerDocument.createTreeWalker(root, whatToShow,
