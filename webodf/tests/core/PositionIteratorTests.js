@@ -69,7 +69,8 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             { x: "<a>hello</a>", n: 6 },
             { x: "<a>hel<b/>lo</a>", n: 6 },
             { x: "<a><c><b>a</b>a</c></a>", n: 2 },
-            { x: "<a><c/>abc<b/>de</a>", n: 6 }
+            { x: "<a><c/>abc<b/>de</a>", n: 6 },
+            { x: "<a><a><a>ab</a>a<a></a></a></a>", n: 10 }
         ];
 
     this.setUp = function () {
