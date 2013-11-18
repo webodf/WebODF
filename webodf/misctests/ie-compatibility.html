@@ -40,6 +40,11 @@
         area.insertBefore(newNode, undefined);
     });
 
+    test("Node.insertBefore with undefined (child nodes)", function(area) {
+        var newNode = document.createElement("span");
+        area.insertBefore(newNode, newNode.childNodes[0]);
+    });
+
     test("Selection.extend support", function(area) {
         window.getSelection().collapse(area, 0);
         window.getSelection().extend(area, 0);
