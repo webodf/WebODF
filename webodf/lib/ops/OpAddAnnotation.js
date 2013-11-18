@@ -72,10 +72,9 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         annotationNode = doc.createElementNS(odf.Namespaces.officens, 'office:annotation');
         annotationNode.setAttributeNS(odf.Namespaces.officens, 'office:name', name);
 
-        // Only set the memberid attribute on dc:creator. Let the annotation manager actually set the name
-        // for now
         creatorNode = doc.createElementNS(odf.Namespaces.dcns, 'dc:creator');
         creatorNode.setAttributeNS('urn:webodf:names:editinfo', 'editinfo:memberid', memberid);
+        creatorNode.textContent = odtDocument.getMember(memberid).getProperties().fullName;
 
         // Date.toISOString return the current Dublin Core representation
         dateNode = doc.createElementNS(odf.Namespaces.dcns, 'dc:date');

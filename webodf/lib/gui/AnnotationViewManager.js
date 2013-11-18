@@ -220,29 +220,6 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
         connectorAngular.style.MozTransform = 'rotate(' + connectorAngle + 'rad)';
         connectorAngular.style.WebkitTransform = 'rotate(' + connectorAngle + 'rad)';
         connectorAngular.style.msTransform = 'rotate(' + connectorAngle + 'rad)';
-
-        // Bad hack: Since we do not have a straightforward way to access member data here, we will read the computed style
-        // of dc:creator[editinfo|memberid]:before, always applied by SessionView, because that contains the creator name
-        // as the content, when an annotation is created by OpAddAnnotation.
-        if (creatorNode) {
-            creatorName = window.getComputedStyle(/**@type{!Element}*/(creatorNode), ':before').content;
-            // The default `content: ` value for :before and :after pseudo-elements
-            // in webkit is '' and `none` in gecko.
-            if (creatorName && creatorName !== 'none') {
-                // Strip possible opening and closing quotes
-/*jslint regexp: true*/ // jslint complains otherwise about "Insecure '.'"
-                if (/^["'].*["']$/.test(creatorName)) {
-                    creatorName = creatorName.substring(1, creatorName.length - 1);
-                }
-/*jslint regexp: false*/
-                if (creatorNode.firstChild) {
-                    creatorNode.firstChild.nodeValue = creatorName;
-                } else {
-                    creatorNode.appendChild(doc.createTextNode(creatorName));
-                }
-            }
-        }
-
     }
 
     /**
