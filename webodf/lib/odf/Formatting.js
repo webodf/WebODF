@@ -84,7 +84,7 @@ odf.Formatting = function Formatting() {
      * @param {!string} styleFamily
      * @return {?Object}
      */
-    function getBuiltInDefaultStyleAttributes(styleFamily) {
+    function getSystemDefaultStyleAttributes(styleFamily) {
         var result,
             builtInDefaultStyleAttributes = builtInDefaultStyleAttributesByFamily[styleFamily];
 
@@ -97,6 +97,7 @@ odf.Formatting = function Formatting() {
 
         return result;
     }
+    this.getSystemDefaultStyleAttributes = getSystemDefaultStyleAttributes;
 
     /**
      * @param {!odf.OdfContainer} odfcontainer
@@ -348,7 +349,7 @@ odf.Formatting = function Formatting() {
 
         // Last incorporate attributes from the built-in default style
         if (includeSystemDefault) {
-            propertiesMap = getBuiltInDefaultStyleAttributes(styleFamily);
+            propertiesMap = getSystemDefaultStyleAttributes(styleFamily);
             if (propertiesMap) {
                 // All child properties should override any matching parent properties
                 inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
