@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, core, ops, runtime, NodeFilter*/
+/*global Node, core, ops, runtime, NodeFilter, Range*/
 /*jslint bitwise: true*/
 
 (function() {
@@ -170,8 +170,8 @@
          * @returns {boolean}
          */
         function containsRange(container, insideRange) {
-            return container.compareBoundaryPoints(container.START_TO_START, insideRange) <= 0
-                && container.compareBoundaryPoints(container.END_TO_END, insideRange) >= 0;
+            return container.compareBoundaryPoints(Range.START_TO_START, insideRange) <= 0
+                && container.compareBoundaryPoints(Range.END_TO_END, insideRange) >= 0;
         }
         this.containsRange = containsRange;
 
@@ -182,8 +182,8 @@
          * @returns {boolean}
          */
         function rangesIntersect(range1, range2) {
-            return range1.compareBoundaryPoints(range1.END_TO_START, range2) <= 0
-                && range1.compareBoundaryPoints(range1.START_TO_END, range2) >= 0;
+            return range1.compareBoundaryPoints(Range.END_TO_START, range2) <= 0
+                && range1.compareBoundaryPoints(Range.START_TO_END, range2) >= 0;
         }
         this.rangesIntersect = rangesIntersect;
 
@@ -286,8 +286,8 @@
             range.setStart(limits.startContainer, limits.startOffset);
             range.setEnd(limits.endContainer, limits.endOffset);
             nodeRange.selectNodeContents(node);
-            result = range.compareBoundaryPoints(range.START_TO_START, nodeRange) <= 0
-                        && range.compareBoundaryPoints(range.END_TO_END, nodeRange) >= 0;
+            result = range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0
+                        && range.compareBoundaryPoints(Range.END_TO_END, nodeRange) >= 0;
             range.detach();
             nodeRange.detach();
             return result;
@@ -347,8 +347,8 @@
             var nodeRange = node.ownerDocument.createRange(),
                 intersects;
             nodeRange.selectNodeContents(node);
-            intersects = range.compareBoundaryPoints(range.START_TO_END, nodeRange) <= 0
-                            && range.compareBoundaryPoints(range.END_TO_START, nodeRange) >= 0;
+            intersects = range.compareBoundaryPoints(Range.START_TO_END, nodeRange) <= 0
+                            && range.compareBoundaryPoints(Range.END_TO_START, nodeRange) >= 0;
             return intersects;
         }
         this.rangeIntersectsNode = rangeIntersectsNode;

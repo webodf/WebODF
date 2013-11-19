@@ -502,3 +502,27 @@ NodeFilter.SHOW_NOTATION;//                  = 0x00000800;
  * @return {!number}
  */
 NodeFilter.prototype.acceptNode = function(node) {"use strict"; };
+
+/**
+ * http://dom.spec.whatwg.org/#interface-range
+ * @const @type {!number}
+ */
+Range.START_TO_START; // = 0
+
+/**
+ * http://dom.spec.whatwg.org/#interface-range
+ * @const @type {!number}
+ */
+Range.START_TO_END; // = 1
+
+/**
+ * http://dom.spec.whatwg.org/#interface-range
+ * @const @type {!number}
+ */
+Range.END_TO_END; // = 2
+
+/**
+ * http://dom.spec.whatwg.org/#interface-range
+ * @const @type {!number}
+ */
+Range.END_TO_START; // = 3
