@@ -51,7 +51,8 @@ gui.SelectionView = function SelectionView(cursor) {
     "use strict";
 
     var odtDocument = cursor.getOdtDocument(),
-        root = odtDocument.getRootNode().parentNode.parentNode.parentNode,
+        documentRoot, // initialized by addOverlays
+        root, // initialized by addOverlays
         doc = odtDocument.getDOM(),
         overlayTop = doc.createElement('div'),
         overlayMiddle = doc.createElement('div'),
@@ -62,6 +63,25 @@ gui.SelectionView = function SelectionView(cursor) {
         positionIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
         /**@const*/FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = NodeFilter.FILTER_REJECT;
+
+    /**
+     * This evil little check is necessary because someone, not mentioning any names *cough*
+     * added an extremely hacky undo manager that replaces the root node in order to go back
+     * to a prior document state.
+     * This makes things very sad, and kills baby kittens.
+     * Unfortunately, no-one has had time yet to write a *real* undo stack... so we just need
+     * to cope with it for now.
+     */
+    function addOverlays() {
+        var newDocumentRoot = odtDocument.getRootNode();
+        if (documentRoot !== newDocumentRoot) {
+            documentRoot = newDocumentRoot;
+            root = documentRoot.parentNode.parentNode.parentNode;
+            root.appendChild(overlayTop);
+            root.appendChild(overlayMiddle);
+            root.appendChild(overlayBottom);
+        }
+    }
 
     /**
      * Takes a rect with the fields `left, top, width, height`
@@ -547,6 +567,7 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     function rerender() {
+        addOverlays();
         if (cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
             showOverlays(true);
             repositionOverlays(cursor.getSelectedRange());
@@ -604,9 +625,7 @@ gui.SelectionView = function SelectionView(cursor) {
         var editinfons = 'urn:webodf:names:editinfo',
             memberid = cursor.getMemberId();
 
-        root.appendChild(overlayTop);
-        root.appendChild(overlayMiddle);
-        root.appendChild(overlayBottom);
+        addOverlays();
 
         overlayTop.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
         overlayMiddle.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
