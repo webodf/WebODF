@@ -81,10 +81,12 @@
 
                 testElement.appendChild(document.createTextNode("Rect transform test"));
                 directBoundingRect = testElement.getBoundingClientRect();
-                rangeBoundingRect = range.getClientRects()[0];
+                rangeBoundingRect = range.getBoundingClientRect();
                 // Firefox doesn't apply parent css transforms to any range client rectangles
                 // See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
-                browserQuirks.unscaledRangeClientRects = directBoundingRect.height !== rangeBoundingRect.height;
+                // Depending on the browser, client rects can sometimes have sub-pixel rounding effects, so
+                // add some wiggle room for this. The scale is 200%, so there is no issues with false positives here
+                browserQuirks.unscaledRangeClientRects = Math.abs(directBoundingRect.height - rangeBoundingRect.height) > 2;
                 range.detach();
 
                 document.body.removeChild(testContainer);
