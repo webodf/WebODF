@@ -185,15 +185,17 @@ if (Java_JAVA_EXECUTABLE)
 
 endif (Java_JAVA_EXECUTABLE)
 
-add_custom_command(
-    OUTPUT instrumented/index.html
-    COMMAND ${JSCOVERAGE}
-    ARGS --exclude=node_modules
-         ${CMAKE_CURRENT_SOURCE_DIR}
-         ${CMAKE_CURRENT_BINARY_DIR}/instrumented
-    DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
-)
-add_custom_target(instrumented ALL DEPENDS instrumented/index.html)
+if (NOT APPLE)
+    add_custom_command(
+        OUTPUT instrumented/index.html
+        COMMAND ${JSCOVERAGE}
+        ARGS --exclude=node_modules
+             ${CMAKE_CURRENT_SOURCE_DIR}
+             ${CMAKE_CURRENT_BINARY_DIR}/instrumented
+        DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
+    )
+    add_custom_target(instrumented ALL DEPENDS instrumented/index.html)
+endif(NOT APPLE)
 
 add_subdirectory(tests)
 

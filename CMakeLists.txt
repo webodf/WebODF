@@ -173,7 +173,8 @@ if(WIN32)
         TEST_COMMAND ""
     )
     set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
-else(WIN32)
+elseif(APPLE)
+else()
     ExternalProject_Add(
         JSCoverage
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
@@ -186,7 +187,7 @@ else(WIN32)
         INSTALL_COMMAND ""
     )
     set(JSCOVERAGE ${CMAKE_BINARY_DIR}/JSCoverage-prefix/src/JSCoverage/jscoverage)
-endif(WIN32)
+endif()
 
 # Dojo
 ExternalProject_Add(
