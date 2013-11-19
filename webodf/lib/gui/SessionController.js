@@ -52,7 +52,7 @@ runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.ImageManager");
 runtime.loadClass("gui.ImageSelector");
 runtime.loadClass("gui.TextManipulator");
-runtime.loadClass("gui.AnnotationManager");
+runtime.loadClass("gui.AnnotationController");
 runtime.loadClass("gui.EventManager");
 runtime.loadClass("gui.PlainTextPasteboard");
 
@@ -94,7 +94,7 @@ gui.SessionController = (function () {
             mouseDownRootFilter = null,
             undoManager = null,
             eventManager = new gui.EventManager(odtDocument),
-            annotationManager = new gui.AnnotationManager(session, inputMemberId),
+            annotationController = new gui.AnnotationController(session, inputMemberId),
             directTextStyler = new gui.DirectTextStyler(session, inputMemberId),
             directParagraphStyler = args && args.directParagraphStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null,
             createCursorStyleOp = /**@type {function (!number, !number):ops.Operation}*/ (directTextStyler.createCursorStyleOp),
@@ -961,7 +961,7 @@ gui.SessionController = (function () {
 
             if (target.className === "annotationRemoveButton") {
                 annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
-                annotationManager.removeAnnotation(annotationNode);
+                annotationController.removeAnnotation(annotationNode);
             } else {
                 handleMouseClickEvent(event);
             }
@@ -1099,10 +1099,10 @@ gui.SessionController = (function () {
 
 
         /**
-         * @returns {?gui.AnnotationManager}
+         * @returns {?gui.AnnotationController}
          */
-        this.getAnnotationManager = function () {
-            return annotationManager;
+        this.getAnnotationController = function () {
+            return annotationController;
         };
 
         /**
@@ -1250,8 +1250,8 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.R, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
                     keyDownHandler.bind(keyCode.J, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
                 }
-                if (annotationManager) {
-                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationManager.addAnnotation);
+                if (annotationController) {
+                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
                 }
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
@@ -1266,8 +1266,8 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.R, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
                     keyDownHandler.bind(keyCode.J, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
                 }
-                if (annotationManager) {
-                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationManager.addAnnotation);
+                if (annotationController) {
+                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
                 }
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);

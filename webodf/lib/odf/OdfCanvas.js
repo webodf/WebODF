@@ -1139,7 +1139,7 @@ odf.OdfCanvas = (function () {
             sizer,
             annotationsPane,
             allowAnnotations = false,
-            annotationManager,
+            annotationViewManager,
             webodfcss,
             fontcss,
             stylesxmlcss,
@@ -1347,13 +1347,13 @@ odf.OdfCanvas = (function () {
 
             for (i = 0; i < annotationNodes.length; i += 1) {
                 currentAnnotationName = annotationNodes[i].getAttributeNS(officens, 'name');
-                annotationManager.addAnnotation({
+                annotationViewManager.addAnnotation({
                     node: annotationNodes[i],
                     end: annotationEnds.filter(matchAnnotationEnd)[0] || null
                 });
             }
 
-            annotationManager.rerenderAnnotations();
+            annotationViewManager.rerenderAnnotations();
         }
 
         /**
@@ -1367,15 +1367,15 @@ odf.OdfCanvas = (function () {
                     sizer.appendChild(annotationsPane);
                     fixContainerSize();
                 }
-                if (annotationManager) {
-                    annotationManager.forgetAnnotations();
+                if (annotationViewManager) {
+                    annotationViewManager.forgetAnnotations();
                 }
-                annotationManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane);
+                annotationViewManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane);
                 modifyAnnotations(odfnode.body);
             } else {
                 if (annotationsPane.parentNode) {
                     sizer.removeChild(annotationsPane);
-                    annotationManager.forgetAnnotations();
+                    annotationViewManager.forgetAnnotations();
                     fixContainerSize();
                 }
             }
@@ -1525,8 +1525,8 @@ odf.OdfCanvas = (function () {
         /**
          * @return {!gui.AnnotationViewManager}
          */
-        this.getAnnotationManager = function () {
-            return annotationManager;
+        this.getAnnotationViewManager = function () {
+            return annotationViewManager;
         };
 
         /**
@@ -1543,8 +1543,8 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.rerenderAnnotations = function () {
-            if (annotationManager) {
-                annotationManager.rerenderAnnotations();
+            if (annotationViewManager) {
+                annotationViewManager.rerenderAnnotations();
             }
         };
 
@@ -1577,8 +1577,8 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.addAnnotation = function (annotation) {
-            if (annotationManager) {
-                annotationManager.addAnnotation(annotation);
+            if (annotationViewManager) {
+                annotationViewManager.addAnnotation(annotation);
             }
         };
 
@@ -1587,8 +1587,8 @@ odf.OdfCanvas = (function () {
          * @return {undefined}
          */
         this.forgetAnnotations = function () {
-            if (annotationManager) {
-                annotationManager.forgetAnnotations();
+            if (annotationViewManager) {
+                annotationViewManager.forgetAnnotations();
             }
         };
 
@@ -1710,7 +1710,7 @@ odf.OdfCanvas = (function () {
          */
         this.destroy = function(callback) {
             var head = doc.getElementsByTagName('head')[0];
-            // TODO: anything to clean with annotationManager?
+            // TODO: anything to clean with annotationViewManager?
             if (annotationsPane && annotationsPane.parentNode) {
                 annotationsPane.parentNode.removeChild(annotationsPane);
             }
