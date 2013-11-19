@@ -326,6 +326,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         if (moved) {
             // Only do actual work if moveBackward does something to the undo stacks
             // TODO Replace with a neater hack for reloading the Odt tree
+            // Once this is fixed, SelectionView.addOverlays & StepsTranslator.verifyRootNode can be largely removed
             odfContainer.setRootElement(initialDoc.cloneNode(true));
             odfCanvas.setOdfContainer(odfContainer, true);
             eventNotifier.emit(gui.TrivialUndoManager.signalDocumentRootReplaced, { });

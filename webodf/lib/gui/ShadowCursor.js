@@ -74,7 +74,7 @@ gui.ShadowCursor = function ShadowCursor(odtDocument) {
 
     /**
      * Set the given range as the selected range for this cursor
-     * @param {!Range} range,
+     * @param {!Range} range
      * @param {boolean=} isForwardSelection Assumed to be true by default
      * @return {undefined}
      */
