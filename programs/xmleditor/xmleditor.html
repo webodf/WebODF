@@ -38,8 +38,16 @@
     };
 runtime.loadClass("xmled.XmlEditor");
 
-var xsdurl = "meeting.xsd", //"XMLSchema.xsd",
-    xmlurl = "meeting.xml", //"XMLSchema.xsd", //h-tk-20112012-9-23.xml",
+var x = [
+        [ "meeting.xsd", "meeting.xml" ],
+        [ "xsd/XMLSchema.xsd", "xsd/XMLSchema.xsd" ],
+        [ "xsd/VLOS2.0-koop.xsd", "xsd/h-tk-20122013-101-14.xml" ],
+        [ "xsd/op-xsd-2012-05-24_comments.xsd", "xsd/GVOP-2013-629.xml" ],
+        [ "xsd/op-xsd-2012-05-24_comments.xsd", "xsd/g.xml" ]
+    ],
+    current = 3,
+    xsdurl = x[current][0],
+    xmlurl = x[current][1],
     styleurl = "opxml.css";
 function init() {
     var xmlelement = document.getElementById("xml"),
