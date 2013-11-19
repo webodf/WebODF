@@ -50,8 +50,8 @@ runtime.loadClass("gui.SelectionMover");
 gui.SelectionView = function SelectionView(cursor) {
     "use strict";
 
-        var odtDocument = cursor.getOdtDocument(),
-        root = odtDocument.getRootNode().parentNode.parentNode,
+    var odtDocument = cursor.getOdtDocument(),
+        root = odtDocument.getRootNode().parentNode.parentNode.parentNode,
         doc = odtDocument.getDOM(),
         overlayTop = doc.createElement('div'),
         overlayMiddle = doc.createElement('div'),
