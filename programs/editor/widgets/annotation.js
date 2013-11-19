@@ -48,7 +48,7 @@ define("webodf/editor/widgets/annotation", [
             var self = this,
                 widget = {},
                 addAnnotationButton,
-                annotationManager;
+                annotationController;
 
 
             addAnnotationButton = new Button({
@@ -57,8 +57,8 @@ define("webodf/editor/widgets/annotation", [
                 showLabel: false,
                 iconClass: 'dijitIconBookmark',
                 onClick: function () {
-                    if (annotationManager) {
-                        annotationManager.addAnnotation();
+                    if (annotationController) {
+                        annotationController.addAnnotation();
                         self.onToolDone();
                     }
                 }
@@ -83,14 +83,14 @@ define("webodf/editor/widgets/annotation", [
             }
 
             this.setEditorSession = function (session) {
-                if (annotationManager) {
-                    annotationManager.unsubscribe(gui.AnnotationManager.annotatableChanged, onAnnotatableChanged);
+                if (annotationController) {
+                    annotationController.unsubscribe(gui.AnnotationController.annotatableChanged, onAnnotatableChanged);
                 }
-                annotationManager = session && session.sessionController.getAnnotationManager();
-                if (annotationManager) {
-                    annotationManager.subscribe(gui.AnnotationManager.annotatableChanged, onAnnotatableChanged);
+                annotationController = session && session.sessionController.getAnnotationController();
+                if (annotationController) {
+                    annotationController.subscribe(gui.AnnotationController.annotatableChanged, onAnnotatableChanged);
                 }
-                onAnnotatableChanged(annotationManager && annotationManager.isAnnotatable());
+                onAnnotatableChanged(annotationController && annotationController.isAnnotatable());
             };
 
             this.onToolDone = function () {};

@@ -67,7 +67,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
 
         this.getOdfCanvas = returnThis;
         this.odfContainer = returnThis;
-        this.getAnnotationManager = returnThis;
+        this.getAnnotationViewManager = returnThis;
         this.forgetAnnotations = noOp;
         this.refreshAnnotations = noOp;
         this.refreshCSS = noOp;

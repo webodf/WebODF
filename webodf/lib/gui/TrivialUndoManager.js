@@ -223,10 +223,10 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      */
     this.saveInitialState = function() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
-            annotationManager = odtDocument.getOdfCanvas().getAnnotationManager();
+            annotationViewManager = odtDocument.getOdfCanvas().getAnnotationViewManager();
 
-        if (annotationManager) {
-            annotationManager.forgetAnnotations();
+        if (annotationViewManager) {
+            annotationViewManager.forgetAnnotations();
         }
         initialDoc = odfContainer.rootElement.cloneNode(true);
         odtDocument.getOdfCanvas().refreshAnnotations();
