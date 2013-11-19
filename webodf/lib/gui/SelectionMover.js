@@ -194,7 +194,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         if (extend) {
             c = iterator.container();
             o = iterator.unfilteredDomOffset();
-            if (selectionRange.comparePoint(c, o) === -1) {
+            if (domUtils.comparePoints(selectionRange.startContainer, selectionRange.startOffset, c, o) === -1) {
                 selectionRange.setStart(c, o);
                 isForwardSelection = false;
             } else {

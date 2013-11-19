@@ -103,6 +103,7 @@ gui.SessionController = (function () {
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             drawShadowCursorTask,
+            suppressFocusEvent = false,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId);
 
         runtime.assert(window !== null,
@@ -686,8 +687,18 @@ gui.SessionController = (function () {
                     } else {
                         // Internet explorer does provide any method for preserving the range direction
                         // See http://msdn.microsoft.com/en-us/library/ie/ff974359%28v=vs.85%29.aspx
+                        // Unfortunately, clearing the range will trigger a focus event. So to work around this
+                        // we suppress the focus event and use the IE-specific setActive method which will
+                        // return focus back to the event manager without harming the now correct selection
+                        suppressFocusEvent = true;
                         selection.removeAllRanges();
                         selection.addRange(range.cloneRange());
+                        odtDocument.getOdfCanvas().getElement().setActive();
+                        runtime.setTimeout(function() {
+                            // The focus event will fire within the next cycle, so wait until then before
+                            // allowing the selection to resynchronize again
+                            suppressFocusEvent = false;
+                        }, 0);
                     }
                 }
             } else {
@@ -702,7 +713,9 @@ gui.SessionController = (function () {
          * event handlers have been called (observed on FF24, OSX).
          */
         function delayedMaintainCursor() {
-            runtime.setTimeout(maintainCursorSelection, 0);
+            if (suppressFocusEvent === false) {
+                runtime.setTimeout(maintainCursorSelection, 0);
+            }
         }
 
         /**

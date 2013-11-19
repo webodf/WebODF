@@ -36,50 +36,63 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, core, ops, runtime, NodeFilter*/
+/*global Node, core, ops, runtime, NodeFilter, Range*/
 /*jslint bitwise: true*/
 
 (function() {
     "use strict";
-    var rangeClientRectsBug;
+    var browserQuirks;
 
     /**
-     * Firefox does not apply parent transforms to the range's BoundingClientRect.
-     * See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
-     * @param {!Document} document
-     * @returns {!boolean}
+     * Detect various browser quirks
+     * unscaledRangeClientRects - Firefox doesn't apply parent css transforms to any range client rectangles
+     * rangeBCRIgnoresElementBCR - Internet explorer returns 0 client rects for an empty element that has fixed dimensions
+     * @returns {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
      */
-    function rangeClientRectsUntransformedBug(document) {
+    function getBrowserQuirks() {
         var range,
             directBoundingRect,
             rangeBoundingRect,
             testContainer,
-            testElement;
+            testElement,
+            detectedQuirks,
+            window,
+            document;
 
-        if (rangeClientRectsBug === undefined) {
+        if (browserQuirks === undefined) {
+            window = runtime.getWindow();
+            document = window && window.document;
+            browserQuirks = {rangeBCRIgnoresElementBCR: false, unscaledRangeClientRects: false};
+            if (document) {
+                testContainer = document.createElement("div");
+                testContainer.style.position = "absolute";
+                testContainer.style.left = "-99999px";
+                testContainer.style.transform = "scale(2)";
+                testContainer.style["-webkit-transform"] = "scale(2)";
 
-            testContainer = document.createElement("div");
-            testContainer.style.position = "absolute";
-            testContainer.style.left = "-99999px";
-            testContainer.style.transform = "scale(2)";
-            testContainer.style["-webkit-transform"] = "scale(2)";
+                testElement = document.createElement("div");
+                testContainer.appendChild(testElement);
+                document.body.appendChild(testContainer);
+                range = document.createRange();
+                range.selectNode(testElement);
+                // Internet explorer (v10 and others?) will omit the element's own client rect from
+                // the returned client rects list for the range
+                browserQuirks.rangeBCRIgnoresElementBCR = range.getClientRects().length === 0;
 
-            testElement = document.createElement("div");
-            testElement.style.width = "10px";
-            testElement.style.height = "10px";
-            testContainer.appendChild(testElement);
-            document.body.appendChild(testContainer);
+                testElement.appendChild(document.createTextNode("Rect transform test"));
+                directBoundingRect = testElement.getBoundingClientRect();
+                rangeBoundingRect = range.getClientRects()[0];
+                // Firefox doesn't apply parent css transforms to any range client rectangles
+                // See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+                browserQuirks.unscaledRangeClientRects = directBoundingRect.height !== rangeBoundingRect.height;
+                range.detach();
 
-            range = testElement.ownerDocument.createRange();
-            directBoundingRect = testElement.getBoundingClientRect();
-            range.selectNode(testElement);
-            rangeBoundingRect = range.getBoundingClientRect();
-            rangeClientRectsBug = directBoundingRect.height !== rangeBoundingRect.height;
-            range.detach();
-
-            document.body.removeChild(testContainer);
+                document.body.removeChild(testContainer);
+                detectedQuirks = Object.keys(browserQuirks).map(function(quirk) { return quirk + ":" + browserQuirks[quirk];}).join(", ");
+                runtime.log("Detected browser quirks - " + detectedQuirks);
+            }
         }
-        return rangeClientRectsBug;
+        return browserQuirks;
     }
 
     /**
@@ -87,6 +100,15 @@
      * @constructor
      */
     core.DomUtils = function DomUtils() {
+        var sharedRange;
+
+        function getSharedRange(doc) {
+            if (!sharedRange) {
+                sharedRange = doc.createRange();
+            }
+            return sharedRange;
+        }
+
         /**
          * Find the inner-most child point that is equivalent
          * to the provided container and offset.
@@ -162,8 +184,8 @@
          * @returns {boolean}
          */
         function containsRange(container, insideRange) {
-            return container.compareBoundaryPoints(container.START_TO_START, insideRange) <= 0
-                && container.compareBoundaryPoints(container.END_TO_END, insideRange) >= 0;
+            return container.compareBoundaryPoints(Range.START_TO_START, insideRange) <= 0
+                && container.compareBoundaryPoints(Range.END_TO_END, insideRange) >= 0;
         }
         this.containsRange = containsRange;
 
@@ -174,8 +196,8 @@
          * @returns {boolean}
          */
         function rangesIntersect(range1, range2) {
-            return range1.compareBoundaryPoints(range1.END_TO_START, range2) <= 0
-                && range1.compareBoundaryPoints(range1.START_TO_END, range2) >= 0;
+            return range1.compareBoundaryPoints(Range.END_TO_START, range2) <= 0
+                && range1.compareBoundaryPoints(Range.START_TO_END, range2) >= 0;
         }
         this.rangesIntersect = rangesIntersect;
 
@@ -188,7 +210,8 @@
         function getNodesInRange(range, nodeFilter) {
             var document = range.startContainer.ownerDocument,
                 elements = [],
-                root = /**@type{!Node}*/(range.commonAncestorContainer),
+                rangeRoot = range.commonAncestorContainer,
+                root = /**@type{!Node}*/(rangeRoot.nodeType === Node.TEXT_NODE ? rangeRoot.parentNode : rangeRoot),
                 n,
                 filterResult,
                 treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, nodeFilter, false);
@@ -272,12 +295,15 @@
          */
         function rangeContainsNode(limits, node) {
             var range = node.ownerDocument.createRange(),
-                nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length,
+                nodeRange = node.ownerDocument.createRange(),
                 result;
             range.setStart(limits.startContainer, limits.startOffset);
             range.setEnd(limits.endContainer, limits.endOffset);
-            result = range.comparePoint(node, 0) === 0 && range.comparePoint(node, nodeLength) === 0;
+            nodeRange.selectNodeContents(node);
+            result = range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0
+                        && range.compareBoundaryPoints(Range.END_TO_END, nodeRange) >= 0;
             range.detach();
+            nodeRange.detach();
             return result;
         }
         this.rangeContainsNode = rangeContainsNode;
@@ -332,8 +358,12 @@
         this.getElementsByTagNameNS = getElementsByTagNameNS;
 
         function rangeIntersectsNode(range, node) {
-            var nodeLength = node.nodeType === Node.TEXT_NODE ? node.length : node.childNodes.length;
-            return range.comparePoint(node, 0) <= 0 && range.comparePoint(node, nodeLength) >= 0;
+            var nodeRange = node.ownerDocument.createRange(),
+                intersects;
+            nodeRange.selectNodeContents(node);
+            intersects = range.compareBoundaryPoints(Range.START_TO_END, nodeRange) <= 0
+                            && range.compareBoundaryPoints(Range.END_TO_START, nodeRange) >= 0;
+            return intersects;
         }
         this.rangeIntersectsNode = rangeIntersectsNode;
 
@@ -411,15 +441,6 @@
         }
 
         /**
-         * Detect browsers exhibiting bug found at https://bugzilla.mozilla.org/show_bug.cgi?id=863618
-         * @param {!Document} document
-         * @returns {!boolean}
-         */
-        this.areRangeRectanglesTransformed = function(document) {
-            return !rangeClientRectsUntransformedBug(document);
-        };
-
-        /**
          * Scale the supplied number by the specified zoom transformation if the browser does not transform range client
          * rectangles correctly.
          * In firefox, the span rectangle will be affected by the zoom, but the range is not.
@@ -434,14 +455,38 @@
          * @returns {!number}
          */
         function adaptRangeDifferenceToZoomLevel(inputNumber, zoomLevel) {
-            var window = runtime.getWindow(),
-                document = window && window.document;
-            if (document && rangeClientRectsUntransformedBug(document)) {
+            if (getBrowserQuirks().unscaledRangeClientRects) {
                 return inputNumber;
             }
             return inputNumber / zoomLevel;
         }
         this.adaptRangeDifferenceToZoomLevel = adaptRangeDifferenceToZoomLevel;
+
+        /**
+         * Get the bounding client rect for the specified node.
+         * This function attempts to cope with various browser quirks, ideally returning
+         * a rectangle that can be used in conjunction with rectangles retrieved from
+         * ranges.
+         *
+         * Range & element client rectangles can only be mixed if both are transformed in the same way.
+         * See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+         * @param {!Node} node
+         * @returns {!ClientRect}
+         */
+        function getBoundingClientRect(node) {
+            var quirks = getBrowserQuirks(),
+                range;
+
+            if (quirks.unscaledRangeClientRects === false || quirks.rangeBCRIgnoresElementBCR) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    return node.getBoundingClientRect();
+                }
+            }
+            range = getSharedRange(node.ownerDocument);
+            range.selectNode(node);
+            return range.getBoundingClientRect();
+        }
+        this.getBoundingClientRect = getBoundingClientRect;
 
         function init(self) {
             var /**@type{?Window}*/window = runtime.getWindow(),

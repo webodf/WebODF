@@ -120,7 +120,7 @@ core.Cursor = function Cursor(document, memberId) {
         if (container.nodeType === Node.TEXT_NODE) {
             putIntoTextNode(node, /**@type{!Text}*/(container), offset);
         } else if (container.nodeType === Node.ELEMENT_NODE) {
-            container.insertBefore(node, container.childNodes[offset]);
+            container.insertBefore(node, container.childNodes[offset] || null);
         }
         recentlyModifiedNodes.push(node.previousSibling);
         recentlyModifiedNodes.push(node.nextSibling);
