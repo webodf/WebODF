@@ -41,53 +41,58 @@
 
 (function() {
     "use strict";
-    var quirks;
+    var browserQuirks;
 
     /**
      * Detect various browser quirks
      * unscaledRangeClientRects - Firefox doesn't apply parent css transforms to any range client rectangles
      * rangeBCRIgnoresElementBCR - Internet explorer returns 0 client rects for an empty element that has fixed dimensions
-     * @param {!Document} document
      * @returns {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
      */
-    function getBrowserQuirks(document) {
+    function getBrowserQuirks() {
         var range,
             directBoundingRect,
             rangeBoundingRect,
             testContainer,
             testElement,
-            detectedQuirks;
+            detectedQuirks,
+            window,
+            document;
 
-        if (quirks === undefined) {
-            quirks = {rangeBCRIgnoresElementBCR: false, unscaledRangeClientRects: false};
-            testContainer = document.createElement("div");
-            testContainer.style.position = "absolute";
-            testContainer.style.left = "-99999px";
-            testContainer.style.transform = "scale(2)";
-            testContainer.style["-webkit-transform"] = "scale(2)";
+        if (browserQuirks === undefined) {
+            window = runtime.getWindow();
+            document = window && window.document;
+            browserQuirks = {rangeBCRIgnoresElementBCR: false, unscaledRangeClientRects: false};
+            if (document) {
+                testContainer = document.createElement("div");
+                testContainer.style.position = "absolute";
+                testContainer.style.left = "-99999px";
+                testContainer.style.transform = "scale(2)";
+                testContainer.style["-webkit-transform"] = "scale(2)";
 
-            testElement = document.createElement("div");
-            testContainer.appendChild(testElement);
-            document.body.appendChild(testContainer);
-            range = document.createRange();
-            range.selectNode(testElement);
-            // Internet explorer (v10 and others?) will omit the element's own client rect from
-            // the returned client rects list for the range
-            quirks.rangeBCRIgnoresElementBCR = range.getClientRects().length === 0;
+                testElement = document.createElement("div");
+                testContainer.appendChild(testElement);
+                document.body.appendChild(testContainer);
+                range = document.createRange();
+                range.selectNode(testElement);
+                // Internet explorer (v10 and others?) will omit the element's own client rect from
+                // the returned client rects list for the range
+                browserQuirks.rangeBCRIgnoresElementBCR = range.getClientRects().length === 0;
 
-            testElement.appendChild(document.createTextNode("Rect transform test"));
-            directBoundingRect = testElement.getBoundingClientRect();
-            rangeBoundingRect = range.getClientRects()[0];
-            // Firefox doesn't apply parent css transforms to any range client rectangles
-            // See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
-            quirks.unscaledRangeClientRects = directBoundingRect.height !== rangeBoundingRect.height;
-            range.detach();
+                testElement.appendChild(document.createTextNode("Rect transform test"));
+                directBoundingRect = testElement.getBoundingClientRect();
+                rangeBoundingRect = range.getClientRects()[0];
+                // Firefox doesn't apply parent css transforms to any range client rectangles
+                // See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+                browserQuirks.unscaledRangeClientRects = directBoundingRect.height !== rangeBoundingRect.height;
+                range.detach();
 
-            document.body.removeChild(testContainer);
-            detectedQuirks = Object.keys(quirks).map(function(quirk) { return quirk + ":" + quirks[quirk];}).join(", ");
-            runtime.log("Detected browser quirks - " + detectedQuirks);
+                document.body.removeChild(testContainer);
+                detectedQuirks = Object.keys(browserQuirks).map(function(quirk) { return quirk + ":" + browserQuirks[quirk];}).join(", ");
+                runtime.log("Detected browser quirks - " + detectedQuirks);
+            }
         }
-        return quirks;
+        return browserQuirks;
     }
 
     /**
@@ -95,6 +100,15 @@
      * @constructor
      */
     core.DomUtils = function DomUtils() {
+        var sharedRange;
+
+        function getSharedRange(doc) {
+            if (!sharedRange) {
+                sharedRange = doc.createRange();
+            }
+            return sharedRange;
+        }
+
         /**
          * Find the inner-most child point that is equivalent
          * to the provided container and offset.
@@ -441,9 +455,7 @@
          * @returns {!number}
          */
         function adaptRangeDifferenceToZoomLevel(inputNumber, zoomLevel) {
-            var window = runtime.getWindow(),
-                document = window && window.document;
-            if (document && getBrowserQuirks(document).unscaledRangeClientRects) {
+            if (getBrowserQuirks().unscaledRangeClientRects) {
                 return inputNumber;
             }
             return inputNumber / zoomLevel;
@@ -451,13 +463,30 @@
         this.adaptRangeDifferenceToZoomLevel = adaptRangeDifferenceToZoomLevel;
 
         /**
-         * Get detected browser quirks
-         * @param {!Document} document
-         * @returns {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
+         * Get the bounding client rect for the specified node.
+         * This function attempts to cope with various browser quirks, ideally returning
+         * a rectangle that can be used in conjunction with rectangles retrieved from
+         * ranges.
+         *
+         * Range & element client rectangles can only be mixed if both are transformed in the same way.
+         * See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
+         * @param {!Node} node
+         * @returns {!ClientRect}
          */
-        this.getBrowserQuirks = function(document) {
-            return getBrowserQuirks(document);
-        };
+        function getBoundingClientRect(node) {
+            var quirks = getBrowserQuirks(),
+                range;
+
+            if (quirks.unscaledRangeClientRects === false || quirks.rangeBCRIgnoresElementBCR) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    return node.getBoundingClientRect();
+                }
+            }
+            range = getSharedRange(node.ownerDocument);
+            range.selectNode(node);
+            return range.getBoundingClientRect();
+        }
+        this.getBoundingClientRect = getBoundingClientRect;
 
         function init(self) {
             var /**@type{?Window}*/window = runtime.getWindow(),

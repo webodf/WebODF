@@ -62,8 +62,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         shouldBlink = false,
         blinking = false,
         blinkTimeout,
-        domUtils = new core.DomUtils(),
-        rangeBCRIgnoresElementBCR;
+        domUtils = new core.DomUtils();
 
     function blink(reset) {
         if (!shouldBlink || !cursorNode.parentNode) {
@@ -186,27 +185,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
-     * The the span's BoundingClientRect using a range rather than from the element directly. Some browsers apply
-     * different transforms to a range ClientRect vs. an element ClientRect.
-     * See DomUtils, areRangeClientRectsTransformed() for more details
-     * @returns {!ClientRect}
-     */
-    function getSpanBoundingClientRect() {
-        var range,
-            rangeRect;
-
-        if (rangeBCRIgnoresElementBCR) {
-            rangeRect = span.getBoundingClientRect();
-        } else {
-            range = span.ownerDocument.createRange();
-            range.selectNode(span);
-            rangeRect = range.getClientRects()[0];
-            range.detach();
-        }
-        return rangeRect;
-    }
-
-    /**
      * Tweak the height and top offset of the caret to display closely inline in the text block.
      * This uses ranges to account for line-height and text offsets
      *
@@ -231,7 +209,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // If this isn't done, the existing span's top setting would need to be taken into
             // account (and converted if not in pixels) when calculating the new top value
             span.style.top = "0";
-            caretRect = getSpanBoundingClientRect();
+            caretRect = domUtils.getBoundingClientRect(span);
 
             if (selectionRect.height < MIN_CARET_HEIGHT_PX) {
                 // ClientRect's are read-only, so a whole new object is necessary to modify these values
@@ -366,7 +344,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     };
 
     /**
-     * @param {!function(!Object=)} callback, passing an error object in case of error
+     * @param {!function(!Object=)} callback Callback to call when the destroy is complete, passing an error object in case of error
      * @return {undefined}
      */
     this.destroy = function(callback) {
@@ -388,7 +366,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
         avatar = new gui.Avatar(cursorNode, avatarInitiallyVisible);
-        rangeBCRIgnoresElementBCR = domUtils.getBrowserQuirks(dom).rangeBCRIgnoresElementBCR;
         handleUpdate();
     }
     init();
