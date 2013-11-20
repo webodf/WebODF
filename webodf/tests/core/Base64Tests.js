@@ -47,9 +47,9 @@ core.Base64Tests = function Base64Tests(runner) {
     function testConvertByteArrayToBase64() {
         var a = new Uint8Array(new ArrayBuffer(3));
         a[0] = a[1] = a[2] = 65;
-        t.encoded = base64.convertByteArrayToBase64(a.slice(0, 1));
+        t.encoded = base64.convertByteArrayToBase64(a.subarray(0, 1));
         r.shouldBe(t, "t.encoded", "'QQ=='");
-        t.encoded = base64.convertByteArrayToBase64(a.slice(0, 2));
+        t.encoded = base64.convertByteArrayToBase64(a.subarray(0, 2));
         r.shouldBe(t, "t.encoded", "'QUE='");
         t.encoded = base64.convertByteArrayToBase64(a);
         r.shouldBe(t, "t.encoded", "'QUFB'");

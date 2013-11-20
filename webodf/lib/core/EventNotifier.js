@@ -45,7 +45,8 @@
 core.EventNotifier = function EventNotifier(eventIds) {
     "use strict";
 
-    var eventListener = {};
+    var /**@type{!Object.<!string,!Array.<!Function>>}*/
+        eventListener = {};
 
     /**
      * @param {!string} eventId

@@ -552,6 +552,9 @@
         }
         this.getBoundingClientRect = getBoundingClientRect;
 
+        /**
+         * @param {!core.DomUtils} self
+         */
         function init(self) {
             var appVersion, webKitOrSafari, ie,
                 /**@type{?Window}*/
@@ -567,7 +570,7 @@
                     || appVersion.indexOf('safari') !== -1);
             ie = appVersion.indexOf('msie'); // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
             if (webKitOrSafari || ie) {
-                self.containsNode = /**@type{!function(!Element,?Element):!boolean}*/(containsNodeForBrokenWebKit);
+                self.containsNode = containsNodeForBrokenWebKit;
             }
         }
         init(this);

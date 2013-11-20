@@ -139,17 +139,19 @@ function makeBase64() {
             o += 3;
         }
         l = 3 * l - [0, 0, 2, 1][padlen];
-        return bin.slice(0, l);
+        return bin.subarray(0, l);
     }
     /**
      * @param {!Uint8Array} uni
      * @return {!Uint8Array}
      */
     function convertUTF16ArrayToUTF8Array(uni) {
-        var i, l = uni.length, n, o = 0,
+        var i, l = uni.length,
+            n,
+            o = 0,
             bin = new Uint8Array(new ArrayBuffer(3 * l));
         for (i = 0; i < l; i += 1) {
-            n = uni[i];
+            n = /**@type{!number}*/(uni[i]);
             if (n < 0x80) {
                 bin[o++] = n;
             } else if (n < 0x800) {
@@ -161,7 +163,7 @@ function makeBase64() {
                 bin[o++] = 0x80 |  (n         & 0x3f);
             }
         }
-        return bin.slice(0, o);
+        return bin.subarray(0, o);
     }
     /**
      * @param {!Uint8Array} bin
@@ -171,23 +173,23 @@ function makeBase64() {
         var i, l = bin.length, uni = new Uint8Array(new ArrayBuffer(l)),
             c0, c1, c2, o = 0;
         for (i = 0; i < l; i += 1) {
-            c0 = bin[i];
+            c0 = /**@type{!number}*/(bin[i]);
             if (c0 < 0x80) {
                 uni[o++] = c0;
             } else {
                 i += 1;
-                c1 = bin[i];
+                c1 = /**@type{!number}*/(bin[i]);
                 if (c0 < 0xe0) {
                     uni[o++] = ((c0 & 0x1f) << 6) | (c1 & 0x3f);
                 } else {
                     i += 1;
-                    c2 = bin[i];
+                    c2 = /**@type{!number}*/(bin[i]);
                     uni[o++] = ((c0 & 0x0f) << 12) | ((c1 & 0x3f) << 6) |
                             (c2 & 0x3f);
                 }
             }
         }
-        return uni.slice(0, o);
+        return uni.subarray(0, o);
     }
     /**
      * @param {!string} bin
@@ -222,7 +224,7 @@ function makeBase64() {
             i = 0,
             chunksize = 45000;
         while (i < b.length) {
-            r += String.fromCharCode.apply(String, b.slice(i, i + chunksize));
+            r += String.fromCharCode.apply(String, b.subarray(i, i + chunksize));
             i += chunksize;
         }
         return r;

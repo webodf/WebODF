@@ -236,7 +236,7 @@ ops.TransformerTests = function TransformerTests(runner) {
     }
 
     function loadTests(url, tests) {
-        var s = runtime.readFileSync(url, "utf-8"),
+        var s = /**@type{!string}*/(runtime.readFileSync(url, "utf-8")),
             xml = runtime.parseXML(s),
             n,
             testName;

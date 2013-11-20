@@ -161,7 +161,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             eextralen = estream.readUInt16LE();
             estream.pos += filenamelen + eextralen;
             if (compressionMethod) {
-                data = data.slice(estream.pos, estream.pos + compressedSize);
+                data = data.subarray(estream.pos, estream.pos + compressedSize);
                 if (compressedSize !== data.length) {
                     callback("The amount of compressed bytes read was " +
                         data.length.toString() + " instead of " +
@@ -171,7 +171,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
                 }
                 data = inflate(data, uncompressedSize);
             } else {
-                data = data.slice(estream.pos, estream.pos + uncompressedSize);
+                data = data.subarray(estream.pos, estream.pos + uncompressedSize);
             }
             if (uncompressedSize !== data.length) {
                 callback("The amount of bytes read was " +
@@ -261,7 +261,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         stream.pos += 8;
         offset = stream.readUInt32LE();
         this.filename = runtime.byteArrayToString(
-                stream.data.slice(stream.pos, stream.pos + namelen), "utf8");
+                stream.data.subarray(stream.pos, stream.pos + namelen), "utf8");
         stream.pos += namelen + extralen + commentlen;
     }
     /**
@@ -416,7 +416,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             // it would make sense to move this to base64.toBase64
             while (i < data.length) {
                 dataurl += base64.convertUTF8ArrayToBase64(
-                    p.slice(i, Math.min(i + chunksize, p.length))
+                    p.subarray(i, Math.min(i + chunksize, p.length))
                 );
                 i += chunksize;
             }

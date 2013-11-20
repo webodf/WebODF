@@ -46,6 +46,7 @@
 core.LoopWatchDog = function LoopWatchDog(timeout, maxChecks) {
     "use strict";
     var startTime = Date.now(),
+        /**@type{!number}*/
         checks = 0;
     function check() {
         var t;

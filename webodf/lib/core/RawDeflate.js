@@ -56,7 +56,8 @@ core.RawDeflate = function () {
      */
 
     /* constant parameters */
-    var zip_WSIZE = 32768,        // Sliding Window size
+    var /**@type{!number}*/
+        zip_WSIZE = 32768,        // Sliding Window size
         zip_STORED_BLOCK = 0,
         zip_STATIC_TREES = 1,
         zip_DYN_TREES    = 2,
@@ -104,37 +105,52 @@ core.RawDeflate = function () {
                 zip_MIN_MATCH, 10),
 
     /* variables */
+        /**@type{?Zip_DeflateBuffer}*/
         zip_free_queue,
         zip_qhead,
         zip_qtail,
         zip_initflag,
         zip_outbuf = null,
+        /**@type{!number}*/
         zip_outcnt,
+        /**@type{!number}*/
         zip_outoff,
         zip_complete,
+        /**@type{!Array.<!number>}*/
         zip_window,
         zip_d_buf,
         zip_l_buf,
+        /**@type{!Array.<!number>}*/
         zip_prev,
         zip_bi_buf,
+        /**@type{!number}*/
         zip_bi_valid,
+        /**@type{!number}*/
         zip_block_start,
         zip_ins_h,
         zip_hash_head,
         zip_prev_match,
         zip_match_available,
         zip_match_length,
+        /**@type{!number}*/
         zip_prev_length,
+        /**@type{!number}*/
         zip_strstart,
+        /**@type{!number}*/
         zip_match_start,
         zip_eofile,
+        /**@type{!number}*/
         zip_lookahead,
+        /**@type{!number}*/
         zip_max_chain_length,
+        /**@type{!number}*/
         zip_max_lazy_match,
         zip_compr_level,
         zip_good_match,
         zip_nice_match,
+        /**@type{!Array.<!Zip_DeflateCT>}*/
         zip_dyn_ltree,
+        /**@type{!Array.<!Zip_DeflateCT>}*/
         zip_dyn_dtree,
         zip_static_ltree,
         zip_static_dtree,
@@ -143,11 +159,14 @@ core.RawDeflate = function () {
         zip_d_desc,
         zip_bl_desc,
         zip_bl_count,
+        /**@type{!Array.<!number>}*/
         zip_heap,
         zip_heap_len,
         zip_heap_max,
         zip_depth,
+        /**@type{!Array.<!number>}*/
         zip_length_code,
+        /**@type{!Array.<!number>}*/
         zip_dist_code,
         zip_base_length,
         zip_base_dist,
@@ -159,14 +178,21 @@ core.RawDeflate = function () {
         zip_flag_bit,
         zip_opt_len,
         zip_static_len,
+        /**@type{!string}*/
         zip_deflate_data,
+        /**@type{!number}*/
         zip_deflate_pos,
     // var zip_HASH_BITS = 15;
     /* constant tables */
+        /**@type{!Array.<!number>}*/
         zip_extra_lbits = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0],
+        /**@type{!Array.<!number>}*/
         zip_extra_dbits = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13],
+        /**@type{!Array.<!number>}*/
         zip_extra_blbits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7],
+        /**@type{!Array.<!number>}*/
         zip_bl_order = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15],
+        /**@type{!Array.<!Zip_DeflateConfiguration>}*/
         zip_configuration_table;
     if (zip_LIT_BUFSIZE > zip_INBUFSIZ) {
         runtime.log("error: zip_INBUFSIZ is too small");
@@ -186,7 +212,9 @@ core.RawDeflate = function () {
      * @constructor
      */
     function Zip_DeflateCT() {
+        /**@type{!number}*/
         this.fc = 0; // frequency count or bit string
+        /**@type{!number}*/
         this.dl = 0; // father node in Huffman tree or length of bit string
     }
     /**
@@ -207,6 +235,10 @@ core.RawDeflate = function () {
      * exclude worst case performance for pathological files. Better values may be
      * found for specific files.
      * @constructor
+     * @param {!number} a
+     * @param {!number} b
+     * @param {!number} c
+     * @param {!number} d
      */
     function Zip_DeflateConfiguration(a, b, c, d) {
         this.good_length = a; // reduce lazy search above this match length
@@ -226,7 +258,9 @@ core.RawDeflate = function () {
         this.off = 0;
     }
 
-    /* constant tables */
+    /**
+     * constant tables
+     */
     zip_configuration_table = [
         new Zip_DeflateConfiguration(0,    0,   0,    0),
         new Zip_DeflateConfiguration(4,    4,   8,    4),
@@ -243,6 +277,9 @@ core.RawDeflate = function () {
 
     /* routines (deflate) */
 
+    /**
+     * @param {!number} level
+     */
     function zip_deflate_start(level) {
         var i;
 
@@ -318,11 +355,17 @@ core.RawDeflate = function () {
         zip_flag_buf.length = parseInt(zip_LIT_BUFSIZE / 8, 10);
     }
 
+    /**
+     * @param {!Zip_DeflateBuffer} p
+     */
     var zip_reuse_queue = function (p) {
         p.next = zip_free_queue;
         zip_free_queue = p;
     };
 
+    /**
+     * @type {!function():!Zip_DeflateBuffer}
+     */
     var zip_new_queue = function () {
         var p;
 
@@ -338,10 +381,16 @@ core.RawDeflate = function () {
         return p;
     };
 
+    /**
+     * @type {!function(!number):!number}
+     */
     var zip_head1 = function (i) {
         return zip_prev[zip_WSIZE + i];
     };
 
+    /**
+     * @type {!function(!number,!number):!number}
+     */
     var zip_head2 = function (i, val) {
         zip_prev[zip_WSIZE + i] = val;
         return val;
@@ -365,10 +414,12 @@ core.RawDeflate = function () {
         }
     };
 
-    /* put_byte is used for the compressed output, put_ubyte for the
+    /**
+     * put_byte is used for the compressed output, put_ubyte for the
      * uncompressed output. However unlzw() uses window for its
      * suffix table instead of its output buffer, so it does not use put_ubyte
      * (to be cleaned up).
+     * @type {!function(!number):undefined}
      */
     var zip_put_byte = function (c) {
         zip_outbuf[zip_outoff + zip_outcnt++] = c;
@@ -377,7 +428,10 @@ core.RawDeflate = function () {
         }
     };
 
-    /* Output a 16 bit value, lsb first */
+    /**
+     * Output a 16 bit value, lsb first
+     * @type {!function(!number):undefined}
+     */
     var zip_put_short = function (w) {
         w &= 0xffff;
         if (zip_outoff + zip_outcnt < zip_OUTBUFSIZ - 2) {
@@ -406,11 +460,15 @@ core.RawDeflate = function () {
         zip_head2(zip_ins_h, zip_strstart);
     };
 
-    /* ==========================================================================
+    /** ==========================================================================
      * Send a value on a given number of bits.
      * IN assertion: length <= 16 and value fits in length bits.
+     * @type{!number}
      */
     var zip_Buf_size = 16; // bit size of bi_buf
+    /**
+     * @type{!function(!number,!number):undefined}
+     */
     var zip_send_bits = function (
         value,    // value to send
         length
@@ -430,31 +488,38 @@ core.RawDeflate = function () {
         }
     };
 
-    /* Send a code of the given tree. c and tree must not have side effects */
+    /**
+     * Send a code of the given tree. c and tree must not have side effects
+     * @type{!function(!number,!Array.<!Zip_DeflateCT>):undefined}
+     */
     var zip_SEND_CODE = function (c, tree) {
         zip_send_bits(tree[c].fc, tree[c].dl);
     };
 
-    /* Mapping from a distance to a distance code. dist is the distance - 1 and
+    /**
+     * Mapping from a distance to a distance code. dist is the distance - 1 and
      * must not have side effects. dist_code[256] and dist_code[257] are never
      * used.
+     * @type{!function(!number):!number}
      */
     var zip_D_CODE = function (dist) {
         return (dist < 256 ? zip_dist_code[dist]
             : zip_dist_code[256 + (dist >> 7)]) & 0xff;
     };
 
-    /* ==========================================================================
+    /** ==========================================================================
      * Compares to subtrees, using the tree depth as tie breaker when
      * the subtrees have equal frequency. This minimizes the worst case length.
+     * @type{!function(!Array.<!Zip_DeflateCT>,!number,!number):!boolean}
      */
     var zip_SMALLER = function (tree, n, m) {
         return tree[n].fc < tree[m].fc ||
             (tree[n].fc === tree[m].fc && zip_depth[n] <= zip_depth[m]);
     };
 
-    /* ==========================================================================
+    /** ==========================================================================
      * read string data
+     * @type{!function(!Array.<!number>,!number,!number):!number}
      */
     var zip_read_buff = function (buff, offset, n) {
         var i;
@@ -576,13 +641,14 @@ core.RawDeflate = function () {
         }
     };
 
-    /* ==========================================================================
+    /** ==========================================================================
      * Set match_start to the longest match starting at the given string and
      * return its length. Matches shorter or equal to prev_length are discarded,
      * in which case the result is equal to prev_length and match_start is
      * garbage.
      * IN assertions: cur_match is the head of the hash chain for the current
      *   string (strstart) and its distance is <= MAX_DIST, and prev_length >= 1
+     * @type{!function(!number):!number}
      */
     var zip_longest_match = function (cur_match) {
         var chain_length = zip_max_chain_length; // max hash chain length
@@ -670,9 +736,10 @@ core.RawDeflate = function () {
         return best_len;
     };
 
-    /* ==========================================================================
+    /** ==========================================================================
      * Save the match info and tally the frequency counts. Return true if
      * the current block must be flushed.
+     * @type{!function(!number,!number):!boolean}
      */
     var zip_ct_tally = function (
         dist, // distance of matched string
@@ -730,11 +797,12 @@ core.RawDeflate = function () {
          */
     };
 
-    /* ==========================================================================
+    /** ==========================================================================
      * Restore the heap property by moving down the tree starting at node k,
      * exchanging a node with the smallest of its two sons if necessary, stopping
      * when the heap property is re-established (each father smaller than its
      * two sons).
+     * @type{!function(!Array.<!Zip_DeflateCT>,!number):undefined}
      */
     var zip_pqdownheap = function (
         tree,    // the tree to restore
@@ -1787,6 +1855,11 @@ core.RawDeflate = function () {
         return n + zip_qcopy(buff, n + off, buff_size - n);
     };
 
+    /**
+     * @param {!string} str
+     * @param {!number} level
+     * @return {!string}
+     */
     var zip_deflate = function (str, level) {
         var i, j;
 
@@ -1809,7 +1882,7 @@ core.RawDeflate = function () {
             aout[aout.length] = cbuf.join("");
             i = zip_deflate_internal(buff, 0, buff.length);
         }
-        zip_deflate_data = null; // G.C.
+        zip_deflate_data = ""; // G.C.
         return aout.join("");
     };
 

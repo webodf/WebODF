@@ -38,6 +38,26 @@
 /**
  * @constructor
  */
+function NodeStats() {"use strict"; }
+/**
+ * @return {!boolean}
+ */
+NodeStats.prototype.isFile = function () {"use strict"; };
+/**
+ * @type {!number}
+ */
+NodeStats.prototype.size = 0;
+/**
+ * @constructor
+ */
+function NodeStream() {"use strict"; }
+/**
+ * @param {!string} str
+ */
+NodeStream.prototype.write = function (str) {"use strict"; };
+/**
+ * @constructor
+ */
 function NodeJSObject() {"use strict"; }
 /**
  * @param {...} items
@@ -46,21 +66,21 @@ function NodeJSObject() {"use strict"; }
 NodeJSObject.prototype.resolve = function (items) {"use strict"; };
 /**
  * @param {!string} path
- * @param {function(...)} callback
+ * @param {function(?string,?NodeStats)} callback
  * @return {undefined}
  */
 NodeJSObject.prototype.stat = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {?string} encoding
- * @param {function(...)} callback
+ * @param {function(?string,(?string|?Buffer))} callback
  * @return {?string}
  */
 NodeJSObject.prototype.readFile = function (path, encoding, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {?string} encoding
- * @return {?string}
+ * @return {!string|!Buffer}
  */
 NodeJSObject.prototype.readFileSync = function (path, encoding) {"use strict"; };
 /**
@@ -148,9 +168,9 @@ NodeJSProcess.prototype.exit = function (exitCode) {"use strict"; };
  */
 NodeJSProcess.prototype.argv = [];
 /**
- * @type {!Object}
+ * @type {!NodeStream}
  */
-NodeJSProcess.prototype.stderr = {};
+NodeJSProcess.prototype.stderr;
 
 /**
  * @namespace
@@ -193,6 +213,10 @@ var __dirname;
  * @param {!string=} encoding
  */
 function Buffer(arg1, encoding) {"use strict"; }
+/**
+ * @type{!number}
+ */
+Buffer.prototype.length = 0;
 /**
  * @param {!string} msg
  * @return {undefined}
@@ -357,7 +381,7 @@ TreeWalker.prototype.filter;
  */
 TreeWalker.prototype.expandEntityReferences;
 /**
- * @type{Node}
+ * @type{!Node}
  */
 TreeWalker.prototype.currentNode;
 /**
@@ -430,72 +454,72 @@ Document.prototype.createNodeIterator = function (root, whatToShow, filter, enti
 
 // Constants returned by acceptNode
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.FILTER_ACCEPT;//                  = 1;
+NodeFilter.FILTER_ACCEPT                  = 1;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.FILTER_REJECT;//                  = 2;
+NodeFilter.FILTER_REJECT                  = 2;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.FILTER_SKIP;//                    = 3;
+NodeFilter.FILTER_SKIP                    = 3;
 
 
 // Constants for whatToShow
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_ALL;//                       = 0xFFFFFFFF;
+NodeFilter.SHOW_ALL                       = 0xFFFFFFFF;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ELEMENT                   = 0x00000001;
+/**
+ * @type {!number}
+ */
+NodeFilter.SHOW_ATTRIBUTE                 = 0x00000002;
 /**
  * @const @type {!number}
  */
-NodeFilter.SHOW_ELEMENT;//                   = 0x00000001;
+NodeFilter.SHOW_TEXT                      = 0x00000004;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_ATTRIBUTE;//                 = 0x00000002;
+NodeFilter.SHOW_CDATA_SECTION             = 0x00000008;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_TEXT;//                      = 0x00000004;
+NodeFilter.SHOW_ENTITY_REFERENCE          = 0x00000010;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_CDATA_SECTION;//             = 0x00000008;
+NodeFilter.SHOW_ENTITY                    = 0x00000020;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_ENTITY_REFERENCE;//          = 0x00000010;
+NodeFilter.SHOW_PROCESSING_INSTRUCTION    = 0x00000040;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_ENTITY;//                    = 0x00000020;
+NodeFilter.SHOW_COMMENT                   = 0x00000080;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_PROCESSING_INSTRUCTION;//    = 0x00000040;
+NodeFilter.SHOW_DOCUMENT                  = 0x00000100;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_COMMENT;//                   = 0x00000080;
+NodeFilter.SHOW_DOCUMENT_TYPE             = 0x00000200;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_DOCUMENT;//                  = 0x00000100;
+NodeFilter.SHOW_DOCUMENT_FRAGMENT         = 0x00000400;
 /**
- * @const @type {!number}
+ * @type {!number}
  */
-NodeFilter.SHOW_DOCUMENT_TYPE;//             = 0x00000200;
-/**
- * @const @type {!number}
- */
-NodeFilter.SHOW_DOCUMENT_FRAGMENT;//         = 0x00000400;
-/**
- * @const @type {!number}
- */
-NodeFilter.SHOW_NOTATION;//                  = 0x00000800;
+NodeFilter.SHOW_NOTATION                  = 0x00000800;
 
 /**
  * @param {!Node} node
@@ -505,24 +529,24 @@ NodeFilter.prototype.acceptNode = function(node) {"use strict"; };
 
 /**
  * http://dom.spec.whatwg.org/#interface-range
- * @const @type {!number}
+ * @type {!number}
  */
-Range.START_TO_START; // = 0
+Range.START_TO_START = 0;
 
 /**
  * http://dom.spec.whatwg.org/#interface-range
- * @const @type {!number}
+ * @type {!number}
  */
-Range.START_TO_END; // = 1
+Range.START_TO_END = 1;
 
 /**
  * http://dom.spec.whatwg.org/#interface-range
- * @const @type {!number}
+ * @type {!number}
  */
-Range.END_TO_END; // = 2
+Range.END_TO_END = 2;
 
 /**
  * http://dom.spec.whatwg.org/#interface-range
- * @const @type {!number}
+ * @type {!number}
  */
-Range.END_TO_START; // = 3
+Range.END_TO_START = 3;
