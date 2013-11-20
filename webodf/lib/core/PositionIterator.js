@@ -97,7 +97,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * Empty text nodes are not considered to be a valid position for the
      * positioniterator. They should be filtered out in all cases.
      * @constructor
-     * @implements NodeFilter
+     * @extends NodeFilter
      */
     function EmptyTextNodeFilter() {
         this.acceptNode = function (node) {
@@ -109,7 +109,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
     }
     /**
      * @constructor
-     * @implements NodeFilter
+     * @extends NodeFilter
      * @param {!NodeFilter} filter
      */
     function FilteredEmptyTextNodeFilter(filter) {
