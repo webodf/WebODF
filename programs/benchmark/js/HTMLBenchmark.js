@@ -52,6 +52,9 @@ define([
              SelectEntireDocument, RemoveCurrentSelection) {
     "use strict";
 
+    /**
+     * @constructor
+     */
     function HTMLBenchmark() {
         var loadingScreen = document.getElementById('loadingScreen'),
             fileUrl = window.location.hash.substr(1) || "100pages.odt",

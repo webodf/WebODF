@@ -39,6 +39,9 @@
 define(function() {
     "use strict";
 
+    /**
+     * @constructor
+     */
     function ManualStep() {
         var wizardContainer = document.getElementById("wizardPrompt"),
             messageContainer = document.getElementById("wizardMessage"),
