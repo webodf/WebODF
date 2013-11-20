@@ -27,10 +27,9 @@
 
 define("webodf/editor/server/pullbox/ServerFactory", [
     "webodf/editor/server/pullbox/Server",
-    "webodf/editor/server/pullbox/MemberModel",
     "webodf/editor/server/pullbox/OperationRouter",
     "webodf/editor/server/pullbox/SessionList"],
-    function (PullBoxServer, PullBoxMemberModel, PullBoxOperationRouter, PullBoxSessionList) {
+    function (PullBoxServer, PullBoxOperationRouter, PullBoxSessionList) {
         "use strict";
 
         /**
@@ -43,9 +42,6 @@ define("webodf/editor/server/pullbox/ServerFactory", [
             };
             this.createOperationRouter = function (sid, mid, server, odfContainer) {
                 return new PullBoxOperationRouter(sid, mid, server, odfContainer);
-            };
-            this.createMemberModel = function (sid, server) {
-                return new PullBoxMemberModel(sid, server);
             };
             this.createSessionList = function (server) {
                 return new PullBoxSessionList(server);

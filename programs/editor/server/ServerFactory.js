@@ -58,13 +58,6 @@ ServerFactory.prototype.createServer = function () {"use strict"; };
 ServerFactory.prototype.createOperationRouter = function (sessionId, memberId, server, odfContainer) {"use strict"; };
 
 /**
- * @param {!string} sessionId
- * @param {!ops.Server} server
- * @return {!ops.MemberModel}
- */
-ServerFactory.prototype.createMemberModel = function (sessionId, server) {"use strict"; };
-
-/**
  * @param {!ops.Server} server
  * @return {!SessionList}
  */
