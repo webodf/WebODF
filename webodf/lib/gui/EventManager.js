@@ -57,12 +57,42 @@ gui.EventManager = function EventManager(odtDocument) {
             "beforepaste": true
         },
         // Events that should be bound to the global window rather than the canvas element
-        bindToWindow = {
-            // Capture selections that start outside the canvas element and end within the canvas element
-            "mousedown": true,
-            // Capture selections that start inside the canvas element and end outside of the element or even window
-            "mouseup": true
+        bindToWindow;
+
+    /**
+     * Ensures events that may bubble through multiple sources are only handled once.
+     * @constructor
+     */
+    function EventDelegate() {
+        var self = this,
+            recentEvents = [];
+
+        /**
+         * @type {!Array.<!function(!Event)>}
+         */
+        this.handlers = [];
+
+        /**
+         * @type {!boolean}
+         */
+        this.isSubscribed = false;
+
+        /**
+         * @param {!Event} e
+         */
+        this.handleEvent = function(e) {
+            if (recentEvents.indexOf(e) === -1) {
+                recentEvents.push(e); // Track this event as already processed by these handlers
+                self.handlers.forEach(function(handler) {
+                    // Yes yes... this is not a spec-compliant event processor... sorry!
+                    handler(e);
+                });
+                // Reset the processed events list after this tick is complete. The event won't be
+                // processed by any other sources after this
+                runtime.setTimeout(function() { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
+            }
         };
+    }
 
     /**
      * @param {!Window} window
@@ -147,10 +177,19 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.subscribe = function(eventName, handler) {
-        if (bindToWindow[eventName] && window) {
-            listenEvent(window, eventName, handler);
+        var delegate = window && bindToWindow[eventName];
+        if (delegate) {
+            delegate.handlers.push(handler);
+            if (!delegate.isSubscribed) {
+                delegate.isSubscribed = true;
+                // Internet explorer will only supply mouse up & down on the window object
+                // For other browser though, listening to both will cause two events to be processed
+                listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
+                listenEvent(canvasElement, eventName, delegate.handleEvent);
+            }
+        } else {
+            listenEvent(canvasElement, eventName, handler);
         }
-        listenEvent(canvasElement, eventName, handler);
     };
 
     /**
@@ -158,10 +197,15 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.unsubscribe = function(eventName, handler) {
-        if (bindToWindow[eventName] && window) {
-            removeEvent(window, eventName, handler);
+        var delegate = window && bindToWindow[eventName],
+            handlerIndex = delegate && delegate.handlers.indexOf(handler);
+        if (delegate) {
+            if (handlerIndex !== -1) {
+                delegate.handlers.splice(handlerIndex, 1);
+            }
+        } else {
+            removeEvent(canvasElement, eventName, handler);
         }
-        removeEvent(canvasElement, eventName, handler);
     };
 
     /**
@@ -209,4 +253,14 @@ gui.EventManager = function EventManager(odtDocument) {
             }
         }
     };
+
+    function init() {
+        bindToWindow = {
+            // Capture selections that start outside the canvas element and end within the canvas element
+            "mousedown": new EventDelegate(),
+            // Capture selections that start inside the canvas element and end outside of the element or even window
+            "mouseup": new EventDelegate()
+        };
+    }
+    init();
 };
