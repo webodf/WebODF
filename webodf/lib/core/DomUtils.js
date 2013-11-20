@@ -299,11 +299,13 @@
             var range = node.ownerDocument.createRange(),
                 nodeRange = node.ownerDocument.createRange(),
                 result;
+
             range.setStart(limits.startContainer, limits.startOffset);
             range.setEnd(limits.endContainer, limits.endOffset);
             nodeRange.selectNodeContents(node);
-            result = range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0
-                        && range.compareBoundaryPoints(Range.END_TO_END, nodeRange) >= 0;
+
+            result = containsRange(range, nodeRange);
+
             range.detach();
             nodeRange.detach();
             return result;
@@ -361,11 +363,13 @@
 
         function rangeIntersectsNode(range, node) {
             var nodeRange = node.ownerDocument.createRange(),
-                intersects;
+                result;
+
             nodeRange.selectNodeContents(node);
-            intersects = range.compareBoundaryPoints(Range.START_TO_END, nodeRange) <= 0
-                            && range.compareBoundaryPoints(Range.END_TO_START, nodeRange) >= 0;
-            return intersects;
+            result = rangesIntersect(range, nodeRange);
+            nodeRange.detach();
+
+            return result;
         }
         this.rangeIntersectsNode = rangeIntersectsNode;
 
