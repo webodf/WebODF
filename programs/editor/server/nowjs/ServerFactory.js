@@ -40,10 +40,9 @@
 
 define("webodf/editor/server/nowjs/ServerFactory", [
     "webodf/editor/server/nowjs/Server",
-    "webodf/editor/server/nowjs/MemberModel",
     "webodf/editor/server/nowjs/OperationRouter",
     "webodf/editor/server/nowjs/SessionList"],
-    function (NowjsServer, NowjsMemberModel, NowjsOperationRouter, NowjsSessionList) {
+    function (NowjsServer, NowjsOperationRouter, NowjsSessionList) {
         "use strict";
 
         /**
@@ -56,9 +55,6 @@ define("webodf/editor/server/nowjs/ServerFactory", [
             };
             this.createOperationRouter = function (sid, mid, server, odfContainer) {
                 return new NowjsOperationRouter(sid, mid, server);
-            };
-            this.createMemberModel = function (sid, server) {
-                return new NowjsMemberModel(server);
             };
             this.createSessionList = function (server) {
                 return new NowjsSessionList(server);

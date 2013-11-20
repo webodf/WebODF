@@ -124,7 +124,20 @@ define("webodf/editor/Editor", [
              * @return {undefined}
              */
             this.openDocument = function (docUrl, memberId, editorReadyCallback) {
-                initDocLoading(docUrl, memberId, editorReadyCallback);
+                initDocLoading(docUrl, memberId, function () {
+                    runtime.loadClass("ops.OpAddMember");
+                    var op = new ops.OpAddMember();
+                    op.init({
+                        memberid: memberId,
+                        setProperties: {
+                            fullName: runtime.tr("Unknown Author"),
+                            color: "black",
+                            imageUrl: "avatar-joe.png"
+                        }
+                    });
+                    session.enqueue([op]);
+                    editorReadyCallback();
+                });
             };
 
             /**
@@ -134,6 +147,14 @@ define("webodf/editor/Editor", [
              */
             this.closeDocument = function (callback) {
                 runtime.assert(session, "session should exist here.");
+                runtime.loadClass("ops.OpRemoveMember");
+
+                var op = new ops.OpRemoveMember();
+                op.init({
+                    memberid: editorSession.sessionController.getInputMemberId()
+                });
+                session.enqueue([op]);
+
                 session.close(function (err) {
                     if (err) {
                         callback(err);
@@ -195,15 +216,11 @@ define("webodf/editor/Editor", [
              */
             this.openSession = function (sessionId, memberId, editorReadyCallback) {
                 initDocLoading(server.getGenesisUrl(sessionId), memberId, function () {
-                    var opRouter, memberModel;
-                    // overwrite router and member model
+                    // overwrite router 
                     // TODO: serverFactory should be a backendFactory,
                     // and there should be a backendFactory for local editing
-                    opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer());
+                    var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer());
                     session.setOperationRouter(opRouter);
-
-                    memberModel = serverFactory.createMemberModel(sessionId, server);
-                    session.setMemberModel(memberModel);
 
                     opRouter.requestReplay(function done() {
                         editorReadyCallback();

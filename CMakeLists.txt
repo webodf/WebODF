@@ -292,6 +292,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
 
+    lib/ops/Member.js
     lib/ops/Server.js
     lib/ops/Operation.js
     lib/ops/OpAddCursor.js
@@ -312,6 +313,9 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpRemoveStyle.js
     lib/ops/OpAddAnnotation.js
     lib/ops/OpRemoveAnnotation.js
+    lib/ops/OpAddMember.js
+    lib/ops/OpUpdateMember.js
+    lib/ops/OpRemoveMember.js
     lib/ops/OperationFactory.js
     lib/gui/SelectionMover.js
     lib/ops/StepsTranslator.js
@@ -334,8 +338,6 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/AnnotationController.js
     lib/gui/EventManager.js
     lib/gui/SessionController.js
-    lib/ops/MemberModel.js
-    lib/ops/TrivialMemberModel.js
     lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
     lib/gui/EditInfoHandle.js

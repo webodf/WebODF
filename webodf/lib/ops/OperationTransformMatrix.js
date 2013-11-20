@@ -1014,6 +1014,13 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
          * empty if the opspec turned into a no-op in the transformation.
          * If a transformation is not doable, the method returns "null".
          *
+         * Some operations are added onto the stack by the server, for example
+         * AddMember, RemoveMember, and UpdateMember. These therefore need
+         * not be transformed against each other, since the server is the
+         * only originator of these ops. Therefore, their entries in the
+         * matrix are missing. They do however require a passUnchanged entry
+         * with other ops.
+         *
          * Here the CC signature of each transformation method:
          * param {!Object} opspecA
          * param {!Object} opspecB
@@ -1029,8 +1036,22 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     {
         "AddCursor": {
             "AddCursor":            passUnchanged,
+            "AddMember":            passUnchanged,
             "AddStyle":             passUnchanged,
             "ApplyDirectStyling":   passUnchanged,
+            "InsertText":           passUnchanged,
+            "MoveCursor":           passUnchanged,
+            "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
+            "RemoveStyle":          passUnchanged,
+            "RemoveText":           passUnchanged,
+            "SetParagraphStyle":    passUnchanged,
+            "SplitParagraph":       passUnchanged,
+            "UpdateMember":         passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
+        "AddMember": {
+            "AddStyle":             passUnchanged,
             "InsertText":           passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
@@ -1046,10 +1067,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
             "RemoveStyle":          transformAddStyleRemoveStyle,
             "RemoveText":           passUnchanged,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "ApplyDirectStyling": {
@@ -1067,49 +1090,69 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           transformInsertTextInsertText,
             "MoveCursor":           transformInsertTextMoveCursor,
             "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           transformInsertTextRemoveText,
             // TODO:"SetParagraphStyle":    transformInsertTextSetParagraphStyle,
             "SplitParagraph":       transformInsertTextSplitParagraph,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "MoveCursor": {
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         transformMoveCursorRemoveCursor,
+            "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           transformMoveCursorRemoveText,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       transformMoveCursorSplitParagraph,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "RemoveCursor": {
             "RemoveCursor":         transformRemoveCursorRemoveCursor,
+            "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           passUnchanged,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": passUnchanged
+        },
+        "RemoveMember": {
+            "RemoveStyle":          passUnchanged,
+            "RemoveText":           passUnchanged,
+            "SetParagraphStyle":    passUnchanged,
+            "SplitParagraph":       passUnchanged,
+            "UpdateParagraphStyle": passUnchanged 
         },
         "RemoveStyle": {
             "RemoveStyle":          transformRemoveStyleRemoveStyle,
             "RemoveText":           passUnchanged,
             "SetParagraphStyle":    transformRemoveStyleSetParagraphStyle,
             "SplitParagraph":       passUnchanged,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": transformRemoveStyleUpdateParagraphStyle
         },
         "RemoveText": {
             "RemoveText":           transformRemoveTextRemoveText,
             // TODO:"SetParagraphStyle":    transformRemoveTextSetParagraphStyle,
             "SplitParagraph":       transformRemoveTextSplitParagraph,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "SetParagraphStyle": {
             // TODO:"SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
             // TODO:"SetParagraphStyle":    transformSetParagraphStyleSplitParagraph,
+            "UpdateMember":         passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "SplitParagraph": {
             "SplitParagraph":       transformSplitParagraphSplitParagraph,
+            "UpdateMember":         passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
+        "UpdateMember": {
             "UpdateParagraphStyle": passUnchanged
         },
         "UpdateParagraphStyle": {

@@ -82,8 +82,11 @@ define("webodf/editor/EditorSession", [
             domUtils = new core.DomUtils(),
             eventNotifier = new core.EventNotifier([
                 EditorSession.signalMemberAdded,
+                EditorSession.signalMemberUpdated,
                 EditorSession.signalMemberRemoved,
+                EditorSession.signalCursorAdded,
                 EditorSession.signalCursorMoved,
+                EditorSession.signalCursorRemoved,
                 EditorSession.signalParagraphChanged,
                 EditorSession.signalCommonStyleCreated,
                 EditorSession.signalCommonStyleDeleted,
@@ -211,13 +214,25 @@ define("webodf/editor/EditorSession", [
             paragraphRange.detach();
         }
 
+        function onMemberAdded(member) {
+            self.emit(EditorSession.signalMemberAdded, member.getMemberId());
+        }
+
+        function onMemberUpdated(member) {
+            self.emit(EditorSession.signalMemberUpdated, member.getMemberId());
+        }
+
+        function onMemberRemoved(memberId) {
+            self.emit(EditorSession.signalMemberRemoved, memberId);
+        }
+
         function onCursorAdded(cursor) {
-            self.emit(EditorSession.signalMemberAdded, cursor.getMemberId());
+            self.emit(EditorSession.signalCursorAdded, cursor.getMemberId());
             trackCursor(cursor);
         }
 
         function onCursorRemoved(memberId) {
-            self.emit(EditorSession.signalMemberRemoved, memberId);
+            self.emit(EditorSession.signalCursorRemoved, memberId);
         }
 
         function onCursorMoved(cursor) {
@@ -265,14 +280,6 @@ define("webodf/editor/EditorSession", [
          */
         this.unsubscribe = function (eventid, cb) {
             eventNotifier.unsubscribe(eventid, cb);
-        };
-
-        this.getMemberDetailsAndUpdates = function (memberId, subscriber) {
-            return session.getMemberModel().getMemberDetailsAndUpdates(memberId, subscriber);
-        };
-
-        this.unsubscribeMemberDetailsUpdates = function (memberId, subscriber) {
-            return session.getMemberModel().unsubscribeMemberDetailsUpdates(memberId, subscriber);
         };
 
         this.getCursorPosition = function () {
@@ -514,6 +521,14 @@ define("webodf/editor/EditorSession", [
         };
 
         /**
+         * @param {!string} memberId
+         * @return {?ops.Member}
+         */
+        this.getMember = function (memberId) {
+            return odtDocument.getMember(memberId);
+        };
+
+        /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
@@ -522,6 +537,9 @@ define("webodf/editor/EditorSession", [
 
             head.removeChild(fontStyles);
 
+            odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, onMemberAdded);
+            odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, onMemberUpdated);
+            odtDocument.unsubscribe(ops.OdtDocument.signalMemberRemoved, onMemberRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
@@ -578,6 +596,9 @@ define("webodf/editor/EditorSession", [
             self.availableFonts = getAvailableFonts();
             selectionViewManager.registerCursor(shadowCursor, true);
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
+            odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, onMemberAdded);
+            odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, onMemberUpdated);
+            odtDocument.subscribe(ops.OdtDocument.signalMemberRemoved, onMemberRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
@@ -592,7 +613,10 @@ define("webodf/editor/EditorSession", [
     };
 
     /**@const*/EditorSession.signalMemberAdded =            "memberAdded";
+    /**@const*/EditorSession.signalMemberUpdated =          "memberUpdated";
     /**@const*/EditorSession.signalMemberRemoved =          "memberRemoved";
+    /**@const*/EditorSession.signalCursorAdded =            "cursorAdded";
+    /**@const*/EditorSession.signalCursorRemoved =          "cursorRemoved";
     /**@const*/EditorSession.signalCursorMoved =            "cursorMoved";
     /**@const*/EditorSession.signalParagraphChanged =       "paragraphChanged";
     /**@const*/EditorSession.signalCommonStyleCreated =     "styleCreated";
