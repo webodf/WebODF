@@ -98,10 +98,12 @@ core.EventNotifier = function EventNotifier(eventIds) {
      * @return {undefined}
      */
     function init() {
-        var i;
+        var i, eventId;
 
         for (i = 0; i < eventIds.length; i += 1) {
-            eventListener[eventIds[i]] = [];
+            eventId = eventIds[i];
+            runtime.assert(!eventListener.hasOwnProperty(eventId), "Duplicated event ids: \"" + eventId + "\" registered more than once.");
+            eventListener[eventId] = [];
         }
     }
 
