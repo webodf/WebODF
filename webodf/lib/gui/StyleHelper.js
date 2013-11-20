@@ -170,27 +170,45 @@ gui.StyleHelper = function StyleHelper(formatting) {
             isDefaultParagraphStyleChecked = false,
             paragraphStyleName, paragraphStyleElement, paragraphStyleAttributes, properties;
 
+        function pickDefaultParagraphStyleElement() {
+            isDefaultParagraphStyleChecked = true;
+            paragraphStyleElement = formatting.getDefaultStyleElement('paragraph');
+            // have to fallback to check built-in default style?
+            if (!paragraphStyleElement) {
+                paragraphStyleElement = null;
+            }
+        }
+
         while (nodes.length > 0) {
             paragraphStyleName = nodes[0].getAttributeNS(textns, 'style-name');
             if (paragraphStyleName) {
                 if (!isStyleChecked[paragraphStyleName]) {
                     paragraphStyleElement = formatting.getStyleElement(paragraphStyleName, 'paragraph') ;
                     isStyleChecked[paragraphStyleName] = true;
+                    // in no such style node exists, fallback to default style
+                    if (!paragraphStyleElement && !isDefaultParagraphStyleChecked) {
+                        pickDefaultParagraphStyleElement();
+                    }
                 }
             } else if(!isDefaultParagraphStyleChecked) {
-                isDefaultParagraphStyleChecked = true;
-                paragraphStyleElement = formatting.getDefaultStyleElement('paragraph');
+                pickDefaultParagraphStyleElement();
             } else {
                 paragraphStyleElement = undefined;
             }
 
-            if (paragraphStyleElement) {
-                paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type {!Element}*/(paragraphStyleElement), true);
+            if (paragraphStyleElement !== undefined) {
+                // have to use built-in default style?
+                if (paragraphStyleElement === null) {
+                    paragraphStyleAttributes = formatting.getSystemDefaultStyleAttributes('paragraph');
+                } else {
+                    paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type {!Element}*/(paragraphStyleElement), true);
+                }
                 properties = paragraphStyleAttributes['style:paragraph-properties'];
                 if (properties && propertyValues.indexOf(properties[propertyName]) === -1) {
                     return false;
                 }
             }
+
             nodes.pop();
         }
         return true;
