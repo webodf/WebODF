@@ -308,6 +308,181 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.result", "true");
     }
 
+    function rangeIntersectsRange_IdenticalBoundaries_ReturnsTrue() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(start, 0);
+        range1.setEnd(end, 0);
+        range2.setStart(start, 0);
+        range2.setEnd(end, 0);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeIntersectsRange_Partial_ReturnsTrue() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(start, 0);
+        range1.setEnd(end, 0);
+        range2.setStart(start, 2);
+        range2.setEnd(end, end.length);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeIntersectsRange_Encapsulator_ReturnsTrue() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(start, 0);
+        range1.setEnd(end, end.length);
+        range2.setStart(start, 2);
+        range2.setEnd(end, 1);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeIntersectsRange_Encapsulatee_ReturnsTrue() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(start, 3);
+        range1.setEnd(end, 0);
+        range2.setStart(start, 1);
+        range2.setEnd(end, 2);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeIntersectsRange_Disjoint_ReturnsFalse() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(start, 0);
+        range1.setEnd(start, start.length);
+        range2.setStart(end, 0);
+        range2.setEnd(end, end.length);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "false");
+    }
+
+    function rangeIntersectsRange_LeftTouch_ReturnsTrue() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(start, 0);
+        range1.setEnd(start, 2);
+        range2.setStart(start, 2);
+        range2.setEnd(end, end.length);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
+    function rangeIntersectsRange_RightTouch_ReturnsTrue() {
+        var container = document.createElement("p"),
+            span1 = document.createElement("span"),
+            span2 = document.createElement("span"),
+            start = document.createTextNode("start"),
+            end = document.createTextNode("end"),
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        span1.appendChild(start);
+        span2.appendChild(end);
+        container.appendChild(span1);
+        container.appendChild(span2);
+        t.doc.appendChild(container);
+
+        range1.setStart(end, 1);
+        range1.setEnd(end, end.length);
+        range2.setStart(start, 0);
+        range2.setEnd(end, 1);
+
+        t.result = t.utils.rangesIntersect(range1, range2);
+
+        r.shouldBe(t, "t.result", "true");
+    }
+
     function removeUnwantedNodes_DiscardAll() {
         var p = document.createElement("p"),
             span1 = document.createElement("span"),
@@ -375,6 +550,14 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             rangeContainsNode_ForDifferentDepths_ReturnsTrue,
             rangeContainsNode_ForAdjacentSpan_ReturnsFalse,
             rangeContainsNode_IdenticalBoundaries_ReturnsTrue,
+
+            rangeIntersectsRange_IdenticalBoundaries_ReturnsTrue,
+            rangeIntersectsRange_Partial_ReturnsTrue,
+            rangeIntersectsRange_Encapsulator_ReturnsTrue,
+            rangeIntersectsRange_Encapsulatee_ReturnsTrue,
+            rangeIntersectsRange_Disjoint_ReturnsFalse,
+            rangeIntersectsRange_LeftTouch_ReturnsTrue,
+            rangeIntersectsRange_RightTouch_ReturnsTrue,
 
             removeUnwantedNodes_DiscardAll,
             removeUnwantedNodes_DiscardSpanOnly
