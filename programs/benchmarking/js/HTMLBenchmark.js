@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-require([
+define([
     "Benchmark",
     "HTMLResultsRenderer",
     "LoadDocument",
@@ -51,25 +51,30 @@ require([
              LoadDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, Remove1Position, MoveCursor1StepLeft,
              SelectEntireDocument, RemoveCurrentSelection) {
     "use strict";
-    var loadingScreen = document.getElementById('loadingScreen'),
-        fileUrl = window.location.hash.substr(1) || "100pages.odt",
-        benchmark = new Benchmark();
 
-    new HTMLResultsRenderer(benchmark);
+    function HTMLBenchmark() {
+        var loadingScreen = document.getElementById('loadingScreen'),
+            fileUrl = window.location.hash.substr(1) || "100pages.odt",
+            benchmark = new Benchmark();
 
-    loadingScreen.style.display = "none";
+        new HTMLResultsRenderer(benchmark);
 
-    benchmark.actions.push(new LoadDocument(fileUrl));
-    benchmark.actions.push(new EnterEditMode());
-    // TODO currently times out
-    // benchmark.addAction(new MoveCursorToEndViaCtrlEnd());
-    benchmark.actions.push(new MoveCursorToEndDirect());
-    benchmark.actions.push(new InsertLetterA());
-    benchmark.actions.push(new Remove1Position(true));
-    benchmark.actions.push(new MoveCursor1StepLeft());
-    benchmark.actions.push(new Remove1Position(false));
-    benchmark.actions.push(new SelectEntireDocument());
-    benchmark.actions.push(new RemoveCurrentSelection());
+        loadingScreen.style.display = "none";
 
-    benchmark.start();
+        benchmark.actions.push(new LoadDocument(fileUrl));
+        benchmark.actions.push(new EnterEditMode());
+        // TODO currently times out
+        // benchmark.addAction(new MoveCursorToEndViaCtrlEnd());
+        benchmark.actions.push(new MoveCursorToEndDirect());
+        benchmark.actions.push(new InsertLetterA());
+        benchmark.actions.push(new Remove1Position(true));
+        benchmark.actions.push(new MoveCursor1StepLeft());
+        benchmark.actions.push(new Remove1Position(false));
+        benchmark.actions.push(new SelectEntireDocument());
+        benchmark.actions.push(new RemoveCurrentSelection());
+
+        this.start = benchmark.start;
+    }
+
+    return HTMLBenchmark;
 });

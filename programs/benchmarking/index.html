@@ -86,26 +86,7 @@
             ];
         };
     </script>
-    <script src="require.js"></script>
-    <script type="text/javascript">
-        requirejs.config({
-            baseUrl: "js",
-            waitSeconds: 0 // some servers are reaaaallly slow unfortunately :/
-        });
-        requirejs.onError = function (err) {
-            console.log(err.requireType);
-            if (err.requireType === 'timeout') {
-                console.log('modules: ' + err.requireModules);
-            }
 
-            throw err;
-        };
-
-        require(["HTMLBenchmark"], function(HTMLBenchmark) {
-            var benchmark = new HTMLBenchmark();
-            benchmark.start();
-        })
-    </script>
 </head>
 <body>
 <div id="loadingScreen">
@@ -131,5 +112,10 @@
     </div>
     <div id="canvas"></div>
 </div>
+<script src="benchmark.js" type="text/javascript"></script>
+<script>
+    var benchmark = new module$HTMLBenchmark();
+    benchmark.start();
+</script>
 </body>
 </html>
