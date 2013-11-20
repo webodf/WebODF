@@ -180,8 +180,6 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
             connectorAngle = 0,
             previousAnnotation = annotations[annotations.indexOf(annotation) - 1],
             previousRect,
-            creatorNode = annotation.node.getElementsByTagNameNS(odf.Namespaces.dcns, 'creator')[0],
-            creatorName,
             zoomLevel = odfCanvas.getZoomLevel();
 
         annotationNote.style.left =

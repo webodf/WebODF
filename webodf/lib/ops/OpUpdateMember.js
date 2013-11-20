@@ -23,9 +23,10 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops, runtime*/
+/*global ops, xmldom, odf, runtime*/
 
 runtime.loadClass("ops.Member");
+runtime.loadClass("xmldom.XPath");
 
 /**
  * OpUpdateMember allows you to set and remove
@@ -41,7 +42,8 @@ ops.OpUpdateMember = function OpUpdateMember() {
 
     var memberid, timestamp,
         /**@type{Object}*/setProperties,
-        /**@type{{attributes}}*/removedProperties;
+        /**@type{{attributes}}*/removedProperties,
+        doc;
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -50,9 +52,26 @@ ops.OpUpdateMember = function OpUpdateMember() {
         removedProperties = data.removedProperties;
     };
 
-    this.execute = function (odtDocument) {
-        var member = odtDocument.getMember(memberid);
+    function updateCreators() {
+        var xpath = new xmldom.XPath(),
+            xp = "//dc:creator[@editinfo:memberid='" + memberid + "']",
+            creators = xpath.getODFElementsWithXPath(doc.getRootNode(), xp, function (prefix) {
+                if (prefix === "editinfo") {
+                    return "urn:webodf:names:editinfo";
+                }
+                return odf.Namespaces.resolvePrefix(prefix);
+            }),
+            i;
 
+        for (i = 0; i < creators.length; i += 1) {
+            creators[i].textContent = setProperties.fullName;
+        }
+    }
+
+    this.execute = function (odtDocument) {
+        doc = odtDocument;
+
+        var member = odtDocument.getMember(memberid);
         if (!member) {
             return false;
         }
@@ -62,6 +81,9 @@ ops.OpUpdateMember = function OpUpdateMember() {
         }
         if (setProperties) {
             member.setProperties(setProperties);
+            if (setProperties.fullName) {
+                updateCreators();
+            }
         }
 
         odtDocument.emit(ops.OdtDocument.signalMemberUpdated, member);

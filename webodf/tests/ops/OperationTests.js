@@ -315,6 +315,11 @@ ops.OperationTests = function OperationTests(runner) {
         t.odfContainer = new odf.OdfContainer("", null);
         t.odfcanvas.setOdfContainer(t.odfContainer);
         t.odtDocument = new ops.OdtDocument(t.odfcanvas);
+        t.odtDocument.addMember(new ops.Member('Alice', {
+            color: "black",
+            fullName: "Alice",
+            imageUrl: ""
+        }));
     };
     this.tearDown = function () {
         t.odfcanvas.destroy(function() { return; });
