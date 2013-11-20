@@ -48,12 +48,6 @@
  * @interface
  */
 function Runtime() {"use strict"; }
-/**
- * Abstraction of byte arrays.
- * @constructor
- * @param {!number} size
- */
-Runtime.ByteArray = function (size) {"use strict"; };
 
 /**
  * @param {!string} name
@@ -74,54 +68,32 @@ Runtime.prototype.toJson = function (anything) { "use strict"; };
 Runtime.prototype.fromJson = function (jsonstr) { "use strict"; };
 
 /**
- * @param {!number} start
- * @param {!number} end
- * @return {!Runtime.ByteArray}
- */
-Runtime.ByteArray.prototype.slice = function (start, end) {"use strict"; };
-
-/**
- * @type {!number}
- */
-Runtime.ByteArray.prototype.length = 0;
-/**
- * @param {!Array.<number>} array
- * @return {!Runtime.ByteArray}
- */
-Runtime.prototype.byteArrayFromArray = function (array) {"use strict"; };
-/**
  * @param {!string} string
  * @param {!string} encoding
- * @return {!Runtime.ByteArray}
+ * @return {!Uint8Array}
  */
 Runtime.prototype.byteArrayFromString = function (string, encoding) {"use strict"; };
 /**
- * @param {!Runtime.ByteArray} bytearray
+ * @param {!Uint8Array} bytearray
  * @param {!string} encoding
  * @return {!string}
  */
 Runtime.prototype.byteArrayToString = function (bytearray, encoding) {"use strict"; };
 /**
- * @param {!Runtime.ByteArray} bytearray1
- * @param {!Runtime.ByteArray} bytearray2
- * @return {!Runtime.ByteArray}
- */
-Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {"use strict"; };
-/**
  * @param {!string} path
  * @param {!number} offset
  * @param {!number} length
- * @param {!function(string,Runtime.ByteArray):undefined} callback
+ * @param {!function(?string,?Uint8Array):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.read = function (path, offset, length, callback) {"use strict"; };
 /**
  * Read the contents of a file. Returns the result via a callback. If the
- * encoding is 'binary', the result is returned as a Runtime.ByteArray,
+ * encoding is 'binary', the result is returned as a Uint8Array,
  * otherwise, it is returned as a string.
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
- * @param {!function(string,(string|Runtime.ByteArray)):undefined} callback
+ * @param {!function(?string,?(string|Uint8Array)):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.readFile = function (path, encoding, callback) {"use strict"; };
@@ -139,7 +111,7 @@ Runtime.prototype.readFileSync = function (path, encoding) {"use strict"; };
 Runtime.prototype.loadXML = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
- * @param {!Runtime.ByteArray} data
+ * @param {!Uint8Array} data
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
@@ -215,7 +187,7 @@ var IS_COMPILED_CODE = false;
 
 /**
  * @this {Runtime}
- * @param {!Runtime.ByteArray} bytearray
+ * @param {!Uint8Array} bytearray
  * @param {!string} encoding
  * @return {!string}
  */
@@ -347,38 +319,6 @@ function BrowserRuntime(logoutput) {
         };
     }
 
-    /**
-     * @constructor
-     * @augments Runtime.ByteArray
-     * @inner
-     * @extends {Runtime.ByteArray}
-     * @param {!number} size
-     */
-    this.ByteArray = useNativeArray
-        // if Uint8Array is available, use that
-        ? function ByteArray(size) {
-            return new Uint8Array(new ArrayBuffer(size));
-        }
-        : function ByteArray(size) {
-            var a = [];
-            a.length = size;
-            return a;
-        };
-    this.concatByteArrays = useNativeArray
-        ? function (bytearray1, bytearray2) {
-            var i, l1 = bytearray1.length, l2 = bytearray2.length,
-                a = new this.ByteArray(l1 + l2);
-            for (i = 0; i < l1; i += 1) {
-                a[i] = bytearray1[i];
-            }
-            for (i = 0; i < l2; i += 1) {
-                a[i + l1] = bytearray2[i];
-            }
-            return a;
-        }
-        : function (bytearray1, bytearray2) {
-            return bytearray1.concat(bytearray2);
-        };
     function utf8ByteArrayFromString(string) {
         var l = string.length, bytearray, i, n, j = 0;
         // first determine the length in bytes
@@ -387,7 +327,7 @@ function BrowserRuntime(logoutput) {
             j += 1 + (n > 0x80) + (n > 0x800);
         }
         // allocate a buffer and convert to a utf8 array
-        bytearray = new self.ByteArray(j);
+        bytearray = new Uint8Array(new ArrayBuffer(j));
         j = 0;
         for (i = 0; i < l; i += 1) {
             n = string.charCodeAt(i);
@@ -410,7 +350,7 @@ function BrowserRuntime(logoutput) {
     function byteArrayFromString(string) {
         // ignore encoding for now
         var l = string.length,
-            a = new self.ByteArray(l),
+            a = new Uint8Array(new ArrayBuffer(l)),
             i;
         for (i = 0; i < l; i += 1) {
             a[i] = string.charCodeAt(i) & 0xff;
@@ -797,15 +737,6 @@ function NodeJSRuntime() {
         parser,
         domImplementation;
 
-    /**
-     * @constructor
-     * @extends {Runtime.ByteArray}
-     * @param {!number} size
-     */
-    this.ByteArray = function (size) {
-        return new Buffer(size);
-    };
-
     this.byteArrayFromArray = function (array) {
         var ba = new Buffer(array.length),
             i,
@@ -827,9 +758,7 @@ function NodeJSRuntime() {
         return new Buffer(string, encoding);
     };
 
-    this.byteArrayToString = function (bytearray, encoding) {
-        return bytearray.toString(encoding);
-    };
+    this.byteArrayToString = Runtime.byteArrayToString;
 
     /**
     * @param {!string} name
@@ -855,11 +784,21 @@ function NodeJSRuntime() {
         });
     }
     function readFile(path, encoding, callback) {
+        function convert(err, data) {
+            if (err || !data) {
+                return callback(err, null);
+            }
+            var l = data.length, b = new Uint8Array(new ArrayBuffer(l)), i;
+            for (i = 0; i < l; i += 1) {
+                b[i] = data[i];
+            }
+            return callback(err, b);
+        }
         path = pathmod.resolve(currentDirectory, path);
         if (encoding !== "binary") {
             fs.readFile(path, encoding, callback);
         } else {
-            fs.readFile(path, null, callback);
+            fs.readFile(path, null, convert);
         }
     }
     this.readFile = readFile;
@@ -873,8 +812,13 @@ function NodeJSRuntime() {
     }
     this.loadXML = loadXML;
     this.writeFile = function (path, data, callback) {
+        var l = data.length, i,
+            buf = new Buffer(data.length);
+        for (i = 0; i < l; i += 1) {
+            buf[i] = data[i];
+        }
         path = pathmod.resolve(currentDirectory, path);
-        fs.writeFile(path, data, "binary", function (err) {
+        fs.writeFile(path, buf, "binary", function (err) {
             callback(err || null);
         });
     };
@@ -1028,13 +972,6 @@ function RhinoRuntime() {
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
 
-    /**
-     * @constructor
-     * @param {!number} size
-     */
-    this.ByteArray = function ByteArray(size) {
-        return [size];
-    };
     this.byteArrayFromArray = function (array) {
         return array;
     };
@@ -1443,8 +1380,11 @@ var runtime = (function () {
                 }
                 return;
             }
-            if (err || codestring === null) {
+            if (err) {
                 runtime.log(err);
+                runtime.exit(1);
+            } else if (codestring === null) {
+                runtime.log("No code found for " + script);
                 runtime.exit(1);
             } else {
                 // run the script with arguments bound to arguments parameter

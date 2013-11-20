@@ -67,7 +67,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         base64 = new core.Base64();
 
     /**
-     * @param {!Runtime.ByteArray} data
+     * @param {!Uint8Array} data
      * @return {!number}
      */
     function crc32(data) {
@@ -141,8 +141,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
             /**@const@type{!ZipEntry}*/ entry = this;
 
         /**
-         * @param {!Runtime.ByteArray} data
-         * @param {!function(?string, ?Runtime.ByteArray)} callback
+         * @param {!Uint8Array} data
+         * @param {!function(?string, ?Uint8Array)} callback
          * @return {undefined}
          */
         function handleEntryData(data, callback) {
@@ -191,7 +191,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             callback(null, data);
         }
         /**
-         * @param {!function(?string, ?Runtime.ByteArray)} callback
+         * @param {!function(?string, ?Uint8Array)} callback
          * @return {undefined}
          */
         function load(callback) {
@@ -218,7 +218,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         this.load = load;
         /**
          * @param {!string} filename
-         * @param {!Runtime.ByteArray} data
+         * @param {!Uint8Array} data
          * @param {!boolean} compressed
          * @param {!Date} date
          * @return {undefined}
@@ -265,7 +265,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         stream.pos += namelen + extralen + commentlen;
     }
     /**
-     * @param {!Runtime.ByteArray} data
+     * @param {!Uint8Array} data
      * @param {!function(?string, !core.Zip)} callback
      * @return {undefined}
      */
@@ -285,7 +285,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
         callback(null, zip);
     }
     /**
-     * @param {!Runtime.ByteArray} data
+     * @param {!Uint8Array} data
      * @param {!function(?string, !core.Zip)} callback
      * @return {undefined}
      */
@@ -337,7 +337,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     }
     /**
      * @param {!string} filename
-     * @param {!function(?string, ?Runtime.ByteArray)} callback receiving err and data
+     * @param {!function(?string, ?Uint8Array)} callback receiving err and data
      * @return {undefined}
      */
     function load(filename, callback) {
@@ -393,10 +393,10 @@ core.Zip = function Zip(url, entriesReadCallback) {
     }
     function loadAsDataURL(filename, mimetype, callback) {
         load(filename, function (err, data) {
-            if (err) {
+            if (err || !data) {
                 return callback(err, null);
             }
-            var /**@const@type{!Runtime.ByteArray}*/p = data,
+            var /**@const@type{!Uint8Array}*/p = data,
                 chunksize = 45000, // must be multiple of 3 and less than 50000
                 i = 0,
                 dataurl;
@@ -439,7 +439,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * This data is not stored to disk yet, and therefore, no callback is
      * necessary.
      * @param {!string} filename
-     * @param {!Runtime.ByteArray} data
+     * @param {!Uint8Array} data
      * @param {!boolean} compressed
      * @param {!Date} date
      * @return {undefined}
@@ -548,7 +548,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
     }
     /**
      * Create a bytearray from the zipfile.
-     * @param {!function(!Runtime.ByteArray):undefined} successCallback receiving zip as bytearray
+     * @param {!function(!Uint8Array):undefined} successCallback receiving zip as bytearray
      * @param {!function(?string):undefined} errorCallback receiving possible err
      * @return {undefined}
      */

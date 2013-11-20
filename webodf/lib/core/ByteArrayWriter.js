@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global runtime, core*/
+/*global runtime, core, Uint8Array, ArrayBuffer*/
 /*jslint bitwise: true */
 /**
  * @constructor
@@ -42,29 +42,52 @@
 core.ByteArrayWriter = function ByteArrayWriter(encoding) {
     "use strict";
     var self = this,
-        data = new runtime.ByteArray(0);
+        /**@type{!number}*/
+        length = 0,
+        /**@type{!number}*/
+        bufferSize = 1024,
+        /**@type{!Uint8Array}*/
+        data = new Uint8Array(new ArrayBuffer(bufferSize));
 
+    /**
+     * @param {!number} extraLength
+     * @return {undefined}
+     */
+    function expand(extraLength) {
+        var newData;
+        if (extraLength > bufferSize - length) {
+            bufferSize = Math.max(2 * bufferSize, length + extraLength); 
+            newData = new Uint8Array(new ArrayBuffer(bufferSize));
+            newData.set(data);
+            data = newData;
+        }
+    }
     /**
      * @param {!core.ByteArrayWriter} writer
      * @return {undefined}
      */
     this.appendByteArrayWriter = function (writer) {
-        data = runtime.concatByteArrays(data, writer.getByteArray());
+        this.appendByteArray(writer.getByteArray());
     };
     /**
-     * @param {!Runtime.ByteArray} array
+     * @param {!Uint8Array} array
      * @return {undefined}
      */
     this.appendByteArray = function (array) {
-        data = runtime.concatByteArrays(data, array);
+        var l = array.length;
+        expand(l);
+        data.set(array, length);
+        length += l;
     };
     /**
      * @param {!Array.<!number>} array
      * @return {undefined}
      */
     this.appendArray = function (array) {
-        data = runtime.concatByteArrays(data,
-                runtime.byteArrayFromArray(array));
+        var l = array.length;
+        expand(l);
+        data.set(array, length);
+        length += l;
     };
     /**
      * @param {!number} value
@@ -86,19 +109,18 @@ core.ByteArrayWriter = function ByteArrayWriter(encoding) {
      * @return {undefined}
      */
     this.appendString = function (string) {
-        data = runtime.concatByteArrays(data,
-                runtime.byteArrayFromString(string, encoding));
+        self.appendByteArray(runtime.byteArrayFromString(string, encoding));
     };
     /**
      * @return {!number}
      */
     this.getLength = function () {
-        return data.length;
+        return length;
     };
     /**
-     * @return {!Runtime.ByteArray}
+     * @return {!Uint8Array}
      */
     this.getByteArray = function () {
-        return data;
+        return data.subarray(0, length);
     };
 };

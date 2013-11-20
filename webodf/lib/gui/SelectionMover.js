@@ -637,15 +637,15 @@ gui.SelectionMover.createPositionIterator = function (rootNode) {
     "use strict";
     /**
      * @constructor
-     * @extends NodeFilter
+     * @implements NodeFilter
       */
     function CursorFilter() {
         /**
-         * @param {!Node} node
+         * @param {?Node} node
          * @return {!number}
          */
         this.acceptNode = function (node) {
-            if (node.namespaceURI === "urn:webodf:names:cursor" ||
+            if (!node || node.namespaceURI === "urn:webodf:names:cursor" ||
                     node.namespaceURI === "urn:webodf:names:editinfo") {
                 return NodeFilter.FILTER_REJECT;
             }

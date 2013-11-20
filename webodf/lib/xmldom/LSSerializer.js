@@ -157,7 +157,7 @@ xmldom.LSSerializer = function LSSerializer() {
      */
     function startElement(ns, qname, element) {
         var /**@type{!string}*/ s = "",
-            /**@const@type{!NamedNodeMap}*/ atts = element.attributes,
+            /**@const*/ atts = /**@type{!NamedNodeMap}*/(element.attributes),
             /**@const@type{!number}*/ length,
             /**@type{!number}*/ i,
             /**@type{!Attr}*/ attr,
