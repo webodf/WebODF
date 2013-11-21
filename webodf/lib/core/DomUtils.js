@@ -126,7 +126,7 @@
             if (sharedRange) {
                 range = sharedRange;
             } else {
-                range = /**@type{!Range}*/(doc.createRange());
+                sharedRange = range = /**@type{!Range}*/(doc.createRange());
             }
             return range;
         }
