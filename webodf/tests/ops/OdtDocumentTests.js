@@ -500,6 +500,9 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         testCursorPositions("<text:p><text:span>|<text:s> </text:s>|</text:span></text:p>");
         // TODO behaviour is different from README_cursorpositions
         // cursorPositionsTest("<text:p> <text:span>|A| |</text:span> <text:s></text:s>| <text:span><text:s> </text:s>|B|</text:span> </text:p>");
+        testCursorPositions("<text:p>|<text:tab>    </text:tab>|<text:s> </text:s>|<text:s> </text:s>|</text:p>");
+        testCursorPositions("<text:p>|<text:tab>    </text:tab>| |<text:s> </text:s>|</text:p>");
+        testCursorPositions("<text:p>|a| | <text:s> </text:s>|   </text:p>");
     }
     function testAvailablePositions_DrawElements() {
         testCursorPositions("<text:p>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:p>");

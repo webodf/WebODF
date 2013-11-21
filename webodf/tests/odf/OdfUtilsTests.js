@@ -233,6 +233,12 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
 
         r.shouldBe(t, "t.isDowngradable", "true");
     }
+    function isDowngradableWhitespace_DowngradesFirstSpaceAfterTab() {
+        t.doc = createDocument("<text:p><text:tab>  </text:tab><text:s> </text:s>b</text:p>");
+        t.isDowngradable = t.odfUtils.isDowngradableSpaceElement(t.doc.childNodes[1]);
+
+        r.shouldBe(t, "t.isDowngradable", "true");
+    }
     function isDowngradableWhitespace_DoesNotDowngradeTrailingSpace() {
         t.doc = createDocument("<text:p>a<text:s> </text:s></text:p>");
         t.isDowngradable = t.odfUtils.isDowngradableSpaceElement(t.doc.childNodes[1]);
@@ -271,6 +277,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             getImageElements_ReturnTwoImages,
 
             isDowngradableWhitespace_DowngradesFirstSpaceAfterChar,
+            isDowngradableWhitespace_DowngradesFirstSpaceAfterTab,
             isDowngradableWhitespace_DoesNotDowngradeTrailingSpace,
             isDowngradableWhitespace_DoesNotDowngradeLeading,
             isDowngradableWhitespace_DoesNotDowngradeAfterSpace
