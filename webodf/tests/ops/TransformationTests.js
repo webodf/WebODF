@@ -108,6 +108,34 @@ ops.TransformationTests = function TransformationTests(runner) {
         }
     }
 
+    /** 
+     * Sort the children of the element by their
+     * tag names for easy comparison and uniform
+     * order.
+     * @param {!Element} element
+     * @return {undefined}
+     */
+    function sortChildrenByTagName(element) {
+        var child = element.firstElementChild,
+            childArray = [],
+            i;
+        while(child) {
+            childArray.push(child);
+            child = child.nextElementSibling;
+        }
+        childArray.sort(function(a, b) {
+            var namea = a.prefix + ":" + a.localName,
+                nameb = b.prefix + ":" + b.localName;
+            return namea === nameb ? 0 :
+                  (namea > nameb ?   1 :
+                                    -1);
+        });
+
+        for(i = 0; i < childArray.length; i += 1) {
+            element.appendChild(childArray[i]);
+        }
+    }
+
     /**
      * Traverse the tree and sort cursors that are at the same position,
      * so identic sets of cursors are in an identic order.
@@ -327,6 +355,14 @@ ops.TransformationTests = function TransformationTests(runner) {
         return getOfficeNSElement(element, "styles");
     }
 
+    /**
+     * @param {!Element} element
+     * @return {?Element}
+     */
+    function getOfficeMetaElement(element) {
+        return getOfficeNSElement(element, "meta");
+    }
+
     function compareOpsExecution(opspecs, transformedOps, before, after) {
         var odfContainer,
             odtDocument,
@@ -336,6 +372,9 @@ ops.TransformationTests = function TransformationTests(runner) {
             styles,
             stylesbefore = getOfficeStylesElement(before),
             stylesafter = getOfficeStylesElement(after),
+            meta,
+            metabefore = getOfficeMetaElement(before),
+            metaafter = getOfficeMetaElement(after),
             i,
             op;
 
@@ -344,10 +383,14 @@ ops.TransformationTests = function TransformationTests(runner) {
         odtDocument = new ops.OdtDocument(t.odfcanvas);
         text = odtDocument.getRootNode();
         styles = odfContainer.rootElement.styles;
+        meta = odfContainer.rootElement.meta;
 
         // inject test data
         if (stylesbefore) {
             copyChildNodes(stylesbefore, styles);
+        }
+        if (metabefore) {
+            copyChildNodes(metabefore, meta);
         }
         copyChildNodes(textbefore, text);
 
@@ -382,6 +425,22 @@ ops.TransformationTests = function TransformationTests(runner) {
                 t.styles = t.stylesafter = "OK";
             }
             r.shouldBe(t, "t.styles", "t.stylesafter");
+        }
+
+        if (metabefore) {
+            metaafter.normalize();
+            // Sort the metadata fields by tag name
+            // for easy comparing
+            sortChildrenByTagName(/**@type{!Element}*/(metaafter));
+            meta.normalize();
+            sortChildrenByTagName(meta);
+            if (!r.areNodesEqual(metaafter, meta)) {
+                t.meta = serialize(meta);
+                t.metaafter = serialize(metaafter);
+            } else {
+                t.meta = t.metaafter = "OK";
+            }
+            r.shouldBe(t, "t.meta", "t.metaafter");
         }
 
         textafter.normalize();

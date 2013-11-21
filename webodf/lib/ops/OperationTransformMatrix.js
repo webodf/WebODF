@@ -656,6 +656,53 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!Object} updateMetadataSpecA 
+     * @param {!Object} updateMetadataSpecB 
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformUpdateMetadataUpdateMetadata(updateMetadataSpecA, updateMetadataSpecB, hasAPriority) {
+        var majorSpec, minorSpec,
+            updateMetadataSpecAResult = [updateMetadataSpecA],
+            updateMetadataSpecBResult = [updateMetadataSpecB];
+
+        majorSpec = hasAPriority ? updateMetadataSpecA : updateMetadataSpecB;
+        minorSpec = hasAPriority ? updateMetadataSpecB : updateMetadataSpecA;
+
+        // any properties which are set by other update op need to be dropped
+        dropOverruledAndUnneededAttributes(minorSpec.setProperties || null,
+                            minorSpec.removedProperties || null,
+                            majorSpec.setProperties || null,
+                            majorSpec.removedProperties ||null);
+
+        // check if there are any changes left and the major op has not become a noop
+        if (!(majorSpec.setProperties && hasProperties(majorSpec.setProperties)) &&
+            !(majorSpec.removedProperties && hasRemovedProperties(majorSpec.removedProperties))) {
+            // set major spec to noop
+            if (hasAPriority) {
+                updateMetadataSpecAResult = [];
+            } else {
+                updateMetadataSpecBResult = [];
+            }
+        }
+        // check if there are any changes left and the minor op has not become a noop
+        if (!(minorSpec.setProperties && hasProperties(minorSpec.setProperties)) &&
+            !(minorSpec.removedProperties && hasRemovedProperties(minorSpec.removedProperties))) {
+            // set minor spec to noop 
+            if (hasAPriority) {
+                updateMetadataSpecBResult = [];
+            } else {
+                updateMetadataSpecAResult = [];
+            }
+        }
+
+        return {
+            opSpecsA:  updateMetadataSpecAResult,
+            opSpecsB:  updateMetadataSpecBResult 
+        };
+    }
+
+    /**
      * @param {!Object} splitParagraphSpecA
      * @param {!Object} splitParagraphSpecB
      * @param {!boolean} hasAPriority
@@ -1048,6 +1095,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "AddMember": {
@@ -1059,6 +1107,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveText":           passUnchanged,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "AddStyle": {
@@ -1073,6 +1122,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "ApplyDirectStyling": {
@@ -1084,6 +1134,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveText":           transformApplyDirectStylingRemoveText,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       transformApplyDirectStylingSplitParagraph,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "InsertText": {
@@ -1096,6 +1147,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             // TODO:"SetParagraphStyle":    transformInsertTextSetParagraphStyle,
             "SplitParagraph":       transformInsertTextSplitParagraph,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "MoveCursor": {
@@ -1107,6 +1159,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       transformMoveCursorSplitParagraph,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "RemoveCursor": {
@@ -1117,6 +1170,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "RemoveMember": {
@@ -1124,6 +1178,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveText":           passUnchanged,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged 
         },
         "RemoveStyle": {
@@ -1132,6 +1187,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "SetParagraphStyle":    transformRemoveStyleSetParagraphStyle,
             "SplitParagraph":       passUnchanged,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": transformRemoveStyleUpdateParagraphStyle
         },
         "RemoveText": {
@@ -1139,20 +1195,28 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             // TODO:"SetParagraphStyle":    transformRemoveTextSetParagraphStyle,
             "SplitParagraph":       transformRemoveTextSplitParagraph,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "SetParagraphStyle": {
             // TODO:"SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
             // TODO:"SetParagraphStyle":    transformSetParagraphStyleSplitParagraph,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "SplitParagraph": {
             "SplitParagraph":       transformSplitParagraphSplitParagraph,
             "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "UpdateMember": {
+            "UpdateMetadata":       passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
+        "UpdateMetadata": {
+            "UpdateMetadata":       transformUpdateMetadataUpdateMetadata,
             "UpdateParagraphStyle": passUnchanged
         },
         "UpdateParagraphStyle": {

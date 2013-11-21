@@ -11,7 +11,8 @@
     xmlns:h="urn:webodf:names:helper"
     xmlns:wo="urn:webodf:names:scope"
     xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink">
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0">
 <test name="AddCursor_Simple">
   <before><office:text><text:p/></office:text></before>
   <ops>
@@ -1330,4 +1331,45 @@
    <office:text><text:p><text:span>Hello<draw:frame draw:name="graphics2" draw:style-name="fr1" text:anchor-type="as-char" svg:width="5cm" svg:height="6cm" h:styleid="graphics2"><draw:image xlink:href="Pictures/helloworld.jpg" xlink:type="simple" xlink:actuate="onLoad" xlink:show="embed" h:styleid="graphics2img"/></draw:frame>World</text:span><draw:frame draw:name="graphics1"><draw:image/></draw:frame></text:p></office:text>
   </after>
  </test>
+ <test name="UpdateMetadata_create">
+  <before>
+   <office:meta></office:meta><office:text></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateMetadata" memberid="Alice" timestamp="1375706047061">
+    <setProperties meta:initial-creator="Bob"/> 
+   </op>
+  </ops>
+  <after>
+   <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><meta:initial-creator>Bob</meta:initial-creator></office:meta><office:text></office:text>
+  </after>
+ </test>
+ <test name="UpdateMetadata_modifySet">
+  <before>
+   <office:meta><dc:title>TestTitle</dc:title></office:meta><office:text></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateMetadata" memberid="Alice" timestamp="1375706047061">
+    <setProperties dc:title="Title"/>
+   </op>
+  </ops>
+  <after>
+   <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:title>Title</dc:title><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date></office:meta><office:text></office:text>
+  </after>
+ </test>
+ <test name="UpdateMetadata_modifySetRemove">
+  <before>
+   <office:meta><dc:title>Title</dc:title><meta:initial-creator>Bob</meta:initial-creator></office:meta><office:text></office:text>
+  </before>
+  <ops>
+   <op optype="UpdateMetadata" memberid="Alice" timestamp="1375706047061">
+    <setProperties dc:creator="Alice"/>
+    <removedProperties attributes="meta:initial-creator,dc:title"/>
+   </op>
+  </ops>
+  <after>
+   <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date></office:meta><office:text></office:text>
+  </after>
+ </test>
+
 </tests>

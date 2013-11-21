@@ -30,7 +30,8 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:c="urn:webodf:names:cursor"
     xmlns:e="urn:webodf:names:editinfo"
-    xmlns:ws="urn:webodf:names:scope">
+    xmlns:ws="urn:webodf:names:scope"
+    xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0">
  <test name="AddCursor_00">
   <before><office:text><text:p>ab</text:p></office:text></before>
   <opsA>
@@ -1161,5 +1162,48 @@
    <op optype="SplitParagraph" memberid="Bob" position="1"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>a</text:p><text:p>b<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+
+ <test name="UpdateMetadataUpdateMetadata_setPriorityOverSet">
+  <before>
+   <office:meta><meta:initial-creator>Eve</meta:initial-creator><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta><office:text></office:text>
+  </before>
+  <opsA>
+   <op optype="UpdateMetadata" memberid="Alice"><setProperties meta:initial-creator="Alice" meta:creation-date="2011-09-05T12:34:07.061Z"></setProperties></op>
+  </opsA>
+  <opsB>
+   <op optype="UpdateMetadata" memberid="Bob"><setProperties meta:initial-creator="Bob"></setProperties></op>
+  </opsB>
+  <after>
+   <office:meta><meta:initial-creator>Bob</meta:initial-creator><meta:creation-date>2011-09-05T12:34:07.061Z</meta:creation-date></office:meta><office:text></office:text>
+  </after>
+ </test>
+ <test name="UpdateMetadataUpdateMetadata_setPriorityOverRemove">
+  <before>
+   <office:meta><meta:initial-creator>Eve</meta:initial-creator><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta><office:text></office:text>
+  </before>
+  <opsA>
+   <op optype="UpdateMetadata" memberid="Alice"><removedProperties attributes="meta:initial-creator"/></op>
+  </opsA>
+  <opsB>
+   <op optype="UpdateMetadata" memberid="Bob"><setProperties meta:initial-creator="Bob"></setProperties></op>
+  </opsB>
+  <after>
+   <office:meta><meta:initial-creator>Bob</meta:initial-creator><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta><office:text></office:text>
+  </after>
+ </test>
+ <test name="UpdateMetadataUpdateMetadata_removePriorityOverSet">
+  <before>
+   <office:meta><meta:initial-creator>Eve</meta:initial-creator><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta><office:text></office:text>
+  </before>
+  <opsA>
+   <op optype="UpdateMetadata" memberid="Alice"><setProperties meta:initial-creator="Alice"></setProperties></op>
+  </opsA>
+  <opsB>
+   <op optype="UpdateMetadata" memberid="Bob"><removedProperties attributes="meta:initial-creator"/></op>
+  </opsB>
+  <after>
+   <office:meta><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta><office:text></office:text>
+  </after>
  </test>
 </tests>

@@ -74,6 +74,34 @@ ops.OperationTests = function OperationTests(runner) {
         }
     }
 
+    /** 
+     * Sort the children of the element by their
+     * tag names for easy comparison and uniform
+     * order.
+     * @param {!Element} element
+     * @return {undefined}
+     */
+    function sortChildrenByTagName(element) {
+        var child = element.firstElementChild,
+            childArray = [],
+            i;
+        while(child) {
+            childArray.push(child);
+            child = child.nextElementSibling;
+        }
+        childArray.sort(function(a, b) {
+            var namea = a.prefix + ":" + a.localName,
+                nameb = b.prefix + ":" + b.localName;
+            return namea === nameb ? 0 :
+                  (namea > nameb ?   1 :
+                                    -1);
+        });
+
+        for(i = 0; i < childArray.length; i += 1) {
+            element.appendChild(childArray[i]);
+        }
+    }
+
     function parseOperation(node) {
         var op = {},
             child = node.firstChild,
@@ -186,6 +214,10 @@ ops.OperationTests = function OperationTests(runner) {
         return getOfficeNSElement(node, "automatic-styles");
     }
 
+    function getOfficeMetaElement(node) {
+        return getOfficeNSElement(node, "meta");
+    }
+
     function runTest(test) {
         var text = t.odtDocument.getRootNode(),
             factory = new ops.OperationFactory(),
@@ -194,17 +226,24 @@ ops.OperationTests = function OperationTests(runner) {
             textbefore = getOfficeTextElement(test.before),
             textafter = getOfficeTextElement(test.after),
             styles = t.odfContainer.rootElement.styles,
+            meta = t.odfContainer.rootElement.meta,
             autostyles = t.odfContainer.rootElement.automaticStyles,
             stylesbefore = getOfficeStylesElement(test.before),
             stylesafter = getOfficeStylesElement(test.after),
             autostylesbefore = getOfficeAutoStylesElement(test.before),
-            autostylesafter = getOfficeAutoStylesElement(test.after);
+            autostylesafter = getOfficeAutoStylesElement(test.after),
+            metabefore = getOfficeMetaElement(test.before),
+            metaafter = getOfficeMetaElement(test.after);
+
         // inject test data
         if (stylesbefore) {
             copyChildNodes(stylesbefore, styles);
         }
         if (autostylesbefore) {
             copyChildNodes(autostylesbefore, autostyles);
+        }
+        if (metabefore) {
+            copyChildNodes(metabefore, meta);
         }
         copyChildNodes(textbefore, text);
         if (test.setup) {
@@ -215,6 +254,9 @@ ops.OperationTests = function OperationTests(runner) {
         for (i = 0; i < test.ops.length; i += 1) {
             op = factory.create(test.ops[i]);
             op.execute(t.odtDocument);
+            if (metabefore) {
+                t.odtDocument.emit(ops.OdtDocument.signalOperationExecuted, op);
+            }
         }
 
         // check result
@@ -248,6 +290,22 @@ ops.OperationTests = function OperationTests(runner) {
                 t.autostyles = t.autostylesafter = "OK";
             }
             r.shouldBe(t, "t.autostyles", "t.autostylesafter");
+        }
+
+        if (metabefore) {
+            metaafter.normalize();
+            // Sort the metadata fields by tag name
+            // for easy comparing
+            sortChildrenByTagName(metaafter);
+            meta.normalize();
+            sortChildrenByTagName(meta);
+            if (!r.areNodesEqual(metaafter, meta)) {
+                t.meta = serialize(meta);
+                t.metaafter = serialize(metaafter);
+            } else {
+                t.meta = t.metaafter = "OK";
+            }
+            r.shouldBe(t, "t.meta", "t.metaafter");
         }
 
         textafter.normalize();
