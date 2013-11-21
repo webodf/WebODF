@@ -48,6 +48,7 @@ odf.Namespaces = (function () {
 
     var /**@const@type {!string}*/ dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
         /**@const@type {!string}*/ dcns = "http://purl.org/dc/elements/1.1/",
+        /**@const@type {!string}*/ metans = "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
         /**@const@type {!string}*/ dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
         /**@const@type {!string}*/ drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
         /**@const@type {!string}*/ chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
@@ -67,6 +68,7 @@ odf.Namespaces = (function () {
         namespaceMap = {
             "db": dbns,
             "dc": dcns,
+            "meta": metans,
             "dr3d": dr3dns,
             "draw": drawns,
             "chart": chartns,
@@ -138,6 +140,7 @@ odf.Namespaces = (function () {
     // add all namespaces
     /**@const@type {!string}*/ namespaces.dbns = dbns;
     /**@const@type {!string}*/ namespaces.dcns = dcns;
+    /**@const@type {!string}*/ namespaces.metans = metans;
     /**@const@type {!string}*/ namespaces.dr3dns = dr3dns;
     /**@const@type {!string}*/ namespaces.drawns = drawns;
     /**@const@type {!string}*/ namespaces.chartns = chartns;

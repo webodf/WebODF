@@ -62,6 +62,7 @@ runtime.loadClass("ops.OpAddStyle");
 runtime.loadClass("ops.OpRemoveStyle");
 runtime.loadClass("ops.OpAddAnnotation");
 runtime.loadClass("ops.OpRemoveAnnotation");
+runtime.loadClass("ops.OpUpdateMetadata");
 
 /**
  * @constructor
@@ -126,7 +127,8 @@ ops.OperationFactory = function OperationFactory() {
             MoveCursor : constructor(ops.OpMoveCursor),
             RemoveCursor : constructor(ops.OpRemoveCursor),
             AddAnnotation : constructor(ops.OpAddAnnotation),
-            RemoveAnnotation : constructor(ops.OpRemoveAnnotation)
+            RemoveAnnotation : constructor(ops.OpRemoveAnnotation),
+            UpdateMetadata: constructor(ops.OpUpdateMetadata)
         };
     }
 

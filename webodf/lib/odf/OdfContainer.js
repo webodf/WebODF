@@ -44,6 +44,7 @@ runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfNodeFilter");
+runtime.loadClass("odf.MetadataManager");
 
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
@@ -56,6 +57,7 @@ runtime.loadClass("odf.OdfNodeFilter");
 odf.OdfContainer = (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
+        metadataManager,
         /**@const @type{!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         /**@const @type{!string}*/ manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
         /**@const @type{!string}*/ webodfns = "urn:webodf:names:scope",
@@ -476,6 +478,11 @@ odf.OdfContainer = (function () {
             }
             return copy;
         }
+
+        function initializeMetadataManager(metaRootElement) {
+            metadataManager = new odf.MetadataManager(metaRootElement);
+        }
+
         /**
          * Import the document elementnode into the DOM of OdfContainer.
          * Any processing instructions are removed, since importing them
@@ -621,6 +628,8 @@ odf.OdfContainer = (function () {
             root = self.rootElement;
             root.meta = getDirectChild(node, officens, 'meta');
             setChild(root, root.meta);
+
+            initializeMetadataManager(root.meta);
         }
         /**
          * @param {Document} xmldoc
@@ -865,6 +874,15 @@ odf.OdfContainer = (function () {
             var content = self.getContentElement();
             return content && content.localName;
         };
+
+        /**
+         * Returns the metadata manager associated with this document
+         * @return {!odf.MetadataManager}
+         */
+        this.getMetadataManager = function () {
+            return metadataManager;
+        };
+
         /**
          * Open file and parse it. Return the XML Node. Return the root node of
          * the file or null if this is not possible.
