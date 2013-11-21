@@ -44,7 +44,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
      * @param {!string} docUrl
      * @constructor
      */
-    function LoadDocument(docUrl) {
+    function OpenDocument(docUrl) {
         var state = {description: "Open document " + docUrl},
             action = new BenchmarkAction(state);
 
@@ -65,5 +65,5 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         };
     }
 
-    return LoadDocument;
+    return OpenDocument;
 });
