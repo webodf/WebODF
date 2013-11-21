@@ -553,6 +553,113 @@
         this.getBoundingClientRect = getBoundingClientRect;
 
         /**
+         * Takes a flat object which is a key-value
+         * map of strings, and populates/modifies
+         * the node with child elements which have
+         * the key name as the node name (namespace
+         * prefix required in the key name)
+         * and the value as the text content. 
+         * Example: mapKeyValObjOntoNode(node, {"dc:creator": "Bob"}, nsResolver);
+         * If a namespace prefix is unresolved with the
+         * nsResolver, that key will be ignored and not written to the node.
+         * @param {!Element} node
+         * @param {!Object.<!string, !string>} properties
+         * @param {!function(!string):!string} nsResolver
+         */
+        function mapKeyValObjOntoNode(node, properties, nsResolver) {
+            Object.keys(properties).forEach(function (key) {
+                var parts = key.split(":"),
+                    prefix = parts[0],
+                    localName = parts[1],
+                    ns = nsResolver(prefix),
+                    value = properties[key],
+                    element;
+
+                // Ignore if the prefix is unsupported,
+                // otherwise set the textContent of the
+                // element to the value.
+                if (ns) {
+                    element = node.getElementsByTagNameNS(ns, localName)[0];
+                    if (!element) {
+                        element = node.ownerDocument.createElementNS(ns, key);
+                        node.appendChild(element);
+                    }
+                    element.textContent = value;
+                } else {
+                   runtime.log("Key ignored: " + key);
+                }
+            });
+        }
+        this.mapKeyValObjOntoNode = mapKeyValObjOntoNode;
+
+        /**
+        * Takes an array of strings, which is a listing of
+        * properties to be removed (namespace required),
+        * and deletes the corresponding top-level child elements
+        * that represent those properties, from the
+        * supplied node.
+        * Example: removeKeyElementsFromNode(node, ["dc:creator"], nsResolver);
+        * If a namespace is not resolved with the nsResolver,
+        * that key element will be not removed.
+        * If a key element does not exist, it will be ignored.
+        * @param {!Element} node
+        * @param {!Array.<!string>} propertyNames 
+        * @param {!function(!string):!string} nsResolver
+        */
+       function removeKeyElementsFromNode(node, propertyNames, nsResolver) {
+           propertyNames.forEach(function (propertyName) {
+               var parts = propertyName.split(":"),
+                   prefix = parts[0],
+                   localName = parts[1],
+                   ns = nsResolver(prefix),
+                   element;
+
+               // Ignore if the prefix is unsupported,
+               // otherwise delete the element if found
+               if (ns) {
+                   element = node.getElementsByTagNameNS(ns, localName)[0];
+                   if (element) {
+                       element.parentNode.removeChild(element);
+                   } else {
+                        runtime.log("Element for " + propertyName + " not found.");
+                   }
+               } else {
+                   runtime.log("Property Name ignored: " + propertyName);
+               }
+           });
+       }
+       this.removeKeyElementsFromNode = removeKeyElementsFromNode;
+ 
+        /**
+         * Looks at an element's direct children,
+         * and generates an object which is a flat
+         * key-value map from the child's ns:localName"
+         * to it's text content.
+         * Only those children that have a resolvable prefixed
+         * name will be taken into account for generating this
+         * map.
+         * @param {!Element} node
+         * @param {!function(!string):!string} prefixResolver 
+         * @return {Object.<!string, !string>}
+         */
+        function getKeyValRepresentationOfNode(node, prefixResolver) {
+            var properties = {},
+                currentSibling = node.firstElementChild,
+                prefix;
+
+            while (currentSibling) {
+                prefix = prefixResolver(currentSibling.namespaceURI);
+                if (prefix) {
+                    properties[prefix + ':' + currentSibling.localName] = currentSibling.textContent;
+                }
+                currentSibling = currentSibling.nextElementSibling;
+            }
+
+            return properties;
+        }
+        this.getKeyValRepresentationOfNode = getKeyValRepresentationOfNode;
+
+        /**
          * Maps attributes and elements in the properties object over top of the node. Supports
          * recursion and deep mapping.
          * @param {!Element} node

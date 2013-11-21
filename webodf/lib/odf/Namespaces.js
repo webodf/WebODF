@@ -92,7 +92,6 @@ odf.Namespaces = (function () {
      */
     function forEachPrefix(cb) {
         var prefix;
-
         for (prefix in namespaceMap) {
             if (namespaceMap.hasOwnProperty(prefix)) {
                 cb(prefix, namespaceMap[prefix]);
@@ -109,6 +108,19 @@ odf.Namespaces = (function () {
         return namespaceMap[prefix] || null;
     }
 
+    function lookupPrefix(namespaceURI) {
+        var foundPrefix, prefix;
+
+        for (prefix in namespaceMap) {
+            if (namespaceMap.hasOwnProperty(prefix) && namespaceMap[prefix] === namespaceURI) {
+                foundPrefix = prefix;
+                break;
+            }
+        }
+
+        return foundPrefix;
+    }
+
     // TODO: document where and why this is needed
     resolvePrefix.lookupNamespaceURI = resolvePrefix;
 
@@ -120,6 +132,7 @@ odf.Namespaces = (function () {
 
     namespaces.forEachPrefix = forEachPrefix;
     namespaces.resolvePrefix = resolvePrefix;
+    namespaces.lookupPrefix = lookupPrefix;
     namespaces.namespaceMap = namespaceMap;
 
     // add all namespaces
