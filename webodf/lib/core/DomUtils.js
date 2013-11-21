@@ -553,6 +553,35 @@
         this.getBoundingClientRect = getBoundingClientRect;
 
         /**
+         * Maps attributes and elements in the properties object over top of the node. Supports
+         * recursion and deep mapping.
+         * @param {!Element} node
+         * @param {!Object} properties
+         * @param {!function(!string):!string} nsResolver
+         */
+        function mapObjOntoNode(node, properties, nsResolver) {
+            Object.keys(properties).forEach(function(key) {
+                var parts = key.split(":"),
+                    prefix = parts[0],
+                    localName = parts[1],
+                    ns = nsResolver(prefix),
+                    value = properties[key],
+                    element;
+
+                if (typeof value === "object" && Object.keys(value).length) {
+                    element = node.getElementsByTagNameNS(ns, localName)[0]
+                        || node.ownerDocument.createElementNS(ns, key);
+                    node.appendChild(element);
+                    mapObjOntoNode(element, value, nsResolver);
+                } else if (ns) {
+                    // If the prefix is unknown or unsupported, simply ignore it for now
+                    node.setAttributeNS(ns, key, value);
+                }
+            });
+        }
+        this.mapObjOntoNode = mapObjOntoNode;
+
+        /**
          * @param {!core.DomUtils} self
          */
         function init(self) {

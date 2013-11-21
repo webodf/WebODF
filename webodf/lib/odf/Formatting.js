@@ -284,33 +284,6 @@ odf.Formatting = function Formatting() {
     this.getStyleAttributes = getStyleAttributes;
 
     /**
-     * Maps attributes and elements in the properties object over top of the node. Supports
-     * recursion and deep mapping. This is effectively the inverse of getStyleAttributes
-     * @param {!Element} node
-     * @param {!Object} properties
-     */
-    function mapObjOntoNode(node, properties) {
-        Object.keys(properties).forEach(function(key) {
-            var parts = key.split(":"),
-                prefix = parts[0],
-                localName = parts[1],
-                ns = odf.Namespaces.resolvePrefix(prefix),
-                value = properties[key],
-                element;
-
-            if (typeof value === "object" && Object.keys(value).length) {
-                element = node.getElementsByTagNameNS(ns, localName)[0]
-                    || node.ownerDocument.createElementNS(ns, key);
-                node.appendChild(element);
-                mapObjOntoNode(element, value);
-            } else if (ns) {
-                // If the prefix is unknown or unsupported, simply ignore it for now
-                node.setAttributeNS(ns, key, value);
-            }
-        });
-    }
-
-    /**
      * Returns a JSON representation of the style attributes of a given style element, also containing attributes
      * inherited from it's ancestry - up to and including the default style for the family.
      * @param {!Element} styleNode
@@ -525,7 +498,8 @@ odf.Formatting = function Formatting() {
      */
     this.updateStyle = function (styleNode, properties) {
         var fontName, fontFaceNode;
-        mapObjOntoNode(styleNode, properties);
+
+        domUtils.mapObjOntoNode(styleNode, properties, odf.Namespaces.resolvePrefix);
 
         fontName = properties["style:text-properties"] && properties["style:text-properties"]["style:font-name"];
         if (fontName && !getFontMap().hasOwnProperty(fontName)) {
