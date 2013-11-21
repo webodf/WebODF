@@ -1,4 +1,8 @@
-var xhr = new XMLHttpRequest();
+var xhr = new XMLHttpRequest(),
+    code;
 xhr.open("GET", "../../webodf/lib/runtime.js", false);
 xhr.send(null);
-eval(xhr.responseText);
+code = xhr.responseText;
+code += "\n//# sourceURL=../../webodf/lib/runtime.js";
+code += "\n//@ sourceURL=../../webodf/lib/runtime.js"; // Chrome
+eval(code);
