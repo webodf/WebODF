@@ -452,6 +452,18 @@ function BrowserRuntime(logoutput) {
         }
     }
     /**
+     * @param {!Array.<!number>} buffer
+     * @return {!Uint8Array}
+     */
+    function arrayToUint8Array(buffer) {
+        var l = buffer.length, i,
+            a = new Uint8Array(new ArrayBuffer(l));
+        for (i = 0; i < l; i += 1) {
+            a[i] = buffer[i];
+        }
+        return a;
+    }
+    /**
      * @param {!string} path
      * @param {!string} encoding
      * @param {!XMLHttpRequest} xhr
@@ -474,9 +486,17 @@ function BrowserRuntime(logoutput) {
                    data = String(xhr.response);
                }
             } else if (encoding === "binary") {
-               // fallback for some really weird browsers
-               data = self.byteArrayFromString(xhr.responseText, "binary");
+               if (xhr.responseBody !== null
+                       && String(typeof VBArray) !== "undefined") {
+                   // fallback for IE <= 10
+                   data = (new VBArray(xhr.responseBody)).toArray();
+                   data = arrayToUint8Array(data);
+               } else {
+                   // fallback for some really weird browsers
+                   data = self.byteArrayFromString(xhr.responseText, "binary");
+               }
             } else {
+               // if we just want text, it's simple
                data = xhr.responseText;
             }
             cache[path] = data;
