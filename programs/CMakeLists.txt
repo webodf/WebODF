@@ -12,6 +12,7 @@ add_subdirectory(firefoxextension)
 
 add_subdirectory(touchui)
 add_subdirectory(playbook)
+add_subdirectory(benchmark)
 add_subdirectory(editor)
 add_subdirectory(viewer)
 add_subdirectory(wordpressplugin)

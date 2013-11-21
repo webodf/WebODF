@@ -36,40 +36,35 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-require([
-    "Benchmark",
-    "HTMLResultsRenderer",
-    "LoadDocument",
-    "EnterEditMode",
-    "MoveCursorToEndDirect",
-    "InsertLetterA",
-    "Remove1Position",
-    "MoveCursor1StepLeft",
-    "SelectEntireDocument",
-    "RemoveCurrentSelection"
-], function (Benchmark, HTMLResultsRenderer,
-             LoadDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, Remove1Position, MoveCursor1StepLeft,
-             SelectEntireDocument, RemoveCurrentSelection) {
+define(function() {
     "use strict";
-    var loadingScreen = document.getElementById('loadingScreen'),
-        fileUrl = window.location.hash.substr(1) || "100pages.odt",
-        benchmark = new Benchmark();
 
-    new HTMLResultsRenderer(benchmark);
+    /**
+     * @constructor
+     */
+    function ManualStep() {
+        var wizardContainer = document.getElementById("wizardPrompt"),
+            messageContainer = document.getElementById("wizardMessage"),
+            doneButton = document.getElementById("wizardClose");
 
-    loadingScreen.style.display = "none";
+        /**
+         * @param {!string} message
+         * @param {!function()} onDone
+         */
+        this.requestAction = function(message, onDone) {
+            while (messageContainer.firstChild) {
+                messageContainer.removeChild(messageContainer.firstChild);
+            }
+            messageContainer.appendChild(document.createTextNode(message));
 
-    benchmark.actions.push(new LoadDocument(fileUrl));
-    benchmark.actions.push(new EnterEditMode());
-    // TODO currently times out
-    // benchmark.addAction(new MoveCursorToEndViaCtrlEnd());
-    benchmark.actions.push(new MoveCursorToEndDirect());
-    benchmark.actions.push(new InsertLetterA());
-    benchmark.actions.push(new Remove1Position(true));
-    benchmark.actions.push(new MoveCursor1StepLeft());
-    benchmark.actions.push(new Remove1Position(false));
-    benchmark.actions.push(new SelectEntireDocument());
-    benchmark.actions.push(new RemoveCurrentSelection());
+            doneButton.onclick = function() {
+                wizardContainer.style.display = "none";
+                onDone();
+            };
 
-    benchmark.start();
+            wizardContainer.style.display = "block";
+        };
+    }
+
+    return ManualStep;
 });

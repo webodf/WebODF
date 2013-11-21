@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebODF performance and benchmarking tool</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        body {
+            font-family: Helvetic, sans-serif;
+        }
+
+        #benchmarkView {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            left: 0;
+            background-color: #70a186;
+        }
+
+        #documentView {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 400px;
+            right: 0;
+            overflow: auto;
+        }
+
+        #benchmarkResults .status {
+            display: none;
+        }
+
+        #documentView *:focus {
+            outline: none;
+        }
+
+        #wizardPrompt {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            border: 1px solid orangered;
+            background-color: orange;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            min-width: 100px;
+            min-height: 100px;
+            padding: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+
+        #wizardMessage {
+            text-align: left;
+        }
+
+        #wizardPrompt h2 {
+            margin: 0;
+            color: #671a00;
+        }
+
+        #loadingScreen {
+            position: fixed;
+            top: 100px;
+            left: 100px;
+            right: 100px;
+            background-color: #c3c3c3;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border: 1px solid black;
+            text-align: center;
+            vertical-align: middle;
+            z-index: 100;
+        }
+    </style>
+
+    <script src="webodf.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        runtime.currentDirectory = function () {
+            return "../../webodf/lib";
+        };
+        runtime.libraryPaths = function () {
+            return [
+                runtime.currentDirectory(),
+                "../../../webodf/lib"
+            ];
+        };
+    </script>
+    <script src="require.js"></script>
+    <script type="text/javascript">
+        requirejs.config({
+            baseUrl: "js",
+            waitSeconds: 0 // some servers are reaaaallly slow unfortunately :/
+        });
+        requirejs.onError = function (err) {
+            console.log(err.requireType);
+            if (err.requireType === 'timeout') {
+                console.log('modules: ' + err.requireModules);
+            }
+
+            throw err;
+        };
+
+        require(["HTMLBenchmark"], function(HTMLBenchmark) {
+            var benchmark = new HTMLBenchmark();
+            benchmark.start();
+        })
+    </script>
+</head>
+<body>
+<div id="loadingScreen">
+    <h1>Loading required files. This may take a while.</h1>
+</div>
+<div id="benchmarkView">
+    <h1>Benchmark results</h1>
+    <table id="benchmarkResults">
+        <thead>
+            <tr>
+                <td class="action">Action</td>
+                <td class="status">Status</td>
+                <td class="elapsed">Elapsed time (ms)</td>
+            </tr>
+        </thead>
+    </table>
+</div>
+<div id="documentView">
+    <div id="wizardPrompt">
+        <h2>Interaction required:</h2>
+        <div id="wizardMessage"></div>
+        <button id="wizardClose">Done!</button>
+    </div>
+    <div id="canvas"></div>
+</div>
+</body>
+</html>

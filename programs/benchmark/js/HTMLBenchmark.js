@@ -36,32 +36,48 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-define(function() {
+define([
+    "Benchmark",
+    "HTMLResultsRenderer",
+    "LoadDocument",
+    "EnterEditMode",
+    "MoveCursorToEndDirect",
+    "InsertLetterA",
+    "Remove1Position",
+    "MoveCursor1StepLeft",
+    "SelectEntireDocument",
+    "RemoveCurrentSelection"
+], function (Benchmark, HTMLResultsRenderer,
+             LoadDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, Remove1Position, MoveCursor1StepLeft,
+             SelectEntireDocument, RemoveCurrentSelection) {
     "use strict";
 
-    function ManualStep() {
-        var wizardContainer = document.getElementById("wizardPrompt"),
-            messageContainer = document.getElementById("wizardMessage"),
-            doneButton = document.getElementById("wizardClose");
+    /**
+     * @constructor
+     */
+    function HTMLBenchmark() {
+        var loadingScreen = document.getElementById('loadingScreen'),
+            fileUrl = window.location.hash.substr(1) || "100pages.odt",
+            benchmark = new Benchmark();
 
-        /**
-         * @param {!string} message
-         * @param {!function()} onDone
-         */
-        this.requestAction = function(message, onDone) {
-            while (messageContainer.firstChild) {
-                messageContainer.removeChild(messageContainer.firstChild);
-            }
-            messageContainer.appendChild(document.createTextNode(message));
+        new HTMLResultsRenderer(benchmark);
 
-            doneButton.onclick = function() {
-                wizardContainer.style.display = "none";
-                onDone();
-            };
+        loadingScreen.style.display = "none";
 
-            wizardContainer.style.display = "block";
-        };
+        benchmark.actions.push(new LoadDocument(fileUrl));
+        benchmark.actions.push(new EnterEditMode());
+        // TODO currently times out
+        // benchmark.addAction(new MoveCursorToEndViaCtrlEnd());
+        benchmark.actions.push(new MoveCursorToEndDirect());
+        benchmark.actions.push(new InsertLetterA());
+        benchmark.actions.push(new Remove1Position(true));
+        benchmark.actions.push(new MoveCursor1StepLeft());
+        benchmark.actions.push(new Remove1Position(false));
+        benchmark.actions.push(new SelectEntireDocument());
+        benchmark.actions.push(new RemoveCurrentSelection());
+
+        this.start = benchmark.start;
     }
 
-    return ManualStep;
+    return HTMLBenchmark;
 });

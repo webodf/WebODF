@@ -420,6 +420,8 @@ add_custom_command(
     # editor
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/editor ${WEBODFZIPDIR}/editor
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}/editor/dojo-deps
+    # benchmark
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/benchmark ${WEBODFZIPDIR}/benchmark
     # wordpressplugin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/readme.txt ${WEBODFZIPDIR}/wordpressplugin-readme.txt
     COMMAND ${CMAKE_COMMAND} -E copy ${WORDPRESSZIP} ${WEBODFZIPDIR}
@@ -436,6 +438,7 @@ add_custom_command(
         webodf-debug.js-target
         webodf.js-target
         editor-compiled.js-target
+        html-benchmark
         viewer-minimized.js-target
         firefoxextension-target
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
