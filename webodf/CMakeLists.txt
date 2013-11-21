@@ -4,6 +4,8 @@ if(WRONGCMAKEDIR)
   message(FATAL_ERROR "You should point CMake to the parent directory.")
 endif(WRONGCMAKEDIR)
 
+configure_file(webodfversion.js.in ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
+
 set(TESTJSFILES tests/core/ZipTests.js
     tests/core/Base64Tests.js
     tests/core/DomUtilsTests.js
@@ -36,6 +38,7 @@ add_custom_target(jslintcheck ALL
     COMMAND ${NODE} lib/runtime.js tools/runjslint.js
         ${LIBJSFILES} ${TESTJSFILES}
         ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
+        ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js
     DEPENDS NodeJS webodf.css.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     SOURCES ${LIBJSFILES} ${TESTJSFILES}
@@ -71,7 +74,8 @@ if (Java_JAVA_EXECUTABLE)
   endforeach(JSFILE ${TESTJSFILES})
 
   set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
-      --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js)
+      --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
+      --js ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
 
   add_custom_command(
       OUTPUT simplecompiled.js

@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document*/
+/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document, webodf_version */
 
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
@@ -905,6 +905,32 @@ odf.OdfContainer = (function () {
         };
 
         /**
+         * Write pre-saving metadata to the DOM
+         * @return {undefined}
+         */
+        function updateMetadataForSaving() {
+            // set the opendocument provider used to create/
+            // last modify the document.
+            // this string should match the definition for
+            // user-agents in the http protocol as specified
+            // in section 14.43 of [RFC2616].
+            var generatorString,
+                window = runtime.getWindow();
+
+            generatorString = "WebODF/" + (
+                String(typeof webodf_version) !== "undefined"
+                    ? webodf_version
+                    : "FromSource"
+            );
+
+            if (window) {
+                generatorString = generatorString + " " + window.navigator.userAgent;
+            }
+
+            metadataManager.setMetadata({"meta:generator": generatorString});
+        }
+
+        /**
          * @return {!core.Zip}
          */
         function createEmptyTextDocument() {
@@ -941,6 +967,8 @@ odf.OdfContainer = (function () {
             addToplevelElement("body");
             root.body.appendChild(text);
 
+            initializeMetadataManager(root.meta);
+
             setState(OdfContainer.DONE);
             return emptyzip;
         }
@@ -955,6 +983,9 @@ odf.OdfContainer = (function () {
             // update the zip entries with the data from the live ODF DOM
             var data,
                 date = new Date();
+
+            updateMetadataForSaving();
+
             data = runtime.byteArrayFromString(serializeSettingsXml(), "utf8");
             zip.save("settings.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeMetaXml(), "utf8");
