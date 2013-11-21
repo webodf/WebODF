@@ -709,6 +709,10 @@ function BrowserRuntime(logoutput) {
         });
     }
     function getFileSize(path, callback) {
+        if (cache.hasOwnProperty(path) && typeof cache[path] !== "string") {
+            callback(cache[path].length);
+            return;
+        }
         var xhr = new XMLHttpRequest();
         xhr.open("HEAD", path, true);
         xhr.onreadystatechange = function () {

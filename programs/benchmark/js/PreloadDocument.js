@@ -36,50 +36,33 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-define([
-    "Benchmark",
-    "HTMLResultsRenderer",
-    "OpenDocument",
-    "EnterEditMode",
-    "MoveCursorToEndDirect",
-    "InsertLetterA",
-    "Remove1Position",
-    "MoveCursor1StepLeft",
-    "SelectEntireDocument",
-    "RemoveCurrentSelection",
-    "PreloadDocument"
-], function (Benchmark, HTMLResultsRenderer,
-             OpenDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, Remove1Position, MoveCursor1StepLeft,
-             SelectEntireDocument, RemoveCurrentSelection, PreloadDocument) {
+define(["BenchmarkAction"], function(BenchmarkAction) {
     "use strict";
 
     /**
+     * Fetch the specified document from the remote location and cache in the runtime
+     * @param {!string} docUrl
      * @constructor
      */
-    function HTMLBenchmark() {
-        var loadingScreen = document.getElementById('loadingScreen'),
-            fileUrl = window.location.hash.substr(1) || "100pages.odt",
-            benchmark = new Benchmark();
+    function DownloadDocument(docUrl) {
+        var state = {description: "Download document " + docUrl},
+            action = new BenchmarkAction(state);
 
-        new HTMLResultsRenderer(benchmark);
+        function onDocumentDownloaded() {
+            action.complete(true);
+        }
 
-        loadingScreen.style.display = "none";
+        this.subscribe = action.subscribe;
+        this.state = state;
 
-        benchmark.actions.push(new PreloadDocument(fileUrl));
-        benchmark.actions.push(new OpenDocument(fileUrl));
-        benchmark.actions.push(new EnterEditMode());
-        // TODO currently times out
-        // benchmark.addAction(new MoveCursorToEndViaCtrlEnd());
-        benchmark.actions.push(new MoveCursorToEndDirect());
-        benchmark.actions.push(new InsertLetterA());
-        benchmark.actions.push(new Remove1Position(true));
-        benchmark.actions.push(new MoveCursor1StepLeft());
-        benchmark.actions.push(new Remove1Position(false));
-        benchmark.actions.push(new SelectEntireDocument());
-        benchmark.actions.push(new RemoveCurrentSelection());
-
-        this.start = benchmark.start;
+        /**
+         * @param {!SharedState} sharedState
+         */
+        this.start = function(sharedState) {
+            action.start();
+            runtime.readFile(docUrl, 'binary', onDocumentDownloaded);
+        };
     }
 
-    return HTMLBenchmark;
+    return DownloadDocument;
 });
