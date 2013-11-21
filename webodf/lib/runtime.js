@@ -465,10 +465,14 @@ function BrowserRuntime(logoutput) {
             r = {err: "File " + path + " is empty.", data: null};
         } else if (xhr.status === 200 || xhr.status === 0) {
             // report file
-            if(xhr.response) {
+            if (xhr.response && typeof xhr.response !== "string") {
                // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
-               data = /**@type{!ArrayBuffer}*/(xhr.response);
-               data = new Uint8Array(data);
+               if (encoding === "binary") {
+                   data = /**@type{!ArrayBuffer}*/(xhr.response);
+                   data = new Uint8Array(data);
+               } else {
+                   data = String(xhr.response);
+               }
             } else if (encoding === "binary") {
                // fallback for some really weird browsers
                data = self.byteArrayFromString(xhr.responseText, "binary");
