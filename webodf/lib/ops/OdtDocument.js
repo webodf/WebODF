@@ -666,26 +666,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * @param {!string} metadataId
-     * @return {?string}
-     */
-    this.getMetaData = function (metadataId) {
-        var node = odfCanvas.odfContainer().rootElement.firstChild;
-        while (node && node.localName !== "meta") {
-            node = node.nextSibling;
-        }
-        node = node && node.firstChild;
-        while (node && node.localName !== metadataId) {
-            node = node.nextSibling;
-        }
-        node = node && node.firstChild;
-        while (node && node.nodeType !== Node.TEXT_NODE) {
-            node = node.nextSibling;
-        }
-        return node ? node.data : null;
-    };
-
-    /**
      * @return {!odf.Formatting}
      */
     this.getFormatting = function () {
