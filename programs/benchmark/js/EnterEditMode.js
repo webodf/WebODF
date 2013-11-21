@@ -45,6 +45,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("gui.ShadowCursor");
+    runtime.loadClass("ops.OpAddMember");
 
     /**
      * Setup and register all components required to start editing the document
@@ -74,7 +75,8 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
                 sessionController,
                 shadowCursor,
                 selectionViewManager,
-                caretManager;
+                caretManager,
+                addMember = new ops.OpAddMember();
 
             action.start();
 
@@ -85,6 +87,17 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             selectionViewManager = new gui.SelectionViewManager();
             new gui.SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager);
             selectionViewManager.registerCursor(shadowCursor, true);
+
+            addMember.init({
+                memberid: localMemberId,
+                setProperties: {
+                    fullName: runtime.tr("Unknown Author"),
+                    color: "black",
+                    imageUrl: "avatar-joe.png"
+                }
+            });
+            session.enqueue([addMember]);
+
             sessionController.startEditing();
             sharedState.sessionController = sessionController;
 
