@@ -67,7 +67,7 @@ core.ByteArrayWriter = function ByteArrayWriter(encoding) {
      * @return {undefined}
      */
     this.appendByteArrayWriter = function (writer) {
-        this.appendByteArray(writer.getByteArray());
+        self.appendByteArray(writer.getByteArray());
     };
     /**
      * @param {!Uint8Array} array
