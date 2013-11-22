@@ -470,7 +470,9 @@ function BrowserRuntime(logoutput) {
      * @return {!{err:?string,data:(?string|?Uint8Array)}}
      */
     function handleXHRResult(path, encoding, xhr) {
-        var data, r;
+        var /**@type{!Uint8Array|!string}*/
+            data,
+            r, d, a;
         if (xhr.status === 0 && !xhr.responseText) {
             // for local files there is no difference between missing
             // and empty files, so empty files are considered as errors
@@ -478,26 +480,26 @@ function BrowserRuntime(logoutput) {
         } else if (xhr.status === 200 || xhr.status === 0) {
             // report file
             if (xhr.response && typeof xhr.response !== "string") {
-               // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
-               if (encoding === "binary") {
-                   data = /**@type{!ArrayBuffer}*/(xhr.response);
-                   data = new Uint8Array(data);
-               } else {
-                   data = String(xhr.response);
-               }
+                // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
+                if (encoding === "binary") {
+                    d = /**@type{!ArrayBuffer}*/(xhr.response);
+                    data = new Uint8Array(d);
+                } else {
+                    data = String(xhr.response);
+                }
             } else if (encoding === "binary") {
-               if (xhr.responseBody !== null
-                       && String(typeof VBArray) !== "undefined") {
-                   // fallback for IE <= 10
-                   data = (new VBArray(xhr.responseBody)).toArray();
-                   data = arrayToUint8Array(data);
-               } else {
-                   // fallback for some really weird browsers
-                   data = self.byteArrayFromString(xhr.responseText, "binary");
-               }
+                if (xhr.responseBody !== null
+                        && String(typeof VBArray) !== "undefined") {
+                    // fallback for IE <= 10
+                    a = (new VBArray(xhr.responseBody)).toArray();
+                    data = arrayToUint8Array(a);
+                } else {
+                    // fallback for some really weird browsers
+                    data = self.byteArrayFromString(xhr.responseText, "binary");
+                }
             } else {
-               // if we just want text, it's simple
-               data = xhr.responseText;
+                // if we just want text, it's simple
+                data = xhr.responseText;
             }
             cache[path] = data;
             r = {err: null, data: data};

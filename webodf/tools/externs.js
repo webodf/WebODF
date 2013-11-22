@@ -354,11 +354,19 @@ Packages.org.xml.sax.InputSource = function (reader) {"use strict"; };
 HTMLStyleElement.prototype.sheet;
 XMLHttpRequest.prototype.sendAsBinary = function (data) {"use strict"; };
 /**
- * @const@type{!string}
+ * @const
+ * @type{!string}
  */
 XMLHttpRequest.prototype.responseBody;
 window.nativeio = {};
-var VBArray = {};
+/**
+ * @constructor
+ * @param {!string} s
+ */
+function VBArray(s) {"use strict"; };
+/**
+ * @return {!Array.<number>}
+ */
 VBArray.prototype.toArray = function () {"use strict"; };
 /**
  * @interface
