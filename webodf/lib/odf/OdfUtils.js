@@ -191,23 +191,23 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.isCharacterElement = isCharacterElement;
     /**
-     * Determine if the node is a whitespace character element.
+     * Determine if the node is a <text:s/> character element.
      * @param {?Node} e
      * @return {!boolean}
      */
-    function isWhitespaceElement(e) {
+    function isSpaceElement(e) {
         var n = e && e.localName,
             ns,
             r = false;
         if (n) {
             ns = e.namespaceURI;
             if (ns === textns) {
-                r = n === "s" || n === "tab";
+                r = n === "s";
             }
         }
         return r;
     }
-    this.isWhitespaceElement = isWhitespaceElement;
+    this.isSpaceElement = isSpaceElement;
     /**
      * @param {!Node} node
      * @return {!Node}
@@ -255,12 +255,13 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Walk to the left along the DOM and return true if the first thing
-     * encountered is either a non-whitespace character or a non-whitespace
-     * character element. Walking goes through grouping elements.
+     * encountered is either a non-whitespace text character or a non-space
+     * character element (i.e., any character element other than <text:s/>).
+     * Walking goes through grouping elements.
      * @param {?Node} node the first node to scan
      * @return {!boolean}
      */
-    function scanLeftForNonWhitespace(node) {
+    function scanLeftForNonSpace(node) {
         var r = false;
         while (node) {
             if (node.nodeType === Node.TEXT_NODE) {
@@ -272,7 +273,7 @@ odf.OdfUtils = function OdfUtils() {
                     );
                 }
             } else if (isCharacterElement(node)) {
-                r = isWhitespaceElement(node) === false;
+                r = isSpaceElement(node) === false;
                 node = null;
             } else {
                 node = previousNode(node);
@@ -280,7 +281,7 @@ odf.OdfUtils = function OdfUtils() {
         }
         return r;
     }
-    this.scanLeftForNonWhitespace = scanLeftForNonWhitespace;
+    this.scanLeftForNonSpace = scanLeftForNonSpace;
     /**
      * Walk to the left along the DOM and return the type of the first
      * thing encountered.
@@ -299,7 +300,7 @@ odf.OdfUtils = function OdfUtils() {
             if (!isODFWhitespace(text.substr(text.length - 1, 1))) {
                 r = 1; // character found
             } else if (text.length === 1) {
-                r = scanLeftForNonWhitespace(previousNode(node)) ? 2 : 0;
+                r = scanLeftForNonSpace(previousNode(node)) ? 2 : 0;
             } else {
                 r = isODFWhitespace(text.substr(text.length - 2, 1)) ? 0 : 2;
             }
@@ -426,7 +427,7 @@ odf.OdfUtils = function OdfUtils() {
                 // First whitespace after a character is significant
                 result = true;
             }
-        } else if (scanLeftForNonWhitespace(previousNode(textNode))) {
+        } else if (scanLeftForNonSpace(previousNode(textNode))) {
             // If the first character found scanning to the left is non-whitespace, this might still be significant
             result = true;
         }
@@ -449,7 +450,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     this.isDowngradableSpaceElement = function(node) {
         if (node.namespaceURI === textns && node.localName === "s") {
-            return scanLeftForNonWhitespace(previousNode(node)) && scanRightForAnyCharacter(nextNode(node));
+            return scanLeftForNonSpace(previousNode(node)) && scanRightForAnyCharacter(nextNode(node));
         }
         return false;
     };

@@ -172,7 +172,6 @@
   </ops>
   <after><office:text><text:p>a b</text:p></office:text></after>
  </test>
-
  <test name="InsertText_withSameCursor_AfterSpace2">
   <before><office:text><text:p>a<text:s> </text:s></text:p><text:p/></office:text></before>
   <ops>
@@ -287,6 +286,17 @@
    <op optype="InsertText" position="3" text="c"/>
   </ops>
   <after><office:text><text:p>a bc</text:p></office:text></after>
+ </test>
+ <test name="InsertText_AfterSpaceAndTab_InNewParagraph">
+  <before><office:text><text:p/></office:text></before>
+  <ops>
+   <op optype="SplitParagraph" position="0"/>
+   <op optype="InsertText" position="1" text="&#x9;  "/>
+   <op optype="SplitParagraph" position="4"/>
+   <op optype="InsertText" position="5" text="U"/>
+   <op optype="RemoveText" position="0" length="1"/>
+  </ops>
+  <after><office:text><text:p><text:tab>&#x9;</text:tab> <text:s> </text:s></text:p><text:p>U</text:p></office:text></after>
  </test>
  <test name="RemoveSpace">
   <before><office:text><text:p><text:s> </text:s></text:p></office:text></before>

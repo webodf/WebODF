@@ -150,9 +150,9 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
                     }
                 } else {
                     // check if there is a non-whitespace character or
-                    // character element in a preceding node
+                    // character element (other than text:s) in a preceding node
                     leftNode = odfUtils.previousNode(container);
-                    if (odfUtils.scanLeftForNonWhitespace(leftNode)) {
+                    if (odfUtils.scanLeftForNonSpace(leftNode)) {
                         r = FILTER_ACCEPT;
                     }
                 }
