@@ -64,6 +64,8 @@ ops.OpAddStyle = function OpAddStyle() {
         setProperties = data.setProperties;
      };
 
+    this.isEdit = true;
+
     this.execute = function (odtDocument) {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             formatting = odtDocument.getFormatting(),

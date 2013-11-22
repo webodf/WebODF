@@ -78,6 +78,8 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         removedProperties = data.removedProperties;
     };
 
+    this.isEdit = true;
+
     this.execute = function (odtDocument) {
         var formatting = odtDocument.getFormatting(),
             styleNode,

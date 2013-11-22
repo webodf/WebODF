@@ -54,6 +54,15 @@ ops.Operation = function Operation() {
 ops.Operation.prototype.init = function (data) {"use strict"; };
 
 /**
+ * This is meant to indicate whether
+ * the operation is an 'edit', i.e.
+ * causes any changes that would make
+ * it into the saved ODF.
+ * @type {!boolean}
+ */
+ops.Operation.prototype.isEdit;
+
+/**
  * @param {!ops.OdtDocument} odtDocument
  * @return {!boolean}
  */

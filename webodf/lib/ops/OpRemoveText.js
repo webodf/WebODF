@@ -86,6 +86,8 @@ ops.OpRemoveText = function OpRemoveText() {
         odfNodeNamespaceMap[odf.Namespaces.textns] = true;
     };
 
+    this.isEdit = true;
+
     /**
      * Defines a set of rules for how elements can be collapsed based on whether they contain ODT content (e.g.,
      * text or character elements).

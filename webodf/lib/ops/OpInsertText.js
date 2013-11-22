@@ -56,6 +56,8 @@ ops.OpInsertText = function OpInsertText() {
         text = data.text;
     };
 
+    this.isEdit = true;
+
     /**
      * This is a workaround for a bug where webkit forgets to relayout
      * the text when a new character is inserted at the beginning of a line in

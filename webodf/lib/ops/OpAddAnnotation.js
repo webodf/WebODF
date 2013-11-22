@@ -55,6 +55,8 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         name = data.name;
     };
 
+    this.isEdit = true;
+
     /**
      * Creates an office:annotation node with a dc:creator, dc:date, and a paragraph wrapped within
      * a list, inside it; and with the given annotation name

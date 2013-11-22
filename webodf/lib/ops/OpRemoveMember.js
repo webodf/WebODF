@@ -41,6 +41,8 @@ ops.OpRemoveMember = function OpRemoveMember() {
         timestamp = parseInt(data.timestamp, 10);
     };
 
+    this.isEdit = false;
+
     this.execute = function (odtDocument) {
         if (!odtDocument.getMember(memberid)) {
             return false;

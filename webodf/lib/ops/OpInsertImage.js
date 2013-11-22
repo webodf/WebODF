@@ -62,6 +62,8 @@ ops.OpInsertImage = function OpInsertImage() {
         frameName = data.frameName;
     };
 
+    this.isEdit = true;
+
     /**
      * @param document
      * @returns {!Element}

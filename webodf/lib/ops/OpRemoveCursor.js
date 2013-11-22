@@ -52,6 +52,8 @@ ops.OpRemoveCursor = function OpRemoveCursor() {
         timestamp = data.timestamp;
     };
 
+    this.isEdit = false;
+
     this.execute = function (odtDocument) {
         if (!odtDocument.removeCursor(memberid)) {
             return false;
