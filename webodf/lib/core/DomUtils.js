@@ -39,9 +39,10 @@
 /*global Node, core, ops, runtime, NodeFilter, Range*/
 /*jslint bitwise: true*/
 
-(function() {
+(function () {
     "use strict";
-    var browserQuirks;
+    var /**@type{!{rangeBCRIgnoresElementBCR: boolean, unscaledRangeClientRects: boolean}}*/
+        browserQuirks;
 
     /**
      * Detect various browser quirks
@@ -62,7 +63,10 @@
         if (browserQuirks === undefined) {
             window = runtime.getWindow();
             document = window && window.document;
-            browserQuirks = {rangeBCRIgnoresElementBCR: false, unscaledRangeClientRects: false};
+            browserQuirks = {
+                rangeBCRIgnoresElementBCR: false,
+                unscaledRangeClientRects: false
+            };
             if (document) {
                 testContainer = document.createElement("div");
                 testContainer.style.position = "absolute";
@@ -90,7 +94,15 @@
                 range.detach();
 
                 document.body.removeChild(testContainer);
-                detectedQuirks = Object.keys(browserQuirks).map(function(quirk) { return quirk + ":" + browserQuirks[quirk];}).join(", ");
+                detectedQuirks = Object.keys(browserQuirks).map(
+                    /**
+                     * @param {!string} quirk
+                     * @return {!string}
+                     */
+                    function (quirk) {
+                        return quirk + ":" + String(browserQuirks[quirk]);
+                    }
+                ).join(", ");
                 runtime.log("Detected browser quirks - " + detectedQuirks);
             }
         }
@@ -102,75 +114,98 @@
      * @constructor
      */
     core.DomUtils = function DomUtils() {
-        var sharedRange;
+        var /**@type{?Range}*/
+            sharedRange = null;
 
+        /**
+         * @param {!Document} doc
+         * @return {!Range}
+         */
         function getSharedRange(doc) {
-            if (!sharedRange) {
-                sharedRange = doc.createRange();
+            var range;
+            if (sharedRange) {
+                range = sharedRange;
+            } else {
+                sharedRange = range = /**@type{!Range}*/(doc.createRange());
             }
-            return sharedRange;
+            return range;
         }
 
         /**
          * Find the inner-most child point that is equivalent
          * to the provided container and offset.
-         * @param {Node} container
+         * @param {!Node} container
          * @param {!number} offset
          * @returns {{container: Node, offset: !number}}
          */
         function findStablePoint(container, offset) {
-            if (offset < container.childNodes.length) {
-                container = container.childNodes[offset];
+            var c = container;
+            if (offset < c.childNodes.length) {
+                c = c.childNodes.item(offset);
                 offset = 0;
-                while (container.firstChild) {
-                    container = container.firstChild;
+                while (c.firstChild) {
+                    c = c.firstChild;
                 }
             } else {
-                while (container.lastChild) {
-                    container = container.lastChild;
-                    offset = container.nodeType === Node.TEXT_NODE ? container.textContent.length : container.childNodes.length;
+                while (c.lastChild) {
+                    c = c.lastChild;
+                    offset = c.nodeType === Node.TEXT_NODE
+                        ? c.textContent.length
+                        : c.childNodes.length;
                 }
             }
-            return {container: container, offset: offset};
+            return {container: c, offset: offset};
         }
 
         /**
-         * If either the start or end boundaries of a range start within a text node, this function will split these text nodes
-         * and reset the range boundaries to select the new nodes. The end result is that there are no partially contained
-         * text nodes within the resulting range.
+         * If either the start or end boundaries of a range start within a text
+         * node, this function will split these text nodes and reset the range
+         * boundaries to select the new nodes. The end result is that there are
+         * no partially contained text nodes within the resulting range.
          * E.g., the text node with selection:
          *  "A|BCD|E"
-         * would be split into 3 text nodes, with the range modified to maintain only the completely selected text node:
+         * would be split into 3 text nodes, with the range modified to maintain
+         * only the completely selected text node:
          *  "A" "|BCD|" "E"
          * @param {!Range} range
-         * @returns {!Array.<!Node>} Return a list of nodes modified as a result of this split operation. These are often
-         *  processed through DomUtils.normalizeTextNodes after all processing has been complete.
+         * @returns {!Array.<!Node>} Return a list of nodes modified as a result
+         *                           of this split operation. These are often
+         *                           processed through
+         *                           DomUtils.normalizeTextNodes after all
+         *                           processing has been complete.
          */
         function splitBoundaries(range) {
-            var modifiedNodes = [], end, splitStart;
+            var modifiedNodes = [], end, splitStart, node, text;
 
-            if (range.startContainer.nodeType === Node.TEXT_NODE || range.endContainer.nodeType === Node.TEXT_NODE) {
-                end = findStablePoint(range.endContainer, range.endOffset);
-                // Stable points need to be found to ensure splitting the text node
-                // doesn't inadvertently modify the other end of the range
+            if (range.startContainer.nodeType === Node.TEXT_NODE
+                    || range.endContainer.nodeType === Node.TEXT_NODE) {
+                end = range.endContainer
+                    && findStablePoint(range.endContainer, range.endOffset);
+                // Stable points need to be found to ensure splitting the text
+                // node doesn't inadvertently modify the other end of the range
                 range.setEnd(end.container, end.offset);
 
                 // Must split end first to stop the start point from being lost
-                if (range.endOffset !== 0
-                    && range.endContainer.nodeType === Node.TEXT_NODE
-                    && range.endOffset !== range.endContainer.length) {
-                    modifiedNodes.push(range.endContainer.splitText(range.endOffset));
-                    modifiedNodes.push(range.endContainer);
-                    // The end doesn't need to be reset as endContainer & endOffset are still valid after the modification
+                node = range.endContainer;
+                if (range.endOffset !== 0 && node.nodeType === Node.TEXT_NODE) {
+                    text = /**@type{!Text}*/(node);
+                    if (range.endOffset !== text.length) {
+                        modifiedNodes.push(text.splitText(range.endOffset));
+                        modifiedNodes.push(text);
+                        // The end doesn't need to be reset as endContainer &
+                        // endOffset are still valid after the modification
+                    }
                 }
 
-                if (range.startOffset !== 0
-                    && range.startContainer.nodeType === Node.TEXT_NODE
-                    && range.startOffset !== range.startContainer.length) {
-                    splitStart = range.startContainer.splitText(range.startOffset);
-                    modifiedNodes.push(range.startContainer);
-                    modifiedNodes.push(splitStart);
-                    range.setStart(splitStart, 0);
+                node = range.startContainer;
+                if (range.startOffset !== 0 && node.nodeType === Node.TEXT_NODE) {
+                    text = /**@type{!Text}*/(node);
+                    if (range.startOffset !== text.length) {
+                        splitStart = text.splitText(range.startOffset);
+                        modifiedNodes.push(text);
+                        modifiedNodes.push(splitStart);
+                        range.setStart(splitStart, 0);
+                    }
                 }
             }
 
@@ -179,8 +214,8 @@
         this.splitBoundaries = splitBoundaries;
 
         /**
-         * Returns true if the container range completely contains the insideRange. Aligned boundaries
-         * are counted as inclusion
+         * Returns true if the container range completely contains the insideRange.
+         * Aligned boundaries are counted as inclusion
          * @param {!Range} container
          * @param {!Range} insideRange
          * @returns {boolean}
@@ -250,19 +285,22 @@
          * @return {?Node} merged text node or null if there is no text node as result
          */
         function mergeTextNodes(node, nextNode) {
-            var mergedNode = null;
+            var mergedNode = null, text, nextText;
 
             if (node.nodeType === Node.TEXT_NODE) {
-                if (node.length === 0) {
-                    node.parentNode.removeChild(node);
+                text = /**@type{!Text}*/(node);
+                if (text.length === 0) {
+                    text.parentNode.removeChild(text);
                     if (nextNode.nodeType === Node.TEXT_NODE) {
                         mergedNode = nextNode;
                     }
                 } else {
                     if (nextNode.nodeType === Node.TEXT_NODE) {
-                        // in chrome it is important to add nextNode to node. doing it the
-                        // other way around causes random whitespace to appear
-                        node.appendData(nextNode.data);
+                        // in chrome it is important to add nextNode to node.
+                        // doing it the other way around causes random
+                        // whitespace to appear
+                        nextText = /**@type{!Text}*/(nextNode);
+                        text.appendData(nextText.data);
                         nextNode.parentNode.removeChild(nextNode);
                     }
                     mergedNode = node;
@@ -293,7 +331,8 @@
          * Checks if the provided limits fully encompass the passed in node
          * @param {{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits
          * @param {!Node} node
-         * @returns {boolean} Returns true if the node is fully contained within the range
+         * @returns {boolean} Returns true if the node is fully contained within
+         *                    the range
          */
         function rangeContainsNode(limits, node) {
             var range = node.ownerDocument.createRange(),
@@ -361,6 +400,11 @@
         }
         this.getElementsByTagNameNS = getElementsByTagNameNS;
 
+        /**
+         * @param {!Range} range
+         * @param {!Node} node
+         * @return {!boolean}
+         */
         function rangeIntersectsNode(range, node) {
             var nodeRange = node.ownerDocument.createRange(),
                 result;
@@ -375,14 +419,32 @@
 
         /**
          * Whether a node contains another node
+         * Wrapper around Node.contains
+         * http://www.w3.org/TR/domcore/#dom-node-contains
          * @param {!Node} parent The node that should contain the other node
          * @param {?Node} descendant The node to test presence of
          * @return {!boolean}
          */
         function containsNode(parent, descendant) {
-            return parent === descendant || parent.contains(descendant);
+            return parent === descendant
+                // the casts to Element are a workaround due to a different
+                // contains() definition in the Closure Compiler externs file.
+                || /**@type{!Element}*/(parent).contains(/**@type{!Element}*/(descendant));
         }
         this.containsNode = containsNode;
+
+        /**
+         * Whether a node contains another node
+         * @param {!Node} parent The node that should contain the other node
+         * @param {?Node} descendant The node to test presence of
+         * @return {!boolean}
+         */
+        function containsNodeForBrokenWebKit(parent, descendant) {
+            // the contains function is not reliable on safari/webkit so use
+            // compareDocumentPosition instead
+            return parent === descendant ||
+                Boolean(parent.compareDocumentPosition(descendant) & Node.DOCUMENT_POSITION_CONTAINED_BY);
+        }
 
         /**
          * Calculate node offset in unfiltered DOM world
@@ -435,28 +497,19 @@
         this.comparePoints = comparePoints;
 
         /**
-         * Whether a node contains another node
-         * @param {!Node} parent The node that should contain the other node
-         * @param {?Node} descendant The node to test presence of
-         * @return {!boolean}
-         */
-        function containsNodeForBrokenWebKit(parent, descendant) {
-            // the contains function is not reliable on safari/webkit so use compareDocumentPosition instead
-            return parent === descendant ||
-                Boolean(parent.compareDocumentPosition(descendant) & Node.DOCUMENT_POSITION_CONTAINED_BY);
-        }
-
-        /**
-         * Scale the supplied number by the specified zoom transformation if the browser does not transform range client
-         * rectangles correctly.
-         * In firefox, the span rectangle will be affected by the zoom, but the range is not.
-         * In most all other browsers, the range number is affected zoom.
+         * Scale the supplied number by the specified zoom transformation if the
+         * bowser does not transform range client rectangles correctly.
+         * In firefox, the span rectangle will be affected by the zoom, but the
+         * range is not. In most all other browsers, the range number is
+         * affected zoom.
          *
          * See http://dev.w3.org/csswg/cssom-view/#extensions-to-the-range-interface
-         * Section 10, getClientRects, "The transforms that apply to the ancestors are applied."
-         * @param {!number} inputNumber An input number to be scaled. This is expected to be the difference
-         *                              between a property on two range-sourced client rectangles
-         *                              (e.g., rect1.top - rect2.top)
+         * Section 10, getClientRects,
+         * "The transforms that apply to the ancestors are applied."
+         * @param {!number} inputNumber An input number to be scaled. This is
+         *                              expected to be the difference between
+         *                              a property on two range-sourced client
+         *                              rectangles (e.g., rect1.top - rect2.top)
          * @param {!number} zoomLevel   Current canvas zoom level
          * @returns {!number}
          */
@@ -470,40 +523,51 @@
 
         /**
          * Get the bounding client rect for the specified node.
-         * This function attempts to cope with various browser quirks, ideally returning
-         * a rectangle that can be used in conjunction with rectangles retrieved from
-         * ranges.
+         * This function attempts to cope with various browser quirks, ideally
+         * returning a rectangle that can be used in conjunction with rectangles
+         * retrieved from ranges.
          *
-         * Range & element client rectangles can only be mixed if both are transformed in the same way.
+         * Range & element client rectangles can only be mixed if both are
+         * transformed in the same way.
          * See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
          * @param {!Node} node
-         * @returns {!ClientRect}
+         * @returns {?ClientRect}
          */
         function getBoundingClientRect(node) {
-            var quirks = getBrowserQuirks(),
-                range;
+            var doc = /**@type{!Document}*/(node.ownerDocument),
+                quirks = getBrowserQuirks(),
+                range,
+                element;
 
-            if (quirks.unscaledRangeClientRects === false || quirks.rangeBCRIgnoresElementBCR) {
+            if (quirks.unscaledRangeClientRects === false
+                    || quirks.rangeBCRIgnoresElementBCR) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    return node.getBoundingClientRect();
+                    element = /**@type{!Element}*/(node);
+                    return element.getBoundingClientRect();
                 }
             }
-            range = getSharedRange(node.ownerDocument);
+            range = getSharedRange(doc);
             range.selectNode(node);
             return range.getBoundingClientRect();
         }
         this.getBoundingClientRect = getBoundingClientRect;
 
+        /**
+         * @param {!core.DomUtils} self
+         */
         function init(self) {
-            var /**@type{?Window}*/window = runtime.getWindow(),
-                appVersion, webKitOrSafari, ie;
+            var appVersion, webKitOrSafari, ie,
+                /**@type{?Window}*/
+                window = runtime.getWindow();
+
             if (window === null) {
                 return;
             }
 
             appVersion = window.navigator.appVersion.toLowerCase();
             webKitOrSafari = appVersion.indexOf('chrome') === -1
-                && (appVersion.indexOf('applewebkit') !== -1 || appVersion.indexOf('safari') !== -1);
+                && (appVersion.indexOf('applewebkit') !== -1
+                    || appVersion.indexOf('safari') !== -1);
             ie = appVersion.indexOf('msie'); // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
             if (webKitOrSafari || ie) {
                 self.containsNode = containsNodeForBrokenWebKit;

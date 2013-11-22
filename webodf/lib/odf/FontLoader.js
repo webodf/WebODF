@@ -78,7 +78,7 @@ odf.FontLoader = (function () {
     /**
      * @param {!string} name
      * @param {!{href:string,family:string}} font
-     * @param {?Runtime.ByteArray} fontdata
+     * @param {!Uint8Array} fontdata
      * @param {!StyleSheet} stylesheet
      * @return {undefined}
      */
@@ -91,7 +91,7 @@ odf.FontLoader = (function () {
         try {
             stylesheet.insertRule(rule, stylesheet.cssRules.length);
         } catch (e) {
-            runtime.log("Problem inserting rule in CSS: " + runtime.toJson(e) + "\nRule: "+rule);
+            runtime.log("Problem inserting rule in CSS: " + runtime.toJson(e) + "\nRule: " + rule);
         }
     }
     /**
@@ -123,6 +123,9 @@ odf.FontLoader = (function () {
         odfContainer.getPartData(embeddedFontDeclarations[name].href, function (err, fontdata) {
             if (err) {
                 runtime.log(err);
+            } else if (!fontdata) {
+                runtime.log("missing font data for "
+                    + embeddedFontDeclarations[name].href);
             } else {
                 addFontToCSS(name, embeddedFontDeclarations[name], fontdata,
                     stylesheet);

@@ -783,7 +783,7 @@ var zip_inflate = function (data, size) {
     zip_inflate_data = data;
     zip_inflate_pos = 0;
 
-    var buff = new runtime.ByteArray(size);
+    var buff = new Uint8Array(new ArrayBuffer(size));
     zip_inflate_internal(buff, 0, size);
     zip_inflate_data = null; // G.C.
     return buff;

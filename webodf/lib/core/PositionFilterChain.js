@@ -44,9 +44,12 @@ runtime.loadClass("core.PositionFilter");
 core.PositionFilterChain = function PositionFilterChain() {
     "use strict";
 
-    var filterChain = {},
-        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-        /**@const*/FILTER_REJECT  = core.PositionFilter.FilterResult.FILTER_REJECT;
+    var /**@type{!Object.<!string,!core.PositionFilter|!core.PositionFilterChain>}*/
+        filterChain = {},
+        /**@const*/
+        FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+        /**@const*/
+        FILTER_REJECT  = core.PositionFilter.FilterResult.FILTER_REJECT;
 
     /**
      * Returns accept if all filters in the chain accept the position, else reject.
@@ -54,7 +57,8 @@ core.PositionFilterChain = function PositionFilterChain() {
      * @return {!core.PositionFilter.FilterResult}
      */
     this.acceptPosition = function (iterator) {
-        var filterName;
+        var /**@type{!string}*/
+            filterName;
         for (filterName in filterChain) {
             if (filterChain.hasOwnProperty(filterName)) {
                 if (filterChain[filterName].acceptPosition(iterator) === FILTER_REJECT) {

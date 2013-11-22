@@ -57,9 +57,7 @@ define("webodf/editor/server/pullbox/Server", [], function () {
          */
         function call(message, cb) {
             var xhr = new XMLHttpRequest(),
-                byteArrayWriter = new core.ByteArrayWriter("utf8"),
-                messageString = JSON.stringify(message),
-                data;
+                messageString = JSON.stringify(message);
 
             function handleResult() {
                 if (xhr.readyState === 4) {
@@ -73,9 +71,6 @@ define("webodf/editor/server/pullbox/Server", [], function () {
             }
 runtime.log("Sending message to server: "+messageString);
             // create body data for request from metadata and payload
-            byteArrayWriter.appendString(messageString);
-    //         byteArrayWriter.appendByteArray(zipData);
-            data = byteArrayWriter.getByteArray();
 
             // do the request
             xhr.open('POST', args.url, true);
@@ -83,20 +78,8 @@ runtime.log("Sending message to server: "+messageString);
                 xhr.setRequestHeader("requesttoken", token);
             }
             xhr.onreadystatechange = handleResult;
-            // ArrayBufferView will have an ArrayBuffer property, in WebKit, XHR can send()
-            // an ArrayBuffer, In Firefox, one must use sendAsBinary with a string
-            if (data.buffer && !xhr.sendAsBinary) {
-                data = data.buffer; // webkit supports sending an ArrayBuffer
-            } else {
-                // encode into a string, this works in FireFox >= 3
-                data = runtime.byteArrayToString(data, "binary");
-            }
             try {
-                if (xhr.sendAsBinary) {
-                    xhr.sendAsBinary(data);
-                } else {
-                    xhr.send(data);
-                }
+                xhr.send(messageString);
             } catch (e) {
                 runtime.log("Problem with calling server: " + e + " " + data);
                 cb(e.message);

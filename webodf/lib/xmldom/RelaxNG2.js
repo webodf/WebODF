@@ -402,7 +402,8 @@ xmldom.RelaxNG2 = function RelaxNG2() {
      */
     this.validate = function validate(walker, callback) {
         walker.currentNode = walker.root;
-        var errors = validatePattern(start.e[0], walker, walker.root);
+        var errors = validatePattern(start.e[0], walker,
+                       /**@type{?Element}*/(walker.root));
         callback(errors);
     };
     this.init = function init(start1, nsmap1) {

@@ -48,12 +48,6 @@
  * @interface
  */
 function Runtime() {"use strict"; }
-/**
- * Abstraction of byte arrays.
- * @constructor
- * @param {!number} size
- */
-Runtime.ByteArray = function (size) {"use strict"; };
 
 /**
  * @param {!string} name
@@ -74,72 +68,52 @@ Runtime.prototype.toJson = function (anything) { "use strict"; };
 Runtime.prototype.fromJson = function (jsonstr) { "use strict"; };
 
 /**
- * @param {!number} start
- * @param {!number} end
- * @return {!Runtime.ByteArray}
- */
-Runtime.ByteArray.prototype.slice = function (start, end) {"use strict"; };
-
-/**
- * @type {!number}
- */
-Runtime.ByteArray.prototype.length = 0;
-/**
- * @param {!Array.<number>} array
- * @return {!Runtime.ByteArray}
- */
-Runtime.prototype.byteArrayFromArray = function (array) {"use strict"; };
-/**
  * @param {!string} string
  * @param {!string} encoding
- * @return {!Runtime.ByteArray}
+ * @return {!Uint8Array}
  */
 Runtime.prototype.byteArrayFromString = function (string, encoding) {"use strict"; };
 /**
- * @param {!Runtime.ByteArray} bytearray
+ * @param {!Uint8Array} bytearray
  * @param {!string} encoding
  * @return {!string}
  */
 Runtime.prototype.byteArrayToString = function (bytearray, encoding) {"use strict"; };
 /**
- * @param {!Runtime.ByteArray} bytearray1
- * @param {!Runtime.ByteArray} bytearray2
- * @return {!Runtime.ByteArray}
- */
-Runtime.prototype.concatByteArrays = function (bytearray1, bytearray2) {"use strict"; };
-/**
+ * Read part of a binary file.
  * @param {!string} path
  * @param {!number} offset
  * @param {!number} length
- * @param {!function(string,Runtime.ByteArray):undefined} callback
+ * @param {!function(?string,?Uint8Array):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.read = function (path, offset, length, callback) {"use strict"; };
 /**
  * Read the contents of a file. Returns the result via a callback. If the
- * encoding is 'binary', the result is returned as a Runtime.ByteArray,
+ * encoding is 'binary', the result is returned as a Uint8Array,
  * otherwise, it is returned as a string.
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
- * @param {!function(string,(string|Runtime.ByteArray)):undefined} callback
+ * @param {!function(?string,?(string|Uint8Array)):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.readFile = function (path, encoding, callback) {"use strict"; };
 /**
+ * Read a file completely, throw an exception if there is a problem.
  * @param {!string} path
  * @param {!string} encoding text encoding or 'binary'
- * @return {!string}
+ * @return {!string|!Uint8Array}
  */
 Runtime.prototype.readFileSync = function (path, encoding) {"use strict"; };
 /**
  * @param {!string} path
- * @param {!function(!string,(Document|undefined)=):undefined} callback
+ * @param {!function(?string,?Document):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.loadXML = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
- * @param {!Runtime.ByteArray} data
+ * @param {!Uint8Array} data
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
@@ -215,12 +189,16 @@ var IS_COMPILED_CODE = false;
 
 /**
  * @this {Runtime}
- * @param {!Runtime.ByteArray} bytearray
+ * @param {!Uint8Array} bytearray
  * @param {!string} encoding
  * @return {!string}
  */
 Runtime.byteArrayToString = function (bytearray, encoding) {
     "use strict";
+    /**
+     * @param {!Uint8Array} bytearray
+     * @return {!string}
+     */
     function byteArrayToString(bytearray) {
         var s = "", i, l = bytearray.length;
         for (i = 0; i < l; i += 1) {
@@ -228,28 +206,32 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
         }
         return s;
     }
+    /**
+     * @param {!Uint8Array} bytearray
+     * @return {!string}
+     */
     function utf8ByteArrayToString(bytearray) {
         var s = "", i, l = bytearray.length,
             chars = [],
             c0, c1, c2, c3, codepoint;
 
         for (i = 0; i < l; i += 1) {
-            c0 = bytearray[i];
+            c0 = /**@type{!number}*/(bytearray[i]);
             if (c0 < 0x80) {
                 chars.push(c0);
             } else {
                 i += 1;
-                c1 = bytearray[i];
+                c1 = /**@type{!number}*/(bytearray[i]);
                 if (c0 >= 0xc2 && c0 < 0xe0) {
                     chars.push(((c0 & 0x1f) << 6) | (c1 & 0x3f));
                 } else {
                     i += 1;
-                    c2 = bytearray[i];
+                    c2 = /**@type{!number}*/(bytearray[i]);
                     if (c0 >= 0xe0 && c0 < 0xf0) {
                         chars.push(((c0 & 0x0f) << 12) | ((c1 & 0x3f) << 6) | (c2 & 0x3f));
                     } else {
                         i += 1;
-                        c3 = bytearray[i];
+                        c3 = /**@type{!number}*/(bytearray[i]);
                         if (c0 >= 0xf0 && c0 < 0xf5) {
                             codepoint = ((c0 & 0x07) << 18) | ((c1 & 0x3f) << 12) | ((c2 & 0x3f) << 6) | (c3 & 0x3f);
                             codepoint -= 0x10000;
@@ -308,6 +290,10 @@ Runtime.fromJson = function (jsonstr) {
     return JSON.parse(jsonstr);
 };
 
+/**
+ * @param {!Function} f
+ * @return {?string}
+ */
 Runtime.getFunctionName = function getFunctionName(f) {
     "use strict";
     var m;
@@ -327,58 +313,13 @@ Runtime.getFunctionName = function getFunctionName(f) {
 function BrowserRuntime(logoutput) {
     "use strict";
     var self = this,
-        cache = {},
-        useNativeArray = window.ArrayBuffer && window.Uint8Array;
-    if (useNativeArray) {
-        Uint8Array.prototype.slice = function (begin, end) {
-            if (end === undefined) {
-                if (begin === undefined) {
-                    begin = 0;
-                }
-                end = this.length;
-            }
-            var view = this.subarray(begin, end), array, i;
-            end -= begin;
-            array = new Uint8Array(new ArrayBuffer(end));
-            for (i = 0; i < end; i += 1) {
-                array[i] = view[i];
-            }
-            return array;
-        };
-    }
+        /**@type{!Object.<!string|!Uint8Array>}*/
+        cache = {};
 
     /**
-     * @constructor
-     * @augments Runtime.ByteArray
-     * @inner
-     * @extends {Runtime.ByteArray}
-     * @param {!number} size
+     * @param {!string} string
+     * @return {!Uint8Array}
      */
-    this.ByteArray = useNativeArray
-        // if Uint8Array is available, use that
-        ? function ByteArray(size) {
-            return new Uint8Array(new ArrayBuffer(size));
-        }
-        : function ByteArray(size) {
-            var a = [];
-            a.length = size;
-            return a;
-        };
-    this.concatByteArrays = useNativeArray
-        ? function (bytearray1, bytearray2) {
-            var i, l1 = bytearray1.length, l2 = bytearray2.length,
-                a = new this.ByteArray(l1 + l2);
-            for (i = 0; i < l1; i += 1) {
-                a[i] = bytearray1[i];
-            }
-            for (i = 0; i < l2; i += 1) {
-                a[i + l1] = bytearray2[i];
-            }
-            return a;
-        }
-        : function (bytearray1, bytearray2) {
-            return bytearray1.concat(bytearray2);
-        };
     function utf8ByteArrayFromString(string) {
         var l = string.length, bytearray, i, n, j = 0;
         // first determine the length in bytes
@@ -387,7 +328,7 @@ function BrowserRuntime(logoutput) {
             j += 1 + (n > 0x80) + (n > 0x800);
         }
         // allocate a buffer and convert to a utf8 array
-        bytearray = new self.ByteArray(j);
+        bytearray = new Uint8Array(new ArrayBuffer(j));
         j = 0;
         for (i = 0; i < l; i += 1) {
             n = string.charCodeAt(i);
@@ -407,19 +348,25 @@ function BrowserRuntime(logoutput) {
         }
         return bytearray;
     }
+    /**
+     * @param {!string} string
+     * @return {!Uint8Array}
+     */
     function byteArrayFromString(string) {
         // ignore encoding for now
         var l = string.length,
-            a = new self.ByteArray(l),
+            a = new Uint8Array(new ArrayBuffer(l)),
             i;
         for (i = 0; i < l; i += 1) {
             a[i] = string.charCodeAt(i) & 0xff;
         }
         return a;
     }
-    this.byteArrayFromArray = function (array) {
-        return array.slice();
-    };
+    /**
+     * @param {!string} string
+     * @param {!string} encoding
+     * @return {!Uint8Array}
+     */
     this.byteArrayFromString = function (string, encoding) {
         var result;
         if (encoding === "utf8") {
@@ -504,126 +451,164 @@ function BrowserRuntime(logoutput) {
 			throw message; // interrupt execution and provide a backtrace
         }
     }
-
+    /**
+     * @param {!Array.<!number>} buffer
+     * @return {!Uint8Array}
+     */
+    function arrayToUint8Array(buffer) {
+        var l = buffer.length, i,
+            a = new Uint8Array(new ArrayBuffer(l));
+        for (i = 0; i < l; i += 1) {
+            a[i] = buffer[i];
+        }
+        return a;
+    }
+    /**
+     * @param {!string} path
+     * @param {!string} encoding
+     * @param {!XMLHttpRequest} xhr
+     * @return {!{err:?string,data:(?string|?Uint8Array)}}
+     */
+    function handleXHRResult(path, encoding, xhr) {
+        var /**@type{!Uint8Array|!string}*/
+            data,
+            r, d, a;
+        if (xhr.status === 0 && !xhr.responseText) {
+            // for local files there is no difference between missing
+            // and empty files, so empty files are considered as errors
+            r = {err: "File " + path + " is empty.", data: null};
+        } else if (xhr.status === 200 || xhr.status === 0) {
+            // report file
+            if (xhr.response && typeof xhr.response !== "string") {
+                // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
+                if (encoding === "binary") {
+                    d = /**@type{!ArrayBuffer}*/(xhr.response);
+                    data = new Uint8Array(d);
+                } else {
+                    data = String(xhr.response);
+                }
+            } else if (encoding === "binary") {
+                if (xhr.responseBody !== null
+                        && String(typeof VBArray) !== "undefined") {
+                    // fallback for IE <= 10
+                    a = (new VBArray(xhr.responseBody)).toArray();
+                    data = arrayToUint8Array(a);
+                } else {
+                    // fallback for some really weird browsers
+                    data = self.byteArrayFromString(xhr.responseText, "binary");
+                }
+            } else {
+                // if we just want text, it's simple
+                data = xhr.responseText;
+            }
+            cache[path] = data;
+            r = {err: null, data: data};
+        } else {
+            // report error
+            r = {err: xhr.responseText || xhr.statusText, data: null};
+        }
+        return r;
+    }
+    /**
+     * @param {!string} path
+     * @param {!string} encoding
+     * @param {!boolean} async
+     * @return {!XMLHttpRequest}
+     */
+    function createXHR(path, encoding, async) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', path, async);
+        if (xhr.overrideMimeType) {
+            if (encoding !== "binary") {
+                xhr.overrideMimeType("text/plain; charset=" + encoding);
+            } else {
+                xhr.overrideMimeType("text/plain; charset=x-user-defined");
+            }
+        }
+        return xhr;
+    }
+    /**
+     * Read the contents of a file. Returns the result via a callback. If the
+     * encoding is 'binary', the result is returned as a Uint8Array,
+     * otherwise, it is returned as a string.
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @param {!function(?string,?(string|Uint8Array)):undefined} callback
+     * @return {undefined}
+     */
     function readFile(path, encoding, callback) {
         if (cache.hasOwnProperty(path)) {
             callback(null, cache[path]);
             return;
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = createXHR(path, encoding, true);
         function handleResult() {
-            var data;
+            var r;
             if (xhr.readyState === 4) {
-                if (xhr.status === 0 && !xhr.responseText) {
-                    // for local files there is no difference between missing
-                    // and empty files, so empty files are considered as errors
-                    callback("File " + path + " is empty.");
-                } else if (xhr.status === 200 || xhr.status === 0) {
-                    // report file
-                    if (encoding === "binary") {
-                        if (xhr.responseBody !== null && String(typeof VBArray) !== "undefined") { // IE9
-                            data = new VBArray(xhr.responseBody).toArray();
-                        } else {
-                            data = self.byteArrayFromString(xhr.responseText,
-                                "binary");
-                        }
-                    } else {
-                        data = xhr.responseText;
-                    }
-                    cache[path] = data;
-                    callback(null, data);
-                } else {
-                    // report error
-                    callback(xhr.responseText || xhr.statusText);
-                }
+                r = handleXHRResult(path, encoding, xhr);
+                callback(r.err, r.data);
             }
         }
-        xhr.open('GET', path, true);
         xhr.onreadystatechange = handleResult;
-        if (xhr.overrideMimeType) {
-            if (encoding !== "binary") {
-                xhr.overrideMimeType("text/plain; charset=" + encoding);
-            } else {
-                xhr.overrideMimeType("text/plain; charset=x-user-defined");
-            }
-        }
         try {
             xhr.send(null);
-        } catch (e) {
-            callback(e.message);
+        } catch (/**@type{!Error}*/e) {
+            callback(e.message, null);
         }
     }
+    /**
+     * @param {!string} path
+     * @param {!number} offset
+     * @param {!number} length
+     * @param {!function(?string,?Uint8Array):undefined} callback
+     * @return {undefined}
+     */
     function read(path, offset, length, callback) {
-        if (cache.hasOwnProperty(path)) {
-            callback(null, cache[path].slice(offset, offset + length));
-            return;
-        }
-        var xhr = new XMLHttpRequest();
-        function handleResult() {
-            var data;
-            if (xhr.readyState === 4) {
-                if (xhr.status === 0 && !xhr.responseText) {
-                    // for local files there is no difference between missing
-                    // and empty files, so empty files are considered as errors
-                    callback("File " + path + " is empty.");
-                } else if (xhr.status === 200 || xhr.status === 0) {
-                    // report file
-                    if(xhr.response) {
-                       // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
-                       data = /**@type{!ArrayBuffer}*/(xhr.response);
-                       data = new Uint8Array(data);
-                    } else if (xhr.responseBody !== null && String(typeof VBArray) !== "undefined") {
-                       // fallback for IE < 9
-                       data = (new VBArray(xhr.responseBody)).toArray();
-                    } else {
-                       // fallback for some really weird browsers
-                       data = self.byteArrayFromString(xhr.responseText, "binary");
-                    }
-                    cache[path] = data;
-                    callback(null, data.slice(offset, offset + length));
-                } else {
-                    // report error
-                    callback(xhr.responseText || xhr.statusText);
+        readFile(path, "binary", function (err, result) {
+            var r = null;
+            if (result) {
+                if (typeof result === "string") {
+                    throw "This should not happen.";
                 }
+                r = /**@type{!Uint8Array}*/(result.subarray(offset,
+                                                            offset + length));
             }
-        }
-        xhr.open('GET', path, true);
-        xhr.onreadystatechange = handleResult;
-        if (xhr.overrideMimeType) {
-            xhr.overrideMimeType("text/plain; charset=x-user-defined");
-        }
-        xhr.responseType = "arraybuffer";
-        //xhr.setRequestHeader('Range', 'bytes=' + offset + '-' +
-        //       (offset + length - 1));
-        try {
-            xhr.send(null);
-        } catch (e) {
-            callback(e.message);
-        }
+            callback(err, r);
+        });
     }
+    /**
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @return {!string|!Uint8Array}
+     */
     function readFileSync(path, encoding) {
-        var xhr = new XMLHttpRequest(),
-            result;
-        xhr.open('GET', path, false);
-        if (xhr.overrideMimeType) {
-            if (encoding !== "binary") {
-                xhr.overrideMimeType("text/plain; charset=" + encoding);
-            } else {
-                xhr.overrideMimeType("text/plain; charset=x-user-defined");
-            }
-        }
+        var xhr = createXHR(path, encoding, false),
+            r;
         try {
             xhr.send(null);
-            if (xhr.status === 200 || xhr.status === 0) {
-                result = xhr.responseText;
+            r = handleXHRResult(path, encoding, xhr);
+            if (r.err) {
+                throw r.err;
             }
-        } catch (ignore) {
+            if (r.data === null) {
+                throw "No data read from " + path + ".";
+            }
+        } catch (/**@type{!Error}*/e) {
+            throw e;
         }
-        return result;
+        return r.data;
     }
+    /**
+     * @param {!string} path
+     * @param {!Uint8Array} data
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     function writeFile(path, data, callback) {
         cache[path] = data;
-        var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest(),
+            /**@type{!string|!ArrayBuffer}*/
+            d;
         function handleResult() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 0 && !xhr.responseText) {
@@ -643,25 +628,31 @@ function BrowserRuntime(logoutput) {
         }
         xhr.open('PUT', path, true);
         xhr.onreadystatechange = handleResult;
-        // ArrayBufferView will have an ArrayBuffer property, in WebKit, XHR can send()
-        // an ArrayBuffer, In Firefox, one must use sendAsBinary with a string
+        // ArrayBufferView will have an ArrayBuffer property, in WebKit, XHR
+        // can send() an ArrayBuffer, In Firefox, one must use sendAsBinary with
+        // a string
         if (data.buffer && !xhr.sendAsBinary) {
-            data = data.buffer; // webkit supports sending an ArrayBuffer
+            d = data.buffer; // webkit supports sending an ArrayBuffer
         } else {
             // encode into a string, this works in FireFox >= 3
-            data = self.byteArrayToString(data, "binary");
+            d = self.byteArrayToString(data, "binary");
         }
         try {
             if (xhr.sendAsBinary) {
-                xhr.sendAsBinary(data);
+                xhr.sendAsBinary(d);
             } else {
-                xhr.send(data);
+                xhr.send(d);
             }
-        } catch (e) {
+        } catch (/**@type{!Error}*/e) {
             self.log("HUH? " + e + " " + data);
             callback(e.message);
         }
     }
+    /**
+     * @param {!string} path
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     function deleteFile(path, callback) {
         delete cache[path];
         var xhr = new XMLHttpRequest();
@@ -677,18 +668,23 @@ function BrowserRuntime(logoutput) {
         };
         xhr.send(null);
     }
+    /**
+     * @param {!string} path
+     * @param {!function(?string,?Document):undefined} callback
+     * @return {undefined}
+     */
     function loadXML(path, callback) {
         var xhr = new XMLHttpRequest();
         function handleResult() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 0 && !xhr.responseText) {
-                    callback("File " + path + " is empty.");
+                    callback("File " + path + " is empty.", null);
                 } else if (xhr.status === 200 || xhr.status === 0) {
                     // report file
                     callback(null, xhr.responseXML);
                 } else {
                     // report error
-                    callback(xhr.responseText);
+                    callback(xhr.responseText, null);
                 }
             }
         }
@@ -699,15 +695,25 @@ function BrowserRuntime(logoutput) {
         xhr.onreadystatechange = handleResult;
         try {
             xhr.send(null);
-        } catch (e) {
-            callback(e.message);
+        } catch (/**@type{!Error}*/e) {
+            callback(e.message, null);
         }
     }
+    /**
+     * @param {!string} path
+     * @param {!function(boolean):undefined} callback
+     * @return {undefined}
+     */
     function isFile(path, callback) {
         self.getFileSize(path, function (size) {
             callback(size !== -1);
         });
     }
+    /**
+     * @param {!string} path
+     * @param {!function(number):undefined} callback
+     * @return {undefined}
+     */
     function getFileSize(path, callback) {
         if (cache.hasOwnProperty(path) && typeof cache[path] !== "string") {
             callback(cache[path].length);
@@ -749,14 +755,26 @@ function BrowserRuntime(logoutput) {
     this.getFileSize = getFileSize;
     this.log = log;
     this.assert = assert;
+    /**
+     * @param {!function():undefined} f
+     * @param {!number} msec
+     * @return {!number}
+     */
     this.setTimeout = function (f, msec) {
         return setTimeout(function () {
             f();
         }, msec);
     };
+    /**
+     * @param {!number} timeoutID
+     * @return {undefined}
+     */
     this.clearTimeout = function (timeoutID) {
         clearTimeout(timeoutID);
     };
+    /**
+     * @return {!Array.<!string>}
+     */
     this.libraryPaths = function () {
         return ["lib"]; // TODO: find a good solution
                                        // probably let html app specify it
@@ -771,14 +789,24 @@ function BrowserRuntime(logoutput) {
     this.getDOMImplementation = function () {
         return window.document.implementation;
     };
+    /**
+     * @param {!string} xml
+     * @return {?Document}
+     */
     this.parseXML = function (xml) {
         var parser = new DOMParser();
         return parser.parseFromString(xml, "text/xml");
     };
+    /**
+     * @param {!number} exitCode
+     */
     this.exit = function (exitCode) {
         log("Calling exit with code " + String(exitCode) +
                 ", but exit() is not implemented.");
     };
+    /**
+     * @return {!Window}
+     */
     this.getWindow = function () {
         return window;
     };
@@ -793,43 +821,39 @@ function NodeJSRuntime() {
     var self = this,
         fs = require('fs'),
         pathmod = require('path'),
+        /**@type{!string}*/
         currentDirectory = "",
+        /**@type{!DOMParser}*/
         parser,
         domImplementation;
 
     /**
-     * @constructor
-     * @extends {Runtime.ByteArray}
-     * @param {!number} size
+     * @param {!Buffer} buffer
+     * @return {!Uint8Array}
      */
-    this.ByteArray = function (size) {
-        return new Buffer(size);
-    };
-
-    this.byteArrayFromArray = function (array) {
-        var ba = new Buffer(array.length),
-            i,
-            l = array.length;
+    function bufferToUint8Array(buffer) {
+        var l = buffer.length, i,
+            a = new Uint8Array(new ArrayBuffer(l));
         for (i = 0; i < l; i += 1) {
-            ba[i] = array[i];
+            a[i] = buffer[i];
         }
-        return ba;
-    };
-
-    this.concatByteArrays = function (a, b) {
-        var ba = new Buffer(a.length + b.length);
-        a.copy(ba, 0, 0);
-        b.copy(ba, a.length, 0);
-        return ba;
-    };
-
+        return a;
+    }
+    /**
+     * @param {!string} string
+     * @param {!string} encoding
+     * @return {!Uint8Array}
+     */
     this.byteArrayFromString = function (string, encoding) {
-        return new Buffer(string, encoding);
+        var buf = new Buffer(string, encoding), i, l = buf.length,
+            a = new Uint8Array(new ArrayBuffer(l));
+        for (i = 0; i < l; i += 1) {
+            a[i] = buf[i];
+        }
+        return a;
     };
 
-    this.byteArrayToString = function (bytearray, encoding) {
-        return bytearray.toString(encoding);
-    };
+    this.byteArrayToString = Runtime.byteArrayToString;
 
     /**
     * @param {!string} name
@@ -848,66 +872,141 @@ function NodeJSRuntime() {
     */
     this.toJson = Runtime.toJson;
 
+    /**
+     * @param {!string} path
+     * @param {!function(boolean):undefined} callback
+     * @return {undefined}
+     */
     function isFile(path, callback) {
         path = pathmod.resolve(currentDirectory, path);
         fs.stat(path, function (err, stats) {
             callback(!err && stats.isFile());
         });
     }
+    /**
+     * Read the contents of a file. Returns the result via a callback. If the
+     * encoding is 'binary', the result is returned as a Uint8Array,
+     * otherwise, it is returned as a string.
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @param {!function(?string,?(string|Uint8Array)):undefined} callback
+     * @return {undefined}
+     */
     function readFile(path, encoding, callback) {
+        /**
+         * @param {?string} err
+         * @param {?Buffer|?string} data
+         * @return {undefined}
+         */
+        function convert(err, data) {
+            if (err) {
+                return callback(err, null);
+            }
+            if (!data) {
+                return callback("No data for " + path + ".", null);
+            }
+            var d;
+            if (typeof data === "string") {
+                d = /**@type{!string}*/(data);
+                return callback(err, d);
+            }
+            d = /**@type{!Buffer}*/(data);
+            callback(err, bufferToUint8Array(d));
+        }
         path = pathmod.resolve(currentDirectory, path);
         if (encoding !== "binary") {
-            fs.readFile(path, encoding, callback);
+            fs.readFile(path, encoding, convert);
         } else {
-            fs.readFile(path, null, callback);
+            fs.readFile(path, null, convert);
         }
     }
     this.readFile = readFile;
+    /**
+     * @param {!string} path
+     * @param {!function(?string,?Document):undefined} callback
+     * @return {undefined}
+     */
     function loadXML(path, callback) {
         readFile(path, "utf-8", function (err, data) {
             if (err) {
-                return callback(err);
+                return callback(err, null);
             }
-            callback(null, self.parseXML(data));
+            if (!data) {
+                return callback("No data for " + path + ".", null);
+            }
+            var d = /**@type{!string}*/(data);
+            callback(null, self.parseXML(d));
         });
     }
     this.loadXML = loadXML;
+    /**
+     * @param {!string} path
+     * @param {!Uint8Array} data
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     this.writeFile = function (path, data, callback) {
+        var buf = new Buffer(data);
         path = pathmod.resolve(currentDirectory, path);
-        fs.writeFile(path, data, "binary", function (err) {
+        fs.writeFile(path, buf, "binary", function (err) {
             callback(err || null);
         });
     };
+    /**
+     * @param {!string} path
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     this.deleteFile = function (path, callback) {
         path = pathmod.resolve(currentDirectory, path);
         fs.unlink(path, callback);
     };
+    /**
+     * @param {!string} path
+     * @param {!number} offset
+     * @param {!number} length
+     * @param {!function(?string,?Uint8Array):undefined} callback
+     * @return {undefined}
+     */
     this.read = function (path, offset, length, callback) {
         path = pathmod.resolve(currentDirectory, path);
         fs.open(path, "r+", 666, function (err, fd) {
             if (err) {
-                callback(err);
+                callback(err, null);
                 return;
             }
             var buffer = new Buffer(length);
             fs.read(fd, buffer, 0, length, offset, function (err) {
                 fs.close(fd);
-                callback(err, buffer);
+                callback(err, bufferToUint8Array(buffer));
             });
         });
     };
+    /**
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @return {!string|!Uint8Array}
+     */
     this.readFileSync = function (path, encoding) {
-        if (!encoding) {
-            // FIXME - this feels wrong
-            return "";
+        var enc = (encoding === "binary") ? null : encoding,
+            r = fs.readFileSync(path, enc), s;
+        if (r === null) {
+            throw "File " + path + " could not be read.";
         }
         if (encoding === "binary") {
-            // this will return a Buffer
-            return fs.readFileSync(path, null);
+            s = /**@type{!Buffer}*/(r);
+            s = bufferToUint8Array(s);
+        } else {
+            s = /**@type{!string}*/(r);
         }
-        return fs.readFileSync(path, encoding);
+        return s;
     };
     this.isFile = isFile;
+    /**
+     * @param {!string} path
+     * @param {!function(number):undefined} callback
+     * @return {undefined}
+     */
     this.getFileSize = function (path, callback) {
         path = pathmod.resolve(currentDirectory, path);
         fs.stat(path, function (err, stats) {
@@ -918,13 +1017,12 @@ function NodeJSRuntime() {
             }
         });
     };
-
     /**
      * @param {!string} msgOrCategory
      * @param {string=} msg
      * @return {undefined}
      */
-    function log (msgOrCategory, msg) {
+    function log(msgOrCategory, msg) {
         var category;
         if (msg !== undefined) {
             category = msgOrCategory;
@@ -940,7 +1038,6 @@ function NodeJSRuntime() {
         }
     }
     this.log = log;
-
     /**
     * @param {!boolean} condition
     * @param {!string} message
@@ -949,25 +1046,39 @@ function NodeJSRuntime() {
     */
     function assert(condition, message, callback) {
         if (!condition) {
-            process.stderr.write("ASSERTION FAILED: "+message);
+            process.stderr.write("ASSERTION FAILED: " + message);
             if (callback) {
                 callback();
             }
         }
     }
     this.assert = assert;
-
+    /**
+     * @param {!function():undefined} f
+     * @param {!number} msec
+     * @return {!number}
+     */
     this.setTimeout = function (f, msec) {
         return setTimeout(function () {
             f();
         }, msec);
     };
+    /**
+     * @param {!number} timeoutID
+     * @return {undefined}
+     */
     this.clearTimeout = function (timeoutID) {
         clearTimeout(timeoutID);
     };
+    /**
+     * @return {!Array.<!string>}
+     */
     this.libraryPaths = function () {
         return [__dirname];
     };
+    /**
+     * @param {!string} dir
+     */
     this.setCurrentDirectory = function (dir) {
         currentDirectory = dir;
     };
@@ -980,6 +1091,10 @@ function NodeJSRuntime() {
     this.getDOMImplementation = function () {
         return domImplementation;
     };
+    /**
+     * @param {!string} xml
+     * @return {?Document}
+     */
     this.parseXML = function (xml) {
         return parser.parseFromString(xml, "text/xml");
     };
@@ -988,7 +1103,8 @@ function NodeJSRuntime() {
         return null;
     };
     function init() {
-        var DOMParser = require('xmldom').DOMParser;
+        var /**@type{function(new:DOMParser)}*/
+            DOMParser = require('xmldom').DOMParser;
         parser = new DOMParser();
         domImplementation = self.parseXML("<a/>").implementation;
     }
@@ -1012,12 +1128,22 @@ function RhinoRuntime() {
     dom.setSchema(null);
 /*jslint unparam: true */
     entityresolver = Packages.org.xml.sax.EntityResolver({
+        /**
+         * @param {!string} publicId
+         * @param {!string} systemId
+         * @return {!Packages.org.xml.sax.InputSource}
+         */
         resolveEntity: function (publicId, systemId) {
-            var file, open = function (path) {
+            var file;
+            /**
+             * @param {!string} path
+             * @return {!Packages.org.xml.sax.InputSource}
+             */
+            function open(path) {
                 var reader = new Packages.java.io.FileReader(path),
                     source = new Packages.org.xml.sax.InputSource(reader);
                 return source;
-            };
+            }
             file = systemId;
             //file = /[^\/]*$/.exec(systemId); // what should this do?
             return open(file);
@@ -1028,16 +1154,6 @@ function RhinoRuntime() {
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
 
-    /**
-     * @constructor
-     * @param {!number} size
-     */
-    this.ByteArray = function ByteArray(size) {
-        return [size];
-    };
-    this.byteArrayFromArray = function (array) {
-        return array;
-    };
 /*jslint unparam: true*/
     this.byteArrayFromString = function (string, encoding) {
         // ignore encoding for now
@@ -1066,10 +1182,6 @@ function RhinoRuntime() {
     * @return {!string}
     */
     this.toJson = Runtime.toJson;
-
-    this.concatByteArrays = function (bytearray1, bytearray2) {
-        return bytearray1.concat(bytearray2);
-    };
 
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),
@@ -1164,11 +1276,20 @@ function RhinoRuntime() {
             callback("Cannot read " + path);
         }
     };
+    /**
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @return {!string}
+     */
     this.readFileSync = function (path, encoding) {
         if (!encoding) {
             return "";
         }
-        return readFile(path, encoding);
+        var s = readFile(path, encoding);
+        if (s === null) {
+            throw "File could not be read.";
+        }
+        return s;
     };
     this.isFile = isFile;
     this.getFileSize = function (path, callback) {
@@ -1216,17 +1337,30 @@ function RhinoRuntime() {
         }
     }
     this.assert = assert;
+    /**
+     * @param {!function():undefined} f
+     * @return {!number}
+     */
     this.setTimeout = function (f) {
         f();
         return 0;
     };
 /*jslint emptyblock: true */
+    /**
+     * @return {undefined}
+     */
     this.clearTimeout = function() {
     };
 /*jslint emptyblock: false */
+    /**
+     * @return {!Array.<!string>}
+     */
     this.libraryPaths = function () {
         return ["lib"];
     };
+    /**
+     * @param {!string} dir
+     */
     this.setCurrentDirectory = function (dir) {
         currentDirectory = dir;
     };
@@ -1307,7 +1441,8 @@ var runtime = (function () {
                 dirs = runtime.libraryPaths(),
                 i,
                 dir,
-                code;
+                code,
+                codestr;
             if (runtime.currentDirectory) {
                 dirs.push(runtime.currentDirectory());
             }
@@ -1318,10 +1453,8 @@ var runtime = (function () {
                         code = runtime.readFileSync(dirs[i] + "/manifest.js",
                                 "utf8");
                         if (code && code.length) {
-
-                                dircontents[dir] = eval(code);
-
-
+                            codestr = /**@type{!string}*/(code);
+                            dircontents[dir] = eval(codestr);
                         } else {
                             dircontents[dir] = null;
                         }
@@ -1443,8 +1576,11 @@ var runtime = (function () {
                 }
                 return;
             }
-            if (err || codestring === null) {
+            if (err) {
                 runtime.log(err);
+                runtime.exit(1);
+            } else if (codestring === null) {
+                runtime.log("No code found for " + script);
                 runtime.exit(1);
             } else {
                 // run the script with arguments bound to arguments parameter

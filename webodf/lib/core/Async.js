@@ -47,7 +47,13 @@ core.Async = function Async() {
      * @return {undefined}
      */
     this.forEach = function (items, f, callback) {
-        var i, l = items.length, itemsDone = 0;
+        var i, l = items.length,
+            /**@type{!number}*/
+            itemsDone = 0;
+        /**
+         * @param {?string} err
+         * @return {undefined}
+         */
         function end(err) {
             if (itemsDone !== l) {
                 if (err) {
@@ -69,14 +75,20 @@ core.Async = function Async() {
     /**
      * @param {!Array.<!function(!function(!Object=))>} items
      * @param {!function(!Object=)} callback
+     * @return {undefined}
      */
-    this.destroyAll = function(items, callback) {
+    this.destroyAll = function (items, callback) {
+        /**
+         * @param {!number} itemIndex
+         * @param {!Object|undefined} err
+         * @return {undefined}
+         */
         function destroy(itemIndex, err) {
             if (err) {
                 callback(err);
             } else {
                 if (itemIndex < items.length) {
-                    items[itemIndex](function(err) { destroy(itemIndex+1, err); });
+                    items[itemIndex](function (err) { destroy(itemIndex + 1, err); });
                 } else {
                     callback();
                 }

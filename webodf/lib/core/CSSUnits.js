@@ -43,23 +43,24 @@ core.CSSUnits = function CSSUnits() {
     "use strict";
 
     // Unit values relative to 1 inch
-    var sizemap = {
-        "in": 1,
-        "cm": 2.54,
-        "mm": 25.4,
-        "pt": 72,
-        "pc": 12
-    };
+    var self = this,
+        sizemap = {
+            "in": 1,
+            "cm": 2.54,
+            "mm": 25.4,
+            "pt": 72,
+            "pc": 12
+        };
 
     /**
-     * Takes a number of an oldUnit and returns it's value in newUnit
-     * @param {number} value
+     * Takes a number of an oldUnit and returns its value in newUnit
+     * @param {!number} value
      * @param {!string} oldUnit
      * @param {!string} newUnit
-     * @return {number}
+     * @return {!number}
      */
     this.convert = function (value, oldUnit, newUnit) {
-        return (value * sizemap[newUnit] / sizemap[oldUnit]);
+        return value * sizemap[newUnit] / sizemap[oldUnit];
     };
 
     /**
@@ -74,16 +75,17 @@ core.CSSUnits = function CSSUnits() {
             value = parseFloat(measure);
             oldUnit = measure.replace(value.toString(), "");
 
-            newMeasure = this.convert(value, oldUnit, newUnit);
+            newMeasure = self.convert(value, oldUnit, newUnit).toString();
         } else {
             newMeasure = '';
         }
-
-        return newMeasure.toString();
+        return newMeasure;
     };
-
+    /**
+     * @param {!string} measure
+     * @return {!string}
+     */
     this.getUnits = function (measure) {
         return measure.substr(measure.length - 2, measure.length);
     };
-
 };

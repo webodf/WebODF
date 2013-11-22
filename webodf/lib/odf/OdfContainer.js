@@ -879,7 +879,7 @@ odf.OdfContainer = (function () {
         };
         /**
          * @param {!string} url
-         * @param {!function(?string, ?Runtime.ByteArray)} callback receiving err and data
+         * @param {!function(?string, ?Uint8Array)} callback receiving err and data
          * @return {undefined}
          */
         this.getPartData = function (url, callback) {
@@ -950,7 +950,7 @@ odf.OdfContainer = (function () {
         }
         /**
          * Create a bytearray from the zipfile.
-         * @param {!function(!Runtime.ByteArray):undefined} successCallback receiving zip as bytearray
+         * @param {!function(!Uint8Array):undefined} successCallback receiving zip as bytearray
          * @param {!function(?string):undefined} errorCallback receiving possible err
          * @return {undefined}
          */

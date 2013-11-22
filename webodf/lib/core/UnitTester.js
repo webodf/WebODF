@@ -386,13 +386,13 @@ core.UnitTester = function UnitTester() {
      * If parameter testNames is supplied only the tests with the names
      * supplied in that array will be executed.
      *
-     * @param {Function} TestClass the constructor for the test class
+     * @param {!Function} TestClass the constructor for the test class
      * @param {!function():undefined} callback
      * @param {!Array.<!string>} testNames
      * @return {undefined}
      */
     this.runTests = function (TestClass, callback, testNames) {
-        var testName = Runtime.getFunctionName(TestClass),
+        var testName = Runtime.getFunctionName(TestClass) || "",
             tname,
             runner = new core.UnitTestRunner(),
             test = new TestClass(runner),

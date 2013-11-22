@@ -71,7 +71,8 @@ core.Cursor = function Cursor(document, memberId) {
         anchorNode = document.createElementNS(cursorns, 'anchor'),
         forwardSelection,
         recentlyModifiedNodes = [],
-        selectedRange,
+        /**@type{?Range}*/
+        selectedRange = null,
         isCollapsed,
         domUtils = new core.DomUtils();
 
@@ -120,7 +121,7 @@ core.Cursor = function Cursor(document, memberId) {
         if (container.nodeType === Node.TEXT_NODE) {
             putIntoTextNode(node, /**@type{!Text}*/(container), offset);
         } else if (container.nodeType === Node.ELEMENT_NODE) {
-            container.insertBefore(node, container.childNodes[offset] || null);
+            container.insertBefore(node, container.childNodes.item(offset));
         }
         recentlyModifiedNodes.push(node.previousSibling);
         recentlyModifiedNodes.push(node.nextSibling);
@@ -155,7 +156,7 @@ core.Cursor = function Cursor(document, memberId) {
      * dragging),, this will return the exact same node as getNode
      * @returns {!Element}
      */
-    this.getAnchorNode = function() {
+    this.getAnchorNode = function () {
         return anchorNode.parentNode ? anchorNode : cursorNode;
     };
     /**

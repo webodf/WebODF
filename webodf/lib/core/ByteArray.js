@@ -37,7 +37,7 @@
 /*jslint plusplus: true, bitwise: true */
 /**
  * @constructor
- * @param {!Runtime.ByteArray} data
+ * @param {!Uint8Array} data
  */
 core.ByteArray = function ByteArray(data) {
     "use strict";
@@ -46,7 +46,7 @@ core.ByteArray = function ByteArray(data) {
      */
     this.pos = 0;
     /**
-     * @type {!Runtime.ByteArray}
+     * @type {!Uint8Array}
      */
     this.data = data;
     /**

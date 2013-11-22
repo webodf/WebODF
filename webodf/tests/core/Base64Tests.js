@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global core, runtime*/
+/*global core, runtime, Uint8Array, ArrayBuffer*/
 runtime.loadClass("core.Base64");
 /**
  * @constructor
@@ -45,11 +45,13 @@ core.Base64Tests = function Base64Tests(runner) {
     var t, r = runner, base64 = new core.Base64();
 
     function testConvertByteArrayToBase64() {
-        t.encoded = base64.convertByteArrayToBase64([65]);
+        var a = new Uint8Array(new ArrayBuffer(3));
+        a[0] = a[1] = a[2] = 65;
+        t.encoded = base64.convertByteArrayToBase64(a.subarray(0, 1));
         r.shouldBe(t, "t.encoded", "'QQ=='");
-        t.encoded = base64.convertByteArrayToBase64([65, 65]);
+        t.encoded = base64.convertByteArrayToBase64(a.subarray(0, 2));
         r.shouldBe(t, "t.encoded", "'QUE='");
-        t.encoded = base64.convertByteArrayToBase64([65, 65, 65]);
+        t.encoded = base64.convertByteArrayToBase64(a);
         r.shouldBe(t, "t.encoded", "'QUFB'");
     }
 
