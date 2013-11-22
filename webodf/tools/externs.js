@@ -209,7 +209,7 @@ var process;
 var __dirname;
 /**
  * @constructor
- * @param {!number|!Array.<!number>|!string} arg1
+ * @param {!number|!Array.<!number>|!string|!Uint8Array} arg1
  * @param {!string=} encoding
  */
 function Buffer(arg1, encoding) {"use strict"; }

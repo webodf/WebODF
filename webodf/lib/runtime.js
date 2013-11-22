@@ -944,11 +944,7 @@ function NodeJSRuntime() {
      * @return {undefined}
      */
     this.writeFile = function (path, data, callback) {
-        var l = data.length, i,
-            buf = new Buffer(data.length);
-        for (i = 0; i < l; i += 1) {
-            buf[i] = data[i];
-        }
+        var buf = new Buffer(data);
         path = pathmod.resolve(currentDirectory, path);
         fs.writeFile(path, buf, "binary", function (err) {
             callback(err || null);
