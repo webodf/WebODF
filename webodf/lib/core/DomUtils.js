@@ -419,17 +419,17 @@
 
         /**
          * Whether a node contains another node
+         * Wrapper around Node.contains
+         * http://www.w3.org/TR/domcore/#dom-node-contains
          * @param {!Node} parent The node that should contain the other node
          * @param {?Node} descendant The node to test presence of
          * @return {!boolean}
          */
         function containsNode(parent, descendant) {
-            var p = /**@type{!Element}*/(parent),
-                d = /**@type{?Element}*/(descendant);
             return parent === descendant
-                   || (parent.nodeType === Node.ELEMENT_NODE
-                       && descendant.nodeType === Node.ELEMENT_NODE
-                       && p.contains(d));
+                // the casts to Element are a workaround due to a different
+                // contains() definition in the Closure Compiler externs file.
+                || /**@type{!Element}*/(parent).contains(/**@type{!Element}*/(descendant));
         }
         this.containsNode = containsNode;
 
