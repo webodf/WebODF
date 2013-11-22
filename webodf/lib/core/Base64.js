@@ -77,7 +77,9 @@ function makeBase64() {
      * @return {!Uint8Array}
      */
     function stringToArray(s) {
-        var i, l = s.length, a = new Uint8Array(new ArrayBuffer(l));
+        var i,
+            l = s.length,
+            a = new Uint8Array(new ArrayBuffer(l));
         for (i = 0; i < l; i += 1) {
             a[i] = s.charCodeAt(i) & 0xff;
         }
@@ -146,8 +148,8 @@ function makeBase64() {
      * @return {!Uint8Array}
      */
     function convertUTF16ArrayToUTF8Array(uni) {
-        var i, l = uni.length,
-            n,
+        var i, n,
+            l = uni.length,
             o = 0,
             bin = new Uint8Array(new ArrayBuffer(3 * l));
         for (i = 0; i < l; i += 1) {
@@ -170,8 +172,10 @@ function makeBase64() {
      * @return {!Uint8Array}
      */
     function convertUTF8ArrayToUTF16Array(bin) {
-        var i, l = bin.length, uni = new Uint8Array(new ArrayBuffer(l)),
-            c0, c1, c2, o = 0;
+        var i, c0, c1, c2,
+            l = bin.length,
+            uni = new Uint8Array(new ArrayBuffer(l)),
+            o = 0;
         for (i = 0; i < l; i += 1) {
             c0 = /**@type{!number}*/(bin[i]);
             if (c0 < 0x80) {
@@ -236,7 +240,8 @@ function makeBase64() {
      * @return {!string}
      */
     function convertUTF8StringToUTF16String_internal(bin, i, end) {
-        var str = "", c0, c1, c2, j;
+        var c0, c1, c2, j,
+            str = "";
         for (j = i; j < end; j += 1) {
             c0 = bin.charCodeAt(j) & 0xff;
             if (c0 < 0x80) {
