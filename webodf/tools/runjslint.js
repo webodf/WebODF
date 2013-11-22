@@ -40,18 +40,20 @@ function checkWithJSLINT(file) {
     "use strict";
     var i, jslint = new core.JSLint().JSLINT,
         jslintconfig = {
+            ass:        false, // if assignment expressions should be allowed
             bitwise:    false, // if bitwise operators should be allowed
             browser:    false, // if the standard browser globals should be predefined
             closure:    true,  // if Google Closure idioms should be tolerated
             'continue': false, // if the continuation statement should be tolerated
             debug:      false, // if debugger statements should be allowed
+            defined:    false, // if already defined variables are allowed
             devel:      false, // if logging should be allowed (console, alert, etc.)
+            emptyblock: false, // if empty blocks should be allowed
             eqeq:       false, // if == should be allowed
-            es5:        false, // if ES5 syntax should be allowed
             evil:       false, // if eval should be allowed
             forin:      false, // if for in statements need not filter
             indent:     4, //the indentation factor
-            maxerr:     10, //the maximum number of errors to allow
+            maxerr:     20, //the maximum number of errors to allow
             //maxlen:   300  the maximum length of a source line
             newcap:     false, // if constructor names capitalization is ignored
             node:       false, // if Node.js globals should be predefined
@@ -61,15 +63,14 @@ function checkWithJSLINT(file) {
             properties: false, // if all property names must be declared with /*properties*/
             regexp:     false, // if the . should be allowed in regexp literals
             rhino:      false, // if the Rhino environment globals should be predefined
-            undef:      false, // if variables can be declared out of order
             unparam:    false, // if unused parameters should be tolerated
             sloppy:     false, // if the 'use strict'; pragma is optional
-            stupid:     true, // if really stupid practices are tolerated
+            stupid:     true,  // if really stupid practices are tolerated
             sub:        false, // if all forms of subscript notation are tolerated
-            todo:       true, // if TODO comments are tolerated
+            todo:       true,  // if TODO comments are tolerated
+            unvar:      false, // if unused variables should be tolerated
             vars:       false, // if multiple var statements per function should be allowed
-            white:      true, // if sloppy whitespace is tolerated
-            windows:    false // if MS Windows-specific globals should be predefined
+            white:      true   // if sloppy whitespace is tolerated
         },
         data, result, err;
 
