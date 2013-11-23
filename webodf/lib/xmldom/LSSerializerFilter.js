@@ -34,11 +34,14 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global xmldom*/
-/*jslint emptyblock: true*/
+/*jslint emptyblock: true, unparam: true*/
 /**
  * Partial implementation of LSSerializerFilter
  * @interface
  */
-xmldom.LSSerializerFilter = function LSSerializerFilter() {
-    "use strict";
-};
+xmldom.LSSerializerFilter = function LSSerializerFilter() {"use strict"; };
+/**
+ * @param {!Node} node
+ * @return {!number}
+ */
+xmldom.LSSerializerFilter.prototype.acceptNode = function (node) { "use strict"; };

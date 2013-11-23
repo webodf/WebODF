@@ -118,8 +118,9 @@ odf.OdfContainer = (function () {
          */
         this.acceptNode = function (node) {
             var result = odfNodeFilter.acceptNode(node);
-            if (result === NodeFilter.FILTER_ACCEPT &&
-                node.parentNode === automaticStyles && node.nodeType === Node.ELEMENT_NODE) {
+            if (result === NodeFilter.FILTER_ACCEPT
+                    && node.parentNode === automaticStyles
+                    && node.nodeType === Node.ELEMENT_NODE) {
                 // skip all automatic styles which are not used
                 if (usedStyleList.uses(/**@type{!Element}*/(node))) {
                     result = NodeFilter.FILTER_ACCEPT;
