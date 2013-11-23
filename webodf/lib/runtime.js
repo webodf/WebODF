@@ -158,6 +158,15 @@ Runtime.prototype.clearTimeout = function (timeoutID) {"use strict"; };
  */
 Runtime.prototype.libraryPaths = function () {"use strict"; };
 /**
+ * @return {!string}
+ */
+Runtime.prototype.currentDirectory = function () {"use strict"; };
+/**
+ * @param {!string} dir
+ * @return {undefined}
+ */
+Runtime.prototype.setCurrentDirectory = function (dir) {"use strict"; };
+/**
  * @return {string}
  */
 Runtime.prototype.type = function () {"use strict"; };
@@ -170,6 +179,10 @@ Runtime.prototype.getDOMImplementation = function () {"use strict"; };
  * @return {?Document}
  */
 Runtime.prototype.parseXML = function (xml) {"use strict"; };
+/**
+ * @param {!number} exitCode
+ */
+Runtime.prototype.exit = function (exitCode) {"use strict"; };
 /**
  * @return {?Window}
  */
@@ -779,10 +792,16 @@ function BrowserRuntime(logoutput) {
         return ["lib"]; // TODO: find a good solution
                                        // probably let html app specify it
     };
-/*jslint emptyblock: true */
+    /*jslint emptyblock: true*/
     this.setCurrentDirectory = function () {
     };
-/*jslint emptyblock: false */
+    /*jslint emptyblock: false*/
+    /**
+     * @return {!string}
+     */
+    this.currentDirectory = function () {
+        return "";
+    };
     this.type = function () {
         return "BrowserRuntime";
     };
@@ -1078,6 +1097,7 @@ function NodeJSRuntime() {
     };
     /**
      * @param {!string} dir
+     * @return {undefined}
      */
     this.setCurrentDirectory = function (dir) {
         currentDirectory = dir;
@@ -1118,9 +1138,12 @@ function NodeJSRuntime() {
 function RhinoRuntime() {
     "use strict";
     var self = this,
+        Packages = {},
         dom = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
+        /**@type{!Packages.javax.xml.parsers.DocumentBuilder}*/
         builder,
         entityresolver,
+        /**@type{!string}*/
         currentDirectory = "";
     dom.setValidating(false);
     dom.setNamespaceAware(true);
@@ -1155,9 +1178,16 @@ function RhinoRuntime() {
     builder.setEntityResolver(entityresolver);
 
 /*jslint unparam: true*/
+    /**
+     * @param {!string} string
+     * @param {!string} encoding
+     * @return {!Uint8Array}
+     */
     this.byteArrayFromString = function (string, encoding) {
         // ignore encoding for now
-        var a = [], i, l = string.length;
+        var i,
+            l = string.length,
+            a = new Uint8Array(new ArrayBuffer(l));
         for (i = 0; i < l; i += 1) {
             a[i] = string.charCodeAt(i) & 0xff;
         }
@@ -1183,18 +1213,28 @@ function RhinoRuntime() {
     */
     this.toJson = Runtime.toJson;
 
+    /**
+     * @param {!string} path
+     * @param {!function(?string,?Document):undefined} callback
+     * @return {undefined}
+     */
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),
-            xmlDocument;
+            xmlDocument = null;
         try {
             xmlDocument = builder.parse(file);
-        } catch (err) {
+        } catch (/**@type{!string}*/err) {
             print(err);
-            callback(err);
-            return;
+            return callback(err, null);
         }
         callback(null, xmlDocument);
     }
+    /**
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @param {!function(?string,?(string|Uint8Array)):undefined} callback
+     * @return {undefined}
+     */
     function runtimeReadFile(path, encoding, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1204,10 +1244,10 @@ function RhinoRuntime() {
             // read binary, seems hacky but works
             rhinoencoding = (encoding === "binary") ? "latin1" : encoding;
         if (!file.isFile()) {
-            callback(path + " is not a file.");
+            callback(path + " is not a file.", null);
         } else {
             data = readFile(path, rhinoencoding);
-            if (encoding === "binary") {
+            if (data && encoding === "binary") {
                 data = self.byteArrayFromString(data, "binary");
             }
             callback(null, data);
@@ -1228,6 +1268,11 @@ function RhinoRuntime() {
         }
         return readFile(path, encoding);
     }
+    /**
+     * @param {!string} path
+     * @param {!function(boolean):undefined} callback
+     * @return {undefined}
+     */
     function isFile(path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1237,6 +1282,12 @@ function RhinoRuntime() {
     }
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
+    /**
+     * @param {!string} path
+     * @param {!Uint8Array} data
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     this.writeFile = function (path, data, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1250,6 +1301,11 @@ function RhinoRuntime() {
         out.close();
         callback(null);
     };
+    /**
+     * @param {!string} path
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     this.deleteFile = function (path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1261,6 +1317,13 @@ function RhinoRuntime() {
             callback("Could not delete " + path);
         }
     };
+    /**
+     * @param {!string} path
+     * @param {!number} offset
+     * @param {!number} length
+     * @param {!function(?string,?Uint8Array):undefined} callback
+     * @return {undefined}
+     */
     this.read = function (path, offset, length, callback) {
         // TODO: adapt to read only a part instead of the whole file
         if (currentDirectory) {
@@ -1273,7 +1336,7 @@ function RhinoRuntime() {
                 "binary"
             ));
         } else {
-            callback("Cannot read " + path);
+            callback("Cannot read " + path, null);
         }
     };
     /**
@@ -1292,6 +1355,11 @@ function RhinoRuntime() {
         return s;
     };
     this.isFile = isFile;
+    /**
+     * @param {!string} path
+     * @param {!function(number):undefined} callback
+     * @return {undefined}
+     */
     this.getFileSize = function (path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1299,7 +1367,6 @@ function RhinoRuntime() {
         var file = new Packages.java.io.File(path);
         callback(file.length());
     };
-
     /**
      * @param {!string} msgOrCategory
      * @param {string=} msg
@@ -1373,8 +1440,14 @@ function RhinoRuntime() {
     this.getDOMImplementation = function () {
         return builder.getDOMImplementation();
     };
+    /**
+     * @param {!string} xml
+     * @return {?Document}
+     */
     this.parseXML = function (xml) {
-        return builder.parse(xml);
+        var reader = new Packages.java.io.StringReader(xml),
+            source = new Packages.org.xml.sax.InputSource(reader);
+        return builder.parse(source);
     };
     this.exit = quit;
     this.getWindow = function () {
@@ -1402,9 +1475,13 @@ var runtime = (function () {
 (function () {
     var cache = {},
         dircontents = {};
+    /**
+     * @param {!Array.<!string>} packageNameComponents
+     * @return {!Object}
+     */
     function getOrDefinePackage(packageNameComponents) {
         var topname = packageNameComponents[0],
-            i,
+            i = 'Runtime',
             pkg;
         // ensure top level package exists
         pkg = eval("if (typeof " + topname + " === 'undefined') {" +
@@ -1436,14 +1513,19 @@ var runtime = (function () {
             cache[classpath] = true;
             return;
         }
+        /**
+         * @param {!string} classpath
+         * @return {?string}
+         */
         function getPathFromManifests(classpath) {
             var path = classpath.replace(/\./g, "/") + ".js",
                 dirs = runtime.libraryPaths(),
                 i,
+                /**@type{!string}*/
                 dir,
                 code,
                 codestr;
-            if (runtime.currentDirectory) {
+            if (runtime.currentDirectory()) {
                 dirs.push(runtime.currentDirectory());
             }
             for (i = 0; i < dirs.length; i += 1) {
@@ -1472,6 +1554,9 @@ var runtime = (function () {
             }
             return null;
         }
+        /**
+         * @param {!string} classpath
+         */
         function load(classpath) {
             var code, path;
             path = getPathFromManifests(classpath);
@@ -1480,7 +1565,7 @@ var runtime = (function () {
             }
             try {
                 code = runtime.readFileSync(path, "utf8");
-            } catch (e2) {
+            } catch (/**@type{!string}*/e2) {
                 runtime.log("Error loading " + classpath + " " + e2);
                 throw e2;
             }
@@ -1493,7 +1578,7 @@ var runtime = (function () {
             // evaluate loaded code
             try {
                 code = eval(classpath + " = eval(code);");
-            } catch (e4) {
+            } catch (/**@type{!string}*/e4) {
                 runtime.log("Error loading " + classpath + " " + e4);
                 throw e4;
             }
@@ -1511,8 +1596,13 @@ var runtime = (function () {
 }());
 
 (function () {
-    /*jslint emptyblock: true*/
-    var translator = function () {};
+    /**
+     * @param {!string} string
+     * @return {!string}
+     */
+    var translator = function (string) {
+        return string;
+    };
     /*jslint emptyblock: false*/
 
     /**
@@ -1555,6 +1645,9 @@ var runtime = (function () {
     }
 
 /*jslint unvar: true, defined: true*/
+    /**
+     * @param {!Array.<!string>} argv
+     */
     function run(argv) {
         if (!argv.length) {
             return;
@@ -1570,7 +1663,7 @@ var runtime = (function () {
             function inner_run() {
                 var script, path, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
-                result = eval(codestring);
+                result = /**@type{!number}*/(eval(codestring));
                 if (result) {
                     runtime.exit(result);
                 }
