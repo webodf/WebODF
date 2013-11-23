@@ -402,17 +402,16 @@ core.UnitTestRunner = function UnitTestRunner() {
      * @template T
      */
     this.name = function (functions) {
-        var i, f, fname,
+        var i, fname,
             nf = [],
             l = functions.length;
         nf.length = l;
         for (i = 0; i < l; i += 1) {
-            f = functions[i];
-            fname = Runtime.getFunctionName(f) || "";
+            fname = Runtime.getFunctionName(functions[i]) || "";
             if (fname === "") {
                 throw "Found a function without a name.";
             }
-            nf[i] = {f: f, name: fname};
+            nf[i] = {f: functions[i], name: fname};
         }
         return nf;
     };
