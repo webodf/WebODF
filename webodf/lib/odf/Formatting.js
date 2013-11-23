@@ -236,15 +236,15 @@ odf.Formatting = function Formatting() {
                             && nodeStyleName === styleName) {
                         return node;
                     }
-                    if(family === "list-style"
-                        && node.namespaceURI === textns
-                        && node.localName === "list-style"
-                        && nodeStyleName === styleName) {
+                    if (family === "list-style"
+                            && node.namespaceURI === textns
+                            && node.localName === "list-style"
+                            && nodeStyleName === styleName) {
                         return node;
                     }
-                    if(family === "data"
-                        && node.namespaceURI === numberns
-                        && nodeStyleName === styleName) {
+                    if (family === "data"
+                            && node.namespaceURI === numberns
+                            && nodeStyleName === styleName) {
                         return node;
                     }
                 }

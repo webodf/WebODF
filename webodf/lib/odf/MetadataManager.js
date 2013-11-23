@@ -77,7 +77,7 @@ odf.MetadataManager = function MetadataManager(metaElement) {
     };
 
     function init() {
-        metadata = domUtils.getKeyValRepresentationOfNode(metaElement, odf.Namespaces.lookupPrefix);
+        metadata = domUtils.getKeyValRepresentationOfNode(metaElement, odf.Namespaces.resolvePrefix);
     }
     init();
 };

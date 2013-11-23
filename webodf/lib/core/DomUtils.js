@@ -564,7 +564,7 @@
          * nsResolver, that key will be ignored and not written to the node.
          * @param {!Element} node
          * @param {!Object.<!string, !string>} properties
-         * @param {!function(!string):!string} nsResolver
+         * @param {!function(!string):?string} nsResolver
          */
         function mapKeyValObjOntoNode(node, properties, nsResolver) {
             Object.keys(properties).forEach(function (key) {
@@ -604,7 +604,7 @@
         * If a key element does not exist, it will be ignored.
         * @param {!Element} node
         * @param {!Array.<!string>} propertyNames 
-        * @param {!function(!string):!string} nsResolver
+        * @param {!function(!string):?string} nsResolver
         */
        function removeKeyElementsFromNode(node, propertyNames, nsResolver) {
            propertyNames.forEach(function (propertyName) {
@@ -639,7 +639,7 @@
          * name will be taken into account for generating this
          * map.
          * @param {!Element} node
-         * @param {!function(!string):!string} prefixResolver 
+         * @param {!function(!string):?string} prefixResolver 
          * @return {Object.<!string, !string>}
          */
         function getKeyValRepresentationOfNode(node, prefixResolver) {
@@ -664,7 +664,7 @@
          * recursion and deep mapping.
          * @param {!Element} node
          * @param {!Object} properties
-         * @param {!function(!string):!string} nsResolver
+         * @param {!function(!string):?string} nsResolver
          */
         function mapObjOntoNode(node, properties, nsResolver) {
             Object.keys(properties).forEach(function(key) {
@@ -676,8 +676,13 @@
                     element;
 
                 if (typeof value === "object" && Object.keys(value).length) {
-                    element = node.getElementsByTagNameNS(ns, localName)[0]
-                        || node.ownerDocument.createElementNS(ns, key);
+                    if (ns) {
+                        element = node.getElementsByTagNameNS(ns, localName)[0]
+                            || node.ownerDocument.createElementNS(ns, key);
+                    } else {
+                        element = node.getElementsByTagName(localName)[0]
+                            || node.ownerDocument.createElement(key);
+                    }
                     node.appendChild(element);
                     mapObjOntoNode(element, value, nsResolver);
                 } else if (ns) {

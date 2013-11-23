@@ -402,6 +402,12 @@ function VBArray(s) {"use strict"; }
  */
 VBArray.prototype.toArray = function () {"use strict"; };
 /**
+ * @constructor
+ * @extends Element
+ */
+function IEElement() {"use strict"; };
+IEElement.prototype.setActive = function () {"use strict"; };
+/**
  * @interface
  */
 function TreeWalker() {"use strict"; }

@@ -337,9 +337,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/ImageManager.js
     lib/gui/ImageSelector.js
     lib/gui/TextManipulator.js
-    lib/gui/AnnotationController.js
     lib/gui/EventManager.js
-    lib/gui/SessionController.js
     lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
     lib/gui/EditInfoHandle.js
@@ -354,6 +352,8 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/ops/OdtDocument.js
     lib/ops/Session.js
+    lib/gui/AnnotationController.js
+    lib/gui/SessionController.js
 )
 
 set(HTML5UIFILES
