@@ -183,7 +183,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         t.odtDocument = new ops.OdtDocument(t.odfcanvas);
     };
     this.tearDown = function () {
-        t.odfcanvas.destroy(function() { return; });
+        t.odfcanvas.destroy(function () { return; });
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
@@ -470,7 +470,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
         backAndForth(odfxml4, 8, 8, dummyfilter);
     }
     this.tests = function () {
-        return [
+        return r.name([
             create,
             moveInEmptyDoc,
             moveInSimpleDoc,
@@ -485,7 +485,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
             backAndForth7,
             backAndForth8,
             backAndForth9
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

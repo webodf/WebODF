@@ -54,7 +54,7 @@ ops.SessionTests = function SessionTests(runner) {
         t.odf = odfcanvas.odfContainer();
     };
     this.tearDown = function () {
-        odfcanvas.destroy(function() { return; });
+        odfcanvas.destroy(function () { return; });
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
@@ -64,9 +64,9 @@ ops.SessionTests = function SessionTests(runner) {
         r.shouldBe(t, "t.session.getOdtDocument().getCursors().length", "0");
     }
     this.tests = function () {
-        return [
+        return r.name([
             newSession
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

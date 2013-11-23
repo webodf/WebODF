@@ -97,11 +97,10 @@ xmldom.XPathTests = function XPathTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [ test1 ];
+        return r.name([test1]);
     };
     this.asyncTests = function () {
-        return [
-        ];
+        return [];
     };
 };
 xmldom.XPathTests.prototype.description = function () {

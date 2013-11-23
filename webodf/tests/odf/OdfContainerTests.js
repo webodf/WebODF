@@ -273,19 +273,19 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     }
 */
     this.tests = function () {
-        return [
+        return r.name([
             createNew
-        ];
+        ]);
     };
     this.asyncTests = function () {
-        return [
+        return r.name([
             createNewSaveAsAndLoad,
             testDefaultStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testAutomaticStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testMultiStylesFontFaceDeclsSaveAsAndLoadRoundTrip
             //loadAndSave
-        ];
+        ]);
     };
 };
 odf.OdfContainerTests.prototype.description = function () {

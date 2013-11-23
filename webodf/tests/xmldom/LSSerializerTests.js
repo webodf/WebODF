@@ -75,10 +75,10 @@ xmldom.LSSerializerTests = function LSSerializerTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [
+        return r.name([
             testEscapeCharactersInNodeValue,
             testEscapeCharactersInAttributeValue
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

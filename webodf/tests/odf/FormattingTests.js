@@ -45,10 +45,10 @@ odf.FormattingTests = function FormattingTests(runner) {
     var t,
         r = runner,
         namespace = {
-            "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-            "style":"urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-            "fo":"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+            "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+            "style": "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+            "fo": "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
         };
 
     this.setUp = function () {
@@ -234,7 +234,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.contentSize", "({'width':25.7,'height':17.001})");
     }
     this.tests = function () {
-        return [
+        return r.name([
             getStyleElement_ParagraphStyle,
             getStyleElement_TextStyle,
             getStyleElement_ListStyle,
@@ -251,7 +251,7 @@ odf.FormattingTests = function FormattingTests(runner) {
 
             getContentSize_PageSizePaddingAndMarginSpecified,
             getContentSize_PageSizePaddingAndMarginNotSpecified
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];

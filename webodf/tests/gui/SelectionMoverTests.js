@@ -42,8 +42,8 @@ runtime.loadClass("gui.SelectionMover");
  */
 gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     "use strict";
-    var r = runner,
-        t, testarea,
+    var t, testarea,
+        r = runner,
         testXMLs = [
             { x: "<a/>", n: 1, t: 0 },
             { x: "<a><b/></a>", n: 3, t: 0 },
@@ -148,7 +148,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             sum += steps;
             steps = counter.countSteps(1, filter);
         }
-        t.totalSteps = counter.countStepsToPosition(t.root, 0,filter);
+        t.totalSteps = counter.countStepsToPosition(t.root, 0, filter);
         r.shouldBe(t, stepped.toString(), (n - 1).toString());
         r.shouldBe(t, sum.toString(), (n - 1).toString());
         r.shouldBe(t, "t.totalSteps", (-1 * (n - 1)).toString());
@@ -181,7 +181,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
         this.acceptPosition = function (iterator) {
             var node = iterator.container();
             if (node.nodeType === Node.ELEMENT_NODE
-                && node.localName === "a") {
+                    && node.localName === "a") {
                 return core.PositionFilter.FilterResult.FILTER_ACCEPT;
             }
             return core.PositionFilter.FilterResult.FILTER_REJECT;
@@ -229,7 +229,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
     };
 
     this.tests = function () {
-        return [
+        return r.name([
             testUpDownTraversal,
             testForthBack,
             testXMLsForthBack,
@@ -237,7 +237,7 @@ gui.SelectionMoverTests = function SelectionMoverTests(runner) {
             testCountStepsToNode,
             countStepsToPosition_CursorInInvalidPlace_ValidPositionRequested,
             countStepsToPosition_CursorInInvalidPlace_InvalidPositionRequested
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

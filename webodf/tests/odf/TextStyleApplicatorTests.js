@@ -46,10 +46,10 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
     var t,
         r = runner,
         namespace = {
-            "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-            "style":"urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-            "fo":"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+            "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+            "style": "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+            "fo": "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
         };
 
     this.setUp = function () {
@@ -69,7 +69,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         var xml = "<?xml version='1.0' encoding='UTF-8'?>";
 
         xml += "<office:document";
-        Object.keys(namespace).forEach(function(key) {
+        Object.keys(namespace).forEach(function (key) {
             xml += " xmlns:" + key + '="' + namespace[key] + '"';
         });
         xml += ">";
@@ -342,7 +342,8 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             'style:name': 'auto-893758051_1',
             'style:parent-style-name': 'SUnderline',
             'style:family': 'text',
-            'scope': 'document-content','style:text-properties':{'fo:font-weight':'bold'}
+            'scope': 'document-content',
+            'style:text-properties': {'fo:font-weight': 'bold'}
         };
         r.shouldBe(t, "t.autoStyle", "t.expectedAutoStyle");
     }
@@ -364,12 +365,12 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             'style:name': 'auto-893758051_1',
             'style:family': 'text',
             'scope': 'document-content',
-            'style:text-properties':{'fo:font-weight':'bold', 'style:text-underline-style':'solid'}
+            'style:text-properties': {'fo:font-weight': 'bold', 'style:text-underline-style': 'solid'}
         };
         r.shouldBe(t, "t.autoStyle", "t.expectedAutoStyle");
     }
     this.tests = function () {
-        return [
+        return r.name([
             apply_ContainerInsertion_SimpleTextRange,
             apply_ContainerInsertion_SimpleTextRange_EndsAtNodeBeginning,
             apply_ContainerInsertion_TextBracketingLink,
@@ -389,7 +390,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
 
             apply_CommonStyle_LinksParentStyle,
             apply_AutoStyle_ClonesProperties
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];

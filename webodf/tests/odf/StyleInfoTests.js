@@ -45,8 +45,8 @@ odf.StyleInfoTests = function StyleInfoTests(runner) {
     var t,
         r = runner,
         namespace = {
-            "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+            "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
         };
 
     this.setUp = function () {
@@ -60,7 +60,7 @@ odf.StyleInfoTests = function StyleInfoTests(runner) {
             footer = "</office:text>";
 
         header += "<office:text";
-        Object.keys(namespace).forEach(function(key) {
+        Object.keys(namespace).forEach(function (key) {
             header += " xmlns:" + key + '="' + namespace[key] + '"';
         });
         header += ">";
@@ -93,11 +93,11 @@ odf.StyleInfoTests = function StyleInfoTests(runner) {
         r.shouldBe(t, "t.usedStyles", "undefined");
     }
     this.tests = function () {
-        return [
+        return r.name([
             determineStylesForNode,
             determineStylesForNode_2,
             determineStylesForNode_NoStyles
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];

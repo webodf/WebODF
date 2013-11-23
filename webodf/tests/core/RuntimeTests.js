@@ -147,12 +147,12 @@ core.RuntimeTests = function RuntimeTests(runner) {
         ];
     };
     this.asyncTests = function () {
-        return [
+        return r.name([
             testRead,
             testWrite,
             testUtf8ByteArrayToString,
             testLoadXML
-        ];
+        ]);
     };
     this.description = function () {
         return "Test the runtime.";

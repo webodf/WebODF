@@ -563,7 +563,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
     }
 
     this.tests = function () {
-        return [
+        return r.name([
             convertStepsToDomPoint_At0,
             convertStepsToDomPoint_At1,
             convertStepsToDomPoint_At5,
@@ -597,7 +597,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             handleStepsRemoved_RemoveMultipleStepsIndividually,
             handleStepsRemoved_RemoveMultipleParagraphsIndividually,
             handleStepsRemoved_AtDocumentStart
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

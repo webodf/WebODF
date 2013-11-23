@@ -337,7 +337,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             t.backwardPositions.unshift({node: t.iterator.container(), offset: t.iterator.unfilteredDomOffset()});
         } while (t.iterator.previousPosition());
 
-        t.backwardPositions.forEach(function(pos, index) {
+        t.backwardPositions.forEach(function (pos, index) {
             t.expected = t.forwardPositions[index];
             t.actual = pos;
             r.shouldBe(t, "t.actual.node", "t.expected.node");
@@ -359,7 +359,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         } while (t.iterator.nextPosition());
 
         t.resultPositions = [];
-        t.forwardPositions.forEach(function(pos, index) {
+        t.forwardPositions.forEach(function (pos, index) {
             t.iterator.setUnfilteredPosition(pos.node, pos.offset);
             t.expected = pos;
             t.resultPositions.push({node: t.iterator.container(), offset: t.iterator.unfilteredDomOffset()});
@@ -477,7 +477,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         r.shouldBe(t, "t.loopCount", "0");
     }
     this.tests = function () {
-        return [
+        return r.name([
             create,
             forwardInEmptyDoc,
             backwardInEmptyDoc,
@@ -505,7 +505,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             iterateOverNode_NextPosition_EventuallyStops,
             iterateOverDisconnectedNode_NextPosition_EventuallyStops,
             iterateOverDisconnectedNode_PreviousPosition_EventuallyStops
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

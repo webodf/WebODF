@@ -96,13 +96,13 @@ core.Base64Tests = function Base64Tests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [
+        return r.name([
             testConvertByteArrayToBase64,
             testToBase64
-        ];
+        ]);
     };
     this.asyncTests = function () {
-        return [ testConvertUTF8StringToUTF16String ];
+        return r.name([ testConvertUTF8StringToUTF16String ]);
     };
     this.description = function () {
         return "Test the Base64 class.";

@@ -55,21 +55,21 @@ ops.OperationTests = function OperationTests(runner) {
         var child = element.firstChild,
             childArray = [],
             i;
-        while(child) {
+        while (child) {
             if (child.nodeType === Node.ELEMENT_NODE) {
                 childArray.push(child);
             }
             child = child.nextSibling;
         }
-        childArray.sort(function(a, b) {
+        childArray.sort(function (a, b) {
             var attra = a.getAttributeNS(attrns, attrLocalName),
                 attrb = b.getAttributeNS(attrns, attrLocalName);
             return attra === attrb ? 0 :
-                  (attra > attrb ?   1 :
+                    (attra > attrb ? 1 :
                                     -1);
         });
 
-        for(i = 0; i < childArray.length; i += 1) {
+        for (i = 0; i < childArray.length; i += 1) {
             element.appendChild(childArray[i]);
         }
     }
@@ -120,7 +120,7 @@ ops.OperationTests = function OperationTests(runner) {
             op[att.nodeName] = value;
         }
         // read complex data by childs
-        while(child) {
+        while (child) {
             if (child.nodeType === Node.ELEMENT_NODE) {
                 op[child.nodeName] = parseOperation(child);
             }
@@ -138,7 +138,7 @@ ops.OperationTests = function OperationTests(runner) {
     function checkWhitespace(rootElement, localName, expectedChar) {
         var i,
             spaceElements = rootElement.getElementsByTagNameNS(odf.Namespaces.textns, localName);
-        for (i = 0; i < spaceElements.length; i+=1) {
+        for (i = 0; i < spaceElements.length; i += 1) {
             if (!checkWhitespaceTexts(spaceElements[i], expectedChar)) {
                 return false;
             }
@@ -326,8 +326,7 @@ ops.OperationTests = function OperationTests(runner) {
         var f = function () {
             runTest(test);
         };
-        f.testName = name;
-        return f;
+        return {f: f, name: name};
     }
 
     function makeTestsIntoFunction(tests) {
@@ -380,7 +379,7 @@ ops.OperationTests = function OperationTests(runner) {
         }));
     };
     this.tearDown = function () {
-        t.odfcanvas.destroy(function() { return; });
+        t.odfcanvas.destroy(function () { return; });
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
@@ -398,7 +397,7 @@ ops.OperationTests = function OperationTests(runner) {
     };
 
     this.setUps = {
-        "ApplyDirectStyling_FixesCursorPositions" : function() {
+        "ApplyDirectStyling_FixesCursorPositions" : function () {
             // Test specifically requires the cursor node to have a child element of some sort to
             // reproduce an issue where the cursor ends up in an invalid position after the operation
             function appendToCursor(cursor) {
@@ -406,8 +405,8 @@ ops.OperationTests = function OperationTests(runner) {
             }
 
             return {
-                setUp: function() {t.odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, appendToCursor); },
-                tearDown: function() {t.odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, appendToCursor); }
+                setUp: function () {t.odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, appendToCursor); },
+                tearDown: function () {t.odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, appendToCursor); }
             };
         }
     };

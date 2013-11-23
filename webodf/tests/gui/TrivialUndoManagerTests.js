@@ -46,11 +46,11 @@ runtime.loadClass("gui.TrivialUndoManager");
  */
 gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     "use strict";
-    var r = runner,
-        t, testarea;
+    var t, testarea,
+        r = runner;
 
     function cursor(id) {
-        return { getMemberId : function() { return id; } };
+        return { getMemberId: function () { return id; } };
     }
 
     /**
@@ -59,9 +59,9 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
      */
     function AdaptiveMock(rootElement) {
         var self = this;
-/*jslint emptyblock: true*/
+        /*jslint emptyblock: true*/
         function noOp() { }
-/*jslint emptyblock: false*/
+        /*jslint emptyblock: false*/
         function returnThis() { return self; }
         this.rootElement = rootElement;
 
@@ -74,7 +74,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         this.setRootElement = noOp;
         this.setOdfContainer = noOp;
         this.cursors = [cursor(1)];
-        this.getCursors = function() { return self.cursors; };
+        this.getCursors = function () { return self.cursors; };
         this.removeCursor = noOp;
     }
 
@@ -86,7 +86,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             ops : []
         };
         t.manager.setOdtDocument(t.mock);
-        t.manager.setPlaybackFunction(function (op) {t.ops.push(op.spec().timestamp);});
+        t.manager.setPlaybackFunction(function (op) {t.ops.push(op.spec().timestamp); });
     };
     this.tearDown = function () {
         t = {};
@@ -298,7 +298,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     this.tests = function () {
-        return [
+        return r.name([
             hasUndoStates_OnlyMovesBackValidStates,
             hasRedoStates_OnlyMovesForwardValidStates,
             setInitialState_SavesMostRecentCursorState,
@@ -309,7 +309,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             moveBackward_BoundaryCheck_InitialDocumentState,
             moveBackward_ResetsMostRecentCursorState_ForVisibleCursors,
             undoState_ConsumesTrailingNonEditOps
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

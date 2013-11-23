@@ -156,19 +156,19 @@ core.ZipTests = function ZipTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [
+        return r.name([
             testSave,
             testRemove
-        ];
+        ]);
     };
     this.asyncTests = function () {
-        return [
+        return r.name([
             testNonExistingFile,
             testNonZipFile,
             testHiUncompressed,
             testHiCompressed,
             testCreateZip
-        ];
+        ]);
     };
 };
 core.ZipTests.prototype.description = function () {

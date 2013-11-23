@@ -38,6 +38,14 @@
 
 /*jslint evil: true, continue: true, emptyblock: true, unparam: true*/
 /**
+ * @typedef{{f:function(),name:!string}}
+ */
+core.NamedFunction;
+/**
+ * @typedef{{f:function(function()),name:!string}}
+ */
+core.NamedAsyncFunction;
+/**
  * @interface
  */
 core.UnitTest = function UnitTest() {"use strict"; };
@@ -54,14 +62,13 @@ core.UnitTest.prototype.tearDown = function () {"use strict"; };
  */
 core.UnitTest.prototype.description = function () {"use strict"; };
 /**
- * @return {Array.<!function():undefined>}
+ * @return {!Array.<!core.NamedFunction>}
  */
 core.UnitTest.prototype.tests = function () {"use strict"; };
 /**
- * @return {Array.<!function(!function():undefined):undefined>}
+ * @return {!Array.<!core.NamedAsyncFunction>}
  */
 core.UnitTest.prototype.asyncTests = function () {"use strict"; };
-
 
 /**
  * @return {!Element}
@@ -271,7 +278,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
         if (Object.prototype.toString.call(expected) ===
                 Object.prototype.toString.call([])) {
-            return areArraysEqual(/**@type{!Array}*/(actual), /**@type{!Array}*/(expected));
+            return areArraysEqual(/**@type{!Array}*/(actual),
+                                  /**@type{!Array}*/(expected));
         }
         if (typeof expected === "object" && typeof actual === "object") {
             if (/**@type{!Object}*/(expected).constructor === Element
@@ -386,6 +394,26 @@ core.UnitTestRunner = function UnitTestRunner() {
     this.countFailedTests = function () {
         return failedTests;
     };
+    /**
+     * @param {!Array.<T>} functions
+     * @return {!Array.<!{f:T,name:string}>}
+     * @template T
+     */
+    this.name = function (functions) {
+        var i, f, fname,
+            nf = [],
+            l = functions.length;
+        nf.length = l;
+        for (i = 0; i < l; i += 1) {
+            f = functions[i];
+            fname = Runtime.getFunctionName(f) || "";
+            if (fname === "") {
+                throw "Found a function without a name.";
+            }
+            nf[i] = {f: f, name: fname};
+        }
+        return nf;
+    };
 };
 
 /**
@@ -393,7 +421,8 @@ core.UnitTestRunner = function UnitTestRunner() {
  */
 core.UnitTester = function UnitTester() {
     "use strict";
-    var failedTests = 0,
+    var /**@type{!number}*/
+        failedTests = 0,
         results = {};
     /**
      * @param {!string} text
@@ -409,22 +438,24 @@ core.UnitTester = function UnitTester() {
      * If parameter testNames is supplied only the tests with the names
      * supplied in that array will be executed.
      *
-     * @param {!Function} TestClass the constructor for the test class
+     * @param {!function(new:core.UnitTest,core.UnitTestRunner)} TestClass
+     *              The constructor for the test class.
      * @param {!function():undefined} callback
      * @param {!Array.<!string>} testNames
      * @return {undefined}
      */
     this.runTests = function (TestClass, callback, testNames) {
         var testName = Runtime.getFunctionName(TestClass) || "",
+            /**@type{!string}*/
             tname,
             runner = new core.UnitTestRunner(),
             test = new TestClass(runner),
             testResults = {},
             i,
+            /**@type{function()|function(function())}*/
             t,
             tests,
             lastFailCount,
-            testNameString = "testName",
             inBrowser = runtime.type() === "BrowserRuntime";
 
         // check that this test has not been run or started yet
@@ -442,8 +473,8 @@ core.UnitTester = function UnitTester() {
         }
         tests = test.tests();
         for (i = 0; i < tests.length; i += 1) {
-            t = tests[i];
-            tname = Runtime.getFunctionName(t) || t[testNameString];
+            t = tests[i].f;
+            tname = tests[i].name;
             if (testNames.length && testNames.indexOf(tname) === -1) {
                 continue;
             }
@@ -460,6 +491,10 @@ core.UnitTester = function UnitTester() {
             test.tearDown();
             testResults[tname] = lastFailCount === runner.countFailedTests();
         }
+        /**
+         * @param {!Array.<!core.NamedAsyncFunction>} todo
+         * @return {undefined}
+         */
         function runAsyncTests(todo) {
             if (todo.length === 0) {
                 results[testName] = testResults;
@@ -467,8 +502,8 @@ core.UnitTester = function UnitTester() {
                 callback();
                 return;
             }
-            t = todo[0];
-            var fname = Runtime.getFunctionName(t);
+            t = todo[0].f;
+            var fname = todo[0].name;
             runtime.log("Running " + fname);
             lastFailCount = runner.countFailedTests();
             test.setUp();

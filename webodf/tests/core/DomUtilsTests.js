@@ -530,7 +530,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
     }
 
     this.tests = function () {
-        return [
+        return r.name([
             normalizeTextNodes_TextWithTextSilblings,
             normalizeTextNodes_EmptyTextWithTextSilblings,
             normalizeTextNodes_TextWithPreviousTextSilbling,
@@ -561,7 +561,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
 
             removeUnwantedNodes_DiscardAll,
             removeUnwantedNodes_DiscardSpanOnly
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];

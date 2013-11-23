@@ -65,7 +65,7 @@ ops.TransformerTests = function TransformerTests(runner) {
     function cloneSpecs(specs) {
         var i, result = [];
 
-        for(i = 0; i < specs.length; i += 1) {
+        for (i = 0; i < specs.length; i += 1) {
             result.push(cloneSpec(specs[i]));
         }
 
@@ -94,7 +94,7 @@ ops.TransformerTests = function TransformerTests(runner) {
             op[att.nodeName] = value;
         }
         // read complex data by childs
-        while(child) {
+        while (child) {
             if (child.nodeType === Node.ELEMENT_NODE) {
                 op[child.nodeName] = parseOperation(/**@type{!Element}*/(child));
             }
@@ -164,7 +164,7 @@ ops.TransformerTests = function TransformerTests(runner) {
      */
     function areObjectsEqual(object, refObject) {
         var key;
-        for(key in object) {
+        for (key in object) {
             if (object.hasOwnProperty(key)) {
                 if (typeof object[key] === 'object') {
                     if (!areObjectsEqual(object[key], refObject[key])) {
@@ -221,8 +221,7 @@ ops.TransformerTests = function TransformerTests(runner) {
         var f = function () {
             runTest(test);
         };
-        f.testName = name;
-        return f;
+        return {f: f, name: name};
     }
 
     function makeTestsIntoFunction(tests) {

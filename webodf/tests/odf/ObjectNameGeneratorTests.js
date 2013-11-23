@@ -156,11 +156,11 @@ odf.ObjectNameGeneratorTests = function ObjectNameGeneratorTests(runner) {
         r.shouldBe(t, "t.result2", "'img105408_4'");
     }
     this.tests = function () {
-        return [
+        return r.name([
             generateStyleName_ReturnsUniqueName,
             generateFrameName_ReturnsUniqueName,
             generateImageName_ReturnsUniqueName
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];
