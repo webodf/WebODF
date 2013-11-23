@@ -125,7 +125,7 @@ function makeBase64() {
     function convertBase64ToUTF8Array(b64) {
         b64 = b64.replace(/[^A-Za-z0-9+\/]+/g, '');
         var l = b64.length,
-            bin = new Uint8Array(new ArrayBuffer(3*l)),
+            bin = new Uint8Array(new ArrayBuffer(3 * l)),
             padlen = b64.length % 4,
             o = 0,
             i,

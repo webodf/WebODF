@@ -374,8 +374,10 @@ core.UnitTestRunner = function UnitTestRunner() {
         bkeys.sort();
         return areArraysEqual(akeys, bkeys)
             && Object.keys(a).every(function (key) {
-                var /**@type{*}*/aval = a[key],
-                    /**@type{*}*/bval = b[key];
+                var /**@type{*}*/
+                    aval = a[key],
+                    /**@type{*}*/
+                    bval = b[key];
                 if (!isResultCorrect(aval, bval)) {
                     testFailed(aval + " should be " + bval + " for key " + key);
                     return false;

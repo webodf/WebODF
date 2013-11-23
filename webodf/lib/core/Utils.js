@@ -64,8 +64,10 @@ core.Utils = function Utils() {
     /**
      * Recursively merge properties of two objects
      * Merge behaviours are:
-     *  array => array - Append clones of source array onto the end of the destination array
-     *  object => object - Map each individual key from source onto destination (recursive, so these are clones)
+     *  array => array - Append clones of source array onto the end of the
+     *                   destination array
+     *  object => object - Map each individual key from source onto destination
+     *                     (recursive, so these are clones)
      *  primitive => primitive - return primitive value
      *
      * @param {!Object} destination
@@ -75,10 +77,13 @@ core.Utils = function Utils() {
     function mergeObjects(destination, source) {
         // Property in destination object set; update its value.
         if (source && Array.isArray(source)) {
-            // An array will report as a type of object, but this is not able to mapped using mergeObjects
-            // The following will clone each individual item in the source array and append them to the end of the
-            // destination array
-            destination = (destination || []).concat(source.map(function(obj) { return mergeObjects({}, obj); }));
+            // An array will report as a type of object, but this is not able to
+            // mapped using mergeObjects
+            // The following will clone each individual item in the source array
+            // and append them to the end of the destination array
+            destination = (destination || []).concat(source.map(function (obj) {
+                return mergeObjects({}, obj);
+            }));
         } else if (source && typeof source === 'object') {
             destination = destination || {};
             Object.keys(source).forEach(function (p) {

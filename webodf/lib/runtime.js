@@ -279,7 +279,7 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
 Runtime.getVariable = function (name) {
     "use strict";
     try {
-    return eval(name);
+        return eval(name);
     } catch (e) {
         return undefined;
     }
@@ -461,7 +461,7 @@ function BrowserRuntime(logoutput) {
             if (callback) {
                 callback();
             }
-			throw message; // interrupt execution and provide a backtrace
+            throw message; // interrupt execution and provide a backtrace
         }
     }
     /**
@@ -747,7 +747,7 @@ function BrowserRuntime(logoutput) {
                 // However, even though the browser won't pull the content-length header (coz it's a security risk!)
                 // the content can still be fetched.
                 // This data will be cached, so we'll still only ever have to fetch it once
-                readFile(path, "binary", function(err, data) {
+                readFile(path, "binary", function (err, data) {
                     if (!err) {
                         callback(data.length);
                     } else {
@@ -1007,8 +1007,9 @@ function NodeJSRuntime() {
      * @return {!string|!Uint8Array}
      */
     this.readFileSync = function (path, encoding) {
-        var enc = (encoding === "binary") ? null : encoding,
-            r = fs.readFileSync(path, enc), s;
+        var s,
+            enc = (encoding === "binary") ? null : encoding,
+            r = fs.readFileSync(path, enc);
         if (r === null) {
             throw "File " + path + " could not be read.";
         }
@@ -1149,7 +1150,7 @@ function RhinoRuntime() {
     dom.setNamespaceAware(true);
     dom.setExpandEntityReferences(false);
     dom.setSchema(null);
-/*jslint unparam: true */
+    /*jslint unparam: true */
     entityresolver = Packages.org.xml.sax.EntityResolver({
         /**
          * @param {!string} publicId
@@ -1172,12 +1173,12 @@ function RhinoRuntime() {
             return open(file);
         }
     });
-/*jslint unparam: false */
+    /*jslint unparam: false */
     //dom.setEntityResolver(entityresolver);
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
 
-/*jslint unparam: true*/
+    /*jslint unparam: true*/
     /**
      * @param {!string} string
      * @param {!string} encoding
@@ -1193,7 +1194,7 @@ function RhinoRuntime() {
         }
         return a;
     };
-/*jslint unparam: false*/
+    /*jslint unparam: false*/
     this.byteArrayToString = Runtime.byteArrayToString;
 
     /**
@@ -1372,7 +1373,7 @@ function RhinoRuntime() {
      * @param {string=} msg
      * @return {undefined}
      */
-    function log (msgOrCategory, msg) {
+    function log(msgOrCategory, msg) {
         var category;
         if (msg !== undefined) {
             category = msgOrCategory;
@@ -1397,7 +1398,7 @@ function RhinoRuntime() {
     */
     function assert(condition, message, callback) {
         if (!condition) {
-            log("alert", "ASSERTION FAILED: "+message);
+            log("alert", "ASSERTION FAILED: " + message);
             if (callback) {
                 callback();
             }
@@ -1412,13 +1413,13 @@ function RhinoRuntime() {
         f();
         return 0;
     };
-/*jslint emptyblock: true */
+    /*jslint emptyblock: true */
     /**
      * @return {undefined}
      */
-    this.clearTimeout = function() {
+    this.clearTimeout = function () {
     };
-/*jslint emptyblock: false */
+    /*jslint emptyblock: false */
     /**
      * @return {!Array.<!string>}
      */
@@ -1624,7 +1625,7 @@ var runtime = (function () {
      * Gets the custom translator function
      * @return {!function(!string):!string}
      */
-    runtime.getTranslator = function() {
+    runtime.getTranslator = function () {
         return translator;
     };
     /**
@@ -1632,7 +1633,7 @@ var runtime = (function () {
      * @param {!function(!string):!string} translatorFunction
      * @return {undefined}
      */
-    runtime.setTranslator = function(translatorFunction) {
+    runtime.setTranslator = function (translatorFunction) {
         translator = translatorFunction;
     };
     runtime.tr = tr;
@@ -1644,7 +1645,7 @@ var runtime = (function () {
         args = [];
     }
 
-/*jslint unvar: true, defined: true*/
+    /*jslint unvar: true, defined: true*/
     /**
      * @param {!Array.<!string>} argv
      */
@@ -1681,7 +1682,7 @@ var runtime = (function () {
             }
         });
     }
-/*jslint unvar: false, defined: false*/
+    /*jslint unvar: false, defined: false*/
     // if rhino or node.js, run the scripts provided as arguments
     if (runtime.type() === "NodeJSRuntime") {
         run(process.argv.slice(2));

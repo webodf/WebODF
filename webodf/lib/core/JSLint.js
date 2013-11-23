@@ -1,5 +1,5 @@
 // jslint.js
-// 2013-11-13
+// 2013-11-21
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -218,16 +218,16 @@
 /*properties
     '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'', '(begin)',
     '(error)', '*', '+', '-', '/', '<', '<=', '==', '===', '>', '>=', '\\', a,
-    a_label, a_scope, already_defined, and, arguments, arity, ass, assign,
-    assignment_expression, assignment_function_expression, at, avoid_a, b,
-    bad_assignment, bad_constructor, bad_in_a, bad_invocation, bad_new,
-    bad_number, bad_operand, bad_wrap, bitwise, block, browser, c, call, charAt,
-    charCodeAt, character, closure, code, color, combine_var, comments,
-    conditional_assignment, confusing_a, confusing_regexp, constructor_name_a,
-    continue, control_a, couch, create, d, dangling_a, data, dead, debug,
-    deleted, devel, disrupt, duplicate_a, edge, edition, else, empty_block,
-    empty_case, empty_class, entityify, eqeq, error_report, errors,
-    evidence, evil, exception, exec, expected_a_at_b_c, expected_a_b,
+    a_label, a_scope, already_defined, and, apply, arguments, arity, ass,
+    assign, assignment_expression, assignment_function_expression, at, avoid_a,
+    b, bad_assignment, bad_constructor, bad_in_a, bad_invocation, bad_new,
+    bad_number, bad_operand, bad_wrap, bitwise, block, break, breakage, browser,
+    c, call, charAt, charCodeAt, character, closure, code, color, combine_var,
+    comments, conditional_assignment, confusing_a, confusing_regexp,
+    constructor_name_a, continue, control_a, couch, create, d, dangling_a, data,
+    dead, debug, deleted, devel, disrupt, duplicate_a, edge, edition, elif,
+    else, empty_block, empty_case, empty_class, entityify, eqeq, error_report,
+    errors, evidence, evil, exception, exec, expected_a_at_b_c, expected_a_b,
     expected_a_b_from_c_d, expected_id_a, expected_identifier_a,
     expected_identifier_a_reserved, expected_number_a, expected_operator_a,
     expected_positive_a, expected_small_a, expected_space_a_b,
@@ -243,7 +243,7 @@
     newcap, node, nomen, not, not_a_constructor, not_a_defined, not_a_function,
     not_a_label, not_a_scope, not_greater, nud, number, octal_a, open, outer,
     parameter, parameter_a_get_b, parameter_arguments_a, parameter_set_a,
-    params, paren, passfail, plusplus, postscript, predef, properties,
+    params, paren, passfail, plusplus, pop, postscript, predef, properties,
     properties_report, property, prototype, push, quote, r, radix, raw,
     read_only, reason, redefinition_a_b, regexp, relation, replace, report,
     reserved, reserved_a, rhino, right, scanned_a_b, scope, search, second,
@@ -256,11 +256,11 @@
     unexpected_property_a, unexpected_space_a_b, unexpected_typeof_a,
     uninitialized_a, unnecessary_else, unnecessary_initialize, unnecessary_use,
     unparam, unreachable_a_b, unsafe, unused_a, url, use_array, use_braces,
-    use_object, use_or, use_param, use_spaces, used, used_before_a, var,
-    var_a_not, var_loop, vars, varstatement, warn, warning, was,
-    weird_assignment, weird_condition, weird_new, weird_program, weird_relation,
-    weird_ternary, white, wrap, wrap_immediate, wrap_regexp, write_is_wrong,
-    writeable
+    use_nested_if, use_object, use_or, use_param, use_spaces, used,
+    used_before_a, var, var_a_not, var_loop, vars, varstatement, warn, warning,
+    was, weird_assignment, weird_condition, weird_new, weird_program,
+    weird_relation, weird_ternary, white, wrap, wrap_immediate, wrap_regexp,
+    write_is_wrong, writeable
 */
 
 // The global directive is used to declare global variables that can
@@ -482,6 +482,7 @@ var JSLINT = (function () {
             url: "JavaScript URL.",
             use_array: "Use the array literal notation [].",
             use_braces: "Spaces are hard to count. Use {{a}}.",
+            use_nested_if: "Expected 'else { if' and instead saw 'else if'.",
             use_object: "Use the object literal notation {} or Object.create(null).",
             use_or: "Use the || operator.",
             use_param: "Use a named parameter.",
@@ -1956,7 +1957,21 @@ klass:              do {
     }
 
     function labeled_stmt(s, f) {
-        var x = stmt(s, f);
+        var x = stmt(s, function labeled() {
+            var the_statement;
+            if (funct.breakage) {
+                funct.breakage.push(this);
+            } else {
+                funct.breakage = [this];
+            }
+            the_statement = f.apply(this);
+            if (funct.breakage.length > 1) {
+                funct.breakage.pop();
+            } else {
+                delete funct.breakage;
+            }
+            return the_statement;
+        });
         x.labeled = true;
     }
 
@@ -2293,6 +2308,7 @@ klass:              do {
             }
             next_token.label = label;
             label.init = true;
+            label.statement = next_token;
         }
 
 // Parse the statement.
@@ -3416,14 +3432,17 @@ klass:              do {
         this.block = block('if');
         if (next_token.id === 'else') {
             if (this.block.disrupt) {
-                next_token.warn('unnecessary_else');
+                next_token.warn(this.elif ? 'use_nested_if' : 'unnecessary_else');
             }
             one_space();
             advance('else');
             one_space();
-            this.else = next_token.id === 'if' || next_token.id === 'switch'
-                ? statement(true)
-                : block('else');
+            if (next_token.id === 'if') {
+                next_token.elif = true;
+                this.else = statement(true);
+            } else {
+                this.else = block('else');
+            }
             if (this.else.disrupt && this.block.disrupt) {
                 this.disrupt = true;
             }
@@ -3520,8 +3539,7 @@ klass:              do {
             old_in_block = in_block,
             particular,
             that = token,
-            the_case = next_token,
-            unbroken = true;
+            the_case = next_token;
 
         function find_duplicate_case(value) {
             if (are_similar(particular, value)) {
@@ -3547,13 +3565,12 @@ klass:              do {
         }
         while (next_token.id === 'case') {
             the_case = next_token;
-            cases.forEach(find_duplicate_case);
             the_case.first = [];
             the_case.arity = 'case';
-            spaces();
-            edge('case');
-            advance('case');
             for (;;) {
+                spaces();
+                edge('case');
+                advance('case');
                 one_space();
                 particular = expression(0);
                 cases.forEach(find_duplicate_case);
@@ -3567,19 +3584,11 @@ klass:              do {
                 if (next_token.id !== 'case') {
                     break;
                 }
-                spaces();
-                edge('case');
-                advance('case');
             }
             spaces();
             the_case.second = statements();
             if (the_case.second && the_case.second.length > 0) {
-                particular = the_case.second[the_case.second.length - 1];
-                if (particular.disrupt) {
-                    if (particular.id === 'break') {
-                        unbroken = false;
-                    }
-                } else {
+                if (!the_case.second[the_case.second.length - 1].disrupt) {
                     next_token.warn('missing_a_after_b', 'break', 'case');
                 }
             } else {
@@ -3601,12 +3610,14 @@ klass:              do {
             spaces();
             the_case.second = statements();
             if (the_case.second && the_case.second.length > 0) {
-                particular = the_case.second[the_case.second.length - 1];
-                if (unbroken && particular.disrupt && particular.id !== 'break') {
-                    this.disrupt = true;
-                }
+                this.disrupt = the_case.second[the_case.second.length - 1].disrupt;
+            } else {
+                the_case.warn('empty_case');
             }
             this.second.push(the_case);
+        }
+        if (this.break) {
+            this.disrupt = false;
         }
         spaces();
         step_out('}', this);
@@ -3777,7 +3788,9 @@ klass:              do {
         var label = next_token.string,
             master;
         that.arity = 'statement';
-        if (next_token.identifier && token.line === next_token.line) {
+        if (!funct.breakage || (!option.continue && that.id === 'continue')) {
+            that.warn('unexpected_a');
+        } else if (next_token.identifier && token.line === next_token.line) {
             one_space_only();
             master = scope[label];
             if (!master || master.kind !== 'label') {
@@ -3786,9 +3799,19 @@ klass:              do {
                 next_token.warn('not_a_scope');
             } else {
                 master.used += 1;
+                if (that.id === 'break') {
+                    master.statement.break = true;
+                }
+                if (funct.breakage[funct.breakage.length - 1] === master.statement) {
+                    next_token.warn('unexpected_a');
+                }
             }
             that.first = next_token;
             advance();
+        } else {
+            if (that.id === 'break') {
+                funct.breakage[funct.breakage.length - 1].break = true;
+            }
         }
         return that;
 
@@ -3799,9 +3822,6 @@ klass:              do {
     });
 
     disrupt_stmt('continue', function () {
-        if (!option.continue) {
-            this.warn('unexpected_a');
-        }
         return optional_label(this);
     });
 
@@ -4257,7 +4277,7 @@ klass:              do {
 
     itself.jslint = itself;
 
-    itself.edition = '2013-11-13';
+    itself.edition = '2013-11-21';
 
     return itself;
 }());
