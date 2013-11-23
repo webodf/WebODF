@@ -1707,7 +1707,11 @@ klass:              do {
         right = right || next_token;
         if ((!option.white) &&
                 left.thru !== right.from && left.line === right.line) {
-            right.warn('unexpected_space_a_b', artifact(left), artifact(right));
+            if (!(option.closure && right.comments.length === 1
+                  && right.comments[0].string.substr(0, 7) === '*@type{')) {
+                right.warn('unexpected_space_a_b', artifact(left),
+                           artifact(right));
+            }
         }
     }
 

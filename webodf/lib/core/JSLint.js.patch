@@ -1,5 +1,5 @@
 --- jslint.js	2013-11-22 11:58:27.468563613 +0100
-+++ lib/core/JSLint.js	2013-11-22 12:00:06.294595912 +0100
++++ lib/core/JSLint.js	2013-11-23 13:51:19.072692196 +0100
 @@ -183,7 +183,9 @@
  //     closure    true, if Google Closure idioms should be tolerated
  //     continue   true, if the continuation statement should be tolerated
@@ -45,7 +45,20 @@
                  if (master.function === funct) {
                      if (master.kind !== 'exception' || kind !== 'exception' ||
                              !master.dead) {
-@@ -2403,7 +2409,7 @@
+@@ -1701,7 +1707,11 @@
+         right = right || next_token;
+         if ((!option.white) &&
+                 left.thru !== right.from && left.line === right.line) {
+-            right.warn('unexpected_space_a_b', artifact(left), artifact(right));
++            if (!(option.closure && right.comments.length === 1
++                  && right.comments[0].string.substr(0, 7) === '*@type{')) {
++                right.warn('unexpected_space_a_b', artifact(left),
++                           artifact(right));
++            }
+         }
+     }
+ 
+@@ -2403,7 +2413,7 @@
              array = [statement()];
              array.disrupt = array[0].disrupt;
          }
@@ -54,7 +67,7 @@
              curly.warn('empty_block');
          }
          block_var.forEach(function (name) {
-@@ -3149,9 +3155,10 @@
+@@ -3149,9 +3159,10 @@
          Object.keys(scope).forEach(function (name) {
              var master = scope[name];
              if (!master.used && master.kind !== 'exception' &&
@@ -67,7 +80,7 @@
                  master.warn('uninitialized_a');
              }
          });
-@@ -4250,3 +4257,6 @@
+@@ -4250,3 +4261,6 @@
  
      return itself;
  }());
