@@ -1311,8 +1311,12 @@ function RhinoRuntime() {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
         }
-        var file = new Packages.java.io.File(path);
-        if (file['delete']()) {
+        var file = new Packages.java.io.File(path),
+            otherPath = path + Math.random(),
+            other = new Packages.java.io.File(otherPath);
+        // 'delete' cannot be used with closure compiler, so we use a workaround
+        if (file.rename(other)) {
+            other.deleteOnExit();
             callback(null);
         } else {
             callback("Could not delete " + path);
@@ -1457,12 +1461,12 @@ function RhinoRuntime() {
 }
 
 /**
- * @const
- * @type {Runtime}
+ * @return {!Runtime}
  */
-var runtime = (function () {
+Runtime.create = function create() {
     "use strict";
-    var result;
+    var /**@type{!Runtime}*/
+        result;
     if (String(typeof window) !== "undefined") {
         result = new BrowserRuntime(window.document.getElementById("logoutput"));
     } else if (String(typeof require) !== "undefined") {
@@ -1471,7 +1475,14 @@ var runtime = (function () {
         result = new RhinoRuntime();
     }
     return result;
-}());
+};
+
+/**
+ * @const
+ * @type {!Runtime}
+ */
+var runtime = Runtime.create();
+
 /*jslint sloppy: true*/
 (function () {
     var cache = {},

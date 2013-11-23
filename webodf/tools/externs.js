@@ -350,6 +350,15 @@ Packages.java.io.File.prototype.isFile = function () {"use strict"; };
  */
 Packages.java.io.File.prototype['delete'] = function () {"use strict"; };
 /**
+ * @param {!Packages.java.io.File} other
+ * @return {!boolean}
+ */
+Packages.java.io.File.prototype.rename = function (other) {"use strict"; };
+/**
+ * @return {undefined}
+ */
+Packages.java.io.File.prototype.deleteOnExit = function () {"use strict"; };
+/**
  * @return {!number}
  */
 Packages.java.io.File.prototype.length = function () {"use strict"; };
