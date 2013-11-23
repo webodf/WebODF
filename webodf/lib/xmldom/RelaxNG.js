@@ -51,6 +51,22 @@
  */
 runtime.loadClass("xmldom.RelaxNGParser");
 /**
+ * @typedef {{
+ *     type: string,
+ *     nullable: boolean,
+ *     hash: (undefined|string),
+ *     nc: (undefined|!xmldom.RelaxNGItem),
+ *     p: (undefined|!xmldom.RelaxNGItem),
+ *     p1: (undefined|!xmldom.RelaxNGItem),
+ *     p2: (undefined|!xmldom.RelaxNGItem),
+ *     textDeriv: (undefined|function(*=,*=):xmldom.RelaxNGItem),
+ *     startTagOpenDeriv: (undefined|function(*=):xmldom.RelaxNGItem),
+ *     attDeriv: function(*=,*=):xmldom.RelaxNGItem,
+ *     startTagCloseDeriv: function():xmldom.RelaxNGItem,
+ *     endTagDeriv: (undefined|function():xmldom.RelaxNGItem)
+ *  }}*/
+xmldom.RelaxNGItem;
+/**
  * @constructor
  */
 xmldom.RelaxNG = function RelaxNG() {
@@ -66,77 +82,137 @@ xmldom.RelaxNG = function RelaxNG() {
         createNameClass,
         createData,
         makePattern,
+        applyAfter,
+        childDeriv,
+        rootPattern,
+        /**@type{!xmldom.RelaxNGItem}*/
         notAllowed = {
             type: "notAllowed",
             nullable: false,
             hash: "notAllowed",
+            nc: undefined,
+            p: undefined,
+            p1: undefined,
+            p2: undefined,
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return notAllowed; },
             endTagDeriv: function () { return notAllowed; }
         },
+        /**@type{!xmldom.RelaxNGItem}*/
         empty = {
             type: "empty",
             nullable: true,
             hash: "empty",
+            nc: undefined,
+            p: undefined,
+            p1: undefined,
+            p2: undefined,
             textDeriv: function () { return notAllowed; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return empty; },
             endTagDeriv: function () { return notAllowed; }
         },
+        /**@type{!xmldom.RelaxNGItem}*/
         text = {
             type: "text",
             nullable: true,
             hash: "text",
+            nc: undefined,
+            p: undefined,
+            p1: undefined,
+            p2: undefined,
             textDeriv: function () { return text; },
             startTagOpenDeriv: function () { return notAllowed; },
             attDeriv: function () { return notAllowed; },
             startTagCloseDeriv: function () { return text; },
             endTagDeriv: function () { return notAllowed; }
-        },
-        applyAfter,
-        childDeriv,
-        rootPattern;
+        };
 
+    /**
+     * @param {function():!xmldom.RelaxNGItem} func
+     * @return {function():!xmldom.RelaxNGItem}
+     */
     function memoize0arg(func) {
-        return (function () {
+        /**
+         * @return {function():!xmldom.RelaxNGItem}
+         */
+        function f() {
+            /**
+             * @type {xmldom.RelaxNGItem}
+             */
             var cache;
-            return function () {
+            /**
+             * @return {!xmldom.RelaxNGItem}
+             */
+            function g() {
                 if (cache === undefined) {
                     cache = func();
                 }
                 return cache;
-            };
-        }());
+            }
+            return g;
+        }
+        return f();
     }
+    /**
+     * @param {string} type
+     * @param {function(!xmldom.RelaxNGItem):!xmldom.RelaxNGItem} func
+     * @return {function(!xmldom.RelaxNGItem):!xmldom.RelaxNGItem}
+     */
     function memoize1arg(type, func) {
-        return (function () {
-            var cache = {}, cachecount = 0;
-            return function (a) {
+        /**
+         * @return {function(!xmldom.RelaxNGItem):!xmldom.RelaxNGItem}
+         */
+        function f() {
+            var /**@type{!Object.<string,!xmldom.RelaxNGItem>}*/
+                cache = {},
+                /**@type{number}*/
+                cachecount = 0;
+            /**
+             * @param {!xmldom.RelaxNGItem} a
+             * @return {!xmldom.RelaxNGItem}
+             */
+            function g(a) {
                 var ahash = a.hash || a.toString(),
                     v;
-                v = cache[ahash];
-                if (v !== undefined) {
-                    return v;
+                if (cache.hasOwnProperty(ahash)) {
+                    return cache[ahash];
                 }
                 cache[ahash] = v = func(a);
                 v.hash = type + cachecount.toString();
                 cachecount += 1;
                 return v;
-            };
-        }());
+            }
+            return g;
+        }
+        return f();
     }
+    /**
+     * @param {function(!Node):!xmldom.RelaxNGItem} func
+     * @return {function(!Node):!xmldom.RelaxNGItem}
+     */
     function memoizeNode(func) {
-        return (function () {
-            var cache = {};
-            return function (node) {
-                var v, m;
-                m = cache[node.localName];
-                if (m === undefined) {
+        /**
+         * @return {function(!Node):!xmldom.RelaxNGItem}
+         */
+        function f() {
+            var /**@type{!Object.<string,!Object.<string,!xmldom.RelaxNGItem>>}*/
+                cache = {};
+            /**
+             * @param {!Node} node
+             * @return {!xmldom.RelaxNGItem}
+             */
+            function g(node) {
+                var v,
+                    /**@type{!Object.<string,!xmldom.RelaxNGItem>}*/
+                    m;
+                if (!cache.hasOwnProperty(node.localName)) {
                     cache[node.localName] = m = {};
                 } else {
+                    m = cache[node.localName];
                     v = m[node.namespaceURI];
                     if (v !== undefined) {
                         return v;
@@ -144,68 +220,108 @@ xmldom.RelaxNG = function RelaxNG() {
                 }
                 m[node.namespaceURI] = v = func(node);
                 return v;
-            };
-        }());
+            }
+            return g;
+        }
+        return f();
     }
+    /**
+     * @param {string} type
+     * @param {undefined|function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):(undefined|xmldom.RelaxNGItem)} fastfunc
+     * @param {function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):!xmldom.RelaxNGItem} func
+     * @return {function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):!xmldom.RelaxNGItem}
+     */
     function memoize2arg(type, fastfunc, func) {
-        return (function () {
-            var cache = {}, cachecount = 0;
-            return function (a, b) {
-                var v = fastfunc && fastfunc(a, b),
+        /**
+         * @return {function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):!xmldom.RelaxNGItem}
+         */
+        function f() {
+            var /**@type{!Object.<string,!Object.<string,!xmldom.RelaxNGItem>>}*/
+                cache = {},
+                /**@type{number}*/
+                cachecount = 0;
+            /**
+             * @param {!xmldom.RelaxNGItem} a
+             * @param {!xmldom.RelaxNGItem} b
+             * @return {!xmldom.RelaxNGItem}
+             */
+            function g(a, b) {
+                var /**@type{undefined|!xmldom.RelaxNGItem}*/
+                    v = fastfunc && fastfunc(a, b),
                     ahash,
                     bhash,
+                    /**@type{!Object.<string,!xmldom.RelaxNGItem>}*/
                     m;
                 if (v !== undefined) { return v; }
                 ahash = a.hash || a.toString();
                 bhash = b.hash || b.toString();
-                m = cache[ahash];
-                if (m === undefined) {
+                if (!cache.hasOwnProperty(ahash)) {
                     cache[ahash] = m = {};
                 } else {
-                    v = m[bhash];
-                    if (v !== undefined) {
-                        return v;
+                    m = cache[ahash];
+                    if (m.hasOwnProperty(bhash)) {
+                        return m[bhash];
                     }
                 }
                 m[bhash] = v = func(a, b);
                 v.hash = type + cachecount.toString();
                 cachecount += 1;
                 return v;
-            };
-        }());
+            }
+            return g;
+        }
+        return f();
     }
-    // this memoize function can be used for functions where the order of two
-    // arguments is not important
+    /**
+     * This memoize function can be used for functions where the order of two
+     * arguments is not important.
+     * @param {string} type
+     * @param {undefined|function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):(undefined|!xmldom.RelaxNGItem)} fastfunc
+     * @param {function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):!xmldom.RelaxNGItem} func
+     * @return {function(!xmldom.RelaxNGItem,!xmldom.RelaxNGItem):!xmldom.RelaxNGItem}
+     */
     function unorderedMemoize2arg(type, fastfunc, func) {
-        return (function () {
-            var cache = {}, cachecount = 0;
-            return function (a, b) {
-                var v = fastfunc && fastfunc(a, b),
+        function f() {
+            var /**@type{!Object.<string,!Object.<string,!xmldom.RelaxNGItem>>}*/
+                cache = {},
+                /**@type{number}*/
+                cachecount = 0;
+            /**
+             * @param {!xmldom.RelaxNGItem} a
+             * @param {!xmldom.RelaxNGItem} b
+             * @return {!xmldom.RelaxNGItem}
+             */
+            function g(a, b) {
+                var /**@type{undefined|!xmldom.RelaxNGItem}*/
+                    v = fastfunc && fastfunc(a, b),
                     ahash,
                     bhash,
+                    hash,
+                    /**@type{!Object.<string,!xmldom.RelaxNGItem>}*/
                     m;
                 if (v !== undefined) { return v; }
                 ahash = a.hash || a.toString();
                 bhash = b.hash || b.toString();
                 if (ahash < bhash) {
-                    m = ahash; ahash = bhash; bhash = m;
-                    m = a; a = b; b = m;
+                    hash = ahash; ahash = bhash; bhash = hash;
+                    hash = a; a = b; b = hash;
                 }
-                m = cache[ahash];
-                if (m === undefined) {
+                if (!cache.hasOwnProperty(ahash)) {
                     cache[ahash] = m = {};
                 } else {
-                    v = m[bhash];
-                    if (v !== undefined) {
-                        return v;
+                    m = cache[ahash];
+                    if (m.hasOwnProperty(bhash)) {
+                        return m[bhash];
                     }
                 }
                 m[bhash] = v = func(a, b);
                 v.hash = type + cachecount.toString();
                 cachecount += 1;
                 return v;
-            };
-        }());
+            }
+            return g;
+        }
+        return f();
     }
     function getUniqueLeaves(leaves, pattern) {
         if (pattern.p1.type === "choice") {
@@ -224,12 +340,20 @@ xmldom.RelaxNG = function RelaxNG() {
         if (p2 === notAllowed) { return p1; }
         if (p1 === p2) { return p1; }
     }, function (p1, p2) {
+        /**
+         * @param {!xmldom.RelaxNGItem} p1
+         * @param {!xmldom.RelaxNGItem} p2
+         * @return {!xmldom.RelaxNGItem}
+         */
         function makeChoice(p1, p2) {
             return {
                 type: "choice",
+                nullable: p1.nullable || p2.nullable,
+                hash: undefined,
+                nc: undefined,
+                p: undefined,
                 p1: p1,
                 p2: p2,
-                nullable: p1.nullable || p2.nullable,
                 textDeriv: function (context, text) {
                     return createChoice(p1.textDeriv(context, text),
                         p2.textDeriv(context, text));
@@ -275,9 +399,10 @@ xmldom.RelaxNG = function RelaxNG() {
     }, function (p1, p2) {
         return {
             type: "interleave",
+            nullable: p1.nullable && p2.nullable,
+            hash: undefined,
             p1: p1,
             p2: p2,
-            nullable: p1.nullable && p2.nullable,
             textDeriv: function (context, text) {
                 return createChoice(
                     createInterleave(p1.textDeriv(context, text), p2),
@@ -301,7 +426,8 @@ xmldom.RelaxNG = function RelaxNG() {
             startTagCloseDeriv: memoize0arg(function () {
                 return createInterleave(p1.startTagCloseDeriv(),
                     p2.startTagCloseDeriv());
-            })
+            }),
+            endTagDeriv: undefined
         };
     });
     createGroup = memoize2arg("group", function (p1, p2) {
@@ -417,8 +543,13 @@ xmldom.RelaxNG = function RelaxNG() {
         return {
             type: "attribute",
             nullable: false,
+            hash: undefined,
             nc: nc,
             p: p,
+            p1: undefined,
+            p2: undefined,
+            textDeriv: undefined,
+            startTagOpenDeriv: undefined,
             attDeriv: function (context, attribute) {
                 if (nc.contains(attribute) && valueMatch(context, p,
                         attribute.nodeValue)) {
@@ -426,7 +557,8 @@ xmldom.RelaxNG = function RelaxNG() {
                 }
                 return notAllowed;
             },
-            startTagCloseDeriv: function () { return notAllowed; }
+            startTagCloseDeriv: function () { return notAllowed; },
+            endTagDeriv: undefined
         };
     });
     function createList() {
