@@ -46,15 +46,23 @@
 gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
     "use strict";
     var self = this,
+        /**@type{!HTMLDivElement}*/
         handle,
+        /**@type{!HTMLImageElement}*/
         image,
         pendingImageUrl,
         displayShown = "block",
         displayHidden = "none";
 
+    /**
+     * @param {!string} color
+     */
     this.setColor = function (color) {
         image.style.borderColor = color;
     };
+    /**
+     * @param {!string} url
+     */
     this.setImageUrl = function (url) {
         if (self.isVisible()) {
             image.src = url;
@@ -63,9 +71,15 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
             pendingImageUrl = url;
         }
     };
+    /**
+     * @return {boolean}
+     */
     this.isVisible = function () {
         return (handle.style.display === displayShown);
     };
+    /**
+     * @return {undefined}
+     */
     this.show = function () {
         if (pendingImageUrl) {
             image.src = pendingImageUrl;
@@ -73,9 +87,16 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
         }
         handle.style.display = displayShown;
     };
+    /**
+     * @return {undefined}
+     */
     this.hide = function () {
         handle.style.display = displayHidden;
     };
+    /**
+     * @param {boolean} isFocussed
+     * @return {undefined}
+     */
     this.markAsFocussed = function (isFocussed) {
         handle.className = (isFocussed ? "active" : "");
     };
@@ -84,18 +105,19 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         parentElement.removeChild(handle);
         callback();
     };
-
 
     function init() {
         var document = /**@type{!Document}*/(parentElement.ownerDocument),
             htmlns = document.documentElement.namespaceURI;
 
-        handle = document.createElementNS(htmlns, "div");
-        image = document.createElementNS(htmlns, "img");
+        handle = /**@type{!HTMLDivElement}*/
+                 (document.createElementNS(htmlns, "div"));
+        image = /**@type{!HTMLImageElement}*/
+                (document.createElementNS(htmlns, "img"));
         image.width = 64;
         image.height = 64;
         handle.appendChild(image);

@@ -52,18 +52,30 @@ runtime.loadClass("ops.OdtCursor");
  */
 gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
-    var /**@const*/MIN_CARET_HEIGHT_PX = 8, /** 8px = 6pt font size */
-        /**@const*/DEFAULT_CARET_TOP = "5%",
-        /**@const*/DEFAULT_CARET_HEIGHT = "1em",
+    var /**@const*/
+        MIN_CARET_HEIGHT_PX = 8, /** 8px = 6pt font size */
+        /**@const*/
+        DEFAULT_CARET_TOP = "5%",
+        /**@const*/
+        DEFAULT_CARET_HEIGHT = "1em",
+        /**@type{!HTMLSpanElement}*/
         span,
+        /**@type{!gui.Avatar}*/
         avatar,
+        /**@type{!Element}*/
         cursorNode,
+        /**@type{boolean}*/
         isShown = true,
         shouldBlink = false,
+        /**@type{boolean}*/
         blinking = false,
         blinkTimeout,
         domUtils = new core.DomUtils();
 
+    /**
+     * @param {boolean} reset
+     * @return {undefined}
+     */
     function blink(reset) {
         if (!shouldBlink || !cursorNode.parentNode) {
             // stop blinking when removed from the document
@@ -72,8 +84,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
 
         if (!blinking || reset) {
             if (reset && blinkTimeout !== undefined) {
-                    runtime.clearTimeout(blinkTimeout);
-                }
+                runtime.clearTimeout(blinkTimeout);
+            }
 
             blinking = true;
             // switch between transparent and color
@@ -124,9 +136,12 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @returns {!number}
      */
     function verticalOverlap(cursorNode, rangeRect) {
-        var cursorRect = cursorNode.getBoundingClientRect(),
+        var cursorRect,
             intersectTop = 0,
             intersectBottom = 0;
+        if (cursorNode.nodeType === Node.ELEMENT_NODE) {
+            cursorRect = /**@type{!Element}*/(cursorNode).getBoundingClientRect();
+        }
 
         if (cursorRect && rangeRect) {
             intersectTop = Math.max(cursorRect.top, rangeRect.top);
@@ -185,11 +200,13 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
-     * Tweak the height and top offset of the caret to display closely inline in the text block.
-     * This uses ranges to account for line-height and text offsets
+     * Tweak the height and top offset of the caret to display closely inline in
+     * the text block.
+     * This uses ranges to account for line-height and text offsets.
      *
-     * This adjustment is necessary as various combinations of fonts and line sizes otherwise cause
-     * the caret to appear above or below the natural line of the text
+     * This adjustment is necessary as various combinations of fonts and line
+     * sizes otherwise cause the caret to appear above or below the natural line
+     * of the text.
      * Fonts known to cause this problem:
      * - STIXGeneral (MacOS, Chrome & Safari)
      */
@@ -231,6 +248,9 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
     this.handleUpdate = handleUpdate;
     
+    /**
+     * @return {undefined}
+     */
     this.refreshCursorBlinking = function () {
         if (blinkOnRangeSelect || cursor.getSelectedRange().collapsed) {
             shouldBlink = true;
@@ -240,34 +260,56 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             span.style.opacity = "0";
         }
     };
-
+    /**
+     * @return {undefined}
+     */
     this.setFocus = function () {
         shouldBlink = true;
         avatar.markAsFocussed(true);
         blink(true);
     };
+    /**
+     * @return {undefined}
+     */
     this.removeFocus = function () {
         shouldBlink = false;
         avatar.markAsFocussed(false);
         span.style.opacity = "1";
     };
+    /**
+     * @return {undefined}
+     */
     this.show = function () {
         isShown = true;
         handleUpdate();
         avatar.markAsFocussed(true);
     };
+    /**
+     * @return {undefined}
+     */
     this.hide = function () {
         isShown = false;
         handleUpdate();
         avatar.markAsFocussed(false);
     };
+    /**
+     * @param {string} url
+     * @return {undefined}
+     */
     this.setAvatarImageUrl = function (url) {
         avatar.setImageUrl(url);
     };
+    /**
+     * @param {string} newColor
+     * @return {undefined}
+     */
     this.setColor = function (newColor) {
         span.style.borderColor = newColor;
         avatar.setColor(newColor);
     };
+    /**
+     * @return {!ops.OdtCursor}}
+     */
     this.getCursor = function () {
         return cursor;
     };
@@ -277,6 +319,9 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     this.getFocusElement = function () {
         return span;
     };
+    /**
+     * @return {undefined}
+     */
     this.toggleHandleVisibility = function () {
         if (avatar.isVisible()) {
             avatar.hide();
@@ -284,13 +329,18 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             avatar.show();
         }
     };
+    /**
+     * @return {undefined}
+     */
     this.showHandle = function () {
         avatar.show();
     };
+    /**
+     * @return {undefined}
+     */
     this.hideHandle = function () {
         avatar.hide();
     };
-
     /**
      * Scrolls the view on the canvas in such a way that the caret is
      * completely visible, with a small margin around.
@@ -347,8 +397,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @param {!function(!Object=)} callback Callback to call when the destroy is complete, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
-        avatar.destroy(function(err) {
+    this.destroy = function (callback) {
+        avatar.destroy(function (err) {
             if (err) {
                 callback(err);
             } else {
@@ -361,7 +411,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     function init() {
         var dom = cursor.getOdtDocument().getDOM(),
             htmlns = dom.documentElement.namespaceURI;
-        span = dom.createElementNS(htmlns, "span");
+        span = /**@type{!HTMLSpanElement}*/
+               (dom.createElementNS(htmlns, "span"));
         span.style.top = DEFAULT_CARET_TOP;
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);

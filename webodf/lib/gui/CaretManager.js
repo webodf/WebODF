@@ -43,14 +43,16 @@ runtime.loadClass("gui.Caret");
 /**
  * The caret manager is responsible for creating a caret as UI representation
  * of a member's cursor.
- * If the caret is for the local member, then the manager will control the caret's
- * current focus, and ensure the caret stays visible after every local operation.
+ * If the caret is for the local member, then the manager will control the
+ * caret's current focus, and ensure the caret stays visible after every local
+ * operation.
  * @constructor
  * @param {!gui.SessionController} sessionController
  */
 gui.CaretManager = function CaretManager(sessionController) {
     "use strict";
-    var carets = {},
+    var /**@type{!Object.<string,!gui.Caret>}*/
+        carets = {},
         window = runtime.getWindow(),
         scrollIntoViewScheduled = false;
 
@@ -63,10 +65,12 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
-     * @returns {!Array.<!gui.Caret>}
+     * @return {!Array.<!gui.Caret>}
      */
     function getCarets() {
-        return Object.keys(carets).map(function(memberid) { return carets[memberid]; });
+        return Object.keys(carets).map(function (memberid) {
+            return carets[memberid];
+        });
     }
 
     /**
@@ -117,9 +121,9 @@ gui.CaretManager = function CaretManager(sessionController) {
             caret.handleUpdate(); // This is really noticeable if delayed. Calculate the cursor size immediately
             if (!scrollIntoViewScheduled) {
                 scrollIntoViewScheduled = true;
-                // Delay the actual scrolling just in case there are a batch of operations
-                // being performed. 50ms is close enough to "instant" that the user won't notice
-                // the delay here.
+                // Delay the actual scrolling just in case there are a batch of
+                // operations being performed. 50ms is close enough to "instant"
+                // that the user won't notice the delay here.
                 runtime.setTimeout(executeEnsureCaretVisible, 50);
             }
         }
@@ -220,7 +224,7 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         var odtDocument = sessionController.getSession().getOdtDocument(),
             eventManager = sessionController.getEventManager(),
             caretArray = getCarets();
@@ -234,12 +238,14 @@ gui.CaretManager = function CaretManager(sessionController) {
         window.removeEventListener("focus", showLocalCaret, false);
         window.removeEventListener("blur", hideLocalCaret, false);
 
-        (function destroyCaret(i, err){
+        (function destroyCaret(i, err) {
             if (err) {
                 callback(err);
             } else {
-                if(i < caretArray.length) {
-                    caretArray[i].destroy(function(err){ destroyCaret(i+1, err);});
+                if (i < caretArray.length) {
+                    caretArray[i].destroy(function (err) {
+                        destroyCaret(i + 1, err);
+                    });
                 } else {
                     callback();
                 }

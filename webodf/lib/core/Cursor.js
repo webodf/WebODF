@@ -171,7 +171,6 @@ core.Cursor = function Cursor(document, memberId) {
             selectedRange.setStartAfter(getStartNode());
             selectedRange.setEndBefore(getEndNode());
         }
-
         return selectedRange;
     };
     /**

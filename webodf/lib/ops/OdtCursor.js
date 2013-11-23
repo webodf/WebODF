@@ -67,8 +67,9 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
     var self = this,
         validSelectionTypes = {},
         selectionType,
-        /**@type{gui.SelectionMover}*/
+        /**@type{!gui.SelectionMover}*/
         selectionMover,
+        /**@type{!core.Cursor}*/
         cursor;
 
     /**
@@ -98,7 +99,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         return moved;
     };
 
-/*jslint emptyblock: true*/
+    /*jslint emptyblock: true*/
     /**
      * Is called whenever the cursor is moved around manually.
      * Set this property to another function that should be called,
@@ -107,7 +108,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      */
     this.handleUpdate = function () {
     };
-/*jslint emptyblock: false*/
+    /*jslint emptyblock: false*/
     this.getStepCounter = function () {
         return selectionMover.getStepCounter();
     };
@@ -131,7 +132,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      * dragging),, this will return the exact same node as getNode
      * @returns {!Element}
      */
-    this.getAnchorNode = function() {
+    this.getAnchorNode = function () {
         return cursor.getAnchorNode();
     };
     /**
@@ -170,7 +171,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      * Gets the current selection type.
      * @return {!string}
      */
-    this.getSelectionType = function() {
+    this.getSelectionType = function () {
         return selectionType;
     };
 
@@ -179,7 +180,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      * @param {!string} value
      * @return {undefined}
      */
-    this.setSelectionType = function(value) {
+    this.setSelectionType = function (value) {
         if (validSelectionTypes.hasOwnProperty(value)) {
             selectionType = value;
         } else {
@@ -191,7 +192,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      * Reset selection type to default.
      * @return {undefined}
      */
-    this.resetSelectionType = function() {
+    this.resetSelectionType = function () {
         self.setSelectionType(ops.OdtCursor.RangeSelection);
     };
 
@@ -207,8 +208,12 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
     init();
 };
 
-/** @const@type {!string} */ops.OdtCursor.RangeSelection = 'Range';
-/** @const@type {!string} */ops.OdtCursor.RegionSelection = 'Region';
+/**@const
+   @type {!string} */
+ops.OdtCursor.RangeSelection = 'Range';
+/**@const
+   @type {!string} */
+ops.OdtCursor.RegionSelection = 'Region';
 
 (function () {
     "use strict";

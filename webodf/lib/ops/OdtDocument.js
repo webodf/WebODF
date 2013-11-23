@@ -59,8 +59,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     var self = this,
         odfUtils,
         domUtils,
-        /**!Object.<!ops.OdtCursor>*/cursors = {},
-        /**!Object.<!ops.Member>*/members = {},
+        /**!Object.<!ops.OdtCursor>*/
+        cursors = {},
+        /**!Object.<!ops.Member>*/
+        members = {},
         eventNotifier = new core.EventNotifier([
             ops.OdtDocument.signalMemberAdded,
             ops.OdtDocument.signalMemberUpdated,
@@ -78,8 +80,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalStepsInserted,
             ops.OdtDocument.signalStepsRemoved
         ]),
-        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-        /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
+        /**@const*/
+        FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+        /**@const*/
+        FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter,
         stepsTranslator,
         lastEditingOp,
@@ -108,8 +112,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!boolean}
      */
     function isRoot(node) {
-        if ((node.namespaceURI === odf.Namespaces.officens && node.localName === 'text') ||
-            (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation')) {
+        if ((node.namespaceURI === odf.Namespaces.officens
+             && node.localName === 'text'
+            ) || (node.namespaceURI === odf.Namespaces.officens
+                  && node.localName === 'annotation')) {
             return true;
         }
         return false;
@@ -174,7 +180,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getIteratorAtPosition = getIteratorAtPosition;
 
     /**
-     *
      * @param {!Node} node
      * @param {!number} offset
      * @param {?boolean=} roundToNextPosition If the position is not accepted,
@@ -182,19 +187,19 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * round to the previous closest allowed position.
      * @returns {!number}
      */
-    this.convertDomPointToCursorStep = function(node, offset, roundToNextPosition) {
+    this.convertDomPointToCursorStep = function (node, offset, roundToNextPosition) {
         return stepsTranslator.convertDomPointToSteps(node, offset, roundToNextPosition);
     };
 
     /**
-     *
      * @param {!Node} anchorNode
      * @param {!number} anchorOffset
      * @param {!Node} focusNode
      * @param {!number} focusOffset
      * @returns {{position: !number, length: number}}
      */
-    this.convertDomToCursorRange = function(anchorNode, anchorOffset, focusNode, focusOffset) {
+    this.convertDomToCursorRange = function (anchorNode, anchorOffset,
+            focusNode, focusOffset) {
         var point1,
             point2;
 
@@ -217,7 +222,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!number} length
      * @returns {Range}
      */
-    this.convertCursorToDomRange = function(position, length) {
+    this.convertCursorToDomRange = function (position, length) {
         var range = getDOM().createRange(),
             point1,
             point2;
@@ -446,7 +451,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         var iterator = getIteratorAtPosition(position),
             container,
             offset,
-            firstSpaceElementChild, lastSpaceElementChild;
+            firstSpaceElementChild,
+            lastSpaceElementChild;
 
         container = iterator.container();
         offset = iterator.unfilteredDomOffset();
