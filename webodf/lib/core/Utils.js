@@ -61,6 +61,41 @@ core.Utils = function Utils() {
     }
     this.hashString = hashString;
 
+    var mergeObjects;
+    /**
+     * @param {*} destination
+     * @param {*} source
+     * @return {*}
+     */
+    function mergeItems(destination, source) {
+        // Property in destination object set; update its value.
+        if (source && Array.isArray(source)) {
+            destination = destination || [];
+            if (!Array.isArray(destination)) {
+                throw "Destination is not an array.";
+            }
+            // An array will report as a type of object, but this is not able to
+            // mapped using mergeObjects
+            // The following will clone each individual item in the source array
+            // and append them to the end of the destination array
+            destination = /**@type{!Array.<*>}*/(destination).concat(
+                /**@type{!Array.<*>}*/(source).map(function (obj) {
+                    return mergeItems(null, obj);
+                })
+            );
+        } else if (source && typeof source === 'object') {
+            destination = destination || {};
+            if (typeof destination !== 'object') {
+                throw "Destination is not an object.";
+            }
+            Object.keys(/**@type{!Object}*/(source)).forEach(function (p) {
+                destination[p] = mergeItems(destination[p], source[p]);
+            });
+        } else {
+            destination = source;
+        }
+        return destination;
+    }
     /**
      * Recursively merge properties of two objects
      * Merge behaviours are:
@@ -74,26 +109,12 @@ core.Utils = function Utils() {
      * @param {!Object} source
      * @return {!Object}
      */
-    function mergeObjects(destination, source) {
-        // Property in destination object set; update its value.
-        if (source && Array.isArray(source)) {
-            // An array will report as a type of object, but this is not able to
-            // mapped using mergeObjects
-            // The following will clone each individual item in the source array
-            // and append them to the end of the destination array
-            destination = (destination || []).concat(source.map(function (obj) {
-                return mergeObjects({}, obj);
-            }));
-        } else if (source && typeof source === 'object') {
-            destination = destination || {};
-            Object.keys(source).forEach(function (p) {
-                destination[p] = mergeObjects(destination[p], source[p]);
-            });
-        } else {
-            destination = source;
-        }
+    mergeObjects = function (destination, source) {
+        Object.keys(source).forEach(function (p) {
+            destination[p] = mergeItems(destination[p], source[p]);
+        });
         return destination;
-    }
+    };
     this.mergeObjects = mergeObjects;
 };
 
