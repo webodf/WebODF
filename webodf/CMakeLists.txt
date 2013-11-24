@@ -85,7 +85,9 @@ if (Java_JAVA_EXECUTABLE)
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js-
-      COMMAND ${CMAKE_COMMAND} ARGS -E rename simplecompiled.js- simplecompiled.js
+      # in WHITESPACE_ONLY mode, it is not possible to define IS_COMPILED_CODE
+      # so the value for IS_COMPILED_CODE is set by find and replace in the code
+      COMMAND ${CMAKE_COMMAND} -DFILENAME:STRING="${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js" -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/set_IS_COMPILED_CODE.cmake
       DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES}
         ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
   )
