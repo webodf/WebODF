@@ -393,10 +393,16 @@
          * @param {!Element|!Document} node
          * @param {!string} namespace
          * @param {!string} tagName
-         * @returns {!Array.<!Node>}
+         * @returns {!Array.<!Element>}
          */
         function getElementsByTagNameNS(node, namespace, tagName) {
-            return Array.prototype.slice.call(node.getElementsByTagNameNS(namespace, tagName));
+            var e = [], list, i, l;
+            list = node.getElementsByTagNameNS(namespace, tagName);
+            e.length = l = list.length;
+            for (i = 0; i < l; i += 1) {
+                e[i] = /**@type{!Element}*/(list.item(i));
+            }
+            return e;
         }
         this.getElementsByTagNameNS = getElementsByTagNameNS;
 

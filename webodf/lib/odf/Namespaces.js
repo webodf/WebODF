@@ -103,7 +103,7 @@ odf.Namespaces.forEachPrefix = function forEachPrefix(cb) {
 
 /**
  * Returns the namespace belonging to the prefix or null.
- * @param {!string} prefix
+ * @param {string} prefix
  * @return {?string}
  */
 odf.Namespaces.resolvePrefix = function resolvePrefix(prefix) {
