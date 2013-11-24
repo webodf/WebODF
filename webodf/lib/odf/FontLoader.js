@@ -47,7 +47,7 @@ runtime.loadClass("odf.OdfContainer");
  **/
 odf.FontLoader = (function () {
     "use strict";
-    var xpath = new xmldom.XPath(),
+    var xpath = xmldom.XPath,
         base64 = new core.Base64();
     /**
      * @param {!Element} fontFaceDecls

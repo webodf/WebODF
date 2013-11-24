@@ -316,7 +316,7 @@ odf.StyleInfo = function StyleInfo() {
          * @type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
          */
         elements,
-        xpath = new xmldom.XPath();
+        xpath = xmldom.XPath;
 
     /**
      * Return if a particular element is the parent style for any other style of the same family.

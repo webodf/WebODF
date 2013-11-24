@@ -235,7 +235,7 @@ odf.Style2CSS = function Style2CSS() {
         documentType,
         odfRoot,
         defaultFontSize,
-        xpath = new xmldom.XPath(),
+        xpath = xmldom.XPath,
         cssUnits = new core.CSSUnits();
 
     // helper functions

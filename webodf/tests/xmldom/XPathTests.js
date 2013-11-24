@@ -74,7 +74,7 @@ xmldom.XPathTests = function XPathTests(runner) {
     }
     function test1() {
         setupDoc();
-        var xpath = new xmldom.XPath(),
+        var xpath = xmldom.XPath,
             xpaths = {
                 "style:font-face[svg:font-face-src]": "t.fontFace",
                 ".//*[*[@text:anchor-type='paragraph']]": "t.fontFace",

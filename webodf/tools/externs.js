@@ -500,6 +500,15 @@ Document.prototype.createTreeWalker = function (root, whatToShow, filter, entity
  * @return {!NodeIterator}
  */
 Document.prototype.createNodeIterator = function (root, whatToShow, filter, entityReferenceExpansion) {"use strict"; };
+/**
+ * @param {string} xpathExpression
+ * @param {!Node} contextNode
+ * @param {!function(string):?string} namespaceResolver
+ * @param {?number=} resultType
+ * @param {*=} result
+ * @return {XPathResult}
+ */
+Document.prototype.evaluate = function (xpathExpression, contextNode, namespaceResolver, resultType, result) {"use strict"; };
 
 /**
  * http://www.w3.org/TR/DOM-Level-2-Traversal-Range/traversal.html#Traversal-NodeFilter

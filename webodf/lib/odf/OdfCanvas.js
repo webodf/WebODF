@@ -358,7 +358,7 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@const@type {!string}*/webodfhelperns = "urn:webodf:names:helper",
         /**@type{?Window}*/window = runtime.getWindow(),
-        xpath = new xmldom.XPath(),
+        xpath = xmldom.XPath,
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils();
 
