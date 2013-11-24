@@ -278,3 +278,11 @@ ops.OpRemoveText = function OpRemoveText() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    length:number
+}}*/
+ops.OpRemoveText.Spec;

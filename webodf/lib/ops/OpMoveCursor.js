@@ -83,3 +83,12 @@ ops.OpMoveCursor = function OpMoveCursor() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    length:number,
+    selectionType:number
+}}*/
+ops.OpMoveCursor.Spec;

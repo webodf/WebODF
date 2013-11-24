@@ -69,5 +69,10 @@ ops.OpRemoveCursor = function OpRemoveCursor() {
             timestamp: timestamp
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number
+}}*/
+ops.OpRemoveCursor.Spec;

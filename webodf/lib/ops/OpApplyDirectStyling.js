@@ -110,5 +110,12 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
             setProperties: setProperties
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    length:number,
+    setProperties:Object
+}}*/
+ops.OpApplyDirectStyling.Spec;

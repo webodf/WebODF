@@ -91,5 +91,12 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
             styleName: styleName
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    styleName:string
+}}*/
+ops.OpSetParagraphStyle.Spec;

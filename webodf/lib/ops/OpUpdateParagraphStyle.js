@@ -139,5 +139,12 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             removedProperties: removedProperties
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    setProperties:Object,
+    removedProperties:Object
+}}*/
+ops.OpUpdateParagraphStyle.Spec;
