@@ -42,12 +42,9 @@
  * Singleton object which provides namespace ids and
  * some utility methods related to prefixes and namespaces
  * @const
- * @type{!Object.<string,string>}
  */
-odf.Namespaces = (function () {
-    "use strict";
-
-    var ns = {
+odf.Namespaces = {
+    namespaceMap: {
         db: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
         dc: "http://purl.org/dc/elements/1.1/",
         dr3d: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
@@ -66,16 +63,23 @@ odf.Namespaces = (function () {
         xlink: 'http://www.w3.org/1999/xlink',
         xml: "http://www.w3.org/XML/1998/namespace"
     },
-        // create the actual odf.Namespaces object as a function, because the
-        // class loader of runtime expects a function
-        namespaces;
-    /*jslint emptyblock: true*/
-    namespaces = function Namespaces() {
-    };
-    /*jslint emptyblock: false*/
-    namespaces.namespaceMap = ns;
-    return namespaces;
-}());
+    dbns: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
+    dcns: "http://purl.org/dc/elements/1.1/",
+    dr3dns: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
+    drawns: "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+    chartns: "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
+    fons: "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+    formns: "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+    numberns: "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
+    officens: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+    presentationns: "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
+    stylens: "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+    svgns: "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+    tablens: "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+    textns: "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+    xlinkns: 'http://www.w3.org/1999/xlink',
+    xmlns: "http://www.w3.org/XML/1998/namespace"
+};
 
 /**
  * Calls the passed callback for all pairs of prefix and namespace
@@ -85,7 +89,9 @@ odf.Namespaces = (function () {
  */
 odf.Namespaces.forEachPrefix = function forEachPrefix(cb) {
     "use strict";
-    var ns = odf.Namespaces.namespaceMap,
+    var /**@type{!Object.<string,string>}*/
+        ns = odf.Namespaces.namespaceMap,
+        /**@type{string}*/
         prefix;
 
     for (prefix in ns) {
@@ -102,48 +108,14 @@ odf.Namespaces.forEachPrefix = function forEachPrefix(cb) {
  */
 odf.Namespaces.resolvePrefix = function resolvePrefix(prefix) {
     "use strict";
-    return odf.Namespaces.namespaceMap[prefix] || null;
+    var /**@type{?string}*/
+        r = null;
+    if (odf.Namespaces.namespaceMap.hasOwnProperty(prefix)) {
+        r = /**@type{string}*/(odf.Namespaces.namespaceMap[prefix]);
+    }
+    return r;
 };
 
 // TODO: document where and why this is needed
 odf.Namespaces.resolvePrefix.lookupNamespaceURI = odf.Namespaces.resolvePrefix;
 
-// add all namespaces
-/**@type{!string}*/
-odf.Namespaces.dbns = odf.Namespaces.namespaceMap.db;
-/**@type{!string}*/
-odf.Namespaces.dcns = odf.Namespaces.namespaceMap.dc;
-/**@type{!string}*/
-odf.Namespaces.dr3dns = odf.Namespaces.namespaceMap.dr3d;
-/**@type{!string}*/
-odf.Namespaces.drawns = odf.Namespaces.namespaceMap.draw;
-/**@type{!string}*/
-odf.Namespaces.chartns = odf.Namespaces.namespaceMap.chart;
-/**@type{!string}*/
-odf.Namespaces.fons = odf.Namespaces.namespaceMap.fo;
-/**@type{!string}*/
-odf.Namespaces.formns = odf.Namespaces.namespaceMap.form;
-/**@type{!string}*/
-odf.Namespaces.metans = odf.Namespaces.namespaceMap.meta;
-/**@type{!string}*/
-odf.Namespaces.numberns = odf.Namespaces.namespaceMap.number;
-/**@type{!string}*/
-odf.Namespaces.officens = odf.Namespaces.namespaceMap.office;
-/**@type{!string}*/
-odf.Namespaces.presentationns = odf.Namespaces.namespaceMap.presentation;
-/**@type{!string}*/
-odf.Namespaces.stylens = odf.Namespaces.namespaceMap.style;
-/**@type{!string}*/
-odf.Namespaces.svgns = odf.Namespaces.namespaceMap.svg;
-/**@type{!string}*/
-odf.Namespaces.tablens = odf.Namespaces.namespaceMap.table;
-/**@type{!string}*/
-odf.Namespaces.textns = odf.Namespaces.namespaceMap.text;
-/**@type{!string}*/
-odf.Namespaces.xlinkns = odf.Namespaces.namespaceMap.xlink;
-/**@type{!string}*/
-odf.Namespaces.xmlns = odf.Namespaces.namespaceMap.xml;
-(function () {
-    "use strict";
-    return odf.Namespaces;
-}());
