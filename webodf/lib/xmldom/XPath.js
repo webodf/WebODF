@@ -41,6 +41,14 @@
  * @interface
  */
 xmldom.XPathIterator = function XPathIterator() {"use strict"; };
+/**
+ * @return {?Node}
+ */
+xmldom.XPathIterator.prototype.next = function () {"use strict"; };
+/**
+ * @return {undefined}
+ */
+xmldom.XPathIterator.prototype.reset = function () {"use strict"; };
 /*jslint emptyblock: false*/
 
 /**
@@ -74,8 +82,11 @@ xmldom.XPath = (function () {
     function parseXPathStep(xpath, pos, end, steps) {
         var location = "",
             predicates = [],
+            /**@type{number}*/
             brapos = xpath.indexOf('[', pos),
+            /**@type{number}*/
             slapos = xpath.indexOf('/', pos),
+            /**@type{number}*/
             eqpos = xpath.indexOf('=', pos);
         // parse the location
         if (isSmallestPositive(slapos, brapos, eqpos)) {
@@ -94,6 +105,10 @@ xmldom.XPath = (function () {
         steps.push({location: location, predicates: predicates});
         return pos;
     }
+    /**
+     * @param {string} xpath
+     * @return {!{steps:!Array.<*>, value: *}}
+     */
     function parseXPath(xpath) {
         var steps = [],
             p = 0,
@@ -117,6 +132,12 @@ xmldom.XPath = (function () {
         }
         return {steps: steps, value: value};
     }
+    /**
+     * @param {string} xpath
+     * @param {number} start
+     * @param {!Array.<!{steps:!Array.<*>, value: *}>} predicates
+     * @return {number}
+     */
     parsePredicates = function parsePredicates(xpath, start, predicates) {
         var pos = start,
             l = xpath.length,
@@ -137,16 +158,6 @@ xmldom.XPath = (function () {
         }
         return pos;
     };
-/*jslint emptyblock: true*/
-    /**
-     * @return {Node}
-     */
-    xmldom.XPathIterator.prototype.next = function () {};
-    /**
-     * @return {undefined}
-     */
-    xmldom.XPathIterator.prototype.reset = function () {};
-/*jslint emptyblock: false*/
     /**
      * @class
      * @constructor
@@ -154,13 +165,26 @@ xmldom.XPath = (function () {
      * @implements {xmldom.XPathIterator}
      */
     function XPathNodeIterator() {
-        var node, done = false;
+        var /**@type{?Node}*/
+            node = null,
+            /**@type{boolean}*/
+            done = false;
+        /**
+         * @param {?Node} n
+         * @return {undefined}
+         */
         this.setNode = function setNode(n) {
             node = n;
         };
+        /**
+         * @return {undefined}
+         */
         this.reset = function () {
             done = false;
         };
+        /**
+         * @return {?Node}
+         */
         this.next = function next() {
             var val = done ? null : node;
             done = true;
@@ -180,10 +204,18 @@ xmldom.XPath = (function () {
         this.reset = function reset() {
             it.reset();
         };
+        /**
+         * @return {?Node}
+         */
         this.next = function next() {
             var node = it.next();
             while (node) {
-                node = node.getAttributeNodeNS(namespace, localName);
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    node = /**@type{!Element}*/(node).getAttributeNodeNS(
+                        namespace,
+                        localName
+                    );
+                }
                 if (node) {
                     return node;
                 }
