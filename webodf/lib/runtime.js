@@ -1574,6 +1574,7 @@ var ops = {};
     /**
      * @param {string} classpath
      * @returns {undefined}
+     * @expose
      */
     runtime.loadClass = function (classpath) {
         if (IS_COMPILED_CODE || loadedClasses.hasOwnProperty(classpath)) {

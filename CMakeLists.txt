@@ -250,14 +250,11 @@ endif(NOT ANDROID_SDK_DIR)
 
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
-set(LIBJSFILES
-
+set(TYPEDLIBJSFILES
     lib/runtime.js
     lib/core/Base64.js
-    lib/core/RawDeflate.js
     lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js
-    lib/core/RawInflate.js
     lib/core/LoopWatchDog.js
     lib/core/Utils.js
     lib/core/DomUtils.js
@@ -269,28 +266,35 @@ set(LIBJSFILES
     lib/core/PositionFilterChain.js
     lib/core/ScheduledTask.js
     lib/core/Async.js
-    lib/core/Zip.js
     lib/core/CSSUnits.js
 
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/LSSerializer.js
-    lib/xmldom/RelaxNGParser.js
-    lib/xmldom/RelaxNG.js
-    lib/xmldom/RelaxNG2.js
     lib/xmldom/XPath.js
 
     lib/odf/Namespaces.js
     lib/odf/OdfUtils.js
-    lib/gui/AnnotationViewManager.js
     lib/odf/OdfNodeFilter.js
-    lib/odf/StyleInfo.js
     lib/odf/TextSerializer.js
-    lib/odf/TextStyleApplicator.js
+)
+set(UNTYPEDLIBJSFILES
+
+    lib/core/RawDeflate.js
+    lib/core/RawInflate.js
+    lib/core/Zip.js
+
+    lib/xmldom/RelaxNGParser.js
+    lib/xmldom/RelaxNG.js
+    lib/xmldom/RelaxNG2.js
+
+    lib/odf/StyleInfo.js
     lib/odf/Style2CSS.js
     lib/odf/MetadataManager.js
+    lib/odf/ObjectNameGenerator.js
+    lib/odf/TextStyleApplicator.js
+    lib/gui/AnnotationViewManager.js
     lib/odf/OdfContainer.js
     lib/odf/FontLoader.js
-    lib/odf/ObjectNameGenerator.js
     lib/odf/Formatting.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
@@ -357,6 +361,7 @@ set(LIBJSFILES
     lib/gui/AnnotationController.js
     lib/gui/SessionController.js
 )
+set(LIBJSFILES ${TYPEDLIBJSFILES} ${UNTYPEDLIBJSFILES})
 
 set(HTML5UIFILES
   app/app.js
