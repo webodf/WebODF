@@ -121,6 +121,8 @@ core.ByteArrayWriter = function ByteArrayWriter(encoding) {
      * @return {!Uint8Array}
      */
     this.getByteArray = function () {
-        return new Uint8Array(data.buffer.slice(0, length));
+        var a = new Uint8Array(new ArrayBuffer(length));
+        a.set(data.subarray(0, length));
+        return a;
     };
 };
