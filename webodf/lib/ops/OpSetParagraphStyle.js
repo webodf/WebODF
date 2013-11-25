@@ -55,6 +55,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         styleName = data.styleName;
     };
 
+    this.isEdit = true;
+
     this.execute = function (odtDocument) {
         var iterator, paragraphNode;
 

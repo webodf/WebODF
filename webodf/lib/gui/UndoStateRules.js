@@ -63,20 +63,12 @@ gui.UndoStateRules = function UndoStateRules() {
 
     /**
      * Returns true if the supplied operation
-     * is considered an editing operation from the perspective
-     * of undo/redo behaviour.
+     * is considered an editing operation.
      * @param {ops.Operation} op
      * @returns {boolean} Returns true if the supplied op is an edit operation
      */
     function isEditOperation(op) {
-        switch (getOpType(op)) {
-            case "MoveCursor":
-            case "AddCursor":
-            case "RemoveCursor":
-                return false;
-            default:
-                return true;
-        }
+        return op.isEdit;
     }
     this.isEditOperation = isEditOperation;
 

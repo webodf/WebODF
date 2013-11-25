@@ -48,6 +48,8 @@ ops.OpAddMember = function OpAddMember() {
         setProperties = data.setProperties;
     };
 
+    this.isEdit = false;
+
     this.execute = function (odtDocument) {
         if (odtDocument.getMember(memberid)) {
             return false;

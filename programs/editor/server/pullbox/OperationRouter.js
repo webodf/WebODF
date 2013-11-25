@@ -410,8 +410,8 @@ runtime.log("OperationRouter: instant opsSync requested");
                 var timedOp,
                     opspec = op.spec();
 
-                // note if any local ops modified TODO: find less fragile way, perhaps have the operationFactory check it?
-                hasPushedModificationOps = hasPushedModificationOps || !/^(AddCursor|MoveCursor|RemoveCursor)$/.test(opspec.optype);
+                // note if any local ops modified 
+                hasPushedModificationOps = hasPushedModificationOps || op.isEdit;
 
                 // apply locally
                 opspec.timestamp = (new Date()).getTime();

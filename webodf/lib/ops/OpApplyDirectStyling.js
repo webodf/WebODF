@@ -64,6 +64,8 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         setProperties = data.setProperties;
     };
 
+    this.isEdit = true;
+
     function getRange(odtDocument) {
         var point1 = length >= 0 ? position : position + length,
             point2 = length >= 0 ? position + length : position,

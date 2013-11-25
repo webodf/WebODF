@@ -55,6 +55,8 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         odfUtils = new odf.OdfUtils();
     };
 
+    this.isEdit = true;
+
     this.execute = function (odtDocument) {
         var domPosition, paragraphNode, targetNode,
             node, splitNode, splitChildNode, keptChildNode;

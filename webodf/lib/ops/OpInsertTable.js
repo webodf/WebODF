@@ -62,6 +62,8 @@ ops.OpInsertTable = function OpInsertTable() {
         tableCellStyleMatrix = data.tableCellStyleMatrix;
     };
 
+    this.isEdit = true;
+
     /**
      * @param {!number} row
      * @param {!number} column

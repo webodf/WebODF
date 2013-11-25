@@ -52,6 +52,8 @@ ops.OpAddCursor = function OpAddCursor() {
         timestamp = data.timestamp;
     };
 
+    this.isEdit = false;
+
     this.execute = function (odtDocument) {
         var cursor = odtDocument.getCursor(memberid);
 

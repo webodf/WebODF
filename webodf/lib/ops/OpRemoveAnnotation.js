@@ -57,6 +57,8 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         domUtils = new core.DomUtils();
     };
 
+    this.isEdit = true;
+
     this.execute = function (odtDocument) {
         var iterator = odtDocument.getIteratorAtPosition(position),
             container = iterator.container(),

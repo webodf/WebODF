@@ -55,6 +55,8 @@ ops.OpMoveCursor = function OpMoveCursor() {
         selectionType = data.selectionType || ops.OdtCursor.RangeSelection;
     };
 
+    this.isEdit = false;
+
     this.execute = function (odtDocument) {
         var cursor = odtDocument.getCursor(memberid),
             selectedRange;

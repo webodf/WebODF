@@ -52,6 +52,8 @@ ops.OpUpdateMember = function OpUpdateMember() {
         removedProperties = data.removedProperties;
     };
 
+    this.isEdit = false;
+
     function updateCreators() {
         var xpath = new xmldom.XPath(),
             xp = "//dc:creator[@editinfo:memberid='" + memberid + "']",
