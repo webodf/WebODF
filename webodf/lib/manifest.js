@@ -70,7 +70,6 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js",
         "ops/Session.js",
-        "ops/SessionNodeFilter.js",
         "ops/OpAddMember.js",
         "ops/OpUpdateMember.js",
         "ops/OpRemoveMember.js",
