@@ -586,7 +586,7 @@ odf.StyleInfo = function StyleInfo() {
                 } else {
                     usedStyles[keyname] = map = {};
                 }
-                map[stylename] = 1;
+                /**@type{!Object.<string,number>}*/(map)[stylename] = 1;
             }
         }
         return usedStyles;

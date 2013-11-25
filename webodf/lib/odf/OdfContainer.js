@@ -89,6 +89,7 @@ odf.OdfContainer = (function () {
      * @param {?Node} node
      * @param {!string} ns
      * @param {!string} name
+     * @return {?Element}
      */
     function getDirectChild(node, ns, name) {
         node = node ? node.firstChild : null;

@@ -44,19 +44,43 @@ runtime.loadClass("xmldom.XPath");
 runtime.loadClass("core.CSSUnits");
 
 /**
+ * @typedef {!Object.<string,string|!{derivedStyles:!odf.StyleTreeNode}>}}
+ */
+odf.StyleTreeNode;
+
+/**
  * @constructor
  */
 odf.Style2CSS = function Style2CSS() {
     "use strict";
     var // helper constants
-        /**@const@type{!string}*/ drawns = odf.Namespaces.drawns,
-        /**@const@type{!string}*/ fons = odf.Namespaces.fons,
-        /**@const@type{!string}*/ stylens = odf.Namespaces.stylens,
-        /**@const@type{!string}*/ svgns = odf.Namespaces.svgns,
-        /**@const@type{!string}*/ tablens = odf.Namespaces.tablens,
-        /**@const@type{!string}*/ textns = odf.Namespaces.textns,
-        /**@const@type{!string}*/ xlinkns = odf.Namespaces.xlinkns,
-        /**@const@type{!string}*/ presentationns = odf.Namespaces.presentationns,
+        /**@const
+           @type{!string}*/
+        drawns = odf.Namespaces.drawns,
+        /**@const
+           @type{!string}*/
+        fons = odf.Namespaces.fons,
+        /**@const
+           @type{!string}*/
+        officens = odf.Namespaces.officens,
+        /**@const
+           @type{!string}*/
+        stylens = odf.Namespaces.stylens,
+        /**@const
+           @type{!string}*/
+        svgns = odf.Namespaces.svgns,
+        /**@const
+           @type{!string}*/
+        tablens = odf.Namespaces.tablens,
+        /**@const
+           @type{!string}*/
+        textns = odf.Namespaces.textns,
+        /**@const
+           @type{!string}*/
+        xlinkns = odf.Namespaces.xlinkns,
+        /**@const
+           @type{!string}*/
+        presentationns = odf.Namespaces.presentationns,
 
         /**@const@type{!Object.<string,!string>}*/
         familynamespaceprefixes = {
@@ -75,7 +99,8 @@ odf.Style2CSS = function Style2CSS() {
             'page': 'office'
         },
 
-        /**@const@type{!Object.<string,!Array.<!string>>}*/
+        /**@const
+           @type{!Object.<string,!Array.<!string>>}*/
         familytagnames = {
             'graphic': ['circle', 'connected', 'control', 'custom-shape',
                 'ellipse', 'frame', 'g', 'line', 'measure', 'page',
@@ -113,7 +138,8 @@ odf.Style2CSS = function Style2CSS() {
             'list': ['list-item']
         },
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         textPropertySimpleMapping = [
             [ fons, 'color', 'color' ],
             // this sets the element background, not just the text background
@@ -122,12 +148,14 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'font-style', 'font-style' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         bgImageSimpleMapping = [
             [ stylens, 'repeat', 'background-repeat' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         paragraphPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'text-align', 'text-align' ],
@@ -149,7 +177,8 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border', 'border' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         graphicPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color'],
             [ fons, 'min-height', 'min-height' ],
@@ -163,7 +192,8 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border-bottom', 'border-bottom' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         tablecellPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'border-left', 'border-left' ],
@@ -173,17 +203,21 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'border', 'border' ]
         ],
 
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         tablecolumnPropertySimpleMapping = [
             [ stylens, 'column-width', 'width' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         tablerowPropertySimpleMapping = [
             [ stylens, 'row-height', 'height' ],
             [ fons, 'keep-together', null ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         tablePropertySimpleMapping = [
             [ stylens, 'width', 'width' ],
             [ fons, 'margin-left', 'margin-left' ],
@@ -192,7 +226,8 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'margin-bottom', 'margin-bottom' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         pageContentPropertySimpleMapping = [
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'padding', 'padding' ],
@@ -212,13 +247,15 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'margin-bottom', 'margin-bottom' ]
         ],
 
-        /**@const@type{!Array.<!Array.<!string>>}*/
+        /**@const
+           @type{!Array.<!Array.<!string>>}*/
         pageSizePropertySimpleMapping = [
             [ fons, 'page-width', 'width' ],
             [ fons, 'page-height', 'height' ]
         ],
 
-        /**@const@type{!Object.<!boolean>}*/
+        /**@const
+           @type{!Object.<!boolean>}*/
         borderPropertyMap = {
             'border': true,
             'border-left': true,
@@ -241,15 +278,17 @@ odf.Style2CSS = function Style2CSS() {
     // helper functions
     /**
      * @param {!Element} stylesnode
-     * @return {!Object}
+     * @return {!Object.<string,!Object.<string,?Element>>}}
      */
     function getStyleMap(stylesnode) {
         // put all style elements in a hash map by family and name
-        var stylemap = {}, node, name, family, style;
+        var node, name, family, style,
+            /**@type{!Object.<string,!Object.<string,?Element>>}}*/
+            stylemap = {};
         if (!stylesnode) {
             return stylemap;
         }
-        node = stylesnode.firstChild;
+        node = stylesnode.firstElementChild;
         while (node) {
             if (node.namespaceURI === stylens &&
                     ((node.localName === 'style') ||
@@ -268,27 +307,30 @@ odf.Style2CSS = function Style2CSS() {
 
             if (family) {
                 // get style name
-                name = node.getAttributeNS &&
-                       node.getAttributeNS(stylens, 'name');
+                name = node.getAttributeNS(stylens, 'name');
                 if (!name) {
                     // For a default style, there is no name
                     name = '';
                 }
 
                 // get style (and create, if not yet existing)
-                style = stylemap[family] = stylemap[family] || {};
+                if (stylemap.hasOwnProperty(family)) {
+                    style = stylemap[family];
+                } else {
+                    stylemap[family] = style = {};
+                }
 
                 // then store style node in map
                 style[name] = node;
             }
 
-            node = node.nextSibling;
+            node = node.nextElementSibling;
         }
 
         return stylemap;
     }
     /**
-     * @param {?Object} stylestree
+     * @param {?odf.StyleTreeNode} stylestree
      * @param {?string} name
      * @return {?string}
      */
@@ -297,15 +339,20 @@ odf.Style2CSS = function Style2CSS() {
             return null;
         }
         if (stylestree[name]) {
-            return stylestree[name];
+            return /**@type{string}*/(stylestree[name]);
         }
-        var n,
-            style;
+        var /**@type{string}*/
+            n,
+            style,
+            v;
         for (n in stylestree) {
             if (stylestree.hasOwnProperty(n)) {
-                style = findStyle(stylestree[n].derivedStyles, name);
-                if (style) {
-                    return style;
+                v = stylestree[n];
+                if (typeof v !== "string") {
+                    style = findStyle(/**@type{!{derivedStyles:!odf.StyleTreeNode}}*/(v).derivedStyles, name);
+                    if (style) {
+                        return style;
+                    }
                 }
             }
         }
@@ -313,7 +360,7 @@ odf.Style2CSS = function Style2CSS() {
     }
     /**
      * @param {!string} stylename
-     * @param {!Object} stylesmap
+     * @param {!Object.<string,?Element>} stylesmap
      * @param {!Object} stylestree
      * @return {undefined}
      */
@@ -344,7 +391,7 @@ odf.Style2CSS = function Style2CSS() {
         }
     }
     /**
-     * @param {!Object} stylesmap
+     * @param {!Object.<string,?Element>} stylesmap
      * @param {!Object} stylestree
      * @return {undefined}
      */
@@ -417,18 +464,14 @@ odf.Style2CSS = function Style2CSS() {
      * @return {?Element}
      */
     function getDirectChild(node, ns, name) {
-        if (!node) {
-            return null;
-        }
-        var c = node.firstChild, e;
-        while (c) {
-            if (c.namespaceURI === ns && c.localName === name) {
-                e = /**@type{Element}*/(c);
-                return e;
+        var e = node && node.firstElementChild;
+        while (e) {
+            if (e.namespaceURI === ns && e.localName === name) {
+                break;
             }
-            c = c.nextSibling;
+            e = e.nextElementSibling;
         }
-        return null;
+        return e;
     }
     /**
      * Make sure border width is no less than 1px wide; otherwise border is not rendered.
@@ -899,9 +942,9 @@ odf.Style2CSS = function Style2CSS() {
             contentLayoutRule = '',
             pageSizeRule = '',
             props = node.getElementsByTagNameNS(stylens, 'page-layout-properties')[0],
-            masterStyles = props.parentNode.parentNode.parentNode.masterStyles,
+            masterStyles,
             masterPages,
-            masterStyleName = '',
+            masterStyleName,
             i;
 
         rule += applySimpleMapping(props, pageContentPropertySimpleMapping);
@@ -917,6 +960,7 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         if (documentType === 'presentation') {
+            masterStyles = getDirectChild(props.parentNode.parentNode.parentNode, officens, 'master-styles');
             if (masterStyles) {
                 masterPages = masterStyles.getElementsByTagNameNS(stylens, 'master-page');
                 for (i = 0; i < masterPages.length; i += 1) {
