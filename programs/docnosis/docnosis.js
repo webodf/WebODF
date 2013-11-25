@@ -296,7 +296,7 @@ function MimetypeTestJob(odffile) {
                 }
             }
             if (mime) {
-                altmime = input.file.data.slice(38, 38 + mime.length);
+                altmime = input.file.data.subarray(38, 38 + mime.length);
                 altmime = runtime.byteArrayToString(altmime, "binary");
                 if (mime !== altmime) {
                     input.errors.mimetypeErrors.push(
@@ -712,7 +712,7 @@ function LoadingFile(file) {
                 return callback(error);
             }
             if (data) {
-                return callback(error, data.slice(offset, offset + length));
+                return callback(error, data.subarray(offset, offset + length));
             }
             readRequests.push(read);
         }
