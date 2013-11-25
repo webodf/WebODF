@@ -285,6 +285,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/odf/TextSerializer.js
     lib/odf/TextStyleApplicator.js
     lib/odf/Style2CSS.js
+    lib/odf/MetadataManager.js
     lib/odf/OdfContainer.js
     lib/odf/FontLoader.js
     lib/odf/ObjectNameGenerator.js
@@ -316,6 +317,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/ops/OpAddMember.js
     lib/ops/OpUpdateMember.js
     lib/ops/OpRemoveMember.js
+    lib/ops/OpUpdateMetadata.js
     lib/ops/OperationFactory.js
     lib/gui/SelectionMover.js
     lib/ops/StepsTranslator.js

@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document*/
+/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document, webodf_version */
 
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
@@ -44,6 +44,7 @@ runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfNodeFilter");
+runtime.loadClass("odf.MetadataManager");
 
 /**
  * The OdfContainer class manages the various parts that constitues an ODF
@@ -56,6 +57,7 @@ runtime.loadClass("odf.OdfNodeFilter");
 odf.OdfContainer = (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
+        metadataManager,
         /**@const @type{!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
         /**@const @type{!string}*/ manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
         /**@const @type{!string}*/ webodfns = "urn:webodf:names:scope",
@@ -476,6 +478,11 @@ odf.OdfContainer = (function () {
             }
             return copy;
         }
+
+        function initializeMetadataManager(metaRootElement) {
+            metadataManager = new odf.MetadataManager(metaRootElement);
+        }
+
         /**
          * Import the document elementnode into the DOM of OdfContainer.
          * Any processing instructions are removed, since importing them
@@ -621,6 +628,8 @@ odf.OdfContainer = (function () {
             root = self.rootElement;
             root.meta = getDirectChild(node, officens, 'meta');
             setChild(root, root.meta);
+
+            initializeMetadataManager(root.meta);
         }
         /**
          * @param {Document} xmldoc
@@ -865,6 +874,15 @@ odf.OdfContainer = (function () {
             var content = self.getContentElement();
             return content && content.localName;
         };
+
+        /**
+         * Returns the metadata manager associated with this document
+         * @return {!odf.MetadataManager}
+         */
+        this.getMetadataManager = function () {
+            return metadataManager;
+        };
+
         /**
          * Open file and parse it. Return the XML Node. Return the root node of
          * the file or null if this is not possible.
@@ -885,6 +903,32 @@ odf.OdfContainer = (function () {
         this.getPartData = function (url, callback) {
             zip.load(url, callback);
         };
+
+        /**
+         * Write pre-saving metadata to the DOM
+         * @return {undefined}
+         */
+        function updateMetadataForSaving() {
+            // set the opendocument provider used to create/
+            // last modify the document.
+            // this string should match the definition for
+            // user-agents in the http protocol as specified
+            // in section 14.43 of [RFC2616].
+            var generatorString,
+                window = runtime.getWindow();
+
+            generatorString = "WebODF/" + (
+                String(typeof webodf_version) !== "undefined"
+                    ? webodf_version
+                    : "FromSource"
+            );
+
+            if (window) {
+                generatorString = generatorString + " " + window.navigator.userAgent;
+            }
+
+            metadataManager.setMetadata({"meta:generator": generatorString});
+        }
 
         /**
          * @return {!core.Zip}
@@ -923,6 +967,8 @@ odf.OdfContainer = (function () {
             addToplevelElement("body");
             root.body.appendChild(text);
 
+            initializeMetadataManager(root.meta);
+
             setState(OdfContainer.DONE);
             return emptyzip;
         }
@@ -937,6 +983,9 @@ odf.OdfContainer = (function () {
             // update the zip entries with the data from the live ODF DOM
             var data,
                 date = new Date();
+
+            updateMetadataForSaving();
+
             data = runtime.byteArrayFromString(serializeSettingsXml(), "utf8");
             zip.save("settings.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeMetaXml(), "utf8");

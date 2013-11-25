@@ -81,7 +81,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter,
-        stepsTranslator;
+        stepsTranslator,
+        lastEditingOp;
 
     /**
      * @return {!Element}
@@ -334,6 +335,41 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
 
         return null;
+    }
+
+    /**
+     * Called after an operation is executed, this
+     * function will check if the operation is an
+     * 'edit', and in that case will update the
+     * document's metadata, such as dc:creator,
+     * meta:editing-cycles, and dc:creator.
+     * @param {!ops.Operation} op
+     */
+    function handleOperationExecuted(op) {
+        var spec = op.spec(),
+            memberId = spec.memberid,
+            date = new Date(spec.timestamp).toISOString(),
+            metadataManager = odfCanvas.odfContainer().getMetadataManager(),
+            fullName;
+
+        // If the operation is an edit (that changes the
+        // ODF that will be saved), then update metadata.
+        if (op.isEdit) {
+            fullName = self.getMember(memberId).getProperties().fullName;
+
+            metadataManager.setMetadata({
+                "dc:creator": fullName,
+                "dc:date": date
+            }, null);
+
+            // If no previous op was found in this session,
+            // then increment meta:editing-cycles by 1.
+            if (!lastEditingOp) {
+                metadataManager.incrementEditingCycles();
+            }
+
+            lastEditingOp = op;
+        }
     }
 
     /**
@@ -666,26 +702,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * @param {!string} metadataId
-     * @return {?string}
-     */
-    this.getMetaData = function (metadataId) {
-        var node = odfCanvas.odfContainer().rootElement.firstChild;
-        while (node && node.localName !== "meta") {
-            node = node.nextSibling;
-        }
-        node = node && node.firstChild;
-        while (node && node.localName !== metadataId) {
-            node = node.nextSibling;
-        }
-        node = node && node.firstChild;
-        while (node && node.nodeType !== Node.TEXT_NODE) {
-            node = node.nextSibling;
-        }
-        return node ? node.data : null;
-    };
-
-    /**
      * @return {!odf.Formatting}
      */
     this.getFormatting = function () {
@@ -754,6 +770,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
+        eventNotifier.subscribe(ops.OdtDocument.signalOperationExecuted, handleOperationExecuted);
     }
     init();
 };
