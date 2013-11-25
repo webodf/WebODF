@@ -82,7 +82,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter,
         stepsTranslator,
-        lastEditingOp;
+        lastEditingOp,
+        unsupportedMetadataRemoved = false;
 
     /**
      * @return {!Element}
@@ -366,6 +367,15 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // then increment meta:editing-cycles by 1.
             if (!lastEditingOp) {
                 metadataManager.incrementEditingCycles();
+                // Remove certain metadata fields that
+                // should be updated as soon as edits happen,
+                // but cannot be because we don't support those yet.
+                if (!unsupportedMetadataRemoved) {
+                    metadataManager.setMetadata(null, [
+                        "meta:editing-duration",
+                        "meta:document-statistic"
+                    ]);
+                }
             }
 
             lastEditingOp = op;
