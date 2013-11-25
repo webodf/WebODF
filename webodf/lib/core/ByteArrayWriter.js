@@ -56,7 +56,7 @@ core.ByteArrayWriter = function ByteArrayWriter(encoding) {
     function expand(extraLength) {
         var newData;
         if (extraLength > bufferSize - length) {
-            bufferSize = Math.max(2 * bufferSize, length + extraLength); 
+            bufferSize = Math.max(2 * bufferSize, length + extraLength);
             newData = new Uint8Array(new ArrayBuffer(bufferSize));
             newData.set(data);
             data = newData;
@@ -121,6 +121,6 @@ core.ByteArrayWriter = function ByteArrayWriter(encoding) {
      * @return {!Uint8Array}
      */
     this.getByteArray = function () {
-        return data.subarray(0, length);
+        return new Uint8Array(data.buffer.slice(0, length));
     };
 };
