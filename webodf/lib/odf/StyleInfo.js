@@ -562,9 +562,7 @@ odf.StyleInfo = function StyleInfo() {
      */
     function determineStylesForNode(element, usedStyles) {
         var i, stylename, elname, elns, a, ns, localName, keyname,
-            /**@type{!Object.<string,number>}*/
-            map,
-            length = 0;
+            length = 0, map;
         elname = elements[element.localName];
         if (elname) {
             elns = elname[element.namespaceURI];
@@ -582,11 +580,12 @@ odf.StyleInfo = function StyleInfo() {
                 usedStyles = usedStyles || {};
                 keyname = a.keyname;
                 if (usedStyles.hasOwnProperty(keyname)) {
-                    map = usedStyles[keyname];
+                    usedStyles[keyname][stylename] = 1;
                 } else {
-                    usedStyles[keyname] = map = {};
+                    map = {};
+                    map[stylename] = 1;
+                    usedStyles[keyname] = map;
                 }
-                /**@type{!Object.<string,number>}*/(map)[stylename] = 1;
             }
         }
         return usedStyles;
