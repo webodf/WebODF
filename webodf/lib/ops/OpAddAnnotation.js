@@ -65,7 +65,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
      * a list, inside it; and with the given annotation name
      * @param {!ops.OdtDocument} odtDocument
      * @param {!Date} date
-     * @return {!Node}
+     * @return {!Element}
      */
     function createAnnotationNode(odtDocument, date) {
         var annotationNode, creatorNode, dateNode,
@@ -100,7 +100,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
 
     /**
      * Creates an office:annotation-end node with the given annotation name
-     * @return {!Node}
+     * @return {!Element}
      */
     function createAnnotationEnd() {
         var annotationEnd;
@@ -113,9 +113,9 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
     }
 
     /**
-     * Inserts the node at a given position
+     * Inserts the element at a given position
      * @param {!ops.OdtDocument} odtDocument
-     * @param {!Node} node
+     * @param {!Element} node
      * @param {!number} insertPosition
      * @return {undefined}
      */
