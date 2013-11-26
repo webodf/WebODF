@@ -591,7 +591,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             return;
         }
         var entry = entries[position];
-        if (entry.data !== undefined) {
+        if (entry.data !== null) {
             loadAllEntries(position + 1, callback);
             return;
         }
