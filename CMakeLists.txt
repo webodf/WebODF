@@ -280,8 +280,8 @@ set(TYPEDLIBJSFILES
 )
 set(UNTYPEDLIBJSFILES
 
-    lib/core/RawDeflate.js
     lib/core/RawInflate.js
+    lib/core/RawDeflate.js
     lib/core/Zip.js
 
     lib/xmldom/RelaxNGParser.js
