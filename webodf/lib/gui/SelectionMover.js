@@ -186,7 +186,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             iterator = getIteratorAtCursor(),
             initialRect,
             range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
-            selectionRange = cursor.getSelectedRange() ? cursor.getSelectedRange().cloneRange() : (rootNode.ownerDocument.createRange()),
+            selectionRange = cursor.getSelectedRange().cloneRange(),
             newRect,
             horizontalMovement,
             o,

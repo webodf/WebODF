@@ -669,7 +669,7 @@ gui.SessionController = (function () {
                 // Always redraw the image selection as this doesn't affect the browser's selection
                 imageSelector.clearSelection();
                 if (cursor.getSelectionType() === ops.OdtCursor.RegionSelection) {
-                    range = /**@type{!Range}*/(cursor.getSelectedRange());
+                    range = cursor.getSelectedRange();
                     imageElement = odfUtils.getImageElements(range)[0];
                     if (imageElement) {
                         imageSelector.select(/**@type{!Element}*/(imageElement.parentNode));
@@ -745,7 +745,7 @@ gui.SessionController = (function () {
          */
         function handleCut(e) {
             var cursor = odtDocument.getCursor(inputMemberId),
-                selectedRange = /**@type{!Range}*/(cursor.getSelectedRange());
+                selectedRange = cursor.getSelectedRange();
 
             if (selectedRange.collapsed) {
                 // Modifying the clipboard data will clear any existing data,
@@ -780,7 +780,7 @@ gui.SessionController = (function () {
          */
         function handleCopy(e) {
             var cursor = odtDocument.getCursor(inputMemberId),
-                selectedRange = /**@type{!Range}*/(cursor.getSelectedRange());
+                selectedRange = cursor.getSelectedRange();
 
             if (selectedRange.collapsed) {
                 // Modifying the clipboard data will clear any existing data,

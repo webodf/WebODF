@@ -66,7 +66,7 @@ gui.ShadowCursor = function ShadowCursor(odtDocument) {
 
     /**
      * Obtain the currently selected range to which the cursor corresponds.
-     * @return {Range}
+     * @return {!Range}
      */
     this.getSelectedRange = function () {
         return selectedRange;

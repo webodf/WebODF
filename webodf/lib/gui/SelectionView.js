@@ -574,7 +574,7 @@ gui.SelectionView = function SelectionView(cursor) {
         addOverlays();
         if (cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
             showOverlays(true);
-            repositionOverlays(/**@type{!Range}*/(cursor.getSelectedRange()));
+            repositionOverlays(cursor.getSelectedRange());
         } else {
             showOverlays(false);
         }
