@@ -1516,7 +1516,7 @@ var ops = {};
         var path = dir + "/manifest.js",
             content,
             list;
-        if (!manifests.hasOwnProperty(path)) {
+        if (!manifests.hasOwnProperty(dir)) {
             try {
                 content = runtime.readFileSync(path, "utf-8");
             } catch (/**@type{string}*/e) {
