@@ -131,17 +131,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     /**
      * Calculate the number of pixels of vertical overlap. If there is no overlap,
      * this number will be negative
-     * @param {!Node} cursorNode
+     * @param {!Element} cursorNode
      * @param {!ClientRect} rangeRect
      * @returns {!number}
      */
     function verticalOverlap(cursorNode, rangeRect) {
-        var cursorRect,
+        var cursorRect = cursorNode.getBoundingClientRect(),
             intersectTop = 0,
             intersectBottom = 0;
-        if (cursorNode.nodeType === Node.ELEMENT_NODE) {
-            cursorRect = /**@type{!Element}*/(cursorNode).getBoundingClientRect();
-        }
 
         if (cursorRect && rangeRect) {
             intersectTop = Math.max(cursorRect.top, rangeRect.top);
