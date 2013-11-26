@@ -75,7 +75,7 @@ define("webodf/editor/widgets/paragraphStyles",
             if (value === "") {
                 value = defaultStyleUIId;
             }
-            select.set('value', value);
+            select.set('value', value, false);
         };
 
         // events
