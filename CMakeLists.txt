@@ -268,6 +268,8 @@ set(TYPEDLIBJSFILES
     lib/core/Async.js
     lib/core/CSSUnits.js
     lib/core/RawInflate.js
+    lib/core/Zip.js
+
 
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/LSSerializer.js
@@ -281,9 +283,7 @@ set(TYPEDLIBJSFILES
 )
 set(UNTYPEDLIBJSFILES
 
-    lib/core/RawDeflate.js
-    lib/core/Zip.js
-
+    # lib/core/RawDeflate.js not used anywhere
     lib/xmldom/RelaxNGParser.js
     lib/xmldom/RelaxNG.js
     lib/xmldom/RelaxNG2.js
