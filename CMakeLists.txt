@@ -267,6 +267,7 @@ set(TYPEDLIBJSFILES
     lib/core/ScheduledTask.js
     lib/core/Async.js
     lib/core/CSSUnits.js
+    lib/core/RawInflate.js
 
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/LSSerializer.js
@@ -280,7 +281,6 @@ set(TYPEDLIBJSFILES
 )
 set(UNTYPEDLIBJSFILES
 
-    lib/core/RawInflate.js
     lib/core/RawDeflate.js
     lib/core/Zip.js
 
