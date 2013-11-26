@@ -58,7 +58,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         positionIterator,
         cachedXOffset,
         timeoutHandle,
-        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+        /**@const*/
+        FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
     /**
      * Resets the positionIterator back to the current cursor position and
@@ -76,8 +77,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
-     * Gets the maximum available offset for a given node. For a text node, this is text length,
-     * for element nodes, this will be childNodes.length
+     * Gets the maximum available offset for a given node. For a text node, this
+     * is text length, for element nodes, this will be childNodes.length
      * @param {!Node} node
      * @returns {!number}
      */
@@ -86,8 +87,9 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
-     * Get the first or last client rectangle based on the useRightEdge flag. If useRightEdge is
-     * set to true, this will return the right-most offset of the last available rectangle
+     * Get the first or last client rectangle based on the useRightEdge flag.
+     * If useRightEdge is set to true, this will return the right-most offset of
+     * the last available rectangle
      * @param {ClientRectList} clientRectangles
      * @param {!boolean} useRightEdge
      * @returns {?{top: !number, left: !number, bottom: !number}}
@@ -112,14 +114,18 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
 
     /**
      * Gets the client rect of a position specified by the container and an
-     * offset. If this is not possible with a range, then the last element's coordinates
-     * are used to guesstimate the position.
+     * offset. If this is not possible with a range, then the last element's
+     * coordinates are used to guesstimate the position.
      * @param {!Node} container
      * @param {!number} offset
      * @param {!Range} range
-     * @param {boolean=} useRightEdge Default value is false. Used when searching for the closest visually equivalent
-     *  rectangle, starting at the specified container offset. In these circumstances, the right-side of the last
-     *  client rectangle actually defines the visual position
+     * @param {boolean=} useRightEdge Default value is false. Used when
+     *                                searching for the closest visually
+     *                                equivalent rectangle, starting at the
+     *                                specified container offset. In these
+     *                                circumstances, the right-side of the last
+     *                                client rectangle actually defines the
+     *                                visual position.
      * @return {{top: !number, left: !number, bottom: !number}}
      */
     function getVisibleRect(container, offset, range, useRightEdge) {
@@ -180,10 +186,11 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             iterator = getIteratorAtCursor(),
             initialRect,
             range = /**@type{!Range}*/(rootNode.ownerDocument.createRange()),
-            selectionRange = cursor.getSelectedRange() ? cursor.getSelectedRange().cloneRange() : (rootNode.ownerDocument.createRange()),
+            selectionRange = cursor.getSelectedRange().cloneRange(),
             newRect,
             horizontalMovement,
-            o, c,
+            o,
+            c,
             isForwardSelection;
 
         initialRect = getVisibleRect(iterator.container(), iterator.unfilteredDomOffset(), range);

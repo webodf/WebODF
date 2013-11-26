@@ -48,13 +48,13 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         t,
         r = runner,
         namespace = {
-            "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-            "style":"urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-            "fo":"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-            "draw":"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-            "svg":"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-            "dr3d":"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0"
+            "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+            "style": "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+            "fo": "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+            "draw": "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+            "svg": "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+            "dr3d": "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0"
         };
 
     this.setUp = function () {
@@ -255,18 +255,18 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
     function getAppliedStyles_InvalidNodes() {
         var i, node,
             invalidNodes = [
-            "draw:text-box",
-            "svg:title",
-            "dr3d:scene",
-            "text:note-body",
-            "text:ruby-text",
-            "office:annotation",
-            "office:binary-data",
-            "office:event-listeners",
-            "editinfo"
-        ];
+                "draw:text-box",
+                "svg:title",
+                "dr3d:scene",
+                "text:note-body",
+                "text:ruby-text",
+                "office:annotation",
+                "office:binary-data",
+                "office:event-listeners",
+                "editinfo"
+            ];
 
-        for (i=0; i<invalidNodes.length; i+=1) {
+        for (i = 0; i < invalidNodes.length; i += 1) {
             if (i > 0) {
                 self.setUp();
             }
@@ -281,12 +281,12 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
             r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
             r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
 
-            if (i<invalidNodes.length-1) {
+            if (i < invalidNodes.length - 1) {
                 self.tearDown();
             }
         }
     }
-    function isBold_CollapsedRangeReturnTrue () {
+    function isBold_CollapsedRangeReturnTrue() {
         var cursor = new core.Cursor(t.testArea.ownerDocument, "Joe"),
             mover;
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SBold'>A</text:span><text:span text:style-name='S1'>B</text:span></text:p>");
@@ -298,7 +298,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         t.isBold = t.styleHelper.isBold(t.appliedStyles);
         r.shouldBe(t, "t.isBold", "true");
     }
-    function isBold_ReturnTrue () {
+    function isBold_ReturnTrue() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SBold'>A</text:span><text:span text:style-name='SBold'>B</text:span></text:p>");
         t.range.selectNode(t.doc);
         t.appliedStyles = t.styleHelper.getAppliedStyles(t.range);
@@ -314,7 +314,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         t.isBold = t.styleHelper.isBold(t.appliedStyles);
         r.shouldBe(t, "t.isBold", "false");
     }
-    function isItalic_ReturnTrue () {
+    function isItalic_ReturnTrue() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SItalic'>A</text:span><text:span text:style-name='SItalic'>B</text:span></text:p>");
         t.range.selectNode(t.doc);
         t.appliedStyles = t.styleHelper.getAppliedStyles(t.range);
@@ -322,7 +322,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         t.isItalic = t.styleHelper.isItalic(t.appliedStyles);
         r.shouldBe(t, "t.isItalic", "true");
     }
-    function hasUnderline_ReturnTrue () {
+    function hasUnderline_ReturnTrue() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SUnderline'>A</text:span><text:span text:style-name='SUnderline'>B</text:span></text:p>");
         t.range.selectNode(t.doc);
         t.appliedStyles = t.styleHelper.getAppliedStyles(t.range);
@@ -330,7 +330,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         t.hasUnderline = t.styleHelper.hasUnderline(t.appliedStyles);
         r.shouldBe(t, "t.hasUnderline", "true");
     }
-    function hasStrikeThrough_ReturnTrue () {
+    function hasStrikeThrough_ReturnTrue() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='SStrikeThrough'>A</text:span><text:span text:style-name='SStrikeThrough'>B</text:span></text:p>");
         t.range.selectNode(t.doc);
         t.appliedStyles = t.styleHelper.getAppliedStyles(t.range);
@@ -339,7 +339,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
         r.shouldBe(t, "t.hasStrikeThrough", "true");
     }
     this.tests = function () {
-        return [
+        return r.name([
             getAppliedStyles_SimpleHierarchy,
             getAppliedStyles_NestedHierarchy,
             getAppliedStyles_StartsAtChild_WithNoText,
@@ -357,7 +357,7 @@ gui.StyleHelperTests = function StyleHelperTests(runner) {
             isItalic_ReturnTrue,
             hasUnderline_ReturnTrue,
             hasStrikeThrough_ReturnTrue
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];

@@ -195,5 +195,12 @@ ops.OpInsertText = function OpInsertText() {
             text: text
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    text:string
+}}*/
+ops.OpInsertText.Spec;

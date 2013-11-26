@@ -58,7 +58,12 @@ if (Java_JAVA_EXECUTABLE)
   # ideally we would enable --jscomp_error reportUnknownTypes
   set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
 
-  foreach(JSFILE ${LIBJSFILES})
+  foreach(JSFILE ${TYPEDLIBJSFILES})
+    set(TYPED_LIB_CLOSURE_ARGS ${TYPED_LIB_CLOSURE_ARGS}
+        --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+  endforeach(JSFILE ${TYPEDLIBJSFILES})
+
+  foreach(JSFILE ${UNTYPEDLIBJSFILES})
     if (IS_ABSOLUTE ${JSFILE})
       set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
           --js ${JSFILE})
@@ -66,7 +71,8 @@ if (Java_JAVA_EXECUTABLE)
       set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
           --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
     endif (IS_ABSOLUTE ${JSFILE})
-  endforeach(JSFILE ${LIBJSFILES})
+  endforeach(JSFILE ${UNTYPEDLIBJSFILES})
+  set(LIB_CLOSURE_ARGS ${TYPED_LIB_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS})
 
   foreach(JSFILE ${TESTJSFILES})
     set(TEST_CLOSURE_ARGS ${TEST_CLOSURE_ARGS}
@@ -85,7 +91,9 @@ if (Java_JAVA_EXECUTABLE)
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js-
-      COMMAND ${CMAKE_COMMAND} ARGS -E rename simplecompiled.js- simplecompiled.js
+      # in WHITESPACE_ONLY mode, it is not possible to define IS_COMPILED_CODE
+      # so the value for IS_COMPILED_CODE is set by find and replace in the code
+      COMMAND ${CMAKE_COMMAND} -DFILENAME:STRING="${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js" -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/set_IS_COMPILED_CODE.cmake
       DEPENDS ClosureCompiler ${LIBJSFILES} ${TESTJSFILES}
         ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
   )
@@ -119,25 +127,25 @@ if (Java_JAVA_EXECUTABLE)
          --js_output_file webodf.js-
       COMMAND ${CMAKE_COMMAND} ARGS -E rename webodf.js- webodf.js
       DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
-         webodf.css.js-target tools/css2js.js
+         webodf.css.js-target
   )
   add_custom_target(webodf.js-target DEPENDS webodf.js)
 
-  # check types, not a standard build target yet
+  # check types on the js files that are listed in TYPEDLIBJSFILES
   add_custom_command(
       OUTPUT typecheck.js
       COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
          --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
+         ${SHARED_CLOSURE_ARGS} ${TYPED_LIB_CLOSURE_ARGS}
          --jscomp_error reportUnknownTypes
-         --compilation_level SIMPLE_OPTIMIZATIONS
-         --formatting PRINT_INPUT_DELIMITER
+         --compilation_level ADVANCED_OPTIMIZATIONS
+         --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
-         --js_output_file webodf.js-
-      COMMAND ${CMAKE_COMMAND} ARGS -E rename webodf.js- webodf.js
+         --js_output_file typecheck.js-
+      COMMAND ${CMAKE_COMMAND} ARGS -E rename typecheck.js- typecheck.js
       DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
-         webodf.css.js-target tools/css2js.js
+         webodf.css.js-target
   )
   add_custom_target(typecheck-target DEPENDS typecheck.js)
 
@@ -151,14 +159,16 @@ if (Java_JAVA_EXECUTABLE)
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf-debug.js-
-      COMMAND ${CMAKE_COMMAND} ARGS -E rename webodf-debug.js- webodf-debug.js
-      DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
+      # in WHITESPACE_ONLY mode, it is not possible to define IS_COMPILED_CODE
+      # so the value for IS_COMPILED_CODE is set by find and replace in the code
+      COMMAND ${CMAKE_COMMAND} -DFILENAME:STRING="${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js" -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/set_IS_COMPILED_CODE.cmake
+      DEPENDS ClosureCompiler ${TYPEDLIBJSFILES} tools/externs.js
           webodf.css.js-target
   )
   add_custom_target(webodf-debug.js-target DEPENDS webodf-debug.js)
 
   add_custom_target(syntaxcheck ALL
-      DEPENDS simplecompiled.js-target webodf.js-target webodf-debug.js-target
+      DEPENDS typecheck-target simplecompiled.js-target webodf.js-target
           compiled.js-target
   )
 

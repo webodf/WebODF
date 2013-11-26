@@ -47,18 +47,42 @@ runtime.loadClass("odf.Namespaces");
 odf.StyleInfo = function StyleInfo() {
     "use strict";
     // helper constants
-    var /**@const@type{!string}*/ chartns = odf.Namespaces.chartns,
-        /**@const@type{!string}*/ dbns = odf.Namespaces.dbns,
-        /**@const@type{!string}*/ dr3dns = odf.Namespaces.dr3dns,
-        /**@const@type{!string}*/ drawns = odf.Namespaces.drawns,
-        /**@const@type{!string}*/ formns = odf.Namespaces.formns,
-        /**@const@type{!string}*/ numberns = odf.Namespaces.numberns,
-        /**@const@type{!string}*/ officens = odf.Namespaces.officens,
-        /**@const@type{!string}*/ presentationns = odf.Namespaces.presentationns,
-        /**@const@type{!string}*/ stylens = odf.Namespaces.stylens,
-        /**@const@type{!string}*/ tablens = odf.Namespaces.tablens,
-        /**@const@type{!string}*/ textns = odf.Namespaces.textns,
-        /**@const@type{!Object.<string,string>}*/ nsprefixes = {
+    var /**@const
+           @type{!string}*/
+        chartns = odf.Namespaces.chartns,
+        /**@const
+           @type{!string}*/
+        dbns = odf.Namespaces.dbns,
+        /**@const
+           @type{!string}*/
+        dr3dns = odf.Namespaces.dr3dns,
+        /**@const
+           @type{!string}*/
+        drawns = odf.Namespaces.drawns,
+        /**@const
+           @type{!string}*/
+        formns = odf.Namespaces.formns,
+        /**@const
+           @type{!string}*/
+        numberns = odf.Namespaces.numberns,
+        /**@const
+           @type{!string}*/
+        officens = odf.Namespaces.officens,
+        /**@const
+           @type{!string}*/
+        presentationns = odf.Namespaces.presentationns,
+        /**@const
+           @type{!string}*/
+        stylens = odf.Namespaces.stylens,
+        /**@const
+           @type{!string}*/
+        tablens = odf.Namespaces.tablens,
+        /**@const
+           @type{!string}*/
+        textns = odf.Namespaces.textns,
+        /**@const
+           @type{!Object.<string,string>}*/
+        nsprefixes = {
             "urn:oasis:names:tc:opendocument:xmlns:chart:1.0": "chart:",
             "urn:oasis:names:tc:opendocument:xmlns:database:1.0": "db:",
             "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0": "dr3d:",
@@ -76,8 +100,11 @@ odf.StyleInfo = function StyleInfo() {
         },
         /**
          * Data about the styles.
-         * ens: element namespace, en: element name, ans: attribute namespace, a: attribute
-         * @type {!Object.<string,Array.<Object.<string,string>>>}
+         *   ens: element namespace,
+         *   en:  element name,
+         *   ans: attribute namespace,
+         *   a: attribute
+         * @type{!Object.<string,!Array.<!{ens:string,en:string,ans:string,a:string}>>}
          */
         elementstyles = {
             "text": [
@@ -311,28 +338,32 @@ odf.StyleInfo = function StyleInfo() {
          * Inversion of elementstyles, created with "inverse(elementstyles);" in
          * init section
          * Map with element name as primary key, element namespace as secondary
-         * key, then an array of {ns: namespace of attribute, localname: name of
-         * attribute, keyname: keyname});
+         * key, then an array of {
+         *     ns: namespace of attribute,
+         *     localname: name of attribute,
+         *     keyname: keyname
+         * }
          * @type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
          */
         elements,
-        xpath = new xmldom.XPath();
+        xpath = xmldom.XPath;
 
     /**
-     * Return if a particular element is the parent style for any other style of the same family.
+     * Return if a particular element is the parent style for any other style of
+     * the same family.
      * @param {!Element} odfbody
-     * @param {!Function} nsResolver
-     * @param {!Node} styleElement
+     * @param {!function(string):?string} nsResolver
+     * @param {!Element} styleElement
      * @return {!boolean}
      */
     function hasDerivedStyles(odfbody, nsResolver, styleElement) {
         var nodes,
             xp,
-            resolver = nsResolver('style'),
-            styleName = styleElement.getAttributeNS(resolver, 'name'),
-            styleFamily = styleElement.getAttributeNS(resolver, 'family');
+            styleName = styleElement.getAttributeNS(stylens, 'name'),
+            styleFamily = styleElement.getAttributeNS(stylens, 'family');
 
-        xp = "//style:*[@style:parent-style-name='" + styleName + "'][@style:family='" + styleFamily + "']";
+        xp = "//style:*[@style:parent-style-name='" + styleName
+            + "'][@style:family='" + styleFamily + "']";
         nodes = xpath.getODFElementsWithXPath(odfbody, xp, nsResolver);
         if (nodes.length) {
             return true;
@@ -343,30 +374,38 @@ odf.StyleInfo = function StyleInfo() {
     /**
      * Prefixes all style ids used to refer to styles in the given DOM element
      * tree with the given prefix.
-     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!Element} element  root element of tree of elements using styles
      * @param {!string} prefix
      * @return {undefined}
      */
-    function prefixUsedStyleNames(styleUsingElementsRoot, prefix) {
-        var elname = elements[styleUsingElementsRoot.localName],
-            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
-            length = elns ? elns.length : 0,
-            i, stylename, e;
+    function prefixUsedStyleNames(element, prefix) {
+        var i, stylename, a, e, ns, elname, elns,
+            /**@type{string}*/
+            localName,
+            length = 0;
+        elname = elements[element.localName];
+        if (elname) {
+            elns = elname[element.namespaceURI];
+            if (elns) {
+                length = elns.length;
+            }
+        }
         // prefix any used style ids
         for (i = 0; i < length; i += 1) {
-            stylename = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+            a = /**@type{!{ns:string,localname:string}}*/(elns[i]);
+            ns = a.ns;
+            localName = a.localname;
+            stylename = element.getAttributeNS(ns, localName);
             if (stylename) { // a style reference has been found!
-                styleUsingElementsRoot.setAttributeNS(elns[i].ns, nsprefixes[elns[i].ns]+elns[i].localname, prefix+stylename);
+                element.setAttributeNS(ns, nsprefixes[ns] + localName,
+                                       prefix + stylename);
             }
         }
         // continue prefixing with all child elements
-        i = styleUsingElementsRoot.firstChild;
-        while (i) {
-            if (i.nodeType === Node.ELEMENT_NODE) {
-                e = /**@type{!Element}*/(i);
-                prefixUsedStyleNames(e, prefix);
-            }
-            i = i.nextSibling;
+        e = element.firstElementChild;
+        while (e) {
+            prefixUsedStyleNames(e, prefix);
+            e = e.nextElementSibling;
         }
     }
     /**
@@ -389,7 +428,8 @@ odf.StyleInfo = function StyleInfo() {
         }
 
         if (ns) {
-            styleElement.setAttributeNS(ns, nsprefixes[ns]+"name", prefix+stylename);
+            styleElement.setAttributeNS(ns, nsprefixes[ns] + "name",
+                prefix + stylename);
         }
     }
 
@@ -424,31 +464,37 @@ odf.StyleInfo = function StyleInfo() {
     }
 
     /**
-     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!Element} element  root element of tree of elements using styles
      * @param {!RegExp} regExp
      * @return {undefined}
      */
-    function removeRegExpFromUsedStyleNames(styleUsingElementsRoot, regExp) {
-        var elname = elements[styleUsingElementsRoot.localName],
-            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
-            length = elns ? elns.length : 0,
-            i, stylename, e;
+    function removeRegExpFromUsedStyleNames(element, regExp) {
+        var i, stylename, e, elname, elns, a, ns, localName,
+            length = 0;
+        elname = elements[element.localName];
+        if (elname) {
+            elns = elname[element.namespaceURI];
+            if (elns) {
+                length = elns.length;
+            }
+        }
         // remove prefix from any used style id
         for (i = 0; i < length; i += 1) {
-            stylename = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
+            a = /**@type{!{ns:string,localname:string}}*/(elns[i]);
+            ns = a.ns;
+            localName = a.localname;
+            stylename = element.getAttributeNS(ns, localName);
             if (stylename) { // a style reference has been found!
                 stylename = stylename.replace(regExp, '');
-                styleUsingElementsRoot.setAttributeNS(elns[i].ns, nsprefixes[elns[i].ns]+elns[i].localname, stylename);
+                element.setAttributeNS(ns, nsprefixes[ns] + localName,
+                      stylename);
             }
         }
         // continue removal with all child elements
-        i = styleUsingElementsRoot.firstChild;
-        while (i) {
-            if (i.nodeType === Node.ELEMENT_NODE) {
-                e = /**@type{!Element}*/(i);
-                removeRegExpFromUsedStyleNames(e, regExp);
-            }
-            i = i.nextSibling;
+        e = element.firstElementChild;
+        while (e) {
+            removeRegExpFromUsedStyleNames(e, regExp);
+            e = e.nextElementSibling;
         }
     }
     /**
@@ -472,7 +518,7 @@ odf.StyleInfo = function StyleInfo() {
 
         if (ns) {
             stylename = stylename.replace(regExp, '');
-            styleElement.setAttributeNS(ns, nsprefixes[ns]+"name", stylename);
+            styleElement.setAttributeNS(ns, nsprefixes[ns] + "name", stylename);
         }
     }
 
@@ -488,7 +534,7 @@ odf.StyleInfo = function StyleInfo() {
      */
     function removePrefixFromStyleNames(styleElementsRoot, prefix, styleUsingElementsRoot) {
         var s,
-            regExp = new RegExp("^"+prefix);
+            regExp = new RegExp("^" + prefix);
 
         if (styleElementsRoot) {
             // remove prefix from all set style ids
@@ -509,25 +555,37 @@ odf.StyleInfo = function StyleInfo() {
 
     /**
      * Determines all stylenames that are referenced in the passed element
-     * @param {!Element} node  element to check for styles
-     * @param {Object.<string,Object.<string,number>>=} usedStyles  map of used styles names, grouped by style family
-     * @return {Object.<string,Object.<string,number>>|undefined} Returns either map of used styles, or undefined if none
+     * @param {!Element} element  element to check for styles
+     * @param {!Object.<string,!Object.<string,number>>=} usedStyles  map of used styles names, grouped by style family
+     * @return {!Object.<string,!Object.<string,number>>|undefined} Returns either map of used styles, or undefined if none
      *      have been found an usedStyles was not passed in
      */
-    function determineStylesForNode(node, usedStyles) {
-        var elname = elements[node.localName],
-            elns = elname && elname[node.namespaceURI],
-            length = elns ? elns.length : 0,
-            stylename, keyname, map, i;
-
+    function determineStylesForNode(element, usedStyles) {
+        var i, stylename, elname, elns, a, ns, localName, keyname,
+            length = 0, map;
+        elname = elements[element.localName];
+        if (elname) {
+            elns = elname[element.namespaceURI];
+            if (elns) {
+                length = elns.length;
+            }
+        }
         // check if any styles are referenced
         for (i = 0; i < length; i += 1) {
-            stylename = node.getAttributeNS(elns[i].ns, elns[i].localname);
+            a = /**@type{!{ns:string,localname:string,keyname:string}}*/(elns[i]);
+            ns = a.ns;
+            localName = a.localname;
+            stylename = element.getAttributeNS(ns, localName);
             if (stylename) { // a style has been found!
                 usedStyles = usedStyles || {};
-                keyname = elns[i].keyname;
-                map = usedStyles[keyname] = usedStyles[keyname] || {};
-                map[stylename] = 1;
+                keyname = a.keyname;
+                if (usedStyles.hasOwnProperty(keyname)) {
+                    usedStyles[keyname][stylename] = 1;
+                } else {
+                    map = {};
+                    map[stylename] = 1;
+                    usedStyles[keyname] = map;
+                }
             }
         }
         return usedStyles;
@@ -603,69 +661,90 @@ odf.StyleInfo = function StyleInfo() {
 
     /**
      * Builds a style dependency map for the supplied style tree
-     * @param {!Element} styleUsingElementsRoot  root element of tree of elements using styles
+     * @param {!Element} element  root element of tree of elements using styles
      * @param {?StyleDefinition} styleScope parent style the specified style element is part of
      * @param {!Object.<string,StyleDefinition>} knownStyles  map of used stylesnames, grouped by keyname
      * @return {!Object.<string,StyleDefinition>}
      */
-    function determineDependentStyles(styleUsingElementsRoot, styleScope, knownStyles) {
-        var elname = elements[styleUsingElementsRoot.localName],
-            elns = elname && elname[styleUsingElementsRoot.namespaceURI],
-            length = elns ? elns.length : 0,
-            newScopeName = styleUsingElementsRoot.getAttributeNS(stylens, 'name'),
-            newScopeFamily = styleUsingElementsRoot.getAttributeNS(stylens, 'family'),
-            referencedStyleName, referencedStyleFamily, referencedStyleDef,
-            i, e;
-
+    function determineDependentStyles(element, styleScope, knownStyles) {
+        var i, stylename, elname, elns, a, ns, localName, e,
+            referencedStyleFamily, referencedStyleDef,
+            length = 0,
+            newScopeName = element.getAttributeNS(stylens, 'name'),
+            newScopeFamily = element.getAttributeNS(stylens, 'family');
         if (newScopeName && newScopeFamily) {
-            styleScope = getStyleDefinition(newScopeName, newScopeFamily, knownStyles);
+            styleScope = getStyleDefinition(newScopeName, newScopeFamily,
+                   knownStyles);
         }
-
         if (styleScope) {
+            elname = elements[element.localName];
+            if (elname) {
+                elns = elname[element.namespaceURI];
+                if (elns) {
+                    length = elns.length;
+                }
+            }
             // check if any styles are referenced
             for (i = 0; i < length; i += 1) {
-                referencedStyleName = styleUsingElementsRoot.getAttributeNS(elns[i].ns, elns[i].localname);
-                if (referencedStyleName) { // a style has been found!
-                    referencedStyleFamily = elns[i].keyname;
-                    referencedStyleDef = getStyleDefinition(referencedStyleName, referencedStyleFamily, knownStyles);
+                a = /**@type{!{ns:string,localname:string,keyname:string}}*/(elns[i]);
+                ns = a.ns;
+                localName = a.localname;
+                stylename = element.getAttributeNS(ns, localName);
+                if (stylename) { // a style has been found!
+                    referencedStyleFamily = a.keyname;
+                    referencedStyleDef = getStyleDefinition(stylename, referencedStyleFamily, knownStyles);
                     styleScope.requires[referencedStyleDef.key] = referencedStyleDef;
                 }
             }
         }
 
         // continue determination with all child elements
-        i = styleUsingElementsRoot.firstChild;
-        while (i) {
-            if (i.nodeType === Node.ELEMENT_NODE) {
-                e = /**@type{!Element}*/(i);
-                determineDependentStyles(e, styleScope, knownStyles);
-            }
-            i = i.nextSibling;
+        e = element.firstElementChild;
+        while (e) {
+            determineDependentStyles(e, styleScope, knownStyles);
+            e = e.nextElementSibling;
         }
         return knownStyles;
     }
 
     /**
      * Creates the elements data from the elementstyles data.
-     * @param {!Object.<Array.<Object.<string,string>>>} elementstyles
      * @return {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}
      */
-    function inverse(elementstyles) {
-        var keyname, i, l,
-            /**@type {Array.<Object.<string,string>>}*/list,
-            /**@type {Object.<string,string>}*/item,
-            /**@type {!Object.<string,Object.<string,Array.<Object.<string,string>>>>}*/e = {},
-            map, array;
+    function inverse() {
+        var i, l,
+            /**@type{string}*/
+            keyname,
+            /**@type{!Array.<!{ens:string,en:string,ans:string,a:string}>}*/
+            list,
+            /**@type{!{en:string,ens:string}}*/
+            item,
+            /**@type{!Object.<string,Object.<string,Array.<Object.<string,string>>>>}*/
+            e = {},
+            map, array, en, ens;
         for (keyname in elementstyles) {
             if (elementstyles.hasOwnProperty(keyname)) {
                 list = elementstyles[keyname];
                 l = list.length;
                 for (i = 0; i < l; i += 1) {
                     item = list[i];
-                    map = e[item.en] = e[item.en] || {};
-                    array = map[item.ens] = map[item.ens] || [];
-                    array.push(
-                        {ns: item.ans, localname: item.a, keyname: keyname});
+                    en = item.en;
+                    ens = item.ens;
+                    if (e.hasOwnProperty(en)) {
+                        map = e[en];
+                    } else {
+                        e[en] = map = {};
+                    }
+                    if (map.hasOwnProperty(ens)) {
+                        array = map[ens];
+                    } else {
+                        map[ens] = array = [];
+                    }
+                    array.push({
+                        ns: item.ans,
+                        localname: item.a,
+                        keyname: keyname
+                    });
                 }
             }
         }
@@ -713,30 +792,33 @@ odf.StyleInfo = function StyleInfo() {
      * Collects all names of font-face declarations which are referenced in the
      * children elements of the given root element.
      * @param {!Object.<!string,!boolean>} usedFontFaceDeclMap
-     * @param {?Element} styleElementsRoot  root element with style elements as childs
+     * @param {?Element} styleElement  root element with style elements as childs
      * @return {undefined}
      */
-    function collectUsedFontFaces(usedFontFaceDeclMap, styleElementsRoot) {
+    function collectUsedFontFaces(usedFontFaceDeclMap, styleElement) {
         var localNames = ["font-name", "font-name-asian", "font-name-complex"],
-            currentNode;
+            e,
+            /**@type{!Element}*/
+            currentElement;
 
+        /**
+         * @param {string} localName
+         */
         function collectByAttribute(localName) {
-            var fontFaceName = currentNode.getAttributeNS(stylens, localName);
+            var fontFaceName = currentElement.getAttributeNS(stylens,
+                    localName);
             if (fontFaceName) {
                 usedFontFaceDeclMap[fontFaceName] = true;
             }
         }
 
-        if (styleElementsRoot) {
-            currentNode = styleElementsRoot.firstChild;
-            while (currentNode) {
-                if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                    // TODO: only check elements which have those attributes defined
-                    localNames.forEach(collectByAttribute);
-                    collectUsedFontFaces(usedFontFaceDeclMap, /**@type{!Element}*/(currentNode));
-                }
-                currentNode = currentNode.nextSibling;
-            }
+        e = styleElement && styleElement.firstElementChild;
+        while (e) {
+            // TODO: only check elements which have those attributes defined
+            currentElement = e;
+            localNames.forEach(collectByAttribute);
+            collectUsedFontFaces(usedFontFaceDeclMap, currentElement);
+            e = e.nextElementSibling;
         }
     }
     this.collectUsedFontFaces = collectUsedFontFaces;
@@ -744,31 +826,33 @@ odf.StyleInfo = function StyleInfo() {
     /**
      * Changes all names of font-face declarations which are referenced in the
      * children elements of the given root element.
-     * @param {?Element} styleElementsRoot  root element with style elements as childs
+     * @param {?Element} styleElement  root element with style elements as childs
      * @param {!Object.<!string,!string>} fontFaceNameChangeMap
      * @return {undefined}
      */
-    function changeFontFaceNames(styleElementsRoot, fontFaceNameChangeMap) {
+    function changeFontFaceNames(styleElement, fontFaceNameChangeMap) {
         var localNames = ["font-name", "font-name-asian", "font-name-complex"],
-            currentNode;
+            e,
+            /**@type{!Element}*/
+            currentElement;
 
+        /**
+         * @param {string} localName
+         */
         function changeFontFaceNameByAttribute(localName) {
-            var fontFaceName = currentNode.getAttributeNS(stylens, localName);
+            var fontFaceName = currentElement.getAttributeNS(stylens, localName);
             if (fontFaceName && fontFaceNameChangeMap.hasOwnProperty(fontFaceName)) {
-                currentNode.setAttributeNS(stylens, "style:" + localName, fontFaceNameChangeMap[fontFaceName]);
+                currentElement.setAttributeNS(stylens, "style:" + localName, fontFaceNameChangeMap[fontFaceName]);
             }
         }
 
-        if (styleElementsRoot) {
-            currentNode = styleElementsRoot.firstChild;
-            while (currentNode) {
-                if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                    // TODO: only check elements which have those attributes defined
-                    localNames.forEach(changeFontFaceNameByAttribute);
-                    changeFontFaceNames(/**@type{!Element}*/(currentNode), fontFaceNameChangeMap);
-                }
-                currentNode = currentNode.nextSibling;
-            }
+        e = styleElement && styleElement.firstElementChild;
+        while (e) {
+            // TODO: only check elements which have those attributes defined
+            currentElement = e;
+            localNames.forEach(changeFontFaceNameByAttribute);
+            changeFontFaceNames(currentElement, fontFaceNameChangeMap);
+            e = e.nextElementSibling;
         }
     }
     this.changeFontFaceNames = changeFontFaceNames;
@@ -824,5 +908,5 @@ odf.StyleInfo = function StyleInfo() {
 
 
     // init
-    elements = inverse(elementstyles);
+    elements = inverse();
 };

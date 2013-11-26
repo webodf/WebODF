@@ -158,6 +158,15 @@ Runtime.prototype.clearTimeout = function (timeoutID) {"use strict"; };
  */
 Runtime.prototype.libraryPaths = function () {"use strict"; };
 /**
+ * @return {!string}
+ */
+Runtime.prototype.currentDirectory = function () {"use strict"; };
+/**
+ * @param {!string} dir
+ * @return {undefined}
+ */
+Runtime.prototype.setCurrentDirectory = function (dir) {"use strict"; };
+/**
  * @return {string}
  */
 Runtime.prototype.type = function () {"use strict"; };
@@ -170,6 +179,10 @@ Runtime.prototype.getDOMImplementation = function () {"use strict"; };
  * @return {?Document}
  */
 Runtime.prototype.parseXML = function (xml) {"use strict"; };
+/**
+ * @param {!number} exitCode
+ */
+Runtime.prototype.exit = function (exitCode) {"use strict"; };
 /**
  * @return {?Window}
  */
@@ -266,7 +279,7 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
 Runtime.getVariable = function (name) {
     "use strict";
     try {
-    return eval(name);
+        return eval(name);
     } catch (e) {
         return undefined;
     }
@@ -448,7 +461,7 @@ function BrowserRuntime(logoutput) {
             if (callback) {
                 callback();
             }
-			throw message; // interrupt execution and provide a backtrace
+            throw message; // interrupt execution and provide a backtrace
         }
     }
     /**
@@ -734,7 +747,7 @@ function BrowserRuntime(logoutput) {
                 // However, even though the browser won't pull the content-length header (coz it's a security risk!)
                 // the content can still be fetched.
                 // This data will be cached, so we'll still only ever have to fetch it once
-                readFile(path, "binary", function(err, data) {
+                readFile(path, "binary", function (err, data) {
                     if (!err) {
                         callback(data.length);
                     } else {
@@ -779,10 +792,16 @@ function BrowserRuntime(logoutput) {
         return ["lib"]; // TODO: find a good solution
                                        // probably let html app specify it
     };
-/*jslint emptyblock: true */
+    /*jslint emptyblock: true*/
     this.setCurrentDirectory = function () {
     };
-/*jslint emptyblock: false */
+    /*jslint emptyblock: false*/
+    /**
+     * @return {!string}
+     */
+    this.currentDirectory = function () {
+        return "";
+    };
     this.type = function () {
         return "BrowserRuntime";
     };
@@ -988,8 +1007,9 @@ function NodeJSRuntime() {
      * @return {!string|!Uint8Array}
      */
     this.readFileSync = function (path, encoding) {
-        var enc = (encoding === "binary") ? null : encoding,
-            r = fs.readFileSync(path, enc), s;
+        var s,
+            enc = (encoding === "binary") ? null : encoding,
+            r = fs.readFileSync(path, enc);
         if (r === null) {
             throw "File " + path + " could not be read.";
         }
@@ -1078,6 +1098,7 @@ function NodeJSRuntime() {
     };
     /**
      * @param {!string} dir
+     * @return {undefined}
      */
     this.setCurrentDirectory = function (dir) {
         currentDirectory = dir;
@@ -1118,15 +1139,18 @@ function NodeJSRuntime() {
 function RhinoRuntime() {
     "use strict";
     var self = this,
+        Packages = {},
         dom = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance(),
+        /**@type{!Packages.javax.xml.parsers.DocumentBuilder}*/
         builder,
         entityresolver,
+        /**@type{!string}*/
         currentDirectory = "";
     dom.setValidating(false);
     dom.setNamespaceAware(true);
     dom.setExpandEntityReferences(false);
     dom.setSchema(null);
-/*jslint unparam: true */
+    /*jslint unparam: true */
     entityresolver = Packages.org.xml.sax.EntityResolver({
         /**
          * @param {!string} publicId
@@ -1149,21 +1173,28 @@ function RhinoRuntime() {
             return open(file);
         }
     });
-/*jslint unparam: false */
+    /*jslint unparam: false */
     //dom.setEntityResolver(entityresolver);
     builder = dom.newDocumentBuilder();
     builder.setEntityResolver(entityresolver);
 
-/*jslint unparam: true*/
+    /*jslint unparam: true*/
+    /**
+     * @param {!string} string
+     * @param {!string} encoding
+     * @return {!Uint8Array}
+     */
     this.byteArrayFromString = function (string, encoding) {
         // ignore encoding for now
-        var a = [], i, l = string.length;
+        var i,
+            l = string.length,
+            a = new Uint8Array(new ArrayBuffer(l));
         for (i = 0; i < l; i += 1) {
             a[i] = string.charCodeAt(i) & 0xff;
         }
         return a;
     };
-/*jslint unparam: false*/
+    /*jslint unparam: false*/
     this.byteArrayToString = Runtime.byteArrayToString;
 
     /**
@@ -1183,18 +1214,28 @@ function RhinoRuntime() {
     */
     this.toJson = Runtime.toJson;
 
+    /**
+     * @param {!string} path
+     * @param {!function(?string,?Document):undefined} callback
+     * @return {undefined}
+     */
     function loadXML(path, callback) {
         var file = new Packages.java.io.File(path),
-            xmlDocument;
+            xmlDocument = null;
         try {
             xmlDocument = builder.parse(file);
-        } catch (err) {
+        } catch (/**@type{!string}*/err) {
             print(err);
-            callback(err);
-            return;
+            return callback(err, null);
         }
         callback(null, xmlDocument);
     }
+    /**
+     * @param {!string} path
+     * @param {!string} encoding text encoding or 'binary'
+     * @param {!function(?string,?(string|Uint8Array)):undefined} callback
+     * @return {undefined}
+     */
     function runtimeReadFile(path, encoding, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1204,10 +1245,10 @@ function RhinoRuntime() {
             // read binary, seems hacky but works
             rhinoencoding = (encoding === "binary") ? "latin1" : encoding;
         if (!file.isFile()) {
-            callback(path + " is not a file.");
+            callback(path + " is not a file.", null);
         } else {
             data = readFile(path, rhinoencoding);
-            if (encoding === "binary") {
+            if (data && encoding === "binary") {
                 data = self.byteArrayFromString(data, "binary");
             }
             callback(null, data);
@@ -1228,6 +1269,11 @@ function RhinoRuntime() {
         }
         return readFile(path, encoding);
     }
+    /**
+     * @param {!string} path
+     * @param {!function(boolean):undefined} callback
+     * @return {undefined}
+     */
     function isFile(path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1237,6 +1283,12 @@ function RhinoRuntime() {
     }
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
+    /**
+     * @param {!string} path
+     * @param {!Uint8Array} data
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     this.writeFile = function (path, data, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1250,17 +1302,33 @@ function RhinoRuntime() {
         out.close();
         callback(null);
     };
+    /**
+     * @param {!string} path
+     * @param {!function(?string):undefined} callback
+     * @return {undefined}
+     */
     this.deleteFile = function (path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
         }
-        var file = new Packages.java.io.File(path);
-        if (file['delete']()) {
+        var file = new Packages.java.io.File(path),
+            otherPath = path + Math.random(),
+            other = new Packages.java.io.File(otherPath);
+        // 'delete' cannot be used with closure compiler, so we use a workaround
+        if (file.rename(other)) {
+            other.deleteOnExit();
             callback(null);
         } else {
             callback("Could not delete " + path);
         }
     };
+    /**
+     * @param {!string} path
+     * @param {!number} offset
+     * @param {!number} length
+     * @param {!function(?string,?Uint8Array):undefined} callback
+     * @return {undefined}
+     */
     this.read = function (path, offset, length, callback) {
         // TODO: adapt to read only a part instead of the whole file
         if (currentDirectory) {
@@ -1273,7 +1341,7 @@ function RhinoRuntime() {
                 "binary"
             ));
         } else {
-            callback("Cannot read " + path);
+            callback("Cannot read " + path, null);
         }
     };
     /**
@@ -1292,6 +1360,11 @@ function RhinoRuntime() {
         return s;
     };
     this.isFile = isFile;
+    /**
+     * @param {!string} path
+     * @param {!function(number):undefined} callback
+     * @return {undefined}
+     */
     this.getFileSize = function (path, callback) {
         if (currentDirectory) {
             path = currentDirectory + "/" + path;
@@ -1299,13 +1372,12 @@ function RhinoRuntime() {
         var file = new Packages.java.io.File(path);
         callback(file.length());
     };
-
     /**
      * @param {!string} msgOrCategory
      * @param {string=} msg
      * @return {undefined}
      */
-    function log (msgOrCategory, msg) {
+    function log(msgOrCategory, msg) {
         var category;
         if (msg !== undefined) {
             category = msgOrCategory;
@@ -1330,7 +1402,7 @@ function RhinoRuntime() {
     */
     function assert(condition, message, callback) {
         if (!condition) {
-            log("alert", "ASSERTION FAILED: "+message);
+            log("alert", "ASSERTION FAILED: " + message);
             if (callback) {
                 callback();
             }
@@ -1345,13 +1417,13 @@ function RhinoRuntime() {
         f();
         return 0;
     };
-/*jslint emptyblock: true */
+    /*jslint emptyblock: true */
     /**
      * @return {undefined}
      */
-    this.clearTimeout = function() {
+    this.clearTimeout = function () {
     };
-/*jslint emptyblock: false */
+    /*jslint emptyblock: false */
     /**
      * @return {!Array.<!string>}
      */
@@ -1373,8 +1445,14 @@ function RhinoRuntime() {
     this.getDOMImplementation = function () {
         return builder.getDOMImplementation();
     };
+    /**
+     * @param {!string} xml
+     * @return {?Document}
+     */
     this.parseXML = function (xml) {
-        return builder.parse(xml);
+        var reader = new Packages.java.io.StringReader(xml),
+            source = new Packages.org.xml.sax.InputSource(reader);
+        return builder.parse(source);
     };
     this.exit = quit;
     this.getWindow = function () {
@@ -1383,12 +1461,12 @@ function RhinoRuntime() {
 }
 
 /**
- * @const
- * @type {Runtime}
+ * @return {!Runtime}
  */
-var runtime = (function () {
+Runtime.create = function create() {
     "use strict";
-    var result;
+    var /**@type{!Runtime}*/
+        result;
     if (String(typeof window) !== "undefined") {
         result = new BrowserRuntime(window.document.getElementById("logoutput"));
     } else if (String(typeof require) !== "undefined") {
@@ -1397,122 +1475,129 @@ var runtime = (function () {
         result = new RhinoRuntime();
     }
     return result;
-}());
+};
+
+/**
+ * @const
+ * @type {!Runtime}
+ */
+var runtime = Runtime.create();
+
+/**
+ * @namespace The core package.
+ */
+var core = {};
+/**
+ * @namespace The gui package.
+ */
+var gui = {};
+/**
+ * @namespace The xmldom package.
+ */
+var xmldom = {};
+/**
+ * @namespace The ODF package.
+ */
+var odf = {};
+/**
+ * @namespace The editing operations
+ */
+var ops = {};
+
 /*jslint sloppy: true*/
 (function () {
-    var cache = {},
-        dircontents = {};
-    function getOrDefinePackage(packageNameComponents) {
-        var topname = packageNameComponents[0],
-            i,
-            pkg;
-        // ensure top level package exists
-        pkg = eval("if (typeof " + topname + " === 'undefined') {" +
-                "eval('" + topname + " = {};');}" + topname);
-        for (i = 1; i < packageNameComponents.length - 1; i += 1) {
-            if (!pkg.hasOwnProperty(packageNameComponents[i])) {
-                pkg = pkg[packageNameComponents[i]] = {};
-            } else {
-                pkg = pkg[packageNameComponents[i]];
+    var /**@type{!Object.<!Array.<string>>}*/
+        manifests = {},
+        loadedClasses = {};
+    /**
+     * @param {string} dir
+     */
+    function loadManifest(dir) {
+        var path = dir + "/manifest.js",
+            content,
+            list;
+        if (!manifests.hasOwnProperty(dir)) {
+            try {
+                content = runtime.readFileSync(path, "utf-8");
+            } catch (/**@type{string}*/e) {
+                console.log("TYPE " + (typeof e));
+                return;
+            }
+            list = JSON.parse(/**@type{string}*/(content));
+            manifests[dir] = /**@type{!Array}*/(list);
+        }
+    }
+    function loadManifests() {
+        var paths = runtime.libraryPaths(),
+            i;
+        if (runtime.currentDirectory()) {
+            loadManifest(runtime.currentDirectory());
+        }
+        for (i = 0; i < paths.length; i += 1) {
+            loadManifest(paths[i]);
+        }
+    }
+    /**
+     * @param {string} classpath
+     * @param {string} dir
+     * @return {undefined|string}
+     */
+    function findPathInManifest(classpath, dir) {
+        var manifest;
+        if (manifests.hasOwnProperty(dir)) {
+            manifest = manifests[dir];
+            if (manifest.indexOf(classpath) !== -1) {
+                return dir + "/" + classpath;
             }
         }
-        return pkg[packageNameComponents[packageNameComponents.length - 1]];
+    }
+    /**
+     * @param {string} classname
+     * @return {string}
+     */
+    function findFullPath(classname) {
+        var classpath = classname.replace(".", "/") + ".js",
+            paths = runtime.libraryPaths(),
+            path,
+            i;
+        if (runtime.currentDirectory()) {
+            path = findPathInManifest(classpath, runtime.currentDirectory());
+        }
+        for (i = 0; path === undefined && i < paths.length; i += 1) {
+            path = findPathInManifest(classpath, paths[i]);
+        }
+        if (path === undefined) {
+            throw "Class " + classpath + " was not found in any manifest.";
+        }
+        return path;
     }
     /**
      * @param {string} classpath
      * @returns {undefined}
+     * @expose
      */
     runtime.loadClass = function (classpath) {
-        if (IS_COMPILED_CODE) {
+        if (IS_COMPILED_CODE || loadedClasses.hasOwnProperty(classpath)) {
             return;
         }
-        if (cache.hasOwnProperty(classpath)) {
-            return;
-        }
-        var names = classpath.split("."),
-            impl;
-        impl = getOrDefinePackage(names);
-        if (impl) {
-            cache[classpath] = true;
-            return;
-        }
-        function getPathFromManifests(classpath) {
-            var path = classpath.replace(/\./g, "/") + ".js",
-                dirs = runtime.libraryPaths(),
-                i,
-                dir,
-                code,
-                codestr;
-            if (runtime.currentDirectory) {
-                dirs.push(runtime.currentDirectory());
-            }
-            for (i = 0; i < dirs.length; i += 1) {
-                dir = dirs[i];
-                if (!dircontents.hasOwnProperty(dir)) {
-                    try {
-                        code = runtime.readFileSync(dirs[i] + "/manifest.js",
-                                "utf8");
-                        if (code && code.length) {
-                            codestr = /**@type{!string}*/(code);
-                            dircontents[dir] = eval(codestr);
-                        } else {
-                            dircontents[dir] = null;
-                        }
-                    } catch (e1) {
-                        dircontents[dir] = null;
-                        runtime.log("Cannot load manifest for " + dir +
-                            ".");
-                    }
-                }
-                code = null;
-                dir = dircontents[dir];
-                if (dir && dir.indexOf && dir.indexOf(path) !== -1) {
-                    return dirs[i] + "/" + path;
-                }
-            }
-            return null;
-        }
-        function load(classpath) {
-            var code, path;
-            path = getPathFromManifests(classpath);
-            if (!path) {
-                throw classpath + " is not listed in any manifest.js.";
-            }
-            try {
-                code = runtime.readFileSync(path, "utf8");
-            } catch (e2) {
-                runtime.log("Error loading " + classpath + " " + e2);
-                throw e2;
-            }
-            if (code === undefined) {
-                throw "Cannot load class " + classpath;
-            }
-            // add label to dynamic script for easier debugging
-            code += "\n//# sourceURL=" + path;
-            code += "\n//@ sourceURL=" + path; // Chrome
-            // evaluate loaded code
-            try {
-                code = eval(classpath + " = eval(code);");
-            } catch (e4) {
-                runtime.log("Error loading " + classpath + " " + e4);
-                throw e4;
-            }
-            return code;
-        }
-        // check if the class in context already
-        impl = load(classpath);
-        if (!impl || Runtime.getFunctionName(impl) !==
-                names[names.length - 1]) {
-            runtime.log("Loaded code is not for " + names[names.length - 1]);
-            throw "Loaded code is not for " + names[names.length - 1];
-        }
-        cache[classpath] = true;
+        loadManifests();
+        var path = findFullPath(classpath),
+            content = runtime.readFileSync(path, "utf-8");
+        // add label to dynamic script for easier debugging
+        content += "\n//# sourceURL=" + path;
+        content += "\n//@ sourceURL=" + path; // Chrome
+        eval(content);
     };
 }());
 
 (function () {
-    /*jslint emptyblock: true*/
-    var translator = function () {};
+    /**
+     * @param {!string} string
+     * @return {!string}
+     */
+    var translator = function (string) {
+        return string;
+    };
     /*jslint emptyblock: false*/
 
     /**
@@ -1534,7 +1619,7 @@ var runtime = (function () {
      * Gets the custom translator function
      * @return {!function(!string):!string}
      */
-    runtime.getTranslator = function() {
+    runtime.getTranslator = function () {
         return translator;
     };
     /**
@@ -1542,7 +1627,7 @@ var runtime = (function () {
      * @param {!function(!string):!string} translatorFunction
      * @return {undefined}
      */
-    runtime.setTranslator = function(translatorFunction) {
+    runtime.setTranslator = function (translatorFunction) {
         translator = translatorFunction;
     };
     runtime.tr = tr;
@@ -1554,7 +1639,10 @@ var runtime = (function () {
         args = [];
     }
 
-/*jslint unvar: true, defined: true*/
+    /*jslint unvar: true, defined: true*/
+    /**
+     * @param {!Array.<!string>} argv
+     */
     function run(argv) {
         if (!argv.length) {
             return;
@@ -1570,7 +1658,7 @@ var runtime = (function () {
             function inner_run() {
                 var script, path, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
-                result = eval(codestring);
+                result = /**@type{!number}*/(eval(codestring));
                 if (result) {
                     runtime.exit(result);
                 }
@@ -1588,7 +1676,7 @@ var runtime = (function () {
             }
         });
     }
-/*jslint unvar: false, defined: false*/
+    /*jslint unvar: false, defined: false*/
     // if rhino or node.js, run the scripts provided as arguments
     if (runtime.type() === "NodeJSRuntime") {
         run(process.argv.slice(2));

@@ -58,21 +58,38 @@ odf.OdfContainer = (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
         metadataManager,
-        /**@const @type{!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        /**@const @type{!string}*/ manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
-        /**@const @type{!string}*/ webodfns = "urn:webodf:names:scope",
-        /**@const @type{!string}*/ stylens = odf.Namespaces.stylens,
-        /**@const @type{!Array.<!string>}*/ nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
+        /**@const
+           @type{!string}*/
+        officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        /**@const
+           @type{!string}*/
+        manifestns = "urn:oasis:names:tc:opendocument:xmlns:manifest:1.0",
+        /**@const
+           @type{!string}*/
+        webodfns = "urn:webodf:names:scope",
+        /**@const
+           @type{!string}*/
+        stylens = odf.Namespaces.stylens,
+        /**@const
+           @type{!Array.<!string>}*/
+        nodeorder = ['meta', 'settings', 'scripts', 'font-face-decls', 'styles',
             'automatic-styles', 'master-styles', 'body'],
-        /**@const @type{!string}*/ automaticStylePrefix = (new Date()).getTime() + "_webodf_",
+        /**@const
+           @type{!string}*/
+        automaticStylePrefix = (new Date()).getTime() + "_webodf_",
         base64 = new core.Base64(),
-        /**@const @type{!string}*/ documentStylesScope = "document-styles",
-        /**@const @type{!string}*/ documentContentScope = "document-content";
+        /**@const
+           @type{!string}*/
+        documentStylesScope = "document-styles",
+        /**@const
+           @type{!string}*/
+        documentContentScope = "document-content";
 
     /**
      * @param {?Node} node
      * @param {!string} ns
      * @param {!string} name
+     * @return {?Element}
      */
     function getDirectChild(node, ns, name) {
         node = node ? node.firstChild : null;
@@ -118,8 +135,9 @@ odf.OdfContainer = (function () {
          */
         this.acceptNode = function (node) {
             var result = odfNodeFilter.acceptNode(node);
-            if (result === NodeFilter.FILTER_ACCEPT &&
-                node.parentNode === automaticStyles && node.nodeType === Node.ELEMENT_NODE) {
+            if (result === NodeFilter.FILTER_ACCEPT
+                    && node.parentNode === automaticStyles
+                    && node.nodeType === Node.ELEMENT_NODE) {
                 // skip all automatic styles which are not used
                 if (usedStyleList.uses(/**@type{!Element}*/(node))) {
                     result = NodeFilter.FILTER_ACCEPT;
@@ -148,8 +166,9 @@ odf.OdfContainer = (function () {
         this.acceptNode = function (node) {
             var result = odfStylesFilter.acceptNode(node);
             if (result === NodeFilter.FILTER_ACCEPT
-                && node.parentNode && node.parentNode.namespaceURI === odf.Namespaces.textns
-                && (node.parentNode.localName === 's' || node.parentNode.localName === 'tab')) {
+                    && node.parentNode
+                    && node.parentNode.namespaceURI === odf.Namespaces.textns
+                    && (node.parentNode.localName === 's' || node.parentNode.localName === 'tab')) {
                 result = NodeFilter.FILTER_REJECT;
             }
             return result;
@@ -181,7 +200,7 @@ odf.OdfContainer = (function () {
         }
         node.insertBefore(child, c);
     }
-/*jslint emptyblock: true*/
+    /*jslint emptyblock: true*/
     /**
      * A DOM element that is part of and ODF part of a DOM.
      * @constructor
@@ -189,7 +208,7 @@ odf.OdfContainer = (function () {
      */
     function ODFElement() {
     }
-/*jslint emptyblock: false*/
+    /*jslint emptyblock: false*/
     /**
      * The root element of an ODF document.
      * @constructor
@@ -252,10 +271,10 @@ odf.OdfContainer = (function () {
             });
         };
     }
-/*jslint emptyblock: true*/
+    /*jslint emptyblock: true*/
     OdfPart.prototype.load = function () {
     };
-/*jslint emptyblock: false*/
+    /*jslint emptyblock: false*/
     OdfPart.prototype.getUrl = function () {
         if (this.data) {
             return 'data:;base64,' + base64.toBase64(this.data);
@@ -393,7 +412,7 @@ odf.OdfContainer = (function () {
                     // already such a name used in target?
                     if (targetFontFaceDeclsMap.hasOwnProperty(fontFaceName)) {
                         // skip it if the declarations are equal, otherwise insert with a new, unused name
-                        if (!n.isEqualNode(targetFontFaceDeclsMap[fontFaceName]) ){
+                        if (!n.isEqualNode(targetFontFaceDeclsMap[fontFaceName])) {
                             newFontFaceName = unusedKey(fontFaceName, targetFontFaceDeclsMap, sourceFontFaceDeclsMap);
                             n.setAttributeNS(stylens, "style:name", newFontFaceName);
                             // copy with a new name
@@ -410,7 +429,7 @@ odf.OdfContainer = (function () {
                         targetFontFaceDeclsRootElement.appendChild(n);
                         targetFontFaceDeclsMap[fontFaceName] = /**@type{!Element}*/(n);
                         delete sourceFontFaceDeclsMap[fontFaceName];
-                   }
+                    }
                 }
                 n = s;
             }
@@ -452,13 +471,13 @@ odf.OdfContainer = (function () {
          * @return {?Element}
          */
         function cloneFontFaceDeclsUsedInStyles(fontFaceDeclsRootElement, stylesRootElementList) {
-            var copy = null,
-                n, nextSibling, fontFaceName,
+            var n, nextSibling, fontFaceName,
+                copy = null,
                 usedFontFaceDeclMap = {};
 
             if (fontFaceDeclsRootElement) {
                 // first collect used font faces
-                stylesRootElementList.forEach(function(stylesRootElement) {
+                stylesRootElementList.forEach(function (stylesRootElement) {
                     styleInfo.collectUsedFontFaces(usedFontFaceDeclMap, stylesRootElement);
                 });
 
@@ -680,9 +699,9 @@ odf.OdfContainer = (function () {
                 callback;
 
             if (component) {
-                filepath = /**@type {!string}*/(component[0]);
-                callback = /**@type {!function(?Document)}*/(component[1]);
-                zip.loadAsDOM(filepath, function(err, xmldoc) {
+                filepath = /**@type{!string}*/(component[0]);
+                callback = /**@type{!function(?Document)}*/(component[1]);
+                zip.loadAsDOM(filepath, function (err, xmldoc) {
                     callback(xmldoc);
                     if (err || self.state === OdfContainer.INVALID) {
                         return;
@@ -713,7 +732,7 @@ odf.OdfContainer = (function () {
         function createDocumentElement(name) {
             var s = "";
 
-            odf.Namespaces.forEachPrefix(function(prefix, ns) {
+            odf.Namespaces.forEachPrefix(function (prefix, ns) {
                 s += " xmlns:" + prefix + "=\"" + ns + "\"";
             });
             return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:" + name +
@@ -724,7 +743,8 @@ odf.OdfContainer = (function () {
          */
         function serializeMetaXml() {
             var serializer = new xmldom.LSSerializer(),
-                /**@type{!string}*/ s = createDocumentElement("document-meta");
+                /**@type{!string}*/
+                s = createDocumentElement("document-meta");
             serializer.filter = new odf.OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.meta, odf.Namespaces.namespaceMap);
             s += "</office:document-meta>";
@@ -753,7 +773,7 @@ odf.OdfContainer = (function () {
                 serializer = new xmldom.LSSerializer(),
                 fullPath;
 
-            for(fullPath in partMimetypes) {
+            for (fullPath in partMimetypes) {
                 if (partMimetypes.hasOwnProperty(fullPath)) {
                     manifestRoot.appendChild(createManifestEntry(fullPath, partMimetypes[fullPath]));
                 }
@@ -766,7 +786,8 @@ odf.OdfContainer = (function () {
          */
         function serializeSettingsXml() {
             var serializer = new xmldom.LSSerializer(),
-                /**@type{!string}*/ s = createDocumentElement("document-settings");
+                /**@type{!string}*/
+                s = createDocumentElement("document-settings");
             serializer.filter = new odf.OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
             s += "</office:document-settings>";
@@ -776,10 +797,11 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         function serializeStylesXml() {
-            var nsmap = odf.Namespaces.namespaceMap,
+            var fontFaceDecls, automaticStyles, masterStyles,
+                nsmap = odf.Namespaces.namespaceMap,
                 serializer = new xmldom.LSSerializer(),
-                fontFaceDecls, automaticStyles, masterStyles,
-                /**@type{!string}*/ s = createDocumentElement("document-styles");
+                /**@type{!string}*/
+                s = createDocumentElement("document-styles");
 
             // special handling for merged toplevel nodes
             automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentStylesScope);
@@ -804,10 +826,11 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         function serializeContentXml() {
-            var nsmap = odf.Namespaces.namespaceMap,
+            var fontFaceDecls, automaticStyles,
+                nsmap = odf.Namespaces.namespaceMap,
                 serializer = new xmldom.LSSerializer(),
-                fontFaceDecls, automaticStyles,
-                /**@type{!string}*/ s = createDocumentElement("document-content");
+                /**@type{!string}*/
+                s = createDocumentElement("document-content");
 
             // special handling for merged toplevel nodes
             automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentContentScope);

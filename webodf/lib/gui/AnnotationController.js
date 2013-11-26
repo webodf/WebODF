@@ -27,6 +27,7 @@
 
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.PositionFilter");
+runtime.loadClass("ops.Session");
 runtime.loadClass("ops.OpAddAnnotation");
 runtime.loadClass("ops.OpRemoveAnnotation");
 runtime.loadClass("gui.SelectionMover");
@@ -42,7 +43,7 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
     var odtDocument = session.getOdtDocument(),
         isAnnotatable = false,
         eventNotifier = new core.EventNotifier([gui.AnnotationController.annotatableChanged]),
-        /**@const @type {!string}*/officens = odf.Namespaces.officens;
+        officens = odf.Namespaces.officens;
 
     /**
      * @param {?Node} node  Node to start searching with
@@ -65,7 +66,10 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
     function updatedCachedValues() {
         var cursor = odtDocument.getCursor(inputMemberId),
             cursorNode = cursor && cursor.getNode(),
-            newIsAnnotatable = cursorNode && ! isWithinAnnotation(cursorNode, odtDocument.getRootNode());
+            newIsAnnotatable = false;
+        if (cursorNode) {
+            newIsAnnotatable = !isWithinAnnotation(cursorNode, odtDocument.getRootNode());
+        }
 
         if (newIsAnnotatable !== isAnnotatable) {
             isAnnotatable = newIsAnnotatable;
@@ -106,7 +110,7 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
     /**
      * @return {!boolean}
      */
-    this.isAnnotatable = function() {
+    this.isAnnotatable = function () {
         return isAnnotatable;
     };
 
@@ -120,7 +124,7 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
             length = selection.length,
             position = selection.position;
 
-        if (! isAnnotatable) {
+        if (!isAnnotatable) {
             return;
         }
 

@@ -358,7 +358,7 @@ odf.OdfCanvas = (function () {
         /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@const@type {!string}*/webodfhelperns = "urn:webodf:names:helper",
         /**@type{?Window}*/window = runtime.getWindow(),
-        xpath = new xmldom.XPath(),
+        xpath = xmldom.XPath,
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils();
 
@@ -594,7 +594,7 @@ odf.OdfCanvas = (function () {
             i,
             nodes = xpath.getODFElementsWithXPath(odfbody,
                 ".//*[*[@text:anchor-type='paragraph']]",
-                odf.Namespaces.resolvePrefix);
+                odf.Namespaces.lookupNamespaceURI);
         for (i = 0; i < nodes.length; i += 1) {
             n = nodes[i];
             if (n.setAttributeNS) {
@@ -662,13 +662,13 @@ odf.OdfCanvas = (function () {
                     var bookmarks = xpath.getODFElementsWithXPath(
                         odffragment,
                         "//text:bookmark-start[@text:name='" + url + "']",
-                        odf.Namespaces.resolvePrefix);
+                        odf.Namespaces.lookupNamespaceURI);
 
                     if (bookmarks.length === 0) {
                         bookmarks = xpath.getODFElementsWithXPath(
                             odffragment,
                             "//text:bookmark[@text:name='" + url + "']",
-                            odf.Namespaces.resolvePrefix);
+                            odf.Namespaces.lookupNamespaceURI);
                     }
 
                     if (bookmarks.length > 0) {

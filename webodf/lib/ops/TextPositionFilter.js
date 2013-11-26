@@ -119,7 +119,10 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
         }
         if (nodeType === TEXT_NODE) {
             if (!odfUtils.isGroupingElement(container.parentNode)
-                || odfUtils.isWithinTrackedChanges(container.parentNode, getRootNode())) {
+                    || odfUtils.isWithinTrackedChanges(
+                        container.parentNode,
+                        getRootNode()
+                    )) {
                 return FILTER_REJECT;
             }
             // In a PositionIterator, the offset in a text node is never
@@ -157,7 +160,8 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
                     }
                 }
                 if (r === FILTER_ACCEPT) {
-                    return odfUtils.isTrailingWhitespace(container, offset)
+                    return odfUtils.isTrailingWhitespace(
+                            /**@type{!Text}*/(container), offset)
                         ? FILTER_REJECT : FILTER_ACCEPT;
                 }
                 rightChar = text[offset];
@@ -172,7 +176,7 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
             container = /**@type{!Node}*/(container.parentNode);
             r = checkLeftRight(container, leftNode, rightNode);
         } else if (!odfUtils.isGroupingElement(container)
-            || odfUtils.isWithinTrackedChanges(container,getRootNode())) {
+                || odfUtils.isWithinTrackedChanges(container, getRootNode())) {
             r = FILTER_REJECT;
         } else {
             leftNode = iterator.leftNode();

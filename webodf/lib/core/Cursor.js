@@ -71,8 +71,8 @@ core.Cursor = function Cursor(document, memberId) {
         anchorNode = document.createElementNS(cursorns, 'anchor'),
         forwardSelection,
         recentlyModifiedNodes = [],
-        /**@type{?Range}*/
-        selectedRange = null,
+        /**@type{!Range}*/
+        selectedRange = /**@type{!Range}*/(document.createRange()),
         isCollapsed,
         domUtils = new core.DomUtils();
 
@@ -161,7 +161,7 @@ core.Cursor = function Cursor(document, memberId) {
     };
     /**
      * Obtain the selection to which the cursor corresponds.
-     * @return {?Range}
+     * @return {!Range}
      */
     this.getSelectedRange = function () {
         if (isCollapsed) {
@@ -171,7 +171,6 @@ core.Cursor = function Cursor(document, memberId) {
             selectedRange.setStartAfter(getStartNode());
             selectedRange.setEndBefore(getEndNode());
         }
-
         return selectedRange;
     };
     /**

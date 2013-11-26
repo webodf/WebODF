@@ -78,7 +78,7 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         return undoState.some(t.rules.isEditOperation) ? index : -1;
     }
 
-    function discardTrailingOps(fromIndex){
+    function discardTrailingOps(fromIndex) {
         t.ops.splice(fromIndex, t.ops.length - fromIndex);
     }
 
@@ -265,7 +265,7 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
     }
 
     this.tests = function () {
-        return [
+        return r.name([
             isPartOfOperationSet_NoValidStates,
             isPartOfOperationSet_AvoidsPrecedingNonEditStates,
             isPartOfOperationSet_TextInsertion_Simple,
@@ -276,7 +276,7 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
             isPartOfOperationSet_SeparatesOperationTypes,
             isPartOfOperationSet_SeparatesOperationDirections,
             isPartOfOperationSet_SeparatesOperationDirections_BROKEN
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

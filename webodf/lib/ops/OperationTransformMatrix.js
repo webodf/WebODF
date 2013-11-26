@@ -36,7 +36,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /**
      * Inverts the range spanned up by the spec's parameter position and length,
      * so that position is at the other end of the range and length relative to that.
-     * @param {!Object} moveCursorSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @return {undefined}
      */
     function invertMoveCursorSpecRange(moveCursorSpec) {
@@ -47,7 +47,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /**
      * Inverts the range spanned up by position and length if the length is negative.
      * Returns true if an inversion was done, false otherwise.
-     * @param {!Object} moveCursorSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @return {!boolean}
      */
     function invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec) {
@@ -258,8 +258,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /* Transformation methods */
 
     /**
-     * @param {!Object} addStyleSpec
-     * @param {!Object} removeStyleSpec
+     * @param {!ops.OpAddStyle.Spec} addStyleSpec
+     * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformAddStyleRemoveStyle(addStyleSpec, removeStyleSpec) {
@@ -293,8 +293,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} applyDirectStylingSpecA
-     * @param {!Object} applyDirectStylingSpecB
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpecA
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpecB
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -398,8 +398,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} applyDirectStylingSpec
-     * @param {!Object} insertTextSpec
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformApplyDirectStylingInsertText(applyDirectStylingSpec, insertTextSpec) {
@@ -417,8 +417,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} applyDirectStylingSpec
-     * @param {!Object} removeTextSpec
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformApplyDirectStylingRemoveText(applyDirectStylingSpec, removeTextSpec) {
@@ -465,8 +465,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} applyDirectStylingSpec
-     * @param {!Object} splitParagraphSpec
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformApplyDirectStylingSplitParagraph(applyDirectStylingSpec, splitParagraphSpec) {
@@ -484,8 +484,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} insertTextSpecA
-     * @param {!Object} insertTextSpecB
+     * @param {!ops.OpInsertText.Spec} insertTextSpecA
+     * @param {!ops.OpInsertText.Spec} insertTextSpecB
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -511,8 +511,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} insertTextSpec
-     * @param {!Object} moveCursorSpec
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformInsertTextMoveCursor(insertTextSpec, moveCursorSpec) {
@@ -536,8 +536,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} insertTextSpec
-     * @param {!Object} removeTextSpec
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformInsertTextRemoveText(insertTextSpec, removeTextSpec) {
@@ -577,8 +577,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} insertTextSpec
-     * @param {!Object} splitParagraphSpec
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -604,8 +604,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} updateParagraphStyleSpecA
-     * @param {!Object} updateParagraphStyleSpecB
+     * @param {!ops.OpUpdateParagraphStyle.Spec} updateParagraphStyleSpecA
+     * @param {!ops.OpUpdateParagraphStyle.Spec} updateParagraphStyleSpecB
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -703,8 +703,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} splitParagraphSpecA
-     * @param {!Object} splitParagraphSpecB
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpecA
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpecB
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -730,8 +730,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} moveCursorSpec
-     * @param {!Object} removeCursorSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @param {!ops.OpRemoveCursor.Spec} removeCursorSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformMoveCursorRemoveCursor(moveCursorSpec, removeCursorSpec) {
@@ -744,7 +744,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} moveCursorSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @param {!Object} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -793,8 +793,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} moveCursorSpec
-     * @param {!Object} splitParagraphSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformMoveCursorSplitParagraph(moveCursorSpec, splitParagraphSpec) {
@@ -818,8 +818,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} removeCursorSpecA
-     * @param {!Object} removeCursorSpecB
+     * @param {!ops.OpRemoveCursor.Spec} removeCursorSpecA
+     * @param {!ops.OpRemoveCursor.Spec} removeCursorSpecB
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformRemoveCursorRemoveCursor(removeCursorSpecA, removeCursorSpecB) {
@@ -833,8 +833,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} removeStyleSpecA
-     * @param {!Object} removeStyleSpecB
+     * @param {!ops.OpRemoveStyle.Spec} removeStyleSpecA
+     * @param {!ops.OpRemoveStyle.Spec} removeStyleSpecB
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformRemoveStyleRemoveStyle(removeStyleSpecA, removeStyleSpecB) {
@@ -848,8 +848,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} removeStyleSpec
-     * @param {!Object} setParagraphStyleSpec
+     * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformRemoveStyleSetParagraphStyle(removeStyleSpec, setParagraphStyleSpec) {
@@ -881,8 +881,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} removeStyleSpec
-     * @param {!Object} updateParagraphStyleSpec
+     * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
+     * @param {!ops.OpUpdateParagraphStyle.Spec} updateParagraphStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformRemoveStyleUpdateParagraphStyle(removeStyleSpec, updateParagraphStyleSpec) {
@@ -924,8 +924,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} removeTextSpecA
-     * @param {!Object} removeTextSpecB
+     * @param {!ops.OpRemoveText.Spec} removeTextSpecA
+     * @param {!ops.OpRemoveText.Spec} removeTextSpecB
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformRemoveTextRemoveText(removeTextSpecA, removeTextSpecB) {
@@ -992,8 +992,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} removeTextSpec
-     * @param {!Object} splitParagraphSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformRemoveTextSplitParagraph(removeTextSpec, splitParagraphSpec) {

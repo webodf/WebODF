@@ -36,6 +36,30 @@
 /*global Node, runtime, xmldom*/
 
 /**
+ * @namespace
+ */
+xmldom.RNG = {};
+/**
+ * @typedef {!{e:!Array.<xmldom.RNG.Name>,name:string}}
+ */
+xmldom.RNG.Name;
+/**
+ * @typedef {!{ns:string, name:string}}
+ */
+xmldom.RNG.Attr;
+/**
+ * @typedef {!{
+ *     id:    number,
+ *     e:     (undefined|?|!Array.<xmldom.RNG.Element>),
+ *     name:  string,
+ *     names: (undefined|!Array.<string>),
+ *     a:     (undefined|?|!xmldom.RNG.Attr),
+ *     text:  string
+ * }}
+ */
+xmldom.RNG.Element;
+
+/**
  * RelaxNG can check a DOM tree against a Relax NG schema
  * The RelaxNG implementation is currently not complete. Relax NG should not
  * report errors on valid DOM trees, but it will not check all constraints that
@@ -53,7 +77,9 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         rngns = "http://relaxng.org/ns/structure/1.0",
         xmlnsns = "http://www.w3.org/2000/xmlns/",
         start,
+        /**@type{!Object.<string,string>}*/
         nsmap = { "http://www.w3.org/XML/1998/namespace": "xml" },
+        /**@type{function(...):?xmldom.RNG.Element}*/
         parse;
 
     /**
@@ -77,6 +103,10 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
             return error;
         };
     }
+    /**
+     * @param {!xmldom.RNG.Name} e
+     * @return {!xmldom.RNG.Name}
+     */
     function splitToDuos(e) {
         if (e.e.length <= 2) {
             return e;
@@ -94,6 +124,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     function splitQName(name) {
         var r = name.split(":", 2),
             prefix = "",
+            /**@type{string}*/
             i;
         if (r.length === 1) {
             r = ["", r[0]];
@@ -108,6 +139,10 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         return r;
     }
 
+    /**
+     * @param {!{names:!Array.<string>}} def
+     * @return {undefined}
+     */
     function splitQNames(def) {
         var i, l = (def.names) ? def.names.length : 0, name,
             localnames = [],
@@ -136,15 +171,15 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     }
 
     /**
-     * @param {!Object.<string,string>} atts
+     * @param {?NamedNodeMap} atts
      * @param {!string} name
      * @param {!Array.<string>} names
-     * @return {!Object}
+     * @return {!Object.<string,string>}
      */
     function copyAttributes(atts, name, names) {
         var a = {}, i, att;
-        for (i = 0; i < atts.length; i += 1) {
-            att = atts.item(i);
+        for (i = 0; atts && i < atts.length; i += 1) {
+            att = /**@type{!Attr}*/(atts.item(i));
             if (!att.namespaceURI) {
                 if (att.localName === "name" &&
                         (name === "element" || name === "attribute")) {
@@ -162,11 +197,18 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         return a;
     }
 
+    /**
+     * @param {?Node} c
+     * @param {!Array.<*>} e
+     * @param {!Array.<*>} elements
+     * @param {!Array.<string>} names
+     * @return {string}
+     */
     function parseChildren(c, e, elements, names) {
         var text = "", ce;
         while (c) {
             if (c.nodeType === Node.ELEMENT_NODE && c.namespaceURI === rngns) {
-                ce = parse(c, elements, e);
+                ce = parse(/**@type{!Element}*/(c), elements, e);
                 if (ce) {
                     if (ce.name === "name") {
                         names.push(nsmap[ce.a.ns] + ":" + ce.text);
@@ -188,6 +230,13 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         return text;
     }
 
+    /**
+     * @param {*} combine
+     * @param {string} name
+     * @param {!xmldom.RNG.Element} e
+     * @param {undefined|!Array.<!xmldom.RNG.Element>} siblings
+     * @return {?xmldom.RNG.Element}
+     */
     function combineDefines(combine, name, e, siblings) {
         // combineDefines is called often enough that there can only be one
         // other element with the same name
@@ -202,11 +251,18 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         return null;
     }
 
+    /**
+     * @param {!Element} element
+     * @param {!Array.<*>} elements
+     * @param {!Array.<*>|undefined} siblings
+     * @return {?}
+     */
     parse = function parse(element, elements, siblings) {
         // parse all elements from the Relax NG namespace into JavaScript
         // objects
         var e = [],
-            /**@type{Object}*/a,
+            /**@type{Object}*/
+            a,
             ce,
             i,
             text,
@@ -300,7 +356,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         if (name === "define" && a.combine) {
             ce = combineDefines(a.combine, a.name, e, siblings);
             if (ce) {
-                return;
+                return null;
             }
         }
 
@@ -399,6 +455,10 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
         }
     }
 
+    /**
+     * @param {!xmldom.RNG.Element} def
+     * @return {undefined}
+     */
     function resolveElements(def, elements) {
         var i = 0, e;
         while (def.e && i < def.e.length) {
@@ -416,7 +476,7 @@ xmldom.RelaxNGParser = function RelaxNGParser() {
     /**
      * @param {!Document} dom
      * @param {!Function} callback
-     * @return {?Array}
+     * @return {?Array.<!RelaxNGParseError>}
      */
     function main(dom, callback) {
         var elements = [],

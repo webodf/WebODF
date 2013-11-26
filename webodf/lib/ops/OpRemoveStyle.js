@@ -80,3 +80,11 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    styleName:string,
+    styleFamily:string
+ }}*/
+ops.OpRemoveStyle.Spec;

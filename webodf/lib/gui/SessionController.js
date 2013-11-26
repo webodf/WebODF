@@ -162,23 +162,25 @@ gui.SessionController = (function () {
          */
         function caretPositionFromPoint(x, y) {
             var doc = odtDocument.getDOM(),
-                result;
+                c,
+                result = null;
 
             if (doc.caretRangeFromPoint) {
-                result = doc.caretRangeFromPoint(x, y);
-                return {
-                    container : result.startContainer,
-                    offset : result.startOffset
+                c = doc.caretRangeFromPoint(x, y);
+                result = {
+                    container: c.startContainer,
+                    offset: c.startOffset
                 };
+            } else if (doc.caretPositionFromPoint) {
+                c = doc.caretPositionFromPoint(x, y);
+                if (c && c.offsetNode) {
+                    result = {
+                        container: c.offsetNode,
+                        offset: c.offset
+                    };
+                }
             }
-            if (doc.caretPositionFromPoint) {
-                result = doc.caretPositionFromPoint(x, y);
-                return {
-                    container : result.offsetNode,
-                    offset : result.offset
-                };
-            }
-            return null;
+            return result;
         }
 
         /**
@@ -524,7 +526,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToParagraphStart() {
-            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+            var paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode())),
                 iterator,
                 node,
                 steps;
@@ -549,7 +551,7 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToParagraphEnd() {
-            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
+            var paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode())),
                 iterator,
                 node,
                 steps;
@@ -667,9 +669,10 @@ gui.SessionController = (function () {
                 // Always redraw the image selection as this doesn't affect the browser's selection
                 imageSelector.clearSelection();
                 if (cursor.getSelectionType() === ops.OdtCursor.RegionSelection) {
-                    imageElement = odfUtils.getImageElements(cursor.getSelectedRange())[0];
+                    range = cursor.getSelectedRange();
+                    imageElement = odfUtils.getImageElements(range)[0];
                     if (imageElement) {
-                        imageSelector.select(/** @type {!Element}*/(imageElement.parentNode));
+                        imageSelector.select(/**@type{!Element}*/(imageElement.parentNode));
                     }
                 }
 
@@ -685,18 +688,21 @@ gui.SessionController = (function () {
                             selection.extend(range.startContainer, range.startOffset);
                         }
                     } else {
-                        // Internet explorer does provide any method for preserving the range direction
+                        // Internet explorer does provide any method for
+                        // preserving the range direction
                         // See http://msdn.microsoft.com/en-us/library/ie/ff974359%28v=vs.85%29.aspx
-                        // Unfortunately, clearing the range will trigger a focus event. So to work around this
-                        // we suppress the focus event and use the IE-specific setActive method which will
-                        // return focus back to the event manager without harming the now correct selection
+                        // Unfortunately, clearing the range will trigger a
+                        // focus event. So to work around this we suppress the                          // focus event and use the IE-specific setActive method
+                        // which will return focus back to the event manager
+                        // without harming the now correct selection
                         suppressFocusEvent = true;
                         selection.removeAllRanges();
                         selection.addRange(range.cloneRange());
-                        odtDocument.getOdfCanvas().getElement().setActive();
-                        runtime.setTimeout(function() {
-                            // The focus event will fire within the next cycle, so wait until then before
-                            // allowing the selection to resynchronize again
+                        /**@type{!IEElement}*/(odtDocument.getOdfCanvas().getElement()).setActive();
+                        runtime.setTimeout(function () {
+                            // The focus event will fire within the next cycle,
+                            // so wait until then before allowing the selection
+                            // to resynchronize again
                             suppressFocusEvent = false;
                         }, 0);
                     }
@@ -747,9 +753,9 @@ gui.SessionController = (function () {
                 return;
             }
 
-            // The document is readonly, so the data will never get placed on the clipboard in
-            // most browsers unless we do it ourselves.
-            if (clipboard.setDataFromRange(e, cursor.getSelectedRange())) {
+            // The document is readonly, so the data will never get placed on
+            // the clipboard in most browsers unless we do it ourselves.
+            if (clipboard.setDataFromRange(e, selectedRange)) {
                 textManipulator.removeCurrentSelection();
             } else {
                 // TODO What should we do if cut isn't supported?
@@ -778,12 +784,14 @@ gui.SessionController = (function () {
 
             if (selectedRange.collapsed) {
                 // Modifying the clipboard data will clear any existing data,
-                // so cut shouldn't touch the clipboard if there is nothing selected
+                // so cut shouldn't touch the clipboard if there is nothing
+                // selected
                 return;
             }
 
-            // Place the data on the clipboard ourselves to ensure consistency with cut behaviours
-            if (!clipboard.setDataFromRange(e, cursor.getSelectedRange())) {
+            // Place the data on the clipboard ourselves to ensure consistency
+            // with cut behaviours
+            if (!clipboard.setDataFromRange(e, selectedRange)) {
                 // TODO What should we do if cut isn't supported?
                 runtime.log("Cut operation failed");
             }

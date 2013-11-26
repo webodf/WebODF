@@ -36,6 +36,10 @@
 /*global Node, NodeFilter, xmldom, runtime*/
 /*jslint sub: true, emptyblock: true*/
 if (typeof Object.create !== 'function') {
+    /**
+     * @param {!Object} o
+     * @return {!Object}
+     */
     Object['create'] = function (o) {
         "use strict";
         /**
@@ -54,15 +58,21 @@ if (typeof Object.create !== 'function') {
  */
 xmldom.LSSerializer = function LSSerializer() {
     "use strict";
-    var /**@const@type{!LSSerializer}*/ self = this;
+    var self = this;
 
     /**
      * @constructor
      * @param {!Object.<string,string>} nsmap
      */
     function Namespaces(nsmap) {
+        /**
+         * @param {!Object.<string,string>} map
+         * @return {!Object.<string,string>}
+         */
         function invertMap(map) {
-            var m = {}, i;
+            var m = {},
+                /**@type{string}*/
+                i;
             for (i in map) {
                 if (map.hasOwnProperty(i)) {
                     m[map[i]] = i;
@@ -70,10 +80,15 @@ xmldom.LSSerializer = function LSSerializer() {
             }
             return m;
         }
-        var current = nsmap || {},
+        var /**@type{!Object.<string,string>}*/
+            current = nsmap || {},
+            /**@type{!Object.<string,string>}*/
             currentrev = invertMap(nsmap),
+            /**@type{!Array.<!Object.<string,string>>}*/
             levels = [ current ],
+            /**@type{!Array.<!Object.<string,string>>}*/
             levelsrev = [ currentrev ],
+            /**@type{number}*/
             level = 0;
         this.push = function () {
             level += 1;
@@ -81,8 +96,8 @@ xmldom.LSSerializer = function LSSerializer() {
             currentrev = levelsrev[level] = Object.create(currentrev);
         };
         this.pop = function () {
-            levels[level] = undefined;
-            levelsrev[level] = undefined;
+            levels.pop();
+            levelsrev.pop();
             level -= 1;
             current = levels[level];
             currentrev = levelsrev[level];
@@ -98,7 +113,9 @@ xmldom.LSSerializer = function LSSerializer() {
          * @return {!string}
          */
         this.getQName = function (node) {
-            var ns = node.namespaceURI, i = 0, p;
+            var ns = node.namespaceURI,
+                i = 0,
+                p;
             if (!ns) {
                 return node.localName;
             }
@@ -133,11 +150,11 @@ xmldom.LSSerializer = function LSSerializer() {
      * @returns {string}
      */
     function escapeContent(value) {
-        return value.replace(/&/g,"&amp;")
-            .replace(/</g,"&lt;")
-            .replace(/>/g,"&gt;")
-            .replace(/'/g,"&apos;")
-            .replace(/"/g,"&quot;");
+        return value.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/'/g, "&apos;")
+            .replace(/"/g, "&quot;");
     }
     /**
      * @param {!string} qname
@@ -145,8 +162,11 @@ xmldom.LSSerializer = function LSSerializer() {
      * @return {!string}
      */
     function serializeAttribute(qname, attr) {
-        var escapedValue = typeof attr.value === 'string' ? escapeContent(attr.value) : attr.value,
-            /**@type{!string}*/ s = qname + "=\"" + escapedValue + "\"";
+        var escapedValue = typeof attr.value === 'string'
+                           ? escapeContent(attr.value)
+                           : attr.value,
+            /**@type{!string}*/
+            s = qname + "=\"" + escapedValue + "\"";
         return s;
     }
     /**
@@ -157,20 +177,30 @@ xmldom.LSSerializer = function LSSerializer() {
      */
     function startElement(ns, qname, element) {
         var /**@type{!string}*/ s = "",
-            /**@const*/ atts = /**@type{!NamedNodeMap}*/(element.attributes),
-            /**@const@type{!number}*/ length,
-            /**@type{!number}*/ i,
-            /**@type{!Attr}*/ attr,
-            /**@type{!string}*/ attstr = "",
-            /**@type{!number}*/ accept,
-            /**@type{!string}*/ prefix,
+            /**@const*/
+            atts = /**@type{!NamedNodeMap}*/(element.attributes),
+            /**@const
+ *             @type{!number}*/
+            length,
+            /**@type{!number}*/
+            i,
+            /**@type{!Attr}*/
+            attr,
+            /**@type{!string}*/
+            attstr = "",
+            /**@type{!number}*/
+            accept,
+            /**@type{!string}*/
+            prefix,
             nsmap;
         s += "<" + qname;
         length = atts.length;
         for (i = 0; i < length; i += 1) {
             attr = /**@type{!Attr}*/(atts.item(i));
             if (attr.namespaceURI !== "http://www.w3.org/2000/xmlns/") {
-                accept = (self.filter) ? self.filter.acceptNode(attr) : NodeFilter.FILTER_ACCEPT;
+                accept = self.filter
+                         ? self.filter.acceptNode(attr)
+                         : NodeFilter.FILTER_ACCEPT;
                 if (accept === NodeFilter.FILTER_ACCEPT) {
                     attstr += " " + serializeAttribute(ns.getQName(attr),
                         attr);
@@ -197,17 +227,24 @@ xmldom.LSSerializer = function LSSerializer() {
      * @return {!string}
      */
     function serializeNode(ns, node) {
-        var /**@type{!string}*/ s = "",
-            /**@const@type{!number}*/ accept
-                = (self.filter) ? self.filter.acceptNode(node) : NodeFilter.FILTER_ACCEPT,
-            /**@type{Node}*/child,
-            /**@const@type{string}*/ qname;
-        if (accept === NodeFilter.FILTER_ACCEPT && node.nodeType === Node.ELEMENT_NODE) {
+        var /**@type{!string}*/
+            s = "",
+            /**@const
+ *             @type{!number}*/
+            accept = (self.filter) ? self.filter.acceptNode(node) : NodeFilter.FILTER_ACCEPT,
+            /**@type{Node}*/
+            child,
+            /**@const
+ *             @type{string}*/
+            qname;
+        if (accept === NodeFilter.FILTER_ACCEPT
+                && node.nodeType === Node.ELEMENT_NODE) {
             ns.push();
             qname = ns.getQName(node);
             s += startElement(ns, qname, node);
         }
-        if (accept === NodeFilter.FILTER_ACCEPT || accept === NodeFilter.FILTER_SKIP) {
+        if (accept === NodeFilter.FILTER_ACCEPT
+                || accept === NodeFilter.FILTER_SKIP) {
             child = node.firstChild;
             while (child) {
                 s += serializeNode(ns, child);

@@ -61,34 +61,61 @@ core.Utils = function Utils() {
     }
     this.hashString = hashString;
 
+    var mergeObjects;
     /**
-     * Recursively merge properties of two objects
-     * Merge behaviours are:
-     *  array => array - Append clones of source array onto the end of the destination array
-     *  object => object - Map each individual key from source onto destination (recursive, so these are clones)
-     *  primitive => primitive - return primitive value
-     *
-     * @param {!Object} destination
-     * @param {!Object} source
-     * @return {!Object}
+     * @param {*} destination
+     * @param {*} source
+     * @return {*}
      */
-    function mergeObjects(destination, source) {
+    function mergeItems(destination, source) {
         // Property in destination object set; update its value.
         if (source && Array.isArray(source)) {
-            // An array will report as a type of object, but this is not able to mapped using mergeObjects
-            // The following will clone each individual item in the source array and append them to the end of the
-            // destination array
-            destination = (destination || []).concat(source.map(function(obj) { return mergeObjects({}, obj); }));
+            // create destination array if it does not exist yet
+            destination = destination || [];
+            if (!Array.isArray(destination)) {
+                throw "Destination is not an array.";
+            }
+            // An array will report as a type of object, but this is not able to
+            // mapped using mergeObjects
+            // The following will clone each individual item in the source array
+            // and append them to the end of the destination array
+            destination = /**@type{!Array.<*>}*/(destination).concat(
+                /**@type{!Array.<*>}*/(source).map(function (obj) {
+                    return mergeItems(null, obj);
+                })
+            );
         } else if (source && typeof source === 'object') {
             destination = destination || {};
-            Object.keys(source).forEach(function (p) {
-                destination[p] = mergeObjects(destination[p], source[p]);
+            if (typeof destination !== 'object') {
+                throw "Destination is not an object.";
+            }
+            Object.keys(/**@type{!Object}*/(source)).forEach(function (p) {
+                destination[p] = mergeItems(destination[p], source[p]);
             });
         } else {
             destination = source;
         }
         return destination;
     }
+    /**
+     * Recursively merge properties of two objects
+     * Merge behaviours for the object members are:
+     *  array => array - Append clones of source array onto the end of the
+     *                   destination array
+     *  object => object - Map each individual key from source onto destination
+     *                     (recursive, so these are clones)
+     *  primitive => primitive - return primitive value
+     *
+     * @param {!Object.<string,*>} destination
+     * @param {!Object.<string,*>} source
+     * @return {!Object.<string,*>}
+     */
+    mergeObjects = function (destination, source) {
+        Object.keys(source).forEach(function (p) {
+            destination[p] = mergeItems(destination[p], source[p]);
+        });
+        return destination;
+    };
     this.mergeObjects = mergeObjects;
 };
 

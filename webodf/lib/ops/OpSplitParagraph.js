@@ -174,3 +174,10 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number
+}}*/
+ops.OpSplitParagraph.Spec;

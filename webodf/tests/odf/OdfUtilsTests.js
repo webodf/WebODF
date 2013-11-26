@@ -260,7 +260,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.isDowngradable2", "false");
     }
     this.tests = function () {
-        return [
+        return r.name([
             isCharacterElement_ReturnTrueForTab,
             isCharacterElement_ReturnTrueForSpace,
             isCharacterElement_ReturnTrueForLineBreak,
@@ -281,7 +281,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             isDowngradableWhitespace_DoesNotDowngradeTrailingSpace,
             isDowngradableWhitespace_DoesNotDowngradeLeading,
             isDowngradableWhitespace_DoesNotDowngradeAfterSpace
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [];

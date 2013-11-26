@@ -55,13 +55,13 @@ odf.MetadataManager = function MetadataManager(metaElement) {
             Object.keys(setProperties).forEach(function (key) {
                 metadata[key] = setProperties[key];
             });
-            domUtils.mapKeyValObjOntoNode(metaElement, setProperties, odf.Namespaces.resolvePrefix);
+            domUtils.mapKeyValObjOntoNode(metaElement, setProperties, odf.Namespaces.lookupNamespaceURI);
         }
         if (removedProperties) {
             removedProperties.forEach(function (name) {
                 delete metadata[name];
             });
-            domUtils.removeKeyElementsFromNode(metaElement, removedProperties, odf.Namespaces.resolvePrefix);
+            domUtils.removeKeyElementsFromNode(metaElement, removedProperties, odf.Namespaces.lookupNamespaceURI);
         }
     }
     this.setMetadata = setMetadata;

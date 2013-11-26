@@ -55,13 +55,13 @@ ops.OpUpdateMember = function OpUpdateMember() {
     this.isEdit = false;
 
     function updateCreators() {
-        var xpath = new xmldom.XPath(),
+        var xpath = xmldom.XPath,
             xp = "//dc:creator[@editinfo:memberid='" + memberid + "']",
             creators = xpath.getODFElementsWithXPath(doc.getRootNode(), xp, function (prefix) {
                 if (prefix === "editinfo") {
                     return "urn:webodf:names:editinfo";
                 }
-                return odf.Namespaces.resolvePrefix(prefix);
+                return odf.Namespaces.lookupNamespaceURI(prefix);
             }),
             i;
 

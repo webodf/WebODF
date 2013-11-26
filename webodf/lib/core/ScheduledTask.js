@@ -66,7 +66,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
      * Schedule this task to execute. If one has already been requested,
      * this call will have no impact
      */
-    this.trigger = function() {
+    this.trigger = function () {
         if (!scheduled) {
             timeoutId = runtime.setTimeout(execute, delay);
         }
@@ -75,7 +75,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
     /**
      * Immediately trigger this task and clear any pending requests.
      */
-    this.triggerImmediate = function() {
+    this.triggerImmediate = function () {
         cancel();
         execute();
     };
@@ -84,7 +84,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
      * Execute any pending requests, but do not start any new ones.
      * If there are no pending requests, this call will do nothing.
      */
-    this.processRequests = function() {
+    this.processRequests = function () {
         if (scheduled) {
             cancel();
             execute();
@@ -101,7 +101,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
      * Cancel any pending requests
      * @param {!function(!Object=)} callback
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         cancel();
         callback();
     };

@@ -108,3 +108,13 @@ ops.OpAddStyle = function OpAddStyle() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    styleName:string,
+    styleFamily:string,
+    isAutomaticStyle:boolean,
+    setProperties:Object
+}}*/
+ops.OpAddStyle.Spec;

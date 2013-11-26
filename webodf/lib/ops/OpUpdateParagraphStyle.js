@@ -66,7 +66,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         for (i = 0; i < attributeNameList.length; i += 1) {
             attributeNameParts = attributeNameList[i].split(":");
             // TODO: ensure all used prefixes have a namespaces listed
-            node.removeAttributeNS(odf.Namespaces.resolvePrefix(attributeNameParts[0]), attributeNameParts[1]);
+            node.removeAttributeNS(odf.Namespaces.lookupNamespaceURI(attributeNameParts[0]), attributeNameParts[1]);
         }
     }
 
@@ -139,5 +139,12 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
             removedProperties: removedProperties
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    setProperties:Object,
+    removedProperties:Object
+}}*/
+ops.OpUpdateParagraphStyle.Spec;

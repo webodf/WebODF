@@ -60,8 +60,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
      */
     function OdfCanvasAdapter(node) {
         var self = this;
-        this.odfContainer = function() { return self; };
-        this.getContentElement = function() { return node.getElementsByTagNameNS(odf.Namespaces.officens, 'text')[0]; };
+        this.odfContainer = function () { return self; };
+        this.getContentElement = function () { return node.getElementsByTagNameNS(odf.Namespaces.officens, 'text')[0]; };
     }
     function createOdtDocument(xml) {
         var domDocument = testarea.ownerDocument,
@@ -652,7 +652,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     };
 
     this.tests = function () {
-        return [
+        return r.name([
             testCountLinesStepsDown_FromParagraphStart,
             testCountLinesStepsDown_FromParagraphEnd,
             testCountLinesStepsDown_FromJaggedParagraphEnd,
@@ -705,7 +705,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             getTextNodeAtStep_At4_PutsTargetMemberCursor_AfterTextNode,
             getTextNodeAtStep_AfterNonText_PutsTargetMemberCursor_AfterTextNode,
             getTextNodeAtStep_RearrangesExistingCursors_MovesMemberAfterTextNode
-        ];
+        ]);
     };
     this.asyncTests = function () {
         return [

@@ -46,12 +46,14 @@ runtime.loadClass("gui.SelectionMover");
  * rectangles that may not be of the full width as the selection, and
  * a 'filler' rect that is of full width and covers everything in between.
  * @constructor
+ * @param {!ops.OdtCursor} cursor
  */
 gui.SelectionView = function SelectionView(cursor) {
     "use strict";
 
     var odtDocument = cursor.getOdtDocument(),
         documentRoot, // initialized by addOverlays
+        /**@type{!Element}*/
         root, // initialized by addOverlays
         doc = odtDocument.getDOM(),
         overlayTop = doc.createElement('div'),
@@ -61,8 +63,10 @@ gui.SelectionView = function SelectionView(cursor) {
         domUtils = new core.DomUtils(),
         isVisible = true,
         positionIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-        /**@const*/FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
-        /**@const*/FILTER_REJECT = NodeFilter.FILTER_REJECT;
+        /**@const*/
+        FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
+        /**@const*/
+        FILTER_REJECT = NodeFilter.FILTER_REJECT;
 
     /**
      * This evil little check is necessary because someone, not mentioning any names *cough*
@@ -76,7 +80,7 @@ gui.SelectionView = function SelectionView(cursor) {
         var newDocumentRoot = odtDocument.getRootNode();
         if (documentRoot !== newDocumentRoot) {
             documentRoot = newDocumentRoot;
-            root = documentRoot.parentNode.parentNode.parentNode;
+            root = /**@type{!Element}*/(documentRoot.parentNode.parentNode.parentNode);
             root.appendChild(overlayTop);
             root.appendChild(overlayMiddle);
             root.appendChild(overlayBottom);
@@ -93,8 +97,8 @@ gui.SelectionView = function SelectionView(cursor) {
     function setRect(div, rect) {
         div.style.left = rect.left + 'px';
         div.style.top = rect.top + 'px';
-        div.style.width = rect.width+ 'px';
-        div.style.height = rect.height+ 'px';
+        div.style.width = rect.width + 'px';
+        div.style.height = rect.height + 'px';
     }
 
     /**
@@ -167,7 +171,7 @@ gui.SelectionView = function SelectionView(cursor) {
             } else if (node.nodeType === Node.TEXT_NODE && startOffset > 0) {
                 // Extending start to include one more text char. End offset remains unchanged
                 startOffset -= 1;
-            } else if(nodes[nextNodeIndex]) {
+            } else if (nodes[nextNodeIndex]) {
                 // Moving range to a new node. Start collapsed at last available point
                 node = nodes[nextNodeIndex];
                 nextNodeIndex -= 1;
@@ -202,7 +206,7 @@ gui.SelectionView = function SelectionView(cursor) {
             } else if (node.nodeType === Node.TEXT_NODE && endOffset < node.length) {
                 // Extending end to include one more text char. Start offset remains unchanged
                 endOffset += 1;
-            } else if(nodes[nextNodeIndex]) {
+            } else if (nodes[nextNodeIndex]) {
                 // Moving range to a new node. Start collapsed at first available point
                 node = nodes[nextNodeIndex];
                 nextNodeIndex += 1;
@@ -597,7 +601,7 @@ gui.SelectionView = function SelectionView(cursor) {
     /**
      * Returns if the selection view is visible or hidden
      */
-    this.visible = function() {
+    this.visible = function () {
         return isVisible;
     };
     /**

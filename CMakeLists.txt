@@ -250,12 +250,11 @@ endif(NOT ANDROID_SDK_DIR)
 
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
-set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
-
-    lib/core/RawDeflate.js
+set(TYPEDLIBJSFILES
+    lib/runtime.js
+    lib/core/Base64.js
     lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js
-    lib/core/RawInflate.js
     lib/core/LoopWatchDog.js
     lib/core/Utils.js
     lib/core/DomUtils.js
@@ -267,28 +266,35 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/core/PositionFilterChain.js
     lib/core/ScheduledTask.js
     lib/core/Async.js
-    lib/core/Zip.js
     lib/core/CSSUnits.js
+    lib/core/RawInflate.js
+    lib/core/Zip.js
+
 
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/LSSerializer.js
+    lib/xmldom/XPath.js
+
+    lib/odf/Namespaces.js
+    lib/odf/OdfUtils.js
+    lib/odf/OdfNodeFilter.js
+    lib/odf/TextSerializer.js
+    lib/odf/StyleInfo.js
+)
+set(UNTYPEDLIBJSFILES
+
+    # lib/core/RawDeflate.js not used anywhere
     lib/xmldom/RelaxNGParser.js
     lib/xmldom/RelaxNG.js
     lib/xmldom/RelaxNG2.js
-    lib/xmldom/XPath.js
 
-    lib/gui/AnnotationViewManager.js
-    lib/odf/OdfNodeFilter.js
-    lib/odf/Namespaces.js
-    lib/odf/StyleInfo.js
-    lib/odf/OdfUtils.js
-    lib/odf/TextSerializer.js
-    lib/odf/TextStyleApplicator.js
     lib/odf/Style2CSS.js
     lib/odf/MetadataManager.js
+    lib/odf/ObjectNameGenerator.js
+    lib/odf/TextStyleApplicator.js
+    lib/gui/AnnotationViewManager.js
     lib/odf/OdfContainer.js
     lib/odf/FontLoader.js
-    lib/odf/ObjectNameGenerator.js
     lib/odf/Formatting.js
     lib/odf/OdfCanvas.js
     lib/odf/CommandLineTools.js
@@ -337,9 +343,7 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
     lib/gui/ImageManager.js
     lib/gui/ImageSelector.js
     lib/gui/TextManipulator.js
-    lib/gui/AnnotationController.js
     lib/gui/EventManager.js
-    lib/gui/SessionController.js
     lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
     lib/gui/EditInfoHandle.js
@@ -354,7 +358,10 @@ set(LIBJSFILES lib/packages.js lib/runtime.js lib/core/Base64.js
 
     lib/ops/OdtDocument.js
     lib/ops/Session.js
+    lib/gui/AnnotationController.js
+    lib/gui/SessionController.js
 )
+set(LIBJSFILES ${TYPEDLIBJSFILES} ${UNTYPEDLIBJSFILES})
 
 set(HTML5UIFILES
   app/app.js

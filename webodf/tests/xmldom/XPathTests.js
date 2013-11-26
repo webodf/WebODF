@@ -74,7 +74,7 @@ xmldom.XPathTests = function XPathTests(runner) {
     }
     function test1() {
         setupDoc();
-        var xpath = new xmldom.XPath(),
+        var xpath = xmldom.XPath,
             xpaths = {
                 "style:font-face[svg:font-face-src]": "t.fontFace",
                 ".//*[*[@text:anchor-type='paragraph']]": "t.fontFace",
@@ -84,7 +84,7 @@ xmldom.XPathTests = function XPathTests(runner) {
         for (x in xpaths) {
             if (xpaths.hasOwnProperty(x)) {
                 t.result = xpath.getODFElementsWithXPath(t.doc.documentElement,
-                        x, odf.Namespaces.resolvePrefix);
+                        x, odf.Namespaces.lookupNamespaceURI);
                 r.shouldBe(t, "t.result.length", "1");
                 r.shouldBe(t, "t.result[0]", xpaths[x]);
             }
@@ -97,11 +97,10 @@ xmldom.XPathTests = function XPathTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [ test1 ];
+        return r.name([test1]);
     };
     this.asyncTests = function () {
-        return [
-        ];
+        return [];
     };
 };
 xmldom.XPathTests.prototype.description = function () {

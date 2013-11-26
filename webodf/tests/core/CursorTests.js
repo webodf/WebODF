@@ -83,7 +83,7 @@ core.CursorTests = function CursorTests(runner) {
         t.root.appendChild(t.textnode);
     }
 
-    tests = [
+    tests = r.name([
         // create a document, add a cursor and check that the cursor is present
         function testOnEmptyNode1() {
             // if the document is the container of the selection, the cursor
@@ -193,7 +193,7 @@ core.CursorTests = function CursorTests(runner) {
             r.shouldBe(t, "t.range.endOffset", "3");
             r.shouldBe(t, "t.range.collapsed", "false");
         }
-    ];
+    ]);
     this.setUp = function () {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();

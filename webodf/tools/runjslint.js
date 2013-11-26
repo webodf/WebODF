@@ -74,11 +74,6 @@ function checkWithJSLINT(file) {
         },
         data, result, err;
 
-    // these files are an exception for now
-    if (file === "lib/core/RawInflate.js") {
-        return;
-    }
-
     data = runtime.readFileSync(file, "utf-8");
     result = jslint(data, jslintconfig);
     if (!result) {

@@ -43,118 +43,109 @@
  * some utility methods related to prefixes and namespaces
  * @const
  */
-odf.Namespaces = (function () {
+odf.Namespaces = {
+    namespaceMap: {
+        db: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
+        dc: "http://purl.org/dc/elements/1.1/",
+        dr3d: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
+        draw: "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+        chart: "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
+        fo: "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+        form: "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+        meta: "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
+        number: "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
+        office: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        presentation: "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
+        style: "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+        svg: "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+        table: "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+        text: "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        xlink: 'http://www.w3.org/1999/xlink',
+        xml: "http://www.w3.org/XML/1998/namespace"
+    },
+    /**@type{!Object.<string,string>}*/
+    prefixMap: {},
+    dbns: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
+    dcns: "http://purl.org/dc/elements/1.1/",
+    dr3dns: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
+    drawns: "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+    chartns: "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
+    fons: "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+    formns: "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+    numberns: "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
+    officens: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+    presentationns: "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
+    stylens: "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+    svgns: "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
+    tablens: "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+    textns: "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+    xlinkns: 'http://www.w3.org/1999/xlink',
+    xmlns: "http://www.w3.org/XML/1998/namespace"
+};
+
+(function () {
     "use strict";
+    // map namespacemap to prefix map on startup
+    var map = odf.Namespaces.namespaceMap,
+        /**@type{!Object.<string,string>}*/
+        pmap = odf.Namespaces.prefixMap,
+        /**@type{string}*/
+        prefix;
 
-    var /**@const@type {!string}*/ dbns = "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
-        /**@const@type {!string}*/ dcns = "http://purl.org/dc/elements/1.1/",
-        /**@const@type {!string}*/ metans = "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
-        /**@const@type {!string}*/ dr3dns = "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
-        /**@const@type {!string}*/ drawns = "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-        /**@const@type {!string}*/ chartns = "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
-        /**@const@type {!string}*/ fons = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-        /**@const@type {!string}*/ formns = "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
-        /**@const@type {!string}*/ numberns = "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
-        /**@const@type {!string}*/ officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-        /**@const@type {!string}*/ presentationns = "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",
-        /**@const@type {!string}*/ stylens = "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-        /**@const@type {!string}*/ svgns = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-        /**@const@type {!string}*/ tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
-        /**@const@type {!string}*/ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        /**@const@type {!string}*/ xlinkns = 'http://www.w3.org/1999/xlink',
-        /**@const@type {!string}*/ xmlns = "http://www.w3.org/XML/1998/namespace",
-
-        /** @const@type {!Object.<string,!string>} */
-        namespaceMap = {
-            "db": dbns,
-            "dc": dcns,
-            "meta": metans,
-            "dr3d": dr3dns,
-            "draw": drawns,
-            "chart": chartns,
-            "fo": fons,
-            "form": formns,
-            "numberns": numberns,
-            "office": officens,
-            "presentation": presentationns,
-            "style": stylens,
-            "svg": svgns,
-            "table": tablens,
-            "text": textns,
-            "xlink": xlinkns,
-            "xml": xmlns
-        },
-        namespaces;
-
-    /**
-     * Calls the passed callback for all pairs of prefix and namespace
-     * which are in the namespaceMap property
-     * @param {function(string,string)} cb
-     * @return {undefined}
-     */
-    function forEachPrefix(cb) {
-        var prefix;
-        for (prefix in namespaceMap) {
-            if (namespaceMap.hasOwnProperty(prefix)) {
-                cb(prefix, namespaceMap[prefix]);
-            }
+    for (prefix in map) {
+        if (map.hasOwnProperty(prefix)) {
+            pmap[map[prefix]] = prefix;
         }
     }
-
-    /**
-     * Returns the namespace belonging to the prefix or null.
-     * @param {!string} prefix
-     * @return {?string}
-     */
-    function resolvePrefix(prefix) {
-        return namespaceMap[prefix] || null;
-    }
-
-    function lookupPrefix(namespaceURI) {
-        var foundPrefix, prefix;
-
-        for (prefix in namespaceMap) {
-            if (namespaceMap.hasOwnProperty(prefix) && namespaceMap[prefix] === namespaceURI) {
-                foundPrefix = prefix;
-                break;
-            }
-        }
-
-        return foundPrefix;
-    }
-
-    // TODO: document where and why this is needed
-    resolvePrefix.lookupNamespaceURI = resolvePrefix;
-
-/*jslint emptyblock: true*/
-    // create the actual odf.Namespaces object as a function, because the
-    // class loader of runtime expects a function
-    namespaces = function Namespaces() {};
-/*jslint emptyblock: false*/
-
-    namespaces.forEachPrefix = forEachPrefix;
-    namespaces.resolvePrefix = resolvePrefix;
-    namespaces.lookupPrefix = lookupPrefix;
-    namespaces.namespaceMap = namespaceMap;
-
-    // add all namespaces
-    /**@const@type {!string}*/ namespaces.dbns = dbns;
-    /**@const@type {!string}*/ namespaces.dcns = dcns;
-    /**@const@type {!string}*/ namespaces.metans = metans;
-    /**@const@type {!string}*/ namespaces.dr3dns = dr3dns;
-    /**@const@type {!string}*/ namespaces.drawns = drawns;
-    /**@const@type {!string}*/ namespaces.chartns = chartns;
-    /**@const@type {!string}*/ namespaces.fons = fons;
-    /**@const@type {!string}*/ namespaces.formns = formns;
-    /**@const@type {!string}*/ namespaces.numberns = numberns;
-    /**@const@type {!string}*/ namespaces.officens = officens;
-    /**@const@type {!string}*/ namespaces.presentationns = presentationns;
-    /**@const@type {!string}*/ namespaces.stylens = stylens;
-    /**@const@type {!string}*/ namespaces.svgns = svgns;
-    /**@const@type {!string}*/ namespaces.tablens = tablens;
-    /**@const@type {!string}*/ namespaces.textns = textns;
-    /**@const@type {!string}*/ namespaces.xlinkns = xlinkns;
-    /**@const@type {!string}*/ namespaces.xmlns = xmlns;
-
-    return namespaces;
 }());
+
+/**
+ * Calls the passed callback for all pairs of prefix and namespace
+ * which are in the namespaceMap property
+ * @param {function(string,string)} cb
+ * @return {undefined}
+ */
+odf.Namespaces.forEachPrefix = function forEachPrefix(cb) {
+    "use strict";
+    var /**@type{!Object.<string,string>}*/
+        ns = odf.Namespaces.namespaceMap,
+        /**@type{string}*/
+        prefix;
+
+    for (prefix in ns) {
+        if (ns.hasOwnProperty(prefix)) {
+            cb(prefix, ns[prefix]);
+        }
+    }
+};
+
+/**
+ * Returns the namespace belonging to the prefix or null.
+ * @param {string} prefix
+ * @return {?string}
+ */
+odf.Namespaces.lookupNamespaceURI = function lookupNamespaceURI(prefix) {
+    "use strict";
+    var /**@type{?string}*/
+        r = null;
+    if (odf.Namespaces.namespaceMap.hasOwnProperty(prefix)) {
+        r = /**@type{string}*/(odf.Namespaces.namespaceMap[prefix]);
+    }
+    return r;
+};
+
+/**
+ * Returns the prefix belonging to the NamespaceURI or null.
+ * @param {string} namespaceURI
+ * @return {?string}
+ */
+odf.Namespaces.lookupPrefix = function lookupPrefix(namespaceURI) {
+    "use strict";
+    var /**@type{!Object.<string,string>}*/
+        map = odf.Namespaces.prefixMap;
+    return map.hasOwnProperty(namespaceURI) ? map[namespaceURI] : null;
+};
+
+// TODO: document where and why this is needed
+odf.Namespaces.lookupNamespaceURI.lookupNamespaceURI = odf.Namespaces.lookupNamespaceURI;
+

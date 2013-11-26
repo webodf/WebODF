@@ -181,7 +181,7 @@ odf.Formatting = function Formatting() {
     this.isStyleUsed = function (styleElement) {
         var hasDerivedStyles, isUsed;
 
-        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, odf.Namespaces.resolvePrefix, styleElement);
+        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, odf.Namespaces.lookupNamespaceURI, styleElement);
 
         isUsed = new styleInfo.UsedStyleList(odfContainer.rootElement.styles).uses(styleElement)
             || new styleInfo.UsedStyleList(odfContainer.rootElement.automaticStyles).uses(styleElement)
@@ -236,15 +236,15 @@ odf.Formatting = function Formatting() {
                             && nodeStyleName === styleName) {
                         return node;
                     }
-                    if(family === "list-style"
-                        && node.namespaceURI === textns
-                        && node.localName === "list-style"
-                        && nodeStyleName === styleName) {
+                    if (family === "list-style"
+                            && node.namespaceURI === textns
+                            && node.localName === "list-style"
+                            && nodeStyleName === styleName) {
                         return node;
                     }
-                    if(family === "data"
-                        && node.namespaceURI === numberns
-                        && nodeStyleName === styleName) {
+                    if (family === "data"
+                            && node.namespaceURI === numberns
+                            && nodeStyleName === styleName) {
                         return node;
                     }
                 }
@@ -499,7 +499,7 @@ odf.Formatting = function Formatting() {
     this.updateStyle = function (styleNode, properties) {
         var fontName, fontFaceNode;
 
-        domUtils.mapObjOntoNode(styleNode, properties, odf.Namespaces.resolvePrefix);
+        domUtils.mapObjOntoNode(styleNode, properties, odf.Namespaces.lookupNamespaceURI);
 
         fontName = properties["style:text-properties"] && properties["style:text-properties"]["style:font-name"];
         if (fontName && !getFontMap().hasOwnProperty(fontName)) {

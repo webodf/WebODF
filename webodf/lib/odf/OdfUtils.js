@@ -47,9 +47,15 @@ runtime.loadClass("odf.Namespaces");
 odf.OdfUtils = function OdfUtils() {
     "use strict";
 
-    var /**@const @type{!string}*/ textns = odf.Namespaces.textns,
-        /**@const @type{!string}*/ drawns = odf.Namespaces.drawns,
-        /**@const @type{!RegExp}*/ whitespaceOnly = /^\s*$/,
+    var /**@const
+           @type{!string}*/
+        textns = odf.Namespaces.textns,
+        /**@const
+           @type{!string}*/
+        drawns = odf.Namespaces.drawns,
+        /**@const
+           @type{!RegExp}*/
+        whitespaceOnly = /^\s*$/,
         domUtils = new core.DomUtils();
 
     /**
@@ -69,9 +75,11 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function isCharacterFrame(e) {
-        var name = e && e.localName;
         // TODO the anchor-type can be defined on any style associated with the frame
-        return name === "frame" && e.namespaceURI === drawns && e.getAttributeNS(textns, "anchor-type") === "as-char";
+        return e !== null && e.nodeType === Node.ELEMENT_NODE
+            && e.localName === "frame" && e.namespaceURI === drawns
+            && /**@type{!Element}*/(e).getAttributeNS(textns, "anchor-type")
+                === "as-char";
     }
     this.isCharacterFrame = isCharacterFrame;
 
@@ -158,16 +166,19 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Determine if the node is a grouping element.
-     * @param {?Node} e
+     * @param {?Node} n
      * @return {!boolean}
      */
-    function isGroupingElement(e) {
-        var localName = e && e.localName;
-        if ((/^(span|p|h|a|meta)$/.test(localName) && e.namespaceURI === textns)
-                || (localName === "span" && e.className === "annotationHighlight")) {
-            return true;
+    function isGroupingElement(n) {
+        if (n === null || n.nodeType !== Node.ELEMENT_NODE) {
+            return false;
         }
-        return false;
+        var e = /**@type{!Element}*/(n),
+            localName = e.localName;
+        return (/^(span|p|h|a|meta)$/.test(localName)
+                && e.namespaceURI === textns)
+               || (localName === "span"
+                   && e.className === "annotationHighlight");
     }
     this.isGroupingElement = isGroupingElement;
     /**
@@ -262,14 +273,16 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function scanLeftForNonSpace(node) {
-        var r = false;
+        var r = false,
+            text;
         while (node) {
             if (node.nodeType === Node.TEXT_NODE) {
-                if (node.length === 0) {
-                    node = previousNode(node);
+                text = /**@type{!Text}*/(node);
+                if (text.length === 0) {
+                    node = previousNode(text);
                 } else {
                     return !isODFWhitespace(
-                        node.data.substr(node.length - 1, 1)
+                        text.data.substr(text.length - 1, 1)
                     );
                 }
             } else if (isCharacterElement(node)) {
@@ -294,15 +307,18 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!number}
      */
     function lookLeftForCharacter(node) {
-        var text, r = 0;
-        if (node.nodeType === Node.TEXT_NODE && node.length > 0) {
-            text = node.data;
-            if (!isODFWhitespace(text.substr(text.length - 1, 1))) {
+        var text, r = 0, tl = 0;
+        if (node.nodeType === Node.TEXT_NODE) {
+            tl = /**@type{!Text}*/(node).length;
+        }
+        if (tl > 0) {
+            text = /**@type{!Text}*/(node).data;
+            if (!isODFWhitespace(text.substr(tl - 1, 1))) {
                 r = 1; // character found
-            } else if (text.length === 1) {
+            } else if (tl === 1) {
                 r = scanLeftForNonSpace(previousNode(node)) ? 2 : 0;
             } else {
-                r = isODFWhitespace(text.substr(text.length - 2, 1)) ? 0 : 2;
+                r = isODFWhitespace(text.substr(tl - 2, 1)) ? 0 : 2;
             }
         } else if (isCharacterElement(node)) {
             r = 1;
@@ -319,9 +335,13 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function lookRightForCharacter(node) {
-        var r = false;
-        if (node && node.nodeType === Node.TEXT_NODE && node.length > 0) {
-            r = !isODFWhitespace(node.data.substr(0, 1));
+        var r = false,
+            l = 0;
+        if (node && node.nodeType === Node.TEXT_NODE) {
+            l = /**@type{!Text}*/(node).length;
+        }
+        if (l > 0) {
+            r = !isODFWhitespace(/**@type{!Text}*/(node).data.substr(0, 1));
         } else if (isCharacterElement(node)) {
             r = true;
         }
@@ -336,11 +356,15 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function scanLeftForAnyCharacter(node) {
-        var r = false;
+        var r = false, l;
         node = node && lastChild(node);
         while (node) {
-            if (node.nodeType === Node.TEXT_NODE && node.length > 0
-                    && !isODFWhitespace(node.data)) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                l = /**@type{!Text}*/(node).length;
+            } else {
+                l = 0;
+            }
+            if (l > 0 && !isODFWhitespace(/**@type{!Text}*/(node).data)) {
                 r = true;
                 break;
             }
@@ -361,11 +385,15 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function scanRightForAnyCharacter(node) {
-        var r = false;
+        var r = false, l;
         node = node && firstChild(node);
         while (node) {
-            if (node.nodeType === Node.TEXT_NODE && node.length > 0
-                    && !isODFWhitespace(node.data)) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                l = /**@type{!Text}*/(node).length;
+            } else {
+                l = 0;
+            }
+            if (l > 0 && !isODFWhitespace(/**@type{!Text}*/(node).data)) {
                 r = true;
                 break;
             }
@@ -381,7 +409,7 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * check if the node is part of the trailing whitespace
-     * @param {!Node} textnode
+     * @param {!Text} textnode
      * @param {!number} offset
      * @return {!boolean}
      */
@@ -545,29 +573,53 @@ odf.OdfUtils = function OdfUtils() {
         return parseNonNegativeLength(lineHeight) || parsePercentage(lineHeight);
     }
     this.parseFoLineHeight = parseFoLineHeight;
+    /**
+     * @param {!Array.<!Element>} a
+     * @param {number} i
+     * @return {!Element}
+     */
+    function item(a, i) {
+        return a[i];
+    }
 
     /**
      * Returns the paragraphs touched by the given range
      * @param {!Range} range
-     * return {!Array.<Node>}
+     * return {!Array.<!Element>}
      */
     function getImpactedParagraphs(range) {
-        var outerContainer = /**@type {!Element}*/(range.commonAncestorContainer),
-            impactedParagraphs = [];
+        var i, l, e,
+            outerContainer = /**@type{!Element}*/(range.commonAncestorContainer),
+            /**@type{!Array.<!Element>}*/
+            impactedParagraphs = [],
+            /**@type{!Array.<!Element>}*/
+            filtered = [];
 
         if (outerContainer.nodeType === Node.ELEMENT_NODE) {
-            impactedParagraphs = domUtils.getElementsByTagNameNS(outerContainer, textns, "p")
-                                .concat(domUtils.getElementsByTagNameNS(outerContainer, textns, "h"));
+            impactedParagraphs = domUtils.getElementsByTagNameNS(
+                outerContainer,
+                textns,
+                "p"
+            ).concat(domUtils.getElementsByTagNameNS(
+                outerContainer,
+                textns,
+                "h"
+            ));
         }
-
         while (outerContainer && !isParagraph(outerContainer)) {
             outerContainer = outerContainer.parentNode;
         }
         if (outerContainer) {
             impactedParagraphs.push(outerContainer);
         }
-
-        return impactedParagraphs.filter(function (n) { return domUtils.rangeIntersectsNode(range, n); });
+        l = impactedParagraphs.length;
+        for (i = 0; i < l; i += 1) {
+            e = item(impactedParagraphs, i);
+            if (domUtils.rangeIntersectsNode(range, e)) {
+                filtered.push(e);
+            }
+        }
+        return filtered;
     }
     this.getImpactedParagraphs = getImpactedParagraphs;
 
@@ -641,10 +693,11 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Returns a array of text nodes considered to be part of the supplied range.
-     * This will exclude elements that are not part of the ODT main text body, as well
-     * as insignificant whitespace text nodes.
+     * This will exclude elements that are not part of the ODT main text body,
+     * as well as insignificant whitespace text nodes.
      * @param {!Range} range    Range to search for nodes within
-     * @param {boolean} includePartial Include partially intersecting text nodes in the result
+     * @param {boolean} includePartial Include partially intersecting text nodes
+     *                                 in the result.
      * @returns {!Array.<Node>}
      */
     function getTextNodes(range, includePartial) {
@@ -652,12 +705,18 @@ odf.OdfUtils = function OdfUtils() {
             nodeRange = document.createRange(),
             textNodes;
 
+        /**
+         * @param {!Node} node
+         * @return {number}
+         */
         function nodeFilter(node) {
             nodeRange.selectNodeContents(node);
 
             if (node.nodeType === Node.TEXT_NODE) {
                 if (includeNode(range, nodeRange, includePartial)) {
-                    return isSignificantTextContent(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    return isSignificantTextContent(/**@type{!Text}*/(node))
+                        ? NodeFilter.FILTER_ACCEPT
+                        : NodeFilter.FILTER_REJECT;
                 }
             } else if (domUtils.rangesIntersect(range, nodeRange)) {
                 if (isAcceptedNode(node)) {
@@ -675,24 +734,34 @@ odf.OdfUtils = function OdfUtils() {
     this.getTextNodes = getTextNodes;
 
     /**
-     * Get all character elements and text nodes fully contained within the supplied range in document order
+     * Get all character elements and text nodes fully contained within the
+     * supplied range in document order.
      *
-     * For example, given the following fragment, with the range starting at b, and ending at c:
+     * For example, given the following fragment, with the range starting at b,
+     * and ending at c:
      *      <text:p>ab<text:s/>cd</text:p>
      * this function would return the following array:
      *      ["b", text:s, "c"]
      * @param {!Range} range
-     * @param {!boolean} includePartial Include partially intersecting text & character nodes in the result
-     * @param {!boolean} includeInsignificantWhitespace Include whitespace only nodes that are not considered significant
-     *  text content. This includes whitespace only elements used in pretty-formatted xml as LibreOffice produces in
-     *  flat ODT files
+     * @param {!boolean} includePartial Include partially intersecting text &
+     *                         character nodes in the result.
+     * @param {!boolean} includeInsignificantWhitespace Include whitespace only
+     *                         nodes that are not considered significant text
+     *                         content. This includes whitespace only elements
+     *                         used in pretty-formatted xml as LibreOffice
+     *                         produces in flat ODT files.
      * @returns {!Array.<Node>}
      */
-    this.getTextElements = function (range, includePartial, includeInsignificantWhitespace) {
+    this.getTextElements = function (range, includePartial,
+                includeInsignificantWhitespace) {
         var document = range.startContainer.ownerDocument,
             nodeRange = document.createRange(),
             elements;
 
+        /**
+         * @param {!Node} node
+         * @return {number}
+         */
         function nodeFilter(node) {
             nodeRange.selectNodeContents(node);
             // do not return anything inside the character element
@@ -702,14 +771,19 @@ odf.OdfUtils = function OdfUtils() {
 
             if (node.nodeType === Node.TEXT_NODE) {
                 if (includeNode(range, nodeRange, includePartial)) {
-                    if (includeInsignificantWhitespace || isSignificantTextContent(node)) {
-                            // text nodes should only be returned if they are fully contained within the range
-                            return NodeFilter.FILTER_ACCEPT;
+                    if (includeInsignificantWhitespace
+                            || isSignificantTextContent(
+                              /**@type{!Text}*/(node)
+                            )) {
+                            // Text nodes should only be returned if they are
+                            // fully contained within the range.
+                        return NodeFilter.FILTER_ACCEPT;
                     }
                 }
             } else if (isCharacterElement(node)) {
                 if (includeNode(range, nodeRange, includePartial)) {
-                    // character elements should only be returned if they are fully contained within the range
+                    // Character elements should only be returned if they are
+                    // fully contained within the range.
                     return NodeFilter.FILTER_ACCEPT;
                 }
             } else if (isAcceptedNode(node) || isGroupingElement(node)) {
@@ -725,9 +799,11 @@ odf.OdfUtils = function OdfUtils() {
     };
 
     /**
-     * Get all paragraph elements that intersect the supplied range in document order
+     * Get all paragraph elements that intersect the supplied range in document
+     * order.
      *
-     * For example, given the following fragment, with the range starting at b, and ending at c:
+     * For example, given the following fragment, with the range starting at b,
+     * and ending at c:
      *      <text:p id="A">ab</text:p><text:p id="B"><text:s/>cd</text:p>
      * this function would return the following array:
      *      [text:p{id="A"}, text:p{id="B"}]
@@ -739,6 +815,10 @@ odf.OdfUtils = function OdfUtils() {
             nodeRange = document.createRange(),
             elements;
 
+        /**
+         * @param {!Node} node
+         * @return {number}
+         */
         function nodeFilter(node) {
             nodeRange.selectNodeContents(node);
             if (isParagraph(node)) {
@@ -758,7 +838,8 @@ odf.OdfUtils = function OdfUtils() {
     };
 
     /**
-     * Get all image elements that fully contained within the supplied range in document order
+     * Get all image elements that fully contained within the supplied range in
+     * document order.
      * @param {!Range} range
      * @returns {!Array.<Node>}
      */
@@ -767,6 +848,10 @@ odf.OdfUtils = function OdfUtils() {
             nodeRange = document.createRange(),
             elements;
 
+        /**
+         * @param {!Node} node
+         * @return {number}
+         */
         function nodeFilter(node) {
             nodeRange.selectNodeContents(node);
             if (isImage(node) && domUtils.containsRange(range, nodeRange)) {

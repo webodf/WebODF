@@ -393,10 +393,16 @@
          * @param {!Element|!Document} node
          * @param {!string} namespace
          * @param {!string} tagName
-         * @returns {!Array.<!Node>}
+         * @returns {!Array.<!Element>}
          */
         function getElementsByTagNameNS(node, namespace, tagName) {
-            return Array.prototype.slice.call(node.getElementsByTagNameNS(namespace, tagName));
+            var e = [], list, i, l;
+            list = node.getElementsByTagNameNS(namespace, tagName);
+            e.length = l = list.length;
+            for (i = 0; i < l; i += 1) {
+                e[i] = /**@type{!Element}*/(list.item(i));
+            }
+            return e;
         }
         this.getElementsByTagNameNS = getElementsByTagNameNS;
 
@@ -564,7 +570,7 @@
          * nsResolver, that key will be ignored and not written to the node.
          * @param {!Element} node
          * @param {!Object.<!string, !string>} properties
-         * @param {!function(!string):!string} nsResolver
+         * @param {!function(!string):?string} nsResolver
          */
         function mapKeyValObjOntoNode(node, properties, nsResolver) {
             Object.keys(properties).forEach(function (key) {
@@ -579,14 +585,14 @@
                 // otherwise set the textContent of the
                 // element to the value.
                 if (ns) {
-                    element = node.getElementsByTagNameNS(ns, localName)[0];
+                    element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0]);
                     if (!element) {
                         element = node.ownerDocument.createElementNS(ns, key);
                         node.appendChild(element);
                     }
                     element.textContent = value;
                 } else {
-                   runtime.log("Key ignored: " + key);
+                    runtime.log("Key ignored: " + key);
                 }
             });
         }
@@ -604,7 +610,7 @@
         * If a key element does not exist, it will be ignored.
         * @param {!Element} node
         * @param {!Array.<!string>} propertyNames 
-        * @param {!function(!string):!string} nsResolver
+        * @param {!function(!string):?string} nsResolver
         */
        function removeKeyElementsFromNode(node, propertyNames, nsResolver) {
            propertyNames.forEach(function (propertyName) {
@@ -617,7 +623,7 @@
                // Ignore if the prefix is unsupported,
                // otherwise delete the element if found
                if (ns) {
-                   element = node.getElementsByTagNameNS(ns, localName)[0];
+                   element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0]);
                    if (element) {
                        element.parentNode.removeChild(element);
                    } else {
@@ -639,7 +645,7 @@
          * name will be taken into account for generating this
          * map.
          * @param {!Element} node
-         * @param {!function(!string):!string} prefixResolver 
+         * @param {!function(!string):?string} prefixResolver 
          * @return {Object.<!string, !string>}
          */
         function getKeyValRepresentationOfNode(node, prefixResolver) {
@@ -663,8 +669,8 @@
          * Maps attributes and elements in the properties object over top of the node. Supports
          * recursion and deep mapping.
          * @param {!Element} node
-         * @param {!Object} properties
-         * @param {!function(!string):!string} nsResolver
+         * @param {!Object.<string,*>} properties
+         * @param {!function(!string):?string} nsResolver
          */
         function mapObjOntoNode(node, properties, nsResolver) {
             Object.keys(properties).forEach(function(key) {
@@ -675,14 +681,19 @@
                     value = properties[key],
                     element;
 
-                if (typeof value === "object" && Object.keys(value).length) {
-                    element = node.getElementsByTagNameNS(ns, localName)[0]
-                        || node.ownerDocument.createElementNS(ns, key);
+                if (typeof value === "object" && Object.keys(/**@type{!Object}*/(value)).length) {
+                    if (ns) {
+                        element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0])
+                            || node.ownerDocument.createElementNS(ns, key);
+                    } else {
+                        element = /**@type{!Element|undefined}*/(node.getElementsByTagName(localName)[0])
+                            || node.ownerDocument.createElement(key);
+                    }
                     node.appendChild(element);
-                    mapObjOntoNode(element, value, nsResolver);
+                    mapObjOntoNode(element, /**@type{!Object}*/(value), nsResolver);
                 } else if (ns) {
                     // If the prefix is unknown or unsupported, simply ignore it for now
-                    node.setAttributeNS(ns, key, value);
+                    node.setAttributeNS(ns, key, String(value));
                 }
             });
         }
