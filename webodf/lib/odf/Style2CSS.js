@@ -561,7 +561,7 @@ odf.Style2CSS = function Style2CSS() {
         } else {
             xp = "//style:default-style[@style:family='" + parentStyleFamily + "']";
         }
-        parentStyleNode = xpath.getODFElementsWithXPath(/**@type{!Element}*/(odfRoot), xp, odf.Namespaces.resolvePrefix)[0];
+        parentStyleNode = xpath.getODFElementsWithXPath(/**@type{!Element}*/(odfRoot), xp, odf.Namespaces.lookupNamespaceURI)[0];
         return parentStyleNode;
     }
     /**

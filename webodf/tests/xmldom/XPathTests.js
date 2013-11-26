@@ -84,7 +84,7 @@ xmldom.XPathTests = function XPathTests(runner) {
         for (x in xpaths) {
             if (xpaths.hasOwnProperty(x)) {
                 t.result = xpath.getODFElementsWithXPath(t.doc.documentElement,
-                        x, odf.Namespaces.resolvePrefix);
+                        x, odf.Namespaces.lookupNamespaceURI);
                 r.shouldBe(t, "t.result.length", "1");
                 r.shouldBe(t, "t.result[0]", xpaths[x]);
             }

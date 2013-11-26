@@ -594,7 +594,7 @@ odf.OdfCanvas = (function () {
             i,
             nodes = xpath.getODFElementsWithXPath(odfbody,
                 ".//*[*[@text:anchor-type='paragraph']]",
-                odf.Namespaces.resolvePrefix);
+                odf.Namespaces.lookupNamespaceURI);
         for (i = 0; i < nodes.length; i += 1) {
             n = nodes[i];
             if (n.setAttributeNS) {
@@ -662,13 +662,13 @@ odf.OdfCanvas = (function () {
                     var bookmarks = xpath.getODFElementsWithXPath(
                         odffragment,
                         "//text:bookmark-start[@text:name='" + url + "']",
-                        odf.Namespaces.resolvePrefix);
+                        odf.Namespaces.lookupNamespaceURI);
 
                     if (bookmarks.length === 0) {
                         bookmarks = xpath.getODFElementsWithXPath(
                             odffragment,
                             "//text:bookmark[@text:name='" + url + "']",
-                            odf.Namespaces.resolvePrefix);
+                            odf.Namespaces.lookupNamespaceURI);
                     }
 
                     if (bookmarks.length > 0) {

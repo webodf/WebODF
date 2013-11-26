@@ -61,7 +61,7 @@ ops.OpUpdateMember = function OpUpdateMember() {
                 if (prefix === "editinfo") {
                     return "urn:webodf:names:editinfo";
                 }
-                return odf.Namespaces.resolvePrefix(prefix);
+                return odf.Namespaces.lookupNamespaceURI(prefix);
             }),
             i;
 

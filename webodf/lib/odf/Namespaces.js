@@ -63,6 +63,8 @@ odf.Namespaces = {
         xlink: 'http://www.w3.org/1999/xlink',
         xml: "http://www.w3.org/XML/1998/namespace"
     },
+    /**@type{!Object.<string,string>}*/
+    prefixMap: {},
     dbns: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
     dcns: "http://purl.org/dc/elements/1.1/",
     dr3dns: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
@@ -80,6 +82,22 @@ odf.Namespaces = {
     xlinkns: 'http://www.w3.org/1999/xlink',
     xmlns: "http://www.w3.org/XML/1998/namespace"
 };
+
+(function () {
+    "use strict";
+    // map namespacemap to prefix map on startup
+    var map = odf.Namespaces.namespaceMap,
+        /**@type{!Object.<string,string>}*/
+        pmap = odf.Namespaces.prefixMap,
+        /**@type{string}*/
+        prefix;
+
+    for (prefix in map) {
+        if (map.hasOwnProperty(prefix)) {
+            pmap[map[prefix]] = prefix;
+        }
+    }
+}());
 
 /**
  * Calls the passed callback for all pairs of prefix and namespace
@@ -106,7 +124,7 @@ odf.Namespaces.forEachPrefix = function forEachPrefix(cb) {
  * @param {string} prefix
  * @return {?string}
  */
-odf.Namespaces.resolvePrefix = function resolvePrefix(prefix) {
+odf.Namespaces.lookupNamespaceURI = function lookupNamespaceURI(prefix) {
     "use strict";
     var /**@type{?string}*/
         r = null;
@@ -116,6 +134,18 @@ odf.Namespaces.resolvePrefix = function resolvePrefix(prefix) {
     return r;
 };
 
+/**
+ * Returns the prefix belonging to the NamespaceURI or null.
+ * @param {string} namespaceURI
+ * @return {?string}
+ */
+odf.Namespaces.lookupPrefix = function lookupPrefix(namespaceURI) {
+    "use strict";
+    var /**@type{!Object.<string,string>}*/
+        map = odf.Namespaces.prefixMap;
+    return map.hasOwnProperty(namespaceURI) ? map[namespaceURI] : null;
+};
+
 // TODO: document where and why this is needed
-odf.Namespaces.resolvePrefix.lookupNamespaceURI = odf.Namespaces.resolvePrefix;
+odf.Namespaces.lookupNamespaceURI.lookupNamespaceURI = odf.Namespaces.lookupNamespaceURI;
 
