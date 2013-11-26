@@ -637,16 +637,13 @@
        this.removeKeyElementsFromNode = removeKeyElementsFromNode;
  
         /**
-         * Looks at an element's direct children,
-         * and generates an object which is a flat
-         * key-value map from the child's ns:localName"
-         * to it's text content.
-         * Only those children that have a resolvable prefixed
-         * name will be taken into account for generating this
-         * map.
+         * Looks at an element's direct children, and generates an object which is a
+         * flat key-value map from the child's ns:localName to it's text content.
+         * Only those children that have a resolvable prefixed name will be taken into
+         * account for generating this map.
          * @param {!Element} node
-         * @param {!function(!string):?string} prefixResolver 
-         * @return {Object.<!string, !string>}
+         * @param {function(!string):?string} prefixResolver 
+         * @return {!Object.<!string,!string>}
          */
         function getKeyValRepresentationOfNode(node, prefixResolver) {
             var properties = {},
@@ -666,8 +663,8 @@
         this.getKeyValRepresentationOfNode = getKeyValRepresentationOfNode;
 
         /**
-         * Maps attributes and elements in the properties object over top of the node. Supports
-         * recursion and deep mapping.
+         * Maps attributes and elements in the properties object over top of the node.
+         * Supports recursion and deep mapping.
          * @param {!Element} node
          * @param {!Object.<string,*>} properties
          * @param {!function(!string):?string} nsResolver

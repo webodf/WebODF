@@ -29,18 +29,17 @@ runtime.loadClass("odf.Namespaces");
 runtime.loadClass("core.DomUtils");
 
 /**
- * The MetadataManager class allows easy access to 
- * metadata fields.
- * It stores a cache of metadata fields
- * inside itself. When metadata is set through setMetadata,
- * both this cache and the DOM are updated.
- * When accessing using getMetadata, reading is quick because
- * it does not touch the DOM.
+ * The MetadataManager class allows easy access to * metadata fields.
+ * It stores a cache of metadata fields inside itself. When metadata is set through
+ * setMetadata, both this cache and the DOM are updated. When accessing using
+ * getMetadata, reading is quick because it does not touch the DOM.
  * @constructor
+ * @param {!Element} metaElement
  */
 odf.MetadataManager = function MetadataManager(metaElement) {
     "use strict";
-    var domUtils = new core.DomUtils(), 
+    var domUtils = new core.DomUtils(),
+        /**@type{!Object.<string,string>}*/
         metadata = {};
 
     /**

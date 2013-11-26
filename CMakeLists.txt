@@ -280,6 +280,7 @@ set(TYPEDLIBJSFILES
     lib/odf/OdfNodeFilter.js
     lib/odf/TextSerializer.js
     lib/odf/StyleInfo.js
+    lib/odf/MetadataManager.js
 )
 set(UNTYPEDLIBJSFILES
 
@@ -289,7 +290,6 @@ set(UNTYPEDLIBJSFILES
     lib/xmldom/RelaxNG2.js
 
     lib/odf/Style2CSS.js
-    lib/odf/MetadataManager.js
     lib/odf/ObjectNameGenerator.js
     lib/odf/TextStyleApplicator.js
     lib/gui/AnnotationViewManager.js
