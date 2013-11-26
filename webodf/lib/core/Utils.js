@@ -70,6 +70,7 @@ core.Utils = function Utils() {
     function mergeItems(destination, source) {
         // Property in destination object set; update its value.
         if (source && Array.isArray(source)) {
+            // create destination array if it does not exist yet
             destination = destination || [];
             if (!Array.isArray(destination)) {
                 throw "Destination is not an array.";
@@ -98,16 +99,16 @@ core.Utils = function Utils() {
     }
     /**
      * Recursively merge properties of two objects
-     * Merge behaviours are:
+     * Merge behaviours for the object members are:
      *  array => array - Append clones of source array onto the end of the
      *                   destination array
      *  object => object - Map each individual key from source onto destination
      *                     (recursive, so these are clones)
      *  primitive => primitive - return primitive value
      *
-     * @param {!Object} destination
-     * @param {!Object} source
-     * @return {!Object}
+     * @param {!Object.<string,*>} destination
+     * @param {!Object.<string,*>} source
+     * @return {!Object.<string,*>}
      */
     mergeObjects = function (destination, source) {
         Object.keys(source).forEach(function (p) {
