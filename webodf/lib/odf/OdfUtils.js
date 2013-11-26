@@ -307,18 +307,18 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!number}
      */
     function lookLeftForCharacter(node) {
-        var text, r = 0, l = 0;
+        var text, r = 0, tl = 0;
         if (node.nodeType === Node.TEXT_NODE) {
-            l = /**@type{!Text}*/(node).length;
+            tl = /**@type{!Text}*/(node).length;
         }
-        if (l > 0) {
+        if (tl > 0) {
             text = /**@type{!Text}*/(node).data;
-            if (!isODFWhitespace(text.substr(l - 1, 1))) {
+            if (!isODFWhitespace(text.substr(tl - 1, 1))) {
                 r = 1; // character found
-            } else if (l === 1) {
+            } else if (tl === 1) {
                 r = scanLeftForNonSpace(previousNode(node)) ? 2 : 0;
             } else {
-                r = isODFWhitespace(text.substr(l - 2, 1)) ? 0 : 2;
+                r = isODFWhitespace(text.substr(tl - 2, 1)) ? 0 : 2;
             }
         } else if (isCharacterElement(node)) {
             r = 1;

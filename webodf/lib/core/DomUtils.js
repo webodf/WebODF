@@ -585,14 +585,14 @@
                 // otherwise set the textContent of the
                 // element to the value.
                 if (ns) {
-                    element = node.getElementsByTagNameNS(ns, localName)[0];
+                    element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0]);
                     if (!element) {
                         element = node.ownerDocument.createElementNS(ns, key);
                         node.appendChild(element);
                     }
                     element.textContent = value;
                 } else {
-                   runtime.log("Key ignored: " + key);
+                    runtime.log("Key ignored: " + key);
                 }
             });
         }
@@ -623,7 +623,7 @@
                // Ignore if the prefix is unsupported,
                // otherwise delete the element if found
                if (ns) {
-                   element = node.getElementsByTagNameNS(ns, localName)[0];
+                   element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0]);
                    if (element) {
                        element.parentNode.removeChild(element);
                    } else {
@@ -669,7 +669,7 @@
          * Maps attributes and elements in the properties object over top of the node. Supports
          * recursion and deep mapping.
          * @param {!Element} node
-         * @param {!Object} properties
+         * @param {!Object.<string,*>} properties
          * @param {!function(!string):?string} nsResolver
          */
         function mapObjOntoNode(node, properties, nsResolver) {
@@ -681,19 +681,19 @@
                     value = properties[key],
                     element;
 
-                if (typeof value === "object" && Object.keys(value).length) {
+                if (typeof value === "object" && Object.keys(/**@type{!Object}*/(value)).length) {
                     if (ns) {
-                        element = node.getElementsByTagNameNS(ns, localName)[0]
+                        element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0])
                             || node.ownerDocument.createElementNS(ns, key);
                     } else {
-                        element = node.getElementsByTagName(localName)[0]
+                        element = /**@type{!Element|undefined}*/(node.getElementsByTagName(localName)[0])
                             || node.ownerDocument.createElement(key);
                     }
                     node.appendChild(element);
-                    mapObjOntoNode(element, value, nsResolver);
+                    mapObjOntoNode(element, /**@type{!Object}*/(value), nsResolver);
                 } else if (ns) {
                     // If the prefix is unknown or unsupported, simply ignore it for now
-                    node.setAttributeNS(ns, key, value);
+                    node.setAttributeNS(ns, key, String(value));
                 }
             });
         }
