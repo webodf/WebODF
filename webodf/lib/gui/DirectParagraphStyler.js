@@ -173,26 +173,30 @@ gui.DirectParagraphStyler = function DirectParagraphStyler(session, inputMemberI
     };
 
     /**
+     * Round the step up to the next step
+     * @param {!number} step
+     * @returns {!boolean}
+     */
+    function roundUp(step) {
+        return step === ops.StepsTranslator.NEXT_STEP;
+    }
+
+    /**
      * @param {!function(!Object) : !Object} applyDirectStyling
      * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
-            position = odtDocument.getCursorPosition(inputMemberId),
             paragraphs = odfUtils.getParagraphElements(range),
             formatting = odtDocument.getFormatting();
 
         paragraphs.forEach(function(paragraph) {
-            var paragraphStartPoint = position + odtDocument.getDistanceFromCursor(inputMemberId, paragraph, 0),
+            var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
                 paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
                 newParagraphStyleName = objectNameGenerator.generateStyleName(),
                 opAddStyle,
                 opSetParagraphStyle,
                 paragraphProperties;
-
-            // getDistanceFromCursor returns the last position before the node & offset
-            // The first index of the paragraph may not be walkable
-            paragraphStartPoint += 1;
 
             if (paragraphStyleName) {
                 paragraphProperties = formatting.createDerivedStyleObject(paragraphStyleName, "paragraph", {});
