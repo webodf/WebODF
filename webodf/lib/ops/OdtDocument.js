@@ -182,13 +182,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * @param {!Node} node
      * @param {!number} offset
-     * @param {?boolean=} roundToNextPosition If the position is not accepted,
-     * round to the next closest allowed one if this argument is true. Otherwise,
-     * round to the previous closest allowed position.
+     * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
+     * is not in an accepted location, this delegate is used to choose between rounding up or
+     * rounding down to the nearest step. If not provided, the default behaviour is to round down.
      * @returns {!number}
      */
-    this.convertDomPointToCursorStep = function (node, offset, roundToNextPosition) {
-        return stepsTranslator.convertDomPointToSteps(node, offset, roundToNextPosition);
+    this.convertDomPointToCursorStep = function (node, offset, roundDirection) {
+        return stepsTranslator.convertDomPointToSteps(node, offset, roundDirection);
     };
 
     /**

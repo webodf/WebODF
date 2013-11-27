@@ -47,7 +47,17 @@ runtime.loadClass("odf.OdfUtils");
     "use strict";
     // Multiple cached translators may exist in the same runtime. Therefore, each node id should
     // be globally unique, so they can be safely re-used by multiple translators
-    var nextNodeId = 0;
+    var nextNodeId = 0,
+        /**
+         * @const
+         * @type {!number}
+         */
+        PREVIOUS_STEP = 0,
+        /**
+         * @const
+         * @type {!number}
+         */
+        NEXT_STEP = 1;
 
     /**
      * Implementation of a step to DOM point lookup cache.
@@ -465,14 +475,47 @@ runtime.loadClass("odf.OdfUtils");
         };
 
         /**
+         * Uses the provided delegate to choose between rounding up or rounding down to the nearest step.
+         * @param {!core.PositionIterator} iterator
+         * @param {function(!number, !Node, !number):boolean=} roundDirection
+         * @return {!boolean} Returns true if an accepted position is found, otherwise returns false.
+         */
+        function roundToPreferredStep(iterator, roundDirection) {
+            if (!roundDirection || filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                return true;
+            }
+
+            while (iterator.previousPosition()) {
+                if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                    if (roundDirection(PREVIOUS_STEP, iterator.container(), iterator.unfilteredDomOffset())) {
+                        return true;
+                    }
+                    break;
+                }
+            }
+
+            while (iterator.nextPosition()) {
+                if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                    if (roundDirection(NEXT_STEP, iterator.container(), iterator.unfilteredDomOffset())) {
+                        return true;
+                    }
+                    break;
+                }
+            }
+
+            return false;
+        }
+
+        /**
          * Convert the supplied DOM node & offset pair into it's equivalent steps from root
          * @param {!Node} node
          * @param {!number} offset
-         * @param {!boolean=} roundUp True indicates that the node & offset should be rounded up to the next closest step
-         *  if it is not an accepted position
+         * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
+         * is not in an accepted location, this delegate is used to choose between rounding up or
+         * rounding down to the nearest step. If not provided, the default behaviour is to round down.
          * @returns {!number}
          */
-        this.convertDomPointToSteps = function(node, offset, roundUp) {
+        this.convertDomPointToSteps = function(node, offset, roundDirection) {
             var stepsFromRoot,
                 beforeRoot,
                 destinationNode,
@@ -487,19 +530,23 @@ runtime.loadClass("odf.OdfUtils");
                 offset = beforeRoot ? 0 : rootNode.childNodes.length;
             }
 
-            // Get the iterator equivalent position of the current node & offset
-            // This ensures the while loop will match the exact container and offset during iteration
             iterator.setUnfilteredPosition(node, offset);
-            destinationNode = iterator.container();
-            destinationOffset = iterator.unfilteredDomOffset();
-            if (roundUp && filter.acceptPosition(iterator) !== FILTER_ACCEPT) {
-                rounding = 1;
+            // if the user has set provided a rounding selection delegate, use that to select the previous or next
+            // step if the (node, offset) position is not accepted by the filter
+            if (!roundToPreferredStep(iterator, roundDirection)) {
+                // The rounding selection delegate rejected both. Revert back to the previous step
+                iterator.setUnfilteredPosition(node, offset);
             }
 
-            stepsFromRoot = stepsCache.setToClosestDomPoint(node, offset, iterator);
+            // Get the iterator equivalent position of the current node & offset
+            // This ensures the while loop will match the exact container and offset during iteration
+            destinationNode = iterator.container();
+            destinationOffset = iterator.unfilteredDomOffset();
+
+            stepsFromRoot = stepsCache.setToClosestDomPoint(destinationNode, destinationOffset, iterator);
             if (domUtils.comparePoints(iterator.container(), iterator.unfilteredDomOffset(), destinationNode, destinationOffset) < 0) {
                 // Special case: the requested DOM point is between the bookmark node and walkable step it represents
-                return (stepsFromRoot > 0 && !roundUp) ? stepsFromRoot - 1 : stepsFromRoot;
+                return stepsFromRoot > 0 ? stepsFromRoot - 1 : stepsFromRoot;
             }
 
             while (!(iterator.container() === destinationNode  && iterator.unfilteredDomOffset() === destinationOffset)
@@ -561,6 +608,18 @@ runtime.loadClass("odf.OdfUtils");
             });
         };
     };
+
+    /**
+     * @const
+     * @type {!number}
+     */
+    ops.StepsTranslator.PREVIOUS_STEP = PREVIOUS_STEP;
+
+    /**
+     * @const
+     * @type {!number}
+     */
+    ops.StepsTranslator.NEXT_STEP = NEXT_STEP;
 
     return ops.StepsTranslator;
 }());

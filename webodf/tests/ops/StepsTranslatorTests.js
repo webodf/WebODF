@@ -51,6 +51,14 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r = runner,
         testarea;
 
+    function roundDown(step) {
+        return step === ops.StepsTranslator.PREVIOUS_STEP;
+    }
+
+    function roundUp(step) {
+        return step === ops.StepsTranslator.NEXT_STEP;
+    }
+
     /**
      * @param {!core.PositionFilter} filter
      * @implements {core.PositionFilter}
@@ -78,7 +86,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
      * @returns {!{node: !Node, start: !number, length: !number}}
      */
     function createParagraphBoundary(paragraphNode) {
-        var start = t.translator.convertDomPointToSteps(paragraphNode, 0, true),
+        var start = t.translator.convertDomPointToSteps(paragraphNode, 0, roundUp),
             end = t.translator.convertDomPointToSteps(paragraphNode, paragraphNode.childNodes.length);
         return {
             node: paragraphNode,
@@ -109,7 +117,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             r.shouldBe(t, "t.paragraphStartPoint.node", "t.paragraph.node.firstChild || t.paragraph.node");
             r.shouldBe(t, "t.paragraphStartPoint.offset", "0");
 
-            t.paragraphStartStep = t.translator.convertDomPointToSteps(paragraph.node, 0, true);
+            t.paragraphStartStep = t.translator.convertDomPointToSteps(paragraph.node, 0, roundUp);
             r.shouldBe(t, "t.paragraphStartStep", "t.paragraph.start");
 
             t.paragraphEndPoint = t.translator.convertStepsToDomPoint(paragraph.start + paragraph.length);
@@ -365,6 +373,25 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.steps", "2");
     }
 
+    function convertDomPointsToSteps_BeforeRootNode_RoundingCheck() {
+        createDoc("<text:p>AB</text:p>");
+
+        t.steps1 = t.translator.convertDomPointToSteps(testarea.parentNode, 0, roundDown);
+        t.steps2 = t.translator.convertDomPointToSteps(testarea.parentNode, 0, roundUp);
+        r.shouldBe(t, "t.steps1", "0");
+        r.shouldBe(t, "t.steps2", "0");
+    }
+
+    function convertDomPointsToSteps_BetweenPositions_RoundingCheck() {
+        var doc = createDoc("<text:p>A<text:span/><text:span/>B</text:p>"),
+            p = doc.getElementsByTagName("p")[0];
+
+        t.steps1 = t.translator.convertDomPointToSteps(p, 2, roundDown);
+        t.steps2 = t.translator.convertDomPointToSteps(p, 2, roundUp);
+        r.shouldBe(t, "t.steps1", "1");
+        r.shouldBe(t, "t.steps2", "2");
+    }
+
     function convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>C</text:p>"),
             p = doc.getElementsByTagName("p")[1];
@@ -401,9 +428,9 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         body.insertBefore(cloneParagraph, originalParagraph.node);
         t.translator.handleStepsInserted({position: originalParagraph.start - 1, length: originalParagraph.length + 1});
 
-        t.actualOriginalSteps = t.translator.convertDomPointToSteps(originalParagraph.node, 0, true);
+        t.actualOriginalSteps = t.translator.convertDomPointToSteps(originalParagraph.node, 0, roundUp);
         r.shouldBe(t, "t.actualOriginalSteps", "10");
-        t.actualCloneSteps = t.translator.convertDomPointToSteps(cloneParagraph, 0, true);
+        t.actualCloneSteps = t.translator.convertDomPointToSteps(cloneParagraph, 0, roundUp);
         r.shouldBe(t, "t.actualCloneSteps", "5");
     }
 
@@ -585,6 +612,8 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertDomPointsToSteps_BetweenPositions_RoundsDown,
             convertDomPointsToSteps_At5,
             convertDomPointsToSteps_WithinParagraph_BeforeFirstWalkablePosition_RoundsDown,
+            convertDomPointsToSteps_BeforeRootNode_RoundingCheck,
+            convertDomPointsToSteps_BetweenPositions_RoundingCheck,
             convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached,
             convertDomPointsToSteps_Cached_SpeedsUpSecondCall,
             convertDomPointsToSteps_Cached_CopesWithClonedNode,
