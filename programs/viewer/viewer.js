@@ -51,17 +51,81 @@ function Viewer(viewerPlugin) {
         initialized = false,
         isSlideshow = false,
         url,
-        viewerElement,
+        viewerElement = document.getElementById('viewer'),
         canvasContainer = document.getElementById('canvasContainer'),
         overlayNavigator = document.getElementById('overlayNavigator'),
         pageSwitcher = document.getElementById('toolbarLeft'),
         zoomWidget = document.getElementById('toolbarMiddleContainer'),
         scaleSelector = document.getElementById('scaleSelect'),
+        overlay = document.getElementById('overlay'),
+        toolbarRight = document.getElementById('toolbarRight'),
+        aboutDialog,
         filename,
         pages = [],
         currentPage,
         scaleChangeTimer,
         touchTimer;
+
+    function initializeAboutInformation() {
+        var basedOnDiv, aboutButton, pluginName, pluginVersion, pluginURL;
+
+        if (viewerPlugin) {
+            pluginName = viewerPlugin.getPluginName();
+            pluginVersion = viewerPlugin.getPluginVersion();
+            pluginURL = viewerPlugin.getPluginURL();
+        }
+
+        // Create dialog
+        aboutDialog = document.createElement('div');
+        aboutDialog.id = "aboutDialog";
+        aboutDialog.innerHTML =
+            "<h1><a href = \"http://viewerjs.org\" target=\"_blank\">ViewerJS</a></h1>" +
+            (viewerPlugin ? ("<p>Using the <a href = \""+ pluginURL + "\" target=\"_blank\">" + pluginName + "</a> " +
+                            "(<span id = \"pluginVersion\">" + pluginVersion + "</span>) " +
+                            "plugin to show you this document.</p>")
+                         : "") +
+            "<p>Made by <a href = \"http://kogmbh.com\" target=\"_blank\">KO GmbH</a>.</p>" +
+            "<button id = \"aboutDialogCloseButton\" class = \"toolbarButton textButton\">Close</button>";
+        viewerElement.appendChild(aboutDialog);
+
+        // Create "based on" line
+        basedOnDiv = document.createElement('div');
+        basedOnDiv.id = "basedOn";
+        basedOnDiv.innerHTML =
+            "Based on " +
+            "<a href = \"http://webodf.org\" target=\"_blank\">WebODF</a>" +
+            " by " +
+            "<a href = \"http://kogmbh.com\" target=\"_blank\">KO</a>";
+
+        toolbarRight.appendChild(basedOnDiv);
+
+        // Create button to open dialog that says "ViewerJS"
+        aboutButton = document.createElement('button');
+        aboutButton.id = "about";
+        aboutButton.className = "toolbarButton textButton about";
+        aboutButton.title = "About";
+        aboutButton.innerHTML = "ViewerJS"
+        toolbarRight.appendChild(aboutButton);
+
+        // Attach events to the above
+        aboutButton.addEventListener('click', function () {
+                showAboutDialog();
+        });
+        document.getElementById('aboutDialogCloseButton').addEventListener('click', function () {
+                hideAboutDialog();
+        });
+
+    }
+
+    function showAboutDialog() {
+        aboutDialog.style.display = 'block';
+        overlay.style.visibility = "visible";
+    }
+
+    function hideAboutDialog() {
+        aboutDialog.style.display = "none";
+        overlay.style.visibility = "hidden";
+    }
 
     function isFullScreen() {
     // Note that the browser fullscreen (triggered by short keys) might
@@ -186,13 +250,14 @@ function Viewer(viewerPlugin) {
             return;
         }
 
-        viewerElement = document.getElementById('viewer');
         url = location;
         filename = url.replace(/^.*[\\\/]/, '');
         document.title = filename;
         document.getElementById('documentName').innerHTML = document.title;
 
         viewerPlugin.onLoad = function () {
+            document.getElementById('pluginVersion').innerHTML = viewerPlugin.getPluginVersion();
+
             isSlideshow = viewerPlugin.isSlideshow();
             if (isSlideshow) {
                 // No padding for slideshows
@@ -392,6 +457,8 @@ function Viewer(viewerPlugin) {
     }
 
     function init() {
+
+        initializeAboutInformation();
 
         self.initialize();
 
