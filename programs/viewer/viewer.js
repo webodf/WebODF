@@ -460,105 +460,107 @@ function Viewer(viewerPlugin) {
 
         initializeAboutInformation();
 
-        self.initialize();
+        if (viewerPlugin) {
+            self.initialize();
 
-        if (!(document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen)) {
-            document.getElementById('fullscreen').style.visibility = 'hidden';
-        }
-
-        document.getElementById('overlayCloseButton').addEventListener('click', self.toggleFullScreen);
-        document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
-        document.getElementById('presentation').addEventListener('click', function () {
-            if (!isFullScreen()) {
-                self.toggleFullScreen();
+            if (!(document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen)) {
+                document.getElementById('fullscreen').style.visibility = 'hidden';
             }
-            self.togglePresentationMode();
-        });
 
-        document.addEventListener('fullscreenchange', cancelPresentationMode);
-        document.addEventListener('webkitfullscreenchange', cancelPresentationMode);
-        document.addEventListener('mozfullscreenchange', cancelPresentationMode);
+            document.getElementById('overlayCloseButton').addEventListener('click', self.toggleFullScreen);
+            document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
+            document.getElementById('presentation').addEventListener('click', function () {
+                if (!isFullScreen()) {
+                    self.toggleFullScreen();
+                }
+                self.togglePresentationMode();
+            });
 
-        document.getElementById('download').addEventListener('click', function () {
-            self.download();
-        });
+            document.addEventListener('fullscreenchange', cancelPresentationMode);
+            document.addEventListener('webkitfullscreenchange', cancelPresentationMode);
+            document.addEventListener('mozfullscreenchange', cancelPresentationMode);
 
-        document.getElementById('zoomOut').addEventListener('click', function () {
-            self.zoomOut();
-        });
+            document.getElementById('download').addEventListener('click', function () {
+                self.download();
+            });
 
-        document.getElementById('zoomIn').addEventListener('click', function () {
-            self.zoomIn();
-        });
+            document.getElementById('zoomOut').addEventListener('click', function () {
+                self.zoomOut();
+            });
 
-        document.getElementById('previous').addEventListener('click', function () {
-            self.showPreviousPage();
-        });
+            document.getElementById('zoomIn').addEventListener('click', function () {
+                self.zoomIn();
+            });
 
-        document.getElementById('next').addEventListener('click', function () {
-            self.showNextPage();
-        });
-
-        document.getElementById('previousPage').addEventListener('click', function () {
-            self.showPreviousPage();
-        });
-
-        document.getElementById('nextPage').addEventListener('click', function () {
-            self.showNextPage();
-        });
-
-        document.getElementById('pageNumber').addEventListener('change', function () {
-            self.showPage(this.value);
-        });
-
-        document.getElementById('scaleSelect').addEventListener('change', function () {
-            parseScale(this.value);
-        });
-
-        canvasContainer.addEventListener('click', showOverlayNavigator);
-        overlayNavigator.addEventListener('click', showOverlayNavigator);
-
-        window.addEventListener('scalechange', function (evt) {
-            var customScaleOption = document.getElementById('customScaleOption'),
-                predefinedValueFound = selectScaleOption(String(evt.scale));
-
-            customScaleOption.selected = false;
-
-            if (!predefinedValueFound) {
-                customScaleOption.textContent = Math.round(evt.scale * 10000) / 100 + '%';
-                customScaleOption.selected = true;
-            }
-        }, true);
-
-        window.addEventListener('resize', function (evt) {
-            if (initialized &&
-                      (document.getElementById('pageWidthOption').selected ||
-                      document.getElementById('pageAutoOption').selected)) {
-                parseScale(document.getElementById('scaleSelect').value);
-            }
-            showOverlayNavigator();
-        });
-
-        window.addEventListener('keydown', function (evt) {
-            var key = evt.keyCode,
-                shiftKey = evt.shiftKey;
-
-            switch (key) {
-            case 33: // pageUp
-            case 38: // up
-            case 37: // left
+            document.getElementById('previous').addEventListener('click', function () {
                 self.showPreviousPage();
-                break;
-            case 34: // pageDown
-            case 40: // down
-            case 39: // right
+            });
+
+            document.getElementById('next').addEventListener('click', function () {
                 self.showNextPage();
-                break;
-            case 32: // space
-                shiftKey ? self.showPreviousPage() : self.showNextPage();
-                break;
-            }
-        });
+            });
+
+            document.getElementById('previousPage').addEventListener('click', function () {
+                self.showPreviousPage();
+            });
+
+            document.getElementById('nextPage').addEventListener('click', function () {
+                self.showNextPage();
+            });
+
+            document.getElementById('pageNumber').addEventListener('change', function () {
+                self.showPage(this.value);
+            });
+
+            document.getElementById('scaleSelect').addEventListener('change', function () {
+                parseScale(this.value);
+            });
+
+            canvasContainer.addEventListener('click', showOverlayNavigator);
+            overlayNavigator.addEventListener('click', showOverlayNavigator);
+
+            window.addEventListener('scalechange', function (evt) {
+                var customScaleOption = document.getElementById('customScaleOption'),
+                    predefinedValueFound = selectScaleOption(String(evt.scale));
+
+                customScaleOption.selected = false;
+
+                if (!predefinedValueFound) {
+                    customScaleOption.textContent = Math.round(evt.scale * 10000) / 100 + '%';
+                    customScaleOption.selected = true;
+                }
+            }, true);
+
+            window.addEventListener('resize', function (evt) {
+                if (initialized &&
+                          (document.getElementById('pageWidthOption').selected ||
+                          document.getElementById('pageAutoOption').selected)) {
+                    parseScale(document.getElementById('scaleSelect').value);
+                }
+                showOverlayNavigator();
+            });
+
+            window.addEventListener('keydown', function (evt) {
+                var key = evt.keyCode,
+                    shiftKey = evt.shiftKey;
+
+                switch (key) {
+                case 33: // pageUp
+                case 38: // up
+                case 37: // left
+                    self.showPreviousPage();
+                    break;
+                case 34: // pageDown
+                case 40: // down
+                case 39: // right
+                    self.showNextPage();
+                    break;
+                case 32: // space
+                    shiftKey ? self.showPreviousPage() : self.showNextPage();
+                    break;
+                }
+            });
+        }
     }
 
     init();
