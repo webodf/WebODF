@@ -22,7 +22,7 @@ QByteArray getRuntimeBindings() {
     "            err = nativeio.error()||null;"
     "        if (err) {"
     "            data = undefined;"
-    "        } else {"
+    "        } else if (encoding === 'binary') {"
     "            data = runtime.byteArrayFromString(data, 'binary');"
     "        }"
     "        callback(nativeio.error()||null, data);"
