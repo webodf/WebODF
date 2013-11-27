@@ -34,15 +34,16 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/tests.js
 )
 
-add_custom_target(jslintcheck ALL
-    COMMAND ${NODE} lib/runtime.js tools/runjslint.js
-        ${LIBJSFILES} ${TESTJSFILES}
-        ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
-        ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js
-    DEPENDS NodeJS webodf.css.js
+add_custom_command(
+    OUTPUT manifest.json
+    COMMAND ${NODE}
+    ARGS lib/runtime.js tools/updateJS.js
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/lib/manifest.json ${CMAKE_CURRENT_BINARY_DIR}/manifest.json
+    DEPENDS NodeJS tools/updateJS.js ${LIBJSFILES} ${TESTJSFILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    SOURCES ${LIBJSFILES} ${TESTJSFILES}
 )
+
+add_custom_target(manifest.json-target DEPENDS manifest.json)
 
 add_custom_command(
     OUTPUT webodf.css.js
@@ -214,7 +215,7 @@ if (NOT APPLE)
         ARGS --exclude=node_modules
              ${CMAKE_CURRENT_SOURCE_DIR}
              ${CMAKE_CURRENT_BINARY_DIR}/instrumented
-        DEPENDS ${LIBJSFILES} jslintcheck JSCoverage
+        DEPENDS ${LIBJSFILES} JSCoverage
     )
     add_custom_target(instrumented ALL DEPENDS instrumented/index.html)
 endif(NOT APPLE)
