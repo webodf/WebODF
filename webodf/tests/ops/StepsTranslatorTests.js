@@ -154,7 +154,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertStepsToDomPoint_At0() {
         var doc = createDoc("<text:p>AB</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.expected = {node: p.firstChild, offset: 0};
         t.position = t.translator.convertStepsToDomPoint(0);
@@ -165,7 +165,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertStepsToDomPoint_At1() {
         var doc = createDoc("<text:p>AB</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.expected = {node: p.firstChild, offset: 1};
         t.position = t.translator.convertStepsToDomPoint(1);
@@ -176,7 +176,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertStepsToDomPoint_At5() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.expected = {node: p.firstChild, offset: 0};
         t.position = t.translator.convertStepsToDomPoint(5);
@@ -187,7 +187,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertStepsToDomPoint_LessThan0_Returns0() {
         var doc = createDoc("<text:p>AB</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.expected = {node: p.firstChild, offset: 0};
         t.position = t.translator.convertStepsToDomPoint(-1);
@@ -206,7 +206,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertStepsToDomPoint_Prime_PrimesCache() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.translator.prime();
         t.filter.popCallCount();
@@ -260,7 +260,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertStepsToDomPoint_Cached_ContentAddedBeforeWalkablePosition() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.expected = t.translator.convertStepsToDomPoint(5);
         t.uncachedCallCount = t.filter.popCallCount();
@@ -297,7 +297,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_At0() {
         var doc = createDoc("<text:p>AB</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.steps = t.translator.convertDomPointToSteps(p.firstChild, 0);
         r.shouldBe(t, "t.filter.acceptPositionCalls", "4");
@@ -306,7 +306,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_Before0() {
         var doc = createDoc("<text:p>AB</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.steps = t.translator.convertDomPointToSteps(p, 0);
         r.shouldBe(t, "t.filter.acceptPositionCalls", "4");
@@ -338,7 +338,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_At1() {
         var doc = createDoc("<text:p>AB</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.steps = t.translator.convertDomPointToSteps(p.firstChild, 1);
         r.shouldBe(t, "t.filter.acceptPositionCalls", "5");
@@ -347,7 +347,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_BetweenPositions_RoundsDown() {
         var doc = createDoc("<text:p>A<text:span/><text:span/>B</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.steps1 = t.translator.convertDomPointToSteps(p, 1);
         t.steps2 = t.translator.convertDomPointToSteps(p, 2);
@@ -357,7 +357,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_At5() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.steps = t.translator.convertDomPointToSteps(p.firstChild, 0);
         r.shouldBe(t, "t.filter.acceptPositionCalls", "10");
@@ -366,7 +366,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_WithinParagraph_BeforeFirstWalkablePosition_RoundsDown() {
         var doc = createDoc("<text:p>AB</text:p><text:p><text:span/>C</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.steps = t.translator.convertDomPointToSteps(p, 0);
         r.shouldBe(t, "t.filter.acceptPositionCalls", "8");
@@ -384,7 +384,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_BetweenPositions_RoundingCheck() {
         var doc = createDoc("<text:p>A<text:span/><text:span/>B</text:p>"),
-            p = doc.getElementsByTagName("p")[0];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.steps1 = t.translator.convertDomPointToSteps(p, 2, roundDown);
         t.steps2 = t.translator.convertDomPointToSteps(p, 2, roundUp);
@@ -394,7 +394,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_Cached_FirstPositionInParagraph_ConsistentWhenCached() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>C</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.steps = t.translator.convertDomPointToSteps(p, 0);
         t.stepsCached = t.translator.convertDomPointToSteps(p, 0);
@@ -404,7 +404,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function convertDomPointsToSteps_Cached_SpeedsUpSecondCall() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EF</text:p>"),
-            p = doc.getElementsByTagName("p")[1];
+            p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1];
 
         t.expected = t.translator.convertDomPointToSteps(p.firstChild, 0);
         t.uncachedCallCount = t.filter.popCallCount();
@@ -573,10 +573,10 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     function handleStepsRemoved_AtDocumentStart() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>EFG</text:p>"),
-            removedParagraph = doc.getElementsByTagName("p")[0],
+            removedParagraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0],
             paragraphs = [];
 
-        paragraphs.push(createParagraphBoundary(doc.getElementsByTagName("p")[1]));
+        paragraphs.push(createParagraphBoundary(doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1]));
         t.translator.prime();
         t.filter.popCallCount();
 
