@@ -36,7 +36,9 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops, odf, runtime*/
+/*global ops, core, odf, runtime*/
+
+runtime.loadClass("core.DomUtils");
 
 /**
  * @constructor
@@ -45,7 +47,8 @@
 ops.OpAddAnnotation = function OpAddAnnotation() {
     "use strict";
 
-    var memberid, timestamp, position, length, name;
+    var memberid, timestamp, position, length, name,
+        doc;
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -62,12 +65,11 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
      * a list, inside it; and with the given annotation name
      * @param {!ops.OdtDocument} odtDocument
      * @param {!Date} date
-     * @return {!Node}
+     * @return {!Element}
      */
     function createAnnotationNode(odtDocument, date) {
         var annotationNode, creatorNode, dateNode,
-            listNode, listItemNode, paragraphNode,
-            doc = odtDocument.getDOM();
+            listNode, listItemNode, paragraphNode;
 
         // Create an office:annotation node with the calculated name, and an attribute with the memberid
         // for SessionView styling
@@ -98,12 +100,10 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
 
     /**
      * Creates an office:annotation-end node with the given annotation name
-     * @param {!ops.OdtDocument} odtDocument
-     * @return {!Node}
+     * @return {!Element}
      */
-    function createAnnotationEnd(odtDocument) {
-        var annotationEnd,
-            doc = odtDocument.getDOM();
+    function createAnnotationEnd() {
+        var annotationEnd;
 
         // Create an office:annotation-end node with the calculated name
         annotationEnd = doc.createElementNS(odf.Namespaces.officens, 'office:annotation-end');
@@ -113,9 +113,9 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
     }
 
     /**
-     * Inserts the node at a given position
+     * Inserts the element at a given position
      * @param {!ops.OdtDocument} odtDocument
-     * @param {!Node} node
+     * @param {!Element} node
      * @param {!number} insertPosition
      * @return {undefined}
      */
@@ -142,20 +142,19 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
 
     this.execute = function (odtDocument) {
         var annotation = {},
-            positionFilter = odtDocument.getPositionFilter(),
             cursor = odtDocument.getCursor(memberid),
-            oldCursorPosition = odtDocument.getCursorPosition(memberid),
-            // The -1 is added because the cursor is always to the 'right' of the annotation node,
-            // and the target position is 1 step to the right of the annotation node
-            lengthToMove = position - oldCursorPosition - 1,
-            stepsToParagraph;
+            selectedRange,
+            paragraphElement,
+            domUtils = new core.DomUtils();
+
+        doc = odtDocument.getDOM();
 
         annotation.node = createAnnotationNode(odtDocument, new Date(timestamp));
         if (!annotation.node) {
             return false;
         }
         if (length) {
-            annotation.end = createAnnotationEnd(odtDocument);
+            annotation.end = createAnnotationEnd();
             if (!annotation.end) {
                 return false;
             }
@@ -166,11 +165,13 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         insertNodeAtPosition(odtDocument, annotation.node, position);
         odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: length});
 
-        // Move the cursor inside the new annotation
+        // Move the cursor inside the new annotation,
+        // by selecting the paragraph's range.
         if (cursor) {
-            stepsToParagraph = cursor.getStepCounter().countSteps(lengthToMove , positionFilter);
-            cursor.move(stepsToParagraph);
-            cursor.resetSelectionType();
+            selectedRange = doc.createRange();
+            paragraphElement = domUtils.getElementsByTagNameNS(annotation.node, odf.Namespaces.textns, "p")[0];
+            selectedRange.selectNodeContents(paragraphElement);
+            cursor.setSelectedRange(selectedRange);
             odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
         }
         // Track this annotation
