@@ -59,8 +59,13 @@ if (Java_JAVA_EXECUTABLE)
   set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
 
   foreach(JSFILE ${TYPEDLIBJSFILES})
-    set(TYPED_LIB_CLOSURE_ARGS ${TYPED_LIB_CLOSURE_ARGS}
-        --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+    if (IS_ABSOLUTE ${JSFILE})
+      set(TYPED_LIB_CLOSURE_ARGS ${TYPED_LIB_CLOSURE_ARGS}
+          --js ${JSFILE})
+    else (IS_ABSOLUTE ${JSFILE})
+      set(TYPED_LIB_CLOSURE_ARGS ${TYPED_LIB_CLOSURE_ARGS}
+          --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+    endif (IS_ABSOLUTE ${JSFILE})
   endforeach(JSFILE ${TYPEDLIBJSFILES})
 
   foreach(JSFILE ${UNTYPEDLIBJSFILES})
@@ -80,8 +85,7 @@ if (Java_JAVA_EXECUTABLE)
   endforeach(JSFILE ${TESTJSFILES})
 
   set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
-      --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
-      --js ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
+      --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js)
 
   add_custom_command(
       OUTPUT simplecompiled.js

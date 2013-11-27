@@ -251,6 +251,8 @@ endif(NOT ANDROID_SDK_DIR)
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
 set(TYPEDLIBJSFILES
+    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js
+
     lib/runtime.js
     lib/core/Base64.js
     lib/core/ByteArray.js
@@ -280,6 +282,7 @@ set(TYPEDLIBJSFILES
     lib/odf/OdfNodeFilter.js
     lib/odf/TextSerializer.js
     lib/odf/StyleInfo.js
+    lib/odf/MetadataManager.js
 )
 set(UNTYPEDLIBJSFILES
 
@@ -289,7 +292,6 @@ set(UNTYPEDLIBJSFILES
     lib/xmldom/RelaxNG2.js
 
     lib/odf/Style2CSS.js
-    lib/odf/MetadataManager.js
     lib/odf/ObjectNameGenerator.js
     lib/odf/TextStyleApplicator.js
     lib/gui/AnnotationViewManager.js
