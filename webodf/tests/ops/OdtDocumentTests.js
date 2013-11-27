@@ -514,7 +514,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_BeginningOfTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(0);
 
@@ -526,7 +526,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_EndOfTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(4);
 
@@ -538,7 +538,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Front() {
         var doc = createOdtDocument("<text:p><text:s> </text:s></text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(0);
 
@@ -550,7 +550,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Back() {
         var doc = createOdtDocument("<text:p><text:s> </text:s></text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(1);
 
@@ -562,7 +562,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_At0_PutsTargetMemberCursor_AfterTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(0, inputMemberId);
 
@@ -575,7 +575,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_At1_PutsTargetMemberCursor_AfterTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
         setCursorPosition(1);
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(1, inputMemberId);
@@ -589,7 +589,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_At4_PutsTargetMemberCursor_AfterTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
         setCursorPosition(4);
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(4, inputMemberId);
@@ -603,7 +603,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_AfterNonText_PutsTargetMemberCursor_AfterTextNode() {
         var doc = createOdtDocument("<text:p>ABC<text:s> </text:s></text:p>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
         setCursorPosition(4);
 
         t.domPosition = t.odtDocument.getTextNodeAtStep(4, inputMemberId);
@@ -617,7 +617,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function getTextNodeAtStep_RearrangesExistingCursors_MovesMemberAfterTextNode() {
         var doc = createOdtDocument("<text:p/>");
-        t.paragraph = doc.getElementsByTagName("p")[0];
+        t.paragraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
         t.odtDocument.addCursor(new ops.OdtCursor("new 1", t.odtDocument));
         t.odtDocument.addCursor(new ops.OdtCursor("new 2", t.odtDocument));
 
