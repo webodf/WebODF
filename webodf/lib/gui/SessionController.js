@@ -104,6 +104,7 @@ gui.SessionController = (function () {
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             drawShadowCursorTask,
             suppressFocusEvent = false,
+            redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId);
 
         runtime.assert(window !== null,
@@ -849,7 +850,7 @@ gui.SessionController = (function () {
         function undo() {
             if (undoManager) {
                 undoManager.moveBackward(1);
-                maintainCursorSelection();
+                redrawRegionSelectionTask.trigger();
                 return true;
             }
 
@@ -862,7 +863,7 @@ gui.SessionController = (function () {
         function redo() {
             if (undoManager) {
                 undoManager.moveForward(1);
-                maintainCursorSelection();
+                redrawRegionSelectionTask.trigger();
                 return true;
             }
 
@@ -1017,7 +1018,7 @@ gui.SessionController = (function () {
             eventManager.subscribe("focus", delayedMaintainCursor);
 
             // start maintaining the cursor selection now
-            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
 
             op = new ops.OpAddCursor();
@@ -1045,7 +1046,7 @@ gui.SessionController = (function () {
             }
 
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
-            odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, maintainCursorSelection);
+            odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
 
             eventManager.unsubscribe("keydown", keyDownHandler.handleEvent);
             eventManager.unsubscribe("keypress", keyPressHandler.handleEvent);
@@ -1205,6 +1206,7 @@ gui.SessionController = (function () {
                 keyCode = gui.KeyboardHandler.KeyCode;
 
             drawShadowCursorTask = new core.ScheduledTask(updateShadowCursor, 0);
+            redrawRegionSelectionTask = new core.ScheduledTask(maintainCursorSelection, 0);
 
             // TODO: deselect the currently selected image when press Esc
             // TODO: move the image selection box to next image/frame when press tab on selected image
