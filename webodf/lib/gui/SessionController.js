@@ -309,12 +309,28 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {Function} lookup
+         * @returns {!function(!Node, !number):!function(!number, !Node, !number):!boolean}
+         */
+        /*jslint unparam:true*/
+        function constrain(lookup) {
+            return function(originalNode) {
+                var originalContainer = lookup(originalNode);
+                return function(step, node) {
+                    return lookup(node) === originalContainer;
+                };
+            };
+        }
+        /*jslint unparam:false*/
+
+        /**
          * @param {!Range} range
          * @param {!boolean} hasForwardSelection
          * @param {number=} clickCount
          */
         function selectRange(range, hasForwardSelection, clickCount) {
             var canvasElement = odtDocument.getOdfCanvas().getElement(),
+                validSelection,
                 startInsideCanvas,
                 endInsideCanvas,
                 existingSelection,
@@ -336,7 +352,8 @@ gui.SessionController = (function () {
                 }
             }
 
-            newSelection = odtDocument.convertDomToCursorRange(rangeToSelection(range, hasForwardSelection));
+            validSelection = rangeToSelection(range, hasForwardSelection);
+            newSelection = odtDocument.convertDomToCursorRange(validSelection, constrain(odfUtils.getParagraphElement));
             existingSelection = odtDocument.getCursorSelection(inputMemberId);
             if (newSelection.position !== existingSelection.position || newSelection.length !== existingSelection.length) {
                 op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RangeSelection);
