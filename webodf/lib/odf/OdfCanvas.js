@@ -450,9 +450,10 @@ odf.OdfCanvas = (function () {
     /**
      * Modify tables to support merged cells (col/row span)
      * @param {!Element} odffragment
+     * @param {!string} documentns
      * @return {undefined}
      */
-    function modifyTables(odffragment) {
+    function modifyTables(odffragment, documentns) {
         var i,
             tableCells,
             node;
@@ -465,11 +466,11 @@ odf.OdfCanvas = (function () {
             // If we have a cell which spans columns or rows,
             // then add col-span or row-span attributes.
             if (node.hasAttributeNS(tablens, "number-columns-spanned")) {
-                node.setAttribute("colspan",
+                node.setAttributeNS(documentns, "colspan",
                     node.getAttributeNS(tablens, "number-columns-spanned"));
             }
             if (node.hasAttributeNS(tablens, "number-rows-spanned")) {
-                node.setAttribute("rowspan",
+                node.setAttributeNS(documentns, "rowspan",
                     node.getAttributeNS(tablens, "number-rows-spanned"));
             }
         }
@@ -837,9 +838,10 @@ odf.OdfCanvas = (function () {
      * Load all the lists that are inside an odf element, and correct numbering.
      * @param {!Element} odffragment
      * @param {!StyleSheet} stylesheet
+     * @param {!string} documentns
      * @return {undefined}
      */
-    function loadLists(odffragment, stylesheet) {
+    function loadLists(odffragment, stylesheet, documentns) {
         var i,
             lists,
             node,
@@ -872,7 +874,7 @@ odf.OdfCanvas = (function () {
 
             if (id) {
                 continueList = node.getAttributeNS(textns, "continue-list");
-                node.setAttribute("id", id);
+                node.setAttributeNS(documentns, "id", id);
                 rule = 'text|list#' + id + ' > text|list-item > *:first-child:before {';
 
                 styleName = node.getAttributeNS(textns, 'style-name');
@@ -1157,14 +1159,14 @@ odf.OdfCanvas = (function () {
 
             modifyDrawElements(odfnode.body, css);
             cloneMasterPages(container, shadowContent, odfnode.body, css);
-            modifyTables(odfnode.body);
+            modifyTables(odfnode.body, element.namespaceURI);
             modifyLinks(odfnode.body);
             modifyLineBreakElements(odfnode.body);
             expandSpaceElements(odfnode.body);
             expandTabElements(odfnode.body);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body);
-            loadLists(odfnode.body, css);
+            loadLists(odfnode.body, css, element.namespaceURI);
 
             sizer.insertBefore(shadowContent, sizer.firstChild);
             fixContainerSize();
