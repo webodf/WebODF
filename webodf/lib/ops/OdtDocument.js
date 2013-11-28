@@ -192,22 +192,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * @param {!Node} anchorNode
-     * @param {!number} anchorOffset
-     * @param {!Node} focusNode
-     * @param {!number} focusOffset
+     * @param {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}} selection
      * @returns {{position: !number, length: number}}
      */
-    this.convertDomToCursorRange = function (anchorNode, anchorOffset,
-            focusNode, focusOffset) {
+    this.convertDomToCursorRange = function (selection) {
         var point1,
             point2;
 
-        point1 = stepsTranslator.convertDomPointToSteps(anchorNode, anchorOffset);
-        if (anchorNode === focusNode && anchorOffset === focusOffset) {
+        point1 = stepsTranslator.convertDomPointToSteps(selection.anchorNode, selection.anchorOffset);
+        if (selection.anchorNode === selection.focusNode && selection.anchorOffset === selection.focusOffset) {
             point2 = point1;
         } else {
-            point2 = stepsTranslator.convertDomPointToSteps(focusNode, focusOffset);
+            point2 = stepsTranslator.convertDomPointToSteps(selection.focusNode, selection.focusOffset);
         }
 
         return {
