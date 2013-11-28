@@ -189,161 +189,6 @@ odf.OdfCanvas = (function () {
             eventTarget["on" + eventType] = eventHandler;
         }
     }
-    /**
-     * @param {!Element} eventTarget
-     * @param {!string} eventType
-     * @param {!Function} eventHandler
-     * @return {undefined}
-     */
-    function removeEvent(eventTarget, eventType, eventHandler) {
-        var onVariant = "on" + eventType;
-        if (eventTarget.removeEventListener) {
-            eventTarget.removeEventListener(eventType, eventHandler, false);
-        } else if (eventTarget.detachEvent) {
-            eventTarget.detachEvent(onVariant, eventHandler);
-        } else if (eventTarget[onVariant] === eventHandler) {
-            eventTarget[onVariant] = null;
-        }
-    }
-
-    /**
-     * Class that listens to events and sends a signal if the selection changes.
-     * @constructor
-     * @param {!Element} element
-     */
-    function SelectionWatcher(element) {
-        var selection = [], listeners = [];
-        /**
-         * @param {!Element} ancestor
-         * @param {Node} descendant
-         * @return {!boolean}
-         */
-        function isAncestorOf(ancestor, descendant) {
-            while (descendant) {
-                if (descendant === ancestor) {
-                    return true;
-                }
-                descendant = descendant.parentNode;
-            }
-            return false;
-        }
-        /**
-         * @param {!Element} element
-         * @param {!Range} range
-         * @return {!boolean}
-         */
-        function fallsWithin(element, range) {
-            return isAncestorOf(element, range.startContainer) &&
-                isAncestorOf(element, range.endContainer);
-        }
-        /**
-         * @return {!Array.<!Range>}
-         */
-        function getCurrentSelection() {
-            var s = [], current = runtime.getWindow().getSelection(), i, r;
-            for (i = 0; i < current.rangeCount; i += 1) {
-                r = current.getRangeAt(i);
-                // check if the nodes in the range fall completely within the
-                // element
-                if (r !== null && fallsWithin(element, r)) {
-                    s.push(r);
-                }
-            }
-            return s;
-        }
-        /**
-         * @param {Range} rangeA
-         * @param {Range} rangeB
-         * @return {!boolean}
-         */
-        function rangesNotEqual(rangeA, rangeB) {
-            if (rangeA === rangeB) {
-                return false;
-            }
-            if (rangeA === null || rangeB === null) {
-                return true;
-            }
-            return rangeA.startContainer !== rangeB.startContainer ||
-                rangeA.startOffset !== rangeB.startOffset ||
-                rangeA.endContainer !== rangeB.endContainer ||
-                rangeA.endOffset !== rangeB.endOffset;
-        }
-        /**
-         * @return {undefined}
-         */
-        function emitNewSelection() {
-            var i, l = listeners.length;
-            for (i = 0; i < l; i += 1) {
-                listeners[i](element, selection);
-            }
-        }
-        /**
-         * @param {!Array.<!Range>} selection
-         * @return {!Array.<!Range>}
-         */
-        function copySelection(selection) {
-            var s = [selection.length], i, oldr, r,
-                doc = element.ownerDocument;
-            for (i = 0; i < selection.length; i += 1) {
-                oldr = selection[i];
-                r = doc.createRange();
-                r.setStart(oldr.startContainer, oldr.startOffset);
-                r.setEnd(oldr.endContainer, oldr.endOffset);
-                s[i] = r;
-            }
-            return s;
-        }
-        /**
-         * @return {undefined}
-         */
-        function checkSelection() {
-            var s = getCurrentSelection(), i;
-            if (s.length === selection.length) {
-                for (i = 0; i < s.length; i += 1) {
-                    if (rangesNotEqual(s[i], selection[i])) {
-                        break;
-                    }
-                }
-                if (i === s.length) {
-                    return; // no change
-                }
-            }
-            selection = s;
-            selection = copySelection(s);
-            emitNewSelection();
-        }
-/*jslint unparam: true*/
-        /**
-         * @param {!string} eventName
-         * @param {!function(!Element, !Array.<!Range>)} handler
-         * @return {undefined}
-         */
-        this.addListener = function (eventName, handler) {
-            var i, l = listeners.length;
-            for (i = 0; i < l; i += 1) {
-                if (listeners[i] === handler) {
-                    return;
-                }
-            }
-            listeners.push(handler);
-        };
-/*jslint unparam: false*/
-        /**
-         * @param {!function(!Object=)} callback, passing an error object in case of error
-         * @return {undefined}
-         */
-        this.destroy = function(callback) {
-            removeEvent(element, "mouseup", checkSelection);
-            removeEvent(element, "keyup", checkSelection);
-            removeEvent(element, "keydown", checkSelection);
-            callback();
-        };
-
-        // init
-        listenEvent(element, "mouseup", checkSelection);
-        listenEvent(element, "keyup", checkSelection);
-        listenEvent(element, "keydown", checkSelection);
-    }
 
     // variables per class (so not per instance!)
     var /**@const@type {!string}*/drawns  = odf.Namespaces.drawns,
@@ -1134,7 +979,6 @@ odf.OdfCanvas = (function () {
             odfcontainer,
             /**@type{!odf.Formatting}*/
             formatting = new odf.Formatting(),
-            selectionWatcher = new SelectionWatcher(element),
             pageSwitcher,
             sizer,
             annotationsPane,
@@ -1506,8 +1350,6 @@ odf.OdfCanvas = (function () {
          */
         this.addListener = function (eventName, handler) {
             switch (eventName) {
-            case "selectionchange":
-                selectionWatcher.addListener(eventName, handler); break;
             case "click":
                 listenEvent(element, eventName, handler); break;
             default:
@@ -1724,14 +1566,7 @@ odf.OdfCanvas = (function () {
             head.removeChild(positioncss);
 
             // TODO: loadingQueue, make sure it is empty
-
-            selectionWatcher.destroy(function (err) {
-                if (err) {
-                    callback(err);
-                } else {
-                    pageSwitcher.destroy(callback);
-                }
-            });
+            pageSwitcher.destroy(callback);
         };
 
         function init() {
