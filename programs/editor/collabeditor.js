@@ -71,6 +71,7 @@ var webodfEditor = (function () {
         currentPageId = null,
         sessionList,
         userId, token,
+        currentSessionId, currentMemberId,
         booting = false;
 
     /**
@@ -105,9 +106,21 @@ var webodfEditor = (function () {
     /**
      * @return {undefined}
      */
-     function startEditing() {
-         editorInstance.startEditing();
-     }
+    function startEditing() {
+        editorInstance.startEditing();
+    }
+
+    /**
+     * @return {undefined}
+     */
+    function closeEditing() {
+        editorInstance.endEditing();
+        editorInstance.closeSession(function() {
+            server.leaveSession(currentSessionId, currentMemberId, function() {
+                showSessions();
+            });
+        });
+    }
 
     /**
      * @returns {undefined}
@@ -131,7 +144,10 @@ var webodfEditor = (function () {
 
         updateLocationWithSessionId(sessionId);
 
+        currentSessionId = sessionId;
         server.joinSession(userId, sessionId, function(memberId) {
+            currentMemberId = memberId;
+
             if (!editorInstance) {
                 require({ }, [
                 "webodf/editor/Translator",
@@ -143,14 +159,7 @@ var webodfEditor = (function () {
 
                                 editorOptions = editorOptions || {}; // TODO: cleanup
                                 editorOptions.networkSecurityToken = token;
-                                editorOptions.closeCallback = function() {
-                                    editorInstance.endEditing();
-                                    editorInstance.closeSession(function() {
-                                        server.leaveSession(sessionId, memberId, function() {
-                                            showSessions();
-                                        });
-                                    });
-                                };
+                                editorOptions.closeCallback = closeEditing;
 
                                 editorInstance = new Editor(editorOptions, server, serverFactory);
 
