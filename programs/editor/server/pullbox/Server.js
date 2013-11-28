@@ -61,7 +61,7 @@ define("webodf/editor/server/pullbox/Server", [], function () {
 
             function handleResult() {
                 if (xhr.readyState === 4) {
-                    if ((xhr.status < 200 || xhr.status >= 300) && xhr.status === 0) {
+                    if ((xhr.status < 200 || xhr.status >= 300) && xhr.status !== 0) {
                         // report error
                         runtime.log("Status " + String(xhr.status) + ": " +
                                 xhr.responseText || xhr.statusText);
