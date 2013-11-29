@@ -919,12 +919,19 @@ gui.SessionController = (function () {
          * @param e
          */
         function handleMouseDown(e) {
-            var target = getTarget(e);
+            var target = getTarget(e),
+                cursor = odtDocument.getCursor(inputMemberId);
             clickStartedWithinContainer = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
             if (clickStartedWithinContainer) {
                 isMouseMoved = false;
                 mouseDownRootFilter = odtDocument.createRootFilter(target);
                 clickCount = e.detail;
+                if (cursor && e.shiftKey) {
+                    // Firefox seems to get rather confused about the window selection when shift+extending it.
+                    // Help this poor browser by resetting the window selection back to the anchor node if the user
+                    // is holding shift.
+                    window.getSelection().collapse(cursor.getAnchorNode(), 0);
+                }
                 if (clickCount > 1) {
                     updateShadowCursor();
                 }
