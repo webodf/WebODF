@@ -103,7 +103,6 @@ gui.SessionController = (function () {
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             drawShadowCursorTask,
-            suppressFocusEvent = false,
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
             clickCount = 0;
@@ -367,10 +366,6 @@ gui.SessionController = (function () {
                 op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RangeSelection);
                 session.enqueue([op]);
             }
-
-            // canvas element won't have focus if user click somewhere outside the canvas then drag and
-            // release click inside the canvas.
-            eventManager.focus();
         }
         // TODO Extract selection functions into a standalone SelectionManipulator
         this.selectRange = selectRange;
@@ -674,75 +669,25 @@ gui.SessionController = (function () {
         this.extendSelectionToEntireDocument = extendSelectionToEntireDocument;
 
         /**
-         * TODO: This method and associated event subscriptions really belong in SessionView
-         * As this implementation relies on the current browser selection, only a single
-         * cursor can be highlighted at a time. Eventually, when virtual selection & cursors are
-         * implemented, this limitation will be eliminated
+         * If the user's current selection is region selection (e.g., an image), any executed operations
+         * could cause the picture to shift relative to the selection rectangle.
          * @return {undefined}
          */
-        function maintainCursorSelection() {
+        function redrawRegionSelection() {
             var cursor = odtDocument.getCursor(inputMemberId),
-                selection = window.getSelection(),
-                imageElement,
-                range;
+                imageElement;
 
-            if (cursor) {
-                // Always redraw the image selection as this doesn't affect the browser's selection
-                imageSelector.clearSelection();
-                if (cursor.getSelectionType() === ops.OdtCursor.RegionSelection) {
-                    range = cursor.getSelectedRange();
-                    imageElement = odfUtils.getImageElements(range)[0];
-                    if (imageElement) {
-                        imageSelector.select(/**@type{!Element}*/(imageElement.parentNode));
-                    }
+            if (cursor && cursor.getSelectionType() === ops.OdtCursor.RegionSelection) {
+                imageElement = odfUtils.getImageElements(cursor.getSelectedRange())[0];
+                if (imageElement) {
+                    imageSelector.select(/**@type{!Element}*/(imageElement.parentNode));
+                    return;
                 }
-
-                if (eventManager.hasFocus()) {
-                    // Only recapture the browser selection if focus is currently on the canvas
-                    range = cursor.getSelectedRange();
-                    if (selection.extend) {
-                        if (cursor.hasForwardSelection()) {
-                            selection.collapse(range.startContainer, range.startOffset);
-                            selection.extend(range.endContainer, range.endOffset);
-                        } else {
-                            selection.collapse(range.endContainer, range.endOffset);
-                            selection.extend(range.startContainer, range.startOffset);
-                        }
-                    } else {
-                        // Internet explorer does provide any method for
-                        // preserving the range direction
-                        // See http://msdn.microsoft.com/en-us/library/ie/ff974359%28v=vs.85%29.aspx
-                        // Unfortunately, clearing the range will trigger a
-                        // focus event. So to work around this we suppress the                          // focus event and use the IE-specific setActive method
-                        // which will return focus back to the event manager
-                        // without harming the now correct selection
-                        suppressFocusEvent = true;
-                        selection.removeAllRanges();
-                        selection.addRange(range.cloneRange());
-                        /**@type{!IEElement}*/(odtDocument.getOdfCanvas().getElement()).setActive();
-                        runtime.setTimeout(function () {
-                            // The focus event will fire within the next cycle,
-                            // so wait until then before allowing the selection
-                            // to resynchronize again
-                            suppressFocusEvent = false;
-                        }, 0);
-                    }
-                }
-            } else {
-                // May have just processed our own remove cursor operation...
-                // In this case, clear any image selection chrome to prevent user confusion
-                imageSelector.clearSelection();
             }
-        }
 
-        /**
-         * The focus event will sometimes update the window's current selection after all
-         * event handlers have been called (observed on FF24, OSX).
-         */
-        function delayedMaintainCursor() {
-            if (suppressFocusEvent === false) {
-                runtime.setTimeout(maintainCursorSelection, 0);
-            }
+            // May have just processed our own remove cursor operation...
+            // In this case, clear any image selection chrome to prevent user confusion
+            imageSelector.clearSelection();
         }
 
         /**
@@ -771,6 +716,7 @@ gui.SessionController = (function () {
             if (selectedRange.collapsed) {
                 // Modifying the clipboard data will clear any existing data,
                 // so cut shouldn't touch the clipboard if there is nothing selected
+                e.preventDefault();
                 return;
             }
 
@@ -805,16 +751,17 @@ gui.SessionController = (function () {
 
             if (selectedRange.collapsed) {
                 // Modifying the clipboard data will clear any existing data,
-                // so cut shouldn't touch the clipboard if there is nothing
+                // so copy shouldn't touch the clipboard if there is nothing
                 // selected
+                e.preventDefault();
                 return;
             }
 
             // Place the data on the clipboard ourselves to ensure consistency
             // with cut behaviours
             if (!clipboard.setDataFromRange(e, selectedRange)) {
-                // TODO What should we do if cut isn't supported?
-                runtime.log("Cut operation failed");
+                // TODO What should we do if copy isn't supported?
+                runtime.log("Copy operation failed");
             }
         }
 
@@ -834,8 +781,8 @@ gui.SessionController = (function () {
             if (plainText) {
                 textManipulator.removeCurrentSelection();
                 session.enqueue(pasteHandler.createPasteOps(plainText));
-                cancelEvent(e);
             }
+            cancelEvent(e);
         }
 
         /**
@@ -912,6 +859,35 @@ gui.SessionController = (function () {
         }
 
         /**
+         * In order for drag operations to work, the browser needs to have it's current
+         * selection set. This is called on mouse down to synchronize the user's last selection
+         * to the browser selection
+         * @param {ops.OdtCursor} cursor
+         * @return {undefined}
+         */
+        function synchronizeWindowSelection(cursor) {
+            var selection = window.getSelection(),
+                range = cursor.getSelectedRange();
+            if (selection.extend) {
+                if (cursor.hasForwardSelection()) {
+                    selection.collapse(range.startContainer, range.startOffset);
+                    selection.extend(range.endContainer, range.endOffset);
+                } else {
+                    selection.collapse(range.endContainer, range.endOffset);
+                    selection.extend(range.startContainer, range.startOffset);
+                }
+            } else {
+                // Internet explorer does provide any method for
+                // preserving the range direction
+                // See http://msdn.microsoft.com/en-us/library/ie/ff974359%28v=vs.85%29.aspx
+                // Unfortunately, clearing the range will also blur the current focus.
+                selection.removeAllRanges();
+                selection.addRange(range.cloneRange());
+                /**@type{!IEElement}*/(odtDocument.getOdfCanvas().getElement()).setActive();
+            }
+        }
+
+        /**
          * Updates a flag indicating whether the mouse down event occurred within the OdfCanvas element.
          * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
          * events that occur when the user releases the mouse button outside the canvas.
@@ -931,6 +907,8 @@ gui.SessionController = (function () {
                     // Help this poor browser by resetting the window selection back to the anchor node if the user
                     // is holding shift.
                     window.getSelection().collapse(cursor.getAnchorNode(), 0);
+                } else {
+                    synchronizeWindowSelection(cursor);
                 }
                 if (clickCount > 1) {
                     updateShadowCursor();
@@ -966,31 +944,36 @@ gui.SessionController = (function () {
             drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
             if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
                 selectImage(target.parentNode);
+                eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (clickStartedWithinContainer && !imageSelector.isSelectorElement(target)) {
                 if (isMouseMoved) {
                     selectRange(shadowCursor.getSelectedRange(), shadowCursor.hasForwardSelection(), event.detail);
+                    eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
                 } else {
-                    // When click somewhere within already selected text, call window.getSelection() straight away results
-                    // the previous selection get returned. Set 0 timeout here so the newly clicked position can be updated
+                    // Clicking in already selected text won't update window.getSelection() until just after
+                    // the click is processed. Set 0 timeout here so the newly clicked position can be updated
                     // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
                     // out the caret position from two coordinates.
                     runtime.setTimeout(function() {
                         var selection = mutableSelection(window.getSelection()),
                             selectionRange,
                             caretPos;
-                        if (!selection.anchorNode && !selection.focusNode) { // chrome & safari will do this after a right-click
+                        if (!selection.anchorNode && !selection.focusNode) {
+                            // chrome & safari will report null for focus and anchor nodes after a right-click in text selection
                             caretPos = caretPositionFromPoint(eventDetails.clientX, eventDetails.clientY);
-                            if (!caretPos) {
-                                return;
+                            if (caretPos) {
+                                selection.anchorNode = /**@type{!Node}*/(caretPos.container);
+                                selection.anchorOffset = caretPos.offset;
+                                selection.focusNode = selection.anchorNode;
+                                selection.focusOffset = selection.anchorOffset;
                             }
-
-                            selection.anchorNode = /**@type{!Node}*/(caretPos.container);
-                            selection.anchorOffset = caretPos.offset;
-                            selection.focusNode = selection.anchorNode;
-                            selection.focusOffset = selection.anchorOffset;
                         }
-                        selectionRange = selectionToRange(selection);
-                        selectRange(selectionRange.range, selectionRange.hasForwardSelection, eventDetails.detail);
+                        // Need to check the selection again in case the caret position didn't return any result
+                        if (selection.anchorNode && selection.focusNode) {
+                            selectionRange = selectionToRange(selection);
+                            selectRange(selectionRange.range, selectionRange.hasForwardSelection, eventDetails.detail);
+                        }
+                        eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
                     }, 0);
                 }
             }
@@ -1040,7 +1023,6 @@ gui.SessionController = (function () {
             eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
             eventManager.subscribe("mouseup", handleMouseUp);
             eventManager.subscribe("contextmenu", handleContextMenu);
-            eventManager.subscribe("focus", delayedMaintainCursor);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
@@ -1085,7 +1067,6 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("mousedown", handleMouseDown);
             eventManager.unsubscribe("mouseup", handleMouseUp);
             eventManager.unsubscribe("contextmenu", handleContextMenu);
-            eventManager.unsubscribe("focus", delayedMaintainCursor);
             odtDocument.getOdfCanvas().getElement().classList.remove("virtualSelections");
         };
 
@@ -1231,7 +1212,7 @@ gui.SessionController = (function () {
                 keyCode = gui.KeyboardHandler.KeyCode;
 
             drawShadowCursorTask = new core.ScheduledTask(updateShadowCursor, 0);
-            redrawRegionSelectionTask = new core.ScheduledTask(maintainCursorSelection, 0);
+            redrawRegionSelectionTask = new core.ScheduledTask(redrawRegionSelection, 0);
 
             // TODO: deselect the currently selected image when press Esc
             // TODO: move the image selection box to next image/frame when press tab on selected image

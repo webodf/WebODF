@@ -47,8 +47,7 @@
  */
 gui.EventManager = function EventManager(odtDocument) {
     "use strict";
-    var canvasElement = odtDocument.getOdfCanvas().getElement(),
-        window = runtime.getWindow(),
+    var window = /**@type{!Window}*/(runtime.getWindow()),
         bindToDirectHandler = {
             // In Safari 6.0.5 (7536.30.1), Using either attachEvent or addEventListener
             // results in the beforecut return value being ignored which prevents cut from being called.
@@ -57,7 +56,19 @@ gui.EventManager = function EventManager(odtDocument) {
             "beforepaste": true
         },
         // Events that should be bound to the global window rather than the canvas element
-        bindToWindow;
+        bindToWindow,
+        eventTrap;
+
+    /**
+     * Get the current canvas element. The current trivial undo manager replaces the root element
+     * of the ODF container with a clone from a previous state. This results in the root element
+     * being changed. As such, it can't be stored, and should be queried on each use.
+     * @returns {!Element}
+     */
+    function getCanvasElement() {
+        // TODO Remove when a proper undo manager arrives
+        return odtDocument.getOdfCanvas().getElement();
+    }
 
     /**
      * Ensures events that may bubble through multiple sources are only handled once.
@@ -113,7 +124,7 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
-     * @param {!HTMLElement} element
+     * @param {!Element} element
      * @constructor
      */
     function ElementScrollState(element) {
@@ -177,7 +188,8 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.subscribe = function(eventName, handler) {
-        var delegate = window && bindToWindow[eventName];
+        var delegate = bindToWindow[eventName],
+            canvasElement = getCanvasElement();
         if (delegate) {
             delegate.handlers.push(handler);
             if (!delegate.isSubscribed) {
@@ -186,6 +198,7 @@ gui.EventManager = function EventManager(odtDocument) {
                 // For other browser though, listening to both will cause two events to be processed
                 listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
                 listenEvent(canvasElement, eventName, delegate.handleEvent);
+                listenEvent(eventTrap, eventName, delegate.handleEvent);
             }
         } else {
             listenEvent(canvasElement, eventName, handler);
@@ -197,8 +210,9 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.unsubscribe = function(eventName, handler) {
-        var delegate = window && bindToWindow[eventName],
-            handlerIndex = delegate && delegate.handlers.indexOf(handler);
+        var delegate = bindToWindow[eventName],
+            handlerIndex = delegate && delegate.handlers.indexOf(handler),
+            canvasElement = getCanvasElement();
         if (delegate) {
             if (handlerIndex !== -1) {
                 delegate.handlers.splice(handlerIndex, 1);
@@ -213,35 +227,32 @@ gui.EventManager = function EventManager(odtDocument) {
      * @returns {boolean}
      */
     function hasFocus() {
-        var activeElement = odtDocument.getDOM().activeElement;
-        return activeElement === canvasElement;
+        return odtDocument.getDOM().activeElement === getCanvasElement();
     }
-    this.hasFocus = hasFocus;
 
     /**
      * Find the closest scrolled ancestor to the specified element
-     * @param {HTMLElement} element
+     * @param {Element} element
      * @returns {*}
      */
     function findScrollableParent(element) {
         // If a scrollable parent exists with a non-0 top or left scroll then return this as the container to restore
         while (element && !element.scrollTop && !element.scrollLeft) {
-            element = /**@type {HTMLElement}*/(element.parentNode);
+            element = /**@type {Element}*/(element.parentNode);
         }
         if (element) {
             return new ElementScrollState(element);
         }
-        if (window) {
-            return new WindowScrollState(window);
-        }
-        return null;
+        return new WindowScrollState(window);
     }
 
     /**
      * Return event focus back to the event manager
      */
     this.focus = function() {
-        var scrollParent;
+        var scrollParent,
+            canvasElement = getCanvasElement(),
+            selection = window.getSelection();
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
             // Passing focus back to an element that did not previously have it will also
@@ -252,15 +263,42 @@ gui.EventManager = function EventManager(odtDocument) {
                 scrollParent.restore();
             }
         }
+        if (selection && selection.extend) {
+            if (eventTrap.parentNode !== canvasElement) {
+                // The undo manager can replace the root element, discarding the original.
+                // The event trap node is still valid, and simply needs to be re-attached
+                // after this occurs.
+                canvasElement.appendChild(eventTrap);
+            }
+            // A browser selection in an editable area is necessary to allow cut/copy events to fire
+            // It doesn't have to be an accurate selection however as the SessionController will override
+            // the default browser handling.
+            selection.collapse(eventTrap.firstChild, 0);
+            selection.extend(eventTrap, eventTrap.childNodes.length);
+        }
     };
 
     function init() {
+        var canvasElement = getCanvasElement(),
+            doc = canvasElement.ownerDocument;
+
+        runtime.assert(Boolean(window), "EventManager requires a window object to operate correctly");
         bindToWindow = {
             // Capture selections that start outside the canvas element and end within the canvas element
             "mousedown": new EventDelegate(),
             // Capture selections that start inside the canvas element and end outside of the element or even window
-            "mouseup": new EventDelegate()
+            "mouseup": new EventDelegate(),
+            // Focus is a non-bubbling event, and we'll usually pass focus to the event trap
+            "focus": new EventDelegate()
         };
+        eventTrap = doc.createElement("div");
+        eventTrap.id = "eventTrap";
+        eventTrap.setAttribute("contenteditable", "true");
+        eventTrap.style.position = "absolute";
+        eventTrap.style.left = "-10000px";
+        // Content is necessary for cut/copy to be enabled
+        eventTrap.appendChild(doc.createTextNode("dummy content"));
+        canvasElement.appendChild(eventTrap);
     }
     init();
 };
