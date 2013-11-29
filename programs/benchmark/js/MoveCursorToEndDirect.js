@@ -54,16 +54,14 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          * @param {!SharedState} sharedState
          */
         this.start = function(sharedState) {
-            var canvasElement;
+            var canvasElement,
+                range;
             action.start();
 
             canvasElement = sharedState.odfCanvas.getElement();
-            sharedState.sessionController.selectRange({
-                anchorNode: canvasElement,
-                anchorOffset: canvasElement.childNodes.length,
-                focusNode: canvasElement,
-                focusOffset: canvasElement.childNodes.length
-            }, {clientX: 0, clientY: 0, detail: 1});
+            range = canvasElement.ownerDocument.createRange();
+            range.setStart(canvasElement, canvasElement.childNodes.length);
+            sharedState.sessionController.selectRange(range, true, 1);
 
             action.complete(true);
         }

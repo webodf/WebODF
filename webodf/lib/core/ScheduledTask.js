@@ -48,12 +48,8 @@
 core.ScheduledTask = function ScheduledTask(fn, delay) {
     "use strict";
     var timeoutId,
-        scheduled = false;
-
-    function execute() {
-        fn();
-        scheduled = false;
-    }
+        scheduled = false,
+        args = [];
 
     function cancel() {
         if (scheduled) {
@@ -62,12 +58,20 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
         }
     }
 
+    function execute() {
+        cancel();
+        fn.apply(undefined, args);
+        args = null;
+    }
+
     /**
      * Schedule this task to execute. If one has already been requested,
      * this call will have no impact
      */
     this.trigger = function () {
+        args = Array.prototype.slice.call(arguments);
         if (!scheduled) {
+            scheduled = true;
             timeoutId = runtime.setTimeout(execute, delay);
         }
     };
@@ -76,7 +80,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
      * Immediately trigger this task and clear any pending requests.
      */
     this.triggerImmediate = function () {
-        cancel();
+        args = Array.prototype.slice.call(arguments);
         execute();
     };
 
@@ -86,7 +90,6 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
      */
     this.processRequests = function () {
         if (scheduled) {
-            cancel();
             execute();
         }
     };
