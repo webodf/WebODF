@@ -235,7 +235,14 @@ gui.SessionController = (function () {
             }
 
             if (endParagraph) {
-                range.setEnd(endParagraph, endParagraph.childNodes.length);
+                if (odfUtils.isParagraph(range.endContainer) && range.endOffset === 0) {
+                    // Chrome's built-in paragraph expansion will put the end of the selection
+                    // at (p,0) of the FOLLOWING paragraph. Round this back down to ensure
+                    // the next paragraph doesn't get incorrectly selected
+                    range.setEndBefore(endParagraph);
+                } else {
+                    range.setEnd(endParagraph, endParagraph.childNodes.length);
+                }
             }
         }
 
