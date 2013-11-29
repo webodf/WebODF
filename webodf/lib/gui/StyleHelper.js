@@ -44,20 +44,25 @@ runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor
+ * @param {!odf.Formatting} formatting
  */
 gui.StyleHelper = function StyleHelper(formatting) {
     "use strict";
     var domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils(),
-        /**@const @type{!string}*/ textns = odf.Namespaces.textns;
+        /**@const*/
+        textns = odf.Namespaces.textns;
 
+    /**
+     * @param {!Range} range
+     */
     function getAppliedStyles(range) {
         var container, nodes;
 
         if (range.collapsed) {
             container = range.startContainer;
             if (container.hasChildNodes() && range.startOffset < container.childNodes.length) {
-                container = container.childNodes[range.startOffset];
+                container = container.childNodes.item(range.startOffset);
             }
             nodes = [container];
         } else {

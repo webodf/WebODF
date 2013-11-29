@@ -46,10 +46,13 @@
 gui.KeyboardHandler = function KeyboardHandler() {
     "use strict";
     var modifier = gui.KeyboardHandler.Modifier,
+        /**@type{?function(!KeyboardEvent):boolean}*/
         defaultBinding = null,
+        /**@type{!Object.<string,function():boolean>}*/
         bindings = {};
 
     /**
+     * @param {!KeyboardEvent} e
      * @return {!number}
      */
     function getModifiers(e) {
@@ -62,6 +65,8 @@ gui.KeyboardHandler = function KeyboardHandler() {
     }
 
     /**
+     * @param {!number}     keyCode
+     * @param {!number}     modifiers
      * @return {!string}
      */
     function getKeyCombo(keyCode, modifiers) {
@@ -92,7 +97,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
 
     /**
      * @param {!number}     keyCode
-     * @@param {!number}    modifiers
+     * @param {!number}    modifiers
      */
     this.unbind = function (keyCode, modifiers) {
         var keyCombo = getKeyCombo(keyCode, modifiers);
@@ -108,10 +113,11 @@ gui.KeyboardHandler = function KeyboardHandler() {
     };
 
     /**
-     * @param {!Event} e
+     * @param {!KeyboardEvent} e
      */
     this.handleEvent = function (e) {
         var keyCombo = getKeyCombo(e.keyCode, getModifiers(e)),
+            /**@type{function():boolean|undefined}*/
             callback = bindings[keyCombo],
             handled = false;
 

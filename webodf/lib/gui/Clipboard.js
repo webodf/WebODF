@@ -49,7 +49,11 @@ runtime.loadClass("odf.TextSerializer");
  */
 gui.Clipboard = function Clipboard() {
     "use strict";
-    var xmlSerializer, textSerializer, filter;
+    var /**@type{!xmldom.LSSerializer}*/
+        xmlSerializer,
+        /**@type{!odf.TextSerializer}*/
+        textSerializer,
+        filter;
 
     /**
      * Copy the contents of the supplied range onto the clipboard (if available).
@@ -57,7 +61,7 @@ gui.Clipboard = function Clipboard() {
      * @param {!Range} range Selection range to copy into the clipboard
      * @return {boolean} Returns true if the data was successfully copied to the clipboard
      */
-    this.setDataFromRange = function(e, range) {
+    this.setDataFromRange = function (e, range) {
         var result = true,
             setDataResult,
             clipboard = e.clipboardData,

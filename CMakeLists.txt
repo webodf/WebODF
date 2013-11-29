@@ -268,8 +268,12 @@ set(TYPEDLIBJSFILES
     lib/core/UnitTester.js
     lib/core/Utils.js
     lib/core/Zip.js
+    lib/gui/Avatar.js
+    lib/gui/EditInfoHandle.js
+    lib/gui/KeyboardHandler.js
     lib/odf/Namespaces.js
     lib/odf/OdfUtils.js
+    lib/ops/Server.js
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/XPath.js
     lib/core/Cursor.js
@@ -279,24 +283,19 @@ set(TYPEDLIBJSFILES
     lib/odf/OdfNodeFilter.js
     lib/odf/StyleInfo.js
     lib/odf/TextSerializer.js
+    lib/ops/TextPositionFilter.js
     lib/xmldom/LSSerializer.js
+    lib/gui/Clipboard.js
 )
 # This list is generated automatically, do not edit this list by hand.
 set(UNTYPEDLIBJSFILES
 # These files depend only on files that are 100% typed.
     lib/core/RawDeflate.js
-    lib/gui/Avatar.js
-    lib/gui/Clipboard.js
-    lib/gui/EditInfoHandle.js
-    lib/gui/KeyboardHandler.js
     lib/gui/SelectionMover.js
-    lib/gui/StyleHelper.js
     lib/odf/OdfContainer.js
     lib/odf/Style2CSS.js
     lib/ops/Member.js
-    lib/ops/Server.js
     lib/ops/StepsTranslator.js
-    lib/ops/TextPositionFilter.js
     lib/xmldom/RelaxNGParser.js
 # These files depend on files that are not 100% typed.
     lib/gui/AnnotationViewManager.js
@@ -315,6 +314,7 @@ set(UNTYPEDLIBJSFILES
     lib/gui/Caret.js
     lib/gui/EventManager.js
     lib/gui/ShadowCursor.js
+    lib/gui/StyleHelper.js
     lib/gui/UndoManager.js
     lib/gui/UndoStateRules.js
     lib/ops/EditInfo.js

@@ -201,6 +201,7 @@
     ],
     "gui/StyleHelper.js": [
         "core/DomUtils.js",
+        "odf/Formatting.js",
         "odf/Namespaces.js",
         "odf/OdfUtils.js"
     ],

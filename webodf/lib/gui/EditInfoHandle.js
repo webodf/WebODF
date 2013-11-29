@@ -36,11 +36,14 @@
 /*global gui*/
 /**
  * @constructor
+ * @param {!Element} parentElement
  */
 gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     "use strict";
 
-    var edits = [],
+    var /**@type{!Array.<{memberid:string,time:Date}>}*/
+        edits = [],
+        /**@type{!HTMLDivElement}*/
         handle,
         document = /**@type{!Document}*/(parentElement.ownerDocument),
         htmlns = document.documentElement.namespaceURI,
@@ -73,6 +76,9 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
         }
     }
 
+    /**
+     * @param {!Array.<{memberid:string,time:Date}>} editArray
+     */
     this.setEdits = function (editArray) {
         edits = editArray;
         renderEdits();
@@ -90,13 +96,13 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         parentElement.removeChild(handle);
         callback();
     };
 
     function init() {
-        handle = document.createElementNS(htmlns, "div");
+        handle = /**@type{!HTMLDivElement}*/(document.createElementNS(htmlns, "div"));
         handle.setAttribute('class', 'editInfoHandle');
 
         handle.style.display = 'none';
