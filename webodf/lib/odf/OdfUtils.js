@@ -808,7 +808,7 @@ odf.OdfUtils = function OdfUtils() {
      * this function would return the following array:
      *      [text:p{id="A"}, text:p{id="B"}]
      * @param {!Range} range
-     * @returns {!Array.<Node>}
+     * @returns {!Array.<!Element>}
      */
     this.getParagraphElements = function (range) {
         var document = range.startContainer.ownerDocument,

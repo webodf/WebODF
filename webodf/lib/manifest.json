@@ -16,8 +16,6 @@
     ],
     "core/EventNotifier.js": [
     ],
-    "core/JSLint.js": [
-    ],
     "core/LoopWatchDog.js": [
     ],
     "core/PositionFilter.js": [

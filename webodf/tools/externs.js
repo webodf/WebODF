@@ -412,7 +412,7 @@ function VBArray(s) {"use strict"; }
 VBArray.prototype.toArray = function () {"use strict"; };
 /**
  * @constructor
- * @extends Element
+ * @extends HTMLElement
  */
 function IEElement() {"use strict"; };
 IEElement.prototype.setActive = function () {"use strict"; };

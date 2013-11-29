@@ -104,10 +104,11 @@ function Main() {
         return circs;
     }
 
-    function findOccurances(source, symbol, files, occs) {
+    function findOccurances(source, symbols, files, occs) {
+        symbols = symbols.join("|").split(".").join("\\.");
         var classname,
             content,
-            regex = new RegExp("\\b" + symbol + "\\b");
+            regex = new RegExp("\\b(" + symbols + ")\\b");
         for (classname in files) {
             if (files.hasOwnProperty(classname)) {
                 content = files[classname];
@@ -172,7 +173,7 @@ function Main() {
         }
         for (i = 0; i < list.length; i += 1) {
             classname = list[i];
-            findOccurances(classname, classname, files, occs);
+            findOccurances(classname, [classname], files, occs);
         }
         //mergeOperations(files, occs);
         //occs = findCircles(occs);
@@ -204,17 +205,54 @@ function Main() {
         return Object.keys(defines);
     }
 
-    function saveIfDifferent(path, content) {
+    function saveIfDifferent(path, content, saveCallback) {
         var fs = require("fs");
-        fs.readFile(path, function (err, data) {
+        fs.readFile(path, "utf8", function (err, data) {
             if (err || data !== content) {
                 fs.writeFile(path, content, function (err2) {
                     if (err2) {
                         throw err2;
                     }
+                    if (saveCallback) {
+                        saveCallback();
+                    }
                 });
             }
         });
+    }
+
+    /**
+     * @param {!Array.<string>} list
+     * @param {!Object.<string,!Array.<string>>} deps
+     * @param {!Object.<string,boolean>} defined
+     * @return {!Array.<string>} list
+     */
+    function createOrderedList(list, deps, defined) {
+        var sorted = [], i, p, jl, l = list.length, depsPresent, missing;
+        while (sorted.length < l) {
+            for (i = 0; i < l; i += 1) {
+                p = list[i];
+                if (!defined.hasOwnProperty(p)) {
+                    missing = deps[p].filter(function (dep) {
+                        return !defined.hasOwnProperty(dep);
+                    });
+                    depsPresent = missing.length === 0;
+                    if (depsPresent) {
+                        sorted.push(p);
+                        defined[p] = true;
+                    } else if (missing.length === 1 && deps[missing[0]].indexOf(p) !== -1) {
+                        // resolve simple circular problem
+                        sorted.push(p);
+                        defined[p] = true;
+                        sorted.push(missing[0]);
+                        defined[missing[0]] = true;
+                        console.log("Circular dependency: "
+                            + missing + " <> " + p);
+                    }
+                }
+            }
+        }
+        return sorted;
     }
 
     var typedfiles = [
@@ -268,35 +306,57 @@ function Main() {
         return typedDefs;
     }
 
-    function createOrderedFileList(manifest) {
-        var typedDefs = determineIfHasTypedDefs(manifest),
-            list = Object.keys(manifest),
-            t = [],
-            out = [],
-            j;
-        list.sort();
-        for (j = 0; j < list.length; j += 1) {
-            if (typedfiles.indexOf(list[j]) !== -1) {
-                out.push(list[j]);
-console.log("    lib/" + list[j]);
+    function createCMakeLists(typed, almostTyped, remaining) {
+        var fs = require("fs"), path = "../CMakeLists.txt";
+        fs.readFile(path, "utf8", function (err, content) {
+            if (err) {
+                throw err;
             }
-        }
-console.log("");
-        for (j = 0; j < list.length; j += 1) {
-            if (typedfiles.indexOf(list[j]) === -1
-                    && typedDefs[list[j]]) {
-                out.push(list[j]);
-console.log("    lib/" + list[j]);
-            }
-        }
-console.log("");
-        for (j = 0; j < list.length; j += 1) {
-            if (typedfiles.indexOf(list[j]) === -1
-                    && !typedDefs[list[j]]) {
-                out.push(list[j]);
-console.log("    lib/" + list[j]);
-            }
-        }
+            content = content.replace(/TYPEDLIBJSFILES[^)]+\)/,
+                "TYPEDLIBJSFILES\n" +
+                "    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js\n" +
+                "    lib/runtime.js\n    lib/" +
+                typed.join("\n    lib/") + "\n)");
+            content = content.replace(/UNTYPEDLIBJSFILES[^)]+\)/,
+                "UNTYPEDLIBJSFILES" +
+                "\n# These files depend only on files that are 100% typed." +
+                "\n    lib/" +
+                almostTyped.join("\n    lib/") +
+                "\n# These files depend on files that are not 100% typed." +
+                "\n    lib/" +
+                remaining.join("\n    lib/") + "\n)");
+            saveIfDifferent(path, content, function () {
+                console.log("CMakeLists.txt was updated. Rerun the build.");
+                process.exit(1);
+            });
+        });
+    }
+
+    function updateCMakeLists(deps) {
+        var lib = deps.lib,
+            defined = {},
+            sortedTyped = createOrderedList(typedfiles, lib, defined),
+            almostTyped,
+            definedCopy,
+            remaining;
+        definedCopy = {};
+        Object.keys(defined).forEach(function (key) {
+            definedCopy[key] = true;
+        });
+        almostTyped = Object.keys(lib).filter(function (key) {
+            return !defined.hasOwnProperty(key) && 
+                lib[key].every(function (dep) {
+                        return defined.hasOwnProperty(dep);
+                    });
+        }).sort();
+        almostTyped.forEach(function (key) {
+            defined[key] = true;
+        });
+        remaining = Object.keys(lib).filter(function (key) {
+            return !defined.hasOwnProperty(key);
+        });
+        remaining = createOrderedList(remaining, lib, defined);
+        createCMakeLists(sortedTyped, almostTyped, remaining);
     }
 
     /**
@@ -361,9 +421,7 @@ console.log("    lib/" + list[j]);
         for (i = 0; i < list.length; i += 1) {
             classname = list[i];
             d = defines[classname];
-            for (j = 0; j < d.length; j += 1) {
-                findOccurances(classname, d[j], classes, occs);
-            }
+            findOccurances(classname, d, classes, occs);
         }
         for (classname in occs) {
             if (occs.hasOwnProperty(classname)) {
@@ -384,7 +442,7 @@ console.log("    lib/" + list[j]);
             j = deps[d.split("/")[0]];
             saveIfDifferent(d + "manifest.json", serializeManifest(j));
         }
-        createOrderedFileList(deps.lib);
+        updateCMakeLists(deps);
     };
 
     /**
@@ -536,6 +594,7 @@ function main(f) {
         var files = {};
         f.runJSLint(contents);
         delete contents["lib/runtime.js"];
+        delete contents["lib/core/JSLint.js"];
         delete contents["tests/tests.js"];
         Object.keys(contents).forEach(function (name) {
             if (typeof contents[name] === "string") {

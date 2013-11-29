@@ -71,7 +71,7 @@ core.UnitTest.prototype.tests = function () {"use strict"; };
 core.UnitTest.prototype.asyncTests = function () {"use strict"; };
 
 /**
- * @return {!Element}
+ * @return {!HTMLDivElement}
  */
 core.UnitTest.provideTestAreaDiv = function () {
     "use strict";
@@ -83,7 +83,7 @@ core.UnitTest.provideTestAreaDiv = function () {
     testarea = maindoc.createElement('div');
     testarea.setAttribute('id', 'testarea');
     maindoc.body.appendChild(testarea);
-    return testarea;
+    return /**@type{!HTMLDivElement}*/(testarea);
 };
 
 /**

@@ -317,8 +317,10 @@ gui.SelectionView = function SelectionView(cursor) {
      */
     function getFillerRect(fillerRange) {
         var containerNode = fillerRange.commonAncestorContainer,
-            firstNode = fillerRange.startContainer,
-            lastNode = fillerRange.endContainer,
+            /**@type{!Node}*/
+            firstNode = /**@type{!Node}*/(fillerRange.startContainer),
+            /**@type{!Node}*/
+            lastNode = /**@type{!Node}*/(fillerRange.endContainer),
             firstOffset = fillerRange.startOffset,
             lastOffset = fillerRange.endOffset,
             currentNode,
