@@ -105,7 +105,8 @@ gui.SessionController = (function () {
             drawShadowCursorTask,
             suppressFocusEvent = false,
             redrawRegionSelectionTask,
-            pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId);
+            pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
+            clickCount = 0;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -889,6 +890,27 @@ gui.SessionController = (function () {
             return false;
         }
 
+        function updateShadowCursor() {
+            var selection = window.getSelection(),
+                selectionRange = selection.rangeCount > 0 && selectionToRange(selection);
+
+            if (clickStartedWithinContainer && selectionRange) {
+                isMouseMoved = true;
+
+                imageSelector.clearSelection();
+                shadowCursorIterator.setUnfilteredPosition(/**@type {!Node}*/(selection.focusNode), selection.focusOffset);
+                if (mouseDownRootFilter.acceptPosition(shadowCursorIterator) === FILTER_ACCEPT) {
+                    if (clickCount === 2) {
+                        expandToWordBoundaries(selectionRange.range);
+                    } else if (clickCount >= 3) {
+                        expandToParagraphBoundaries(selectionRange.range);
+                    }
+                    shadowCursor.setSelectedRange(selectionRange.range, selectionRange.hasForwardSelection);
+                    odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
+                }
+            }
+        }
+
         /**
          * Updates a flag indicating whether the mouse down event occurred within the OdfCanvas element.
          * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
@@ -896,12 +918,16 @@ gui.SessionController = (function () {
          * This filter limits selection changes to mouse down events that start inside the canvas
          * @param e
          */
-        function filterMouseClicks(e) {
+        function handleMouseDown(e) {
             var target = getTarget(e);
             clickStartedWithinContainer = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
             if (clickStartedWithinContainer) {
                 isMouseMoved = false;
                 mouseDownRootFilter = odtDocument.createRootFilter(target);
+                clickCount = e.detail;
+                if (clickCount > 1) {
+                    updateShadowCursor();
+                }
             }
         }
 
@@ -961,6 +987,7 @@ gui.SessionController = (function () {
                     }, 0);
                 }
             }
+            clickCount = 0;
             clickStartedWithinContainer = false;
             isMouseMoved = false;
         }
@@ -987,22 +1014,6 @@ gui.SessionController = (function () {
             }
         }
 
-        function updateShadowCursor() {
-            var selection = window.getSelection(),
-                selectionRange = selection.rangeCount > 0 && selectionToRange(selection);
-
-            if (clickStartedWithinContainer && selectionRange) {
-                isMouseMoved = true;
-
-                imageSelector.clearSelection();
-                shadowCursorIterator.setUnfilteredPosition(/**@type {!Node}*/(selection.focusNode), selection.focusOffset);
-                if (mouseDownRootFilter.acceptPosition(shadowCursorIterator) === FILTER_ACCEPT) {
-                    shadowCursor.setSelectedRange(selectionRange.range, selectionRange.hasForwardSelection);
-                    odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
-                }
-            }
-        }
-
         /**
          * @return {undefined}
          */
@@ -1018,7 +1029,7 @@ gui.SessionController = (function () {
             eventManager.subscribe("copy", handleCopy);
             eventManager.subscribe("beforepaste", handleBeforePaste);
             eventManager.subscribe("paste", handlePaste);
-            eventManager.subscribe("mousedown", filterMouseClicks);
+            eventManager.subscribe("mousedown", handleMouseDown);
             eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
             eventManager.subscribe("mouseup", handleMouseUp);
             eventManager.subscribe("contextmenu", handleContextMenu);
@@ -1064,7 +1075,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("paste", handlePaste);
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
             eventManager.unsubscribe("mousemove", drawShadowCursorTask.trigger);
-            eventManager.unsubscribe("mousedown", filterMouseClicks);
+            eventManager.unsubscribe("mousedown", handleMouseDown);
             eventManager.unsubscribe("mouseup", handleMouseUp);
             eventManager.unsubscribe("contextmenu", handleContextMenu);
             eventManager.unsubscribe("focus", delayedMaintainCursor);
