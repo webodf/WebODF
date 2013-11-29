@@ -286,13 +286,15 @@ set(TYPEDLIBJSFILES
     lib/ops/TextPositionFilter.js
     lib/xmldom/LSSerializer.js
     lib/gui/Clipboard.js
+    lib/odf/OdfContainer.js
 )
 # This list is generated automatically, do not edit this list by hand.
 set(UNTYPEDLIBJSFILES
 # These files depend only on files that are 100% typed.
     lib/core/RawDeflate.js
     lib/gui/SelectionMover.js
-    lib/odf/OdfContainer.js
+    lib/odf/FontLoader.js
+    lib/odf/ObjectNameGenerator.js
     lib/odf/Style2CSS.js
     lib/ops/Member.js
     lib/ops/StepsTranslator.js
@@ -302,10 +304,8 @@ set(UNTYPEDLIBJSFILES
     lib/odf/OdfCanvas.js
     lib/gui/ImageSelector.js
     lib/odf/CommandLineTools.js
-    lib/odf/FontLoader.js
-    lib/odf/ObjectNameGenerator.js
-    lib/odf/TextStyleApplicator.js
     lib/odf/Formatting.js
+    lib/odf/TextStyleApplicator.js
     lib/ops/OdtCursor.js
     lib/ops/OdtDocument.js
     lib/ops/Operation.js

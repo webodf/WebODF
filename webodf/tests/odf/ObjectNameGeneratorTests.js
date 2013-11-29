@@ -45,19 +45,19 @@ odf.ObjectNameGeneratorTests = function ObjectNameGeneratorTests(runner) {
     var t,
         r = runner,
         namespace = {
-            "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-            "style":"urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-            "draw":"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-            "fo":"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
-            "xlink":"http://www.w3.org/1999/xlink"
+            "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+            "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+            "style": "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
+            "draw": "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+            "fo": "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
+            "xlink": "http://www.w3.org/1999/xlink"
         };
 
     function parseXML(data) {
         var xml = "<?xml version='1.0' encoding='UTF-8'?>";
 
         xml += "<office:document";
-        Object.keys(namespace).forEach(function(key) {
+        Object.keys(namespace).forEach(function (key) {
             xml += " xmlns:" + key + '="' + namespace[key] + '"';
         });
         xml += ">";
@@ -74,11 +74,14 @@ odf.ObjectNameGeneratorTests = function ObjectNameGeneratorTests(runner) {
      * @constructor
      */
     function OdfContainerMock(styles, automaticStyles, body) {
-        this.rootElement = {
-            styles : styles,
-            automaticStyles: automaticStyles,
-            body: body
-        };
+        var root = styles.ownerDocument.createElementNS(
+            namespace.office,
+            "office:document"
+        );
+        root.styles = styles;
+        root.automaticStyles = automaticStyles;
+        root.body = body;
+        this.rootElement = /**@type{!odf.ODFDocumentElement}}*/(root);
     }
 
     this.setUp = function () {
@@ -120,7 +123,10 @@ odf.ObjectNameGeneratorTests = function ObjectNameGeneratorTests(runner) {
 
         t.testArea.appendChild(parseXML(xml));
         containerMock = new OdfContainerMock(
-            t.testArea.firstChild.childNodes[0], t.testArea.firstChild.childNodes[1], t.testArea.firstChild.childNodes[2]);
+            t.testArea.firstChild.childNodes[0],
+            t.testArea.firstChild.childNodes[1],
+            t.testArea.firstChild.childNodes[2]
+        );
 
         t.generator = new odf.ObjectNameGenerator(containerMock, 'joe');
     };

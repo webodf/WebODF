@@ -51,25 +51,34 @@ runtime.loadClass("odf.TextStyleApplicator");
 odf.Formatting = function Formatting() {
     "use strict";
     var self = this,
-        /**@type{odf.OdfContainer}*/ odfContainer,
-        /**@type{odf.StyleInfo}*/ styleInfo = new odf.StyleInfo(),
-        /**@const@type {!string}*/ svgns = odf.Namespaces.svgns,
-        /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
-        /**@const@type {!string}*/ textns = odf.Namespaces.textns,
-        /**@const@type {!string}*/ numberns = odf.Namespaces.numberns,
-        /**@const@type {!string}*/ fons = odf.Namespaces.fons,
+        /**@type{odf.OdfContainer}*/
+        odfContainer,
+        /**@type{odf.StyleInfo}*/
+        styleInfo = new odf.StyleInfo(),
+        /**@const*/
+        svgns = odf.Namespaces.svgns,
+        /**@const*/
+        stylens = odf.Namespaces.stylens,
+        /**@const*/
+        textns = odf.Namespaces.textns,
+        /**@const*/
+        numberns = odf.Namespaces.numberns,
+        /**@const*/
+        fons = odf.Namespaces.fons,
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         utils = new core.Utils(),
         // TODO: needs to be extended. Possibly created together with CSS from sone default description?
-        /** @const */ builtInDefaultStyleAttributesByFamily = {
+        /**@const*/
+        builtInDefaultStyleAttributesByFamily = {
             'paragraph' : {
                 'style:paragraph-properties': {
                     'fo:text-align': 'left'
                 }
             }
         },
-        /** @const */ defaultPageFormatSettings = {
+        /**@const*/
+        defaultPageFormatSettings = {
             width: 21.001, // showing as 21.00 in page format dialog but the value is actually 21.001 in the xml
             height: 29.7,
             margin: 2,
@@ -179,13 +188,16 @@ odf.Formatting = function Formatting() {
      * @return {!boolean}
      */
     this.isStyleUsed = function (styleElement) {
-        var hasDerivedStyles, isUsed;
+        var hasDerivedStyles, isUsed,
+            root = odfContainer.rootElement;
 
-        hasDerivedStyles = styleInfo.hasDerivedStyles(odfContainer.rootElement, odf.Namespaces.lookupNamespaceURI, styleElement);
+        hasDerivedStyles = styleInfo.hasDerivedStyles(root,
+            odf.Namespaces.lookupNamespaceURI, styleElement);
 
-        isUsed = new styleInfo.UsedStyleList(odfContainer.rootElement.styles).uses(styleElement)
-            || new styleInfo.UsedStyleList(odfContainer.rootElement.automaticStyles).uses(styleElement)
-            || new styleInfo.UsedStyleList(odfContainer.rootElement.body).uses(styleElement);
+        isUsed =
+            new styleInfo.UsedStyleList(root.styles).uses(styleElement)
+            || new styleInfo.UsedStyleList(root.automaticStyles).uses(styleElement)
+            || new styleInfo.UsedStyleList(root.body).uses(styleElement);
 
         return hasDerivedStyles || isUsed;
     };

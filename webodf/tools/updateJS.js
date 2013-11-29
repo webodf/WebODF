@@ -309,6 +309,7 @@ function Main() {
             "gui/KeyboardHandler.js",
             "odf/MetadataManager.js",
             "odf/Namespaces.js",
+            "odf/OdfContainer.js",
             "odf/OdfNodeFilter.js",
             "odf/OdfUtils.js",
             "odf/StyleInfo.js",
