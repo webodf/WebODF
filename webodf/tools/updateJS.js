@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global runtime, process*/
+/*global runtime, process, require, console*/
 
 function Main() {
     "use strict";
@@ -41,25 +41,6 @@ function Main() {
     function className(path) {
         return path.substr(0, path.length - 3).replace('/', '.');
     }
-
-    this.loadAll = function (list, loaded, callback) {
-        var i, l = list.length, done = 0;
-        function load(path) {
-            runtime.readFile("../lib/" + path, "utf-8", function (err, js) {
-                if (err) {
-                    throw err;
-                }
-                done += 1;
-                loaded[className(path)] = js;
-                if (done === l) {
-                    callback();
-                }
-            });
-        }
-        for (i = 0; i < l; i += 1) {
-            load(list[i]);
-        }
-    };
 
     function add(occs, key, value) {
         var a = occs[key] || [];
@@ -77,6 +58,9 @@ function Main() {
         add(circs, list[l - 1], list[0]);
     }
 
+    /**
+     * Function to help find loops/circles in the dependency graph.
+     */
     function findLoops(v, occs, list, circs, pos) {
         var i, name, j, l = v.length;
         for (i = 0; i < l; i += 1) {
@@ -91,6 +75,9 @@ function Main() {
         }
     }
 
+    /**
+     * Find loops/circles in the dependency graph.
+     */
     function findCircles(occs) {
         var name,
             list = [],
@@ -104,6 +91,13 @@ function Main() {
         return circs;
     }
 
+    /**
+     * Scan javascript source for the given symbols.
+     * @param {string} source
+     * @param {!Array.<string>} symbols
+     * @param {!Object.<string,string> files
+     * @param {!Object.<string,!Array.<string,>>
+     */
     function findOccurances(source, symbols, files, occs) {
         symbols = symbols.join("|").split(".").join("\\.");
         var classname,
@@ -119,10 +113,25 @@ function Main() {
         }
     }
 
+    /**
+     * Determine if the javascript source defines an ops.Operation.
+     */
     function isOperation(fileContent) {
         return (/ \* @implements ops\.Operation\b/).test(fileContent);
     }
 
+    /**
+     * Retrieve all the classes deriving from ops.Operation..
+     */
+    function getOperations(files) {
+        return Object.keys(files).filter(function (key) {
+            return isOperation(files[key]);
+        });
+    }
+
+    /**
+     * Print a .dot dependency graph.
+     */
     function print(occs, out, files) {
         var i, j, m, n, done = {}, d;
         out.write("digraph webodf {\n");
@@ -132,24 +141,18 @@ function Main() {
                 for (j = 0; j < m.length; j += 1) {
                     i = isOperation(files[i]) ? "{Operation}" : i;
                     n = m[j];
-   if (occs[n].length) {
-                    n = isOperation(files[n]) ? "{Operation}" : n;
-                    if (!done.hasOwnProperty(i) || !done[i].hasOwnProperty(n)) {
-                        out.write('"' + i + '" -> "' + n + '";\n');
-                        d = done[i] = done[i] || {};
-                        d[n] = 1;
+                    if (occs[n].length) {
+                        n = isOperation(files[n]) ? "{Operation}" : n;
+                        if (!done.hasOwnProperty(i) || !done[i].hasOwnProperty(n)) {
+                            out.write('"' + i + '" -> "' + n + '";\n');
+                            d = done[i] = done[i] || {};
+                            d[n] = 1;
+                        }
                     }
-}
                 }
             }
         }
         out.write("}\n");
-    }
-
-    function getOperations(files) {
-        return Object.keys(files).filter(function (key) {
-            return isOperation(files[key]);
-        });
     }
 
     function mergeOperations(files, occs) {
@@ -162,7 +165,10 @@ function Main() {
             delete occs[i];
         }
     }
- 
+
+    /**
+     * Analyze the given files and create a graphviz dependency graph.
+     */
     this.analyze = function (files) {
         var list = Object.keys(files),
             occs = {},
@@ -175,8 +181,8 @@ function Main() {
             classname = list[i];
             findOccurances(classname, [classname], files, occs);
         }
-        //mergeOperations(files, occs);
-        //occs = findCircles(occs);
+        mergeOperations(files, occs);
+        occs = findCircles(occs);
         print(occs, process.stdout, files);
     };
 
@@ -193,11 +199,13 @@ function Main() {
             m;
         re = new RegExp("^\\s*(" + names[1] + "\\.[\\w.]+) = ", "gm");
         if (names.length !== 3) {
-           throw path + " Only two levels are supported.";
+            throw path + " Only two levels are supported.";
         }
-        while ((match = re.exec(content)) !== null) {
+        match = re.exec(content);
+        while (match !== null) {
             m = match[1];
             defines[m] = 1;
+            match = re.exec(content);
         }
         if (Object.keys(defines).length === 0) {
             throw "No defines found in " + path;
@@ -205,6 +213,10 @@ function Main() {
         return Object.keys(defines);
     }
 
+    /**
+     * Save data to a file if the contents is different then it currently is.
+     * If the file is written anew, saveCallback is called.
+     */
     function saveIfDifferent(path, content, saveCallback) {
         var fs = require("fs");
         fs.readFile(path, "utf8", function (err, data) {
@@ -228,14 +240,15 @@ function Main() {
      * @return {!Array.<string>} list
      */
     function createOrderedList(list, deps, defined) {
-        var sorted = [], i, p, jl, l = list.length, depsPresent, missing;
+        var sorted = [], i, p, l = list.length, depsPresent, missing;
+        function isUndefined(dep) {
+            return !defined.hasOwnProperty(dep);
+        }
         while (sorted.length < l) {
             for (i = 0; i < l; i += 1) {
                 p = list[i];
                 if (!defined.hasOwnProperty(p)) {
-                    missing = deps[p].filter(function (dep) {
-                        return !defined.hasOwnProperty(dep);
-                    });
+                    missing = deps[p].filter(isUndefined);
                     depsPresent = missing.length === 0;
                     if (depsPresent) {
                         sorted.push(p);
@@ -255,6 +268,12 @@ function Main() {
         return sorted;
     }
 
+    /**
+     * List of files that are 100% typed. When working on making WebODF more
+     * typed, choose a file from CMakeLists.txt that is listed as only depending
+     * on typed files and add it to this list. The run the typecheck-target to
+     * find where type annotations are needed.
+     */
     var typedfiles = [
             "core/Async.js",
             "core/Base64.js",
@@ -282,29 +301,8 @@ function Main() {
             "xmldom/LSSerializer.js",
             "xmldom/LSSerializerFilter.js",
             "xmldom/XPath.js"
-        ];
-
-    function determineIfHasTypedDefs(manifest) {
-        var typedDefs = {},
-            j;
-        function hasOnlyTypedDefs(path) {
-            var dep = manifest[path],
-                i;
-            for (i = 0; i < dep.length; i += 1) {
-                if (typedfiles.indexOf([i]) === -1) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        for (j in manifest) {
-            if (manifest.hasOwnProperty(j)) {
-                typedDefs[j] = typedfiles.indexOf(j) !== -1
-                        || hasOnlyTypedDefs(j);
-            }
-        }
-        return typedDefs;
-    }
+        ],
+        jslintconfig;
 
     function createCMakeLists(typed, almostTyped, remaining) {
         var fs = require("fs"), path = "../CMakeLists.txt";
@@ -344,10 +342,10 @@ function Main() {
             definedCopy[key] = true;
         });
         almostTyped = Object.keys(lib).filter(function (key) {
-            return !defined.hasOwnProperty(key) && 
+            return !defined.hasOwnProperty(key) &&
                 lib[key].every(function (dep) {
-                        return defined.hasOwnProperty(dep);
-                    });
+                    return defined.hasOwnProperty(dep);
+                });
         }).sort();
         almostTyped.forEach(function (key) {
             defined[key] = true;
@@ -373,7 +371,7 @@ function Main() {
             a = manifest[list[j]];
             out += '    "' + list[j] + '": [\n';
             for (i = 0; i < a.length; i += 1) {
-                out += '        "' + a[i]
+                out += '        "' + a[i];
                 out += i === a.length - 1 ? '"\n' : '",\n';
             }
             out += j === list.length - 1 ? '    ]\n' : '    ],\n';
@@ -387,7 +385,7 @@ function Main() {
      * @param {!Array.<string>}
      * @return {!Object.<string,!Array.<string>>}
      */
-    this.createManifests = function (files, dirs) {
+    this.createManifestsAndCMakeLists = function (files, dirs) {
         var list = Object.keys(files),
             classes = {},
             paths = {},
@@ -400,17 +398,17 @@ function Main() {
             j;
         // make map with classname as key and file content as value
         list.forEach(function (path) {
-            var j, found = false, dir, classname;
-            for (j = 0; j < dirs.length; j += 1) {
-                dir = dirs[j];
+            var k, dir, name;
+            for (k = 0; k < dirs.length; k += 1) {
+                dir = dirs[k];
                 if (path.indexOf(dir) === 0) {
-                    classname = className(path.substr(dir.length));
-                    if (classes.hasOwnProperty(classname)) {
-                        throw classname + " occurs more than once.";
+                    name = className(path.substr(dir.length));
+                    if (classes.hasOwnProperty(name)) {
+                        throw name + " occurs more than once.";
                     }
-                    classes[classname] = files[path];
-                    defines[classname] = getTopLevelDefines(path, files[path]);
-                    paths[classname] = path;
+                    classes[name] = files[path];
+                    defines[name] = getTopLevelDefines(path, files[path]);
+                    paths[name] = path;
                 }
             }
         });
@@ -423,6 +421,11 @@ function Main() {
             d = defines[classname];
             findOccurances(classname, d, classes, occs);
         }
+        function prefixDir(cn) {
+            var p = paths[cn],
+                n = p.indexOf("/");
+            return p.substr(n + 1);
+        }
         for (classname in occs) {
             if (occs.hasOwnProperty(classname)) {
                 d = paths[classname];
@@ -430,11 +433,7 @@ function Main() {
                 j = d.substr(i + 1);
                 i = d.substr(0, i);
                 d = deps[i] = deps[i] || {};
-                d[j] = occs[classname].map(function (cn)  {
-                    var p = paths[cn],
-                        n = p.indexOf("/");
-                    return p.substr(n + 1);
-                }).sort();
+                d[j] = occs[classname].map(prefixDir).sort();
             }
         }
         for (i = 0; i < dirs.length; i += 1) {
@@ -447,9 +446,10 @@ function Main() {
 
     /**
      * Load content of a directory recursively.
-     * Directories are listed as Objects and files are read as text and stored as
-     * strings.
-     * The filter allows loading only a subset of files based on file or directory name.
+     * Directories are listed as Objects and files are read as text and stored
+     * as strings.
+     * The filter allows loading only a subset of files based on file or
+     * directory name.
      * @param {!Array.<string>} dirs
      * @param {function(string,boolean):boolean} filter
      * @param {function(!Object}:undefined} callback
@@ -488,7 +488,7 @@ function Main() {
                 contents[filepath] = data;
                 readMore();
             });
-        } 
+        }
         function readDirectory(dirpath) {
             fs.readdir(dirpath, function (err, files) {
                 if (err) {
@@ -501,7 +501,7 @@ function Main() {
                 contents[dirpath] = files;
                 readMore();
             });
-        } 
+        }
         read = function (p) {
             fs.stat(p, function (err, stats) {
                 if (err) {
@@ -524,7 +524,7 @@ function Main() {
         readMore();
     };
 
-    var jslintconfig = {
+    jslintconfig = {
         ass:        false, // if assignment expressions should be allowed
         bitwise:    false, // if bitwise operators should be allowed
         browser:    false, // if the standard browser globals should be predefined
@@ -566,7 +566,9 @@ function Main() {
             i,
             err;
         // load JSLint
+        /*jslint evil: true*/
         eval(contents["lib/core/JSLint.js"]);
+        /*jslint evil: false*/
         jslint = new core.JSLint().JSLINT;
         for (path in contents) {
             if (contents.hasOwnProperty(path)
@@ -587,12 +589,14 @@ function Main() {
 
 function main(f) {
     "use strict";
+    // recursively read all the files in the lib and tests directories
     f.readFiles(["lib", "tests"], function (name, isfile) {
         // only read directories and js files
         return !isfile || name.indexOf(".js") === name.length - 3;
     }, function (contents) {
         var files = {};
         f.runJSLint(contents);
+        // remove files that should not go in the manifest.json files
         delete contents["lib/runtime.js"];
         delete contents["lib/core/JSLint.js"];
         delete contents["tests/tests.js"];
@@ -601,7 +605,7 @@ function main(f) {
                 files[name] = contents[name];
             }
         });
-        f.createManifests(files, ["lib/", "tests/"]);
+        f.createManifestsAndCMakeLists(files, ["lib/", "tests/"]);
     });
 }
 
