@@ -77,15 +77,16 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
         existingImageNames = {};
 
     /**
-     * @param {!string} prefix Prefix to use for unique name generation
-     * @param {!function():!Object.<string, !boolean>} findExistingNames
+     * @param {string} prefix Prefix to use for unique name generation
+     * @param {function():!Object.<string,boolean>} findExistingNames
      * @constructor
      */
     function NameGenerator(prefix, findExistingNames) {
-        var reportedNames = {};
+        var /**@type{!Object.<string,boolean>}*/
+            reportedNames = {};
         /**
          * Generate a unique name
-         * @returns {!string}
+         * @returns {string}
          */
         this.generateName = function () {
             var existingNames = findExistingNames(),
@@ -101,24 +102,31 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
     }
 
     /**
-     * Get all the style names defined in the style:style elements of the current document including automatic styles
+     * Get all the style names defined in the style:style elements of the
+     * current document including automatic styles.
      *
-     * @returns {!Object.<string, !boolean>}
+     * @returns {!Object.<string,boolean>}
      */
     function getAllStyleNames() {
-        var styleElements = [odfContainer.rootElement.automaticStyles, odfContainer.rootElement.styles],
-            node,
+        var styleElements = [
+                odfContainer.rootElement.automaticStyles,
+                odfContainer.rootElement.styles
+            ],
             styleNames = {};
 
-        styleElements.forEach(function (styleListElement) {
-            node = styleListElement.firstChild;
-            while (node) {
-                if (node.nodeType === Node.ELEMENT_NODE && node.namespaceURI === stylens && node.localName === "style") {
-                    styleNames[node.getAttributeNS(stylens, 'name')] = true;
+        /**
+         * @param {!Element} styleListElement
+         */
+        function getStyleNames(styleListElement) {
+            var e = styleListElement.firstElementChild;
+            while (e) {
+                if (e.namespaceURI === stylens && e.localName === "style") {
+                    styleNames[e.getAttributeNS(stylens, 'name')] = true;
                 }
-                node = node.nextSibling;
+                e = e.nextElementSibling;
             }
-        });
+        }
+        styleElements.forEach(getStyleNames);
         return styleNames;
     }
 

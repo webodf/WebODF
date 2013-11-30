@@ -359,8 +359,8 @@ odf.Style2CSS = function Style2CSS() {
         return null;
     }
     /**
-     * @param {!string} stylename
-     * @param {!Object.<string,?Element>} stylesmap
+     * @param {string} stylename
+     * @param {!Object.<string,Element>} stylesmap
      * @param {!Object} stylestree
      * @return {undefined}
      */
@@ -1102,7 +1102,7 @@ odf.Style2CSS = function Style2CSS() {
             rule = '@namespace ' + prefix + ' url(' + ns + ');';
             try {
                 stylesheet.insertRule(rule, stylesheet.cssRules.length);
-            } catch (ignore) {
+            } catch (/**@type{!DOMException}*/ignore) {
                 // WebKit can throw an exception here, but it will have
                 // retained the namespace declarations anyway.
             }

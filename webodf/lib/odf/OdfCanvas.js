@@ -243,7 +243,8 @@ odf.OdfCanvas = (function () {
     function handleFonts(odfContainer, fontcss) {
         // update the css references to the fonts
         var fontLoader = new odf.FontLoader();
-        fontLoader.loadFonts(odfContainer, fontcss.sheet);
+        fontLoader.loadFonts(odfContainer,
+            /**@type{!CSSStyleSheet}*/(fontcss.sheet));
     }
 
     /**
