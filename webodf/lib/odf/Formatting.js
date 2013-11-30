@@ -47,6 +47,7 @@ runtime.loadClass("odf.TextStyleApplicator");
 
 /**
  * @constructor
+ * @implements odf.TextStyleApplicatorFormatting
  */
 odf.Formatting = function Formatting() {
     "use strict";
@@ -383,10 +384,11 @@ odf.Formatting = function Formatting() {
      * Builds up a style chain for a given node by climbing up all parent nodes and checking for style information
      * @param {!Node} node
      * @param {Object.<string, Array.<Object>>=} collectedChains Dictionary to add any new style chains to
-     * @returns {Array.<Object>|undefined}
+     * @return {Array.<Object>|undefined}
      */
     function buildStyleChain(node, collectedChains) {
-        var parent = node.nodeType === Node.TEXT_NODE ? node.parentNode : node,
+        var parent = /**@type{!Element}*/(node.nodeType === Node.TEXT_NODE
+                  ? node.parentNode : node),
             nodeStyles,
             appliedStyles = [],
             chainKey = '',
@@ -395,11 +397,11 @@ odf.Formatting = function Formatting() {
             if (!foundContainer && odfUtils.isGroupingElement(parent)) {
                 foundContainer = true;
             }
-            nodeStyles = styleInfo.determineStylesForNode(/**@type {!Element}*/(parent));
+            nodeStyles = styleInfo.determineStylesForNode(parent);
             if (nodeStyles) {
                 appliedStyles.push(nodeStyles);
             }
-            parent = parent.parentNode;
+            parent = parent.parentElement;
         }
 
         if (foundContainer) {
@@ -464,7 +466,7 @@ odf.Formatting = function Formatting() {
         var styleChains = {},
             styles = [];
 
-        textNodes.forEach(function(n) {
+        textNodes.forEach(function (n) {
             buildStyleChain(n, styleChains);
         });
 
@@ -476,7 +478,7 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns a the applied style to the current node
-     * @param {!Element} node
+     * @param {!CharacterData} node
      * @returns {Object|undefined}
      */
     this.getAppliedStylesForElement = function (node) {

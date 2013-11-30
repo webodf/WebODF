@@ -41,36 +41,73 @@ runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.LoopWatchDog");
 runtime.loadClass("odf.Namespaces");
 
+/*jslint emptyblock: true, unparam: true*/
+/**
+ * @interface
+ */
+odf.TextStyleApplicatorFormatting = function () {"use strict"; };
+/**
+ * @param {!CharacterData} textnode
+ * @return {Object|undefined}
+ */
+odf.TextStyleApplicatorFormatting.prototype.getAppliedStylesForElement = function (textnode) {"use strict"; };
+/**
+ * @param {!string} parentStyleName
+ * @param {!string} family
+ * @param {!Object} overrides
+ * @return {!Object}
+ */
+odf.TextStyleApplicatorFormatting.prototype.createDerivedStyleObject = function (parentStyleName, family, overrides) {"use strict"; };
+/**
+ * @param {!Element} styleNode
+ * @param {!Object} properties Prefix to put in front of new auto styles
+ */
+odf.TextStyleApplicatorFormatting.prototype.updateStyle = function (styleNode, properties) {"use strict"; };
+/*jslint emptyblock: false, unparam: false*/
+
 /**
  * Class for applying a supplied text style to the given text nodes.
  * @constructor
  * @param {!odf.ObjectNameGenerator} objectNameGenerator Source for generating unique automatic style names
- * @param {!odf.Formatting} formatting Formatting retrieval and computation store
+ * @param {!odf.TextStyleApplicatorFormatting} formatting Formatting retrieval and computation store
  * @param {!Node} automaticStyles Root element for automatic styles
  */
 odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, formatting, automaticStyles) {
     "use strict";
     var domUtils = new core.DomUtils(),
-        /**@const@type {!string}*/ textns = odf.Namespaces.textns,
-        /**@const@type {!string}*/ stylens = odf.Namespaces.stylens,
-        /**@const@type {!string}*/ textProperties = "style:text-properties",
-        /**@const@type {!string}*/ webodfns = "urn:webodf:names:scope";
+        /**@const*/
+        textns = odf.Namespaces.textns,
+        /**@const*/
+        stylens = odf.Namespaces.stylens,
+        /**@const*/
+        textProperties = "style:text-properties",
+        /**@const*/
+        webodfns = "urn:webodf:names:scope";
 
     /**
-     * @param {!Object} info Style information
      * @constructor
+     * @param {!Object} info Style information
      */
     function StyleLookup(info) {
+        /**
+         * @param {!Object} expected
+         * @param {Object|undefined} actual
+         * @return {boolean}
+         */
         function compare(expected, actual) {
             if (typeof expected === "object" && typeof actual === "object") {
-                return Object.keys(expected).every(function(key) {
+                return Object.keys(expected).every(function (key) {
                     return compare(expected[key], actual[key]);
                 });
             }
             return expected === actual;
         }
 
-        this.isStyleApplied = function(textNode) {
+        /**
+         * @param {!CharacterData} textNode
+         * @return {boolean}
+         */
+        this.isStyleApplied = function (textNode) {
             // TODO make this performant...
             // TODO take into account defaults and don't require styles if re-iterating the default impacts
             // TODO can direct style to element just be removed somewhere to end up with desired style?
@@ -80,14 +117,20 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
     }
 
     /**
-     * Responsible for maintaining a collection of creates auto-styles for re-use on
-     * styling new containers.
-     * @param {!Object} info Style information
+     * Responsible for maintaining a collection of creates auto-styles for
+     * re-use on styling new containers.
      * @constructor
+     * @param {!Object} info Style information
      */
     function StyleManager(info) {
-        var createdStyles = {};
+        var /**@type{!Object.<string,!Element>}*/
+            createdStyles = {};
 
+        /**
+         * @param {string} existingStyleName
+         * @param {Document} document
+         * @return {!Element}
+         */
         function createDirectFormat(existingStyleName, document) {
             var derivedStyleInfo, derivedStyleNode;
 
@@ -101,6 +144,11 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             return derivedStyleNode;
         }
 
+        /**
+         * @param {string} existingStyleName
+         * @param {Document} document
+         * @return {string}
+         */
         function getDirectStyle(existingStyleName, document) {
             existingStyleName = existingStyleName || "";
             if (!createdStyles.hasOwnProperty(existingStyleName)) {
@@ -111,9 +159,9 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
 
         /**
          * Applies the required styling changes to the supplied container.
-         * @param container
+         * @param {!Element} container
          */
-        this.applyStyleToContainer = function(container) {
+        this.applyStyleToContainer = function (container) {
             // container will be a span by this point, and the style-name can only appear in one place
             var name = getDirectStyle(container.getAttributeNS(textns, "style-name"), container.ownerDocument);
             container.setAttributeNS(textns, "text:style-name", name);
@@ -144,6 +192,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             node,
             nextNode,
             loopGuard = new core.LoopWatchDog(10000),
+            /**@type{!Array.<!Node>}*/
             styledNodes = [];
 
         // Do we need a new style container?
@@ -153,7 +202,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             originalContainer.insertBefore(styledContainer, startNode);
             moveTrailing = false;
         } else if (startNode.previousSibling
-            && !domUtils.rangeContainsNode(limits, /**@type{!Element}*/(originalContainer.firstChild))) {
+                && !domUtils.rangeContainsNode(limits, /**@type{!Element}*/(originalContainer.firstChild))) {
             // Yes, text node has prior siblings that are not styled
             // TODO what elements should be stripped when the clone occurs?
             styledContainer = originalContainer.cloneNode(false);
@@ -175,9 +224,9 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             styledNodes.push(node);
             node = node.nextSibling;
         }
-        styledNodes.forEach(function(node) {
-            if (node.parentNode !== styledContainer) {
-                styledContainer.appendChild(node);
+        styledNodes.forEach(function (n) {
+            if (n.parentNode !== styledContainer) {
+                styledContainer.appendChild(n);
             }
         });
 
@@ -207,23 +256,29 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      * @return {undefined}
      */
-    this.applyStyle = function(textNodes, limits, info) {
+    this.applyStyle = function (textNodes, limits, info) {
         var textPropsOnly = {},
             isStyled,
             container,
+            /**@type{!StyleManager}*/
             styleCache,
+            /**@type{!StyleLookup}*/
             styleLookup;
-        runtime.assert(info && info[textProperties], "applyStyle without any text properties");
+        runtime.assert(info && info.hasOwnProperty(textProperties), "applyStyle without any text properties");
         textPropsOnly[textProperties] = info[textProperties];
         styleCache = new StyleManager(textPropsOnly);
         styleLookup = new StyleLookup(textPropsOnly);
 
-        textNodes.forEach(function(n) {
+        /**
+         * @param {!CharacterData} n
+         */
+        function apply(n) {
             isStyled = styleLookup.isStyleApplied(n);
             if (isStyled === false) {
-                container = moveToNewSpan(/**@type {!CharacterData}*/(n), limits);
+                container = moveToNewSpan(n, limits);
                 styleCache.applyStyleToContainer(container);
             }
-        });
+        }
+        textNodes.forEach(apply);
     };
 };

@@ -318,6 +318,7 @@ function Main() {
             "odf/Style2CSS.js",
             "odf/StyleInfo.js",
             "odf/TextSerializer.js",
+            "odf/TextStyleApplicator.js",
             "ops/Server.js",
             "ops/TextPositionFilter.js",
             "xmldom/LSSerializer.js",

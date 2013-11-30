@@ -306,7 +306,6 @@
     "odf/TextStyleApplicator.js": [
         "core/DomUtils.js",
         "core/LoopWatchDog.js",
-        "odf/Formatting.js",
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js"
     ],
