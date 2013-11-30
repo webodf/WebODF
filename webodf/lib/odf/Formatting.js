@@ -91,8 +91,8 @@ odf.Formatting = function Formatting() {
      * of a given style family.
      * Creates a deep copy, so the result can be modified by the callee.
      * If there are no such attributes, null is returned.
-     * @param {!string} styleFamily
-     * @return {?Object}
+     * @param {string} styleFamily
+     * @return {!Object.<string,!Object.<string,string>>}
      */
     function getSystemDefaultStyleAttributes(styleFamily) {
         var result,
@@ -103,7 +103,7 @@ odf.Formatting = function Formatting() {
             // reusing mergeObjects to copy builtInDefaultStyleAttributes into the result
             result = utils.mergeObjects({}, builtInDefaultStyleAttributes);
         } else {
-            result = null;
+            result = {};
         }
 
         return result;
@@ -314,7 +314,7 @@ odf.Formatting = function Formatting() {
      * inherited from it's ancestry - up to and including the default style for the family.
      * @param {!Element} styleNode
      * @param {!boolean=} includeSystemDefault
-     * @return {!Object}
+     * @return {!Object.<string,!Object.<string,string>>}
      */
     function getInheritedStyleAttributes(styleNode, includeSystemDefault) {
         var styleListElement = odfContainer.rootElement.styles,
