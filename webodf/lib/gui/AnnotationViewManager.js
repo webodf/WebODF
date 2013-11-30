@@ -56,7 +56,7 @@ gui.AnnotatableCanvas.prototype.refreshSize = function () {"use strict"; };
  */
 gui.AnnotatableCanvas.prototype.getZoomLevel = function () {"use strict"; };
 /**
- * @return {!Element}
+ * @return {Element}
  */
 gui.AnnotatableCanvas.prototype.getSizer = function () {"use strict"; };
 /*jslint emptyblock:false*/

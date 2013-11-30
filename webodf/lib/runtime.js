@@ -1778,6 +1778,10 @@ var ops = {};
     runtime.setTranslator = function (translatorFunction) {
         translator = translatorFunction;
     };
+    /**
+     * @param {string} original
+     * @return {string}
+     */
     runtime.tr = tr;
 }());
 (function (args) {

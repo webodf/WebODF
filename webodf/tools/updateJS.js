@@ -314,6 +314,7 @@ function Main() {
             "odf/MetadataManager.js",
             "odf/Namespaces.js",
             "odf/ObjectNameGenerator.js",
+            "odf/OdfCanvas.js",
             "odf/OdfContainer.js",
             "odf/OdfNodeFilter.js",
             "odf/OdfUtils.js",

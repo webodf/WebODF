@@ -259,12 +259,12 @@ runtime.loadClass("odf.MetadataManager");
     // private constructor
     /**
      * @constructor
-     * @param {!string} name
-     * @param {!string} mimetype
+     * @param {string} name
+     * @param {string} mimetype
      * @param {!odf.OdfContainer} container
      * @param {core.Zip} zip
      */
-    function OdfPart(name, mimetype,  container, zip) {
+    odf.OdfPart = function OdfPart(name, mimetype,  container, zip) {
         var self = this;
 
         // declare public variables
@@ -272,11 +272,14 @@ runtime.loadClass("odf.MetadataManager");
         this.type = null;
         this.name = name;
         this.container = container;
+        /**@type{?string}*/
         this.url = null;
-        this.mimetype = null;
+        /**@type{string}*/
+        this.mimetype = mimetype;
         this.document = null;
         this.onstatereadychange = null;
-        this.onchange = null;
+        /**@type{?function(!odf.OdfPart)}*/
+        this.onchange;
         this.EMPTY = 0;
         this.LOADING = 1;
         this.DONE = 2;
@@ -306,12 +309,12 @@ runtime.loadClass("odf.MetadataManager");
                 }
             });
         };
-    }
+    };
     /*jslint emptyblock: true*/
-    OdfPart.prototype.load = function () {
+    odf.OdfPart.prototype.load = function () {
     };
     /*jslint emptyblock: false*/
-    OdfPart.prototype.getUrl = function () {
+    odf.OdfPart.prototype.getUrl = function () {
         if (this.data) {
             return 'data:;base64,' + base64.toBase64(this.data);
         }
@@ -322,7 +325,7 @@ runtime.loadClass("odf.MetadataManager");
      * document.
      * @constructor
      * @param {!string} url
-     * @param {?Function} onstatereadychange
+     * @param {?function(!odf.OdfContainer)=} onstatereadychange
      * @return {?}
      */
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
@@ -979,15 +982,15 @@ runtime.loadClass("odf.MetadataManager");
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
          * elements 'document-content', 'document-styles', 'document-meta', or
          * 'document-settings' will be returned respectively.
-         * @param {!string} partname
-         * @return {!OdfPart}
+         * @param {string} partname
+         * @return {!odf.OdfPart}
          **/
         this.getPart = function (partname) {
-            return new OdfPart(partname, partMimetypes[partname], self, zip);
+            return new odf.OdfPart(partname, partMimetypes[partname], self, zip);
         };
         /**
-         * @param {!string} url
-         * @param {!function(?string, ?Uint8Array)} callback receiving err and data
+         * @param {string} url
+         * @param {function(?string, ?Uint8Array)} callback receiving err and data
          * @return {undefined}
          */
         this.getPartData = function (url, callback) {
