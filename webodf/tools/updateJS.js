@@ -303,6 +303,7 @@ function Main() {
             "core/UnitTester.js",
             "core/Utils.js",
             "core/Zip.js",
+            "gui/AnnotationViewManager.js",
             "gui/Avatar.js",
             "gui/Clipboard.js",
             "gui/EditInfoHandle.js",

@@ -45,7 +45,7 @@
 
 /*jslint emptyblock:true*/
 /**
- * Abstraction of the runtime environment.
+ * Abstraction of document canvas that can have annotations.
  * @class
  * @interface
  */
@@ -71,7 +71,8 @@ gui.AnnotatableCanvas.prototype.getSizer = function () {"use strict"; };
  */
 gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, annotationsPane) {
     "use strict";
-    var annotations = [],
+    var /**@type{!Array.<!{node:!Element,end:Node}>}*/
+        annotations = [],
         doc = odfFragment.ownerDocument,
         odfUtils = new odf.OdfUtils(),
         /**@const*/
@@ -84,7 +85,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
                    "Expected to be run in an environment which has a global window, like a browser.");
     /**
      * Wraps an annotation with various HTML elements for styling, including connectors
-     * @param {!{node: !Element, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function wrapAnnotation(annotation) {
@@ -113,7 +114,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
     /**
      * Unwraps an annotation
-     * @param {!{node: !Element, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function unwrapAnnotation(annotation) {
@@ -128,7 +129,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
     /**
      * Highlights the text between the annotation node and it's end
-     * @param {!{node: !Element, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function highlightAnnotation(annotation) {
@@ -159,7 +160,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
     /**
      * Unhighlights the text between the annotation node and it's end
-     * @param {!{node: !Element, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function unhighlightAnnotation(annotation) {
@@ -198,14 +199,14 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     /**
      * Recalculates the positions, widths, and rotation angles of things like the annotation note and it's
      * connectors. Can and should be called frequently to update the UI
-     * @param {!{node: !Node, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function renderAnnotation(annotation) {
-        var annotationNote = annotation.node.parentNode,
-            connectorHorizontal = annotationNote.nextSibling,
-            connectorAngular = connectorHorizontal.nextSibling,
-            annotationWrapper = annotationNote.parentNode,
+        var annotationNote = annotation.node.parentElement,
+            connectorHorizontal = annotationNote.nextElementSibling,
+            connectorAngular = connectorHorizontal.nextElementSibling,
+            annotationWrapper = annotationNote.parentElement,
             connectorAngle = 0,
             previousAnnotation = annotations[annotations.indexOf(annotation) - 1],
             previousRect,
@@ -221,7 +222,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
                                           - CONNECTOR_MARGIN + 'px';
 
         if (previousAnnotation) {
-            previousRect = previousAnnotation.node.parentNode.getBoundingClientRect();
+            previousRect = previousAnnotation.node.parentElement.getBoundingClientRect();
             if ((annotationWrapper.getBoundingClientRect().top - previousRect.bottom) / zoomLevel <= NOTE_MARGIN) {
                 annotationNote.style.top = Math.abs(annotationWrapper.getBoundingClientRect().top - previousRect.bottom) / zoomLevel + NOTE_MARGIN + 'px';
             } else {
@@ -298,7 +299,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
     /**
      * Adds an annotation to track, and wraps and highlights it
-     * @param {!{node: !Element, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function addAnnotation(annotation) {
@@ -321,7 +322,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
     /**
      * Unhighlights, unwraps, and ejects an annotation from the tracking
-     * @param {!{node: !Element, end: ?Node}} annotation
+     * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
      */
     function forgetAnnotation(annotation) {
