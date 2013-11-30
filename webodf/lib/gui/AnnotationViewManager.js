@@ -43,15 +43,33 @@
  * This needs to be fixed soon.
  */
 
+/*jslint emptyblock:true*/
+/**
+ * Abstraction of the runtime environment.
+ * @class
+ * @interface
+ */
+gui.AnnotatableCanvas = function AnnotatableCanvas() {"use strict"; };
+gui.AnnotatableCanvas.prototype.refreshSize = function () {"use strict"; };
+/**
+ * @return {!number}
+ */
+gui.AnnotatableCanvas.prototype.getZoomLevel = function () {"use strict"; };
+/**
+ * @return {!Element}
+ */
+gui.AnnotatableCanvas.prototype.getSizer = function () {"use strict"; };
+/*jslint emptyblock:false*/
+
 /**
  * A GUI class for wrapping Annotation nodes inside html wrappers, positioning
  * them on the sidebar, drawing connectors, and highlighting comments.
  * @constructor
- * @param {!odf.OdfCanvas} odfCanvas
+ * @param {!gui.AnnotatableCanvas} canvas
  * @param {!Element} odfFragment
  * @param {!Element} annotationsPane
  */
-gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragment, annotationsPane) {
+gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, annotationsPane) {
     "use strict";
     var annotations = [],
         doc = odfFragment.ownerDocument,
@@ -191,7 +209,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
             connectorAngle = 0,
             previousAnnotation = annotations[annotations.indexOf(annotation) - 1],
             previousRect,
-            zoomLevel = odfCanvas.getZoomLevel();
+            zoomLevel = canvas.getZoomLevel();
 
         annotationNote.style.left =
             (annotationsPane.getBoundingClientRect().left
@@ -237,7 +255,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
      * @return {undefined}
      */
     function showAnnotationsPane(show) {
-        var sizer = odfCanvas.getSizer();
+        var sizer = canvas.getSizer();
 
         if (show) {
             annotationsPane.style.display = 'inline-block';
@@ -246,7 +264,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(odfCanvas, odfFragmen
             annotationsPane.style.display = 'none';
             sizer.style.paddingRight = 0;
         }
-        odfCanvas.refreshSize();
+        canvas.refreshSize();
     }
 
     /**

@@ -53,6 +53,7 @@ runtime.loadClass("gui.AnnotationViewManager");
  * It takes care of giving visual feedback on loading, ensures that the
  * stylesheets are loaded.
  * @constructor
+ * @implements {gui.AnnotatableCanvas}
  * @param {!HTMLElement} element Put and ODF Canvas inside this element.
  * @return {?}
  **/
