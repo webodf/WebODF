@@ -315,6 +315,7 @@ function Main() {
             "odf/OdfContainer.js",
             "odf/OdfNodeFilter.js",
             "odf/OdfUtils.js",
+            "odf/Style2CSS.js",
             "odf/StyleInfo.js",
             "odf/TextSerializer.js",
             "ops/Server.js",

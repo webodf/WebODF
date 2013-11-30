@@ -229,7 +229,7 @@ odf.OdfCanvas = (function () {
         var style2css = new odf.Style2CSS();
         style2css.style2css(
             odfcontainer.getDocumentType(),
-            stylesxmlcss.sheet,
+            /**@type{!CSSStyleSheet}*/(stylesxmlcss.sheet),
             formatting.getFontMap(),
             odfcontainer.rootElement.styles,
             odfcontainer.rootElement.automaticStyles

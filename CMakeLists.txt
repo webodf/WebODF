@@ -282,6 +282,7 @@ set(TYPEDLIBJSFILES
     lib/gui/AnnotationViewManager.js
     lib/odf/MetadataManager.js
     lib/odf/OdfNodeFilter.js
+    lib/odf/Style2CSS.js
     lib/odf/StyleInfo.js
     lib/odf/TextSerializer.js
     lib/ops/TextPositionFilter.js
@@ -296,7 +297,6 @@ set(UNTYPEDLIBJSFILES
 # These files depend only on files that are 100% typed.
     lib/core/RawDeflate.js
     lib/gui/SelectionMover.js
-    lib/odf/Style2CSS.js
     lib/ops/Member.js
     lib/ops/StepsTranslator.js
     lib/xmldom/RelaxNGParser.js
