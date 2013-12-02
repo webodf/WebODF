@@ -221,6 +221,10 @@ function Main() {
         var fs = require("fs");
         fs.readFile(path, "utf8", function (err, data) {
             if (err || data !== content) {
+                if (data.length !== content.length) {
+                    console.log("Different file length for " + path
+                        + ": " + data.length + " " + content.length);
+                }
                 fs.writeFile(path, content, function (err2) {
                     if (err2) {
                         throw err2;
@@ -240,11 +244,13 @@ function Main() {
      * @return {!Array.<string>} list
      */
     function createOrderedList(list, deps, defined) {
-        var sorted = [], i, p, l = list.length, depsPresent, missing;
+        var sorted = [], i, p, l = list.length, depsPresent, missing,
+            lastLength = -1;
         function isUndefined(dep) {
             return !defined.hasOwnProperty(dep);
         }
-        while (sorted.length < l) {
+        while (sorted.length < l && sorted.length !== lastLength) {
+            lastLength = sorted.length;
             for (i = 0; i < l; i += 1) {
                 p = list[i];
                 if (!defined.hasOwnProperty(p)) {
@@ -264,6 +270,10 @@ function Main() {
                     }
                 }
             }
+        }
+        if (sorted.length === lastLength) {
+            console.log("Unresolvable circular dependency.");
+            process.exit(1);
         }
         return sorted;
     }
@@ -292,12 +302,28 @@ function Main() {
             "core/UnitTester.js",
             "core/Utils.js",
             "core/Zip.js",
+            "gui/AnnotationViewManager.js",
+            "gui/Avatar.js",
+            "gui/Clipboard.js",
+            "gui/EditInfoHandle.js",
+            "gui/KeyboardHandler.js",
+            "gui/SelectionMover.js",
+            "gui/StyleHelper.js",
+            "odf/FontLoader.js",
+            "odf/Formatting.js",
             "odf/MetadataManager.js",
             "odf/Namespaces.js",
+            "odf/ObjectNameGenerator.js",
+            "odf/OdfCanvas.js",
+            "odf/OdfContainer.js",
             "odf/OdfNodeFilter.js",
             "odf/OdfUtils.js",
+            "odf/Style2CSS.js",
             "odf/StyleInfo.js",
             "odf/TextSerializer.js",
+            "odf/TextStyleApplicator.js",
+            "ops/Server.js",
+            "ops/TextPositionFilter.js",
             "xmldom/LSSerializer.js",
             "xmldom/LSSerializerFilter.js",
             "xmldom/XPath.js"

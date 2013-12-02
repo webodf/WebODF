@@ -72,7 +72,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         var xml, container, fragment;
 
         xml = "<office:styles>";
-        xml += "    <style:style style:name='P1' style:display-name='P1 Display' style:family='paragraph' master-page-name='Index'>";
+        xml += "    <style:style style:name='P1' style:display-name='P1 Display' style:family='paragraph' style:master-page-name='Index'>";
         xml += "        <style:text-properties fo:font-name='P1 Font' />";
         xml += "    </style:style>";
         xml += "    <style:style style:name='P2' style:display-name='P1 Display' style:family='paragraph'>";
@@ -114,7 +114,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         container = { rootElement : {
             styles : t.body.firstChild.childNodes[0],
             automaticStyles: t.body.firstChild.childNodes[1],
-            masterStyles : t.body.firstChild.childNodes[2]
+            masterStyles : t.body.firstChild.childNodes[3]
         }};
         t.formatting.setOdfContainer(container);
         t.range = t.body.ownerDocument.createRange();
@@ -224,12 +224,12 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.styleAttributes['style:text-properties']", "({'fo:font-name':'P1 Font'})");
     }
     function getContentSize_PageSizePaddingAndMarginSpecified() {
-        createDocument("<text:p style:name='P1'/>", "<style:page-layout name='pm2' scope='document-styles'><style:page-layout-properties fo:page-width='10cm' fo:page-height='20cm' fo:margin-top='1cm' fo:margin-bottom='0cm' fo:margin-left='1.5cm' fo:margin-right='1.5cm' fo:padding='3cm' /></style:page-layout>");
+        createDocument("<text:p style:name='P1'/>", "<style:page-layout style:name='pm2' scope='document-styles'><style:page-layout-properties fo:page-width='10cm' fo:page-height='20cm' fo:margin-top='1cm' fo:margin-bottom='0cm' fo:margin-left='1.5cm' fo:margin-right='1.5cm' fo:padding='3cm' /></style:page-layout>");
         t.contentSize = t.formatting.getContentSize("P1", "paragraph");
         r.shouldBe(t, "t.contentSize", "({'width':1,'height':13})");
     }
     function getContentSize_PageSizePaddingAndMarginNotSpecified() {
-        createDocument("<text:p style:name='P2'/>", "<style:page-layout name='pm1' scope='document-styles'><style:page-layout-properties style:print-orientation='landscape' /></style:page-layout>");
+        createDocument("<text:p style:name='P2'/>", "<style:page-layout style:name='pm1' scope='document-styles'><style:page-layout-properties style:print-orientation='landscape' /></style:page-layout>");
         t.contentSize = t.formatting.getContentSize("P2", "paragraph");
         r.shouldBe(t, "t.contentSize", "({'width':25.7,'height':17.001})");
     }

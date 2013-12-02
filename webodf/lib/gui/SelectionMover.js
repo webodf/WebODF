@@ -53,8 +53,9 @@ runtime.loadClass("odf.OdfUtils");
  */
 gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     "use strict";
-    var odfUtils,
-        domUtils,
+    var odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
+        /**@type{!core.PositionIterator}*/
         positionIterator,
         cachedXOffset,
         timeoutHandle,
@@ -98,8 +99,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         var rectangle,
             simplifiedRectangle = null;
 
-        if (clientRectangles) {
-            rectangle = useRightEdge ? clientRectangles[clientRectangles.length - 1] : clientRectangles[0];
+        if (clientRectangles && clientRectangles.length > 0) {
+            rectangle = useRightEdge ? clientRectangles.item(clientRectangles.length - 1) : clientRectangles.item(0);
         }
 
         if (rectangle) {
@@ -151,7 +152,8 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         }
 
         if (!rectangle) {
-            if (nodeType === Node.ELEMENT_NODE && container.childNodes[offset - 1]) {
+            if (nodeType === Node.ELEMENT_NODE && offset > 0
+                    && /**@type{!Element}*/(container).childNodes.length >= offset) {
                 // Fallback 2 - there are other child nodes directly preceding this offset. Try those
                 rectangle = getVisibleRect(container, offset - 1, range, true);
             } else if (container.nodeType === Node.TEXT_NODE && offset > 0) {
@@ -201,7 +203,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         if (extend) {
             c = iterator.container();
             o = iterator.unfilteredDomOffset();
-            if (domUtils.comparePoints(selectionRange.startContainer, selectionRange.startOffset, c, o) === -1) {
+            if (domUtils.comparePoints(/**@type{!Node}*/(selectionRange.startContainer), selectionRange.startOffset, c, o) === -1) {
                 selectionRange.setStart(c, o);
                 isForwardSelection = false;
             } else {
@@ -626,8 +628,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
         };
     };
     function init() {
-        odfUtils = new odf.OdfUtils();
-        domUtils = new core.DomUtils();
         positionIterator = gui.SelectionMover.createPositionIterator(rootNode);
         var range = rootNode.ownerDocument.createRange();
         range.setStart(positionIterator.container(), positionIterator.unfilteredDomOffset());

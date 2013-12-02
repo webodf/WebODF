@@ -40,12 +40,7 @@
 runtime.loadClass("core.Base64");
 runtime.loadClass("xmldom.XPath");
 runtime.loadClass("odf.OdfContainer");
-/**
- * This class loads embedded fonts into the CSS
- * @constructor
- * @return {?}
- **/
-odf.FontLoader = (function () {
+(function () {
     "use strict";
     var xpath = xmldom.XPath,
         base64 = new core.Base64();
@@ -79,7 +74,7 @@ odf.FontLoader = (function () {
      * @param {!string} name
      * @param {!{href:string,family:string}} font
      * @param {!Uint8Array} fontdata
-     * @param {!StyleSheet} stylesheet
+     * @param {!CSSStyleSheet} stylesheet
      * @return {undefined}
      */
     function addFontToCSS(name, font, fontdata, stylesheet) {
@@ -90,7 +85,7 @@ odf.FontLoader = (function () {
                 ") format(\"truetype\"); }";
         try {
             stylesheet.insertRule(rule, stylesheet.cssRules.length);
-        } catch (e) {
+        } catch (/**@type{!DOMException}*/e) {
             runtime.log("Problem inserting rule in CSS: " + runtime.toJson(e) + "\nRule: " + rule);
         }
     }
@@ -98,13 +93,15 @@ odf.FontLoader = (function () {
      * @param {!Object.<string,{href:string,family:string}>} embeddedFontDeclarations
      * @param {!odf.OdfContainer} odfContainer
      * @param {!number} pos
-     * @param {!StyleSheet} stylesheet
+     * @param {!CSSStyleSheet} stylesheet
      * @param {!function():undefined=} callback
      * @return {undefined}
      */
     function loadFontIntoCSS(embeddedFontDeclarations, odfContainer, pos,
             stylesheet, callback) {
-        var name, i = 0, n;
+        var name, i = 0,
+            /**@type{string}*/
+            n;
         for (n in embeddedFontDeclarations) {
             if (embeddedFontDeclarations.hasOwnProperty(n)) {
                 if (i === pos) {
@@ -137,7 +134,7 @@ odf.FontLoader = (function () {
     /**
      * @param {!Object.<string,{href:string,family:string}>} embeddedFontDeclarations
      * @param {!odf.OdfContainer} odfContainer
-     * @param {!StyleSheet} stylesheet
+     * @param {!CSSStyleSheet} stylesheet
      * @return {undefined}
      */
     function loadFontsIntoCSS(embeddedFontDeclarations, odfContainer,
@@ -145,13 +142,14 @@ odf.FontLoader = (function () {
         loadFontIntoCSS(embeddedFontDeclarations, odfContainer, 0, stylesheet);
     }
     /**
+     * This class loads embedded fonts into the CSS
      * @constructor
      * @return {?}
      */
     odf.FontLoader = function FontLoader() {
         /**
          * @param {!odf.OdfContainer} odfContainer
-         * @param {!StyleSheet} stylesheet Will be cleaned and filled with rules for the fonts
+         * @param {!CSSStyleSheet} stylesheet Will be cleaned and filled with rules for the fonts
          * @return {undefined}
          */
         this.loadFonts = function (odfContainer, stylesheet) {

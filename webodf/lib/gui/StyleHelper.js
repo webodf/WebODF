@@ -44,20 +44,25 @@ runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor
+ * @param {!odf.Formatting} formatting
  */
 gui.StyleHelper = function StyleHelper(formatting) {
     "use strict";
     var domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils(),
-        /**@const @type{!string}*/ textns = odf.Namespaces.textns;
+        /**@const*/
+        textns = odf.Namespaces.textns;
 
+    /**
+     * @param {!Range} range
+     */
     function getAppliedStyles(range) {
         var container, nodes;
 
         if (range.collapsed) {
             container = range.startContainer;
             if (container.hasChildNodes() && range.startOffset < container.childNodes.length) {
-                container = container.childNodes[range.startOffset];
+                container = container.childNodes.item(range.startOffset);
             }
             nodes = [container];
         } else {
@@ -101,14 +106,13 @@ gui.StyleHelper = function StyleHelper(formatting) {
     /**
      * Returns true if all the node within given range have the same value for
      * the property; otherwise false.
-     * @param {!Array.<Object>} appliedStyles
-     * @param {!string} propertyName
-     * @param {!string} propertyValue
-     * @return {!boolean}
+     * @param {!Array.<!Object.<string,!Object.<string,string>>>} appliedStyles
+     * @param {string} propertyName
+     * @param {string} propertyValue
+     * @return {boolean}
      */
     function hasTextPropertyValue(appliedStyles, propertyName, propertyValue) {
-        var hasOtherValue = true,
-            properties, i;
+        var hasOtherValue = true, properties, i;
 
         for (i = 0; i < appliedStyles.length; i += 1) {
             properties = appliedStyles[i]['style:text-properties'];
@@ -165,10 +169,11 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @return {!boolean}
      */
     function hasParagraphPropertyValue(range, propertyName, propertyValues) {
-        var nodes = odfUtils.getParagraphElements(range),
+        var paragraphStyleName, paragraphStyleElement, paragraphStyleAttributes,
+            properties,
+            nodes = odfUtils.getParagraphElements(range),
             isStyleChecked = {},
-            isDefaultParagraphStyleChecked = false,
-            paragraphStyleName, paragraphStyleElement, paragraphStyleAttributes, properties;
+            isDefaultParagraphStyleChecked = false;
 
         function pickDefaultParagraphStyleElement() {
             isDefaultParagraphStyleChecked = true;
@@ -183,14 +188,14 @@ gui.StyleHelper = function StyleHelper(formatting) {
             paragraphStyleName = nodes[0].getAttributeNS(textns, 'style-name');
             if (paragraphStyleName) {
                 if (!isStyleChecked[paragraphStyleName]) {
-                    paragraphStyleElement = formatting.getStyleElement(paragraphStyleName, 'paragraph') ;
+                    paragraphStyleElement = formatting.getStyleElement(paragraphStyleName, 'paragraph');
                     isStyleChecked[paragraphStyleName] = true;
                     // in no such style node exists, fallback to default style
                     if (!paragraphStyleElement && !isDefaultParagraphStyleChecked) {
                         pickDefaultParagraphStyleElement();
                     }
                 }
-            } else if(!isDefaultParagraphStyleChecked) {
+            } else if (!isDefaultParagraphStyleChecked) {
                 pickDefaultParagraphStyleElement();
             } else {
                 paragraphStyleElement = undefined;
@@ -201,7 +206,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
                 if (paragraphStyleElement === null) {
                     paragraphStyleAttributes = formatting.getSystemDefaultStyleAttributes('paragraph');
                 } else {
-                    paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type {!Element}*/(paragraphStyleElement), true);
+                    paragraphStyleAttributes = formatting.getInheritedStyleAttributes(/**@type{!Element}*/(paragraphStyleElement), true);
                 }
                 properties = paragraphStyleAttributes['style:paragraph-properties'];
                 if (properties && propertyValues.indexOf(properties[propertyName]) === -1) {
@@ -219,7 +224,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.isAlignedLeft = function(range) {
+    this.isAlignedLeft = function (range) {
         return hasParagraphPropertyValue(range, 'fo:text-align', ['left', 'start']);
     };
 
@@ -228,7 +233,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.isAlignedCenter = function(range) {
+    this.isAlignedCenter = function (range) {
         return hasParagraphPropertyValue(range, 'fo:text-align', ['center']);
     };
 
@@ -237,7 +242,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.isAlignedRight = function(range) {
+    this.isAlignedRight = function (range) {
         return hasParagraphPropertyValue(range, 'fo:text-align', ['right', 'end']);
     };
 
@@ -246,7 +251,7 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @param {!Range} range
      * @return {!boolean}
      */
-    this.isAlignedJustified = function(range) {
+    this.isAlignedJustified = function (range) {
         return hasParagraphPropertyValue(range, 'fo:text-align', ['justify']);
     };
 };

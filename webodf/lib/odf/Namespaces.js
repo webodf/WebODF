@@ -102,7 +102,7 @@ odf.Namespaces = {
 /**
  * Calls the passed callback for all pairs of prefix and namespace
  * which are in the namespaceMap property
- * @param {function(string,string)} cb
+ * @param {function(string,string):undefined} cb
  * @return {undefined}
  */
 odf.Namespaces.forEachPrefix = function forEachPrefix(cb) {

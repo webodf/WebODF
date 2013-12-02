@@ -46,17 +46,10 @@ runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfNodeFilter");
 runtime.loadClass("odf.MetadataManager");
 
-/**
- * The OdfContainer class manages the various parts that constitues an ODF
- * document.
- * @constructor
- * @param {!string} url
- * @param {?Function} onstatereadychange
- * @return {?}
- **/
-odf.OdfContainer = (function () {
+(function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
+        /**@type{!odf.MetadataManager}*/
         metadataManager,
         /**@const
            @type{!string}*/
@@ -206,30 +199,72 @@ odf.OdfContainer = (function () {
      * @constructor
      * @extends {Element}
      */
-    function ODFElement() {
-    }
-    /*jslint emptyblock: false*/
+    odf.ODFElement = function ODFElement() {
+    };
     /**
      * The root element of an ODF document.
      * @constructor
-     * @extends {ODFElement}
+     * @extends {odf.ODFElement}
      */
-    function ODFDocumentElement(odfcontainer) {
-        this.OdfContainer = odfcontainer;
-    }
-    ODFDocumentElement.prototype = new ODFElement();
-    ODFDocumentElement.prototype.constructor = ODFDocumentElement;
-    ODFDocumentElement.namespaceURI = officens;
-    ODFDocumentElement.localName = 'document';
+    odf.ODFDocumentElement = function ODFDocumentElement() {
+    };
+    /*jslint emptyblock: false*/
+    odf.ODFDocumentElement.prototype = new odf.ODFElement();
+    odf.ODFDocumentElement.prototype.constructor = odf.ODFDocumentElement;
+    /**
+     * Optional tag <office:automatic-styles/>
+     * If it is missing, it is created.
+     * @type {!Element}
+     */
+    odf.ODFDocumentElement.prototype.automaticStyles;
+    /**
+     * Required tag <office:body/>
+     * @type {!Element}
+     */
+    odf.ODFDocumentElement.prototype.body;
+    /**
+     * Optional tag <office:font-face-decls/>
+     * @type {Element}
+     */
+    odf.ODFDocumentElement.prototype.fontFaceDecls = null;
+    /**
+     * @type {Element}
+     */
+    odf.ODFDocumentElement.prototype.manifest = null;
+    /**
+     * Optional tag <office:master-styles/>
+     * If it is missing, it is created.
+     * @type {!Element}
+     */
+    odf.ODFDocumentElement.prototype.masterStyles;
+    /**
+     * Optional tag <office:meta/>
+     * If it is missing, it is created.
+     * @type {!Element}
+     */
+    odf.ODFDocumentElement.prototype.meta;
+    /**
+     * Optional tag <office:settings/>
+     * @type {Element}
+     */
+    odf.ODFDocumentElement.prototype.settings = null;
+    /**
+     * Optional tag <office:styles/>
+     * If it is missing, it is created.
+     * @type {!Element}
+     */
+    odf.ODFDocumentElement.prototype.styles;
+    odf.ODFDocumentElement.namespaceURI = officens;
+    odf.ODFDocumentElement.localName = 'document';
     // private constructor
     /**
      * @constructor
-     * @param {!string} name
-     * @param {!string} mimetype
+     * @param {string} name
+     * @param {string} mimetype
      * @param {!odf.OdfContainer} container
      * @param {core.Zip} zip
      */
-    function OdfPart(name, mimetype,  container, zip) {
+    odf.OdfPart = function OdfPart(name, mimetype,  container, zip) {
         var self = this;
 
         // declare public variables
@@ -237,15 +272,19 @@ odf.OdfContainer = (function () {
         this.type = null;
         this.name = name;
         this.container = container;
+        /**@type{?string}*/
         this.url = null;
-        this.mimetype = null;
+        /**@type{string}*/
+        this.mimetype = mimetype;
         this.document = null;
-        this.onreadystatechange = null;
-        this.onchange = null;
+        this.onstatereadychange = null;
+        /**@type{?function(!odf.OdfPart)}*/
+        this.onchange;
         this.EMPTY = 0;
         this.LOADING = 1;
         this.DONE = 2;
         this.state = this.EMPTY;
+        this.data = "";
 
         // private functions
         // public functions
@@ -270,21 +309,23 @@ odf.OdfContainer = (function () {
                 }
             });
         };
-    }
+    };
     /*jslint emptyblock: true*/
-    OdfPart.prototype.load = function () {
+    odf.OdfPart.prototype.load = function () {
     };
     /*jslint emptyblock: false*/
-    OdfPart.prototype.getUrl = function () {
+    odf.OdfPart.prototype.getUrl = function () {
         if (this.data) {
             return 'data:;base64,' + base64.toBase64(this.data);
         }
         return null;
     };
     /**
+     * The OdfContainer class manages the various parts that constitues an ODF
+     * document.
      * @constructor
      * @param {!string} url
-     * @param {?Function} onstatereadychange
+     * @param {?function(!odf.OdfContainer)=} onstatereadychange
      * @return {?}
      */
     odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
@@ -304,7 +345,10 @@ odf.OdfContainer = (function () {
         this.onstatereadychange = onstatereadychange;
         this.onchange = null;
         this.state = null;
-        this.rootElement = null;
+        /**
+         * @type {!odf.ODFDocumentElement}
+         */
+        this.rootElement;
 
         /**
          * @param {!Element} element
@@ -337,10 +381,54 @@ odf.OdfContainer = (function () {
             var n = stylesRootElement && stylesRootElement.firstChild;
             while (n) {
                 if (n.nodeType === Node.ELEMENT_NODE) {
-                    n.setAttributeNS(webodfns, "scope", scope);
+                    /**@type{!Element}*/(n).setAttributeNS(webodfns, "scope", scope);
                 }
                 n = n.nextSibling;
             }
+        }
+
+        /**
+         * Returns key with a number postfix or none, as key unused both in map1 and map2.
+         * @param {!string} key
+         * @param {!Object} map1
+         * @param {!Object} map2
+         * @return {!string}
+         */
+        function unusedKey(key, map1, map2) {
+            var i = 0, postFixedKey;
+
+            // cut any current postfix number
+            key = key.replace(/\d+$/, '');
+            // start with no postfix, continue with i = 1, aiming for the simpelst unused number or key
+            postFixedKey = key;
+            while (map1.hasOwnProperty(postFixedKey) || map2.hasOwnProperty(postFixedKey)) {
+                i += 1;
+                postFixedKey = key + i;
+            }
+
+            return postFixedKey;
+        }
+
+        /**
+         * Returns a map with the fontface declaration elements, with font-face name as key.
+         * @param {!Element} fontFaceDecls
+         * @return {!Object.<!string,!Element>}
+          */
+        function mapByFontFaceName(fontFaceDecls) {
+            var fn, result = {}, fontname;
+            // create map of current target decls
+            fn = fontFaceDecls.firstChild;
+            while (fn) {
+                if (fn.nodeType === Node.ELEMENT_NODE
+                        && fn.namespaceURI === stylens
+                        && fn.localName === "font-face") {
+                    fontname = /**@type{!Element}*/(fn).getAttributeNS(stylens, "name");
+                    // assuming existance and uniqueness of style:name here
+                    result[fontname] = fn;
+                }
+                fn = fn.nextSibling;
+            }
+            return result;
         }
 
         /**
@@ -354,70 +442,28 @@ odf.OdfContainer = (function () {
          * @return {!Object.<!string,!string>}  mapping of old font-face name to new
          */
         function mergeFontFaceDecls(targetFontFaceDeclsRootElement, sourceFontFaceDeclsRootElement) {
-            var n, s, fontFaceName, newFontFaceName,
+            var e, s, fontFaceName, newFontFaceName,
                 targetFontFaceDeclsMap, sourceFontFaceDeclsMap,
                 fontFaceNameChangeMap = {};
-
-            /**
-             * Returns key with a number postfix or none, as key unused both in map1 and map2.
-             * @param {!string} key
-             * @param {!Object} map1
-             * @param {!Object} map2
-             * @return {!string}
-             */
-            function unusedKey(key, map1, map2) {
-                var i = 0, postFixedKey;
-
-                // cut any current postfix number
-                key = key.replace(/\d+$/, '');
-                // start with no postfix, continue with i = 1, aiming for the simpelst unused number or key
-                postFixedKey = key;
-                while (map1.hasOwnProperty(postFixedKey) || map2.hasOwnProperty(postFixedKey)) {
-                    i += 1;
-                    postFixedKey = key + i;
-                }
-
-                return postFixedKey;
-            }
-
-            /**
-             * Returns a map with the fontface declaration elements, with font-face name as key.
-             * @param {!Element} fontFaceDecls
-             * @return {!Object.<!string,!Element>}
-              */
-            function mapByFontFaceName(fontFaceDecls) {
-                var fn, result = {};
-                // create map of current target decls
-                fn = fontFaceDecls.firstChild;
-                while (fn) {
-                    if (fn.nodeType === Node.ELEMENT_NODE && fn.namespaceURI === stylens && fn.localName === "font-face") {
-                        fontFaceName = fn.getAttributeNS(stylens, "name");
-                        // assuming existance and uniqueness of style:name here
-                        result[fontFaceName] = fn;
-                    }
-                    fn = fn.nextSibling;
-                }
-                return result;
-            }
 
             targetFontFaceDeclsMap = mapByFontFaceName(targetFontFaceDeclsRootElement);
             sourceFontFaceDeclsMap = mapByFontFaceName(sourceFontFaceDeclsRootElement);
 
             // merge source decls into target
-            n = sourceFontFaceDeclsRootElement.firstChild;
-            while (n) {
-                s = n.nextSibling;
-                if (n.nodeType === Node.ELEMENT_NODE && n.namespaceURI === stylens && n.localName === "font-face") {
-                    fontFaceName = n.getAttributeNS(stylens, "name");
+            e = sourceFontFaceDeclsRootElement.firstElementChild;
+            while (e) {
+                s = e.nextElementSibling;
+                if (e.namespaceURI === stylens && e.localName === "font-face") {
+                    fontFaceName = e.getAttributeNS(stylens, "name");
                     // already such a name used in target?
                     if (targetFontFaceDeclsMap.hasOwnProperty(fontFaceName)) {
                         // skip it if the declarations are equal, otherwise insert with a new, unused name
-                        if (!n.isEqualNode(targetFontFaceDeclsMap[fontFaceName])) {
+                        if (!e.isEqualNode(targetFontFaceDeclsMap[fontFaceName])) {
                             newFontFaceName = unusedKey(fontFaceName, targetFontFaceDeclsMap, sourceFontFaceDeclsMap);
-                            n.setAttributeNS(stylens, "style:name", newFontFaceName);
+                            e.setAttributeNS(stylens, "style:name", newFontFaceName);
                             // copy with a new name
-                            targetFontFaceDeclsRootElement.appendChild(n);
-                            targetFontFaceDeclsMap[newFontFaceName] = /**@type{!Element}*/(n);
+                            targetFontFaceDeclsRootElement.appendChild(e);
+                            targetFontFaceDeclsMap[newFontFaceName] = e;
                             delete sourceFontFaceDeclsMap[fontFaceName];
                             // note name change
                             fontFaceNameChangeMap[fontFaceName] = newFontFaceName;
@@ -426,12 +472,12 @@ odf.OdfContainer = (function () {
                         // move over
                         // perhaps one day it could also be checked if there is an equal declaration
                         // with a different name, but that has yet to be seen in real life
-                        targetFontFaceDeclsRootElement.appendChild(n);
-                        targetFontFaceDeclsMap[fontFaceName] = /**@type{!Element}*/(n);
+                        targetFontFaceDeclsRootElement.appendChild(e);
+                        targetFontFaceDeclsMap[fontFaceName] = e;
                         delete sourceFontFaceDeclsMap[fontFaceName];
                     }
                 }
-                n = s;
+                e = s;
             }
             return fontFaceNameChangeMap;
         }
@@ -446,32 +492,30 @@ odf.OdfContainer = (function () {
          * @return {?Element}
          */
         function cloneStylesInScope(stylesRootElement, scope) {
-            var copy = null, n, s, scopeAttrValue;
+            var copy = null, e, s, scopeAttrValue;
             if (stylesRootElement) {
                 copy = stylesRootElement.cloneNode(true);
-                n = copy.firstChild;
-                while (n) {
-                    s = n.nextSibling;
-                    if (n.nodeType === Node.ELEMENT_NODE) {
-                        scopeAttrValue = n.getAttributeNS(webodfns, "scope");
-                        if (scopeAttrValue && scopeAttrValue !== scope) {
-                            copy.removeChild(n);
-                        }
+                e = copy.firstElementChild;
+                while (e) {
+                    s = e.nextElementSibling;
+                    scopeAttrValue = e.getAttributeNS(webodfns, "scope");
+                    if (scopeAttrValue && scopeAttrValue !== scope) {
+                        copy.removeChild(e);
                     }
-                    n = s;
+                    e = s;
                 }
             }
             return copy;
         }
         /**
-         * Creates a clone of the font face declaration tree containing only those declarations
-         * which are referenced in the passed styles.
+         * Creates a clone of the font face declaration tree containing only
+         * those declarations which are referenced in the passed styles.
          * @param {?Element} fontFaceDeclsRootElement
          * @param {!Array.<!Element>} stylesRootElementList
          * @return {?Element}
          */
         function cloneFontFaceDeclsUsedInStyles(fontFaceDeclsRootElement, stylesRootElementList) {
-            var n, nextSibling, fontFaceName,
+            var e, nextSibling, fontFaceName,
                 copy = null,
                 usedFontFaceDeclMap = {};
 
@@ -483,21 +527,22 @@ odf.OdfContainer = (function () {
 
                 // then clone all font face declarations and drop those which are not in the list of used
                 copy = fontFaceDeclsRootElement.cloneNode(true);
-                n = copy.firstChild;
-                while (n) {
-                    nextSibling = n.nextSibling;
-                    if (n.nodeType === Node.ELEMENT_NODE) {
-                        fontFaceName = n.getAttributeNS(stylens, "name");
-                        if (!usedFontFaceDeclMap[fontFaceName]) {
-                            copy.removeChild(n);
-                        }
+                e = copy.firstElementChild;
+                while (e) {
+                    nextSibling = e.nextElementSibling;
+                    fontFaceName = e.getAttributeNS(stylens, "name");
+                    if (!usedFontFaceDeclMap[fontFaceName]) {
+                        copy.removeChild(e);
                     }
-                    n = nextSibling;
+                    e = nextSibling;
                 }
             }
             return copy;
         }
 
+        /**
+         * @param {!Element} metaRootElement
+         */
         function initializeMetadataManager(metaRootElement) {
             metadataManager = new odf.MetadataManager(metaRootElement);
         }
@@ -542,7 +587,7 @@ odf.OdfContainer = (function () {
          */
         function setRootElement(root) {
             contentElement = null;
-            self.rootElement = root;
+            self.rootElement = /**@type{!odf.ODFDocumentElement}*/(root);
             root.fontFaceDecls = getDirectChild(root, officens, 'font-face-decls');
             root.styles = getDirectChild(root, officens, 'styles');
             root.automaticStyles = getDirectChild(root, officens, 'automatic-styles');
@@ -570,7 +615,8 @@ odf.OdfContainer = (function () {
          */
         function handleStylesXml(xmldoc) {
             var node = importRootNode(xmldoc),
-                root = self.rootElement;
+                root = self.rootElement,
+                n;
             if (!node || node.localName !== 'document-styles' ||
                     node.namespaceURI !== officens) {
                 setState(OdfContainer.INVALID);
@@ -578,16 +624,19 @@ odf.OdfContainer = (function () {
             }
             root.fontFaceDecls = getDirectChild(node, officens, 'font-face-decls');
             setChild(root, root.fontFaceDecls);
-            root.styles = getDirectChild(node, officens, 'styles');
+            n = getDirectChild(node, officens, 'styles');
+            root.styles = n || xmldoc.createElementNS(officens, 'styles');
             setChild(root, root.styles);
-            root.automaticStyles = getDirectChild(node, officens,
-                    'automatic-styles');
+            n = getDirectChild(node, officens, 'automatic-styles');
+            root.automaticStyles = n || xmldoc.createElementNS(officens, 'automatic-styles');
             setAutomaticStylesScope(root.automaticStyles, documentStylesScope);
             setChild(root, root.automaticStyles);
-            root.masterStyles = getDirectChild(node, officens, 'master-styles');
+            node = getDirectChild(node, officens, 'master-styles');
+            root.masterStyles = node || xmldoc.createElementNS(officens,
+                    'master-styles');
             setChild(root, root.masterStyles);
-            // automatic styles from styles.xml could shadow automatic styles from content.xml,
-            // because they could have the same name
+            // automatic styles from styles.xml could shadow automatic styles
+            // from content.xml, because they could have the same name
             // so prefix them and their uses with some almost unique string
             styleInfo.prefixStyleNames(root.automaticStyles, automaticStylePrefix, root.masterStyles);
         }
@@ -630,7 +679,11 @@ odf.OdfContainer = (function () {
                 root.automaticStyles = automaticStyles;
                 setChild(root, automaticStyles);
             }
-            root.body = getDirectChild(node, officens, 'body');
+            node = getDirectChild(node, officens, 'body');
+            if (node === null) {
+                throw "<office:body/> tag is mising.";
+            }
+            root.body = node;
             setChild(root, root.body);
         }
         /**
@@ -645,7 +698,8 @@ odf.OdfContainer = (function () {
                 return;
             }
             root = self.rootElement;
-            root.meta = getDirectChild(node, officens, 'meta');
+            node = getDirectChild(node, officens, 'meta');
+            root.meta = node || xmldoc.createElementNS(officens, "meta");
             setChild(root, root.meta);
 
             initializeMetadataManager(root.meta);
@@ -672,37 +726,33 @@ odf.OdfContainer = (function () {
         function handleManifestXml(xmldoc) {
             var node = importRootNode(xmldoc),
                 root,
-                n;
+                e;
             if (!node || node.localName !== 'manifest' ||
                     node.namespaceURI !== manifestns) {
                 return;
             }
             root = self.rootElement;
-            root.manifest = node;
-            n = root.manifest.firstChild;
-            while (n) {
-                if (n.nodeType === Node.ELEMENT_NODE && n.localName === "file-entry" &&
-                        n.namespaceURI === manifestns) {
-                    partMimetypes[n.getAttributeNS(manifestns, "full-path")] =
-                        n.getAttributeNS(manifestns, "media-type");
+            root.manifest = /**@type{!Element}*/(node);
+            e = root.manifest.firstElementChild;
+            while (e) {
+                if (e.localName === "file-entry" &&
+                        e.namespaceURI === manifestns) {
+                    partMimetypes[e.getAttributeNS(manifestns, "full-path")] =
+                        e.getAttributeNS(manifestns, "media-type");
                 }
-                n = n.nextSibling;
+                e = e.nextElementSibling;
             }
         }
         /**
-         * @param {!Array} remainingComponents
+         * @param {!Array.<!{path:string,handler:function(?Document)}>} remainingComponents
          * @return {undefined}
          */
         function loadNextComponent(remainingComponents) {
-            var component = remainingComponents.shift(),
-                filepath,
-                callback;
+            var component = remainingComponents.shift();
 
             if (component) {
-                filepath = /**@type{!string}*/(component[0]);
-                callback = /**@type{!function(?Document)}*/(component[1]);
-                zip.loadAsDOM(filepath, function (err, xmldoc) {
-                    callback(xmldoc);
+                zip.loadAsDOM(component.path, function (err, xmldoc) {
+                    component.handler(xmldoc);
                     if (err || self.state === OdfContainer.INVALID) {
                         return;
                     }
@@ -717,11 +767,11 @@ odf.OdfContainer = (function () {
          */
         function loadComponents() {
             var componentOrder = [
-                ['styles.xml', handleStylesXml],
-                ['content.xml', handleContentXml],
-                ['meta.xml', handleMetaXml],
-                ['settings.xml', handleSettingsXml],
-                ['META-INF/manifest.xml', handleManifestXml]
+                {path: 'styles.xml', handler: handleStylesXml},
+                {path: 'content.xml', handler: handleContentXml},
+                {path: 'meta.xml', handler: handleMetaXml},
+                {path: 'settings.xml', handler: handleSettingsXml},
+                {path: 'META-INF/manifest.xml', handler: handleManifestXml}
             ];
             loadNextComponent(componentOrder);
         }
@@ -730,11 +780,17 @@ odf.OdfContainer = (function () {
          * @return {!string}
          */
         function createDocumentElement(name) {
-            var s = "";
+            var /**@type{string}*/
+                s = "";
 
-            odf.Namespaces.forEachPrefix(function (prefix, ns) {
+            /**
+             * @param {string} prefix
+             * @param {string} ns
+             */
+            function defineNamespace(prefix, ns) {
                 s += " xmlns:" + prefix + "=\"" + ns + "\"";
-            });
+            }
+            odf.Namespaces.forEachPrefix(defineNamespace);
             return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><office:" + name +
                     " " + s + " office:version=\"1.2\">";
         }
@@ -763,7 +819,7 @@ odf.OdfContainer = (function () {
             return element;
         }
         /**
-         * @return {!string}
+         * @return {string}
          */
         function serializeManifestXml() {
             var header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n',
@@ -771,6 +827,7 @@ odf.OdfContainer = (function () {
                 manifest = /**@type{!Document}*/(runtime.parseXML(xml)),
                 manifestRoot = getDirectChild(manifest, manifestns, 'manifest'),
                 serializer = new xmldom.LSSerializer(),
+                /**@type{string}*/
                 fullPath;
 
             for (fullPath in partMimetypes) {
@@ -786,7 +843,7 @@ odf.OdfContainer = (function () {
          */
         function serializeSettingsXml() {
             var serializer = new xmldom.LSSerializer(),
-                /**@type{!string}*/
+                /**@type{string}*/
                 s = createDocumentElement("document-settings");
             serializer.filter = new odf.OdfNodeFilter();
             s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
@@ -804,15 +861,19 @@ odf.OdfContainer = (function () {
                 s = createDocumentElement("document-styles");
 
             // special handling for merged toplevel nodes
-            automaticStyles = cloneStylesInScope(self.rootElement.automaticStyles, documentStylesScope);
-            masterStyles = self.rootElement.masterStyles && self.rootElement.masterStyles.cloneNode(true);
+            automaticStyles = cloneStylesInScope(
+                self.rootElement.automaticStyles,
+                documentStylesScope
+            );
+            masterStyles = /**@type{!Element}*/(self.rootElement.masterStyles.cloneNode(true));
             fontFaceDecls = cloneFontFaceDeclsUsedInStyles(self.rootElement.fontFaceDecls, [masterStyles, self.rootElement.styles, automaticStyles]);
 
             // automatic styles from styles.xml could shadow automatic styles from content.xml,
             // because they could have the same name
             // thus they were prefixed on loading with some almost unique string, which cam be removed
             // again before saving
-            styleInfo.removePrefixFromStyleNames(automaticStyles, automaticStylePrefix, masterStyles);
+            styleInfo.removePrefixFromStyleNames(automaticStyles,
+                    automaticStylePrefix, masterStyles);
             serializer.filter = new OdfStylesFilter(masterStyles, automaticStyles);
 
             s += serializer.writeToString(fontFaceDecls, nsmap);
@@ -844,13 +905,18 @@ odf.OdfContainer = (function () {
             s += "</office:document-content>";
             return s;
         }
-        function createElement(Type) {
+        /**
+         * @param {!{Type:function(new:Object),namespaceURI:string,localName:string}} type
+         * @return {!Element}
+         */
+        function createElement(type) {
             var original = document.createElementNS(
-                    Type.namespaceURI,
-                    Type.localName
+                    type.namespaceURI,
+                    type.localName
                 ),
+                /**@type{string}*/
                 method,
-                iface = new Type();
+                iface = new type.Type();
             for (method in iface) {
                 if (iface.hasOwnProperty(method)) {
                     original[method] = iface[method];
@@ -879,12 +945,16 @@ odf.OdfContainer = (function () {
          * @return {!Element}
          */
         this.getContentElement = function () {
-            var body;
+            var /**@type{!Element}*/
+                body;
             if (!contentElement) {
                 body = self.rootElement.body;
-                contentElement = body.getElementsByTagNameNS(officens, 'text')[0] ||
-                    body.getElementsByTagNameNS(officens, 'presentation')[0] ||
-                    body.getElementsByTagNameNS(officens, 'spreadsheet')[0];
+                contentElement = getDirectChild(body, officens, "text")
+                    || getDirectChild(body, officens, "presentation")
+                    || getDirectChild(body, officens, "spreadsheet");
+            }
+            if (!contentElement) {
+                throw "Could not find content element in <office:body/>.";
             }
             return contentElement;
         };
@@ -912,15 +982,15 @@ odf.OdfContainer = (function () {
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
          * elements 'document-content', 'document-styles', 'document-meta', or
          * 'document-settings' will be returned respectively.
-         * @param {!string} partname
-         * @return {!OdfPart}
+         * @param {string} partname
+         * @return {!odf.OdfPart}
          **/
         this.getPart = function (partname) {
-            return new OdfPart(partname, partMimetypes[partname], self, zip);
+            return new odf.OdfPart(partname, partMimetypes[partname], self, zip);
         };
         /**
-         * @param {!string} url
-         * @param {!function(?string, ?Uint8Array)} callback receiving err and data
+         * @param {string} url
+         * @param {function(?string, ?Uint8Array)} callback receiving err and data
          * @return {undefined}
          */
         this.getPartData = function (url, callback) {
@@ -950,7 +1020,8 @@ odf.OdfContainer = (function () {
                 generatorString = generatorString + " " + window.navigator.userAgent;
             }
 
-            metadataManager.setMetadata({"meta:generator": generatorString});
+            metadataManager.setMetadata({"meta:generator": generatorString},
+                null);
         }
 
         /**
@@ -1083,7 +1154,13 @@ odf.OdfContainer = (function () {
         };
         // initialize public variables
         this.state = OdfContainer.LOADING;
-        this.rootElement = createElement(ODFDocumentElement);
+        this.rootElement = /**@type{!odf.ODFDocumentElement}*/(
+            createElement({
+                Type: odf.ODFDocumentElement,
+                namespaceURI: odf.ODFDocumentElement.namespaceURI,
+                localName: odf.ODFDocumentElement.localName
+            })
+        );
 
         // initialize private variables
         if (url) {

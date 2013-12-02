@@ -141,7 +141,7 @@ if (Java_JAVA_EXECUTABLE)
       OUTPUT typecheck.js
       COMMAND ${Java_JAVA_EXECUTABLE}
       ARGS -jar ${CLOSURE_JAR}
-         --define IS_COMPILED_CODE=true
+         --define IS_COMPILED_CODE=true --js webodf.css.js
          ${SHARED_CLOSURE_ARGS} ${TYPED_LIB_CLOSURE_ARGS}
          --jscomp_error reportUnknownTypes
          --compilation_level ADVANCED_OPTIMIZATIONS

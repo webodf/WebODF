@@ -268,45 +268,45 @@ set(TYPEDLIBJSFILES
     lib/core/UnitTester.js
     lib/core/Utils.js
     lib/core/Zip.js
+    lib/gui/Avatar.js
+    lib/gui/EditInfoHandle.js
+    lib/gui/KeyboardHandler.js
     lib/odf/Namespaces.js
     lib/odf/OdfUtils.js
+    lib/ops/Server.js
     lib/xmldom/LSSerializerFilter.js
     lib/xmldom/XPath.js
     lib/core/Cursor.js
     lib/core/PositionFilter.js
     lib/core/PositionFilterChain.js
+    lib/gui/AnnotationViewManager.js
+    lib/gui/SelectionMover.js
     lib/odf/MetadataManager.js
     lib/odf/OdfNodeFilter.js
+    lib/odf/Style2CSS.js
     lib/odf/StyleInfo.js
     lib/odf/TextSerializer.js
+    lib/ops/TextPositionFilter.js
     lib/xmldom/LSSerializer.js
+    lib/gui/Clipboard.js
+    lib/odf/OdfContainer.js
+    lib/odf/FontLoader.js
+    lib/odf/ObjectNameGenerator.js
+    lib/odf/TextStyleApplicator.js
+    lib/odf/Formatting.js
+    lib/odf/OdfCanvas.js
+    lib/gui/StyleHelper.js
 )
 # This list is generated automatically, do not edit this list by hand.
 set(UNTYPEDLIBJSFILES
 # These files depend only on files that are 100% typed.
     lib/core/RawDeflate.js
-    lib/gui/Avatar.js
-    lib/gui/Clipboard.js
-    lib/gui/EditInfoHandle.js
-    lib/gui/KeyboardHandler.js
-    lib/gui/SelectionMover.js
-    lib/gui/StyleHelper.js
-    lib/odf/OdfContainer.js
-    lib/odf/Style2CSS.js
-    lib/ops/Member.js
-    lib/ops/Server.js
-    lib/ops/StepsTranslator.js
-    lib/ops/TextPositionFilter.js
-    lib/xmldom/RelaxNGParser.js
-# These files depend on files that are not 100% typed.
-    lib/gui/AnnotationViewManager.js
-    lib/odf/OdfCanvas.js
     lib/gui/ImageSelector.js
     lib/odf/CommandLineTools.js
-    lib/odf/FontLoader.js
-    lib/odf/ObjectNameGenerator.js
-    lib/odf/TextStyleApplicator.js
-    lib/odf/Formatting.js
+    lib/ops/Member.js
+    lib/ops/StepsTranslator.js
+    lib/xmldom/RelaxNGParser.js
+# These files depend on files that are not 100% typed.
     lib/ops/OdtCursor.js
     lib/ops/OdtDocument.js
     lib/ops/Operation.js
