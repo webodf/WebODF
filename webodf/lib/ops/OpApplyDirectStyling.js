@@ -38,8 +38,9 @@
 
 /*global ops, runtime, gui, odf, Node, core*/
 
-runtime.loadClass("gui.StyleHelper");
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("odf.TextStyleApplicator");
 
 /**
  * @constructor
@@ -54,7 +55,8 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         /**@type {number}*/
         length,
         setProperties,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils();
 
     this.init = function (data) {
         memberid = data.memberid;
@@ -78,12 +80,43 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         return range;
     }
 
+    /**
+     * Apply the specified style properties to all elements within the given range.
+     * Currently, only text styles are applied.
+     * @param {!Range} range Range to apply text style to
+     * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
+     */
+    function applyStyle(odtDocument, range, info) {
+        var odfCanvas = odtDocument.getOdfCanvas(),
+            odfContainer = odfCanvas.odfContainer(),
+            nextTextNodes = domUtils.splitBoundaries(range),
+            textNodes = odfUtils.getTextNodes(range, false),
+            limits,
+            textStyles;
+
+        // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
+        limits = {
+            startContainer: range.startContainer,
+            startOffset: range.startOffset,
+            endContainer: range.endContainer,
+            endOffset: range.endOffset
+        };
+
+        textStyles = new odf.TextStyleApplicator(
+            new odf.ObjectNameGenerator(/**@type{!odf.OdfContainer}*/(odfContainer), memberid), // TODO: use the instance in SessionController
+            odtDocument.getFormatting(),
+            odfContainer.rootElement.automaticStyles
+        );
+        textStyles.applyStyle(textNodes, limits, info);
+        nextTextNodes.forEach(domUtils.normalizeTextNodes);
+    }
+
     this.execute = function (odtDocument) {
         var range = getRange(odtDocument),
-            impactedParagraphs = odfUtils.getImpactedParagraphs(range),
-            styleHelper = new gui.StyleHelper(odtDocument.getFormatting());
+            impactedParagraphs = odfUtils.getImpactedParagraphs(range);
 
-        styleHelper.applyStyle(memberid, range, setProperties);
+        applyStyle(odtDocument, range, setProperties);
+
         range.detach();
         odtDocument.getOdfCanvas().refreshCSS();
         odtDocument.fixCursorPositions(); // The container splits may leave the cursor in an invalid spot
