@@ -56,9 +56,10 @@ function loadPlugin(pluginName, callback) {
 function loadDocument(documentUrl) {
     "use strict";
 
+    var Plugin;
+
     if (documentUrl) {
-        var extension = documentUrl.split('.').pop(),
-            Plugin;
+        var extension = documentUrl.split('.').pop();
 
         switch (extension) {
         case 'odt':
@@ -70,11 +71,13 @@ function loadDocument(documentUrl) {
             });
             break;
         }
-
-        window.onload = function () {
-            if (Plugin) {
-                viewer = new Viewer(new Plugin());
-            }
-        };
     }
+
+    window.onload = function () {
+        if (Plugin) {
+            viewer = new Viewer(new Plugin());
+        } else {
+            viewer = new Viewer();
+        }
+    };
 }

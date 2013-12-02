@@ -73,6 +73,8 @@ function ODFViewerPlugin() {
     }
 
     var self = this,
+        pluginName = "WebODF",
+        pluginURL = "http://webodf.org",
         odfCanvas = null,
         odfElement = null,
         initialized = false,
@@ -154,9 +156,24 @@ function ODFViewerPlugin() {
         }
         return pages;
     };
-    
+
     this.showPage = function (n) {
         odfCanvas.showPage(n);
     };
- 
+
+    this.getPluginName = function () {
+        return pluginName;
+    };
+
+    this.getPluginVersion = function () {
+        var version = (String(typeof webodf_version) !== "undefined"
+            ? webodf_version
+            : "From Source"
+        );
+        return version;
+    };
+
+    this.getPluginURL = function () {
+        return pluginURL;
+    };
 }
