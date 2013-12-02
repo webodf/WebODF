@@ -53,7 +53,7 @@ runtime.loadClass("gui.AnnotationViewManager");
  * It takes care of giving visual feedback on loading, ensures that the
  * stylesheets are loaded.
  * @constructor
- * @param {!Element} element Put and ODF Canvas inside this element.
+ * @param {!HTMLElement} element Put and ODF Canvas inside this element.
  * @return {?}
  **/
 odf.OdfCanvas = (function () {
@@ -967,7 +967,7 @@ odf.OdfCanvas = (function () {
     }
     /**
      * @constructor
-     * @param {!Element} element Put and ODF Canvas inside this element.
+     * @param {!HTMLElement} element Put and ODF Canvas inside this element.
      * @return {?}
      */
     odf.OdfCanvas = function OdfCanvas(element) {
@@ -1532,7 +1532,7 @@ odf.OdfCanvas = (function () {
         };
 
         /**
-         * @return {!Element}
+         * @return {!HTMLElement}
          */
         this.getElement = function () {
             return element;

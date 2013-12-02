@@ -757,7 +757,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
-     * @param {!string} inputMemberId
+     * @param {string|!Node} inputMemberId
      * @reurn {!RootFilter}
      */
     this.createRootFilter = function (inputMemberId) {

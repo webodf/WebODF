@@ -1,3 +1,4 @@
+/*global core*/
 // jslint.js
 // 2013-11-21
 
@@ -216,6 +217,7 @@
 // For example:
 
 /*properties
+    defined, emptyblock, unvar, JSLINT, JSLint,
     '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'', '(begin)',
     '(error)', '*', '+', '-', '/', '<', '<=', '==', '===', '>', '>=', '\\', a,
     a_label, a_scope, already_defined, and, apply, arguments, arity, ass,
@@ -4279,8 +4281,10 @@ klass:              do {
 
     itself.edition = '2013-11-21';
 
+    core.JSLINT = itself;
     return itself;
 }());
 core.JSLint = function JSLint() {
-    this.JSLINT = JSLINT;
+    "use strict";
+    this.JSLINT = core.JSLINT;
 };

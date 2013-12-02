@@ -250,118 +250,114 @@ endif(NOT ANDROID_SDK_DIR)
 
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
+# This list is generated automatically, do not edit this list by hand.
 set(TYPEDLIBJSFILES
     ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js
-
     lib/runtime.js
+    lib/core/Async.js
     lib/core/Base64.js
     lib/core/ByteArray.js
     lib/core/ByteArrayWriter.js
-    lib/core/LoopWatchDog.js
-    lib/core/Utils.js
-    lib/core/DomUtils.js
-    lib/core/Cursor.js
-    lib/core/EventNotifier.js
-    lib/core/UnitTester.js
-    lib/core/PositionIterator.js
-    lib/core/PositionFilter.js
-    lib/core/PositionFilterChain.js
-    lib/core/ScheduledTask.js
-    lib/core/Async.js
     lib/core/CSSUnits.js
+    lib/core/DomUtils.js
+    lib/core/EventNotifier.js
+    lib/core/LoopWatchDog.js
+    lib/core/PositionIterator.js
     lib/core/RawInflate.js
+    lib/core/ScheduledTask.js
+    lib/core/UnitTester.js
+    lib/core/Utils.js
     lib/core/Zip.js
-
-
-    lib/xmldom/LSSerializerFilter.js
-    lib/xmldom/LSSerializer.js
-    lib/xmldom/XPath.js
-
     lib/odf/Namespaces.js
     lib/odf/OdfUtils.js
-    lib/odf/OdfNodeFilter.js
-    lib/odf/TextSerializer.js
-    lib/odf/StyleInfo.js
+    lib/xmldom/LSSerializerFilter.js
+    lib/xmldom/XPath.js
+    lib/core/Cursor.js
+    lib/core/PositionFilter.js
+    lib/core/PositionFilterChain.js
     lib/odf/MetadataManager.js
+    lib/odf/OdfNodeFilter.js
+    lib/odf/StyleInfo.js
+    lib/odf/TextSerializer.js
+    lib/xmldom/LSSerializer.js
 )
+# This list is generated automatically, do not edit this list by hand.
 set(UNTYPEDLIBJSFILES
-
-    # lib/core/RawDeflate.js not used anywhere
-    lib/xmldom/RelaxNGParser.js
-    lib/xmldom/RelaxNG.js
-    lib/xmldom/RelaxNG2.js
-
-    lib/odf/Style2CSS.js
-    lib/odf/ObjectNameGenerator.js
-    lib/odf/TextStyleApplicator.js
-    lib/gui/AnnotationViewManager.js
+# These files depend only on files that are 100% typed.
+    lib/core/RawDeflate.js
+    lib/gui/Avatar.js
+    lib/gui/Clipboard.js
+    lib/gui/EditInfoHandle.js
+    lib/gui/KeyboardHandler.js
+    lib/gui/SelectionMover.js
+    lib/gui/StyleHelper.js
     lib/odf/OdfContainer.js
-    lib/odf/FontLoader.js
-    lib/odf/Formatting.js
-    lib/odf/OdfCanvas.js
-    lib/odf/CommandLineTools.js
-
+    lib/odf/Style2CSS.js
     lib/ops/Member.js
     lib/ops/Server.js
+    lib/ops/StepsTranslator.js
+    lib/ops/TextPositionFilter.js
+    lib/xmldom/RelaxNGParser.js
+# These files depend on files that are not 100% typed.
+    lib/gui/AnnotationViewManager.js
+    lib/odf/OdfCanvas.js
+    lib/gui/ImageSelector.js
+    lib/odf/CommandLineTools.js
+    lib/odf/FontLoader.js
+    lib/odf/ObjectNameGenerator.js
+    lib/odf/TextStyleApplicator.js
+    lib/odf/Formatting.js
+    lib/ops/OdtCursor.js
+    lib/ops/OdtDocument.js
     lib/ops/Operation.js
+    lib/xmldom/RelaxNG.js
+    lib/xmldom/RelaxNG2.js
+    lib/gui/Caret.js
+    lib/gui/EventManager.js
+    lib/gui/ShadowCursor.js
+    lib/gui/UndoManager.js
+    lib/gui/UndoStateRules.js
+    lib/ops/EditInfo.js
+    lib/ops/OpAddAnnotation.js
     lib/ops/OpAddCursor.js
-    lib/gui/StyleHelper.js
+    lib/ops/OpAddMember.js
+    lib/ops/OpAddStyle.js
     lib/ops/OpApplyDirectStyling.js
-    lib/ops/OpRemoveCursor.js
-    lib/ops/OpMoveCursor.js
-    lib/ops/OpSetBlob.js
-    lib/ops/OpRemoveBlob.js
     lib/ops/OpInsertImage.js
     lib/ops/OpInsertTable.js
     lib/ops/OpInsertText.js
-    lib/ops/OpRemoveText.js
-    lib/ops/OpSplitParagraph.js
-    lib/ops/OpSetParagraphStyle.js
-    lib/ops/OpUpdateParagraphStyle.js
-    lib/ops/OpAddStyle.js
-    lib/ops/OpRemoveStyle.js
-    lib/ops/OpAddAnnotation.js
+    lib/ops/OpMoveCursor.js
     lib/ops/OpRemoveAnnotation.js
-    lib/ops/OpAddMember.js
-    lib/ops/OpUpdateMember.js
+    lib/ops/OpRemoveBlob.js
+    lib/ops/OpRemoveCursor.js
     lib/ops/OpRemoveMember.js
+    lib/ops/OpRemoveStyle.js
+    lib/ops/OpRemoveText.js
+    lib/ops/OpSetBlob.js
+    lib/ops/OpSetParagraphStyle.js
+    lib/ops/OpSplitParagraph.js
+    lib/ops/OpUpdateMember.js
     lib/ops/OpUpdateMetadata.js
+    lib/ops/OpUpdateParagraphStyle.js
     lib/ops/OperationFactory.js
-    lib/gui/SelectionMover.js
-    lib/ops/StepsTranslator.js
-    lib/ops/TextPositionFilter.js
+    lib/ops/OperationRouter.js
     lib/ops/OperationTransformMatrix.js
     lib/ops/OperationTransformer.js
-    lib/ops/OdtCursor.js
-    lib/ops/EditInfo.js
-    lib/gui/ShadowCursor.js
-    lib/gui/Avatar.js
-    lib/gui/Caret.js
-    lib/gui/PlainTextPasteboard.js
-    lib/gui/Clipboard.js
-    lib/gui/DirectTextStyler.js
-    lib/gui/DirectParagraphStyler.js
-    lib/gui/KeyboardHandler.js
-    lib/gui/ImageManager.js
-    lib/gui/ImageSelector.js
-    lib/gui/TextManipulator.js
-    lib/gui/EventManager.js
-    lib/ops/OperationRouter.js
     lib/ops/TrivialOperationRouter.js
-    lib/gui/EditInfoHandle.js
     lib/gui/EditInfoMarker.js
-    lib/gui/SessionView.js
-    lib/gui/CaretManager.js
-    lib/gui/UndoManager.js
-    lib/gui/UndoStateRules.js
-    lib/gui/TrivialUndoManager.js
+    lib/gui/PlainTextPasteboard.js
     lib/gui/SelectionView.js
     lib/gui/SelectionViewManager.js
-
-    lib/ops/OdtDocument.js
+    lib/gui/TrivialUndoManager.js
     lib/ops/Session.js
     lib/gui/AnnotationController.js
+    lib/gui/DirectParagraphStyler.js
+    lib/gui/DirectTextStyler.js
+    lib/gui/ImageManager.js
+    lib/gui/TextManipulator.js
     lib/gui/SessionController.js
+    lib/gui/CaretManager.js
+    lib/gui/SessionView.js
 )
 set(LIBJSFILES ${TYPEDLIBJSFILES} ${UNTYPEDLIBJSFILES})
 

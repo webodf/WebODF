@@ -1506,88 +1506,235 @@ var ops = {};
 
 /*jslint sloppy: true*/
 (function () {
-    var /**@type{!Object.<!Array.<string>>}*/
-        manifests = {},
-        loadedClasses = {};
+    var /**@type{!Object.<string,!{dir:string, deps:!Array.<string>}>}*/
+        dependencies = {},
+        loadedFiles = {};
     /**
      * @param {string} dir
+     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
      */
-    function loadManifest(dir) {
-        var path = dir + "/manifest.js",
+    function loadManifest(dir, manifests) {
+        var path = dir + "/manifest.json",
             content,
-            list;
-        if (!manifests.hasOwnProperty(dir)) {
-            try {
-                content = runtime.readFileSync(path, "utf-8");
-            } catch (/**@type{string}*/e) {
-                console.log("TYPE " + (typeof e));
-                return;
-            }
-            list = JSON.parse(/**@type{string}*/(content));
-            manifests[dir] = /**@type{!Array}*/(list);
+            list,
+            manifest,
+            /**@type{string}*/
+            m;
+        if (loadedFiles.hasOwnProperty(path)) {
+            return;
         }
+        loadedFiles[path] = 1;
+        try {
+            content = runtime.readFileSync(path, "utf-8");
+        } catch (/**@type{string}*/e) {
+            console.log(String(e));
+            return;
+        }
+        list = JSON.parse(/**@type{string}*/(content));
+        manifest = /**@type{!Object.<!Array.<string>>}*/(list);
+        for (m in manifest) {
+            if (manifest.hasOwnProperty(m)) {
+                manifests[m] = {dir: dir, deps: manifest[m]};
+            }
+        }
+    }
+    /**
+     * @param {string} path
+     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
+     * @param {!Object.<string,!Object.<string,number>>} allDeps
+     */
+    function expandPathDependencies(path, manifests, allDeps) {
+        var d = manifests[path].deps, deps = {};
+        allDeps[path] = deps;
+        d.forEach(function (dp) {
+            deps[dp] = 1;
+        });
+        d.forEach(function (dp) {
+            if (!allDeps[dp]) {
+                expandPathDependencies(dp, manifests, allDeps);
+            }
+        });
+        d.forEach(function (dp) {
+            Object.keys(allDeps[dp]).forEach(function (k) {
+                deps[k] = 1;
+            });
+        });
+    }
+    /**
+     * @param {!Array.<string>} deps
+     * @param {!Object.<string,!Object.<string,number>>} allDeps
+     * @return {!Array.<string>}
+     */
+    function sortDeps(deps, allDeps) {
+        var i, sorted = [];
+        /**
+         * @param {string} path
+         * @param {!Array.<string>} stack
+         */
+        function add(path, stack) {
+            var j, d = allDeps[path];
+            if (sorted.indexOf(path) === -1 && stack.indexOf(path) === -1) {
+                stack.push(path);
+                for (j = 0; j < deps.length; j += 1) {
+                    if (d[deps[j]]) {
+                        add(deps[j], stack);
+                    }
+                }
+                stack.pop();
+                sorted.push(path);
+            }
+        }
+        for (i = 0; i < deps.length; i += 1) {
+            add(deps[i], []);
+        }
+        return sorted;
+    }
+    /**
+     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
+     */
+    function expandDependencies(manifests) {
+        var /**@type{string}*/
+            path,
+            /**@type{!Array.<string>}*/
+            deps,
+            allDeps = {};
+        for (path in manifests) {
+            if (manifests.hasOwnProperty(path)) {
+                expandPathDependencies(path, manifests, allDeps);
+            }
+        }
+        for (path in manifests) {
+            if (manifests.hasOwnProperty(path)) {
+                deps = /**@type{!Array.<string>}*/(
+                    Object.keys(allDeps[path])
+                );
+                manifests[path].deps = sortDeps(deps, allDeps);
+                manifests[path].deps.push(path);
+            }
+        }
+        dependencies = manifests;
     }
     function loadManifests() {
+        // only load the dependencies once
+        if (Object.keys(dependencies).length > 0) {
+            return;
+        }
         var paths = runtime.libraryPaths(),
+            manifests = {},
             i;
         if (runtime.currentDirectory()) {
-            loadManifest(runtime.currentDirectory());
+            loadManifest(runtime.currentDirectory(), manifests);
         }
         for (i = 0; i < paths.length; i += 1) {
-            loadManifest(paths[i]);
+            loadManifest(paths[i], manifests);
         }
-    }
-    /**
-     * @param {string} classpath
-     * @param {string} dir
-     * @return {undefined|string}
-     */
-    function findPathInManifest(classpath, dir) {
-        var manifest;
-        if (manifests.hasOwnProperty(dir)) {
-            manifest = manifests[dir];
-            if (manifest.indexOf(classpath) !== -1) {
-                return dir + "/" + classpath;
-            }
-        }
+        expandDependencies(manifests);
     }
     /**
      * @param {string} classname
      * @return {string}
      */
-    function findFullPath(classname) {
-        var classpath = classname.replace(".", "/") + ".js",
-            paths = runtime.libraryPaths(),
-            path,
-            i;
-        if (runtime.currentDirectory()) {
-            path = findPathInManifest(classpath, runtime.currentDirectory());
-        }
-        for (i = 0; path === undefined && i < paths.length; i += 1) {
-            path = findPathInManifest(classpath, paths[i]);
-        }
-        if (path === undefined) {
-            throw "Class " + classpath + " was not found in any manifest.";
-        }
-        return path;
+    function classPath(classname) {
+        return classname.replace(".", "/") + ".js";
     }
     /**
-     * @param {string} classpath
+     * @param {string} classname
+     * @return {!Array.<string>}
+     */
+    function getDependencies(classname) {
+        var classpath = classPath(classname),
+            deps = [],
+            d = dependencies[classpath].deps,
+            i;
+        for (i = 0; i < d.length; i += 1) {
+            if (!loadedFiles.hasOwnProperty(d[i])) {
+                deps.push(d[i]);
+            }
+        }
+        return deps;
+    }
+    /**
+     * @param {!Array.<string>} paths
+     * @param {!Array.<?string>} contents
+     */
+    function evalArray(paths, contents) {
+        var i = 0;
+        while (i < paths.length && contents[i] !== undefined) {
+            if (contents[i] !== null) {
+                eval(/**@type{string}*/(contents[i]));
+                contents[i] = null;
+            }
+            i += 1;
+        }
+    }
+    /**
+     * @param {!Array.<string>} paths
+     */
+    function loadFiles(paths) {
+        var contents = [],
+            i,
+            p,
+            c,
+            async = false;
+        contents.length = paths.length;
+        /**
+         * @param {number} pos
+         * @param {string} path
+         * @param {string} content
+         */
+        function addContent(pos, path, content) {
+            content += "\n//# sourceURL=" + path;
+            content += "\n//@ sourceURL=" + path; // Chrome
+            contents[pos] = content;
+        }
+        /**
+         * @param {number} pos
+         */
+        function loadFile(pos) {
+            var path = dependencies[paths[pos]].dir + "/" + paths[pos];
+            runtime.readFile(path, "utf8", function (err, content) {
+                if (err) {
+                    throw err;
+                }
+                if (contents[pos] === undefined) {
+                    addContent(pos, path, /**@type{string}*/(content));
+                }
+            });
+        }
+        if (async) {
+            for (i = 0; i < paths.length; i += 1) {
+                loadedFiles[paths[i]] = 1;
+                loadFile(i);
+            }
+        }
+        for (i = paths.length - 1; i >= 0; i -= 1) {
+            loadedFiles[paths[i]] = 1;
+            if (contents[i] === undefined) {
+                p = paths[i];
+                p = dependencies[p].dir + "/" + p;
+                c = runtime.readFileSync(p, "utf-8");
+                addContent(i, p, /**@type{string}*/(c));
+            }
+        }
+        evalArray(paths, contents);
+    }
+    /**
+     * @param {string} classname
      * @returns {undefined}
      * @expose
      */
-    runtime.loadClass = function (classpath) {
-        if (IS_COMPILED_CODE || loadedClasses.hasOwnProperty(classpath)) {
+    runtime.loadClass = function (classname) {
+        if (IS_COMPILED_CODE) {
+            return;
+        }
+        var classpath = classPath(classname),
+            paths;
+        if (loadedFiles.hasOwnProperty(classpath)) {
             return;
         }
         loadManifests();
-        var path = findFullPath(classpath),
-            content = runtime.readFileSync(path, "utf-8");
-        loadedClasses[classpath] = 1;
-        // add label to dynamic script for easier debugging
-        content += "\n//# sourceURL=" + path;
-        content += "\n//@ sourceURL=" + path; // Chrome
-        eval(content);
+        paths = getDependencies(classname);
+        loadFiles(paths);
     };
 }());
 
