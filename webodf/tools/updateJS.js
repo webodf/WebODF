@@ -245,12 +245,12 @@ function Main() {
      */
     function createOrderedList(list, deps, defined) {
         var sorted = [], i, p, l = list.length, depsPresent, missing,
-            maxCount = 100,
-            count = 0;
+            lastLength = -1;
         function isUndefined(dep) {
             return !defined.hasOwnProperty(dep);
         }
-        while (sorted.length < l && count < maxCount) {
+        while (sorted.length < l && sorted.length !== lastLength) {
+            lastLength = sorted.length;
             for (i = 0; i < l; i += 1) {
                 p = list[i];
                 if (!defined.hasOwnProperty(p)) {
@@ -270,9 +270,8 @@ function Main() {
                     }
                 }
             }
-            count += 1;
         }
-        if (count === maxCount) {
+        if (sorted.length === lastLength) {
             console.log("Unresolvable circular dependency.");
             process.exit(1);
         }
