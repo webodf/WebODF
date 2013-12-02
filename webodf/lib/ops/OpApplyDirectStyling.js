@@ -68,18 +68,6 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
 
     this.isEdit = true;
 
-    function getRange(odtDocument) {
-        var point1 = length >= 0 ? position : position + length,
-            point2 = length >= 0 ? position + length : position,
-            p1 = odtDocument.getIteratorAtPosition(point1),
-            p2 = length ? odtDocument.getIteratorAtPosition(point2) : p1,
-            range = odtDocument.getDOM().createRange();
-
-        range.setStart(p1.container(), p1.unfilteredDomOffset());
-        range.setEnd(p2.container(), p2.unfilteredDomOffset());
-        return range;
-    }
-
     /**
      * Apply the specified style properties to all elements within the given range.
      * Currently, only text styles are applied.
@@ -112,7 +100,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
     }
 
     this.execute = function (odtDocument) {
-        var range = getRange(odtDocument),
+        var range = odtDocument.convertCursorToDomRange(position, length),
             impactedParagraphs = odfUtils.getImpactedParagraphs(range);
 
         applyStyle(odtDocument, range, setProperties);
