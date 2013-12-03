@@ -158,7 +158,7 @@ runtime.log("Sending message to server: "+messageString);
          * @param {!string} userId
          * @param {!string} sessionId
          * @param {!function(!string)} successCb
-         * @param {function()=} failCb
+         * @param {!function()} failCb
          * @return {undefined}
          */
         this.joinSession = function (userId, sessionId, successCb, failCb) {
@@ -175,9 +175,7 @@ runtime.log("Sending message to server: "+messageString);
                 if (response.hasOwnProperty("success") && response.success) {
                     successCb(response.member_id);
                 } else {
-                    if (failCb) {
-                        failCb();
-                    }
+                    failCb();
                 }
             });
         };
@@ -186,7 +184,7 @@ runtime.log("Sending message to server: "+messageString);
          * @param {!string} sessionId
          * @param {!string} memberId
          * @param {!function()} successCb
-         * @param {function()=} failCb
+         * @param {!function()} failCb
          * @return {undefined}
          */
         this.leaveSession = function (sessionId, memberId, successCb, failCb) {
@@ -203,9 +201,7 @@ runtime.log("Sending message to server: "+messageString);
                 if (response.hasOwnProperty("success") && response.success) {
                     successCb();
                 } else {
-                    if (failCb) {
-                        failCb();
-                    }
+                    failCb();
                 }
             });
         };

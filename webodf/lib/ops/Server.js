@@ -71,7 +71,7 @@ ops.Server.prototype.login = function (login, password, successCb, failCb) {"use
  * @param {!string} userId  TODO: should the server not rather cache that info after login as property?
  * @param {!string} sessionId
  * @param {!function(!string)} successCb
- * @param {function()=} failCb
+ * @param {!function()} failCb
  * @return {undefined}
  */
 ops.Server.prototype.joinSession = function (userId, sessionId, successCb, failCb) {"use strict"; };
@@ -80,7 +80,7 @@ ops.Server.prototype.joinSession = function (userId, sessionId, successCb, failC
  * @param {!string} sessionId
  * @param {!string} memberId
  * @param {!function(!string)} successCb
- * @param {function()=} failCb
+ * @param {!function()} failCb
  * @return {undefined}
  */
 ops.Server.prototype.leaveSession = function (sessionId, memberId, successCb, failCb) {"use strict"; };
