@@ -84,35 +84,34 @@ ops.OperationRouter.prototype.push = function (operations) {"use strict"; };
 ops.OperationRouter.prototype.close = function (callback) {"use strict"; };
 
 /**
- * subscriber is called with the current state and after that
- * on every state change.
+ * The passed cb will be called on every event of type eventId.
  *
- * @param {function(!boolean)} subscriber
+ * @param {!string} eventId
+ * @param {!Function} cb
  * @return {undefined}
  */
-ops.OperationRouter.prototype.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {"use strict"; };
+ops.OperationRouter.prototype.subscribe = function (eventId, cb) {"use strict"; };
 
 /**
- * Undoes the subscription done with getHasLocalUnsyncedOpsAndUpdates
+ * Undoes the subscription done with subscribe(...).
  *
- * @param {function(!boolean)} subscriber
+ * @param {!string} eventId
+ * @param {!Function} cb
  * @return {undefined}
  */
-ops.OperationRouter.prototype.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {"use strict"; };
+ops.OperationRouter.prototype.unsubscribe = function (eventId, cb) {"use strict"; };
 
 /**
- * subscriber is called with the current state and after that
- * on every state change.
+ * Returns if there are operations done locally that have not yet been
+ * synchronized with the host of the session.
  *
- * @param {function(!boolean)} subscriber
- * @return {undefined}
+ * @return {!boolean}
  */
-ops.OperationRouter.prototype.getHasSessionHostConnectionAndUpdates = function (subscriber) {"use strict"; };
+ops.OperationRouter.prototype.hasLocalUnsyncedOps = function () {"use strict"; };
 
 /**
- * Undoes the subscription done with getHasServerConnectionAndUpdates
+ * Returns if the connection to the host of the session is currently existing.
  *
- * @param {function(!boolean)} subscriber
- * @return {undefined}
+ * @return {!boolean}
  */
-ops.OperationRouter.prototype.unsubscribeHasSessionHostConnectionUpdates = function (subscriber) {"use strict"; };
+ops.OperationRouter.prototype.hasSessionHostConnection = function () {"use strict"; };

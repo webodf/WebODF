@@ -93,22 +93,6 @@ define("webodf/editor/Editor", [
              */
             function fireEvent(eventid, args) {
                 eventNotifier.emit(eventid, args);
-            };
-
-            /**
-             * @param {!boolean} hasUnsyncedOps
-             * @return {undefined}
-             */
-            function forwardHasUnsyncedLocalOps(hasUnsyncedOps) {
-                fireEvent(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, hasUnsyncedOps);
-            }
-
-            /**
-             * @param {!boolean} hasSessionHostConnection
-             * @return {undefined}
-             */
-            function forwardHasSessionHostConnection(hasSessionHostConnection) {
-                fireEvent(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, hasSessionHostConnection);
             }
 
             function getFileBlob(cbSuccess, cbError) {
@@ -266,10 +250,22 @@ define("webodf/editor/Editor", [
                     // and there should be a backendFactory for local editing
                     var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer(), handleOperationRouterErrors);
                     session.setOperationRouter(opRouter);
-                    // TODO: this results also in event directly on calling it
-                    opRouter.getHasLocalUnsyncedOpsAndUpdates(forwardHasUnsyncedLocalOps);
-                    opRouter.getHasSessionHostConnectionAndUpdates(forwardHasSessionHostConnection);
+                    // forward events
+                    // TODO: relying here on that opRouter uses the same id strings ATM, those should be defined at OperationRouter interface
+                    opRouter.subscribe(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function (hasUnsyncedOps) {
+                        fireEvent(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, hasUnsyncedOps);
+                    });
+                    opRouter.subscribe(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function (hasSessionHostConnection) {
+                        fireEvent(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, hasSessionHostConnection);
+                    });
+                    opRouter.subscribe(Editor.EVENT_BEFORESAVETOFILE, function () {
+                        fireEvent(Editor.EVENT_BEFORESAVETOFILE, null);
+                    });
+                    opRouter.subscribe(Editor.EVENT_SAVEDTOFILE, function () {
+                        fireEvent(Editor.EVENT_SAVEDTOFILE, null);
+                    });
 
+                    // now get existing ops and after that let the user edit
                     opRouter.requestReplay(function done() {
                         editorReadyCallback();
                     });

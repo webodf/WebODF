@@ -28,7 +28,18 @@
 define("webodf/editor/server/pullbox/OperationRouter", [], function () {
     "use strict";
 
+    // TODO: these eventid strings should be defined at OperationRouter interface
+    var /**@const @type {!string}*/
+        EVENT_BEFORESAVETOFILE =                  "beforeSaveToFile",
+        /**@const @type {!string}*/
+        EVENT_SAVEDTOFILE =                       "savedToFile",
+        /**@const @type {!string}*/
+        EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED = "hasLocalUnsyncedOperationsChanged",
+        /**@const @type {!string}*/
+        EVENT_HASSESSIONHOSTCONNECTIONCHANGED =   "hasSessionHostConnectionChanged";
+
     runtime.loadClass("ops.OperationTransformer");
+    runtime.loadClass("core.EventNotifier");
 
     /**
      * route operations in a networked collaborative manner.
@@ -79,6 +90,12 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             hasSessionHostConnectionStateSubscribers = [],
             /**@type{!boolean}*/
             hasSessionHostConnection = true,
+            eventNotifier = new core.EventNotifier([
+                EVENT_BEFORESAVETOFILE,
+                EVENT_SAVEDTOFILE,
+                EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED,
+                EVENT_HASSESSIONHOSTCONNECTIONCHANGED
+            ]),
             /**@type{!boolean} tells if any local ops have been modifying ops */
             hasPushedModificationOps = false,
             operationTransformer = new ops.OperationTransformer(),
@@ -99,9 +116,7 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             }
 
             hasLocalUnsyncedOps = hasLocalUnsyncedOpsNow;
-            for (i=0; i<hasLocalUnsyncedOpsStateSubscribers.length; i+=1) {
-                hasLocalUnsyncedOpsStateSubscribers[i](hasLocalUnsyncedOps);
-            }
+            eventNotifier.emit(EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, hasLocalUnsyncedOps);
         }
 
         /**
@@ -117,9 +132,7 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             }
 
             hasSessionHostConnection = hasConnection;
-            for (i = 0; i < hasLocalUnsyncedOpsStateSubscribers.length; i += 1) {
-                hasSessionHostConnectionStateSubscribers[i](hasSessionHostConnection);
-            }
+            eventNotifier.emit(EVENT_HASSESSIONHOSTCONNECTIONCHANGED, hasSessionHostConnection);
         }
 
         /**
@@ -513,14 +526,21 @@ runtime.log("OperationRouter: instant opsSync requested");
          * A callback is called on success.
          */
         this.close = function (cb) {
+            function cbDoneSaving(err) {
+                eventNotifier.emit(EVENT_SAVEDTOFILE, null);
+                cb(err);
+            }
+
             function cbSuccess(fileData) {
-                server.writeSessionStateToFile(sessionId, memberId, lastServerSeq, fileData, cb);
+                server.writeSessionStateToFile(sessionId, memberId, lastServerSeq, fileData, cbDoneSaving);
             }
 
             function doClose() {
                 syncingBlocked = true;
                 if (hasPushedModificationOps) {
-                    odfContainer.createByteArray(cbSuccess, cb);
+                    eventNotifier.emit(EVENT_BEFORESAVETOFILE, null);
+
+                    odfContainer.createByteArray(cbSuccess, cbDoneSaving);
                 } else {
                     cb();
                 }
@@ -535,74 +555,36 @@ runtime.log("OperationRouter: instant opsSync requested");
             }
         };
 
-        this.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {
-            var i;
-
-            // detect double subscription
-            for (i=0; i<hasLocalUnsyncedOpsStateSubscribers.length; i+=1) {
-                if (subscribers[i] === subscriber) {
-                    break;
-                }
-            }
-            if (i < hasLocalUnsyncedOpsStateSubscribers.length) {
-                // already subscribed
-                runtime.log("double subscription request in PullBoxMemberModel::getHasLocalUnsyncedOpsAndUpdates");
-            } else {
-                // subscribe
-                hasLocalUnsyncedOpsStateSubscribers.push(subscriber);
-            }
-
-            subscriber(hasLocalUnsyncedOps);
+        /**
+         * @param {!string} eventId
+         * @param {!Function} cb
+         * @return {undefined}
+         */
+        this.subscribe = function (eventId, cb) {
+            eventNotifier.subscribe(eventId, cb);
         };
 
-        this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
-            var i;
-
-            for (i=0; i<hasLocalUnsyncedOpsStateSubscribers.length; i+=1) {
-                if (hasLocalUnsyncedOpsStateSubscribers[i] === subscriber) {
-                    break;
-                }
-            }
-
-            runtime.assert((i < hasLocalUnsyncedOpsStateSubscribers.length),
-                            "tried to unsubscribe when not subscribed in PullBoxMemberModel::getHasLocalUnsyncedOpsAndUpdates");
-
-            hasLocalUnsyncedOpsStateSubscribers.splice(i,1);
+        /**
+         * @param {!string} eventId
+         * @param {!Function} cb
+         * @return {undefined}
+         */
+        this.unsubscribe = function (eventId, cb) {
+            eventNotifier.unsubscribe(eventId, cb);
         };
 
-        this.getHasSessionHostConnectionAndUpdates = function (subscriber) {
-            var i;
-
-            // detect double subscription
-            for (i = 0; i < hasSessionHostConnectionStateSubscribers.length; i += 1) {
-                if (subscribers[i] === subscriber) {
-                    break;
-                }
-            }
-            if (i < hasSessionHostConnectionStateSubscribers.length) {
-                // already subscribed
-                runtime.log("double subscription request in PullBoxMemberModel::getHasLocalUnsyncedOpsAndUpdates");
-            } else {
-                // subscribe
-                hasSessionHostConnectionStateSubscribers.push(subscriber);
-            }
-
-            subscriber(hasSessionHostConnection);
+        /**
+         * @return {!boolean}
+         */
+        this.hasLocalUnsyncedOps = function () {
+            return hasLocalUnsyncedOps;
         };
 
-        this.unsubscribeHasSessionHostConnectionUpdates = function (subscriber) {
-            var i;
-
-            for (i = 0; i < hasSessionHostConnectionStateSubscribers.length; i += 1) {
-                if (hasSessionHostConnectionStateSubscribers[i] === subscriber) {
-                    break;
-                }
-            }
-
-            runtime.assert((i < hasSessionHostConnectionStateSubscribers.length),
-                            "tried to unsubscribe when not subscribed in PullBoxMemberModel::getHasSessionHostConnectionAndUpdates");
-
-            hasSessionHostConnectionStateSubscribers.splice(i,1);
+        /**
+         * @return {!boolean}
+         */
+        this.hasSessionHostConnection = function () {
+            return hasSessionHostConnection;
         };
     };
 });

@@ -178,13 +178,22 @@ define("webodf/editor/server/nowjs/OperationRouter", [], function () {
         };
         /*jslint emptyblock: false, unparam: false*/
 
-        this.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {
-            subscriber(false);
-        };
-
         /*jslint emptyblock: true, unparam: true*/
-        this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
+        this.subscribe = function (eventId, cb) {
         };
         /*jslint emptyblock: false, unparam: false*/
+
+        /*jslint emptyblock: true, unparam: true*/
+        this.unsubscribe = function (eventId, cb) {
+        };
+        /*jslint emptyblock: false, unparam: false*/
+
+        this.hasLocalUnsyncedOps = function () {
+            return false;
+        };
+
+        this.hasSessionHostConnection = function () {
+            return true; // TODO: make this check real state
+        };
     };
 });

@@ -98,21 +98,37 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
         cb();
     };
 
-    this.getHasLocalUnsyncedOpsAndUpdates = function (subscriber) {
-        subscriber(false);
-    };
-
+    /**
+     * @param {!string} eventId
+     * @param {!Function} cb
+     * @return {undefined}
+     */
     /*jslint emptyblock: true, unparam: true*/
-    this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
+    this.subscribe = function (eventId, cb) {
     };
     /*jslint emptyblock: false, unparam: false*/
 
-    this.getHasSessionHostConnectionAndUpdates = function (subscriber) {
-        subscriber(true);
-    };
-
+    /**
+     * @param {!string} eventId
+     * @param {!Function} cb
+     * @return {undefined}
+     */
     /*jslint emptyblock: true, unparam: true*/
-    this.unsubscribeHasSessionHostConnectionUpdates = function (subscriber) {
+    this.unsubscribe = function (eventId, cb) {
     };
     /*jslint emptyblock: false, unparam: false*/
+
+    /**
+     * @return {!boolean}
+     */
+    this.hasLocalUnsyncedOps = function () {
+        return false;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.hasSessionHostConnection = function () {
+        return true;
+    };
 };

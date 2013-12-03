@@ -225,7 +225,7 @@ runtime.log("Sending message to server: "+messageString);
          * @param {!string} sessionId
          * @param {!string} memberId
          * @param {!string} seqHead
-         * @param {function()=} callback
+         * @param {!function(!Object=)} callback
          * @return {undefined}
          */
         this.writeSessionStateToFile = function(sessionId, memberId, seqHead, fileData, callback) {
