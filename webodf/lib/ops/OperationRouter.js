@@ -55,7 +55,7 @@ ops.OperationRouter.prototype.setOperationFactory = function (f) {"use strict"; 
 /**
  * Sets the method which should be called to apply operations.
  *
- * @param {!function(!ops.Operation)} playback_func
+ * @param {!function(!ops.Operation):boolean} playback_func
  * @return {undefined}
  */
 ops.OperationRouter.prototype.setPlaybackFunction = function (playback_func) {"use strict"; };

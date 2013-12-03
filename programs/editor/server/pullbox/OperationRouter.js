@@ -47,7 +47,7 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
         "use strict";
 
         var operationFactory,
-            /**@type{function(!ops.Operation)}*/
+            /**@type{function(!ops.Operation):boolean}*/
             playbackFunction,
             idleTimeout = null,
             syncOpsTimeout = null,
@@ -58,7 +58,7 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             /**@type{!boolean}*/
             isSyncCallRunning = false,
             /**@type{!boolean}*/
-            hasUnresolvableConflict = false,
+            hasError = false,
             /**@type{!boolean}*/
             syncingBlocked = false,
             /** @type {!string} id of latest op stack state known on the server */
@@ -128,9 +128,16 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
                     op = operationFactory.create(opspec);
                     runtime.log(" op in: "+runtime.toJson(opspec));
                     if (op !== null) {
-                        playbackFunction(op);
+                        if (!playbackFunction(op)) {
+                            hasError = true;
+                            // TODO: call whatever error callback
+                            return;
+                        }
                     } else {
+                        hasError = true;
                         runtime.log("ignoring invalid incoming opspec: " + opspec);
+                        // TODO: call whatever error callback
+                        return;
                     }
                 }
 
@@ -220,7 +227,7 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
                 }, syncOpsDelay);
             }
 
-            if (isSyncCallRunning || hasUnresolvableConflict) {
+            if (isSyncCallRunning || hasError) {
                 return;
             }
             // TODO: hack, remove
@@ -249,13 +256,23 @@ runtime.log("OperationRouter: sending sync_ops call");
                     client_ops: syncedClientOpspecs
                 }
             }, function(responseData) {
-                var response = /** @type{{result:string, head_seq:string, ops:Array.<!Object>}} */(runtime.fromJson(responseData));
+                var response,
+                    /**@type{!boolean}*/
+                    hasUnresolvableConflict = false;
 
-                // TODO: hack, remove
                 if (syncingBlocked) {
                     return;
                 }
 
+                try {
+                    response = /** @type{{result:string, head_seq:string, ops:Array.<!Object>}} */(runtime.fromJson(responseData));
+                } catch (e) {
+                    hasError = true;
+                    runtime.log("Could not parse reply: "+responseData);
+                    errorCallback("unknownServerReply");
+                    return;
+                }
+                // TODO: hack, remove
                 runtime.log("sync_ops reply: " + responseData);
 
                 // just new ops?
@@ -296,14 +313,21 @@ runtime.log("OperationRouter: sending sync_ops call");
                     if (!hasUnresolvableConflict) {
                         isInstantSyncRequested = true;
                     }
+                } else if (response.result === "error") {
+                    hasError = true;
+                    runtime.assert(false, "server reports an error: "+response.error);
+                    return;
                 } else {
+                    hasError = true;
                     runtime.assert(false, "Unexpected result on sync-ops call: "+response.result);
+                    return;
                 }
 
                 // unlock
                 isSyncCallRunning = false;
 
                 if (hasUnresolvableConflict) {
+                    hasError = true;
                     // TODO: offer option to reload session automatically?
                     runtime.assert(false,
                         "Sorry to tell:\n" +
@@ -387,7 +411,7 @@ runtime.log("OperationRouter: instant opsSync requested");
         /**
          * Sets the method which should be called to apply operations.
          *
-         * @param {!function(!ops.Operation)} playback_func
+         * @param {!function(!ops.Operation):boolean} playback_func
          * @return {undefined}
          */
         this.setPlaybackFunction = function (playback_func) {
@@ -401,7 +425,10 @@ runtime.log("OperationRouter: instant opsSync requested");
          * @return {undefined}
          */
         this.push = function (operations) {
-            if (hasUnresolvableConflict) {
+            var i, op, opspec,
+                timestamp = (new Date()).getTime();
+
+            if (hasError) {
                 return;
             }
             // TODO: should be an assert in the future
@@ -412,22 +439,27 @@ runtime.log("OperationRouter: instant opsSync requested");
                 return;
             }
 
-            operations.forEach(function(op) {
-                var timedOp,
-                    opspec = op.spec();
+            for (i = 0; i < operations.length; i += 1) {
+                op = operations[i];
+                opspec = op.spec();
 
                 // note if any local ops modified 
                 hasPushedModificationOps = hasPushedModificationOps || op.isEdit;
 
-                // apply locally
-                opspec.timestamp = (new Date()).getTime();
-                timedOp = operationFactory.create(opspec);
+                // add timestamp TODO: improve the useless recreation of the op
+                opspec.timestamp = timestamp;
+                op = operationFactory.create(opspec);
 
-                playbackFunction(timedOp);
+                // apply locally
+                if (!playbackFunction(op)) {
+                    hasError = true;
+                    // TODO: call whatever error callback
+                    return;
+                }
 
                 // send to server
                 unsyncedClientOpspecQueue.push(opspec);
-            });
+            }
 
             triggerPushingOps();
 
@@ -453,7 +485,9 @@ runtime.log("OperationRouter: instant opsSync requested");
                 }
             }
 
-            if (hasLocalUnsyncedOps) {
+            if (hasError) {
+                cb();
+            } else if (hasLocalUnsyncedOps) {
                 requestInstantOpsSync(doClose);
             } else {
                 doClose();
@@ -480,7 +514,6 @@ runtime.log("OperationRouter: instant opsSync requested");
             subscriber(hasLocalUnsyncedOps);
         };
 
-        /*jslint emptyblock: true, unparam: true*/
         this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
             var i;
 

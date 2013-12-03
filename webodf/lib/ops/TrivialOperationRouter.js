@@ -68,7 +68,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
     /**
      * Sets the method which should be called to apply operations.
      *
-     * @param {!function(!ops.Operation)} playback_func
+     * @param {!function(!ops.Operation):boolean} playback_func
      * @return {undefined}
      */
     this.setPlaybackFunction = function (playback_func) {
@@ -89,6 +89,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
             opspec.timestamp = (new Date()).getTime();
             timedOp = operationFactory.create(opspec);
 
+            // TODO: handle return flag in error case
             playbackFunction(timedOp);
         });
     };
