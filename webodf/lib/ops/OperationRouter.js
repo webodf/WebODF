@@ -55,7 +55,7 @@ ops.OperationRouter.prototype.setOperationFactory = function (f) {"use strict"; 
 /**
  * Sets the method which should be called to apply operations.
  *
- * @param {!function(!ops.Operation)} playback_func
+ * @param {!function(!ops.Operation):boolean} playback_func
  * @return {undefined}
  */
 ops.OperationRouter.prototype.setPlaybackFunction = function (playback_func) {"use strict"; };
@@ -82,3 +82,36 @@ ops.OperationRouter.prototype.push = function (operations) {"use strict"; };
  * @return {undefined}
  */
 ops.OperationRouter.prototype.close = function (callback) {"use strict"; };
+
+/**
+ * The passed cb will be called on every event of type eventId.
+ *
+ * @param {!string} eventId
+ * @param {!Function} cb
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.subscribe = function (eventId, cb) {"use strict"; };
+
+/**
+ * Undoes the subscription done with subscribe(...).
+ *
+ * @param {!string} eventId
+ * @param {!Function} cb
+ * @return {undefined}
+ */
+ops.OperationRouter.prototype.unsubscribe = function (eventId, cb) {"use strict"; };
+
+/**
+ * Returns if there are operations done locally that have not yet been
+ * synchronized with the host of the session.
+ *
+ * @return {!boolean}
+ */
+ops.OperationRouter.prototype.hasLocalUnsyncedOps = function () {"use strict"; };
+
+/**
+ * Returns if the connection to the host of the session is currently existing.
+ *
+ * @return {!boolean}
+ */
+ops.OperationRouter.prototype.hasSessionHostConnection = function () {"use strict"; };

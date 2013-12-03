@@ -76,8 +76,24 @@ define("webodf/editor/Editor", [
                 saveOdtFile = args.saveCallback,
                 close = args.closeCallback,
                 odfCanvas,
+                eventNotifier = new core.EventNotifier([
+                    Editor.EVENT_ERROR,
+                    Editor.EVENT_BEFORESAVETOFILE,
+                    Editor.EVENT_SAVEDTOFILE,
+                    Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED,
+                    Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED
+                ]),
                 pendingMemberId,
                 pendingEditorReadyCallback;
+
+            /**
+             * @param {!string} eventid
+             * @param {*} args
+             * @return {undefined}
+             */
+            function fireEvent(eventid, args) {
+                eventNotifier.emit(eventid, args);
+            }
 
             function getFileBlob(cbSuccess, cbError) {
                 var odfContainer = odfCanvas.odfContainer();
@@ -196,13 +212,26 @@ define("webodf/editor/Editor", [
                     }
                     blob = new Blob([data.buffer], {type: mimetype});
                     saveAs(blob, filename);
+                    //TODO: add callback as event handler to saveAs
+                    fireEvent(Editor.EVENT_SAVEDTOFILE, null);
                 }
                 function onerror(error) {
+                    // TODO: use callback for that
                     alert(error);
                 }
 
+                fireEvent(Editor.EVENT_BEFORESAVETOFILE, null);
                 getFileBlob(onsuccess, onerror);
             };
+
+            /**
+             * @param {!Object} error
+             * @return {undefined}
+             */
+            function handleOperationRouterErrors(error) {
+                // TODO: translate error into Editor ids or at least document the possible values
+                fireEvent(Editor.EVENT_ERROR, error);
+            }
 
             /**
              * open the initial document of an editing-session,
@@ -219,9 +248,24 @@ define("webodf/editor/Editor", [
                     // overwrite router 
                     // TODO: serverFactory should be a backendFactory,
                     // and there should be a backendFactory for local editing
-                    var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer());
+                    var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer(), handleOperationRouterErrors);
                     session.setOperationRouter(opRouter);
+                    // forward events
+                    // TODO: relying here on that opRouter uses the same id strings ATM, those should be defined at OperationRouter interface
+                    opRouter.subscribe(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function (hasUnsyncedOps) {
+                        fireEvent(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, hasUnsyncedOps);
+                    });
+                    opRouter.subscribe(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function (hasSessionHostConnection) {
+                        fireEvent(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, hasSessionHostConnection);
+                    });
+                    opRouter.subscribe(Editor.EVENT_BEFORESAVETOFILE, function () {
+                        fireEvent(Editor.EVENT_BEFORESAVETOFILE, null);
+                    });
+                    opRouter.subscribe(Editor.EVENT_SAVEDTOFILE, function () {
+                        fireEvent(Editor.EVENT_SAVEDTOFILE, null);
+                    });
 
+                    // now get existing ops and after that let the user edit
                     opRouter.requestReplay(function done() {
                         editorReadyCallback();
                     });
@@ -286,6 +330,38 @@ define("webodf/editor/Editor", [
 
                 tools.setEditorSession(undefined);
                 editorSession.sessionController.endEditing();
+            };
+
+            /**
+             * Allows to register listeners for certain events. Currently
+             * available events are, with the type of the argument passed to the callback:
+             * Editor.EVENT_BEFORESAVETOFILE - no argument
+             * Editor.EVENT_SAVEDTOFILE - no argument
+             * Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED - boolean, reflecting new hasLocalUnsyncedOperations state
+             * Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED - boolean, reflecting new hasSessionhostConnection state
+             * Editor.EVENT_ERROR - string, one of these errorcodes:
+             *   "notMemberOfSession"
+             *   "opExecutionFailure"
+             *   "sessionDoesNotExist"
+             *   "unknownOpReceived"
+             *   "unknownServerReply"
+             *   "unresolvableConflictingOps"
+             *
+             * @param {!string} eventid
+             * @param {!Function} listener
+             * @return {undefined}
+             */
+            this.addEventListener = function (eventid, listener) {
+                eventNotifier.subscribe(eventid, listener);
+            };
+
+            /**
+             * @param {!string} eventid
+             * @param {!Function} listener
+             * @return {undefined}
+             */
+            this.removeEventListener = function (eventid, listener) {
+                eventNotifier.unsubscribe(eventid, listener);
             };
 
             /**
@@ -440,6 +516,18 @@ define("webodf/editor/Editor", [
 
             init();
         }
+
+        /**@const @type {!string}*/
+        Editor.EVENT_ERROR =                             "error";
+        /**@const @type {!string}*/
+        Editor.EVENT_BEFORESAVETOFILE =                  "beforeSaveToFile";
+        /**@const @type {!string}*/
+        Editor.EVENT_SAVEDTOFILE =                       "savedToFile";
+        /**@const @type {!string}*/
+        Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED = "hasLocalUnsyncedOperationsChanged";
+        /**@const @type {!string}*/
+        Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED =   "hasSessionHostConnectionChanged";
+
         return Editor;
     });
 

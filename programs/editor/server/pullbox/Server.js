@@ -40,6 +40,7 @@ define("webodf/editor/server/pullbox/Server", [], function () {
 
         var self = this,
             token,
+            /**@const*/serverCallTimeout = 10000,
             base64 = new core.Base64();
 
         args = args || {};
@@ -53,22 +54,33 @@ define("webodf/editor/server/pullbox/Server", [], function () {
         /**
          * @param {!Object} message
          * @param {!function(!string)} cb
+         * @param {!function(!number,!string)} cbError  passes the status number
+         *     and the statustext, or -1 if there was an exception on sending
          * @return {undefined}
          */
-        function call(message, cb) {
+        function call(message, cb, cbError) {
             var xhr = new XMLHttpRequest(),
                 messageString = JSON.stringify(message);
 
             function handleResult() {
                 if (xhr.readyState === 4) {
-                    if ((xhr.status < 200 || xhr.status >= 300) && xhr.status === 0) {
+                    if (xhr.status < 200 || xhr.status >= 300) {
                         // report error
                         runtime.log("Status " + String(xhr.status) + ": " +
                                 xhr.responseText || xhr.statusText);
+                        cbError(xhr.status, xhr.statusText);
+                    } else {
+                        runtime.log("Status " + String(xhr.status) + ": " +
+                                xhr.responseText || xhr.statusText);
+                        cb(xhr.responseText);
                     }
-                    cb(xhr.responseText);
                 }
             }
+            function handleTimeout() {
+                runtime.log("Timeout on call to server.");
+                cbError(0, xhr.statusText);
+            }
+
 runtime.log("Sending message to server: "+messageString);
             // create body data for request from metadata and payload
 
@@ -78,11 +90,14 @@ runtime.log("Sending message to server: "+messageString);
                 xhr.setRequestHeader("requesttoken", token);
             }
             xhr.onreadystatechange = handleResult;
+            xhr.timeout = serverCallTimeout;
+            // TODO: seems handleResult is called on timeout as well, with xhr.status === 0
+//             xhr.ontimeout = handleTimeout;
             try {
                 xhr.send(messageString);
             } catch (e) {
                 runtime.log("Problem with calling server: " + e + " " + data);
-                cb(e.message);
+                cbError(-1, e.message);
             }
         }
 
@@ -151,14 +166,14 @@ runtime.log("Sending message to server: "+messageString);
                 } else {
                     failCb(responseData);
                 }
-            });
+            }, failCb);
         };
 
         /**
          * @param {!string} userId
          * @param {!string} sessionId
          * @param {!function(!string)} successCb
-         * @param {function()=} failCb
+         * @param {!function()} failCb
          * @return {undefined}
          */
         this.joinSession = function (userId, sessionId, successCb, failCb) {
@@ -175,18 +190,16 @@ runtime.log("Sending message to server: "+messageString);
                 if (response.hasOwnProperty("success") && response.success) {
                     successCb(response.member_id);
                 } else {
-                    if (failCb) {
-                        failCb();
-                    }
+                    failCb();
                 }
-            });
+            }, failCb);
         };
 
         /**
          * @param {!string} sessionId
          * @param {!string} memberId
          * @param {!function()} successCb
-         * @param {function()=} failCb
+         * @param {!function()} failCb
          * @return {undefined}
          */
         this.leaveSession = function (sessionId, memberId, successCb, failCb) {
@@ -203,18 +216,16 @@ runtime.log("Sending message to server: "+messageString);
                 if (response.hasOwnProperty("success") && response.success) {
                     successCb();
                 } else {
-                    if (failCb) {
-                        failCb();
-                    }
+                    failCb();
                 }
-            });
+            }, failCb);
         };
 
         /**
          * @param {!string} sessionId
          * @param {!string} memberId
          * @param {!string} seqHead
-         * @param {function()=} callback
+         * @param {!function(!Object=)} callback
          * @return {undefined}
          */
         this.writeSessionStateToFile = function(sessionId, memberId, seqHead, fileData, callback) {

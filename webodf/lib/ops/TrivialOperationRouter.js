@@ -68,7 +68,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
     /**
      * Sets the method which should be called to apply operations.
      *
-     * @param {!function(!ops.Operation)} playback_func
+     * @param {!function(!ops.Operation):boolean} playback_func
      * @return {undefined}
      */
     this.setPlaybackFunction = function (playback_func) {
@@ -89,11 +89,46 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
             opspec.timestamp = (new Date()).getTime();
             timedOp = operationFactory.create(opspec);
 
+            // TODO: handle return flag in error case
             playbackFunction(timedOp);
         });
     };
 
     this.close = function (cb) {
         cb();
+    };
+
+    /**
+     * @param {!string} eventId
+     * @param {!Function} cb
+     * @return {undefined}
+     */
+    /*jslint emptyblock: true, unparam: true*/
+    this.subscribe = function (eventId, cb) {
+    };
+    /*jslint emptyblock: false, unparam: false*/
+
+    /**
+     * @param {!string} eventId
+     * @param {!Function} cb
+     * @return {undefined}
+     */
+    /*jslint emptyblock: true, unparam: true*/
+    this.unsubscribe = function (eventId, cb) {
+    };
+    /*jslint emptyblock: false, unparam: false*/
+
+    /**
+     * @return {!boolean}
+     */
+    this.hasLocalUnsyncedOps = function () {
+        return false;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.hasSessionHostConnection = function () {
+        return true;
     };
 };

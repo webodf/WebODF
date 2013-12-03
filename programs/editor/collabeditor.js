@@ -69,9 +69,31 @@ var webodfEditor = (function () {
         server = null,
         editorOptions = {},
         currentPageId = null,
+        savingOverlay, disconnectedOverlay, hasLocalUnsyncedOpsOverlay,
         sessionList,
         userId, token,
+        currentSessionId, currentMemberId,
         booting = false;
+
+    // TODO: just some quick hack done for testing, make nice (e.g. the position calculation is fragile)
+    function addStatusOverlay(parentElementId, symbolFileName, position) {
+        var htmlns = document.documentElement.namespaceURI,
+            parentElement = document.getElementById(parentElementId),
+            imageElement, overlay;
+
+        runtime.assert(parentElement, "heya, no such element with id "+parentElementId);
+
+        overlay = document.createElementNS(htmlns, "div");
+        imageElement = document.createElementNS(htmlns, "img");
+        imageElement.src = symbolFileName;
+        overlay.appendChild(imageElement);
+        overlay.style.position = "relative";
+        overlay.style.top = 24*position + "px";
+        overlay.style.opacity = "0.8";
+        overlay.style.display = "none";
+        parentElement.appendChild(overlay);
+        return overlay;
+    }
 
     /**
      * Switches the pages by hiding the old one and unhiding the new
@@ -105,9 +127,35 @@ var webodfEditor = (function () {
     /**
      * @return {undefined}
      */
-     function startEditing() {
-         editorInstance.startEditing();
-     }
+    function startEditing() {
+        editorInstance.startEditing();
+    }
+
+    /**
+     * @param {!boolean=} ignoreError
+     * @return {undefined}
+     */
+    function closeEditing(ignoreError) {
+        editorInstance.endEditing();
+        editorInstance.closeSession(function() {
+            server.leaveSession(currentSessionId, currentMemberId, function() {
+                showSessions();
+            }, function() {
+                if (ignoreError) {
+                    showSessions();
+                }
+                // TODO: else report problem
+            });
+        });
+    }
+
+    /**
+     * @return {undefined}
+     */
+    function handleEditingError(error) {
+        alert("Something went wrong:\n"+error);
+        closeEditing(true);
+    }
 
     /**
      * @returns {undefined}
@@ -131,7 +179,10 @@ var webodfEditor = (function () {
 
         updateLocationWithSessionId(sessionId);
 
+        currentSessionId = sessionId;
         server.joinSession(userId, sessionId, function(memberId) {
+            currentMemberId = memberId;
+
             if (!editorInstance) {
                 require({ }, [
                 "webodf/editor/Translator",
@@ -140,19 +191,28 @@ var webodfEditor = (function () {
                         var locale = navigator.language || "en-US",
                             t = new Translator(locale, function (editorTranslator) {
                                 runtime.setTranslator(editorTranslator.translate);
+                                savingOverlay = addStatusOverlay("editor", "document-save.png", 0);
+                                hasLocalUnsyncedOpsOverlay = addStatusOverlay("editor", "vcs-locally-modified.png", 0);
+                                disconnectedOverlay = addStatusOverlay("editor", "network-disconnect.png", 1);
 
                                 editorOptions = editorOptions || {}; // TODO: cleanup
                                 editorOptions.networkSecurityToken = token;
-                                editorOptions.closeCallback = function() {
-                                    editorInstance.endEditing();
-                                    editorInstance.closeSession(function() {
-                                        server.leaveSession(sessionId, memberId, function() {
-                                            showSessions();
-                                        });
-                                    });
-                                };
+                                editorOptions.closeCallback = closeEditing;
 
                                 editorInstance = new Editor(editorOptions, server, serverFactory);
+                                editorInstance.addEventListener(Editor.EVENT_BEFORESAVETOFILE, function() {
+                                    savingOverlay.style.display = "";
+                                });
+                                editorInstance.addEventListener(Editor.EVENT_SAVEDTOFILE, function() {
+                                    savingOverlay.style.display = "none";
+                                });
+                                editorInstance.addEventListener(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function(has) {
+                                    hasLocalUnsyncedOpsOverlay.style.display = has ? "" : "none";
+                                });
+                                editorInstance.addEventListener(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function(has) {
+                                    disconnectedOverlay.style.display = has ? "none" : "";
+                                });
+                                editorInstance.addEventListener(Editor.EVENT_ERROR, handleEditingError);
 
                                 // load the document and get called back when it's live
                                 editorInstance.openSession(sessionId, memberId, startEditing);
@@ -162,6 +222,8 @@ var webodfEditor = (function () {
             } else {
                 editorInstance.openSession(sessionId, memberId, startEditing);
             }
+        }, function() {
+            // TODO: handle error
         });
     }
 
