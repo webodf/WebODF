@@ -158,6 +158,27 @@
         }
 
         /**
+         * Gets the unfiltered DOM 'offset' of a node within a container that may not be it's direct parent.
+         * @param {!Node} node
+         * @param {!Node} container
+         * @return {!number}
+         */
+        function getPositionInContainingNode(node, container) {
+            var offset = 0,
+                n;
+            while (node.parentNode !== container) {
+                runtime.assert(node.parentNode !== null, "parent is null");
+                node = /**@type{!Node}*/(node.parentNode);
+            }
+            n = container.firstChild;
+            while (n !== node) {
+                offset += 1;
+                n = n.nextSibling;
+            }
+            return offset;
+        }
+
+        /**
          * If either the start or end boundaries of a range start within a text
          * node, this function will split these text nodes and reset the range
          * boundaries to select the new nodes. The end result is that there are
@@ -175,12 +196,25 @@
          *                           processing has been complete.
          */
         function splitBoundaries(range) {
-            var modifiedNodes = [], end, splitStart, node, text;
+            var modifiedNodes = [],
+                originalEndContainer,
+                resetToContainerLength,
+                end,
+                splitStart,
+                node,
+                text,
+                offset;
 
             if (range.startContainer.nodeType === Node.TEXT_NODE
                     || range.endContainer.nodeType === Node.TEXT_NODE) {
-                end = range.endContainer
-                    && findStablePoint(range.endContainer, range.endOffset);
+                originalEndContainer = range.endContainer;
+                resetToContainerLength = range.endContainer.nodeType !== Node.TEXT_NODE ?
+                        range.endOffset === range.endContainer.childNodes.length : false;
+
+                end = findStablePoint(range.endContainer, range.endOffset);
+                if (end.container === originalEndContainer) {
+                    originalEndContainer = null;
+                }
                 // Stable points need to be found to ensure splitting the text
                 // node doesn't inadvertently modify the other end of the range
                 range.setEnd(end.container, end.offset);
@@ -207,8 +241,20 @@
                         range.setStart(splitStart, 0);
                     }
                 }
-            }
 
+                if (originalEndContainer !== null) {
+                    node = range.endContainer;
+                    while (node.parentNode && node.parentNode !== originalEndContainer) {
+                        node = node.parentNode;
+                    }
+                    if (resetToContainerLength) {
+                        offset = originalEndContainer.childNodes.length;
+                    } else {
+                        offset = getPositionInContainingNode(node, originalEndContainer);
+                    }
+                    range.setEnd(originalEndContainer, offset);
+                }
+            }
             return modifiedNodes;
         }
         this.splitBoundaries = splitBoundaries;
@@ -452,26 +498,6 @@
                 Boolean(parent.compareDocumentPosition(descendant) & Node.DOCUMENT_POSITION_CONTAINED_BY);
         }
 
-        /**
-         * Calculate node offset in unfiltered DOM world
-         * @param {!Node} node
-         * @param {!Node} container
-         * @return {!number}
-         */
-        function getPositionInContainingNode(node, container) {
-            var offset = 0,
-                n;
-            while (node.parentNode !== container) {
-                runtime.assert(node.parentNode !== null, "parent is null");
-                node = /**@type{!Node}*/(node.parentNode);
-            }
-            n = container.firstChild;
-            while (n !== node) {
-                offset += 1;
-                n = n.nextSibling;
-            }
-            return offset;
-        }
         /**
          * Return a number > 0 when point 1 precedes point 2. Return 0 if the points
          * are equal. Return < 0 when point 2 precedes point 1.
