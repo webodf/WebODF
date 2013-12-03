@@ -204,6 +204,14 @@ define("webodf/editor/Editor", [
                 getFileBlob(onsuccess, onerror);
             };
 
+             /**
+             * @param {!Object} error
+             * @return {undefined}
+             */
+            function handleOperationRouterErrors(error) {
+                // TODO: translate error into Editor ids or at least document the possible values
+            }
+
             /**
              * open the initial document of an editing-session,
              * request a replay of previous operations, call
@@ -219,7 +227,7 @@ define("webodf/editor/Editor", [
                     // overwrite router 
                     // TODO: serverFactory should be a backendFactory,
                     // and there should be a backendFactory for local editing
-                    var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer());
+                    var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer(), handleOperationRouterErrors);
                     session.setOperationRouter(opRouter);
 
                     opRouter.requestReplay(function done() {

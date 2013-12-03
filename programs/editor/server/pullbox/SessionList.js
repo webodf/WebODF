@@ -111,6 +111,8 @@ define("webodf/editor/server/pullbox/SessionList", [], function () {
                 } else {
                     runtime.log("Meh, sessionlist data broken: " + responseData);
                 }
+            }, function() {
+                // ignore error for now
             });
         }
 

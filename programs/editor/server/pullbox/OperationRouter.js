@@ -43,7 +43,7 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
      * @constructor
      * @implements ops.OperationRouter
      */
-    return function PullBoxOperationRouter(sessionId, memberId, server, odfContainer) {
+    return function PullBoxOperationRouter(sessionId, memberId, server, odfContainer, errorCallback) {
         "use strict";
 
         var operationFactory,
@@ -152,13 +152,13 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
                     if (op !== null) {
                         if (!playbackFunction(op)) {
                             hasError = true;
-                            // TODO: call whatever error callback
+                            errorCallback("opExecutionFailure");
                             return;
                         }
                     } else {
                         hasError = true;
                         runtime.log("ignoring invalid incoming opspec: " + opspec);
-                        // TODO: call whatever error callback
+                        errorCallback("unknownOpReceived");
                         return;
                     }
                 }
@@ -338,12 +338,18 @@ runtime.log("OperationRouter: sending sync_ops call");
                         isInstantSyncRequested = true;
                     }
                 } else if (response.result === "error") {
+                    runtime.log("server reports an error: "+response.error);
                     hasError = true;
-                    runtime.assert(false, "server reports an error: "+response.error);
+                    errorCallback(
+                        response.error === "ENOSESSION" ? "sessionDoesNotExist":
+                        response.error === "ENOMEMBER" ?  "notMemberOfSession":
+                                                          "unknownServerReply"
+                    );
                     return;
                 } else {
                     hasError = true;
-                    runtime.assert(false, "Unexpected result on sync-ops call: "+response.result);
+                    runtime.log("Unexpected result on sync-ops call: "+response.result);
+                    errorCallback("unknownServerReply");
                     return;
                 }
 
@@ -352,12 +358,7 @@ runtime.log("OperationRouter: sending sync_ops call");
 
                 if (hasUnresolvableConflict) {
                     hasError = true;
-                    // TODO: offer option to reload session automatically?
-                    runtime.assert(false,
-                        "Sorry to tell:\n" +
-                        "we hit a pair of operations in a state which yet need to be supported for transformation against each other.\n" +
-                        "Client disconnected from session, no further editing accepted.\n\n" +
-                        "Please reconnect manually for now.");
+                    errorCallback("unresolvableConflictingOps");
                 } else {
                     // prepare next sync
                     if (isInstantSyncRequested) {
@@ -372,6 +373,22 @@ runtime.log("OperationRouter: sending sync_ops call");
                     }
                     playUnplayedServerOpSpecs();
                 }
+            }, function() {
+                runtime.log("meh, server cannot be reached ATM.");
+                // signal connection problem, but do not give up for now
+                updateHasSessionHostConnectionState(false);
+                // put the (not) send ops back into the outgoing queue
+                unsyncedClientOpspecQueue = syncedClientOpspecs.concat(unsyncedClientOpspecQueue);
+                syncRequestCallbacksQueue = syncRequestCallbacksArray.concat(syncRequestCallbacksQueue);
+                // unlock
+                isSyncCallRunning = false;
+                // nothing on client to sync?
+                if (unsyncedClientOpspecQueue.length === 0) {
+                    idleTimeout = runtime.getWindow().setTimeout(startSyncOpsTimeout, idleDelay);
+                } else {
+                    startSyncOpsTimeout();
+                }
+                playUnplayedServerOpSpecs();
             });
         }
 
@@ -477,7 +494,7 @@ runtime.log("OperationRouter: instant opsSync requested");
                 // apply locally
                 if (!playbackFunction(op)) {
                     hasError = true;
-                    // TODO: call whatever error callback
+                    errorCallback("opExecutionFailure");
                     return;
                 }
 
