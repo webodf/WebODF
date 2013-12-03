@@ -333,6 +333,20 @@ define("webodf/editor/Editor", [
             };
 
             /**
+             * Allows to register listeners for certain events. Currently
+             * available events are, with the type of the argument passed to the callback:
+             * Editor.EVENT_BEFORESAVETOFILE - no argument
+             * Editor.EVENT_SAVEDTOFILE - no argument
+             * Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED - boolean, reflecting new hasLocalUnsyncedOperations state
+             * Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED - boolean, reflecting new hasSessionhostConnection state
+             * Editor.EVENT_ERROR - string, one of these errorcodes:
+             *   "notMemberOfSession"
+             *   "opExecutionFailure"
+             *   "sessionDoesNotExist"
+             *   "unknownOpReceived"
+             *   "unknownServerReply"
+             *   "unresolvableConflictingOps"
+             *
              * @param {!string} eventid
              * @param {!Function} listener
              * @return {undefined}
