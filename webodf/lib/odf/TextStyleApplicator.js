@@ -41,35 +41,11 @@ runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.LoopWatchDog");
 runtime.loadClass("odf.Namespaces");
 
-/*jslint emptyblock: true, unparam: true*/
-/**
- * @interface
- */
-odf.TextStyleApplicatorFormatting = function () {"use strict"; };
-/**
- * @param {!CharacterData} textnode
- * @return {Object|undefined}
- */
-odf.TextStyleApplicatorFormatting.prototype.getAppliedStylesForElement = function (textnode) {"use strict"; };
-/**
- * @param {!string} parentStyleName
- * @param {!string} family
- * @param {!Object} overrides
- * @return {!Object}
- */
-odf.TextStyleApplicatorFormatting.prototype.createDerivedStyleObject = function (parentStyleName, family, overrides) {"use strict"; };
-/**
- * @param {!Element} styleNode
- * @param {!Object} properties Prefix to put in front of new auto styles
- */
-odf.TextStyleApplicatorFormatting.prototype.updateStyle = function (styleNode, properties) {"use strict"; };
-/*jslint emptyblock: false, unparam: false*/
-
 /**
  * Class for applying a supplied text style to the given text nodes.
  * @constructor
  * @param {!odf.ObjectNameGenerator} objectNameGenerator Source for generating unique automatic style names
- * @param {!odf.TextStyleApplicatorFormatting} formatting Formatting retrieval and computation store
+ * @param {!odf.Formatting} formatting Formatting retrieval and computation store
  * @param {!Node} automaticStyles Root element for automatic styles
  */
 odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, formatting, automaticStyles) {

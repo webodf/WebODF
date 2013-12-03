@@ -43,11 +43,9 @@ runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("odf.TextStyleApplicator");
 
 /**
  * @constructor
- * @implements odf.TextStyleApplicatorFormatting
  */
 odf.Formatting = function Formatting() {
     "use strict";
