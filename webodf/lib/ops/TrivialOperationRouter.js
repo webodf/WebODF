@@ -106,4 +106,13 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
     this.unsubscribeHasLocalUnsyncedOpsUpdates = function (subscriber) {
     };
     /*jslint emptyblock: false, unparam: false*/
+
+    this.getHasSessionHostConnectionAndUpdates = function (subscriber) {
+        subscriber(true);
+    };
+
+    /*jslint emptyblock: true, unparam: true*/
+    this.unsubscribeHasSessionHostConnectionUpdates = function (subscriber) {
+    };
+    /*jslint emptyblock: false, unparam: false*/
 };
