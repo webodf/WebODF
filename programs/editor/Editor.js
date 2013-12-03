@@ -76,8 +76,40 @@ define("webodf/editor/Editor", [
                 saveOdtFile = args.saveCallback,
                 close = args.closeCallback,
                 odfCanvas,
+                eventNotifier = new core.EventNotifier([
+                    Editor.EVENT_ERROR,
+                    Editor.EVENT_BEFORESAVETOFILE,
+                    Editor.EVENT_SAVEDTOFILE,
+                    Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED,
+                    Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED
+                ]),
                 pendingMemberId,
                 pendingEditorReadyCallback;
+
+            /**
+             * @param {!string} eventid
+             * @param {*} args
+             * @return {undefined}
+             */
+            function fireEvent(eventid, args) {
+                eventNotifier.emit(eventid, args);
+            };
+
+            /**
+             * @param {!boolean} hasUnsyncedOps
+             * @return {undefined}
+             */
+            function forwardHasUnsyncedLocalOps(hasUnsyncedOps) {
+                fireEvent(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, hasUnsyncedOps);
+            }
+
+            /**
+             * @param {!boolean} hasSessionHostConnection
+             * @return {undefined}
+             */
+            function forwardHasSessionHostConnection(hasSessionHostConnection) {
+                fireEvent(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, hasSessionHostConnection);
+            }
 
             function getFileBlob(cbSuccess, cbError) {
                 var odfContainer = odfCanvas.odfContainer();
@@ -196,20 +228,25 @@ define("webodf/editor/Editor", [
                     }
                     blob = new Blob([data.buffer], {type: mimetype});
                     saveAs(blob, filename);
+                    //TODO: add callback as event handler to saveAs
+                    fireEvent(Editor.EVENT_SAVEDTOFILE, null);
                 }
                 function onerror(error) {
+                    // TODO: use callback for that
                     alert(error);
                 }
 
+                fireEvent(Editor.EVENT_BEFORESAVETOFILE, null);
                 getFileBlob(onsuccess, onerror);
             };
 
-             /**
+            /**
              * @param {!Object} error
              * @return {undefined}
              */
             function handleOperationRouterErrors(error) {
                 // TODO: translate error into Editor ids or at least document the possible values
+                fireEvent(Editor.EVENT_ERROR, error);
             }
 
             /**
@@ -229,6 +266,9 @@ define("webodf/editor/Editor", [
                     // and there should be a backendFactory for local editing
                     var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer(), handleOperationRouterErrors);
                     session.setOperationRouter(opRouter);
+                    // TODO: this results also in event directly on calling it
+                    opRouter.getHasLocalUnsyncedOpsAndUpdates(forwardHasUnsyncedLocalOps);
+                    opRouter.getHasSessionHostConnectionAndUpdates(forwardHasSessionHostConnection);
 
                     opRouter.requestReplay(function done() {
                         editorReadyCallback();
@@ -294,6 +334,24 @@ define("webodf/editor/Editor", [
 
                 tools.setEditorSession(undefined);
                 editorSession.sessionController.endEditing();
+            };
+
+            /**
+             * @param {!string} eventid
+             * @param {!Function} listener
+             * @return {undefined}
+             */
+            this.addEventListener = function (eventid, listener) {
+                eventNotifier.subscribe(eventid, listener);
+            };
+
+            /**
+             * @param {!string} eventid
+             * @param {!Function} listener
+             * @return {undefined}
+             */
+            this.removeEventListener = function (eventid, listener) {
+                eventNotifier.unsubscribe(eventid, listener);
             };
 
             /**
@@ -448,6 +506,18 @@ define("webodf/editor/Editor", [
 
             init();
         }
+
+        /**@const @type {!string}*/
+        Editor.EVENT_ERROR =                             "error";
+        /**@const @type {!string}*/
+        Editor.EVENT_BEFORESAVETOFILE =                  "beforeSaveToFile";
+        /**@const @type {!string}*/
+        Editor.EVENT_SAVEDTOFILE =                       "savedToFile";
+        /**@const @type {!string}*/
+        Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED = "hasLocalUnsyncedOperationsChanged";
+        /**@const @type {!string}*/
+        Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED =   "hasSessionHostConnectionChanged";
+
         return Editor;
     });
 
