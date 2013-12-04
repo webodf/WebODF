@@ -40,17 +40,16 @@
 
 runtime.loadClass("core.Base64");
 runtime.loadClass("core.Zip");
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfNodeFilter");
-runtime.loadClass("odf.MetadataManager");
 
 (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
-        /**@type{!odf.MetadataManager}*/
-        metadataManager,
+        domUtils = new core.DomUtils(),
         /**@const
            @type{!string}*/
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
@@ -239,8 +238,7 @@ runtime.loadClass("odf.MetadataManager");
     odf.ODFDocumentElement.prototype.masterStyles;
     /**
      * Optional tag <office:meta/>
-     * If it is missing, it is created.
-     * @type {!Element}
+     * @type {?Element}
      */
     odf.ODFDocumentElement.prototype.meta;
     /**
@@ -385,6 +383,45 @@ runtime.loadClass("odf.MetadataManager");
                 }
                 n = n.nextSibling;
             }
+        }
+
+        /**
+         * Returns the meta element. If it did not exist before, it will be created.
+         * @return {!Element}
+         */
+        function getEnsuredMetaElement() {
+            var root = self.rootElement,
+                meta = root.meta;
+
+            if (!meta) {
+                root.meta = meta = document.createElementNS(officens, "meta");
+                setChild(root, meta);
+            }
+
+            return meta;
+        }
+
+        /**
+         * @param {!string} metadataNs
+         * @param {!string} metadataLocalName
+         * @return {?string}
+         */
+        function getMetaData(metadataNs, metadataLocalName) {
+            var node = self.rootElement.meta, textNode;
+
+            node = node && node.firstChild;
+            while (node && (node.namespaceURI !== metadataNs || node.localName !== metadataLocalName)) {
+                node = node.nextSibling;
+            }
+            node = node && node.firstChild;
+            while (node && node.nodeType !== Node.TEXT_NODE) {
+                node = node.nextSibling;
+            }
+            if (node) {
+                textNode = /**@type{!Text}*/(node);
+                return textNode.data;
+            }
+            return null;
         }
 
         /**
@@ -541,13 +578,6 @@ runtime.loadClass("odf.MetadataManager");
         }
 
         /**
-         * @param {!Element} metaRootElement
-         */
-        function initializeMetadataManager(metaRootElement) {
-            metadataManager = new odf.MetadataManager(metaRootElement);
-        }
-
-        /**
          * Import the document elementnode into the DOM of OdfContainer.
          * Any processing instructions are removed, since importing them
          * gives an exception.
@@ -698,11 +728,8 @@ runtime.loadClass("odf.MetadataManager");
                 return;
             }
             root = self.rootElement;
-            node = getDirectChild(node, officens, 'meta');
-            root.meta = node || xmldoc.createElementNS(officens, "meta");
+            root.meta = getDirectChild(node, officens, 'meta');
             setChild(root, root.meta);
-
-            initializeMetadataManager(root.meta);
         }
         /**
          * @param {Document} xmldoc
@@ -969,14 +996,6 @@ runtime.loadClass("odf.MetadataManager");
         };
 
         /**
-         * Returns the metadata manager associated with this document
-         * @return {!odf.MetadataManager}
-         */
-        this.getMetadataManager = function () {
-            return metadataManager;
-        };
-
-        /**
          * Open file and parse it. Return the XML Node. Return the root node of
          * the file or null if this is not possible.
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
@@ -995,6 +1014,39 @@ runtime.loadClass("odf.MetadataManager");
          */
         this.getPartData = function (url, callback) {
             zip.load(url, callback);
+        };
+
+        /**
+         * Sets the metadata fields from the given properties map.
+         * @param {?Object.<!string, !string>} setProperties A flat object that is a string->string map of field name -> value.
+         * @param {?Array.<!string>} removedPropertyNames An array of metadata field names (prefixed).
+         * @return {undefined}
+         */
+        function setMetadata(setProperties, removedPropertyNames) {
+            var metaElement = getEnsuredMetaElement();
+
+            if (setProperties) {
+                domUtils.mapKeyValObjOntoNode(metaElement, setProperties, odf.Namespaces.lookupNamespaceURI);
+            }
+            if (removedPropertyNames) {
+                domUtils.removeKeyElementsFromNode(metaElement, removedPropertyNames, odf.Namespaces.lookupNamespaceURI);
+            }
+        }
+        this.setMetadata = setMetadata;
+
+        /**
+         * Increment the number of times the document has been edited.
+         * @return {undefined}
+         */
+        this.incrementEditingCycles = function () {
+            var currentValueString = getMetaData(odf.Namespaces.metans, "editing-cycles"),
+                currentCycles = currentValueString ? parseInt(currentValueString, 10) : 0;
+
+            if (isNaN(currentCycles)) {
+                currentCycles = 0;
+            }
+
+            setMetadata({"meta:editing-cycles": currentCycles + 1}, null);
         };
 
         /**
@@ -1020,8 +1072,7 @@ runtime.loadClass("odf.MetadataManager");
                 generatorString = generatorString + " " + window.navigator.userAgent;
             }
 
-            metadataManager.setMetadata({"meta:generator": generatorString},
-                null);
+            setMetadata({"meta:generator": generatorString}, null);
         }
 
         /**
@@ -1060,8 +1111,6 @@ runtime.loadClass("odf.MetadataManager");
             addToplevelElement("masterStyles",    "master-styles");
             addToplevelElement("body");
             root.body.appendChild(text);
-
-            initializeMetadataManager(root.meta);
 
             setState(OdfContainer.DONE);
             return emptyzip;

@@ -386,7 +386,8 @@ ops.TransformationTests = function TransformationTests(runner) {
         odtDocument = new ops.OdtDocument(t.odfcanvas);
         text = odtDocument.getRootNode();
         styles = odfContainer.rootElement.styles;
-        meta = odfContainer.rootElement.meta;
+        meta = /**@type{!Element}*/(odfContainer.rootElement.meta);
+        runtime.assert(Boolean(meta), "Missing <office:meta>!");
 
         // inject test data
         if (stylesbefore) {

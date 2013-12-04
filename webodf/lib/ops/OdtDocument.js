@@ -391,7 +391,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         var spec = op.spec(),
             memberId = spec.memberid,
             date = new Date(spec.timestamp).toISOString(),
-            metadataManager = odfCanvas.odfContainer().getMetadataManager(),
+            odfContainer = odfCanvas.odfContainer(),
             fullName;
 
         // If the operation is an edit (that changes the
@@ -399,7 +399,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         if (op.isEdit) {
             fullName = self.getMember(memberId).getProperties().fullName;
 
-            metadataManager.setMetadata({
+            odfContainer.setMetadata({
                 "dc:creator": fullName,
                 "dc:date": date
             }, null);
@@ -407,12 +407,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             // If no previous op was found in this session,
             // then increment meta:editing-cycles by 1.
             if (!lastEditingOp) {
-                metadataManager.incrementEditingCycles();
+                odfContainer.incrementEditingCycles();
                 // Remove certain metadata fields that
                 // should be updated as soon as edits happen,
                 // but cannot be because we don't support those yet.
                 if (!unsupportedMetadataRemoved) {
-                    metadataManager.setMetadata(null, [
+                    odfContainer.setMetadata(null, [
                         "meta:editing-duration",
                         "meta:document-statistic"
                     ]);

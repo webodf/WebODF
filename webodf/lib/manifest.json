@@ -247,10 +247,6 @@
         "odf/OdfUtils.js",
         "odf/StyleInfo.js"
     ],
-    "odf/MetadataManager.js": [
-        "core/DomUtils.js",
-        "odf/Namespaces.js"
-    ],
     "odf/Namespaces.js": [
     ],
     "odf/ObjectNameGenerator.js": [
@@ -272,8 +268,8 @@
     ],
     "odf/OdfContainer.js": [
         "core/Base64.js",
+        "core/DomUtils.js",
         "core/Zip.js",
-        "odf/MetadataManager.js",
         "odf/Namespaces.js",
         "odf/OdfNodeFilter.js",
         "odf/StyleInfo.js",
