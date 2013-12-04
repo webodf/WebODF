@@ -180,7 +180,24 @@
    <op optype="MoveCursor" memberid="Joe" position="2"/>
    <op optype="InsertText" memberid="Joe" position="2" text="b"/>
   </ops>
+  <after><office:text><text:p>a <c:cursor c:memberId="Joe"/>b</text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_withSameCursor_AfterSpace2_moveCursor">
+  <before><office:text><text:p>a<text:s> </text:s></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="2"/>
+   <op optype="InsertText" memberid="Joe" position="2" text="b" moveCursor="true"/>
+  </ops>
   <after><office:text><text:p>a b<c:cursor c:memberId="Joe"/></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_withSameCursor_BeforeSpan_moveCursor">
+  <before><office:text><text:p>a<text:span>b</text:span></text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="InsertText" memberid="Joe" position="0" text="c" moveCursor="true"/>
+  </ops>
+  <after><office:text><text:p>c<c:cursor c:memberId="Joe"/>a<text:span>b</text:span></text:p><text:p/></office:text></after>
  </test>
  <test name="InsertText_withSameCursor_BeforeSpan">
   <before><office:text><text:p>a<text:span>b</text:span></text:p><text:p/></office:text></before>
@@ -188,7 +205,15 @@
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="InsertText" memberid="Joe" position="0" text="c"/>
   </ops>
-  <after><office:text><text:p>c<c:cursor c:memberId="Joe"/>a<text:span>b</text:span></text:p><text:p/></office:text></after>
+  <after><office:text><text:p><c:cursor c:memberId="Joe"/>ca<text:span>b</text:span></text:p><text:p/></office:text></after>
+ </test>
+ <test name="InsertText_withSameCursor_moveCursor">
+  <before><office:text><text:p>a</text:p><text:p/></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="InsertText" memberid="Joe" position="0" text="b" moveCursor="true"/>
+  </ops>
+  <after><office:text><text:p>b<c:cursor c:memberId="Joe"/>a</text:p><text:p/></office:text></after>
  </test>
  <test name="InsertText_withSameCursor">
   <before><office:text><text:p>a</text:p><text:p/></office:text></before>
@@ -196,14 +221,14 @@
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="InsertText" memberid="Joe" position="0" text="b"/>
   </ops>
-  <after><office:text><text:p>b<c:cursor c:memberId="Joe"/>a</text:p><text:p/></office:text></after>
+  <after><office:text><text:p><c:cursor c:memberId="Joe"/>ba</text:p><text:p/></office:text></after>
  </test>
  <test name="InsertText_withSameCursor2">
   <before><office:text><text:p>ab c</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" position="1"/>
-   <op optype="InsertText" memberid="Joe" position="1" text="d"/>
+   <op optype="InsertText" memberid="Joe" position="1" text="d" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>ad<c:cursor c:memberId="Joe"/>b c</text:p><text:p/></office:text></after>
  </test>
@@ -212,7 +237,7 @@
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" position="2"/>
-   <op optype="InsertText" memberid="Alice" position="2" text="b"/>
+   <op optype="InsertText" memberid="Alice" position="2" text="b" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a <c:cursor c:memberId="Joe"/>b</text:p><text:p/></office:text></after>
  </test>
@@ -220,7 +245,7 @@
   <before><office:text><text:p>a<text:span>b</text:span></text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
-   <op optype="InsertText" memberid="Alice" position="0" text="c"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="c" moveCursor="true"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Joe"/>ca<text:span>b</text:span></text:p><text:p/></office:text></after>
  </test>
@@ -228,7 +253,7 @@
   <before><office:text><text:p>a</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
-   <op optype="InsertText" memberid="Alice" position="0" text="b"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="b" moveCursor="true"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Joe"/>ba</text:p><text:p/></office:text></after>
  </test>
@@ -237,54 +262,54 @@
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" position="1"/>
-   <op optype="InsertText" memberid="Alice" position="1" text="d"/>
+   <op optype="InsertText" memberid="Alice" position="1" text="d" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Joe"/>db c</text:p><text:p/></office:text></after>
  </test>
  <test name="InsertSpace">
   <before><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="InsertText" position="0" text=" "/>
+   <op optype="InsertText" position="0" text=" " moveCursor="true"/>
   </ops>
   <after><office:text><text:p><text:s> </text:s></text:p></office:text></after>
  </test>
  <test name="InsertSpace_IntoExistingSpaceBlock">
   <before><office:text><text:p>a <text:s> </text:s><text:s> </text:s>b</text:p></office:text></before>
   <ops>
-   <op optype="InsertText" position="2" text=" "/>
+   <op optype="InsertText" position="2" text=" " moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s><text:s> </text:s>b</text:p></office:text></after>
  </test>
  <test name="InsertSpaceAndCharacters">
   <before><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="InsertText" position="0" text="a"/>
-   <op optype="InsertText" position="1" text=" "/>
-   <op optype="InsertText" position="2" text="b"/>
-   <op optype="InsertText" position="3" text="c"/>
+   <op optype="InsertText" position="0" text="a" moveCursor="true"/>
+   <op optype="InsertText" position="1" text=" " moveCursor="true"/>
+   <op optype="InsertText" position="2" text="b" moveCursor="true"/>
+   <op optype="InsertText" position="3" text="c" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a bc</text:p></office:text></after>
  </test>
  <test name="InsertMultipleSpaces">
   <before><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="InsertText" position="0" text="a    b"/>
+   <op optype="InsertText" position="0" text="a    b" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s><text:s> </text:s>b</text:p></office:text></after>
  </test>
  <test name="InsertWithTrailingSpace">
   <before><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="InsertText" position="0" text="a "/>
+   <op optype="InsertText" position="0" text="a " moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a<text:s> </text:s></text:p></office:text></after>
  </test>
  <test name="InsertSpaceAndCharacters2">
   <before><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="InsertText" position="0" text="a "/>
-   <op optype="InsertText" position="2" text="b"/>
-   <op optype="InsertText" position="3" text="c"/>
+   <op optype="InsertText" position="0" text="a " moveCursor="true"/>
+   <op optype="InsertText" position="2" text="b" moveCursor="true"/>
+   <op optype="InsertText" position="3" text="c" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>a bc</text:p></office:text></after>
  </test>
@@ -292,9 +317,9 @@
   <before><office:text><text:p/></office:text></before>
   <ops>
    <op optype="SplitParagraph" position="0"/>
-   <op optype="InsertText" position="1" text="&#x9;  "/>
+   <op optype="InsertText" position="1" text="&#x9;  " moveCursor="true"/>
    <op optype="SplitParagraph" position="4"/>
-   <op optype="InsertText" position="5" text="U"/>
+   <op optype="InsertText" position="5" text="U" moveCursor="true"/>
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
   <after><office:text><text:p><text:tab>&#x9;</text:tab> <text:s> </text:s></text:p><text:p>U</text:p></office:text></after>
@@ -309,7 +334,7 @@
  <test name="AddRemoveSpace">
   <before><office:text><text:p>ab</text:p></office:text></before>
   <ops>
-   <op optype="InsertText" position="1" text="  "/>
+   <op optype="InsertText" position="1" text="  " moveCursor="true"/>
    <op optype="RemoveText" position="1" length="1"/>
   </ops>
   <after><office:text><text:p>a b</text:p></office:text></after>
@@ -317,70 +342,70 @@
  <test name="InsertTab">
   <before><office:text><text:p/></office:text></before>
    <ops>
-    <op optype="InsertText" position="0" text="&#x9;"/>
+    <op optype="InsertText" position="0" text="&#x9;" moveCursor="true"/>
    </ops>
   <after><office:text><text:p><text:tab>&#09;</text:tab></text:p></office:text></after>
  </test>
  <test name="InsertText_TabChars">
   <before><office:text><text:p/></office:text></before>
    <ops>
-    <op optype="InsertText" position="0" text="ab&#x9;c"/>
+    <op optype="InsertText" position="0" text="ab&#x9;c" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>ab<text:tab>&#09;</text:tab>c</text:p></office:text></after>
  </test>
  <test name="InsertText_SingleSpaceChar">
   <before><office:text><text:p/></office:text></before>
    <ops>
-    <op optype="InsertText" position="0" text="a bc"/>
+    <op optype="InsertText" position="0" text="a bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a bc</text:p></office:text></after>
  </test>
  <test name="InsertText_TextWithLeadingSpaceAfterSpace">
   <before><office:text><text:p>a d</text:p></office:text></before>
    <ops>
-    <op optype="InsertText" position="2" text=" bc"/>
+    <op optype="InsertText" position="2" text=" bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a <text:s> </text:s>bcd</text:p></office:text></after>
  </test>
  <test name="InsertText_TextAfterUnexpandedSpace">
   <before><office:text><text:p>a d</text:p></office:text></before>
    <ops>
-    <op optype="InsertText" position="2" text="bc"/>
+    <op optype="InsertText" position="2" text="bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a bcd</text:p></office:text></after>
  </test>
  <test name="InsertText_TextAfterExpandedSpace">
   <before><office:text><text:p>a<text:s> </text:s>d</text:p></office:text></before>
    <ops>
-    <op optype="InsertText" position="2" text="bc"/>
+    <op optype="InsertText" position="2" text="bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a bcd</text:p></office:text></after>
  </test>
  <test name="InsertText_MultipleSpaceChar">
   <before><office:text><text:p/></office:text></before>
    <ops>
-    <op optype="InsertText" position="0" text="a   bc"/>
+    <op optype="InsertText" position="0" text="a   bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a <text:s> </text:s><text:s> </text:s>bc</text:p></office:text></after>
  </test>
  <test name="InsertText_DowngradeLeadingSpaces">
   <before><office:text><text:p>a</text:p></office:text></before>
    <ops>
-    <op optype="InsertText" position="1" text=" bc"/>
+    <op optype="InsertText" position="1" text=" bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a bc</text:p></office:text></after>
  </test>
  <test name="InsertText_DowngradeTrailingSpaces">
   <before><office:text><text:p>a <text:s> </text:s>d</text:p></office:text></before>
    <ops>
-    <op optype="InsertText" position="2" text="bc"/>
+    <op optype="InsertText" position="2" text="bc" moveCursor="true"/>
    </ops>
   <after><office:text><text:p>a bc d</text:p></office:text></after>
  </test>
  <test name="InsertText_UpgradesTrailingSpace">
   <before><office:text><text:p>a d</text:p></office:text></before>
    <ops>
-    <op optype="InsertText" position="1" text="bc "/>
+    <op optype="InsertText" position="1" text="bc " moveCursor="true"/>
    </ops>
   <after><office:text><text:p>abc <text:s> </text:s>d</text:p></office:text></after>
  </test>
@@ -401,7 +426,7 @@
  <test name="InsertRemoveText_Simple_Backwards">
   <before><office:text><text:p/></office:text></before>
   <ops>
-   <op optype="InsertText" position="0" text="ABC"/>
+   <op optype="InsertText" position="0" text="ABC" moveCursor="true"/>
    <op optype="RemoveText" position="1" length="2"/>
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
@@ -565,9 +590,9 @@
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" position="9"/>
-   <op optype="InsertText" memberid="Joe" position="9" text="A"/>
-   <op optype="InsertText" memberid="Joe" position="10" text=" "/>
-   <op optype="InsertText" memberid="Joe" position="11" text=" "/>
+   <op optype="InsertText" memberid="Joe" position="9" text="A" moveCursor="true"/>
+   <op optype="InsertText" memberid="Joe" position="10" text=" " moveCursor="true"/>
+   <op optype="InsertText" memberid="Joe" position="11" text=" " moveCursor="true"/>
    <op optype="MoveCursor" memberid="Joe" position="11"/>
    <op optype="MoveCursor" memberid="Joe" position="10"/>
   </ops>
@@ -578,9 +603,9 @@
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
    <op optype="MoveCursor" memberid="Joe" position="9"/>
-   <op optype="InsertText" memberid="Alice" position="9" text="A"/>
-   <op optype="InsertText" memberid="Alice" position="10" text=" "/>
-   <op optype="InsertText" memberid="Alice" position="11" text=" "/>
+   <op optype="InsertText" memberid="Alice" position="9" text="A" moveCursor="true"/>
+   <op optype="InsertText" memberid="Alice" position="10" text=" " moveCursor="true"/>
+   <op optype="InsertText" memberid="Alice" position="11" text=" " moveCursor="true"/>
    <op optype="MoveCursor" memberid="Joe" position="11"/>
    <op optype="MoveCursor" memberid="Joe" position="10"/>
   </ops>
@@ -595,7 +620,7 @@
    <op optype="MoveCursor" memberid="Bob" position="3"/>
    <op optype="AddCursor" memberid="Eve"/>
    <op optype="MoveCursor" memberid="Eve" position="3"/>
-   <op optype="InsertText" memberid="Eve" position="3" text="123"/>
+   <op optype="InsertText" memberid="Eve" position="3" text="123" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>abc<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/>123<c:cursor c:memberId="Eve"/>defgh</text:p></office:text></after>
  </test>
@@ -636,7 +661,7 @@
   <ops>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="1"/>
-   <op optype="InsertText" memberid="Alice" position="1" text="123"/>
+   <op optype="InsertText" memberid="Alice" position="1" text="123" moveCursor="true"/>
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="a" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -652,7 +677,7 @@
   <ops>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="2"/>
-   <op optype="InsertText" memberid="Alice" position="2" text="123"/>
+   <op optype="InsertText" memberid="Alice" position="2" text="123" moveCursor="true"/>
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="a" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -668,7 +693,7 @@
   <ops>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="4"/>
-   <op optype="InsertText" memberid="Alice" position="4" text="123"/>
+   <op optype="InsertText" memberid="Alice" position="4" text="123" moveCursor="true"/>
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="a" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -684,7 +709,7 @@
   <ops>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="3"/>
-   <op optype="InsertText" memberid="Alice" position="3" text="123"/>
+   <op optype="InsertText" memberid="Alice" position="3" text="123" moveCursor="true"/>
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="a" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -1288,7 +1313,7 @@
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="2"/>
    <op optype="AddAnnotation" memberid="Alice" position="2" length="1" name="alice_1" timestamp="1375706047061"/>
-   <op optype="InsertText" memberid="Bob" position="2" text="123"/>
+   <op optype="InsertText" memberid="Bob" position="2" text="123" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>ab123<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p></office:text></after>
  </test>
@@ -1301,8 +1326,8 @@
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="3"/>
    <op optype="AddAnnotation" memberid="Alice" position="2" length="1" name="alice_1" timestamp="1375706047061"/>
-   <op optype="InsertText" memberid="Bob" position="4" text="1"/>
-   <op optype="InsertText" memberid="Bob" position="5" text="2"/>
+   <op optype="InsertText" memberid="Bob" position="4" text="1" moveCursor="true"/>
+   <op optype="InsertText" memberid="Bob" position="5" text="2" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>ab<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>c12<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p></office:text></after>
  </test>
@@ -1315,8 +1340,8 @@
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="4"/>
    <op optype="AddAnnotation" memberid="Alice" position="2" length="2" name="alice_1" timestamp="1375706047061"/>
-   <op optype="InsertText" memberid="Bob" position="5" text="1"/>
-   <op optype="InsertText" memberid="Bob" position="6" text="2"/>
+   <op optype="InsertText" memberid="Bob" position="5" text="1" moveCursor="true"/>
+   <op optype="InsertText" memberid="Bob" position="6" text="2" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>ab<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>cd12<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/></text:p></office:text></after>
  </test>

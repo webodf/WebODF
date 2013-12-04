@@ -66,7 +66,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="1" text="V" moveCursor="true"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -84,7 +84,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="0" text="V" moveCursor="true"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -102,7 +102,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="2" text="V" moveCursor="true"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -120,7 +120,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="3" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="3" text="V" moveCursor="true"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -138,7 +138,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="4" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="4" text="V" moveCursor="true"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -388,7 +388,7 @@
    <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="2" text="V" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/>V</text:p><text:p/></office:text></after>
  </test>
@@ -399,7 +399,7 @@
    <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="0" text="V" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p><c:anchor c:memberId="Alice"/>Vab<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -410,7 +410,7 @@
    <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="1" text="V" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p><c:anchor c:memberId="Alice"/>aVb<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -421,7 +421,7 @@
    <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="2" text="V" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>ab<c:anchor c:memberId="Alice"/>V</text:p><text:p/></office:text></after>
  </test>
@@ -432,7 +432,7 @@
    <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="0" text="V" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>Vab<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -443,7 +443,7 @@
    <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
   </opsA>
   <opsB>
-   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+   <op optype="InsertText" memberid="Bob" position="1" text="V" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>aVb<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -452,28 +452,27 @@
   <before><office:text><text:p>T</text:p></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="InsertText" memberid="Alice" position="0" text="a"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="a" moveCursor="true"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
-   <op optype="InsertText" memberid="Bob" position="1" text="b"/>
+   <op optype="InsertText" memberid="Bob" position="1" text="b" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p>a<c:cursor c:memberId="Alice"/>Tb<c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
- <!--test name="InsertText_abT">
+ <test name="InsertText_baT">
   <before><office:text><text:p>T</text:p></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="InsertText" memberid="Alice" position="0" text="a"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="a" moveCursor="true"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="InsertText" memberid="Bob" position="0" text="b"/>
+   <op optype="InsertText" memberid="Bob" position="0" text="b" moveCursor="true"/>
   </opsB>
   <after><office:text><text:p>b<c:cursor c:memberId="Bob"/>a<c:cursor c:memberId="Alice"/>T</text:p></office:text></after>
- </test-->
-
+ </test>
  <test name="SplitParagraph_VaV">
   <before><office:text><text:p>a</text:p></office:text></before>
   <opsA>
@@ -647,7 +646,7 @@
   <before><office:text><text:p>T</text:p></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="InsertText" memberid="Alice" position="0" text="V"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="V" moveCursor="true"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
@@ -660,7 +659,7 @@
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
-   <op optype="InsertText" memberid="Alice" position="1" text="V"/>
+   <op optype="InsertText" memberid="Alice" position="1" text="V" moveCursor="true"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
@@ -673,7 +672,7 @@
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
-   <op optype="InsertText" memberid="Alice" position="1" text="V"/>
+   <op optype="InsertText" memberid="Alice" position="1" text="V" moveCursor="true"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
