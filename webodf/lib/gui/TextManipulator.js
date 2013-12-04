@@ -96,7 +96,8 @@ gui.TextManipulator = function TextManipulator(session, inputMemberId, directSty
         op = new ops.OpSplitParagraph();
         op.init({
             memberid: inputMemberId,
-            position: selection.position
+            position: selection.position,
+            moveCursor: true
         });
         operations.push(op);
 

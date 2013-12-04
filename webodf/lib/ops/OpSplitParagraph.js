@@ -40,18 +40,25 @@
 /*global ops, odf*/
 
 /**
+ * This operation splits the paragraph at the given
+ * position. If the `moveCursor` flag is specified
+ * and is set as true, the cursor is moved to the
+ * beginning of the next paragraph. Otherwise, it
+ * remains in it's original position.
  * @constructor
  * @implements ops.Operation
  */
 ops.OpSplitParagraph = function OpSplitParagraph() {
     "use strict";
 
-    var memberid, timestamp, position, odfUtils;
+    var memberid, timestamp, position, moveCursor,
+        odfUtils;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
+        moveCursor = data.moveCursor === 'true' || data.moveCursor === true;
         odfUtils = new odf.OdfUtils();
     };
 
@@ -59,10 +66,11 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
 
     this.execute = function (odtDocument) {
         var domPosition, paragraphNode, targetNode,
-            node, splitNode, splitChildNode, keptChildNode;
+            node, splitNode, splitChildNode, keptChildNode,
+            cursor = odtDocument.getCursor(memberid);
 
         odtDocument.upgradeWhitespacesAtPosition(position);
-        domPosition = odtDocument.getTextNodeAtStep(position, memberid);
+        domPosition = odtDocument.getTextNodeAtStep(position);
         if (!domPosition) {
             return false;
         }
@@ -147,6 +155,11 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         }
         odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: 1});
 
+        if (cursor && moveCursor) {
+            odtDocument.moveCursor(memberid, position + 1, 0);
+            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+        }
+
         odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();
         // mark both paragraphs as edited
@@ -170,7 +183,8 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             optype: "SplitParagraph",
             memberid: memberid,
             timestamp: timestamp,
-            position: position
+            position: position,
+            moveCursor: moveCursor
         };
     };
 };

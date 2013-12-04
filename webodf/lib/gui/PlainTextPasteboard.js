@@ -66,7 +66,8 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
         paragraphs.forEach(function(text) {
             operations.push(createOp(new ops.OpSplitParagraph(), {
                 memberid: inputMemberId,
-                position: cursorPosition
+                position: cursorPosition,
+                moveCursor: true
             }));
             cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
             operations.push(createOp(new ops.OpInsertText(), {

@@ -717,8 +717,6 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             } else {
                 splitParagraphSpecA.position += 1;
             }
-            // TODO: cursors get out of sync, so for now have OT fail
-            return null;
         }
 
         return {
