@@ -72,7 +72,8 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
             operations.push(createOp(new ops.OpInsertText(), {
                 memberid: inputMemberId,
                 position: cursorPosition,
-                text: text
+                text: text,
+                moveCursor: true
             }));
             cursorPosition += text.length;
         });

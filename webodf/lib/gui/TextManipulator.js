@@ -241,7 +241,8 @@ gui.TextManipulator = function TextManipulator(session, inputMemberId, directSty
         op.init({
             memberid: inputMemberId,
             position: selection.position,
-            text: text
+            text: text,
+            moveCursor: true
         });
         operations.push(op);
         if (directStyleOp) {

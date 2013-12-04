@@ -39,6 +39,13 @@
 /*global ops*/
 
 /**
+ * This operation inserts the given text
+ * at the specified position, and if
+ * the moveCursor flag is specified and
+ * is set as true, moves the cursor to
+ * the end of the inserted text.
+ * Otherwise, the cursor remains at the
+ * same position as before.
  * @constructor
  * @implements ops.Operation
  */
@@ -47,13 +54,14 @@ ops.OpInsertText = function OpInsertText() {
 
     var space = " ",
         tab = "\t",
-        memberid, timestamp, position, text;
+        memberid, timestamp, position, text, moveCursor;
 
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
         text = data.text;
+        moveCursor = data.moveCursor === 'true' || data.moveCursor === true;
     };
 
     this.isEdit = true;
@@ -96,6 +104,8 @@ ops.OpInsertText = function OpInsertText() {
             toInsertIndex = 0,
             spaceTag,
             spaceElement,
+            cursor = odtDocument.getCursor(memberid),
+            originalCursorPosition = odtDocument.getCursorPosition(memberid),
             i;
 
         function insertTextNode(toInsertText) {
@@ -158,6 +168,22 @@ ops.OpInsertText = function OpInsertText() {
             }
 
             odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: text.length});
+
+            if (cursor) {
+                // Explicitly place the cursor in the desired position after insertion
+                if (moveCursor) {
+                    // TODO: At the moment the inserted text already appears before the
+                    // cursor, so the cursor is effectively at position + text.length
+                    // already. So this ought to be optimized, by perhaps removing
+                    // the textnode + cursor reordering logic from OdtDocument's
+                    // getTextNodeAtStep.
+                    odtDocument.moveCursor(memberid, position + text.length, 0);
+                    odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+                } else {
+                    odtDocument.moveCursor(memberid, originalCursorPosition, 0);
+                }
+            }
+
             if (position > 0) {
                 // Necessary to match upgradeWhitespaces behaviour which searches the preceding positions as well
                 if (position > 1) {
@@ -171,7 +197,6 @@ ops.OpInsertText = function OpInsertText() {
             odtDocument.downgradeWhitespacesAtPosition(position + text.length - 1);
             // Try and downgrade the next position just *after* the added text
             odtDocument.downgradeWhitespacesAtPosition(position + text.length);
-
 
             odtDocument.getOdfCanvas().refreshSize();
             odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
@@ -192,7 +217,8 @@ ops.OpInsertText = function OpInsertText() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
-            text: text
+            text: text,
+            moveCursor: moveCursor
         };
     };
 };
@@ -201,6 +227,7 @@ ops.OpInsertText = function OpInsertText() {
     memberid:string,
     timestamp:number,
     position:number,
-    text:string
+    text:string,
+    moveCursor:boolean
 }}*/
 ops.OpInsertText.Spec;

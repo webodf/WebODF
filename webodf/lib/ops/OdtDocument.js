@@ -723,6 +723,27 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
+     * Moves the cursor/selection of a given memberid to the
+     * given position+length combination and adopts the given
+     * selectionType.
+     * It is the caller's responsibility to decide if and when
+     * to subsequently fire signalCursorMoved.
+     * @param {!string} memberid
+     * @param {!number} position
+     * @param {!number} length
+     * @param {!string} selectionType
+     * @return {undefined}
+     */
+    this.moveCursor = function (memberid, position, length, selectionType) {
+        var cursor = cursors[memberid],
+            selectionRange = self.convertCursorToDomRange(position, length);
+        if (cursor && selectionRange) {
+            cursor.setSelectedRange(selectionRange, length >= 0);
+            cursor.setSelectionType(selectionType || ops.OdtCursor.RangeSelection);
+        }
+    };
+
+    /**
      * @return {!odf.Formatting}
      */
     this.getFormatting = function () {

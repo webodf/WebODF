@@ -500,8 +500,6 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             } else {
                 insertTextSpecA.position += insertTextSpecB.text.length;
             }
-            // TODO: cursors get out of sync, so for now have OT fail
-            return null;
         }
 
         return {
