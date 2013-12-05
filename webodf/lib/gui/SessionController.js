@@ -982,6 +982,17 @@ gui.SessionController = (function () {
             isMouseMoved = false;
         }
 
+        function handleDragEnd() {
+            // Drag operations consume the corresponding mouse up event.
+            // If this happens, the selection should still be reset.
+            if (clickStartedWithinContainer) {
+                eventManager.focus();
+            }
+            clickCount = 0;
+            clickStartedWithinContainer = false;
+            isMouseMoved = false;
+        }
+
         function handleContextMenu(e) {
             // TODO Various browsers have different default behaviours on right click
             // We can detect this at runtime without doing any kind of platform sniffing
@@ -1023,6 +1034,7 @@ gui.SessionController = (function () {
             eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
             eventManager.subscribe("mouseup", handleMouseUp);
             eventManager.subscribe("contextmenu", handleContextMenu);
+            eventManager.subscribe("dragend", handleDragEnd);
 
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
@@ -1067,6 +1079,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("mousedown", handleMouseDown);
             eventManager.unsubscribe("mouseup", handleMouseUp);
             eventManager.unsubscribe("contextmenu", handleContextMenu);
+            eventManager.unsubscribe("dragend", handleDragEnd);
             odtDocument.getOdfCanvas().getElement().classList.remove("virtualSelections");
         };
 
