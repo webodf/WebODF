@@ -281,7 +281,6 @@ set(TYPEDLIBJSFILES
     lib/core/PositionFilterChain.js
     lib/gui/AnnotationViewManager.js
     lib/gui/SelectionMover.js
-    lib/odf/MetadataManager.js
     lib/odf/OdfNodeFilter.js
     lib/odf/Style2CSS.js
     lib/odf/StyleInfo.js

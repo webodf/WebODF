@@ -72,6 +72,7 @@ odf.Namespaces = {
     chartns: "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
     fons: "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
     formns: "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+    metans: "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
     numberns: "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
     officens: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
     presentationns: "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0",

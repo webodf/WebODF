@@ -311,7 +311,6 @@ function Main() {
             "gui/StyleHelper.js",
             "odf/FontLoader.js",
             "odf/Formatting.js",
-            "odf/MetadataManager.js",
             "odf/Namespaces.js",
             "odf/ObjectNameGenerator.js",
             "odf/OdfCanvas.js",

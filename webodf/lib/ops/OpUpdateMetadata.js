@@ -52,7 +52,7 @@ ops.OpUpdateMetadata = function OpUpdateMetadata() {
     this.isEdit = true;
 
     this.execute = function (odtDocument) {
-        var metadataManager = odtDocument.getOdfCanvas().odfContainer().getMetadataManager(),
+        var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             removedPropertiesArray = [],
             blockedProperties = ["dc:date", "dc:creator", "meta:editing-cycles"];
 
@@ -72,7 +72,7 @@ ops.OpUpdateMetadata = function OpUpdateMetadata() {
             removedPropertiesArray = removedProperties.attributes.split(',');
         }
 
-        metadataManager.setMetadata(setProperties, removedPropertiesArray);
+        odfContainer.setMetadata(setProperties, removedPropertiesArray);
 
         return true;
     };
