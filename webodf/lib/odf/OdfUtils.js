@@ -84,6 +84,38 @@ odf.OdfUtils = function OdfUtils() {
     this.isCharacterFrame = isCharacterFrame;
 
     /**
+     * Determine if the node is an office:annotation element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isAnnotation(e) {
+        var name = e && e.localName;
+        return name === "annotation" && e.namespaceURI === odf.Namespaces.officens;
+    }
+
+    /**
+     * Determine if the node is an annotation wrapper element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isAnnotationWrapper(e) {
+        var name = e && e.localName;
+        return name === "div" && /**@type{!HTMLDivElement}*/(e).className === "annotationWrapper";
+    }
+
+    /**
+     * Determine if the node is an inline 'root' type,
+     * i.e. an office:annotation or a wrapper for an annotaiton.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isInlineRoot(e) {
+        return isAnnotation(e)
+            || isAnnotationWrapper(e);
+    }
+    this.isInlineRoot = isInlineRoot;
+
+    /**
      * Determine if the node is a text:span element.
      * @param {?Node} e
      * @return {!boolean}
@@ -195,7 +227,7 @@ odf.OdfUtils = function OdfUtils() {
             if (ns === textns) {
                 r = n === "s" || n === "tab" || n === "line-break";
             } else {
-                r = isCharacterFrame(e);
+                r = isCharacterFrame(e) || isInlineRoot(e);
             }
         }
         return r;
