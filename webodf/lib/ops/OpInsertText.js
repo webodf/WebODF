@@ -105,7 +105,6 @@ ops.OpInsertText = function OpInsertText() {
             spaceTag,
             spaceElement,
             cursor = odtDocument.getCursor(memberid),
-            originalCursorPosition = odtDocument.getCursorPosition(memberid),
             i;
 
         function insertTextNode(toInsertText) {
@@ -113,7 +112,7 @@ ops.OpInsertText = function OpInsertText() {
         }
 
         odtDocument.upgradeWhitespacesAtPosition(position);
-        domPosition = odtDocument.getTextNodeAtStep(position, memberid);
+        domPosition = odtDocument.getTextNodeAtStep(position);
 
         if (domPosition) {
             previousNode = domPosition.textNode;
@@ -169,19 +168,15 @@ ops.OpInsertText = function OpInsertText() {
 
             odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position, length: text.length});
 
-            if (cursor) {
+            if (cursor && moveCursor) {
                 // Explicitly place the cursor in the desired position after insertion
-                if (moveCursor) {
-                    // TODO: At the moment the inserted text already appears before the
-                    // cursor, so the cursor is effectively at position + text.length
-                    // already. So this ought to be optimized, by perhaps removing
-                    // the textnode + cursor reordering logic from OdtDocument's
-                    // getTextNodeAtStep.
-                    odtDocument.moveCursor(memberid, position + text.length, 0);
-                    odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
-                } else {
-                    odtDocument.moveCursor(memberid, originalCursorPosition, 0);
-                }
+                // TODO: At the moment the inserted text already appears before the
+                // cursor, so the cursor is effectively at position + text.length
+                // already. So this ought to be optimized, by perhaps removing
+                // the textnode + cursor reordering logic from OdtDocument's
+                // getTextNodeAtStep.
+                odtDocument.moveCursor(memberid, position + text.length, 0);
+                odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
             }
 
             if (position > 0) {
