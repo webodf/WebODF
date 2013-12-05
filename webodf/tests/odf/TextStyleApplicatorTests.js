@@ -34,8 +34,10 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, gui, odf, NodeFilter*/
-runtime.loadClass("gui.StyleHelper");
+runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.Formatting");
+runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("odf.TextStyleApplicator");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
@@ -45,6 +47,8 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
     "use strict";
     var t,
         r = runner,
+        odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
         namespace = {
             "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
@@ -58,7 +62,6 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
             testArea : core.UnitTest.provideTestAreaDiv(),
             ns: namespace
         };
-        t.styleHelper = new gui.StyleHelper(t.formatting);
     };
     this.tearDown = function () {
         t.range.detach();
@@ -133,12 +136,40 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         }
         return replacedNames;
     }
+
+    /**
+     * Apply the specified style information to the supplied range
+     * @param {!Range} range
+     * @param {!Object} info
+     * @retur {undefined}
+     */
+    function applyStyle(range, info) {
+        var limits,
+            newTextNodes = domUtils.splitBoundaries(t.range),
+            textNodes = odfUtils.getTextNodes(range, false),
+            textStyles = new odf.TextStyleApplicator(
+                new odf.ObjectNameGenerator(/**@type{!odf.OdfContainer}*/(t.container), "tStyle"), // TODO: use the instance in SessionController
+                t.formatting,
+                t.container.rootElement.automaticStyles
+            );
+
+        // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
+        limits = {
+            startContainer: range.startContainer,
+            startOffset: range.startOffset,
+            endContainer: range.endContainer,
+            endOffset: range.endOffset
+        };
+
+        textStyles.applyStyle(textNodes, limits, info);
+        newTextNodes.forEach(domUtils.normalizeTextNodes);
+    }
     function apply_ContainerInsertion_SimpleTextRange() {
         t.doc = createDocument("<text:p>ABCD</text:p>");
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[0], 3);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>BC</text:span>D</text:p>");
@@ -150,7 +181,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1], 0);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         r.shouldBe(t, "t.doc.childNodes.length", "3");
@@ -167,7 +198,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[2], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B<text:a>C</text:a>D</text:span>E</text:p>");
@@ -178,7 +209,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[0].childNodes[0], 3);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span>A</text:span>" +
@@ -191,7 +222,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1].childNodes[0], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span>A</text:span>" +
@@ -205,7 +236,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[0].childNodes[2], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span>A</text:span>" +
@@ -218,7 +249,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[1], 0);
         t.range.setEnd(t.doc.childNodes[0].childNodes[3], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>" +
@@ -232,7 +263,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span>A</text:span>" +
@@ -246,7 +277,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[2].childNodes[0], 0);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span>A</text:span>" +
@@ -260,7 +291,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[2].childNodes[0], 0);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span>A</text:span>" +
@@ -273,7 +304,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc, 1);
         t.range.setEnd(t.doc, 2);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B<text:span/>C</text:span>D</text:p>");
@@ -285,7 +316,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[0], 3);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p text:style-name='PBold'>ABCD</text:p>");
@@ -296,7 +327,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[0].childNodes[0], 3);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span text:style-name='SBold'>ABCD</text:span></text:p>");
@@ -307,7 +338,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[0].childNodes[0], 3);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p><text:span text:style-name='ABold'>ABCD</text:span></text:p>");
@@ -318,7 +349,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1].childNodes[0], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B</text:span><text:span text:style-name='ABold'>CD</text:span></text:p>");
@@ -329,7 +360,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1].childNodes[0], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         t.autoStyles = simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B</text:span>" +
@@ -352,7 +383,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         t.range.setStart(t.doc.childNodes[0], 1);
         t.range.setEnd(t.doc.childNodes[1].childNodes[0], 1);
 
-        t.styleHelper.applyStyle("tStyle", t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
+        applyStyle(t.range, {"style:text-properties": {"fo:font-weight": "bold"}});
 
         t.autoStyles = simplifyAutoStyleNames(t.doc);
         t.expected = parseXML("<text:p>A<text:span text:style-name='auto0'>B</text:span>" +

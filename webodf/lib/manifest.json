@@ -199,7 +199,6 @@
         "ops/OdtDocument.js"
     ],
     "gui/StyleHelper.js": [
-        "core/DomUtils.js",
         "odf/Formatting.js",
         "odf/Namespaces.js",
         "odf/OdfUtils.js"
@@ -246,8 +245,7 @@
         "odf/ObjectNameGenerator.js",
         "odf/OdfContainer.js",
         "odf/OdfUtils.js",
-        "odf/StyleInfo.js",
-        "odf/TextStyleApplicator.js"
+        "odf/StyleInfo.js"
     ],
     "odf/MetadataManager.js": [
         "core/DomUtils.js",
@@ -306,6 +304,7 @@
     "odf/TextStyleApplicator.js": [
         "core/DomUtils.js",
         "core/LoopWatchDog.js",
+        "odf/Formatting.js",
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js"
     ],
@@ -358,8 +357,11 @@
         "ops/Operation.js"
     ],
     "ops/OpApplyDirectStyling.js": [
-        "gui/StyleHelper.js",
+        "core/DomUtils.js",
+        "odf/ObjectNameGenerator.js",
+        "odf/OdfContainer.js",
         "odf/OdfUtils.js",
+        "odf/TextStyleApplicator.js",
         "ops/OdtDocument.js",
         "ops/Operation.js"
     ],

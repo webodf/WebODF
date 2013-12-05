@@ -38,7 +38,6 @@
 
 /*global core, runtime, gui, odf*/
 
-runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfUtils");
 
@@ -48,8 +47,7 @@ runtime.loadClass("odf.OdfUtils");
  */
 gui.StyleHelper = function StyleHelper(formatting) {
     "use strict";
-    var domUtils = new core.DomUtils(),
-        odfUtils = new odf.OdfUtils(),
+    var odfUtils = new odf.OdfUtils(),
         /**@const*/
         textns = odf.Namespaces.textns;
 
@@ -78,30 +76,6 @@ gui.StyleHelper = function StyleHelper(formatting) {
      * @returns {!Array.<Object>}
      */
     this.getAppliedStyles = getAppliedStyles;
-
-    /**
-     * Apply the specified style properties to all elements within the given range.
-     * Currently, only text styles are applied.
-     * @param {!string} memberId Identifier of the member applying the style. This is used for naming generated autostyles
-     * @param {!Range} range Range to apply text style to
-     * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
-     */
-    this.applyStyle = function (memberId, range, info) {
-        var nextTextNodes = domUtils.splitBoundaries(range),
-            textNodes = odfUtils.getTextNodes(range, false),
-            limits;
-
-        // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
-        limits = {
-            startContainer: range.startContainer,
-            startOffset: range.startOffset,
-            endContainer: range.endContainer,
-            endOffset: range.endOffset
-        };
-
-        formatting.applyStyle(memberId, textNodes, limits, info);
-        nextTextNodes.forEach(domUtils.normalizeTextNodes);
-    };
 
     /**
      * Returns true if all the node within given range have the same value for

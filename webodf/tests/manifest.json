@@ -79,9 +79,13 @@
         "odf/StyleInfo.js"
     ],
     "odf/TextStyleApplicatorTests.js": [
+        "core/DomUtils.js",
         "core/UnitTester.js",
-        "gui/StyleHelper.js",
-        "odf/Formatting.js"
+        "odf/Formatting.js",
+        "odf/ObjectNameGenerator.js",
+        "odf/OdfContainer.js",
+        "odf/OdfUtils.js",
+        "odf/TextStyleApplicator.js"
     ],
     "ops/OdtCursorTests.js": [
         "core/UnitTester.js",

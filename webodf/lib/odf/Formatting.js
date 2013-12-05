@@ -43,16 +43,13 @@ runtime.loadClass("odf.Namespaces");
 runtime.loadClass("odf.OdfContainer");
 runtime.loadClass("odf.StyleInfo");
 runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("odf.TextStyleApplicator");
 
 /**
  * @constructor
- * @implements odf.TextStyleApplicatorFormatting
  */
 odf.Formatting = function Formatting() {
     "use strict";
-    var self = this,
-        /**@type{odf.OdfContainer}*/
+    var /**@type{odf.OdfContainer}*/
         odfContainer,
         /**@type{odf.StyleInfo}*/
         styleInfo = new odf.StyleInfo(),
@@ -503,23 +500,6 @@ odf.Formatting = function Formatting() {
         var styleChain;
         styleChain = buildStyleChain(node);
         return styleChain ? calculateAppliedStyle(styleChain) : undefined;
-    };
-
-    /**
-     * Apply the specified style properties to all given text nodes
-     * Currently, only text styles are applied.
-     * @param {!string} memberId Identifier of the member applying the style. This is used for naming generated autostyles
-     * @param {!Array.<!CharacterData>} textNodes
-     * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
-     * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
-     */
-    this.applyStyle = function (memberId, textNodes, limits, info) {
-        var textStyles = new odf.TextStyleApplicator(
-            new odf.ObjectNameGenerator(/**@type{!odf.OdfContainer}*/(odfContainer), memberId), // TODO: use the instance in SessionController
-            self,
-            odfContainer.rootElement.automaticStyles
-        );
-        textStyles.applyStyle(textNodes, limits, info);
     };
 
     /**
