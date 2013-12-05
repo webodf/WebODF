@@ -64,6 +64,9 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
         var r, firstPos, rightOfChar;
         // accept if there is a character immediately to the left
         if (leftNode) {
+            if (odfUtils.isInlineRoot(leftNode) && odfUtils.isGroupingElement(rightNode)) {
+                return FILTER_REJECT;
+            }
             r = odfUtils.lookLeftForCharacter(leftNode);
             if (r === 1) {// non-whitespace character or a character element
                 return FILTER_ACCEPT;
