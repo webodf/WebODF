@@ -266,7 +266,20 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         if (node.nodeType === Node.TEXT_NODE) {
             // Iterator has stopped within an existing text node, to put that up as a possible target node
             lastTextNode = /**@type{!Text}*/(node);
-            nodeOffset = iterator.unfilteredDomOffset();
+            nodeOffset = /**@type{!number}*/(iterator.unfilteredDomOffset());
+            // Always cut in a new empty text node at the requested position.
+            // If this proves to be unnecessary, it will be cleaned up just before the return
+            // after all necessary cursor rearrangements have been performed
+            if (lastTextNode.length > 0) {
+                // The node + offset returned make up the boundary just to the right of the requested step
+                if (nodeOffset > 0) {
+                    // In this case, after the split, the right of the requested step is just after the new node
+                    lastTextNode = lastTextNode.splitText(nodeOffset);
+                }
+                lastTextNode.parentNode.insertBefore(getDOM().createTextNode(""), lastTextNode);
+                lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
+                nodeOffset = 0;
+            }
         } else {
             // There is no text node at the current position, so insert a new one at the current position
             lastTextNode = getDOM().createTextNode("");
@@ -274,35 +287,53 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             node.insertBefore(lastTextNode, iterator.rightNode());
         }
 
-
-        // If the member cursor is as the requested position
-        if (memberid && cursors[memberid] && self.getCursorPosition(memberid) === steps) {
-            cursorNode = cursors[memberid].getNode();
-            // Then move the member's cursor after all adjacent cursors
-            while (cursorNode.nextSibling && cursorNode.nextSibling.localName === "cursor") {
+        if (memberid) {
+            // DEPRECATED: This branch is no longer the recommended way of handling cursor movements DO NOT USE
+            // If the member cursor is as the requested position
+            if (cursors[memberid] && self.getCursorPosition(memberid) === steps) {
+                cursorNode = cursors[memberid].getNode();
+                // Then move the member's cursor after all adjacent cursors
+                while (cursorNode.nextSibling && cursorNode.nextSibling.localName === "cursor") {
+                    // TODO this re-arrange logic will break if there are non-cursor elements in the way
+                    // E.g., cursors occupy the same "step", but are on different sides of a span boundary
+                    // This is currently avoided by calling fixCursorPositions after (almost) every op
+                    // to re-arrange cursors together again
+                    cursorNode.parentNode.insertBefore(cursorNode.nextSibling, cursorNode);
+                }
+                if (lastTextNode.length > 0 && lastTextNode.nextSibling !== cursorNode) {
+                    // The last text node contains content but is not adjacent to the cursor
+                    // This can't be moved, as moving it would move the text content around as well. Yikes!
+                    // So, create a new text node to insert data into
+                    lastTextNode = getDOM().createTextNode('');
+                    nodeOffset = 0;
+                }
+                // Keep the destination text node right next to the member's cursor, so inserted text pushes the cursor over
+                cursorNode.parentNode.insertBefore(lastTextNode, cursorNode);
+            }
+        } else {
+            // Move all cursors BEFORE the new text node. Any cursors occupying the requested position should not
+            // move when new text is added in the position
+            while (lastTextNode.nextSibling && lastTextNode.nextSibling.localName === "cursor") {
                 // TODO this re-arrange logic will break if there are non-cursor elements in the way
                 // E.g., cursors occupy the same "step", but are on different sides of a span boundary
                 // This is currently avoided by calling fixCursorPositions after (almost) every op
                 // to re-arrange cursors together again
-                cursorNode.parentNode.insertBefore(cursorNode.nextSibling, cursorNode);
+                lastTextNode.parentNode.insertBefore(lastTextNode.nextSibling, lastTextNode);
             }
-            if (lastTextNode.length > 0 && lastTextNode.nextSibling !== cursorNode) {
-                // The last text node contains content but is not adjacent to the cursor
-                // This can't be moved, as moving it would move the text content around as well. Yikes!
-                // So, create a new text node to insert data into
-                lastTextNode = getDOM().createTextNode('');
-                nodeOffset = 0;
-            }
-            // Keep the destination text node right next to the member's cursor, so inserted text pushes the cursor over
-            cursorNode.parentNode.insertBefore(lastTextNode, cursorNode);
         }
 
-        // After the above cursor-specific adjustment, if the lastTextNode
+        // After the above cursor adjustments, if the lastTextNode
         // has a text node previousSibling, merge them and make the result the lastTextNode
         while (lastTextNode.previousSibling && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
             lastTextNode.previousSibling.appendData(lastTextNode.data);
-            nodeOffset = lastTextNode.previousSibling.length;
+            nodeOffset = /**@type{!number}*/(lastTextNode.previousSibling.length);
             lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
+            lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
+        }
+
+        // Empty text nodes can be left on either side of the split operations that have occurred
+        while (lastTextNode.nextSibling && lastTextNode.nextSibling.nodeType === Node.TEXT_NODE) {
+            lastTextNode.appendData(lastTextNode.nextSibling.data);
             lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
         }
 
@@ -720,6 +751,27 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             return true;
         }
         return false;
+    };
+
+    /**
+     * Moves the cursor/selection of a given memberid to the
+     * given position+length combination and adopts the given
+     * selectionType.
+     * It is the caller's responsibility to decide if and when
+     * to subsequently fire signalCursorMoved.
+     * @param {!string} memberid
+     * @param {!number} position
+     * @param {!number} length
+     * @param {!string} selectionType
+     * @return {undefined}
+     */
+    this.moveCursor = function (memberid, position, length, selectionType) {
+        var cursor = cursors[memberid],
+            selectionRange = self.convertCursorToDomRange(position, length);
+        if (cursor && selectionRange) {
+            cursor.setSelectedRange(selectionRange, length >= 0);
+            cursor.setSelectionType(selectionType || ops.OdtCursor.RangeSelection);
+        }
     };
 
     /**
