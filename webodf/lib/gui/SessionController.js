@@ -92,6 +92,7 @@ gui.SessionController = (function () {
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             isMouseMoved = false,
             mouseDownRootFilter = null,
+            handleMouseClickTimeoutId,
             undoManager = null,
             eventManager = new gui.EventManager(odtDocument),
             annotationController = new gui.AnnotationController(session, inputMemberId),
@@ -954,7 +955,7 @@ gui.SessionController = (function () {
                     // the click is processed. Set 0 timeout here so the newly clicked position can be updated
                     // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
                     // out the caret position from two coordinates.
-                    runtime.setTimeout(function() {
+                    handleMouseClickTimeoutId = runtime.setTimeout(function() {
                         var selection = mutableSelection(window.getSelection()),
                             selectionRange,
                             caretPos;
@@ -1185,6 +1186,7 @@ gui.SessionController = (function () {
          */
         this.destroy = function(callback) {
             var destroyCallbacks = [drawShadowCursorTask.destroy, directTextStyler.destroy];
+            runtime.clearTimeout(handleMouseClickTimeoutId);
             if (directParagraphStyler) {
                 destroyCallbacks.push(directParagraphStyler.destroy);
             }
