@@ -54,6 +54,7 @@ gui.CaretManager = function CaretManager(sessionController) {
     var /**@type{!Object.<string,!gui.Caret>}*/
         carets = {},
         window = runtime.getWindow(),
+        ensureCaretVisibleTimeoutId,
         scrollIntoViewScheduled = false;
 
     /**
@@ -124,7 +125,7 @@ gui.CaretManager = function CaretManager(sessionController) {
                 // Delay the actual scrolling just in case there are a batch of
                 // operations being performed. 50ms is close enough to "instant"
                 // that the user won't notice the delay here.
-                runtime.setTimeout(executeEnsureCaretVisible, 50);
+                ensureCaretVisibleTimeoutId = runtime.setTimeout(executeEnsureCaretVisible, 50);
             }
         }
     }
@@ -229,6 +230,7 @@ gui.CaretManager = function CaretManager(sessionController) {
             eventManager = sessionController.getEventManager(),
             caretArray = getCarets();
 
+        runtime.clearTimeout(ensureCaretVisibleTimeoutId);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);

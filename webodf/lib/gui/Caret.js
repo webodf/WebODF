@@ -395,6 +395,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {undefined}
      */
     this.destroy = function (callback) {
+        runtime.clearTimeout(blinkTimeout);
         avatar.destroy(function (err) {
             if (err) {
                 callback(err);

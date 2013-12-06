@@ -1028,6 +1028,7 @@ runtime.loadClass("gui.AnnotationViewManager");
             zoomLevel = 1,
             /**@type{!Object.<string,!Array.<!Function>>}*/
             eventHandlers = {},
+            waitingForDoneTimeoutId,
             loadingQueue = new LoadingQueue();
 
         /**
@@ -1298,12 +1299,12 @@ runtime.loadClass("gui.AnnotationViewManager");
                 // FIXME: use callback registry instead of replacing the onchange
                 runtime.log("WARNING: refreshOdf called but ODF was not DONE.");
 
-                runtime.setTimeout(function later_cb() {
+                waitingForDoneTimeoutId = runtime.setTimeout(function later_cb() {
                     if (odfcontainer.state === odf.OdfContainer.DONE) {
                         callback();
                     } else {
                         runtime.log("will be back later...");
-                        runtime.setTimeout(later_cb, 500);
+                        waitingForDoneTimeoutId = runtime.setTimeout(later_cb, 500);
                     }
                 }, 100);
             }
@@ -1589,6 +1590,7 @@ runtime.loadClass("gui.AnnotationViewManager");
          */
         this.destroy = function(callback) {
             var head = /**@type{!HTMLHeadElement}*/(doc.getElementsByTagName('head')[0]);
+            runtime.clearTimeout(waitingForDoneTimeoutId);
             // TODO: anything to clean with annotationViewManager?
             if (annotationsPane && annotationsPane.parentNode) {
                 annotationsPane.parentNode.removeChild(annotationsPane);

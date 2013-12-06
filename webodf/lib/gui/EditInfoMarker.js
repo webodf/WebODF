@@ -54,8 +54,9 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
         handle,
         marker,
         editinfons = 'urn:webodf:names:editinfo',
-        decay1,
-        decay2,
+        decayTimer0,
+        decayTimer1,
+        decayTimer2,
         decayTimeStep = 10000; // 10 seconds
 
     /**
@@ -73,10 +74,10 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
 
     /**
      * Stops the specified timer
-     * @param {number} timer
+     * @param {number} timerId
      */
-    function deleteDecay(timer) {
-        runtime.clearTimeout(timer);
+    function deleteDecay(timerId) {
+        runtime.clearTimeout(timerId);
     }
 
     function setLastAuthor(memberid) {
@@ -91,12 +92,8 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
         setLastAuthor(memberid);
 
         // Since a new edit has arrived, stop decaying for the old edits
-        if (decay1) {
-            deleteDecay(decay1);
-        }
-        if (decay2) {
-            deleteDecay(decay2);
-        }
+        deleteDecay(decayTimer1);
+        deleteDecay(decayTimer2);
 
         // Decide the decay path:
         // this decides the initial opacity and subsequent decays to apply
@@ -105,14 +102,14 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
         // an opaque marker in that case, we would want it to start with a lower opacity
         // and decay accordingly further, if possible.
         if (age < decayTimeStep) {
-            applyDecay(1, 0);
-            decay1 = applyDecay(0.5, decayTimeStep - age);
-            decay2 = applyDecay(0.2, decayTimeStep * 2 - age);
+            decayTimer0 = applyDecay(1, 0);
+            decayTimer1 = applyDecay(0.5, decayTimeStep - age);
+            decayTimer2 = applyDecay(0.2, decayTimeStep * 2 - age);
         } else if (age >= decayTimeStep && age < decayTimeStep * 2) {
-            applyDecay(0.5, 0);
-            decay2 = applyDecay(0.2, decayTimeStep * 2 - age);
+            decayTimer0 = applyDecay(0.5, 0);
+            decayTimer2 = applyDecay(0.2, decayTimeStep * 2 - age);
         } else {
-            applyDecay(0.2, 0);
+            decayTimer0 = applyDecay(0.2, 0);
         }
     };
     this.getEdits = function () {
@@ -159,6 +156,9 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
      * @return {undefined}
      */
     this.destroy = function(callback) {
+        deleteDecay(decayTimer0);
+        deleteDecay(decayTimer1);
+        deleteDecay(decayTimer2);
         editInfoNode.removeChild(marker);
         handle.destroy(function(err) {
             if (err) {
