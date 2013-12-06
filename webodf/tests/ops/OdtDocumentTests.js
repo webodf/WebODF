@@ -509,8 +509,12 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         testCursorPositions("<text:p><text:span>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:span></text:p>");
     }
     function testAvailablePositions_Annotations() {
-        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>');
+        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>|c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>');
     }
+    function testAvailablePositions_BetweenAnnotationAndSpan() {
+        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>c|d|e|</text:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
+    }
+
 
     function getTextNodeAtStep_BeginningOfTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
@@ -768,6 +772,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testAvailablePositions_SpaceElements,
             testAvailablePositions_DrawElements,
             testAvailablePositions_Annotations,
+            testAvailablePositions_BetweenAnnotationAndSpan,
 
             getTextNodeAtStep_BeginningOfTextNode,
             getTextNodeAtStep_EndOfTextNode,

@@ -76,30 +76,45 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             ? t.testArea.firstChild.firstChild.firstChild
             : t.testArea.firstChild.firstChild;
     }
-    function isCharacterElement_ReturnTrueForTab() {
+    function isAnchoredAsCharacterElement_ReturnTrueForTab() {
         t.doc = createDocument("<text:p><text:tab/></text:p>");
-        t.isCharacter = t.odfUtils.isCharacterElement(t.doc.firstChild);
-        r.shouldBe(t, "t.isCharacter", "true");
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "true");
     }
-    function isCharacterElement_ReturnTrueForSpace() {
+    function isAnchoredAsCharacterElement_ReturnTrueForSpace() {
         t.doc = createDocument("<text:p><text:s/></text:p>");
-        t.isCharacter = t.odfUtils.isCharacterElement(t.doc.firstChild);
-        r.shouldBe(t, "t.isCharacter", "true");
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "true");
     }
-    function isCharacterElement_ReturnTrueForLineBreak() {
+    function isAnchoredAsCharacterElement_ReturnTrueForLineBreak() {
         t.doc = createDocument("<text:p><text:line-break/></text:p>");
-        t.isCharacter = t.odfUtils.isCharacterElement(t.doc.firstChild);
-        r.shouldBe(t, "t.isCharacter", "true");
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "true");
     }
-    function isCharacterElement_ReturnTrueForCharacterFrame() {
+    function isAnchoredAsCharacterElement_ReturnTrueForCharacterFrame() {
         t.doc = createDocument("<text:p><draw:frame text:anchor-type='as-char'/></text:p>");
-        t.isCharacter = t.odfUtils.isCharacterElement(t.doc.firstChild);
-        r.shouldBe(t, "t.isCharacter", "true");
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "true");
     }
-    function isCharacterElement_ReturnFalseForNonCharacterFrame() {
+    function isAnchoredAsCharacterElement_ReturnFalseForNonCharacterFrame() {
         t.doc = createDocument("<text:p><draw:frame text:anchor-type='char'/></text:p>");
-        t.isCharacter = t.odfUtils.isCharacterElement(t.doc.firstChild);
-        r.shouldBe(t, "t.isCharacter", "false");
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "false");
+    }
+    function isAnchoredAsCharacterElement_ReturnTrueForAnnotation() {
+        t.doc = createDocument("<text:p><office:annotation><text:p></text:p></office:annotation></text:p>");
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "true");
+    }
+    function isAnchoredAsCharacterElement_ReturnTrueForAnnotationWrapper() {
+        var div = t.testArea.ownerDocument.createElement('div');
+        div.className = "annotationWrapper";
+
+        t.doc = createDocument("<text:p><office:annotation><text:p></text:p></office:annotation></text:p>");
+        div.appendChild(t.doc.firstChild);
+        t.doc.appendChild(div);
+        t.isAnchoredAsCharacter = t.odfUtils.isAnchoredAsCharacterElement(t.doc.firstChild);
+        r.shouldBe(t, "t.isAnchoredAsCharacter", "true");
     }
     function getTextElements_EncompassedWithinParagraph() {
         t.doc = createDocument("<text:p>AB<text:s> </text:s>CD</text:p>");
@@ -261,11 +276,13 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
     }
     this.tests = function () {
         return r.name([
-            isCharacterElement_ReturnTrueForTab,
-            isCharacterElement_ReturnTrueForSpace,
-            isCharacterElement_ReturnTrueForLineBreak,
-            isCharacterElement_ReturnTrueForCharacterFrame,
-            isCharacterElement_ReturnFalseForNonCharacterFrame,
+            isAnchoredAsCharacterElement_ReturnTrueForTab,
+            isAnchoredAsCharacterElement_ReturnTrueForSpace,
+            isAnchoredAsCharacterElement_ReturnTrueForLineBreak,
+            isAnchoredAsCharacterElement_ReturnTrueForCharacterFrame,
+            isAnchoredAsCharacterElement_ReturnTrueForAnnotation,
+            isAnchoredAsCharacterElement_ReturnTrueForAnnotationWrapper,
+            isAnchoredAsCharacterElement_ReturnFalseForNonCharacterFrame,
 
             getTextElements_EncompassedWithinParagraph,
             getTextElements_EncompassedWithinSpan_And_Paragraph,

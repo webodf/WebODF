@@ -84,6 +84,38 @@ odf.OdfUtils = function OdfUtils() {
     this.isCharacterFrame = isCharacterFrame;
 
     /**
+     * Determine if the node is an office:annotation element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isAnnotation(e) {
+        var name = e && e.localName;
+        return name === "annotation" && e.namespaceURI === odf.Namespaces.officens;
+    }
+
+    /**
+     * Determine if the node is an annotation wrapper element.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isAnnotationWrapper(e) {
+        var name = e && e.localName;
+        return name === "div" && /**@type{!HTMLDivElement}*/(e).className === "annotationWrapper";
+    }
+
+    /**
+     * Determine if the node is an inline 'root' type,
+     * i.e. an office:annotation or a wrapper for an annotaiton.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isInlineRoot(e) {
+        return isAnnotation(e)
+            || isAnnotationWrapper(e);
+    }
+    this.isInlineRoot = isInlineRoot;
+
+    /**
      * Determine if the node is a text:span element.
      * @param {?Node} e
      * @return {!boolean}
@@ -182,7 +214,8 @@ odf.OdfUtils = function OdfUtils() {
     }
     this.isGroupingElement = isGroupingElement;
     /**
-     * Determine if the node is a grouping element.
+     * Determine if the node is a character element,
+     * namely "s", "tab", or "line-break".
      * @param {?Node} e
      * @return {!boolean}
      */
@@ -194,13 +227,25 @@ odf.OdfUtils = function OdfUtils() {
             ns = e.namespaceURI;
             if (ns === textns) {
                 r = n === "s" || n === "tab" || n === "line-break";
-            } else {
-                r = isCharacterFrame(e);
             }
         }
         return r;
     }
     this.isCharacterElement = isCharacterElement;
+    /**
+     * Determine if the node is an 'as char' type of element,
+     * i.e. any element which behaves like a character with
+     * respect to it's surrounding positions, such as the
+     * space/tab/line-break elements, draw:frames with
+     * anchor type being 'as-char', or inline root elements
+     * such as annotations.
+     * @param {?Node} e
+     * @return {!boolean}
+     */
+    function isAnchoredAsCharacterElement(e) {
+        return isCharacterElement(e) || isCharacterFrame(e) || isInlineRoot(e);
+    }
+    this.isAnchoredAsCharacterElement = isAnchoredAsCharacterElement;
     /**
      * Determine if the node is a <text:s/> character element.
      * @param {?Node} e
@@ -285,7 +330,7 @@ odf.OdfUtils = function OdfUtils() {
                         text.data.substr(text.length - 1, 1)
                     );
                 }
-            } else if (isCharacterElement(node)) {
+            } else if (isAnchoredAsCharacterElement(node)) {
                 r = isSpaceElement(node) === false;
                 node = null;
             } else {
@@ -320,7 +365,7 @@ odf.OdfUtils = function OdfUtils() {
             } else {
                 r = isODFWhitespace(text.substr(tl - 2, 1)) ? 0 : 2;
             }
-        } else if (isCharacterElement(node)) {
+        } else if (isAnchoredAsCharacterElement(node)) {
             r = 1;
         }
         return r;
@@ -342,7 +387,7 @@ odf.OdfUtils = function OdfUtils() {
         }
         if (l > 0) {
             r = !isODFWhitespace(/**@type{!Text}*/(node).data.substr(0, 1));
-        } else if (isCharacterElement(node)) {
+        } else if (isAnchoredAsCharacterElement(node)) {
             r = true;
         }
         return r;
@@ -368,7 +413,7 @@ odf.OdfUtils = function OdfUtils() {
                 r = true;
                 break;
             }
-            if (isCharacterElement(node)) {
+            if (isAnchoredAsCharacterElement(node)) {
                 r = true;
                 break;
             }
@@ -397,7 +442,7 @@ odf.OdfUtils = function OdfUtils() {
                 r = true;
                 break;
             }
-            if (isCharacterElement(node)) {
+            if (isAnchoredAsCharacterElement(node)) {
                 r = true;
                 break;
             }
@@ -444,7 +489,7 @@ odf.OdfUtils = function OdfUtils() {
             return false;
         }
 
-        if (isCharacterElement(textNode.parentNode)) {
+        if (isAnchoredAsCharacterElement(textNode.parentNode)) {
             // Parent is a character element, and therefore does not actually contain text
             // This prevents a space element from being upgraded again
             return false;
@@ -780,7 +825,7 @@ odf.OdfUtils = function OdfUtils() {
                         return NodeFilter.FILTER_ACCEPT;
                     }
                 }
-            } else if (isCharacterElement(node)) {
+            } else if (isAnchoredAsCharacterElement(node)) {
                 if (includeNode(range, nodeRange, includePartial)) {
                     // Character elements should only be returned if they are
                     // fully contained within the range.
