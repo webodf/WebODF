@@ -489,7 +489,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
         container = iterator.container();
         offset = iterator.unfilteredDomOffset();
-        while (!odfUtils.isCharacterElement(container) && container.childNodes[offset]) {
+        while (!odfUtils.isSpaceElement(container) && container.childNodes[offset]) {
             // iterator.container will likely return a paragraph element with a non-zero offset
             // easiest way to translate this is to keep diving into child nodes until the either
             // an odf character element is encountered, or there are no more children
