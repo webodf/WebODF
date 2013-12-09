@@ -127,6 +127,7 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
         handle.style.top = '-80px';
         handle.style.left = '-34px'; // TODO: see to automatically calculate this, depending on the style
         handle.style.display = avatarInitiallyVisible ? displayShown : displayHidden;
+        handle.className = "handle";
         parentElement.appendChild(handle);
     }
 

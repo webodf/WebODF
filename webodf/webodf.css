@@ -229,7 +229,7 @@ cursor|cursor {
     position: relative;
     z-index: 1;
 }
-cursor|cursor > span {
+cursor|cursor > .caret {
     /* IMPORTANT: when changing these values ensure DEFAULT_CARET_TOP and DEFAULT_CARET_HEIGHT
         in Caret.js remain in sync */
     display: inline;
@@ -240,7 +240,7 @@ cursor|cursor > span {
     outline: none;
 }
 
-cursor|cursor > div {
+cursor|cursor > .handle {
     padding: 3px;
     box-shadow: 0px 0px 5px rgba(50, 50, 50, 0.75);
     border: none !important;
@@ -248,15 +248,15 @@ cursor|cursor > div {
     opacity: 0.3;
 }
 
-cursor|cursor > div > img {
+cursor|cursor > .handle > img {
     border-radius: 5px;
 }
 
-cursor|cursor > div.active {
+cursor|cursor > .handle.active {
     opacity: 0.8;
 }
 
-cursor|cursor > div:after {
+cursor|cursor > .handle:after {
     content: ' ';
     position: absolute;
     width: 0px;
