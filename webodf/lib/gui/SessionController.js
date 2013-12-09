@@ -58,6 +58,7 @@ runtime.loadClass("gui.TextManipulator");
 runtime.loadClass("gui.AnnotationController");
 runtime.loadClass("gui.EventManager");
 runtime.loadClass("gui.PlainTextPasteboard");
+runtime.loadClass("gui.InputMethodEditor");
 
 /**
  * @constructor
@@ -110,6 +111,7 @@ gui.SessionController = (function () {
             drawShadowCursorTask,
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
+            inputMethodEditor = new gui.InputMethodEditor(inputMemberId, odtDocument, eventManager),
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
             hyperlinkController = new gui.HyperlinkController(session, inputMemberId);
@@ -887,7 +889,7 @@ gui.SessionController = (function () {
                 // Unfortunately, clearing the range will also blur the current focus.
                 selection.removeAllRanges();
                 selection.addRange(range.cloneRange());
-                /**@type{!IEElement}*/(odtDocument.getOdfCanvas().getElement()).setActive();
+                /**@type{!IEElement}*/(eventManager.getEventTrap()).setActive();
             }
         }
 
@@ -1020,12 +1022,27 @@ gui.SessionController = (function () {
         }
 
         /**
+         * Handle composition end event. If there is data specified, treat this as text
+         * to be inserted into the document.
+         * @param {!CompositionEvent} e
+         */
+        function insertNonEmptyData(e) {
+            // https://dvcs.w3.org/hg/dom3events/raw-file/tip/html/DOM3-Events.html#event-type-compositionend
+            var input = e.data;
+            if (input) {
+                textManipulator.insertText(input);
+            }
+        }
+
+        /**
          * @return {undefined}
          */
         this.startEditing = function () {
             var op;
 
             odtDocument.getOdfCanvas().getElement().classList.add("virtualSelections");
+            eventManager.subscribe("compositionupdate", textManipulator.removeCurrentSelection);
+            eventManager.subscribe("compositionend", insertNonEmptyData);
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);
             eventManager.subscribe("keypress", keyPressHandler.handleEvent);
             eventManager.subscribe("keyup", keyUpHandler.handleEvent);
@@ -1043,6 +1060,9 @@ gui.SessionController = (function () {
             // start maintaining the cursor selection now
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
+
+            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
 
             op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
@@ -1069,9 +1089,13 @@ gui.SessionController = (function () {
                 undoManager.resetInitialState();
             }
 
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
 
+            eventManager.unsubscribe("compositionupdate", textManipulator.removeCurrentSelection);
+            eventManager.unsubscribe("compositionend", insertNonEmptyData);
             eventManager.unsubscribe("keydown", keyDownHandler.handleEvent);
             eventManager.unsubscribe("keypress", keyPressHandler.handleEvent);
             eventManager.unsubscribe("keyup", keyUpHandler.handleEvent);

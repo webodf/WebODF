@@ -615,3 +615,15 @@ Range.END_TO_END = 2;
  * @type {!number}
  */
 Range.END_TO_START = 3;
+
+/**
+ * https://dvcs.w3.org/hg/dom3events/raw-file/tip/html/DOM3-Events.html#interface-CompositionEvent
+ * @constructor
+ * @extends Event
+ */
+function CompositionEvent() { "use strict"; }
+
+/**
+ * @type {!string}
+ */
+CompositionEvent.prototype.data;

@@ -314,6 +314,7 @@ set(UNTYPEDLIBJSFILES
     lib/xmldom/RelaxNG2.js
     lib/gui/Caret.js
     lib/gui/EventManager.js
+    lib/gui/InputMethodEditor.js
     lib/gui/ShadowCursor.js
     lib/gui/UndoManager.js
     lib/gui/UndoStateRules.js

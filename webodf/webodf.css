@@ -222,13 +222,14 @@ video {
 /* below set up the cursor */
 cursor|cursor {
     display: inline;
-    width: 0px;
+    width: 0;
     height: 1em;
     /* making the position relative enables the avatar to use
        the cursor as reference for its absolute position */
     position: relative;
     z-index: 1;
 }
+
 cursor|cursor > .caret {
     /* IMPORTANT: when changing these values ensure DEFAULT_CARET_TOP and DEFAULT_CARET_HEIGHT
         in Caret.js remain in sync */
@@ -269,6 +270,50 @@ cursor|cursor > .handle:after {
     left: 43%;
 }
 
+/** Input Method Editor input pane & behaviours */
+/* not within a cursor */
+#eventTrap {
+    height: 1px;
+    margin: auto 0;
+    display: block;
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    outline: none;
+}
+
+/* within a cursor */
+cursor|cursor > #eventTrap {
+    display: inline-block;
+    position: static;
+    left: 0;
+    margin-right: -1px; /* Hide the content editable's own caret */
+    color: rgba(255, 255, 255, 0); /** additionally hide the blinking caret by setting the colour to fully transparent */
+    overflow: hidden; /* The overflow visibility is used to hide and show characters being entered */
+    height: 1px;
+    width: 1px; /* marginRight + width must equal 0 so chrome & FF don't think the element takes up space */
+}
+
+cursor|cursor[cursor|composing="true"] > #eventTrap {
+    color: inherit; /* make colour non-transparent again to show the entered text */
+    overflow: visible; /* The overflow visibility is used to hide and show characters being entered */
+    height: auto;
+    width: auto;
+}
+
+cursor|cursor[cursor|composing="true"] {
+    display: inline-block;
+    width: auto;
+    height: inherit;
+}
+
+cursor|cursor[cursor|composing="true"] > .caret {
+    /* during composition, the caret should be pushed along by the composition text, inline with the text */
+    position: static;
+    /* as it is now part of an inline-block, it will no longer need correct to top or height values to align properly */
+    height: auto !important;
+    top: auto !important;
+}
 
 .editInfoMarker {
     position: absolute;

@@ -35,7 +35,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui */
+/*global runtime, gui, core */
 
 /**
  * Event wiring and management abstraction layer
@@ -197,6 +197,7 @@ gui.EventManager = function EventManager(odtDocument) {
                 // Internet explorer will only supply mouse up & down on the window object
                 // For other browser though, listening to both will cause two events to be processed
                 listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
+                // TODO this needs to be rebound if canvasElement changes
                 listenEvent(canvasElement, eventName, delegate.handleEvent);
                 listenEvent(eventTrap, eventName, delegate.handleEvent);
             }
@@ -227,8 +228,9 @@ gui.EventManager = function EventManager(odtDocument) {
      * @returns {boolean}
      */
     function hasFocus() {
-        return odtDocument.getDOM().activeElement === getCanvasElement();
+        return odtDocument.getDOM().activeElement === eventTrap;
     }
+    this.hasFocus = hasFocus;
 
     /**
      * Find the all scrollable ancestor for the specified element
@@ -253,32 +255,25 @@ gui.EventManager = function EventManager(odtDocument) {
      * Return event focus back to the event manager
      */
     this.focus = function() {
-        var scrollParents,
-            canvasElement = getCanvasElement(),
-            selection = window.getSelection();
+        var scrollParents;
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
             // Passing focus back to an element that did not previously have it will also
             // cause the element to attempt to recentre back into scroll view
             scrollParents = findScrollableParents(eventTrap);
-            canvasElement.focus();
+            eventTrap.focus();
             scrollParents.forEach(function(scrollParent) {
                 scrollParent.restore();
             });
         }
-        if (selection && selection.extend) {
-            if (eventTrap.parentNode !== canvasElement) {
-                // The undo manager can replace the root element, discarding the original.
-                // The event trap node is still valid, and simply needs to be re-attached
-                // after this occurs.
-                canvasElement.appendChild(eventTrap);
-            }
-            // A browser selection in an editable area is necessary to allow cut/copy events to fire
-            // It doesn't have to be an accurate selection however as the SessionController will override
-            // the default browser handling.
-            selection.collapse(eventTrap.firstChild, 0);
-            selection.extend(eventTrap, eventTrap.childNodes.length);
-        }
+    };
+
+    /**
+     * Returns the event trap div
+     * @returns {!Element}
+     */
+    this.getEventTrap = function() {
+        return eventTrap;
     };
 
     /**
@@ -305,11 +300,6 @@ gui.EventManager = function EventManager(odtDocument) {
         };
         eventTrap = doc.createElement("div");
         eventTrap.id = "eventTrap";
-        eventTrap.setAttribute("contenteditable", "true");
-        eventTrap.style.position = "absolute";
-        eventTrap.style.left = "-10000px";
-        // Content is necessary for cut/copy to be enabled
-        eventTrap.appendChild(doc.createTextNode("dummy content"));
         canvasElement.appendChild(eventTrap);
     }
     init();
