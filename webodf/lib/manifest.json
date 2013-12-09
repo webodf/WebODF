@@ -327,6 +327,7 @@
     ],
     "ops/OdtCursor.js": [
         "core/Cursor.js",
+        "core/EventNotifier.js",
         "gui/SelectionMover.js",
         "ops/OdtDocument.js"
     ],

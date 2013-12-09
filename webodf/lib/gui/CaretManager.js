@@ -198,13 +198,13 @@ gui.CaretManager = function CaretManager(sessionController) {
             runtime.log("Starting to track input on new cursor of " + memberid);
 
             // wire up the cursor update to caret visibility update
-            cursor.handleUpdate = scheduleCaretVisibilityCheck;
+            cursor.subscribe(ops.OdtCursor.signalCursorUpdated, scheduleCaretVisibilityCheck);
             // Negative tab index still allows focus, but removes accessibility by keyboard
             getCanvasElement().setAttribute("tabindex", -1);
             // Pass event focus to the session controller
             sessionController.getEventManager().focus();
         } else {
-            cursor.handleUpdate = caret.handleUpdate;
+            cursor.subscribe(ops.OdtCursor.signalCursorUpdated, caret.handleUpdate);
         }
 
         return caret;

@@ -35,6 +35,7 @@
  */
 /*global core, ops, gui, runtime*/
 runtime.loadClass("core.Cursor");
+runtime.loadClass("core.EventNotifier");
 runtime.loadClass("gui.SelectionMover");
 
 /**
@@ -70,7 +71,8 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         /**@type{!gui.SelectionMover}*/
         selectionMover,
         /**@type{!core.Cursor}*/
-        cursor;
+        cursor,
+        events = new core.EventNotifier([ops.OdtCursor.signalCursorUpdated]);
 
     /**
      * Remove the cursor from the odt document
@@ -95,20 +97,30 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
         } else if (number <= 0) {
             moved = -selectionMover.movePointBackward(-number, extend);
         }
-        self.handleUpdate();
+        events.emit(ops.OdtCursor.signalCursorUpdated, self);
         return moved;
     };
 
-    /*jslint emptyblock: true*/
     /**
-     * Is called whenever the cursor is moved around manually.
-     * Set this property to another function that should be called,
-     * e.g. the UI avatar/caret to reset focus.
-     * Ideally would be a signal, but this works for now.
+     * Subscribe to cursor update events.
+     *
+     * The update event called whenever the cursor is moved around manually.
+     * @param {!string} eventid
+     * @param {!Function} cb
      */
-    this.handleUpdate = function () {
+    this.subscribe = function (eventid, cb) {
+        events.subscribe(eventid, cb);
     };
-    /*jslint emptyblock: false*/
+
+    /**
+     * Unsubscribe from cursor events
+     * @param {!string} eventid
+     * @param {!Function} cb
+     */
+    this.unsubscribe = function (eventid, cb) {
+        events.unsubscribe(eventid, cb);
+    };
+
     this.getStepCounter = function () {
         return selectionMover.getStepCounter();
     };
@@ -149,7 +161,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      */
     this.setSelectedRange = function (range, isForwardSelection) {
         cursor.setSelectedRange(range, isForwardSelection);
-        self.handleUpdate();
+        events.emit(ops.OdtCursor.signalCursorUpdated, self);
     };
     /**
      * Returns if the selection of this cursor has the
@@ -214,6 +226,9 @@ ops.OdtCursor.RangeSelection = 'Range';
 /**@const
    @type {!string} */
 ops.OdtCursor.RegionSelection = 'Region';
+/**@const
+ @type {!string} */
+ops.OdtCursor.signalCursorUpdated = "cursorUpdated";
 
 (function () {
     "use strict";
