@@ -44,25 +44,38 @@ runtime.loadClass("core.Cursor");
  **/
 xmled.XmlCaret = function XmlCaret(root) {
     "use strict";
+    /**
+     * @param {!Node} node
+     * @return {number}
+     */
     function acceptAll(node) {
         return node ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
     }
     var doc = root.ownerDocument,
         htmlns = doc.documentElement.namespaceURI,
+        /**@type{!core.Cursor}*/
         cursor,
         //leafNode,
+        /**@type{Element}*/
         activeElement,
         cursorns = "urn:webodf:names:cursor",
+        /**@type{!Array.<!Element>}*/
         history = [],
         walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT,
                 acceptAll, false),
-        /**@const*/DEFAULT_CARET_TOP = "5%",
+        /**@const*/
+        DEFAULT_CARET_TOP = "5%",
         shouldBlink = true,
         blinking = false,
+        /**@type{!HTMLSpanElement}*/
         cursorSpan,
+        /**@type{!Element}*/
         cursorNode,
         blinkTimeout;
 
+    /**
+     * @param {boolean} reset
+     */
     function blink(reset) {
         if (!shouldBlink || !cursorNode.parentNode) {
             // stop blinking when removed from the document
@@ -88,21 +101,27 @@ xmled.XmlCaret = function XmlCaret(root) {
         }
     }
 
+    /**
+     * @param {Element} a
+     * @param {Element} b
+     * @return {Element}
+     */
     function getCommonParent(a, b) {
         var pa = [], i, l;
         while (a && a !== root) {
             pa[pa.length] = a;
-            a = a.parentNode;
+            a = a.parentElement;
         }
         l = pa.length;
-        while (b) {  
+        while (b) {
             for (i = 0; i < l; i += 1) {
                 if (pa[i] === b) {
                     return b;
                 }
             }
-            b = b.parentNode;
+            b = b.parentElement;
         }
+        return null;
     }
 
     function updateHistory() {
@@ -118,6 +137,9 @@ xmled.XmlCaret = function XmlCaret(root) {
         history.push(root);
     }
 
+    /**
+     * @param {Element} element
+     */
     function makeActive(element) {
         if (activeElement) {
             activeElement.removeAttributeNS(cursorns, "active");
@@ -127,14 +149,14 @@ xmled.XmlCaret = function XmlCaret(root) {
         }
         var commonParent = getCommonParent(activeElement, element),
             e = activeElement;
-        while (e && e.nodeType === 1 && e !== commonParent) {
+        while (e && e !== commonParent) {
             e.removeAttributeNS(cursorns, "caret");
-            e = e.parentNode;
+            e = e.parentElement;
         }
         e = element;
-        while (e && e.nodeType === 1 && e !== commonParent) {
+        while (e && e !== commonParent) {
             e.setAttributeNS(cursorns, "caret", "1");
-            e = e.parentNode;
+            e = e.parentElement;
         }
         activeElement = element;
         updateHistory();
@@ -149,15 +171,19 @@ xmled.XmlCaret = function XmlCaret(root) {
             range;
         if (sel.rangeCount) {
             range = runtime.getWindow().getSelection().getRangeAt(0);
-            cursor.setSelectedRange(range);
+            cursor.setSelectedRange(/**@type{!Range}*/(range));
         }
         makeActive(element);
     };
+    /**
+     * @param {Element} e
+     * @return {number}
+     */
     function getDepth(e) {
         var depth = 0;
         while (e && e !== root) {
             depth += 1;
-            e = e.parentNode;
+            e = e.parentElement;
         }
         return depth;
     }
@@ -202,7 +228,7 @@ xmled.XmlCaret = function XmlCaret(root) {
             return;
         }
         if (activeElement !== root) {
-            makeActive(activeElement.parentNode);
+            makeActive(activeElement.parentElement);
         }
     };
     this.down = function () {
@@ -219,9 +245,15 @@ xmled.XmlCaret = function XmlCaret(root) {
             makeActive(i);
         }
     };
+    /**
+     * @return {Element}
+     */
     this.getActiveElement = function () {
         return activeElement;
     };
+    /**
+     * @return {!core.Cursor}
+     */
     this.getCursor = function () {
         return cursor;
     };
@@ -230,7 +262,8 @@ xmled.XmlCaret = function XmlCaret(root) {
         node.parentNode.normalize();
         p = node.previousSibling;
         if (p && p.nodeType === 3) {
-            t = p.splitText(p.length - 1);
+            t = /**@type{!Text}*/(p);
+            t = t.splitText(t.length - 1);
             node.parentNode.insertBefore(t, node.nextSibling);
         }
     };
@@ -240,10 +273,13 @@ xmled.XmlCaret = function XmlCaret(root) {
         p.normalize();
         n = node.nextSibling;
         if (n && n.nodeType === 3) {
-            t = n.splitText(1);
+            t = /**@type{!Text}*/(n).splitText(1);
             p.insertBefore(node, t);
         }
     };
+    /**
+     * @return {Text}
+     */
     this.leftText = function () {
         var node = cursor.getNode(),
             p = node.parentNode,
@@ -254,8 +290,11 @@ xmled.XmlCaret = function XmlCaret(root) {
             t = doc.createTextNode("");
             p.insertBefore(t, node);
         }
-        return t;
+        return /**@type{Text}*/(t);
     };
+    /**
+     * @return {Text}
+     */
     this.rightText = function () {
         var node = cursor.getNode(),
             p = node.parentNode,
@@ -266,7 +305,7 @@ xmled.XmlCaret = function XmlCaret(root) {
             t = doc.createTextNode("");
             p.insertBefore(t, node.nextSibling);
         }
-        return t;
+        return /**@type{Text}*/(t);
     };
     this.setFocus = function () {
         shouldBlink = true;
@@ -281,7 +320,7 @@ xmled.XmlCaret = function XmlCaret(root) {
             return;
         }
         cursor = new core.Cursor(doc, "me");
-        cursorSpan = doc.createElementNS(htmlns, "span");
+        cursorSpan = /**@type{!HTMLSpanElement}*/(doc.createElementNS(htmlns, "span"));
         cursorSpan.style.top = DEFAULT_CARET_TOP;
         cursorNode = cursor.getNode();
         cursorNode.appendChild(cursorSpan);

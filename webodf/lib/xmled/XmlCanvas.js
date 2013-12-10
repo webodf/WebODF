@@ -52,6 +52,7 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
     "use strict";
     var self = this,
         doc = element.ownerDocument,
+        /**@type{!Element}*/
         styleElement,
         state = xmled.XmlCanvas.State.LOADING,
         error,
@@ -97,7 +98,7 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
         if (!doc) {
             throw "No document!";
         }
-        var head = doc.getElementsByTagName('head')[0],
+        var head = /**@type{!HTMLHeadElement}*/(doc.getElementsByTagName('head')[0]),
             ns = element.namespaceURI;
         styleElement = doc.createElementNS(ns, 'link');
         styleElement.setAttribute("rel", "stylesheet");
@@ -144,6 +145,9 @@ xmled.XmlCanvas = function XmlCanvas(element, validationModel, styleurl) {
     this.getDocumentRoot = function () {
         return root;
     };
+    /**
+     * @return {!xmled.XmlCaret}
+     */
     this.getCaret = function () {
         return caret;
     };

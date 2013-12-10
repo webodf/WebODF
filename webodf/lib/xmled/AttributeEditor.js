@@ -58,13 +58,20 @@ xmled.AttributeEditor = function AttributeEditor(element) {
             element.removeChild(element.firstChild);
         }
     }
+    /**
+     * @return {!HTMLInputElement}
+     */
     function createAttributeToggle() {
-        var toggle = doc.createElementNS(htmlns, "input");
+        var toggle = /**@type{!HTMLInputElement}*/(doc.createElementNS(htmlns, "input"));
         toggle.setAttribute("type", "checkbox");
         return toggle;
     }
+    /**
+     * @param {!{values:!Array.<string>,name:string}} type
+     * @return {!HTMLSelectElement}
+     */
     function createComboBox(type) {
-        var txt = doc.createElementNS(htmlns, "select"),
+        var txt = /**@type{!HTMLSelectElement}*/(doc.createElementNS(htmlns, "select")),
             value,
             i,
             option;
@@ -77,15 +84,22 @@ xmled.AttributeEditor = function AttributeEditor(element) {
         }
         return txt;
     }
+    /**
+     * param {!{name:string,type:{values:!Array.<string>,name:string}}} att
+     * @param {!xmled.AttributeDefinition} att
+     * @param {!Element} target
+     * @return {!HTMLSpanElement}
+     */
     function createAttributeEditor(att, target) {
-        var span = doc.createElementNS(htmlns, "span"),
+        var span = /**@type{!HTMLSpanElement}*/(doc.createElementNS(htmlns, "span")),
+            /**@type{!HTMLSelectElement|!HTMLInputElement}*/
             field,
             toggle = createAttributeToggle();
         span.style.whiteSpace = "nowrap";
         if (att.type && att.type.name === "enumeration") {
             field = createComboBox(att.type);
         } else {
-            field = doc.createElementNS(htmlns, "input");
+            field = /**@type{!HTMLInputElement}*/(doc.createElementNS(htmlns, "input"));
         }
         toggle.checked = target.hasAttribute(att.name);
         field.disabled = !toggle.checked;
@@ -105,6 +119,10 @@ xmled.AttributeEditor = function AttributeEditor(element) {
         field.value = target.getAttribute(att.name);
         return span;
     }
+    /**
+     * @param {!Element} e
+     * @param {!Element} element
+     */
     function addHoverBehaviour(e, element) {
         e.onmouseover = function () {
             element.setAttributeNS(cursorns, "hover", "1");
@@ -114,13 +132,13 @@ xmled.AttributeEditor = function AttributeEditor(element) {
         };
     }
     /**
-     * @param {!Array} attributesDefinitions
+     * @param {!Array.<!{name:string,atts:!Array.<!xmled.AttributeDefinition>}>} attributesDefinitions
      * @param {!Element} target
      */
     this.setAttributeDefinitions = function (attributesDefinitions, target) {
         clear();
         var i, e, a, att, j, table, tr, td, t = target;
-        for (i = 0; i < attributesDefinitions.length; i += 1) {
+        for (i = 0; t && i < attributesDefinitions.length; i += 1) {
             e = doc.createElementNS(htmlns, "b");
             a = attributesDefinitions[i];
             e.appendChild(doc.createTextNode(a.name));
@@ -143,7 +161,7 @@ xmled.AttributeEditor = function AttributeEditor(element) {
                     table.appendChild(tr);
                 }
             }
-            t = t.parentNode;
+            t = t.parentElement;
         }
     };
 };

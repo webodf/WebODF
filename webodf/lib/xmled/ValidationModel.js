@@ -52,14 +52,24 @@ xmled.AttributeUse = {
     REQUIRED:   2,
     PROHIBITED: 3
 };
+/**@typedef{{
+    name:string,
+    type:{
+        values:!Array.<string>,
+        name:string
+    },
+    use:!xmled.AttributeUse
+}}*/
+xmled.AttributeDefinition;
 /**
  * @constructor
  * @struct
  */
 xmled.ParticleDefinition = function ParticleDefinition() {
     "use strict";
-    /**@type{!xmled.ParticleType}*/
-    this.type = xmled.ParticleType.SEQUENCE;
+    /**@const
+       @type{!xmled.ParticleType}*/
+    this.type;
     /**@type{!number}*/
     this.minOccurs = 1;
     /**@type{!number}*/
@@ -70,9 +80,25 @@ xmled.ParticleDefinition = function ParticleDefinition() {
  * @extends xmled.ParticleDefinition
  * @struct
  */
+xmled.CollectionDefinition = function CollectionDefinition() {
+    "use strict";
+    /**@const
+       @type{!xmled.ParticleType}*/
+    this.type;
+    /**@type{!number}*/
+    this.minOccurs = 1;
+    /**@type{!number}*/
+    this.maxOccurs = 1;
+};
+/**
+ * @constructor
+ * @extends xmled.CollectionDefinition
+ * @struct
+ */
 xmled.Sequence = function Sequence() {
     "use strict";
-    /**@const@type{!xmled.ParticleType}*/
+    /**@const
+       @type{!xmled.ParticleType}*/
     this.type = xmled.ParticleType.SEQUENCE;
     /**@type{!number}*/
     this.minOccurs = 1;
@@ -83,13 +109,14 @@ xmled.Sequence = function Sequence() {
 };
 /**
  * @constructor
- * @extends xmled.ParticleDefinition
+ * @extends xmled.CollectionDefinition
  * @struct
  * @param {!Object.<!string,!number>} map
  */
 xmled.Choice = function Choice(map) {
     "use strict";
-    /**@const@type{!xmled.ParticleType}*/
+    /**@const
+       @type{!xmled.ParticleType}*/
     this.type = xmled.ParticleType.CHOICE;
     /**@type{!number}*/
     this.minOccurs = 1;
@@ -110,12 +137,13 @@ xmled.Choice = function Choice(map) {
 };
 /**
  * @constructor
- * @extends xmled.ParticleDefinition
+ * @extends xmled.CollectionDefinition
  * @struct
  */
 xmled.All = function All() {
     "use strict";
-    /**@const@type{!xmled.ParticleType}*/
+    /**@const
+       @type{!xmled.ParticleType}*/
     this.type = xmled.ParticleType.ALL;
     /**@type{!number}*/
     this.minOccurs = 1;
@@ -129,7 +157,8 @@ xmled.All = function All() {
  */
 xmled.Any = function Any() {
     "use strict";
-    /**@const@type{!xmled.ParticleType}*/
+    /**@const
+       @type{!xmled.ParticleType}*/
     this.type = xmled.ParticleType.ANY;
     /**@type{!number}*/
     this.minOccurs = 1;
@@ -144,7 +173,8 @@ xmled.Any = function Any() {
  */
 xmled.ElementRef = function ElementRef(element) {
     "use strict";
-    /**@const@type{!xmled.ParticleType}*/
+    /**@const
+       @type{!xmled.ParticleType}*/
     this.type = xmled.ParticleType.ELEMENT;
     /**@type{!number}*/
     this.minOccurs = 1;
@@ -179,7 +209,7 @@ xmled.Type = function Type() {
     this.mixed = false;
     /**@type{!boolean}*/
     this.simple = false;
-    /**@type{?xmled.Sequence|?xmled.Choice|?xmled.All}*/
+    /**@type{xmled.CollectionDefinition}*/
     this.particle = null;
     /**@type{!Array.<!xmled.Attribute>}*/
     this.attributes = [];
@@ -204,7 +234,7 @@ xmled.Element = function Element(ns, name) {
     this.simple = false;
     /**@type{!string}*/
     this.annotation = "";
-    /**@type{?xmled.Sequence|?xmled.Choice|?xmled.All}*/
+    /**@type{xmled.CollectionDefinition}*/
     this.particle = null;
     /**@type{!Array.<!xmled.Attribute>}*/
     this.attributes = [];
@@ -214,6 +244,8 @@ xmled.Element = function Element(ns, name) {
 /**
  * @constructor
  * @struct
+ * @param {?string} ns
+ * @param {string} name
  */
 xmled.QName = function QName(ns, name) {
     "use strict";
@@ -229,12 +261,24 @@ xmled.QName = function QName(ns, name) {
  */
 xmled.ParsedSchema = function ParsedSchema(elements) {
     "use strict";
+    /**
+     * @param {?string} namespaceURI
+     * @param {string} localName
+     * @return {?xmled.Element}
+     */
     this.element = function (namespaceURI, localName) {
         var ns = elements[namespaceURI];
         return ns ? ns[localName] : null;
     };
-    this.elements = (function () {
-        var es = [], i, e, j;
+    /**
+     * @return {!Array.<!xmled.Element>}
+     */
+    function createElements() {
+        var es = [], e,
+            /**@type{string}*/
+            i,
+            /**@type{string}*/
+            j;
         for (i in elements) {
             if (elements.hasOwnProperty(i)) {
                 e = elements[i];
@@ -246,12 +290,13 @@ xmled.ParsedSchema = function ParsedSchema(elements) {
             }
         }
         return es;
-    }());
+    }
+    this.elements = createElements();
 };
 /**
  * @param {!Document} dom
  * @param {!Object} doms
- * @return {!Object.<?string,!Object.<!string,!xmled.Element>>}
+ * @return {!xmled.ParsedSchema}
  */
 xmled.parseSchema = function (dom, doms) {
     "use strict";
@@ -260,16 +305,27 @@ xmled.parseSchema = function (dom, doms) {
         xsdns = "http://www.w3.org/2001/XMLSchema",
         /**@type{!Object.<?string,!Object.<!string,!xmled.Element>>}*/
         topElements = {},
+        /**@type{!Object.<string,!Element>}*/
         elements = {},
+        /**@type{!Object.<string,!Element>}*/
         attributes = {},
+        /**@type{!Object.<string,!Element>}*/
         groups = {},
+        /**@type{!Object.<string,!Element>}*/
         attributeGroups = {},
+        /**@type{!Object.<string,!Element>}*/
         simpleTypes = {},
+        /**@type{!Object.<string,!Element>}*/
         complexTypes = {},
+        /**@type{function(!Element):!xmled.Choice}*/
         parseChoice,
+        /**@type{function(!Element):!xmled.Type}*/
         parseLocalComplexType,
+        /**@type{function(!Element,!xmled.Element)}*/
         parseTopLevelElement,
+        /**@type{function(!Element):!xmled.CollectionDefinition}*/
         parseGroup,
+        /**@type{function(?Element,!xmled.Type)}*/
         addAttributes,
         simpleXsdTypes = {
             "string": 1,
@@ -277,9 +333,17 @@ xmled.parseSchema = function (dom, doms) {
             "boolean": 1,
             "unsignedByte": 1
         };
+    /**
+     * @param {!Element} e
+     * @return {undefined}
+     */
     function unexpected(e) {
         throw "Unexpected element " + e.namespaceURI + " " + e.localName;
     }
+    /**
+     * @param {?Element} e
+     * @return {?string}
+     */
     function xsdname(e) {
         if (!e) {
             return null;
@@ -365,21 +429,33 @@ xmled.parseSchema = function (dom, doms) {
             } else if (name === "complexType") {
                 e = parseComplexType(def);
             } else {
-                throw unexpected(e);
+                throw unexpected(def);
             }
         }
         return e;
     }
+    /**
+     * @param {!xmled.Element} element
+     * @param {!xmled.Type} type
+     */
     function setType(element, type) {
         element.mixed = type.mixed;
         element.particle = type.particle;
         element.attributes = type.attributes;
         element.anyAttribute = type.anyAttribute;
     }
+    /**
+     * @param {!Element} element
+     * @return {number}
+     */
     function getMinOccurs(element) {
         var minOccurs = element.getAttribute("minOccurs");
         return (minOccurs !== null) ? parseInt(minOccurs, 10) : 1;
     }
+    /**
+     * @param {!Element} element
+     * @return {number}
+     */
     function getMaxOccurs(element) {
         var maxOccurs = element.getAttribute("maxOccurs");
         if (maxOccurs === null) {
@@ -427,8 +503,14 @@ xmled.parseSchema = function (dom, doms) {
         }
         return new xmled.ElementRef(element);
     }
+    /**
+     * @param {!Object.<string,!xmled.ElementRef>} a
+     * @param {!Object.<string,!xmled.ElementRef>} b
+     * @return {boolean}
+     */
     function merge(a, b) {
-        var i;
+        var /**@type{string}*/
+            i;
         for (i in b) {
             if (b.hasOwnProperty(i)) {
                 a[i] = b[i];
@@ -436,8 +518,13 @@ xmled.parseSchema = function (dom, doms) {
         }
         return a === b;
     }
+    /**
+     * @param {string} group
+     * @return {!Object.<string,!xmled.ElementRef>}
+     */
     function getAlternateGroupElements(group) {
         var e,
+            /**@type{string}*/
             name,
             sg,
             es = {};
@@ -457,19 +544,25 @@ xmled.parseSchema = function (dom, doms) {
         }
         return es;
     }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Choice}
+     */
     function createChoiceFromAbstractElement(def) {
         var els = [],
+            /**@type{string}*/
             i,
             e,
-            a = getAlternateGroupElements(getLocalName(def.getAttribute("name")));
+            a = getAlternateGroupElements(getLocalName(def.getAttribute("name"))),
+            offsetMap = {};
         for (i in a) {
             if (a.hasOwnProperty(i)) {
                 e = a[i];
-                a[i] = els.length;
+                offsetMap[i] = els.length;
                 els.push(e);
             }
         }
-        a = new xmled.Choice(a);
+        a = new xmled.Choice(offsetMap);
         a.choices = els;
         return a;
     }
@@ -622,27 +715,7 @@ xmled.parseSchema = function (dom, doms) {
     }
     /**
      * @param {!Element} def
-     * @return {!xmled.All|!xmled.Choice|!xmled.Sequence}
-     */
-    parseGroup = function parseGroup(def) {
-        var e = findGroupCollection(def),
-            name = xsdname(e),
-            r;
-        if (name === "sequence") {
-            r = parseSequence(e);
-        } else if (e && name === "choice") {
-            r = parseChoice(e);
-        } else if (e && name === "all") {
-            r = parseAll(e);
-        } else {
-            throw unexpected(e);
-        }
-        parseOccurrence(def, r);
-        return r;
-    };
-    /**
-     * @param {!Element} def
-     * @return {!xmled.All|!xmled.Choice|!xmled.Sequence}
+     * @return {!xmled.CollectionDefinition}
      */
     function parseDefinitionGroup(def) {
         var e = findGroupCollection(def),
@@ -659,6 +732,15 @@ xmled.parseSchema = function (dom, doms) {
         }
         return r;
     }
+    /**
+     * @param {!Element} def
+     * @return {!xmled.CollectionDefinition}
+     */
+    parseGroup = function parseGroup(def) {
+        var r = parseDefinitionGroup(def);
+        parseOccurrence(def, r);
+        return r;
+    };
     /**
      * @param {!Element} def
      * @return {!xmled.Type}
@@ -698,32 +780,39 @@ xmled.parseSchema = function (dom, doms) {
         } else if (e && name === "restriction") {
             el = parseRestriction(e);
         } else {
-            throw unexpected(e);
+            if (e) {
+                throw unexpected(e);
+            }
+            throw "No element found.";
         }
         return el;
     }
+    /**
+     * @param {Element} attribute
+     * @return {?{name:string,values:!Array.<string>}}
+     */
     function getAttributeType(attribute) {
         if (!attribute) {
             return null;
         }
-        var e = attribute.firstChild,
-            enumeration = []; 
+        var e = attribute.firstElementChild,
+            enumeration = [];
         while (e && e.localName !== "simpleType") {
-            e = e.nextSibling;
+            e = e.nextElementSibling;
         }
-        e = e && e.firstChild;
+        e = e && e.firstElementChild;
         while (e && e.localName !== "restriction") {
-            e = e.nextSibling;
+            e = e.nextElementSibling;
         }
         if (!e) {
             return null;
         }
-        e = e.firstChild;
+        e = e.firstElementChild;
         while (e) {
             if (e.localName === "enumeration") {
                 enumeration.push(e.getAttribute("value"));
             }
-            e = e.nextSibling;
+            e = e.nextElementSibling;
         }
         if (enumeration.length) {
             return { name: "enumeration", values: enumeration };
@@ -833,8 +922,16 @@ xmled.parseSchema = function (dom, doms) {
         addAttributes(e, type);
         return type;
     };
+    /**
+     * @param {!Element} def
+     * @return {!xmled.Type}
+     */
     function parseLocalSimpleType(def) {
-        return def;
+        var type = new xmled.Type();
+        if (def) {
+            return type;
+        }
+        return type;
     }
     /**
      * @param {?Element} e
@@ -879,7 +976,7 @@ xmled.parseSchema = function (dom, doms) {
             parseIdentityConstraint(e);
             return;
         }
-        if (name === "simpleType") {
+        if (e && name === "simpleType") {
             type = parseLocalSimpleType(e);
             setType(element, type);
             e = e.nextElementSibling;
@@ -958,7 +1055,9 @@ xmled.Particle = function Particle(id, def, offset, parent) {
  */
 xmled.ParticleCache = function ParticleCache() {
     "use strict";
-    var rootParticles = {},
+    var /**@type{!Object.<string,!xmled.Particle>}*/
+        rootParticles = {},
+        /**@type{!Array.<!Array.<!xmled.Particle>>}*/
         particles = [];
     /**
      * @param {!xmled.ParticleDefinition} def
@@ -967,16 +1066,17 @@ xmled.ParticleCache = function ParticleCache() {
      * @return {!xmled.Particle}
      */
     this.getParticle = function (def, offset, parent) {
-        var e,
-            p,
-            ps;
+        var p,
+            ps,
+            name;
         if (!parent) { // asking for a root particle
-            e = /**@type{!xmled.ElementRef}*/(def);
-            p = rootParticles[e.element.name];
-            if (!p) {
+            name = /**@type{!xmled.ElementRef}*/(def).element.name;
+            if (!rootParticles.hasOwnProperty(name)) {
                 p = new xmled.Particle(particles.length, def);
                 particles.push([]);
-                rootParticles[e.element.name] = p;
+                rootParticles[name] = p;
+            } else {
+                p = rootParticles[name];
             }
         } else {
             ps = particles[parent.id];
@@ -1073,12 +1173,14 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
     var modelState = xmled.ValidationModel.State.LOADING,
         xsdns = "http://www.w3.org/2001/XMLSchema",
         error,
+        /**@type{!Element}*/
         xsd,
         targetNamespace = null,
         checker = new xmled.XsdChecker(),
         particles = new xmled.ParticleCache(),
         fillElementWithDefaults,
         findParticlesInCollection,
+        /**@type{!xmled.ParsedSchema}*/
         schema,
         addCollection;
     /**
@@ -1125,14 +1227,18 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             es = xsd.getElementsByTagNameNS(xsdns, "element");
         return getElementWithName(es, localName);
     }
-    function getAllowedElements(e, allowed) {
-        e = e.firstElementChild;
+    /**
+     * @param {!Element} pe
+     * @param {!Object.<string,boolean>} allowed
+     */
+    function getAllowedElements(pe, allowed) {
+        var e = pe.firstElementChild;
         while (e) {
             if (e.localName === "element") {
                 if (e.hasAttribute("name")) {
-                    allowed[e.getAttribute("name")] = 1;
+                    allowed[e.getAttribute("name")] = true;
                 } else if (e.hasAttribute("ref")) {
-                    allowed[e.getAttribute("ref")] = 1;
+                    allowed[e.getAttribute("ref")] = true;
                 }
             } else {
                 getAllowedElements(e, allowed);
@@ -1152,9 +1258,9 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         if (!e) {
             return Object.keys(allowed);
         }
-        complexType = e.firstChild;
+        complexType = e.firstElementChild;
         while (complexType && complexType.localName !== "complexType") {
-            complexType = complexType.nextSibling;
+            complexType = complexType.nextElementSibling;
         }
         if (!complexType) {
             return Object.keys(allowed);
@@ -1225,6 +1331,10 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
             addChoice(instance, el);
         }
     };
+    /**
+     * @param {!xmled.Attribute} att
+     * @return {string}
+     */
     function createDefaultAttributeValue(att) {
         return att ? "1" : "0";
     }
@@ -1302,8 +1412,8 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      */
     function getPosition(element, filter) {
         var position = 0,
-            e = element.parentNode.firstElementChild;
-        while (e !== element) {
+            e = element.parentElement.firstElementChild;
+        while (e && e !== element) {
             if (!filter || filter.acceptNode(e) === NodeFilter.FILTER_ACCEPT) {
                 position += 1;
             }
@@ -1479,14 +1589,16 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
      * @return {!Array.<!Array.<!xmled.Particle>>}
      */
     function findAllParticles(documentElement, element, filter) {
-        var parents = [element],
+        var /**@type{!Array.<!Element>}*/
+            parents = [element],
             parentParticle,
             e = element,
+            /**@type{!Array.<!Array.<!xmled.Particle>>}*/
             ps = [],
             state,
             i;
         while (e && documentElement !== e) {
-            e = /**@type{!Element}*/(e.parentNode);
+            e = e.parentElement;
             parents.push(e);
         }
         parents.reverse();
@@ -1745,8 +1857,13 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
 */
         return findAlternativeElements(ps, documentElement, node, filter);
     }
+    /**
+     * @param {Node} container
+     * @param {number} offset
+     * @return {Node}
+     */
     function getNode(container, offset) {
-        var n = container.firstChild;
+        var n = container && container.firstChild;
         while (offset > 0) {
             n = n.nextSibling;
             offset -= 1;
@@ -1765,7 +1882,7 @@ xmled.ValidationModel = function ValidationModel(grammarurl, onready) {
         var n1 = getNode(range.startContainer, range.startOffset),
             n2 = getNode(range.endContainer, range.endOffset),
             c = 0;
-        while (n1 !== n2) {
+        while (n1 && n1 !== n2) {
             if (!filter || filter.acceptNode(n1) === NodeFilter.FILTER_ACCEPT) {
                 c += 1;
             }

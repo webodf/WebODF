@@ -53,8 +53,11 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
             htmlelement.removeChild(htmlelement.firstChild);
         }
     }
+    /**
+     * @return {!HTMLSpanElement}
+     */
     function createArrow() {
-        var span = doc.createElementNS(htmlns, "span");
+        var span = /**@type{!HTMLSpanElement}*/(doc.createElementNS(htmlns, "span"));
         span.appendChild(doc.createTextNode(" ▸ "));
         span.style.color = "#FF8A00";
         span.style.padding = "2px";
@@ -62,6 +65,10 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
         return span;
     }
 
+    /**
+     * @param {!HTMLDivElement} menu
+     * @param {string} text
+     */
     function createMenuItem(menu, text) {
         var item = doc.createElementNS(htmlns, "div");
         item.appendChild(doc.createTextNode(text));
@@ -71,42 +78,62 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
 //        item.setAttribute("tabindex", "1");
     }
 
-    function getElementPosition(element) {
-        var e = element.parentNode.firstChild,
+    /**
+     * @param {!Node} node
+     * @return {number}
+     */
+    function getNodePosition(node) {
+        var n = node.parentNode.firstChild,
             pos = 0;
-        while (e !== element) {
+        while (n !== node) {
             pos += 1;
-            e = e.nextSibling;
+            n = n.nextSibling;
         }
         return pos;
     }
 
-    function getRangeAroundElement(element) {
-        var range = element.ownerDocument.createRange(),
-            pos = getElementPosition(element);
-        range.setStart(element.parentNode, pos);
-        range.setEnd(element.parentNode, pos + 1);
+    /**
+     * @param {!Node} node
+     * @return {!Range}
+     */
+    function getRangeAroundNode(node) {
+        var range = node.ownerDocument.createRange(),
+            pos = getNodePosition(node);
+        range.setStart(node.parentNode, pos);
+        range.setEnd(node.parentNode, pos + 1);
         return range;
     }
 
-    function getRangeAtStartOfElement(element) {
-        var range = element.ownerDocument.createRange();
-        range.setStart(element, 0);
-        range.setEnd(element, 0);
+    /**
+     * @param {!Node} node
+     * @return {!Range}
+     */
+    function getRangeAtStartOfNode(node) {
+        var range = node.ownerDocument.createRange();
+        range.setStart(node, 0);
+        range.setEnd(node, 0);
         return range;
     }
 
-    function getRangeAtEndOfElement(element) {
-        var range = element.ownerDocument.createRange(),
-            count = element.childNodes.length;
-        range.setStart(element, count);
-        range.setEnd(element, count);
+    /**
+     * @param {!Node} node
+     * @return {!Range}
+     */
+    function getRangeAtEndOfNode(node) {
+        var range = node.ownerDocument.createRange(),
+            count = node.childNodes.length;
+        range.setStart(node, count);
+        range.setEnd(node, count);
         return range;
     }
 
+    /**
+     * @param {!Element} element
+     * @return {!HTMLDivElement}
+     */
     function createMenu(element) {
-        var menu = doc.createElementNS(htmlns, "div"),
-            range = getRangeAroundElement(element),
+        var menu = /**@type{!HTMLDivElement}*/(doc.createElementNS(htmlns, "div")),
+            range = getRangeAroundNode(element),
             range2,
             allowed = validationModel.getPossibleReplacements(root, range, filter),
             i;
@@ -116,13 +143,13 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
             createMenuItem(menu, 'Replace with ' + allowed[i].desc);
         }
         // prepend
-        range = getRangeAtStartOfElement(element);
+        range = getRangeAtStartOfNode(element);
         allowed = validationModel.getPossibleReplacements(root, range, filter);
         range.detach();
         for (i = 0; i < allowed.length; i += 1) {
             createMenuItem(menu, 'Prepend ' + allowed[i].desc);
         }
-        range2 = getRangeAtEndOfElement(element);
+        range2 = getRangeAtEndOfNode(element);
         range2.detach();
         menu.style.display = "none";
         menu.style.position = "absolute";
@@ -138,8 +165,11 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
         return menu;
     }
 
-    function hideMenus(e) {
-        e = e.firstElementChild;
+    /**
+     * @param {?Element} element
+     */
+    function hideMenus(element) {
+        var e = element.firstElementChild;
         while (e) {
             if (e.style.display === "block") {
                 e.style.display = "none";
@@ -149,9 +179,13 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
         }
     }
  
+    /**
+     * @param {!Element} element
+     * @return {!HTMLSpanElement}
+     */
     function createCrumb(element) {
         var span = createArrow(),
-            crumb = doc.createElementNS(htmlns, "span"),
+            crumb = /**@type{!HTMLSpanElement}*/(doc.createElementNS(htmlns, "span")),
             menu = createMenu(element);
         span.className = 'hoveropaque';
         span.appendChild(crumb);
@@ -169,7 +203,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
         crumb.appendChild(menu);
         span.onclick = function () {
             var d = menu.style.display;
-            hideMenus(crumb.parentNode.parentNode);
+            hideMenus(crumb.parentElement.parentElement);
             menu.style.display = d === "none" ? "block" : "none";
         };
         return span;
@@ -194,7 +228,7 @@ xmled.CrumbBar = function CrumbBar(htmlelement, root, validationModel, filter) {
         while (e && e !== root.parentNode) {
             htmlelement.insertBefore(createCrumb(e), htmlelement.firstChild);
             empty = false;
-            e = e.parentNode;
+            e = e.parentElement;
         }
         if (empty) {
             htmlelement.appendChild(createArrow());
