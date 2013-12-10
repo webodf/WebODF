@@ -8,6 +8,8 @@ set(VIEWER_IMAGES
 	images/toolbarButton-pageUp.png
 	images/toolbarButton-zoomIn.png
 	images/toolbarButton-zoomOut.png
+       images/nlnet.png
+       images/kogmbh.png
 )
 
 set (TOOLSDIR ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
