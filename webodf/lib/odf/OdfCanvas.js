@@ -252,17 +252,18 @@ runtime.loadClass("gui.AnnotationViewManager");
         }
 
         var masterStyles = odfContainer.rootElement.masterStyles,
-            masterPageElement = masterStyles.firstElementChild;
+            masterStylesChild = masterStyles.firstElementChild;
 
-        while (masterPageElement) {
-            if (masterPageElement.getAttributeNS(stylens, 'name')
+        while (masterStylesChild) {
+            if (masterStylesChild.getAttributeNS(stylens, 'name')
                     === masterPageName
-                    && masterPageElement.localName === "master-page"
-                    && masterPageElement.namespaceURI === stylens) {
+                    && masterStylesChild.localName === "master-page"
+                    && masterStylesChild.namespaceURI === stylens) {
                 break;
             }
+            masterStylesChild = masterStylesChild.nextElementSibling;
         }
-        return masterPageElement;
+        return masterStylesChild;
     }
 
     /**
