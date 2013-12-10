@@ -242,6 +242,31 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.imageElements.shift()", "t.doc.childNodes[0].firstChild.firstChild.firstChild");
         r.shouldBe(t, "t.imageElements.shift()", "t.doc.childNodes[1].firstChild.firstChild.firstChild.firstChild");
     }
+    function getTextElements_InlineRoots_ExcludesSubRoots() {
+        t.doc = createDocument("<text:p>abc<div xmlns='http://www.w3.org/1999/xhtml' class='annotationWrapper'><office:annotation>def</office:annotation></div>ghi</text:p>");
+        t.range.selectNode(t.doc);
+
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
+
+        r.shouldBe(t, "t.textElements.length", "3");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1]");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]");
+    }
+    function getTextElements_ContainedWithinRoot_StaysBounded() {
+        t.doc = createDocument("<text:p>abc<div xmlns='http://www.w3.org/1999/xhtml' class='annotationWrapper'>" +
+            "<office:annotation>" +
+            "<text:list><text:list-item><text:p>def</text:p></text:list-item></text:list>" +
+            "</office:annotation>" +
+            "</div>ghi</text:p>");
+        t.annotationText = t.doc.childNodes[1].firstChild.firstChild.firstChild.firstChild.firstChild; // should be "def"
+        t.range.selectNodeContents(t.annotationText.parentNode);
+
+        t.textElements = t.odfUtils.getTextElements(t.range, true, false);
+
+        r.shouldBe(t, "t.textElements.length", "1");
+        r.shouldBe(t, "t.textElements.shift()", "t.annotationText");
+    }
     function isDowngradableWhitespace_DowngradesFirstSpaceAfterChar() {
         t.doc = createDocument("<text:p>a<text:s> </text:s>b</text:p>");
         t.isDowngradable = t.odfUtils.isDowngradableSpaceElement(t.doc.childNodes[1]);
@@ -292,6 +317,8 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             getTextElements_ExcludesInsignificantWhitespace,
             getTextElements_CharacterElements,
             getImageElements_ReturnTwoImages,
+            getTextElements_InlineRoots_ExcludesSubRoots,
+            getTextElements_ContainedWithinRoot_StaysBounded,
 
             isDowngradableWhitespace_DowngradesFirstSpaceAfterChar,
             isDowngradableWhitespace_DowngradesFirstSpaceAfterTab,

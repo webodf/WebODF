@@ -809,8 +809,8 @@ odf.OdfUtils = function OdfUtils() {
          */
         function nodeFilter(node) {
             nodeRange.selectNodeContents(node);
-            // do not return anything inside the character element
-            if (isCharacterElement(node.parentNode)) {
+            // do not return anything inside an character element or an inline root such as an annotation
+            if (isCharacterElement(node.parentNode) || isInlineRoot(node.parentNode)) {
                 return NodeFilter.FILTER_REJECT;
             }
 
