@@ -650,10 +650,20 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToEntireDocument() {
-            var rootNode = odtDocument.getRootNode(),
-                lastWalkableStep = odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length);
-            // TODO this needs to respect roots
-            session.enqueue([createOpMoveCursor(0, lastWalkableStep)]);
+            var cursor = odtDocument.getCursor(inputMemberId),
+                root = odtDocument.getRootElement(cursor.getNode()),
+                newSelection,
+                newCursorSelection;
+
+            runtime.assert(Boolean(root), "SessionController: Cursor outside root");
+            newSelection = {
+                anchorNode: root,
+                anchorOffset: 0,
+                focusNode: root,
+                focusOffset: root.childNodes.length
+            };
+            newCursorSelection = odtDocument.convertDomToCursorRange(newSelection, constrain(odtDocument.getRootElement));
+            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
             return true;
         }
         // TODO Extract selection functions into a standalone SelectionManipulator
