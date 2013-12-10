@@ -599,42 +599,42 @@
         this.mapKeyValObjOntoNode = mapKeyValObjOntoNode;
 
         /**
-        * Takes an array of strings, which is a listing of
-        * properties to be removed (namespace required),
-        * and deletes the corresponding top-level child elements
-        * that represent those properties, from the
-        * supplied node.
-        * Example: removeKeyElementsFromNode(node, ["dc:creator"], nsResolver);
-        * If a namespace is not resolved with the nsResolver,
-        * that key element will be not removed.
-        * If a key element does not exist, it will be ignored.
-        * @param {!Element} node
-        * @param {!Array.<!string>} propertyNames 
-        * @param {!function(!string):?string} nsResolver
-        */
-       function removeKeyElementsFromNode(node, propertyNames, nsResolver) {
-           propertyNames.forEach(function (propertyName) {
-               var parts = propertyName.split(":"),
-                   prefix = parts[0],
-                   localName = parts[1],
-                   ns = nsResolver(prefix),
-                   element;
+         * Takes an array of strings, which is a listing of
+         * properties to be removed (namespace required),
+         * and deletes the corresponding top-level child elements
+         * that represent those properties, from the
+         * supplied node.
+         * Example: removeKeyElementsFromNode(node, ["dc:creator"], nsResolver);
+         * If a namespace is not resolved with the nsResolver,
+         * that key element will be not removed.
+         * If a key element does not exist, it will be ignored.
+         * @param {!Element} node
+         * @param {!Array.<!string>} propertyNames
+         * @param {!function(!string):?string} nsResolver
+         */
+        function removeKeyElementsFromNode(node, propertyNames, nsResolver) {
+            propertyNames.forEach(function (propertyName) {
+                var parts = propertyName.split(":"),
+                    prefix = parts[0],
+                    localName = parts[1],
+                    ns = nsResolver(prefix),
+                    element;
 
-               // Ignore if the prefix is unsupported,
-               // otherwise delete the element if found
-               if (ns) {
-                   element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0]);
-                   if (element) {
-                       element.parentNode.removeChild(element);
-                   } else {
-                        runtime.log("Element for " + propertyName + " not found.");
-                   }
-               } else {
-                   runtime.log("Property Name ignored: " + propertyName);
-               }
-           });
-       }
-       this.removeKeyElementsFromNode = removeKeyElementsFromNode;
+                // Ignore if the prefix is unsupported,
+                // otherwise delete the element if found
+                if (ns) {
+                    element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0]);
+                    if (element) {
+                        element.parentNode.removeChild(element);
+                    } else {
+                         runtime.log("Element for " + propertyName + " not found.");
+                    }
+                } else {
+                    runtime.log("Property Name ignored: " + propertyName);
+                }
+            });
+        }
+        this.removeKeyElementsFromNode = removeKeyElementsFromNode;
  
         /**
          * Looks at an element's direct children, and generates an object which is a
