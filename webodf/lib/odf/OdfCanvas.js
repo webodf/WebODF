@@ -277,7 +277,7 @@ runtime.loadClass("gui.AnnotationViewManager");
         for (i = 0; i < clonedDrawFrameElements.length; i += 1) {
             element = /**@type{!Element}*/(clonedDrawFrameElements[i]);
             presentationClass = element.getAttributeNS(presentationns, 'class');
-            if (presentationClass && ! /^(date-time|footer|header|page-number')$/.test(presentationClass)) {
+            if (presentationClass && ! /^(date-time|footer|header|page-number)$/.test(presentationClass)) {
                 element.parentNode.removeChild(element);
             }
         }
