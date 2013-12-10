@@ -307,20 +307,23 @@ ops.TransformationTests = function TransformationTests(runner) {
     }
 
     /**
-     * @param {!Element} a
-     * @param {!Element} b
+     * Creates a deep copy of all child nodes of the source element
+     * and adds them as child nodes to the target element.
+     * If the target element had child nodes before, they are removed.
+     * @param {!Element} targetElement
+     * @param {!Element} sourceElement
      * @return {undefined}
      */
-    function copyChildNodes(a, b) {
-        while (b.firstChild) {
-            b.removeChild(b.firstChild);
+    function copyChildNodes(targetElement, sourceElement) {
+        while (targetElement.firstChild) {
+            targetElement.removeChild(targetElement.firstChild);
         }
-        var n = a.firstChild;
+        var n = sourceElement.firstChild;
         while (n) {
-            if (a.ownerDocument === b.ownerDocument) {
-                b.appendChild(n.cloneNode(true));
+            if (sourceElement.ownerDocument === targetElement.ownerDocument) {
+                targetElement.appendChild(n.cloneNode(true));
             } else {
-                b.appendChild(b.ownerDocument.importNode(n, true));
+                targetElement.appendChild(targetElement.ownerDocument.importNode(n, true));
             }
             n = n.nextSibling;
         }
@@ -391,12 +394,12 @@ ops.TransformationTests = function TransformationTests(runner) {
 
         // inject test data
         if (stylesbefore) {
-            copyChildNodes(stylesbefore, styles);
+            copyChildNodes(styles, stylesbefore);
         }
         if (metabefore) {
-            copyChildNodes(metabefore, meta);
+            copyChildNodes(meta, metabefore);
         }
-        copyChildNodes(textbefore, text);
+        copyChildNodes(text, textbefore);
 
         // execute opspecs
         for (i = 0; i < opspecs.length; i += 1) {
