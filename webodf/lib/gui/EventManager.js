@@ -278,6 +278,15 @@ gui.EventManager = function EventManager(odtDocument) {
         }
     };
 
+    /**
+     * Blur focus from the event manager
+     */
+    this.blur = function() {
+        if (hasFocus()) {
+            eventTrap.blur();
+        }
+    };
+
     function init() {
         var canvasElement = getCanvasElement(),
             doc = canvasElement.ownerDocument;

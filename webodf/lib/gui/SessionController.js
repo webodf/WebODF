@@ -865,6 +865,13 @@ gui.SessionController = (function () {
         function synchronizeWindowSelection(cursor) {
             var selection = window.getSelection(),
                 range = cursor.getSelectedRange();
+
+            // Workaround for a FF bug when resynchronizing the selection on mouse-down.
+            // Attempting to collapse a selection if a content editable element is the current activeElement
+            // for the document will cause the collapse call to throw an exception
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
+            eventManager.blur();
             if (selection.extend) {
                 if (cursor.hasForwardSelection()) {
                     selection.collapse(range.startContainer, range.startOffset);
