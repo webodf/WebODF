@@ -43,7 +43,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
      * Move the cursor to the end of the document using the same interface as ctrl/cmd+end
      * @constructor
      */
-    function MoveCursorToEndViaCtrlEnd() {
+    function MoveCursorToEnd() {
         var state = {description: "Move to document end (ctrl+end)"},
             action = new BenchmarkAction(state);
 
@@ -55,10 +55,10 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(sharedState) {
             action.start();
-            sharedState.sessionController.moveCursorToDocumentBoundary(1, false);
+            sharedState.sessionController.moveCursorToDocumentEnd();
             action.complete(true);
         }
     }
 
-    return MoveCursorToEndViaCtrlEnd;
+    return MoveCursorToEnd;
 });

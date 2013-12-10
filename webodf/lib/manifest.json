@@ -180,7 +180,8 @@
         "ops/OpMoveCursor.js",
         "ops/OpRemoveCursor.js",
         "ops/Operation.js",
-        "ops/Session.js"
+        "ops/Session.js",
+        "ops/StepsTranslator.js"
     ],
     "gui/SessionView.js": [
         "gui/Caret.js",

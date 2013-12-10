@@ -45,6 +45,7 @@ runtime.loadClass("odf.ObjectNameGenerator");
 runtime.loadClass("ops.OdtCursor");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
+runtime.loadClass("ops.StepsTranslator");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.DirectTextStyler");
 runtime.loadClass("gui.DirectParagraphStyler");
@@ -540,27 +541,34 @@ gui.SessionController = (function () {
         }
 
         /**
+         * @param {!number} direction -1 for beginning, 1 for end
+         * @param {!function(!Node):Node} getContainmentNode Returns a node container for the supplied node.
+         *  Usually this will be something like the parent paragraph or root the supplied node is within
+         * @return {undefined}
+         */
+        function extendCursorToNodeBoundary(direction, getContainmentNode) {
+            var cursor = odtDocument.getCursor(inputMemberId),
+                node = getContainmentNode(cursor.getNode()),
+                selection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
+                newCursorSelection;
+
+            runtime.assert(Boolean(node), "SessionController: Cursor outside root");
+            if (direction < 0) {
+                selection.focusNode = /**@type{!Node}*/(node);
+                selection.focusOffset = 0;
+            } else {
+                selection.focusNode = /**@type{!Node}*/(node);
+                selection.focusOffset = node.childNodes.length;
+            }
+            newCursorSelection = odtDocument.convertDomToCursorRange(selection, constrain(getContainmentNode));
+            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
+        }
+
+        /**
          * @return {!boolean}
          */
         function extendSelectionToParagraphStart() {
-            var paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode())),
-                iterator,
-                node,
-                steps;
-
-            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = odtDocument.getDistanceFromCursor(inputMemberId, paragraphNode, 0);
-            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
-            iterator.setUnfilteredPosition(paragraphNode, 0);
-
-            while (steps === 0 && iterator.previousPosition()) {
-                node = iterator.getCurrentNode();
-
-                if (odfUtils.isParagraph(node)) {
-                    steps = odtDocument.getDistanceFromCursor(inputMemberId, node, 0);
-                }
-            }
-            extendCursorByAdjustment(steps);
+            extendCursorToNodeBoundary(-1, odtDocument.getParagraphElement);
             return true;
         }
 
@@ -568,102 +576,94 @@ gui.SessionController = (function () {
          * @return {!boolean}
          */
         function extendSelectionToParagraphEnd() {
-            var paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode())),
-                iterator,
-                node,
-                steps;
-
-            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode());
-            iterator.moveToEndOfNode(paragraphNode);
-            steps = odtDocument.getDistanceFromCursor(
-                inputMemberId,
-                iterator.container(),
-                iterator.unfilteredDomOffset()
-            );
-
-            while (steps === 0 && iterator.nextPosition()) {
-                node = iterator.getCurrentNode();
-
-                if (odfUtils.isParagraph(node)) {
-                    iterator.moveToEndOfNode(node);
-                    steps = odtDocument.getDistanceFromCursor(
-                        inputMemberId,
-                        iterator.container(),
-                        iterator.unfilteredDomOffset()
-                    );
-                }
-            }
-            extendCursorByAdjustment(steps);
+            extendCursorToNodeBoundary(1, odtDocument.getParagraphElement);
             return true;
         }
 
         /**
          * @param {!number} direction -1 for beginning, 1 for end
-         * @param {!boolean=} extend
-         * @return {undefined}
+         * @return {!boolean}
          */
-        function moveCursorToDocumentBoundary(direction, extend) {
-            var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                steps;
-            if (direction > 0) {
-                iterator.moveToEnd();
-            }
+        function moveCursorToRootBoundary(direction) {
+            var cursor = odtDocument.getCursor(inputMemberId),
+                root = odtDocument.getRootElement(cursor.getNode()),
+                newPosition;
 
-            steps = odtDocument.getDistanceFromCursor(
-                inputMemberId,
-                iterator.container(),
-                iterator.unfilteredDomOffset()
-            );
-            if (extend) {
-                extendCursorByAdjustment(steps);
+            runtime.assert(Boolean(root), "SessionController: Cursor outside root");
+            if (direction < 0) {
+                // The anchor node will already be in a walkable position having just been retrieved from the cursor
+                // The rounding will only impact the new focus node
+                // Need to round up as (p, 0) is potentially before the first walkable position in the paragraph
+                newPosition = odtDocument.convertDomPointToCursorStep(root, 0, function (step) {
+                    return step === ops.StepsTranslator.NEXT_STEP;
+                });
             } else {
-                moveCursorByAdjustment(steps);
+                // Default behaviour is to round down to the previous walkable step if (p, p.childNodes.length) isn't
+                // walkable. Either way, this still equates to moving to the last walkable step in the paragraph
+                newPosition = odtDocument.convertDomPointToCursorStep(root, root.childNodes.length);
             }
+            session.enqueue([createOpMoveCursor(newPosition, 0)]);
+            return true;
         }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.moveCursorToDocumentBoundary = moveCursorToDocumentBoundary;
 
         /**
          * @return {!boolean}
          */
         function moveCursorToDocumentStart() {
-            moveCursorToDocumentBoundary(-1, false);
+            moveCursorToRootBoundary(-1);
             return true;
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.moveCursorToDocumentStart = moveCursorToDocumentStart;
 
         /**
          * @return {!boolean}
          */
         function moveCursorToDocumentEnd() {
-            moveCursorToDocumentBoundary(1, false);
+            moveCursorToRootBoundary(1);
             return true;
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.moveCursorToDocumentEnd = moveCursorToDocumentEnd;
 
         /**
          * @return {!boolean}
          */
         function extendSelectionToDocumentStart() {
-            moveCursorToDocumentBoundary(-1, true);
+            extendCursorToNodeBoundary(-1, odtDocument.getRootElement);
             return true;
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.extendSelectionToDocumentStart = extendSelectionToDocumentStart;
 
         /**
          * @return {!boolean}
          */
         function extendSelectionToDocumentEnd() {
-            moveCursorToDocumentBoundary(1, true);
+            extendCursorToNodeBoundary(1, odtDocument.getRootElement);
             return true;
         }
+        // TODO Extract selection functions into a standalone SelectionManipulator
+        this.extendSelectionToDocumentEnd = extendSelectionToDocumentEnd;
 
         /**
          * @return {!boolean}
          */
         function extendSelectionToEntireDocument() {
-            var rootNode = odtDocument.getRootNode(),
-                lastWalkableStep = odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length);
-            // TODO this needs to respect roots
-            session.enqueue([createOpMoveCursor(0, lastWalkableStep)]);
+            var cursor = odtDocument.getCursor(inputMemberId),
+                root = odtDocument.getRootElement(cursor.getNode()),
+                newSelection,
+                newCursorSelection;
+
+            runtime.assert(Boolean(root), "SessionController: Cursor outside root");
+            newSelection = {
+                anchorNode: root,
+                anchorOffset: 0,
+                focusNode: root,
+                focusOffset: root.childNodes.length
+            };
+            newCursorSelection = odtDocument.convertDomToCursorRange(newSelection, constrain(odtDocument.getRootElement));
+            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
             return true;
         }
         // TODO Extract selection functions into a standalone SelectionManipulator

@@ -49,10 +49,10 @@ define([
     "RemoveCurrentSelection",
     "PreloadDocument",
     "BoldCurrentSelection",
-    "MoveCursorToEndViaCtrlEnd"
+    "MoveCursorToEnd"
 ], function (Benchmark, HTMLResultsRenderer,
              OpenDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, Remove1Position, MoveCursor1StepLeft,
-             SelectEntireDocument, RemoveCurrentSelection, PreloadDocument, BoldCurrentSelection, MoveCursorToEndViaCtrlEnd) {
+             SelectEntireDocument, RemoveCurrentSelection, PreloadDocument, BoldCurrentSelection, MoveCursorToEnd) {
     "use strict";
 
     /**
@@ -105,9 +105,7 @@ define([
         benchmark.actions.push(new PreloadDocument(config.fileUrl));
         benchmark.actions.push(new OpenDocument(config.fileUrl));
         benchmark.actions.push(new EnterEditMode());
-        if (config.includeSlow) {
-            benchmark.actions.push(new MoveCursorToEndViaCtrlEnd());
-        }
+        benchmark.actions.push(new MoveCursorToEnd());
         benchmark.actions.push(new MoveCursorToEndDirect());
         benchmark.actions.push(new InsertLetterA());
         benchmark.actions.push(new Remove1Position(true));
