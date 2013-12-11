@@ -193,8 +193,8 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.doc.childNodes[1].data", "'bcde'");
         r.shouldBe(t, "t.range.startContainer", "t.doc.childNodes[1]");
         r.shouldBe(t, "t.range.startOffset", "0");
-        r.shouldBe(t, "t.range.endContainer", "t.doc.childNodes[1]");
-        r.shouldBe(t, "t.range.endOffset", "4");
+        r.shouldBe(t, "t.range.endContainer", "t.doc");
+        r.shouldBe(t, "t.range.endOffset", "2");
         r.shouldBe(t, "t.range.toString()", "'bcde'");
     }
 
@@ -230,7 +230,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.doc.childNodes[1].data", "'b'");
         r.shouldBe(t, "t.range.startContainer", "t.doc.childNodes[1]");
         r.shouldBe(t, "t.range.startOffset", "0");
-        r.shouldBe(t, "t.range.endContainer", "t.doc.childNodes[2].firstChild");
+        r.shouldBe(t, "t.range.endContainer", "t.doc");
         r.shouldBe(t, "t.range.endOffset", "3");
         r.shouldBe(t, "t.range.toString()", "'bcde'");
     }
