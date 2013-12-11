@@ -231,37 +231,40 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
-     * Find the closest scrolled ancestor to the specified element
+     * Find the all scrollable ancestor for the specified element
      * @param {Element} element
-     * @returns {*}
+     * @returns {!Array}
      */
-    function findScrollableParent(element) {
-        // If a scrollable parent exists with a non-0 top or left scroll then return this as the container to restore
-        while (element && !element.scrollTop && !element.scrollLeft) {
+    function findScrollableParents(element) {
+        var scrollParents = [];
+        while (element) {
+            // Find the first scrollable parent and track it's current position
+            // This is assumed to be the document scroll pane
+            if (element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight) {
+                scrollParents.push(new ElementScrollState(element));
+            }
             element = /**@type {Element}*/(element.parentNode);
         }
-        if (element) {
-            return new ElementScrollState(element);
-        }
-        return new WindowScrollState(window);
+        scrollParents.push(new WindowScrollState(window));
+        return scrollParents;
     }
 
     /**
      * Return event focus back to the event manager
      */
     this.focus = function() {
-        var scrollParent,
+        var scrollParents,
             canvasElement = getCanvasElement(),
             selection = window.getSelection();
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
             // Passing focus back to an element that did not previously have it will also
             // cause the element to attempt to recentre back into scroll view
-            scrollParent = findScrollableParent(canvasElement);
+            scrollParents = findScrollableParents(eventTrap);
             canvasElement.focus();
-            if (scrollParent) {
+            scrollParents.forEach(function(scrollParent) {
                 scrollParent.restore();
-            }
+            });
         }
         if (selection && selection.extend) {
             if (eventTrap.parentNode !== canvasElement) {
