@@ -330,19 +330,43 @@ function BrowserRuntime(logoutput) {
         cache = {};
 
     /**
-     * @param {!string} string
-     * @return {!Uint8Array}
+     * Return the number of bytes a string would take up when encoded as utf-8.
+     * @param {string} string
+     * @return {number}
      */
-    function utf8ByteArrayFromString(string) {
-        var l = string.length, bytearray, i, n, j = 0;
-        // first determine the length in bytes
+    function getUtf8LengthForString(string) {
+        var l = string.length, i, n, j = 0;
         for (i = 0; i < l; i += 1) {
             n = string.charCodeAt(i);
             j += 1 + (n > 0x80) + (n > 0x800);
+            if (n > 0xd700 && n < 0xe000) { // first of a surrogate pair
+                j += 1;
+                i += 1; // skip second half of in surrogate pair
+            }
         }
+        return j;
+    }
+
+    /**
+     * Convert UCS-2 string to UTF-8 array.
+     * @param {string} string
+     * @param {number} length the length of the resulting array
+     * @param {boolean} addBOM whether or not to start with a BOM
+     * @return {!Uint8Array}
+     */
+    function utf8ByteArrayFromString(string, length, addBOM) {
+        var l = string.length, bytearray, i, n,
+            j;
         // allocate a buffer and convert to a utf8 array
-        bytearray = new Uint8Array(new ArrayBuffer(j));
-        j = 0;
+        bytearray = new Uint8Array(new ArrayBuffer(length));
+        if (addBOM) {
+            bytearray[0] = 0xef;
+            bytearray[1] = 0xbb;
+            bytearray[2] = 0xbf;
+            j = 3;
+        } else {
+            j = 0;
+        }
         for (i = 0; i < l; i += 1) {
             n = string.charCodeAt(i);
             if (n < 0x80) {
@@ -352,14 +376,44 @@ function BrowserRuntime(logoutput) {
                 bytearray[j] = 0xc0 | (n >>>  6);
                 bytearray[j + 1] = 0x80 | (n & 0x3f);
                 j += 2;
-            } else {
+            } else if (n <= 0xd700 || n >= 0xe000) {
                 bytearray[j] = 0xe0 | ((n >>> 12) & 0x0f);
                 bytearray[j + 1] = 0x80 | ((n >>>  6) & 0x3f);
                 bytearray[j + 2] = 0x80 |  (n         & 0x3f);
                 j += 3;
+            } else { // surrogate pair
+                i += 1;
+                n = (((n - 0xd800) << 10) | (string.charCodeAt(i) - 0xdc00))
+                    + 0x10000;
+                bytearray[j] = 0xf0 | (n >>> 18 & 0x07);
+                bytearray[j + 1] = 0x80 | (n >>> 12 & 0x3f);
+                bytearray[j + 2] = 0x80 | (n >>> 6 & 0x3f);
+                bytearray[j + 3] = 0x80 | (n & 0x3f);
+                j += 4;
             }
         }
         return bytearray;
+    }
+    /**
+     * Convert UCS-2 string to UTF-8 array.
+     * wishLength is the desired length, if it is 3 bytes longer than
+     * forsee by the string data, a BOM is prepended.
+     * @param {string} string
+     * @param {(number|string)=} wishLength
+     * @return {!Uint8Array|undefined}
+     */
+    function utf8ByteArrayFromXHRString(string, wishLength) {
+        var addBOM = false,
+            length = getUtf8LengthForString(string);
+        if (typeof wishLength === "number") {
+            if (wishLength !== length && wishLength !== length + 3) {
+                // the desired length does not match the content of the string
+                return undefined;
+            }
+            addBOM = length + 3 === wishLength;
+            length = wishLength;
+        }
+        return utf8ByteArrayFromString(string, length, addBOM);
     }
     /**
      * @param {!string} string
@@ -383,7 +437,8 @@ function BrowserRuntime(logoutput) {
     this.byteArrayFromString = function (string, encoding) {
         var result;
         if (encoding === "utf8") {
-            result = utf8ByteArrayFromString(string);
+            result = utf8ByteArrayFromString(string,
+                getUtf8LengthForString(string), false);
         } else {
             if (encoding !== "binary") {
                 self.log("unknown encoding: " + encoding);
@@ -477,15 +532,46 @@ function BrowserRuntime(logoutput) {
         return a;
     }
     /**
+     * Convert the text received by XHR to a byte array.
+     * An XHR request can send a text as a response even though binary content
+     * was requested. This text string should be converted to a byte array.
+     * If the length of the text is equal to the reported length of the content
+     * then each character becomes one byte.
+     * If the length is different, which can happen on WebKit and Blink
+     * browsers, the string should be converted while taking into account the
+     * encoding. Currently, only utf8 is supported for this procedure.
+     * @param {!XMLHttpRequest} xhr
+     * @return {!Uint8Array}
+     */
+    function stringToBinaryWorkaround(xhr) {
+        var cl, data;
+        cl = xhr.getResponseHeader("Content-Length");
+        if (cl) {
+            cl = parseInt(cl, 10);
+        }
+        // If Content-Length was found and is a valid number that is not equal
+        // to the length of the string, the byte array should be reconstructed
+        // from the encoding.
+        if (cl && cl !== xhr.responseText.length) {
+            // The text is not simple ascii, so we assume it is utf8 and try to
+            // reconstruct the text from that.
+            data = utf8ByteArrayFromXHRString(xhr.responseText, cl);
+        }
+        if (data === undefined) {
+            data = byteArrayFromString(xhr.responseText);
+        }
+        return data;
+    }
+    /**
      * @param {!string} path
      * @param {!string} encoding
      * @param {!XMLHttpRequest} xhr
      * @return {!{err:?string,data:(?string|?Uint8Array)}}
      */
     function handleXHRResult(path, encoding, xhr) {
-        var /**@type{!Uint8Array|!string}*/
-            data,
-            r, d, a;
+        var r, d, a,
+            /**@type{!Uint8Array|!string}*/
+            data;
         if (xhr.status === 0 && !xhr.responseText) {
             // for local files there is no difference between missing
             // and empty files, so empty files are considered as errors
@@ -493,7 +579,7 @@ function BrowserRuntime(logoutput) {
         } else if (xhr.status === 200 || xhr.status === 0) {
             // report file
             if (xhr.response && typeof xhr.response !== "string") {
-                // w3c complaint way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
+                // w3c compliant way http://www.w3.org/TR/XMLHttpRequest2/#the-response-attribute
                 if (encoding === "binary") {
                     d = /**@type{!ArrayBuffer}*/(xhr.response);
                     data = new Uint8Array(d);
@@ -507,8 +593,7 @@ function BrowserRuntime(logoutput) {
                     a = (new VBArray(xhr.responseBody)).toArray();
                     data = arrayToUint8Array(a);
                 } else {
-                    // fallback for some really weird browsers
-                    data = self.byteArrayFromString(xhr.responseText, "binary");
+                    data = stringToBinaryWorkaround(xhr);
                 }
             } else {
                 // if we just want text, it's simple
