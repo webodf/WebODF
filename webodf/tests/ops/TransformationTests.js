@@ -425,7 +425,7 @@ ops.TransformationTests = function TransformationTests(runner) {
             sortChildrenByNSAttribute(stylesafter, odf.Namespaces.stylens, "name");
             styles.normalize();
             sortChildrenByNSAttribute(styles, odf.Namespaces.stylens, "name");
-            if (!r.areNodesEqual(stylesafter, styles)) {
+            if (!r.areNodesEqual(styles, stylesafter)) {
                 t.styles = serialize(styles);
                 t.stylesafter = serialize(stylesafter);
             } else {
@@ -441,7 +441,7 @@ ops.TransformationTests = function TransformationTests(runner) {
             sortChildrenByTagName(/**@type{!Element}*/(metaafter));
             meta.normalize();
             sortChildrenByTagName(meta);
-            if (!r.areNodesEqual(metaafter, meta)) {
+            if (!r.areNodesEqual(meta, metaafter)) {
                 t.meta = serialize(meta);
                 t.metaafter = serialize(metaafter);
             } else {
@@ -454,7 +454,7 @@ ops.TransformationTests = function TransformationTests(runner) {
         normalizeCursorsAndAnchors(textafter);
         text.normalize();
         normalizeCursorsAndAnchors(text);
-        if (!r.areNodesEqual(textafter, text)) {
+        if (!r.areNodesEqual(text, textafter)) {
             t.text = serialize(text);
             t.after = serialize(textafter);
         } else {

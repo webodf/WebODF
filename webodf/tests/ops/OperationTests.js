@@ -277,7 +277,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByNSAttribute(stylesafter, odf.Namespaces.stylens, "name");
             styles.normalize();
             sortChildrenByNSAttribute(styles, odf.Namespaces.stylens, "name");
-            if (!r.areNodesEqual(stylesafter, styles)) {
+            if (!r.areNodesEqual(styles, stylesafter)) {
                 t.styles = serialize(styles);
                 t.stylesafter = serialize(stylesafter);
             } else {
@@ -291,7 +291,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByNSAttribute(autostylesafter, odf.Namespaces.stylens, "name");
             autostyles.normalize();
             sortChildrenByNSAttribute(autostyles, odf.Namespaces.stylens, "name");
-            if (!r.areNodesEqual(autostylesafter, autostyles)) {
+            if (!r.areNodesEqual(autostyles, autostylesafter)) {
                 t.autostyles = serialize(autostyles);
                 t.autostylesafter = serialize(autostylesafter);
             } else {
@@ -307,7 +307,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByTagName(metaafter);
             meta.normalize();
             sortChildrenByTagName(meta);
-            if (!r.areNodesEqual(metaafter, meta)) {
+            if (!r.areNodesEqual(meta, metaafter)) {
                 t.meta = serialize(meta);
                 t.metaafter = serialize(metaafter);
             } else {
@@ -318,7 +318,7 @@ ops.OperationTests = function OperationTests(runner) {
 
         textafter.normalize();
         text.normalize();
-        if (!r.areNodesEqual(textafter, text)) {
+        if (!r.areNodesEqual(text, textafter)) {
             t.text = serialize(text);
             t.after = serialize(textafter);
         } else {

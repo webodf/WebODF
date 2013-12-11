@@ -153,8 +153,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         runtime.log("pass", msg);
     }
     /**
-     * @param {!Array.<*>} a
-     * @param {!Array.<*>} b
+     * @param {!Array.<*>} a actual
+     * @param {!Array.<*>} b expected
      * @return {!boolean}
      */
     function areArraysEqual(a, b) {
@@ -178,8 +178,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         return true;
     }
     /**
-     * @param {!Element} a
-     * @param {!Element} b
+     * @param {!Element} a actual
+     * @param {!Element} b expected
      * @param {!boolean} skipReverseCheck
      * @return {!boolean}
      */
@@ -206,8 +206,8 @@ core.UnitTestRunner = function UnitTestRunner() {
         return skipReverseCheck ? true : areAttributesEqual(b, a, true);
     }
     /**
-     * @param {!Node} a
-     * @param {!Node} b
+     * @param {!Node} a actual
+     * @param {!Node} b expected
      * @return {!boolean}
      */
     function areNodesEqual(a, b) {
@@ -284,11 +284,11 @@ core.UnitTestRunner = function UnitTestRunner() {
         if (typeof expected === "object" && typeof actual === "object") {
             if (/**@type{!Object}*/(expected).constructor === Element
                     || /**@type{!Object}*/(expected).constructor === Node) {
-                return areNodesEqual(/**@type{!Node}*/(expected),
-                                     /**@type{!Node}*/(actual));
+                return areNodesEqual(/**@type{!Node}*/(actual),
+                                     /**@type{!Node}*/(expected));
             }
-            return areObjectsEqual(/**@type{!Object}*/(expected),
-                                   /**@type{!Object}*/(actual));
+            return areObjectsEqual(/**@type{!Object}*/(actual),
+                                   /**@type{!Object}*/(expected));
         }
         return false;
     }
