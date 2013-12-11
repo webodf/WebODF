@@ -37,9 +37,10 @@
 
 function Main() {
     "use strict";
-    
+    var  pathModule = require("path");
+
     function className(path) {
-        return path.substr(0, path.length - 3).replace('/', '.');
+        return path.substr(0, path.length - 3).replace(pathModule.sep, '.');
     }
 
     function add(occs, key, value) {
@@ -192,7 +193,7 @@ function Main() {
      * @return {!Array.<string>}
      */
     function getTopLevelDefines(path, content) {
-        var names = path.split('/'),
+        var names = path.split(pathModule.sep),
             re,
             defines = {},
             match,
@@ -252,7 +253,7 @@ function Main() {
         while (sorted.length < l && sorted.length !== lastLength) {
             lastLength = sorted.length;
             for (i = 0; i < l; i += 1) {
-                p = list[i];
+                p = pathModule.normalize(list[i]);
                 if (!defined.hasOwnProperty(p)) {
                     missing = deps[p].filter(isUndefined);
                     depsPresent = missing.length === 0;
@@ -359,6 +360,15 @@ function Main() {
         });
     }
 
+    /**
+     * Replace the platform-specific file separator with forward slash '/'
+     * @param {!string} path
+     * @return {!string}
+     */
+    function deNormalizePath(path) {
+        return path.replace(pathModule.sep, "/");
+    }
+
     function updateCMakeLists(deps) {
         var lib = deps.lib,
             defined = {},
@@ -383,7 +393,11 @@ function Main() {
             return !defined.hasOwnProperty(key);
         });
         remaining = createOrderedList(remaining, lib, defined);
-        createCMakeLists(sortedTyped, almostTyped, remaining);
+        createCMakeLists(
+            sortedTyped.map(deNormalizePath),
+            almostTyped.map(deNormalizePath),
+            remaining.map(deNormalizePath)
+        );
     }
 
     /**
@@ -398,9 +412,9 @@ function Main() {
             j;
         for (j = 0; j < list.length; j += 1) {
             a = manifest[list[j]];
-            out += '    "' + list[j] + '": [\n';
+            out += '    "' + deNormalizePath(list[j]) + '": [\n';
             for (i = 0; i < a.length; i += 1) {
-                out += '        "' + a[i];
+                out += '        "' + deNormalizePath(a[i]);
                 out += i === a.length - 1 ? '"\n' : '",\n';
             }
             out += j === list.length - 1 ? '    ]\n' : '    ],\n';
@@ -452,13 +466,13 @@ function Main() {
         }
         function prefixDir(cn) {
             var p = paths[cn],
-                n = p.indexOf("/");
+                n = p.indexOf(pathModule.sep);
             return p.substr(n + 1);
         }
         for (classname in occs) {
             if (occs.hasOwnProperty(classname)) {
                 d = paths[classname];
-                i = d.indexOf("/");
+                i = d.indexOf(pathModule.sep);
                 j = d.substr(i + 1);
                 i = d.substr(0, i);
                 d = deps[i] = deps[i] || {};
@@ -467,7 +481,7 @@ function Main() {
         }
         for (i = 0; i < dirs.length; i += 1) {
             d = dirs[i];
-            j = deps[d.split("/")[0]];
+            j = deps[d.split(pathModule.sep)[0]];
             saveIfDifferent(d + "manifest.json", serializeManifest(j));
         }
         updateCMakeLists(deps);
@@ -596,7 +610,7 @@ function Main() {
             err;
         // load JSLint
         /*jslint evil: true*/
-        eval(contents["lib/core/JSLint.js"]);
+        eval(contents[pathModule.normalize("lib/core/JSLint.js")]);
         /*jslint evil: false*/
         jslint = new core.JSLint().JSLINT;
         for (path in contents) {
@@ -618,6 +632,7 @@ function Main() {
 
 function main(f) {
     "use strict";
+    var pathModule = require("path");
     // recursively read all the files in the lib and tests directories
     f.readFiles(["lib", "tests"], function (name, isfile) {
         // only read directories and js files
@@ -626,15 +641,15 @@ function main(f) {
         var files = {};
         f.runJSLint(contents);
         // remove files that should not go in the manifest.json files
-        delete contents["lib/runtime.js"];
-        delete contents["lib/core/JSLint.js"];
-        delete contents["tests/tests.js"];
+        delete contents[pathModule.normalize("lib/runtime.js")];
+        delete contents[pathModule.normalize("lib/core/JSLint.js")];
+        delete contents[pathModule.normalize("tests/tests.js")];
         Object.keys(contents).forEach(function (name) {
             if (typeof contents[name] === "string") {
                 files[name] = contents[name];
             }
         });
-        f.createManifestsAndCMakeLists(files, ["lib/", "tests/"]);
+        f.createManifestsAndCMakeLists(files, ["lib" + pathModule.sep, "tests" + pathModule.sep]);
     });
 }
 
