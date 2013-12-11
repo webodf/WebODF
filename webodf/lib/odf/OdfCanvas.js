@@ -1017,6 +1017,7 @@ runtime.loadClass("gui.AnnotationViewManager");
             /**@type{HTMLDivElement}*/
             annotationsPane = null,
             allowAnnotations = false,
+            showAnnotationRemoveButton = false,
             /**@type{gui.AnnotationViewManager}*/
             annotationViewManager = null,
             webodfcss,
@@ -1254,7 +1255,7 @@ runtime.loadClass("gui.AnnotationViewManager");
                 if (annotationViewManager) {
                     annotationViewManager.forgetAnnotations();
                 }
-                annotationViewManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane);
+                annotationViewManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane, showAnnotationRemoveButton);
                 modifyAnnotations(odfnode.body);
             } else {
                 if (annotationsPane.parentNode) {
@@ -1435,11 +1436,13 @@ runtime.loadClass("gui.AnnotationViewManager");
 
         /** Allows / disallows annotations
          * @param {!boolean} allow
+         * @param {!boolean} showRemoveButton
          * @return {undefined}
          */
-        this.enableAnnotations = function (allow) {
+        this.enableAnnotations = function (allow, showRemoveButton) {
             if (allow !== allowAnnotations) {
                 allowAnnotations = allow;
+                showAnnotationRemoveButton = showRemoveButton;
                 if (odfcontainer) {
                     handleAnnotations(odfcontainer.rootElement);
                 }

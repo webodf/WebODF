@@ -482,7 +482,7 @@ define("webodf/editor/Editor", [
                     });
 
                 odfCanvas = new odf.OdfCanvas(canvasElement);
-                odfCanvas.enableAnnotations(annotationsEnabled);
+                odfCanvas.enableAnnotations(annotationsEnabled, true);
 
                 odfCanvas.addListener("statereadychange", function () {
                     var viewOptions = {
