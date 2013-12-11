@@ -594,7 +594,7 @@ odf.Style2CSS = function Style2CSS() {
             rule += 'font-family: ' + (value || fontName) + ';';
         }
 
-        parentStyle = props.parentElement;
+        parentStyle = /**@type{!Element}*/(props.parentNode);
         fontSize = getFontSize(parentStyle);
         // This is actually the font size of the current style.
         if (!fontSize) {
@@ -994,7 +994,7 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         if (documentType === 'presentation') {
-            masterStyles = getDirectChild(node.parentNode.parentElement, officens, 'master-styles');
+            masterStyles = getDirectChild(/**@type{!Element}*/(node.parentNode.parentNode), officens, 'master-styles');
             e = masterStyles && masterStyles.firstElementChild;
             while (e) {
                 // Generate CSS for all the pages that use the master page that use this page-layout

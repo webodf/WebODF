@@ -203,10 +203,10 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
      * @return {undefined}
      */
     function renderAnnotation(annotation) {
-        var annotationNote = annotation.node.parentElement,
+        var annotationNote = /**@type{!Element}*/(annotation.node.parentNode),
             connectorHorizontal = annotationNote.nextElementSibling,
             connectorAngular = connectorHorizontal.nextElementSibling,
-            annotationWrapper = annotationNote.parentElement,
+            annotationWrapper = /**@type{!Element}*/(annotationNote.parentNode),
             connectorAngle = 0,
             previousAnnotation = annotations[annotations.indexOf(annotation) - 1],
             previousRect,
@@ -222,7 +222,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
                                           - CONNECTOR_MARGIN + 'px';
 
         if (previousAnnotation) {
-            previousRect = previousAnnotation.node.parentElement.getBoundingClientRect();
+            previousRect = /**@type{!Element}*/(previousAnnotation.node.parentNode).getBoundingClientRect();
             if ((annotationWrapper.getBoundingClientRect().top - previousRect.bottom) / zoomLevel <= NOTE_MARGIN) {
                 annotationNote.style.top = Math.abs(annotationWrapper.getBoundingClientRect().top - previousRect.bottom) / zoomLevel + NOTE_MARGIN + 'px';
             } else {
