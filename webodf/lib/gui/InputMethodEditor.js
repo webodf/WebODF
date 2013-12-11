@@ -35,7 +35,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, core, ops*/
+/*global runtime, gui, core, ops, Node*/
 
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.ScheduledTask");
@@ -84,7 +84,11 @@ gui.InputMethodEditor = function InputMethodEditor(inputMemberId, odtDocument, e
             getCanvasElement().appendChild(eventTrap);
         }
 
-        if (!textNode) {
+        if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+            while (eventTrap.firstChild) {
+                // Opera puts a random BR tag in as the first node for some reason...
+                eventTrap.removeChild(eventTrap.firstChild);
+            }
             // Content is necessary for cut/copy/paste to be enabled
             textNode = eventTrap.appendChild(doc.createTextNode(""));
         }
