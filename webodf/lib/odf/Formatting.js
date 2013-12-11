@@ -412,7 +412,7 @@ odf.Formatting = function Formatting() {
             if (nodeStyles) {
                 appliedStyles.push(nodeStyles);
             }
-            parent = parent.parentElement;
+            parent = /**@type{!Element}*/(parent.parentNode);
         }
 
         /**

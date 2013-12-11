@@ -639,7 +639,7 @@ runtime.loadClass("gui.AnnotationViewManager");
                 node = node.firstElementChild;
             } else {
                 while (node && node !== odfbody && !node.nextElementSibling) {
-                    node = node.parentElement;
+                    node = /**@type{!Element}*/(node.parentNode);
                 }
                 if (node && node.nextElementSibling) {
                     node = node.nextElementSibling;
