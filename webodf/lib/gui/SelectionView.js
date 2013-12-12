@@ -41,10 +41,8 @@ runtime.loadClass("odf.OdfNodeFilter");
 runtime.loadClass("gui.SelectionMover");
 
 /**
- * A GUI class that attaches to a cursor and renders it's selection
- * as an arrangement of 3 divs - a top rect and bottom rect for the
- * rectangles that may not be of the full width as the selection, and
- * a 'filler' rect that is of full width and covers everything in between.
+ *  A GUI class that attaches to a cursor and renders it's selection
+ *  as an SVG polygon.
  * @constructor
  * @param {!ops.OdtCursor} cursor
  */
@@ -52,13 +50,13 @@ gui.SelectionView = function SelectionView(cursor) {
     "use strict";
 
     var odtDocument = cursor.getOdtDocument(),
-        documentRoot, // initialized by addOverlays
+        documentRoot, // initialized by addOverlay
         /**@type{!Element}*/
         root, // initialized by addOverlays
         doc = odtDocument.getDOM(),
-        overlayTop = doc.createElement('div'),
-        overlayMiddle = doc.createElement('div'),
-        overlayBottom = doc.createElement('div'),
+        svgns = "http://www.w3.org/2000/svg",
+        overlay = doc.createElementNS(svgns, 'svg'),
+        polygon = doc.createElementNS(svgns, 'polygon'),
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         isVisible = true,
@@ -76,43 +74,29 @@ gui.SelectionView = function SelectionView(cursor) {
      * Unfortunately, no-one has had time yet to write a *real* undo stack... so we just need
      * to cope with it for now.
      */
-    function addOverlays() {
+    function addOverlay() {
         var newDocumentRoot = odtDocument.getRootNode();
         if (documentRoot !== newDocumentRoot) {
             documentRoot = newDocumentRoot;
             root = /**@type{!Element}*/(documentRoot.parentNode.parentNode.parentNode);
-            root.appendChild(overlayTop);
-            root.appendChild(overlayMiddle);
-            root.appendChild(overlayBottom);
+            root.appendChild(overlay);
+            overlay.setAttribute('class', 'selectionOverlay');
+            overlay.appendChild(polygon);
         }
     }
 
     /**
-     * Takes a rect with the fields `left, top, width, height`
-     * as numbers and uses these dimensions as pixels for the div
-     * @param {!Element} div
-     * @param {!{left: !number, top: !number, width: !number, height: !number}} rect
-     * @return {undefined}
-     */
-    function setRect(div, rect) {
-        div.style.left = rect.left + 'px';
-        div.style.top = rect.top + 'px';
-        div.style.width = rect.width + 'px';
-        div.style.height = rect.height + 'px';
-    }
-
-    /**
-     * Shows or hides the selection overlays for this view
+     * Shows or hides the selection overlay for this view
      * @param {boolean} choice
      * @return {undefined}
      */
-    function showOverlays(choice) {
+    function showOverlay(choice) {
         var display;
 
         isVisible = choice;
         display = (choice === true) ? "block" : "none";
 
-        overlayTop.style.display = overlayMiddle.style.display = overlayBottom.style.display = display;
+        overlay.style.display = display;
     }
 
     /**
@@ -507,7 +491,23 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     /**
-     * Repositions overlays over the given selected range of the cursor
+     * Resets and grows the polygon from the supplied
+     * points.
+     * @param {!Array.<{x: !number, y: !number}>} points
+     * @return {undefined}
+     */
+    function setPoints(points) {
+        var pointsString = "",
+            i;
+
+        for (i = 0; i < points.length; i += 1) {
+            pointsString += points[i].x + "," + points[i].y + " ";
+        }
+        polygon.setAttribute('points', pointsString);
+    }
+
+    /**
+     * Repositions overlay over the given selected range of the cursor
      * @param {!Range} selectedRange
      * @return {undefined}
      */
@@ -518,14 +518,18 @@ gui.SelectionView = function SelectionView(cursor) {
             fillerRange,
             firstRect,
             fillerRect,
-            lastRect;
+            lastRect,
+            left,
+            right,
+            top,
+            bottom;
 
         // If the range is collapsed (no selection) or no extremes were found, do not show
         // any virtual selections.
         if (selectedRange.collapsed || !extremes) {
-            showOverlays(false);
+            showOverlay(false);
         } else {
-            showOverlays(true);
+            showOverlay(true);
 
             firstRange = extremes.firstRange;
             lastRange = extremes.lastRange;
@@ -541,30 +545,31 @@ gui.SelectionView = function SelectionView(cursor) {
                 fillerRect = translateRect(fillerRect);
             }
 
-            setRect(overlayTop, {
-                left: firstRect.left,
-                top: firstRect.top,
-                width: Math.max(0, fillerRect.width - (firstRect.left - fillerRect.left)),
-                height: firstRect.height
-            });
-            // If the first and last rect are on the same line, they coincide. Therefore
-            // show only the first rect.
-            if (lastRect.top === firstRect.top || lastRect.bottom === firstRect.bottom) {
-                overlayMiddle.style.display = overlayBottom.style.display = 'none';
-            } else {
-                setRect(overlayBottom, {
-                    left: fillerRect.left,
-                    top: lastRect.top,
-                    width: Math.max(0, lastRect.right - fillerRect.left),
-                    height: lastRect.height
-                });
-                setRect(overlayMiddle, {
-                    left: fillerRect.left,
-                    top: firstRect.top + firstRect.height,
-                    width: Math.max(0, parseFloat(overlayTop.style.left) + parseFloat(overlayTop.style.width) - parseFloat(overlayBottom.style.left)),
-                    height: Math.max(0, lastRect.top - firstRect.bottom)
-                });
-            }
+            // These are the absolute bounding left, right, top, and bottom coordinates of the
+            // entire selection.
+            left = fillerRect.left;
+            right = firstRect.left + Math.max(0, fillerRect.width - (firstRect.left - fillerRect.left));
+            // We will use the topmost 'top' value, because if lastRect.top lies above
+            // firstRect.top, then both are most likely on the same line, and font sizes
+            // are different, so the selection should be taller.
+            top = Math.min(firstRect.top, lastRect.top);
+            bottom = lastRect.top + lastRect.height;
+
+            // Now we grow the polygon by adding the corners one by one,
+            // and finally we make sure that the last point is the same
+            // as the first.
+
+            setPoints([
+                { x: firstRect.left,    y: top + firstRect.height   },
+                { x: firstRect.left,    y: top                      },
+                { x: right,             y: top                      },
+                { x: right,             y: bottom - lastRect.height },
+                { x: lastRect.right,    y: bottom - lastRect.height },
+                { x: lastRect.right,    y: bottom                   },
+                { x: left,              y: bottom                   },
+                { x: left,              y: top + firstRect.height   },
+                { x: firstRect.left,    y: top + firstRect.height   }
+            ]);
 
             firstRange.detach();
             lastRange.detach();
@@ -573,32 +578,32 @@ gui.SelectionView = function SelectionView(cursor) {
     }
 
     function rerender() {
-        addOverlays();
+        addOverlay();
         if (cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
-            showOverlays(true);
+            showOverlay(true);
             repositionOverlays(cursor.getSelectedRange());
         } else {
-            showOverlays(false);
+            showOverlay(false);
         }
     }
 
     /**
-     * Rerender the selection overlays
+     * Rerender the selection overlay
      * @return {undefined}
      */
     this.rerender = rerender;
 
     /**
-     * Show selection overlays
+     * Show selection overlay
      * @return {undefined}
      */
     this.show = rerender;
     /**
-     * Hide selection overlays
+     * Hide selection overlay
      * @return {undefined}
      */
     this.hide = function () {
-        showOverlays(false);
+        showOverlay(false);
     };
     /**
      * Returns if the selection view is visible or hidden
@@ -616,12 +621,10 @@ gui.SelectionView = function SelectionView(cursor) {
         }
     }
     /**
-     * Clear all overlays from the DOM
+     * Clear all overlay from the DOM
      */
     this.destroy = function (callback) {
-        root.removeChild(overlayTop);
-        root.removeChild(overlayMiddle);
-        root.removeChild(overlayBottom);
+        root.removeChild(overlay);
         cursor.getOdtDocument().unsubscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
 
         callback();
@@ -631,14 +634,8 @@ gui.SelectionView = function SelectionView(cursor) {
         var editinfons = 'urn:webodf:names:editinfo',
             memberid = cursor.getMemberId();
 
-        addOverlays();
-
-        overlayTop.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
-        overlayMiddle.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
-        overlayBottom.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
-
-        overlayTop.className = overlayMiddle.className = overlayBottom.className = "selectionOverlay";
-
+        addOverlay();
+        overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
         cursor.getOdtDocument().subscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
     }
 
