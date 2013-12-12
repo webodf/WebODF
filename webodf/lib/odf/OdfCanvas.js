@@ -1133,7 +1133,8 @@ runtime.loadClass("gui.AnnotationViewManager");
          * @return {undefined}
          */
         function fixContainerSize() {
-            var odfdoc = sizer.firstChild;
+            var minHeight,
+                odfdoc = sizer.firstChild;
             if (!odfdoc) {
                 return;
             }
@@ -1160,6 +1161,15 @@ runtime.loadClass("gui.AnnotationViewManager");
             sizer.style.MozTransform = 'scale(' + zoomLevel + ')';
             sizer.style.OTransform = 'scale(' + zoomLevel + ')';
             sizer.style.msTransform = 'scale(' + zoomLevel + ')';
+
+            if (annotationViewManager) {
+                minHeight = annotationViewManager.getMinimumHeightForAnnotationPane();
+                if (minHeight) {
+                    sizer.style.minHeight = minHeight;
+                } else {
+                    sizer.style.removeProperty('min-height');
+                }
+            }
 
             element.style.width = Math.round(zoomLevel * sizer.offsetWidth) + "px";
             element.style.height = Math.round(zoomLevel * sizer.offsetHeight) + "px";
@@ -1250,13 +1260,13 @@ runtime.loadClass("gui.AnnotationViewManager");
             if (allowAnnotations) {
                 if (!annotationsPane.parentNode) {
                     sizer.appendChild(annotationsPane);
-                    fixContainerSize();
                 }
                 if (annotationViewManager) {
                     annotationViewManager.forgetAnnotations();
                 }
                 annotationViewManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane, showAnnotationRemoveButton);
                 modifyAnnotations(odfnode.body);
+                fixContainerSize();
             } else {
                 if (annotationsPane.parentNode) {
                     sizer.removeChild(annotationsPane);
@@ -1422,6 +1432,7 @@ runtime.loadClass("gui.AnnotationViewManager");
         this.rerenderAnnotations = function () {
             if (annotationViewManager) {
                 annotationViewManager.rerenderAnnotations();
+                fixContainerSize();
             }
         };
 
@@ -1458,6 +1469,7 @@ runtime.loadClass("gui.AnnotationViewManager");
         this.addAnnotation = function (annotation) {
             if (annotationViewManager) {
                 annotationViewManager.addAnnotation(annotation);
+                fixContainerSize();
             }
         };
 
@@ -1468,6 +1480,7 @@ runtime.loadClass("gui.AnnotationViewManager");
         this.forgetAnnotations = function () {
             if (annotationViewManager) {
                 annotationViewManager.forgetAnnotations();
+                fixContainerSize();
             }
         };
 
