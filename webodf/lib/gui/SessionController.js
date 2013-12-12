@@ -1041,8 +1041,8 @@ gui.SessionController = (function () {
             var op;
 
             odtDocument.getOdfCanvas().getElement().classList.add("virtualSelections");
-            eventManager.subscribe("compositionupdate", textManipulator.removeCurrentSelection);
-            eventManager.subscribe("compositionend", insertNonEmptyData);
+            inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
+            inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);
             eventManager.subscribe("keypress", keyPressHandler.handleEvent);
             eventManager.subscribe("keyup", keyUpHandler.handleEvent);
@@ -1094,8 +1094,8 @@ gui.SessionController = (function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
 
-            eventManager.unsubscribe("compositionupdate", textManipulator.removeCurrentSelection);
-            eventManager.unsubscribe("compositionend", insertNonEmptyData);
+            inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
+            inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
             eventManager.unsubscribe("keydown", keyDownHandler.handleEvent);
             eventManager.unsubscribe("keypress", keyPressHandler.handleEvent);
             eventManager.unsubscribe("keyup", keyUpHandler.handleEvent);

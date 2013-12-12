@@ -139,6 +139,7 @@
     ],
     "gui/InputMethodEditor.js": [
         "core/DomUtils.js",
+        "core/EventNotifier.js",
         "core/ScheduledTask.js",
         "gui/EventManager.js",
         "ops/OdtCursor.js",

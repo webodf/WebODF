@@ -38,143 +38,212 @@
 /*global runtime, gui, core, ops, Node*/
 
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.ScheduledTask");
 runtime.loadClass("ops.OdtDocument");
 runtime.loadClass("ops.OdtCursor");
 
-/**
- * @constructor
- * @param {!string} inputMemberId
- * @param {!ops.OdtDocument} odtDocument
- * @param {!gui.EventManager} eventManager
- */
-gui.InputMethodEditor = function InputMethodEditor(inputMemberId, odtDocument, eventManager) {
+(function() {
     "use strict";
-    var window = runtime.getWindow(),
-        localCursor = null,
-        eventTrap = eventManager.getEventTrap(),
-        domUtils = new core.DomUtils(),
-        FAKE_CONTENT = "b",
-        clearTrapText;
 
     /**
-     * Get the current canvas element. The current trivial undo manager replaces the root element
-     * of the ODF container with a clone from a previous state. This results in the root element
-     * being changed. As such, it can't be stored, and should be queried on each use.
-     * @returns {!Element}
+     * Challenges of note:
+     * - On FF & Chrome, the composition session is interrupted if the OdtCursor moves
+     * - On Safari, using Option+char incorrectly reports the following keypress event
+     * - On Chrome, using Option+char will include the following keypress in the composition event
+     *
+     * @constructor
+     * @param {!string} inputMemberId
+     * @param {!ops.OdtDocument} odtDocument
+     * @param {!gui.EventManager} eventManager
      */
-    function getCanvasElement() {
-        // TODO Remove when a proper undo manager arrives
-        return odtDocument.getOdfCanvas().getElement();
-    }
+    gui.InputMethodEditor = function InputMethodEditor(inputMemberId, odtDocument, eventManager) {
+        var window = runtime.getWindow(),
+            cursorns = "urn:webodf:names:cursor",
+            localCursor = null,
+            eventTrap = eventManager.getEventTrap(),
+            domUtils = new core.DomUtils(),
+            FAKE_CONTENT = "b",
+            processUpdates,
+            pendingEvent = false,
+            pendingData = "",
+            events = new core.EventNotifier([gui.InputMethodEditor.signalCompositionStart,
+                                                gui.InputMethodEditor.signalCompositionEnd]);
 
-    function resetWindowSelection() {
-        var selection = window.getSelection(),
-            textNode = eventTrap.firstChild,
-            doc = eventTrap.ownerDocument;
+        /**
+         * Subscribe to IME events
+         * @type {Function}
+         */
+        this.subscribe = events.subscribe;
 
-        if (!domUtils.containsNode(getCanvasElement(), eventTrap)) {
+        /**
+         * Unsubscribe from IME events
+         * @type {Function}
+         */
+        this.unsubscribe = events.unsubscribe;
+
+        /**
+         * Get the current canvas element. The current trivial undo manager replaces the root element
+         * of the ODF container with a clone from a previous state. This results in the root element
+         * being changed. As such, it can't be stored, and should be queried on each use.
+         * @returns {!Element}
+         */
+        function getCanvasElement() {
             // TODO Remove when a proper undo manager arrives
-            // The undo manager can replace the root element, discarding the original.
-            // The event trap node is still valid, and simply needs to be re-attached
-            // after this occurs.
-
-            // Don't worry about the local caret yet. The event trap will eventually be moved to
-            // a new valid local caret when it is registered upon cursor re-registration
-            getCanvasElement().appendChild(eventTrap);
+            return odtDocument.getOdfCanvas().getElement();
         }
 
-        if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
-            while (eventTrap.firstChild) {
-                // Opera puts a random BR tag in as the first node for some reason...
-                eventTrap.removeChild(eventTrap.firstChild);
+        function flushEvent() {
+            var cursorNode;
+            if (pendingEvent) {
+                pendingEvent = false;
+                cursorNode = localCursor.getNode();
+                cursorNode.removeAttributeNS(cursorns, "composing");
+                events.emit(gui.InputMethodEditor.signalCompositionEnd, {data: pendingData});
+                pendingData = "";
             }
-            // Content is necessary for cut/copy/paste to be enabled
-            textNode = eventTrap.appendChild(doc.createTextNode(""));
         }
 
-        // If there is a local cursor, and it is collapsed, collapse the window selection as well.
-        // Otherwise, ensure some text is selected by default.
-        // A browser selection in an editable area is necessary to allow cut/copy events to fire
-        // It doesn't have to be an accurate selection however as the SessionController will override
-        // the default browser handling.
-        if (localCursor && localCursor.getSelectedRange().collapsed) {
-            textNode.deleteData(0, textNode.length);
-        } else {
-            textNode.replaceData(0, textNode.length, FAKE_CONTENT);
+        function addCompositionData(data) {
+            pendingEvent = true;
+            pendingData += data;
+            // A delay is necessary as modifying document text and moving the cursor will interrupt
+            // back-to-back composition sessions (e.g., repeatedly pressiong Option+char on MacOS in Chrome)
+            processUpdates.trigger();
         }
 
-        // Obtain document focus again after a cursor update
-        // This is necessary because the cursor currently removes then adds itself back into the DOM
-        // breaking the focus on the event trap as a result
-        eventManager.focus();
-        selection.collapse(eventTrap.firstChild, 0);
-        if (selection.extend) {
-            selection.extend(eventTrap, eventTrap.childNodes.length);
+        function resetWindowSelection() {
+            var selection = window.getSelection(),
+                textNode = eventTrap.firstChild,
+                doc = eventTrap.ownerDocument;
+
+            flushEvent();
+            if (!domUtils.containsNode(getCanvasElement(), eventTrap)) {
+                // TODO Remove when a proper undo manager arrives
+                // The undo manager can replace the root element, discarding the original.
+                // The event trap node is still valid, and simply needs to be re-attached
+                // after this occurs.
+
+                // Don't worry about the local caret yet. The event trap will eventually be moved to
+                // a new valid local caret when it is registered upon cursor re-registration
+                getCanvasElement().appendChild(eventTrap);
+            }
+
+            if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+                while (eventTrap.firstChild) {
+                    // Opera puts a random BR tag in as the first node for some reason...
+                    eventTrap.removeChild(eventTrap.firstChild);
+                }
+                // Content is necessary for cut/copy/paste to be enabled
+                textNode = eventTrap.appendChild(doc.createTextNode(""));
+            }
+
+            // If there is a local cursor, and it is collapsed, collapse the window selection as well.
+            // Otherwise, ensure some text is selected by default.
+            // A browser selection in an editable area is necessary to allow cut/copy events to fire
+            // It doesn't have to be an accurate selection however as the SessionController will override
+            // the default browser handling.
+            if (localCursor && localCursor.getSelectedRange().collapsed) {
+                textNode.deleteData(0, textNode.length);
+            } else {
+                textNode.replaceData(0, textNode.length, FAKE_CONTENT);
+            }
+
+            // Obtain document focus again after a cursor update
+            // This is necessary because the cursor currently removes then adds itself back into the DOM
+            // breaking the focus on the event trap as a result
+            eventManager.focus();
+            selection.collapse(eventTrap.firstChild, 0);
+            if (selection.extend) {
+                selection.extend(eventTrap, eventTrap.childNodes.length);
+            }
         }
-    }
 
-    function compositionStart() {
-        var cursorNode = localCursor.getNode();
-        cursorNode.setAttributeNS("urn:webodf:names:cursor", "composing", "true");
-    }
+        function compositionStart() {
+            var cursorNode = localCursor.getNode();
+            // Some IMEs will stack end & start requests back to back.
+            // Aggregate these as a group and report them in a single request once all are
+            // complete to avoid the selection being reset
+            processUpdates.cancel();
+            cursorNode.setAttributeNS(cursorns, "composing", "true");
+            if (!pendingEvent) {
+                events.emit(gui.InputMethodEditor.signalCompositionStart, {data: ""});
+            }
+        }
 
-    function compositionEnd() {
-        var cursorNode = localCursor.getNode();
-        cursorNode.removeAttributeNS("urn:webodf:names:cursor", "composing");
-        // The text is not updated until after the composition event fires
-        clearTrapText.trigger();
-    }
+        /**
+         * @param {!CompositionEvent} e
+         */
+        function compositionEnd(e) {
+            addCompositionData(e.data);
+        }
 
-    /**
-     * Handle a cursor registration event
-     * @param {!ops.OdtCursor} cursor
-     */
-    this.registerCursor = function (cursor) {
-        var cursorNode, hasFocus;
-        if (cursor.getMemberId() === inputMemberId) {
-            hasFocus = eventManager.hasFocus();
-            localCursor = cursor;
-            localCursor.subscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
-            cursorNode = localCursor.getNode();
-            cursorNode.insertBefore(eventTrap, cursorNode.firstChild);
-            if (hasFocus) {
-                // Relocating the event trap will reset the window selection
-                // Restore this again if the document previously had focus
+        /**
+         * Handle a cursor registration event
+         * @param {!ops.OdtCursor} cursor
+         */
+        this.registerCursor = function (cursor) {
+            var cursorNode, hasFocus;
+            if (cursor.getMemberId() === inputMemberId) {
+                hasFocus = eventManager.hasFocus();
+                localCursor = cursor;
+                localCursor.subscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
+                cursorNode = localCursor.getNode();
+                cursorNode.insertBefore(eventTrap, cursorNode.firstChild);
+                if (hasFocus) {
+                    // Relocating the event trap will reset the window selection
+                    // Restore this again if the document previously had focus
+                    resetWindowSelection();
+                }
+            }
+        };
+
+        /**
+         * Handle a cursor removal event
+         * @param {!string} memberid Member id of the removed cursor
+         */
+        this.removeCursor = function (memberid) {
+            var hasFocus;
+            if (memberid ===  inputMemberId) {
+                hasFocus = eventManager.hasFocus();
+                localCursor.unsubscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
+                localCursor = null;
+                getCanvasElement().appendChild(eventTrap);
                 resetWindowSelection();
+                if (hasFocus) {
+                    // Relocating the event trap will reset the window selection
+                    // Restore this again if the document previously had focus
+                    eventManager.focus();
+                }
             }
+        };
+
+        function init() {
+            eventManager.subscribe('compositionstart', compositionStart);
+            eventManager.subscribe('compositionend', compositionEnd);
+            eventManager.subscribe('keypress', flushEvent);
+
+
+            eventTrap.setAttribute("contenteditable", "true");
+            // Negative tab index still allows focus, but removes accessibility by keyboard
+            eventTrap.setAttribute("tabindex", -1);
+            processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
         }
+
+        init();
     };
 
     /**
-     * Handle a cursor removal event
-     * @param {!string} memberid Member id of the removed cursor
+     * @const
+     * @type {!string}
      */
-    this.removeCursor = function (memberid) {
-        var hasFocus;
-        if (memberid ===  inputMemberId) {
-            hasFocus = eventManager.hasFocus();
-            localCursor.unsubscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
-            localCursor = null;
-            getCanvasElement().appendChild(eventTrap);
-            resetWindowSelection();
-            if (hasFocus) {
-                // Relocating the event trap will reset the window selection
-                // Restore this again if the document previously had focus
-                eventManager.focus();
-            }
-        }
-    };
+    gui.InputMethodEditor.signalCompositionStart = "input/compositionstart";
 
-    function init() {
-        eventManager.subscribe('compositionstart', compositionStart);
-        eventManager.subscribe('compositionend', compositionEnd);
+    /**
+     * @const
+     * @type {!string}
+     */
+    gui.InputMethodEditor.signalCompositionEnd = "input/compositionend";
 
-        eventTrap.setAttribute("contenteditable", "true");
-        // Negative tab index still allows focus, but removes accessibility by keyboard
-        eventTrap.setAttribute("tabindex", -1);
-        clearTrapText = new core.ScheduledTask(resetWindowSelection, 0);
-    }
-
-    init();
-};
+    return gui.InputMethodEditor;
+}());
