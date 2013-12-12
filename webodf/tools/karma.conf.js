@@ -3,7 +3,8 @@
 /**
  * Configuration for running tests in PhantomJS with Karma.
  *
- * To run these tests, install karma with 'npm install karma-coverage'.
+ * To run these tests, install karma with
+ *     npm install karma-coverage karma-junit-reporter
  * Then run 'node ../node_modules/.bin/karma start tools/karma.conf.js' from
  * the directory 'webodf' that contains the 'tools' directory.
  * This results in a folder called 'coverage' with the coverage information of
@@ -122,12 +123,13 @@ module.exports = function (config) {
             { pattern: 'tests/manifest.json', included: false, watched: false, served: true },
             { pattern: 'tests/**', served: true, included: false }
         ],
-        browsers: ['PhantomJS'],
-        reporters: ['progress', 'coverage'],
+        browsers: ['PhantomJS', 'Chrome', 'Firefox'],
+        reporters: ['progress', 'coverage', 'junit'],
         preprocessors: {
             'lib/*.js': ['coverage'],
             'lib/*/*.js': ['coverage'],
-            'tests/tests.js': ['coverage']
+            'tests/tests.js': ['coverage'],
+            'tests/*/*.js': ['coverage']
         },
         urlRoot: '/base/',
         singleRun: true
