@@ -37,6 +37,7 @@
 
 /*global runtime, gui, core, ops, Node*/
 
+runtime.loadClass("core.Async");
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.ScheduledTask");
@@ -45,6 +46,68 @@ runtime.loadClass("ops.OdtCursor");
 
 (function() {
     "use strict";
+
+    /**
+     * When composition session is ended on Safari under MacOS by pressing
+     * another text char, Safari incorrectly reports the next keypress event’s
+     * “which” value as the last compositionend data, rather than the new key
+     * that was pressed.
+     *
+     * This class will filter out these bad key presses, and emit the actual
+     * text as if it occurred via a normal composition event
+     *
+     * @constructor
+     * @param {!gui.EventManager} eventManager
+     * @param {!function(!string):undefined} emitNewData
+     */
+    function DetectSafariCompositionError(eventManager, emitNewData) {
+        var lastCompositionValue,
+            suppressedKeyPress = false;
+
+        /**
+         * Detect and filter out bad Safari key presses
+         * @param {!(Event|KeyboardEvent)} e
+         * @return {!boolean}
+         */
+        function filterBadSafariKeys(e) {
+            suppressedKeyPress = e.which && String.fromCharCode(e.which) === lastCompositionValue;
+            lastCompositionValue = undefined;
+            return suppressedKeyPress === false;
+        }
+
+        /**
+         * @param {!TextEvent} e
+         */
+        function handleTextInput(e) {
+            if (suppressedKeyPress) {
+                emitNewData(e.data);
+            }
+            suppressedKeyPress = false;
+        }
+
+        /**
+         * @param {!CompositionEvent} e
+         */
+        function handleCompositionEnd(e) {
+            lastCompositionValue = e.data;
+            suppressedKeyPress = false;
+        }
+
+        function init() {
+            eventManager.subscribe("textInput", handleTextInput);
+            eventManager.subscribe("compositionend", handleCompositionEnd);
+            eventManager.addFilter("keypress", filterBadSafariKeys);
+        }
+
+        this.destroy = function(callback) {
+            eventManager.unsubscribe("textInput", handleTextInput);
+            eventManager.unsubscribe("compositionend", handleCompositionEnd);
+            eventManager.unsubscribe("keypress", filterBadSafariKeys);
+            callback();
+        };
+
+        init();
+    }
 
     /**
      * Challenges of note:
@@ -62,13 +125,16 @@ runtime.loadClass("ops.OdtCursor");
             cursorns = "urn:webodf:names:cursor",
             localCursor = null,
             eventTrap = eventManager.getEventTrap(),
+            async = new core.Async(),
             domUtils = new core.DomUtils(),
             FAKE_CONTENT = "b",
             processUpdates,
             pendingEvent = false,
             pendingData = "",
             events = new core.EventNotifier([gui.InputMethodEditor.signalCompositionStart,
-                                                gui.InputMethodEditor.signalCompositionEnd]);
+                                                gui.InputMethodEditor.signalCompositionEnd]),
+            safariCompositionFilter,
+            cleanup = [];
 
         /**
          * Subscribe to IME events
@@ -218,16 +284,26 @@ runtime.loadClass("ops.OdtCursor");
             }
         };
 
+        this.destroy = function(callback) {
+            eventManager.unsubscribe('compositionstart', compositionStart);
+            eventManager.unsubscribe('compositionend', compositionEnd);
+            eventManager.unsubscribe('keypress', flushEvent);
+            async.destroyAll(cleanup, callback);
+        };
+
         function init() {
             eventManager.subscribe('compositionstart', compositionStart);
             eventManager.subscribe('compositionend', compositionEnd);
             eventManager.subscribe('keypress', flushEvent);
 
+            safariCompositionFilter = new DetectSafariCompositionError(eventManager, addCompositionData);
+            cleanup.push(safariCompositionFilter.destroy);
 
             eventTrap.setAttribute("contenteditable", "true");
             // Negative tab index still allows focus, but removes accessibility by keyboard
             eventTrap.setAttribute("tabindex", -1);
             processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
+            cleanup.push(processUpdates.destroy);
         }
 
         init();

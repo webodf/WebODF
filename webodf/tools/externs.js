@@ -627,3 +627,15 @@ function CompositionEvent() { "use strict"; }
  * @type {!string}
  */
 CompositionEvent.prototype.data;
+
+/**
+ * http://www.whatwg.org/specs/web-apps/current-work/multipage/common-input-element-attributes.html#event-input-input
+ * @constructor
+ * @extends Event
+ */
+function TextEvent() { "use strict"; }
+
+/**
+ * @type {!string}
+ */
+TextEvent.prototype.data;

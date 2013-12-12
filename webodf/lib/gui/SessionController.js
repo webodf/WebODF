@@ -1221,7 +1221,7 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         this.destroy = function(callback) {
-            var destroyCallbacks = [drawShadowCursorTask.destroy, directTextStyler.destroy];
+            var destroyCallbacks = [drawShadowCursorTask.destroy, directTextStyler.destroy, inputMethodEditor.destroy];
             runtime.clearTimeout(handleMouseClickTimeoutId);
             if (directParagraphStyler) {
                 destroyCallbacks.push(directParagraphStyler.destroy);

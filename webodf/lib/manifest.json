@@ -138,6 +138,7 @@
         "odf/OdfCanvas.js"
     ],
     "gui/InputMethodEditor.js": [
+        "core/Async.js",
         "core/DomUtils.js",
         "core/EventNotifier.js",
         "core/ScheduledTask.js",

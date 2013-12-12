@@ -56,7 +56,15 @@ gui.EventManager = function EventManager(odtDocument) {
             "beforepaste": true
         },
         // Events that should be bound to the global window rather than the canvas element
-        bindToWindow,
+        bindToWindow = {
+            // Capture selections that start outside the canvas element and end within the canvas element
+            "mousedown": true,
+            // Capture selections that start inside the canvas element and end outside of the element or even window
+            "mouseup": true,
+            // Focus is a non-bubbling event, and we'll usually pass focus to the event trap
+            "focus": true
+        },
+        eventDelegates = {},
         eventTrap;
 
     /**
@@ -79,14 +87,14 @@ gui.EventManager = function EventManager(odtDocument) {
             recentEvents = [];
 
         /**
+         * @type {!Array.<!function(!Event):!boolean>}
+         */
+        this.filters = [];
+
+        /**
          * @type {!Array.<!function(!Event)>}
          */
         this.handlers = [];
-
-        /**
-         * @type {!boolean}
-         */
-        this.isSubscribed = false;
 
         /**
          * @param {!Event} e
@@ -94,10 +102,12 @@ gui.EventManager = function EventManager(odtDocument) {
         this.handleEvent = function(e) {
             if (recentEvents.indexOf(e) === -1) {
                 recentEvents.push(e); // Track this event as already processed by these handlers
-                self.handlers.forEach(function(handler) {
-                    // Yes yes... this is not a spec-compliant event processor... sorry!
-                    handler(e);
-                });
+                if (self.filters.every(function(filter) { return filter(e); })) {
+                    self.handlers.forEach(function(handler) {
+                        // Yes yes... this is not a spec-compliant event processor... sorry!
+                        handler(e);
+                    });
+                }
                 // Reset the processed events list after this tick is complete. The event won't be
                 // processed by any other sources after this
                 runtime.setTimeout(function() { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
@@ -165,45 +175,46 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
-     * @param {!Element|!Window} eventTarget
-     * @param {!string} eventType
-     * @param {function(!Event)|function()} eventHandler
-     * @return {undefined}
+     * Get an event delegate for the requested event name
+     * @param {!string} eventName
+     * @param {!boolean} shouldCreate Create a delegate for the requested event if it doesn't exist
+     * @returns {EventDelegate}
      */
-    function removeEvent(eventTarget, eventType, eventHandler) {
-        var onVariant = "on" + eventType;
-        if (eventTarget.detachEvent) {
-            eventTarget.detachEvent(onVariant, eventHandler);
+    function getDelegateForEvent(eventName, shouldCreate) {
+        var delegate = eventDelegates[eventName] || null,
+            canvasElement;
+        if (!delegate && shouldCreate) {
+            canvasElement = getCanvasElement();
+            delegate = eventDelegates[eventName] = new EventDelegate();
+            if (bindToWindow[eventName]) {
+                // Internet explorer will only supply mouse up & down on the window object
+                // For other browser though, listening to both will cause two events to be processed
+                listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
+                listenEvent(eventTrap, eventName, delegate.handleEvent);
+            }
+            // TODO this needs to be rebound if canvasElement changes
+            listenEvent(canvasElement, eventName, delegate.handleEvent);
         }
-        if (eventTarget.removeEventListener) {
-            eventTarget.removeEventListener(eventType, eventHandler, false);
-        }
-        if (eventTarget[onVariant] === eventHandler) {
-            eventTarget[onVariant] = null;
-        }
+        return delegate;
     }
+
+    /**
+     * Add an event filter that is able to reject events from being processed
+     * @param {!string} eventName
+     * @param {!function(!Event):!boolean} filter
+     */
+    this.addFilter = function(eventName, filter) {
+        var delegate = getDelegateForEvent(eventName, true);
+        delegate.filters.push(filter);
+    };
 
     /**
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
      */
     this.subscribe = function(eventName, handler) {
-        var delegate = bindToWindow[eventName],
-            canvasElement = getCanvasElement();
-        if (delegate) {
-            delegate.handlers.push(handler);
-            if (!delegate.isSubscribed) {
-                delegate.isSubscribed = true;
-                // Internet explorer will only supply mouse up & down on the window object
-                // For other browser though, listening to both will cause two events to be processed
-                listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
-                // TODO this needs to be rebound if canvasElement changes
-                listenEvent(canvasElement, eventName, delegate.handleEvent);
-                listenEvent(eventTrap, eventName, delegate.handleEvent);
-            }
-        } else {
-            listenEvent(canvasElement, eventName, handler);
-        }
+        var delegate = getDelegateForEvent(eventName, true);
+        delegate.handlers.push(handler);
     };
 
     /**
@@ -211,15 +222,10 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {function(!Event)|function()} handler
      */
     this.unsubscribe = function(eventName, handler) {
-        var delegate = bindToWindow[eventName],
-            handlerIndex = delegate && delegate.handlers.indexOf(handler),
-            canvasElement = getCanvasElement();
-        if (delegate) {
-            if (handlerIndex !== -1) {
-                delegate.handlers.splice(handlerIndex, 1);
-            }
-        } else {
-            removeEvent(canvasElement, eventName, handler);
+        var delegate = getDelegateForEvent(eventName, false),
+            handlerIndex = delegate && delegate.handlers.indexOf(handler);
+        if (delegate && handlerIndex !== -1) {
+            delegate.handlers.splice(handlerIndex, 1);
         }
     };
 
@@ -290,14 +296,6 @@ gui.EventManager = function EventManager(odtDocument) {
             doc = canvasElement.ownerDocument;
 
         runtime.assert(Boolean(window), "EventManager requires a window object to operate correctly");
-        bindToWindow = {
-            // Capture selections that start outside the canvas element and end within the canvas element
-            "mousedown": new EventDelegate(),
-            // Capture selections that start inside the canvas element and end outside of the element or even window
-            "mouseup": new EventDelegate(),
-            // Focus is a non-bubbling event, and we'll usually pass focus to the event trap
-            "focus": new EventDelegate()
-        };
         eventTrap = doc.createElement("div");
         eventTrap.id = "eventTrap";
         canvasElement.appendChild(eventTrap);
