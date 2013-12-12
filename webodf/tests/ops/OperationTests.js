@@ -178,16 +178,24 @@ ops.OperationTests = function OperationTests(runner) {
         };
     }
 
-    function copyChildNodes(a, b) {
-        while (b.firstChild) {
-            b.removeChild(b.firstChild);
+    /**
+     * Creates a deep copy of all child nodes of the source element
+     * and adds them as child nodes to the target element.
+     * If the target element had child nodes before, they are removed.
+     * @param {!Element} targetElement
+     * @param {!Element} sourceElement
+     * @return {undefined}
+     */
+    function copyChildNodes(targetElement, sourceElement) {
+        while (targetElement.firstChild) {
+            targetElement.removeChild(targetElement.firstChild);
         }
-        var n = a.firstChild;
+        var n = sourceElement.firstChild;
         while (n) {
-            if (a.ownerDocument === b.ownerDocument) {
-                b.appendChild(n.cloneNode(true));
+            if (sourceElement.ownerDocument === targetElement.ownerDocument) {
+                targetElement.appendChild(n.cloneNode(true));
             } else {
-                b.appendChild(b.ownerDocument.importNode(n, true));
+                targetElement.appendChild(targetElement.ownerDocument.importNode(n, true));
             }
             n = n.nextSibling;
         }
@@ -237,15 +245,15 @@ ops.OperationTests = function OperationTests(runner) {
 
         // inject test data
         if (stylesbefore) {
-            copyChildNodes(stylesbefore, styles);
+            copyChildNodes(styles, stylesbefore);
         }
         if (autostylesbefore) {
-            copyChildNodes(autostylesbefore, autostyles);
+            copyChildNodes(autostyles, autostylesbefore);
         }
         if (metabefore) {
-            copyChildNodes(metabefore, meta);
+            copyChildNodes(meta, metabefore);
         }
-        copyChildNodes(textbefore, text);
+        copyChildNodes(text, textbefore);
         if (test.setup) {
             test.setup.setUp();
         }
@@ -269,7 +277,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByNSAttribute(stylesafter, odf.Namespaces.stylens, "name");
             styles.normalize();
             sortChildrenByNSAttribute(styles, odf.Namespaces.stylens, "name");
-            if (!r.areNodesEqual(stylesafter, styles)) {
+            if (!r.areNodesEqual(styles, stylesafter)) {
                 t.styles = serialize(styles);
                 t.stylesafter = serialize(stylesafter);
             } else {
@@ -283,7 +291,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByNSAttribute(autostylesafter, odf.Namespaces.stylens, "name");
             autostyles.normalize();
             sortChildrenByNSAttribute(autostyles, odf.Namespaces.stylens, "name");
-            if (!r.areNodesEqual(autostylesafter, autostyles)) {
+            if (!r.areNodesEqual(autostyles, autostylesafter)) {
                 t.autostyles = serialize(autostyles);
                 t.autostylesafter = serialize(autostylesafter);
             } else {
@@ -299,7 +307,7 @@ ops.OperationTests = function OperationTests(runner) {
             sortChildrenByTagName(metaafter);
             meta.normalize();
             sortChildrenByTagName(meta);
-            if (!r.areNodesEqual(metaafter, meta)) {
+            if (!r.areNodesEqual(meta, metaafter)) {
                 t.meta = serialize(meta);
                 t.metaafter = serialize(metaafter);
             } else {
@@ -310,7 +318,7 @@ ops.OperationTests = function OperationTests(runner) {
 
         textafter.normalize();
         text.normalize();
-        if (!r.areNodesEqual(textafter, text)) {
+        if (!r.areNodesEqual(text, textafter)) {
             t.text = serialize(text);
             t.after = serialize(textafter);
         } else {
