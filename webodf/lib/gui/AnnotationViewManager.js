@@ -302,6 +302,20 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     this.rerenderAnnotations = rerenderAnnotations;
 
     /**
+     * Reports the minimum height in pixels needed to display all
+     * annotation notes in the annotation pane.
+     * If there is no pane shown or are no annotations, null is returned.
+     * @return {?string}
+     */
+    function getMinimumHeightForAnnotationPane() {
+        if (annotationsPane.style.display !== 'none' && annotations.length > 0) {
+            return (/**@type{!Element}*/(annotations[annotations.length-1].node.parentNode).getBoundingClientRect().bottom - annotationsPane.getBoundingClientRect().top) / canvas.getZoomLevel() + 'px';
+        }
+        return null;
+    }
+    this.getMinimumHeightForAnnotationPane = getMinimumHeightForAnnotationPane;
+
+    /**
      * Adds an annotation to track, and wraps and highlights it
      * @param {!{node:!Element,end:Node}} annotation
      * @return {undefined}
