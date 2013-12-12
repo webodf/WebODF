@@ -68,8 +68,9 @@ gui.AnnotatableCanvas.prototype.getSizer = function () {"use strict"; };
  * @param {!gui.AnnotatableCanvas} canvas
  * @param {!Element} odfFragment
  * @param {!Element} annotationsPane
+ * @param {!boolean} showAnnotationRemoveButton
  */
-gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, annotationsPane) {
+gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, annotationsPane, showAnnotationRemoveButton) {
     "use strict";
     var /**@type{!Array.<!{node:!Element,end:Node}>}*/
         annotations = [],
@@ -93,7 +94,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
             annotationNote = doc.createElement('div'),
             connectorHorizontal = doc.createElement('div'),
             connectorAngular = doc.createElement('div'),
-            removeButton = doc.createElement('div'),
+            removeButton,
             annotationNode = annotation.node;
 
         annotationWrapper.className = 'annotationWrapper';
@@ -101,8 +102,11 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
         annotationNote.className = 'annotationNote';
         annotationNote.appendChild(annotationNode);
-        removeButton.className = 'annotationRemoveButton';
-        annotationNote.appendChild(removeButton);
+        if (showAnnotationRemoveButton) {
+            removeButton = doc.createElement('div');
+            removeButton.className = 'annotationRemoveButton';
+            annotationNote.appendChild(removeButton);
+        }
 
         connectorHorizontal.className = 'annotationConnector horizontal';
         connectorAngular.className = 'annotationConnector angular';
