@@ -118,10 +118,11 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         appendXmlsToNode(t.odf.rootElement.styles,          args.styles);
         appendXmlsToNode(t.odf.rootElement.automaticStyles, args.automaticStyles);
 
-        t.odf.saveAs("fontFaceDeclsTest.odt", function (err) {
+        var path = r.resourcePrefix() + "fontFaceDeclsTest.odt";
+        t.odf.saveAs(path, function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
-            t.odf = new odf.OdfContainer("fontFaceDeclsTest.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 t.fontFaceDecls = "<office:font-face-decls>" + args.keptFontFaceDecls.join('') + "</office:font-face-decls>";
                 t.fontFaceDeclsAfter = serialize(odf.rootElement.fontFaceDecls);

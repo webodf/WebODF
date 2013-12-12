@@ -124,12 +124,19 @@ core.UnitTest.createOdtDocument = function (xml, namespaceMap) {
 
 /**
  * @constructor
+ * @param {string} resourcePrefix
  */
-core.UnitTestRunner = function UnitTestRunner() {
+core.UnitTestRunner = function UnitTestRunner(resourcePrefix) {
     "use strict";
     var /**@type{!number}*/
         failedTests = 0,
         areObjectsEqual;
+    /**
+     * @return {string}
+     */
+    this.resourcePrefix = function () {
+        return resourcePrefix;
+    };
     /**
      * @param {!string} msg
      * @return {undefined}
@@ -422,9 +429,14 @@ core.UnitTestRunner = function UnitTestRunner() {
  */
 core.UnitTester = function UnitTester() {
     "use strict";
-    var /**@type{!number}*/
+    var self = this,
+        /**@type{!number}*/
         failedTests = 0,
         results = {};
+    /**
+     * @type {string}
+     */
+    this.resourcePrefix = "";
     /**
      * @param {!string} text
      * @param {!string} code
@@ -449,7 +461,7 @@ core.UnitTester = function UnitTester() {
         var testName = Runtime.getFunctionName(TestClass) || "",
             /**@type{!string}*/
             tname,
-            runner = new core.UnitTestRunner(),
+            runner = new core.UnitTestRunner(self.resourcePrefix),
             test = new TestClass(runner),
             testResults = {},
             i,

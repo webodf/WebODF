@@ -271,9 +271,10 @@ ops.TransformerTests = function TransformerTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
     this.tests = function () {
+        var pre = r.resourcePrefix();
         if (!tests) {
             tests = makeTestsIntoFunction(loadTestFiles(
-                ["ops/transformertests.xml"]
+                [pre + "ops/transformertests.xml"]
             ));
         }
         return tests;

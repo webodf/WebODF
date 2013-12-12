@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global window, runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
+/*global runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
 
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.DomUtilsTests");
@@ -116,15 +116,11 @@ var tester = new core.UnitTester();
  * @param {!Array.<Function>} tests
  * @return {undefined}
  */
-function runNextTest(tests, tester) {
+function runNextTest(tests, tester, callback) {
     "use strict";
     // done with all tests?
     if (tests.length === 0) {
-        //runtime.log(JSON.stringify(tester.results()));
-        runtime.log("Number of failed tests: " +
-                String(tester.countFailedTests()));
-        runtime.exit(tester.countFailedTests());
-        return;
+        return callback(tester);
     }
 
     // run first of passed tests, on success continue with the left
@@ -138,7 +134,7 @@ function runNextTest(tests, tester) {
     runtime.log("Running test '" + Runtime.getFunctionName(test) + "'.");
     try {
         tester.runTests(test, function () {
-            runNextTest(tests.slice(1), tester);
+            runNextTest(tests.slice(1), tester, callback);
         }, []);
     } catch (e) {
         runtime.log(e);
@@ -154,6 +150,7 @@ function runNextTest(tests, tester) {
 function queryObj() {
     "use strict";
     var result = { suite: null, test: null },
+        window = runtime.getWindow(),
         keyValuePairs = window.location.search.slice(1).split('&');
 
     keyValuePairs.forEach(function (keyValuePair) {
@@ -176,11 +173,11 @@ function findSuite(name) {
 
 function runSuite(name) {
     "use strict";
-    window.location.search = "?suite=" + name;
+    runtime.getWindow().location.search = "?suite=" + name;
 }
 function runTest(suite, name) {
     "use strict";
-    window.location.search = "?suite=" + suite + "&test=" + name;
+    runtime.getWindow().location.search = "?suite=" + suite + "&test=" + name;
 }
 
 function runSelectedTests(selectedTests) {
@@ -229,9 +226,19 @@ var args = String(typeof arguments) !== "undefined" && Array.prototype.slice.cal
 if (runtime.type() === "BrowserRuntime") {
     getTestNameFromUrl(selectedTests);
 }
-if (!selectedTests.suite) {
-    getTestNamesFromArguments(selectedTests, args);
-}
-if (!runSelectedTests(selectedTests)) {
-    runNextTest(tests, tester);
+// run the tests here, unless this is a karma run
+if (!runtime.getWindow() || !runtime.getWindow().hasOwnProperty("use_karma")) {
+    if (!selectedTests.suite) {
+        getTestNamesFromArguments(selectedTests, args);
+    }
+    if (!runSelectedTests(selectedTests)) {
+        runNextTest(tests, tester, function (tester) {
+            "use strict";
+            //runtime.log(JSON.stringify(tester.results()));
+            runtime.log("Number of failed tests: " +
+                    String(tester.countFailedTests()));
+            runtime.exit(tester.countFailedTests());
+            return;
+        });
+    }
 }

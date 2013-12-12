@@ -58,6 +58,7 @@ core.ZipTests = function ZipTests(runner) {
     function testNonZipFile(callback) {
         var path = "core/ZipTests.js";
         // check that file exists
+        path = r.resourcePrefix() + path;
         runtime.isFile(path, function (exists) {
             t.exists = exists;
             r.shouldBe(t, "t.exists", "true");
@@ -71,6 +72,7 @@ core.ZipTests = function ZipTests(runner) {
     }
 
     function testHi(path, callback) {
+        path = r.resourcePrefix() + path;
         t.zip = new core.Zip(path, function (err, zip) {
             t.err = err;
             t.zip = zip;
@@ -97,7 +99,7 @@ core.ZipTests = function ZipTests(runner) {
     }
 
     function testCreateZip(callback) {
-        var filename = "writetest.zip",
+        var filename = r.resourcePrefix() + "writetest.zip",
             zip = new core.Zip(filename, null),
             data = runtime.byteArrayFromString(
                 "application/vnd.oasis.opendocument.text",

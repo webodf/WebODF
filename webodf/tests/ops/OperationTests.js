@@ -392,10 +392,12 @@ ops.OperationTests = function OperationTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
     this.tests = function () {
+        var pre = r.resourcePrefix();
         if (!tests) {
-            tests = makeTestsIntoFunction(loadTestFiles(
-                ["ops/operationtests.xml", "ops/allowedpositions.xml"]
-            ));
+            tests = makeTestsIntoFunction(loadTestFiles([
+                pre + "ops/operationtests.xml",
+                pre + "ops/allowedpositions.xml"
+            ]));
         }
         return tests;
     };
