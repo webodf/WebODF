@@ -63,6 +63,8 @@ runtime.loadClass("ops.OpRemoveStyle");
 runtime.loadClass("ops.OpAddAnnotation");
 runtime.loadClass("ops.OpRemoveAnnotation");
 runtime.loadClass("ops.OpUpdateMetadata");
+runtime.loadClass("ops.OpApplyHyperlink");
+runtime.loadClass("ops.OpRemoveHyperlink");
 
 /**
  * @constructor
@@ -128,7 +130,9 @@ ops.OperationFactory = function OperationFactory() {
             RemoveCursor : constructor(ops.OpRemoveCursor),
             AddAnnotation : constructor(ops.OpAddAnnotation),
             RemoveAnnotation : constructor(ops.OpRemoveAnnotation),
-            UpdateMetadata: constructor(ops.OpUpdateMetadata)
+            UpdateMetadata: constructor(ops.OpUpdateMetadata),
+            ApplyHyperlink: constructor(ops.OpApplyHyperlink),
+            RemoveHyperlink: constructor(ops.OpRemoveHyperlink)
         };
     }
 

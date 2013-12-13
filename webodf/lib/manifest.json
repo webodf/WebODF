@@ -111,6 +111,15 @@
     "gui/EventManager.js": [
         "ops/OdtDocument.js"
     ],
+    "gui/HyperlinkManager.js": [
+        "gui/SelectionMover.js",
+        "odf/OdfUtils.js",
+        "ops/OpApplyHyperlink.js",
+        "ops/OpInsertText.js",
+        "ops/OpMoveCursor.js",
+        "ops/OpRemoveHyperlink.js",
+        "ops/Session.js"
+    ],
     "gui/ImageManager.js": [
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
@@ -164,6 +173,7 @@
         "gui/DirectParagraphStyler.js",
         "gui/DirectTextStyler.js",
         "gui/EventManager.js",
+        "gui/HyperlinkManager.js",
         "gui/ImageManager.js",
         "gui/ImageSelector.js",
         "gui/KeyboardHandler.js",
@@ -362,6 +372,13 @@
         "ops/OdtDocument.js",
         "ops/Operation.js"
     ],
+    "ops/OpApplyHyperlink.js": [
+        "core/DomUtils.js",
+        "odf/Namespaces.js",
+        "odf/OdfUtils.js",
+        "ops/OdtDocument.js",
+        "ops/Operation.js"
+    ],
     "ops/OpInsertImage.js": [
         "odf/Namespaces.js",
         "ops/OdtDocument.js",
@@ -390,6 +407,12 @@
         "ops/Operation.js"
     ],
     "ops/OpRemoveCursor.js": [
+        "ops/Operation.js"
+    ],
+    "ops/OpRemoveHyperlink.js": [
+        "core/DomUtils.js",
+        "odf/OdfUtils.js",
+        "ops/OdtDocument.js",
         "ops/Operation.js"
     ],
     "ops/OpRemoveMember.js": [
@@ -444,6 +467,7 @@
         "ops/OpAddMember.js",
         "ops/OpAddStyle.js",
         "ops/OpApplyDirectStyling.js",
+        "ops/OpApplyHyperlink.js",
         "ops/OpInsertImage.js",
         "ops/OpInsertTable.js",
         "ops/OpInsertText.js",
@@ -451,6 +475,7 @@
         "ops/OpRemoveAnnotation.js",
         "ops/OpRemoveBlob.js",
         "ops/OpRemoveCursor.js",
+        "ops/OpRemoveHyperlink.js",
         "ops/OpRemoveMember.js",
         "ops/OpRemoveStyle.js",
         "ops/OpRemoveText.js",

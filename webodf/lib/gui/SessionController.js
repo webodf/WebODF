@@ -50,6 +50,7 @@ runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.DirectTextStyler");
 runtime.loadClass("gui.DirectParagraphStyler");
 runtime.loadClass("gui.KeyboardHandler");
+runtime.loadClass("gui.HyperlinkManager");
 runtime.loadClass("gui.ImageManager");
 runtime.loadClass("gui.ImageSelector");
 runtime.loadClass("gui.TextManipulator");
@@ -107,7 +108,8 @@ gui.SessionController = (function () {
             drawShadowCursorTask,
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
-            clickCount = 0;
+            clickCount = 0,
+            hyperlinkManager = new gui.HyperlinkManager(session, inputMemberId);
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -1126,7 +1128,6 @@ gui.SessionController = (function () {
             return undoManager;
         };
 
-
         /**
          * @returns {?gui.AnnotationController}
          */
@@ -1146,6 +1147,13 @@ gui.SessionController = (function () {
          */
         this.getDirectParagraphStyler = function () {
             return directParagraphStyler;
+        };
+
+        /**
+         * @returns {!gui.HyperlinkManager}
+         */
+        this.getHyperlinkManager = function () {
+            return hyperlinkManager;
         };
 
         /**
