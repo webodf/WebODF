@@ -11,6 +11,7 @@
 @namespace editinfo url(urn:webodf:names:editinfo);
 @namespace annotation url(urn:webodf:names:annotation);
 @namespace dc url(http://purl.org/dc/elements/1.1/);
+@namespace svgns url(http://www.w3.org/2000/svg);
 
 office|document > *, office|document-content > * {
   display: none;
@@ -482,13 +483,20 @@ dc|*::-moz-selection {
 
 .selectionOverlay {
     position: absolute;
-    z-index: 15;
-    opacity: 0.2;
     pointer-events: none;
     top: 0;
     left: 0;
-    width: 0;
-    height: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 15;
+}
+.selectionOverlay > polygon {
+    fill-opacity: 0.3;
+    stroke-opacity: 0.8;
+    stroke-width: 1;
+    fill-rule: evenodd;
 }
 
 #imageSelector {

@@ -164,7 +164,7 @@ gui.SessionView = (function () {
             setStyle('span.editInfoColor', '{ background-color: ' + color + '; }', '');
             setStyle('span.editInfoAuthor', '{ content: "' + name + '"; }', ':before');
             setStyle('dc|creator', '{ background-color: ' + color + '; }', '');
-            setStyle('div.selectionOverlay', '{ background-color: ' + color + ';}', '');
+            setStyle('.selectionOverlay', '{ fill: ' + color + '; stroke: ' + color + ';}', '');
         }
 
         /**
