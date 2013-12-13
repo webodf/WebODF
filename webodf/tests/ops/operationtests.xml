@@ -568,6 +568,20 @@
   </ops>
   <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
  </test>
+ <test name="Remove_deleteLink1">
+  <before><office:text><text:p><text:a xlink:type="simple" xlink:href="http://www.hello.com"><text:span>Hello</text:span></text:a></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="5"/>
+  </ops>
+  <after><office:text><text:p/></office:text></after>
+ </test>
+ <test name="Remove_deleteLink2">
+  <before><office:text><text:p><text:span><text:a xlink:type="simple" xlink:href="http://www.hello.com">Hello</text:a><text:a xlink:type="simple" xlink:href="http://www.world.com">World</text:a></text:span></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="4" length="6"/>
+  </ops>
+  <after><office:text><text:p><text:span><text:a xlink:type="simple" xlink:href="http://www.hello.com">Hell</text:a></text:span></text:p></office:text></after>
+ </test>
  <test name="Remove_deleteNearSpace">
   <before><office:text><text:p>AB</text:p><text:p><text:s> </text:s><text:span>CD</text:span></text:p></office:text></before>
   <ops>
@@ -1396,5 +1410,53 @@
    <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date></office:meta><office:text></office:text>
   </after>
  </test>
-
+ <test name="ApplyHyperlink_WithinSpan">
+  <before><office:text><text:p><text:span>Hello</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="ApplyHyperlink" memberid="Alice" position="1" length="3" hyperlink="link1" />
+  </ops>
+  <after><office:text><text:p><text:span>H<text:a xlink:type="simple" xlink:href="link1">ell</text:a>o</text:span></text:p></office:text></after>
+ </test>
+ <test name="ApplyHyperlink_AcrossTwoSpan">
+  <before><office:text><text:p><text:span>Hello</text:span><text:span>World</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="ApplyHyperlink" memberid="Alice" position="1" length="8" hyperlink="link1" />
+  </ops>
+  <after><office:text><text:p><text:span>H<text:a xlink:type="simple" xlink:href="link1">ello</text:a></text:span><text:span><text:a xlink:type="simple" xlink:href="link1">Worl</text:a>d</text:span></text:p></office:text></after>
+ </test>
+ <test name="ApplyHyperlink_AfterLink">
+  <before><office:text><text:p><text:a xlink:type="simple" xlink:href="link1">hello</text:a>world</text:p></office:text></before>
+   <ops>
+    <op optype="ApplyHyperlink" memberid="Alice" position="5" length="5" hyperlink="link2" />
+  </ops>
+  <after><office:text><text:p><text:a xlink:type="simple" xlink:href="link1">hello</text:a><text:a xlink:type="simple" xlink:href="link2">world</text:a></text:p></office:text></after>
+ </test>
+ <test name="ApplyHyperlink_BeforeLink">
+  <before><office:text><text:p>world<text:a xlink:type="simple" xlink:href="link1">hello</text:a></text:p></office:text></before>
+  <ops>
+   <op optype="ApplyHyperlink" memberid="Alice" position="0" length="5" hyperlink="link2" />
+  </ops>
+  <after><office:text><text:p><text:a xlink:type="simple" xlink:href="link2">world</text:a><text:a xlink:type="simple" xlink:href="link1">hello</text:a></text:p></office:text></after>
+ </test>
+ <test name="RemoveHyperlink_SingleLink">
+  <before><office:text><text:p><text:a xlink:type="simple" xlink:href="link1"><text:span>Hello</text:span><text:span>World</text:span></text:a></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveHyperlink" memberid="Alice" position="1" length="8" />
+  </ops>
+  <after><office:text><text:p><text:span>Hello</text:span><text:span>World</text:span></text:p></office:text></after>
+ </test>
+ <test name="RemoveHyperlink_AfterLink">
+  <before><office:text><text:p><text:a xlink:type="simple" xlink:href="link1">hello</text:a><text:a xlink:type="simple" xlink:href="link2">world</text:a></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveHyperlink" memberid="Alice" position="5" length="5" />
+  </ops>
+  <after><office:text><text:p><text:a xlink:type="simple" xlink:href="link1">hello</text:a>world</text:p></office:text></after>
+ </test>
+ <test name="RemoveHyperlink_BeforeLink">
+  <before><office:text><text:p><text:a xlink:type="simple" xlink:href="link1">hello</text:a><text:a xlink:type="simple" xlink:href="link2">world</text:a></text:p></office:text></before>
+  <ops>
+   <op optype="RemoveHyperlink" memberid="Alice" position="0" length="5" />
+  </ops>
+  <after><office:text><text:p>hello<text:a xlink:type="simple" xlink:href="link2">world</text:a></text:p></office:text></after>
+ </test>
 </tests>

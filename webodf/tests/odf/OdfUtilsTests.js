@@ -51,7 +51,8 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             "fo":"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
             "draw":"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
             "svg":"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
-            "dr3d":"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0"
+            "dr3d":"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
+            "xlink":"http://www.w3.org/1999/xlink"
         };
 
     this.setUp = function () {
@@ -299,6 +300,33 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.isDowngradable1", "true");
         r.shouldBe(t, "t.isDowngradable2", "false");
     }
+    function getHyperlinkElements_ReturnNoLinkOutsideSelection() {
+        t.doc = createDocument("<text:p><text:a xlink:href='apple'>apple</text:a>google</text:p>");
+        t.range.setStartBefore(t.doc.childNodes[1]);
+        t.range.setEndAfter(t.doc.childNodes[1]);
+
+        t.hyperlinks = t.odfUtils.getHyperlinkElements(t.range);
+        r.shouldBe(t, "t.hyperlinks.length", "0");
+    }
+    function getHyperlinkElements_ReturnLinkWithinSelection() {
+        t.doc = createDocument("<text:p><text:a xlink:href='google'>google</text:a><text:a xlink:href='apple'>apple</text:a></text:p>");
+        t.range.setStartBefore(t.doc.childNodes[0]);
+        t.range.setEndAfter(t.doc.childNodes[0]);
+
+        t.hyperlinks = t.odfUtils.getHyperlinkElements(t.range);
+        r.shouldBe(t, "t.hyperlinks.length", "1");
+        r.shouldBe(t, "t.hyperlinks.shift()", "t.doc.childNodes[0]");
+    }
+    function getHyperlinkElements_ReturnLinksForPartialSelection() {
+        t.doc = createDocument("<text:p><text:a xlink:href='google'>google</text:a><text:a xlink:href='apple'>apple</text:a></text:p>");
+        t.range.setStart(t.doc.childNodes[0].childNodes[0], 1);
+        t.range.setEnd(t.doc.childNodes[1].childNodes[0], 2);
+
+        t.hyperlinks = t.odfUtils.getHyperlinkElements(t.range);
+        r.shouldBe(t, "t.hyperlinks.length", "2");
+        r.shouldBe(t, "t.hyperlinks.shift()", "t.doc.childNodes[0]");
+        r.shouldBe(t, "t.hyperlinks.shift()", "t.doc.childNodes[1]");
+    }
     this.tests = function () {
         return r.name([
             isAnchoredAsCharacterElement_ReturnTrueForTab,
@@ -324,7 +352,11 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             isDowngradableWhitespace_DowngradesFirstSpaceAfterTab,
             isDowngradableWhitespace_DoesNotDowngradeTrailingSpace,
             isDowngradableWhitespace_DoesNotDowngradeLeading,
-            isDowngradableWhitespace_DoesNotDowngradeAfterSpace
+            isDowngradableWhitespace_DoesNotDowngradeAfterSpace,
+
+            getHyperlinkElements_ReturnNoLinkOutsideSelection,
+            getHyperlinkElements_ReturnLinkWithinSelection,
+            getHyperlinkElements_ReturnLinksForPartialSelection
         ]);
     };
     this.asyncTests = function () {

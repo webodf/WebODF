@@ -49,11 +49,12 @@ define("webodf/editor/Tools", [
     "webodf/editor/widgets/undoRedoMenu",
     "webodf/editor/widgets/toolbarWidgets/currentStyle",
     "webodf/editor/widgets/annotation",
-    "webodf/editor/widgets/paragraphStylesDialog",
+    "webodf/editor/widgets/editHyperlinks",
     "webodf/editor/widgets/imageInserter",
+    "webodf/editor/widgets/paragraphStylesDialog",
     "webodf/editor/widgets/zoomSlider",
     "webodf/editor/EditorSession"],
-    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, ParagraphStylesDialog, ImageInserter, ZoomSlider, EditorSession) {
+    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, EditHyperlinks, ImageInserter, ParagraphStylesDialog, ZoomSlider, EditorSession) {
         "use strict";
 
         return function Tools(args) {
@@ -72,6 +73,7 @@ define("webodf/editor/Tools", [
                 paragraphAlignment,
                 imageInserter,
                 annotationControl,
+                editHyperlinks,
                 sessionSubscribers = [];
 
             function handleCursorMoved(cursor) {
@@ -225,6 +227,15 @@ define("webodf/editor/Tools", [
                 });
                 sessionSubscribers.push(paragraphStylesDialog);
                 paragraphStylesDialog.onToolDone = onToolDone;
+
+                if (args.hyperlinkEditingEnabled) {
+                    editHyperlinks = new EditHyperlinks(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    sessionSubscribers.push(editHyperlinks);
+                    editHyperlinks.onToolDone = onToolDone;
+                }
 
                 formatMenuButton = new DropDownButton({
                     dropDown: formatDropDownMenu,

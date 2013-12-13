@@ -490,65 +490,56 @@ runtime.loadClass("gui.AnnotationViewManager");
     }
 
     /**
+     * @param {!Element} node
+     * @param {!Element} odffragment
+     * @return {undefined}
+     */
+    function modifyLink(node, odffragment) {
+        var /**@type{?string}*/url = odfUtils.getHyperlinkTarget(node),
+            clickHandler;
+        if (!url) {
+            return;
+        }
+
+        if (url[0] === '#') { // bookmark
+            url = url.substring(1);
+            clickHandler = function () {
+                var bookmarks = xpath.getODFElementsWithXPath(odffragment,
+                    "//text:bookmark-start[@text:name='" + url + "']",
+                    odf.Namespaces.lookupNamespaceURI);
+
+                if (bookmarks.length === 0) {
+                    bookmarks = xpath.getODFElementsWithXPath(odffragment,
+                        "//text:bookmark[@text:name='" + url + "']",
+                        odf.Namespaces.lookupNamespaceURI);
+                }
+
+                if (bookmarks.length > 0) {
+                    bookmarks[0].scrollIntoView(true);
+                }
+
+                return false;
+            };
+        } else {
+            // Ask the browser to open the link in a new window.
+            clickHandler = function () {
+                window.open(url);
+            };
+        }
+
+        node.onclick = clickHandler;
+    }
+
+    /**
      * Modify ODF links to work like HTML links.
      * @param {!Element} odffragment
      * @return {undefined}
      */
     function modifyLinks(odffragment) {
-        var i,
-            links,
-            node;
-
-        /**
-         * @param {!Element} node
-         * @return {undefined}
-         */
-        function modifyLink(node) {
-            var /**@type{string}*/
-                url,
-                clickHandler;
-            if (!node.hasAttributeNS(xlinkns, "href")) {
-                return;
-            }
-
-            url = node.getAttributeNS(xlinkns, "href");
-            if (url[0] === '#') { // bookmark
-                url = url.substring(1);
-                clickHandler = function () {
-                    var bookmarks = xpath.getODFElementsWithXPath(
-                        odffragment,
-                        "//text:bookmark-start[@text:name='" + url + "']",
-                        odf.Namespaces.lookupNamespaceURI);
-
-                    if (bookmarks.length === 0) {
-                        bookmarks = xpath.getODFElementsWithXPath(
-                            odffragment,
-                            "//text:bookmark[@text:name='" + url + "']",
-                            odf.Namespaces.lookupNamespaceURI);
-                    }
-
-                    if (bookmarks.length > 0) {
-                        bookmarks[0].scrollIntoView(true);
-                    }
-
-                    return false;
-                };
-            } else {
-                // Ask the browser to open the link in a new window.
-                clickHandler = function () {
-                    window.open(url);
-                };
-            }
-
-            node.onclick = clickHandler;
-        }
-
         // All links are of name text:a.
-        links = odffragment.getElementsByTagNameNS(textns, 'a');
-        for (i = 0; i < links.length; i += 1) {
-            node = /**@type{!Element}*/(links.item(i));
-            modifyLink(node);
-        }
+        domUtils.getElementsByTagNameNS(odffragment, textns, 'a').forEach(function(link) {
+            modifyLink(/**@type{!Element}*/(link), odffragment);
+        });
     }
 
     /**
@@ -1321,6 +1312,15 @@ runtime.loadClass("gui.AnnotationViewManager");
                 }, 100);
             }
         }
+
+        /**
+         * Register the supplied link with the canvas. This hooks up specialised event
+         * handlers to the onclick event
+         * @param {!Element} linkNode
+         */
+        this.registerLink = function(linkNode) {
+            modifyLink(linkNode, odfcontainer.rootElement);
+        };
 
         /**
          * Updates the CSS rules to match the ODF document styles and also

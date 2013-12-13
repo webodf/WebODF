@@ -411,6 +411,7 @@ define("webodf/editor/Editor", [
                     collabEditing = Boolean(server),
                     directParagraphStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                     imageInsertingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
+                    hyperlinkEditingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                     // annotations not yet properly supported for OT
                     annotationsEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                      // undo manager is not yet integrated with collaboration
@@ -471,15 +472,16 @@ define("webodf/editor/Editor", [
                 }
 
                 tools = new Tools({
-                        onToolDone: setFocusToOdfCanvas,
-                        loadOdtFile: loadOdtFile,
-                        saveOdtFile: saveOdtFile,
-                        close: close,
-                        directParagraphStylingEnabled: directParagraphStylingEnabled,
-                        imageInsertingEnabled: imageInsertingEnabled,
-                        annotationsEnabled: annotationsEnabled,
-                        undoRedoEnabled: undoRedoEnabled
-                    });
+                    onToolDone: setFocusToOdfCanvas,
+                    loadOdtFile: loadOdtFile,
+                    saveOdtFile: saveOdtFile,
+                    close: close,
+                    directParagraphStylingEnabled: directParagraphStylingEnabled,
+                    imageInsertingEnabled: imageInsertingEnabled,
+                    hyperlinkEditingEnabled: hyperlinkEditingEnabled,
+                    annotationsEnabled: annotationsEnabled,
+                    undoRedoEnabled: undoRedoEnabled
+                });
 
                 odfCanvas = new odf.OdfCanvas(canvasElement);
                 odfCanvas.enableAnnotations(annotationsEnabled, true);
@@ -496,7 +498,8 @@ define("webodf/editor/Editor", [
                     editorSession = new EditorSession(session, pendingMemberId, {
                         viewOptions: viewOptions,
                         directParagraphStylingEnabled: directParagraphStylingEnabled,
-                        imageInsertingEnabled: imageInsertingEnabled
+                        imageInsertingEnabled: imageInsertingEnabled,
+                        hyperlinkEditingEnabled: hyperlinkEditingEnabled
                     });
                     if (undoRedoEnabled) {
                         editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
