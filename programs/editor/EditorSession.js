@@ -54,6 +54,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("ops.Session");
     runtime.loadClass("odf.Namespaces");
     runtime.loadClass("odf.OdfCanvas");
+    runtime.loadClass("odf.OdfUtils");
     runtime.loadClass("gui.CaretManager");
     runtime.loadClass("gui.Caret");
     runtime.loadClass("gui.SessionController");
@@ -387,14 +388,14 @@ define("webodf/editor/EditorSession", [
             return formatting.isStyleUsed(styleElement);
         };
 
-        function getDefaultParagraphStyleAttributes () {
+        function getDefaultParagraphStyleAttributes() {
             var styleNode = formatting.getDefaultStyleElement('paragraph');
             if (styleNode) {
                 return formatting.getInheritedStyleAttributes(styleNode);
             }
 
             return null;
-        };
+        }
 
         /**
          * Returns the attributes of a given paragraph style name
@@ -520,6 +521,20 @@ define("webodf/editor/EditorSession", [
             }
 
             return array;
+        };
+
+        this.getSelectedHyperlinks = function () {
+            var cursor = odtDocument.getCursor(localMemberId);
+            // no own cursor yet/currently added?
+            if (!cursor) {
+                return [];
+            }
+            return odfUtils.getHyperlinkElements(cursor.getSelectedRange());
+        };
+
+        this.getSelectedRange = function () {
+            var cursor = odtDocument.getCursor(localMemberId);
+            return cursor && cursor.getSelectedRange();
         };
 
         function undoStackModified(e) {
