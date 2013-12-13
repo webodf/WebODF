@@ -354,7 +354,7 @@ set(UNTYPEDLIBJSFILES
     lib/gui/AnnotationController.js
     lib/gui/DirectParagraphStyler.js
     lib/gui/DirectTextStyler.js
-    lib/gui/HyperlinkManager.js
+    lib/gui/HyperlinkController.js
     lib/gui/ImageManager.js
     lib/gui/TextManipulator.js
     lib/gui/SessionController.js

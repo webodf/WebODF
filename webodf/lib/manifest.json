@@ -111,7 +111,7 @@
     "gui/EventManager.js": [
         "ops/OdtDocument.js"
     ],
-    "gui/HyperlinkManager.js": [
+    "gui/HyperlinkController.js": [
         "gui/SelectionMover.js",
         "odf/OdfUtils.js",
         "ops/OpApplyHyperlink.js",
@@ -173,7 +173,7 @@
         "gui/DirectParagraphStyler.js",
         "gui/DirectTextStyler.js",
         "gui/EventManager.js",
-        "gui/HyperlinkManager.js",
+        "gui/HyperlinkController.js",
         "gui/ImageManager.js",
         "gui/ImageSelector.js",
         "gui/KeyboardHandler.js",

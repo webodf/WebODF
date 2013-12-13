@@ -41,7 +41,7 @@ runtime.loadClass("odf.OdfUtils");
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  */
-gui.HyperlinkManager = function HyperlinkManager(session, inputMemberId) {
+gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
     "use strict";
 
     var odfUtils = new odf.OdfUtils(),

@@ -51,7 +51,7 @@ define("webodf/editor/widgets/editHyperlinks", [
             var self = this,
                 widget = {},
                 editorSession,
-                hyperlinkManager,
+                hyperlinkController,
                 linkEditorContent,
                 editHyperlinkButton,
                 removeHyperlinkButton,
@@ -77,7 +77,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 disabled: true,
                 iconClass: 'dijitEditorIcon dijitEditorIconUnlink',
                 onClick: function () {
-                    hyperlinkManager.removeHyperlinks();
+                    hyperlinkController.removeHyperlinks();
                     self.onToolDone();
                 }
             });
@@ -86,10 +86,10 @@ define("webodf/editor/widgets/editHyperlinks", [
                 var hyperlinkData = linkEditorContent.value();
                 editHyperlinkButton.closeDropDown(false);
                 if (hyperlinkData.isReadOnlyText == "true") {
-                    hyperlinkManager.removeHyperlinks();
-                    hyperlinkManager.addHyperlink(hyperlinkData.linkUrl);
+                    hyperlinkController.removeHyperlinks();
+                    hyperlinkController.addHyperlink(hyperlinkData.linkUrl);
                 } else {
-                    hyperlinkManager.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
+                    hyperlinkController.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
                 }
                 self.onToolDone();
             };
@@ -157,9 +157,9 @@ define("webodf/editor/widgets/editHyperlinks", [
                     editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
                 }
                 editorSession = session;
-                hyperlinkManager = session && session.sessionController.getHyperlinkManager();
+                hyperlinkController = session && session.sessionController.getHyperlinkController();
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !hyperlinkManager);
+                    element.setAttribute('disabled', !hyperlinkController);
                 });
                 if (editorSession) {
                     editorSession.subscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
