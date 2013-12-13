@@ -54,6 +54,9 @@ odf.OdfUtils = function OdfUtils() {
            @type{!string}*/
         drawns = odf.Namespaces.drawns,
         /**@const
+           @type{!string}*/
+        xlinkns = odf.Namespaces.xlinkns,
+        /**@const
            @type{!RegExp}*/
         whitespaceOnly = /^\s*$/,
         domUtils = new core.DomUtils();
@@ -123,6 +126,26 @@ odf.OdfUtils = function OdfUtils() {
     this.isTextSpan = function (e) {
         var name = e && e.localName;
         return name === "span" && e.namespaceURI === textns;
+    };
+
+    /**
+     * Determine if the node is a text:a element.
+     * @param {?Node} node
+     * @return {!boolean}
+     */
+    function isHyperlink(node) {
+        var name = node && node.localName;
+        return name === "a" && node.namespaceURI === textns;
+    }
+    this.isHyperlink = isHyperlink;
+
+    /**
+     * Gets the href attribute of text:a element
+     * @param {!Element} element
+     * @return {?string}
+     */
+    this.getHyperlinkTarget = function (element) {
+        return element.getAttributeNS(xlinkns, 'href');
     };
 
     /**
@@ -797,7 +820,7 @@ odf.OdfUtils = function OdfUtils() {
      *                         produces in flat ODT files.
      * @returns {!Array.<Node>}
      */
-    this.getTextElements = function (range, includePartial,
+    function getTextElements(range, includePartial,
                 includeInsignificantWhitespace) {
         var document = range.startContainer.ownerDocument,
             nodeRange = document.createRange(),
@@ -841,7 +864,8 @@ odf.OdfUtils = function OdfUtils() {
         nodeRange.detach();
 
         return elements;
-    };
+    }
+    this.getTextElements = getTextElements;
 
     /**
      * Get all paragraph elements that intersect the supplied range in document
@@ -909,5 +933,65 @@ odf.OdfUtils = function OdfUtils() {
         nodeRange.detach();
 
         return elements;
+    };
+
+    /**
+     * Returns the node right after the given point.
+     * @param {!Node} container
+     * @param {!number} offset
+     * @return {!Node}
+     */
+    function getRightNode(container, offset) {
+        var node = container;
+        if (offset < node.childNodes.length - 1) {
+            node = /** @type {!Node} */(node.childNodes[offset + 1]);
+        } else {
+            while (!node.nextSibling) {
+                node = node.parentNode;
+            }
+            node = node.nextSibling;
+        }
+        while (node.firstChild) {
+            node = node.firstChild;
+        }
+        return node;
+    }
+
+    /**
+     * Get all hyperlink elements that intersect the supplied range in document order
+     *
+     * For example, given the following fragment, with the range starting at b, and ending at c:
+     *      <text:a xlink:href="google">ab</text:a><text:a xlink:href="apple">cd</text:a>
+     * this function would return the following array:
+     *      [text:a{xlink:href="google"}, text:a{xlink:href="apple"}]
+     * @param {!Range} range
+     * @returns {!Array.<Node>}
+     */
+    this.getHyperlinkElements = function (range) {
+        var links = [],
+            newRange = /** @type {!Range}*/(range.cloneRange()),
+            node,
+            textNodes;
+
+        if (range.collapsed && range.endContainer.nodeType === Node.ELEMENT_NODE) {
+            node = getRightNode(range.endContainer, range.endOffset);
+            if (node.nodeType === Node.TEXT_NODE) {
+                newRange.setEnd(node, 1);
+            }
+        }
+
+        textNodes = getTextElements(newRange, true, false);
+        textNodes.forEach(function (node) {
+            var parent = node.parentNode;
+            while (!isParagraph(parent)) {
+                if (isHyperlink(parent) && links.indexOf(parent) === -1) {
+                    links.push(parent);
+                    break;
+                }
+                parent = parent.parentNode;
+            }
+        });
+        newRange.detach();
+        return links;
     };
 };
