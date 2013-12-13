@@ -256,7 +256,7 @@ runtime.loadClass("ops.OdtCursor");
 
         function resetWindowSelection() {
             var selection = window.getSelection(),
-                textNode = eventTrap.firstChild,
+                textNode,
                 doc = eventTrap.ownerDocument;
 
             flushEvent();
@@ -271,6 +271,11 @@ runtime.loadClass("ops.OdtCursor");
                 getCanvasElement().appendChild(eventTrap);
             }
 
+            while (eventTrap.childNodes.length > 1) {
+                // Repeated text entry events can result in lots of empty text nodes
+                eventTrap.removeChild(eventTrap.firstChild);
+            }
+            textNode = eventTrap.firstChild;
             if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
                 while (eventTrap.firstChild) {
                     // Opera puts a random BR tag in as the first node for some reason...
