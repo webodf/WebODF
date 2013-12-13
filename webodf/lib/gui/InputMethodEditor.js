@@ -110,6 +110,82 @@ runtime.loadClass("ops.OdtCursor");
     }
 
     /**
+     * Browsers:
+     * Chrome 31.0.1650.63, Ubuntu 13.10
+     *
+     * Data isn't in the compositionend event. The text is added to the focused field
+     * immediately after however in a textInput event. Firefox appears to be unaffected
+     * by this bug.
+     *
+     * Recorded events:
+     * keyup: O |cycle: 4
+     * keyup: å |cycle: 3
+     * textInput: た |cycle: 3
+     * keydown: å |cycle: 2
+     * keyup: å |cycle: 2
+     * compositionend:  |cycle: 2
+     * keydown: å |cycle: 2
+     * keyup: å |cycle: 2
+     * compositionupdate: t |cycle: 2
+     * keydown: å |cycle: 2
+     * keyup: T |cycle: 1
+     * keyup: å |cycle: 0
+     * compositionupdate: t |cycle: 0
+     * compositionstart:  |cycle: 0
+     * keydown: å |cycle: 0
+     *
+     * @constructor
+     * @param {!gui.EventManager} eventManager
+     * @param {!function(!string):undefined} emitNewData
+     */
+    function DetectChromeLinuxCompositionError(eventManager, emitNewData) {
+        var afterComposition = false,
+            resetEndComposition;
+
+        /**
+         * @param {!TextEvent} e
+         */
+        function handleTextInput(e) {
+            if (afterComposition && e.data) {
+                emitNewData(e.data);
+            }
+            afterComposition = false;
+            resetEndComposition.cancel();
+        }
+
+        /**
+         * @param {!CompositionEvent} e
+         */
+        function handleCompositionEnd(e) {
+            if (!e.data) {
+                afterComposition = true;
+                resetEndComposition.trigger();
+            }
+        }
+
+        function handleCompositionStart() {
+            afterComposition = false;
+            resetEndComposition.cancel();
+        }
+
+        function init() {
+            eventManager.subscribe("textInput", handleTextInput);
+            eventManager.subscribe("compositionend", handleCompositionEnd);
+            eventManager.subscribe("compositionstart", handleCompositionStart);
+            resetEndComposition = new core.ScheduledTask(function() { afterComposition = false; }, 0);
+        }
+
+        this.destroy = function(callback) {
+            eventManager.unsubscribe("textInput", handleTextInput);
+            eventManager.unsubscribe("compositionend", handleCompositionEnd);
+            eventManager.unsubscribe("compositionstart", handleCompositionEnd);
+            resetEndComposition.destroy(callback);
+        };
+
+        init();
+    }
+
+    /**
      * Challenges of note:
      * - On FF & Chrome, the composition session is interrupted if the OdtCursor moves
      * - On Safari, using Option+char incorrectly reports the following keypress event
@@ -133,8 +209,8 @@ runtime.loadClass("ops.OdtCursor");
             pendingData = "",
             events = new core.EventNotifier([gui.InputMethodEditor.signalCompositionStart,
                                                 gui.InputMethodEditor.signalCompositionEnd]),
-            safariCompositionFilter,
-            cleanup = [];
+            filters = [],
+            cleanup;
 
         /**
          * Subscribe to IME events
@@ -296,8 +372,9 @@ runtime.loadClass("ops.OdtCursor");
             eventManager.subscribe('compositionend', compositionEnd);
             eventManager.subscribe('keypress', flushEvent);
 
-            safariCompositionFilter = new DetectSafariCompositionError(eventManager, addCompositionData);
-            cleanup.push(safariCompositionFilter.destroy);
+            filters.push(new DetectSafariCompositionError(eventManager, addCompositionData));
+            filters.push(new DetectChromeLinuxCompositionError(eventManager, addCompositionData));
+            cleanup = filters.map(function(filter) { return filter.destroy; });
 
             eventTrap.setAttribute("contenteditable", "true");
             // Negative tab index still allows focus, but removes accessibility by keyboard
