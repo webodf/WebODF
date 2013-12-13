@@ -43,15 +43,15 @@ define([
     "EnterEditMode",
     "MoveCursorToEndDirect",
     "InsertLetterA",
-    "Remove1Position",
-    "MoveCursor1StepLeft",
+    "RemovePositions",
+    "MoveCursorLeft",
     "SelectEntireDocument",
     "RemoveCurrentSelection",
     "PreloadDocument",
     "BoldCurrentSelection",
     "MoveCursorToEnd"
 ], function (Benchmark, HTMLResultsRenderer,
-             OpenDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, Remove1Position, MoveCursor1StepLeft,
+             OpenDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, RemovePositions, MoveCursorLeft,
              SelectEntireDocument, RemoveCurrentSelection, PreloadDocument, BoldCurrentSelection, MoveCursorToEnd) {
     "use strict";
 
@@ -107,14 +107,15 @@ define([
         benchmark.actions.push(new EnterEditMode());
         benchmark.actions.push(new MoveCursorToEnd());
         benchmark.actions.push(new MoveCursorToEndDirect());
-        benchmark.actions.push(new InsertLetterA());
-        benchmark.actions.push(new Remove1Position(true));
-        benchmark.actions.push(new MoveCursor1StepLeft());
-        benchmark.actions.push(new Remove1Position(false));
+        benchmark.actions.push(new InsertLetterA(1));
+        benchmark.actions.push(new InsertLetterA(100));
+        benchmark.actions.push(new RemovePositions(1, true));
+        benchmark.actions.push(new MoveCursorLeft(1));
+        benchmark.actions.push(new MoveCursorLeft(100));
+        benchmark.actions.push(new RemovePositions(1, false));
+        benchmark.actions.push(new RemovePositions(100, true));
         benchmark.actions.push(new SelectEntireDocument());
-        if (config.includeSlow) {
-            benchmark.actions.push(new BoldCurrentSelection());
-        }
+        benchmark.actions.push(new BoldCurrentSelection());
         benchmark.actions.push(new RemoveCurrentSelection());
 
         this.start = benchmark.start;

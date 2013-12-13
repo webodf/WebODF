@@ -40,12 +40,12 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
     "use strict";
 
     /**
-     * Remove the last character in the document via backspace or delete
-     * @param {!boolean} useBackspace Remove character via backspace or delete
+     * Move cursor the requested number of steps to the left
      * @constructor
+     * @param {!number} steps Number of steps to move the cursor
      */
-    function Remove1Position(useBackspace) {
-        var state = {description: "Remove character (" + (useBackspace ? "backspace" : "delete") + ")"},
+    function MoveCursorLeft(steps) {
+        var state = {description: "Move cursor to the left (x" + steps + ")"},
             action = new BenchmarkAction(state);
 
         this.subscribe = action.subscribe;
@@ -55,15 +55,14 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          * @param {!SharedState} sharedState
          */
         this.start = function(sharedState) {
+            var count;
             action.start();
-            if (useBackspace) {
-                sharedState.sessionController.getTextController().removeTextByBackspaceKey();
-            } else {
-                sharedState.sessionController.getTextController().removeTextByDeleteKey();
+            for (count = 0; count < steps; count += 1) {
+                sharedState.sessionController.getSelectionController().moveCursorToLeft();
             }
             action.complete(true);
         }
     }
 
-    return Remove1Position;
+    return MoveCursorLeft;
 });
