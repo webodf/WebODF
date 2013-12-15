@@ -697,7 +697,7 @@ odf.OdfUtils = function OdfUtils() {
      * @param {!Node} node
      * @returns {boolean}
      */
-    function isAcceptedNode(node) {
+    function isTextContentContainingNode(node) {
         switch (node.namespaceURI) {
             // Namespace skips
         case odf.Namespaces.drawns:
@@ -733,6 +733,7 @@ odf.OdfUtils = function OdfUtils() {
         }
         return true;
     }
+    this.isTextContentContainingNode = isTextContentContainingNode;
 
     /**
      * Returns true if the text node is within a paragraph and contains either non-whitespace characters, or
@@ -787,7 +788,7 @@ odf.OdfUtils = function OdfUtils() {
                         : NodeFilter.FILTER_REJECT;
                 }
             } else if (domUtils.rangesIntersect(range, nodeRange)) {
-                if (isAcceptedNode(node)) {
+                if (isTextContentContainingNode(node)) {
                     return NodeFilter.FILTER_SKIP;
                 }
             }
@@ -854,7 +855,7 @@ odf.OdfUtils = function OdfUtils() {
                     // fully contained within the range.
                     return NodeFilter.FILTER_ACCEPT;
                 }
-            } else if (isAcceptedNode(node) || isGroupingElement(node)) {
+            } else if (isTextContentContainingNode(node) || isGroupingElement(node)) {
                 return NodeFilter.FILTER_SKIP;
             }
             return NodeFilter.FILTER_REJECT;
@@ -894,7 +895,7 @@ odf.OdfUtils = function OdfUtils() {
                 if (domUtils.rangesIntersect(range, nodeRange)) {
                     return NodeFilter.FILTER_ACCEPT;
                 }
-            } else if (isAcceptedNode(node) || isGroupingElement(node)) {
+            } else if (isTextContentContainingNode(node) || isGroupingElement(node)) {
                 return NodeFilter.FILTER_SKIP;
             }
             return NodeFilter.FILTER_REJECT;
