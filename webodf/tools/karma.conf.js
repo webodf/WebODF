@@ -131,7 +131,10 @@ module.exports = function (config) {
             'tests/tests.js': ['coverage'],
             'tests/*/*.js': ['coverage']
         },
-        urlRoot: '/base/',
+        proxies: {
+            '/proxy': 'http://localhost:8642'
+        },
+        urlRoot: '/proxy/',
         singleRun: true
     });
 };
