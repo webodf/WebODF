@@ -116,7 +116,6 @@
         "odf/OdfUtils.js",
         "ops/OpApplyHyperlink.js",
         "ops/OpInsertText.js",
-        "ops/OpMoveCursor.js",
         "ops/OpRemoveHyperlink.js",
         "ops/Session.js"
     ],
