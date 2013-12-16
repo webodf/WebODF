@@ -38,10 +38,11 @@
 
 /*global runtime,core,define,require,dijit */
 
-runtime.loadClass("core.CSSUnits");
-
 define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
     "use strict";
+
+    runtime.loadClass("core.CSSUnits");
+
     var AlignmentPane = function (callback) {
         var self = this,
             editorSession,
