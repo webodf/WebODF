@@ -57,5 +57,9 @@
     "Text": "Text",
     "Background": "Hintergrund",
     "Default Style": "Grundstil",
-    "Insert Image": "Bild Einfügen"
+    "Insert Image": "Bild Einfügen",
+    "Edit link": "Link bearbeiten",
+    "Remove link": "Link entfernen",
+    "Display Text": "Angezeigter Text",
+    "URL": "URL"
 }
