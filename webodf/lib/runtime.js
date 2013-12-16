@@ -1608,7 +1608,6 @@ var ops = {};
         if (loadedFiles.hasOwnProperty(path)) {
             return;
         }
-        loadedFiles[path] = 1;
         try {
             content = runtime.readFileSync(path, "utf-8");
         } catch (/**@type{string}*/e) {
@@ -1622,6 +1621,13 @@ var ops = {};
                 manifests[m] = {dir: dir, deps: manifest[m]};
             }
         }
+        // only mark file loaded here
+        // Firefox seems to process other xhr results while running sync xhr.sends,
+        // so it could happen that another runtime.loadClass(...) call reaches
+        // this method before the first is done with fetching the manifest.
+        // As those calls are syncronous, there is no better way known currently
+        // than just letting it load the manifest a second time
+        loadedFiles[path] = 1;
     }
     /**
      * @param {string} path

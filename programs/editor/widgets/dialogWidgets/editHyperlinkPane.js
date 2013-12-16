@@ -35,14 +35,14 @@
 
 /*global runtime,core,define,require,document,dijit */
 
-runtime.loadClass("core.CSSUnits");
-
 define("webodf/editor/widgets/dialogWidgets/editHyperlinkPane", [
     "dojo",
     "dijit/layout/ContentPane"],
 
     function (dojo, ContentPane) {
         "use strict";
+
+        runtime.loadClass("core.CSSUnits");
 
         var EditHyperlinkPane = function () {
             var self = this,

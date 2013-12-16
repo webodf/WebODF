@@ -35,8 +35,6 @@
 
 /*global define,require,document,odf */
 
-runtime.loadClass("odf.OdfUtils");
-
 define("webodf/editor/widgets/editHyperlinks", [
     "webodf/editor/EditorSession",
     "webodf/editor/widgets/dialogWidgets/editHyperlinkPane",
@@ -46,6 +44,8 @@ define("webodf/editor/widgets/editHyperlinks", [
 
     function (EditorSession, EditHyperlinkPane, Button, DropDownButton, TooltipDialog) {
         "use strict";
+
+        runtime.loadClass("odf.OdfUtils");
 
         var EditHyperlinks = function (callback) {
             var self = this,
