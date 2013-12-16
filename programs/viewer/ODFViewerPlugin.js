@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, document, odf, console*/
+/*global runtime, document, odf, gui, console*/
 
 function ODFViewerPlugin() {
     "use strict";
@@ -54,6 +54,7 @@ function ODFViewerPlugin() {
                 return [ runtime.currentDirectory() ];
             };
 
+            runtime.loadClass('gui.HyperlinkClickHandler');
             runtime.loadClass('odf.OdfCanvas');
             callback();
         };
@@ -86,6 +87,7 @@ function ODFViewerPlugin() {
     this.initialize = function (viewerElement, documentUrl) {
         // If the URL has a fragment (#...), try to load the file it represents
         init(function () {
+            var hyperlinkClickHandler;
             odfElement = document.getElementById('canvas');
             odfCanvas = new odf.OdfCanvas(odfElement);
             odfCanvas.load(documentUrl);
@@ -99,6 +101,11 @@ function ODFViewerPlugin() {
                 }
                 self.onLoad();
             });
+
+            hyperlinkClickHandler = new gui.HyperlinkClickHandler(function () {
+                return odfCanvas.odfContainer().getContentElement();
+            });
+            odfCanvas.addListener("click", hyperlinkClickHandler.handleEvent);
         });
     };
 
