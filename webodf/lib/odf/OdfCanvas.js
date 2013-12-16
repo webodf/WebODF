@@ -490,59 +490,6 @@ runtime.loadClass("gui.AnnotationViewManager");
     }
 
     /**
-     * @param {!Element} node
-     * @param {!Element} odffragment
-     * @return {undefined}
-     */
-    function modifyLink(node, odffragment) {
-        var /**@type{?string}*/url = odfUtils.getHyperlinkTarget(node),
-            clickHandler;
-        if (!url) {
-            return;
-        }
-
-        if (url[0] === '#') { // bookmark
-            url = url.substring(1);
-            clickHandler = function () {
-                var bookmarks = xpath.getODFElementsWithXPath(odffragment,
-                    "//text:bookmark-start[@text:name='" + url + "']",
-                    odf.Namespaces.lookupNamespaceURI);
-
-                if (bookmarks.length === 0) {
-                    bookmarks = xpath.getODFElementsWithXPath(odffragment,
-                        "//text:bookmark[@text:name='" + url + "']",
-                        odf.Namespaces.lookupNamespaceURI);
-                }
-
-                if (bookmarks.length > 0) {
-                    bookmarks[0].scrollIntoView(true);
-                }
-
-                return false;
-            };
-        } else {
-            // Ask the browser to open the link in a new window.
-            clickHandler = function () {
-                window.open(url);
-            };
-        }
-
-        node.onclick = clickHandler;
-    }
-
-    /**
-     * Modify ODF links to work like HTML links.
-     * @param {!Element} odffragment
-     * @return {undefined}
-     */
-    function modifyLinks(odffragment) {
-        // All links are of name text:a.
-        domUtils.getElementsByTagNameNS(odffragment, textns, 'a').forEach(function(link) {
-            modifyLink(/**@type{!Element}*/(link), odffragment);
-        });
-    }
-
-    /**
      * Make the text:line-break elements behave like html br element.
      * @param {!Element} odffragment
      * @return {undefined}
@@ -1200,7 +1147,6 @@ runtime.loadClass("gui.AnnotationViewManager");
             modifyDrawElements(odfnode.body, css);
             cloneMasterPages(container, shadowContent, odfnode.body, css);
             modifyTables(odfnode.body, element.namespaceURI);
-            modifyLinks(odfnode.body);
             modifyLineBreakElements(odfnode.body);
             expandSpaceElements(odfnode.body);
             expandTabElements(odfnode.body);
@@ -1312,15 +1258,6 @@ runtime.loadClass("gui.AnnotationViewManager");
                 }, 100);
             }
         }
-
-        /**
-         * Register the supplied link with the canvas. This hooks up specialised event
-         * handlers to the onclick event
-         * @param {!Element} linkNode
-         */
-        this.registerLink = function(linkNode) {
-            modifyLink(linkNode, odfcontainer.rootElement);
-        };
 
         /**
          * Updates the CSS rules to match the ODF document styles and also

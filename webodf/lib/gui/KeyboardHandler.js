@@ -156,6 +156,7 @@ gui.KeyboardHandler.KeyCode = {
     Tab: 9,
     Clear: 12,
     Enter: 13,
+    Ctrl: 17,
     End: 35,
     Home: 36,
     Left: 37,
@@ -188,7 +189,9 @@ gui.KeyboardHandler.KeyCode = {
     W: 87,
     X: 88,
     Y: 89,
-    Z: 90
+    Z: 90,
+    LeftMeta: 91,
+    MetaInMozilla: 224
 };
 
 (function () {

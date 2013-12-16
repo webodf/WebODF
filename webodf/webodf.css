@@ -191,6 +191,9 @@ text|a {
     text-decoration: underline;
     cursor: pointer;
 }
+office|text[webodfhelper|links="inactive"] text|a {
+    cursor: text;
+}
 text|note-citation {
     vertical-align: super;
     font-size: smaller;

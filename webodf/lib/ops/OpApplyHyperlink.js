@@ -95,7 +95,6 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
             linkNode = createHyperlink(ownerDocument, hyperlink);
             node.parentNode.insertBefore(linkNode, node);
             linkNode.appendChild(node);
-            odtDocument.getOdfCanvas().registerLink(linkNode);
             if (modifiedParagraphs.indexOf(paragraph) === -1) {
                 modifiedParagraphs.push(paragraph);
             }
