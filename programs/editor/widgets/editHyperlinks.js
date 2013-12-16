@@ -60,19 +60,19 @@ define("webodf/editor/widgets/editHyperlinks", [
 
             linkEditorContent = new EditHyperlinkPane();
             dialog = new TooltipDialog({
-                title: runtime.tr("editLink"),
+                title: runtime.tr("Edit link"),
                 content: linkEditorContent.widget()
             });
 
             editHyperlinkButton = new DropDownButton({
-                label: runtime.tr('editLink'),
+                label: runtime.tr('Edit link'),
                 showLabel: false,
                 iconClass: 'dijitEditorIcon dijitEditorIconCreateLink',
                 dropDown: dialog
             });
 
             removeHyperlinkButton = new Button({
-                label: runtime.tr('removeLink'),
+                label: runtime.tr('Remove link'),
                 showLabel: false,
                 disabled: true,
                 iconClass: 'dijitEditorIcon dijitEditorIconUnlink',
