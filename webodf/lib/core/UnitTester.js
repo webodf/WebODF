@@ -338,6 +338,9 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
         if (actual === expected) {
             return true;
         }
+        if (actual === null || expected === null) {
+            return false;
+        }
         if (typeof expected === "number" && isNaN(expected)) {
             return typeof actual === "number" && isNaN(actual);
         }
