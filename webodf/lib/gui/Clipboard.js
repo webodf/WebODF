@@ -39,7 +39,6 @@
 /*global gui, runtime, odf, xmldom*/
 
 runtime.loadClass("odf.Namespaces");
-runtime.loadClass("xmldom.LSSerializer");
 runtime.loadClass("odf.OdfNodeFilter");
 runtime.loadClass("odf.TextSerializer");
 
@@ -49,9 +48,7 @@ runtime.loadClass("odf.TextSerializer");
  */
 gui.Clipboard = function Clipboard() {
     "use strict";
-    var /**@type{!xmldom.LSSerializer}*/
-        xmlSerializer,
-        /**@type{!odf.TextSerializer}*/
+    var /**@type{!odf.TextSerializer}*/
         textSerializer,
         filter;
 
@@ -84,9 +81,6 @@ gui.Clipboard = function Clipboard() {
             // However, if we don't call it, the data we add is stripped out and thrown away :-/
             setDataResult = clipboard.setData('text/plain', textSerializer.writeToString(fragmentContainer));
             result = result && setDataResult;
-            // Lazy-man's way of generating pretend html
-            setDataResult = clipboard.setData('text/html', xmlSerializer.writeToString(fragmentContainer, odf.Namespaces.namespaceMap));
-            result = result && setDataResult;
             e.preventDefault();
         } else {
             result = false;
@@ -96,10 +90,8 @@ gui.Clipboard = function Clipboard() {
     };
 
     function init() {
-        xmlSerializer = new xmldom.LSSerializer();
         textSerializer = new odf.TextSerializer();
         filter = new odf.OdfNodeFilter();
-        xmlSerializer.filter = filter;
         textSerializer.filter = filter;
     }
 
