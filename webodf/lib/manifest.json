@@ -111,6 +111,11 @@
     "gui/EventManager.js": [
         "ops/OdtDocument.js"
     ],
+    "gui/HyperlinkClickHandler.js": [
+        "odf/Namespaces.js",
+        "odf/OdfUtils.js",
+        "xmldom/XPath.js"
+    ],
     "gui/HyperlinkController.js": [
         "gui/SelectionMover.js",
         "odf/OdfUtils.js",
@@ -172,6 +177,7 @@
         "gui/DirectParagraphStyler.js",
         "gui/DirectTextStyler.js",
         "gui/EventManager.js",
+        "gui/HyperlinkClickHandler.js",
         "gui/HyperlinkController.js",
         "gui/ImageManager.js",
         "gui/ImageSelector.js",

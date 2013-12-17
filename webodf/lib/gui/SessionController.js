@@ -50,6 +50,7 @@ runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.DirectTextStyler");
 runtime.loadClass("gui.DirectParagraphStyler");
 runtime.loadClass("gui.KeyboardHandler");
+runtime.loadClass("gui.HyperlinkClickHandler");
 runtime.loadClass("gui.HyperlinkController");
 runtime.loadClass("gui.ImageManager");
 runtime.loadClass("gui.ImageSelector");
@@ -88,6 +89,7 @@ gui.SessionController = (function () {
             clipboard = new gui.Clipboard(),
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
+            keyUpHandler = new gui.KeyboardHandler(),
             keyboardMovementsFilter = new core.PositionFilterChain(),
             baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
@@ -109,6 +111,7 @@ gui.SessionController = (function () {
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
             clickCount = 0,
+            hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
             hyperlinkController = new gui.HyperlinkController(session, inputMemberId);
 
         runtime.assert(window !== null,
@@ -132,15 +135,6 @@ gui.SessionController = (function () {
             } else {
                 event.returnValue = false;
             }
-        }
-
-        /**
-         * @param {!Event} e
-         * @return {undefined}
-         */
-        function dummyHandler(e) {
-            // runtime.log("ignore event " + e.type);
-            cancelEvent(e);
         }
 
         /**
@@ -1027,7 +1021,7 @@ gui.SessionController = (function () {
             odtDocument.getOdfCanvas().getElement().classList.add("virtualSelections");
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);
             eventManager.subscribe("keypress", keyPressHandler.handleEvent);
-            eventManager.subscribe("keyup", dummyHandler);
+            eventManager.subscribe("keyup", keyUpHandler.handleEvent);
             eventManager.subscribe("beforecut", handleBeforeCut);
             eventManager.subscribe("cut", handleCut);
             eventManager.subscribe("copy", handleCopy);
@@ -1051,6 +1045,7 @@ gui.SessionController = (function () {
                 // For most undo managers, the initial state is a clean document *with* a cursor present
                 undoManager.saveInitialState();
             }
+            hyperlinkClickHandler.setEditing(true);
         };
 
         /**
@@ -1072,7 +1067,7 @@ gui.SessionController = (function () {
 
             eventManager.unsubscribe("keydown", keyDownHandler.handleEvent);
             eventManager.unsubscribe("keypress", keyPressHandler.handleEvent);
-            eventManager.unsubscribe("keyup", dummyHandler);
+            eventManager.unsubscribe("keyup", keyUpHandler.handleEvent);
             eventManager.unsubscribe("cut", handleCut);
             eventManager.unsubscribe("beforecut", handleBeforeCut);
             eventManager.unsubscribe("copy", handleCopy);
@@ -1084,6 +1079,8 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("contextmenu", handleContextMenu);
             eventManager.unsubscribe("dragend", handleDragEnd);
             odtDocument.getOdfCanvas().getElement().classList.remove("virtualSelections");
+
+            hyperlinkClickHandler.setEditing(false);
         };
 
         /**
@@ -1294,6 +1291,11 @@ gui.SessionController = (function () {
                 }
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
+
+                keyDownHandler.bind(keyCode.LeftMeta, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
+                keyUpHandler.bind(keyCode.LeftMeta, modifier.None, hyperlinkClickHandler.showTextCursor);
+                keyDownHandler.bind(keyCode.MetaInMozilla, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
+                keyUpHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showTextCursor);
             } else {
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(extendSelectionToEntireDocument));
                 keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleBold));
@@ -1310,6 +1312,9 @@ gui.SessionController = (function () {
                 }
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
+
+                keyDownHandler.bind(keyCode.Ctrl, modifier.Ctrl, hyperlinkClickHandler.showPointerCursor);
+                keyUpHandler.bind(keyCode.Ctrl, modifier.None, hyperlinkClickHandler.showTextCursor);
             }
 
             // the default action is to insert text into the document
@@ -1322,6 +1327,8 @@ gui.SessionController = (function () {
                 return false;
             }));
             keyPressHandler.bind(keyCode.Enter, modifier.None, rangeSelectionOnly(textManipulator.enqueueParagraphSplittingOps));
+
+            eventManager.subscribe("click", hyperlinkClickHandler.handleClick);
         }
 
         init();
