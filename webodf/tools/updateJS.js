@@ -37,7 +37,58 @@
 
 function Main() {
     "use strict";
-    var  pathModule = require("path");
+    var pathModule = require("path"),
+        /**
+         * List of files that are 100% typed. When working on making WebODF more
+         * typed, choose a file from CMakeLists.txt that is listed as only
+         * depending on typed files and add it to this list. The run the
+         * typecheck-target to find where type annotations are needed.
+         */
+        typedFiles = [
+            "core/Async.js",
+            "core/Base64.js",
+            "core/ByteArray.js",
+            "core/ByteArrayWriter.js",
+            "core/CSSUnits.js",
+            "core/Cursor.js",
+            "core/DomUtils.js",
+            "core/EventNotifier.js",
+            "core/LoopWatchDog.js",
+            "core/PositionFilter.js",
+            "core/PositionFilterChain.js",
+            "core/PositionIterator.js",
+            "core/RawInflate.js",
+            "core/ScheduledTask.js",
+            "core/UnitTester.js",
+            "core/Utils.js",
+            "core/Zip.js",
+            "gui/AnnotationViewManager.js",
+            "gui/Avatar.js",
+            "gui/Clipboard.js",
+            "gui/EditInfoHandle.js",
+            "gui/KeyboardHandler.js",
+            "gui/SelectionMover.js",
+            "gui/StyleHelper.js",
+            "odf/FontLoader.js",
+            "odf/Formatting.js",
+            "odf/Namespaces.js",
+            "odf/ObjectNameGenerator.js",
+            "odf/OdfCanvas.js",
+            "odf/OdfContainer.js",
+            "odf/OdfNodeFilter.js",
+            "odf/OdfUtils.js",
+            "odf/Style2CSS.js",
+            "odf/StyleInfo.js",
+            "odf/TextSerializer.js",
+            "odf/TextStyleApplicator.js",
+            "ops/Server.js",
+            "ops/TextPositionFilter.js",
+            "xmldom/LSSerializer.js",
+            "xmldom/LSSerializerFilter.js",
+            "xmldom/XPath.js"
+        ],
+        jslintconfig;
+
 
     function className(path) {
         return path.substr(0, path.length - 3).replace(pathModule.sep, '.');
@@ -273,62 +324,17 @@ function Main() {
             }
         }
         if (sorted.length === lastLength) {
-            console.log("Unresolvable circular dependency.");
+            console.log("Unresolvable circular dependency. Check relations between ");
+            for (i = 0; i < l; i += 1) {
+                p = pathModule.normalize(list[i]);
+                if (!defined.hasOwnProperty(p)) {
+                    console.log(p);
+                }
+            }
             process.exit(1);
         }
         return sorted;
     }
-
-    /**
-     * List of files that are 100% typed. When working on making WebODF more
-     * typed, choose a file from CMakeLists.txt that is listed as only depending
-     * on typed files and add it to this list. The run the typecheck-target to
-     * find where type annotations are needed.
-     */
-    var typedfiles = [
-            "core/Async.js",
-            "core/Base64.js",
-            "core/ByteArray.js",
-            "core/ByteArrayWriter.js",
-            "core/CSSUnits.js",
-            "core/Cursor.js",
-            "core/DomUtils.js",
-            "core/EventNotifier.js",
-            "core/LoopWatchDog.js",
-            "core/PositionFilter.js",
-            "core/PositionFilterChain.js",
-            "core/PositionIterator.js",
-            "core/RawInflate.js",
-            "core/ScheduledTask.js",
-            "core/UnitTester.js",
-            "core/Utils.js",
-            "core/Zip.js",
-            "gui/AnnotationViewManager.js",
-            "gui/Avatar.js",
-            "gui/Clipboard.js",
-            "gui/EditInfoHandle.js",
-            "gui/KeyboardHandler.js",
-            "gui/SelectionMover.js",
-            "gui/StyleHelper.js",
-            "odf/FontLoader.js",
-            "odf/Formatting.js",
-            "odf/Namespaces.js",
-            "odf/ObjectNameGenerator.js",
-            "odf/OdfCanvas.js",
-            "odf/OdfContainer.js",
-            "odf/OdfNodeFilter.js",
-            "odf/OdfUtils.js",
-            "odf/Style2CSS.js",
-            "odf/StyleInfo.js",
-            "odf/TextSerializer.js",
-            "odf/TextStyleApplicator.js",
-            "ops/Server.js",
-            "ops/TextPositionFilter.js",
-            "xmldom/LSSerializer.js",
-            "xmldom/LSSerializerFilter.js",
-            "xmldom/XPath.js"
-        ],
-        jslintconfig;
 
     function createCMakeLists(typed, almostTyped, remaining) {
         var fs = require("fs"), path = "../CMakeLists.txt";
@@ -372,7 +378,7 @@ function Main() {
     function updateCMakeLists(deps) {
         var lib = deps.lib,
             defined = {},
-            sortedTyped = createOrderedList(typedfiles, lib, defined),
+            sortedTyped = createOrderedList(typedFiles, lib, defined),
             almostTyped,
             definedCopy,
             remaining;
