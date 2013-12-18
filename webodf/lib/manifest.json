@@ -176,16 +176,13 @@
         "odf/OdfUtils.js"
     ],
     "gui/SelectionView.js": [
-        "core/DomUtils.js",
-        "gui/SelectionMover.js",
         "gui/ShadowCursor.js",
-        "odf/OdfNodeFilter.js",
-        "odf/OdfUtils.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js"
+        "ops/OdtCursor.js"
     ],
     "gui/SelectionViewManager.js": [
-        "gui/SelectionView.js"
+        "gui/SelectionView.js",
+        "gui/ShadowCursor.js",
+        "ops/OdtCursor.js"
     ],
     "gui/SessionController.js": [
         "core/Async.js",
@@ -239,6 +236,16 @@
         "odf/Formatting.js",
         "odf/Namespaces.js",
         "odf/OdfUtils.js"
+    ],
+    "gui/SvgSelectionView.js": [
+        "core/DomUtils.js",
+        "gui/SelectionMover.js",
+        "gui/SelectionView.js",
+        "gui/ShadowCursor.js",
+        "odf/OdfNodeFilter.js",
+        "odf/OdfUtils.js",
+        "ops/OdtCursor.js",
+        "ops/OdtDocument.js"
     ],
     "gui/TextManipulator.js": [
         "core/PositionFilter.js",

@@ -352,6 +352,7 @@ set(UNTYPEDLIBJSFILES
     lib/gui/PlainTextPasteboard.js
     lib/gui/SelectionView.js
     lib/gui/SelectionViewManager.js
+    lib/gui/SvgSelectionView.js
     lib/gui/TrivialUndoManager.js
     lib/ops/Session.js
     lib/gui/AnnotationController.js

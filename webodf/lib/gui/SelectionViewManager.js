@@ -44,8 +44,9 @@ runtime.loadClass("gui.SelectionView");
  * The Selection View Manager is responsible for managing SelectionView objects
  * and attaching/detaching them to cursors.
  * @constructor
+ * @param {!function(new:gui.SelectionView, !(ops.OdtCursor|gui.ShadowCursor))} SelectionView
  */
-gui.SelectionViewManager = function SelectionViewManager() {
+gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     "use strict";
     var selectionViews = {};
 
@@ -114,9 +115,14 @@ gui.SelectionViewManager = function SelectionViewManager() {
         });
     };
 
+    /**
+     * @param {!(ops.OdtCursor|gui.ShadowCursor)} cursor
+     * @param {!boolean} virtualSelectionsInitiallyVisible
+     * @returns {!gui.SelectionView}
+     */
     this.registerCursor = function (cursor, virtualSelectionsInitiallyVisible) {
         var memberId = cursor.getMemberId(),
-            selectionView = new gui.SelectionView(cursor);
+            selectionView = new SelectionView(cursor);
 
         if (virtualSelectionsInitiallyVisible) {
             selectionView.show();
