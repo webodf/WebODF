@@ -62,7 +62,8 @@ odf.TextSerializer = function TextSerializer() {
             nodeType = node.nodeType,
             child;
 
-        if (accept === NodeFilter.FILTER_ACCEPT || accept === NodeFilter.FILTER_SKIP) {
+        if ((accept === NodeFilter.FILTER_ACCEPT || accept === NodeFilter.FILTER_SKIP) &&
+            odfUtils.isTextContentContainingNode(node)) {
             child = node.firstChild;
             while (child) {
                 s += serializeNode(child);

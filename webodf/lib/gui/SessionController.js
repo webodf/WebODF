@@ -45,6 +45,7 @@ runtime.loadClass("odf.ObjectNameGenerator");
 runtime.loadClass("ops.OdtCursor");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
+runtime.loadClass("gui.MimeDataExporter");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.DirectTextStyler");
 runtime.loadClass("gui.DirectParagraphStyler");
@@ -87,7 +88,8 @@ gui.SessionController = (function () {
             async = new core.Async(),
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
-            clipboard = new gui.Clipboard(),
+            mimeDataExporter = new gui.MimeDataExporter(),
+            clipboard = new gui.Clipboard(mimeDataExporter),
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             keyUpHandler = new gui.KeyboardHandler(),
@@ -385,7 +387,6 @@ gui.SessionController = (function () {
                 // Unfortunately, clearing the range will also blur the current focus.
                 selection.removeAllRanges();
                 selection.addRange(range.cloneRange());
-                /**@type{!IEElement}*/(eventManager.getEventTrap()).setActive();
             }
         }
 
@@ -486,6 +487,21 @@ gui.SessionController = (function () {
             isMouseMoved = false;
         }
 
+        /**
+         * @param {!Event} e
+         * @return {undefined}
+         */
+        function handleDragStart(e) {
+            var cursor = odtDocument.getCursor(inputMemberId),
+                selectedRange = cursor.getSelectedRange();
+
+            if (selectedRange.collapsed) {
+                return;
+            }
+
+            mimeDataExporter.exportRangeToDataTransfer(e.dataTransfer, selectedRange);
+        }
+
         function handleDragEnd() {
             // Drag operations consume the corresponding mouse up event.
             // If this happens, the selection should still be reset.
@@ -553,6 +569,7 @@ gui.SessionController = (function () {
             eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
             eventManager.subscribe("mouseup", handleMouseUp);
             eventManager.subscribe("contextmenu", handleContextMenu);
+            eventManager.subscribe("dragstart", handleDragStart);
             eventManager.subscribe("dragend", handleDragEnd);
 
             // start maintaining the cursor selection now
@@ -606,6 +623,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("mousedown", handleMouseDown);
             eventManager.unsubscribe("mouseup", handleMouseUp);
             eventManager.unsubscribe("contextmenu", handleContextMenu);
+            eventManager.unsubscribe("dragstart", handleDragStart);
             eventManager.unsubscribe("dragend", handleDragEnd);
             odtDocument.getOdfCanvas().getElement().classList.remove("virtualSelections");
 
