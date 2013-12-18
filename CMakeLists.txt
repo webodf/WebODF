@@ -310,13 +310,14 @@ set(UNTYPEDLIBJSFILES
     lib/ops/OdtCursor.js
     lib/ops/OdtDocument.js
     lib/ops/Operation.js
-    lib/xmldom/RelaxNG.js
-    lib/xmldom/RelaxNG2.js
     lib/gui/Caret.js
     lib/gui/EventManager.js
+    lib/gui/InputMethodEditor.js
     lib/gui/ShadowCursor.js
     lib/gui/UndoManager.js
     lib/gui/UndoStateRules.js
+    lib/xmldom/RelaxNG.js
+    lib/xmldom/RelaxNG2.js
     lib/ops/EditInfo.js
     lib/ops/OpAddAnnotation.js
     lib/ops/OpAddCursor.js

@@ -137,6 +137,15 @@
         "odf/Namespaces.js",
         "odf/OdfCanvas.js"
     ],
+    "gui/InputMethodEditor.js": [
+        "core/Async.js",
+        "core/DomUtils.js",
+        "core/EventNotifier.js",
+        "core/ScheduledTask.js",
+        "gui/EventManager.js",
+        "ops/OdtCursor.js",
+        "ops/OdtDocument.js"
+    ],
     "gui/KeyboardHandler.js": [
     ],
     "gui/PlainTextPasteboard.js": [
@@ -181,6 +190,7 @@
         "gui/HyperlinkController.js",
         "gui/ImageManager.js",
         "gui/ImageSelector.js",
+        "gui/InputMethodEditor.js",
         "gui/KeyboardHandler.js",
         "gui/PlainTextPasteboard.js",
         "gui/SelectionMover.js",
@@ -327,6 +337,7 @@
     ],
     "ops/OdtCursor.js": [
         "core/Cursor.js",
+        "core/EventNotifier.js",
         "gui/SelectionMover.js",
         "ops/OdtDocument.js"
     ],

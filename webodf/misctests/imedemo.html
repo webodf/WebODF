@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IME test harness</title>
+</head>
+<body>
+<h1>Enter text using an IME into the box below</h1>
+<div id="editArea" contenteditable="true" style="width: 100px; height: 100px; background-color: red"></div>
+<pre id="log"></pre>
+<script type="text/javascript">
+    var editArea = document.getElementById("editArea"),
+        log = document.getElementById("log"),
+        updateRequested = false,
+        cycleCount = 0;
+
+    function updateTick() {
+        if (updateRequested) {
+            updateRequested = false;
+            cycleCount++;
+        }
+    }
+
+    function logInfo(text) {
+        log.insertBefore(document.createTextNode(text + " |cycle: " + cycleCount + "\n"), log.firstChild);
+        updateRequested = true;
+    }
+
+    editArea.addEventListener("input", function() {
+        logInfo("input: " + editArea.textContent);
+    });
+    editArea.addEventListener("textInput", function(e) {
+        logInfo("textInput: " + e.data);
+    });
+    editArea.addEventListener("keydown", function(e) {
+        logInfo("keydown: " + String.fromCharCode(e.which));
+    });
+    editArea.addEventListener("keypress", function(e) {
+        logInfo("keypress: " + String.fromCharCode(e.which));
+    });
+    editArea.addEventListener("keyup", function(e) {
+        logInfo("keyup: " + String.fromCharCode(e.which));
+    });
+    editArea.addEventListener("compositionstart", function(e) {
+        logInfo("compositionstart: " + e.data);
+    });
+    editArea.addEventListener("compositionupdate", function(e) {
+        logInfo("compositionupdate: " + e.data);
+    });
+    editArea.addEventListener("compositionend", function(e) {
+        logInfo("compositionend: " + e.data);
+    });
+
+    setInterval(updateTick, 0);
+</script>
+</body>
+</html>

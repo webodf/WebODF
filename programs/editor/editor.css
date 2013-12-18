@@ -241,7 +241,7 @@ div.memberListLabel[fullname]:before {
     text-align: center;
 }
 
-cursor div {
+cursor .handle {
     margin-top: 5px;
     padding-top: 3px;
     margin-left: auto;
@@ -269,11 +269,11 @@ cursor img {
     margin: auto;
 }
 
-cursor div.active {
+cursor .handle.active {
     opacity: 0.8;
 }
 
-cursor div:after {
+cursor .handle:after {
     content: ' ';
     position: absolute;
     width: 0px;

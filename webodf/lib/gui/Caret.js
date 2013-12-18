@@ -409,8 +409,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     function init() {
         var dom = cursor.getOdtDocument().getDOM(),
             htmlns = dom.documentElement.namespaceURI;
-        span = /**@type{!HTMLSpanElement}*/
-               (dom.createElementNS(htmlns, "span"));
+        span = /**@type{!HTMLSpanElement}*/(dom.createElementNS(htmlns, "span"));
+        span.className = "caret";
         span.style.top = DEFAULT_CARET_TOP;
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
