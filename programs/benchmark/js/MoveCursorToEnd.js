@@ -55,7 +55,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(sharedState) {
             action.start();
-            sharedState.sessionController.moveCursorToDocumentEnd();
+            sharedState.sessionController.getSelectionController().moveCursorToDocumentEnd();
             action.complete(true);
         }
     }

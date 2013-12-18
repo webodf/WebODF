@@ -45,7 +45,6 @@ runtime.loadClass("odf.ObjectNameGenerator");
 runtime.loadClass("ops.OdtCursor");
 runtime.loadClass("ops.OpAddCursor");
 runtime.loadClass("ops.OpRemoveCursor");
-runtime.loadClass("ops.StepsTranslator");
 runtime.loadClass("gui.Clipboard");
 runtime.loadClass("gui.DirectTextStyler");
 runtime.loadClass("gui.DirectParagraphStyler");
@@ -54,6 +53,7 @@ runtime.loadClass("gui.HyperlinkClickHandler");
 runtime.loadClass("gui.HyperlinkController");
 runtime.loadClass("gui.ImageManager");
 runtime.loadClass("gui.ImageSelector");
+runtime.loadClass("gui.SelectionController");
 runtime.loadClass("gui.TextManipulator");
 runtime.loadClass("gui.AnnotationController");
 runtime.loadClass("gui.EventManager");
@@ -91,8 +91,6 @@ gui.SessionController = (function () {
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             keyUpHandler = new gui.KeyboardHandler(),
-            keyboardMovementsFilter = new core.PositionFilterChain(),
-            baseFilter = odtDocument.getPositionFilter(),
             clickStartedWithinContainer = false,
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             isMouseMoved = false,
@@ -114,13 +112,11 @@ gui.SessionController = (function () {
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, odtDocument, eventManager),
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
-            hyperlinkController = new gui.HyperlinkController(session, inputMemberId);
+            hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
+            selectionController = new gui.SelectionController(session, inputMemberId);
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
-
-        keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
-        keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
 
         function getTarget(e) {
             // e.srcElement because IE10 likes to be different...
@@ -137,23 +133,6 @@ gui.SessionController = (function () {
             } else {
                 event.returnValue = false;
             }
-        }
-
-        /**
-         * @param {!number} position
-         * @param {!number} length
-         * @param {string=} selectionType
-         * @return {!ops.Operation}
-         */
-        function createOpMoveCursor(position, length, selectionType) {
-            var op = new ops.OpMoveCursor();
-            op.init({
-                memberid: inputMemberId,
-                position: position,
-                length: length || 0,
-                selectionType: selectionType
-            });
-            return op;
         }
 
         /**
@@ -183,489 +162,6 @@ gui.SessionController = (function () {
             }
             return result;
         }
-
-        /**
-         * Expands the supplied selection to the nearest word boundaries
-         * @param {!Range} range
-         */
-        function expandToWordBoundaries(range) {
-            var alphaNumeric = /[A-Za-z0-9]/,
-                iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-                currentNode, c;
-
-            iterator.setUnfilteredPosition(/**@type{!Node}*/(range.startContainer), range.startOffset);
-            while (iterator.previousPosition()) {
-                currentNode = iterator.getCurrentNode();
-                if (currentNode.nodeType === Node.TEXT_NODE) {
-                    c = currentNode.data[iterator.unfilteredDomOffset()];
-                    if (!alphaNumeric.test(c)) {
-                        break;
-                    }
-                } else if (!odfUtils.isTextSpan(currentNode)) {
-                    break;
-                }
-                range.setStart(iterator.container(), iterator.unfilteredDomOffset());
-            }
-
-            iterator.setUnfilteredPosition(/**@type{!Node}*/(range.endContainer), range.endOffset);
-            do {
-                currentNode = iterator.getCurrentNode();
-                if (currentNode.nodeType === Node.TEXT_NODE) {
-                    c = currentNode.data[iterator.unfilteredDomOffset()];
-                    if (!alphaNumeric.test(c)) {
-                        break;
-                    }
-                } else if (!odfUtils.isTextSpan(currentNode)) {
-                    break;
-                }
-            } while (iterator.nextPosition());
-            range.setEnd(iterator.container(), iterator.unfilteredDomOffset());
-        }
-
-        /**
-         * Expands the supplied selection to the nearest paragraph boundaries
-         * @param {!Range} range
-         */
-        function expandToParagraphBoundaries(range) {
-            var startParagraph = odtDocument.getParagraphElement(range.startContainer),
-                endParagraph = odtDocument.getParagraphElement(range.endContainer);
-
-            if (startParagraph) {
-                range.setStart(startParagraph, 0);
-            }
-
-            if (endParagraph) {
-                if (odfUtils.isParagraph(range.endContainer) && range.endOffset === 0) {
-                    // Chrome's built-in paragraph expansion will put the end of the selection
-                    // at (p,0) of the FOLLOWING paragraph. Round this back down to ensure
-                    // the next paragraph doesn't get incorrectly selected
-                    range.setEndBefore(endParagraph);
-                } else {
-                    range.setEnd(endParagraph, endParagraph.childNodes.length);
-                }
-            }
-        }
-
-        /**
-         * @param {!Node} frameNode
-         */
-        function selectImage(frameNode) {
-            var stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, frameNode, 0),
-                stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null,
-                oldPosition,
-                op;
-
-            if (stepsToFocus || stepsToAnchor) {
-                oldPosition = odtDocument.getCursorPosition(inputMemberId);
-                op = createOpMoveCursor(
-                    oldPosition + stepsToAnchor,
-                    stepsToFocus - stepsToAnchor,
-                    ops.OdtCursor.RegionSelection
-                );
-                session.enqueue([op]);
-            }
-
-            // canvas element won't have focus if user click somewhere outside the canvas then drag and
-            // release click inside the canvas.
-            eventManager.focus();
-        }
-
-        /**
-         * Derive a selection-type object from the provided cursor
-         * @param {!{anchorNode: Node, anchorOffset: !number, focusNode: Node, focusOffset: !number}} selection
-         * @returns {{range: !Range, hasForwardSelection: !boolean}}
-         */
-        function selectionToRange(selection) {
-            var hasForwardSelection = domUtils.comparePoints(/**@type{!Node}*/(selection.anchorNode), selection.anchorOffset,
-                                                            /**@type{!Node}*/(selection.focusNode), selection.focusOffset) >= 0,
-                range = selection.focusNode.ownerDocument.createRange();
-            if (hasForwardSelection) {
-                range.setStart(selection.anchorNode, selection.anchorOffset);
-                range.setEnd(selection.focusNode, selection.focusOffset);
-            } else {
-                range.setStart(selection.focusNode, selection.focusOffset);
-                range.setEnd(selection.anchorNode, selection.anchorOffset);
-            }
-            return {
-                range: range,
-                hasForwardSelection: hasForwardSelection
-            };
-        }
-
-        /**
-         * Derive a selection-type object from the provided cursor
-         * @param {!Range} range
-         * @param {!boolean} hasForwardSelection
-         * @returns {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}}
-         */
-        function rangeToSelection(range, hasForwardSelection) {
-            if (hasForwardSelection) {
-                return {
-                    anchorNode: /**@type{!Node}*/(range.startContainer),
-                    anchorOffset: range.startOffset,
-                    focusNode: /**@type{!Node}*/(range.endContainer),
-                    focusOffset: range.endOffset
-                };
-            }
-            return {
-                anchorNode: /**@type{!Node}*/(range.endContainer),
-                anchorOffset: range.endOffset,
-                focusNode: /**@type{!Node}*/(range.startContainer),
-                focusOffset: range.startOffset
-            };
-        }
-
-        /**
-         * @param {Function} lookup
-         * @returns {!function(!Node, !number):!function(!number, !Node, !number):!boolean}
-         */
-        /*jslint unparam:true*/
-        function constrain(lookup) {
-            return function(originalNode) {
-                var originalContainer = lookup(originalNode);
-                return function(step, node) {
-                    return lookup(node) === originalContainer;
-                };
-            };
-        }
-        /*jslint unparam:false*/
-
-        /**
-         * @param {!Range} range
-         * @param {!boolean} hasForwardSelection
-         * @param {number=} clickCount
-         */
-        function selectRange(range, hasForwardSelection, clickCount) {
-            var canvasElement = odtDocument.getOdfCanvas().getElement(),
-                validSelection,
-                startInsideCanvas,
-                endInsideCanvas,
-                existingSelection,
-                newSelection,
-                op;
-
-            startInsideCanvas = domUtils.containsNode(canvasElement, range.startContainer);
-            endInsideCanvas = domUtils.containsNode(canvasElement, range.endContainer);
-            if (!startInsideCanvas && !endInsideCanvas) {
-                return;
-            }
-
-            if (startInsideCanvas && endInsideCanvas) {
-                // Expansion behaviour should only occur when double & triple clicking is inside the canvas
-                if (clickCount === 2) {
-                    expandToWordBoundaries(range);
-                } else if (clickCount >= 3) {
-                    expandToParagraphBoundaries(range);
-                }
-            }
-
-            validSelection = rangeToSelection(range, hasForwardSelection);
-            newSelection = odtDocument.convertDomToCursorRange(validSelection, constrain(odfUtils.getParagraphElement));
-            existingSelection = odtDocument.getCursorSelection(inputMemberId);
-            if (newSelection.position !== existingSelection.position || newSelection.length !== existingSelection.length) {
-                op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RangeSelection);
-                session.enqueue([op]);
-            }
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.selectRange = selectRange;
-
-        /**
-         * @param {!number} lengthAdjust   length adjustment
-         * @return {undefined}
-         */
-        function extendCursorByAdjustment(lengthAdjust) {
-            var selection = odtDocument.getCursorSelection(inputMemberId),
-                stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter(),
-                newLength;
-            if (lengthAdjust !== 0) {
-                lengthAdjust = (lengthAdjust > 0)
-                    ? stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter)
-                    : -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter);
-
-                newLength = selection.length + lengthAdjust;
-                session.enqueue([createOpMoveCursor(selection.position, newLength)]);
-            }
-        }
-
-        /**
-         * @param {!number} positionAdjust   position adjustment
-         * @return {undefined}
-         */
-        function moveCursorByAdjustment(positionAdjust) {
-            var position = odtDocument.getCursorPosition(inputMemberId),
-                stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter();
-            if (positionAdjust !== 0) {
-                positionAdjust = (positionAdjust > 0)
-                    ? stepCounter.convertForwardStepsBetweenFilters(positionAdjust, keyboardMovementsFilter, baseFilter)
-                    : -stepCounter.convertBackwardStepsBetweenFilters(-positionAdjust, keyboardMovementsFilter, baseFilter);
-
-                position = position + positionAdjust;
-                session.enqueue([createOpMoveCursor(position, 0)]);
-            }
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorToLeft() {
-            moveCursorByAdjustment(-1);
-            return true;
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.moveCursorToLeft = moveCursorToLeft;
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorToRight() {
-            moveCursorByAdjustment(1);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToLeft() {
-            extendCursorByAdjustment(-1);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToRight() {
-            extendCursorByAdjustment(1);
-            return true;
-        }
-
-        /**
-         * @param {!number} direction -1 for upwards 1 for downwards
-         * @param {!boolean} extend
-         * @return {undefined}
-         */
-        function moveCursorByLine(direction, extend) {
-            var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-                steps;
-
-            runtime.assert(Boolean(paragraphNode), "SessionController: Cursor outside paragraph");
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, keyboardMovementsFilter);
-            if (extend) {
-                extendCursorByAdjustment(steps);
-            } else {
-                moveCursorByAdjustment(steps);
-            }
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorUp() {
-            moveCursorByLine(-1, false);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorDown() {
-            moveCursorByLine(1, false);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionUp() {
-            moveCursorByLine(-1, true);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionDown() {
-            moveCursorByLine(1, true);
-            return true;
-        }
-
-        /**
-         * @param {!number} direction -1 for beginning 1 for end
-         * @param {!boolean} extend
-         * @return {undefined}
-         */
-        function moveCursorToLineBoundary(direction, extend) {
-            var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
-                direction,
-                keyboardMovementsFilter
-            );
-            if (extend) {
-                extendCursorByAdjustment(steps);
-            } else {
-                moveCursorByAdjustment(steps);
-            }
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorToLineStart() {
-            moveCursorToLineBoundary(-1, false);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorToLineEnd() {
-            moveCursorToLineBoundary(1, false);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToLineStart() {
-            moveCursorToLineBoundary(-1, true);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToLineEnd() {
-            moveCursorToLineBoundary(1, true);
-            return true;
-        }
-
-        /**
-         * @param {!number} direction -1 for beginning, 1 for end
-         * @param {!function(!Node):Node} getContainmentNode Returns a node container for the supplied node.
-         *  Usually this will be something like the parent paragraph or root the supplied node is within
-         * @return {undefined}
-         */
-        function extendCursorToNodeBoundary(direction, getContainmentNode) {
-            var cursor = odtDocument.getCursor(inputMemberId),
-                node = getContainmentNode(cursor.getNode()),
-                selection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
-                newCursorSelection;
-
-            runtime.assert(Boolean(node), "SessionController: Cursor outside root");
-            if (direction < 0) {
-                selection.focusNode = /**@type{!Node}*/(node);
-                selection.focusOffset = 0;
-            } else {
-                selection.focusNode = /**@type{!Node}*/(node);
-                selection.focusOffset = node.childNodes.length;
-            }
-            newCursorSelection = odtDocument.convertDomToCursorRange(selection, constrain(getContainmentNode));
-            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToParagraphStart() {
-            extendCursorToNodeBoundary(-1, odtDocument.getParagraphElement);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToParagraphEnd() {
-            extendCursorToNodeBoundary(1, odtDocument.getParagraphElement);
-            return true;
-        }
-
-        /**
-         * @param {!number} direction -1 for beginning, 1 for end
-         * @return {!boolean}
-         */
-        function moveCursorToRootBoundary(direction) {
-            var cursor = odtDocument.getCursor(inputMemberId),
-                root = odtDocument.getRootElement(cursor.getNode()),
-                newPosition;
-
-            runtime.assert(Boolean(root), "SessionController: Cursor outside root");
-            if (direction < 0) {
-                // The anchor node will already be in a walkable position having just been retrieved from the cursor
-                // The rounding will only impact the new focus node
-                // Need to round up as (p, 0) is potentially before the first walkable position in the paragraph
-                newPosition = odtDocument.convertDomPointToCursorStep(root, 0, function (step) {
-                    return step === ops.StepsTranslator.NEXT_STEP;
-                });
-            } else {
-                // Default behaviour is to round down to the previous walkable step if (p, p.childNodes.length) isn't
-                // walkable. Either way, this still equates to moving to the last walkable step in the paragraph
-                newPosition = odtDocument.convertDomPointToCursorStep(root, root.childNodes.length);
-            }
-            session.enqueue([createOpMoveCursor(newPosition, 0)]);
-            return true;
-        }
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorToDocumentStart() {
-            moveCursorToRootBoundary(-1);
-            return true;
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.moveCursorToDocumentStart = moveCursorToDocumentStart;
-
-        /**
-         * @return {!boolean}
-         */
-        function moveCursorToDocumentEnd() {
-            moveCursorToRootBoundary(1);
-            return true;
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.moveCursorToDocumentEnd = moveCursorToDocumentEnd;
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToDocumentStart() {
-            extendCursorToNodeBoundary(-1, odtDocument.getRootElement);
-            return true;
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.extendSelectionToDocumentStart = extendSelectionToDocumentStart;
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToDocumentEnd() {
-            extendCursorToNodeBoundary(1, odtDocument.getRootElement);
-            return true;
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.extendSelectionToDocumentEnd = extendSelectionToDocumentEnd;
-
-        /**
-         * @return {!boolean}
-         */
-        function extendSelectionToEntireDocument() {
-            var cursor = odtDocument.getCursor(inputMemberId),
-                root = odtDocument.getRootElement(cursor.getNode()),
-                newSelection,
-                newCursorSelection;
-
-            runtime.assert(Boolean(root), "SessionController: Cursor outside root");
-            newSelection = {
-                anchorNode: root,
-                anchorOffset: 0,
-                focusNode: root,
-                focusOffset: root.childNodes.length
-            };
-            newCursorSelection = odtDocument.convertDomToCursorRange(newSelection, constrain(odtDocument.getRootElement));
-            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
-            return true;
-        }
-        // TODO Extract selection functions into a standalone SelectionManipulator
-        this.extendSelectionToEntireDocument = extendSelectionToEntireDocument;
 
         /**
          * If the user's current selection is region selection (e.g., an image), any executed operations
@@ -838,7 +334,7 @@ gui.SessionController = (function () {
 
         function updateShadowCursor() {
             var selection = window.getSelection(),
-                selectionRange = selection.rangeCount > 0 && selectionToRange(selection);
+                selectionRange = selection.rangeCount > 0 && selectionController.selectionToRange(selection);
 
             if (clickStartedWithinContainer && selectionRange) {
                 isMouseMoved = true;
@@ -847,9 +343,9 @@ gui.SessionController = (function () {
                 shadowCursorIterator.setUnfilteredPosition(/**@type {!Node}*/(selection.focusNode), selection.focusOffset);
                 if (mouseDownRootFilter.acceptPosition(shadowCursorIterator) === FILTER_ACCEPT) {
                     if (clickCount === 2) {
-                        expandToWordBoundaries(selectionRange.range);
+                        selectionController.expandToWordBoundaries(selectionRange.range);
                     } else if (clickCount >= 3) {
-                        expandToParagraphBoundaries(selectionRange.range);
+                        selectionController.expandToParagraphBoundaries(selectionRange.range);
                     }
                     shadowCursor.setSelectedRange(selectionRange.range, selectionRange.hasForwardSelection);
                     odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
@@ -949,11 +445,12 @@ gui.SessionController = (function () {
                 };
             drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
             if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
-                selectImage(target.parentNode);
+                selectionController.selectImage(target.parentNode);
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (clickStartedWithinContainer && !imageSelector.isSelectorElement(target)) {
                 if (isMouseMoved) {
-                    selectRange(shadowCursor.getSelectedRange(), shadowCursor.hasForwardSelection(), event.detail);
+                    selectionController.selectRange(shadowCursor.getSelectedRange(),
+                        shadowCursor.hasForwardSelection(), event.detail);
                     eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
                 } else {
                     // Clicking in already selected text won't update window.getSelection() until just after
@@ -976,8 +473,9 @@ gui.SessionController = (function () {
                         }
                         // Need to check the selection again in case the caret position didn't return any result
                         if (selection.anchorNode && selection.focusNode) {
-                            selectionRange = selectionToRange(selection);
-                            selectRange(selectionRange.range, selectionRange.hasForwardSelection, eventDetails.detail);
+                            selectionRange = selectionController.selectionToRange(selection);
+                            selectionController.selectRange(selectionRange.range,
+                                selectionRange.hasForwardSelection, eventDetails.detail);
                         }
                         eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
                     }, 0);
@@ -1192,6 +690,13 @@ gui.SessionController = (function () {
         };
 
         /**
+         * @returns {!gui.SelectionController}
+         */
+        this.getSelectionController = function () {
+            return selectionController;
+        };
+
+        /**
          * @returns {!gui.TextManipulator}
          */
         this.getTextManipulator = function() {
@@ -1271,43 +776,43 @@ gui.SessionController = (function () {
                 textManipulator.insertText("\t");
                 return true;
             }));
-            keyDownHandler.bind(keyCode.Left, modifier.None, rangeSelectionOnly(moveCursorToLeft));
-            keyDownHandler.bind(keyCode.Right, modifier.None, rangeSelectionOnly(moveCursorToRight));
-            keyDownHandler.bind(keyCode.Up, modifier.None, rangeSelectionOnly(moveCursorUp));
-            keyDownHandler.bind(keyCode.Down, modifier.None, rangeSelectionOnly(moveCursorDown));
+            keyDownHandler.bind(keyCode.Left, modifier.None, rangeSelectionOnly(selectionController.moveCursorToLeft));
+            keyDownHandler.bind(keyCode.Right, modifier.None, rangeSelectionOnly(selectionController.moveCursorToRight));
+            keyDownHandler.bind(keyCode.Up, modifier.None, rangeSelectionOnly(selectionController.moveCursorUp));
+            keyDownHandler.bind(keyCode.Down, modifier.None, rangeSelectionOnly(selectionController.moveCursorDown));
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
             keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey));
             keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
-            keyDownHandler.bind(keyCode.Left, modifier.Shift, rangeSelectionOnly(extendSelectionToLeft));
-            keyDownHandler.bind(keyCode.Right, modifier.Shift, rangeSelectionOnly(extendSelectionToRight));
-            keyDownHandler.bind(keyCode.Up, modifier.Shift, rangeSelectionOnly(extendSelectionUp));
-            keyDownHandler.bind(keyCode.Down, modifier.Shift, rangeSelectionOnly(extendSelectionDown));
+            keyDownHandler.bind(keyCode.Left, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionToLeft));
+            keyDownHandler.bind(keyCode.Right, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionToRight));
+            keyDownHandler.bind(keyCode.Up, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionUp));
+            keyDownHandler.bind(keyCode.Down, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionDown));
 
-            keyDownHandler.bind(keyCode.Home, modifier.None, rangeSelectionOnly(moveCursorToLineStart));
-            keyDownHandler.bind(keyCode.End, modifier.None, rangeSelectionOnly(moveCursorToLineEnd));
-            keyDownHandler.bind(keyCode.Home, modifier.Ctrl, rangeSelectionOnly(moveCursorToDocumentStart));
-            keyDownHandler.bind(keyCode.End, modifier.Ctrl, rangeSelectionOnly(moveCursorToDocumentEnd));
-            keyDownHandler.bind(keyCode.Home, modifier.Shift, rangeSelectionOnly(extendSelectionToLineStart));
-            keyDownHandler.bind(keyCode.End, modifier.Shift, rangeSelectionOnly(extendSelectionToLineEnd));
-            keyDownHandler.bind(keyCode.Up, modifier.CtrlShift, rangeSelectionOnly(extendSelectionToParagraphStart));
-            keyDownHandler.bind(keyCode.Down, modifier.CtrlShift, rangeSelectionOnly(extendSelectionToParagraphEnd));
-            keyDownHandler.bind(keyCode.Home, modifier.CtrlShift, rangeSelectionOnly(extendSelectionToDocumentStart));
-            keyDownHandler.bind(keyCode.End, modifier.CtrlShift, rangeSelectionOnly(extendSelectionToDocumentEnd));
+            keyDownHandler.bind(keyCode.Home, modifier.None, rangeSelectionOnly(selectionController.moveCursorToLineStart));
+            keyDownHandler.bind(keyCode.End, modifier.None, rangeSelectionOnly(selectionController.moveCursorToLineEnd));
+            keyDownHandler.bind(keyCode.Home, modifier.Ctrl, rangeSelectionOnly(selectionController.moveCursorToDocumentStart));
+            keyDownHandler.bind(keyCode.End, modifier.Ctrl, rangeSelectionOnly(selectionController.moveCursorToDocumentEnd));
+            keyDownHandler.bind(keyCode.Home, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionToLineStart));
+            keyDownHandler.bind(keyCode.End, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionToLineEnd));
+            keyDownHandler.bind(keyCode.Up, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionToParagraphStart));
+            keyDownHandler.bind(keyCode.Down, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionToParagraphEnd));
+            keyDownHandler.bind(keyCode.Home, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentStart));
+            keyDownHandler.bind(keyCode.End, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentEnd));
 
             if (isMacOS) {
                 keyDownHandler.bind(keyCode.Clear, modifier.None, textManipulator.removeCurrentSelection);
-                keyDownHandler.bind(keyCode.Left, modifier.Meta, rangeSelectionOnly(moveCursorToLineStart));
-                keyDownHandler.bind(keyCode.Right, modifier.Meta, rangeSelectionOnly(moveCursorToLineEnd));
-                keyDownHandler.bind(keyCode.Home, modifier.Meta, rangeSelectionOnly(moveCursorToDocumentStart));
-                keyDownHandler.bind(keyCode.End, modifier.Meta, rangeSelectionOnly(moveCursorToDocumentEnd));
-                keyDownHandler.bind(keyCode.Left, modifier.MetaShift, rangeSelectionOnly(extendSelectionToLineStart));
-                keyDownHandler.bind(keyCode.Right, modifier.MetaShift, rangeSelectionOnly(extendSelectionToLineEnd));
-                keyDownHandler.bind(keyCode.Up, modifier.AltShift, rangeSelectionOnly(extendSelectionToParagraphStart));
-                keyDownHandler.bind(keyCode.Down, modifier.AltShift, rangeSelectionOnly(extendSelectionToParagraphEnd));
-                keyDownHandler.bind(keyCode.Up, modifier.MetaShift, rangeSelectionOnly(extendSelectionToDocumentStart));
-                keyDownHandler.bind(keyCode.Down, modifier.MetaShift, rangeSelectionOnly(extendSelectionToDocumentEnd));
-                keyDownHandler.bind(keyCode.A, modifier.Meta, rangeSelectionOnly(extendSelectionToEntireDocument));
+                keyDownHandler.bind(keyCode.Left, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToLineStart));
+                keyDownHandler.bind(keyCode.Right, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToLineEnd));
+                keyDownHandler.bind(keyCode.Home, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToDocumentStart));
+                keyDownHandler.bind(keyCode.End, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToDocumentEnd));
+                keyDownHandler.bind(keyCode.Left, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToLineStart));
+                keyDownHandler.bind(keyCode.Right, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToLineEnd));
+                keyDownHandler.bind(keyCode.Up, modifier.AltShift, rangeSelectionOnly(selectionController.extendSelectionToParagraphStart));
+                keyDownHandler.bind(keyCode.Down, modifier.AltShift, rangeSelectionOnly(selectionController.extendSelectionToParagraphEnd));
+                keyDownHandler.bind(keyCode.Up, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentStart));
+                keyDownHandler.bind(keyCode.Down, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentEnd));
+                keyDownHandler.bind(keyCode.A, modifier.Meta, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
                 keyDownHandler.bind(keyCode.B, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleBold));
                 keyDownHandler.bind(keyCode.I, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleItalic));
                 keyDownHandler.bind(keyCode.U, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleUnderline));
@@ -1328,7 +833,7 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.MetaInMozilla, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
                 keyUpHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showTextCursor);
             } else {
-                keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(extendSelectionToEntireDocument));
+                keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
                 keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleBold));
                 keyDownHandler.bind(keyCode.I, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleItalic));
                 keyDownHandler.bind(keyCode.U, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleUnderline));

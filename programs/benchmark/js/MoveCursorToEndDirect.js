@@ -61,7 +61,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             canvasElement = sharedState.odfCanvas.getElement();
             range = canvasElement.ownerDocument.createRange();
             range.setStart(canvasElement, canvasElement.childNodes.length);
-            sharedState.sessionController.selectRange(range, true, 1);
+            sharedState.sessionController.getSelectionController().selectRange(range, true, 1);
 
             action.complete(true);
         }
