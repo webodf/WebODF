@@ -66,6 +66,7 @@ function Main() {
             "gui/Avatar.js",
             "gui/Clipboard.js",
             "gui/EditInfoHandle.js",
+            "gui/HyperlinkClickHandler.js",
             "gui/KeyboardHandler.js",
             "gui/SelectionMover.js",
             "gui/StyleHelper.js",

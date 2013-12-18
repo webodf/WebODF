@@ -40,7 +40,7 @@ runtime.loadClass("xmldom.XPath");
 
 /**
  * @constructor
- * @param {!function():!Node} getRootNode
+ * @param {!function():!Element} getRootNode
  */
 gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
     "use strict";
@@ -55,16 +55,17 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
         inactive = "inactive",
         odfUtils = new odf.OdfUtils(),
         xpath = xmldom.XPath,
+        /**@type{!boolean}*/
         editing = false;
 
     /**
-     * @param {?EventTarget} node
+     * @param {?Node} node
      * @return {?Element}
      */
     function getHyperlinkElement(node) {
         while (node !== null) {
             if (odfUtils.isHyperlink(node)) {
-                return node;
+                return /**@type{!Element}*/(node);
             }
             if (odfUtils.isParagraph(node)) {
                 break;
@@ -88,7 +89,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
             return;
         }
 
-        linkElement = getHyperlinkElement(target);
+        linkElement = getHyperlinkElement(/**@type{?Node}*/(target));
         if (!linkElement) {
             return;
         }
@@ -124,7 +125,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
      * Show pointer cursor when hover over hyperlink
      */
     function showPointerCursor() {
-        getRootNode().removeAttributeNS(webodfns, links, inactive);
+        getRootNode().removeAttributeNS(webodfns, links);
     }
     this.showPointerCursor = showPointerCursor;
 

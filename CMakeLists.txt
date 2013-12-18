@@ -280,6 +280,7 @@ set(TYPEDLIBJSFILES
     lib/core/PositionFilter.js
     lib/core/PositionFilterChain.js
     lib/gui/AnnotationViewManager.js
+    lib/gui/HyperlinkClickHandler.js
     lib/gui/SelectionMover.js
     lib/odf/OdfNodeFilter.js
     lib/odf/Style2CSS.js
@@ -300,7 +301,6 @@ set(TYPEDLIBJSFILES
 set(UNTYPEDLIBJSFILES
 # These files depend only on files that are 100% typed.
     lib/core/RawDeflate.js
-    lib/gui/HyperlinkClickHandler.js
     lib/gui/ImageSelector.js
     lib/odf/CommandLineTools.js
     lib/ops/Member.js
@@ -310,21 +310,6 @@ set(UNTYPEDLIBJSFILES
     lib/ops/OdtCursor.js
     lib/ops/OdtDocument.js
     lib/ops/Operation.js
-    lib/gui/Caret.js
-    lib/gui/EventManager.js
-    lib/gui/InputMethodEditor.js
-    lib/gui/ShadowCursor.js
-    lib/gui/UndoManager.js
-    lib/gui/UndoStateRules.js
-    lib/xmldom/RelaxNG.js
-    lib/xmldom/RelaxNG2.js
-    lib/ops/EditInfo.js
-    lib/ops/OpAddAnnotation.js
-    lib/ops/OpAddCursor.js
-    lib/ops/OpAddMember.js
-    lib/ops/OpAddStyle.js
-    lib/ops/OpApplyDirectStyling.js
-    lib/ops/OpApplyHyperlink.js
     lib/ops/OpInsertImage.js
     lib/ops/OpInsertTable.js
     lib/ops/OpInsertText.js
@@ -342,16 +327,31 @@ set(UNTYPEDLIBJSFILES
     lib/ops/OpUpdateMember.js
     lib/ops/OpUpdateMetadata.js
     lib/ops/OpUpdateParagraphStyle.js
+    lib/xmldom/RelaxNG.js
+    lib/xmldom/RelaxNG2.js
+    lib/gui/Caret.js
+    lib/gui/EventManager.js
+    lib/gui/InputMethodEditor.js
+    lib/gui/PlainTextPasteboard.js
+    lib/gui/ShadowCursor.js
+    lib/gui/UndoManager.js
+    lib/gui/UndoStateRules.js
+    lib/ops/EditInfo.js
+    lib/ops/OpAddAnnotation.js
+    lib/ops/OpAddCursor.js
+    lib/ops/OpAddMember.js
+    lib/ops/OpAddStyle.js
+    lib/ops/OpApplyDirectStyling.js
+    lib/ops/OpApplyHyperlink.js
     lib/ops/OperationFactory.js
     lib/ops/OperationRouter.js
     lib/ops/OperationTransformMatrix.js
-    lib/ops/OperationTransformer.js
     lib/ops/TrivialOperationRouter.js
     lib/gui/EditInfoMarker.js
-    lib/gui/PlainTextPasteboard.js
     lib/gui/SelectionView.js
     lib/gui/SelectionViewManager.js
     lib/gui/TrivialUndoManager.js
+    lib/ops/OperationTransformer.js
     lib/ops/Session.js
     lib/gui/AnnotationController.js
     lib/gui/DirectParagraphStyler.js
