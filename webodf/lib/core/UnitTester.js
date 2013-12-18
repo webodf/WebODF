@@ -125,32 +125,99 @@ core.UnitTest.createOdtDocument = function (xml, namespaceMap) {
 /**
  * @constructor
  */
-core.UnitTestRunner = function UnitTestRunner() {
+core.UnitTestLogger = function UnitTestLogger() {
     "use strict";
-    var /**@type{!number}*/
+    var /**@type{!Array.<{category:string,message:string}>}*/
+        messages = [],
+        /**@type{number}*/
+        errors = 0,
+        start = 0,
+        suite = "",
+        test = "";
+    /**
+     * @param {string} suiteName
+     * @param {string} testName
+     */
+    this.startTest = function (suiteName, testName) {
+        messages = [];
+        errors = 0;
+        suite = suiteName;
+        test = testName;
+        start = (new Date()).getTime();
+    };
+    /**
+     * @return {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number}}
+     */
+    this.endTest = function () {
+        var end = (new Date()).getTime();
+        return {
+            description: test,
+            suite: [suite, test],
+            success: errors === 0,
+            log: messages.map(function (i) {
+                return i.message;
+            }),
+            time: end - start
+        };
+    };
+    /**
+     * @param {string} msg
+     */
+    this.debug = function (msg) {
+        messages.push({category: "debug", message: msg});
+    };
+    /**
+     * @param {string} msg
+     */
+    this.fail = function (msg) {
+        errors += 1;
+        messages.push({category: "fail", message: msg});
+    };
+    /**
+     * @param {string} msg
+     */
+    this.pass = function (msg) {
+        messages.push({category: "pass", message: msg});
+    };
+};
+
+/**
+ * @constructor
+ * @param {string} resourcePrefix
+ * @param {!core.UnitTestLogger} logger
+ */
+core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
+    "use strict";
+    var /**@type{number}*/
         failedTests = 0,
         areObjectsEqual;
     /**
-     * @param {!string} msg
+     * @return {string}
+     */
+    this.resourcePrefix = function () {
+        return resourcePrefix;
+    };
+    /**
+     * @param {string} msg
      * @return {undefined}
      */
     function debug(msg) {
-        runtime.log(msg);
+        logger.debug(msg);
     }
     /**
-     * @param {!string} msg
+     * @param {string} msg
      * @return {undefined}
      */
     function testFailed(msg) {
         failedTests += 1;
-        runtime.log("fail", msg);
+        logger.fail(msg);
     }
     /**
-     * @param {!string} msg
+     * @param {string} msg
      * @return {undefined}
      */
     function testPassed(msg) {
-        runtime.log("pass", msg);
+        logger.pass(msg);
     }
     /**
      * @param {!Array.<*>} a actual
@@ -272,6 +339,9 @@ core.UnitTestRunner = function UnitTestRunner() {
         }
         if (actual === expected) {
             return true;
+        }
+        if (actual === null || expected === null) {
+            return false;
         }
         if (typeof expected === "number" && isNaN(expected)) {
             return typeof actual === "number" && isNaN(actual);
@@ -422,9 +492,16 @@ core.UnitTestRunner = function UnitTestRunner() {
  */
 core.UnitTester = function UnitTester() {
     "use strict";
-    var /**@type{!number}*/
+    var self = this,
+        /**@type{!number}*/
         failedTests = 0,
-        results = {};
+        logger = new core.UnitTestLogger(),
+        results = {},
+        inBrowser = runtime.type() === "BrowserRuntime";
+    /**
+     * @type {string}
+     */
+    this.resourcePrefix = "";
     /**
      * @param {!string} text
      * @param {!string} code
@@ -433,6 +510,33 @@ core.UnitTester = function UnitTester() {
     function link(text, code) {
         return "<span style='color:blue;cursor:pointer' onclick='" + code + "'>"
             + text + "</span>";
+    }
+    /**
+     * @type {function(!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number})}
+     */
+    this.reporter = function (r) {
+        var i, m;
+        if (inBrowser) {
+            runtime.log("<span>Running "
+                + link(r.description, "runTest(\"" + r.suite[0] + "\",\""
+                                  + r.description + "\")") + "</span>");
+        } else {
+            runtime.log("Running " + r.description);
+        }
+        if (!r.success) {
+            for (i = 0; i < r.log.length; i += 1) {
+                m = r.log[i];
+                runtime.log(m.category, m.message);
+            }
+        }
+    };
+    /**
+     * @param {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number}} r
+     */
+    function report(r) {
+        if (self.reporter) {
+            self.reporter(r);
+        }
     }
     /**
      * Run the tests from TestClass.
@@ -449,15 +553,14 @@ core.UnitTester = function UnitTester() {
         var testName = Runtime.getFunctionName(TestClass) || "",
             /**@type{!string}*/
             tname,
-            runner = new core.UnitTestRunner(),
+            runner = new core.UnitTestRunner(self.resourcePrefix, logger),
             test = new TestClass(runner),
             testResults = {},
             i,
             /**@type{function()|function(function())}*/
             t,
             tests,
-            lastFailCount,
-            inBrowser = runtime.type() === "BrowserRuntime";
+            lastFailCount;
 
         // check that this test has not been run or started yet
         if (results.hasOwnProperty(testName)) {
@@ -479,16 +582,11 @@ core.UnitTester = function UnitTester() {
             if (testNames.length && testNames.indexOf(tname) === -1) {
                 continue;
             }
-            if (inBrowser) {
-                runtime.log("<span>Running "
-                    + link(tname, "runTest(\"" + testName + "\",\""
-                                  + tname + "\")") + "</span>");
-            } else {
-                runtime.log("Running " + tname);
-            }
             lastFailCount = runner.countFailedTests();
             test.setUp();
+            logger.startTest(testName, tname);
             t();
+            report(logger.endTest());
             test.tearDown();
             testResults[tname] = lastFailCount === runner.countFailedTests();
         }
@@ -505,10 +603,11 @@ core.UnitTester = function UnitTester() {
             }
             t = todo[0].f;
             var fname = todo[0].name;
-            runtime.log("Running " + fname);
             lastFailCount = runner.countFailedTests();
             test.setUp();
+            logger.startTest(testName, fname);
             t(function () {
+                report(logger.endTest());
                 test.tearDown();
                 testResults[fname] = lastFailCount ===
                     runner.countFailedTests();

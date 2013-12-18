@@ -1593,7 +1593,31 @@ var ops = {};
 (function () {
     var /**@type{!Object.<string,!{dir:string, deps:!Array.<string>}>}*/
         dependencies = {},
-        loadedFiles = {};
+        loadedFiles = {},
+        packages = {
+            core: core,
+            gui: gui,
+            xmldom: xmldom,
+            odf: odf,
+            ops: ops
+        };
+    /**
+     * @param {string} classname
+     * @return {boolean}
+     */
+    function isDefined(classname) {
+        var parts = classname.split("."), i,
+            /**@type{Object}*/
+            p = packages,
+            l = parts.length;
+        for (i = 0; i < l; i += 1) {
+            if (!p.hasOwnProperty(parts[i])) {
+                return false;
+            }
+            p = /**@type{Object}*/(p[parts[i]]);
+        }
+        return true;
+    }
     /**
      * @param {string} dir
      * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
@@ -1815,7 +1839,7 @@ var ops = {};
      * @expose
      */
     runtime.loadClass = function (classname) {
-        if (IS_COMPILED_CODE) {
+        if (IS_COMPILED_CODE || isDefined(classname)) {
             return;
         }
         var classpath = classPath(classname),
