@@ -127,7 +127,7 @@ core.UnitTest.createOdtDocument = function (xml, namespaceMap) {
  */
 core.UnitTestLogger = function UnitTestLogger() {
     "use strict";
-    var /**@type{!Array.<string>}*/
+    var /**@type{!Array.<{category:string,message:string}>}*/
         messages = [],
         /**@type{number}*/
         errors = 0,
@@ -146,7 +146,7 @@ core.UnitTestLogger = function UnitTestLogger() {
         start = (new Date()).getTime();
     };
     /**
-     * @return {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<string>,time:number}}
+     * @return {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number}}
      */
     this.endTest = function () {
         var end = (new Date()).getTime();
@@ -154,7 +154,9 @@ core.UnitTestLogger = function UnitTestLogger() {
             description: test,
             suite: [suite, test],
             success: errors === 0,
-            log: messages,
+            log: messages.map(function (i) {
+                return i.message;
+            }),
             time: end - start
         };
     };
@@ -162,20 +164,20 @@ core.UnitTestLogger = function UnitTestLogger() {
      * @param {string} msg
      */
     this.debug = function (msg) {
-        messages.push(msg);
+        messages.push({category: "debug", message: msg});
     };
     /**
      * @param {string} msg
      */
-    this.error = function (msg) {
+    this.fail = function (msg) {
         errors += 1;
-        messages.push(msg);
+        messages.push({category: "fail", message: msg});
     };
     /**
      * @param {string} msg
      */
-    this.ok = function (msg) {
-        messages.push(msg);
+    this.pass = function (msg) {
+        messages.push({category: "pass", message: msg});
     };
 };
 
@@ -208,14 +210,14 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
      */
     function testFailed(msg) {
         failedTests += 1;
-        logger.error(msg);
+        logger.fail(msg);
     }
     /**
      * @param {string} msg
      * @return {undefined}
      */
     function testPassed(msg) {
-        logger.ok(msg);
+        logger.pass(msg);
     }
     /**
      * @param {!Array.<*>} a actual
@@ -510,10 +512,10 @@ core.UnitTester = function UnitTester() {
             + text + "</span>";
     }
     /**
-     * @type {function(!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<string>,time:number})}
+     * @type {function(!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number})}
      */
     this.reporter = function (r) {
-        var i;
+        var i, m;
         if (inBrowser) {
             runtime.log("<span>Running "
                 + link(r.description, "runTest(\"" + r.suite[0] + "\",\""
@@ -523,12 +525,13 @@ core.UnitTester = function UnitTester() {
         }
         if (!r.success) {
             for (i = 0; i < r.log.length; i += 1) {
-                runtime.log(r.log[i]);
+                m = r.log[i];
+                runtime.log(m.category, m.message);
             }
         }
     };
     /**
-     * @param {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<string>,time:number}} r
+     * @param {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number}} r
      */
     function report(r) {
         if (self.reporter) {
