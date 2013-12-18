@@ -55,7 +55,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(sharedState) {
             action.start();
-            sharedState.sessionController.extendSelectionToEntireDocument();
+            sharedState.sessionController.getSelectionController().extendSelectionToEntireDocument();
             action.complete(true);
         }
     }

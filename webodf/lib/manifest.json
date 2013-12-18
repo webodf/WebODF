@@ -155,6 +155,17 @@
         "ops/OpSplitParagraph.js",
         "ops/Operation.js"
     ],
+    "gui/SelectionController.js": [
+        "core/DomUtils.js",
+        "core/PositionFilterChain.js",
+        "gui/SelectionMover.js",
+        "odf/OdfUtils.js",
+        "ops/OdtCursor.js",
+        "ops/OpMoveCursor.js",
+        "ops/Operation.js",
+        "ops/Session.js",
+        "ops/StepsTranslator.js"
+    ],
     "gui/SelectionMover.js": [
         "core/Cursor.js",
         "core/DomUtils.js",
@@ -179,7 +190,6 @@
         "core/Async.js",
         "core/DomUtils.js",
         "core/PositionFilter.js",
-        "core/PositionFilterChain.js",
         "core/ScheduledTask.js",
         "gui/AnnotationController.js",
         "gui/Clipboard.js",
@@ -193,6 +203,7 @@
         "gui/InputMethodEditor.js",
         "gui/KeyboardHandler.js",
         "gui/PlainTextPasteboard.js",
+        "gui/SelectionController.js",
         "gui/SelectionMover.js",
         "gui/TextManipulator.js",
         "gui/UndoManager.js",
@@ -202,11 +213,9 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js",
         "ops/OpAddCursor.js",
-        "ops/OpMoveCursor.js",
         "ops/OpRemoveCursor.js",
         "ops/Operation.js",
-        "ops/Session.js",
-        "ops/StepsTranslator.js"
+        "ops/Session.js"
     ],
     "gui/SessionView.js": [
         "gui/Caret.js",
