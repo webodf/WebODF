@@ -36,21 +36,16 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global gui, runtime, odf, xmldom*/
-
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.OdfNodeFilter");
-runtime.loadClass("odf.TextSerializer");
+/*global gui, runtime*/
 
 /**
  * Clipboard wrapper to attempt some semblance of cross-browser clipboard support
+ *
+ * @param {!gui.MimeDataExporter} mimeDataExporter
  * @constructor
  */
-gui.Clipboard = function Clipboard() {
+gui.Clipboard = function Clipboard(mimeDataExporter) {
     "use strict";
-    var /**@type{!odf.TextSerializer}*/
-        textSerializer,
-        filter;
 
     /**
      * Copy the contents of the supplied range onto the clipboard (if available).
@@ -59,28 +54,19 @@ gui.Clipboard = function Clipboard() {
      * @return {boolean} Returns true if the data was successfully copied to the clipboard
      */
     this.setDataFromRange = function (e, range) {
-        var result = true,
-            setDataResult,
+        var result,
             clipboard = e.clipboardData,
-            /**@type{?Window}*/window = runtime.getWindow(),
-            document = range.startContainer.ownerDocument,
-            fragmentContainer;
+            /**@type{?Window}*/window = runtime.getWindow();
 
+        // IE
         if (!clipboard && window) {
             clipboard = window.clipboardData;
         }
 
         if (clipboard) {
-            fragmentContainer = document.createElement('span');
-
-            // the document fragment needs to be wrapped in a span as
-            // text nodes cannot be inserted at the top level of the DOM
-            fragmentContainer.appendChild(range.cloneContents());
-
+            result = mimeDataExporter.exportRangeToDataTransfer(/**@type{!DataTransfer}*/(clipboard), range);
             // By calling preventDefault on the copy event, no data is actually placed into the clipboard.
             // However, if we don't call it, the data we add is stripped out and thrown away :-/
-            setDataResult = clipboard.setData('text/plain', textSerializer.writeToString(fragmentContainer));
-            result = result && setDataResult;
             e.preventDefault();
         } else {
             result = false;
@@ -88,12 +74,4 @@ gui.Clipboard = function Clipboard() {
 
         return result;
     };
-
-    function init() {
-        textSerializer = new odf.TextSerializer();
-        filter = new odf.OdfNodeFilter();
-        textSerializer.filter = filter;
-    }
-
-    init();
 };

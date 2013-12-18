@@ -64,6 +64,7 @@ function Main() {
             "core/Zip.js",
             "gui/AnnotationViewManager.js",
             "gui/Avatar.js",
+            "gui/MimeDataExporter.js",
             "gui/Clipboard.js",
             "gui/EditInfoHandle.js",
             "gui/HyperlinkClickHandler.js",

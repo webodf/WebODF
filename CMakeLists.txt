@@ -288,6 +288,7 @@ set(TYPEDLIBJSFILES
     lib/odf/TextSerializer.js
     lib/ops/TextPositionFilter.js
     lib/xmldom/LSSerializer.js
+    lib/gui/MimeDataExporter.js
     lib/gui/Clipboard.js
     lib/odf/OdfContainer.js
     lib/odf/FontLoader.js

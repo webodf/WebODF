@@ -73,10 +73,7 @@
         "ops/OdtDocument.js"
     ],
     "gui/Clipboard.js": [
-        "odf/Namespaces.js",
-        "odf/OdfNodeFilter.js",
-        "odf/TextSerializer.js",
-        "xmldom/LSSerializer.js"
+        "gui/MimeDataExporter.js"
     ],
     "gui/DirectParagraphStyler.js": [
         "core/EventNotifier.js",
@@ -148,6 +145,10 @@
     ],
     "gui/KeyboardHandler.js": [
     ],
+    "gui/MimeDataExporter.js": [
+        "odf/OdfNodeFilter.js",
+        "odf/TextSerializer.js"
+    ],
     "gui/PlainTextPasteboard.js": [
         "ops/OdtDocument.js",
         "ops/OpInsertText.js",
@@ -202,6 +203,7 @@
         "gui/ImageSelector.js",
         "gui/InputMethodEditor.js",
         "gui/KeyboardHandler.js",
+        "gui/MimeDataExporter.js",
         "gui/PlainTextPasteboard.js",
         "gui/SelectionController.js",
         "gui/SelectionMover.js",
