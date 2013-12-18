@@ -42,6 +42,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
     runtime.loadClass("ops.Session");
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.CaretManager");
+    runtime.loadClass("gui.SvgSelectionView");
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("gui.ShadowCursor");
@@ -84,7 +85,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             shadowCursor = new gui.ShadowCursor(session.getOdtDocument());
             sessionController = new gui.SessionController(session, localMemberId, shadowCursor, sessionControllerOptions);
             caretManager = new gui.CaretManager(sessionController);
-            selectionViewManager = new gui.SelectionViewManager();
+            selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
             new gui.SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager);
             selectionViewManager.registerCursor(shadowCursor, true);
 

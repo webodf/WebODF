@@ -60,6 +60,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.TrivialUndoManager");
+    runtime.loadClass("gui.SvgSelectionView");
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("core.EventNotifier");
     runtime.loadClass("gui.ShadowCursor");
@@ -638,7 +639,7 @@ define("webodf/editor/EditorSession", [
                 directParagraphStylingEnabled: config.directParagraphStylingEnabled
             });
             caretManager = new gui.CaretManager(self.sessionController);
-            selectionViewManager = new gui.SelectionViewManager();
+            selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
             self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, caretManager, selectionViewManager);
             self.availableFonts = getAvailableFonts();
             selectionViewManager.registerCursor(shadowCursor, true);
