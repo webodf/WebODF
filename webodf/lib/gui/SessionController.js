@@ -387,7 +387,6 @@ gui.SessionController = (function () {
                 // Unfortunately, clearing the range will also blur the current focus.
                 selection.removeAllRanges();
                 selection.addRange(range.cloneRange());
-                /**@type{!IEElement}*/(eventManager.getEventTrap()).setActive();
             }
         }
 
