@@ -152,6 +152,7 @@ define("webodf/editor/Editor", [
                         }
                     });
                     session.enqueue([op]);
+                    editorSession.sessionController.registerLocalCursor();
                     editorReadyCallback();
                 });
             };
