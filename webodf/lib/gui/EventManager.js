@@ -209,6 +209,19 @@ gui.EventManager = function EventManager(odtDocument) {
     };
 
     /**
+     * Remove a registered event filter
+     * @param {!string} eventName
+     * @param {!function(!Event):!boolean} filter
+     */
+    this.removeFilter = function(eventName, filter) {
+        var delegate = getDelegateForEvent(eventName, true),
+            index = delegate.filters.indexOf(filter);
+        if (index !== -1) {
+            delegate.filters.splice(index, 1);
+        }
+    };
+
+    /**
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
      */
