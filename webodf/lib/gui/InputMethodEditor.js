@@ -351,16 +351,15 @@ runtime.loadClass("ops.OdtCursor");
          */
         this.removeCursor = function (memberid) {
             var hasFocus;
-            if (memberid ===  inputMemberId) {
+            if (localCursor && memberid ===  inputMemberId) {
                 hasFocus = eventManager.hasFocus();
                 localCursor.unsubscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
                 localCursor = null;
                 getCanvasElement().appendChild(eventTrap);
-                resetWindowSelection();
                 if (hasFocus) {
                     // Relocating the event trap will reset the window selection
                     // Restore this again if the document previously had focus
-                    eventManager.focus();
+                    resetWindowSelection();
                 }
             }
         };
