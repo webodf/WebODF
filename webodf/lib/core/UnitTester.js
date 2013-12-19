@@ -154,9 +154,7 @@ core.UnitTestLogger = function UnitTestLogger() {
             description: test,
             suite: [suite, test],
             success: errors === 0,
-            log: messages.map(function (i) {
-                return i.message;
-            }),
+            log: messages,
             time: end - start
         };
     };
