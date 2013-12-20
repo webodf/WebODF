@@ -542,6 +542,7 @@ function Main() {
                     throw err;
                 }
                 var i;
+                files.sort();
                 for (i = 0; i < files.length; i += 1) {
                     contents[path.join(dirpath, files[i])] = undefined;
                 }
