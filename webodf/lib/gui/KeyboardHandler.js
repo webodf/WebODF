@@ -77,7 +77,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
     }
 
     /**
-     * @param {!Function}   callback
+     * @param {?Function}   callback
      */
     this.setDefault = function (callback) {
         defaultBinding = callback;

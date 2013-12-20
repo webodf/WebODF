@@ -115,7 +115,10 @@ gui.SessionController = (function () {
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
             hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
-            selectionController = new gui.SelectionController(session, inputMemberId);
+            selectionController = new gui.SelectionController(session, inputMemberId),
+            modifier = gui.KeyboardHandler.Modifier,
+            keyCode = gui.KeyboardHandler.KeyCode,
+            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -549,85 +552,185 @@ gui.SessionController = (function () {
         }
 
         /**
+         * Executes the provided function and returns true
+         * Used to swallow events regardless of whether an operation was created
+         * @param {!Function} fn
+         * @returns {!Function}
+         */
+        function returnTrue(fn) {
+            return function() {
+                fn();
+                return true;
+            };
+        }
+
+        /**
+         * Executes the given function only on range selection only
+         * @param {!Function} fn
+         * @return {!Function}
+         */
+        function rangeSelectionOnly(fn) {
+            return function (e) {
+                var selectionType = odtDocument.getCursor(inputMemberId).getSelectionType();
+                if (selectionType === ops.OdtCursor.RangeSelection) {
+                    return fn(e);
+                }
+                return true;
+            };
+        }
+
+        /**
+         * Adds a local cursor.
+         */
+        function registerLocalCursor() {
+            var op = new ops.OpAddCursor();
+            op.init({memberid: inputMemberId});
+            session.enqueue([op]);
+        }
+        this.registerLocalCursor = registerLocalCursor;
+
+        /**
          * @return {undefined}
          */
         this.startEditing = function () {
-            var op;
+            var localCursor = session.getOdtDocument().getCursor(inputMemberId);
+            if (!localCursor) {
+                registerLocalCursor();
+            }
 
-            odtDocument.getOdfCanvas().getElement().classList.add("virtualSelections");
             inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
             inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
-            eventManager.subscribe("keydown", keyDownHandler.handleEvent);
-            eventManager.subscribe("keypress", keyPressHandler.handleEvent);
-            eventManager.subscribe("keyup", keyUpHandler.handleEvent);
+
             eventManager.subscribe("beforecut", handleBeforeCut);
             eventManager.subscribe("cut", handleCut);
-            eventManager.subscribe("copy", handleCopy);
             eventManager.subscribe("beforepaste", handleBeforePaste);
             eventManager.subscribe("paste", handlePaste);
-            eventManager.subscribe("mousedown", handleMouseDown);
-            eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
-            eventManager.subscribe("mouseup", handleMouseUp);
-            eventManager.subscribe("contextmenu", handleContextMenu);
-            eventManager.subscribe("dragstart", handleDragStart);
-            eventManager.subscribe("dragend", handleDragEnd);
 
             // start maintaining the cursor selection now
-            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
             odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
-
-            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
-
-            op = new ops.OpAddCursor();
-            op.init({memberid: inputMemberId});
-            session.enqueue([op]);
 
             if (undoManager) {
                 // For most undo managers, the initial state is a clean document *with* a cursor present
                 undoManager.saveInitialState();
             }
+
             hyperlinkClickHandler.setEditing(true);
+            // Most browsers will go back one page when given an unhandled backspace press
+            // To prevent this, the event handler for this key should always return true
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey));
+            keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
+
+            // TODO: deselect the currently selected image when press Esc
+            // TODO: move the image selection box to next image/frame when press tab on selected image
+            keyDownHandler.bind(keyCode.Tab, modifier.None, rangeSelectionOnly(function () {
+                textManipulator.insertText("\t");
+                return true;
+            }));
+
+            if (isMacOS) {
+                keyDownHandler.bind(keyCode.Clear, modifier.None, textManipulator.removeCurrentSelection);
+                keyDownHandler.bind(keyCode.B, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleBold));
+                keyDownHandler.bind(keyCode.I, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleItalic));
+                keyDownHandler.bind(keyCode.U, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleUnderline));
+                if (directParagraphStyler) {
+                    keyDownHandler.bind(keyCode.L, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphLeft));
+                    keyDownHandler.bind(keyCode.E, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
+                    keyDownHandler.bind(keyCode.R, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
+                    keyDownHandler.bind(keyCode.J, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
+                }
+                if (annotationController) {
+                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
+                }
+                keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
+                keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
+            } else {
+                keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleBold));
+                keyDownHandler.bind(keyCode.I, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleItalic));
+                keyDownHandler.bind(keyCode.U, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleUnderline));
+                if (directParagraphStyler) {
+                    keyDownHandler.bind(keyCode.L, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphLeft));
+                    keyDownHandler.bind(keyCode.E, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
+                    keyDownHandler.bind(keyCode.R, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
+                    keyDownHandler.bind(keyCode.J, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
+                }
+                if (annotationController) {
+                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
+                }
+                keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
+                keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
+            }
+
+            // the default action is to insert text into the document
+            keyPressHandler.setDefault(rangeSelectionOnly(function (e) {
+                var text = stringFromKeyPress(e);
+                if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
+                    textManipulator.insertText(text);
+                    return true;
+                }
+                return false;
+            }));
+            keyPressHandler.bind(keyCode.Enter, modifier.None, rangeSelectionOnly(textManipulator.enqueueParagraphSplittingOps));
         };
 
         /**
          * @return {undefined}
          */
         this.endEditing = function () {
-            var op;
-
-            op = new ops.OpRemoveCursor();
-            op.init({memberid: inputMemberId});
-            session.enqueue([op]);
-
             if (undoManager) {
                 undoManager.resetInitialState();
             }
 
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
-            odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
 
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
-            eventManager.unsubscribe("keydown", keyDownHandler.handleEvent);
-            eventManager.unsubscribe("keypress", keyPressHandler.handleEvent);
-            eventManager.unsubscribe("keyup", keyUpHandler.handleEvent);
+
             eventManager.unsubscribe("cut", handleCut);
             eventManager.unsubscribe("beforecut", handleBeforeCut);
-            eventManager.unsubscribe("copy", handleCopy);
             eventManager.unsubscribe("paste", handlePaste);
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
-            eventManager.unsubscribe("mousemove", drawShadowCursorTask.trigger);
-            eventManager.unsubscribe("mousedown", handleMouseDown);
-            eventManager.unsubscribe("mouseup", handleMouseUp);
-            eventManager.unsubscribe("contextmenu", handleContextMenu);
-            eventManager.unsubscribe("dragstart", handleDragStart);
-            eventManager.unsubscribe("dragend", handleDragEnd);
-            odtDocument.getOdfCanvas().getElement().classList.remove("virtualSelections");
 
             hyperlinkClickHandler.setEditing(false);
+            keyDownHandler.unbind(keyCode.Backspace, modifier.None);
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; });
+            keyDownHandler.unbind(keyCode.Delete, modifier.None);
+            keyDownHandler.unbind(keyCode.Tab, modifier.None);
+
+            if (isMacOS) {
+                keyDownHandler.unbind(keyCode.Clear, modifier.None);
+                keyDownHandler.unbind(keyCode.B, modifier.Meta);
+                keyDownHandler.unbind(keyCode.I, modifier.Meta);
+                keyDownHandler.unbind(keyCode.U, modifier.Meta);
+                if (directParagraphStyler) {
+                    keyDownHandler.unbind(keyCode.L, modifier.MetaShift);
+                    keyDownHandler.unbind(keyCode.E, modifier.MetaShift);
+                    keyDownHandler.unbind(keyCode.R, modifier.MetaShift);
+                    keyDownHandler.unbind(keyCode.J, modifier.MetaShift);
+                }
+                if (annotationController) {
+                    keyDownHandler.unbind(keyCode.C, modifier.MetaShift);
+                }
+                keyDownHandler.unbind(keyCode.Z, modifier.Meta);
+                keyDownHandler.unbind(keyCode.Z, modifier.MetaShift);
+            } else {
+                keyDownHandler.unbind(keyCode.B, modifier.Ctrl);
+                keyDownHandler.unbind(keyCode.I, modifier.Ctrl);
+                keyDownHandler.unbind(keyCode.U, modifier.Ctrl);
+                if (directParagraphStyler) {
+                    keyDownHandler.unbind(keyCode.L, modifier.CtrlShift);
+                    keyDownHandler.unbind(keyCode.E, modifier.CtrlShift);
+                    keyDownHandler.unbind(keyCode.R, modifier.CtrlShift);
+                    keyDownHandler.unbind(keyCode.J, modifier.CtrlShift);
+                }
+                if (annotationController) {
+                    keyDownHandler.unbind(keyCode.C, modifier.CtrlAlt);
+                }
+                keyDownHandler.unbind(keyCode.Z, modifier.Ctrl);
+                keyDownHandler.unbind(keyCode.Z, modifier.CtrlShift);
+            }
+
+            keyPressHandler.setDefault(null);
+            keyPressHandler.unbind(keyCode.Enter, modifier.None);
         };
 
         /**
@@ -752,56 +855,14 @@ gui.SessionController = (function () {
             async.destroyAll(destroyCallbacks, callback);
         };
 
-        /**
-         * Executes the provided function and returns true
-         * Used to swallow events regardless of whether an operation was created
-         * @param {!Function} fn
-         * @returns {!Function}
-         */
-        function returnTrue(fn) {
-            return function() {
-                fn();
-                return true;
-            };
-        }
-
-        /**
-         * Executes the given function only on range selection only
-         * @param {!Function} fn
-         * @return {!Function}
-         */
-        function rangeSelectionOnly(fn) {
-            return function (e) {
-                var selectionType = odtDocument.getCursor(inputMemberId).getSelectionType();
-                if (selectionType === ops.OdtCursor.RangeSelection) {
-                    return fn(e);
-                }
-                return true;
-            };
-        }
-
         function init() {
-            var isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
-                modifier = gui.KeyboardHandler.Modifier,
-                keyCode = gui.KeyboardHandler.KeyCode;
-
             drawShadowCursorTask = new core.ScheduledTask(updateShadowCursor, 0);
             redrawRegionSelectionTask = new core.ScheduledTask(redrawRegionSelection, 0);
 
-            // TODO: deselect the currently selected image when press Esc
-            // TODO: move the image selection box to next image/frame when press tab on selected image
-            keyDownHandler.bind(keyCode.Tab, modifier.None, rangeSelectionOnly(function () {
-                textManipulator.insertText("\t");
-                return true;
-            }));
             keyDownHandler.bind(keyCode.Left, modifier.None, rangeSelectionOnly(selectionController.moveCursorToLeft));
             keyDownHandler.bind(keyCode.Right, modifier.None, rangeSelectionOnly(selectionController.moveCursorToRight));
             keyDownHandler.bind(keyCode.Up, modifier.None, rangeSelectionOnly(selectionController.moveCursorUp));
             keyDownHandler.bind(keyCode.Down, modifier.None, rangeSelectionOnly(selectionController.moveCursorDown));
-            // Most browsers will go back one page when given an unhandled backspace press
-            // To prevent this, the event handler for this key should always return true
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey));
-            keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
             keyDownHandler.bind(keyCode.Left, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionToLeft));
             keyDownHandler.bind(keyCode.Right, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionToRight));
             keyDownHandler.bind(keyCode.Up, modifier.Shift, rangeSelectionOnly(selectionController.extendSelectionUp));
@@ -819,7 +880,6 @@ gui.SessionController = (function () {
             keyDownHandler.bind(keyCode.End, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentEnd));
 
             if (isMacOS) {
-                keyDownHandler.bind(keyCode.Clear, modifier.None, textManipulator.removeCurrentSelection);
                 keyDownHandler.bind(keyCode.Left, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToLineStart));
                 keyDownHandler.bind(keyCode.Right, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToLineEnd));
                 keyDownHandler.bind(keyCode.Home, modifier.Meta, rangeSelectionOnly(selectionController.moveCursorToDocumentStart));
@@ -831,58 +891,31 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Up, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentStart));
                 keyDownHandler.bind(keyCode.Down, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentEnd));
                 keyDownHandler.bind(keyCode.A, modifier.Meta, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
-                keyDownHandler.bind(keyCode.B, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleBold));
-                keyDownHandler.bind(keyCode.I, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleItalic));
-                keyDownHandler.bind(keyCode.U, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleUnderline));
-                if (directParagraphStyler) {
-                    keyDownHandler.bind(keyCode.L, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphLeft));
-                    keyDownHandler.bind(keyCode.E, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
-                    keyDownHandler.bind(keyCode.R, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
-                    keyDownHandler.bind(keyCode.J, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
-                }
-                if (annotationController) {
-                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
-                }
-                keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
-                keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
-
                 keyDownHandler.bind(keyCode.LeftMeta, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
                 keyUpHandler.bind(keyCode.LeftMeta, modifier.None, hyperlinkClickHandler.showTextCursor);
                 keyDownHandler.bind(keyCode.MetaInMozilla, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
                 keyUpHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showTextCursor);
             } else {
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
-                keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleBold));
-                keyDownHandler.bind(keyCode.I, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleItalic));
-                keyDownHandler.bind(keyCode.U, modifier.Ctrl, rangeSelectionOnly(directTextStyler.toggleUnderline));
-                if (directParagraphStyler) {
-                    keyDownHandler.bind(keyCode.L, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphLeft));
-                    keyDownHandler.bind(keyCode.E, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphCenter));
-                    keyDownHandler.bind(keyCode.R, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
-                    keyDownHandler.bind(keyCode.J, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
-                }
-                if (annotationController) {
-                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
-                }
-                keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
-                keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
-
                 keyDownHandler.bind(keyCode.Ctrl, modifier.Ctrl, hyperlinkClickHandler.showPointerCursor);
                 keyUpHandler.bind(keyCode.Ctrl, modifier.None, hyperlinkClickHandler.showTextCursor);
             }
 
-            // the default action is to insert text into the document
-            keyPressHandler.setDefault(rangeSelectionOnly(function (e) {
-                var text = stringFromKeyPress(e);
-                if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
-                    textManipulator.insertText(text);
-                    return true;
-                }
-                return false;
-            }));
-            keyPressHandler.bind(keyCode.Enter, modifier.None, rangeSelectionOnly(textManipulator.enqueueParagraphSplittingOps));
-
+            eventManager.subscribe("keydown", keyDownHandler.handleEvent);
+            eventManager.subscribe("keypress", keyPressHandler.handleEvent);
+            eventManager.subscribe("keyup", keyUpHandler.handleEvent);
+            eventManager.subscribe("copy", handleCopy);
+            eventManager.subscribe("mousedown", handleMouseDown);
+            eventManager.subscribe("mousemove", drawShadowCursorTask.trigger);
+            eventManager.subscribe("mouseup", handleMouseUp);
+            eventManager.subscribe("contextmenu", handleContextMenu);
+            eventManager.subscribe("dragstart", handleDragStart);
+            eventManager.subscribe("dragend", handleDragEnd);
             eventManager.subscribe("click", hyperlinkClickHandler.handleClick);
+
+            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
+            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
         }
 
         init();

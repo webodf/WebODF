@@ -60,10 +60,10 @@ office|text::selection {
   background: transparent;
 }
 
-.virtualSelections office|document *::selection {
+office|document *::selection {
   background: transparent;
 }
-.virtualSelections office|document *::-moz-selection {
+office|document *::-moz-selection {
   background: transparent;
 }
 
