@@ -443,6 +443,7 @@ function Main() {
             d,
             i,
             j;
+        list.sort();
         // make map with classname as key and file content as value
         list.forEach(function (path) {
             var k, dir, name;
