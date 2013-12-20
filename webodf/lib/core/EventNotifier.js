@@ -74,7 +74,6 @@ core.EventNotifier = function EventNotifier(eventIds) {
         runtime.assert(eventListener.hasOwnProperty(eventId),
             "tried to subscribe to unknown event \"" + eventId + "\"");
         eventListener[eventId].push(cb);
-        runtime.log("event \"" + eventId + "\" subscribed.");
     };
 
     /**
@@ -92,7 +91,6 @@ core.EventNotifier = function EventNotifier(eventIds) {
         if (cbIndex !== -1) {
             eventListener[eventId].splice(cbIndex, 1);
         }
-        runtime.log("event \"" + eventId + "\" unsubscribed.");
     };
 
     /**
