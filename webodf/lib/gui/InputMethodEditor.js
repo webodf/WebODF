@@ -58,9 +58,8 @@ runtime.loadClass("ops.OdtCursor");
      *
      * @constructor
      * @param {!gui.EventManager} eventManager
-     * @param {!function(!string):undefined} emitNewData
      */
-    function DetectSafariCompositionError(eventManager, emitNewData) {
+    function DetectSafariCompositionError(eventManager) {
         var lastCompositionValue,
             suppressedKeyPress = false;
 
@@ -69,117 +68,35 @@ runtime.loadClass("ops.OdtCursor");
          * @param {!(Event|KeyboardEvent)} e
          * @return {!boolean}
          */
-        function filterBadSafariKeys(e) {
+        function suppressIncorrectKeyPress(e) {
             suppressedKeyPress = e.which && String.fromCharCode(e.which) === lastCompositionValue;
             lastCompositionValue = undefined;
             return suppressedKeyPress === false;
         }
 
-        /**
-         * @param {!TextEvent} e
-         */
-        function handleTextInput(e) {
-            if (suppressedKeyPress) {
-                emitNewData(e.data);
-            }
+        function clearSuppression() {
             suppressedKeyPress = false;
         }
 
         /**
          * @param {!CompositionEvent} e
          */
-        function handleCompositionEnd(e) {
+        function trapComposedValue(e) {
             lastCompositionValue = e.data;
             suppressedKeyPress = false;
         }
 
         function init() {
-            eventManager.subscribe("textInput", handleTextInput);
-            eventManager.subscribe("compositionend", handleCompositionEnd);
-            eventManager.addFilter("keypress", filterBadSafariKeys);
+            eventManager.subscribe("textInput", clearSuppression);
+            eventManager.subscribe("compositionend", trapComposedValue);
+            eventManager.addFilter("keypress", suppressIncorrectKeyPress);
         }
 
         this.destroy = function(callback) {
-            eventManager.unsubscribe("textInput", handleTextInput);
-            eventManager.unsubscribe("compositionend", handleCompositionEnd);
-            eventManager.unsubscribe("keypress", filterBadSafariKeys);
+            eventManager.unsubscribe("textInput", clearSuppression);
+            eventManager.unsubscribe("compositionend", trapComposedValue);
+            eventManager.removeFilter("keypress", suppressIncorrectKeyPress);
             callback();
-        };
-
-        init();
-    }
-
-    /**
-     * Browsers:
-     * Chrome 31.0.1650.63, Ubuntu 13.10
-     *
-     * Data isn't in the compositionend event. The text is added to the focused field
-     * immediately after however in a textInput event. Firefox appears to be unaffected
-     * by this bug.
-     *
-     * Recorded events:
-     * keyup: O |cycle: 4
-     * keyup: å |cycle: 3
-     * textInput: た |cycle: 3
-     * keydown: å |cycle: 2
-     * keyup: å |cycle: 2
-     * compositionend:  |cycle: 2
-     * keydown: å |cycle: 2
-     * keyup: å |cycle: 2
-     * compositionupdate: t |cycle: 2
-     * keydown: å |cycle: 2
-     * keyup: T |cycle: 1
-     * keyup: å |cycle: 0
-     * compositionupdate: t |cycle: 0
-     * compositionstart:  |cycle: 0
-     * keydown: å |cycle: 0
-     *
-     * @constructor
-     * @param {!gui.EventManager} eventManager
-     * @param {!function(!string):undefined} emitNewData
-     */
-    function DetectChromeLinuxCompositionError(eventManager, emitNewData) {
-        var afterComposition = false,
-            resetEndComposition;
-
-        /**
-         * @param {!TextEvent} e
-         */
-        function handleTextInput(e) {
-            if (afterComposition && e.data) {
-                emitNewData(e.data);
-            }
-            afterComposition = false;
-            resetEndComposition.cancel();
-        }
-
-        /**
-         * @param {!CompositionEvent} e
-         */
-        function handleCompositionEnd(e) {
-            if (!e.data) {
-                afterComposition = true;
-                resetEndComposition.trigger();
-            }
-        }
-
-        function handleCompositionStart() {
-            afterComposition = false;
-            resetEndComposition.cancel();
-        }
-
-        function init() {
-            eventManager.subscribe("textInput", handleTextInput);
-            eventManager.subscribe("compositionend", handleCompositionEnd);
-            eventManager.subscribe("compositionstart", handleCompositionStart);
-            resetEndComposition = new core.ScheduledTask(function() { afterComposition = false; }, 0);
-        }
-
-        this.destroy = function(callback) {
-            eventManager.unsubscribe("textInput", handleTextInput);
-            eventManager.unsubscribe("compositionend", handleCompositionEnd);
-            eventManager.unsubscribe("compositionstart", handleCompositionEnd);
-            resetEndComposition.destroy(callback);
         };
 
         init();
@@ -209,6 +126,7 @@ runtime.loadClass("ops.OdtCursor");
             pendingData = "",
             events = new core.EventNotifier([gui.InputMethodEditor.signalCompositionStart,
                                                 gui.InputMethodEditor.signalCompositionEnd]),
+            lastCompositionData,
             filters = [],
             cleanup;
 
@@ -250,7 +168,7 @@ runtime.loadClass("ops.OdtCursor");
             pendingEvent = true;
             pendingData += data;
             // A delay is necessary as modifying document text and moving the cursor will interrupt
-            // back-to-back composition sessions (e.g., repeatedly pressiong Option+char on MacOS in Chrome)
+            // back-to-back composition sessions (e.g., repeatedly pressing Option+char on MacOS in Chrome)
             processUpdates.trigger();
         }
 
@@ -308,6 +226,7 @@ runtime.loadClass("ops.OdtCursor");
 
         function compositionStart() {
             var cursorNode = localCursor.getNode();
+            lastCompositionData = undefined;
             // Some IMEs will stack end & start requests back to back.
             // Aggregate these as a group and report them in a single request once all are
             // complete to avoid the selection being reset
@@ -318,11 +237,19 @@ runtime.loadClass("ops.OdtCursor");
             }
         }
 
-        /**
-         * @param {!CompositionEvent} e
-         */
         function compositionEnd(e) {
+            lastCompositionData = e.data;
             addCompositionData(e.data);
+        }
+
+        function textInput(e) {
+            if (e.data !== lastCompositionData) {
+                // Chrome/Safari fire a compositionend event with data & a textInput event with data
+                // Firefox only fires a compositionend event with data (textInput is not supported)
+                // Chrome linux IME fires a compositionend event with no data, and a textInput event with data
+                addCompositionData(e.data);
+            }
+            lastCompositionData = undefined;
         }
 
         /**
@@ -367,6 +294,7 @@ runtime.loadClass("ops.OdtCursor");
         this.destroy = function(callback) {
             eventManager.unsubscribe('compositionstart', compositionStart);
             eventManager.unsubscribe('compositionend', compositionEnd);
+            eventManager.unsubscribe('textInput', textInput);
             eventManager.unsubscribe('keypress', flushEvent);
             async.destroyAll(cleanup, callback);
         };
@@ -374,10 +302,10 @@ runtime.loadClass("ops.OdtCursor");
         function init() {
             eventManager.subscribe('compositionstart', compositionStart);
             eventManager.subscribe('compositionend', compositionEnd);
+            eventManager.subscribe('textInput', textInput);
             eventManager.subscribe('keypress', flushEvent);
 
-            filters.push(new DetectSafariCompositionError(eventManager, addCompositionData));
-            filters.push(new DetectChromeLinuxCompositionError(eventManager, addCompositionData));
+            filters.push(new DetectSafariCompositionError(eventManager));
             cleanup = filters.map(function(filter) { return filter.destroy; });
 
             eventTrap.setAttribute("contenteditable", "true");

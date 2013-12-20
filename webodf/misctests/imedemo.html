@@ -21,7 +21,8 @@
     }
 
     function logInfo(text) {
-        log.insertBefore(document.createTextNode(text + " |cycle: " + cycleCount + "\n"), log.firstChild);
+//        log.insertBefore(document.createTextNode(text + " |cycle: " + cycleCount + "\n"), log.firstChild);
+        log.appendChild(document.createTextNode("cycle: " + cycleCount + "| " + text + "\n"));
         updateRequested = true;
     }
 
