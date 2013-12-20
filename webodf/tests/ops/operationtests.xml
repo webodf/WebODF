@@ -1459,4 +1459,12 @@
   </ops>
   <after><office:text><text:p>hello<text:a xlink:type="simple" xlink:href="link2">world</text:a></text:p></office:text></after>
  </test>
+ <test name="MakeSelection">
+  <before><office:text><text:p>ABC</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="0" length="2"/>
+  </ops>
+  <after><office:text><text:p><c:anchor c:memberId="Joe"/>AB<c:cursor c:memberId="Joe"/>C</text:p></office:text></after>
+ </test>
 </tests>

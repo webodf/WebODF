@@ -65,4 +65,15 @@
    <office:text><text:p>ABC<foreign:text/>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
   </after>
  </test>
+ <test name="SelectionWithDirectsStyling">
+  <before><office:text><text:p>ABC</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="0" length="2"/>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="0" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </ops>
+  <after><office:text><text:p><c:anchor memberId="Joe"/><text:span text:style-name="auto63350368_0">AB<c:cursor c:memberId="Joe"/></text:span>C</text:p></office:text></after>
+ </test>
 </tests>
