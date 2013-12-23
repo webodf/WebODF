@@ -299,11 +299,33 @@ runtime.loadClass("ops.OdtCursor");
             async.destroyAll(cleanup, callback);
         };
 
+        /**
+         * Prevent the event trap from receiving focus
+         */
+        function suppressFocus() {
+            // Workaround for a FF bug
+            // If the window selection is in the even trap when it is set non-editable,
+            // further attempts to modify the window selection will crash
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
+            eventManager.blur();
+            eventTrap.setAttribute("contenteditable", "false");
+        }
+
+        /**
+         * Allow the event trap to receive focus
+         */
+        function restoreFocus() {
+            eventTrap.setAttribute("contenteditable", "true");
+        }
+
         function init() {
             eventManager.subscribe('compositionstart', compositionStart);
             eventManager.subscribe('compositionend', compositionEnd);
             eventManager.subscribe('textInput', textInput);
             eventManager.subscribe('keypress', flushEvent);
+            eventManager.subscribe('mousedown', suppressFocus);
+            eventManager.subscribe('mouseup', restoreFocus);
 
             filters.push(new DetectSafariCompositionError(eventManager));
             cleanup = filters.map(function(filter) { return filter.destroy; });
