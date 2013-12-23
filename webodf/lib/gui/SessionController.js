@@ -369,12 +369,6 @@ gui.SessionController = (function () {
             var selection = window.getSelection(),
                 range = cursor.getSelectedRange();
 
-            // Workaround for a FF bug when resynchronizing the selection on mouse-down.
-            // Attempting to collapse a selection if a content editable element is the current activeElement
-            // for the document will cause the collapse call to throw an exception
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
-            eventManager.blur();
             if (selection.extend) {
                 if (cursor.hasForwardSelection()) {
                     selection.collapse(range.startContainer, range.startOffset);
@@ -408,6 +402,12 @@ gui.SessionController = (function () {
                 isMouseMoved = false;
                 mouseDownRootFilter = odtDocument.createRootFilter(target);
                 clickCount = e.detail;
+                // Workaround for a FF bug when resynchronizing the selection on mouse-down.
+                // Attempting to collapse a selection if a content editable element is the current activeElement
+                // for the document will cause the collapse call to throw an exception
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
+                eventManager.blur();
                 if (cursor && e.shiftKey) {
                     // Firefox seems to get rather confused about the window selection when shift+extending it.
                     // Help this poor browser by resetting the window selection back to the anchor node if the user
