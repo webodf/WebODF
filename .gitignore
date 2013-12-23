@@ -16,3 +16,17 @@ webodf/webodf.css.js
 build
 *.sw?
 .idea
+node_modules/.bin/
+node_modules/requirejs/
+webodf/coverage/
+node_modules/karma-chrome-launcher/
+node_modules/karma-coffee-preprocessor/
+node_modules/karma-coverage/
+node_modules/karma-firefox-launcher/
+node_modules/karma-html2js-preprocessor/
+node_modules/karma-jasmine/
+node_modules/karma-junit-reporter/
+node_modules/karma-phantomjs-launcher/
+node_modules/karma-requirejs/
+node_modules/karma-script-launcher/
+node_modules/karma/
