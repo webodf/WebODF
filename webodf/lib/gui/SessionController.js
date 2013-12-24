@@ -611,7 +611,7 @@ gui.SessionController = (function () {
             hyperlinkClickHandler.setEditing(true);
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey));
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey), true);
             keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
 
             // TODO: deselect the currently selected image when press Esc
@@ -681,8 +681,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
 
             hyperlinkClickHandler.setEditing(false);
-            keyDownHandler.unbind(keyCode.Backspace, modifier.None);
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; });
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; }, true);
             keyDownHandler.unbind(keyCode.Delete, modifier.None);
             keyDownHandler.unbind(keyCode.Tab, modifier.None);
 
