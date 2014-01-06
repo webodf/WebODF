@@ -611,7 +611,7 @@ gui.SessionController = (function () {
             hyperlinkClickHandler.setEditing(true);
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey));
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey), true);
             keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
 
             // TODO: deselect the currently selected image when press Esc
@@ -632,9 +632,7 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.R, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
                     keyDownHandler.bind(keyCode.J, modifier.MetaShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
                 }
-                if (annotationController) {
-                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
-                }
+                keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
@@ -647,9 +645,7 @@ gui.SessionController = (function () {
                     keyDownHandler.bind(keyCode.R, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphRight));
                     keyDownHandler.bind(keyCode.J, modifier.CtrlShift, rangeSelectionOnly(directParagraphStyler.alignParagraphJustified));
                 }
-                if (annotationController) {
-                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
-                }
+                keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }
@@ -685,8 +681,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
 
             hyperlinkClickHandler.setEditing(false);
-            keyDownHandler.unbind(keyCode.Backspace, modifier.None);
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; });
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; }, true);
             keyDownHandler.unbind(keyCode.Delete, modifier.None);
             keyDownHandler.unbind(keyCode.Tab, modifier.None);
 
@@ -701,9 +696,7 @@ gui.SessionController = (function () {
                     keyDownHandler.unbind(keyCode.R, modifier.MetaShift);
                     keyDownHandler.unbind(keyCode.J, modifier.MetaShift);
                 }
-                if (annotationController) {
-                    keyDownHandler.unbind(keyCode.C, modifier.MetaShift);
-                }
+                keyDownHandler.unbind(keyCode.C, modifier.MetaShift);
                 keyDownHandler.unbind(keyCode.Z, modifier.Meta);
                 keyDownHandler.unbind(keyCode.Z, modifier.MetaShift);
             } else {
@@ -716,9 +709,7 @@ gui.SessionController = (function () {
                     keyDownHandler.unbind(keyCode.R, modifier.CtrlShift);
                     keyDownHandler.unbind(keyCode.J, modifier.CtrlShift);
                 }
-                if (annotationController) {
-                    keyDownHandler.unbind(keyCode.C, modifier.CtrlAlt);
-                }
+                keyDownHandler.unbind(keyCode.C, modifier.CtrlAlt);
                 keyDownHandler.unbind(keyCode.Z, modifier.Ctrl);
                 keyDownHandler.unbind(keyCode.Z, modifier.CtrlShift);
             }

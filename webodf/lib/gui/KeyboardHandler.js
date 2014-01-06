@@ -87,10 +87,11 @@ gui.KeyboardHandler = function KeyboardHandler() {
      * @param {!number}     keyCode
      * @param {!number}     modifiers
      * @param {!Function}   callback
+     * @param {boolean=}   overwrite    Set to true to force a binding to be overwritten
      */
-    this.bind = function (keyCode, modifiers, callback) {
+    this.bind = function (keyCode, modifiers, callback, overwrite) {
         var keyCombo = getKeyCombo(keyCode, modifiers);
-        runtime.assert(bindings.hasOwnProperty(keyCombo) === false,
+        runtime.assert(overwrite || bindings.hasOwnProperty(keyCombo) === false,
             "tried to overwrite the callback handler of key combo: " + keyCombo);
         bindings[keyCombo] = callback;
     };
