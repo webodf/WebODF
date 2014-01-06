@@ -619,9 +619,6 @@ gui.SessionController = (function () {
             eventManager.subscribe("beforepaste", handleBeforePaste);
             eventManager.subscribe("paste", handlePaste);
 
-            // start maintaining the cursor selection now
-            odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
-
             if (undoManager) {
                 // For most undo managers, the initial state is a clean document *with* a cursor present
                 undoManager.saveInitialState();
@@ -688,8 +685,6 @@ gui.SessionController = (function () {
             if (undoManager) {
                 undoManager.resetInitialState();
             }
-
-            odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
 
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
@@ -922,6 +917,7 @@ gui.SessionController = (function () {
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.subscribe(ops.OdtDocument.signalOperationStart, saveFocus);
             odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, restoreFocus);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
         }
 
         init();
