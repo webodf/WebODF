@@ -190,6 +190,51 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         r.shouldBe(t, "t.ops", "[1,4]");
     }
 
+    function initialize_WhenNotInitialized_SavesInitialState() {
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 2}));
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 3}));
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 4}));
+
+        t.manager.initialize();
+
+        r.shouldBe(t, "t.manager.hasUndoStates()", "false");
+        r.shouldBe(t, "t.manager.hasRedoStates()", "false");
+
+        // Now make something that can be undone
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
+        r.shouldBe(t, "t.manager.hasUndoStates()", "true");
+
+        // And then undo it
+        t.manager.moveBackward(1); // Should be back at origin
+
+        r.shouldBe(t, "t.ops", "[3]");
+    }
+
+    function initialize_WhenAlreadyInitialized_DoesNothing() {
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 2}));
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 3}));
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 4}));
+
+        t.manager.initialize();
+
+        r.shouldBe(t, "t.manager.hasUndoStates()", "false");
+        r.shouldBe(t, "t.manager.hasRedoStates()", "false");
+
+        // Now make something that can be undone
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
+
+        // Now re-initialize and ensure nothing else happens
+        t.manager.initialize();
+        r.shouldBe(t, "t.manager.hasUndoStates()", "true");
+
+        // And then undo it
+        t.manager.moveBackward(1); // Should be back at origin
+
+        r.shouldBe(t, "t.ops", "[3]");
+    }
+
     function resetInitialState_ClearsAllStacks() {
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 2}));
@@ -303,6 +348,8 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             hasRedoStates_OnlyMovesForwardValidStates,
             setInitialState_SavesMostRecentCursorState,
             setInitialState_AllCursorsMaintainedWhenCalledMultipleTimes,
+            initialize_WhenNotInitialized_SavesInitialState,
+            initialize_WhenAlreadyInitialized_DoesNothing,
             resetInitialState_ClearsAllStacks,
             moveBackward_MovesBack_InUndoQueue,
             moveBackward_NextOperation_ClearsRedo,

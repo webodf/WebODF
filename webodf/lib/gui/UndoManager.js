@@ -71,6 +71,12 @@ gui.UndoManager.prototype.setOdtDocument = function (newDocument) {"use strict";
 gui.UndoManager.prototype.saveInitialState = function () {"use strict"; };
 
 /**
+ * Sets the initial document state and operation state. This is the earliest point
+ * in time the document can be rewound to.
+ */
+gui.UndoManager.prototype.initialize = function () {"use strict"; };
+
+/**
  * Resets the initial document state and operation state, including clearing
  * all undo and redo stacks
  */

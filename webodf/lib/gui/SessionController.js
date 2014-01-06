@@ -621,7 +621,7 @@ gui.SessionController = (function () {
 
             if (undoManager) {
                 // For most undo managers, the initial state is a clean document *with* a cursor present
-                undoManager.saveInitialState();
+                undoManager.initialize();
             }
 
             hyperlinkClickHandler.setEditing(true);
@@ -682,10 +682,6 @@ gui.SessionController = (function () {
          * @return {undefined}
          */
         this.endEditing = function () {
-            if (undoManager) {
-                undoManager.resetInitialState();
-            }
-
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
 

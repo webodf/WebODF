@@ -217,11 +217,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         emitStackChange();
     };
 
-    /**
-     * Sets the initial document state and operation state. This is the earliest point
-     * in time the document can be rewound to.
-     */
-    this.saveInitialState = function() {
+    function saveInitialState() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             annotationViewManager = odtDocument.getOdfCanvas().getAnnotationViewManager();
 
@@ -244,6 +240,22 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         undoStates.length = 0;
         redoStates.length = 0;
         emitStackChange();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    this.saveInitialState = saveInitialState;
+
+    /**
+     * Initializes the undo manager and creates the initial document
+     * snapshot. If the undo manager has already been initialized previously,
+     * this call will do nothing.
+     */
+    this.initialize = function() {
+        if (!initialDoc) {
+            saveInitialState();
+        }
     };
 
     /**
