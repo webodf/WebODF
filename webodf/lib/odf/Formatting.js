@@ -493,7 +493,7 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns a the applied style to the current node
-     * @param {!CharacterData} node
+     * @param {!Node} node
      * @return {Object|undefined}
      */
     this.getAppliedStylesForElement = function (node) {
