@@ -79,9 +79,12 @@
     "gui/Clipboard.js": [
         "gui/MimeDataExporter.js"
     ],
-    "gui/DirectParagraphStyler.js": [
+    "gui/DirectFormattingController.js": [
         "core/EventNotifier.js",
+        "core/PositionFilter.js",
+        "core/PositionFilterChain.js",
         "core/Utils.js",
+        "gui/SelectionMover.js",
         "gui/StyleHelper.js",
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
@@ -89,19 +92,11 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js",
         "ops/OpAddStyle.js",
+        "ops/OpApplyDirectStyling.js",
         "ops/OpSetParagraphStyle.js",
+        "ops/Operation.js",
         "ops/Session.js",
         "ops/StepsTranslator.js"
-    ],
-    "gui/DirectTextStyler.js": [
-        "core/EventNotifier.js",
-        "core/Utils.js",
-        "gui/StyleHelper.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/OpApplyDirectStyling.js",
-        "ops/Operation.js",
-        "ops/Session.js"
     ],
     "gui/EditInfoHandle.js": [
     ],
@@ -195,8 +190,7 @@
         "core/ScheduledTask.js",
         "gui/AnnotationController.js",
         "gui/Clipboard.js",
-        "gui/DirectParagraphStyler.js",
-        "gui/DirectTextStyler.js",
+        "gui/DirectFormattingController.js",
         "gui/EventManager.js",
         "gui/HyperlinkClickHandler.js",
         "gui/HyperlinkController.js",

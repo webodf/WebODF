@@ -45,8 +45,9 @@ runtime.loadClass("core.PositionFilter");
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  * @param {function(!number, !number, !boolean):ops.Operation} directStyleOp
+ * @param {function(!number):!Array.<!ops.Operation>} paragraphStyleOps
  */
-gui.TextController = function TextController(session, inputMemberId, directStyleOp) {
+gui.TextController = function TextController(session, inputMemberId, directStyleOp, paragraphStyleOps) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
@@ -86,7 +87,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      */
     this.enqueueParagraphSplittingOps = function() {
         var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
-            op, operations = [];
+            op, operations = [], styleOps;
 
         if (selection.length > 0) {
             op = createOpRemoveSelection(selection);
@@ -119,6 +120,10 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
          }
          */
 
+        if (paragraphStyleOps) {
+            styleOps = paragraphStyleOps(selection.position + 1);
+            operations = operations.concat(styleOps);
+        }
         session.enqueue(operations);
         return true;
     };

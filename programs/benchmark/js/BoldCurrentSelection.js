@@ -55,7 +55,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(sharedState) {
             action.start();
-            sharedState.sessionController.getDirectTextStyler().setBold(true);
+            sharedState.sessionController.getDirectFormattingController().setBold(true);
             action.complete(true);
         }
     }

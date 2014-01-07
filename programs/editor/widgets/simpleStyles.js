@@ -51,7 +51,7 @@ define("webodf/editor/widgets/simpleStyles", [
             var self = this,
                 editorSession,
                 widget = {},
-                directTextStyler,
+                directFormattingController,
                 boldButton,
                 italicButton,
                 underlineButton,
@@ -67,7 +67,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconBold",
                 onChange: function (checked) {
-                    directTextStyler.setBold(checked);
+                    directFormattingController.setBold(checked);
                     self.onToolDone();
                 }
             });
@@ -79,7 +79,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconItalic",
                 onChange: function (checked) {
-                    directTextStyler.setItalic(checked);
+                    directFormattingController.setItalic(checked);
                     self.onToolDone();
                 }
             });
@@ -91,7 +91,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconUnderline",
                 onChange: function (checked) {
-                    directTextStyler.setHasUnderline(checked);
+                    directFormattingController.setHasUnderline(checked);
                     self.onToolDone();
                 }
             });
@@ -103,7 +103,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconStrikethrough",
                 onChange: function (checked) {
-                    directTextStyler.setHasStrikethrough(checked);
+                    directFormattingController.setHasStrikethrough(checked);
                     self.onToolDone();
                 }
             });
@@ -117,7 +117,7 @@ define("webodf/editor/widgets/simpleStyles", [
                 constraints: {min:6, max:96},
                 intermediateChanges: true,
                 onChange: function (value) {
-                    directTextStyler.setFontSize(value);
+                    directFormattingController.setFontSize(value);
                 },
                 onClick: function () {
                     self.onToolDone();
@@ -134,7 +134,7 @@ define("webodf/editor/widgets/simpleStyles", [
             fontPickerWidget = fontPicker.widget();
             fontPickerWidget.setAttribute('disabled', true);
             fontPickerWidget.onChange = function(value) {
-                directTextStyler.setFontName(value);
+                directFormattingController.setFontName(value);
                 self.onToolDone();
             };
 
@@ -183,24 +183,24 @@ define("webodf/editor/widgets/simpleStyles", [
             }
 
             this.setEditorSession = function(session) {
-                if (directTextStyler) {
-                    directTextStyler.unsubscribe(gui.DirectTextStyler.textStylingChanged, updateStyleButtons);
+                if (directFormattingController) {
+                    directFormattingController.unsubscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                 }
-                directTextStyler = session && session.sessionController.getDirectTextStyler();
+                directFormattingController = session && session.sessionController.getDirectFormattingController();
                 fontPicker.setEditorSession(session);
-                if (directTextStyler) {
-                    directTextStyler.subscribe(gui.DirectTextStyler.textStylingChanged, updateStyleButtons);
+                if (directFormattingController) {
+                    directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                 }
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !directTextStyler);
+                    element.setAttribute('disabled', !directFormattingController);
                 });
                 updateStyleButtons({
-                    isBold: directTextStyler ? directTextStyler.isBold() : false,
-                    isItalic: directTextStyler ? directTextStyler.isItalic() : false,
-                    hasUnderline: directTextStyler ? directTextStyler.hasUnderline() : false,
-                    hasStrikeThrough: directTextStyler ? directTextStyler.hasStrikeThrough() : false,
-                    fontSize: directTextStyler ? directTextStyler.fontSize() : undefined,
-                    fontName: directTextStyler ? directTextStyler.fontName() : undefined
+                    isBold: directFormattingController ? directFormattingController.isBold() : false,
+                    isItalic: directFormattingController ? directFormattingController.isItalic() : false,
+                    hasUnderline: directFormattingController ? directFormattingController.hasUnderline() : false,
+                    hasStrikeThrough: directFormattingController ? directFormattingController.hasStrikeThrough() : false,
+                    fontSize: directFormattingController ? directFormattingController.fontSize() : undefined,
+                    fontName: directFormattingController ? directFormattingController.fontName() : undefined
                 });
 
                 if (editorSession) {

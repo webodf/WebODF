@@ -357,8 +357,7 @@ set(UNTYPEDLIBJSFILES
     lib/gui/TrivialUndoManager.js
     lib/ops/Session.js
     lib/gui/AnnotationController.js
-    lib/gui/DirectParagraphStyler.js
-    lib/gui/DirectTextStyler.js
+    lib/gui/DirectFormattingController.js
     lib/gui/HyperlinkController.js
     lib/gui/ImageController.js
     lib/gui/SelectionController.js
