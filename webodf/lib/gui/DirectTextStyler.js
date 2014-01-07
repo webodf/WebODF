@@ -454,7 +454,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
-        odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, clearCursorStyle);
+        odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
         callback();
     };
 
@@ -464,7 +464,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
-        odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, clearCursorStyle);
+        odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
         updatedCachedValues();
     }
 

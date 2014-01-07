@@ -263,7 +263,7 @@ ops.OperationTests = function OperationTests(runner) {
             op = factory.create(test.ops[i]);
             op.execute(t.odtDocument);
             if (metabefore) {
-                t.odtDocument.emit(ops.OdtDocument.signalOperationExecuted, op);
+                t.odtDocument.emit(ops.OdtDocument.signalOperationEnd, op);
             }
         }
 
