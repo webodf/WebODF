@@ -38,13 +38,13 @@
 
 /*jslint evil: true, continue: true, emptyblock: true, unparam: true*/
 /**
- * @typedef{{f:function(),name:!string}}
+ * @typedef{{f:function(),name:!string,expectFail:boolean}}
  */
-core.NamedFunction;
+core.TestData;
 /**
- * @typedef{{f:function(function()),name:!string}}
+ * @typedef{{f:function(function()),name:!string,expectFail:boolean}}
  */
-core.NamedAsyncFunction;
+core.AsyncTestData;
 /**
  * @interface
  */
@@ -62,11 +62,11 @@ core.UnitTest.prototype.tearDown = function () {"use strict"; };
  */
 core.UnitTest.prototype.description = function () {"use strict"; };
 /**
- * @return {!Array.<!core.NamedFunction>}
+ * @return {!Array.<!core.TestData>}
  */
 core.UnitTest.prototype.tests = function () {"use strict"; };
 /**
- * @return {!Array.<!core.NamedAsyncFunction>}
+ * @return {!Array.<!core.AsyncTestData>}
  */
 core.UnitTest.prototype.asyncTests = function () {"use strict"; };
 
@@ -188,12 +188,32 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
     "use strict";
     var /**@type{number}*/
         failedTests = 0,
+        /**@type{number}*/
+        failedTestsOnBeginExpectFail,
         areObjectsEqual;
     /**
      * @return {string}
      */
     this.resourcePrefix = function () {
         return resourcePrefix;
+    };
+    /**
+     * @return {undefined}
+     */
+    this.beginExpectFail = function () {
+        failedTestsOnBeginExpectFail = failedTests;
+    };
+    /**
+     * @return {undefined}
+     */
+    this.endExpectFail = function () {
+        var hasNoFailedTests = (failedTestsOnBeginExpectFail === failedTests);
+
+        failedTests = failedTestsOnBeginExpectFail;
+        if (hasNoFailedTests) {
+            failedTests += 1;
+            logger.fail("Expected at least one failed test, but none registered.");
+        }
     };
     /**
      * @param {string} msg
@@ -558,6 +578,7 @@ core.UnitTester = function UnitTester() {
             /**@type{function()|function(function())}*/
             t,
             tests,
+            texpectFail,
             lastFailCount;
 
         // check that this test has not been run or started yet
@@ -577,19 +598,26 @@ core.UnitTester = function UnitTester() {
         for (i = 0; i < tests.length; i += 1) {
             t = tests[i].f;
             tname = tests[i].name;
+            texpectFail = (tests[i].expectFail === true);
             if (testNames.length && testNames.indexOf(tname) === -1) {
                 continue;
             }
             lastFailCount = runner.countFailedTests();
             test.setUp();
             logger.startTest(testName, tname);
+            if (texpectFail) {
+                runner.beginExpectFail();
+            }
             t();
+            if (texpectFail) {
+                runner.endExpectFail();
+            }
             report(logger.endTest());
             test.tearDown();
             testResults[tname] = lastFailCount === runner.countFailedTests();
         }
         /**
-         * @param {!Array.<!core.NamedAsyncFunction>} todo
+         * @param {!Array.<!core.AsyncTestData>} todo
          * @return {undefined}
          */
         function runAsyncTests(todo) {
@@ -600,11 +628,18 @@ core.UnitTester = function UnitTester() {
                 return;
             }
             t = todo[0].f;
-            var fname = todo[0].name;
+            var fname = todo[0].name,
+                expectFail = (todo[0].expectFail === true);
             lastFailCount = runner.countFailedTests();
             test.setUp();
             logger.startTest(testName, fname);
+            if (expectFail) {
+                runner.beginExpectFail();
+            }
             t(function () {
+                if (expectFail) {
+                    runner.endExpectFail();
+                }
                 report(logger.endTest());
                 test.tearDown();
                 testResults[fname] = lastFailCount ===
