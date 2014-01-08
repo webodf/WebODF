@@ -75,7 +75,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalCommonStyleCreated,
             ops.OdtDocument.signalCommonStyleDeleted,
             ops.OdtDocument.signalTableAdded,
-            ops.OdtDocument.signalOperationExecuted,
+            ops.OdtDocument.signalOperationStart,
+            ops.OdtDocument.signalOperationEnd,
             ops.OdtDocument.signalUndoStackChanged,
             ops.OdtDocument.signalStepsInserted,
             ops.OdtDocument.signalStepsRemoved
@@ -843,7 +844,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
-        eventNotifier.subscribe(ops.OdtDocument.signalOperationExecuted, handleOperationExecuted);
+        eventNotifier.subscribe(ops.OdtDocument.signalOperationEnd, handleOperationExecuted);
     }
     init();
 };
@@ -859,7 +860,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalCommonStyleCreated = "style/created";
 /**@const*/ops.OdtDocument.signalCommonStyleDeleted = "style/deleted";
 /**@const*/ops.OdtDocument.signalParagraphStyleModified = "paragraphstyle/modified";
-/**@const*/ops.OdtDocument.signalOperationExecuted = "operation/executed";
+/**@const*/ops.OdtDocument.signalOperationStart = "operation/start";
+/**@const*/ops.OdtDocument.signalOperationEnd = "operation/end";
 /**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";
 /**@const*/ops.OdtDocument.signalStepsInserted = "steps/inserted";
 /**@const*/ops.OdtDocument.signalStepsRemoved = "steps/removed";

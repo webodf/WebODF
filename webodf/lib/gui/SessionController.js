@@ -118,10 +118,29 @@ gui.SessionController = (function () {
             selectionController = new gui.SelectionController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,
             keyCode = gui.KeyboardHandler.KeyCode,
-            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1;
+            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
+            hadFocus;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
+
+        function saveFocus() {
+            hadFocus = eventManager.hasFocus();
+        }
+
+        /**
+         * Execution of an operation can cause the focus to be lost if the local cursor
+         * shifts around. Restore focus back to the event trap if it was in focus before
+         * the operation.
+         */
+        function restoreFocus() {
+            if (hadFocus) {
+                // Only restore focus if previously in focus to prevent
+                // stealing focus when a remote operation occurs
+                eventManager.focus();
+            }
+            hadFocus = undefined;
+        }
 
         function getTarget(e) {
             // e.srcElement because IE10 likes to be different...
@@ -601,7 +620,7 @@ gui.SessionController = (function () {
             eventManager.subscribe("paste", handlePaste);
 
             // start maintaining the cursor selection now
-            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
 
             if (undoManager) {
                 // For most undo managers, the initial state is a clean document *with* a cursor present
@@ -670,7 +689,7 @@ gui.SessionController = (function () {
                 undoManager.resetInitialState();
             }
 
-            odtDocument.unsubscribe(ops.OdtDocument.signalOperationExecuted, updateUndoStack);
+            odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
 
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
@@ -898,9 +917,11 @@ gui.SessionController = (function () {
             eventManager.subscribe("dragend", handleDragEnd);
             eventManager.subscribe("click", hyperlinkClickHandler.handleClick);
 
-            odtDocument.subscribe(ops.OdtDocument.signalOperationExecuted, redrawRegionSelectionTask.trigger);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationStart, saveFocus);
+            odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, restoreFocus);
         }
 
         init();

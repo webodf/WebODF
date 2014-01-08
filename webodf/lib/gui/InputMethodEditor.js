@@ -153,12 +153,26 @@ runtime.loadClass("ops.OdtCursor");
             return odtDocument.getOdfCanvas().getElement();
         }
 
+        /**
+         * Set the local cursor's current composition state. If there is no local cursor,
+         * this function will do nothing
+         * @param {!boolean} state
+         * @returns {undefined}
+         */
+        function setCursorComposing(state) {
+            if (localCursor) {
+                if (state) {
+                    localCursor.getNode().setAttributeNS(cursorns, "composing", "true");
+                } else {
+                    localCursor.getNode().removeAttributeNS(cursorns, "composing");
+                }
+            }
+        }
+
         function flushEvent() {
-            var cursorNode;
             if (pendingEvent) {
                 pendingEvent = false;
-                cursorNode = localCursor.getNode();
-                cursorNode.removeAttributeNS(cursorns, "composing");
+                setCursorComposing(false);
                 events.emit(gui.InputMethodEditor.signalCompositionEnd, {data: pendingData});
                 pendingData = "";
             }
@@ -214,10 +228,6 @@ runtime.loadClass("ops.OdtCursor");
                 textNode.replaceData(0, textNode.length, FAKE_CONTENT);
             }
 
-            // Obtain document focus again after a cursor update
-            // This is necessary because the cursor currently removes then adds itself back into the DOM
-            // breaking the focus on the event trap as a result
-            eventManager.focus();
             selection.collapse(eventTrap.firstChild, 0);
             if (selection.extend) {
                 selection.extend(eventTrap, eventTrap.childNodes.length);
@@ -225,13 +235,12 @@ runtime.loadClass("ops.OdtCursor");
         }
 
         function compositionStart() {
-            var cursorNode = localCursor.getNode();
             lastCompositionData = undefined;
             // Some IMEs will stack end & start requests back to back.
             // Aggregate these as a group and report them in a single request once all are
             // complete to avoid the selection being reset
             processUpdates.cancel();
-            cursorNode.setAttributeNS(cursorns, "composing", "true");
+            setCursorComposing(true);
             if (!pendingEvent) {
                 events.emit(gui.InputMethodEditor.signalCompositionStart, {data: ""});
             }
@@ -261,13 +270,12 @@ runtime.loadClass("ops.OdtCursor");
             if (cursor.getMemberId() === inputMemberId) {
                 hasFocus = eventManager.hasFocus();
                 localCursor = cursor;
-                localCursor.subscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
                 cursorNode = localCursor.getNode();
                 cursorNode.insertBefore(eventTrap, cursorNode.firstChild);
                 if (hasFocus) {
                     // Relocating the event trap will reset the window selection
                     // Restore this again if the document previously had focus
-                    resetWindowSelection();
+                    eventManager.focus();
                 }
             }
         };
@@ -280,13 +288,12 @@ runtime.loadClass("ops.OdtCursor");
             var hasFocus;
             if (localCursor && memberid ===  inputMemberId) {
                 hasFocus = eventManager.hasFocus();
-                localCursor.unsubscribe(ops.OdtCursor.signalCursorUpdated, resetWindowSelection);
                 localCursor = null;
                 getCanvasElement().appendChild(eventTrap);
                 if (hasFocus) {
                     // Relocating the event trap will reset the window selection
                     // Restore this again if the document previously had focus
-                    resetWindowSelection();
+                    eventManager.focus();
                 }
             }
         };
@@ -326,6 +333,7 @@ runtime.loadClass("ops.OdtCursor");
             eventManager.subscribe('keypress', flushEvent);
             eventManager.subscribe('mousedown', suppressFocus);
             eventManager.subscribe('mouseup', restoreFocus);
+            eventManager.subscribe('focus', resetWindowSelection);
 
             filters.push(new DetectSafariCompositionError(eventManager));
             cleanup = filters.map(function(filter) { return filter.destroy; });
