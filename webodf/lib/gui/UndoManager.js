@@ -66,21 +66,22 @@ gui.UndoManager.prototype.setOdtDocument = function (newDocument) {"use strict";
 
 /**
  * Sets the initial document state and operation state. This is the earliest point
- * in time the document can be rewound to.
+ * the document can be undone to.
  */
-gui.UndoManager.prototype.saveInitialState = function () {"use strict"; };
+gui.UndoManager.prototype.setInitialState = function () {"use strict"; };
 
 /**
- * Sets the initial document state and operation state. This is the earliest point
- * in time the document can be rewound to.
+ * Initializes the undo manager and creates the initial document
+ * snapshot. If the undo manager has already been previously initialized,
+ * this call will do nothing.
  */
 gui.UndoManager.prototype.initialize = function () {"use strict"; };
 
 /**
- * Resets the initial document state and operation state, including clearing
- * all undo and redo stacks
+ * Purges entire undo stack including the initial state. This is primarily intended
+ * to free up memory and resources when the undo state is no longer required.
  */
-gui.UndoManager.prototype.resetInitialState = function () {"use strict"; };
+gui.UndoManager.prototype.purgeInitialState = function () {"use strict"; };
 
 /**
  * Sets the playback function to use to re-execute operations from the undo stack.

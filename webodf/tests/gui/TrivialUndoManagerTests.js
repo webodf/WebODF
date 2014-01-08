@@ -100,7 +100,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     function hasUndoStates_OnlyMovesBackValidStates() {
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
         r.shouldBe(t, "t.manager.hasUndoStates()", "false");
@@ -119,7 +119,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     function hasRedoStates_OnlyMovesForwardValidStates() {
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
         r.shouldBe(t, "t.manager.hasRedoStates()", "false");
@@ -145,7 +145,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 3}));
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 4}));
 
-        t.manager.saveInitialState();
+        t.manager.setInitialState();
 
         r.shouldBe(t, "t.manager.hasUndoStates()", "false");
         r.shouldBe(t, "t.manager.hasRedoStates()", "false");
@@ -164,13 +164,13 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         t.mock.cursors.push(cursor(2));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1, memberid: 1}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 2, memberid: 2}));
-        t.manager.saveInitialState();
+        t.manager.setInitialState();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 3}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 4, memberid: 2}));
-        t.manager.saveInitialState();
-        t.manager.saveInitialState();
-        t.manager.saveInitialState();
+        t.manager.setInitialState();
+        t.manager.setInitialState();
+        t.manager.setInitialState();
 
         r.shouldBe(t, "t.manager.hasUndoStates()", "false");
         r.shouldBe(t, "t.manager.hasRedoStates()", "false");
@@ -235,13 +235,13 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         r.shouldBe(t, "t.ops", "[3]");
     }
 
-    function resetInitialState_ClearsAllStacks() {
+    function purgeInitialState_ClearsAllStacks() {
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 2}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 3}));
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 4}));
 
-        t.manager.saveInitialState();
+        t.manager.setInitialState();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 6}));
@@ -255,20 +255,20 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         t.ops = [];
         // Now make something that can be undone
         // And now reset it
-        t.manager.resetInitialState();
+        t.manager.purgeInitialState();
         r.shouldBe(t, "t.manager.hasUndoStates()", "false");
         r.shouldBe(t, "t.manager.hasRedoStates()", "false");
         r.shouldBe(t, "t.manager.moveBackward(1)", "0");
         r.shouldBe(t, "t.manager.moveForward(1)", "0");
 
-        t.manager.saveInitialState();
+        t.manager.setInitialState();
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 8}));
         t.manager.moveBackward(1);
         r.shouldBe(t, "t.ops", "[]");
     }
 
     function moveBackward_MovesBack_InUndoQueue() {
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 10}));
@@ -279,7 +279,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     function moveBackward_NextOperation_ClearsRedo() {
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
         t.manager.moveBackward(1); // Now to 0 undo states available
@@ -292,7 +292,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     function moveBackward_BoundaryCheck_InitialDocumentState() {
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
         t.manager.moveBackward(1); // Now to 0 undo states available
@@ -316,7 +316,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 6, memberid: 2}));
 
         t.mock.cursors = [cursor(2)];
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         r.shouldBe(t, "t.manager.hasUndoStates()", "false");
         r.shouldBe(t, "t.manager.hasRedoStates()", "false");
@@ -332,7 +332,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     function undoState_ConsumesTrailingNonEditOps() {
-        t.manager.saveInitialState();
+        t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
@@ -350,7 +350,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             setInitialState_AllCursorsMaintainedWhenCalledMultipleTimes,
             initialize_WhenNotInitialized_SavesInitialState,
             initialize_WhenAlreadyInitialized_DoesNothing,
-            resetInitialState_ClearsAllStacks,
+            purgeInitialState_ClearsAllStacks,
             moveBackward_MovesBack_InUndoQueue,
             moveBackward_NextOperation_ClearsRedo,
             moveBackward_BoundaryCheck_InitialDocumentState,
