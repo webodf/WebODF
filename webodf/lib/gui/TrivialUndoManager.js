@@ -205,10 +205,9 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     };
 
     /**
-     * Resets the initial document state and operation state, including clearing
-     * all undo and redo stacks
+     * @inheritDoc
      */
-    this.resetInitialState = function() {
+    this.purgeInitialState = function() {
         undoStates.length = 0;
         redoStates.length = 0;
         initialState.length = 0;
@@ -217,11 +216,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         emitStackChange();
     };
 
-    /**
-     * Sets the initial document state and operation state. This is the earliest point
-     * in time the document can be rewound to.
-     */
-    this.saveInitialState = function() {
+    function setInitialState() {
         var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             annotationViewManager = odtDocument.getOdfCanvas().getAnnotationViewManager();
 
@@ -244,6 +239,20 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         undoStates.length = 0;
         redoStates.length = 0;
         emitStackChange();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    this.setInitialState = setInitialState;
+
+    /**
+     * @inheritDoc
+     */
+    this.initialize = function() {
+        if (!initialDoc) {
+            setInitialState();
+        }
     };
 
     /**
@@ -263,7 +272,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     this.onOperationExecuted = function(op) {
         redoStates.length = 0;
         // An edit operation will signal the end of the initial state usually.
-        // If this isn't the case, saveInitialState will reassemble these fragment states
+        // If this isn't the case, setInitialState will reassemble these fragment states
         // anyways.
         if ((undoRules.isEditOperation(op) && currentUndoState === initialState)
                 || !undoRules.isPartOfOperationSet(op, currentUndoState)) {
