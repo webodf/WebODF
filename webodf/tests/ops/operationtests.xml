@@ -358,6 +358,13 @@
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
+ <test name="RemoveText_SurroundingCursor">
+  <before><office:text><text:p>a<c:cursor>b</c:cursor>c</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="2"/>
+  </ops>
+  <after><office:text><text:p><c:cursor>b</c:cursor></text:p></office:text></after>
+ </test>
  <test name="AddRemoveSpace">
   <before><office:text><text:p>ab</text:p></office:text></before>
   <ops>

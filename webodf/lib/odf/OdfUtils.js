@@ -724,8 +724,9 @@ odf.OdfUtils = function OdfUtils() {
             }
             break;
         default:
-            // Skip webodf edit markers
+            // Skip webodf edit markers or cursor information
             switch (node.localName) {
+            case 'cursor':
             case 'editinfo':
                 return false;
             }

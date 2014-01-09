@@ -52,7 +52,8 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             "draw":"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
             "svg":"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
             "dr3d":"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
-            "xlink":"http://www.w3.org/1999/xlink"
+            "xlink":"http://www.w3.org/1999/xlink",
+            "cursor":"urn:webodf:names:cursor"
         };
 
     this.setUp = function () {
@@ -254,6 +255,16 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1]");
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]");
     }
+    function getTextElements_InlineRoots_ExcludesCursorContent() {
+        t.doc = createDocument("<text:p>abc<cursor:cursor>def</cursor:cursor>ghi</text:p>");
+        t.range.selectNode(t.doc);
+
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
+
+        r.shouldBe(t, "t.textElements.length", "2");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]");
+    }
     function getTextElements_ContainedWithinRoot_StaysBounded() {
         t.doc = createDocument("<text:p>abc<div xmlns='http://www.w3.org/1999/xhtml' class='annotationWrapper'>" +
             "<office:annotation>" +
@@ -346,6 +357,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             getTextElements_CharacterElements,
             getImageElements_ReturnTwoImages,
             getTextElements_InlineRoots_ExcludesSubRoots,
+            getTextElements_InlineRoots_ExcludesCursorContent,
             getTextElements_ContainedWithinRoot_StaysBounded,
 
             isDowngradableWhitespace_DowngradesFirstSpaceAfterChar,
