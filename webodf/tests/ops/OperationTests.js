@@ -147,6 +147,7 @@ ops.OperationTests = function OperationTests(runner) {
     }
     function parseTest(name, node) {
         var hasSetup = node.getAttribute("hasSetup") === "true",
+            isFailing = node.getAttribute("isFailing") === "true",
             before = node.firstElementChild,
             opsElement = before.nextElementSibling,
             after = opsElement.nextElementSibling,
@@ -171,6 +172,7 @@ ops.OperationTests = function OperationTests(runner) {
             runtime.assert(Boolean(setup), "Required setup for " + name + " was not found.");
         }
         return {
+            isFailing: isFailing,
             setup : setup,
             before: before,
             ops: ops,
@@ -334,7 +336,7 @@ ops.OperationTests = function OperationTests(runner) {
         var f = function () {
             runTest(test);
         };
-        return {f: f, name: name};
+        return {f: f, name: name, expectFail: test.isFailing};
     }
 
     function makeTestsIntoFunction(tests) {
