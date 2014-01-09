@@ -261,17 +261,20 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      * position and length
      * @param {!number} position
      * @param {!number} length
+     * @param {!boolean} useCachedStyle
      * @return {ops.Operation}
      */
-    this.createCursorStyleOp = function (position, length) {
-        var styleOp = null;
-        if (directCursorStyleProperties) {
+    this.createCursorStyleOp = function (position, length, useCachedStyle) {
+        var styleOp = null,
+            properties = useCachedStyle ? currentSelectionStyles[0] : directCursorStyleProperties;
+
+        if (properties && properties['style:text-properties']) {
             styleOp = new ops.OpApplyDirectStyling();
             styleOp.init({
                 memberid: inputMemberId,
                 position: position,
                 length: length,
-                setProperties: directCursorStyleProperties
+                setProperties: {'style:text-properties': properties['style:text-properties']}
             });
             directCursorStyleProperties = null;
             updatedCachedValues();

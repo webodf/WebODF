@@ -44,7 +44,7 @@ runtime.loadClass("core.PositionFilter");
  * @constructor
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
- * @param {function(!number, !number):ops.Operation} directStyleOp
+ * @param {function(!number, !number, !boolean):ops.Operation} directStyleOp
  */
 gui.TextManipulator = function TextManipulator(session, inputMemberId, directStyleOp) {
     "use strict";
@@ -231,11 +231,12 @@ gui.TextManipulator = function TextManipulator(session, inputMemberId, directSty
      */
     function insertText(text) {
         var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
-            op, stylingOp, operations = [];
+            op, stylingOp, operations = [], useCachedStyle = false;
 
         if (selection.length > 0) {
             op = createOpRemoveSelection(selection);
             operations.push(op);
+            useCachedStyle = true;
         }
 
         op = new ops.OpInsertText();
@@ -247,7 +248,7 @@ gui.TextManipulator = function TextManipulator(session, inputMemberId, directSty
         });
         operations.push(op);
         if (directStyleOp) {
-            stylingOp = directStyleOp(selection.position, text.length);
+            stylingOp = directStyleOp(selection.position, text.length, useCachedStyle);
             if (stylingOp) {
                 operations.push(stylingOp);
             }
