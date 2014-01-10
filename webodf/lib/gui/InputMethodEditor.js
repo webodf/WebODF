@@ -128,7 +128,8 @@ runtime.loadClass("ops.OdtCursor");
                                                 gui.InputMethodEditor.signalCompositionEnd]),
             lastCompositionData,
             filters = [],
-            cleanup;
+            cleanup,
+            isEditable = false;
 
         /**
          * Subscribe to IME events
@@ -316,15 +317,24 @@ runtime.loadClass("ops.OdtCursor");
             // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
             // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
             eventManager.blur();
-            eventTrap.setAttribute("contenteditable", "false");
+            eventTrap.setAttribute("contenteditable", false);
         }
 
         /**
          * Allow the event trap to receive focus
          */
         function restoreFocus() {
-            eventTrap.setAttribute("contenteditable", "true");
+            eventTrap.setAttribute("contenteditable", isEditable);
         }
+
+        /**
+         * Sets to true when in edit mode; otherwise false
+         * @param {!boolean} editable
+         */
+        this.setEditing = function(editable) {
+            isEditable = editable;
+            eventTrap.setAttribute("contenteditable", isEditable);
+        };
 
         function init() {
             eventManager.subscribe('compositionstart', compositionStart);
@@ -338,7 +348,6 @@ runtime.loadClass("ops.OdtCursor");
             filters.push(new DetectSafariCompositionError(eventManager));
             cleanup = filters.map(function(filter) { return filter.destroy; });
 
-            eventTrap.setAttribute("contenteditable", "true");
             // Negative tab index still allows focus, but removes accessibility by keyboard
             eventTrap.setAttribute("tabindex", -1);
             processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
