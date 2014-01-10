@@ -624,6 +624,7 @@ gui.SessionController = (function () {
                 undoManager.initialize();
             }
 
+            inputMethodEditor.setEditing(true);
             hyperlinkClickHandler.setEditing(true);
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
@@ -690,6 +691,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("paste", handlePaste);
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
 
+            inputMethodEditor.setEditing(false);
             hyperlinkClickHandler.setEditing(false);
             keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; }, true);
             keyDownHandler.unbind(keyCode.Delete, modifier.None);
