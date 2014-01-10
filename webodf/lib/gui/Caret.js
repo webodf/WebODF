@@ -244,11 +244,11 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         }
     }
     this.handleUpdate = handleUpdate;
-    
+
     /**
      * @return {undefined}
      */
-    this.refreshCursorBlinking = function () {
+    function refreshCursorBlinking() {
         if (blinkOnRangeSelect || cursor.getSelectedRange().collapsed) {
             shouldBlink = true;
             blink(true);
@@ -256,14 +256,15 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             shouldBlink = false;
             span.style.opacity = "0";
         }
-    };
+    }
+    this.refreshCursorBlinking = refreshCursorBlinking;
+
     /**
      * @return {undefined}
      */
     this.setFocus = function () {
-        shouldBlink = true;
         avatar.markAsFocussed(true);
-        blink(true);
+        refreshCursorBlinking();
     };
     /**
      * @return {undefined}
