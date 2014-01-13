@@ -279,6 +279,35 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.textElements.length", "1");
         r.shouldBe(t, "t.textElements.shift()", "t.annotationText");
     }
+    function getParagraphElements_Returns_ParagraphsAndHeadings() {
+        t.doc = createDocument("<text:p>abc</text:p><text:h>def</text:h>");
+        t.range.setStart(t.doc.firstChild.firstChild, 0);
+        t.range.setEnd(t.doc.lastChild.lastChild, t.doc.lastChild.lastChild.length);
+
+        t.paragraphElements = t.odfUtils.getParagraphElements(t.range);
+
+        r.shouldBe(t, "t.paragraphElements.length", "2");
+        r.shouldBe(t, "t.paragraphElements.shift()", "t.doc.firstChild");
+        r.shouldBe(t, "t.paragraphElements.shift()", "t.doc.lastChild");
+    }
+    function getParagraphElements_ContainedWithinRoot_StaysBounded() {
+        t.doc = createDocument("<text:p>abc<div xmlns='http://www.w3.org/1999/xhtml' class='annotationWrapper'><office:annotation><text:p>hi</text:p></office:annotation></div>ghi</text:p>");
+        t.range.selectNodeContents(t.doc.childNodes[1].firstChild);
+
+        t.paragraphElements = t.odfUtils.getParagraphElements(t.range);
+
+        r.shouldBe(t, "t.paragraphElements.length", "1");
+        r.shouldBe(t, "t.paragraphElements.shift()", "t.doc.childNodes[1].getElementsByTagNameNS(t.ns.text, 'p')[0]");
+    }
+    function getParagraphElements_InlineRoots_ExcludesSubRoots() {
+        t.doc = createDocument("<text:p>abc<div xmlns='http://www.w3.org/1999/xhtml' class='annotationWrapper'><office:annotation><text:p>hi</text:p></office:annotation></div>ghi</text:p>");
+        t.range.selectNode(t.doc);
+
+        t.paragraphElements = t.odfUtils.getParagraphElements(t.range);
+
+        r.shouldBe(t, "t.paragraphElements.length", "1");
+        r.shouldBe(t, "t.paragraphElements.shift()", "t.doc");
+    }
     function isDowngradableWhitespace_DowngradesFirstSpaceAfterChar() {
         t.doc = createDocument("<text:p>a<text:s> </text:s>b</text:p>");
         t.isDowngradable = t.odfUtils.isDowngradableSpaceElement(t.doc.childNodes[1]);
@@ -359,6 +388,10 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             getTextElements_InlineRoots_ExcludesSubRoots,
             getTextElements_InlineRoots_ExcludesCursorContent,
             getTextElements_ContainedWithinRoot_StaysBounded,
+
+            getParagraphElements_Returns_ParagraphsAndHeadings,
+            getParagraphElements_ContainedWithinRoot_StaysBounded,
+            getParagraphElements_InlineRoots_ExcludesSubRoots,
 
             isDowngradableWhitespace_DowngradesFirstSpaceAfterChar,
             isDowngradableWhitespace_DowngradesFirstSpaceAfterTab,

@@ -101,7 +101,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
 
     this.execute = function (odtDocument) {
         var range = odtDocument.convertCursorToDomRange(position, length),
-            impactedParagraphs = odfUtils.getImpactedParagraphs(range);
+            impactedParagraphs = odfUtils.getParagraphElements(range);
 
         applyStyle(odtDocument, range, setProperties);
 

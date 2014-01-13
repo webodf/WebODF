@@ -203,8 +203,9 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @param {!Range} range
      */
     function expandToParagraphBoundaries(range) {
-        var startParagraph = odtDocument.getParagraphElement(range.startContainer),
-            endParagraph = odtDocument.getParagraphElement(range.endContainer);
+        var paragraphs = odfUtils.getParagraphElements(range),
+            startParagraph = paragraphs[0],
+            endParagraph = paragraphs[paragraphs.length - 1];
 
         if (startParagraph) {
             range.setStart(startParagraph, 0);
