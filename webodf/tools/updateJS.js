@@ -59,6 +59,7 @@ function Main() {
             "core/PositionIterator.js",
             "core/RawInflate.js",
             "core/ScheduledTask.js",
+            "core/StepIterator.js",
             "core/UnitTester.js",
             "core/Utils.js",
             "core/Zip.js",

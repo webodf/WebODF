@@ -279,6 +279,7 @@ set(TYPEDLIBJSFILES
     lib/core/Cursor.js
     lib/core/PositionFilter.js
     lib/core/PositionFilterChain.js
+    lib/core/StepIterator.js
     lib/gui/AnnotationViewManager.js
     lib/gui/HyperlinkClickHandler.js
     lib/gui/SelectionMover.js
