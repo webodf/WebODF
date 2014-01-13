@@ -797,17 +797,19 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
+     * Adds the specified cursor to the ODT document. The cursor will be collapsed
+     * to the first available cursor position in the document.
      * @param {!ops.OdtCursor} cursor
      * @return {undefined}
      */
     this.addCursor = function (cursor) {
         runtime.assert(Boolean(cursor), "OdtDocument::addCursor without cursor");
-        var distanceToFirstTextNode = cursor.getStepCounter().countSteps(1, filter),
-            memberid = cursor.getMemberId();
+        var memberid = cursor.getMemberId(),
+            initialSelection = self.convertCursorToDomRange(0, 0);
 
         runtime.assert(typeof memberid === "string", "OdtDocument::addCursor has cursor without memberid");
         runtime.assert(!cursors[memberid], "OdtDocument::addCursor is adding a duplicate cursor with memberid " + memberid);
-        cursor.move(distanceToFirstTextNode);
+        cursor.setSelectedRange(initialSelection, true);
 
         cursors[memberid] = cursor;
     };
