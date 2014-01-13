@@ -267,22 +267,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
         r.shouldBe(t, "t.steps", "-4");
     }
-    function testcountStepsToPosition_CursorNearBeginningOfSpan() {
-        var span;
-        createOdtDocument("<text:p>A<text:span>BCD</text:span></text:p>");
-        span = t.root.getElementsByTagNameNS(odf.Namespaces.textns, "span")[0];
-        setCursorPosition(2);
-        t.steps = t.counter.countStepsToPosition(span, 0, t.filter);
-        r.shouldBe(t, "t.steps", "-1");
-    }
-    function testcountStepsToPosition_CursorNearEndOfSpan() {
-        var span;
-        createOdtDocument("<text:p>A<text:span>BCD</text:span></text:p>");
-        span = t.root.getElementsByTagNameNS(odf.Namespaces.textns, "span")[0];
-        setCursorPosition(3);
-        t.steps = t.counter.countStepsToPosition(span, span.childNodes.length, t.filter);
-        r.shouldBe(t, "t.steps", "1");
-    }
 
     /**
      * Wraps the supplied node in a parent div
@@ -303,13 +287,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "-2");
-        r.shouldBe(t, "t.stepsToRoot", "-3");
+        r.shouldBe(t, "t.rootToAnchor", "1");
+        r.shouldBe(t, "t.rootToFocus", "3");
     }
     function testFixCursorPositions_Range_CursorInInvalidPlace() {
         createOdtDocument("<text:p>ABCD</text:p>");
@@ -321,13 +305,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "-2");
-        r.shouldBe(t, "t.stepsToRoot", "-3");
+        r.shouldBe(t, "t.rootToAnchor", "1");
+        r.shouldBe(t, "t.rootToFocus", "3");
     }
     function testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace() {
         createOdtDocument("<text:p>ABCD</text:p>");
@@ -340,13 +324,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "-2");
-        r.shouldBe(t, "t.stepsToRoot", "-3");
+        r.shouldBe(t, "t.rootToAnchor", "1");
+        r.shouldBe(t, "t.rootToFocus", "3");
     }
     function testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace_OverAnnotation() {
         createOdtDocument("<text:p>AB<office:annotation><text:p>#</text:p></office:annotation>CD</text:p>");
@@ -359,13 +343,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "-4");
-        r.shouldBe(t, "t.stepsToRoot", "-5");
+        r.shouldBe(t, "t.rootToAnchor", "1");
+        r.shouldBe(t, "t.rootToFocus", "5");
     }
     function testFixCursorPositions_CursorAndAnchorNearParagraphStart() {
         createOdtDocument("<text:p>A</text:p><text:p>BC</text:p><text:p>DE</text:p>");
@@ -378,15 +362,15 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         t.selectedText = t.cursor.getSelectedRange().toString();
         r.shouldBe(t, "t.selectedText", "'BC'");
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "-3");
-        r.shouldBe(t, "t.stepsToRoot", "-5");
+        r.shouldBe(t, "t.rootToAnchor", "2");
+        r.shouldBe(t, "t.rootToFocus", "5");
     }
     function testFixCursorPositions_CursorNearParagraphStart_ForwardSelection() {
         createOdtDocument("<text:p>A</text:p><text:p>BCD</text:p><text:p>E</text:p>");
@@ -399,15 +383,15 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         t.selectedText = t.cursor.getSelectedRange().toString();
         r.shouldBe(t, "t.selectedText", "'BCD'");
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "-3");
-        r.shouldBe(t, "t.stepsToRoot", "-5");
+        r.shouldBe(t, "t.rootToAnchor", "2");
+        r.shouldBe(t, "t.rootToFocus", "5");
     }
     function testFixCursorPositions_CursorNearParagraphStart_ReverseSelection() {
         createOdtDocument("<text:p>A</text:p><text:p>BCD</text:p><text:p>E</text:p>");
@@ -420,15 +404,15 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToAnchor = t.counter.countStepsToPosition(t.cursor.getAnchorNode(), 0, t.filter);
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         t.selectedText = t.cursor.getSelectedRange().toString();
         r.shouldBe(t, "t.selectedText", "'BCD'");
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToAnchor", "3");
-        r.shouldBe(t, "t.stepsToRoot", "-2");
+        r.shouldBe(t, "t.rootToAnchor", "5");
+        r.shouldBe(t, "t.rootToFocus", "2");
     }
     function testFixCursorPositions_Collapsed_CursorInInvalidPlace() {
         createOdtDocument("<text:p>ABCD</text:p>");
@@ -440,11 +424,11 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = t.counter.isPositionWalkable(t.filter);
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.stepsToRoot = t.counter.countStepsToPosition(t.root, 0, t.filter);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
-        r.shouldBe(t, "t.stepsToRoot", "-1");
+        r.shouldBe(t, "t.rootToFocus", "1");
     }
 
     function testAvailablePositions_EmptyParagraph() {
@@ -748,9 +732,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
             testCountStepsToLineBoundary_Backward_OverWrapping,
             testCountStepsToLineBoundary_Backward_OverWrapping2,
-
-            testcountStepsToPosition_CursorNearBeginningOfSpan,
-            testcountStepsToPosition_CursorNearEndOfSpan,
 
             testFixCursorPositions_AnchorInInvalidPlace,
             testFixCursorPositions_Range_CursorInInvalidPlace,
