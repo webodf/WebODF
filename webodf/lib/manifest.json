@@ -121,7 +121,7 @@
         "ops/OpRemoveHyperlink.js",
         "ops/Session.js"
     ],
-    "gui/ImageManager.js": [
+    "gui/ImageController.js": [
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
         "ops/OpAddStyle.js",
@@ -196,7 +196,7 @@
         "gui/EventManager.js",
         "gui/HyperlinkClickHandler.js",
         "gui/HyperlinkController.js",
-        "gui/ImageManager.js",
+        "gui/ImageController.js",
         "gui/ImageSelector.js",
         "gui/InputMethodEditor.js",
         "gui/KeyboardHandler.js",

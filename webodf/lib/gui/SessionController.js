@@ -52,7 +52,7 @@ runtime.loadClass("gui.DirectParagraphStyler");
 runtime.loadClass("gui.KeyboardHandler");
 runtime.loadClass("gui.HyperlinkClickHandler");
 runtime.loadClass("gui.HyperlinkController");
-runtime.loadClass("gui.ImageManager");
+runtime.loadClass("gui.ImageController");
 runtime.loadClass("gui.ImageSelector");
 runtime.loadClass("gui.SelectionController");
 runtime.loadClass("gui.TextManipulator");
@@ -105,7 +105,7 @@ gui.SessionController = (function () {
             directParagraphStyler = args && args.directParagraphStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null,
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directTextStyler.createCursorStyleOp),
             textManipulator = new gui.TextManipulator(session, inputMemberId, createCursorStyleOp),
-            imageManager = new gui.ImageManager(session, inputMemberId, objectNameGenerator),
+            imageController = new gui.ImageController(session, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             drawShadowCursorTask,
@@ -807,10 +807,10 @@ gui.SessionController = (function () {
         };
 
         /**
-         * @returns {!gui.ImageManager}
+         * @returns {!gui.ImageController}
          */
-        this.getImageManager = function () {
-            return imageManager;
+        this.getImageController = function () {
+            return imageController;
         };
 
         /**

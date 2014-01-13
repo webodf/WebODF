@@ -112,7 +112,7 @@ module.exports = function (config) {
             'lib/gui/AnnotationController.js',
             'lib/gui/DirectParagraphStyler.js',
             'lib/gui/DirectTextStyler.js',
-            'lib/gui/ImageManager.js',
+            'lib/gui/ImageController.js',
             'lib/gui/TextManipulator.js',
             'lib/gui/SessionController.js',
             'lib/gui/CaretManager.js',
