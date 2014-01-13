@@ -126,6 +126,12 @@ gui.SessionController = (function () {
 
         function saveFocus() {
             hadFocus = eventManager.hasFocus();
+            if (hadFocus) {
+                // Performing operations while the event manager has focus causes the browser to
+                // spend a lot of effort maintaining the global window selection.
+                // Avoid this by discarding focus before any operation
+                eventManager.blur();
+            }
         }
 
         /**
