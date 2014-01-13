@@ -55,7 +55,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(sharedState) {
             action.start();
-            sharedState.sessionController.getTextManipulator().insertText('A');
+            sharedState.sessionController.getTextController().insertText('A');
             action.complete(true);
         }
     }

@@ -55,7 +55,7 @@ runtime.loadClass("gui.HyperlinkController");
 runtime.loadClass("gui.ImageController");
 runtime.loadClass("gui.ImageSelector");
 runtime.loadClass("gui.SelectionController");
-runtime.loadClass("gui.TextManipulator");
+runtime.loadClass("gui.TextController");
 runtime.loadClass("gui.AnnotationController");
 runtime.loadClass("gui.EventManager");
 runtime.loadClass("gui.PlainTextPasteboard");
@@ -104,7 +104,7 @@ gui.SessionController = (function () {
             directTextStyler = new gui.DirectTextStyler(session, inputMemberId),
             directParagraphStyler = args && args.directParagraphStylingEnabled ? new gui.DirectParagraphStyler(session, inputMemberId, objectNameGenerator) : null,
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directTextStyler.createCursorStyleOp),
-            textManipulator = new gui.TextManipulator(session, inputMemberId, createCursorStyleOp),
+            textController = new gui.TextController(session, inputMemberId, createCursorStyleOp),
             imageController = new gui.ImageController(session, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
@@ -248,7 +248,7 @@ gui.SessionController = (function () {
             // The document is readonly, so the data will never get placed on
             // the clipboard in most browsers unless we do it ourselves.
             if (clipboard.setDataFromRange(e, selectedRange)) {
-                textManipulator.removeCurrentSelection();
+                textController.removeCurrentSelection();
             } else {
                 // TODO What should we do if cut isn't supported?
                 runtime.log("Cut operation failed");
@@ -304,7 +304,7 @@ gui.SessionController = (function () {
             }
 
             if (plainText) {
-                textManipulator.removeCurrentSelection();
+                textController.removeCurrentSelection();
                 session.enqueue(pasteHandler.createPasteOps(plainText));
             }
             cancelEvent(e);
@@ -566,7 +566,7 @@ gui.SessionController = (function () {
             // https://dvcs.w3.org/hg/dom3events/raw-file/tip/html/DOM3-Events.html#event-type-compositionend
             var input = e.data;
             if (input) {
-                textManipulator.insertText(input);
+                textController.insertText(input);
             }
         }
 
@@ -617,7 +617,7 @@ gui.SessionController = (function () {
                 registerLocalCursor();
             }
 
-            inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
+            inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionStart, textController.removeCurrentSelection);
             inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
 
             eventManager.subscribe("beforecut", handleBeforeCut);
@@ -634,18 +634,18 @@ gui.SessionController = (function () {
             hyperlinkClickHandler.setEditing(true);
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
-            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textManipulator.removeTextByBackspaceKey), true);
-            keyDownHandler.bind(keyCode.Delete, modifier.None, textManipulator.removeTextByDeleteKey);
+            keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textController.removeTextByBackspaceKey), true);
+            keyDownHandler.bind(keyCode.Delete, modifier.None, textController.removeTextByDeleteKey);
 
             // TODO: deselect the currently selected image when press Esc
             // TODO: move the image selection box to next image/frame when press tab on selected image
             keyDownHandler.bind(keyCode.Tab, modifier.None, rangeSelectionOnly(function () {
-                textManipulator.insertText("\t");
+                textController.insertText("\t");
                 return true;
             }));
 
             if (isMacOS) {
-                keyDownHandler.bind(keyCode.Clear, modifier.None, textManipulator.removeCurrentSelection);
+                keyDownHandler.bind(keyCode.Clear, modifier.None, textController.removeCurrentSelection);
                 keyDownHandler.bind(keyCode.B, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleBold));
                 keyDownHandler.bind(keyCode.I, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleItalic));
                 keyDownHandler.bind(keyCode.U, modifier.Meta, rangeSelectionOnly(directTextStyler.toggleUnderline));
@@ -677,19 +677,19 @@ gui.SessionController = (function () {
             keyPressHandler.setDefault(rangeSelectionOnly(function (e) {
                 var text = stringFromKeyPress(e);
                 if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
-                    textManipulator.insertText(text);
+                    textController.insertText(text);
                     return true;
                 }
                 return false;
             }));
-            keyPressHandler.bind(keyCode.Enter, modifier.None, rangeSelectionOnly(textManipulator.enqueueParagraphSplittingOps));
+            keyPressHandler.bind(keyCode.Enter, modifier.None, rangeSelectionOnly(textController.enqueueParagraphSplittingOps));
         };
 
         /**
          * @return {undefined}
          */
         this.endEditing = function () {
-            inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textManipulator.removeCurrentSelection);
+            inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionStart, textController.removeCurrentSelection);
             inputMethodEditor.unsubscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
 
             eventManager.unsubscribe("cut", handleCut);
@@ -821,10 +821,10 @@ gui.SessionController = (function () {
         };
 
         /**
-         * @returns {!gui.TextManipulator}
+         * @returns {!gui.TextController}
          */
-        this.getTextManipulator = function() {
-            return textManipulator;
+        this.getTextController = function() {
+            return textController;
         };
 
         /**

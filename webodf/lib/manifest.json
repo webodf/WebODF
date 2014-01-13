@@ -204,7 +204,7 @@
         "gui/PlainTextPasteboard.js",
         "gui/SelectionController.js",
         "gui/SelectionMover.js",
-        "gui/TextManipulator.js",
+        "gui/TextController.js",
         "gui/UndoManager.js",
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
@@ -247,7 +247,7 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js"
     ],
-    "gui/TextManipulator.js": [
+    "gui/TextController.js": [
         "core/PositionFilter.js",
         "core/PositionFilterChain.js",
         "gui/SelectionMover.js",
