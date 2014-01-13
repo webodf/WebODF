@@ -641,55 +641,6 @@ odf.OdfUtils = function OdfUtils() {
         return parseNonNegativeLength(lineHeight) || parsePercentage(lineHeight);
     }
     this.parseFoLineHeight = parseFoLineHeight;
-    /**
-     * @param {!Array.<!Element>} a
-     * @param {number} i
-     * @return {!Element}
-     */
-    function item(a, i) {
-        return a[i];
-    }
-
-    /**
-     * Returns the paragraphs touched by the given range
-     * @param {!Range} range
-     * return {!Array.<!Element>}
-     */
-    function getImpactedParagraphs(range) {
-        var i, l, e,
-            outerContainer = /**@type{!Element}*/(range.commonAncestorContainer),
-            /**@type{!Array.<!Element>}*/
-            impactedParagraphs = [],
-            /**@type{!Array.<!Element>}*/
-            filtered = [];
-
-        if (outerContainer.nodeType === Node.ELEMENT_NODE) {
-            impactedParagraphs = domUtils.getElementsByTagNameNS(
-                outerContainer,
-                textns,
-                "p"
-            ).concat(domUtils.getElementsByTagNameNS(
-                outerContainer,
-                textns,
-                "h"
-            ));
-        }
-        while (outerContainer && !isParagraph(outerContainer)) {
-            outerContainer = outerContainer.parentNode;
-        }
-        if (outerContainer) {
-            impactedParagraphs.push(outerContainer);
-        }
-        l = impactedParagraphs.length;
-        for (i = 0; i < l; i += 1) {
-            e = item(impactedParagraphs, i);
-            if (domUtils.rangeIntersectsNode(range, e)) {
-                filtered.push(e);
-            }
-        }
-        return filtered;
-    }
-    this.getImpactedParagraphs = getImpactedParagraphs;
 
     /**
      * Adapted from instructions on how to generate plain text from an ODT document.
