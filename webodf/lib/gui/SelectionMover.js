@@ -370,30 +370,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
-     * Finds the most appropriate valid position to move the cursor to. Attempts to keep
-     * the cursor within the same paragraph, so that cursors near the front or end of a paragraph do not
-     * incorrectly jump to the next or previous paragraph.
-     * @param {!Node} container
-     * @param {!number} offset
-     * @param {!core.PositionFilter} filter
-     * @returns {!number} positions Number of positions to the nearest step
-     */
-    function countPositionsToClosestStep(container, offset, filter) {
-        var iterator = getIteratorAtCursor(),
-            paragraphNode = odfUtils.getParagraphElement(iterator.getCurrentNode()),
-            count = 0;
-
-        iterator.setUnfilteredPosition(container, offset);
-        if (filter.acceptPosition(iterator) !== FILTER_ACCEPT) {
-            count = countSteps(iterator, -1, filter);
-            if (count === 0 || (paragraphNode && paragraphNode !== odfUtils.getParagraphElement(iterator.getCurrentNode()))) {
-                iterator.setUnfilteredPosition(container, offset);
-                count = countSteps(iterator, 1, filter);
-            }
-        }
-        return count;
-    }
-    /**
      * Return the number of steps needed to move across one line in the specified direction.
      * If it is not possible to move across one line, then 0 is returned.
      *
@@ -623,8 +599,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             countLinesSteps: countLinesSteps,
             countStepsToLineBoundary: countStepsToLineBoundary,
             countStepsToPosition: countStepsToPosition,
-            isPositionWalkable: isPositionWalkable,
-            countPositionsToNearestStep: countPositionsToClosestStep
+            isPositionWalkable: isPositionWalkable
         };
     };
     function init() {

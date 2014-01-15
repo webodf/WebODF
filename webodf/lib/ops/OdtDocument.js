@@ -41,6 +41,7 @@
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.DomUtils");
 runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("core.StepIterator");
 runtime.loadClass("odf.Namespaces");
 runtime.loadClass("gui.SelectionMover");
 runtime.loadClass("core.PositionFilterChain");
@@ -163,6 +164,26 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
             return FILTER_REJECT;
         };
+    }
+
+    /**
+     * Create a new StepIterator instance set to the defined position
+     *
+     * @param {!Node} container
+     * @param {!number} offset
+     * @param {!core.PositionFilter} filter Filter to apply to the iterator positions
+     * @param {!Node} subTree Subtree to search for step within. Generally a paragraph or document root. Choosing
+     * a smaller subtree allows iteration to end quickly if there are no walkable steps remaining in a particular
+     * direction. This can vastly improve performance
+     *
+     * @returns {!core.StepIterator}
+     */
+    function createStepIterator(container, offset, filter, subTree) {
+        var positionIterator = gui.SelectionMover.createPositionIterator(subTree),
+            stepIterator = new core.StepIterator(filter, positionIterator);
+
+        stepIterator.setPosition(container, offset);
+        return stepIterator;
     }
 
     /**
@@ -540,6 +561,25 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getTextNodeAtStep = getTextNodeAtStep;
 
     /**
+     * Returns the closest parent paragraph or root to the supplied container and offset
+     * @param {!Node} container
+     * @param {!number} offset
+     * @param {!Node} root
+     *
+     * @returns {!Node}
+     */
+    function paragraphOrRoot(container, offset, root) {
+        var node = container.childNodes[offset] || container,
+            paragraph = getParagraphElement(node);
+        if (paragraph && domUtils.containsNode(root, paragraph)) {
+            // Only return the paragraph if it is contained within the destination root
+            return /**@type{!Node}*/(paragraph);
+        }
+        // Otherwise the step filter should be contained within the supplied root
+        return root;
+    }
+
+    /**
      * Iterates through all cursors and checks if they are in
      * walkable positions; if not, move the cursor 1 filtered step backward
      * which guarantees walkable state for all cursors,
@@ -551,51 +591,48 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
         Object.keys(cursors).forEach(function(memberId) {
             var cursor = cursors[memberId],
-                stepCounter = cursor.getStepCounter(),
-                stepsSelectionLength,
-                positionsToAdjustFocus,
-                positionsToAdjustAnchor,
-                positionsToAnchor,
+                root = getRoot(cursor.getNode()),
+                subTree,
+                startPoint,
+                endPoint,
+                selectedRange,
                 cursorMoved = false;
 
             // Equip a Root Filter for specifically this cursor
-            rootConstrainedFilter.addFilter('RootFilter', self.createRootFilter(memberId));
-            stepsSelectionLength = stepCounter.countStepsToPosition(cursor.getAnchorNode(), 0, rootConstrainedFilter);
+            rootConstrainedFilter.addFilter('RootFilter', self.createRootFilter(root));
 
-            if (!stepCounter.isPositionWalkable(rootConstrainedFilter)) {
+            selectedRange = cursor.getSelectedRange();
+            subTree = paragraphOrRoot(/**@type{!Node}*/(selectedRange.startContainer), selectedRange.startOffset, root);
+            startPoint = createStepIterator(/**@type{!Node}*/(selectedRange.startContainer), selectedRange.startOffset,
+                rootConstrainedFilter, subTree);
+
+            if (!selectedRange.collapsed) {
+                subTree = paragraphOrRoot(/**@type{!Node}*/(selectedRange.endContainer), selectedRange.endOffset, root);
+                endPoint = createStepIterator(/**@type{!Node}*/(selectedRange.endContainer), selectedRange.endOffset,
+                    rootConstrainedFilter, subTree);
+            } else {
+                endPoint = startPoint;
+            }
+
+            if (!startPoint.isStep() || !endPoint.isStep()) {
                 cursorMoved = true;
-                // Record how far off each end of the selection is from an accepted position
-                positionsToAdjustFocus = stepCounter.countPositionsToNearestStep(cursor.getNode(), 0, rootConstrainedFilter);
-                positionsToAdjustAnchor = stepCounter.countPositionsToNearestStep(cursor.getAnchorNode(), 0, rootConstrainedFilter);
-                cursor.move(positionsToAdjustFocus); // Need to move into a valid position before extending the selection
-
-                if (stepsSelectionLength !== 0) {
-                    // Normally the step is rounded down, meaning the position adjustment will be negative
-                    // The only circumstance in which the position adjust is positive is when either the node appears
-                    // before the first valid position in a document, or, the rounded down position would move the node
-                    // to a previous paragraph (something that is never desired)
-                    // In this case, the selection is lengthened or shortened when the anchor and focus are adjusted
-                    if (positionsToAdjustAnchor > 0) {
-                        stepsSelectionLength += 1;
-                    }
-                    if (positionsToAdjustFocus > 0) {
-                        stepsSelectionLength -= 1;
-                    }
-                    positionsToAnchor = stepCounter.countSteps(stepsSelectionLength, rootConstrainedFilter);
-                    // Cursor extension implicitly goes anchor-to-focus. As such, the cursor needs to be navigated
-                    // first to the anchor position, then extended to the focus node to ensure the focus ends up at the
-                    // correct end of the selection
-                    cursor.move(positionsToAnchor);
-                    cursor.move(-positionsToAnchor, true);
+                runtime.assert(startPoint.roundToClosestStep(), "No walkable step found for cursor owned by " + memberId);
+                selectedRange.setStart(startPoint.container(), startPoint.offset());
+                runtime.assert(endPoint.roundToClosestStep(), "No walkable step found for cursor owned by " + memberId);
+                selectedRange.setEnd(endPoint.container(), endPoint.offset());
+            } else if (startPoint.container() === endPoint.container() && startPoint.offset() === endPoint.offset()) {
+                // The range *should* be collapsed
+                if (!selectedRange.collapsed || cursor.getAnchorNode() !== cursor.getNode()) {
+                    // It might not be collapsed if there are other unwalkable nodes (e.g., cursors)
+                    // between the cursor and anchor nodes. In this case, force the cursor to collapse
+                    cursorMoved = true;
+                    selectedRange.setStart(startPoint.container(), startPoint.offset());
+                    selectedRange.collapse(true);
                 }
-            } else if (stepsSelectionLength === 0) {
-                cursorMoved = true;
-                // call move(0) here to force the cursor to reset its selection to collapsed
-                // and remove the now-unnecessary anchor node
-                cursor.move(0);
             }
 
             if (cursorMoved) {
+                cursor.setSelectedRange(selectedRange, cursor.hasForwardSelection());
                 self.emit(ops.OdtDocument.signalCursorMoved, cursor);
             }
             // Un-equip the Root Filter for this cursor because we are done with it

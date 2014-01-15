@@ -33,6 +33,10 @@
     ],
     "core/ScheduledTask.js": [
     ],
+    "core/StepIterator.js": [
+        "core/PositionFilter.js",
+        "core/PositionIterator.js"
+    ],
     "core/UnitTester.js": [
     ],
     "core/Utils.js": [
@@ -365,6 +369,7 @@
         "core/PositionFilter.js",
         "core/PositionFilterChain.js",
         "core/PositionIterator.js",
+        "core/StepIterator.js",
         "gui/SelectionMover.js",
         "odf/Formatting.js",
         "odf/Namespaces.js",
