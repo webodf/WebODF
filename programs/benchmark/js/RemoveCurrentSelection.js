@@ -55,7 +55,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(sharedState) {
             action.start();
-            sharedState.sessionController.getTextManipulator().removeCurrentSelection();
+            sharedState.sessionController.getTextController().removeCurrentSelection();
             action.complete(true);
         }
     }

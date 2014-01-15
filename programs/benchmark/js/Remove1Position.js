@@ -57,9 +57,9 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.start = function(sharedState) {
             action.start();
             if (useBackspace) {
-                sharedState.sessionController.getTextManipulator().removeTextByBackspaceKey();
+                sharedState.sessionController.getTextController().removeTextByBackspaceKey();
             } else {
-                sharedState.sessionController.getTextManipulator().removeTextByDeleteKey();
+                sharedState.sessionController.getTextController().removeTextByDeleteKey();
             }
             action.complete(true);
         }

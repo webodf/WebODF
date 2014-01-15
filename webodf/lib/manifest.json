@@ -121,7 +121,7 @@
         "ops/OpRemoveHyperlink.js",
         "ops/Session.js"
     ],
-    "gui/ImageManager.js": [
+    "gui/ImageController.js": [
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
         "ops/OpAddStyle.js",
@@ -196,7 +196,7 @@
         "gui/EventManager.js",
         "gui/HyperlinkClickHandler.js",
         "gui/HyperlinkController.js",
-        "gui/ImageManager.js",
+        "gui/ImageController.js",
         "gui/ImageSelector.js",
         "gui/InputMethodEditor.js",
         "gui/KeyboardHandler.js",
@@ -204,7 +204,7 @@
         "gui/PlainTextPasteboard.js",
         "gui/SelectionController.js",
         "gui/SelectionMover.js",
-        "gui/TextManipulator.js",
+        "gui/TextController.js",
         "gui/UndoManager.js",
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
@@ -247,7 +247,7 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js"
     ],
-    "gui/TextManipulator.js": [
+    "gui/TextController.js": [
         "core/PositionFilter.js",
         "core/PositionFilterChain.js",
         "gui/SelectionMover.js",

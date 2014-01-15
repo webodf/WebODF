@@ -564,8 +564,8 @@ define("webodf/editor/EditorSession", [
          * @param {!number} height
          */
         this.insertImage = function (mimetype, content, width, height) {
-            self.sessionController.getTextManipulator().removeCurrentSelection();
-            self.sessionController.getImageManager().insertImage(mimetype, content, width, height);
+            self.sessionController.getTextController().removeCurrentSelection();
+            self.sessionController.getImageController().insertImage(mimetype, content, width, height);
         };
 
         /**

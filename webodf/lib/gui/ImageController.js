@@ -45,7 +45,7 @@ runtime.loadClass("odf.ObjectNameGenerator");
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
  */
-gui.ImageManager = function ImageManager(session, inputMemberId, objectNameGenerator) {
+gui.ImageController = function ImageController(session, inputMemberId, objectNameGenerator) {
     "use strict";
 
     var /**@const@type{!number}*/cmPerPixel = 0.0264583333333334, // since 1px always equals 0.75pt in css2.1
