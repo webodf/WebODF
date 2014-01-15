@@ -64,8 +64,7 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
             container = iterator.container(),
             annotationName,
             annotationNode,
-            annotationEnd,
-            cursors;
+            annotationEnd;
 
         while (!(container.namespaceURI === odf.Namespaces.officens
             && container.localName === 'annotation')) {
@@ -87,10 +86,12 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         odtDocument.getOdfCanvas().forgetAnnotations();
 
         // Move all cursors - outside and before the annotation node
-        cursors = domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'cursor');
-        while (cursors.length) {
-            annotationNode.parentNode.insertBefore(cursors.pop(), annotationNode);
-        }
+        domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'cursor').forEach(function(cursor) {
+            annotationNode.parentNode.insertBefore(cursor, annotationNode);
+        });
+        domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'anchor').forEach(function(anchor) {
+            annotationNode.parentNode.insertBefore(anchor, annotationNode);
+        });
 
         // Delete start and end
         annotationNode.parentNode.removeChild(annotationNode);
