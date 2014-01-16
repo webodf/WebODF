@@ -554,6 +554,7 @@ gui.SessionController = (function () {
             if (target.className === "annotationRemoveButton") {
                 annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
                 annotationController.removeAnnotation(annotationNode);
+                eventManager.focus();
             } else {
                 handleMouseClickEvent(event);
             }
