@@ -470,7 +470,9 @@ gui.SessionController = (function () {
             if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
                 selectionController.selectImage(target.parentNode);
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (clickStartedWithinContainer && !imageSelector.isSelectorElement(target)) {
+            } else if (imageSelector.isSelectorElement(target)) {
+                eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
+            } else if (clickStartedWithinContainer) {
                 if (isMouseMoved) {
                     selectionController.selectRange(shadowCursor.getSelectedRange(),
                         shadowCursor.hasForwardSelection(), event.detail);
