@@ -262,7 +262,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     }
     function insertEmptyTextNodes(doc) {
         var root = doc.documentElement,
-            iterator = doc.createNodeIterator(root, 0xFFFFFFFF, null, false),
+            iterator = doc.createNodeIterator(root, NodeFilter.SHOW_ALL, null, false),
             n = iterator.nextNode();
         while (n !== null) {
             if (n !== root) {
@@ -273,7 +273,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     }
     function splitTextNodes(doc) {
         var root = doc.documentElement,
-            iterator = doc.createNodeIterator(root, 0xFFFFFFFF, null, false),
+            iterator = doc.createNodeIterator(root, NodeFilter.SHOW_ALL, null, false),
             n = iterator.nextNode();
         while (n !== null) {
             if (n.nodeType === Node.TEXT_NODE && n.data.length > 1) {

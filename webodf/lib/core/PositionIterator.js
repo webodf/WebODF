@@ -441,7 +441,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         // instead of an object with a function such as IE 9 and older webkits
         nodeFilter = /**@type {!function(?Node):!number}*/(f.acceptNode);
         nodeFilter.acceptNode = nodeFilter;
-        whatToShow = whatToShow || 0xFFFFFFFF;
+        whatToShow = whatToShow || NodeFilter.SHOW_ALL;
         runtime.assert(root.nodeType !== Node.TEXT_NODE, "Internet Explorer doesn't allow tree walker roots to be text nodes");
         walker = root.ownerDocument.createTreeWalker(root, whatToShow,
                 nodeFilter, expandEntityReferences);

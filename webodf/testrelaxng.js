@@ -34,7 +34,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global runtime, xmldom*/
+/*global runtime, xmldom, NodeFilter*/
 runtime.loadClass("xmldom.RelaxNG");
 runtime.loadClass("xmldom.RelaxNG2");
 
@@ -45,7 +45,7 @@ function validate(relaxng, relaxng2, url) {
         if (err) {
             runtime.log("Could not read " + url + ": " + err);
         } else {
-            walker = dom.createTreeWalker(dom.firstChild, 0xFFFFFFFF);
+            walker = dom.createTreeWalker(dom.firstChild, NodeFilter.SHOW_ALL);
             relaxng.validate(walker, function (err) {
                 if (err) {
                     var i;

@@ -193,7 +193,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
      * @return {undefined}
      */
     function splitTextNodes(root) {
-        var iterator = root.ownerDocument.createNodeIterator(root, 0xFFFFFFFF, null, false),
+        var iterator = root.ownerDocument.createNodeIterator(root, NodeFilter.SHOW_ALL, null, false),
             n = iterator.nextNode();
         while (n !== null) {
             if (n.nodeType === Node.TEXT_NODE && n.data.length > 1) {
@@ -208,7 +208,7 @@ ops.OdtCursorTests = function OdtCursorTests(runner) {
      */
     function insertEmptyTextNodes(root) {
         var doc = root.ownerDocument,
-            iterator = doc.createNodeIterator(root, 0xFFFFFFFF, null, false),
+            iterator = doc.createNodeIterator(root, NodeFilter.SHOW_ALL, null, false),
             n = iterator.nextNode();
         while (n !== null) {
             if (n !== root) {
