@@ -116,44 +116,48 @@ core.StepIterator = function StepIterator(filter, iterator) {
     this.offset = offset;
 
     /**
-     * Round to the closest next step. Returns false if no step exists
+     * Move to the next step. Returns false if no step exists
      * @returns {!boolean}
      */
     function nextStep() {
-        resetCache();
+        resetCache(); // Necessary in case the are no more positions
         while (iterator.nextPosition()) {
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+            resetCache();
+            if (isStep()) {
                 return true;
             }
         }
         return false;
     }
+    this.nextStep = nextStep;
 
     /**
-     * Round to the closest previous step. Returns false if no step exists
+     * Move to the previous step. Returns false if no step exists
      * @returns {!boolean}
      */
     function previousStep() {
-        resetCache();
+        resetCache(); // Necessary in case the are no more positions
         while (iterator.previousPosition()) {
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+            resetCache();
+            if (isStep()) {
                 return true;
             }
         }
         return false;
     }
+    this.previousStep = previousStep;
 
     /**
      * If the current position is not on a valid step, this function will move the iterator
      * to the closest previous step. If there is no previous step, it will advance to the next
      * closest step.
-     * @returns {!boolean}
+     * @returns {!boolean} Returns true if the iterator ends on a valid step
      */
     this.roundToClosestStep = function() {
         var currentContainer = container(),
             currentOffset = offset(),
-            isAtStep = true;
-        if (!isStep()) {
+            isAtStep = isStep();
+        if (!isAtStep) {
             // Default rule is to always round a position DOWN to the closest step equal or prior
             // This produces the easiest behaviour to understand (e.g., put the cursor just AFTER the step it represents)
             isAtStep = previousStep();
@@ -162,6 +166,32 @@ core.StepIterator = function StepIterator(filter, iterator) {
                 setPosition(currentContainer, currentOffset);
                 isAtStep = nextStep();
             }
+        }
+        return isAtStep;
+    };
+
+    /**
+     * If the current position is not a valid step, move to the previous step.
+     * If there is no previous step, returns false.
+     * @returns {!boolean} Returns true if the iterator ends on a valid step
+     */
+    this.roundToPreviousStep = function() {
+        var isAtStep = isStep();
+        if (!isAtStep) {
+            isAtStep = previousStep();
+        }
+        return isAtStep;
+    };
+
+    /**
+     * If the current position is not a valid step, move to the next step.
+     * If there is no next step, returns false.
+     * @returns {!boolean} Returns true if the iterator ends on a valid step
+     */
+    this.roundToNextStep = function() {
+        var isAtStep = isStep();
+        if (!isAtStep) {
+            isAtStep = nextStep();
         }
         return isAtStep;
     };

@@ -20,6 +20,12 @@
         "core/ByteArrayWriter.js",
         "core/UnitTester.js"
     ],
+    "core/StepIteratorTests.js": [
+        "core/PositionFilter.js",
+        "core/PositionIterator.js",
+        "core/StepIterator.js",
+        "core/UnitTester.js"
+    ],
     "core/ZipTests.js": [
         "core/UnitTester.js",
         "core/Zip.js"
