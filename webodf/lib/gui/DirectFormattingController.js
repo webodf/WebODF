@@ -51,8 +51,9 @@ runtime.loadClass("gui.StyleHelper");
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
+ * @param {!boolean} directParagraphStylingEnabled
  */
-gui.DirectFormattingController = function DirectFormattingController(session, inputMemberId, objectNameGenerator) {
+gui.DirectFormattingController = function DirectFormattingController(session, inputMemberId, objectNameGenerator, directParagraphStylingEnabled) {
     "use strict";
 
     var self = this,
@@ -788,6 +789,14 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         callback();
     };
 
+    /**
+     * @return {undefined}
+     */
+    /*jslint emptyblock: true*/
+    function emptyFunction() {
+    }
+    /*jslint emptyblock: false*/
+
     function init() {
         odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
         odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
@@ -797,6 +806,16 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
         updatedCachedTextSettings();
         updatedCachedParagraphSettings();
+
+        if (!directParagraphStylingEnabled) {
+            self.alignParagraphCenter = emptyFunction;
+            self.alignParagraphJustified = emptyFunction;
+            self.alignParagraphLeft = emptyFunction;
+            self.alignParagraphRight = emptyFunction;
+            self.createParagraphStyleOps = function () { return []; };
+            self.indent = emptyFunction;
+            self.outdent = emptyFunction;
+        }
     }
 
     init();
