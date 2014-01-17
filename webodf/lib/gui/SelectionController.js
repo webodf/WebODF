@@ -142,20 +142,33 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @param {!Node} frameNode
      */
     function selectImage(frameNode) {
-        var stepsToAnchor = odtDocument.getDistanceFromCursor(inputMemberId, frameNode, 0),
-            stepsToFocus = stepsToAnchor !== null ? stepsToAnchor + 1 : null,
-            oldPosition,
+        var frameRoot = odtDocument.getRootElement(frameNode),
+            frameRootFilter = odtDocument.createRootFilter(frameRoot),
+            stepIterator = odtDocument.createStepIterator(frameNode, 0, [frameRootFilter, odtDocument.getPositionFilter()], frameRoot),
+            anchorNode,
+            anchorOffset,
+            newSelection,
             op;
 
-        if (stepsToFocus || stepsToAnchor) {
-            oldPosition = odtDocument.getCursorPosition(inputMemberId);
-            op = createOpMoveCursor(
-                oldPosition + stepsToAnchor,
-                stepsToFocus - stepsToAnchor,
-                ops.OdtCursor.RegionSelection
-            );
-            session.enqueue([op]);
+        if (!stepIterator.roundToPreviousStep()) {
+            runtime.assert(false, "No walkable position before frame");
         }
+        anchorNode = stepIterator.container();
+        anchorOffset = stepIterator.offset();
+
+        stepIterator.setPosition(frameNode, frameNode.childNodes.length);
+        if (!stepIterator.roundToNextStep()) {
+            runtime.assert(false, "No walkable position after frame");
+        }
+
+        newSelection = odtDocument.convertDomToCursorRange({
+            anchorNode: anchorNode,
+            anchorOffset: anchorOffset,
+            focusNode: stepIterator.container(),
+            focusOffset: stepIterator.offset()
+        });
+        op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RegionSelection);
+        session.enqueue([op]);
     }
     this.selectImage = selectImage;
 
