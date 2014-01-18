@@ -45,6 +45,7 @@ runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
 runtime.loadClass("gui.UndoStateRulesTests");
 runtime.loadClass("gui.TrivialUndoManagerTests");
+runtime.loadClass("gui.SelectionControllerTests");
 runtime.loadClass("gui.SelectionMoverTests");
 runtime.loadClass("gui.StyleSummaryTests");
 runtime.loadClass("ops.OdtCursorTests");
@@ -89,6 +90,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(core.StepIteratorTests);
     tests.push(gui.UndoStateRulesTests);
     tests.push(gui.TrivialUndoManagerTests);
+    tests.push(gui.SelectionControllerTests);
     tests.push(gui.SelectionMoverTests);
     tests.push(gui.StyleSummaryTests);
     tests.push(odf.OdfUtilsTests);
