@@ -633,7 +633,7 @@ gui.SessionController = (function () {
             }
 
             inputMethodEditor.setEditing(true);
-            hyperlinkClickHandler.setEditing(true);
+            hyperlinkClickHandler.setModifier(isMacOS ? gui.HyperlinkClickHandler.Modifier.Meta : gui.HyperlinkClickHandler.Modifier.Ctrl);
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
             keyDownHandler.bind(keyCode.Backspace, modifier.None, returnTrue(textController.removeTextByBackspaceKey), true);
@@ -696,7 +696,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
 
             inputMethodEditor.setEditing(false);
-            hyperlinkClickHandler.setEditing(false);
+            hyperlinkClickHandler.setModifier(gui.HyperlinkClickHandler.Modifier.None);
             keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; }, true);
             keyDownHandler.unbind(keyCode.Delete, modifier.None);
             keyDownHandler.unbind(keyCode.Tab, modifier.None);
