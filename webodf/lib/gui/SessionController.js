@@ -658,6 +658,13 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
+                keyDownHandler.bind(keyCode.LeftMeta, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
+                keyDownHandler.bind(keyCode.MetaInMozilla, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
+
+                // event.ctrlKey and event.metaKey are always equal false in keyup event. Cannot really refer a source,
+                // but seem this is how all browsers behave. Probably because there is no such need in this event.
+                keyUpHandler.bind(keyCode.LeftMeta, modifier.None, hyperlinkClickHandler.showTextCursor);
+                keyUpHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showTextCursor);
             } else {
                 keyDownHandler.bind(keyCode.B, modifier.Ctrl, rangeSelectionOnly(directFormattingController.toggleBold));
                 keyDownHandler.bind(keyCode.I, modifier.Ctrl, rangeSelectionOnly(directFormattingController.toggleItalic));
@@ -669,6 +676,11 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
+                keyDownHandler.bind(keyCode.Ctrl, modifier.Ctrl, hyperlinkClickHandler.showPointerCursor);
+
+                // event.ctrlKey and event.metaKey are always equal false in keyup event. Cannot really refer a source,
+                // but seem this is how all browsers behave. Probably because there is no such need in this event.
+                keyUpHandler.bind(keyCode.Ctrl, modifier.None, hyperlinkClickHandler.showTextCursor);
             }
 
             // the default action is to insert text into the document
@@ -713,6 +725,11 @@ gui.SessionController = (function () {
                 keyDownHandler.unbind(keyCode.C, modifier.MetaShift);
                 keyDownHandler.unbind(keyCode.Z, modifier.Meta);
                 keyDownHandler.unbind(keyCode.Z, modifier.MetaShift);
+                keyDownHandler.unbind(keyCode.LeftMeta, modifier.Meta);
+                keyDownHandler.unbind(keyCode.MetaInMozilla, modifier.Meta);
+
+                keyUpHandler.unbind(keyCode.LeftMeta, modifier.None);
+                keyUpHandler.unbind(keyCode.MetaInMozilla, modifier.None);
             } else {
                 keyDownHandler.unbind(keyCode.B, modifier.Ctrl);
                 keyDownHandler.unbind(keyCode.I, modifier.Ctrl);
@@ -724,6 +741,9 @@ gui.SessionController = (function () {
                 keyDownHandler.unbind(keyCode.C, modifier.CtrlAlt);
                 keyDownHandler.unbind(keyCode.Z, modifier.Ctrl);
                 keyDownHandler.unbind(keyCode.Z, modifier.CtrlShift);
+                keyDownHandler.unbind(keyCode.Ctrl, modifier.Ctrl);
+
+                keyUpHandler.unbind(keyCode.Ctrl, modifier.None);
             }
 
             keyPressHandler.setDefault(null);
@@ -878,14 +898,8 @@ gui.SessionController = (function () {
                 keyDownHandler.bind(keyCode.Up, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentStart));
                 keyDownHandler.bind(keyCode.Down, modifier.MetaShift, rangeSelectionOnly(selectionController.extendSelectionToDocumentEnd));
                 keyDownHandler.bind(keyCode.A, modifier.Meta, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
-                keyDownHandler.bind(keyCode.LeftMeta, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
-                keyUpHandler.bind(keyCode.LeftMeta, modifier.None, hyperlinkClickHandler.showTextCursor);
-                keyDownHandler.bind(keyCode.MetaInMozilla, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
-                keyUpHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showTextCursor);
             } else {
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
-                keyDownHandler.bind(keyCode.Ctrl, modifier.Ctrl, hyperlinkClickHandler.showPointerCursor);
-                keyUpHandler.bind(keyCode.Ctrl, modifier.None, hyperlinkClickHandler.showTextCursor);
             }
 
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);
