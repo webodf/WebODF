@@ -135,6 +135,12 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
             // Ask the browser to open the link in a new window.
             runtime.getWindow().open(url);
         }
+
+        if (e.preventDefault) {
+            e.preventDefault();
+        } else {
+            e.returnValue = false;
+        }
     };
 
     /**
