@@ -36,35 +36,51 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global core, ops, gui, runtime*/
+/*global core, ops, odf, gui, runtime*/
 
 runtime.loadClass("core.EventNotifier");
 runtime.loadClass("core.Utils");
+runtime.loadClass("odf.OdfUtils");
+runtime.loadClass("ops.OpAddStyle");
 runtime.loadClass("ops.OpApplyDirectStyling");
+runtime.loadClass("ops.OpSetParagraphStyle");
 runtime.loadClass("gui.StyleHelper");
 
 /**
  * @constructor
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
+ * @param {!odf.ObjectNameGenerator} objectNameGenerator
+ * @param {!boolean} directParagraphStylingEnabled
  */
-gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
+gui.DirectFormattingController = function DirectFormattingController(session, inputMemberId, objectNameGenerator, directParagraphStylingEnabled) {
     "use strict";
 
     var self = this,
-        utils = new core.Utils(),
         odtDocument = session.getOdtDocument(),
+        utils = new core.Utils(),
+        odfUtils = new odf.OdfUtils(),
         styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
-        eventNotifier = new core.EventNotifier([gui.DirectTextStyler.textStylingChanged]),
+        eventNotifier = new core.EventNotifier([
+            gui.DirectFormattingController.textStylingChanged,
+            gui.DirectFormattingController.paragraphStylingChanged
+        ]),
+        /**@const*/textns = odf.Namespaces.textns,
+        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         directCursorStyleProperties,
-        // cached values
+        // cached text settings
         currentSelectionStyles = [],
         isBoldValue = false,
         isItalicValue = false,
         hasUnderlineValue = false,
         hasStrikeThroughValue = false,
         fontSizeValue,
-        fontNameValue;
+        fontNameValue,
+        // cached paragraph settings
+        isAlignedLeftValue,
+        isAlignedCenterValue,
+        isAlignedRightValue,
+        isAlignedJustifiedValue;
 
     /**
      * Returns the value for a hierarchy of keys.
@@ -96,7 +112,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     function getCommonValue(objArray, keys) {
         var value = get(objArray[0], keys);
 
-        return objArray.every(function(obj) { return value === get(obj, keys);}) ? value : undefined;
+        return objArray.every(function (obj) { return value === get(obj, keys); }) ? value : undefined;
     }
 
     /**
@@ -120,7 +136,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     /**
      * @return {undefined}
      */
-    function updatedCachedValues() {
+    function updatedCachedTextSettings() {
         var fontSize, diffMap;
         currentSelectionStyles = getAppliedStyles();
 
@@ -144,7 +160,36 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         fontNameValue = noteChange(fontNameValue, currentSelectionStyles && getCommonValue(currentSelectionStyles, ['style:text-properties', 'style:font-name']), 'fontName');
 
         if (diffMap) {
-            eventNotifier.emit(gui.DirectTextStyler.textStylingChanged, diffMap);
+            eventNotifier.emit(gui.DirectFormattingController.textStylingChanged, diffMap);
+        }
+    }
+
+    /**
+     * @return {undefined}
+     */
+    function updatedCachedParagraphSettings() {
+        var cursor = odtDocument.getCursor(inputMemberId),
+            range = cursor && cursor.getSelectedRange(),
+            diffMap;
+
+        function noteChange(oldValue, newValue, id) {
+            if (oldValue !== newValue) {
+                if (diffMap === undefined) {
+                    diffMap = {};
+                }
+                diffMap[id] = newValue;
+            }
+            return newValue;
+        }
+        // TODO: these are mutually exclusive values usually, so just one value with the alignment style might be enough
+        // but in a range with multiple paragraphs there could be multiple alignment styles, which should be reflected somehow
+        isAlignedLeftValue = noteChange(isAlignedLeftValue, range ? styleHelper.isAlignedLeft(range) : false, 'isAlignedLeft');
+        isAlignedCenterValue = noteChange(isAlignedCenterValue, range ? styleHelper.isAlignedCenter(range) : false, 'isAlignedCenter');
+        isAlignedRightValue = noteChange(isAlignedRightValue, range ? styleHelper.isAlignedRight(range) : false, 'isAlignedRight');
+        isAlignedJustifiedValue = noteChange(isAlignedJustifiedValue, range ? styleHelper.isAlignedJustified(range) : false, 'isAlignedJustified');
+
+        if (diffMap) {
+            eventNotifier.emit(gui.DirectFormattingController.paragraphStylingChanged, diffMap);
         }
     }
 
@@ -154,7 +199,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      */
     function onCursorAdded(cursor) {
         if (cursor.getMemberId() === inputMemberId) {
-            updatedCachedValues();
+            updatedCachedParagraphSettings();
         }
     }
 
@@ -164,7 +209,8 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      */
     function onCursorRemoved(memberId) {
         if (memberId === inputMemberId) {
-            updatedCachedValues();
+            updatedCachedTextSettings();
+            updatedCachedParagraphSettings();
         }
     }
 
@@ -174,7 +220,8 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      */
     function onCursorMoved(cursor) {
         if (cursor.getMemberId() === inputMemberId) {
-            updatedCachedValues();
+            updatedCachedTextSettings();
+            updatedCachedParagraphSettings();
         }
     }
 
@@ -183,7 +230,8 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      */
     function onParagraphStyleModified() {
         // TODO: check if the cursor (selection) is actually affected
-        updatedCachedValues();
+        updatedCachedTextSettings();
+        updatedCachedParagraphSettings();
     }
 
     /**
@@ -194,7 +242,8 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         var cursor = odtDocument.getCursor(inputMemberId);
 
         if (cursor && odtDocument.getParagraphElement(cursor.getNode()) === args.paragraphElement) {
-            updatedCachedValues();
+            updatedCachedTextSettings();
+            updatedCachedParagraphSettings();
         }
     }
 
@@ -239,7 +288,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
             // Direct styling is additive. E.g., if the user selects bold and then italic, the intent is to produce
             // bold & italic text
             directCursorStyleProperties = utils.mergeObjects(directCursorStyleProperties || {}, properties);
-            updatedCachedValues();
+            updatedCachedTextSettings();
         }
     }
     this.formatTextSelection = formatTextSelection;
@@ -277,7 +326,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
                 setProperties: {'style:text-properties': properties['style:text-properties']}
             });
             directCursorStyleProperties = null;
-            updatedCachedValues();
+            updatedCachedTextSettings();
         }
         return styleOp;
     };
@@ -295,7 +344,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
                 // added to apply the style to. Even after a split, the cursor should still style the next inserted
                 // character
                 directCursorStyleProperties = null;
-                updatedCachedValues();
+                updatedCachedTextSettings();
             }
         }
     }
@@ -363,7 +412,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      * this will return the style the next inserted character will have
      * @returns {!Array.<Object>}
      */
-    this.getAppliedStyles = function() {
+    this.getAppliedStyles = function () {
         return currentSelectionStyles;
     };
 
@@ -390,43 +439,322 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
     /**
      * @return {!boolean}
      */
-    this.isBold = function() {
+    this.isBold = function () {
         return isBoldValue;
     };
 
     /**
      * @return {!boolean}
      */
-    this.isItalic = function() {
+    this.isItalic = function () {
         return isItalicValue;
     };
 
     /**
      * @return {!boolean}
      */
-    this.hasUnderline = function() {
+    this.hasUnderline = function () {
         return hasUnderlineValue;
     };
 
     /**
      * @return {!boolean}
      */
-    this.hasStrikeThrough = function() {
+    this.hasStrikeThrough = function () {
         return hasStrikeThroughValue;
     };
 
     /**
      * @return {!number}
      */
-    this.fontSize = function() {
+    this.fontSize = function () {
         return fontSizeValue;
     };
 
     /**
      * @return {!string}
      */
-    this.fontName = function() {
+    this.fontName = function () {
         return fontNameValue;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.isAlignedLeft = function () {
+        return isAlignedLeftValue;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.isAlignedCenter = function() {
+        return isAlignedCenterValue;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.isAlignedRight = function () {
+        return isAlignedRightValue;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.isAlignedJustified = function () {
+        return isAlignedJustifiedValue;
+    };
+
+    /**
+     * Round the step up to the next step
+     * @param {!number} step
+     * @returns {!boolean}
+     */
+    function roundUp(step) {
+        return step === ops.StepsTranslator.NEXT_STEP;
+    }
+
+    /**
+     * @param {!function(!Object) : !Object} applyDirectStyling
+     * @return {undefined}
+     */
+    function applyParagraphDirectStyling(applyDirectStyling) {
+        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+            paragraphs = odfUtils.getParagraphElements(range),
+            formatting = odtDocument.getFormatting();
+
+        paragraphs.forEach(function(paragraph) {
+            var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
+                paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
+                newParagraphStyleName = objectNameGenerator.generateStyleName(),
+                opAddStyle,
+                opSetParagraphStyle,
+                paragraphProperties;
+
+            if (paragraphStyleName) {
+                paragraphProperties = formatting.createDerivedStyleObject(paragraphStyleName, "paragraph", {});
+            }
+            paragraphProperties = applyDirectStyling(paragraphProperties || {});
+            opAddStyle = new ops.OpAddStyle();
+            opAddStyle.init({
+                memberid: inputMemberId,
+                styleName: newParagraphStyleName,
+                styleFamily: 'paragraph',
+                isAutomaticStyle: true,
+                setProperties: paragraphProperties
+            });
+
+            opSetParagraphStyle = new ops.OpSetParagraphStyle();
+            opSetParagraphStyle.init({
+                memberid: inputMemberId,
+                styleName: newParagraphStyleName,
+                position: paragraphStartPoint
+            });
+
+            session.enqueue([opAddStyle, opSetParagraphStyle]);
+        });
+    }
+
+    /**
+     * @param {!Object} styleOverrides
+     * @return {undefined}
+     */
+    function applySimpleParagraphDirectStyling(styleOverrides) {
+        applyParagraphDirectStyling(function (paragraphStyle) { return utils.mergeObjects(paragraphStyle, styleOverrides); });
+    }
+
+    /**
+     * @param {!string} alignment
+     * @return {undefined}
+     */
+    function alignParagraph(alignment) {
+        applySimpleParagraphDirectStyling({"style:paragraph-properties" : {"fo:text-align" : alignment}});
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.alignParagraphLeft = function () {
+        alignParagraph('left');
+        return true;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.alignParagraphCenter = function () {
+        alignParagraph('center');
+        return true;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.alignParagraphRight = function () {
+        alignParagraph('right');
+        return true;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.alignParagraphJustified = function () {
+        alignParagraph('justify');
+        return true;
+    };
+
+    /**
+     * @param {!number} direction
+     * @param {!Object} paragraphStyle
+     * @return {!Object}
+     */
+    function modifyParagraphIndent(direction, paragraphStyle) {
+        var tabStopDistance = odtDocument.getFormatting().getDefaultTabStopDistance(),
+            paragraphProperties = paragraphStyle["style:paragraph-properties"],
+            indentValue = paragraphProperties && paragraphProperties["fo:margin-left"],
+            indent = indentValue && odfUtils.parseLength(indentValue),
+            newIndent;
+
+        if (indent && indent.unit === tabStopDistance.unit) {
+            newIndent = (indent.value + (direction * tabStopDistance.value)) + indent.unit;
+        } else {
+            // TODO unit-conversion would allow indent to work irrespective of the paragraph's indent type
+            newIndent = (direction * tabStopDistance.value) + tabStopDistance.unit;
+        }
+
+        return utils.mergeObjects(paragraphStyle, {"style:paragraph-properties" : {"fo:margin-left" : newIndent}});
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.indent = function () {
+        applyParagraphDirectStyling(modifyParagraphIndent.bind(null, 1));
+        return true;
+    };
+
+    /**
+     * @return {!boolean}
+     */
+    this.outdent = function () {
+        applyParagraphDirectStyling(modifyParagraphIndent.bind(null, -1));
+        return true;
+    };
+
+    /**
+     * Check if the selection is at the end of the last paragraph.
+     * @param {!Range} range
+     * @param {!Node} paragraphNode
+     * @return {boolean}
+     */
+    function isSelectionAtTheEndOfLastParagraph(range, paragraphNode) {
+        var iterator = gui.SelectionMover.createPositionIterator(paragraphNode),
+            rootConstrainedFilter = new core.PositionFilterChain();
+        rootConstrainedFilter.addFilter('BaseFilter', odtDocument.getPositionFilter());
+        rootConstrainedFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
+
+        iterator.setUnfilteredPosition(/**@type{!Node}*/(range.endContainer), range.endOffset);
+        while (iterator.nextPosition()) {
+            if (rootConstrainedFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                return odtDocument.getParagraphElement(iterator.getCurrentNode()) !== paragraphNode;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if the first text node in the selection has different text style from the first paragraph; otherwise false.
+     * @param {!Range} range
+     * @param {!Node} paragraphNode
+     * @return {!boolean}
+     */
+    function isTextStyleDifferentFromFirstParagraph(range, paragraphNode) {
+        var textStyle = styleHelper.getAppliedStyles(range)[0],
+            paragraphStyle = odtDocument.getFormatting().getAppliedStylesForElement(paragraphNode);
+        if (!textStyle || textStyle['style:family'] !== 'text' || !textStyle['style:text-properties']) {
+            return false;
+        }
+        if (!paragraphStyle || !paragraphStyle['style:text-properties']) {
+            return true;
+        }
+
+        textStyle = textStyle['style:text-properties'];
+        paragraphStyle = paragraphStyle['style:text-properties'];
+        return !Object.keys(textStyle).every(function (key) {
+            return textStyle[key] === paragraphStyle[key];
+        });
+    }
+
+    /**
+     * TODO: HACK, REMOVE
+     * Generates operations that would create and apply the current direct cursor
+     * styling to the paragraph at given position.
+     * @param position
+     * @return {!Array.<!ops.Operation>}
+     */
+    this.createParagraphStyleOps = function (position) {
+        var cursor = odtDocument.getCursor(inputMemberId),
+            range = cursor.getSelectedRange(),
+            operations = [], op,
+            startNode, endNode, paragraphNode,
+            properties, parentStyleName, styleName;
+
+        if (cursor.hasForwardSelection()) {
+            startNode = cursor.getAnchorNode();
+            endNode = cursor.getNode();
+        } else {
+            startNode = cursor.getNode();
+            endNode = cursor.getAnchorNode();
+        }
+
+        paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(endNode));
+        runtime.assert(Boolean(paragraphNode), "DirectFormattingController: Cursor outside paragraph");
+        if (!isSelectionAtTheEndOfLastParagraph(range, paragraphNode)) {
+            return operations;
+        }
+
+        if (endNode !== startNode) {
+            paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(startNode));
+        }
+
+        if (!directCursorStyleProperties && !isTextStyleDifferentFromFirstParagraph(range, paragraphNode)) {
+            return operations;
+        }
+
+        properties = currentSelectionStyles[0];
+        if (!properties) {
+            return operations;
+        }
+
+        parentStyleName = paragraphNode.getAttributeNS(textns, 'style-name');
+        if (parentStyleName) {
+            properties = {
+                'style:text-properties': properties['style:text-properties']
+            };
+            properties = odtDocument.getFormatting().createDerivedStyleObject(parentStyleName, 'paragraph', properties);
+        }
+
+        styleName = objectNameGenerator.generateStyleName();
+        op = new ops.OpAddStyle();
+        op.init({
+            memberid: inputMemberId,
+            styleName: styleName,
+            styleFamily: 'paragraph',
+            isAutomaticStyle: true,
+            setProperties: properties
+        });
+        operations.push(op);
+
+        op = new ops.OpSetParagraphStyle();
+        op.init({
+            memberid: inputMemberId,
+            styleName: styleName,
+            position: position
+        });
+        operations.push(op);
+
+        return operations;
     };
 
     /**
@@ -451,7 +779,7 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
         odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
@@ -461,6 +789,14 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         callback();
     };
 
+    /**
+     * @return {undefined}
+     */
+    /*jslint emptyblock: true*/
+    function emptyFunction() {
+    }
+    /*jslint emptyblock: false*/
+
     function init() {
         odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
         odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
@@ -468,16 +804,28 @@ gui.DirectTextStyler = function DirectTextStyler(session, inputMemberId) {
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
-        updatedCachedValues();
+        updatedCachedTextSettings();
+        updatedCachedParagraphSettings();
+
+        if (!directParagraphStylingEnabled) {
+            self.alignParagraphCenter = emptyFunction;
+            self.alignParagraphJustified = emptyFunction;
+            self.alignParagraphLeft = emptyFunction;
+            self.alignParagraphRight = emptyFunction;
+            self.createParagraphStyleOps = function () { return []; };
+            self.indent = emptyFunction;
+            self.outdent = emptyFunction;
+        }
     }
 
     init();
 };
 
-/**@const*/gui.DirectTextStyler.textStylingChanged = "textStyling/changed";
+/**@const*/gui.DirectFormattingController.textStylingChanged = "textStyling/changed";
+/**@const*/gui.DirectFormattingController.paragraphStylingChanged = "paragraphStyling/changed";
 
 (function () {
     "use strict";
-    return gui.DirectTextStyler;
+    return gui.DirectFormattingController;
 }());
 

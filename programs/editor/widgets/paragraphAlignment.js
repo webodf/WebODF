@@ -50,7 +50,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
             var self = this,
                 editorSession,
                 widget = {},
-                directParagraphStyler,
+                directFormattingController,
                 justifyLeft,
                 justifyCenter,
                 justifyRight,
@@ -65,7 +65,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyLeft",
                 onChange: function () {
-                    directParagraphStyler.alignParagraphLeft();
+                    directFormattingController.alignParagraphLeft();
                     self.onToolDone();
                 }
             });
@@ -77,7 +77,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyCenter",
                 onChange: function () {
-                    directParagraphStyler.alignParagraphCenter();
+                    directFormattingController.alignParagraphCenter();
                     self.onToolDone();
                 }
             });
@@ -89,7 +89,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyRight",
                 onChange: function () {
-                    directParagraphStyler.alignParagraphRight();
+                    directFormattingController.alignParagraphRight();
                     self.onToolDone();
                 }
             });
@@ -101,7 +101,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 checked: false,
                 iconClass: "dijitEditorIcon dijitEditorIconJustifyFull",
                 onChange: function () {
-                    directParagraphStyler.alignParagraphJustified();
+                    directFormattingController.alignParagraphJustified();
                     self.onToolDone();
                 }
             });
@@ -112,7 +112,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 showLabel: false,
                 iconClass: "dijitEditorIcon dijitEditorIconOutdent",
                 onClick: function () {
-                    directParagraphStyler.outdent();
+                    directFormattingController.outdent();
                     self.onToolDone();
                 }
             });
@@ -123,7 +123,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 showLabel: false,
                 iconClass: "dijitEditorIcon dijitEditorIconIndent",
                 onClick: function () {
-                    directParagraphStyler.indent();
+                    directFormattingController.indent();
                     self.onToolDone();
                 }
             });
@@ -174,21 +174,21 @@ define("webodf/editor/widgets/paragraphAlignment", [
             }
 
             this.setEditorSession = function (session) {
-                if (directParagraphStyler) {
-                    directParagraphStyler.unsubscribe(gui.DirectParagraphStyler.paragraphStylingChanged, updateStyleButtons);
+                if (directFormattingController) {
+                    directFormattingController.unsubscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
                 }
-                directParagraphStyler = session && session.sessionController.getDirectParagraphStyler();
-                if (directParagraphStyler) {
-                    directParagraphStyler.subscribe(gui.DirectParagraphStyler.paragraphStylingChanged, updateStyleButtons);
+                directFormattingController = session && session.sessionController.getDirectFormattingController();
+                if (directFormattingController) {
+                    directFormattingController.subscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
                 }
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !directParagraphStyler);
+                    element.setAttribute('disabled', !directFormattingController);
                 });
                 updateStyleButtons({
-                    isAlignedLeft:      directParagraphStyler ? directParagraphStyler.isAlignedLeft() :      false,
-                    isAlignedCenter:    directParagraphStyler ? directParagraphStyler.isAlignedCenter() :    false,
-                    isAlignedRight:     directParagraphStyler ? directParagraphStyler.isAlignedRight() :     false,
-                    isAlignedJustified: directParagraphStyler ? directParagraphStyler.isAlignedJustified() : false
+                    isAlignedLeft:      directFormattingController ? directFormattingController.isAlignedLeft() :      false,
+                    isAlignedCenter:    directFormattingController ? directFormattingController.isAlignedCenter() :    false,
+                    isAlignedRight:     directFormattingController ? directFormattingController.isAlignedRight() :     false,
+                    isAlignedJustified: directFormattingController ? directFormattingController.isAlignedJustified() : false
                 });
 
                 if (editorSession) {
