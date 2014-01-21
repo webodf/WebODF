@@ -65,7 +65,21 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             gui.UndoManager.signalUndoStateModified,
             gui.TrivialUndoManager.signalDocumentRootReplaced
         ]),
-        undoRules = defaultRules || new gui.UndoStateRules();
+        undoRules = defaultRules || new gui.UndoStateRules(),
+        isExecutingOps = false;
+
+    /**
+     * Execute all operations in the supplied array
+     * @param {!Array.<!ops.Operation>} operations
+     * @return {undefined}
+     */
+    function executeOperations(operations) {
+        if (operations.length > 0) {
+            isExecutingOps = true; // Used to ignore operations received whilst performing an undo or redo
+            playFunc(operations);
+            isExecutingOps = false;
+        }
+    }
 
     function emitStackChange() {
         eventNotifier.emit(gui.UndoManager.signalUndoStackChanged, {
@@ -253,8 +267,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
     /**
      * Sets the playback function to use to re-execute operations from the undo stack.
-     * This should *not* report these operations back to the undo manager as being executed.
-     * @param {!function(!ops.Operation)} playback_func
+     * @param {!function(!Array.<!ops.Operation>)} playback_func
      */
     this.setPlaybackFunction = function(playback_func) {
         playFunc = playback_func;
@@ -266,6 +279,10 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * @return {undefined}
      */
     this.onOperationExecuted = function(op) {
+        if (isExecutingOps) {
+            return; // Ignore new operations generated whilst performing an undo/redo
+        }
+
         // An edit operation is assumed to indicate the end of the initial state. The user can manually
         // reset the initial state later with setInitialState if desired.
         // Additionally, an edit operation received when in the middle of the undo stack should also create a new state,
@@ -294,10 +311,11 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     this.moveForward = function(states) {
         var moved = 0,
             redoOperations;
+
         while (states && redoStates.length) {
             redoOperations = redoStates.pop();
             undoStates.push(redoOperations);
-            redoOperations.forEach(playFunc);
+            executeOperations(redoOperations);
             states -= 1;
             moved += 1;
         }
@@ -341,8 +359,8 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             odtDocument.getCursors().forEach(function (cursor) {
                 odtDocument.removeCursor(cursor.getMemberId());
             });
-            initialState.forEach(playFunc);
-            undoStates.forEach(function (ops) { ops.forEach(playFunc); });
+            executeOperations(initialState);
+            undoStates.forEach(executeOperations);
             odfCanvas.refreshCSS();
 
             // On a move back command, new ops should be subsequently

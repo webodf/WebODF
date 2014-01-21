@@ -341,7 +341,6 @@ gui.SessionController = (function () {
         function undo() {
             if (undoManager) {
                 undoManager.moveBackward(1);
-                redrawRegionSelectionTask.trigger();
                 return true;
             }
 
@@ -354,7 +353,6 @@ gui.SessionController = (function () {
         function redo() {
             if (undoManager) {
                 undoManager.moveForward(1);
-                redrawRegionSelectionTask.trigger();
                 return true;
             }
 
@@ -782,9 +780,7 @@ gui.SessionController = (function () {
                 undoManager.setOdtDocument(odtDocument);
                 // As per gui.UndoManager, this should NOT fire any signals or report
                 // events being executed back to the undo manager.
-                undoManager.setPlaybackFunction(function (op) {
-                    op.execute(odtDocument);
-                });
+                undoManager.setPlaybackFunction(session.enqueue);
                 undoManager.subscribe(gui.UndoManager.signalUndoStackChanged, forwardUndoStackChange);
             }
         };

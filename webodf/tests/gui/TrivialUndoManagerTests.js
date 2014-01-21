@@ -86,7 +86,11 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             ops : []
         };
         t.manager.setOdtDocument(t.mock);
-        t.manager.setPlaybackFunction(function (op) {t.ops.push(op.spec().timestamp); });
+        t.manager.setPlaybackFunction(function (ops) {
+            ops.forEach(function(op) {
+                t.ops.push(op.spec().timestamp);
+            });
+        });
     };
     this.tearDown = function () {
         t = {};
