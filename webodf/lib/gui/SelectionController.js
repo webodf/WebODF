@@ -54,10 +54,23 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils(),
         baseFilter = odtDocument.getPositionFilter(),
-        keyboardMovementsFilter = new core.PositionFilterChain();
+        keyboardMovementsFilter = new core.PositionFilterChain(),
+        rootFilter = odtDocument.createRootFilter(inputMemberId);
 
     keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
     keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
+
+    /**
+     * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
+     * The step iterator subtree is set to the root of the current cursor node
+     * @returns {!core.StepIterator}
+     */
+    function createKeyboardStepIterator() {
+        var cursor = odtDocument.getCursor(inputMemberId),
+            node = cursor.getNode();
+
+        return odtDocument.createStepIterator(node, 0, [baseFilter, rootFilter], odtDocument.getRootElement(node));
+    }
 
     /**
      * @param {Function} lookup
@@ -295,6 +308,26 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
+     * @param {!function(!core.StepIterator):!boolean} advanceIterator
+     * @return {undefined}
+     */
+    function extendSelection(advanceIterator) {
+        var stepIterator = createKeyboardStepIterator(),
+            anchorNode = odtDocument.getCursor(inputMemberId).getAnchorNode(),
+            newSelection;
+
+        if (advanceIterator(stepIterator)) {
+            newSelection = odtDocument.convertDomToCursorRange({
+                anchorNode: anchorNode,
+                anchorOffset: 0,
+                focusNode: stepIterator.container(),
+                focusOffset: stepIterator.offset()
+            });
+            session.enqueue([createOpMoveCursor(newSelection.position, newSelection.length)]);
+        }
+    }
+
+    /**
      * @param {!number} positionAdjust   position adjustment
      * @return {undefined}
      */
@@ -312,10 +345,24 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
+     * @param {!function(!core.StepIterator):!boolean} advanceIterator
+     * @return {undefined}
+     */
+    function moveCursor(advanceIterator) {
+        var stepIterator = createKeyboardStepIterator(),
+            position;
+
+        if (advanceIterator(stepIterator)) {
+            position = odtDocument.convertDomPointToCursorStep(stepIterator.container(), stepIterator.offset());
+            session.enqueue([createOpMoveCursor(position, 0)]);
+        }
+    }
+
+    /**
      * @return {!boolean}
      */
     function moveCursorToLeft() {
-        moveCursorByAdjustment(-1);
+        moveCursor(function(iterator) { return iterator.previousStep(); });
         return true;
     }
     this.moveCursorToLeft = moveCursorToLeft;
@@ -324,7 +371,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToRight() {
-        moveCursorByAdjustment(1);
+        moveCursor(function(iterator) { return iterator.nextStep(); });
         return true;
     }
     this.moveCursorToRight = moveCursorToRight;
@@ -333,7 +380,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToLeft() {
-        extendCursorByAdjustment(-1);
+        extendSelection(function(iterator) { return iterator.previousStep(); });
         return true;
     }
     this.extendSelectionToLeft = extendSelectionToLeft;
@@ -342,7 +389,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToRight() {
-        extendCursorByAdjustment(1);
+        extendSelection(function(iterator) { return iterator.nextStep(); });
         return true;
     }
     this.extendSelectionToRight = extendSelectionToRight;
