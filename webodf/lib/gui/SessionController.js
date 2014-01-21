@@ -626,6 +626,9 @@ gui.SessionController = (function () {
             eventManager.subscribe("cut", handleCut);
             eventManager.subscribe("beforepaste", handleBeforePaste);
             eventManager.subscribe("paste", handlePaste);
+            // eventManager will bind focus event on both eventTrap and window which changes the cursor style to text
+            // straight after cmd+click on MacOs. So bind to window object directly here.
+            window.addEventListener("focus", hyperlinkClickHandler.showTextCursor, false);
 
             if (undoManager) {
                 // For most undo managers, the initial state is a clean document *with* a cursor present
@@ -706,6 +709,7 @@ gui.SessionController = (function () {
             eventManager.unsubscribe("beforecut", handleBeforeCut);
             eventManager.unsubscribe("paste", handlePaste);
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
+            window.removeEventListener("focus", hyperlinkClickHandler.showTextCursor, false);
 
             inputMethodEditor.setEditing(false);
             hyperlinkClickHandler.setModifier(gui.HyperlinkClickHandler.Modifier.None);
