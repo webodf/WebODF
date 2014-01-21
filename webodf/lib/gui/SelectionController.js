@@ -57,8 +57,8 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         keyboardMovementsFilter = new core.PositionFilterChain(),
         rootFilter = odtDocument.createRootFilter(inputMemberId);
 
-    keyboardMovementsFilter.addFilter('BaseFilter', baseFilter);
-    keyboardMovementsFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
+    keyboardMovementsFilter.addFilter(baseFilter);
+    keyboardMovementsFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
 
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.

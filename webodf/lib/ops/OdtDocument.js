@@ -172,10 +172,10 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!Node} container
      * @param {!number} offset
      * @param {!Array.<!core.PositionFilter>} filters Filter to apply to the iterator positions. If multiple
-     * iterators are provided, they will be combined in order using a PositionFilterChain.
+     *  iterators are provided, they will be combined in order using a PositionFilterChain.
      * @param {!Node} subTree Subtree to search for step within. Generally a paragraph or document root. Choosing
-     * a smaller subtree allows iteration to end quickly if there are no walkable steps remaining in a particular
-     * direction. This can vastly improve performance.
+     *  a smaller subtree allows iteration to end quickly if there are no walkable steps remaining in a particular
+     *  direction. This can vastly improve performance.
      *
      * @returns {!core.StepIterator}
      */
@@ -185,9 +185,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             stepIterator;
 
         if (filters.length > 1) {
-            filters.forEach(function(filter, index) {
-                filterOrChain.addFilter("filter" + index, filter);
-            });
+            filters.forEach(filterOrChain.addFilter);
         }
 
         stepIterator = new core.StepIterator(filterOrChain, positionIterator);
