@@ -165,6 +165,20 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         r.shouldBe(t, "t.previousState", "0");
     }
 
+    function isPartOfOperationSet_TextInsertion_DiscontinuousInsertions() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}),
+            create(new ops.OpInsertText(), {position: 2, text: "b"})
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "1");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
     function isPartOfOperationSet_TextInsertion_IgnoresCursorMove() {
         t.ops = [
             create(new ops.OpInsertText(), {position: 0, text: "a"}),
@@ -295,6 +309,7 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
             isPartOfOperationSet_AvoidsPrecedingNonEditStates,
             isPartOfOperationSet_TextInsertion_Simple,
             isPartOfOperationSet_TextInsertion_Simple2,
+            isPartOfOperationSet_TextInsertion_DiscontinuousInsertions,
             isPartOfOperationSet_TextInsertion_IgnoresCursorMove,
             isPartOfOperationSet_ResetsToLastCursorMove,
             isPartOfOperationSet_TextRemoval_ResetsToDirectionChange,

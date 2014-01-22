@@ -35,7 +35,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global gui*/
+/*global gui, runtime*/
 
 /**
  * This class attempts to implement undo/redo behaviour identical
@@ -115,13 +115,39 @@ gui.UndoStateRules = function UndoStateRules() {
         return differenceBetweenNewPositionAndState === differenceBetweenStatePositions;
     }
 
-    function isContinuousOperation(recentEditOps, thisOp) {
-        var optype = getOpType(thisOp);
+    /**
+     * Returns true if the two operations are considered adjacent.
+     * @param {!ops.Operation} thisOp
+     * @param {!ops.Operation} recentEditOp
+     * @returns {!boolean}
+     */
+    function isAdjacentOperation(thisOp, recentEditOp) {
+        var positionDifference = getOpPosition(thisOp) - getOpPosition(recentEditOp);
+        // RemoveText:
+        // - delete via backspace - direction will be -1 as cursor moves back
+        // - delete via delete key - direction will be 0 as cursor doesn't move
+        // InsertText:
+        // - prepend text - direction will be 0 as cursor doesn't move
+        // - append text - direction will be 1 as cursor moves forward
+        return positionDifference === 0 || Math.abs(positionDifference) === 1;
+    }
 
-        if (canAggregateOperation(optype) && optype === getOpType(recentEditOps[0])) {
+    /**
+     * Returns true if thisOp can be grouped together with the most recent edit operation
+     * @param {!Array.<!ops.Operation>} recentEditOps
+     * @param {!ops.Operation} thisOp
+     * @returns {!boolean}
+     */
+    function isContinuousWithExistingOperation(thisOp, recentEditOps) {
+        var thisOpType = getOpType(thisOp),
+            lastEditOp = recentEditOps[recentEditOps.length - 1];
+
+        runtime.assert(Boolean(lastEditOp), "No edit operations found in state");
+        if (canAggregateOperation(thisOpType) && thisOpType === getOpType(lastEditOp)) {
             // Operation can aggregate, and operation type is identical
             if (recentEditOps.length === 1) {
-                return true; // Not enough ops to worry about direction of travel
+                // Not enough ops to worry about direction of travel. Just check new op is adjacent to existing op
+                return isAdjacentOperation(thisOp, lastEditOp);
             }
 
             if (isSameDirectionOfTravel(thisOp, recentEditOps)) {
@@ -145,7 +171,7 @@ gui.UndoStateRules = function UndoStateRules() {
                 return true; // No edit operations so far, so it must be part of the set
             }
             return isEditOperation(/**@type{!ops.Operation}*/(lastOperations[lastOperations.length - 1]))
-                    && isContinuousOperation(lastOperations.filter(isEditOperation), operation);
+                    && isContinuousWithExistingOperation(operation, lastOperations.filter(isEditOperation));
         }
         return true;
     }
