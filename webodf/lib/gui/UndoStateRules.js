@@ -55,7 +55,6 @@ gui.UndoStateRules = function UndoStateRules() {
     function getOpType(op) {
         return op.spec().optype;
     }
-    this.getOpType = getOpType;
 
     function getOpPosition(op) {
         return op.spec().position;
@@ -64,8 +63,8 @@ gui.UndoStateRules = function UndoStateRules() {
     /**
      * Returns true if the supplied operation
      * is considered an editing operation.
-     * @param {ops.Operation} op
-     * @returns {boolean} Returns true if the supplied op is an edit operation
+     * @param {!ops.Operation} op
+     * @returns {!boolean} Returns true if the supplied op is an edit operation
      */
     function isEditOperation(op) {
         return op.isEdit;
@@ -76,7 +75,7 @@ gui.UndoStateRules = function UndoStateRules() {
      * Returns true if the supplied optype is allowed to
      * aggregate multiple operations in a single undo or redo state
      * @param {!string} optype
-     * @returns {boolean}
+     * @returns {!boolean}
      */
     function canAggregateOperation(optype) {
         switch (optype) {
@@ -91,18 +90,19 @@ gui.UndoStateRules = function UndoStateRules() {
     /**
      * Returns true if the newly supplied operation is continuing
      * in the same direction of travel as the recent edit operations
-     * @param {!Array.<!ops.Operation>} recentEditOps
      * @param {!ops.Operation} thisOp
-     * @returns {boolean}
+     * @param {!Array.<!ops.Operation>} recentEditOps
+     * @returns {!boolean}
      */
-    function isSameDirectionOfTravel(recentEditOps, thisOp) {
+    function isSameDirectionOfTravel(thisOp, recentEditOps) {
         // Note, the operations in the recent queue are most
         // recent to least recent. As such, the direction order
         // should be thisPos => existing2 => existing1
-        var existing1 = getOpPosition(recentEditOps[recentEditOps.length - 2]),
-            existing2 = getOpPosition(recentEditOps[recentEditOps.length - 1]),
-            thisPos = getOpPosition(thisOp),
-            direction = existing2 - existing1;
+        var earlierPositionInState = getOpPosition(recentEditOps[recentEditOps.length - 2]),
+            lastPositionInState = getOpPosition(recentEditOps[recentEditOps.length - 1]),
+            newPosition = getOpPosition(thisOp),
+            differenceBetweenStatePositions = lastPositionInState - earlierPositionInState,
+            differenceBetweenNewPositionAndState = newPosition - lastPositionInState;
         // Next, the tricky part... determining the direction of travel
         // Each aggregate operation can have two directions of travel:
         // RemoveText:
@@ -112,7 +112,7 @@ gui.UndoStateRules = function UndoStateRules() {
         // - prepend text - direction will be 0 as cursor doesn't move
         // - append text - direction will be 1 as cursor moves forward
 
-        return existing2 === thisPos - direction;
+        return differenceBetweenNewPositionAndState === differenceBetweenStatePositions;
     }
 
     function isContinuousOperation(recentEditOps, thisOp) {
@@ -124,7 +124,7 @@ gui.UndoStateRules = function UndoStateRules() {
                 return true; // Not enough ops to worry about direction of travel
             }
 
-            if (isSameDirectionOfTravel(recentEditOps, thisOp)) {
+            if (isSameDirectionOfTravel(thisOp, recentEditOps)) {
                 return true;
             }
         }
@@ -136,7 +136,7 @@ gui.UndoStateRules = function UndoStateRules() {
      * Returns true if the provided operation is part of the existing
      * set of operations according to the undo rules
      * @param {!ops.Operation} operation
-     * @param {!Array.<ops.Operation>} lastOperations
+     * @param {!Array.<!ops.Operation>} lastOperations
      * @returns {!boolean}
      */
     function isPartOfOperationSet(operation, lastOperations) {
@@ -144,7 +144,7 @@ gui.UndoStateRules = function UndoStateRules() {
             if (lastOperations.length === 0) {
                 return true; // No edit operations so far, so it must be part of the set
             }
-            return isEditOperation(lastOperations[lastOperations.length - 1])
+            return isEditOperation(/**@type{!ops.Operation}*/(lastOperations[lastOperations.length - 1]))
                     && isContinuousOperation(lastOperations.filter(isEditOperation), operation);
         }
         return true;

@@ -38,6 +38,7 @@ runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpRemoveText");
+runtime.loadClass("ops.Operation");
 runtime.loadClass("gui.UndoStateRules");
 /**
  * @constructor
@@ -58,11 +59,30 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
 
+    /**
+     * Initialize an operation with the supplied arguments
+     * @param {!ops.Operation} operation
+     * @param {?} args
+     * @returns {!ops.Operation}
+     */
     function create(operation, args) {
         operation.init(args);
         return operation;
     }
 
+    /**
+     * Report the index of the latest undo state in the defined array.
+     * If there are no available undo states, returns -1.
+     *
+     * For example, Given [ op1, op2, op3 ], assuming op2 is the start of a new undo state,
+     * this function will return 1.
+     *
+     * Note: non-edit operations starting at the front of the array are gathered into the "initial"
+     * state of the document, and cannot be undone.
+     *
+     * @param {!Array.<!ops.Operation>} undoQueue
+     * @returns {!number}
+     */
     function findLastUndoState(undoQueue) {
         var index = 0,
             undoState = [];
@@ -78,6 +98,11 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         return undoState.some(t.rules.isEditOperation) ? index : -1;
     }
 
+    /**
+     * Discard all remaining operations in the array beginning at the specified index (inclusive)
+     * @param {!number} fromIndex
+     * @return {undefined}
+     */
     function discardTrailingOps(fromIndex) {
         t.ops.splice(fromIndex, t.ops.length - fromIndex);
     }

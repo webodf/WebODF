@@ -57,8 +57,8 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         playFunc,
         odtDocument,
         currentUndoState = [],
-        /**@type {!Array.<Array.<!ops.Operation>>}*/undoStates = [],
-        /**@type {!Array.<Array.<!ops.Operation>>}*/redoStates = [],
+        /**@type {!Array.<!Array.<!ops.Operation>>}*/undoStates = [],
+        /**@type {!Array.<!Array.<!ops.Operation>>}*/redoStates = [],
         eventNotifier = new core.EventNotifier([
             gui.UndoManager.signalUndoStackChanged,
             gui.UndoManager.signalUndoStateCreated,
@@ -85,7 +85,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         if (currentUndoState !== initialState // Initial state should never be in the undo stack
             && currentUndoState !== mostRecentUndoState()) {
             // undoStates may already contain the current undo state if the user
-            // has moved backwards and then forwards in time
+            // has moved backwards and then forwards in the undo stack
             undoStates.push(currentUndoState);
         }
     }
@@ -229,13 +229,9 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         // To prevent this issue, immediately purge all cursor nodes after cloning
         removeCursors(initialDoc);
         completeCurrentUndoState();
-        // This is the only time the initialState should ever end up on the undo stack
-        // Random important point: the initialState will *always* contain the most recent cursor positions,
-        // hence why it is safe to call this method multiple times
-        undoStates.unshift(initialState);
         // We just threw away the cursors in the snapshot, so need to recover all these operations so the
         // cursor can be re-inserted when an undo is performed
-        currentUndoState = initialState = extractCursorStates(undoStates);
+        currentUndoState = initialState = extractCursorStates([initialState].concat(undoStates));
         undoStates.length = 0;
         redoStates.length = 0;
         emitStackChange();
