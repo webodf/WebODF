@@ -181,10 +181,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     function createStepIterator(container, offset, filters, subTree) {
         var positionIterator = gui.SelectionMover.createPositionIterator(subTree),
-            filterOrChain = filters.length === 1 ? filters[0] : new core.PositionFilterChain(),
+            filterOrChain,
             stepIterator;
 
-        if (filters.length > 1) {
+        if (filters.length === 1) {
+            filterOrChain = filters[0];
+        } else {
+            filterOrChain = new core.PositionFilterChain();
             filters.forEach(filterOrChain.addFilter);
         }
 
