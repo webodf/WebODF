@@ -184,13 +184,27 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         r.shouldBe(t, "t.previousState", "0");
     }
 
-    function isPartOfOperationSet_TextInsertion_IgnoresCursorMove() {
+    function isPartOfOperationSet_TextInsertion_TrailingCursorMove_AddsToCurrentUndoState() {
         t.ops = [
             create(new ops.OpInsertText(), {position: 0, text: "a"}),
             create(new ops.OpInsertText(), {position: 1, text: "b"}),
             create(new ops.OpInsertText(), {position: 2, text: "c"}),
             create(new ops.OpInsertText(), {position: 3, text: "d"}),
             create(new ops.OpMoveCursor(), {position: 3}),
+            create(new ops.OpMoveCursor(), {position: 2})
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_TextInsertion_InterleavedCursorMove_AddsToCurrentUndoState() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}),
+            create(new ops.OpMoveCursor(), {position: 3}),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}),
+            create(new ops.OpInsertText(), {position: 2, text: "c"}),
+            create(new ops.OpInsertText(), {position: 3, text: "d"}),
             create(new ops.OpMoveCursor(), {position: 2})
         ];
 
@@ -378,7 +392,8 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
             isPartOfOperationSet_TextInsertion_Simple,
             isPartOfOperationSet_TextInsertion_Simple2,
             isPartOfOperationSet_TextInsertion_DiscontinuousInsertions,
-            isPartOfOperationSet_TextInsertion_IgnoresCursorMove,
+            isPartOfOperationSet_TextInsertion_TrailingCursorMove_AddsToCurrentUndoState,
+            isPartOfOperationSet_TextInsertion_InterleavedCursorMove_AddsToCurrentUndoState,
             isPartOfOperationSet_ResetsToLastCursorMove,
             isPartOfOperationSet_TextRemoval_ResetsToDirectionChange,
             isPartOfOperationSet_SeparatesOperationTypes,

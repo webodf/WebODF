@@ -266,12 +266,13 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * @return {undefined}
      */
     this.onOperationExecuted = function(op) {
-        redoStates.length = 0;
-        // An edit operation will signal the end of the initial state usually.
-        // If this isn't the case, setInitialState will reassemble these fragment states
-        // anyways.
-        if ((undoRules.isEditOperation(op) && currentUndoState === initialState)
+        // An edit operation is assumed to indicate the end of the initial state. The user can manually
+        // reset the initial state later with setInitialState if desired.
+        // Additionally, an edit operation received when in the middle of the undo stack should also create a new state,
+        // as the current undo state is effectively "sealed" and shouldn't gain additional document modifications.
+        if ((undoRules.isEditOperation(op) && (currentUndoState === initialState || redoStates.length > 0))
                 || !undoRules.isPartOfOperationSet(op, currentUndoState)) {
+            redoStates.length = 0; // Creating a new undo state should always reset the redo stack
             completeCurrentUndoState();
             currentUndoState = [op];
             // Every undo state *MUST* contain an edit for it to be valid for undo or redo

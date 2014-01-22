@@ -278,7 +278,20 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         r.shouldBe(t, "t.ops", "[5, 10]");
     }
 
-    function moveBackward_NextOperation_ClearsRedo() {
+    function moveBackward_NextOperationEdit_ClearsRedo() {
+        t.manager.initialize();
+
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
+        t.manager.moveBackward(1); // Now to 0 undo states available
+        r.shouldBe(t, "t.manager.hasUndoStates()", "false");
+        r.shouldBe(t, "t.manager.hasRedoStates()", "true");
+
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 1}));
+        r.shouldBe(t, "t.manager.hasRedoStates()", "false");
+        r.shouldBe(t, "t.manager.moveForward(1)", "0");
+    }
+
+    function moveBackward_NextOperationNonEdit_LeavesRedoInTact() {
         t.manager.initialize();
 
         t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
@@ -287,8 +300,8 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         r.shouldBe(t, "t.manager.hasRedoStates()", "true");
 
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
-        r.shouldBe(t, "t.manager.hasRedoStates()", "false");
-        r.shouldBe(t, "t.manager.moveForward(1)", "0");
+        r.shouldBe(t, "t.manager.hasRedoStates()", "true");
+        r.shouldBe(t, "t.manager.moveForward(1)", "1");
     }
 
     function moveBackward_BoundaryCheck_InitialDocumentState() {
@@ -352,7 +365,8 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             initialize_WhenAlreadyInitialized_DoesNothing,
             purgeInitialState_ClearsAllStacks,
             moveBackward_MovesBack_InUndoQueue,
-            moveBackward_NextOperation_ClearsRedo,
+            moveBackward_NextOperationEdit_ClearsRedo,
+            moveBackward_NextOperationNonEdit_LeavesRedoInTact,
             moveBackward_BoundaryCheck_InitialDocumentState,
             moveBackward_ResetsMostRecentCursorState_ForVisibleCursors,
             undoState_ConsumesTrailingNonEditOps

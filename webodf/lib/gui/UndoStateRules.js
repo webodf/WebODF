@@ -228,7 +228,7 @@ gui.UndoStateRules = function UndoStateRules() {
             return true;
         }
         lastEditOperations = lastOperations.filter(isEditOperation);
-        if (lastEditOperations.length > 0 && isEditOperation(lastOperation)) {
+        if (lastEditOperations.length > 0) {
             // The are existing edit operations. Check if the current op can be combined with existing operations
             // E.g., multiple insert text or remove text ops
             if (areOperationsGrouped) {
