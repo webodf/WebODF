@@ -133,9 +133,15 @@ gui.UndoStateRules = function UndoStateRules() {
     }
 
     /**
-     * Returns true if thisOp can be grouped together with the most recent edit operation
-     * @param {!Array.<!ops.Operation>} recentEditOps
+     * Returns true if thisOp can be grouped together with the most recent edit operations.
+     *
+     * For an operation to be considered continuous it must:
+     * - Be of a type that supports aggregation (e.g., insert text or remove text)
+     * - Be of the same type as the most recent edit operation
+     * - Be considered adjacent (and in the same direction as) the most recent edit operation
+     *
      * @param {!ops.Operation} thisOp
+     * @param {!Array.<!ops.Operation>} recentEditOps
      * @returns {!boolean}
      */
     function isContinuousWithExistingOperation(thisOp, recentEditOps) {
@@ -150,12 +156,50 @@ gui.UndoStateRules = function UndoStateRules() {
                 return isAdjacentOperation(thisOp, lastEditOp);
             }
 
-            if (isSameDirectionOfTravel(thisOp, recentEditOps)) {
-                return true;
+            return isSameDirectionOfTravel(thisOp, recentEditOps);
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if thisOp can be grouped together with the most recent edit operations group.
+     *
+     * For an operation to be considered continuous it must:
+     * - Be of a type that supports aggregation (e.g., insert text or remove text)
+     * - Be continuous with the most recent edit operation of the same type in the most recent operations group
+     *   (see isContinuousWithExistingOperation for the definition of "continuous")
+     *
+     * @param {!ops.Operation} thisOp
+     * @param {!Array.<!ops.Operation>} recentEditOps
+     * @returns {!boolean}
+     */
+    function isContinuousWithExistingGroup(thisOp, recentEditOps) {
+        var thisOpType = getOpType(thisOp),
+            lastEditOp = recentEditOps[recentEditOps.length - 1],
+            groupId,
+            isContinuous;
+
+        runtime.assert(Boolean(lastEditOp), "No edit operations found in state");
+        groupId = lastEditOp.group;
+        runtime.assert(groupId !== undefined, "Operation has no group");
+        // First check if thisOp supports aggregation
+        if (canAggregateOperation(thisOpType)) {
+            // There is a defined group. Check if any operation in the group
+            // is continuous with the current operation, and return true if this is the case.
+            while (lastEditOp && lastEditOp.group === groupId) {
+                if (thisOpType === getOpType(lastEditOp)) {
+                    // The last edit op that is compatible for aggregation defines whether thisOp is compatible with
+                    // the existing edits
+                    isContinuous = isContinuousWithExistingOperation(thisOp, recentEditOps);
+                    break;
+                }
+                recentEditOps.pop(); // Remove the non-matching op and see if the next op in the group is continuous
+                lastEditOp = recentEditOps[recentEditOps.length - 1];
             }
         }
-
-        return false;
+        // isContinuous will still be undefined if there were no compatibleForAggregation ops in the latest group,
+        // hence to turn this into a true/false, comparison to true is necessary
+        return isContinuous === true;
     }
 
     /**
@@ -166,14 +210,38 @@ gui.UndoStateRules = function UndoStateRules() {
      * @returns {!boolean}
      */
     function isPartOfOperationSet(operation, lastOperations) {
-        if (isEditOperation(operation)) {
-            if (lastOperations.length === 0) {
-                return true; // No edit operations so far, so it must be part of the set
-            }
-            return isEditOperation(/**@type{!ops.Operation}*/(lastOperations[lastOperations.length - 1]))
-                    && isContinuousWithExistingOperation(operation, lastOperations.filter(isEditOperation));
+        var areOperationsGrouped = operation.group !== undefined, // Expect groups to be consistently used (if in use at all)
+            lastOperation,
+            lastEditOperations;
+        if (!isEditOperation(operation)) {
+            // Non-edit operations always get appended to the existing undo state
+            // this covers things such as move cursor ops
+            return true;
         }
-        return true;
+        if (lastOperations.length === 0) {
+            // This is the first operation of a pristine state
+            return true;
+        }
+        lastOperation = lastOperations[lastOperations.length - 1];
+        if (areOperationsGrouped && operation.group === lastOperation.group) {
+            // Operation groups match, so these were queued as a group
+            return true;
+        }
+        lastEditOperations = lastOperations.filter(isEditOperation);
+        if (lastEditOperations.length > 0 && isEditOperation(lastOperation)) {
+            // The are existing edit operations. Check if the current op can be combined with existing operations
+            // E.g., multiple insert text or remove text ops
+            if (areOperationsGrouped) {
+                return isContinuousWithExistingGroup(operation, lastEditOperations);
+            }
+            return isContinuousWithExistingOperation(operation, lastEditOperations);
+        }
+        // The following are all true at this point:
+        // - new operation is an edit operation (check 1)
+        // - existing undo state has at least one existing operation (check 2)
+        // - new operation is not part of most recent operation group (check 3)
+        // - new operation is not continuous with the existing edit operations (check 4)
+        return false;
     }
     this.isPartOfOperationSet = isPartOfOperationSet;
 };

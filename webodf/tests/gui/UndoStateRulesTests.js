@@ -34,6 +34,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, gui, ops*/
+runtime.loadClass("ops.OpApplyDirectStyling");
 runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpSplitParagraph");
@@ -63,10 +64,14 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
      * Initialize an operation with the supplied arguments
      * @param {!ops.Operation} operation
      * @param {?} args
+     * @param {string=} group
      * @returns {!ops.Operation}
      */
-    function create(operation, args) {
+    function create(operation, args, group) {
         operation.init(args);
+        if (group) {
+            operation.group = group;
+        }
         return operation;
     }
 
@@ -303,6 +308,69 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         r.shouldBe(t, "t.previousState", "-1");
     }
 
+    function isPartOfOperationSet_GroupedOperations_KeepsGroupsTogether() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "abcde"}, "g1"),
+            create(new ops.OpRemoveText(), {position: 3, length: 1}, "g1"), // Delete d
+            create(new ops.OpRemoveText(), {position: 3, length: 1}, "g2"), // Delete e
+            create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2"), // Delete a
+            create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2") // Delete b
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "2");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_GroupedOperations_TextInsertAndStyle_AllowsContinuation() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}, "g1"),
+            create(new ops.OpApplyDirectStyling(), {position: 0, length: 1}, "g1"),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}, "g2"),
+            create(new ops.OpInsertText(), {position: 1, text: "c"}, "g3")
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "3");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_GroupedOperations_GroupedInserts_CreatesMultipleUndoStates() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}, "g1"),
+            create(new ops.OpInsertText(), {position: 2, text: "b"}, "g1"),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}, "g2")
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "2");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_GroupedOperations_AdjacentGroups_AllowsContinuation() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}, "g1"),
+            create(new ops.OpApplyDirectStyling(), {position: 0, length: 1}, "g1"),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}, "g2"),
+            create(new ops.OpApplyDirectStyling(), {position: 1, length: 1}, "g2"),
+            create(new ops.OpInsertText(), {position: 2, text: "c"}, "g3"),
+            create(new ops.OpApplyDirectStyling(), {position: 2, length: 1}, "g3"),
+            create(new ops.OpInsertText(), {position: 3, text: "e"}, "g4")
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
     this.tests = function () {
         return r.name([
             isPartOfOperationSet_NoValidStates,
@@ -315,7 +383,12 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
             isPartOfOperationSet_TextRemoval_ResetsToDirectionChange,
             isPartOfOperationSet_SeparatesOperationTypes,
             isPartOfOperationSet_SeparatesOperationDirections,
-            isPartOfOperationSet_SeparatesOperationDirections_BROKEN
+            isPartOfOperationSet_SeparatesOperationDirections_BROKEN,
+
+            isPartOfOperationSet_GroupedOperations_KeepsGroupsTogether,
+            isPartOfOperationSet_GroupedOperations_TextInsertAndStyle_AllowsContinuation,
+            isPartOfOperationSet_GroupedOperations_GroupedInserts_CreatesMultipleUndoStates,
+            isPartOfOperationSet_GroupedOperations_AdjacentGroups_AllowsContinuation
         ]);
     };
     this.asyncTests = function () {

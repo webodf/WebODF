@@ -53,7 +53,8 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
     "use strict";
 
     var operationFactory,
-        playbackFunction;
+        playbackFunction,
+        groupIdentifier = 0;
 
     /**
      * Sets the factory to use to create operation instances from operation specs.
@@ -82,12 +83,19 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
      * @return {undefined}
      */
     this.push = function (operations) {
+        // This is an extremely simplistic and VERY temporary implementation of operation grouping.
+        // In order to improve undo behaviour, the undo manager requires knowledge about what groups
+        // of operations were queued together, so these can be stored in a single undo state.
+        // The current implementation is only designed for a localeditor instance & the TrivialUndoManager.
+        // TODO redesign this concept to work with collaborative editing
+        groupIdentifier += 1;
         operations.forEach(function(op) {
             var timedOp,
                 opspec = op.spec();
 
             opspec.timestamp = (new Date()).getTime();
             timedOp = operationFactory.create(opspec);
+            timedOp.group = "g" + groupIdentifier;
 
             // TODO: handle return flag in error case
             playbackFunction(timedOp);
