@@ -171,20 +171,31 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      *
      * @param {!Node} container
      * @param {!number} offset
-     * @param {!core.PositionFilter} filter Filter to apply to the iterator positions
+     * @param {!Array.<!core.PositionFilter>} filters Filter to apply to the iterator positions. If multiple
+     *  iterators are provided, they will be combined in order using a PositionFilterChain.
      * @param {!Node} subTree Subtree to search for step within. Generally a paragraph or document root. Choosing
-     * a smaller subtree allows iteration to end quickly if there are no walkable steps remaining in a particular
-     * direction. This can vastly improve performance
+     *  a smaller subtree allows iteration to end quickly if there are no walkable steps remaining in a particular
+     *  direction. This can vastly improve performance.
      *
      * @returns {!core.StepIterator}
      */
-    function createStepIterator(container, offset, filter, subTree) {
+    function createStepIterator(container, offset, filters, subTree) {
         var positionIterator = gui.SelectionMover.createPositionIterator(subTree),
-            stepIterator = new core.StepIterator(filter, positionIterator);
+            filterOrChain,
+            stepIterator;
 
+        if (filters.length === 1) {
+            filterOrChain = filters[0];
+        } else {
+            filterOrChain = new core.PositionFilterChain();
+            filters.forEach(filterOrChain.addFilter);
+        }
+
+        stepIterator = new core.StepIterator(filterOrChain, positionIterator);
         stepIterator.setPosition(container, offset);
         return stepIterator;
     }
+    this.createStepIterator = createStepIterator;
 
     /**
      * Returns a PositionIterator instance at the
@@ -586,30 +597,25 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * while keeping them inside the same root. An event will be raised for this cursor if it is moved
      */
     this.fixCursorPositions = function () {
-        var rootConstrainedFilter = new core.PositionFilterChain();
-        rootConstrainedFilter.addFilter('BaseFilter', filter);
-
         Object.keys(cursors).forEach(function(memberId) {
             var cursor = cursors[memberId],
                 root = getRoot(cursor.getNode()),
+                rootFilter = self.createRootFilter(root),
                 subTree,
                 startPoint,
                 endPoint,
                 selectedRange,
                 cursorMoved = false;
 
-            // Equip a Root Filter for specifically this cursor
-            rootConstrainedFilter.addFilter('RootFilter', self.createRootFilter(root));
-
             selectedRange = cursor.getSelectedRange();
             subTree = paragraphOrRoot(/**@type{!Node}*/(selectedRange.startContainer), selectedRange.startOffset, root);
             startPoint = createStepIterator(/**@type{!Node}*/(selectedRange.startContainer), selectedRange.startOffset,
-                rootConstrainedFilter, subTree);
+                [filter, rootFilter], subTree);
 
             if (!selectedRange.collapsed) {
                 subTree = paragraphOrRoot(/**@type{!Node}*/(selectedRange.endContainer), selectedRange.endOffset, root);
                 endPoint = createStepIterator(/**@type{!Node}*/(selectedRange.endContainer), selectedRange.endOffset,
-                    rootConstrainedFilter, subTree);
+                    [filter, rootFilter], subTree);
             } else {
                 endPoint = startPoint;
             }
@@ -635,33 +641,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
                 cursor.setSelectedRange(selectedRange, cursor.hasForwardSelection());
                 self.emit(ops.OdtDocument.signalCursorMoved, cursor);
             }
-            // Un-equip the Root Filter for this cursor because we are done with it
-            rootConstrainedFilter.removeFilter('RootFilter');
         });
     };
 
-    /**
-     * This function calculates the steps in ODF world between the cursor of the
-     * given member and the given position in the DOM. If the given position is
-     * not walkable, then it will be the number of steps to the last walkable position
-     * before the given position from the direction of the cursor.
-     * @param {!string} memberid
-     * @param {!Node} node
-     * @param {!number} offset offset in filtered DOM world
-     * @return {!number}
-     */
-    this.getDistanceFromCursor = function (memberid, node, offset) {
-        var cursor = cursors[memberid],
-            focusPosition,
-            targetPosition;
-        runtime.assert((node !== null) && (node !== undefined),
-            "OdtDocument.getDistanceFromCursor called without node");
-        if (cursor) {
-            focusPosition = stepsTranslator.convertDomPointToSteps(cursor.getNode(), 0);
-            targetPosition = stepsTranslator.convertDomPointToSteps(node, offset);
-        }
-        return targetPosition - focusPosition;
-    };
     /**
      * This function returns the position in ODF world of the cursor of the member.
      * @param {!string} memberid

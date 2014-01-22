@@ -146,8 +146,8 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
         // Even though the iterator is bounded to the root, iteration will still go over
         // child elements that are part of a different root. Therefore, a combined filter
         // is still necessary
-        rootConstrainedFilter.addFilter('BaseFilter', odtDocument.getPositionFilter());
-        rootConstrainedFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
+        rootConstrainedFilter.addFilter(odtDocument.getPositionFilter());
+        rootConstrainedFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
         iterator.setUnfilteredPosition(cursorNode, 0);
         while (nextPosition()) {
             if (rootConstrainedFilter.acceptPosition(iterator) === FILTER_ACCEPT) {

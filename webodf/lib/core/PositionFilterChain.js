@@ -45,8 +45,8 @@ runtime.loadClass("core.PositionFilter");
 core.PositionFilterChain = function PositionFilterChain() {
     "use strict";
 
-    var /**@type{!Object.<!string,!core.PositionFilter|!core.PositionFilterChain>}*/
-        filterChain = {},
+    var /**@type{!Array.<!core.PositionFilter|!core.PositionFilterChain>}*/
+        filterChain = [],
         /**@const*/
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/
@@ -58,36 +58,22 @@ core.PositionFilterChain = function PositionFilterChain() {
      * @return {!core.PositionFilter.FilterResult}
      */
     this.acceptPosition = function (iterator) {
-        var /**@type{!string}*/
-            filterName;
-        for (filterName in filterChain) {
-            if (filterChain.hasOwnProperty(filterName)) {
-                if (filterChain[filterName].acceptPosition(iterator) === FILTER_REJECT) {
-                    return FILTER_REJECT;
-                }
+        var i;
+        for (i = 0; i < filterChain.length; i += 1) {
+            if (filterChain[i].acceptPosition(iterator) === FILTER_REJECT) {
+                return FILTER_REJECT;
             }
         }
         return FILTER_ACCEPT;
     };
 
     /**
-     * Adds a filter with a given name and an instance of it to the filter chain.
-     * If a filter with the filterName already exists, it will be overwritten.
-     * @param {!string} filterName
+     * Adds a filter to the filter chain.
      * @param {!core.PositionFilter|!core.PositionFilterChain} filterInstance
      * @return {undefined}
      */
-    this.addFilter = function (filterName, filterInstance) {
-        filterChain[filterName] = filterInstance;
-    };
-
-    /**
-     * Removes the instance of the filter with the given name
-     * @param {!string} filterName
-     * @return {undefined}
-     */
-    this.removeFilter = function (filterName) {
-        delete filterChain[filterName];
+    this.addFilter = function (filterInstance) {
+        filterChain.push(filterInstance);
     };
 
 };

@@ -651,8 +651,8 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     function isSelectionAtTheEndOfLastParagraph(range, paragraphNode) {
         var iterator = gui.SelectionMover.createPositionIterator(paragraphNode),
             rootConstrainedFilter = new core.PositionFilterChain();
-        rootConstrainedFilter.addFilter('BaseFilter', odtDocument.getPositionFilter());
-        rootConstrainedFilter.addFilter('RootFilter', odtDocument.createRootFilter(inputMemberId));
+        rootConstrainedFilter.addFilter(odtDocument.getPositionFilter());
+        rootConstrainedFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
 
         iterator.setUnfilteredPosition(/**@type{!Node}*/(range.endContainer), range.endOffset);
         while (iterator.nextPosition()) {
