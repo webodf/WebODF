@@ -55,6 +55,7 @@
     "core.enums": [
     ],
     "gui.AnnotationController": [
+        "gui.SessionConstraints",
         "ops.Session"
     ],
     "gui.AnnotationViewManager": [

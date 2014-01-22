@@ -24,14 +24,14 @@
 
 /*global runtime, core, gui, odf, ops, Node*/
 
-
 /**
  * @constructor
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
  * @param {!string} inputMemberId
  */
-gui.AnnotationController = function AnnotationController(session, inputMemberId) {
+gui.AnnotationController = function AnnotationController(session, sessionConstraints, inputMemberId) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
@@ -102,6 +102,16 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
     }
 
     /**
+     * Gets the creator of an annotation.
+     * @param {!Element} annotationElement
+     * @return {string}
+     */
+    function getCreator(annotationElement) {
+        var creatorElement = /**@type{!Element}*/(annotationElement.getElementsByTagNameNS(odf.Namespaces.dcns, "creator")[0]);
+        return creatorElement.textContent;
+    }
+
+    /**
      * @return {!boolean}
      */
     this.isAnnotatable = function () {
@@ -136,11 +146,18 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
 
 
     /**
-     * @param {!Node} annotationNode
+     * @param {!Element} annotationNode
      * @return {undefined}
      */
     this.removeAnnotation = function(annotationNode) {
-        var startStep, endStep, op, moveCursor;
+        var startStep, endStep, op, moveCursor,
+            currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName;
+
+        if (sessionConstraints.getState("edit.annotations.onlyDeleteOwn") === true) {
+            if (currentUserName !== odfUtils.getAnnotationCreator(annotationNode)) {
+                return;
+            }
+        }
 
         // (annotationNode, 0) will report as the step just before the first step in the annotation node
         // Add 1 to this to actually get *within* the annotation
@@ -193,6 +210,8 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
     };
 
     function init() {
+        sessionConstraints.registerConstraint("edit.annotations.onlyDeleteOwn");
+
         odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
         odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
         odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorMoved);

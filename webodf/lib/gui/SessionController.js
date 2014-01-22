@@ -64,6 +64,7 @@ gui.SessionControllerOptions = function () {
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
+            sessionConstraints = new gui.SessionConstraints(),
             /**@type{!core.DomUtils}*/
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
@@ -82,7 +83,7 @@ gui.SessionControllerOptions = function () {
             undoManager = null,
             eventManager = new gui.EventManager(odtDocument),
             annotationsEnabled = args.annotationsEnabled,
-            annotationController = new gui.AnnotationController(session, inputMemberId),
+            annotationController = new gui.AnnotationController(session, sessionConstraints, inputMemberId),
             directFormattingController = new gui.DirectFormattingController(session, inputMemberId, objectNameGenerator,
                                                                             args.directTextStylingEnabled, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
@@ -959,6 +960,13 @@ gui.SessionControllerOptions = function () {
          */
         this.getSession = function () {
             return session;
+        };
+
+        /**
+         * @return {!gui.SessionConstraints}
+         */
+        this.getSessionConstraints = function () {
+            return sessionConstraints;
         };
 
         /**
