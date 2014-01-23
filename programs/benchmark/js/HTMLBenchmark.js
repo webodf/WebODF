@@ -77,7 +77,7 @@ define([
 
     /**
      * Extract supported benchmark options from the url query parameters
-     * @returns {!{fileUrl: !string, includeSlow: !boolean}}
+     * @returns {!{fileUrl: !string, includeSlow: !boolean, colour: string|undefined}}
      */
     function getConfiguration() {
         var params = getQueryParams();
@@ -85,7 +85,9 @@ define([
             /** Test document to load. Relative or absolute urls are supported */
             fileUrl: params.fileUrl || "100pages.odt",
             /** Include known slow actions in the benchmark. These can take 10 or more minutes each on large docs */
-            includeSlow: params.includeSlow || false
+            includeSlow: params.includeSlow || false,
+            /** Background colour of the benchmark results. Useful for distinguishing different benchmark versions */
+            colour: params.colour
         };
     }
 
@@ -96,9 +98,10 @@ define([
     function HTMLBenchmark() {
         var loadingScreen = document.getElementById('loadingScreen'),
             config = getConfiguration(),
-            benchmark = new Benchmark();
+            benchmark = new Benchmark(),
+            renderer = new HTMLResultsRenderer(benchmark);
 
-        new HTMLResultsRenderer(benchmark);
+        renderer.setBackgroundColour(config.colour);
 
         loadingScreen.style.display = "none";
 
