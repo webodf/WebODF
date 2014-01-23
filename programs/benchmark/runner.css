@@ -1,0 +1,52 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Helvetic, sans-serif;
+}
+
+#benchmarkView {
+    max-width: 100%;
+    /*width: 400px;*/
+    float: left;
+    background-color: #70a186;
+    padding: 0 10px;
+}
+
+#documentView {
+    min-height: 100%;
+    overflow: auto;
+}
+
+#benchmarkResults .status {
+    display: none;
+}
+
+#benchmarkResults .elapsed {
+    text-align: right;
+}
+
+#benchmarkResults {
+    width: 100%;
+}
+
+#documentView *:focus {
+    outline: none;
+}
+
+#loadingScreen {
+    position: fixed;
+    top: 100px;
+    left: 100px;
+    right: 100px;
+    background-color: #c3c3c3;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid black;
+    text-align: center;
+    vertical-align: middle;
+    z-index: 100;
+}

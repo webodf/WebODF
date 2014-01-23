@@ -76,7 +76,7 @@ define(function() {
 
                     action.subscribe("complete", function(state) {
                         setText(cells[1], state.status ? "done" : "failed");
-                        setText(cells[2], state.elapsedTime + "ms");
+                        setText(cells[2], state.elapsedTime);
                     });
                 });
             }

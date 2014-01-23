@@ -4,6 +4,7 @@ COPY_FILES(BENCHMARK_HTML ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR
     100pages.odt
     1000pages.odt
     index.html
+    runner.css
 )
 
 FILE(GLOB BENCHMARK_JS "${CMAKE_CURRENT_SOURCE_DIR}/js/*.js")
