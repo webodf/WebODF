@@ -393,8 +393,8 @@ odf.Formatting = function Formatting() {
     /**
      * Builds up a style chain for a given node by climbing up all parent nodes and checking for style information
      * @param {!Node} node
-     * @param {Object.<string, Array.<Object>>=} collectedChains Dictionary to add any new style chains to
-     * @return {Array.<Object>|undefined}
+     * @param {!Object.<!string, !Array.<!Object>>=} collectedChains Dictionary to add any new style chains to
+     * @return {!Array.<!Object>|undefined}
      */
     function buildStyleChain(node, collectedChains) {
         var parent = /**@type{!Element}*/(node.nodeType === Node.TEXT_NODE
@@ -438,8 +438,8 @@ odf.Formatting = function Formatting() {
     /**
      * Takes a provided style chain and calculates the resulting inherited style, starting from the outer-most to the
      * inner-most style
-     * @param {Array.<Object>} styleChain Ordered list starting from inner-most style to outer-most style
-     * @return {Object}
+     * @param {!Array.<!Object>} styleChain Ordered list starting from inner-most style to outer-most style
+     * @return {!Object}
      */
     function calculateAppliedStyle(styleChain) {
         var mergedChildStyle = { orderedStyles: [] };
@@ -474,32 +474,43 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns an array of all unique styles in the given text nodes
-     * @param {!Array.<!CharacterData>} textNodes
-     * @return {!Array.<Object>}
+     * @param {!Array.<!Node>} nodes
+     * @param {Object.<!string, !Object>=} calculatedStylesCache Short-lived cache of calculated styles.
+     *      Useful if a function is looking up the style information for multiple nodes without updating
+     *      any style definitions.
+     * @return {!Array.<!Object>}
      */
-    this.getAppliedStyles = function (textNodes) {
+    function getAppliedStyles(nodes, calculatedStylesCache) {
         var styleChains = {},
             styles = [];
 
-        textNodes.forEach(function (n) {
+        if (!calculatedStylesCache) {
+            calculatedStylesCache = {}; // Makes the following logic easier as a cache can be assumed to exist
+        }
+        nodes.forEach(function (n) {
             buildStyleChain(n, styleChains);
         });
 
         Object.keys(styleChains).forEach(function (key) {
-            styles.push(calculateAppliedStyle(styleChains[key]));
+            if (!calculatedStylesCache[key]) {
+                calculatedStylesCache[key] = calculateAppliedStyle(styleChains[key]);
+            }
+            styles.push(calculatedStylesCache[key]);
         });
         return styles;
-    };
+    }
+    this.getAppliedStyles = getAppliedStyles;
 
     /**
      * Returns a the applied style to the current node
      * @param {!Node} node
+     * @param {Object.<!string, !Object>=} calculatedStylesCache Short-lived cache of calculated styles.
+     *      Useful if a function is looking up the style information for multiple nodes without updating
+     *      any style definitions.
      * @return {Object|undefined}
      */
-    this.getAppliedStylesForElement = function (node) {
-        var styleChain;
-        styleChain = buildStyleChain(node);
-        return styleChain ? calculateAppliedStyle(styleChain) : undefined;
+    this.getAppliedStylesForElement = function (node, calculatedStylesCache) {
+        return getAppliedStyles([node], calculatedStylesCache)[0];
     };
 
     /**

@@ -65,6 +65,8 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
      * @param {!Object} info Style information
      */
     function StyleLookup(info) {
+        var cachedAppliedStyles = {};
+
         /**
          * @param {!Object} expected
          * @param {Object|undefined} actual
@@ -84,10 +86,8 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
          * @return {boolean}
          */
         this.isStyleApplied = function (textNode) {
-            // TODO make this performant...
-            // TODO take into account defaults and don't require styles if re-iterating the default impacts
             // TODO can direct style to element just be removed somewhere to end up with desired style?
-            var appliedStyle = formatting.getAppliedStylesForElement(textNode);
+            var appliedStyle = formatting.getAppliedStylesForElement(textNode, cachedAppliedStyles);
             return compare(info, appliedStyle);
         };
     }
