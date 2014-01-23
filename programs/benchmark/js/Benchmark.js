@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-define(["ManualStep"], function(ManualStep) {
+define([], function() {
         "use strict";
 
         /**
@@ -64,7 +64,6 @@ define(["ManualStep"], function(ManualStep) {
         function Benchmark() {
             var self = this,
                 canvasElement = document.getElementById("canvas"),
-                manualStep = new ManualStep(),
                 sharedState = new SharedState(),
                 events = new core.EventNotifier(["start", "complete"]),
                 currentActionIndex,

@@ -76,13 +76,24 @@ define(function() {
 
                     action.subscribe("complete", function(state) {
                         setText(cells[1], state.status ? "done" : "failed");
-                        setText(cells[2], state.elapsedTime + "ms");
+                        setText(cells[2], state.elapsedTime);
                     });
                 });
             }
 
             function onComplete() {
             }
+
+            /**
+             * Set the background colour of the benchmark
+             * @param {!string} bgColour
+             * @return {undefined}
+             */
+            this.setBackgroundColour = function(bgColour) {
+                if (bgColour) {
+                    outputTable.style.backgroundColor = bgColour;
+                }
+            };
 
             function init() {
                 benchmark.subscribe("start", onStart);

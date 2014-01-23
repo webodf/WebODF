@@ -46,6 +46,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("gui.ShadowCursor");
+    runtime.loadClass("gui.TrivialUndoManager");
     runtime.loadClass("ops.OpAddMember");
 
     /**
@@ -63,7 +64,8 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
                 editInfoMarkersInitiallyVisible: false,
                 caretAvatarsInitiallyVisible: false,
                 caretBlinksOnRangeSelect: true
-            };
+            },
+            undoManager = new gui.TrivialUndoManager();
 
         this.subscribe = action.subscribe;
         this.state = state;
@@ -84,6 +86,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             session = new ops.Session(sharedState.odfCanvas);
             shadowCursor = new gui.ShadowCursor(session.getOdtDocument());
             sessionController = new gui.SessionController(session, localMemberId, shadowCursor, sessionControllerOptions);
+            sessionController.setUndoManager(undoManager);
             caretManager = new gui.CaretManager(sessionController);
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
             new gui.SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager);

@@ -42,9 +42,10 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
     /**
      * Insert the letter A at the current position in the document
      * @constructor
+     * @param {!number} times Number of times to insert the letter 'A'
      */
-    function InsertLetterA() {
-        var state = {description: "Insert the letter 'A'"},
+    function InsertLetterA(times) {
+        var state = {description: "Insert the letter 'A' (x" + times + ")"},
             action = new BenchmarkAction(state);
 
         this.subscribe = action.subscribe;
@@ -54,8 +55,11 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          * @param {!SharedState} sharedState
          */
         this.start = function(sharedState) {
+            var count;
             action.start();
-            sharedState.sessionController.getTextController().insertText('A');
+            for (count = 0; count < times; count += 1) {
+                sharedState.sessionController.getTextController().insertText('A');
+            }
             action.complete(true);
         }
     }
