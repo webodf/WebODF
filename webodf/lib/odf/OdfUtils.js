@@ -176,7 +176,7 @@ odf.OdfUtils = function OdfUtils() {
      * @param {Node} node Node to start searching from
      * @param {!Node} container Root container to stop searching at. This helps set the boundary of the current
      *  search and will usually be the root level element node (e.g., office:text, office:presentation, etc.)
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     this.isWithinTrackedChanges = function (node, container) {
         while (node && node !== container) {
@@ -501,7 +501,7 @@ odf.OdfUtils = function OdfUtils() {
      * All other whitespace elements are considered insignificant
      * @param {!Text} textNode
      * @param {!number} offset
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isSignificantWhitespace(textNode, offset) {
         var text = textNode.data,
@@ -542,7 +542,7 @@ odf.OdfUtils = function OdfUtils() {
      * a downgradeable whitespace element is a space element that is immediately preceded by something other than a space
      * and has at least one non-space character after it
      * @param {!Node} node
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     this.isDowngradableSpaceElement = function(node) {
         if (node.namespaceURI === textns && node.localName === "s") {
@@ -554,7 +554,7 @@ odf.OdfUtils = function OdfUtils() {
     /**
      * Returns the first non-whitespace-only child of a given node
      * @param {Node|undefined} node
-     * @returns {Node|undefined}
+     * @return {Node|undefined}
      */
     function getFirstNonWhitespaceChild(node) {
         var child = node && node.firstChild;
@@ -646,7 +646,7 @@ odf.OdfUtils = function OdfUtils() {
      * Adapted from instructions on how to generate plain text from an ODT document.
      * See algorithm at http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1415196_253892949
      * @param {!Node} node
-     * @returns {boolean}
+     * @return {boolean}
      */
     function isTextContentContainingNode(node) {
         switch (node.namespaceURI) {
@@ -692,7 +692,7 @@ odf.OdfUtils = function OdfUtils() {
      * significant whitespace characters (as defined by the ODF standards).
      * WARNING this method is likely to be quite slow, so should be used as little as possible
      * @param {!Text} textNode
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isSignificantTextContent(textNode) {
         return Boolean(getParagraphElement(textNode)
@@ -700,16 +700,19 @@ odf.OdfUtils = function OdfUtils() {
     }
 
     /**
-     * Returns true if the supplied nodeRange should be included in the parent range according
-     * to the setting of the includePartial flag.
-     * @param {!Range} range Selection range
-     * @param {!Range} nodeRange Node character range
-     * @param {!boolean} includePartial flag indicating whether partial intersections are acceptable
-     * @returns {!boolean}
+     * Remove any nodes that aren't fully contained within the supplied range. This function assumes
+     * the nodes appear in document order.
+     * @param {!Range} range
+     * @param {!Array.<!Node>} nodes
+     * @return {undefined}
      */
-    function includeNode(range, nodeRange, includePartial) {
-        return (includePartial && domUtils.rangesIntersect(range, nodeRange))
-                    || domUtils.containsRange(range, nodeRange);
+    function removePartiallyContainedNodes(range, nodes) {
+        while (nodes.length > 0 && !domUtils.rangeContainsNode(range, /**@type{!Node}*/(nodes[0]))) {
+            nodes.shift();
+        }
+        while (nodes.length > 0 && !domUtils.rangeContainsNode(range, /**@type{!Node}*/(nodes[nodes.length - 1]))) {
+            nodes.pop();
+        }
     }
 
     /**
@@ -719,37 +722,34 @@ odf.OdfUtils = function OdfUtils() {
      * @param {!Range} range    Range to search for nodes within
      * @param {boolean} includePartial Include partially intersecting text nodes
      *                                 in the result.
-     * @returns {!Array.<Node>}
+     * @return {!Array.<Node>}
      */
     function getTextNodes(range, includePartial) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            textNodes;
+        var textNodes;
 
         /**
          * @param {!Node} node
          * @return {number}
          */
         function nodeFilter(node) {
-            nodeRange.selectNodeContents(node);
-
+            var result = NodeFilter.FILTER_REJECT;
             if (node.nodeType === Node.TEXT_NODE) {
-                if (includeNode(range, nodeRange, includePartial)) {
-                    return isSignificantTextContent(/**@type{!Text}*/(node))
-                        ? NodeFilter.FILTER_ACCEPT
-                        : NodeFilter.FILTER_REJECT;
+                if (isSignificantTextContent(/**@type{!Text}*/(node))) {
+                    result = NodeFilter.FILTER_ACCEPT;
                 }
-            } else if (domUtils.rangesIntersect(range, nodeRange)) {
-                if (isTextContentContainingNode(node)) {
-                    return NodeFilter.FILTER_SKIP;
-                }
+            } else if (isTextContentContainingNode(node)) {
+                result = NodeFilter.FILTER_SKIP;
             }
-            return NodeFilter.FILTER_REJECT;
+            return result;
         }
 
-        textNodes = domUtils.getNodesInRange(range, nodeFilter);
+        /*jslint bitwise:true*/
+        textNodes = domUtils.getNodesInRange(range, nodeFilter, NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
+        /*jslint bitwise:false*/
+        if (!includePartial) {
+            removePartiallyContainedNodes(range, textNodes);
+        }
 
-        nodeRange.detach();
         return textNodes;
     }
     this.getTextNodes = getTextNodes;
@@ -771,54 +771,72 @@ odf.OdfUtils = function OdfUtils() {
      *                         content. This includes whitespace only elements
      *                         used in pretty-formatted xml as LibreOffice
      *                         produces in flat ODT files.
-     * @returns {!Array.<Node>}
+     * @return {!Array.<Node>}
      */
-    function getTextElements(range, includePartial,
-                includeInsignificantWhitespace) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            elements;
+    function getTextElements(range, includePartial, includeInsignificantWhitespace) {
+        var elements;
 
         /**
          * @param {!Node} node
          * @return {number}
          */
         function nodeFilter(node) {
-            nodeRange.selectNodeContents(node);
+            var result = NodeFilter.FILTER_REJECT;
             // do not return anything inside an character element or an inline root such as an annotation
             if (isCharacterElement(node.parentNode) || isInlineRoot(node.parentNode)) {
-                return NodeFilter.FILTER_REJECT;
-            }
-
-            if (node.nodeType === Node.TEXT_NODE) {
-                if (includeNode(range, nodeRange, includePartial)) {
-                    if (includeInsignificantWhitespace
-                            || isSignificantTextContent(
-                              /**@type{!Text}*/(node)
-                            )) {
-                            // Text nodes should only be returned if they are
-                            // fully contained within the range.
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
+                result = NodeFilter.FILTER_REJECT;
+            } else  if (node.nodeType === Node.TEXT_NODE) {
+                if (includeInsignificantWhitespace || isSignificantTextContent(/**@type{!Text}*/(node))) {
+                        // Text nodes should only be returned if they are
+                        // fully contained within the range.
+                    result = NodeFilter.FILTER_ACCEPT;
                 }
             } else if (isAnchoredAsCharacterElement(node)) {
-                if (includeNode(range, nodeRange, includePartial)) {
-                    // Character elements should only be returned if they are
-                    // fully contained within the range.
-                    return NodeFilter.FILTER_ACCEPT;
-                }
+                // Character elements should only be returned if they are
+                // fully contained within the range.
+                result =  NodeFilter.FILTER_ACCEPT;
             } else if (isTextContentContainingNode(node) || isGroupingElement(node)) {
-                return NodeFilter.FILTER_SKIP;
+                result =  NodeFilter.FILTER_SKIP;
             }
-            return NodeFilter.FILTER_REJECT;
+            return result;
         }
 
-        elements = domUtils.getNodesInRange(range, nodeFilter);
-        nodeRange.detach();
+        /*jslint bitwise:true*/
+        elements = domUtils.getNodesInRange(range, nodeFilter, NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
+        /*jslint bitwise:false*/
+        if (!includePartial) {
+            removePartiallyContainedNodes(range, elements);
+        }
 
         return elements;
     }
     this.getTextElements = getTextElements;
+
+    /**
+     * Crawl parent nodes starting at the startContainer until a matching node is found,
+     * or the first inline root is met. If a node is accepted by the supplied filter, and is
+     * not already the first element in the elements array, this node is prepended to the start
+     * of the elements array.
+     *
+     * @param {!Node} startContainer Container to start search from (inclusive)
+     * @param {!Array.<!Node>} elements Existing elements already discovered
+     * @param {!function(!Node):!boolean} filter
+     */
+    function prependParentContainers(startContainer, elements, filter) {
+        var container = startContainer;
+        while (container) {
+            if (filter(container)) {
+                if (elements[0] !== container) {
+                    elements.unshift(container);
+                }
+                break;
+            }
+            if (isInlineRoot(container)) {
+                break;
+            }
+            container = container.parentNode;
+        }
+    }
 
     /**
      * Get all paragraph elements that intersect the supplied range in document
@@ -830,32 +848,33 @@ odf.OdfUtils = function OdfUtils() {
      * this function would return the following array:
      *      [text:p{id="A"}, text:p{id="B"}]
      * @param {!Range} range
-     * @returns {!Array.<!Element>}
+     * @return {!Array.<!Element>}
      */
     this.getParagraphElements = function (range) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            elements;
-
+        var elements;
         /**
          * @param {!Node} node
          * @return {number}
          */
         function nodeFilter(node) {
-            nodeRange.selectNodeContents(node);
+            var result = NodeFilter.FILTER_REJECT;
             if (isParagraph(node)) {
-                if (domUtils.rangesIntersect(range, nodeRange)) {
-                    return NodeFilter.FILTER_ACCEPT;
-                }
+                result = NodeFilter.FILTER_ACCEPT;
             } else if (isTextContentContainingNode(node) || isGroupingElement(node)) {
-                return NodeFilter.FILTER_SKIP;
+                result = NodeFilter.FILTER_SKIP;
             }
-            return NodeFilter.FILTER_REJECT;
+            return result;
         }
 
-        elements = domUtils.getNodesInRange(range, nodeFilter);
-        nodeRange.detach();
+        elements = domUtils.getNodesInRange(range, nodeFilter, NodeFilter.SHOW_ELEMENT);
+        // getNodesInRange will only return nodes it enters during the iteration.
+        // However, we desire all paragraph nodes either contained OR containing this range,
+        // so we crawl the parentNodes of the start container until a root is found.
 
+        // Note, this isn't necessary for the end container because iteration crosses the
+        // node boundary when entering towards the end container, meaning all paragraphs in
+        // the end container's parentNodes will be reported by getNodesInRange.
+        prependParentContainers(/**@type{!Node}*/(range.startContainer), elements, isParagraph);
         return elements;
     };
 
@@ -863,28 +882,27 @@ odf.OdfUtils = function OdfUtils() {
      * Get all image elements that fully contained within the supplied range in
      * document order.
      * @param {!Range} range
-     * @returns {!Array.<Node>}
+     * @return {!Array.<Node>}
      */
     this.getImageElements = function (range) {
-        var document = range.startContainer.ownerDocument,
-            nodeRange = document.createRange(),
-            elements;
+        var elements;
 
         /**
          * @param {!Node} node
          * @return {number}
          */
         function nodeFilter(node) {
-            nodeRange.selectNodeContents(node);
-            if (isImage(node) && domUtils.containsRange(range, nodeRange)) {
-                return NodeFilter.FILTER_ACCEPT;
+            var result = NodeFilter.FILTER_SKIP;
+            if (isImage(node)) {
+                result = NodeFilter.FILTER_ACCEPT;
             }
-            return NodeFilter.FILTER_SKIP;
+            return result;
         }
 
-        elements = domUtils.getNodesInRange(range, nodeFilter);
-        nodeRange.detach();
-
+        elements = domUtils.getNodesInRange(range, nodeFilter, NodeFilter.SHOW_ELEMENT);
+        // See description in getParagraphElements as to why this is necessary
+        // Short summary: want to include images that completely contain this range
+        prependParentContainers(/**@type{!Node}*/(range.startContainer), elements, isImage);
         return elements;
     };
 
@@ -918,7 +936,7 @@ odf.OdfUtils = function OdfUtils() {
      * this function would return the following array:
      *      [text:a{xlink:href="google"}, text:a{xlink:href="apple"}]
      * @param {!Range} range
-     * @returns {!Array.<Node>}
+     * @return {!Array.<Node>}
      */
     this.getHyperlinkElements = function (range) {
         var links = [],
