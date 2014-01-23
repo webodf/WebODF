@@ -74,11 +74,11 @@ gui.UndoStateRules = function UndoStateRules() {
     /**
      * Returns true if the supplied optype is allowed to
      * aggregate multiple operations in a single undo or redo state
-     * @param {!string} optype
+     * @param {!ops.Operation} op
      * @returns {!boolean}
      */
-    function canAggregateOperation(optype) {
-        switch (optype) {
+    function canAggregateOperation(op) {
+        switch (getOpType(op)) {
             case "RemoveText":
             case "InsertText":
                 return true;
@@ -151,7 +151,7 @@ gui.UndoStateRules = function UndoStateRules() {
             secondLastEditOp;
 
         runtime.assert(Boolean(lastEditOp), "No edit operations found in state");
-        if (canAggregateOperation(thisOpType) && thisOpType === getOpType(lastEditOp)) {
+        if (thisOpType === getOpType(lastEditOp)) {
             // Operation can aggregate, and operation type is identical
             if (recentEditOps.length === 1) {
                 // Not enough ops to worry about direction of travel. Just check new op is adjacent to existing op
@@ -180,29 +180,23 @@ gui.UndoStateRules = function UndoStateRules() {
         var thisOpType = getOpType(thisOp),
             lastEditOp = recentEditOps[recentEditOps.length - 1],
             groupId,
-            isContinuous;
+            isContinuous = false;
 
         runtime.assert(Boolean(lastEditOp), "No edit operations found in state");
         groupId = lastEditOp.group;
         runtime.assert(groupId !== undefined, "Operation has no group");
-        // First check if thisOp supports aggregation
-        if (canAggregateOperation(thisOpType)) {
-            // There is a defined group. Check if any operation in the group
-            // is continuous with the current operation, and return true if this is the case.
-            while (lastEditOp && lastEditOp.group === groupId) {
-                if (thisOpType === getOpType(lastEditOp)) {
-                    // The last edit op that is compatible for aggregation defines whether thisOp is compatible with
-                    // the existing edits
-                    isContinuous = continuesMostRecentEditOperation(thisOp, recentEditOps);
-                    break;
-                }
-                recentEditOps.pop(); // Remove the non-matching op and see if the next op in the group is continuous
-                lastEditOp = recentEditOps[recentEditOps.length - 1];
+        // Check if the current operation continues any operation in the latest, and return true if this is the case.
+        while (lastEditOp && lastEditOp.group === groupId) {
+            if (thisOpType === getOpType(lastEditOp)) {
+                // The last edit op that is compatible for aggregation defines whether thisOp is compatible with
+                // the existing edits
+                isContinuous = continuesMostRecentEditOperation(thisOp, recentEditOps);
+                break;
             }
+            recentEditOps.pop(); // Remove the non-matching op and see if the next op in the group is continuous
+            lastEditOp = recentEditOps[recentEditOps.length - 1];
         }
-        // isContinuous will still be undefined if there were no compatibleForAggregation ops in the latest group,
-        // hence to turn this into a true/false, comparison to true is necessary
-        return isContinuous === true;
+        return isContinuous;
     }
 
     /**
@@ -230,20 +224,22 @@ gui.UndoStateRules = function UndoStateRules() {
             // Operation groups match, so these were queued as a group
             return true;
         }
-        recentEditOperations = recentOperations.filter(isEditOperation);
-        if (recentEditOperations.length > 0) {
-            // The are existing edit operations. Check if the current op can be combined with existing operations
-            // E.g., multiple insert text or remove text ops
-            if (areOperationsGrouped) {
-                return continuesMostRecentEditGroup(operation, recentEditOperations);
+        if (canAggregateOperation(operation)) {
+            recentEditOperations = recentOperations.filter(isEditOperation);
+            if (recentEditOperations.length > 0) {
+                // The are existing edit operations. Check if the current op can be combined with existing operations
+                // E.g., multiple insert text or remove text ops
+                if (areOperationsGrouped) {
+                    return continuesMostRecentEditGroup(operation, recentEditOperations);
+                }
+                return continuesMostRecentEditOperation(operation, recentEditOperations);
             }
-            return continuesMostRecentEditOperation(operation, recentEditOperations);
         }
         // The following are all true at this point:
         // - new operation is an edit operation (check 1)
         // - existing undo state has at least one existing operation (check 2)
         // - new operation is not part of most recent operation group (check 3)
-        // - new operation is not continuous with the existing edit operations (check 4)
+        // - new operation is not continuous with the existing edit operations (check 4 + 5)
         return false;
     }
     this.isPartOfOperationSet = isPartOfOperationSet;
