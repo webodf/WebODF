@@ -406,7 +406,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function getParagraphStyleAttributes(styleName) {
         var node = getParagraphStyleElement(styleName);
         if (node) {
-            return odfCanvas.getFormatting().getInheritedStyleAttributes(node);
+            return odfCanvas.getFormatting().getInheritedStyleAttributes(node, false);
         }
 
         return null;

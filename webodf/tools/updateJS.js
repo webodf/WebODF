@@ -71,7 +71,7 @@ function Main() {
             "gui/HyperlinkClickHandler.js",
             "gui/KeyboardHandler.js",
             "gui/SelectionMover.js",
-            "gui/StyleHelper.js",
+            "gui/StyleSummary.js",
             "odf/FontLoader.js",
             "odf/Formatting.js",
             "odf/Namespaces.js",

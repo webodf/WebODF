@@ -44,7 +44,7 @@ runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("ops.OpAddStyle");
 runtime.loadClass("ops.OpApplyDirectStyling");
 runtime.loadClass("ops.OpSetParagraphStyle");
-runtime.loadClass("gui.StyleHelper");
+runtime.loadClass("gui.StyleSummary");
 
 /**
  * @constructor
@@ -60,7 +60,6 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         odtDocument = session.getOdtDocument(),
         utils = new core.Utils(),
         odfUtils = new odf.OdfUtils(),
-        styleHelper = new gui.StyleHelper(odtDocument.getFormatting()),
         eventNotifier = new core.EventNotifier([
             gui.DirectFormattingController.textStylingChanged,
             gui.DirectFormattingController.paragraphStylingChanged
@@ -69,61 +68,47 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         directCursorStyleProperties,
         // cached text settings
-        currentSelectionStyles = [],
-        isBoldValue = false,
-        isItalicValue = false,
-        hasUnderlineValue = false,
-        hasStrikeThroughValue = false,
-        fontSizeValue,
-        fontNameValue,
-        // cached paragraph settings
-        isAlignedLeftValue,
-        isAlignedCenterValue,
-        isAlignedRightValue,
-        isAlignedJustifiedValue;
+        selectionAppliedStyles = [],
+        selectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles);
 
     /**
-     * Returns the value for a hierarchy of keys.
-     * E.g., get( { a: { b : 10 } }, ["a", "b"] ) will return the value 10
-     * If any keys are not found, this function will return undefined
-     * @param {!Object} obj
-     * @param {!Array.<!string>} keys
-     * @returns {*}
+     * Fetch all the text nodes in the specified range, or if the range is collapsed, the node just to
+     * the left of the cursor.
+     * @param {!Range} range
+     * @return {!Array.<!Node>}
      */
-    function get(obj, keys) {
-        var i = 0,
-            key = keys[i];
-        while (key && obj) {
-            obj = obj[key];
-            i += 1;
-            key = keys[i];
+    function getNodes(range) {
+        var container, nodes;
+
+        if (range.collapsed) {
+            container = range.startContainer;
+            // Attempt to find the node at the specified startOffset within the startContainer.
+            // In the case where a range starts at (parent, 1), this will mean the
+            // style information is retrieved for the child node at index 1.
+
+            // Also, need to check the length is less than the number of child nodes, as a range is
+            // legally able to start at (parent, parent.childNodes.length).
+            if (container.hasChildNodes() && range.startOffset < container.childNodes.length) {
+                container = container.childNodes.item(range.startOffset);
+            }
+            nodes = [container];
+        } else {
+            nodes = odfUtils.getTextNodes(range, true);
         }
-        return keys.length === i ? obj : undefined;
-    }
 
-    /**
-     * Returns the common value found at the specified key hierarchy. If one or more
-     * objects in the supplied array have a different value to the first object, this
-     * function will return "undefined" instead
-     * @param {!Array.<!Object>} objArray
-     * @param {!Array.<!string>} keys
-     * @returns {*}
-     */
-    function getCommonValue(objArray, keys) {
-        var value = get(objArray[0], keys);
-
-        return objArray.every(function (obj) { return value === get(obj, keys); }) ? value : undefined;
+        return nodes;
     }
 
     /**
      * Get all styles currently applied to the selected range. If the range is collapsed,
      * this will return the style the next inserted character will have
-     * @returns {!Array.<Object>}
+     * @return {!Array.<Object>}
      */
-    function getAppliedStyles() {
+    function getSelectionAppliedStyles() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
-            selectionStyles = (range && styleHelper.getAppliedStyles(range)) || [];
+            nodes = range ? getNodes(range) : [],
+            selectionStyles = odtDocument.getFormatting().getAppliedStyles(nodes);
 
         if (selectionStyles[0] && directCursorStyleProperties) {
             // direct cursor styles add to the style of the existing range, overriding where defined
@@ -134,94 +119,62 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     }
 
     /**
-     * @return {undefined}
+     * Create a map containing all the keys that have a different value
+     * in the new summary object.
+     * @param {!Array.<!string>} keys Array of function names to evaluate and diff
+     * @param {!gui.StyleSummary} oldSummary
+     * @param {!gui.StyleSummary} newSummary
+     * @return {!Object.<!string, *>}
      */
-    function updatedCachedTextSettings() {
-        var fontSize, diffMap;
-        currentSelectionStyles = getAppliedStyles();
+    function createDiff(keys, oldSummary, newSummary) {
+        var diffMap = {};
+        keys.forEach(function(funcName) {
+            var oldValue = oldSummary[funcName](),
+                newValue = newSummary[funcName]();
 
-        function noteChange(oldValue, newValue, id) {
             if (oldValue !== newValue) {
-                if (diffMap === undefined) {
-                    diffMap = {};
-                }
-                diffMap[id] = newValue;
+                diffMap[funcName] = newValue;
             }
-            return newValue;
-        }
-        isBoldValue = noteChange(isBoldValue, currentSelectionStyles ? styleHelper.isBold(currentSelectionStyles) : false, 'isBold');
-        isItalicValue = noteChange(isItalicValue, currentSelectionStyles ? styleHelper.isItalic(currentSelectionStyles) : false, 'isItalic');
-        hasUnderlineValue = noteChange(hasUnderlineValue, currentSelectionStyles ? styleHelper.hasUnderline(currentSelectionStyles) : false, 'hasUnderline');
-        hasStrikeThroughValue = noteChange(hasStrikeThroughValue, currentSelectionStyles ? styleHelper.hasStrikeThrough(currentSelectionStyles) : false, 'hasStrikeThrough');
-
-        fontSize = currentSelectionStyles && getCommonValue(currentSelectionStyles, ['style:text-properties', 'fo:font-size']);
-        fontSizeValue = noteChange(fontSizeValue, fontSize && parseFloat(fontSize), 'fontSize'); // TODO: support other units besides pt!
-
-        fontNameValue = noteChange(fontNameValue, currentSelectionStyles && getCommonValue(currentSelectionStyles, ['style:text-properties', 'style:font-name']), 'fontName');
-
-        if (diffMap) {
-            eventNotifier.emit(gui.DirectFormattingController.textStylingChanged, diffMap);
-        }
+        });
+        return diffMap;
     }
 
     /**
      * @return {undefined}
      */
-    function updatedCachedParagraphSettings() {
-        var cursor = odtDocument.getCursor(inputMemberId),
-            range = cursor && cursor.getSelectedRange(),
-            diffMap;
+    function updateSelectionStylesInfo() {
+        var textStyleDiff,
+            paragraphStyleDiff,
+            newSelectionStylesSummary,
+            textStylingKeys = ['isBold', 'isItalic', 'hasUnderline', 'hasStrikeThrough', 'fontSize', 'fontName'],
+            paragraphStylingKeys = ['isAlignedLeft', 'isAlignedCenter', 'isAlignedRight', 'isAlignedJustified'];
 
-        function noteChange(oldValue, newValue, id) {
-            if (oldValue !== newValue) {
-                if (diffMap === undefined) {
-                    diffMap = {};
-                }
-                diffMap[id] = newValue;
-            }
-            return newValue;
+        selectionAppliedStyles = getSelectionAppliedStyles();
+        newSelectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles);
+
+        textStyleDiff = createDiff(textStylingKeys, selectionStylesSummary, newSelectionStylesSummary);
+        paragraphStyleDiff = createDiff(paragraphStylingKeys, selectionStylesSummary, newSelectionStylesSummary);
+
+        selectionStylesSummary = newSelectionStylesSummary;
+
+        if (Object.keys(textStyleDiff).length > 0) {
+            eventNotifier.emit(gui.DirectFormattingController.textStylingChanged, textStyleDiff);
         }
-        // TODO: these are mutually exclusive values usually, so just one value with the alignment style might be enough
-        // but in a range with multiple paragraphs there could be multiple alignment styles, which should be reflected somehow
-        isAlignedLeftValue = noteChange(isAlignedLeftValue, range ? styleHelper.isAlignedLeft(range) : false, 'isAlignedLeft');
-        isAlignedCenterValue = noteChange(isAlignedCenterValue, range ? styleHelper.isAlignedCenter(range) : false, 'isAlignedCenter');
-        isAlignedRightValue = noteChange(isAlignedRightValue, range ? styleHelper.isAlignedRight(range) : false, 'isAlignedRight');
-        isAlignedJustifiedValue = noteChange(isAlignedJustifiedValue, range ? styleHelper.isAlignedJustified(range) : false, 'isAlignedJustified');
 
-        if (diffMap) {
-            eventNotifier.emit(gui.DirectFormattingController.paragraphStylingChanged, diffMap);
+        if (Object.keys(paragraphStyleDiff).length > 0) {
+            eventNotifier.emit(gui.DirectFormattingController.paragraphStylingChanged, paragraphStyleDiff);
         }
     }
 
     /**
-     * @param {!ops.OdtCursor} cursor
+     * @param {!ops.OdtCursor|!string} cursorOrId
      * @return {undefined}
      */
-    function onCursorAdded(cursor) {
-        if (cursor.getMemberId() === inputMemberId) {
-            updatedCachedParagraphSettings();
-        }
-    }
-
-    /**
-     * @param {!string} memberId
-     * @return {undefined}
-     */
-    function onCursorRemoved(memberId) {
-        if (memberId === inputMemberId) {
-            updatedCachedTextSettings();
-            updatedCachedParagraphSettings();
-        }
-    }
-
-    /**
-     * @param {!ops.OdtCursor} cursor
-     * @return {undefined}
-     */
-    function onCursorMoved(cursor) {
-        if (cursor.getMemberId() === inputMemberId) {
-            updatedCachedTextSettings();
-            updatedCachedParagraphSettings();
+    function onCursorEvent(cursorOrId) {
+        var cursorMemberId = (typeof cursorOrId === "string")
+                                ? cursorOrId : cursorOrId.getMemberId();
+        if (cursorMemberId === inputMemberId) {
+            updateSelectionStylesInfo();
         }
     }
 
@@ -230,8 +183,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      */
     function onParagraphStyleModified() {
         // TODO: check if the cursor (selection) is actually affected
-        updatedCachedTextSettings();
-        updatedCachedParagraphSettings();
+        updateSelectionStylesInfo();
     }
 
     /**
@@ -242,25 +194,17 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         var cursor = odtDocument.getCursor(inputMemberId);
 
         if (cursor && odtDocument.getParagraphElement(cursor.getNode()) === args.paragraphElement) {
-            updatedCachedTextSettings();
-            updatedCachedParagraphSettings();
+            updateSelectionStylesInfo();
         }
     }
 
     /**
-     * @param {!function(!Array.<Object>):boolean} predicate
+     * @param {!function():boolean} predicate
      * @param {!function(!boolean):undefined} toggleMethod
      * @return {!boolean}
      */
     function toggle(predicate, toggleMethod) {
-        var cursor = odtDocument.getCursor(inputMemberId),
-            appliedStyles;
-        // no own cursor yet/currently added?
-        if (!cursor) {
-            return false;
-        }
-        appliedStyles = styleHelper.getAppliedStyles(cursor.getSelectedRange());
-        toggleMethod(!predicate(appliedStyles));
+        toggleMethod(!predicate());
         return true;
     }
 
@@ -288,7 +232,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             // Direct styling is additive. E.g., if the user selects bold and then italic, the intent is to produce
             // bold & italic text
             directCursorStyleProperties = utils.mergeObjects(directCursorStyleProperties || {}, properties);
-            updatedCachedTextSettings();
+            updateSelectionStylesInfo();
         }
     }
     this.formatTextSelection = formatTextSelection;
@@ -301,7 +245,6 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     function applyTextPropertyToSelection(propertyName, propertyValue) {
         var textProperties = {};
         textProperties[propertyName] = propertyValue;
-
         formatTextSelection(textProperties);
     }
 
@@ -315,7 +258,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      */
     this.createCursorStyleOp = function (position, length, useCachedStyle) {
         var styleOp = null,
-            properties = useCachedStyle ? currentSelectionStyles[0] : directCursorStyleProperties;
+            properties = useCachedStyle ? selectionAppliedStyles[0] : directCursorStyleProperties;
 
         if (properties && properties['style:text-properties']) {
             styleOp = new ops.OpApplyDirectStyling();
@@ -326,7 +269,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
                 setProperties: {'style:text-properties': properties['style:text-properties']}
             });
             directCursorStyleProperties = null;
-            updatedCachedTextSettings();
+            updateSelectionStylesInfo();
         }
         return styleOp;
     };
@@ -344,7 +287,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
                 // added to apply the style to. Even after a split, the cursor should still style the next inserted
                 // character
                 directCursorStyleProperties = null;
-                updatedCachedTextSettings();
+                updateSelectionStylesInfo();
             }
         }
     }
@@ -409,107 +352,109 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
 
     /**
      * Get all styles currently applied to the selected range. If the range is collapsed,
-     * this will return the style the next inserted character will have
-     * @returns {!Array.<Object>}
+     * this will return the style the next inserted character will have.
+     * (Note, this is not used internally by WebODF, but is provided as a convenience method
+     * for external consumers)
+     * @return {!Array.<!Object>}
      */
     this.getAppliedStyles = function () {
-        return currentSelectionStyles;
+        return selectionAppliedStyles;
     };
 
     /**
      * @return {!boolean}
      */
-    this.toggleBold = toggle.bind(self, styleHelper.isBold, setBold);
+    this.toggleBold = toggle.bind(self, function() { return selectionStylesSummary.isBold(); }, setBold);
 
     /**
      * @return {!boolean}
      */
-    this.toggleItalic = toggle.bind(self, styleHelper.isItalic, setItalic);
+    this.toggleItalic = toggle.bind(self, function() { return selectionStylesSummary.isItalic(); }, setItalic);
 
     /**
      * @return {!boolean}
      */
-    this.toggleUnderline = toggle.bind(self, styleHelper.hasUnderline, setHasUnderline);
+    this.toggleUnderline = toggle.bind(self, function() { return selectionStylesSummary.hasUnderline(); }, setHasUnderline);
 
     /**
      * @return {!boolean}
      */
-    this.toggleStrikethrough = toggle.bind(self, styleHelper.hasStrikeThrough, setHasStrikethrough);
+    this.toggleStrikethrough = toggle.bind(self, function() { return selectionStylesSummary.hasStrikeThrough(); }, setHasStrikethrough);
 
     /**
      * @return {!boolean}
      */
     this.isBold = function () {
-        return isBoldValue;
+        return selectionStylesSummary.isBold();
     };
 
     /**
      * @return {!boolean}
      */
     this.isItalic = function () {
-        return isItalicValue;
+        return selectionStylesSummary.isItalic();
     };
 
     /**
      * @return {!boolean}
      */
     this.hasUnderline = function () {
-        return hasUnderlineValue;
+        return selectionStylesSummary.hasUnderline();
     };
 
     /**
      * @return {!boolean}
      */
     this.hasStrikeThrough = function () {
-        return hasStrikeThroughValue;
+        return selectionStylesSummary.hasStrikeThrough();
     };
 
     /**
-     * @return {!number}
+     * @return {number|undefined}
      */
     this.fontSize = function () {
-        return fontSizeValue;
+        return selectionStylesSummary.fontSize();
     };
 
     /**
-     * @return {!string}
+     * @return {string|undefined}
      */
     this.fontName = function () {
-        return fontNameValue;
+        return selectionStylesSummary.fontName();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedLeft = function () {
-        return isAlignedLeftValue;
+        return selectionStylesSummary.isAlignedLeft();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedCenter = function() {
-        return isAlignedCenterValue;
+        return selectionStylesSummary.isAlignedCenter();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedRight = function () {
-        return isAlignedRightValue;
+        return selectionStylesSummary.isAlignedRight();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedJustified = function () {
-        return isAlignedJustifiedValue;
+        return selectionStylesSummary.isAlignedJustified();
     };
 
     /**
      * Round the step up to the next step
      * @param {!number} step
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function roundUp(step) {
         return step === ops.StepsTranslator.NEXT_STEP;
@@ -673,7 +618,8 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {!boolean}
      */
     function isTextStyleDifferentFromFirstParagraph(range, paragraphNode) {
-        var textStyle = styleHelper.getAppliedStyles(range)[0],
+        var textNodes = getNodes(range),
+            textStyle = odtDocument.getFormatting().getAppliedStyles(textNodes)[0],
             paragraphStyle = odtDocument.getFormatting().getAppliedStylesForElement(paragraphNode);
         if (!textStyle || textStyle['style:family'] !== 'text' || !textStyle['style:text-properties']) {
             return false;
@@ -725,7 +671,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             return operations;
         }
 
-        properties = currentSelectionStyles[0];
+        properties = selectionAppliedStyles[0];
         if (!properties) {
             return operations;
         }
@@ -783,9 +729,9 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {undefined}
      */
     this.destroy = function (callback) {
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+        odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorEvent);
+        odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorEvent);
+        odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorEvent);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
@@ -801,14 +747,13 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     /*jslint emptyblock: false*/
 
     function init() {
-        odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+        odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorEvent);
+        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorEvent);
+        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorEvent);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
-        updatedCachedTextSettings();
-        updatedCachedParagraphSettings();
+        updateSelectionStylesInfo();
 
         if (!directParagraphStylingEnabled) {
             self.alignParagraphCenter = emptyFunction;

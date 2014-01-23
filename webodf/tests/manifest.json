@@ -36,11 +36,9 @@
         "core/UnitTester.js",
         "gui/SelectionMover.js"
     ],
-    "gui/StyleHelperTests.js": [
-        "core/Cursor.js",
+    "gui/StyleSummaryTests.js": [
         "core/UnitTester.js",
-        "gui/SelectionMover.js",
-        "gui/StyleHelper.js",
+        "gui/StyleSummary.js",
         "odf/Formatting.js"
     ],
     "gui/TrivialUndoManagerTests.js": [
@@ -64,7 +62,8 @@
     ],
     "odf/FormattingTests.js": [
         "core/UnitTester.js",
-        "odf/Formatting.js"
+        "odf/Formatting.js",
+        "odf/Namespaces.js"
     ],
     "odf/ObjectNameGeneratorTests.js": [
         "core/UnitTester.js",
