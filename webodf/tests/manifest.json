@@ -55,10 +55,12 @@
     "gui/UndoStateRulesTests.js": [
         "core/UnitTester.js",
         "gui/UndoStateRules.js",
+        "ops/OpApplyDirectStyling.js",
         "ops/OpInsertText.js",
         "ops/OpMoveCursor.js",
         "ops/OpRemoveText.js",
-        "ops/OpSplitParagraph.js"
+        "ops/OpSplitParagraph.js",
+        "ops/Operation.js"
     ],
     "odf/FormattingTests.js": [
         "core/UnitTester.js",

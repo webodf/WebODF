@@ -57,15 +57,29 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         playFunc,
         odtDocument,
         currentUndoState = [],
-        /**@type {!Array.<Array.<!ops.Operation>>}*/undoStates = [],
-        /**@type {!Array.<Array.<!ops.Operation>>}*/redoStates = [],
+        /**@type {!Array.<!Array.<!ops.Operation>>}*/undoStates = [],
+        /**@type {!Array.<!Array.<!ops.Operation>>}*/redoStates = [],
         eventNotifier = new core.EventNotifier([
             gui.UndoManager.signalUndoStackChanged,
             gui.UndoManager.signalUndoStateCreated,
             gui.UndoManager.signalUndoStateModified,
             gui.TrivialUndoManager.signalDocumentRootReplaced
         ]),
-        undoRules = defaultRules || new gui.UndoStateRules();
+        undoRules = defaultRules || new gui.UndoStateRules(),
+        isExecutingOps = false;
+
+    /**
+     * Execute all operations in the supplied array
+     * @param {!Array.<!ops.Operation>} operations
+     * @return {undefined}
+     */
+    function executeOperations(operations) {
+        if (operations.length > 0) {
+            isExecutingOps = true; // Used to ignore operations received whilst performing an undo or redo
+            playFunc(operations);
+            isExecutingOps = false;
+        }
+    }
 
     function emitStackChange() {
         eventNotifier.emit(gui.UndoManager.signalUndoStackChanged, {
@@ -85,7 +99,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         if (currentUndoState !== initialState // Initial state should never be in the undo stack
             && currentUndoState !== mostRecentUndoState()) {
             // undoStates may already contain the current undo state if the user
-            // has moved backwards and then forwards in time
+            // has moved backwards and then forwards in the undo stack
             undoStates.push(currentUndoState);
         }
     }
@@ -229,13 +243,9 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         // To prevent this issue, immediately purge all cursor nodes after cloning
         removeCursors(initialDoc);
         completeCurrentUndoState();
-        // This is the only time the initialState should ever end up on the undo stack
-        // Random important point: the initialState will *always* contain the most recent cursor positions,
-        // hence why it is safe to call this method multiple times
-        undoStates.unshift(initialState);
         // We just threw away the cursors in the snapshot, so need to recover all these operations so the
         // cursor can be re-inserted when an undo is performed
-        currentUndoState = initialState = extractCursorStates(undoStates);
+        currentUndoState = initialState = extractCursorStates([initialState].concat(undoStates));
         undoStates.length = 0;
         redoStates.length = 0;
         emitStackChange();
@@ -257,8 +267,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
     /**
      * Sets the playback function to use to re-execute operations from the undo stack.
-     * This should *not* report these operations back to the undo manager as being executed.
-     * @param {!function(!ops.Operation)} playback_func
+     * @param {!function(!Array.<!ops.Operation>)} playback_func
      */
     this.setPlaybackFunction = function(playback_func) {
         playFunc = playback_func;
@@ -270,12 +279,17 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * @return {undefined}
      */
     this.onOperationExecuted = function(op) {
-        redoStates.length = 0;
-        // An edit operation will signal the end of the initial state usually.
-        // If this isn't the case, setInitialState will reassemble these fragment states
-        // anyways.
-        if ((undoRules.isEditOperation(op) && currentUndoState === initialState)
+        if (isExecutingOps) {
+            return; // Ignore new operations generated whilst performing an undo/redo
+        }
+
+        // An edit operation is assumed to indicate the end of the initial state. The user can manually
+        // reset the initial state later with setInitialState if desired.
+        // Additionally, an edit operation received when in the middle of the undo stack should also create a new state,
+        // as the current undo state is effectively "sealed" and shouldn't gain additional document modifications.
+        if ((undoRules.isEditOperation(op) && (currentUndoState === initialState || redoStates.length > 0))
                 || !undoRules.isPartOfOperationSet(op, currentUndoState)) {
+            redoStates.length = 0; // Creating a new undo state should always reset the redo stack
             completeCurrentUndoState();
             currentUndoState = [op];
             // Every undo state *MUST* contain an edit for it to be valid for undo or redo
@@ -297,10 +311,11 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     this.moveForward = function(states) {
         var moved = 0,
             redoOperations;
+
         while (states && redoStates.length) {
             redoOperations = redoStates.pop();
             undoStates.push(redoOperations);
-            redoOperations.forEach(playFunc);
+            executeOperations(redoOperations);
             states -= 1;
             moved += 1;
         }
@@ -344,8 +359,8 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             odtDocument.getCursors().forEach(function (cursor) {
                 odtDocument.removeCursor(cursor.getMemberId());
             });
-            initialState.forEach(playFunc);
-            undoStates.forEach(function (ops) { ops.forEach(playFunc); });
+            executeOperations(initialState);
+            undoStates.forEach(executeOperations);
             odfCanvas.refreshCSS();
 
             // On a move back command, new ops should be subsequently

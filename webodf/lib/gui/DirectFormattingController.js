@@ -522,7 +522,8 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     function applyParagraphDirectStyling(applyDirectStyling) {
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             paragraphs = odfUtils.getParagraphElements(range),
-            formatting = odtDocument.getFormatting();
+            formatting = odtDocument.getFormatting(),
+            operations = [];
 
         paragraphs.forEach(function(paragraph) {
             var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
@@ -544,6 +545,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
                 isAutomaticStyle: true,
                 setProperties: paragraphProperties
             });
+            operations.push(opAddStyle);
 
             opSetParagraphStyle = new ops.OpSetParagraphStyle();
             opSetParagraphStyle.init({
@@ -552,8 +554,9 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
                 position: paragraphStartPoint
             });
 
-            session.enqueue([opAddStyle, opSetParagraphStyle]);
+            operations.push(opSetParagraphStyle);
         });
+        session.enqueue(operations);
     }
 
     /**

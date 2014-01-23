@@ -34,10 +34,12 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, gui, ops*/
+runtime.loadClass("ops.OpApplyDirectStyling");
 runtime.loadClass("ops.OpMoveCursor");
 runtime.loadClass("ops.OpInsertText");
 runtime.loadClass("ops.OpSplitParagraph");
 runtime.loadClass("ops.OpRemoveText");
+runtime.loadClass("ops.Operation");
 runtime.loadClass("gui.UndoStateRules");
 /**
  * @constructor
@@ -58,11 +60,34 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
 
-    function create(operation, args) {
+    /**
+     * Initialize an operation with the supplied arguments
+     * @param {!ops.Operation} operation
+     * @param {?} args
+     * @param {string=} group
+     * @returns {!ops.Operation}
+     */
+    function create(operation, args, group) {
         operation.init(args);
+        if (group) {
+            operation.group = group;
+        }
         return operation;
     }
 
+    /**
+     * Report the index of the latest undo state in the defined array.
+     * If there are no available undo states, returns -1.
+     *
+     * For example, Given [ op1, op2, op3 ], assuming op2 is the start of a new undo state,
+     * this function will return 1.
+     *
+     * Note: non-edit operations starting at the front of the array are gathered into the "initial"
+     * state of the document, and cannot be undone.
+     *
+     * @param {!Array.<!ops.Operation>} undoQueue
+     * @returns {!number}
+     */
     function findLastUndoState(undoQueue) {
         var index = 0,
             undoState = [];
@@ -78,6 +103,11 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         return undoState.some(t.rules.isEditOperation) ? index : -1;
     }
 
+    /**
+     * Discard all remaining operations in the array beginning at the specified index (inclusive)
+     * @param {!number} fromIndex
+     * @return {undefined}
+     */
     function discardTrailingOps(fromIndex) {
         t.ops.splice(fromIndex, t.ops.length - fromIndex);
     }
@@ -140,13 +170,41 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         r.shouldBe(t, "t.previousState", "0");
     }
 
-    function isPartOfOperationSet_TextInsertion_IgnoresCursorMove() {
+    function isPartOfOperationSet_TextInsertion_DiscontinuousInsertions() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}),
+            create(new ops.OpInsertText(), {position: 2, text: "b"})
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "1");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_TextInsertion_TrailingCursorMove_AddsToCurrentUndoState() {
         t.ops = [
             create(new ops.OpInsertText(), {position: 0, text: "a"}),
             create(new ops.OpInsertText(), {position: 1, text: "b"}),
             create(new ops.OpInsertText(), {position: 2, text: "c"}),
             create(new ops.OpInsertText(), {position: 3, text: "d"}),
             create(new ops.OpMoveCursor(), {position: 3}),
+            create(new ops.OpMoveCursor(), {position: 2})
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_TextInsertion_InterleavedCursorMove_AddsToCurrentUndoState() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}),
+            create(new ops.OpMoveCursor(), {position: 3}),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}),
+            create(new ops.OpInsertText(), {position: 2, text: "c"}),
+            create(new ops.OpInsertText(), {position: 3, text: "d"}),
             create(new ops.OpMoveCursor(), {position: 2})
         ];
 
@@ -264,18 +322,88 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         r.shouldBe(t, "t.previousState", "-1");
     }
 
+    function isPartOfOperationSet_GroupedOperations_KeepsGroupsTogether() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "abcde"}, "g1"),
+            create(new ops.OpRemoveText(), {position: 3, length: 1}, "g1"), // Delete d
+            create(new ops.OpRemoveText(), {position: 3, length: 1}, "g2"), // Delete e
+            create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2"), // Delete a
+            create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2") // Delete b
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "2");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_GroupedOperations_TextInsertAndStyle_AllowsContinuation() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}, "g1"),
+            create(new ops.OpApplyDirectStyling(), {position: 0, length: 1}, "g1"),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}, "g2"),
+            create(new ops.OpInsertText(), {position: 1, text: "c"}, "g3")
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "3");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_GroupedOperations_GroupedInserts_CreatesMultipleUndoStates() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}, "g1"),
+            create(new ops.OpInsertText(), {position: 2, text: "b"}, "g1"),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}, "g2")
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "2");
+        discardTrailingOps(t.previousState);
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
+    function isPartOfOperationSet_GroupedOperations_AdjacentGroups_AllowsContinuation() {
+        t.ops = [
+            create(new ops.OpInsertText(), {position: 0, text: "a"}, "g1"),
+            create(new ops.OpApplyDirectStyling(), {position: 0, length: 1}, "g1"),
+            create(new ops.OpInsertText(), {position: 1, text: "b"}, "g2"),
+            create(new ops.OpApplyDirectStyling(), {position: 1, length: 1}, "g2"),
+            create(new ops.OpInsertText(), {position: 2, text: "c"}, "g3"),
+            create(new ops.OpApplyDirectStyling(), {position: 2, length: 1}, "g3"),
+            create(new ops.OpInsertText(), {position: 3, text: "e"}, "g4")
+        ];
+
+        t.previousState = findLastUndoState(t.ops);
+        r.shouldBe(t, "t.previousState", "0");
+    }
+
     this.tests = function () {
         return r.name([
             isPartOfOperationSet_NoValidStates,
             isPartOfOperationSet_AvoidsPrecedingNonEditStates,
             isPartOfOperationSet_TextInsertion_Simple,
             isPartOfOperationSet_TextInsertion_Simple2,
-            isPartOfOperationSet_TextInsertion_IgnoresCursorMove,
+            isPartOfOperationSet_TextInsertion_DiscontinuousInsertions,
+            isPartOfOperationSet_TextInsertion_TrailingCursorMove_AddsToCurrentUndoState,
+            isPartOfOperationSet_TextInsertion_InterleavedCursorMove_AddsToCurrentUndoState,
             isPartOfOperationSet_ResetsToLastCursorMove,
             isPartOfOperationSet_TextRemoval_ResetsToDirectionChange,
             isPartOfOperationSet_SeparatesOperationTypes,
             isPartOfOperationSet_SeparatesOperationDirections,
-            isPartOfOperationSet_SeparatesOperationDirections_BROKEN
+            isPartOfOperationSet_SeparatesOperationDirections_BROKEN,
+
+            isPartOfOperationSet_GroupedOperations_KeepsGroupsTogether,
+            isPartOfOperationSet_GroupedOperations_TextInsertAndStyle_AllowsContinuation,
+            isPartOfOperationSet_GroupedOperations_GroupedInserts_CreatesMultipleUndoStates,
+            isPartOfOperationSet_GroupedOperations_AdjacentGroups_AllowsContinuation
         ]);
     };
     this.asyncTests = function () {

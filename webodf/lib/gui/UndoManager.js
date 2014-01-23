@@ -85,8 +85,7 @@ gui.UndoManager.prototype.purgeInitialState = function () {"use strict"; };
 
 /**
  * Sets the playback function to use to re-execute operations from the undo stack.
- * This should *not* report these operations back to the undo manager as being executed.
- * @param {!function(!ops.Operation)} playback_func
+ * @param {!function(!Array.<!ops.Operation>)} playback_func
  */
 gui.UndoManager.prototype.setPlaybackFunction = function (playback_func) {"use strict"; };
 
