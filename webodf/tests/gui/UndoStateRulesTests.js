@@ -326,9 +326,9 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
         t.ops = [
             create(new ops.OpInsertText(), {position: 0, text: "abcde"}, "g1"),
             create(new ops.OpRemoveText(), {position: 3, length: 1}, "g1"), // Delete d
-            create(new ops.OpRemoveText(), {position: 3, length: 1}, "g2"), // Delete e
+            create(new ops.OpRemoveText(), {position: 1, length: 1}, "g2"), // Delete b
             create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2"), // Delete a
-            create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2") // Delete b
+            create(new ops.OpRemoveText(), {position: 0, length: 1}, "g2") // Delete c
         ];
 
         t.previousState = findLastUndoState(t.ops);
