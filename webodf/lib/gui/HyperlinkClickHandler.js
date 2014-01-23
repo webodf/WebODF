@@ -53,10 +53,19 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
         /**@const
          @type{!string}*/
         inactive = "inactive",
+        /**@const
+         @type{!number}*/
+        None = gui.HyperlinkClickHandler.Modifier.None,
+        /**@const
+         @type{!number}*/
+        Ctrl = gui.HyperlinkClickHandler.Modifier.Ctrl,
+        /**@const
+         @type{!number}*/
+        Meta = gui.HyperlinkClickHandler.Modifier.Meta,
         odfUtils = new odf.OdfUtils(),
         xpath = xmldom.XPath,
-        /**@type{!boolean}*/
-        editing = false;
+        /**@type{!number}*/
+        modifier = None;
 
     /**
      * @param {?Node} node
@@ -80,12 +89,19 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
      */
     this.handleClick = function (e) {
         var target = e.target || e.srcElement,
+            modifierPressed,
             linkElement,
             url,
             rootNode,
             bookmarks;
 
-        if (editing && !e.ctrlKey && !e.metaKey) {
+        if (e.ctrlKey) {
+            modifierPressed = Ctrl;
+        } else if (e.metaKey) {
+            modifierPressed = Meta;
+        }
+
+        if (modifier !== None && modifier !== modifierPressed) {
             return;
         }
 
@@ -119,6 +135,12 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
             // Ask the browser to open the link in a new window.
             runtime.getWindow().open(url);
         }
+
+        if (e.preventDefault) {
+            e.preventDefault();
+        } else {
+            e.returnValue = false;
+        }
     };
 
     /**
@@ -138,15 +160,22 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
     this.showTextCursor = showTextCursor;
 
     /**
-     * Sets to true when in edit mode; otherwise false
-     * @param {!boolean} value
+     * Sets the modifier key for activating the hyperlink.
+     * @param {!number} value
      */
-    this.setEditing = function (value) {
-        editing = value;
-        if (editing) {
+    this.setModifier = function (value) {
+        modifier = value;
+        if (modifier !== None) {
             showTextCursor();
         } else {
             showPointerCursor();
         }
     };
+};
+
+/**@const*/
+gui.HyperlinkClickHandler.Modifier = {
+    None: 0,
+    Ctrl: 1,
+    Meta: 2
 };
