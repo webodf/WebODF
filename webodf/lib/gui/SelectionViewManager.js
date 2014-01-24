@@ -109,9 +109,7 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
      */
     this.rerenderSelectionViews = function () {
         Object.keys(selectionViews).forEach(function (memberId) {
-            if(selectionViews[memberId].visible()) {
-                selectionViews[memberId].rerender();
-            }
+            selectionViews[memberId].rerender();
         });
     };
 
