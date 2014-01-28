@@ -75,20 +75,10 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
-     * @return {!Element}
-     */
-    function getCanvasElement() {
-        return sessionController.getSession().getOdtDocument().getOdfCanvas().getElement();
-    }
-
-    /**
      * @param {!string} memberId
      * @return {undefined}
      */
     function removeCaret(memberId) {
-        if (memberId === sessionController.getInputMemberId()) {
-            getCanvasElement().removeAttribute("tabindex");
-        }
         delete carets[memberId];
     }
 
