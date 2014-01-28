@@ -271,6 +271,7 @@ set(TYPEDLIBJSFILES
     lib/gui/Avatar.js
     lib/gui/EditInfoHandle.js
     lib/gui/KeyboardHandler.js
+    lib/gui/StyleSummary.js
     lib/odf/Namespaces.js
     lib/odf/OdfUtils.js
     lib/ops/Server.js
@@ -297,7 +298,6 @@ set(TYPEDLIBJSFILES
     lib/odf/Formatting.js
     lib/odf/OdfCanvas.js
     lib/odf/TextStyleApplicator.js
-    lib/gui/StyleHelper.js
 )
 # This list is generated automatically, do not edit this list by hand.
 set(UNTYPEDLIBJSFILES

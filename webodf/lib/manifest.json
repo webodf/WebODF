@@ -85,7 +85,7 @@
         "core/PositionFilterChain.js",
         "core/Utils.js",
         "gui/SelectionMover.js",
-        "gui/StyleHelper.js",
+        "gui/StyleSummary.js",
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js",
         "odf/OdfUtils.js",
@@ -231,10 +231,7 @@
         "ops/OdtCursor.js",
         "ops/OdtDocument.js"
     ],
-    "gui/StyleHelper.js": [
-        "odf/Formatting.js",
-        "odf/Namespaces.js",
-        "odf/OdfUtils.js"
+    "gui/StyleSummary.js": [
     ],
     "gui/SvgSelectionView.js": [
         "core/DomUtils.js",

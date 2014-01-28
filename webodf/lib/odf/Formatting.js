@@ -308,9 +308,9 @@ odf.Formatting = function Formatting() {
 
     /**
      * Returns a JSON representation of the style attributes of a given style element, also containing attributes
-     * inherited from it's ancestry - up to and including the default style for the family.
+     * inherited from it's ancestry - up to and including the document's default style for the family.
      * @param {!Element} styleNode
-     * @param {!boolean=} includeSystemDefault
+     * @param {!boolean=} includeSystemDefault True by default. Specify false to suppress inclusion of system defaults
      * @return {!Object.<string,!Object.<string,string>>}
      */
     function getInheritedStyleAttributes(styleNode, includeSystemDefault) {
@@ -344,12 +344,10 @@ odf.Formatting = function Formatting() {
         }
 
         // Last incorporate attributes from the built-in default style
-        if (includeSystemDefault) {
+        if (includeSystemDefault !== false) {
             propertiesMap = getSystemDefaultStyleAttributes(styleFamily);
-            if (propertiesMap) {
-                // All child properties should override any matching parent properties
-                inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
-            }
+            // All child properties should override any matching parent properties
+            inheritedPropertiesMap = utils.mergeObjects(propertiesMap, inheritedPropertiesMap);
         }
 
         return inheritedPropertiesMap;

@@ -59,7 +59,7 @@ module.exports = function (config) {
             'lib/odf/Formatting.js',
             'lib/odf/OdfCanvas.js',
             'lib/odf/TextStyleApplicator.js',
-            'lib/gui/StyleHelper.js',
+            'lib/gui/StyleSummary.js',
             'lib/core/RawDeflate.js',
             'lib/gui/ImageSelector.js',
             'lib/odf/CommandLineTools.js',

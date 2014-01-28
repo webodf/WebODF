@@ -33,8 +33,9 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global runtime, core, odf*/
+/*global runtime, core, odf, NodeFilter*/
 runtime.loadClass("odf.Formatting");
+runtime.loadClass("odf.Namespaces");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner
@@ -42,14 +43,10 @@ runtime.loadClass("odf.Formatting");
  */
 odf.FormattingTests = function FormattingTests(runner) {
     "use strict";
-    var t,
+    var self = this,
+        t,
         r = runner,
-        namespace = {
-            "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-            "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-            "style": "urn:oasis:names:tc:opendocument:xmlns:style:1.0",
-            "fo": "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
-        };
+        namespace = odf.Namespaces.namespaceMap;
 
     this.setUp = function () {
         t = {
@@ -59,14 +56,13 @@ odf.FormattingTests = function FormattingTests(runner) {
         };
     };
     this.tearDown = function () {
-        t.range.detach();
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
     /**
      * @param {!string} dom
      * @param {string=} pageLayoutStyle
-     * @returns {!Node}
+     * @return {!Node}
      */
     function createDocument(dom, pageLayoutStyle) {
         var xml, container, fragment;
@@ -83,6 +79,18 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "    </style:style>";
         xml += "    <style:style style:name='S2' style:display-name='S2 Display' style:family='text'>";
         xml += "        <style:text-properties fo:font-weight='bold'/>";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SBold' style:display-name='SBold Display' style:family='text'>";
+        xml += "        <style:text-properties fo:font-weight='bold'/>";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SItalic' style:family='text'>";
+        xml += "        <style:text-properties fo:font-style='italic' />";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SUnderline' style:family='text'>";
+        xml += "        <style:text-properties style:text-underline-style='solid' />";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='SStrikeThrough' style:family='text'>";
+        xml += "        <style:text-properties style:text-line-through-style='solid' />";
         xml += "    </style:style>";
         xml += "</office:styles>";
 
@@ -120,6 +128,24 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.range = t.body.ownerDocument.createRange();
         return t.body.firstChild.childNodes[2].firstChild;
     }
+
+    /**
+     * Get all text nodes in the test div
+     * @return {!Array.<!Node>}
+     */
+    function getTextNodes() {
+        var document = t.body.ownerDocument,
+            walker = document.createTreeWalker(t.body, NodeFilter.SHOW_TEXT, null, false),
+            nodes = [],
+            n = walker.nextNode();
+
+        while (n) {
+            nodes.push(n);
+            n = walker.nextNode();
+        }
+        return nodes;
+    }
+
     function getStyleElement_ParagraphStyle() {
         createDocument("<text:p/>");
 
@@ -233,6 +259,150 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.contentSize = t.formatting.getContentSize("P2", "paragraph");
         r.shouldBe(t, "t.contentSize", "({'width':25.7,'height':17.001})");
     }
+
+    function getAppliedStyles_SimpleHierarchy() {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>");
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getAppliedStyles_NestedHierarchy() {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'><text:span text:style-name='SBold'>A</text:span></text:span></text:p>");
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "3");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'SBold', displayName: 'SBold Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font', 'fo:font-weight': 'bold'})");
+    }
+    function getAppliedStyles_CompleteContent_OnlyReportsUniqueStyles() {
+        t.doc = createDocument("<text:p text:style-name='P1'>A<text:span text:style-name='S1'>B</text:span>C</text:p>");
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "2");
+
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
+
+        t.appliedStyles.shift();
+
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getAppliedStyles_EmptyArray() {
+        t.appliedStyles = t.formatting.getAppliedStyles([]);
+
+        r.shouldBe(t, "t.appliedStyles.length", "0");
+    }
+    function getAppliedStyles_StartsAndEnds_InSameTextNode() {
+        t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'></text:span>ABC</text:p>");
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
+    }
+    function getAppliedStyles_StartsAndEnds_InDifferentTextNodes() {
+        t.doc = createDocument("<text:p text:style-name='P1'>A<text:span text:style-name='S1'>B</text:span>C</text:p>");
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "2");
+
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
+
+        t.appliedStyles.shift();
+
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getAppliedStyles_SimpleList() {
+        var xml = "<text:list text:style-name='L2'><text:list-item>" +
+            "<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>" +
+            "</text:list-item></text:list>";
+        t.doc = createDocument(xml);
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "3");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getAppliedStyles_NestedList() {
+        var xml = "<text:list text:style-name='L1'><text:list-item>" +
+            "<text:list text:style-name='L2'><text:list-item>" +
+            "<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>" +
+            "</text:list-item></text:list>" +
+            "</text:list-item></text:list>";
+        t.doc = createDocument(xml);
+
+        t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+        r.shouldBe(t, "t.appliedStyles.length", "1");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "4");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L1', displayName: 'L1 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+    }
+    function getAppliedStyles_InvalidNodes() {
+        var i, node,
+            invalidNodes = [
+                "draw:text-box",
+                "svg:title",
+                "dr3d:scene",
+                "text:note-body",
+                "text:ruby-text",
+                "office:annotation",
+                "office:binary-data",
+                "office:event-listeners",
+                "editinfo"
+            ];
+
+        for (i = 0; i < invalidNodes.length; i += 1) {
+            if (i > 0) {
+                self.setUp();
+            }
+
+            node = "<" + invalidNodes[i] + "><text:span text:style-name='S1'>test</text:span></" + invalidNodes[i] + ">";
+            t.doc = createDocument("<text:p text:style-name='P1'>" + node + "</text:p>");
+
+            t.appliedStyles = t.formatting.getAppliedStyles(getTextNodes());
+
+            r.shouldBe(t, "t.appliedStyles.length", "1");
+            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
+            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
+            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+
+            if (i < invalidNodes.length - 1) {
+                self.tearDown();
+            }
+        }
+    }
+
     this.tests = function () {
         return r.name([
             getStyleElement_ParagraphStyle,
@@ -250,7 +420,17 @@ odf.FormattingTests = function FormattingTests(runner) {
             getStyleAttributes_ReturnsAllStyleAttributes,
 
             getContentSize_PageSizePaddingAndMarginSpecified,
-            getContentSize_PageSizePaddingAndMarginNotSpecified
+            getContentSize_PageSizePaddingAndMarginNotSpecified,
+
+            getAppliedStyles_SimpleHierarchy,
+            getAppliedStyles_NestedHierarchy,
+            getAppliedStyles_EmptyArray,
+            getAppliedStyles_CompleteContent_OnlyReportsUniqueStyles,
+            getAppliedStyles_StartsAndEnds_InSameTextNode,
+            getAppliedStyles_StartsAndEnds_InDifferentTextNodes,
+            getAppliedStyles_SimpleList,
+            getAppliedStyles_NestedList,
+            getAppliedStyles_InvalidNodes
         ]);
     };
     this.asyncTests = function () {

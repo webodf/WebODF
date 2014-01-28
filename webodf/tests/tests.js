@@ -46,7 +46,7 @@ runtime.loadClass("core.ZipTests");
 runtime.loadClass("gui.UndoStateRulesTests");
 runtime.loadClass("gui.TrivialUndoManagerTests");
 runtime.loadClass("gui.SelectionMoverTests");
-runtime.loadClass("gui.StyleHelperTests");
+runtime.loadClass("gui.StyleSummaryTests");
 runtime.loadClass("ops.OdtCursorTests");
 runtime.loadClass("ops.OdtDocumentTests");
 runtime.loadClass("ops.SessionTests");
@@ -90,7 +90,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(gui.UndoStateRulesTests);
     tests.push(gui.TrivialUndoManagerTests);
     tests.push(gui.SelectionMoverTests);
-    tests.push(gui.StyleHelperTests);
+    tests.push(gui.StyleSummaryTests);
     tests.push(odf.OdfUtilsTests);
     tests.push(odf.ObjectNameGeneratorTests);
     tests.push(odf.FormattingTests);
