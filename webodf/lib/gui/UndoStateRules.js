@@ -52,6 +52,31 @@
 gui.UndoStateRules = function UndoStateRules() {
     "use strict";
 
+    /**
+     * Return the first element from the end of the array that matches the supplied predicate.
+     * Each subsequent call to previous will return the next element from the end of the array
+     * that matches the predicate.
+     * @constructor
+     * @param {!Array.<!ops.Operation>} array
+     * @param {!function(!ops.Operation):!boolean} predicate
+     */
+    function ReverseIterator(array, predicate) {
+        var index = array.length;
+
+        /**
+         * Return the previous element in the array that matches the predicate
+         * @return {?ops.Operation} Returns null when no more elements in the array match the predicate
+         */
+        this.previous = function() {
+            for (index = index - 1; index >= 0; index -= 1) {
+                if (predicate(array[index])) {
+                    return array[index];
+                }
+            }
+            return null;
+        };
+    }
+
     function getOpType(op) {
         return op.spec().optype;
     }
@@ -64,7 +89,7 @@ gui.UndoStateRules = function UndoStateRules() {
      * Returns true if the supplied operation
      * is considered an editing operation.
      * @param {!ops.Operation} op
-     * @returns {!boolean} Returns true if the supplied op is an edit operation
+     * @return {!boolean} Returns true if the supplied op is an edit operation
      */
     function isEditOperation(op) {
         return op.isEdit;
@@ -75,7 +100,7 @@ gui.UndoStateRules = function UndoStateRules() {
      * Returns true if the supplied optype is allowed to
      * aggregate multiple operations in a single undo or redo state
      * @param {!ops.Operation} op
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function canAggregateOperation(op) {
         switch (getOpType(op)) {
@@ -93,7 +118,7 @@ gui.UndoStateRules = function UndoStateRules() {
      * @param {!ops.Operation} thisOp
      * @param {!ops.Operation} lastEditOp
      * @param {!ops.Operation} secondLastEditOp
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isSameDirectionOfTravel(thisOp, lastEditOp, secondLastEditOp) {
         // Note, the operations in the recent queue are most
@@ -120,7 +145,7 @@ gui.UndoStateRules = function UndoStateRules() {
      * Returns true if the two operations are considered adjacent.
      * @param {!ops.Operation} thisOp
      * @param {!ops.Operation} lastEditOp
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isAdjacentOperation(thisOp, lastEditOp) {
         var positionDifference = getOpPosition(thisOp) - getOpPosition(lastEditOp);
@@ -134,6 +159,22 @@ gui.UndoStateRules = function UndoStateRules() {
     }
 
     /**
+     *
+     * @param {!ops.Operation} thisOp
+     * @param {!ops.Operation} lastEditOp
+     * @param {?ops.Operation} secondLastEditOp
+     * @return {!boolean}
+     */
+    function continuesOperations(thisOp, lastEditOp, secondLastEditOp) {
+        if (!secondLastEditOp) {
+            // No previous edit operations, so can't calculate a direction of travel.
+            // Just check new op is adjacent to existing op
+            return isAdjacentOperation(thisOp, lastEditOp);
+        }
+        return isSameDirectionOfTravel(thisOp, lastEditOp, secondLastEditOp);
+    }
+
+    /**
      * Returns true if thisOp can be grouped together with the most recent edit operations.
      *
      * For an operation to be considered continuous it must:
@@ -142,24 +183,18 @@ gui.UndoStateRules = function UndoStateRules() {
      * - Be considered adjacent (and in the same direction as) the most recent edit operation
      *
      * @param {!ops.Operation} thisOp
-     * @param {!Array.<!ops.Operation>} recentEditOps
-     * @returns {!boolean}
+     * @param {!Array.<!ops.Operation>} recentOperations
+     * @return {!boolean}
      */
-    function continuesMostRecentEditOperation(thisOp, recentEditOps) {
+    function continuesMostRecentEditOperation(thisOp, recentOperations) {
         var thisOpType = getOpType(thisOp),
-            lastEditOp = recentEditOps[recentEditOps.length - 1],
-            secondLastEditOp;
+            editOpsFinder = new ReverseIterator(recentOperations, isEditOperation),
+            lastEditOp = editOpsFinder.previous();
 
         runtime.assert(Boolean(lastEditOp), "No edit operations found in state");
         if (thisOpType === getOpType(lastEditOp)) {
-            // Operation can aggregate, and operation type is identical
-            if (recentEditOps.length === 1) {
-                // Not enough ops to worry about direction of travel. Just check new op is adjacent to existing op
-                return isAdjacentOperation(thisOp, lastEditOp);
-            }
-
-            secondLastEditOp = recentEditOps[recentEditOps.length - 2];
-            return isSameDirectionOfTravel(thisOp, lastEditOp, secondLastEditOp);
+            // Operation type is identical, so check if these operations are continuous
+            return continuesOperations(thisOp, /**@type{!ops.Operation}*/(lastEditOp), editOpsFinder.previous());
         }
         return false;
     }
@@ -173,30 +208,56 @@ gui.UndoStateRules = function UndoStateRules() {
      *   (see isContinuousWithExistingOperation for the definition of "continuous")
      *
      * @param {!ops.Operation} thisOp
-     * @param {!Array.<!ops.Operation>} recentEditOps
-     * @returns {!boolean}
+     * @param {!Array.<!ops.Operation>} recentOperations
+     * @return {!boolean}
      */
-    function continuesMostRecentEditGroup(thisOp, recentEditOps) {
+    function continuesMostRecentEditGroup(thisOp, recentOperations) {
         var thisOpType = getOpType(thisOp),
-            lastEditOp = recentEditOps[recentEditOps.length - 1],
-            groupId,
-            isContinuous = false;
+            editOpsFinder = new ReverseIterator(recentOperations, isEditOperation),
+            candidateOp = editOpsFinder.previous(),
+            lastEditOp,
+            secondLastEditOp = null,
+            inspectedGroupsCount,
+            groupId;
 
-        runtime.assert(Boolean(lastEditOp), "No edit operations found in state");
-        groupId = lastEditOp.group;
+        runtime.assert(Boolean(candidateOp), "No edit operations found in state");
+        groupId = candidateOp.group;
         runtime.assert(groupId !== undefined, "Operation has no group");
-        // Check if the current operation continues any operation in the latest, and return true if this is the case.
-        while (lastEditOp && lastEditOp.group === groupId) {
-            if (thisOpType === getOpType(lastEditOp)) {
-                // The last edit op that is compatible for aggregation defines whether thisOp is compatible with
-                // the existing edits
-                isContinuous = continuesMostRecentEditOperation(thisOp, recentEditOps);
+        inspectedGroupsCount = 1; // Need to keep track of how many edit groups have been inspected
+
+        // Check if the current operation continues any operation in the latest group
+        while (candidateOp && candidateOp.group === groupId) {
+            if (thisOpType === getOpType(candidateOp)) {
+                // A matching edit operation was found in the most recent edit group
+                lastEditOp = candidateOp;
                 break;
             }
-            recentEditOps.pop(); // Remove the non-matching op and see if the next op in the group is continuous
-            lastEditOp = recentEditOps[recentEditOps.length - 1];
+            candidateOp = editOpsFinder.previous();
         }
-        return isContinuous;
+
+        if (lastEditOp) {
+            // Now try and find a second operation of the same type in either of the most recent two edit groups
+            candidateOp = editOpsFinder.previous();
+            while (candidateOp) {
+                if (candidateOp.group !== groupId) {
+                    if (inspectedGroupsCount === 2) {
+                        // No second compatible op was found within two edit groups, so abandon searching for more
+                        // and check continuity against lastEditOp only
+                        break;
+                    }
+                    groupId = candidateOp.group;
+                    inspectedGroupsCount += 1;
+                }
+                if (thisOpType === getOpType(candidateOp)) {
+                    // Found an operation of the same type within the last two edit groups on the stack
+                    secondLastEditOp = candidateOp;
+                    break;
+                }
+                candidateOp = editOpsFinder.previous();
+            }
+            return continuesOperations(thisOp, /**@type{!ops.Operation}*/(lastEditOp), secondLastEditOp);
+        }
+        return false;
     }
 
     /**
@@ -204,12 +265,11 @@ gui.UndoStateRules = function UndoStateRules() {
      * set of operations according to the undo rules
      * @param {!ops.Operation} operation
      * @param {!Array.<!ops.Operation>} recentOperations
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isPartOfOperationSet(operation, recentOperations) {
         var areOperationsGrouped = operation.group !== undefined, // Expect groups to be consistently used (if in use at all)
-            lastOperation,
-            recentEditOperations;
+            lastOperation;
         if (!isEditOperation(operation)) {
             // Non-edit operations always get appended to the existing undo state
             // this covers things such as move cursor ops
@@ -224,16 +284,13 @@ gui.UndoStateRules = function UndoStateRules() {
             // Operation groups match, so these were queued as a group
             return true;
         }
-        if (canAggregateOperation(operation)) {
-            recentEditOperations = recentOperations.filter(isEditOperation);
-            if (recentEditOperations.length > 0) {
-                // The are existing edit operations. Check if the current op can be combined with existing operations
-                // E.g., multiple insert text or remove text ops
-                if (areOperationsGrouped) {
-                    return continuesMostRecentEditGroup(operation, recentEditOperations);
-                }
-                return continuesMostRecentEditOperation(operation, recentEditOperations);
+        if (canAggregateOperation(operation) && recentOperations.some(isEditOperation)) {
+            // The are existing edit operations. Check if the current op can be combined with existing operations
+            // E.g., multiple insert text or remove text ops
+            if (areOperationsGrouped) {
+                return continuesMostRecentEditGroup(operation, recentOperations);
             }
+            return continuesMostRecentEditOperation(operation, recentOperations);
         }
         // The following are all true at this point:
         // - new operation is an edit operation (check 1)
