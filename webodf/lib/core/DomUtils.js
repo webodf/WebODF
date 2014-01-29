@@ -37,7 +37,6 @@
  */
 
 /*global Node, core, ops, runtime, NodeFilter, Range*/
-/*jslint bitwise: true*/
 
 (function () {
     "use strict";
@@ -48,7 +47,7 @@
      * Detect various browser quirks
      * unscaledRangeClientRects - Firefox doesn't apply parent css transforms to any range client rectangles
      * rangeBCRIgnoresElementBCR - Internet explorer returns 0 client rects for an empty element that has fixed dimensions
-     * @returns {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
+     * @return {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
      */
     function getBrowserQuirks() {
         var range,
@@ -136,7 +135,7 @@
          * to the provided container and offset.
          * @param {!Node} container
          * @param {!number} offset
-         * @returns {{container: Node, offset: !number}}
+         * @return {{container: Node, offset: !number}}
          */
         function findStablePoint(container, offset) {
             var c = container;
@@ -189,7 +188,7 @@
          * only the completely selected text node:
          *  "A" "|BCD|" "E"
          * @param {!Range} range
-         * @returns {!Array.<!Node>} Return a list of nodes modified as a result
+         * @return {!Array.<!Node>} Return a list of nodes modified as a result
          *                           of this split operation. These are often
          *                           processed through
          *                           DomUtils.normalizeTextNodes after all
@@ -264,7 +263,7 @@
          * Aligned boundaries are counted as inclusion
          * @param {!Range} container
          * @param {!Range} insideRange
-         * @returns {boolean}
+         * @return {boolean}
          */
         function containsRange(container, insideRange) {
             return container.compareBoundaryPoints(Range.START_TO_START, insideRange) <= 0
@@ -276,7 +275,7 @@
          * Returns true if there is any intersection between range1 and range2
          * @param {!Range} range1
          * @param {!Range} range2
-         * @returns {boolean}
+         * @return {boolean}
          */
         function rangesIntersect(range1, range2) {
             return range1.compareBoundaryPoints(Range.END_TO_START, range2) <= 0
@@ -285,41 +284,89 @@
         this.rangesIntersect = rangesIntersect;
 
         /**
+         * Returns the maximum available offset for the node. If this is a text
+         * node, this will be node.length, or for an element node, childNodes.length
+         * @param {!Node} node
+         * @return {!number}
+         */
+        function maximumOffset(node) {
+            return node.nodeType === Node.TEXT_NODE ? /**@type{!Text}*/(node).length : node.childNodes.length;
+        }
+
+        /**
          * Fetches all nodes within a supplied range that pass the required filter
          * @param {!Range} range
          * @param {!function(!Node) : number} nodeFilter
-         * @returns {!Array.<Node>}
+         * @param {!number} whatToShow
+         * @return {!Array.<Node>}
          */
-        function getNodesInRange(range, nodeFilter) {
+        /*jslint bitwise:true*/
+        function getNodesInRange(range, nodeFilter, whatToShow) {
             var document = range.startContainer.ownerDocument,
                 elements = [],
                 rangeRoot = range.commonAncestorContainer,
                 root = /**@type{!Node}*/(rangeRoot.nodeType === Node.TEXT_NODE ? rangeRoot.parentNode : rangeRoot),
-                n,
-                filterResult,
-                treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ALL, nodeFilter, false);
+                treeWalker = document.createTreeWalker(root, whatToShow, nodeFilter, false),
+                currentNode,
+                lastNodeInRange,
+                endNodeCompareFlags,
+                comparePositionResult;
 
-            treeWalker.currentNode = range.startContainer;
-            n = range.startContainer;
-            while (n) {
-                filterResult = nodeFilter(n);
-                if (filterResult === NodeFilter.FILTER_ACCEPT) {
-                    elements.push(n);
-                } else if (filterResult === NodeFilter.FILTER_REJECT) {
+            if (range.endContainer.childNodes[range.endOffset - 1]) {
+                // This is the last node completely contained in the range
+                lastNodeInRange = /**@type{!Node}*/(range.endContainer.childNodes[range.endOffset - 1]);
+                // Accept anything preceding or contained by this node.
+                endNodeCompareFlags = Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINED_BY;
+            } else {
+                // Either no child nodes (e.g., TEXT_NODE) or endOffset = 0
+                lastNodeInRange = /**@type{!Node}*/(range.endContainer);
+                // Don't accept things contained within this node, as the range ends before this node's children.
+                // This is the last node touching the range though, so the node is still accepted into the results.
+                endNodeCompareFlags = Node.DOCUMENT_POSITION_PRECEDING;
+            }
+
+            if (range.startContainer.childNodes[range.startOffset]) {
+                // The range starts within startContainer, so this child node is the first node in the range
+                currentNode = /**@type{!Node}*/(range.startContainer.childNodes[range.startOffset]);
+                treeWalker.currentNode = currentNode;
+            } else if (range.startOffset === maximumOffset(range.startContainer)) {
+                // This condition will be true if the range starts beyond the last position of a node
+                // E.g., (text, text.length) or (div, div.childNodes.length)
+                currentNode = /**@type{!Node}*/(range.startContainer);
+                treeWalker.currentNode = currentNode;
+                // In this case, move to the last child (if the node has children)
+                treeWalker.lastChild(); // May return null if the current node has no children
+                // And navigate onto the next node in sequence
+                currentNode = treeWalker.nextNode();
+            } else {
+                // This will only be hit for a text node that is partially overlapped by the range start
+                currentNode = /**@type{!Node}*/(range.startContainer);
+                treeWalker.currentNode = currentNode;
+            }
+
+            if (currentNode && nodeFilter(currentNode) === NodeFilter.FILTER_ACCEPT) {
+                // The first call to nextNode will return the next node *after* walker.currentNode
+                // Therefore, need to manually check if currentNode should be included in the elements array
+                // and save it if it passes the filter
+                elements.push(currentNode);
+            }
+
+            currentNode = treeWalker.nextNode();
+            while (currentNode) {
+                comparePositionResult = lastNodeInRange.compareDocumentPosition(currentNode);
+                if (comparePositionResult !== 0 && (comparePositionResult & endNodeCompareFlags) === 0) {
+                    // comparePositionResult === 0 if currentNode === lastNodeInRange. This is considered within the range
+                    // comparePositionResult & endNodeCompareFlags would be non-zero if n precedes lastNodeInRange
+                    // If either of these statements are false, currentNode is past the end of the range
                     break;
                 }
-                n = n.parentNode;
+                elements.push(currentNode);
+                currentNode = treeWalker.nextNode();
             }
-            // The expected sequence is outer-most to inner-most element, thus, the array just built needs to be reversed
-            elements.reverse();
 
-            n = treeWalker.nextNode();
-            while (n) {
-                elements.push(n);
-                n = treeWalker.nextNode();
-            }
             return elements;
         }
+        /*jslint bitwise:false*/
         this.getNodesInRange = getNodesInRange;
 
         /**
@@ -375,9 +422,9 @@
 
         /**
          * Checks if the provided limits fully encompass the passed in node
-         * @param {{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits
+         * @param {!Range|{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits
          * @param {!Node} node
-         * @returns {boolean} Returns true if the node is fully contained within
+         * @return {boolean} Returns true if the node is fully contained within
          *                    the range
          */
         function rangeContainsNode(limits, node) {
@@ -439,7 +486,7 @@
          * @param {!Element|!Document} node
          * @param {!string} namespace
          * @param {!string} tagName
-         * @returns {!Array.<!Element>}
+         * @return {!Array.<!Element>}
          */
         function getElementsByTagNameNS(node, namespace, tagName) {
             var e = [], list, i, l;
@@ -451,23 +498,6 @@
             return e;
         }
         this.getElementsByTagNameNS = getElementsByTagNameNS;
-
-        /**
-         * @param {!Range} range
-         * @param {!Node} node
-         * @return {!boolean}
-         */
-        function rangeIntersectsNode(range, node) {
-            var nodeRange = node.ownerDocument.createRange(),
-                result;
-
-            nodeRange.selectNodeContents(node);
-            result = rangesIntersect(range, nodeRange);
-            nodeRange.detach();
-
-            return result;
-        }
-        this.rangeIntersectsNode = rangeIntersectsNode;
 
         /**
          * Whether a node contains another node
@@ -491,12 +521,14 @@
          * @param {?Node} descendant The node to test presence of
          * @return {!boolean}
          */
+        /*jslint bitwise:true*/
         function containsNodeForBrokenWebKit(parent, descendant) {
             // the contains function is not reliable on safari/webkit so use
             // compareDocumentPosition instead
             return parent === descendant ||
                 Boolean(parent.compareDocumentPosition(descendant) & Node.DOCUMENT_POSITION_CONTAINED_BY);
         }
+        /*jslint bitwise:false*/
 
         /**
          * Return a number > 0 when point 1 precedes point 2. Return 0 if the points
@@ -543,7 +575,7 @@
          *                              a property on two range-sourced client
          *                              rectangles (e.g., rect1.top - rect2.top)
          * @param {!number} zoomLevel   Current canvas zoom level
-         * @returns {!number}
+         * @return {!number}
          */
         function adaptRangeDifferenceToZoomLevel(inputNumber, zoomLevel) {
             if (getBrowserQuirks().unscaledRangeClientRects) {
@@ -563,7 +595,7 @@
          * transformed in the same way.
          * See https://bugzilla.mozilla.org/show_bug.cgi?id=863618
          * @param {!Node} node
-         * @returns {?ClientRect}
+         * @return {?ClientRect}
          */
         function getBoundingClientRect(node) {
             var doc = /**@type{!Document}*/(node.ownerDocument),
