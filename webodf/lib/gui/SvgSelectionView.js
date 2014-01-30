@@ -35,7 +35,9 @@
  */
 /*global Node, NodeFilter, gui, odf, ops, runtime, core*/
 
+runtime.loadClass("core.Async");
 runtime.loadClass("core.DomUtils");
+runtime.loadClass("core.ScheduledTask");
 runtime.loadClass("odf.OdfUtils");
 runtime.loadClass("odf.OdfNodeFilter");
 runtime.loadClass("gui.SelectionMover");
@@ -55,6 +57,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         /**@type{!Element}*/
         root, // initialized by addOverlays
         doc = odtDocument.getDOM(),
+        async = new core.Async(),
         svgns = "http://www.w3.org/2000/svg",
         overlay = doc.createElementNS(svgns, 'svg'),
         polygon = doc.createElementNS(svgns, 'polygon'),
@@ -65,7 +68,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         /**@const*/
         FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/
-        FILTER_REJECT = NodeFilter.FILTER_REJECT;
+        FILTER_REJECT = NodeFilter.FILTER_REJECT,
+        renderTask;
 
     /**
      * This evil little check is necessary because someone, not mentioning any names *cough*
@@ -84,20 +88,6 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             overlay.setAttribute('class', 'selectionOverlay');
             overlay.appendChild(polygon);
         }
-    }
-
-    /**
-     * Shows or hides the selection overlay for this view
-     * @param {boolean} choice
-     * @return {undefined}
-     */
-    function showOverlay(choice) {
-        var display;
-
-        isVisible = choice;
-        display = (choice === true) ? "block" : "none";
-
-        overlay.style.display = display;
     }
 
     /**
@@ -508,9 +498,14 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     }
 
     /**
-     * Repositions overlay over the given selected range of the cursor
+     * Repositions overlay over the given selected range of the cursor. If the
+     * selected range has no visible rectangles (as may happen if the selection only
+     * encompasses collapsed whitespace, or does not span any ODT text elements), this
+     * function will return false to indicate the overlay element can be hidden.
+     *
      * @param {!Range} selectedRange
-     * @return {undefined}
+     * @return {!boolean} Returns true if the selected range is visible (i.e., height +
+     *    width are non-zero), otherwise returns false
      */
     function repositionOverlays(selectedRange) {
         var extremes = getExtremeRanges(selectedRange),
@@ -527,11 +522,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
 
         // If the range is collapsed (no selection) or no extremes were found, do not show
         // any virtual selections.
-        if (selectedRange.collapsed || !extremes) {
-            showOverlay(false);
-        } else {
-            showOverlay(true);
-
+        if (extremes) {
             firstRange = extremes.firstRange;
             lastRange = extremes.lastRange;
             fillerRange = extremes.fillerRange;
@@ -576,40 +567,54 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             lastRange.detach();
             fillerRange.detach();
         }
+        return Boolean(extremes);
     }
 
+    /**
+     * Update the visible selection, or hide if it should no
+     * longer be visible
+     * @return {undefined}
+     */
     function rerender() {
-        addOverlay();
-        if (cursor.getSelectionType() === ops.OdtCursor.RangeSelection) {
-            showOverlay(true);
-            repositionOverlays(cursor.getSelectedRange());
+        var range = cursor.getSelectedRange(),
+            shouldShow;
+        shouldShow = isVisible
+                        && cursor.getSelectionType() === ops.OdtCursor.RangeSelection
+                        && !range.collapsed;
+        if (shouldShow) {
+            shouldShow = repositionOverlays(range);
+        }
+        if (shouldShow) {
+            overlay.style.display = "block";
+            addOverlay();
         } else {
-            showOverlay(false);
+            overlay.style.display = "none";
         }
     }
 
     /**
      * @inheritDoc
      */
-    this.rerender = rerender;
-
-    /**
-     * @inheritDoc
-     */
-    this.show = rerender;
-
-    /**
-     * @inheritDoc
-     */
-    this.hide = function () {
-        showOverlay(false);
+    this.rerender = function() {
+        if (isVisible) {
+            renderTask.trigger();
+        }
     };
 
     /**
      * @inheritDoc
      */
-    this.visible = function () {
-        return isVisible;
+    this.show = function() {
+        isVisible = true;
+        renderTask.trigger();
+    };
+
+    /**
+     * @inheritDoc
+     */
+    this.hide = function () {
+        isVisible = false;
+        renderTask.trigger();
     };
 
     /**
@@ -617,25 +622,29 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * @return {undefined}
      */
     function handleCursorMove(movedCursor) {
-        if (movedCursor === cursor) {
-            rerender();
+        if (isVisible && movedCursor === cursor) {
+            renderTask.trigger();
         }
+    }
+
+    function destroy(callback) {
+        root.removeChild(overlay);
+        cursor.getOdtDocument().unsubscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
+        callback();
     }
 
     /**
      * @inheritDoc
      */
     this.destroy = function (callback) {
-        root.removeChild(overlay);
-        cursor.getOdtDocument().unsubscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
-
-        callback();
+        async.destroyAll([renderTask.destroy, destroy], callback);
     };
 
     function init() {
         var editinfons = 'urn:webodf:names:editinfo',
             memberid = cursor.getMemberId();
 
+        renderTask = new core.ScheduledTask(rerender, 0);
         addOverlay();
         overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
         cursor.getOdtDocument().subscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);

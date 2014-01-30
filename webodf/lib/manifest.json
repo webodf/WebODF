@@ -238,7 +238,9 @@
     "gui/StyleSummary.js": [
     ],
     "gui/SvgSelectionView.js": [
+        "core/Async.js",
         "core/DomUtils.js",
+        "core/ScheduledTask.js",
         "gui/SelectionMover.js",
         "gui/SelectionView.js",
         "gui/ShadowCursor.js",
