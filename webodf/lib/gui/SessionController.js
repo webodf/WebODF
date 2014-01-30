@@ -92,7 +92,7 @@ gui.SessionController = (function () {
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             keyUpHandler = new gui.KeyboardHandler(),
-            clickStartedWithinContainer = false,
+            clickStartedWithinCanvas = false,
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             isMouseMoved = false,
             mouseDownRootFilter = null,
@@ -363,7 +363,7 @@ gui.SessionController = (function () {
             var selection = window.getSelection(),
                 selectionRange = selection.rangeCount > 0 && selectionController.selectionToRange(selection);
 
-            if (clickStartedWithinContainer && selectionRange) {
+            if (clickStartedWithinCanvas && selectionRange) {
                 isMouseMoved = true;
 
                 imageSelector.clearSelection();
@@ -419,8 +419,8 @@ gui.SessionController = (function () {
         function handleMouseDown(e) {
             var target = getTarget(e),
                 cursor = odtDocument.getCursor(inputMemberId);
-            clickStartedWithinContainer = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
-            if (clickStartedWithinContainer) {
+            clickStartedWithinCanvas = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
+            if (clickStartedWithinCanvas) {
                 isMouseMoved = false;
                 mouseDownRootFilter = odtDocument.createRootFilter(target);
                 clickCount = e.detail;
@@ -469,7 +469,7 @@ gui.SessionController = (function () {
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (imageSelector.isSelectorElement(target)) {
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (clickStartedWithinContainer) {
+            } else if (clickStartedWithinCanvas) {
                 if (isMouseMoved) {
                     selectionController.selectRange(shadowCursor.getSelectedRange(),
                         shadowCursor.hasForwardSelection(), event.detail);
@@ -504,7 +504,7 @@ gui.SessionController = (function () {
                 }
             }
             clickCount = 0;
-            clickStartedWithinContainer = false;
+            clickStartedWithinCanvas = false;
             isMouseMoved = false;
         }
 
@@ -526,11 +526,11 @@ gui.SessionController = (function () {
         function handleDragEnd() {
             // Drag operations consume the corresponding mouse up event.
             // If this happens, the selection should still be reset.
-            if (clickStartedWithinContainer) {
+            if (clickStartedWithinCanvas) {
                 eventManager.focus();
             }
             clickCount = 0;
-            clickStartedWithinContainer = false;
+            clickStartedWithinCanvas = false;
             isMouseMoved = false;
         }
 
