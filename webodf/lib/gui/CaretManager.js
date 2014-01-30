@@ -205,7 +205,7 @@ gui.CaretManager = function CaretManager(sessionController) {
     this.getCaret = getCaret;
 
     /**
-     * @returns {!Array.<!gui.Caret>}
+     * @return {!Array.<!gui.Caret>}
      */
     this.getCarets = getCarets;
 

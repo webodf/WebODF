@@ -314,7 +314,7 @@ define("webodf/editor/EditorSession", [
         /**
          * Round the step up to the next step
          * @param {!number} step
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function roundUp(step) {
             return step === ops.StepsTranslator.NEXT_STEP;

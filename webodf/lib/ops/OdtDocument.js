@@ -177,7 +177,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      *  a smaller subtree allows iteration to end quickly if there are no walkable steps remaining in a particular
      *  direction. This can vastly improve performance.
      *
-     * @returns {!core.StepIterator}
+     * @return {!core.StepIterator}
      */
     function createStepIterator(container, offset, filters, subTree) {
         var positionIterator = gui.SelectionMover.createPositionIterator(subTree),
@@ -218,7 +218,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
      * is not in an accepted location, this delegate is used to choose between rounding up or
      * rounding down to the nearest step. If not provided, the default behaviour is to round down.
-     * @returns {!number}
+     * @return {!number}
      */
     this.convertDomPointToCursorStep = function (node, offset, roundDirection) {
         return stepsTranslator.convertDomPointToSteps(node, offset, roundDirection);
@@ -227,7 +227,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * @param {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}} selection
      * @param {function(!Node, !number):function(!number, !Node, !number):!boolean=} constraint
-     * @returns {{position: !number, length: number}}
+     * @return {{position: !number, length: number}}
      */
     this.convertDomToCursorRange = function (selection, constraint) {
         var point1,
@@ -255,7 +255,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Convert a cursor range to a DOM range
      * @param {!number} position
      * @param {!number} length
-     * @returns {Range}
+     * @return {Range}
      */
     this.convertCursorToDomRange = function (position, length) {
         var range = getDOM().createRange(),
@@ -384,7 +384,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * @param {!string} styleName
      * @param {!string} styleFamily
-     * @returns {Element}
+     * @return {Element}
      */
     function getStyleElement(styleName, styleFamily) {
         return odfCanvas.getFormatting().getStyleElement(styleName, styleFamily);
@@ -577,7 +577,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!number} offset
      * @param {!Node} root
      *
-     * @returns {!Node}
+     * @return {!Node}
      */
     function paragraphOrRoot(container, offset, root) {
         var node = container.childNodes[offset] || container,
@@ -662,7 +662,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * !IMPORTANT! length is a vector, and may be negative if the cursor selection
      * is reversed (i.e., user clicked and dragged the cursor backwards)
      * @param {!string} memberid
-     * @returns {{position: !number, length: !number}}
+     * @return {{position: !number, length: !number}}
      */
     this.getCursorSelection = function(memberid) {
         var cursor = cursors[memberid],

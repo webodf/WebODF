@@ -65,7 +65,7 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
      * @param {!ops.Operation} operation
      * @param {?} args
      * @param {string=} group
-     * @returns {!ops.Operation}
+     * @return {!ops.Operation}
      */
     function create(operation, args, group) {
         operation.init(args);
@@ -86,7 +86,7 @@ gui.UndoStateRulesTests = function UndoStateRulesTests(runner) {
      * state of the document, and cannot be undone.
      *
      * @param {!Array.<!ops.Operation>} undoQueue
-     * @returns {!number}
+     * @return {!number}
      */
     function findLastUndoState(undoQueue) {
         var index = 0,

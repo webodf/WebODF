@@ -104,7 +104,7 @@ core.UnitTest.cleanupTestAreaDiv = function () {
  *                      <office:document>..</office:document> tags
  * @param {!Object.<string, string>} namespaceMap Name-value pairs that map the
  *                                   prefix onto the appropriate uri namespace
- * @returns {?Document}
+ * @return {?Document}
  */
 core.UnitTest.createOdtDocument = function (xml, namespaceMap) {
     "use strict";

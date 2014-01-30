@@ -83,7 +83,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     /**
      * @param {!Node} paragraphNode
-     * @returns {!{node: !Node, start: !number, length: !number}}
+     * @return {!{node: !Node, start: !number, length: !number}}
      */
     function createParagraphBoundary(paragraphNode) {
         var start = t.translator.convertDomPointToSteps(paragraphNode, 0, roundUp),
@@ -97,7 +97,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
 
     /**
      * @param {!HTMLElement} node
-     * @returns {!Array.<!{node: !Node, start: !number, length: !number}>}
+     * @return {!Array.<!{node: !Node, start: !number, length: !number}>}
      */
     function extractParagraphBoundaries(node) {
         return domUtils.getElementsByTagNameNS(node, textns, "p").map(createParagraphBoundary);

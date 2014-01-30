@@ -87,7 +87,7 @@ ops.OpInsertText = function OpInsertText() {
      * Logic is based on http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-text_s
      * @param {!string} text
      * @param {!number} index
-     * @returns {boolean}
+     * @return {boolean}
      */
     function requiresSpaceElement(text, index) {
         return text[index] === space && (index === 0 || index === text.length - 1 || text[index - 1] === space);

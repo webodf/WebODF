@@ -71,7 +71,7 @@ gui.EventManager = function EventManager(odtDocument) {
      * Get the current canvas element. The current trivial undo manager replaces the root element
      * of the ODF container with a clone from a previous state. This results in the root element
      * being changed. As such, it can't be stored, and should be queried on each use.
-     * @returns {!Element}
+     * @return {!Element}
      */
     function getCanvasElement() {
         // TODO Remove when a proper undo manager arrives
@@ -178,7 +178,7 @@ gui.EventManager = function EventManager(odtDocument) {
      * Get an event delegate for the requested event name
      * @param {!string} eventName
      * @param {!boolean} shouldCreate Create a delegate for the requested event if it doesn't exist
-     * @returns {EventDelegate}
+     * @return {EventDelegate}
      */
     function getDelegateForEvent(eventName, shouldCreate) {
         var delegate = eventDelegates[eventName] || null,
@@ -244,7 +244,7 @@ gui.EventManager = function EventManager(odtDocument) {
 
     /**
      * Returns true if the event manager is currently receiving events
-     * @returns {boolean}
+     * @return {boolean}
      */
     function hasFocus() {
         return odtDocument.getDOM().activeElement === eventTrap;
@@ -254,7 +254,7 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * Find the all scrollable ancestor for the specified element
      * @param {Element} element
-     * @returns {!Array}
+     * @return {!Array}
      */
     function findScrollableParents(element) {
         var scrollParents = [];
@@ -289,7 +289,7 @@ gui.EventManager = function EventManager(odtDocument) {
 
     /**
      * Returns the event trap div
-     * @returns {!Element}
+     * @return {!Element}
      */
     this.getEventTrap = function() {
         return eventTrap;

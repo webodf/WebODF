@@ -61,7 +61,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
      * The step iterator subtree is set to the root of the current cursor node
-     * @returns {!core.StepIterator}
+     * @return {!core.StepIterator}
      */
     function createKeyboardStepIterator() {
         var cursor = odtDocument.getCursor(inputMemberId),
@@ -72,7 +72,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
 
     /**
      * @param {Function} lookup
-     * @returns {!function(!Node, !number):!function(!number, !Node, !number):!boolean}
+     * @return {!function(!Node, !number):!function(!number, !Node, !number):!boolean}
      */
     /*jslint unparam:true*/
     function constrain(lookup) {
@@ -88,7 +88,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     /**
      * Derive a selection-type object from the provided cursor
      * @param {!{anchorNode: Node, anchorOffset: !number, focusNode: Node, focusOffset: !number}} selection
-     * @returns {{range: !Range, hasForwardSelection: !boolean}}
+     * @return {{range: !Range, hasForwardSelection: !boolean}}
      */
     function selectionToRange(selection) {
         var hasForwardSelection = domUtils.comparePoints(/**@type{!Node}*/(selection.anchorNode), selection.anchorOffset,
@@ -112,7 +112,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * Derive a selection-type object from the provided cursor
      * @param {!Range} range
      * @param {!boolean} hasForwardSelection
-     * @returns {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}}
+     * @return {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}}
      */
     function rangeToSelection(range, hasForwardSelection) {
         if (hasForwardSelection) {

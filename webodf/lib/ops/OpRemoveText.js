@@ -98,7 +98,7 @@ ops.OpRemoveText = function OpRemoveText() {
         /**
          * Returns true if the given node is an odf node
          * @param {!Node} node
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function isOdfNode(node) {
             return odfNodeNamespaceMap.hasOwnProperty(node.namespaceURI);
@@ -107,7 +107,7 @@ ops.OpRemoveText = function OpRemoveText() {
         /**
          * Returns true if a given node is odf node or a text node that has a odf parent.
          * @param {!Node} node
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function shouldRemove(node) {
             return isOdfNode(node)
@@ -118,7 +118,7 @@ ops.OpRemoveText = function OpRemoveText() {
         /**
          * Returns true if the supplied node contains no text or ODF elements
          * @param {!Node} node
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function isEmpty(node) {
             var childNode;
@@ -144,7 +144,7 @@ ops.OpRemoveText = function OpRemoveText() {
          * text or ODF character elements. The only element that should always be kept is a paragraph element.
          * Paragraph elements can only be deleted through merging
          * @param {!Node} node
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function isCollapsibleContainer(node) {
             return !odfUtils.isParagraph(node) && node !== rootNode && isEmpty(node);

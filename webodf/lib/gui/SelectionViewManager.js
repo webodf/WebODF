@@ -60,7 +60,7 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     this.getSelectionView = getSelectionView;
 
     /**
-     * @returns {!Array.<!gui.SelectionView>}
+     * @return {!Array.<!gui.SelectionView>}
      */
     function getSelectionViews() {
         return Object.keys(selectionViews).map(function(memberid) { return selectionViews[memberid]; });
@@ -116,7 +116,7 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     /**
      * @param {!(ops.OdtCursor|gui.ShadowCursor)} cursor
      * @param {!boolean} virtualSelectionsInitiallyVisible
-     * @returns {!gui.SelectionView}
+     * @return {!gui.SelectionView}
      */
     this.registerCursor = function (cursor, virtualSelectionsInitiallyVisible) {
         var memberId = cursor.getMemberId(),

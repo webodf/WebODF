@@ -131,7 +131,7 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
 
     /**
      * @param {!string} mimetype
-     * @returns {?string}
+     * @return {?string}
      */
     function getFileExtension(mimetype) {
         mimetype = mimetype.toLowerCase();
@@ -199,7 +199,7 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
     /**
      * @param {!{width: number, height: number}} originalSize
      * @param {!{width: number, height: number}} pageContentSize
-     * @returns {!{width: number, height: number}}
+     * @return {!{width: number, height: number}}
      */
     function trimmedSize(originalSize, pageContentSize) {
         var widthRatio = 1,

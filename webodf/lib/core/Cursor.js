@@ -129,7 +129,7 @@ core.Cursor = function Cursor(document, memberId) {
 
     /**
      * Gets the earliest selection node in the document
-     * @returns {!Node}
+     * @return {!Node}
      */
     function getStartNode() {
         return forwardSelection ? anchorNode : cursorNode;
@@ -137,7 +137,7 @@ core.Cursor = function Cursor(document, memberId) {
 
     /**
      * Gets the latest selection node in the document
-     * @returns {!Node}
+     * @return {!Node}
      */
     function getEndNode() {
         return forwardSelection ? cursorNode : anchorNode;
@@ -154,7 +154,7 @@ core.Cursor = function Cursor(document, memberId) {
      * Obtain the node representing the selection start point.
      * If a 0-length range is selected (e.g., by clicking without
      * dragging),, this will return the exact same node as getNode
-     * @returns {!Element}
+     * @return {!Element}
      */
     this.getAnchorNode = function () {
         return anchorNode.parentNode ? anchorNode : cursorNode;

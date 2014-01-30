@@ -76,7 +76,7 @@ gui.SessionView = (function () {
      * is provided
      * @param {boolean} userValue
      * @param {!boolean} defaultValue
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function configOption(userValue, defaultValue) {
         return userValue !== undefined ? Boolean(userValue) : defaultValue;

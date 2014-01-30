@@ -86,7 +86,7 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
             reportedNames = {};
         /**
          * Generate a unique name
-         * @returns {string}
+         * @return {string}
          */
         this.generateName = function () {
             var existingNames = findExistingNames(),
@@ -105,7 +105,7 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
      * Get all the style names defined in the style:style elements of the
      * current document including automatic styles.
      *
-     * @returns {!Object.<string,boolean>}
+     * @return {!Object.<string,boolean>}
      */
     function getAllStyleNames() {
         var styleElements = [
@@ -132,7 +132,7 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
 
     /**
      * Generate a unique style name across the style:style elements
-     * @returns {!string}
+     * @return {!string}
      */
     this.generateStyleName = function () {
         if (styleNameGenerator === null) {
@@ -148,7 +148,7 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
     };
     /**
      * Generate a unique frame name
-     * @returns {!string}
+     * @return {!string}
      */
     this.generateFrameName = function () {
         if (frameNameGenerator === null) {
@@ -168,7 +168,7 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
     };
     /**
      * Generate a unique image name
-     * @returns {!string}
+     * @return {!string}
      */
     this.generateImageName = function () {
         if (imageNameGenerator === null) {

@@ -69,7 +69,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
 
     /**
      * Returns true if the current iterator position is accepted by the supplied filter
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isStep() {
         if (cachedFilterResult === undefined) {
@@ -83,7 +83,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
      * Sets the position of the underlying iterator
      * @param {!Node} newContainer
      * @param {!number} newOffset
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function setPosition(newContainer, newOffset) {
         resetCache();
@@ -105,7 +105,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
 
     /**
      * Get the current unfiltered DOM offset of the underlying iterator
-     * @returns {!number}
+     * @return {!number}
      */
     function offset() {
         if (cachedOffset === undefined) {
@@ -117,7 +117,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
 
     /**
      * Move to the next step. Returns false if no step exists
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function nextStep() {
         resetCache(); // Necessary in case the are no more positions
@@ -133,7 +133,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
 
     /**
      * Move to the previous step. Returns false if no step exists
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function previousStep() {
         resetCache(); // Necessary in case the are no more positions
@@ -151,7 +151,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
      * If the current position is not on a valid step, this function will move the iterator
      * to the closest previous step. If there is no previous step, it will advance to the next
      * closest step.
-     * @returns {!boolean} Returns true if the iterator ends on a valid step
+     * @return {!boolean} Returns true if the iterator ends on a valid step
      */
     this.roundToClosestStep = function() {
         var currentContainer = container(),
@@ -173,7 +173,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
     /**
      * If the current position is not a valid step, move to the previous step.
      * If there is no previous step, returns false.
-     * @returns {!boolean} Returns true if the iterator ends on a valid step
+     * @return {!boolean} Returns true if the iterator ends on a valid step
      */
     this.roundToPreviousStep = function() {
         var isAtStep = isStep();
@@ -186,7 +186,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
     /**
      * If the current position is not a valid step, move to the next step.
      * If there is no next step, returns false.
-     * @returns {!boolean} Returns true if the iterator ends on a valid step
+     * @return {!boolean} Returns true if the iterator ends on a valid step
      */
     this.roundToNextStep = function() {
         var isAtStep = isStep();

@@ -66,7 +66,7 @@ ops.OpInsertImage = function OpInsertImage() {
 
     /**
      * @param document
-     * @returns {!Element}
+     * @return {!Element}
      */
     function createFrameElement(document) {
         var imageNode = document.createElementNS(drawns, 'draw:image'),

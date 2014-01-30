@@ -171,7 +171,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
     }
     /**
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function previousNode() {
         if (walker.previousSibling() === null) {

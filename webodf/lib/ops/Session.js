@@ -85,7 +85,7 @@ ops.Session = function Session(odfCanvas) {
     };
 
     /**
-     * @returns {!ops.OperationFactory}
+     * @return {!ops.OperationFactory}
      */
     this.getOperationFactory = function () {
         return operationFactory;

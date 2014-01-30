@@ -47,7 +47,7 @@ core.Utils = function Utils() {
      * Simple string hash
      * Based off http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
      * @param {!string} value
-     * @returns {!number}
+     * @return {!number}
      */
     function hashString(value) {
         var hash = 0, i, l;

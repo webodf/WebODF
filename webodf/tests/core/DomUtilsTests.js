@@ -66,7 +66,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
     /**
      * Add the specified HTML nodes to the test area's div
      * @param {!string} html XML html string
-     * @returns {undefined}
+     * @return {undefined}
      */
     function createNodes(html) {
         var /**@type{!string}*/
