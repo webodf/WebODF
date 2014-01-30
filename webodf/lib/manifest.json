@@ -159,7 +159,9 @@
     ],
     "gui/SelectionController.js": [
         "core/DomUtils.js",
+        "core/PositionFilter.js",
         "core/PositionFilterChain.js",
+        "core/PositionIterator.js",
         "core/StepIterator.js",
         "gui/SelectionMover.js",
         "odf/OdfUtils.js",

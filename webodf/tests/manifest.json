@@ -30,6 +30,17 @@
         "core/UnitTester.js",
         "core/Zip.js"
     ],
+    "gui/SelectionControllerTests.js": [
+        "core/LoopWatchDog.js",
+        "core/UnitTester.js",
+        "gui/SelectionController.js",
+        "odf/Namespaces.js",
+        "odf/OdfCanvas.js",
+        "ops/OdtCursor.js",
+        "ops/OdtDocument.js",
+        "ops/Session.js",
+        "xmldom/LSSerializer.js"
+    ],
     "gui/SelectionMoverTests.js": [
         "core/Cursor.js",
         "core/PositionFilter.js",
