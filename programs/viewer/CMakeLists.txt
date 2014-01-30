@@ -53,6 +53,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/../../webodf/webodf.js ${VIEWERBUILDDIR}/webodf.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/viewer-minimized.js ${VIEWERBUILDDIR}/viewer.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/index.html ${VIEWERBUILDDIR}/index.html
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ODFViewerPlugin.css ${VIEWERBUILDDIR}/ODFViewerPlugin.css
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ODFViewerPlugin.js ${VIEWERBUILDDIR}/ODFViewerPlugin.js
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PluginLoader.js ${VIEWERBUILDDIR}/PluginLoader.js
     COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${VIEWERBUILDDIR}
@@ -63,6 +64,7 @@ add_custom_command(
         index.html
         PluginLoader.js
         ODFViewerPlugin.js
+        ODFViewerPlugin.css
         webodf.js-target
         viewer-minimized.js-target
 )
