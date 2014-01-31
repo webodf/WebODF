@@ -111,35 +111,20 @@
 
         /**
          * Bookmark indicating the first walkable position in a paragraph
-         * @param {!number} steps
-         * @param {!Node} paragraphNode
          * @constructor
+         * @param {!number} steps
+         * @param {!Element} paragraphNode
          */
         function ParagraphBookmark(steps, paragraphNode) {
             this.steps = steps;
             this.node = paragraphNode;
 
             /**
-             * @param {!Node} node
-             * @return {number}
-             */
-            function positionInContainer(node) {
-                var position = 0;
-                while (node && node.previousSibling) {
-                    position += 1;
-                    node = node.previousSibling;
-                }
-                return position;
-            }
-
-            /**
              * @param {!core.PositionIterator} iterator
+             * @return {undefined}
              */
-            this.setIteratorPosition = function (iterator) {
-                iterator.setUnfilteredPosition(
-                    /**@type{!Node}*/(paragraphNode.parentNode),
-                    positionInContainer(paragraphNode)
-                );
+            this.setIteratorPosition = function(iterator) {
+                iterator.setPositionBeforeElement(paragraphNode);
                 do {
                     if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                         break;
@@ -254,44 +239,24 @@
         }
 
         /**
-         * @param {!Node} node
-         * @param {number} offset
-         * @return {boolean}
-         */
-        function isFirstPositionInParagraph(node, offset) {
-            return offset === 0 && odfUtils.isParagraph(node);
-        }
-
-        /**
          * Process known step to DOM position points for possible caching
          * @param {!number} steps Current steps offset from position 0
-         * @param {!Node} node Current node
-         * @param {!number} offset Current offset
+         * @param {!core.PositionIterator} iterator
          * @param {!boolean} isWalkable True if the current node and offset is considered a walkable position by the filter
          */
-        this.updateCache = function (steps, node, offset, isWalkable) {
+        this.updateCache = function(steps, iterator, isWalkable) {
             var stablePoint,
                 cacheBucket,
                 existingCachePoint,
-                bookmark;
+                bookmark,
+                node = iterator.getCurrentNode();
 
-            if (isFirstPositionInParagraph(node, offset)) {
+            if (iterator.isBeforeNode() && odfUtils.isParagraph(node)) {
                 stablePoint = true;
                 if (!isWalkable) {
                     // Paragraph bookmarks indicate "first position in the paragraph"
                     // If the current stable point is before the first walkable position (as often happens)
                     // simply increase the step number by 1 to move to within the paragraph node
-                    steps += 1;
-                }
-            } else if (node.hasChildNodes() && node.childNodes.item(offset)) {
-                // The current position iterator likes to report offsets in the parent container if offset === 0
-                // Handle this by checking if the referenced child node is perhaps a paragraph node
-                node = /**@type{!Node}*/(node.childNodes.item(offset));
-                offset = 0;
-                stablePoint = isFirstPositionInParagraph(node, offset);
-                if (stablePoint) {
-                    // Each stable point is tied to the first walkable step in the node, which is the *next*
-                    // step when the position is manually advanced
                     steps += 1;
                 }
             }
@@ -332,28 +297,26 @@
         /**
          * Finds the nearest ancestor node that has an associated bookmark
          * @param {!Node} node
-         * @param {!number} offset
          * @return {?ParagraphBookmark}
          */
-        function findBookmarkedAncestor(node, offset) {
-            var n,
+        function findBookmarkedAncestor(node) {
+            var currentNode = node,
                 nodeId,
                 bookmark = null;
 
-            n = node.childNodes.item(offset) || node;
-            while (!bookmark && n && n !== rootNode) {
-                nodeId = getNodeId(n);
+            while (!bookmark && currentNode && currentNode !== rootNode) {
+                nodeId = getNodeId(currentNode);
                 if (nodeId) {
                     // Take care as a nodeId may be bookmarked in another translator, but not this particular instance
                     // Keep crawling up the hierarchy until a node is found with a node id AND bookmark in this translator
                     bookmark = nodeToBookmark[nodeId];
-                    if (bookmark && !isValidBookmarkForNode(n, bookmark)) {
+                    if (bookmark && !isValidBookmarkForNode(currentNode, bookmark)) {
                         runtime.log("Cloned node detected. Creating new bookmark");
                         bookmark = null;
-                        clearNodeId(/**@type{!Element}*/(n));
+                        clearNodeId(/**@type{!Element}*/(currentNode));
                     }
                 }
-                n = n.parentNode;
+                currentNode = currentNode.parentNode;
             }
             return bookmark;
         }
@@ -386,12 +349,12 @@
                     }
                 }
             } else {
-                bookmark = findBookmarkedAncestor(node, offset);
+                bookmark = findBookmarkedAncestor(node.childNodes.item(offset) || node);
                 if (!bookmark) {
                     // No immediate bookmark was found, so crawl backwards using the iterator and try and find a known position
                     iterator.setUnfilteredPosition(node, offset);
                     while (!bookmark && iterator.previousNode()) {
-                        bookmark = findBookmarkedAncestor(iterator.container(), iterator.unfilteredDomOffset());
+                        bookmark = findBookmarkedAncestor(iterator.getCurrentNode());
                     }
                 }
             }
@@ -527,7 +490,7 @@
                 if (isWalkable) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator.container(), iterator.unfilteredDomOffset(), isWalkable);
+                stepsCache.updateCache(stepsFromRoot, iterator, isWalkable);
             }
             if (stepsFromRoot !== steps) {
                 throw new RangeError("Requested steps (" + steps + ") exceeds available steps (" + stepsFromRoot + ")");
@@ -615,13 +578,13 @@
                 return stepsFromRoot > 0 ? stepsFromRoot - 1 : stepsFromRoot;
             }
 
-            while (!(iterator.container() === destinationNode  && iterator.unfilteredDomOffset() === destinationOffset)
+            while (!(iterator.container() === destinationNode && iterator.unfilteredDomOffset() === destinationOffset)
                     && iterator.nextPosition()) {
                 isWalkable = filter.acceptPosition(iterator) === FILTER_ACCEPT;
                 if (isWalkable) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator.container(), iterator.unfilteredDomOffset(), isWalkable);
+                stepsCache.updateCache(stepsFromRoot, iterator, isWalkable);
             }
             return stepsFromRoot + rounding;
         };
@@ -640,7 +603,7 @@
                 if (isWalkable) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator.container(), iterator.unfilteredDomOffset(), isWalkable);
+                stepsCache.updateCache(stepsFromRoot, iterator, isWalkable);
             }
         };
 

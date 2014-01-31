@@ -321,20 +321,106 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
 
         return sibling;
     };
+
     /**
-     * Set the position of the iterator.
-     * The position can be on an unfiltered, i.e. forbidden, position.
-     * If the specified container is forbidden, the iterator will immediately
-     * move to the next visible position
+     * Advance the walker to the first node that is accepted by the node filter
+     * (i.e., nodeFilter(node) === FILTER_ACCEPT)
+     *
+     * @return {!boolean} Returns true if the walker found an accepted node. Otherwise
+     * returns false.
+     */
+    function moveToAcceptedNode() {
+        var filterResult = FILTER_ACCEPT,
+            node = walker.currentNode,
+            moveResult;
+
+        // Ensure currentNode is not within a rejected subtree by crawling each parent node
+        // up to the root and verifying it is either accepted or skipped by the nodeFilter.
+        // NOTE: The root is deliberately not checked as it is the container iteration happens within.
+        while (node && node !== root && filterResult === FILTER_ACCEPT) {
+            filterResult = nodeFilter(node);
+            // TODO this should really crawl up to the highest rejected node below the root and stop there
+            if (filterResult === FILTER_REJECT) {
+                // Set currentPos to 1 to indicate iteration on the currentNode is complete.
+                // This will cause the next call to self.nextPosition() to jump to the next
+                // available sibling or parent
+                currentPos = 1;
+                walker.currentNode = node;
+                break;
+            }
+            node = node.parentNode;
+        }
+
+        if (filterResult === FILTER_ACCEPT) {
+            moveResult = true;
+        } else {
+            // filterResult could either be reject or skip
+            // Either way, the current position is not valid!
+
+            // When filterResult === REJECT, currentPos will be 1, which means nextPosition
+            // will jump to the next sibling
+
+            // When filterResult === SKIP, currentPos might be 0, which means nextPosition
+            // can jump to the first accepted child inside the node
+            moveResult = self.nextPosition();
+        }
+        if (moveResult) {
+            runtime.assert(nodeFilter(walker.currentNode) === FILTER_ACCEPT,
+                "moveToAcceptedNode did not result in walker being on an accepted node");
+        }
+        return moveResult;
+    }
+
+    /**
+     * Set the current position of the iterator to just before the supplied element.
+     *
+     * Querying the iterator then will return the container of the element and the offset
+     * of the element within it's container (assuming the supplied element is accepted by
+     * the nodeFilter).
+     *
+     * E.g.,
+     * p1.setPositionBeforeElement(span);
+     * p1.container() === span.parentNode
+     * p1.unfilteredDomOffset === positionInParent(span)
+     *
+     * If the element is not accepted by the nodeFilter, the iterator will immediately
+     * move to the next accepted node.
+     *
+     * @param {!Element} element
+     * @return {!boolean} Returns true if the iterator was set to a valid position
+     * (i.e., is currently on a node that is accepted by the nodeFilter)
+     */
+    this.setPositionBeforeElement = function (element) {
+        runtime.assert(Boolean(element), "setPositionBeforeElement called without element");
+        walker.currentNode = element;
+        currentPos = 0;
+
+        return moveToAcceptedNode();
+    };
+
+    /**
+     * Set the current position of the iterator to the specified container + offset.
+     *
+     * Querying the iterator will then return the supplied container + offset
+     * (assuming the supplied element is accepted by the nodeFilter).
+     *
+     * E.g.,
+     * p2.setUnfilteredPosition(container, offset);
+     * p2.container() === container
+     * p2.unfilteredDomOffset() === offset;
+     *
+     * If the container is not accepted by the nodeFilter, the iterator will immediately
+     * move to the next accepted node.
      *
      * @param {!Node} container
-     * @param {!number} offset offset in unfiltered DOM world
-     * @return {!boolean}
+     * @param {!number} offset offset in unfiltered DOM world. Will immediately advance
+     * the iterator to the numbered child node of the provided container.
+     * @return {!boolean} Returns true if the iterator was set to a valid position
+     * (i.e., is currently on a node that is accepted by the nodeFilter)
      */
     this.setUnfilteredPosition = function (container, offset) {
-        var filterResult, node, text;
-        runtime.assert((container !== null) && (container !== undefined),
-            "PositionIterator.setUnfilteredPosition called without container");
+        var text;
+        runtime.assert(Boolean(container), "PositionIterator.setUnfilteredPosition called without container");
         walker.currentNode = container;
         if (container.nodeType === TEXT_NODE) {
             currentPos = offset;
@@ -355,44 +441,24 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             return true;
         }
 
-        filterResult = nodeFilter(container);
-        node = container.parentNode;
-        while (node && node !== root && filterResult === FILTER_ACCEPT) {
-            filterResult = nodeFilter(node);
-            if (filterResult !== FILTER_ACCEPT) {
-                walker.currentNode = node;
-            }
-            node = node.parentNode;
-        }
-
-        // Need to ensure the container can have children, otherwise the treewalker will happily
-        // iterate over the child nodes of the container if started on one of the children
-        if (offset < container.childNodes.length && filterResult !== NodeFilter.FILTER_REJECT) {
+        if (offset < container.childNodes.length) {
+            // Immediately advance to the child node at that offset to begin iteration.
+            // This is necessary in order to satisfy the most frequent use case where developer will
+            // store the (container, unfilteredDomOffset) from a previous position iterator, and use
+            // this value to resume iteration at the specified point. If we didn't immediately advance
+            // to the next position, the first call to nextPosition would return the input container+offset.
             walker.currentNode = /**@type{!Node}*/(container.childNodes.item(offset));
-            filterResult = nodeFilter(walker.currentNode);
-            currentPos = 0; // Assume the current position is ok. Will get modified later if necessary
+            currentPos = 0;
         } else {
-            // Either
-            // - the node has no children
-            // - or offset === childNodes.length
-            // - or the container is rejected.
-            // If the container is rejected, this will get modified later regardless, so don't bother checking now
-            currentPos = 1;
-        }
+            // Either the node has no children or offset === childNodes.length
 
-        if (filterResult === NodeFilter.FILTER_REJECT) {
-            // Setting currentPos to 1 indicates iteration on the currentNode is complete.
-            // This will cause the subsequent call to self.nextPosition() to jump to the next
+            // Set currentPos to 1 to indicate iteration on the currentNode is complete.
+            // This will cause the next call to self.nextPosition() to jump to the next
             // available sibling or parent
             currentPos = 1;
         }
-        if (filterResult !== FILTER_ACCEPT) {
-            // The current position is not valid! Move along to the next one that is
-            return self.nextPosition();
-        }
-        runtime.assert(nodeFilter(walker.currentNode) === FILTER_ACCEPT,
-            "PositionIterater.setUnfilteredPosition call resulted in an non-visible node being set");
-        return true;
+
+        return moveToAcceptedNode();
     };
     /**
      * Move the iterator to its last possible position.
@@ -418,6 +484,19 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
             walker.currentNode = node;
             currentPos = 1;
         }
+    };
+
+    /**
+     * Returns true if the iterator is just to the left of a node. In this position,
+     * calls to container() will return the parent of the node, and unfilteredDomOffset
+     * will return the position of the node within the parent container.
+     *
+     * Calls to unfilteredDomOffset are extremely slow when the iterator is just before a
+     * node, so querying this method can provide warning when a slow offset is necessary.
+     * @return {!boolean}
+     */
+    this.isBeforeNode = function() {
+        return currentPos === 0;
     };
 
     /**
