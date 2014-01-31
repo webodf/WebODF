@@ -466,7 +466,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     /**
      * A filter that allows a position if it is in front of a word, picture etc.
      * @constructor
-     * @param {!number} direction -1 for word beginnings 1 for word endings
      * @implements {core.PositionFilter}
      */
     function WordBoundaryFilter() {

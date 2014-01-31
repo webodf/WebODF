@@ -267,8 +267,8 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_NestedHierarchy() {
@@ -278,9 +278,9 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "3");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'SBold', displayName: 'SBold Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'SBold', displayName: 'SBold Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font', 'fo:font-weight': 'bold'})");
     }
     function getAppliedStyles_CompleteContent_OnlyReportsUniqueStyles() {
@@ -291,14 +291,14 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles.length", "2");
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
 
         t.appliedStyles.shift();
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_EmptyArray() {
@@ -314,7 +314,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles.length", "1");
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
     }
     function getAppliedStyles_StartsAndEnds_InDifferentTextNodes() {
@@ -325,14 +325,14 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles.length", "2");
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
 
         t.appliedStyles.shift();
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_SimpleList() {
@@ -345,9 +345,9 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "3");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style', isCommonStyle: false})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_NestedList() {
@@ -362,10 +362,10 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "4");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style'})");
-        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L1', displayName: 'L1 Display', family: 'list-style'})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style', isCommonStyle: false})");
+        r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L1', displayName: 'L1 Display', family: 'list-style', isCommonStyle: false})");
         r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_InvalidNodes() {
@@ -394,8 +394,8 @@ odf.FormattingTests = function FormattingTests(runner) {
 
             r.shouldBe(t, "t.appliedStyles.length", "1");
             r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
-            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text'})");
-            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph'})");
+            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
+            r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
 
             if (i < invalidNodes.length - 1) {
                 self.tearDown();

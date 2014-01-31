@@ -434,6 +434,24 @@ odf.Formatting = function Formatting() {
     }
 
     /**
+     * Returns true if the supplied style node is a common style.
+     * From the OpenDocument spec:
+     *
+     * "Common and automatic styles behave differently in OpenDocument editing consumers. Common
+     *  styles are presented to the user as a named set of formatting properties. The formatting
+     *  properties of an automatic style are presented to a user as properties of the object to
+     *  which the style is applied."
+     *
+     * http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-office_automatic-styles
+     *
+     * @param {!Node} styleNode
+     * @return {!boolean}
+     */
+    function isCommonStyleElement(styleNode) {
+        return styleNode.parentNode === odfContainer.rootElement.styles;
+    }
+
+    /**
      * Takes a provided style chain and calculates the resulting inherited style, starting from the outer-most to the
      * inner-most style
      * @param {!Array.<!Object>} styleChain Ordered list starting from inner-most style to outer-most style
@@ -448,23 +466,25 @@ odf.Formatting = function Formatting() {
             Object.keys(/**@type {!Object}*/(elementStyleSet)).forEach(function (styleFamily) {
                 // Expect there to only be a single style for a given family per element (e.g., 1 text, 1 paragraph)
                 var styleName = Object.keys(elementStyleSet[styleFamily])[0],
+                    styleSummary = {
+                        name: styleName,
+                        family: styleFamily,
+                        displayName: undefined,
+                        isCommonStyle: false
+                    },
                     styleElement,
-                    parentStyle,
-                    displayName;
+                    parentStyle;
 
                 styleElement = getStyleElement(styleName, styleFamily);
                 if (styleElement) {
                     parentStyle = getInheritedStyleAttributes(/**@type {!Element}*/(styleElement));
                     mergedChildStyle = utils.mergeObjects(parentStyle, mergedChildStyle);
-                    displayName = styleElement.getAttributeNS(stylens, 'display-name');
+                    styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name');
+                    styleSummary.isCommonStyle = isCommonStyleElement(styleElement);
                 } else {
                     runtime.log("No style element found for '" + styleName + "' of family '" + styleFamily + "'");
                 }
-                mergedChildStyle.orderedStyles.push({
-                    name: styleName,
-                    family: styleFamily,
-                    displayName: displayName
-                });
+                mergedChildStyle.orderedStyles.push(styleSummary);
             });
         });
         return mergedChildStyle;
@@ -532,15 +552,6 @@ odf.Formatting = function Formatting() {
     };
 
     /**
-     * Returns true if the supplied style node is an automatic style
-     * @param {!Node} styleNode
-     * @return {!boolean}
-     */
-    function isAutomaticStyleElement(styleNode) {
-        return styleNode.parentNode === odfContainer.rootElement.automaticStyles;
-    }
-
-    /**
      * Create a style object (JSON-equivalent) that is equivalent to inheriting from the parent
      * style and family, and applying the specified overrides.
      * This contains logic for simulating inheritance for automatic styles
@@ -553,11 +564,11 @@ odf.Formatting = function Formatting() {
         var originalStyleElement = /**@type{!Element}*/(getStyleElement(parentStyleName, family)),
             newStyleObject;
         runtime.assert(Boolean(originalStyleElement), "No style element found for '" + parentStyleName + "' of family '" + family + "'");
-        if (isAutomaticStyleElement(originalStyleElement)) {
+        if (isCommonStyleElement(originalStyleElement)) {
+            newStyleObject = { "style:parent-style-name": parentStyleName };
+        } else {
             // Automatic styles cannot be inherited from. The way to create a derived style is to clone it entirely
             newStyleObject = getStyleAttributes(originalStyleElement);
-        } else {
-            newStyleObject = { "style:parent-style-name" : parentStyleName };
         }
         newStyleObject["style:family"] =  family;
         utils.mergeObjects(newStyleObject, overrides);
