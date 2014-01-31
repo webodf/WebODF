@@ -58,7 +58,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
      * @extends {odf.OdfCanvas} Well.... we don't really, but please shut your face closure compiler :)
      * @constructor
      */
-    function OdfCanvasAdapter(node) {
+    function MockOdfCanvas(node) {
         var self = this;
         this.odfContainer = function () { return self; };
         this.getContentElement = function () { return node.getElementsByTagNameNS(odf.Namespaces.officens, 'text')[0]; };
@@ -71,7 +71,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         testarea.appendChild(node);
 
         t.root = node;
-        t.odtDocument = new ops.OdtDocument(new OdfCanvasAdapter(t.root));
+        t.odtDocument = new ops.OdtDocument(new MockOdfCanvas(t.root));
         t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
         t.counter = t.cursor.getStepCounter();

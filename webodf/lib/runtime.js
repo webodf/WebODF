@@ -1835,7 +1835,7 @@ var ops = {};
     }
     /**
      * @param {string} classname
-     * @returns {undefined}
+     * @return {undefined}
      * @expose
      */
     runtime.loadClass = function (classname) {

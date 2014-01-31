@@ -118,7 +118,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     /**
      * Converts an object hash into an unordered array of its values
      * @param {!Object} obj
-     * @returns {!Array.<Object>}
+     * @return {!Array.<Object>}
      */
     function values(obj) {
         return Object.keys(obj).map(function(key) { return obj[key]; });
@@ -129,7 +129,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * MoveCursor commands for each still-present cursor. This is used when
      * restoring the original document state at the start of an undo step
      * @param {!Array.<Array.<!ops.Operation>>} undoStates
-     * @returns {!Array.<!ops.Operation>}
+     * @return {!Array.<!ops.Operation>}
      */
     function extractCursorStates(undoStates) {
         var addCursor = {},

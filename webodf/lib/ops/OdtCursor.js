@@ -142,7 +142,7 @@ ops.OdtCursor = function OdtCursor(memberId, odtDocument) {
      * Obtain the node representing the selection start point.
      * If a 0-length range is selected (e.g., by clicking without
      * dragging),, this will return the exact same node as getNode
-     * @returns {!Element}
+     * @return {!Element}
      */
     this.getAnchorNode = function () {
         return cursor.getAnchorNode();

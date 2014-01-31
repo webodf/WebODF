@@ -98,7 +98,7 @@ var webodfEditor = (function () {
     /**
      * Switches the pages by hiding the old one and unhiding the new
      * @param {!string} pageId
-     * @returns {undefined}
+     * @return {undefined}
      */
     function switchToPage(pageId) {
         if (currentPageId) {
@@ -158,7 +158,7 @@ var webodfEditor = (function () {
     }
 
     /**
-     * @returns {undefined}
+     * @return {undefined}
      */
     function showSessions() {
         switchToPage("sessionListContainer");
@@ -170,7 +170,7 @@ var webodfEditor = (function () {
 
     /**
      * @param {!string} sessionId
-     * @returns {undefined}
+     * @return {undefined}
      */
     function enterSession(sessionId) {
         switchToPage("mainContainer");
@@ -245,7 +245,7 @@ var webodfEditor = (function () {
      * with the sessionId as parameter
      *
      * @param {!function(!string, !string, ?string)} callback
-     * @returns {undefined}
+     * @return {undefined}
      */
     function startLoginProcess(callback) {
         booting = true;
@@ -282,7 +282,7 @@ var webodfEditor = (function () {
         }
 
         /**
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function onLoginSubmit() {
             server.login(document.loginForm.login.value, document.loginForm.password.value, loginSuccess, loginFail);
@@ -306,7 +306,7 @@ var webodfEditor = (function () {
      *
      * callback:  callback to be called as soon as the document is loaded
      *
-     * @returns {undefined}
+     * @return {undefined}
      */
     function boot(args) {
         runtime.assert(!booting, "editor creation already in progress");

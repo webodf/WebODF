@@ -147,7 +147,7 @@ runtime.loadClass("ops.OdtCursor");
          * Get the current canvas element. The current trivial undo manager replaces the root element
          * of the ODF container with a clone from a previous state. This results in the root element
          * being changed. As such, it can't be stored, and should be queried on each use.
-         * @returns {!Element}
+         * @return {!Element}
          */
         function getCanvasElement() {
             // TODO Remove when a proper undo manager arrives
@@ -158,7 +158,7 @@ runtime.loadClass("ops.OdtCursor");
          * Set the local cursor's current composition state. If there is no local cursor,
          * this function will do nothing
          * @param {!boolean} state
-         * @returns {undefined}
+         * @return {undefined}
          */
         function setCursorComposing(state) {
             if (localCursor) {

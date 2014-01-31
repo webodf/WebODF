@@ -147,7 +147,7 @@ xmldom.LSSerializer = function LSSerializer() {
      * Escape characters within document content
      * Follows basic guidelines specified at http://xerces.apache.org/xerces2-j/javadocs/api/org/w3c/dom/ls/LSSerializer.html
      * @param {string} value
-     * @returns {string}
+     * @return {string}
      */
     function escapeContent(value) {
         return value.replace(/&/g, "&amp;")

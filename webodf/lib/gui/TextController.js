@@ -56,7 +56,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
     /**
      * Creates an operation to remove the provided selection
      * @param {!{position: number, length: number}} selection
-     * @returns {!ops.OpRemoveText}
+     * @return {!ops.OpRemoveText}
      */
     function createOpRemoveSelection(selection) {
         var op = new ops.OpRemoveText();
@@ -71,7 +71,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
     /**
      * Ensures the provided selection is a "forward" selection (i.e., length is positive)
      * @param {!{position: number, length: number}} selection
-     * @returns {!{position: number, length: number}}
+     * @return {!{position: number, length: number}}
      */
     function toForwardSelection(selection) {
         if (selection.length < 0) {
@@ -135,7 +135,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * iteration will stop once the root is entirely walked in the requested direction
      * @param cursorNode
      * @param forward
-     * @returns {boolean}
+     * @return {boolean}
      */
     function hasPositionInDirection(cursorNode, forward) {
         var rootConstrainedFilter = new core.PositionFilterChain(),

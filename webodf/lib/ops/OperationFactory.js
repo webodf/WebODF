@@ -85,7 +85,7 @@ ops.OperationFactory = function OperationFactory() {
     /**
      * Create an instance of an operation based on the provided spec
      * @param {Object} spec
-     * @returns {ops.Operation|null}
+     * @return {ops.Operation|null}
      */
     this.create = function (spec) {
         var op = null,
@@ -100,7 +100,7 @@ ops.OperationFactory = function OperationFactory() {
     /**
      * Returns a constructor function for the provided type
      * @param OperationType Operation type
-     * @returns {Function}
+     * @return {Function}
      */
     function constructor(OperationType) {
         return function() {

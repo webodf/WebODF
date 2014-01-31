@@ -119,7 +119,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * - contains only collapsed whitespace (e.g., multiple whitespace characters will only display as 1 character)
      *
      * @param {!Range} range
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isRangeVisible(range) {
         var bcr = range.getBoundingClientRect();
@@ -130,7 +130,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * Set the range to the last visible selection in the text nodes array
      * @param {!Range} range
      * @param {!Array.<!Node>} nodes
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function lastVisibleRect(range, nodes) {
         var nextNodeIndex = nodes.length - 1,
@@ -165,7 +165,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * Set the range to the first visible selection in the text nodes array
      * @param {!Range} range
      * @param {!Array.<!Node>} nodes
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function firstVisibleRect(range, nodes) {
         var nextNodeIndex = 0,

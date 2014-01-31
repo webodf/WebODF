@@ -147,7 +147,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
     /**
      * Returns true if the passed in node is an ODT text span
      * @param {!Node} node
-     * @returns {!boolean}
+     * @return {!boolean}
      */
     function isTextSpan(node) {
         return node.localName === "span" && node.namespaceURI === textns;
@@ -157,7 +157,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
      * Moves the specified node and all further siblings within the outer range into a new standalone container
      * @param {!CharacterData} startNode Node to start movement to new container
      * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
-     * @returns {!Element}  Returns the container node that is to be restyled
+     * @return {!Element}  Returns the container node that is to be restyled
      */
     function moveToNewSpan(startNode, limits) {
         var document = startNode.ownerDocument,

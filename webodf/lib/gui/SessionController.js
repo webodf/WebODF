@@ -92,7 +92,7 @@ gui.SessionController = (function () {
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             keyUpHandler = new gui.KeyboardHandler(),
-            clickStartedWithinContainer = false,
+            clickStartedWithinCanvas = false,
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             isMouseMoved = false,
             mouseDownRootFilter = null,
@@ -256,7 +256,7 @@ gui.SessionController = (function () {
 
         /**
          * Tell the browser that it's ok to perform a cut action on our read-only body
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function handleBeforeCut() {
             var cursor = odtDocument.getCursor(inputMemberId),
@@ -311,7 +311,7 @@ gui.SessionController = (function () {
 
         /**
          * Tell the browser that it's ok to perform a paste action on our read-only body
-         * @returns {!boolean}
+         * @return {!boolean}
          */
         function handleBeforePaste() {
             return false;
@@ -363,7 +363,7 @@ gui.SessionController = (function () {
             var selection = window.getSelection(),
                 selectionRange = selection.rangeCount > 0 && selectionController.selectionToRange(selection);
 
-            if (clickStartedWithinContainer && selectionRange) {
+            if (clickStartedWithinCanvas && selectionRange) {
                 isMouseMoved = true;
 
                 imageSelector.clearSelection();
@@ -419,8 +419,8 @@ gui.SessionController = (function () {
         function handleMouseDown(e) {
             var target = getTarget(e),
                 cursor = odtDocument.getCursor(inputMemberId);
-            clickStartedWithinContainer = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
-            if (clickStartedWithinContainer) {
+            clickStartedWithinCanvas = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
+            if (clickStartedWithinCanvas) {
                 isMouseMoved = false;
                 mouseDownRootFilter = odtDocument.createRootFilter(target);
                 clickCount = e.detail;
@@ -441,7 +441,7 @@ gui.SessionController = (function () {
         /**
          * Return a mutable version of a selection-type object.
          * @param {?Selection} selection
-         * @returns {?{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}}
+         * @return {?{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}}
          */
         function mutableSelection(selection) {
             if (selection) {
@@ -469,7 +469,7 @@ gui.SessionController = (function () {
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (imageSelector.isSelectorElement(target)) {
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (clickStartedWithinContainer) {
+            } else if (clickStartedWithinCanvas) {
                 if (isMouseMoved) {
                     selectionController.selectRange(shadowCursor.getSelectedRange(),
                         shadowCursor.hasForwardSelection(), event.detail);
@@ -504,7 +504,7 @@ gui.SessionController = (function () {
                 }
             }
             clickCount = 0;
-            clickStartedWithinContainer = false;
+            clickStartedWithinCanvas = false;
             isMouseMoved = false;
         }
 
@@ -526,11 +526,11 @@ gui.SessionController = (function () {
         function handleDragEnd() {
             // Drag operations consume the corresponding mouse up event.
             // If this happens, the selection should still be reset.
-            if (clickStartedWithinContainer) {
+            if (clickStartedWithinCanvas) {
                 eventManager.focus();
             }
             clickCount = 0;
-            clickStartedWithinContainer = false;
+            clickStartedWithinCanvas = false;
             isMouseMoved = false;
         }
 
@@ -574,7 +574,7 @@ gui.SessionController = (function () {
          * Executes the provided function and returns true
          * Used to swallow events regardless of whether an operation was created
          * @param {!Function} fn
-         * @returns {!Function}
+         * @return {!Function}
          */
         function returnTrue(fn) {
             return function() {
@@ -786,56 +786,56 @@ gui.SessionController = (function () {
         };
 
         /**
-         * @returns {?gui.UndoManager}
+         * @return {?gui.UndoManager}
          */
         this.getUndoManager = function () {
             return undoManager;
         };
 
         /**
-         * @returns {?gui.AnnotationController}
+         * @return {?gui.AnnotationController}
          */
         this.getAnnotationController = function () {
             return annotationController;
         };
 
         /**
-         * @returns {!gui.DirectFormattingController}
+         * @return {!gui.DirectFormattingController}
          */
         this.getDirectFormattingController = function () {
             return directFormattingController;
         };
 
         /**
-         * @returns {!gui.HyperlinkController}
+         * @return {!gui.HyperlinkController}
          */
         this.getHyperlinkController = function () {
             return hyperlinkController;
         };
 
         /**
-         * @returns {!gui.ImageController}
+         * @return {!gui.ImageController}
          */
         this.getImageController = function () {
             return imageController;
         };
 
         /**
-         * @returns {!gui.SelectionController}
+         * @return {!gui.SelectionController}
          */
         this.getSelectionController = function () {
             return selectionController;
         };
 
         /**
-         * @returns {!gui.TextController}
+         * @return {!gui.TextController}
          */
         this.getTextController = function() {
             return textController;
         };
 
         /**
-         * @returns {!gui.EventManager}
+         * @return {!gui.EventManager}
          */
         this.getEventManager = function() {
             return eventManager;
@@ -843,7 +843,7 @@ gui.SessionController = (function () {
 
         /**
          * Return the keyboard event handlers
-         * @returns {{keydown: gui.KeyboardHandler, keypress: gui.KeyboardHandler}}
+         * @return {{keydown: gui.KeyboardHandler, keypress: gui.KeyboardHandler}}
          */
         this.getKeyboardHandlers = function() {
             return {

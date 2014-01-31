@@ -90,7 +90,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
     /**
      * Create a new ODT document with the specified text body
      * @param {!string} xml
-     * @returns {!Element} Root document node
+     * @return {!Element} Root document node
      */
     function createOdtDocument(xml) {
         var domDocument = testarea.ownerDocument,
@@ -112,7 +112,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
      * iterates over the document content.
      * @param {!string} docContent Odt content
      * @param {!number} direction if negative, iterate from right to left over the document instead of left to right
-     * @returns {!Array.<!number>} valid cursor positions within the specified doc content
+     * @return {!Array.<!number>} valid cursor positions within the specified doc content
      */
     function getMovementByWordsPositions(docContent, direction) {
         var bounds = [],

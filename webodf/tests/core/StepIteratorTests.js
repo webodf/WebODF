@@ -90,7 +90,7 @@ core.StepIteratorTests = function StepIteratorTests(runner) {
     /**
      * Create a text node with the supplied text content
      * @param {!string} string
-     * @returns {!Text}
+     * @return {!Text}
      */
     function text(string) {
         return t.doc.ownerDocument.createTextNode(string);

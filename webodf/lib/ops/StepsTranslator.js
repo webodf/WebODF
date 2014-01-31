@@ -159,7 +159,7 @@ runtime.loadClass("odf.OdfUtils");
         /**
          * Returns the closest quantized step at or before the requested step
          * @param {!number} steps
-         * @returns {!number}
+         * @return {!number}
          */
         function getBucket(steps) {
             return Math.floor(steps / bucketSize) * bucketSize;
@@ -168,7 +168,7 @@ runtime.loadClass("odf.OdfUtils");
         /**
          * Returns the closest quantized step at or just after the requested step
          * @param {!number} steps
-         * @returns {!number}
+         * @return {!number}
          */
         function getDestinationBucket(steps) {
             return Math.ceil(steps / bucketSize) * bucketSize;
@@ -194,7 +194,7 @@ runtime.loadClass("odf.OdfUtils");
          * nodeId
          * @param {!Node} node
          * @param {!ParagraphBookmark|!RootBookmark} bookmark
-         * @returns {!boolean} True if the bookmark is actually for the supplied node
+         * @return {!boolean} True if the bookmark is actually for the supplied node
          */
         function isValidBookmarkForNode(node, bookmark) {
             return bookmark.node === node;
@@ -205,7 +205,7 @@ runtime.loadClass("odf.OdfUtils");
          * are updated to the specified number of steps
          * @param {!Node} node
          * @param {!number} steps
-         * @returns {!ParagraphBookmark}
+         * @return {!ParagraphBookmark}
          */
         function getNodeBookmark(node, steps) {
             var nodeId = getNodeId(node) || setNodeId(node),
@@ -278,7 +278,7 @@ runtime.loadClass("odf.OdfUtils");
          * from position 0.
          * @param {!number} steps
          * @param {!core.PositionIterator} iterator
-         * @returns {!number} Corresponding step for the current iterator position
+         * @return {!number} Corresponding step for the current iterator position
          */
         this.setToClosestStep = function(steps, iterator) {
             var cacheBucket = getBucket(steps),
@@ -298,7 +298,7 @@ runtime.loadClass("odf.OdfUtils");
          * Finds the nearest ancestor node that has an associated bookmark
          * @param {!Node} node
          * @param {!number} offset
-         * @returns {?ParagraphBookmark}
+         * @return {?ParagraphBookmark}
          */
         function findBookmarkedAncestor(node, offset) {
             var nodeId,
@@ -328,7 +328,7 @@ runtime.loadClass("odf.OdfUtils");
          * @param {!Node} node
          * @param {!number} offset
          * @param {!core.PositionIterator} iterator
-         * @returns {!number} Corresponding step for the current iterator position
+         * @return {!number} Corresponding step for the current iterator position
          */
         this.setToClosestDomPoint = function(node, offset, iterator) {
             var bookmark;
@@ -445,7 +445,7 @@ runtime.loadClass("odf.OdfUtils");
         /**
          * Convert the requested steps from root into the equivalent DOM node & offset pair
          * @param {!number} steps
-         * @returns {{node: !Node, offset: !number}}
+         * @return {{node: !Node, offset: !number}}
          */
         this.convertStepsToDomPoint = function(steps) {
             var stepsFromRoot,
@@ -513,7 +513,7 @@ runtime.loadClass("odf.OdfUtils");
          * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
          * is not in an accepted location, this delegate is used to choose between rounding up or
          * rounding down to the nearest step. If not provided, the default behaviour is to round down.
-         * @returns {!number}
+         * @return {!number}
          */
         this.convertDomPointToSteps = function(node, offset, roundDirection) {
             var stepsFromRoot,

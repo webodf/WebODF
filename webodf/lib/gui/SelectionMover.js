@@ -81,7 +81,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * Gets the maximum available offset for a given node. For a text node, this
      * is text length, for element nodes, this will be childNodes.length
      * @param {!Node} node
-     * @returns {!number}
+     * @return {!number}
      */
     function getMaximumNodePosition(node) {
         return node.nodeType === Node.TEXT_NODE ? node.textContent.length : node.childNodes.length;
@@ -93,7 +93,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * the last available rectangle
      * @param {ClientRectList} clientRectangles
      * @param {!boolean} useRightEdge
-     * @returns {?{top: !number, left: !number, bottom: !number}}
+     * @return {?{top: !number, left: !number, bottom: !number}}
      */
     function getClientRect(clientRectangles, useRightEdge) {
         var rectangle,
@@ -180,7 +180,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * @param {!number} positions
      * @param {!boolean} extend
      * @param {!function():boolean} move
-     * @returns {!number} Number of positions successfully moved. Will be less than the requested
+     * @return {!number} Number of positions successfully moved. Will be less than the requested
      * number if there are not enough positions available in the specified direction
      */
     function doMove(positions, extend, move) {
@@ -236,7 +236,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * @param {!number} positions
      * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
-     * @returns {!number} Number of positions successfully moved. Will be less than the requested
+     * @return {!number} Number of positions successfully moved. Will be less than the requested
      * number if there are not enough positions available in the specified direction
      **/
     this.movePointForward = function (positions, extend) {
@@ -247,7 +247,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
      * @param {!number} positions
      * @param {boolean=} extend true if range is to be expanded from the current
      *                         point
-     * @returns {!number} Number of positions successfully moved. Will be less than the requested
+     * @return {!number} Number of positions successfully moved. Will be less than the requested
      * number if there are not enough positions available in the specified direction
      **/
     this.movePointBackward = function (positions, extend) {
