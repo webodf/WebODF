@@ -99,6 +99,22 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     }
 
     /**
+     * Returns true if both the anchor and focus nodes are in a walkable step
+     * @returns {!boolean}
+     */
+    function isCursorSelectionInWalkablePositions() {
+        var iterator = t.odtDocument.createStepIterator(t.cursor.getNode(), 0, [t.filter], t.root);
+
+        if (iterator.isStep()) {
+            iterator.setPosition(t.cursor.getAnchorNode(), 0);
+            if (iterator.isStep()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Test cursor iteration over a document fragment. Each supported cursor position should be indicated in
      * the fragment using the pipe character ('|'). This exercises both forwards and backwards iteration.
      * @param {!string} documentString Document fragment with cursor positions indicated using a vertical pipe '|'
@@ -284,7 +300,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -302,7 +318,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -321,7 +337,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -340,7 +356,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -359,7 +375,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -380,7 +396,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -401,7 +417,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
@@ -421,7 +437,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.odtDocument.fixCursorPositions();
 
-        t.isWalkable = t.counter.isPositionWalkable(t.filter);
+        t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
         t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);

@@ -257,25 +257,6 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     };
 
     /**
-     * Returns if the current position is walkable according to the
-     * specified filter. Useful when the position becomes unwalkable after, for example,
-     * text removal.
-     * @param {!core.PositionFilter} filter
-     * @return {boolean}
-     */
-    function isPositionWalkable(filter) {
-        var iterator = getIteratorAtCursor();
-
-        if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-            iterator.setUnfilteredPosition(cursor.getAnchorNode(), 0);
-            if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Returns the number of positions the given (step, filter) pair is
      * equivalent to in unfiltered space.
      * @param {!core.PositionIterator} iterator
@@ -524,8 +505,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
             convertForwardStepsBetweenFilters: convertForwardStepsBetweenFilters,
             convertBackwardStepsBetweenFilters: convertBackwardStepsBetweenFilters,
             countLinesSteps: countLinesSteps,
-            countStepsToLineBoundary: countStepsToLineBoundary,
-            isPositionWalkable: isPositionWalkable
+            countStepsToLineBoundary: countStepsToLineBoundary
         };
     };
     function init() {
