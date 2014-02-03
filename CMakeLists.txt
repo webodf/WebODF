@@ -14,6 +14,8 @@ else (ProcessorCountFound)
   set(NProcessors 1)
 endif (ProcessorCountFound)
 
+SET(REQUIRED_NODEJS_VERSION 0.10.20)
+
 # At this point, the version number that is used throughout is defined
 # The version number is gotten from either the git repository or the name of the
 # folder. If the current folder has a name that matches "webodf-\d+.\d+.\d+"
@@ -137,17 +139,24 @@ if(WIN32)
     )
     add_custom_target(NodeJS DEPENDS "${NODE}")
 else(WIN32)
-    ExternalProject_Add(
-        NodeJS
-        PREFIX ${CMAKE_BINARY_DIR}/NodeJS-prefix
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://nodejs.org/dist/v${NODEVERSION}/node-v${NODEVERSION}.tar.gz"
-        URL_MD5 784e7d7a8e29dfec88ddb2e72a895407
-        CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/NodeJS-prefix
-        INSTALL_DIR ${CMAKE_BINARY_DIR}/NodeJS-prefix
-        BUILD_COMMAND make -j${NProcessors}
-        BUILD_IN_SOURCE 1
+    SET(NODEJS_VERSION 0.0.0)
+    FIND_PROGRAM(NODEJS_EXECUTABLE
+        NAMES node
+        PATHS ""
+        DOC "Path to NodeJS executable"
     )
+    IF(NODEJS_EXECUTABLE)
+        EXEC_PROGRAM(${NODEJS_EXECUTABLE} ARGS --version OUTPUT_VARIABLE NODEJS_VERSION)
+        string(SUBSTRING ${NODEJS_VERSION} 1 -1 NODEJS_VERSION)
+    ENDIF(NODEJS_EXECUTABLE)
+    MESSAGE (STATUS "nodejs found: " ${NODEJS_EXECUTABLE} / ${NODEJS_VERSION})
+
+    # fail if NodeJS version requirement is not satisfied
+    if (${NODEJS_VERSION} VERSION_LESS ${REQUIRED_NODEJS_VERSION})
+        message(FATAL_ERROR "Node.JS is required in version " ${REQUIRED_NODEJS_VERSION}  " or later")
+    else()
+        message(STATUS "good Node.JS found: " ${NODEJS_VERSION} " (" ${REQUIRED_NODEJS_VERSION} " required.)")
+    endif()
 
     # copy node_modules directory from source to build
     # (this is needed if a module is required in there)
@@ -155,7 +164,8 @@ else(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules ${CMAKE_BINARY_DIR}/node_modules
         COMMENT copying node_modules from source to build
     )
-    set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node)
+    set(NODE ${NODEJS_EXECUTABLE})
+    add_custom_target(NodeJS DEPENDS "${NODEJS_EXECUTABLE}")
 endif(WIN32)
 
 
