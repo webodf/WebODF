@@ -98,7 +98,11 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
      * @return {undefined}
      */
     this.markAsFocussed = function (isFocussed) {
-        handle.className = (isFocussed ? "active" : "");
+        if (isFocussed) {
+            handle.classList.add("active");
+        } else {
+            handle.classList.remove("active");
+        }
     };
 
     /**

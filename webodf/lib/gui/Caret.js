@@ -76,7 +76,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         shouldCheckCaretVisibility = false,
         shouldUpdateCaretSize = false,
         /**@type{!Object}*/ state = {
-            isFocused: true,
+            isFocused: false,
             isShown: true,
             visibility: "hidden"
         },
