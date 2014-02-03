@@ -36,39 +36,34 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops*/
-/*jslint emptyblock: true, unparam: true*/
+/*global ops */
+/*jslint emptyblock: true, unparam: true */
 
 /**
- * An operation that can be performed on a document.
+ * A document that keeps all data related to the mapped document.
  * @interface
  */
-ops.Operation = function Operation() {
-    "use strict";
-};
-
+ops.Document = function Document() { "use strict"; };
 /**
- * @param {?} data
- * @return {undefined}
+ * @return {!Array.<!ops.OdtCursor>}
  */
-ops.Operation.prototype.init = function (data) {"use strict"; };
-
+ops.Document.prototype.getCursors = function () { "use strict"; };
 /**
- * This is meant to indicate whether
- * the operation is an 'edit', i.e.
- * causes any changes that would make
- * it into the saved ODF.
- * @type {!boolean}
- */
-ops.Operation.prototype.isEdit;
-
-/**
- * @param {!ops.Document} document
+ * @param {!string} memberid
  * @return {!boolean}
  */
-ops.Operation.prototype.execute = function (document) {"use strict"; };
-
+ops.Document.prototype.removeCursor = function (memberid) { "use strict"; };
 /**
- * @return {!{optype,memberid,timestamp}}
+ * @return {!Element}
  */
-ops.Operation.prototype.spec = function () {"use strict"; };
+ops.Document.prototype.getDocumentElement = function () { "use strict"; };
+/**
+ * @return {!Element}
+ */
+ops.Document.prototype.cloneDocumentElement = function () { "use strict"; };
+/**
+ * @param {!Element} element
+ * @return {undefined}
+ */
+ops.Document.prototype.setDocumentElement = function (element) { "use strict"; };
+// vim:expandtab

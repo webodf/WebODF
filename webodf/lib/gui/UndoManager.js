@@ -60,9 +60,9 @@ gui.UndoManager.prototype.unsubscribe = function(signal, callback) {"use strict"
 
 /**
  * Set the OdtDocument to operate on
- * @param newDocument
+ * @param {!ops.Document} newDocument
  */
-gui.UndoManager.prototype.setOdtDocument = function (newDocument) {"use strict"; };
+gui.UndoManager.prototype.setDocument = function (newDocument) {"use strict"; };
 
 /**
  * Sets the initial document state and operation state. This is the earliest point

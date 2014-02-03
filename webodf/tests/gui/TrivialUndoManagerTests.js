@@ -56,11 +56,13 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     /**
      * @param rootElement
      * @constructor
+     * @implements {ops.Document}
      */
     function AdaptiveMock(rootElement) {
         var self = this;
         /*jslint emptyblock: true*/
         function noOp() { }
+        function noOp2() { return true; }
         /*jslint emptyblock: false*/
         function returnThis() { return self; }
         this.rootElement = rootElement;
@@ -75,7 +77,10 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         this.setOdfContainer = noOp;
         this.cursors = [cursor(1)];
         this.getCursors = function () { return self.cursors; };
-        this.removeCursor = noOp;
+        this.getDocumentElement = function () { return rootElement; };
+        this.cloneDocumentElement = function () { return rootElement; };
+        this.setDocumentElement = noOp;
+        this.removeCursor = noOp2;
     }
 
     this.setUp = function () {
@@ -85,9 +90,9 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             mock : new AdaptiveMock(testarea),
             ops : []
         };
-        t.manager.setOdtDocument(t.mock);
+        t.manager.setDocument(t.mock);
         t.manager.setPlaybackFunction(function (ops) {
-            ops.forEach(function(op) {
+            ops.forEach(function (op) {
                 t.ops.push(op.spec().timestamp);
             });
         });

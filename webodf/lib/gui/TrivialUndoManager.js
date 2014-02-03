@@ -55,7 +55,8 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         initialDoc,
         initialState = [],
         playFunc,
-        odtDocument,
+        /**@type{!ops.Document}*/
+        document,
         currentUndoState = [],
         /**@type {!Array.<!Array.<!ops.Operation>>}*/undoStates = [],
         /**@type {!Array.<!Array.<!ops.Operation>>}*/redoStates = [],
@@ -138,7 +139,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             remainingAddOps,
             operations = undoStates.pop();
 
-        odtDocument.getCursors().forEach(function(cursor) {
+        document.getCursors().forEach(function(cursor) {
             requiredAddOps[cursor.getMemberId()] = true;
         });
         remainingAddOps = Object.keys(requiredAddOps).length;
@@ -212,10 +213,10 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
     /**
      * Set the OdtDocument to operate on
-     * @param newDocument
+     * @param {!ops.Document} newDocument
      */
-    this.setOdtDocument = function(newDocument) {
-        odtDocument = newDocument;
+    this.setDocument = function(newDocument) {
+        document = newDocument;
     };
 
     /**
@@ -231,14 +232,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     };
 
     function setInitialState() {
-        var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
-            annotationViewManager = odtDocument.getOdfCanvas().getAnnotationViewManager();
-
-        if (annotationViewManager) {
-            annotationViewManager.forgetAnnotations();
-        }
-        initialDoc = odfContainer.rootElement.cloneNode(true);
-        odtDocument.getOdfCanvas().refreshAnnotations();
+        initialDoc = document.cloneDocumentElement();
         // The current state may contain cursors if the initial state is modified whilst the document is in edit mode.
         // To prevent this issue, immediately purge all cursor nodes after cloning
         removeCursors(initialDoc);
@@ -337,9 +331,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * @return {!number} Returns the number of states actually moved
      */
     this.moveBackward = function(states) {
-        var odfCanvas = odtDocument.getOdfCanvas(),
-            odfContainer = odfCanvas.odfContainer(),
-            moved = 0;
+        var moved = 0;
 
         while (states && undoStates.length) {
             redoStates.push(undoStates.pop());
@@ -349,19 +341,14 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
         if (moved) {
             // Only do actual work if moveBackward does something to the undo stacks
-            // TODO Replace with a neater hack for reloading the Odt tree
-            // Once this is fixed, SelectionView.addOverlays & StepsTranslator.verifyRootNode can be largely removed
-            // Also checkout some swear words in EventManager which re-adds the event trap
-            odfContainer.setRootElement(initialDoc.cloneNode(true));
-            odfCanvas.setOdfContainer(odfContainer, true);
+            document.setDocumentElement(initialDoc.cloneNode(true));
             eventNotifier.emit(gui.TrivialUndoManager.signalDocumentRootReplaced, { });
             // Need to reset the odt document cursor list back to nil so new cursors are correctly re-registered
-            odtDocument.getCursors().forEach(function (cursor) {
-                odtDocument.removeCursor(cursor.getMemberId());
+            document.getCursors().forEach(function (cursor) {
+                document.removeCursor(cursor.getMemberId());
             });
             executeOperations(initialState);
             undoStates.forEach(executeOperations);
-            odfCanvas.refreshCSS();
 
             // On a move back command, new ops should be subsequently
             // evaluated for inclusion in the initial state again. This will
