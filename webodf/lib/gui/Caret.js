@@ -90,10 +90,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {undefined}
      */
     function blinkCaret() {
-        if (!cursorNode.parentNode) {
-            // stop blinking when removed from the document
-            return;
-        }
         // switch between transparent and color
         span.style.opacity = span.style.opacity === "0" ? "1" : "0";
         blinkTask.trigger(); // Trigger next blink to occur in BLINK_PERIOD_MS

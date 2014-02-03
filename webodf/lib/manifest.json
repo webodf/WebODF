@@ -73,6 +73,7 @@
         "ops/OdtCursor.js"
     ],
     "gui/CaretManager.js": [
+        "core/Async.js",
         "gui/Caret.js",
         "gui/SessionController.js",
         "ops/OdtCursor.js",
