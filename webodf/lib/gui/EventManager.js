@@ -190,8 +190,8 @@ gui.EventManager = function EventManager(odtDocument) {
                 // Internet explorer will only supply mouse up & down on the window object
                 // For other browser though, listening to both will cause two events to be processed
                 listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
-                listenEvent(eventTrap, eventName, delegate.handleEvent);
             }
+            listenEvent(eventTrap, eventName, delegate.handleEvent);
             // TODO this needs to be rebound if canvasElement changes
             listenEvent(canvasElement, eventName, delegate.handleEvent);
         }

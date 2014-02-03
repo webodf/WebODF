@@ -323,8 +323,19 @@ runtime.loadClass("ops.OdtCursor");
         /**
          * Allow the event trap to receive focus
          */
-        function restoreFocus() {
+        function synchronizeEventStatus() {
+            var hasFocus = eventManager.hasFocus();
+            if (hasFocus) {
+                // Toggling the content editable flag while the element is in focus
+                // will sometimes stop the browser from allowing the IME to be activated.
+                // Blurring the focus and then restoring ensures the browser re-evaluates
+                // the IME state after the content editable flag has been updated.
+                eventManager.blur();
+            }
             eventTrap.setAttribute("contenteditable", isEditable);
+            if (hasFocus) {
+                eventManager.focus();
+            }
         }
 
         /**
@@ -333,7 +344,7 @@ runtime.loadClass("ops.OdtCursor");
          */
         this.setEditing = function(editable) {
             isEditable = editable;
-            eventTrap.setAttribute("contenteditable", isEditable);
+            synchronizeEventStatus();
         };
 
         function init() {
@@ -342,7 +353,7 @@ runtime.loadClass("ops.OdtCursor");
             eventManager.subscribe('textInput', textInput);
             eventManager.subscribe('keypress', flushEvent);
             eventManager.subscribe('mousedown', suppressFocus);
-            eventManager.subscribe('mouseup', restoreFocus);
+            eventManager.subscribe('mouseup', synchronizeEventStatus);
             eventManager.subscribe('focus', resetWindowSelection);
 
             filters.push(new DetectSafariCompositionError(eventManager));
