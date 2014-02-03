@@ -284,17 +284,19 @@ cursor|cursor > .handle:after {
 
 /* within a cursor */
 cursor|cursor > #eventTrap {
-    display: inline-block;
-    position: static;
+    top: 0;
+    bottom: 0;
     left: 0;
-    margin-right: -1px; /* Hide the content editable's own caret */
-    color: rgba(255, 255, 255, 0); /** additionally hide the blinking caret by setting the colour to fully transparent */
+    right: 0;
+    color: rgba(255, 255, 255, 0); /* hide the blinking caret by setting the colour to fully transparent */
     overflow: hidden; /* The overflow visibility is used to hide and show characters being entered */
-    height: 1px;
-    width: 1px; /* marginRight + width must equal 0 so chrome & FF don't think the element takes up space */
+    height: auto;
+    width: 1px; /* trap must be visible in order to receive focus */
 }
 
 cursor|cursor[cursor|composing="true"] > #eventTrap {
+    display: inline-block;
+    position: static;
     color: inherit; /* make colour non-transparent again to show the entered text */
     overflow: visible; /* The overflow visibility is used to hide and show characters being entered */
     height: auto;
