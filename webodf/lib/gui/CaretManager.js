@@ -38,6 +38,7 @@
 
 /*global runtime, core, gui, ops*/
 
+runtime.loadClass("core.Async");
 runtime.loadClass("gui.Caret");
 
 /**
@@ -53,6 +54,7 @@ gui.CaretManager = function CaretManager(sessionController) {
     "use strict";
     var /**@type{!Object.<string,!gui.Caret>}*/
         carets = {},
+        async = new core.Async(),
         window = runtime.getWindow(),
         ensureCaretVisibleTimeoutId,
         scrollIntoViewScheduled = false;
@@ -79,7 +81,13 @@ gui.CaretManager = function CaretManager(sessionController) {
      * @return {undefined}
      */
     function removeCaret(memberId) {
-        delete carets[memberId];
+        var caret = carets[memberId];
+        if (caret) {
+            /*jslint emptyblock:true*/
+            caret.destroy(function() {});
+            /*jslint emptyblock:false*/
+            delete carets[memberId];
+        }
     }
 
     /**
@@ -216,7 +224,7 @@ gui.CaretManager = function CaretManager(sessionController) {
     this.destroy = function (callback) {
         var odtDocument = sessionController.getSession().getOdtDocument(),
             eventManager = sessionController.getEventManager(),
-            caretArray = getCarets();
+            caretCleanup = getCarets().map(function(caret) { return caret.destroy; });
 
         runtime.clearTimeout(ensureCaretVisibleTimeoutId);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
@@ -228,20 +236,8 @@ gui.CaretManager = function CaretManager(sessionController) {
         window.removeEventListener("focus", showLocalCaret, false);
         window.removeEventListener("blur", hideLocalCaret, false);
 
-        (function destroyCaret(i, err) {
-            if (err) {
-                callback(err);
-            } else {
-                if (i < caretArray.length) {
-                    caretArray[i].destroy(function (err) {
-                        destroyCaret(i + 1, err);
-                    });
-                } else {
-                    callback();
-                }
-            }
-        }(0, undefined));
         carets = {};
+        async.destroyAll(caretCleanup, callback);
     };
 
     function init() {
