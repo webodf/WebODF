@@ -32,7 +32,7 @@
  * @source: http://gitorious.org/webodf/webodf/
  */
 
-/*global runtime, core, gui, odf, ops, Node, NodeFilter */
+/*global runtime, core, gui, odf, ops, Node */
 
 
 /**
@@ -49,7 +49,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         keyboardMovementsFilter = new core.PositionFilterChain(),
         movementByWordFilter = new core.PositionFilterChain(),
         rootFilter = odtDocument.createRootFilter(inputMemberId);
-    
+
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
      * The step iterator subtree is set to the root of the current cursor node
@@ -465,133 +465,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             moveCursorByAdjustment(steps);
         }
     }
-    
-    /**
-     * A filter that allows a position if it is in front of a word, picture etc.
-     * @constructor
-     * @implements {core.PositionFilter}
-     */
-    function WordBoundaryFilter() {
-        var TEXT_NODE = Node.TEXT_NODE,
-            ELEMENT_NODE = Node.ELEMENT_NODE,
-            alphaNumeric = /[A-Za-z0-9]/,
-            spacing = /\s/,
-            /**@const*/
-            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-            /**@const*/
-            FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
-            /**
-             * @enum {number}
-             */
-            NeighborType = {
-                EDGE:         0,
-                SPACING:      1,
-                PUNCTUATION:  2,
-                WORDCHAR:     3,
-                OTHER:        4
-            };
-            
-        /**
-        * Returns the first filtered sibling ecountered while travelling up the dom from node until
-        * before the documentRoot - or null if none is found.
-        * @param {?Node} node
-        * @param {!number} direction look for a left sibling when negative - for a right sibling otherwise
-        * @param {!function(?Node):!number} nodeFilter
-        * @return {?Node}
-        */
-        function findHigherNeighborNode(node, direction, nodeFilter) {
-            var neighboringNode = null,
-                rootNode = odtDocument.getRootNode(),
-                unfilteredCandidate;
-            
-            while (node !== rootNode && node !== null && neighboringNode === null) {
-                unfilteredCandidate = (direction < 0) ? node.previousSibling : node.nextSibling;
-                if (nodeFilter(unfilteredCandidate) === NodeFilter.FILTER_ACCEPT) {
-                    neighboringNode = unfilteredCandidate;
-                }
-                node = node.parentNode;
-            }
-            
-            return neighboringNode;
-        }
-        
-        /**
-         * @param {?Node} node
-         * @param {!function():!number} getOffset returns the offset inside the node
-         * @return {!NeighborType}
-         */
-        function typeOfNeighbor(node, getOffset) {
-            var neighboringChar;
-            
-            if (node === null) {
-                return NeighborType.EDGE;
-            }
-            if (odfUtils.isCharacterElement(node)) {
-                return NeighborType.SPACING;
-            }
-            if (node.nodeType === TEXT_NODE || odfUtils.isTextSpan(node) || odfUtils.isHyperlink(node)) {
-                neighboringChar = node.textContent.charAt(getOffset());
-                
-                if (spacing.test(neighboringChar)) {
-                    return NeighborType.SPACING;
-                }
-                if (!alphaNumeric.test(neighboringChar)) {
-                    return NeighborType.PUNCTUATION;
-                }
-                return NeighborType.WORDCHAR;
-            }
-            return NeighborType.OTHER;
-        }
-        
-        /**
-         * @param {!core.PositionIterator} iterator
-         * @return {!core.PositionFilter.FilterResult}
-         */
-        this.acceptPosition = function (iterator) {
-            var container = iterator.container(),
-                /**@type{Node}*/
-                leftNode = iterator.leftNode(),
-                rightNode = iterator.rightNode(),
-                // For performance reasons, do not calculate the offset inside the dom until it is necessary
-                getRightCharOffset = iterator.unfilteredDomOffset,
-                getLeftCharOffset = function() {return iterator.unfilteredDomOffset() - 1;},
-                leftNeighborType,
-                rightNeighborType;
-            
-            // If this could be the end of an element node, look for the neighboring node higher in the dom
-            if (container.nodeType === ELEMENT_NODE) {
-                if (rightNode === null) {
-                    rightNode = findHigherNeighborNode(container, 1, iterator.getNodeFilter());
-                }
-                if (leftNode === null) {
-                    leftNode = findHigherNeighborNode(container, -1, iterator.getNodeFilter());
-                }
-            }
-            
-            // If we dont stay inside the container node, the getOffset function needs to be modified so as to
-            // return the offset of the characters just at the beginning/end of the respective neighboring node.
-            if (container !== rightNode) {
-                getRightCharOffset = function() {return 0;};
-            }
-            if (container !== leftNode && leftNode !== null) {
-                getLeftCharOffset = function() {return leftNode.textContent.length - 1;};
-            }
 
-            leftNeighborType = typeOfNeighbor(leftNode, getLeftCharOffset);
-            rightNeighborType = typeOfNeighbor(rightNode, getRightCharOffset);
-            
-            // Reject if: is between two usual characters (inside word) OR
-            //            is between two punctuation marks OR
-            //            is before a spacing and not behind the edge (word ending)
-            if ((leftNeighborType === NeighborType.WORDCHAR    && rightNeighborType === NeighborType.WORDCHAR) ||
-                (leftNeighborType === NeighborType.PUNCTUATION && rightNeighborType === NeighborType.PUNCTUATION) ||
-                (leftNeighborType !== NeighborType.EDGE        && rightNeighborType === NeighborType.SPACING)) {
-                return FILTER_REJECT;
-            }
-            return FILTER_ACCEPT;
-        };
-    }
-    
     /**
      * @param {!number} direction -1 for left 1 for right
      * @param {!boolean} extend whether extend the selection instead of moving the cursor
@@ -817,7 +691,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         keyboardMovementsFilter.addFilter(baseFilter);
         keyboardMovementsFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
         movementByWordFilter.addFilter(keyboardMovementsFilter);
-        movementByWordFilter.addFilter(new WordBoundaryFilter());
+        movementByWordFilter.addFilter(new gui.WordBoundaryFilter(odtDocument));
     }
     init();
 };

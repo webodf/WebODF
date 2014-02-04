@@ -171,11 +171,10 @@
     ],
     "gui.SelectionController": [
         "core.DomUtils",
-        "core.PositionFilter",
         "core.PositionFilterChain",
-        "core.PositionIterator",
         "core.StepIterator",
         "gui.SelectionMover",
+        "gui.WordBoundaryFilter",
         "odf.OdfUtils",
         "ops.OdtCursor",
         "ops.OpMoveCursor",
@@ -292,6 +291,12 @@
     ],
     "gui.UndoStateRules": [
         "ops.Operation"
+    ],
+    "gui.WordBoundaryFilter": [
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "odf.OdfUtils",
+        "ops.OdtDocument"
     ],
     "odf.CommandLineTools": [
         "odf.OdfCanvas",
