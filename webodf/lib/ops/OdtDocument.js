@@ -52,6 +52,7 @@ runtime.loadClass("ops.Member");
 /**
  * A document that keeps all data related to the mapped document.
  * @constructor
+ * @implements {ops.Document}
  * @param {!odf.OdfCanvas} odfCanvas
  */
 ops.OdtDocument = function OdtDocument(odfCanvas) {
@@ -100,6 +101,32 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         runtime.assert(localName === "text", "Unsupported content element type '" + localName + "' for OdtDocument");
         return element;
     }
+    this.getDocumentElement = function () {
+        return odfCanvas.odfContainer().rootElement;
+    };
+
+    this.cloneDocumentElement = function () {
+        var rootElement = self.getDocumentElement(),
+            annotationViewManager = odfCanvas.getAnnotationViewManager(),
+            initialDoc;
+
+        if (annotationViewManager) {
+            annotationViewManager.forgetAnnotations();
+        }
+        initialDoc = rootElement.cloneNode(true);
+        odfCanvas.refreshAnnotations();
+        return initialDoc;
+    };
+
+    this.setDocumentElement = function (documentElement) {
+        var odfContainer = odfCanvas.odfContainer();
+        // TODO Replace with a neater hack for reloading the Odt tree
+        // Once this is fixed, SelectionView.addOverlays & StepsTranslator.verifyRootNode can be largely removed
+        // Also checkout some swear words in EventManager which re-adds the event trap
+        odfContainer.setRootElement(documentElement);
+        odfCanvas.setOdfContainer(odfContainer, true);
+        odfCanvas.refreshCSS();
+    };
 
     /**
      * @return {!Document}
@@ -597,7 +624,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * while keeping them inside the same root. An event will be raised for this cursor if it is moved
      */
     this.fixCursorPositions = function () {
-        Object.keys(cursors).forEach(function(memberId) {
+        Object.keys(cursors).forEach(function (memberId) {
             var cursor = cursors[memberId],
                 root = getRoot(cursor.getNode()),
                 rootFilter = self.createRootFilter(root),

@@ -55,6 +55,7 @@
     "gui/TrivialUndoManagerTests.js": [
         "core/UnitTester.js",
         "gui/TrivialUndoManager.js",
+        "ops/Document.js",
         "ops/OpAddCursor.js",
         "ops/OpInsertText.js",
         "ops/OpMoveCursor.js",

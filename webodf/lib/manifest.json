@@ -267,9 +267,11 @@
         "core/EventNotifier.js",
         "gui/UndoManager.js",
         "gui/UndoStateRules.js",
+        "ops/Document.js",
         "ops/Operation.js"
     ],
     "gui/UndoManager.js": [
+        "ops/Document.js",
         "ops/Operation.js"
     ],
     "gui/UndoStateRules.js": [
@@ -351,6 +353,9 @@
         "odf/Namespaces.js",
         "odf/ObjectNameGenerator.js"
     ],
+    "ops/Document.js": [
+        "ops/OdtCursor.js"
+    ],
     "ops/EditInfo.js": [
         "ops/OdtDocument.js"
     ],
@@ -374,6 +379,7 @@
         "odf/Namespaces.js",
         "odf/OdfCanvas.js",
         "odf/OdfUtils.js",
+        "ops/Document.js",
         "ops/Member.js",
         "ops/OdtCursor.js",
         "ops/Operation.js",
@@ -497,7 +503,7 @@
         "ops/Operation.js"
     ],
     "ops/Operation.js": [
-        "ops/OdtDocument.js"
+        "ops/Document.js"
     ],
     "ops/OperationFactory.js": [
         "ops/OpAddAnnotation.js",
