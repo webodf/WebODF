@@ -173,6 +173,16 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.movementPositions", "[19, 16, 14, 13, 11, 9, 4, 0]");
     }
 
+    function moveCursorPastWord_SimpleText_NonLatin() {
+        t.movementPositions = getMovementByWordsPositions("<text:p>the tes阿t rèd fox.</text:p>", 1);
+        r.shouldBe(t, "t.movementPositions", "[4, 10, 14, 17, 18]");
+    }
+
+    function moveCursorBeforeWord_SimpleText_NonLatin() {
+        t.movementPositions = getMovementByWordsPositions("<text:p>the tes阿t rèd fox.</text:p>", -1);
+        r.shouldBe(t, "t.movementPositions", "[17, 14, 10, 4, 0]");
+    }
+
     function moveCursorPastWord_TextSplitBySpans() {
         t.movementPositions = getMovementByWordsPositions("<text:p>the q<text:span>uick</text:span> red fox</text:p>", 1);
         r.shouldBe(t, "t.movementPositions", "[4, 10, 14, 17]");
@@ -402,6 +412,8 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             moveCursorBeforeWord_SimpleText,
             moveCursorPastWord_SimpleText_Punctuation,
             moveCursorBeforeWord_SimpleText_Punctuation,
+            moveCursorBeforeWord_SimpleText_NonLatin,
+            moveCursorPastWord_SimpleText_NonLatin,
 
             moveCursorPastWord_TextSplitBySpans,
             moveCursorBeforeWord_TextSplitBySpans,
