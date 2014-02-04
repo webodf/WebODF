@@ -260,124 +260,13 @@ endif(NOT ANDROID_SDK_DIR)
 
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
-# This list is generated automatically, do not edit this list by hand.
-set(TYPEDLIBJSFILES
-    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js
-    lib/runtime.js
-    lib/core/Async.js
-    lib/core/Base64.js
-    lib/core/ByteArray.js
-    lib/core/ByteArrayWriter.js
-    lib/core/CSSUnits.js
-    lib/core/DomUtils.js
-    lib/core/EventNotifier.js
-    lib/core/LoopWatchDog.js
-    lib/core/PositionIterator.js
-    lib/core/RawInflate.js
-    lib/core/ScheduledTask.js
-    lib/core/UnitTester.js
-    lib/core/Utils.js
-    lib/core/Zip.js
-    lib/gui/Avatar.js
-    lib/gui/EditInfoHandle.js
-    lib/gui/KeyboardHandler.js
-    lib/gui/StyleSummary.js
-    lib/odf/Namespaces.js
-    lib/odf/OdfUtils.js
-    lib/ops/Server.js
-    lib/xmldom/LSSerializerFilter.js
-    lib/xmldom/XPath.js
-    lib/core/Cursor.js
-    lib/core/PositionFilter.js
-    lib/core/PositionFilterChain.js
-    lib/core/StepIterator.js
-    lib/gui/AnnotationViewManager.js
-    lib/gui/HyperlinkClickHandler.js
-    lib/gui/SelectionMover.js
-    lib/odf/OdfNodeFilter.js
-    lib/odf/Style2CSS.js
-    lib/odf/StyleInfo.js
-    lib/odf/TextSerializer.js
-    lib/ops/TextPositionFilter.js
-    lib/xmldom/LSSerializer.js
-    lib/gui/MimeDataExporter.js
-    lib/gui/Clipboard.js
-    lib/odf/OdfContainer.js
-    lib/odf/FontLoader.js
-    lib/odf/ObjectNameGenerator.js
-    lib/odf/Formatting.js
-    lib/odf/OdfCanvas.js
-    lib/odf/TextStyleApplicator.js
-)
-# This list is generated automatically, do not edit this list by hand.
-set(UNTYPEDLIBJSFILES
-# These files depend only on files that are 100% typed.
-    lib/core/RawDeflate.js
-    lib/gui/ImageSelector.js
-    lib/odf/CommandLineTools.js
-    lib/ops/Member.js
-    lib/ops/StepsTranslator.js
-    lib/xmldom/RelaxNGParser.js
-# These files depend on files that are not 100% typed.
-    lib/ops/OdtCursor.js
-    lib/ops/OdtDocument.js
-    lib/xmldom/RelaxNG.js
-    lib/xmldom/RelaxNG2.js
-    lib/gui/Caret.js
-    lib/gui/EventManager.js
-    lib/gui/InputMethodEditor.js
-    lib/gui/ShadowCursor.js
-    lib/ops/Document.js
-    lib/ops/EditInfo.js
-    lib/ops/Operation.js
-    lib/gui/EditInfoMarker.js
-    lib/gui/SelectionView.js
-    lib/gui/SelectionViewManager.js
-    lib/gui/SvgSelectionView.js
-    lib/gui/UndoManager.js
-    lib/gui/UndoStateRules.js
-    lib/ops/OpAddAnnotation.js
-    lib/ops/OpAddCursor.js
-    lib/ops/OpAddMember.js
-    lib/ops/OpAddStyle.js
-    lib/ops/OpApplyDirectStyling.js
-    lib/ops/OpApplyHyperlink.js
-    lib/ops/OpInsertImage.js
-    lib/ops/OpInsertTable.js
-    lib/ops/OpInsertText.js
-    lib/ops/OpMoveCursor.js
-    lib/ops/OpRemoveAnnotation.js
-    lib/ops/OpRemoveBlob.js
-    lib/ops/OpRemoveCursor.js
-    lib/ops/OpRemoveHyperlink.js
-    lib/ops/OpRemoveMember.js
-    lib/ops/OpRemoveStyle.js
-    lib/ops/OpRemoveText.js
-    lib/ops/OpSetBlob.js
-    lib/ops/OpSetParagraphStyle.js
-    lib/ops/OpSplitParagraph.js
-    lib/ops/OpUpdateMember.js
-    lib/ops/OpUpdateMetadata.js
-    lib/ops/OpUpdateParagraphStyle.js
-    lib/ops/OperationFactory.js
-    lib/ops/OperationRouter.js
-    lib/ops/OperationTransformMatrix.js
-    lib/ops/OperationTransformer.js
-    lib/ops/TrivialOperationRouter.js
-    lib/gui/PlainTextPasteboard.js
-    lib/gui/TrivialUndoManager.js
-    lib/ops/Session.js
-    lib/gui/AnnotationController.js
-    lib/gui/DirectFormattingController.js
-    lib/gui/HyperlinkController.js
-    lib/gui/ImageController.js
-    lib/gui/SelectionController.js
-    lib/gui/TextController.js
-    lib/gui/SessionController.js
-    lib/gui/CaretManager.js
-    lib/gui/SessionView.js
-)
-set(LIBJSFILES ${TYPEDLIBJSFILES} ${UNTYPEDLIBJSFILES})
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/jsfileslist.txt)
+  execute_process(
+    COMMAND ${NODE} lib/runtime.js tools/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/webodf
+  )
+endif(NOT EXISTS ${CMAKE_BINARY_DIR}/jsfileslist.txt)
+include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
 
 set(HTML5UIFILES
   app/app.js
