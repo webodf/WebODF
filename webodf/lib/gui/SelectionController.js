@@ -47,7 +47,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         odfUtils = new odf.OdfUtils(),
         baseFilter = odtDocument.getPositionFilter(),
         keyboardMovementsFilter = new core.PositionFilterChain(),
-        movementByWordFilter = new core.PositionFilterChain(),
         rootFilter = odtDocument.createRootFilter(inputMemberId);
 
     /**
@@ -62,6 +61,18 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         return odtDocument.createStepIterator(node, 0, [baseFilter, rootFilter], odtDocument.getRootElement(node));
     }
 
+    /**
+     * Create a new step iterator that will iterate by word boundaries
+     * @param {!Node} node
+     * @param {!number} offset
+     * @return {!core.StepIterator}
+     */
+    function createWordBoundaryStepIterator(node, offset) {
+        var wordBoundaryFilter = new gui.WordBoundaryFilter(odtDocument);
+        return odtDocument.createStepIterator(node, offset, [baseFilter, rootFilter, wordBoundaryFilter],
+            odtDocument.getRootElement(node));
+    }
+    
     /**
      * @param {function(!Node):Node} lookup
      * @return {function(!Node,number):function(number,!Node,number):boolean}
@@ -472,17 +483,28 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {undefined}
      */
     function moveCursorByWord(direction, extend) {
-        var stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter(),
-            singleStepsCursorMovementOffset;
-        
-        singleStepsCursorMovementOffset = (direction >= 0)
-            ? stepCounter.convertForwardStepsBetweenFilters(1, movementByWordFilter, keyboardMovementsFilter)
-            : -stepCounter.convertBackwardStepsBetweenFilters(1, movementByWordFilter, keyboardMovementsFilter);
-        
-        if (extend) {
-            extendCursorByAdjustment(singleStepsCursorMovementOffset);
+        var cursor = odtDocument.getCursor(inputMemberId),
+            newSelection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
+            newCursorSelection,
+            selectionUpdated,
+            stepIterator = createWordBoundaryStepIterator(newSelection.focusNode, newSelection.focusOffset);
+
+        if (direction >= 0) {
+            selectionUpdated = stepIterator.nextStep();
         } else {
-            moveCursorByAdjustment(singleStepsCursorMovementOffset);
+            selectionUpdated = stepIterator.previousStep();
+        }
+        
+        if (selectionUpdated) {
+            newSelection.focusNode = stepIterator.container();
+            newSelection.focusOffset = stepIterator.offset();
+        
+            if (!extend) {
+                newSelection.anchorNode = newSelection.focusNode;
+                newSelection.anchorOffset = newSelection.focusOffset;
+            }
+            newCursorSelection = odtDocument.convertDomToCursorRange(newSelection);
+            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
         }
     }
     
@@ -690,8 +712,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     function init() {
         keyboardMovementsFilter.addFilter(baseFilter);
         keyboardMovementsFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
-        movementByWordFilter.addFilter(keyboardMovementsFilter);
-        movementByWordFilter.addFilter(new gui.WordBoundaryFilter(odtDocument));
     }
     init();
 };

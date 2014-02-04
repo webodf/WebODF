@@ -264,7 +264,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     /**
      * @param {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}} selection
      * @param {function(!Node, !number):function(!number, !Node, !number):!boolean=} constraint
-     * @return {{position: !number, length: number}}
+     * @return {!{position: !number, length: number}}
      */
     this.convertDomToCursorRange = function (selection, constraint) {
         var point1,

@@ -44,6 +44,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
     var r = runner,
         t,
         testarea,
+        textns = odf.Namespaces.textns,
         inputMemberId = "Joe";
 
     /**
@@ -57,6 +58,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         var self = this;
         this.odfContainer = function () { return self; };
         this.getContentElement = function () { return node.getElementsByTagNameNS(odf.Namespaces.officens, 'text')[0]; };
+        this.getElement = function () { return node; };
         this.rootElement = node;
     }
 
@@ -98,9 +100,20 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         t.odtDocument = new ops.OdtDocument(new MockOdfCanvas(node));
         t.session = new MockSession(t.odtDocument);
         t.selectionController = new gui.SelectionController(t.session, inputMemberId);
+        t.selectionToRange = t.selectionController.selectionToRange;
+        t.rangeToSelection = t.selectionController.rangeToSelection;
         t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
         return node;
+    }
+
+    /**
+     * Gets the position of the local cursor in cursor steps
+     * @return {!{position: !number, length: number}}
+     */
+    function getCursorPosition() {
+        var selection = t.rangeToSelection(t.cursor.getSelectedRange(), t.cursor.hasForwardSelection());
+        return t.odtDocument.convertDomToCursorRange(selection);
     }
 
     /**
@@ -240,6 +253,44 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.movementPositions", "[14, 10, 4, 0]");
     }
 
+    function extendCursorBeforeWord_IsWithinWord() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1],
+            selection = t.selectionToRange({
+                anchorNode: text,
+                anchorOffset: 5,
+                focusNode: text,
+                focusOffset: 5
+            });
+        t.selectionController.selectRange(selection.range, selection.hasForwardSelection);
+
+        t.selectionController.extendSelectionBeforeWord();
+
+        t.cursorPosition = getCursorPosition();
+        r.shouldBe(t, "t.cursorPosition.position", "5");
+        r.shouldBe(t, "t.cursorPosition.length", "-1");
+    }
+
+    function extendCursorPastWord_IsWithinWord() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1],
+            selection = t.selectionToRange({
+                anchorNode: text,
+                anchorOffset: 5,
+                focusNode: text,
+                focusOffset: 5
+            });
+        t.selectionController.selectRange(selection.range, selection.hasForwardSelection);
+
+        t.selectionController.extendSelectionPastWord();
+
+        t.cursorPosition = getCursorPosition();
+        r.shouldBe(t, "t.cursorPosition.position", "5");
+        r.shouldBe(t, "t.cursorPosition.length", "3");
+    }
+
     function moveCursorToDocumentEnd_Simple() {
         t.position = undefined;
         createOdtDocument("<text:p>the <text:a>q</text:a><text:a><text:span>u</text:span></text:a>ick red fox</text:p>");
@@ -285,6 +336,9 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             moveCursorBeforeWord_TextWithinLink,
             moveCursorPastWord_TextWithinLinkAndSpan,
             moveCursorBeforeWord_TextWithinLinkAndSpan,
+
+            extendCursorBeforeWord_IsWithinWord,
+            extendCursorPastWord_IsWithinWord,
 
             moveCursorToDocumentEnd_Simple
         ]);
