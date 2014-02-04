@@ -47,7 +47,9 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         odfUtils = new odf.OdfUtils(),
         baseFilter = odtDocument.getPositionFilter(),
         keyboardMovementsFilter = new core.PositionFilterChain(),
-        rootFilter = odtDocument.createRootFilter(inputMemberId);
+        rootFilter = odtDocument.createRootFilter(inputMemberId),
+        TRAILING_SPACE = gui.WordBoundaryFilter.IncludeWhitespace.TRAILING,
+        LEADING_SPACE = gui.WordBoundaryFilter.IncludeWhitespace.LEADING;
 
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
@@ -65,10 +67,11 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * Create a new step iterator that will iterate by word boundaries
      * @param {!Node} node
      * @param {!number} offset
+     * @param {!gui.WordBoundaryFilter.IncludeWhitespace} includeWhitespace
      * @return {!core.StepIterator}
      */
-    function createWordBoundaryStepIterator(node, offset) {
-        var wordBoundaryFilter = new gui.WordBoundaryFilter(odtDocument);
+    function createWordBoundaryStepIterator(node, offset, includeWhitespace) {
+        var wordBoundaryFilter = new gui.WordBoundaryFilter(odtDocument, includeWhitespace);
         return odtDocument.createStepIterator(node, offset, [baseFilter, rootFilter, wordBoundaryFilter],
             odtDocument.getRootElement(node));
     }
@@ -199,38 +202,17 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @param {!Range} range
      */
     function expandToWordBoundaries(range) {
-        var alphaNumeric = /[A-Za-z0-9]/,
-            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-            currentNode,
-            c;
+        var stepIterator;
 
-        iterator.setUnfilteredPosition(/**@type{!Node}*/(range.startContainer), range.startOffset);
-        while (iterator.previousPosition()) {
-            currentNode = iterator.getCurrentNode();
-            if (currentNode.nodeType === Node.TEXT_NODE) {
-                c = /**@type{!Text}*/(currentNode).substringData(iterator.unfilteredDomOffset(), 1);
-                if (!alphaNumeric.test(c)) {
-                    break;
-                }
-            } else if (!odfUtils.isTextSpan(currentNode)) {
-                break;
-            }
-            range.setStart(iterator.container(), iterator.unfilteredDomOffset());
+        stepIterator = createWordBoundaryStepIterator(/**@type{!Node}*/(range.startContainer), range.startOffset, TRAILING_SPACE);
+        if (stepIterator.roundToPreviousStep()) {
+            range.setStart(stepIterator.container(), stepIterator.offset());
         }
 
-        iterator.setUnfilteredPosition(/**@type{!Node}*/(range.endContainer), range.endOffset);
-        do {
-            currentNode = iterator.getCurrentNode();
-            if (currentNode.nodeType === Node.TEXT_NODE) {
-                c = /**@type{!Text}*/(currentNode).substringData(iterator.unfilteredDomOffset(), 1);
-                if (!alphaNumeric.test(c)) {
-                    break;
-                }
-            } else if (!odfUtils.isTextSpan(currentNode)) {
-                break;
-            }
-        } while (iterator.nextPosition());
-        range.setEnd(iterator.container(), iterator.unfilteredDomOffset());
+        stepIterator = createWordBoundaryStepIterator(/**@type{!Node}*/(range.endContainer), range.endOffset, LEADING_SPACE);
+        if (stepIterator.roundToNextStep()) {
+            range.setEnd(stepIterator.container(), stepIterator.offset());
+        }
     }
     this.expandToWordBoundaries = expandToWordBoundaries;
 
@@ -487,18 +469,18 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             newSelection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
             newCursorSelection,
             selectionUpdated,
-            stepIterator = createWordBoundaryStepIterator(newSelection.focusNode, newSelection.focusOffset);
+            stepIterator = createWordBoundaryStepIterator(newSelection.focusNode, newSelection.focusOffset, TRAILING_SPACE);
 
         if (direction >= 0) {
             selectionUpdated = stepIterator.nextStep();
         } else {
             selectionUpdated = stepIterator.previousStep();
         }
-        
+
         if (selectionUpdated) {
             newSelection.focusNode = stepIterator.container();
             newSelection.focusOffset = stepIterator.offset();
-        
+
             if (!extend) {
                 newSelection.anchorNode = newSelection.focusNode;
                 newSelection.anchorOffset = newSelection.focusOffset;

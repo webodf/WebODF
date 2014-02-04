@@ -66,8 +66,11 @@
  * @constructor
  * @implements {core.PositionFilter}
  * @param {!ops.OdtDocument} odtDocument
+ * @param {!gui.WordBoundaryFilter.IncludeWhitespace} includeWhitespace Specify the type of whitespace to include within
+ *  the word boundary. TRAILING causes the accepted position to be after the whitespace trailing a word, while LEADING
+ *  causes the accepted position to be just after the word boundary (but before the trailing whitespace).
  */
-gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument) {
+gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitespace) {
     "use strict";
     var TEXT_NODE = Node.TEXT_NODE,
         ELEMENT_NODE = Node.ELEMENT_NODE,
@@ -78,6 +81,10 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument) {
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/
         FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
+        /**@const*/
+        TRAILING = gui.WordBoundaryFilter.IncludeWhitespace.TRAILING,
+        /**@const*/
+        LEADING = gui.WordBoundaryFilter.IncludeWhitespace.LEADING,
         /**
          * @enum {number}
          */
@@ -180,12 +187,29 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument) {
 
         // Reject if: is between two usual characters (inside word) OR
         //            is between two punctuation marks OR
-        //            is before a spacing and not behind the edge (word ending)
+        //            (if including trailing space) is before a spacing and not behind the edge (word ending)
+        //            (if excluding trailing space) is before an edge (word start) and not behind the spacing
         if ((leftNeighborType === NeighborType.WORDCHAR    && rightNeighborType === NeighborType.WORDCHAR) ||
             (leftNeighborType === NeighborType.PUNCTUATION && rightNeighborType === NeighborType.PUNCTUATION) ||
-            (leftNeighborType !== NeighborType.EDGE        && rightNeighborType === NeighborType.SPACING)) {
+            (includeWhitespace === TRAILING && leftNeighborType !== NeighborType.EDGE && rightNeighborType === NeighborType.SPACING) ||
+            (includeWhitespace === LEADING && leftNeighborType === NeighborType.SPACING && rightNeighborType !== NeighborType.EDGE)) {
             return FILTER_REJECT;
         }
         return FILTER_ACCEPT;
     };
 };
+
+/**
+ * Type of whitespace to include within the word boundary
+ * @enum {!number}
+ */
+gui.WordBoundaryFilter.IncludeWhitespace = {
+    /**@const*/None: 0,
+    /**@const*/TRAILING: 1,
+    /**@const*/LEADING: 2
+};
+
+(function() {
+    "use strict";
+    return gui.WordBoundaryFilter;
+}());

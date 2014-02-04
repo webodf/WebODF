@@ -303,6 +303,90 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.position", "17");
     }
 
+    function expandToWordBoundaries_CollapsedInWord() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 5,
+            focusNode: text,
+            focusOffset: 5
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
+    function expandToWordBoundaries_CollasedAtWordStart() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 4,
+            focusNode: text,
+            focusOffset: 4
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
+    function expandToWordBoundaries_CollasedAtWordEnd() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 7,
+            focusNode: text,
+            focusOffset: 7
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
+    function expandToWordBoundaries_AlreadyAtWordBoundaries() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 4,
+            focusNode: text,
+            focusOffset: 7
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
     this.setUp = function () {
         testarea = core.UnitTest.provideTestAreaDiv();
         t = { doc: testarea.ownerDocument };
@@ -340,7 +424,12 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             extendCursorBeforeWord_IsWithinWord,
             extendCursorPastWord_IsWithinWord,
 
-            moveCursorToDocumentEnd_Simple
+            moveCursorToDocumentEnd_Simple,
+
+            expandToWordBoundaries_CollapsedInWord,
+            expandToWordBoundaries_CollasedAtWordStart,
+            expandToWordBoundaries_CollasedAtWordEnd,
+            expandToWordBoundaries_AlreadyAtWordBoundaries
         ]);
     };
     this.asyncTests = function () {

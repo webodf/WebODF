@@ -173,7 +173,6 @@
         "core.DomUtils",
         "core.PositionFilterChain",
         "core.StepIterator",
-        "gui.SelectionMover",
         "gui.WordBoundaryFilter",
         "odf.OdfUtils",
         "ops.OdtCursor",
