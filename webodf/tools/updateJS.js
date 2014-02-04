@@ -35,7 +35,7 @@
  */
 /*global runtime, process, require, console*/
 
-function Main() {
+function Main(cmakeListPath) {
     "use strict";
     var pathModule = require("path"),
         /**
@@ -276,7 +276,7 @@ function Main() {
         var fs = require("fs");
         fs.readFile(path, "utf8", function (err, data) {
             if (err || data !== content) {
-                if (data.length !== content.length) {
+                if (!err && data.length !== content.length) {
                     console.log("Different file length for " + path
                         + ": " + data.length + " " + content.length);
                 }
@@ -340,28 +340,21 @@ function Main() {
     }
 
     function createCMakeLists(typed, almostTyped, remaining) {
-        var fs = require("fs"), path = "../CMakeLists.txt";
-        fs.readFile(path, "utf8", function (err, content) {
-            if (err) {
-                throw err;
-            }
-            content = content.replace(/TYPEDLIBJSFILES[^)]+\)/,
-                "TYPEDLIBJSFILES\n" +
+        var path = cmakeListPath, content;
+        content = "set(TYPEDLIBJSFILES\n" +
                 "    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js\n" +
                 "    lib/runtime.js\n    lib/" +
-                typed.join("\n    lib/") + "\n)");
-            content = content.replace(/UNTYPEDLIBJSFILES[^)]+\)/,
-                "UNTYPEDLIBJSFILES" +
+                typed.join("\n    lib/") + "\n)\n" +
+                "set(UNTYPEDLIBJSFILES" +
                 "\n# These files depend only on files that are 100% typed." +
                 "\n    lib/" +
                 almostTyped.join("\n    lib/") +
                 "\n# These files depend on files that are not 100% typed." +
                 "\n    lib/" +
-                remaining.join("\n    lib/") + "\n)");
-            saveIfDifferent(path, content, function () {
-                console.log("CMakeLists.txt was updated. Rerun the build.");
-                process.exit(1);
-            });
+                remaining.join("\n    lib/") + "\n)";
+        saveIfDifferent(path, content, function () {
+            console.log("JS file dependencies were updated. Rerun the build.");
+            process.exit(1);
         });
     }
 
@@ -660,4 +653,4 @@ function main(f) {
     });
 }
 
-main(new Main());
+main(new Main(process.argv[3]));

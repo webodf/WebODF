@@ -39,7 +39,7 @@ set(TESTJSFILES tests/core/ZipTests.js
 add_custom_command(
     OUTPUT manifest.json
     COMMAND ${NODE}
-    ARGS lib/runtime.js tools/updateJS.js
+    ARGS lib/runtime.js tools/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/lib/manifest.json ${CMAKE_CURRENT_BINARY_DIR}/manifest.json
     DEPENDS NodeJS tools/updateJS.js ${LIBJSFILES} ${TESTJSFILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
