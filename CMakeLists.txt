@@ -14,7 +14,7 @@ else (ProcessorCountFound)
   set(NProcessors 1)
 endif (ProcessorCountFound)
 
-SET(REQUIRED_NODEJS_VERSION 0.10.20)
+SET(REQUIRED_NODEJS_VERSION 0.10.5)
 
 # At this point, the version number that is used throughout is defined
 # The version number is gotten from either the git repository or the name of the
