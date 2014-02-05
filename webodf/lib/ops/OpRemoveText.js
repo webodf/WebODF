@@ -183,14 +183,12 @@ ops.OpRemoveText = function OpRemoveText() {
      */
     function mergeParagraphs(first, second, collapseRules) {
         var child,
-            mergeForward = false,
             destination = first,
             source = second,
             secondParent,
             insertionPoint = null;
 
         if (collapseRules.isEmpty(first)) {
-            mergeForward = true;
             if (second.parentNode !== first.parentNode) {
                 // We're just about to move the second paragraph in to the right position for the merge.
                 // Therefore, we need to remember if the second paragraph is from a different parent in order to clean
@@ -203,8 +201,8 @@ ops.OpRemoveText = function OpRemoveText() {
             insertionPoint = destination.getElementsByTagNameNS(editinfons, 'editinfo')[0] || destination.firstChild;
         }
 
-        while (source.hasChildNodes()) {
-            child = mergeForward ? source.lastChild : source.firstChild;
+        while (source.firstChild) {
+            child = source.firstChild;
             source.removeChild(child);
             if (child.localName !== 'editinfo') {
                 destination.insertBefore(child, insertionPoint);
