@@ -49,10 +49,12 @@ define([
     "RemoveCurrentSelection",
     "PreloadDocument",
     "BoldCurrentSelection",
+    "AlignCurrentSelectionJustified",
     "MoveCursorToEnd"
 ], function (Benchmark, HTMLResultsRenderer,
              OpenDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, RemovePositions, MoveCursorLeft,
-             SelectEntireDocument, RemoveCurrentSelection, PreloadDocument, BoldCurrentSelection, MoveCursorToEnd) {
+             SelectEntireDocument, RemoveCurrentSelection, PreloadDocument, BoldCurrentSelection,
+             AlignCurrentSelectionJustified, MoveCursorToEnd) {
     "use strict";
 
     /**
@@ -119,6 +121,7 @@ define([
         benchmark.actions.push(new RemovePositions(100, true));
         benchmark.actions.push(new SelectEntireDocument());
         benchmark.actions.push(new BoldCurrentSelection());
+        benchmark.actions.push(new AlignCurrentSelectionJustified());
         benchmark.actions.push(new RemoveCurrentSelection());
 
         this.start = benchmark.start;

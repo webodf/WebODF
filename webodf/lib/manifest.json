@@ -305,7 +305,9 @@
         "odf/OdfContainer.js"
     ],
     "odf/OdfCanvas.js": [
+        "core/Async.js",
         "core/DomUtils.js",
+        "core/ScheduledTask.js",
         "gui/AnnotationViewManager.js",
         "odf/FontLoader.js",
         "odf/Formatting.js",
@@ -574,6 +576,7 @@
         "odf/OdfUtils.js"
     ],
     "ops/TrivialOperationRouter.js": [
+        "core/EventNotifier.js",
         "ops/Operation.js",
         "ops/OperationFactory.js",
         "ops/OperationRouter.js"
