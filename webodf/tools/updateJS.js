@@ -97,6 +97,7 @@ function Main(cmakeListPath) {
             "ops/OdtCursor.js",
             "ops/Operation.js",
             "ops/Server.js",
+            "ops/StepsTranslator.js",
             "ops/TextPositionFilter.js",
             "xmldom/LSSerializer.js",
             "xmldom/LSSerializerFilter.js",
