@@ -313,6 +313,55 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.position", "17");
     }
 
+    function moveCursorToDocumentEnd_EndsBeforeAnnotation() {
+        t.position = undefined;
+        createOdtDocument("<text:p>the quick red fox<office:annotation><text:p>an</text:p></office:annotation></text:p>");
+
+        t.selectionController.moveCursorToDocumentEnd();
+
+        if(t.session.operations.length > 0) {
+            t.position = t.session.operations[0].spec().position;
+        }
+        r.shouldBe(t, "t.position", "21");
+    }
+
+    function moveSelectionToParagraphEnd_OverAnnotation() {
+        var lastPosition,
+            loopGuard = new core.LoopWatchDog(100000, 100); // Don't care really how long this takes
+        t.movementPositions = [];
+        createOdtDocument("<text:p>ab<office:annotation><text:p>an</text:p></office:annotation></text:p>"
+                            + "<text:p>cde</text:p>"
+                            + "<text:p><text:span>fgh</text:span></text:p>");
+
+        do {
+            loopGuard.check();
+            lastPosition = getCursorPosition().position;
+            t.movementPositions.push(lastPosition);
+            t.selectionController.moveCursorToParagraphEnd();
+        } while (lastPosition !== getCursorPosition().position);
+
+        r.shouldBe(t, "t.movementPositions", "[0, 6, 10, 14]");
+    }
+
+    function moveSelectionToParagraphStart_OverAnnotation() {
+        var lastPosition,
+            loopGuard = new core.LoopWatchDog(100000, 100); // Don't care really how long this takes
+        t.movementPositions = [];
+        createOdtDocument("<text:p><office:annotation><text:p>an</text:p></office:annotation>ab</text:p>"
+            + "<text:p>cde</text:p>"
+            + "<text:p><text:span>fgh</text:span></text:p>");
+        t.selectionController.moveCursorToDocumentEnd();
+
+        do {
+            loopGuard.check();
+            lastPosition = getCursorPosition().position;
+            t.movementPositions.push(lastPosition);
+            t.selectionController.moveCursorToParagraphStart();
+        } while (lastPosition !== getCursorPosition().position);
+
+        r.shouldBe(t, "t.movementPositions", "[14, 11, 7, 0]");
+    }
+
     function expandToWordBoundaries_CollapsedInWord() {
         var doc = createOdtDocument("<text:p>one two three</text:p>"),
             p = doc.getElementsByTagNameNS(textns, "p")[0],
@@ -437,6 +486,10 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             extendCursorPastWord_IsWithinWord,
 
             moveCursorToDocumentEnd_Simple,
+            moveCursorToDocumentEnd_EndsBeforeAnnotation,
+
+            moveSelectionToParagraphEnd_OverAnnotation,
+            moveSelectionToParagraphStart_OverAnnotation,
 
             expandToWordBoundaries_CollapsedInWord,
             expandToWordBoundaries_CollasedAtWordStart,
