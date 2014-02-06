@@ -34,8 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf, NodeFilter*/
-runtime.loadClass("odf.Formatting");
-runtime.loadClass("odf.Namespaces");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

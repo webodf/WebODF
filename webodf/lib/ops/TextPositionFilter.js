@@ -38,8 +38,6 @@
 
 /*global Node, runtime, core, odf, ops*/
 
-runtime.loadClass("core.PositionFilter");
-runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor

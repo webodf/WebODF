@@ -38,13 +38,6 @@
 
 /*global core, ops, odf, gui, runtime*/
 
-runtime.loadClass("core.EventNotifier");
-runtime.loadClass("core.Utils");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("ops.OpAddStyle");
-runtime.loadClass("ops.OpApplyDirectStyling");
-runtime.loadClass("ops.OpSetParagraphStyle");
-runtime.loadClass("gui.StyleSummary");
 
 /**
  * @constructor

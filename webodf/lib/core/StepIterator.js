@@ -38,7 +38,6 @@
 
 /*global runtime, core*/
 
-runtime.loadClass("core.PositionFilter");
 
 /**
  * Creates a helper class for navigating by steps. Instances of this class are intended to be VERY

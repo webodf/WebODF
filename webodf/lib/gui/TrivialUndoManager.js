@@ -37,9 +37,6 @@
  */
 /*global gui,ops,core,runtime*/
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("gui.UndoManager");
-runtime.loadClass("gui.UndoStateRules");
 
 /**
  * @param {gui.UndoStateRules=} defaultRules

@@ -25,7 +25,6 @@
 
 /*global ops, runtime*/
 
-runtime.loadClass("ops.Member");
 
 /**
  * @constructor

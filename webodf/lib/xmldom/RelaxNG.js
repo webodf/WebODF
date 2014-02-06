@@ -49,7 +49,6 @@
  * implementation according to
  * http://www.thaiopensource.com/relaxng/derivative.html
  */
-runtime.loadClass("xmldom.RelaxNGParser");
 /**
  * @typedef {{
  *     type: string,

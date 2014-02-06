@@ -38,10 +38,6 @@
 
 /*global odf, runtime, xmldom, core, document*/
 
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("xmldom.XPath");
-runtime.loadClass("core.CSSUnits");
 
 
 /**

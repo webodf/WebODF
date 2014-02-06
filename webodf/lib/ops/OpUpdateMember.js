@@ -25,8 +25,6 @@
 
 /*global ops, xmldom, odf, runtime*/
 
-runtime.loadClass("ops.Member");
-runtime.loadClass("xmldom.XPath");
 
 /**
  * OpUpdateMember allows you to set and remove

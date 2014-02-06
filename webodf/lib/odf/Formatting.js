@@ -37,12 +37,6 @@
  */
 /*global Node, odf, runtime, console, core*/
 
-runtime.loadClass("core.Utils");
-runtime.loadClass("odf.ObjectNameGenerator");
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.OdfContainer");
-runtime.loadClass("odf.StyleInfo");
-runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor

@@ -25,12 +25,6 @@
 
 /*global runtime, core, gui, odf, ops, Node*/
 
-runtime.loadClass("core.EventNotifier");
-runtime.loadClass("core.PositionFilter");
-runtime.loadClass("ops.Session");
-runtime.loadClass("ops.OpAddAnnotation");
-runtime.loadClass("ops.OpRemoveAnnotation");
-runtime.loadClass("gui.SelectionMover");
 
 /**
  * @constructor

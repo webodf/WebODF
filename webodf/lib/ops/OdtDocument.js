@@ -38,16 +38,6 @@
 
 /*global Node, runtime, core, gui, ops, odf*/
 
-runtime.loadClass("core.EventNotifier");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("core.StepIterator");
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("gui.SelectionMover");
-runtime.loadClass("core.PositionFilterChain");
-runtime.loadClass("ops.StepsTranslator");
-runtime.loadClass("ops.TextPositionFilter");
-runtime.loadClass("ops.Member");
 
 /**
  * A document that keeps all data related to the mapped document.

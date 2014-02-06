@@ -38,9 +38,6 @@
 
 /*global runtime, ops, odf*/
 
-runtime.loadClass("ops.TrivialOperationRouter");
-runtime.loadClass("ops.OperationFactory");
-runtime.loadClass("ops.OdtDocument");
 
 /**
  * An editing session and what belongs to it.

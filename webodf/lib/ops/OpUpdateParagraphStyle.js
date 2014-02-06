@@ -38,7 +38,6 @@
 
 /*global runtime, odf, ops*/
 
-runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor

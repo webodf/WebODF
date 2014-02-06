@@ -25,9 +25,6 @@
 
 /*global Node, runtime, core, gui, ops, odf, xmldom*/
 
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("xmldom.LSSerializer");
-runtime.loadClass("ops.OperationTransformer");
 
 /**
  * @constructor

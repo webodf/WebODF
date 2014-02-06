@@ -44,10 +44,6 @@
 * Project home: http://www.webodf.org/
 */
 
-runtime.loadClass("core.RawInflate");
-runtime.loadClass("core.ByteArray");
-runtime.loadClass("core.ByteArrayWriter");
-runtime.loadClass("core.Base64");
 
 /**
  * @constructor

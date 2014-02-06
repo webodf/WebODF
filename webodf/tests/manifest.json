@@ -13,8 +13,7 @@
     ],
     "core.PositionIteratorTests": [
         "core.PositionIterator",
-        "core.UnitTester",
-        "xmldom.LSSerializer"
+        "core.UnitTester"
     ],
     "core.RuntimeTests": [
         "core.ByteArrayWriter",
@@ -38,8 +37,7 @@
         "odf.OdfCanvas",
         "ops.OdtCursor",
         "ops.OdtDocument",
-        "ops.Session",
-        "xmldom.LSSerializer"
+        "ops.Session"
     ],
     "gui.SelectionMoverTests": [
         "core.Cursor",
@@ -58,9 +56,7 @@
         "ops.Document",
         "ops.OpAddCursor",
         "ops.OpInsertText",
-        "ops.OpMoveCursor",
-        "ops.OpRemoveText",
-        "ops.OpSplitParagraph"
+        "ops.OpMoveCursor"
     ],
     "gui.UndoStateRulesTests": [
         "core.UnitTester",
@@ -115,7 +111,6 @@
     ],
     "ops.OdtDocumentTests": [
         "core.UnitTester",
-        "gui.SelectionMover",
         "odf.Namespaces",
         "odf.OdfCanvas",
         "ops.OdtCursor",
@@ -159,15 +154,12 @@
     ],
     "ops.TransformerTests": [
         "core.UnitTester",
-        "odf.Namespaces",
         "odf.OdfCanvas",
         "ops.OperationFactory",
-        "ops.OperationTransformer",
-        "xmldom.LSSerializer"
+        "ops.OperationTransformer"
     ],
     "xmldom.LSSerializerTests": [
         "core.UnitTester",
-        "odf.Namespaces",
         "xmldom.LSSerializer"
     ],
     "xmldom.XPathTests": [

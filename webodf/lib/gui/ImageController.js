@@ -37,8 +37,6 @@
 
 /*global runtime, gui, odf, ops */
 
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.ObjectNameGenerator");
 /**
  * @constructor
  * @param {!ops.Session} session

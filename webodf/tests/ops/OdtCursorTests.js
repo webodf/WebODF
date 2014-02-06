@@ -34,9 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global Node, runtime, core, gui, ops, odf, NodeFilter*/
-runtime.loadClass("odf.OdfCanvas");
-runtime.loadClass("ops.OdtCursor");
-runtime.loadClass("ops.OdtDocument");
 
 /**
  * @constructor

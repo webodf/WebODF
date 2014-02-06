@@ -34,11 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, gui, odf, ops, Node, NodeFilter, xmldom*/
-runtime.loadClass("xmldom.LSSerializer");
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("gui.SelectionMover");
-runtime.loadClass("ops.OdtDocument");
-runtime.loadClass("ops.OdtCursor");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf*/
-runtime.loadClass("odf.StyleInfo");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

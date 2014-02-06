@@ -35,11 +35,6 @@
  */
 /*global core, gui, ops, runtime, Node*/
 
-runtime.loadClass("core.Async");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.ScheduledTask");
-runtime.loadClass("gui.Avatar");
-runtime.loadClass("ops.OdtCursor");
 
 /**
  * Class that represents a caret in a document.

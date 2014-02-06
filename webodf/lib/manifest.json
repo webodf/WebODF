@@ -49,8 +49,6 @@
     ],
     "gui.AnnotationController": [
         "core.EventNotifier",
-        "core.PositionFilter",
-        "gui.SelectionMover",
         "odf.Namespaces",
         "ops.OdtCursor",
         "ops.OdtDocument",
@@ -217,7 +215,6 @@
         "ops.OdtCursor",
         "ops.OdtDocument",
         "ops.OpAddCursor",
-        "ops.OpRemoveCursor",
         "ops.Operation",
         "ops.Session"
     ],
@@ -233,7 +230,6 @@
         "ops.Session"
     ],
     "gui.ShadowCursor": [
-        "gui.SelectionMover",
         "ops.Document",
         "ops.OdtCursor"
     ],
@@ -292,7 +288,6 @@
         "core.DomUtils",
         "core.Utils",
         "odf.Namespaces",
-        "odf.ObjectNameGenerator",
         "odf.OdfContainer",
         "odf.OdfUtils",
         "odf.StyleInfo"
@@ -469,7 +464,6 @@
         "ops.Operation"
     ],
     "ops.OpRemoveMember": [
-        "ops.Member",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -498,7 +492,6 @@
     ],
     "ops.OpUpdateMember": [
         "odf.Namespaces",
-        "ops.Member",
         "ops.OdtDocument",
         "ops.Operation",
         "xmldom.XPath"
@@ -594,10 +587,8 @@
     "xmldom.LSSerializerFilter": [
     ],
     "xmldom.RelaxNG": [
-        "xmldom.RelaxNGParser"
     ],
     "xmldom.RelaxNG2": [
-        "xmldom.RelaxNGParser"
     ],
     "xmldom.RelaxNGParser": [
     ],

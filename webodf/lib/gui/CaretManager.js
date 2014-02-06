@@ -38,8 +38,6 @@
 
 /*global runtime, core, gui, ops*/
 
-runtime.loadClass("core.Async");
-runtime.loadClass("gui.Caret");
 
 /**
  * The caret manager is responsible for creating a caret as UI representation

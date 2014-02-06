@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global core, runtime, Uint8Array, ArrayBuffer*/
-runtime.loadClass("core.Base64");
 /**
  * @constructor
  * @param runner {UnitTestRunner}

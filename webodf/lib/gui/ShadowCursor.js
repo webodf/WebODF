@@ -35,7 +35,6 @@
  */
 /*global core, gui, ops, runtime*/
 
-runtime.loadClass("gui.SelectionMover");
 
 /**
  * @class

@@ -37,28 +37,6 @@
 
 /*global runtime, core, gui, Node, ops, odf */
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.Async");
-runtime.loadClass("core.ScheduledTask");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("odf.ObjectNameGenerator");
-runtime.loadClass("ops.OdtCursor");
-runtime.loadClass("ops.OpAddCursor");
-runtime.loadClass("ops.OpRemoveCursor");
-runtime.loadClass("gui.MimeDataExporter");
-runtime.loadClass("gui.Clipboard");
-runtime.loadClass("gui.DirectFormattingController");
-runtime.loadClass("gui.KeyboardHandler");
-runtime.loadClass("gui.HyperlinkClickHandler");
-runtime.loadClass("gui.HyperlinkController");
-runtime.loadClass("gui.ImageController");
-runtime.loadClass("gui.ImageSelector");
-runtime.loadClass("gui.SelectionController");
-runtime.loadClass("gui.TextController");
-runtime.loadClass("gui.AnnotationController");
-runtime.loadClass("gui.EventManager");
-runtime.loadClass("gui.PlainTextPasteboard");
-runtime.loadClass("gui.InputMethodEditor");
 
 /**
  * @constructor

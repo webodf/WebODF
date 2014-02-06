@@ -34,14 +34,6 @@
 
 /*global runtime, core, gui, odf, ops, Node, NodeFilter */
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.PositionFilterChain");
-runtime.loadClass("gui.SelectionMover");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("ops.OdtCursor");
-runtime.loadClass("ops.OpMoveCursor");
-runtime.loadClass("ops.Session");
-runtime.loadClass("ops.StepsTranslator");
 
 /**
  * @constructor

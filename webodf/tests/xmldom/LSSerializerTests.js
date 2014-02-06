@@ -34,8 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, xmldom, odf, XMLSerializer*/
-runtime.loadClass("xmldom.LSSerializer");
-runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor

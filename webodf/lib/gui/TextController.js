@@ -38,7 +38,6 @@
 
 /*global core, ops, gui, runtime*/
 
-runtime.loadClass("core.PositionFilter");
 
 /**
  * @constructor

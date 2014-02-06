@@ -35,12 +35,6 @@
  */
 /*global Node, NodeFilter, gui, odf, ops, runtime, core*/
 
-runtime.loadClass("core.Async");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.ScheduledTask");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("odf.OdfNodeFilter");
-runtime.loadClass("gui.SelectionMover");
 
 /**
  *  A GUI class that attaches to a cursor and renders it's selection

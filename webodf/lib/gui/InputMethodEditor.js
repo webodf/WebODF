@@ -37,12 +37,6 @@
 
 /*global runtime, gui, core, ops, Node*/
 
-runtime.loadClass("core.Async");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.EventNotifier");
-runtime.loadClass("core.ScheduledTask");
-runtime.loadClass("ops.OdtDocument");
-runtime.loadClass("ops.OdtCursor");
 
 (function() {
     "use strict";

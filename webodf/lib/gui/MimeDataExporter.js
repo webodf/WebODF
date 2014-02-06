@@ -25,8 +25,6 @@
 
 /*global gui, runtime, odf*/
 
-runtime.loadClass("odf.OdfNodeFilter");
-runtime.loadClass("odf.TextSerializer");
 
 /**
  * MimeDataExporter exports a passed range as several types

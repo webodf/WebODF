@@ -34,9 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global core, runtime, Node*/
-runtime.loadClass("core.PositionIterator");
-runtime.loadClass("core.PositionFilter");
-runtime.loadClass("core.StepIterator");
 
 /**
  * @constructor

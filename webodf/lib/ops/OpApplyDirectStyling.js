@@ -38,9 +38,6 @@
 
 /*global ops, runtime, gui, odf, Node, core*/
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("odf.TextStyleApplicator");
 
 /**
  * @constructor

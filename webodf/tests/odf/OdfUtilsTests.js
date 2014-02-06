@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf, NodeFilter*/
-runtime.loadClass("odf.OdfUtils");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

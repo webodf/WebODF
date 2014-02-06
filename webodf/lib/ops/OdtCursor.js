@@ -34,9 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global core, ops, gui, runtime*/
-runtime.loadClass("core.Cursor");
-runtime.loadClass("core.EventNotifier");
-runtime.loadClass("gui.SelectionMover");
 
 /**
  * @class

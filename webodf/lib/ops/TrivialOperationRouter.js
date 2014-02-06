@@ -37,7 +37,6 @@
  */
 /*global ops, runtime, core*/
 
-runtime.loadClass("core.EventNotifier");
 
 /*
  * route the operations.

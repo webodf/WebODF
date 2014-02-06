@@ -42,29 +42,6 @@
  * create specific operation instances.
  */
 
-runtime.loadClass("ops.OpAddMember");
-runtime.loadClass("ops.OpUpdateMember");
-runtime.loadClass("ops.OpRemoveMember");
-runtime.loadClass("ops.OpAddCursor");
-runtime.loadClass("ops.OpApplyDirectStyling");
-runtime.loadClass("ops.OpRemoveCursor");
-runtime.loadClass("ops.OpMoveCursor");
-runtime.loadClass("ops.OpSetBlob");
-runtime.loadClass("ops.OpRemoveBlob");
-runtime.loadClass("ops.OpInsertImage");
-runtime.loadClass("ops.OpInsertTable");
-runtime.loadClass("ops.OpInsertText");
-runtime.loadClass("ops.OpRemoveText");
-runtime.loadClass("ops.OpSplitParagraph");
-runtime.loadClass("ops.OpSetParagraphStyle");
-runtime.loadClass("ops.OpUpdateParagraphStyle");
-runtime.loadClass("ops.OpAddStyle");
-runtime.loadClass("ops.OpRemoveStyle");
-runtime.loadClass("ops.OpAddAnnotation");
-runtime.loadClass("ops.OpRemoveAnnotation");
-runtime.loadClass("ops.OpUpdateMetadata");
-runtime.loadClass("ops.OpApplyHyperlink");
-runtime.loadClass("ops.OpRemoveHyperlink");
 
 /**
  * @constructor

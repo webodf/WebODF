@@ -29,8 +29,6 @@
  * create specific operation instances.
  */
 
-runtime.loadClass("ops.OperationFactory");
-runtime.loadClass("ops.OperationTransformMatrix");
 
 /**
  * @constructor
