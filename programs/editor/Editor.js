@@ -409,6 +409,7 @@ define("webodf/editor/Editor", [
                 var editorPane, memberListPane,
                     inviteButton,
                     canvasElement = document.getElementById("canvas"),
+                    container = document.getElementById('container'),
                     memberListElement = document.getElementById('memberList'),
                     collabEditing = Boolean(server),
                     directParagraphStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
@@ -517,6 +518,30 @@ define("webodf/editor/Editor", [
                     pendingEditorReadyCallback = null;
                     pendingMemberId = null;
                 });
+
+                /**
+                 * Applies a CSS transformation to the toolbar
+                 * to ensure that if there is a body-scroll,
+                 * the toolbar remains visible at the top of
+                 * the screen.
+                 * The bodyscroll quirk has been observed on
+                 * iOS, generally when the keyboard appears.
+                 * But this workaround should function on
+                 * other platforms that exhibit this behaviour
+                 * as well.
+                 * @return {undefined}
+                 */
+                function translateToolbar() {
+                    var bar = document.getElementById('toolbar'),
+                        y = document.body.scrollTop;
+
+                    bar.style.WebkitTransformOrigin = "center top";
+                    bar.style.WebkitTransform = 'translateY(' + y + 'px)';
+                }
+
+                runtime.getWindow().addEventListener('scroll', translateToolbar);
+                runtime.getWindow().addEventListener('focusout', translateToolbar);
+                runtime.getWindow().addEventListener('touchmove', translateToolbar);
             }
 
             init();
