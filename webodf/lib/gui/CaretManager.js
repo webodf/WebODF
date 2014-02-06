@@ -186,7 +186,8 @@ gui.CaretManager = function CaretManager(sessionController) {
      */
     this.registerCursor = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
         var memberid = cursor.getMemberId(),
-            caret = new gui.Caret(cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect);
+            caret = new gui.Caret(cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect),
+            eventManager = sessionController.getEventManager();
 
         carets[memberid] = caret;
 
@@ -196,6 +197,8 @@ gui.CaretManager = function CaretManager(sessionController) {
 
             // wire up the cursor update to caret visibility update
             cursor.subscribe(ops.OdtCursor.signalCursorUpdated, scheduleCaretVisibilityCheck);
+            // Add event trap as an overlay element to the caret
+            caret.setOverlayElement(eventManager.getEventTrap());
         } else {
             cursor.subscribe(ops.OdtCursor.signalCursorUpdated, caret.handleUpdate);
         }

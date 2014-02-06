@@ -146,14 +146,14 @@
         this.unsubscribe = events.unsubscribe;
 
         /**
-         * Get the current canvas element. The current trivial undo manager replaces the root element
+         * Get the current sizer element. The current trivial undo manager replaces the root element
          * of the ODF container with a clone from a previous state. This results in the root element
          * being changed. As such, it can't be stored, and should be queried on each use.
          * @return {!Element}
          */
-        function getCanvasElement() {
+        function getSizerElement() {
             // TODO Remove when a proper undo manager arrives
-            return odtDocument.getOdfCanvas().getElement();
+            return odtDocument.getOdfCanvas().getSizer();
         }
 
         /**
@@ -199,7 +199,7 @@
                 doc = eventTrap.ownerDocument;
 
             flushEvent();
-            if (!domUtils.containsNode(getCanvasElement(), eventTrap)) {
+            if (!domUtils.containsNode(getSizerElement(), eventTrap)) {
                 // TODO Remove when a proper undo manager arrives
                 // The undo manager can replace the root element, discarding the original.
                 // The event trap node is still valid, and simply needs to be re-attached
@@ -207,7 +207,7 @@
 
                 // Don't worry about the local caret yet. The event trap will eventually be moved to
                 // a new valid local caret when it is registered upon cursor re-registration
-                getCanvasElement().appendChild(eventTrap);
+                getSizerElement().appendChild(eventTrap);
             }
 
             while (eventTrap.childNodes.length > 1) {
@@ -278,37 +278,22 @@
         /**
          * Handle a cursor registration event
          * @param {!ops.OdtCursor} cursor
+         * @return {undefined}
          */
         this.registerCursor = function (cursor) {
-            var cursorNode, hasFocus;
             if (cursor.getMemberId() === inputMemberId) {
-                hasFocus = eventManager.hasFocus();
                 localCursor = cursor;
-                cursorNode = localCursor.getNode();
-                cursorNode.insertBefore(eventTrap, cursorNode.firstChild);
-                if (hasFocus) {
-                    // Relocating the event trap will reset the window selection
-                    // Restore this again if the document previously had focus
-                    eventManager.focus();
-                }
             }
         };
 
         /**
          * Handle a cursor removal event
          * @param {!string} memberid Member id of the removed cursor
+         * @return {undefined}
          */
         this.removeCursor = function (memberid) {
-            var hasFocus;
             if (localCursor && memberid ===  inputMemberId) {
-                hasFocus = eventManager.hasFocus();
                 localCursor = null;
-                getCanvasElement().appendChild(eventTrap);
-                if (hasFocus) {
-                    // Relocating the event trap will reset the window selection
-                    // Restore this again if the document previously had focus
-                    eventManager.focus();
-                }
             }
         };
 
@@ -387,6 +372,7 @@
             cleanup = filters.map(getDestroy);
 
             // Negative tab index still allows focus, but removes accessibility by keyboard
+            getSizerElement().appendChild(eventTrap);
             eventTrap.setAttribute("tabindex", -1);
             processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
             cleanup.push(processUpdates.destroy);

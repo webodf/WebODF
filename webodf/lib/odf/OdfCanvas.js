@@ -1399,10 +1399,10 @@
         /**
          * This returns the element inside the canvas which can be zoomed with
          * CSS and which contains the ODF document and the annotation sidebar.
-         * @return {Element}
+         * @return {!HTMLElement}
          */
         this.getSizer = function () {
-            return sizer;
+            return /**@type{!HTMLElement}*/(sizer);
         };
 
         /** Allows / disallows annotations

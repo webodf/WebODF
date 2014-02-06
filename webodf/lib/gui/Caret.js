@@ -64,6 +64,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         avatar,
         /**@type{!Element}*/
         cursorNode,
+        /**@type{?Element}*/
+        overlayElement,
         domUtils = new core.DomUtils(),
         async = new core.Async(),
         /**@type{!core.ScheduledTask}*/
@@ -207,8 +209,11 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     function updateCaretHeightAndPosition() {
         var selectionRect = getSelectionRect(),
-            zoomLevel = cursor.getDocument().getCanvas().getZoomLevel(),
-            caretRect;
+            canvas = /**@type{!odf.OdfCanvas}*/(cursor.getDocument().getCanvas()),
+            zoomLevel = canvas.getZoomLevel(),
+            rootRect = domUtils.getBoundingClientRect(canvas.getSizer()),
+            caretRect,
+            caretStyle;
 
         if (selectionRect) {
             // Reset the top back to 0 so that the new client rect calculations are simple
@@ -233,6 +238,26 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // will fall back to the existing behaviour
             span.style.height = DEFAULT_CARET_HEIGHT;
             span.style.top = DEFAULT_CARET_TOP;
+        }
+
+        // Update the overlay element
+        if (overlayElement) {
+            caretStyle = runtime.getWindow().getComputedStyle(span, null);
+            caretRect = domUtils.getBoundingClientRect(span);
+            overlayElement.style.bottom = domUtils.adaptRangeDifferenceToZoomLevel(rootRect.bottom - caretRect.bottom, zoomLevel) + 'px';
+            overlayElement.style.left = domUtils.adaptRangeDifferenceToZoomLevel(caretRect.right - rootRect.left, zoomLevel) + 'px';
+            if (caretStyle.font) {
+                overlayElement.style.font = caretStyle.font;
+            } else {
+                // On IE, window.getComputedStyle(element).font returns "".
+                // Therefore we need to individually set the font properties.
+                overlayElement.style.fontStyle = caretStyle.fontStyle;
+                overlayElement.style.fontVariant = caretStyle.fontVariant;
+                overlayElement.style.fontWeight = caretStyle.fontWeight;
+                overlayElement.style.fontSize = caretStyle.fontSize;
+                overlayElement.style.lineHeight = caretStyle.lineHeight;
+                overlayElement.style.fontFamily = caretStyle.fontFamily;
+            }
         }
     }
 
@@ -474,6 +499,16 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     this.hideHandle = function () {
         avatar.hide();
+    };
+
+    /**
+     * @param {!Element} element
+     * @return {undefined}
+     */
+    this.setOverlayElement  = function (element) {
+        overlayElement = element;
+        shouldUpdateCaretSize = true;
+        redrawTask.trigger();
     };
 
     /**
