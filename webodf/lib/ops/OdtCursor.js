@@ -119,7 +119,7 @@ ops.OdtCursor = function OdtCursor(memberId, document) {
     };
 
     /**
-     * @return {!Object}
+     * @return {!gui.StepCounter}
      */
     this.getStepCounter = function () {
         return selectionMover.getStepCounter();

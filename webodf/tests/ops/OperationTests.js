@@ -373,18 +373,18 @@ ops.OperationTests = function OperationTests(runner) {
     }
 
     this.setUp = function () {
-        var testarea;
+        var testarea, properties;
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         t.odfcanvas = new odf.OdfCanvas(testarea);
         t.odfContainer = new odf.OdfContainer("", null);
         t.odfcanvas.setOdfContainer(t.odfContainer);
         t.odtDocument = new ops.OdtDocument(t.odfcanvas);
-        t.odtDocument.addMember(new ops.Member('Alice', {
-            color: "black",
-            fullName: "Alice",
-            imageUrl: ""
-        }));
+        properties = new ops.MemberProperties();
+        properties.color = "black";
+        properties.fullName = "Alice";
+        properties.imageUrl = "";
+        t.odtDocument.addMember(new ops.Member('Alice', properties));
     };
     this.tearDown = function () {
         t.odfcanvas.destroy(function () { return; });

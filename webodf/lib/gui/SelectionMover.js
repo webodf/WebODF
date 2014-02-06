@@ -38,6 +38,10 @@
 
 /*global Node, NodeFilter, runtime, core, gui, odf*/
 
+/**@typedef{{
+  countSteps:function(number,!core.PositionFilter):number
+}}*/
+gui.StepCounter;
 
 /**
  * This class modifies the selection in different ways.
@@ -586,7 +590,7 @@ gui.SelectionMover = function SelectionMover(cursor, rootNode) {
     }
 
     /**
-     * @return {!Object}
+     * @return {!gui.StepCounter}
      */
     this.getStepCounter = function () {
         return {
