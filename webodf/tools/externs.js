@@ -639,3 +639,7 @@ function TextEvent() { "use strict"; }
  * @type {!string}
  */
 TextEvent.prototype.data;
+/**
+ * @type {?HTMLScriptElement}
+ */
+HTMLDocument.prototype.currentScript;

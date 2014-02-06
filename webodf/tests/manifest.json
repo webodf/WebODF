@@ -1,178 +1,178 @@
 {
-    "core/Base64Tests.js": [
-        "core/Base64.js",
-        "core/UnitTester.js"
+    "core.Base64Tests": [
+        "core.Base64",
+        "core.UnitTester"
     ],
-    "core/CursorTests.js": [
-        "core/Cursor.js",
-        "core/UnitTester.js"
+    "core.CursorTests": [
+        "core.Cursor",
+        "core.UnitTester"
     ],
-    "core/DomUtilsTests.js": [
-        "core/DomUtils.js",
-        "core/UnitTester.js"
+    "core.DomUtilsTests": [
+        "core.DomUtils",
+        "core.UnitTester"
     ],
-    "core/PositionIteratorTests.js": [
-        "core/PositionIterator.js",
-        "core/UnitTester.js",
-        "xmldom/LSSerializer.js"
+    "core.PositionIteratorTests": [
+        "core.PositionIterator",
+        "core.UnitTester",
+        "xmldom.LSSerializer"
     ],
-    "core/RuntimeTests.js": [
-        "core/ByteArrayWriter.js",
-        "core/UnitTester.js"
+    "core.RuntimeTests": [
+        "core.ByteArrayWriter",
+        "core.UnitTester"
     ],
-    "core/StepIteratorTests.js": [
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "core/StepIterator.js",
-        "core/UnitTester.js"
+    "core.StepIteratorTests": [
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "core.StepIterator",
+        "core.UnitTester"
     ],
-    "core/ZipTests.js": [
-        "core/UnitTester.js",
-        "core/Zip.js"
+    "core.ZipTests": [
+        "core.UnitTester",
+        "core.Zip"
     ],
-    "gui/SelectionControllerTests.js": [
-        "core/LoopWatchDog.js",
-        "core/UnitTester.js",
-        "gui/SelectionController.js",
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/Session.js",
-        "xmldom/LSSerializer.js"
+    "gui.SelectionControllerTests": [
+        "core.LoopWatchDog",
+        "core.UnitTester",
+        "gui.SelectionController",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Session",
+        "xmldom.LSSerializer"
     ],
-    "gui/SelectionMoverTests.js": [
-        "core/Cursor.js",
-        "core/PositionFilter.js",
-        "core/UnitTester.js",
-        "gui/SelectionMover.js"
+    "gui.SelectionMoverTests": [
+        "core.Cursor",
+        "core.PositionFilter",
+        "core.UnitTester",
+        "gui.SelectionMover"
     ],
-    "gui/StyleSummaryTests.js": [
-        "core/UnitTester.js",
-        "gui/StyleSummary.js",
-        "odf/Formatting.js"
+    "gui.StyleSummaryTests": [
+        "core.UnitTester",
+        "gui.StyleSummary",
+        "odf.Formatting"
     ],
-    "gui/TrivialUndoManagerTests.js": [
-        "core/UnitTester.js",
-        "gui/TrivialUndoManager.js",
-        "ops/Document.js",
-        "ops/OpAddCursor.js",
-        "ops/OpInsertText.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSplitParagraph.js"
+    "gui.TrivialUndoManagerTests": [
+        "core.UnitTester",
+        "gui.TrivialUndoManager",
+        "ops.Document",
+        "ops.OpAddCursor",
+        "ops.OpInsertText",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveText",
+        "ops.OpSplitParagraph"
     ],
-    "gui/UndoStateRulesTests.js": [
-        "core/UnitTester.js",
-        "gui/UndoStateRules.js",
-        "ops/OpApplyDirectStyling.js",
-        "ops/OpInsertText.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSplitParagraph.js",
-        "ops/Operation.js"
+    "gui.UndoStateRulesTests": [
+        "core.UnitTester",
+        "gui.UndoStateRules",
+        "ops.OpApplyDirectStyling",
+        "ops.OpInsertText",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveText",
+        "ops.OpSplitParagraph",
+        "ops.Operation"
     ],
-    "odf/FormattingTests.js": [
-        "core/UnitTester.js",
-        "odf/Formatting.js",
-        "odf/Namespaces.js"
+    "odf.FormattingTests": [
+        "core.UnitTester",
+        "odf.Formatting",
+        "odf.Namespaces"
     ],
-    "odf/ObjectNameGeneratorTests.js": [
-        "core/UnitTester.js",
-        "odf/ObjectNameGenerator.js",
-        "odf/OdfContainer.js"
+    "odf.ObjectNameGeneratorTests": [
+        "core.UnitTester",
+        "odf.ObjectNameGenerator",
+        "odf.OdfContainer"
     ],
-    "odf/OdfContainerTests.js": [
-        "core/UnitTester.js",
-        "core/Zip.js",
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js",
-        "xmldom/LSSerializer.js"
+    "odf.OdfContainerTests": [
+        "core.UnitTester",
+        "core.Zip",
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "xmldom.LSSerializer"
     ],
-    "odf/OdfUtilsTests.js": [
-        "core/UnitTester.js",
-        "odf/OdfUtils.js"
+    "odf.OdfUtilsTests": [
+        "core.UnitTester",
+        "odf.OdfUtils"
     ],
-    "odf/StyleInfoTests.js": [
-        "core/UnitTester.js",
-        "odf/StyleInfo.js"
+    "odf.StyleInfoTests": [
+        "core.UnitTester",
+        "odf.StyleInfo"
     ],
-    "odf/TextStyleApplicatorTests.js": [
-        "core/DomUtils.js",
-        "core/UnitTester.js",
-        "odf/Formatting.js",
-        "odf/ObjectNameGenerator.js",
-        "odf/OdfContainer.js",
-        "odf/OdfUtils.js",
-        "odf/TextStyleApplicator.js"
+    "odf.TextStyleApplicatorTests": [
+        "core.DomUtils",
+        "core.UnitTester",
+        "odf.Formatting",
+        "odf.ObjectNameGenerator",
+        "odf.OdfContainer",
+        "odf.OdfUtils",
+        "odf.TextStyleApplicator"
     ],
-    "ops/OdtCursorTests.js": [
-        "core/UnitTester.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js"
+    "ops.OdtCursorTests": [
+        "core.UnitTester",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "ops.OdtCursor",
+        "ops.OdtDocument"
     ],
-    "ops/OdtDocumentTests.js": [
-        "core/UnitTester.js",
-        "gui/SelectionMover.js",
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "xmldom/LSSerializer.js"
+    "ops.OdtDocumentTests": [
+        "core.UnitTester",
+        "gui.SelectionMover",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "xmldom.LSSerializer"
     ],
-    "ops/OperationTests.js": [
-        "core/UnitTester.js",
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "ops/Member.js",
-        "ops/OdtDocument.js",
-        "ops/OperationFactory.js",
-        "xmldom/LSSerializer.js"
+    "ops.OperationTests": [
+        "core.UnitTester",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "ops.Member",
+        "ops.OdtDocument",
+        "ops.OperationFactory",
+        "xmldom.LSSerializer"
     ],
-    "ops/SessionTests.js": [
-        "core/UnitTester.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "ops/Session.js"
+    "ops.SessionTests": [
+        "core.UnitTester",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "ops.Session"
     ],
-    "ops/StepsTranslatorTests.js": [
-        "core/DomUtils.js",
-        "core/PositionFilter.js",
-        "core/UnitTester.js",
-        "gui/SelectionMover.js",
-        "odf/Namespaces.js",
-        "ops/StepsTranslator.js",
-        "ops/TextPositionFilter.js"
+    "ops.StepsTranslatorTests": [
+        "core.DomUtils",
+        "core.PositionFilter",
+        "core.UnitTester",
+        "gui.SelectionMover",
+        "odf.Namespaces",
+        "ops.StepsTranslator",
+        "ops.TextPositionFilter"
     ],
-    "ops/TransformationTests.js": [
-        "core/UnitTester.js",
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js",
-        "ops/OdtDocument.js",
-        "ops/OperationFactory.js",
-        "ops/OperationTransformer.js",
-        "xmldom/LSSerializer.js"
+    "ops.TransformationTests": [
+        "core.UnitTester",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "ops.OdtDocument",
+        "ops.OperationFactory",
+        "ops.OperationTransformer",
+        "xmldom.LSSerializer"
     ],
-    "ops/TransformerTests.js": [
-        "core/UnitTester.js",
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js",
-        "ops/OperationFactory.js",
-        "ops/OperationTransformer.js",
-        "xmldom/LSSerializer.js"
+    "ops.TransformerTests": [
+        "core.UnitTester",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "ops.OperationFactory",
+        "ops.OperationTransformer",
+        "xmldom.LSSerializer"
     ],
-    "xmldom/LSSerializerTests.js": [
-        "core/UnitTester.js",
-        "odf/Namespaces.js",
-        "xmldom/LSSerializer.js"
+    "xmldom.LSSerializerTests": [
+        "core.UnitTester",
+        "odf.Namespaces",
+        "xmldom.LSSerializer"
     ],
-    "xmldom/XPathTests.js": [
-        "core/UnitTester.js",
-        "odf/Namespaces.js",
-        "xmldom/XPath.js"
+    "xmldom.XPathTests": [
+        "core.UnitTester",
+        "odf.Namespaces",
+        "xmldom.XPath"
     ]
 }

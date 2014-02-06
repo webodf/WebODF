@@ -438,9 +438,9 @@ function Main(cmakeListPath) {
             j;
         for (j = 0; j < list.length; j += 1) {
             a = manifest[list[j]];
-            out += '    "' + deNormalizePath(list[j]) + '": [\n';
+            out += '    "' + className(list[j]) + '": [\n';
             for (i = 0; i < a.length; i += 1) {
-                out += '        "' + deNormalizePath(a[i]);
+                out += '        "' + className(a[i]);
                 out += i === a.length - 1 ? '"\n' : '",\n';
             }
             out += j === list.length - 1 ? '    ]\n' : '    ],\n';
