@@ -476,6 +476,7 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],

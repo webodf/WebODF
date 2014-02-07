@@ -101,6 +101,7 @@ function Main(cmakeListPath) {
             "ops/OdtCursor.js",
             "ops/OdtDocument.js",
             "ops/OpInsertText.js",
+            "ops/OpRemoveText.js",
             "ops/Operation.js",
             "ops/Server.js",
             "ops/StepsTranslator.js",
