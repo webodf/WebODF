@@ -124,6 +124,7 @@ function Main(cmakeListPath) {
             "ops/OpUpdateMetadata.js",
             "ops/OpUpdateParagraphStyle.js",
             "ops/Operation.js",
+            "ops/OperationFactory.js",
             "ops/Server.js",
             "ops/StepsTranslator.js",
             "ops/TextPositionFilter.js",

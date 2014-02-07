@@ -48,68 +48,59 @@
  */
 ops.OperationFactory = function OperationFactory() {
     "use strict";
-    var specs;
+    var /**@type{!Object.<string,function(new:ops.Operation)>}*/
+        specs;
 
     /**
      * Registers an operation constructor with this operation factory
      * @param {!string} specName
-     * @param {!function(Object) : !ops.Operation} specConstructor
+     * @param {!function(new:ops.Operation)} specConstructor
      */
-    this.register = function(specName, specConstructor) {
+    this.register = function (specName, specConstructor) {
         specs[specName] = specConstructor;
     };
 
     /**
      * Create an instance of an operation based on the provided spec
-     * @param {Object} spec
-     * @return {ops.Operation|null}
+     * @param {!{optype:string}} spec
+     * @return {ops.Operation}
      */
     this.create = function (spec) {
-        var op = null,
-            specConstructor = specs[spec.optype];
-        if (specConstructor) {
-            op = specConstructor(spec);
+        var /**@type{ops.Operation}*/
+            op = null,
+            Constructor = specs[spec.optype];
+        if (Constructor) {
+            op = new Constructor();
             op.init(spec);
         }
         return op;
     };
 
-    /**
-     * Returns a constructor function for the provided type
-     * @param OperationType Operation type
-     * @return {Function}
-     */
-    function constructor(OperationType) {
-        return function() {
-            return new OperationType();
-        };
-    }
-
     function init() {
         specs = {
-            AddMember: constructor(ops.OpAddMember),
-            UpdateMember: constructor(ops.OpUpdateMember),
-            RemoveMember: constructor(ops.OpRemoveMember),
-            AddCursor : constructor(ops.OpAddCursor),
-            ApplyDirectStyling : constructor(ops.OpApplyDirectStyling),
-            SetBlob : constructor(ops.OpSetBlob),
-            RemoveBlob : constructor(ops.OpRemoveBlob),
-            InsertImage : constructor(ops.OpInsertImage),
-            InsertTable : constructor(ops.OpInsertTable),
-            InsertText : constructor(ops.OpInsertText),
-            RemoveText : constructor(ops.OpRemoveText),
-            SplitParagraph : constructor(ops.OpSplitParagraph),
-            SetParagraphStyle : constructor(ops.OpSetParagraphStyle),
-            UpdateParagraphStyle : constructor(ops.OpUpdateParagraphStyle),
-            AddStyle : constructor(ops.OpAddStyle),
-            RemoveStyle : constructor(ops.OpRemoveStyle),
-            MoveCursor : constructor(ops.OpMoveCursor),
-            RemoveCursor : constructor(ops.OpRemoveCursor),
-            AddAnnotation : constructor(ops.OpAddAnnotation),
-            RemoveAnnotation : constructor(ops.OpRemoveAnnotation),
-            UpdateMetadata: constructor(ops.OpUpdateMetadata),
-            ApplyHyperlink: constructor(ops.OpApplyHyperlink),
-            RemoveHyperlink: constructor(ops.OpRemoveHyperlink)
+            AddMember: ops.OpAddMember,
+            UpdateMember: ops.OpUpdateMember,
+            RemoveMember: ops.OpRemoveMember,
+            AddCursor: ops.OpAddCursor,
+            ApplyDirectStyling: ops.OpApplyDirectStyling,
+            SetBlob: ops.OpSetBlob,
+            RemoveBlob: ops.OpRemoveBlob,
+            InsertImage: ops.OpInsertImage,
+            InsertTable: ops.OpInsertTable,
+            InsertText: ops.OpInsertText,
+            RemoveText: ops.OpRemoveText,
+            SplitParagraph: ops.OpSplitParagraph,
+            SetParagraphStyle: ops.OpSetParagraphStyle,
+            UpdateParagraphStyle: ops.OpUpdateParagraphStyle,
+            AddStyle: ops.OpAddStyle,
+            RemoveStyle: ops.OpRemoveStyle,
+            MoveCursor: ops.OpMoveCursor,
+            RemoveCursor: ops.OpRemoveCursor,
+            AddAnnotation: ops.OpAddAnnotation,
+            RemoveAnnotation: ops.OpRemoveAnnotation,
+            UpdateMetadata: ops.OpUpdateMetadata,
+            ApplyHyperlink: ops.OpApplyHyperlink,
+            RemoveHyperlink: ops.OpRemoveHyperlink
         };
     }
 
