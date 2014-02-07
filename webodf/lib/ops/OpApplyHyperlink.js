@@ -34,8 +34,6 @@
  */
 
 /*global ops, odf, core, runtime, Node */
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("odf.OdfUtils");
 /**
  * @constructor
  * @implements ops.Operation

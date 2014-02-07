@@ -38,8 +38,6 @@
 
 /*global core, gui, runtime*/
 
-runtime.loadClass("ops.EditInfo");
-runtime.loadClass("gui.EditInfoHandle");
 
 /**
  * @constructor

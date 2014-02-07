@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, odf*/
-runtime.loadClass("odf.OdfCanvas");
 /**
  * @constructor
  */

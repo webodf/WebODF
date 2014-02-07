@@ -38,8 +38,6 @@
 
 /*global runtime, core, odf, xmldom*/
 
-runtime.loadClass("odf.OdfContainer");
-runtime.loadClass("xmldom.LSSerializer");
 
 /**
  * @constructor

@@ -35,7 +35,6 @@
  */
 /*global runtime, gui, odf */
 
-runtime.loadClass("odf.Namespaces");
 
 /**
  * @class

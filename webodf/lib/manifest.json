@@ -1,606 +1,597 @@
 {
-    "core/Async.js": [
-    ],
-    "core/Base64.js": [
+    "core.Async": [
     ],
-    "core/ByteArray.js": [
+    "core.Base64": [
     ],
-    "core/ByteArrayWriter.js": [
+    "core.ByteArray": [
     ],
-    "core/CSSUnits.js": [
+    "core.ByteArrayWriter": [
     ],
-    "core/Cursor.js": [
-        "core/DomUtils.js"
+    "core.CSSUnits": [
     ],
-    "core/DomUtils.js": [
+    "core.Cursor": [
+        "core.DomUtils"
     ],
-    "core/EventNotifier.js": [
+    "core.DomUtils": [
     ],
-    "core/LoopWatchDog.js": [
+    "core.EventNotifier": [
     ],
-    "core/PositionFilter.js": [
-        "core/PositionIterator.js"
-    ],
-    "core/PositionFilterChain.js": [
-        "core/PositionFilter.js",
-        "core/PositionIterator.js"
-    ],
-    "core/PositionIterator.js": [
-    ],
-    "core/RawDeflate.js": [
-    ],
-    "core/RawInflate.js": [
-    ],
-    "core/ScheduledTask.js": [
-    ],
-    "core/StepIterator.js": [
-        "core/PositionFilter.js",
-        "core/PositionIterator.js"
-    ],
-    "core/UnitTester.js": [
-    ],
-    "core/Utils.js": [
-    ],
-    "core/Zip.js": [
-        "core/Base64.js",
-        "core/ByteArray.js",
-        "core/ByteArrayWriter.js",
-        "core/RawInflate.js"
-    ],
-    "gui/AnnotationController.js": [
-        "core/EventNotifier.js",
-        "core/PositionFilter.js",
-        "gui/SelectionMover.js",
-        "odf/Namespaces.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/OpAddAnnotation.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpRemoveAnnotation.js",
-        "ops/Session.js"
-    ],
-    "gui/AnnotationViewManager.js": [
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js",
-        "odf/OdfUtils.js"
-    ],
-    "gui/Avatar.js": [
-    ],
-    "gui/Caret.js": [
-        "core/Async.js",
-        "core/DomUtils.js",
-        "core/ScheduledTask.js",
-        "gui/Avatar.js",
-        "ops/OdtCursor.js"
-    ],
-    "gui/CaretManager.js": [
-        "core/Async.js",
-        "gui/Caret.js",
-        "gui/SessionController.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js"
-    ],
-    "gui/Clipboard.js": [
-        "gui/MimeDataExporter.js"
-    ],
-    "gui/DirectFormattingController.js": [
-        "core/EventNotifier.js",
-        "core/PositionFilter.js",
-        "core/PositionFilterChain.js",
-        "core/Utils.js",
-        "gui/SelectionMover.js",
-        "gui/StyleSummary.js",
-        "odf/Namespaces.js",
-        "odf/ObjectNameGenerator.js",
-        "odf/OdfUtils.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/OpAddStyle.js",
-        "ops/OpApplyDirectStyling.js",
-        "ops/OpSetParagraphStyle.js",
-        "ops/Operation.js",
-        "ops/Session.js",
-        "ops/StepsTranslator.js"
-    ],
-    "gui/EditInfoHandle.js": [
-    ],
-    "gui/EditInfoMarker.js": [
-        "gui/EditInfoHandle.js",
-        "ops/EditInfo.js"
-    ],
-    "gui/EventManager.js": [
-        "ops/OdtDocument.js"
-    ],
-    "gui/HyperlinkClickHandler.js": [
-        "odf/Namespaces.js",
-        "odf/OdfUtils.js",
-        "xmldom/XPath.js"
-    ],
-    "gui/HyperlinkController.js": [
-        "gui/SelectionMover.js",
-        "odf/OdfUtils.js",
-        "ops/OpApplyHyperlink.js",
-        "ops/OpInsertText.js",
-        "ops/OpRemoveHyperlink.js",
-        "ops/Session.js"
-    ],
-    "gui/ImageController.js": [
-        "odf/Namespaces.js",
-        "odf/ObjectNameGenerator.js",
-        "ops/OpAddStyle.js",
-        "ops/OpInsertImage.js",
-        "ops/OpSetBlob.js",
-        "ops/Operation.js",
-        "ops/Session.js"
-    ],
-    "gui/ImageSelector.js": [
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js"
-    ],
-    "gui/InputMethodEditor.js": [
-        "core/Async.js",
-        "core/DomUtils.js",
-        "core/EventNotifier.js",
-        "core/ScheduledTask.js",
-        "gui/EventManager.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js"
-    ],
-    "gui/KeyboardHandler.js": [
-    ],
-    "gui/MimeDataExporter.js": [
-        "odf/OdfNodeFilter.js",
-        "odf/TextSerializer.js"
-    ],
-    "gui/PlainTextPasteboard.js": [
-        "ops/OdtDocument.js",
-        "ops/OpInsertText.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSplitParagraph.js",
-        "ops/Operation.js"
-    ],
-    "gui/SelectionController.js": [
-        "core/DomUtils.js",
-        "core/PositionFilter.js",
-        "core/PositionFilterChain.js",
-        "core/PositionIterator.js",
-        "core/StepIterator.js",
-        "gui/SelectionMover.js",
-        "odf/OdfUtils.js",
-        "ops/OdtCursor.js",
-        "ops/OpMoveCursor.js",
-        "ops/Operation.js",
-        "ops/Session.js",
-        "ops/StepsTranslator.js"
-    ],
-    "gui/SelectionMover.js": [
-        "core/Cursor.js",
-        "core/DomUtils.js",
-        "core/LoopWatchDog.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "odf/OdfUtils.js"
-    ],
-    "gui/SelectionView.js": [
-        "gui/ShadowCursor.js",
-        "ops/OdtCursor.js"
-    ],
-    "gui/SelectionViewManager.js": [
-        "gui/SelectionView.js",
-        "gui/ShadowCursor.js",
-        "ops/OdtCursor.js"
-    ],
-    "gui/SessionController.js": [
-        "core/Async.js",
-        "core/DomUtils.js",
-        "core/PositionFilter.js",
-        "core/ScheduledTask.js",
-        "gui/AnnotationController.js",
-        "gui/Clipboard.js",
-        "gui/DirectFormattingController.js",
-        "gui/EventManager.js",
-        "gui/HyperlinkClickHandler.js",
-        "gui/HyperlinkController.js",
-        "gui/ImageController.js",
-        "gui/ImageSelector.js",
-        "gui/InputMethodEditor.js",
-        "gui/KeyboardHandler.js",
-        "gui/MimeDataExporter.js",
-        "gui/PlainTextPasteboard.js",
-        "gui/SelectionController.js",
-        "gui/SelectionMover.js",
-        "gui/TextController.js",
-        "gui/UndoManager.js",
-        "odf/Namespaces.js",
-        "odf/ObjectNameGenerator.js",
-        "odf/OdfUtils.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/OpAddCursor.js",
-        "ops/OpRemoveCursor.js",
-        "ops/Operation.js",
-        "ops/Session.js"
-    ],
-    "gui/SessionView.js": [
-        "gui/Caret.js",
-        "gui/CaretManager.js",
-        "gui/EditInfoMarker.js",
-        "gui/ShadowCursor.js",
-        "ops/EditInfo.js",
-        "ops/Member.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/Session.js"
-    ],
-    "gui/ShadowCursor.js": [
-        "gui/SelectionMover.js",
-        "ops/Document.js",
-        "ops/OdtCursor.js"
-    ],
-    "gui/StyleSummary.js": [
-    ],
-    "gui/SvgSelectionView.js": [
-        "core/Async.js",
-        "core/DomUtils.js",
-        "core/ScheduledTask.js",
-        "gui/SelectionMover.js",
-        "gui/SelectionView.js",
-        "gui/ShadowCursor.js",
-        "odf/OdfNodeFilter.js",
-        "odf/OdfUtils.js",
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js"
-    ],
-    "gui/TextController.js": [
-        "core/PositionFilter.js",
-        "core/PositionFilterChain.js",
-        "gui/SelectionMover.js",
-        "odf/Namespaces.js",
-        "ops/OpInsertText.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSetParagraphStyle.js",
-        "ops/OpSplitParagraph.js",
-        "ops/Operation.js",
-        "ops/Session.js"
-    ],
-    "gui/TrivialUndoManager.js": [
-        "core/DomUtils.js",
-        "core/EventNotifier.js",
-        "gui/UndoManager.js",
-        "gui/UndoStateRules.js",
-        "ops/Document.js",
-        "ops/Operation.js"
-    ],
-    "gui/UndoManager.js": [
-        "ops/Document.js",
-        "ops/Operation.js"
-    ],
-    "gui/UndoStateRules.js": [
-        "ops/Operation.js"
-    ],
-    "odf/CommandLineTools.js": [
-        "odf/OdfCanvas.js",
-        "odf/OdfContainer.js"
-    ],
-    "odf/FontLoader.js": [
-        "core/Base64.js",
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js",
-        "xmldom/XPath.js"
-    ],
-    "odf/Formatting.js": [
-        "core/DomUtils.js",
-        "core/Utils.js",
-        "odf/Namespaces.js",
-        "odf/ObjectNameGenerator.js",
-        "odf/OdfContainer.js",
-        "odf/OdfUtils.js",
-        "odf/StyleInfo.js"
-    ],
-    "odf/Namespaces.js": [
-    ],
-    "odf/ObjectNameGenerator.js": [
-        "core/DomUtils.js",
-        "core/Utils.js",
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js"
-    ],
-    "odf/OdfCanvas.js": [
-        "core/Async.js",
-        "core/DomUtils.js",
-        "core/ScheduledTask.js",
-        "gui/AnnotationViewManager.js",
-        "odf/FontLoader.js",
-        "odf/Formatting.js",
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js",
-        "odf/OdfUtils.js",
-        "odf/Style2CSS.js",
-        "ops/Canvas.js",
-        "xmldom/XPath.js"
-    ],
-    "odf/OdfContainer.js": [
-        "core/Base64.js",
-        "core/DomUtils.js",
-        "core/Zip.js",
-        "odf/Namespaces.js",
-        "odf/OdfNodeFilter.js",
-        "odf/StyleInfo.js",
-        "xmldom/LSSerializer.js",
-        "xmldom/LSSerializerFilter.js"
-    ],
-    "odf/OdfNodeFilter.js": [
-        "xmldom/LSSerializerFilter.js"
-    ],
-    "odf/OdfUtils.js": [
-        "core/DomUtils.js",
-        "odf/Namespaces.js"
-    ],
-    "odf/Style2CSS.js": [
-        "core/CSSUnits.js",
-        "odf/Namespaces.js",
-        "odf/OdfUtils.js",
-        "xmldom/XPath.js"
-    ],
-    "odf/StyleInfo.js": [
-        "odf/Namespaces.js",
-        "xmldom/XPath.js"
-    ],
-    "odf/TextSerializer.js": [
-        "odf/OdfUtils.js",
-        "xmldom/LSSerializerFilter.js"
-    ],
-    "odf/TextStyleApplicator.js": [
-        "core/DomUtils.js",
-        "core/LoopWatchDog.js",
-        "odf/Formatting.js",
-        "odf/Namespaces.js",
-        "odf/ObjectNameGenerator.js"
-    ],
-    "ops/Canvas.js": [
-    ],
-    "ops/Document.js": [
-        "ops/Canvas.js"
-    ],
-    "ops/EditInfo.js": [
-        "ops/OdtDocument.js"
-    ],
-    "ops/Member.js": [
-    ],
-    "ops/OdtCursor.js": [
-        "core/Cursor.js",
-        "core/EventNotifier.js",
-        "gui/SelectionMover.js",
-        "ops/Document.js"
-    ],
-    "ops/OdtDocument.js": [
-        "core/DomUtils.js",
-        "core/EventNotifier.js",
-        "core/PositionFilter.js",
-        "core/PositionFilterChain.js",
-        "core/PositionIterator.js",
-        "core/StepIterator.js",
-        "gui/SelectionMover.js",
-        "odf/Formatting.js",
-        "odf/Namespaces.js",
-        "odf/OdfCanvas.js",
-        "odf/OdfUtils.js",
-        "ops/Canvas.js",
-        "ops/Document.js",
-        "ops/Member.js",
-        "ops/OdtCursor.js",
-        "ops/Operation.js",
-        "ops/StepsTranslator.js",
-        "ops/TextPositionFilter.js"
-    ],
-    "ops/OpAddAnnotation.js": [
-        "core/DomUtils.js",
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpAddCursor.js": [
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpAddMember.js": [
-        "ops/Member.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpAddStyle.js": [
-        "odf/Namespaces.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpApplyDirectStyling.js": [
-        "core/DomUtils.js",
-        "odf/ObjectNameGenerator.js",
-        "odf/OdfContainer.js",
-        "odf/OdfUtils.js",
-        "odf/TextStyleApplicator.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpApplyHyperlink.js": [
-        "core/DomUtils.js",
-        "odf/Namespaces.js",
-        "odf/OdfUtils.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpInsertImage.js": [
-        "odf/Namespaces.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpInsertTable.js": [
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpInsertText.js": [
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpMoveCursor.js": [
-        "ops/OdtCursor.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveAnnotation.js": [
-        "core/DomUtils.js",
-        "odf/Namespaces.js",
-        "odf/OdfContainer.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveBlob.js": [
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveCursor.js": [
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveHyperlink.js": [
-        "core/DomUtils.js",
-        "odf/OdfUtils.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveMember.js": [
-        "ops/Member.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveStyle.js": [
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpRemoveText.js": [
-        "core/DomUtils.js",
-        "odf/Namespaces.js",
-        "odf/OdfUtils.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpSetBlob.js": [
-        "ops/Operation.js"
-    ],
-    "ops/OpSetParagraphStyle.js": [
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpSplitParagraph.js": [
-        "odf/OdfUtils.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/OpUpdateMember.js": [
-        "odf/Namespaces.js",
-        "ops/Member.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js",
-        "xmldom/XPath.js"
-    ],
-    "ops/OpUpdateMetadata.js": [
-        "ops/Operation.js"
-    ],
-    "ops/OpUpdateParagraphStyle.js": [
-        "odf/Namespaces.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js"
-    ],
-    "ops/Operation.js": [
-        "ops/Document.js"
-    ],
-    "ops/OperationFactory.js": [
-        "ops/OpAddAnnotation.js",
-        "ops/OpAddCursor.js",
-        "ops/OpAddMember.js",
-        "ops/OpAddStyle.js",
-        "ops/OpApplyDirectStyling.js",
-        "ops/OpApplyHyperlink.js",
-        "ops/OpInsertImage.js",
-        "ops/OpInsertTable.js",
-        "ops/OpInsertText.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpRemoveAnnotation.js",
-        "ops/OpRemoveBlob.js",
-        "ops/OpRemoveCursor.js",
-        "ops/OpRemoveHyperlink.js",
-        "ops/OpRemoveMember.js",
-        "ops/OpRemoveStyle.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSetBlob.js",
-        "ops/OpSetParagraphStyle.js",
-        "ops/OpSplitParagraph.js",
-        "ops/OpUpdateMember.js",
-        "ops/OpUpdateMetadata.js",
-        "ops/OpUpdateParagraphStyle.js",
-        "ops/Operation.js"
-    ],
-    "ops/OperationRouter.js": [
-        "ops/Operation.js",
-        "ops/OperationFactory.js"
-    ],
-    "ops/OperationTransformMatrix.js": [
-        "ops/OpAddStyle.js",
-        "ops/OpApplyDirectStyling.js",
-        "ops/OpInsertText.js",
-        "ops/OpMoveCursor.js",
-        "ops/OpRemoveCursor.js",
-        "ops/OpRemoveStyle.js",
-        "ops/OpRemoveText.js",
-        "ops/OpSetParagraphStyle.js",
-        "ops/OpSplitParagraph.js",
-        "ops/OpUpdateParagraphStyle.js"
-    ],
-    "ops/OperationTransformer.js": [
-        "ops/Operation.js",
-        "ops/OperationFactory.js",
-        "ops/OperationTransformMatrix.js"
-    ],
-    "ops/Server.js": [
-    ],
-    "ops/Session.js": [
-        "odf/OdfCanvas.js",
-        "ops/OdtDocument.js",
-        "ops/Operation.js",
-        "ops/OperationFactory.js",
-        "ops/OperationRouter.js",
-        "ops/TrivialOperationRouter.js"
-    ],
-    "ops/StepsTranslator.js": [
-        "core/DomUtils.js",
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "odf/OdfUtils.js"
-    ],
-    "ops/TextPositionFilter.js": [
-        "core/PositionFilter.js",
-        "core/PositionIterator.js",
-        "odf/OdfUtils.js"
-    ],
-    "ops/TrivialOperationRouter.js": [
-        "core/EventNotifier.js",
-        "ops/Operation.js",
-        "ops/OperationFactory.js",
-        "ops/OperationRouter.js"
-    ],
-    "xmldom/LSSerializer.js": [
-        "xmldom/LSSerializerFilter.js"
-    ],
-    "xmldom/LSSerializerFilter.js": [
-    ],
-    "xmldom/RelaxNG.js": [
-        "xmldom/RelaxNGParser.js"
-    ],
-    "xmldom/RelaxNG2.js": [
-        "xmldom/RelaxNGParser.js"
-    ],
-    "xmldom/RelaxNGParser.js": [
-    ],
-    "xmldom/XPath.js": [
+    "core.LoopWatchDog": [
+    ],
+    "core.PositionFilter": [
+        "core.PositionIterator"
+    ],
+    "core.PositionFilterChain": [
+        "core.PositionFilter",
+        "core.PositionIterator"
+    ],
+    "core.PositionIterator": [
+    ],
+    "core.RawDeflate": [
+    ],
+    "core.RawInflate": [
+    ],
+    "core.ScheduledTask": [
+    ],
+    "core.StepIterator": [
+        "core.PositionFilter",
+        "core.PositionIterator"
+    ],
+    "core.UnitTester": [
+    ],
+    "core.Utils": [
+    ],
+    "core.Zip": [
+        "core.Base64",
+        "core.ByteArray",
+        "core.ByteArrayWriter",
+        "core.RawInflate"
+    ],
+    "gui.AnnotationController": [
+        "core.EventNotifier",
+        "odf.Namespaces",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.OpAddAnnotation",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveAnnotation",
+        "ops.Session"
+    ],
+    "gui.AnnotationViewManager": [
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "odf.OdfUtils"
+    ],
+    "gui.Avatar": [
+    ],
+    "gui.Caret": [
+        "core.Async",
+        "core.DomUtils",
+        "core.ScheduledTask",
+        "gui.Avatar",
+        "ops.OdtCursor"
+    ],
+    "gui.CaretManager": [
+        "core.Async",
+        "gui.Caret",
+        "gui.SessionController",
+        "ops.OdtCursor",
+        "ops.OdtDocument"
+    ],
+    "gui.Clipboard": [
+        "gui.MimeDataExporter"
+    ],
+    "gui.DirectFormattingController": [
+        "core.EventNotifier",
+        "core.PositionFilter",
+        "core.PositionFilterChain",
+        "core.Utils",
+        "gui.SelectionMover",
+        "gui.StyleSummary",
+        "odf.Namespaces",
+        "odf.ObjectNameGenerator",
+        "odf.OdfUtils",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.OpAddStyle",
+        "ops.OpApplyDirectStyling",
+        "ops.OpSetParagraphStyle",
+        "ops.Operation",
+        "ops.Session",
+        "ops.StepsTranslator"
+    ],
+    "gui.EditInfoHandle": [
+    ],
+    "gui.EditInfoMarker": [
+        "gui.EditInfoHandle",
+        "ops.EditInfo"
+    ],
+    "gui.EventManager": [
+        "ops.OdtDocument"
+    ],
+    "gui.HyperlinkClickHandler": [
+        "odf.Namespaces",
+        "odf.OdfUtils",
+        "xmldom.XPath"
+    ],
+    "gui.HyperlinkController": [
+        "gui.SelectionMover",
+        "odf.OdfUtils",
+        "ops.OpApplyHyperlink",
+        "ops.OpInsertText",
+        "ops.OpRemoveHyperlink",
+        "ops.Session"
+    ],
+    "gui.ImageController": [
+        "odf.Namespaces",
+        "odf.ObjectNameGenerator",
+        "ops.OpAddStyle",
+        "ops.OpInsertImage",
+        "ops.OpSetBlob",
+        "ops.Operation",
+        "ops.Session"
+    ],
+    "gui.ImageSelector": [
+        "odf.Namespaces",
+        "odf.OdfCanvas"
+    ],
+    "gui.InputMethodEditor": [
+        "core.Async",
+        "core.DomUtils",
+        "core.EventNotifier",
+        "core.ScheduledTask",
+        "gui.EventManager",
+        "ops.OdtCursor",
+        "ops.OdtDocument"
+    ],
+    "gui.KeyboardHandler": [
+    ],
+    "gui.MimeDataExporter": [
+        "odf.OdfNodeFilter",
+        "odf.TextSerializer"
+    ],
+    "gui.PlainTextPasteboard": [
+        "ops.OdtDocument",
+        "ops.OpInsertText",
+        "ops.OpRemoveText",
+        "ops.OpSplitParagraph",
+        "ops.Operation"
+    ],
+    "gui.SelectionController": [
+        "core.DomUtils",
+        "core.PositionFilter",
+        "core.PositionFilterChain",
+        "core.PositionIterator",
+        "core.StepIterator",
+        "gui.SelectionMover",
+        "odf.OdfUtils",
+        "ops.OdtCursor",
+        "ops.OpMoveCursor",
+        "ops.Operation",
+        "ops.Session",
+        "ops.StepsTranslator"
+    ],
+    "gui.SelectionMover": [
+        "core.Cursor",
+        "core.DomUtils",
+        "core.LoopWatchDog",
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "odf.OdfUtils"
+    ],
+    "gui.SelectionView": [
+        "gui.ShadowCursor",
+        "ops.OdtCursor"
+    ],
+    "gui.SelectionViewManager": [
+        "gui.SelectionView",
+        "gui.ShadowCursor",
+        "ops.OdtCursor"
+    ],
+    "gui.SessionController": [
+        "core.Async",
+        "core.DomUtils",
+        "core.PositionFilter",
+        "core.ScheduledTask",
+        "gui.AnnotationController",
+        "gui.Clipboard",
+        "gui.DirectFormattingController",
+        "gui.EventManager",
+        "gui.HyperlinkClickHandler",
+        "gui.HyperlinkController",
+        "gui.ImageController",
+        "gui.ImageSelector",
+        "gui.InputMethodEditor",
+        "gui.KeyboardHandler",
+        "gui.MimeDataExporter",
+        "gui.PlainTextPasteboard",
+        "gui.SelectionController",
+        "gui.SelectionMover",
+        "gui.TextController",
+        "gui.UndoManager",
+        "odf.Namespaces",
+        "odf.ObjectNameGenerator",
+        "odf.OdfUtils",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.OpAddCursor",
+        "ops.Operation",
+        "ops.Session"
+    ],
+    "gui.SessionView": [
+        "gui.Caret",
+        "gui.CaretManager",
+        "gui.EditInfoMarker",
+        "gui.ShadowCursor",
+        "ops.EditInfo",
+        "ops.Member",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Session"
+    ],
+    "gui.ShadowCursor": [
+        "ops.Document",
+        "ops.OdtCursor"
+    ],
+    "gui.StyleSummary": [
+    ],
+    "gui.SvgSelectionView": [
+        "core.Async",
+        "core.DomUtils",
+        "core.ScheduledTask",
+        "gui.SelectionMover",
+        "gui.SelectionView",
+        "gui.ShadowCursor",
+        "odf.OdfNodeFilter",
+        "odf.OdfUtils",
+        "ops.OdtCursor",
+        "ops.OdtDocument"
+    ],
+    "gui.TextController": [
+        "core.PositionFilter",
+        "core.PositionFilterChain",
+        "gui.SelectionMover",
+        "odf.Namespaces",
+        "ops.OpInsertText",
+        "ops.OpRemoveText",
+        "ops.OpSetParagraphStyle",
+        "ops.OpSplitParagraph",
+        "ops.Operation",
+        "ops.Session"
+    ],
+    "gui.TrivialUndoManager": [
+        "core.DomUtils",
+        "core.EventNotifier",
+        "gui.UndoManager",
+        "gui.UndoStateRules",
+        "ops.Document",
+        "ops.Operation"
+    ],
+    "gui.UndoManager": [
+        "ops.Document",
+        "ops.Operation"
+    ],
+    "gui.UndoStateRules": [
+        "ops.Operation"
+    ],
+    "odf.CommandLineTools": [
+        "odf.OdfCanvas",
+        "odf.OdfContainer"
+    ],
+    "odf.FontLoader": [
+        "core.Base64",
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "xmldom.XPath"
+    ],
+    "odf.Formatting": [
+        "core.DomUtils",
+        "core.Utils",
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "odf.OdfUtils",
+        "odf.StyleInfo"
+    ],
+    "odf.Namespaces": [
+    ],
+    "odf.ObjectNameGenerator": [
+        "core.DomUtils",
+        "core.Utils",
+        "odf.Namespaces",
+        "odf.OdfContainer"
+    ],
+    "odf.OdfCanvas": [
+        "core.Async",
+        "core.DomUtils",
+        "core.ScheduledTask",
+        "gui.AnnotationViewManager",
+        "odf.FontLoader",
+        "odf.Formatting",
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "odf.OdfUtils",
+        "odf.Style2CSS",
+        "ops.Canvas",
+        "xmldom.XPath"
+    ],
+    "odf.OdfContainer": [
+        "core.Base64",
+        "core.DomUtils",
+        "core.Zip",
+        "odf.Namespaces",
+        "odf.OdfNodeFilter",
+        "odf.StyleInfo",
+        "xmldom.LSSerializer",
+        "xmldom.LSSerializerFilter"
+    ],
+    "odf.OdfNodeFilter": [
+        "xmldom.LSSerializerFilter"
+    ],
+    "odf.OdfUtils": [
+        "core.DomUtils",
+        "odf.Namespaces"
+    ],
+    "odf.Style2CSS": [
+        "core.CSSUnits",
+        "odf.Namespaces",
+        "odf.OdfUtils",
+        "xmldom.XPath"
+    ],
+    "odf.StyleInfo": [
+        "odf.Namespaces",
+        "xmldom.XPath"
+    ],
+    "odf.TextSerializer": [
+        "odf.OdfUtils",
+        "xmldom.LSSerializerFilter"
+    ],
+    "odf.TextStyleApplicator": [
+        "core.DomUtils",
+        "core.LoopWatchDog",
+        "odf.Formatting",
+        "odf.Namespaces",
+        "odf.ObjectNameGenerator"
+    ],
+    "ops.Canvas": [
+    ],
+    "ops.Document": [
+        "ops.Canvas"
+    ],
+    "ops.EditInfo": [
+        "ops.OdtDocument"
+    ],
+    "ops.Member": [
+    ],
+    "ops.OdtCursor": [
+        "core.Cursor",
+        "core.EventNotifier",
+        "gui.SelectionMover",
+        "ops.Document"
+    ],
+    "ops.OdtDocument": [
+        "core.DomUtils",
+        "core.EventNotifier",
+        "core.PositionFilter",
+        "core.PositionFilterChain",
+        "core.PositionIterator",
+        "core.StepIterator",
+        "gui.SelectionMover",
+        "odf.Formatting",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "odf.OdfUtils",
+        "ops.Canvas",
+        "ops.Document",
+        "ops.Member",
+        "ops.OdtCursor",
+        "ops.Operation",
+        "ops.StepsTranslator",
+        "ops.TextPositionFilter"
+    ],
+    "ops.OpAddAnnotation": [
+        "core.DomUtils",
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpAddCursor": [
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpAddMember": [
+        "ops.Member",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpAddStyle": [
+        "odf.Namespaces",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpApplyDirectStyling": [
+        "core.DomUtils",
+        "odf.ObjectNameGenerator",
+        "odf.OdfContainer",
+        "odf.OdfUtils",
+        "odf.TextStyleApplicator",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpApplyHyperlink": [
+        "core.DomUtils",
+        "odf.Namespaces",
+        "odf.OdfUtils",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpInsertImage": [
+        "odf.Namespaces",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpInsertTable": [
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpInsertText": [
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpMoveCursor": [
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpRemoveAnnotation": [
+        "core.DomUtils",
+        "odf.Namespaces",
+        "odf.OdfContainer",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpRemoveBlob": [
+        "ops.Operation"
+    ],
+    "ops.OpRemoveCursor": [
+        "ops.Operation"
+    ],
+    "ops.OpRemoveHyperlink": [
+        "core.DomUtils",
+        "odf.OdfUtils",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpRemoveMember": [
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpRemoveStyle": [
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpRemoveText": [
+        "core.DomUtils",
+        "odf.Namespaces",
+        "odf.OdfUtils",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpSetBlob": [
+        "ops.Operation"
+    ],
+    "ops.OpSetParagraphStyle": [
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpSplitParagraph": [
+        "odf.OdfUtils",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.OpUpdateMember": [
+        "odf.Namespaces",
+        "ops.OdtDocument",
+        "ops.Operation",
+        "xmldom.XPath"
+    ],
+    "ops.OpUpdateMetadata": [
+        "ops.Operation"
+    ],
+    "ops.OpUpdateParagraphStyle": [
+        "odf.Namespaces",
+        "ops.OdtDocument",
+        "ops.Operation"
+    ],
+    "ops.Operation": [
+        "ops.Document"
+    ],
+    "ops.OperationFactory": [
+        "ops.OpAddAnnotation",
+        "ops.OpAddCursor",
+        "ops.OpAddMember",
+        "ops.OpAddStyle",
+        "ops.OpApplyDirectStyling",
+        "ops.OpApplyHyperlink",
+        "ops.OpInsertImage",
+        "ops.OpInsertTable",
+        "ops.OpInsertText",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveAnnotation",
+        "ops.OpRemoveBlob",
+        "ops.OpRemoveCursor",
+        "ops.OpRemoveHyperlink",
+        "ops.OpRemoveMember",
+        "ops.OpRemoveStyle",
+        "ops.OpRemoveText",
+        "ops.OpSetBlob",
+        "ops.OpSetParagraphStyle",
+        "ops.OpSplitParagraph",
+        "ops.OpUpdateMember",
+        "ops.OpUpdateMetadata",
+        "ops.OpUpdateParagraphStyle",
+        "ops.Operation"
+    ],
+    "ops.OperationRouter": [
+        "ops.Operation",
+        "ops.OperationFactory"
+    ],
+    "ops.OperationTransformMatrix": [
+        "ops.OpAddStyle",
+        "ops.OpApplyDirectStyling",
+        "ops.OpInsertText",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveCursor",
+        "ops.OpRemoveStyle",
+        "ops.OpRemoveText",
+        "ops.OpSetParagraphStyle",
+        "ops.OpSplitParagraph",
+        "ops.OpUpdateParagraphStyle"
+    ],
+    "ops.OperationTransformer": [
+        "ops.Operation",
+        "ops.OperationFactory",
+        "ops.OperationTransformMatrix"
+    ],
+    "ops.Server": [
+    ],
+    "ops.Session": [
+        "odf.OdfCanvas",
+        "ops.OdtDocument",
+        "ops.Operation",
+        "ops.OperationFactory",
+        "ops.OperationRouter",
+        "ops.TrivialOperationRouter"
+    ],
+    "ops.StepsTranslator": [
+        "core.DomUtils",
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "odf.OdfUtils"
+    ],
+    "ops.TextPositionFilter": [
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "odf.OdfUtils"
+    ],
+    "ops.TrivialOperationRouter": [
+        "core.EventNotifier",
+        "ops.Operation",
+        "ops.OperationFactory",
+        "ops.OperationRouter"
+    ],
+    "xmldom.LSSerializer": [
+        "xmldom.LSSerializerFilter"
+    ],
+    "xmldom.LSSerializerFilter": [
+    ],
+    "xmldom.RelaxNG": [
+    ],
+    "xmldom.RelaxNG2": [
+    ],
+    "xmldom.RelaxNGParser": [
+    ],
+    "xmldom.XPath": [
     ]
 }

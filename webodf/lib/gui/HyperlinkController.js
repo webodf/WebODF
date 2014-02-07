@@ -34,7 +34,6 @@
 
 /*global runtime, core, gui, Node, ops, odf */
 
-runtime.loadClass("odf.OdfUtils");
 
 /**
  * @constructor

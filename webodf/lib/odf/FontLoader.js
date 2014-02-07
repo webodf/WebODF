@@ -37,9 +37,6 @@
  */
 /*jslint sub: true*/
 /*global runtime, odf, core, document, xmldom*/
-runtime.loadClass("core.Base64");
-runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.OdfContainer");
 (function () {
     "use strict";
     var xpath = xmldom.XPath,

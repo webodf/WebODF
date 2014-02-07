@@ -38,7 +38,6 @@
 
 /*global odf, xmldom, Node, NodeFilter, runtime*/
 
-runtime.loadClass("odf.OdfUtils");
 
 /**
  * Serializes a provided node structure into plain text, eliminating everything

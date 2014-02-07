@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, gui, Node, NodeFilter*/
-runtime.loadClass("gui.SelectionMover");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

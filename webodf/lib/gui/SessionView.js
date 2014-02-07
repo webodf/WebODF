@@ -38,9 +38,6 @@
 
 /*global Node, document, runtime, gui, ops, core */
 
-runtime.loadClass("gui.Caret");
-runtime.loadClass("ops.EditInfo");
-runtime.loadClass("gui.EditInfoMarker");
 
 /**
  * @constructor

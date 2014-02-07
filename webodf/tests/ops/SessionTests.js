@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf, ops*/
-runtime.loadClass("ops.Session");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

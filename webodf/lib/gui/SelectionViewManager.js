@@ -38,7 +38,6 @@
 
 /*global runtime, core, gui, ops*/
 
-runtime.loadClass("gui.SelectionView");
 
 /**
  * The Selection View Manager is responsible for managing SelectionView objects

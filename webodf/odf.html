@@ -20,7 +20,6 @@
   <script src="lib/runtime.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript" charset="utf-8">
 function init() {
-    runtime.loadClass("odf.OdfCanvas");
     // if the url has a fragment (#...), try to load the file it represents
     var location = String(document.location),
         pos = location.indexOf('#'),
@@ -32,7 +31,7 @@ function init() {
     location = location.substr(pos + 1);
     document.odfcanvas.load(location);
 }
-window.setTimeout(init, 1);
+runtime.loadClass("odf.OdfCanvas", init);
   </script>
   <title></title>
 </head>

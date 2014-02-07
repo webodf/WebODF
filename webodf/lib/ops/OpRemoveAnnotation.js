@@ -38,8 +38,6 @@
 
 /*global ops, runtime, odf, core*/
 
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("core.DomUtils");
 
 /**
  * @constructor

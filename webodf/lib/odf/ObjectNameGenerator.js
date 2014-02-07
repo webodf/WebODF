@@ -38,8 +38,6 @@
 
 /*global odf, runtime, core, Node*/
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.Utils");
 
 /**
  * Helper object for generating unique object names. Each name is only reported once per instance,

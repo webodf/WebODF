@@ -34,13 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, gui, ops*/
-runtime.loadClass("ops.OpApplyDirectStyling");
-runtime.loadClass("ops.OpMoveCursor");
-runtime.loadClass("ops.OpInsertText");
-runtime.loadClass("ops.OpSplitParagraph");
-runtime.loadClass("ops.OpRemoveText");
-runtime.loadClass("ops.Operation");
-runtime.loadClass("gui.UndoStateRules");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

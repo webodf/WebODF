@@ -38,13 +38,6 @@
 
 /*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document, webodf_version */
 
-runtime.loadClass("core.Base64");
-runtime.loadClass("core.Zip");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("xmldom.LSSerializer");
-runtime.loadClass("odf.StyleInfo");
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.OdfNodeFilter");
 
 (function () {
     "use strict";

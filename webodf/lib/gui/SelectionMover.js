@@ -38,12 +38,6 @@
 
 /*global Node, NodeFilter, runtime, core, gui, odf*/
 
-runtime.loadClass("core.Cursor");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.PositionIterator");
-runtime.loadClass("core.PositionFilter");
-runtime.loadClass("core.LoopWatchDog");
-runtime.loadClass("odf.OdfUtils");
 
 /**
  * This class modifies the selection in different ways.

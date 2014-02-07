@@ -34,9 +34,6 @@
 
 /*global runtime, gui, odf, xmldom */
 
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("xmldom.XPath");
 
 /**
  * @constructor

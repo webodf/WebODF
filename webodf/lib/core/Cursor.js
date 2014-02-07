@@ -35,7 +35,6 @@
  */
 /*global Node, core, ops, runtime*/
 
-runtime.loadClass("core.DomUtils");
 
 /**
  * @class

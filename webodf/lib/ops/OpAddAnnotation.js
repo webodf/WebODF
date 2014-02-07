@@ -38,7 +38,6 @@
 
 /*global ops, core, odf, runtime*/
 
-runtime.loadClass("core.DomUtils");
 
 /**
  * @constructor

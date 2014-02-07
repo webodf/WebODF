@@ -34,8 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global Node, NodeFilter, runtime, core, gui, xmldom, ops*/
-runtime.loadClass("core.PositionIterator");
-runtime.loadClass("xmldom.LSSerializer");
 
 /**
  * @constructor

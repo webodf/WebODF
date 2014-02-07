@@ -37,9 +37,6 @@
  */
 /*global Node, odf, runtime, console, core*/
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.LoopWatchDog");
-runtime.loadClass("odf.Namespaces");
 
 /**
  * Class for applying a supplied text style to the given text nodes.

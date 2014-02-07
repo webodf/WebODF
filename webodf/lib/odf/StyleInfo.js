@@ -38,8 +38,6 @@
 
 /*global Node, odf, runtime, xmldom*/
 
-runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor

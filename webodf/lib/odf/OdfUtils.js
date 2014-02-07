@@ -38,8 +38,6 @@
 
 /*global Node, runtime, odf, NodeFilter, core*/
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("odf.Namespaces");
 
 /**
  * @constructor

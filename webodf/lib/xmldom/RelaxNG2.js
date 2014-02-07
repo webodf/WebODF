@@ -46,7 +46,6 @@
  * implementation can hide parts of a DOM tree. This is useful in WebODF, where
  * special elements and attributes in the runtime DOM tree.
  */
-runtime.loadClass("xmldom.RelaxNGParser");
 /**
  * @constructor
  */

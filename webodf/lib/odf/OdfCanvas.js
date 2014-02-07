@@ -39,16 +39,6 @@
 /*jslint sub: true*/
 /*global runtime, odf, xmldom, webodf_css, core, gui */
 
-runtime.loadClass("core.Async");
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.ScheduledTask");
-runtime.loadClass("odf.OdfContainer");
-runtime.loadClass("odf.Formatting");
-runtime.loadClass("xmldom.XPath");
-runtime.loadClass("odf.FontLoader");
-runtime.loadClass("odf.Style2CSS");
-runtime.loadClass("odf.OdfUtils");
-runtime.loadClass("gui.AnnotationViewManager");
 
 (function () {
     "use strict";

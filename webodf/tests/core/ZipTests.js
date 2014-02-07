@@ -34,7 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global core, runtime*/
-runtime.loadClass("core.Zip");
 
 /**
  * @constructor

@@ -34,10 +34,6 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 /*global runtime, core, odf, ops, gui*/
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("odf.Namespaces");
-runtime.loadClass("ops.StepsTranslator");
-runtime.loadClass("gui.SelectionMover");
 /**
  * @constructor
  * @param {core.UnitTestRunner} runner

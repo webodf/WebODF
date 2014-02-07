@@ -38,9 +38,6 @@
 
 /*global runtime, core, ops, odf, Node*/
 
-runtime.loadClass("core.DomUtils");
-runtime.loadClass("core.PositionFilter");
-runtime.loadClass("odf.OdfUtils");
 
 
 (function() {

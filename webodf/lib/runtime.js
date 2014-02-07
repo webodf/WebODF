@@ -33,8 +33,8 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*jslint nomen: true, evil: true, bitwise: true, emptyblock: true, unparam: true */
-/*global window, XMLHttpRequest, require, console, DOMParser,
+/*jslint nomen: true, bitwise: true, emptyblock: true, unparam: true */
+/*global window, XMLHttpRequest, require, console, DOMParser, document,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
   navigator, VBArray, alert, now, clearTimeout */
@@ -278,11 +278,13 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
  */
 Runtime.getVariable = function (name) {
     "use strict";
+    /*jslint evil: true*/
     try {
         return eval(name);
     } catch (e) {
         return undefined;
     }
+    /*jslint evil: false*/
 };
 
 /**
@@ -1591,9 +1593,152 @@ var ops = {};
 
 /*jslint sloppy: true*/
 (function () {
+    /**
+     * @param {string} dir
+     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} dependencies
+     */
+    function loadDependenciesFromManifest(dir, dependencies) {
+        "use strict";
+        var path = dir + "/manifest.json",
+            content,
+            list,
+            manifest,
+            /**@type{string}*/
+            m;
+        try {
+            content = runtime.readFileSync(path, "utf-8");
+        } catch (/**@type{string}*/e) {
+            console.log(String(e));
+            return;
+        }
+        list = JSON.parse(/**@type{string}*/(content));
+        manifest = /**@type{!Object.<!Array.<string>>}*/(list);
+        for (m in manifest) {
+            if (manifest.hasOwnProperty(m)) {
+                dependencies[m] = {dir: dir, deps: manifest[m]};
+            }
+        }
+    }
+    /**
+     * @return {!Object.<string,!{dir:string, deps:!Array.<string>}>}
+     */
+    function loadDependenciesFromManifests() {
+        "use strict";
+        var /**@type{!Object.<string,!{dir:string, deps:!Array.<string>}>}*/
+            dependencies = [],
+            paths = runtime.libraryPaths(),
+            i;
+        if (runtime.currentDirectory()) {
+            loadDependenciesFromManifest(runtime.currentDirectory(), dependencies);
+        }
+        for (i = 0; i < paths.length; i += 1) {
+            loadDependenciesFromManifest(paths[i], dependencies);
+        }
+        return dependencies;
+    }
+    /**
+     * @param {string} dir
+     * @param {string} className
+     * @return {string}
+     */
+    function getPath(dir, className) {
+        "use strict";
+        return dir + "/" + className.replace(".", "/") + ".js";
+    }
+    /**
+     * Create a list of required classes from a list of desired classes.
+     * A new list is created that lists all classes that still need to be loaded
+     * to load the list of desired classes.
+     * @param {!Array.<string>} classNames
+     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} dependencies
+     * @param {function(string):boolean} isDefined
+     * @return {!Array.<string>}
+     */
+    function getLoadList(classNames, dependencies, isDefined) {
+        "use strict";
+        var loadList = [],
+            stack = {},
+            /**@type{!Object.<string,boolean>}*/
+            visited = {};
+        /**
+         * @param {string} n
+         */
+        function visit(n) {
+            if (visited[n] || isDefined(n)) {
+                return;
+            }
+            if (stack[n]) {
+                throw "Circular dependency detected for " + n + ".";
+            }
+            stack[n] = true;
+            var d = dependencies[n], deps = d.deps, i, l = deps.length;
+            for (i = 0; i < l; i += 1) {
+                visit(deps[i]);
+            }
+            stack[n] = false;
+            visited[n] = true;
+            loadList.push(getPath(d.dir, n));
+        }
+        classNames.forEach(visit);
+        return loadList;
+    }
+    /**
+     * @param {string} path
+     * @param {string} content
+     * @return {string}
+     */
+    function addContent(path, content) {
+        "use strict";
+        content += "\n//# sourceURL=" + path;
+        content += "\n//@ sourceURL=" + path; // Chrome
+        return content;
+    }
+    /**
+     * @param {!Array.<string>} paths
+     */
+    function loadFiles(paths) {
+        // this function is not strict, so eval can assign to globals
+        var i,
+            content;
+        for (i = 0; i < paths.length; i += 1) {
+            content = runtime.readFileSync(paths[i], "utf-8");
+            content = addContent(paths[i], /**@type{string}*/(content));
+            /*jslint evil: true*/
+            eval(content);
+            /*jslint evil: false*/
+        }
+    }
+    /**
+     * Load scripts by adding <script/> elements to the DOM.
+     * The new script tags are added after the <script/> tag for runtime.js.
+     * The scripts are added with async = false so that they are executed in the
+     * right order. The scripts are executed when control returns to the browser
+     * from the current stack.
+     * If a callback is provided, it is executed after the last script has run.
+     * @param {!Array.<string>} paths array with one or more script paths
+     * @param {!Function=} callback
+     */
+    function loadFilesInBrowser(paths, callback) {
+        "use strict";
+        var e = document.currentScript || document.documentElement.lastChild,
+            df = document.createDocumentFragment(),
+            script,
+            i;
+        for (i = 0; i < paths.length; i += 1) {
+            script = document.createElement("script");
+            script.type = "text/javascript";
+            script.charset = "utf-8";
+            script.async = false; // execute the scripts in order
+            script.setAttribute("src", paths[i]);
+            df.appendChild(script);
+        }
+        if (callback) {
+            script.onload = callback;
+        }
+        e.parentNode.insertBefore(df, e);
+    }
     var /**@type{!Object.<string,!{dir:string, deps:!Array.<string>}>}*/
-        dependencies = {},
-        loadedFiles = {},
+        dependencies,
         packages = {
             core: core,
             gui: gui,
@@ -1602,10 +1747,14 @@ var ops = {};
             ops: ops
         };
     /**
+     * Check if a class has been defined.
+     * For class "core.sub.Name", this checks if there is an entry
+     * packages.core.sub.Name.
      * @param {string} classname
      * @return {boolean}
      */
     function isDefined(classname) {
+        "use strict";
         var parts = classname.split("."), i,
             /**@type{Object}*/
             p = packages,
@@ -1619,241 +1768,44 @@ var ops = {};
         return true;
     }
     /**
-     * @param {string} dir
-     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
+     * @param {!Array.<string>} classnames
+     * @param {function():undefined=} callback
+     * @returns {undefined}
      */
-    function loadManifest(dir, manifests) {
-        var path = dir + "/manifest.json",
-            content,
-            list,
-            manifest,
-            /**@type{string}*/
-            m;
-        if (loadedFiles.hasOwnProperty(path)) {
-            return;
+    runtime.loadClasses = function (classnames, callback) {
+        "use strict";
+        if (IS_COMPILED_CODE || classnames.length === 0) {
+            return callback && callback();
         }
-        try {
-            content = runtime.readFileSync(path, "utf-8");
-        } catch (/**@type{string}*/e) {
-            console.log(String(e));
-            return;
+        dependencies = dependencies || loadDependenciesFromManifests();
+        classnames = getLoadList(classnames, dependencies, isDefined);
+        if (classnames.length === 0) {
+            return callback && callback();
         }
-        list = JSON.parse(/**@type{string}*/(content));
-        manifest = /**@type{!Object.<!Array.<string>>}*/(list);
-        for (m in manifest) {
-            if (manifest.hasOwnProperty(m)) {
-                manifests[m] = {dir: dir, deps: manifest[m]};
+        if (runtime.type() === "BrowserRuntime" && callback) {
+            loadFilesInBrowser(classnames, callback);
+        } else {
+            loadFiles(classnames);
+            if (callback) {
+                callback();
             }
         }
-        // only mark file loaded here
-        // Firefox seems to process other xhr results while running sync xhr.sends,
-        // so it could happen that another runtime.loadClass(...) call reaches
-        // this method before the first is done with fetching the manifest.
-        // As those calls are syncronous, there is no better way known currently
-        // than just letting it load the manifest a second time
-        loadedFiles[path] = 1;
-    }
-    /**
-     * @param {string} path
-     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
-     * @param {!Object.<string,!Object.<string,number>>} allDeps
-     */
-    function expandPathDependencies(path, manifests, allDeps) {
-        var d = manifests[path].deps, deps = {};
-        allDeps[path] = deps;
-        d.forEach(function (dp) {
-            deps[dp] = 1;
-        });
-        d.forEach(function (dp) {
-            if (!allDeps[dp]) {
-                expandPathDependencies(dp, manifests, allDeps);
-            }
-        });
-        d.forEach(function (dp) {
-            Object.keys(allDeps[dp]).forEach(function (k) {
-                deps[k] = 1;
-            });
-        });
-    }
-    /**
-     * @param {!Array.<string>} deps
-     * @param {!Object.<string,!Object.<string,number>>} allDeps
-     * @return {!Array.<string>}
-     */
-    function sortDeps(deps, allDeps) {
-        var i, sorted = [];
-        /**
-         * @param {string} path
-         * @param {!Array.<string>} stack
-         */
-        function add(path, stack) {
-            var j, d = allDeps[path];
-            if (sorted.indexOf(path) === -1 && stack.indexOf(path) === -1) {
-                stack.push(path);
-                for (j = 0; j < deps.length; j += 1) {
-                    if (d[deps[j]]) {
-                        add(deps[j], stack);
-                    }
-                }
-                stack.pop();
-                sorted.push(path);
-            }
-        }
-        for (i = 0; i < deps.length; i += 1) {
-            add(deps[i], []);
-        }
-        return sorted;
-    }
-    /**
-     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
-     */
-    function expandDependencies(manifests) {
-        var /**@type{string}*/
-            path,
-            /**@type{!Array.<string>}*/
-            deps,
-            allDeps = {};
-        for (path in manifests) {
-            if (manifests.hasOwnProperty(path)) {
-                expandPathDependencies(path, manifests, allDeps);
-            }
-        }
-        for (path in manifests) {
-            if (manifests.hasOwnProperty(path)) {
-                deps = /**@type{!Array.<string>}*/(
-                    Object.keys(allDeps[path])
-                );
-                manifests[path].deps = sortDeps(deps, allDeps);
-                manifests[path].deps.push(path);
-            }
-        }
-        dependencies = manifests;
-    }
-    function loadManifests() {
-        // only load the dependencies once
-        if (Object.keys(dependencies).length > 0) {
-            return;
-        }
-        var paths = runtime.libraryPaths(),
-            manifests = {},
-            i;
-        if (runtime.currentDirectory()) {
-            loadManifest(runtime.currentDirectory(), manifests);
-        }
-        for (i = 0; i < paths.length; i += 1) {
-            loadManifest(paths[i], manifests);
-        }
-        expandDependencies(manifests);
-    }
+    };
     /**
      * @param {string} classname
-     * @return {string}
-     */
-    function classPath(classname) {
-        return classname.replace(".", "/") + ".js";
-    }
-    /**
-     * @param {string} classname
-     * @return {!Array.<string>}
-     */
-    function getDependencies(classname) {
-        var classpath = classPath(classname),
-            deps = [],
-            d = dependencies[classpath].deps,
-            i;
-        for (i = 0; i < d.length; i += 1) {
-            if (!loadedFiles.hasOwnProperty(d[i])) {
-                deps.push(d[i]);
-            }
-        }
-        return deps;
-    }
-    /**
-     * @param {!Array.<string>} paths
-     * @param {!Array.<?string>} contents
-     */
-    function evalArray(paths, contents) {
-        var i = 0;
-        while (i < paths.length && contents[i] !== undefined) {
-            if (contents[i] !== null) {
-                eval(/**@type{string}*/(contents[i]));
-                contents[i] = null;
-            }
-            i += 1;
-        }
-    }
-    /**
-     * @param {!Array.<string>} paths
-     */
-    function loadFiles(paths) {
-        var contents = [],
-            i,
-            p,
-            c,
-            async = false;
-        contents.length = paths.length;
-        /**
-         * @param {number} pos
-         * @param {string} path
-         * @param {string} content
-         */
-        function addContent(pos, path, content) {
-            content += "\n//# sourceURL=" + path;
-            content += "\n//@ sourceURL=" + path; // Chrome
-            contents[pos] = content;
-        }
-        /**
-         * @param {number} pos
-         */
-        function loadFile(pos) {
-            var path = dependencies[paths[pos]].dir + "/" + paths[pos];
-            runtime.readFile(path, "utf8", function (err, content) {
-                if (err) {
-                    throw err;
-                }
-                if (contents[pos] === undefined) {
-                    addContent(pos, path, /**@type{string}*/(content));
-                }
-            });
-        }
-        if (async) {
-            for (i = 0; i < paths.length; i += 1) {
-                loadedFiles[paths[i]] = 1;
-                loadFile(i);
-            }
-        }
-        for (i = paths.length - 1; i >= 0; i -= 1) {
-            loadedFiles[paths[i]] = 1;
-            if (contents[i] === undefined) {
-                p = paths[i];
-                p = dependencies[p].dir + "/" + p;
-                c = runtime.readFileSync(p, "utf-8");
-                addContent(i, p, /**@type{string}*/(c));
-            }
-        }
-        evalArray(paths, contents);
-    }
-    /**
-     * @param {string} classname
+     * @param {function():undefined=} callback
      * @return {undefined}
      * @expose
      */
-    runtime.loadClass = function (classname) {
-        if (IS_COMPILED_CODE || isDefined(classname)) {
-            return;
-        }
-        var classpath = classPath(classname),
-            paths;
-        if (loadedFiles.hasOwnProperty(classpath)) {
-            return;
-        }
-        loadManifests();
-        paths = getDependencies(classname);
-        loadFiles(paths);
+    runtime.loadClass = function (classname, callback) {
+        "use strict";
+        runtime.loadClasses([classname], callback);
     };
 }());
+/*jslint sloppy: false*/
 
 (function () {
+    "use strict";
     /**
      * @param {!string} string
      * @return {!string}
@@ -1899,6 +1851,8 @@ var ops = {};
      */
     runtime.tr = tr;
 }());
+
+/*jslint sloppy: true*/
 (function (args) {
     if (args) {
         args = Array.prototype.slice.call(/**@type{{length:number}}*/(args));
@@ -1925,7 +1879,9 @@ var ops = {};
             function inner_run() {
                 var script, path, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
+                /*jslint evil: true*/
                 result = /**@type{!number}*/(eval(codestring));
+                /*jslint evil: false*/
                 if (result) {
                     runtime.exit(result);
                 }

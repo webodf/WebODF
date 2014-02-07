@@ -25,7 +25,6 @@
 
 /*global ops, runtime*/
 
-runtime.loadClass("ops.Member");
 
 /**
  * OpAddMember has 3 required properties:
