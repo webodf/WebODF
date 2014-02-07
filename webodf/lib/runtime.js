@@ -1709,7 +1709,13 @@ var ops = {};
         }
     }
     /**
-     * @param {!Array.<string>} paths
+     * Load scripts by adding <script/> elements to the DOM.
+     * The new script tags are added after the <script/> tag for runtime.js.
+     * The scripts are added with async = false so that they are executed in the
+     * right order. The scripts are executed when control returns to the browser
+     * from the current stack.
+     * If a callback is provided, it is executed after the last script has run.
+     * @param {!Array.<string>} paths array with one or more script paths
      * @param {!Function=} callback
      */
     function loadFilesInBrowser(paths, callback) {
@@ -1776,7 +1782,7 @@ var ops = {};
         if (classnames.length === 0) {
             return callback && callback();
         }
-        if (runtime.getWindow() && callback) {
+        if (runtime.type() === "BrowserRuntime" && callback) {
             loadFilesInBrowser(classnames, callback);
         } else {
             loadFiles(classnames);
