@@ -489,6 +489,7 @@
     ],
     "ops.OpSplitParagraph": [
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],

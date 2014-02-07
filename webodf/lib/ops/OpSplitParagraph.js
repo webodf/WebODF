@@ -51,9 +51,17 @@
 ops.OpSplitParagraph = function OpSplitParagraph() {
     "use strict";
 
-    var memberid, timestamp, position, moveCursor,
+    var memberid, timestamp,
+        /**@type{number}*/
+        position,
+        /**@type{boolean}*/
+        moveCursor,
+        /**@type{!odf.OdfUtils}*/
         odfUtils;
 
+    /**
+     * @param {!ops.OpSplitParagraph.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -65,8 +73,12 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var domPosition, paragraphNode, targetNode,
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{!ops.OdtDocument}*/(document),
+            domPosition, paragraphNode, targetNode,
             node, splitNode, splitChildNode, keptChildNode,
             cursor = odtDocument.getCursor(memberid);
 
@@ -147,7 +159,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         }
 
         if (odfUtils.isListItem(splitChildNode)) {
-            splitChildNode = splitChildNode.childNodes[0];
+            splitChildNode = splitChildNode.childNodes.item(0);
         }
 
         // clean up any empty text node which was created by odtDocument.getTextNodeAtStep
@@ -193,6 +205,14 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
     optype:string,
     memberid:string,
     timestamp:number,
-    position:number
+    position:number,
+    moveCursor:boolean
 }}*/
 ops.OpSplitParagraph.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    moveCursor:(string|boolean|undefined)
+}}*/
+ops.OpSplitParagraph.InitSpec;
