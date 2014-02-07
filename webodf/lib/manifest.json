@@ -392,21 +392,25 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfContainer",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpAddCursor": [
+        "ops.Document",
         "ops.OdtCursor",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpAddMember": [
+        "ops.Document",
         "ops.Member",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpAddStyle": [
         "odf.Namespaces",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -416,6 +420,7 @@
         "odf.OdfContainer",
         "odf.OdfUtils",
         "odf.TextStyleApplicator",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -423,11 +428,13 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpInsertImage": [
         "odf.Namespaces",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],

@@ -46,9 +46,19 @@
 ops.OpAddAnnotation = function OpAddAnnotation() {
     "use strict";
 
-    var memberid, timestamp, position, length, name,
+    var memberid, timestamp,
+        /**@type{number}*/
+        position,
+        /**@type{number}*/
+        length,
+        /**@type{string}*/
+        name,
+        /**@type{!Document}*/
         doc;
 
+    /**
+     * @param {!ops.OpAddAnnotation.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = parseInt(data.timestamp, 10);
@@ -140,8 +150,12 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         }
     }
 
-    this.execute = function (odtDocument) {
-        var annotation, annotationEnd,
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            annotation, annotationEnd,
             cursor = odtDocument.getCursor(memberid),
             selectedRange,
             paragraphElement,
@@ -168,7 +182,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
             selectedRange = doc.createRange();
             paragraphElement = domUtils.getElementsByTagNameNS(annotation, odf.Namespaces.textns, "p")[0];
             selectedRange.selectNodeContents(paragraphElement);
-            cursor.setSelectedRange(selectedRange);
+            cursor.setSelectedRange(selectedRange, false);
             odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
         }
         // Track this annotation
@@ -189,3 +203,20 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    length:number,
+    name:string
+}}*/
+ops.OpAddAnnotation.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    length:number,
+    name:string
+}}*/
+ops.OpAddAnnotation.InitSpec;

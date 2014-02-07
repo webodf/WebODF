@@ -51,6 +51,9 @@ ops.OpInsertImage = function OpInsertImage() {
         textns = odf.Namespaces.textns,
         xlinkns = odf.Namespaces.xlinkns;
 
+    /**
+     * @param {!ops.OpInsertImage.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -66,7 +69,7 @@ ops.OpInsertImage = function OpInsertImage() {
     this.group = undefined;
 
     /**
-     * @param document
+     * @param {!Document} document
      * @return {!Element}
      */
     function createFrameElement(document) {
@@ -88,8 +91,12 @@ ops.OpInsertImage = function OpInsertImage() {
         return frameNode;
     }
 
-    this.execute = function (odtDocument) {
-        var odfCanvas = odtDocument.getOdfCanvas(),
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            odfCanvas = odtDocument.getOdfCanvas(),
             domPosition = odtDocument.getTextNodeAtStep(position, memberid),
             textNode, refNode, paragraphElement, frameElement;
 
@@ -134,5 +141,27 @@ ops.OpInsertImage = function OpInsertImage() {
             frameName: frameName
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    filename:string,
+    position:number,
+    frameWidth:string,
+    frameHeight:string,
+    frameStyleName:string,
+    frameName:string
+}}*/
+ops.OpInsertImage.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    filename:string,
+    position:number,
+    frameWidth:string,
+    frameHeight:string,
+    frameStyleName:string,
+    frameName:string
+}}*/
+ops.OpInsertImage.InitSpec;

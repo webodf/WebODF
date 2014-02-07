@@ -47,6 +47,9 @@ ops.OpAddCursor = function OpAddCursor() {
 
     var memberid, timestamp;
 
+    /**
+     * @param {!ops.OpAddCursor.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -55,8 +58,12 @@ ops.OpAddCursor = function OpAddCursor() {
     this.isEdit = false;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var cursor = odtDocument.getCursor(memberid);
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            cursor = odtDocument.getCursor(memberid);
 
         // there should be none
         if (cursor) {
@@ -76,5 +83,15 @@ ops.OpAddCursor = function OpAddCursor() {
             timestamp: timestamp
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number
+}}*/
+ops.OpAddCursor.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined)
+}}*/
+ops.OpAddCursor.InitSpec;

@@ -45,6 +45,9 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
         domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils();
 
+    /**
+     * @param {!ops.OpApplyHyperlink.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -56,6 +59,11 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
     this.isEdit = true;
     this.group = undefined;
 
+    /**
+     * @param {!Document} document
+     * @param {string} hyperlink
+     * @return {!Element}
+     */
     function createHyperlink(document, hyperlink) {
         var node = document.createElementNS(odf.Namespaces.textns, 'text:a');
         node.setAttributeNS(odf.Namespaces.xlinkns, 'xlink:type', 'simple');
@@ -63,6 +71,10 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
         return node;
     }
 
+    /**
+     * @param {?Node} node
+     * @return {boolean}
+     */
     function isPartOfLink(node) {
         while (node) {
             if (odfUtils.isHyperlink(node)) {
@@ -73,11 +85,16 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
         return false;
     }
 
-    // TODO: support adding image link
-    this.execute = function (odtDocument) {
-        var ownerDocument = odtDocument.getDOMDocument(),
-            range = odtDocument.convertCursorToDomRange(position, length),
+    /**
+     * TODO: support adding image link
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            ownerDocument = odtDocument.getDOMDocument(),
+            range = /**@type{!Range}*/(odtDocument.convertCursorToDomRange(position, length)),
             boundaryNodes = domUtils.splitBoundaries(range),
+            /**@type{!Array.<!Element>}*/
             modifiedParagraphs = [],
             textNodes = odfUtils.getTextNodes(range, false);
 
@@ -127,3 +144,20 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    length:number,
+    hyperlink:string
+}}*/
+ops.OpApplyHyperlink.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    length:number,
+    hyperlink:string
+}}*/
+ops.OpApplyHyperlink.InitSpec;

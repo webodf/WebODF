@@ -55,6 +55,9 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils();
 
+    /**
+     * @param {!ops.OpApplyDirectStyling.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -69,6 +72,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
     /**
      * Apply the specified style properties to all elements within the given range.
      * Currently, only text styles are applied.
+     * @param {!ops.OdtDocument} odtDocument
      * @param {!Range} range Range to apply text style to
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      */
@@ -97,8 +101,12 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         nextTextNodes.forEach(domUtils.normalizeTextNodes);
     }
 
-    this.execute = function (odtDocument) {
-        var range = odtDocument.convertCursorToDomRange(position, length),
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            range = /**@type{!Range}*/(odtDocument.convertCursorToDomRange(position, length)),
             impactedParagraphs = odfUtils.getParagraphElements(range);
 
         applyStyle(odtDocument, range, setProperties);
@@ -134,7 +142,16 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
     optype:string,
     memberid:string,
     timestamp:number,
+    position:number,
     length:number,
-    setProperties:Object
+    setProperties:!Object
 }}*/
 ops.OpApplyDirectStyling.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    length:number,
+    setProperties:!Object
+}}*/
+ops.OpApplyDirectStyling.InitSpec;

@@ -40,7 +40,9 @@ ops.OpAddMember = function OpAddMember() {
     "use strict";
 
     var memberid, timestamp, setProperties;
-
+    /**
+     * @param {!ops.OpAddMember.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = parseInt(data.timestamp, 10);
@@ -50,12 +52,17 @@ ops.OpAddMember = function OpAddMember() {
     this.isEdit = false;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            member;
         if (odtDocument.getMember(memberid)) {
             return false;
         }
 
-        var member = new ops.Member(memberid, setProperties);
+        member = new ops.Member(memberid, setProperties);
         odtDocument.addMember(member);
         odtDocument.emit(ops.OdtDocument.signalMemberAdded, member);
 
@@ -67,7 +74,20 @@ ops.OpAddMember = function OpAddMember() {
             optype: "AddMember",
             memberid: memberid,
             timestamp: timestamp,
-            setProperties: setProperties 
+            setProperties: setProperties
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    setProperties:!ops.MemberProperties
+}}*/
+ops.OpAddMember.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    setProperties:!ops.MemberProperties
+}}*/
+ops.OpAddMember.InitSpec;
