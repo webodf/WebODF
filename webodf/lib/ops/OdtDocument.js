@@ -835,7 +835,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string} memberid
      * @param {!number} position
      * @param {!number} length
-     * @param {!string} selectionType
+     * @param {!string=} selectionType
      * @return {undefined}
      */
     this.moveCursor = function (memberid, position, length, selectionType) {

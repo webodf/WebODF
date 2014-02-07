@@ -56,6 +56,7 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
     function sortEdits() {
         var /**@type {!Array.<{memberid:string,time:Date}>}*/
             arr = [],
+            /**@type{string}*/
             memberid;
         for (memberid in editHistory) {
             if (editHistory.hasOwnProperty(memberid)) {

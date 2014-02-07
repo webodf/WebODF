@@ -436,6 +436,7 @@
         "ops.Operation"
     ],
     "ops.OpInsertText": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
