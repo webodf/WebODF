@@ -70,6 +70,7 @@ function Main(cmakeListPath) {
             "gui/Caret.js",
             "gui/Clipboard.js",
             "gui/EditInfoHandle.js",
+            "gui/EventManager.js",
             "gui/HyperlinkClickHandler.js",
             "gui/ImageSelector.js",
             "gui/KeyboardHandler.js",

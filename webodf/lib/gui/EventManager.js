@@ -42,12 +42,13 @@
  * This class contains workarounds for various behaviour issues with events cross-browser. Additionally, this
  * class provides a mechanism for returning event focus back to the SessionController when it has been lost to
  * an external source.
- * @param {!ops.OdtDocument} odtDocument
  * @constructor
+ * @param {!ops.OdtDocument} odtDocument
  */
 gui.EventManager = function EventManager(odtDocument) {
     "use strict";
     var window = /**@type{!Window}*/(runtime.getWindow()),
+        /**@type{!Object.<string,boolean>}*/
         bindToDirectHandler = {
             // In Safari 6.0.5 (7536.30.1), Using either attachEvent or addEventListener
             // results in the beforecut return value being ignored which prevents cut from being called.
@@ -64,7 +65,9 @@ gui.EventManager = function EventManager(odtDocument) {
             // Focus is a non-bubbling event, and we'll usually pass focus to the event trap
             "focus": true
         },
+        /**@type{!Object.<string,!EventDelegate>}*/
         eventDelegates = {},
+        /**@type{!HTMLDivElement}*/
         eventTrap;
 
     /**
@@ -99,18 +102,18 @@ gui.EventManager = function EventManager(odtDocument) {
         /**
          * @param {!Event} e
          */
-        this.handleEvent = function(e) {
+        this.handleEvent = function (e) {
             if (recentEvents.indexOf(e) === -1) {
                 recentEvents.push(e); // Track this event as already processed by these handlers
-                if (self.filters.every(function(filter) { return filter(e); })) {
-                    self.handlers.forEach(function(handler) {
+                if (self.filters.every(function (filter) { return filter(e); })) {
+                    self.handlers.forEach(function (handler) {
                         // Yes yes... this is not a spec-compliant event processor... sorry!
                         handler(e);
                     });
                 }
                 // Reset the processed events list after this tick is complete. The event won't be
                 // processed by any other sources after this
-                runtime.setTimeout(function() { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
+                runtime.setTimeout(function () { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
             }
         };
     }
@@ -126,7 +129,7 @@ gui.EventManager = function EventManager(odtDocument) {
         /**
          * Restore the scroll state captured on construction
          */
-        this.restore = function() {
+        this.restore = function () {
             if (window.scrollX !== x || window.scrollY !== y) {
                 window.scrollTo(x, y);
             }
@@ -144,7 +147,7 @@ gui.EventManager = function EventManager(odtDocument) {
         /**
          * Restore the scroll state captured on construction
          */
-        this.restore = function() {
+        this.restore = function () {
             if (element.scrollTop !== top || element.scrollLeft !== left) {
                 element.scrollTop = top;
                 element.scrollLeft = left;
@@ -162,7 +165,9 @@ gui.EventManager = function EventManager(odtDocument) {
         var onVariant = "on" + eventType,
             bound = false;
         if (eventTarget.attachEvent) {
-            bound = eventTarget.attachEvent(onVariant, eventHandler);
+            // unsupported from IE 11
+            eventTarget.attachEvent(onVariant, eventHandler);
+            bound = true; // assume it was bound, missing @return in externs.js
         }
         if (!bound && eventTarget.addEventListener) {
             eventTarget.addEventListener(eventType, eventHandler, false);
@@ -189,7 +194,7 @@ gui.EventManager = function EventManager(odtDocument) {
             if (bindToWindow[eventName]) {
                 // Internet explorer will only supply mouse up & down on the window object
                 // For other browser though, listening to both will cause two events to be processed
-                listenEvent(/**@type {!Window}*/(window), eventName, delegate.handleEvent);
+                listenEvent(window, eventName, delegate.handleEvent);
             }
             listenEvent(eventTrap, eventName, delegate.handleEvent);
             // TODO this needs to be rebound if canvasElement changes
@@ -203,7 +208,7 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {!string} eventName
      * @param {!function(!Event):!boolean} filter
      */
-    this.addFilter = function(eventName, filter) {
+    this.addFilter = function (eventName, filter) {
         var delegate = getDelegateForEvent(eventName, true);
         delegate.filters.push(filter);
     };
@@ -213,7 +218,7 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {!string} eventName
      * @param {!function(!Event):!boolean} filter
      */
-    this.removeFilter = function(eventName, filter) {
+    this.removeFilter = function (eventName, filter) {
         var delegate = getDelegateForEvent(eventName, true),
             index = delegate.filters.indexOf(filter);
         if (index !== -1) {
@@ -225,7 +230,7 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
      */
-    this.subscribe = function(eventName, handler) {
+    this.subscribe = function (eventName, handler) {
         var delegate = getDelegateForEvent(eventName, true);
         delegate.handlers.push(handler);
     };
@@ -234,7 +239,7 @@ gui.EventManager = function EventManager(odtDocument) {
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
      */
-    this.unsubscribe = function(eventName, handler) {
+    this.unsubscribe = function (eventName, handler) {
         var delegate = getDelegateForEvent(eventName, false),
             handlerIndex = delegate && delegate.handlers.indexOf(handler);
         if (delegate && handlerIndex !== -1) {
@@ -254,7 +259,7 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * Find the all scrollable ancestor for the specified element
      * @param {Element} element
-     * @return {!Array}
+     * @return {!Array.<!WindowScrollState>}
      */
     function findScrollableParents(element) {
         var scrollParents = [];
@@ -273,7 +278,7 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * Return event focus back to the event manager
      */
-    this.focus = function() {
+    this.focus = function () {
         var scrollParents;
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
@@ -281,7 +286,7 @@ gui.EventManager = function EventManager(odtDocument) {
             // cause the element to attempt to recentre back into scroll view
             scrollParents = findScrollableParents(eventTrap);
             eventTrap.focus();
-            scrollParents.forEach(function(scrollParent) {
+            scrollParents.forEach(function (scrollParent) {
                 scrollParent.restore();
             });
         }
@@ -291,14 +296,14 @@ gui.EventManager = function EventManager(odtDocument) {
      * Returns the event trap div
      * @return {!Element}
      */
-    this.getEventTrap = function() {
+    this.getEventTrap = function () {
         return eventTrap;
     };
 
     /**
      * Blur focus from the event manager
      */
-    this.blur = function() {
+    this.blur = function () {
         if (hasFocus()) {
             eventTrap.blur();
         }
@@ -309,7 +314,7 @@ gui.EventManager = function EventManager(odtDocument) {
             doc = canvasElement.ownerDocument;
 
         runtime.assert(Boolean(window), "EventManager requires a window object to operate correctly");
-        eventTrap = doc.createElement("div");
+        eventTrap = /**@type{!HTMLDivElement}*/(doc.createElement("div"));
         eventTrap.id = "eventTrap";
         canvasElement.appendChild(eventTrap);
     }
