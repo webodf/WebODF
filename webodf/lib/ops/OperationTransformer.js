@@ -46,7 +46,7 @@ ops.OperationTransformer = function OperationTransformer() {
     function operations(opspecs) {
         var ops = [];
 
-        opspecs.forEach(function(opspec) {
+        opspecs.forEach(function (opspec) {
             ops.push(operationFactory.create(opspec));
         });
 
@@ -78,7 +78,7 @@ ops.OperationTransformer = function OperationTransformer() {
         while ((opSpecsA.length > 0) && opSpecB) {
             transformResult = transformOpVsOp(opSpecsA.shift(), /**@type {!ops.Operation}*/(opSpecB));
             // unresolvable operation conflicts?
-            if (! transformResult) {
+            if (!transformResult) {
                 return null;
             }
 
@@ -99,7 +99,7 @@ ops.OperationTransformer = function OperationTransformer() {
             while (transformResult.opSpecsB.length > 1) {
                 transformListResult = transformOpListVsOp(opSpecsA, transformResult.opSpecsB.shift());
                 // unresolvable operation conflicts?
-                if (! transformListResult) {
+                if (!transformListResult) {
                     return null;
                 }
                 // take transformed ops of the single b
@@ -150,7 +150,7 @@ ops.OperationTransformer = function OperationTransformer() {
         while (opSpecsB.length > 0) {
             transformResult = transformOpListVsOp(opSpecsA, opSpecsB.shift());
             // unresolvable operation conflicts?
-            if (! transformResult) {
+            if (!transformResult) {
                 return null;
             }
 

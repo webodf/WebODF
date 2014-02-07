@@ -125,9 +125,11 @@ function Main(cmakeListPath) {
             "ops/OpUpdateParagraphStyle.js",
             "ops/Operation.js",
             "ops/OperationFactory.js",
+            "ops/OperationRouter.js",
             "ops/Server.js",
             "ops/StepsTranslator.js",
             "ops/TextPositionFilter.js",
+            "ops/TrivialOperationRouter.js",
             "xmldom/LSSerializer.js",
             "xmldom/LSSerializerFilter.js",
             "xmldom/XPath.js"
