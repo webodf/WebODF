@@ -318,6 +318,12 @@ cursor|cursor[cursor|composing="true"] > .caret {
     top: auto !important;
 }
 
+editinfo|editinfo {
+    /* Empty or invisible display:inline elements respond very badly to mouse selection.
+       Inline blocks are much more reliably selectable in Chrome & friends */
+    display: inline-block;
+}
+
 .editInfoMarker {
     position: absolute;
     width: 10px;
