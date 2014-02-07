@@ -455,6 +455,25 @@ gui.SessionController = (function () {
             return null;
         }
 
+        /**
+         * Gets the next walkable position after the given node.
+         * @param {!Node} node
+         * @return {?{container:!Node, offset:!number}}
+         */
+        function getNextWalkablePosition(node) {
+            var root = odtDocument.getRootElement(node),
+                rootFilter = odtDocument.createRootFilter(root),
+                stepIterator = odtDocument.createStepIterator(node, 0, [rootFilter, odtDocument.getPositionFilter()], root);
+            stepIterator.setPosition(node, node.childNodes.length);
+            if (!stepIterator.roundToNextStep()) {
+                return null;
+            }
+            return {
+                container: stepIterator.container(),
+                offset: stepIterator.offset()
+            };
+        }
+
         function handleMouseClickEvent(event) {
             var target = getTarget(event),
                 eventDetails = {
@@ -482,17 +501,44 @@ gui.SessionController = (function () {
                     handleMouseClickTimeoutId = runtime.setTimeout(function() {
                         var selection = mutableSelection(window.getSelection()),
                             selectionRange,
-                            caretPos;
+                            position,
+                            frameNode,
+                            rect;
                         if (!selection.anchorNode && !selection.focusNode) {
                             // chrome & safari will report null for focus and anchor nodes after a right-click in text selection
-                            caretPos = caretPositionFromPoint(eventDetails.clientX, eventDetails.clientY);
-                            if (caretPos) {
-                                selection.anchorNode = /**@type{!Node}*/(caretPos.container);
-                                selection.anchorOffset = caretPos.offset;
+                            position = caretPositionFromPoint(eventDetails.clientX, eventDetails.clientY);
+                            if (position) {
+                                selection.anchorNode = /**@type{!Node}*/(position.container);
+                                selection.anchorOffset = position.offset;
                                 selection.focusNode = selection.anchorNode;
                                 selection.focusOffset = selection.anchorOffset;
                             }
                         }
+
+                        if (odfUtils.isImage(selection.focusNode) && selection.focusOffset === 0) {
+                            // In FireFox if an image has no text around it, click on either side of the
+                            // image resulting the same selection get returned. focusNode: image, focusOffset: 0
+                            // Move the cursor to the next walkable position when clicking on the right side of an image
+                            frameNode = selection.anchorNode.parentNode;
+                            rect = frameNode.getBoundingClientRect();
+                            if (event.clientX > rect.right) {
+                                position = getNextWalkablePosition(frameNode);
+                                if (position) {
+                                    selection.anchorNode = selection.focusNode = position.container;
+                                    selection.anchorOffset = selection.focusOffset = position.offset;
+                                }
+                            }
+                        } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1) {
+                            // When click on the right side of an image that has no text elements, non-FireFox browsers
+                            // will return focusNode: frame, focusOffset: 1 as the selection. Since this is not a valid cursor
+                            // position, move the cursor to the next walkable position after the frame node.
+                            position = getNextWalkablePosition(selection.focusNode);
+                            if (position) {
+                                selection.anchorNode = selection.focusNode = position.container;
+                                selection.anchorOffset = selection.focusOffset = position.offset;
+                            }
+                        }
+
                         // Need to check the selection again in case the caret position didn't return any result
                         if (selection.anchorNode && selection.focusNode) {
                             selectionRange = selectionController.selectionToRange(selection);
