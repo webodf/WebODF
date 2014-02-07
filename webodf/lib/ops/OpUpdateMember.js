@@ -38,11 +38,16 @@
 ops.OpUpdateMember = function OpUpdateMember() {
     "use strict";
 
-    var memberid, timestamp,
-        /**@type{Object}*/setProperties,
-        /**@type{{attributes}}*/removedProperties,
-        doc;
+    var /**@type{string}*/
+        memberid,
+        timestamp,
+        /**@type{ops.MemberProperties}*/
+        setProperties,
+        removedProperties;
 
+    /**
+     * @param {!ops.OpUpdateMember.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = parseInt(data.timestamp, 10);
@@ -53,7 +58,10 @@ ops.OpUpdateMember = function OpUpdateMember() {
     this.isEdit = false;
     this.group = undefined;
 
-    function updateCreators() {
+    /**
+     * @param {!ops.OdtDocument} doc
+     */
+    function updateCreators(doc) {
         var xpath = xmldom.XPath,
             xp = "//dc:creator[@editinfo:memberid='" + memberid + "']",
             creators = xpath.getODFElementsWithXPath(doc.getRootNode(), xp, function (prefix) {
@@ -69,10 +77,12 @@ ops.OpUpdateMember = function OpUpdateMember() {
         }
     }
 
-    this.execute = function (odtDocument) {
-        doc = odtDocument;
-
-        var member = odtDocument.getMember(memberid);
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            member = odtDocument.getMember(memberid);
         if (!member) {
             return false;
         }
@@ -83,7 +93,7 @@ ops.OpUpdateMember = function OpUpdateMember() {
         if (setProperties) {
             member.setProperties(setProperties);
             if (setProperties.fullName) {
-                updateCreators();
+                updateCreators(odtDocument);
             }
         }
 
@@ -101,3 +111,18 @@ ops.OpUpdateMember = function OpUpdateMember() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    setProperties:?ops.MemberProperties,
+    removedProperties:Object
+ }}*/
+ops.OpUpdateMember.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    setProperties:?ops.MemberProperties,
+    removedProperties:Object
+ }}*/
+ops.OpUpdateMember.InitSpec;

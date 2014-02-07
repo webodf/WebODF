@@ -414,7 +414,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {?Node} node
-     * @return {?Node}
+     * @return {?Element}
      */
     function getParagraphElement(node) {
         return odfUtils.getParagraphElement(node);

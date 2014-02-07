@@ -45,8 +45,17 @@
  */
 ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
     "use strict";
-    var memberid, timestamp, position, length, domUtils;
+    var memberid, timestamp,
+        /**@type{number}*/
+        position,
+        /**@type{number}*/
+        length,
+        /**@type{!core.DomUtils}*/
+        domUtils;
 
+    /**
+     * @param {!ops.OpRemoveAnnotation.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -58,8 +67,12 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var iterator = odtDocument.getIteratorAtPosition(position),
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            iterator = odtDocument.getIteratorAtPosition(position),
             container = iterator.container(),
             annotationNode,
             annotationEnd;
@@ -78,13 +91,15 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         // Untrack and unwrap annotation
         odtDocument.getOdfCanvas().forgetAnnotations();
 
+        /**
+         * @param {!Node} node
+         */
+        function insert(node) {
+            /**@type{!Node}*/(annotationNode).parentNode.insertBefore(node, annotationNode);
+        }
         // Move all cursors - outside and before the annotation node
-        domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'cursor').forEach(function(cursor) {
-            annotationNode.parentNode.insertBefore(cursor, annotationNode);
-        });
-        domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'anchor').forEach(function(anchor) {
-            annotationNode.parentNode.insertBefore(anchor, annotationNode);
-        });
+        domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'cursor').forEach(insert);
+        domUtils.getElementsByTagNameNS(annotationNode, 'urn:webodf:names:cursor', 'anchor').forEach(insert);
 
         // Delete start and end
         annotationNode.parentNode.removeChild(annotationNode);
@@ -109,3 +124,18 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    length:number
+}}*/
+ops.OpRemoveAnnotation.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    length:number
+}}*/
+ops.OpRemoveAnnotation.InitSpec;

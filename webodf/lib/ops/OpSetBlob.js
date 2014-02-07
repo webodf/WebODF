@@ -47,6 +47,9 @@ ops.OpSetBlob = function OpSetBlob() {
 
     var memberid, timestamp, filename, mimetype, content;
 
+    /**
+     * @param {!ops.OpSetBlob.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -58,7 +61,11 @@ ops.OpSetBlob = function OpSetBlob() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document);
         odtDocument.getOdfCanvas().odfContainer().setBlob(filename, mimetype, content);
         return true;
     };
@@ -74,3 +81,20 @@ ops.OpSetBlob = function OpSetBlob() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    filename:string,
+    mimetype:string,
+    content:string
+ }}*/
+ops.OpSetBlob.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    filename:string,
+    mimetype:string,
+    content:string
+ }}*/
+ops.OpSetBlob.InitSpec;

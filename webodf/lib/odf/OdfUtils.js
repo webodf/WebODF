@@ -159,13 +159,13 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * @param {?Node} node
-     * @return {?Node}
+     * @return {?Element}
      */
     function getParagraphElement(node) {
         while (node && !isParagraph(node)) {
             node = node.parentNode;
         }
-        return node;
+        return /**@type{?Element}*/(node);
     }
     this.getParagraphElement = getParagraphElement;
 

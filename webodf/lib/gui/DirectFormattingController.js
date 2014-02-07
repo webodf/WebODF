@@ -357,22 +357,22 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     /**
      * @return {!boolean}
      */
-    this.toggleBold = toggle.bind(self, function() { return selectionStylesSummary.isBold(); }, setBold);
+    this.toggleBold = toggle.bind(self, function () { return selectionStylesSummary.isBold(); }, setBold);
 
     /**
      * @return {!boolean}
      */
-    this.toggleItalic = toggle.bind(self, function() { return selectionStylesSummary.isItalic(); }, setItalic);
+    this.toggleItalic = toggle.bind(self, function () { return selectionStylesSummary.isItalic(); }, setItalic);
 
     /**
      * @return {!boolean}
      */
-    this.toggleUnderline = toggle.bind(self, function() { return selectionStylesSummary.hasUnderline(); }, setHasUnderline);
+    this.toggleUnderline = toggle.bind(self, function () { return selectionStylesSummary.hasUnderline(); }, setHasUnderline);
 
     /**
      * @return {!boolean}
      */
-    this.toggleStrikethrough = toggle.bind(self, function() { return selectionStylesSummary.hasStrikeThrough(); }, setHasStrikethrough);
+    this.toggleStrikethrough = toggle.bind(self, function () { return selectionStylesSummary.hasStrikeThrough(); }, setHasStrikethrough);
 
     /**
      * @return {!boolean}
@@ -426,7 +426,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     /**
      * @return {!boolean}
      */
-    this.isAlignedCenter = function() {
+    this.isAlignedCenter = function () {
         return selectionStylesSummary.isAlignedCenter();
     };
 
@@ -474,7 +474,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             derivedStyleNames = {},
             defaultStyleName;
 
-        paragraphs.forEach(function(paragraph) {
+        paragraphs.forEach(function (paragraph) {
             var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
                 paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
                 newParagraphStyleName,
@@ -505,7 +505,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
                 opAddStyle = new ops.OpAddStyle();
                 opAddStyle.init({
                     memberid: inputMemberId,
-                    styleName: newParagraphStyleName,
+                    styleName: newParagraphStyleName.toString(),
                     styleFamily: 'paragraph',
                     isAutomaticStyle: true,
                     setProperties: paragraphProperties
@@ -517,7 +517,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             opSetParagraphStyle = new ops.OpSetParagraphStyle();
             opSetParagraphStyle.init({
                 memberid: inputMemberId,
-                styleName: newParagraphStyleName,
+                styleName: newParagraphStyleName.toString(),
                 position: paragraphStartPoint
             });
 

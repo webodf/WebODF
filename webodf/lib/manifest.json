@@ -439,6 +439,7 @@
         "ops.Operation"
     ],
     "ops.OpInsertTable": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -448,6 +449,7 @@
         "ops.Operation"
     ],
     "ops.OpMoveCursor": [
+        "ops.Document",
         "ops.OdtCursor",
         "ops.OdtDocument",
         "ops.Operation"
@@ -456,26 +458,34 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfContainer",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveBlob": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveCursor": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveHyperlink": [
         "core.DomUtils",
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveMember": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveStyle": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -488,9 +498,12 @@
         "ops.Operation"
     ],
     "ops.OpSetBlob": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpSetParagraphStyle": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -502,15 +515,20 @@
     ],
     "ops.OpUpdateMember": [
         "odf.Namespaces",
+        "ops.Document",
+        "ops.Member",
         "ops.OdtDocument",
         "ops.Operation",
         "xmldom.XPath"
     ],
     "ops.OpUpdateMetadata": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpUpdateParagraphStyle": [
         "odf.Namespaces",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],

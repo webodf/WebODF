@@ -47,28 +47,36 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, styleName,
-        /**@type{Object}*/setProperties,
-        /**@type{{attributes}}*/removedProperties,
-        /**@const*/paragraphPropertiesName = 'style:paragraph-properties',
-        /**@const*/textPropertiesName = 'style:text-properties',
-        /**@const*/stylens = odf.Namespaces.stylens;
+        setProperties,
+        /**@type{{attributes:string}}*/
+        removedProperties,
+        /**@const*/
+        paragraphPropertiesName = 'style:paragraph-properties',
+        /**@const*/
+        textPropertiesName = 'style:text-properties',
+        /**@const*/
+        stylens = odf.Namespaces.stylens;
 
     /**
      * Removes attributes of a node by the names listed in removedAttributeNames.
-     * @param {!Node} node
+     * @param {!Element} node
      * @param {!string} removedAttributeNames
      */
     function removedAttributesFromStyleNode(node, removedAttributeNames) {
         var i, attributeNameParts,
+            /**@type{!Array.<string>}*/
             attributeNameList = removedAttributeNames ? removedAttributeNames.split(',') : [];
 
         for (i = 0; i < attributeNameList.length; i += 1) {
             attributeNameParts = attributeNameList[i].split(":");
             // TODO: ensure all used prefixes have a namespaces listed
-            node.removeAttributeNS(odf.Namespaces.lookupNamespaceURI(attributeNameParts[0]), attributeNameParts[1]);
+            node.removeAttributeNS(/**@type{string}*/(odf.Namespaces.lookupNamespaceURI(attributeNameParts[0])), attributeNameParts[1]);
         }
     }
 
+    /**
+     * @param {!ops.OpUpdateParagraphStyle.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -80,9 +88,13 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var formatting = odtDocument.getFormatting(),
-            styleNode,
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            formatting = odtDocument.getFormatting(),
+            styleNode, object,
             paragraphPropertiesNode, textPropertiesNode;
 
         if (styleName !== "") {
@@ -94,8 +106,8 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         }
 
         if (styleNode) {
-            paragraphPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties')[0];
-            textPropertiesNode = styleNode.getElementsByTagNameNS(stylens, 'text-properties')[0];
+            paragraphPropertiesNode = /**@type{Element}*/(styleNode.getElementsByTagNameNS(stylens, 'paragraph-properties').item(0));
+            textPropertiesNode = /**@type{Element}*/(styleNode.getElementsByTagNameNS(stylens, 'text-properties').item(0));
 
             if (setProperties) {
                 formatting.updateStyle(styleNode, setProperties);
@@ -103,16 +115,18 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
             // remove attributes in the style nodes
             if (removedProperties) {
-                if (removedProperties[paragraphPropertiesName]) {
-                    removedAttributesFromStyleNode(paragraphPropertiesNode, removedProperties[paragraphPropertiesName].attributes);
+                object = /**@type{{attributes:string}}*/(removedProperties[paragraphPropertiesName]);
+                if (paragraphPropertiesNode && object) {
+                    removedAttributesFromStyleNode(paragraphPropertiesNode, object.attributes);
                     if (paragraphPropertiesNode.attributes.length === 0) {
                         styleNode.removeChild(paragraphPropertiesNode);
                     }
                 }
 
-                if (removedProperties[textPropertiesName]) {
+                object = /**@type{{attributes:string}}*/(removedProperties[textPropertiesName]);
+                if (textPropertiesNode && object) {
                     // TODO: check if fontname can be removed from font-face-declaration
-                    removedAttributesFromStyleNode(textPropertiesNode, removedProperties[textPropertiesName].attributes);
+                    removedAttributesFromStyleNode(textPropertiesNode, object.attributes);
                     if (textPropertiesNode.attributes.length === 0) {
                         styleNode.removeChild(textPropertiesNode);
                     }
@@ -144,7 +158,16 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     optype:string,
     memberid:string,
     timestamp:number,
+    styleName:string,
     setProperties:Object,
-    removedProperties:Object
+    removedProperties:Object.<string,{attributes:string}>
 }}*/
 ops.OpUpdateParagraphStyle.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    styleName:string,
+    setProperties:Object,
+    removedProperties:{attributes:string}
+}}*/
+ops.OpUpdateParagraphStyle.InitSpec;
