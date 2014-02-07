@@ -54,7 +54,8 @@ add_custom_target(webodf.css.js-target DEPENDS webodf.css.js)
 if (Java_JAVA_EXECUTABLE)
   # nonStandardJsDocs is not used because we use @licstart @licend and @source
   # ideally we would enable --jscomp_error reportUnknownTypes
-  set(SHARED_CLOSURE_ARGS --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
+  # -XX:+TieredCompilation reduces compilation time by about 30%
+  set(SHARED_CLOSURE_ARGS -XX:+TieredCompilation -jar ${CLOSURE_JAR} --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
 
   foreach(JSFILE ${TYPEDLIBJSFILES})
     if (IS_ABSOLUTE ${JSFILE})
@@ -88,8 +89,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT simplecompiled.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
+      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js-
@@ -104,9 +104,8 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT compiled.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
+      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
          --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
          --compilation_level ADVANCED_OPTIMIZATIONS
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
@@ -120,9 +119,8 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT webodf.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
+      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
          --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
          --compilation_level SIMPLE_OPTIMIZATIONS
          --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
@@ -137,9 +135,8 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT typecheck.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
+      ARGS ${SHARED_CLOSURE_ARGS} ${TYPED_LIB_CLOSURE_ARGS}
          --define IS_COMPILED_CODE=true --js webodf.css.js
-         ${SHARED_CLOSURE_ARGS} ${TYPED_LIB_CLOSURE_ARGS}
          --jscomp_error reportUnknownTypes
          --compilation_level ADVANCED_OPTIMIZATIONS
          --formatting PRETTY_PRINT
@@ -154,9 +151,8 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT webodf-debug.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS -jar ${CLOSURE_JAR}
+      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
          --define IS_COMPILED_CODE=true
-         ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
