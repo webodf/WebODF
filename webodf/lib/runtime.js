@@ -1595,9 +1595,9 @@ var ops = {};
 (function () {
     /**
      * @param {string} dir
-     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} manifests
+     * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} dependencies
      */
-    function loadManifest(dir, manifests) {
+    function loadDependenciesFromManifest(dir, dependencies) {
         "use strict";
         var path = dir + "/manifest.json",
             content,
@@ -1615,24 +1615,24 @@ var ops = {};
         manifest = /**@type{!Object.<!Array.<string>>}*/(list);
         for (m in manifest) {
             if (manifest.hasOwnProperty(m)) {
-                manifests[m] = {dir: dir, deps: manifest[m]};
+                dependencies[m] = {dir: dir, deps: manifest[m]};
             }
         }
     }
     /**
      * @return {!Object.<string,!{dir:string, deps:!Array.<string>}>}
      */
-    function loadManifests() {
+    function loadDependenciesFromManifests() {
         "use strict";
         var /**@type{!Object.<string,!{dir:string, deps:!Array.<string>}>}*/
             dependencies = [],
             paths = runtime.libraryPaths(),
             i;
         if (runtime.currentDirectory()) {
-            loadManifest(runtime.currentDirectory(), dependencies);
+            loadDependenciesFromManifest(runtime.currentDirectory(), dependencies);
         }
         for (i = 0; i < paths.length; i += 1) {
-            loadManifest(paths[i], dependencies);
+            loadDependenciesFromManifest(paths[i], dependencies);
         }
         return dependencies;
     }
@@ -1777,7 +1777,7 @@ var ops = {};
         if (IS_COMPILED_CODE || classnames.length === 0) {
             return callback && callback();
         }
-        dependencies = dependencies || loadManifests();
+        dependencies = dependencies || loadDependenciesFromManifests();
         classnames = getLoadList(classnames, dependencies, isDefined);
         if (classnames.length === 0) {
             return callback && callback();
