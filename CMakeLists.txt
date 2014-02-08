@@ -267,7 +267,6 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/jsfileslist.txt)
   )
 endif(NOT EXISTS ${CMAKE_BINARY_DIR}/jsfileslist.txt)
 include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
-set(LIBJSFILES ${TYPEDLIBJSFILES} ${UNTYPEDLIBJSFILES})
 
 set(HTML5UIFILES
   app/app.js
