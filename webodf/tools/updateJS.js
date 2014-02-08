@@ -313,43 +313,29 @@ function Main(cmakeListPath) {
      * @return {!Array.<string>} list
      */
     function createOrderedList(list, deps, defined) {
-        var sorted = [], i, p, l = list.length, depsPresent, missing,
-            lastLength = -1;
-        function isUndefined(dep) {
-            return !defined.hasOwnProperty(dep);
-        }
-        while (sorted.length < l && sorted.length !== lastLength) {
-            lastLength = sorted.length;
-            for (i = 0; i < l; i += 1) {
-                p = pathModule.normalize(list[i]);
-                if (!defined.hasOwnProperty(p)) {
-                    missing = deps[p].filter(isUndefined);
-                    depsPresent = missing.length === 0;
-                    if (depsPresent) {
-                        sorted.push(p);
-                        defined[p] = true;
-                    } else if (missing.length === 1 && deps[missing[0]].indexOf(p) !== -1) {
-                        // resolve simple circular problem
-                        sorted.push(p);
-                        defined[p] = true;
-                        sorted.push(missing[0]);
-                        defined[missing[0]] = true;
-                        console.log("Circular dependency: "
-                            + missing + " <> " + p);
-                    }
-                }
+        var sorted = [],
+            stack = {};
+        /**
+         * @param {string} n
+         * @param {string} parent
+         */
+        function visit(n, parent) {
+            if (defined[n]) {
+                return;
             }
-        }
-        if (sorted.length === lastLength) {
-            console.log("Unresolvable circular dependency:");
-            for (i = 0; i < l; i += 1) {
-                p = pathModule.normalize(list[i]);
-                if (!defined.hasOwnProperty(p)) {
-                    console.log(p + " misses " + deps[p].filter(isUndefined));
-                }
+            if (stack[n]) {
+                throw "Circular dependency caused by " + n + " and " + parent;
             }
-            process.exit(1);
+            stack[n] = true;
+            var d = deps[n], i, l = d.length;
+            for (i = 0; i < l; i += 1) {
+                visit(d[i], n);
+            }
+            stack[n] = false;
+            defined[n] = true;
+            sorted.push(n);
         }
+        list.forEach(visit);
         return sorted;
     }
 
