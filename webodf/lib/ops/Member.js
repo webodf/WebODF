@@ -93,9 +93,8 @@ ops.Member = function Member(memberId, properties) {
      */
     function removeProperties(removedProperties) {
         Object.keys(removedProperties).forEach(function (key) {
-            if (key === "fullName" || key === "color" || key === "imageUrl") {
-                delete removedProperties[key];
-            } else if (props.hasOwnProperty(key)) {
+            if (key !== "fullName" && key !== "color" && key !== "imageUrl"
+                    && props.hasOwnProperty(key)) {
                 delete props[key];
             }
         });
