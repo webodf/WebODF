@@ -40,11 +40,12 @@
 
 
 
-(function() {
+(function () {
     "use strict";
     // Multiple cached translators may exist in the same runtime. Therefore, each node id should
     // be globally unique, so they can be safely re-used by multiple translators
-    var nextNodeId = 0,
+    var /**@type{number}*/
+        nextNodeId = 0,
         /**
          * @const
          * @type {!number}
@@ -97,12 +98,16 @@
      */
     function StepsCache(rootNode, filter, bucketSize) {
         var coordinatens = "urn:webodf:names:steps",
-            /**@type {!Object.<(!string|!number), !ParagraphBookmark>}*/ stepToDomPoint = {},
-            /**@type {!Object.<!string, !ParagraphBookmark>}*/ nodeToBookmark = {},
+            /**@type{!Object.<(!string|!number), !ParagraphBookmark>}*/
+            stepToDomPoint = {},
+            /**@type{!Object.<!string, !ParagraphBookmark>}*/
+            nodeToBookmark = {},
             odfUtils = new odf.OdfUtils(),
             domUtils = new core.DomUtils(),
+            /**@type{!RootBookmark}*/
             basePoint,
-            /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+            /**@const*/
+            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
         /**
          * Bookmark indicating the first walkable position in a paragraph
@@ -114,6 +119,10 @@
             this.steps = steps;
             this.node = paragraphNode;
 
+            /**
+             * @param {!Node} node
+             * @return {number}
+             */
             function positionInContainer(node) {
                 var position = 0;
                 while (node && node.previousSibling) {
@@ -123,13 +132,19 @@
                 return position;
             }
 
-            this.setIteratorPosition = function(iterator) {
-                iterator.setUnfilteredPosition(paragraphNode.parentNode, positionInContainer(paragraphNode));
+            /**
+             * @param {!core.PositionIterator} iterator
+             */
+            this.setIteratorPosition = function (iterator) {
+                iterator.setUnfilteredPosition(
+                    /**@type{!Node}*/(paragraphNode.parentNode),
+                    positionInContainer(paragraphNode)
+                );
                 do {
                     if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                         break;
                     }
-                } while(iterator.nextPosition());
+                } while (iterator.nextPosition());
             };
         }
 
@@ -143,13 +158,16 @@
             this.steps = steps;
             this.node = rootNode;
 
-            this.setIteratorPosition = function(iterator) {
+            /**
+             * @param {!core.PositionIterator} iterator
+             */
+            this.setIteratorPosition = function (iterator) {
                 iterator.setUnfilteredPosition(rootNode, 0);
                 do {
                     if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
                         break;
                     }
-                } while(iterator.nextPosition());
+                } while (iterator.nextPosition());
             };
         }
 
@@ -171,17 +189,32 @@
             return Math.ceil(steps / bucketSize) * bucketSize;
         }
 
+        /**
+         * @param {!Element} node
+         */
         function clearNodeId(node) {
             node.removeAttributeNS(coordinatens, "nodeId");
         }
 
+        /**
+         * @param {!Node} node
+         * @return {string}
+         */
         function getNodeId(node) {
-            return node.nodeType === Node.ELEMENT_NODE && node.getAttributeNS(coordinatens, "nodeId");
+            var id = "";
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                id = /**@type{!Element}*/(node).getAttributeNS(coordinatens, "nodeId");
+            }
+            return id;
         }
 
+        /**
+         * @param {!Element} node
+         * @return {string}
+         */
         function setNodeId(node) {
-            var nodeId = nextNodeId;
-            node.setAttributeNS(coordinatens, "nodeId", nodeId.toString());
+            var nodeId = nextNodeId.toString();
+            node.setAttributeNS(coordinatens, "nodeId", nodeId);
             nextNodeId += 1;
             return nodeId;
         }
@@ -200,7 +233,7 @@
         /**
          * Fetches (or creates) a bookmark for the specified node. The bookmark's steps
          * are updated to the specified number of steps
-         * @param {!Node} node
+         * @param {!Element} node
          * @param {!number} steps
          * @return {!ParagraphBookmark}
          */
@@ -220,6 +253,11 @@
             return existingBookmark;
         }
 
+        /**
+         * @param {!Node} node
+         * @param {number} offset
+         * @return {boolean}
+         */
         function isFirstPositionInParagraph(node, offset) {
             return offset === 0 && odfUtils.isParagraph(node);
         }
@@ -231,7 +269,7 @@
          * @param {!number} offset Current offset
          * @param {!boolean} isWalkable True if the current node and offset is considered a walkable position by the filter
          */
-        this.updateCache = function(steps, node, offset, isWalkable) {
+        this.updateCache = function (steps, node, offset, isWalkable) {
             var stablePoint,
                 cacheBucket,
                 existingCachePoint,
@@ -245,10 +283,10 @@
                     // simply increase the step number by 1 to move to within the paragraph node
                     steps += 1;
                 }
-            } else if (node.hasChildNodes() && node.childNodes[offset]) {
+            } else if (node.hasChildNodes() && node.childNodes.item(offset)) {
                 // The current position iterator likes to report offsets in the parent container if offset === 0
                 // Handle this by checking if the referenced child node is perhaps a paragraph node
-                node = node.childNodes[offset];
+                node = /**@type{!Node}*/(node.childNodes.item(offset));
                 offset = 0;
                 stablePoint = isFirstPositionInParagraph(node, offset);
                 if (stablePoint) {
@@ -260,7 +298,7 @@
 
             if (stablePoint) {
                 // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
-                bookmark = getNodeBookmark(node, steps);
+                bookmark = getNodeBookmark(/**@type{!Element}*/(node), steps);
                 cacheBucket = getDestinationBucket(bookmark.steps);
                 existingCachePoint = stepToDomPoint[cacheBucket];
                 if (!existingCachePoint || bookmark.steps > existingCachePoint.steps) {
@@ -277,7 +315,7 @@
          * @param {!core.PositionIterator} iterator
          * @return {!number} Corresponding step for the current iterator position
          */
-        this.setToClosestStep = function(steps, iterator) {
+        this.setToClosestStep = function (steps, iterator) {
             var cacheBucket = getBucket(steps),
                 cachePoint;
 
@@ -298,23 +336,24 @@
          * @return {?ParagraphBookmark}
          */
         function findBookmarkedAncestor(node, offset) {
-            var nodeId,
+            var n,
+                nodeId,
                 bookmark = null;
 
-            node = node.childNodes[offset] || node;
-            while (!bookmark && node && node !== rootNode) {
-                nodeId = getNodeId(node);
+            n = node.childNodes.item(offset) || node;
+            while (!bookmark && n && n !== rootNode) {
+                nodeId = getNodeId(n);
                 if (nodeId) {
                     // Take care as a nodeId may be bookmarked in another translator, but not this particular instance
                     // Keep crawling up the hierarchy until a node is found with a node id AND bookmark in this translator
                     bookmark = nodeToBookmark[nodeId];
-                    if (bookmark && !isValidBookmarkForNode(node, bookmark)) {
+                    if (bookmark && !isValidBookmarkForNode(n, bookmark)) {
                         runtime.log("Cloned node detected. Creating new bookmark");
                         bookmark = null;
-                        clearNodeId(node);
+                        clearNodeId(/**@type{!Element}*/(n));
                     }
                 }
-                node = node.parentNode;
+                n = n.parentNode;
             }
             return bookmark;
         }
@@ -327,17 +366,25 @@
          * @param {!core.PositionIterator} iterator
          * @return {!number} Corresponding step for the current iterator position
          */
-        this.setToClosestDomPoint = function(node, offset, iterator) {
-            var bookmark;
+        this.setToClosestDomPoint = function (node, offset, iterator) {
+            var /**@type{!RootBookmark|?ParagraphBookmark}*/
+                bookmark,
+                b,
+                /**@type{string|number}*/
+                key;
 
             if (node === rootNode && offset === 0) {
                 bookmark = basePoint;
             } else if (node === rootNode && offset === rootNode.childNodes.length) {
-                bookmark = Object.keys(stepToDomPoint)
-                    .map(function(cacheBucket) { return stepToDomPoint[cacheBucket]; })
-                    .reduce(function(largestBookmark, bookmark) {
-                        return bookmark.steps > largestBookmark.steps ? bookmark : largestBookmark;
-                    }, basePoint);
+                bookmark = basePoint;
+                for (key in stepToDomPoint) {
+                    if (stepToDomPoint.hasOwnProperty(key)) {
+                        b = stepToDomPoint[key];
+                        if (b.steps > bookmark.steps) {
+                            bookmark = b;
+                        }
+                    }
+                }
             } else {
                 bookmark = findBookmarkedAncestor(node, offset);
                 if (!bookmark) {
@@ -357,26 +404,38 @@
         /**
          * Update all cached bookmarks starting just beyond the specified step
          * @param {!number} inflectionStep Step beyond which the changes occurs. Bookmarks beyond step+1 will be updated
-         * @param {!function(!ParagraphBookmark)} doUpdate Callback to update the bookmark
+         * @param {!function(number):number} getUpdatedSteps Callback to get an updated number of bookmark steps
          */
-        this.updateCacheAtPoint = function(inflectionStep, doUpdate) {
-            var affectedBookmarks,
-                updatedBuckets = {};
+        this.updateCacheAtPoint = function (inflectionStep, getUpdatedSteps) {
+            var affectedBookmarks = [],
+                /**@type{!Object.<(string|number),!ParagraphBookmark>}*/
+                updatedBuckets = {},
+                /**@type{string}*/
+                key,
+                bookmark;
 
             // Key concept: on step removal, the inflectionStep is replaced by the following step.
             // In the case of paragraph removal, this means the bookmark at exactly the point of inflection might be replaced.
 
-            affectedBookmarks = Object.keys(nodeToBookmark)
-                .map(function(nodeId) { return nodeToBookmark[nodeId]; })
-                .filter(function(bookmark) { return bookmark.steps > inflectionStep; });
+            for (key in nodeToBookmark) {
+                if (nodeToBookmark.hasOwnProperty(key)) {
+                    bookmark = nodeToBookmark[key];
+                    if (bookmark.steps > inflectionStep) {
+                        affectedBookmarks.push(bookmark);
+                    }
+                }
+            }
 
-            affectedBookmarks.forEach(function(bookmark) {
+            /**
+             * @param {!ParagraphBookmark} bookmark
+             */
+            function handle(bookmark) {
                 var originalCacheBucket = getDestinationBucket(bookmark.steps),
                     newCacheBucket,
                     existingBookmark;
 
                 if (domUtils.containsNode(rootNode, bookmark.node)) {
-                    doUpdate(bookmark);
+                    bookmark.steps = getUpdatedSteps(bookmark.steps);
                     // The destination cache bucket might have updated as a result of the bookmark update
                     newCacheBucket = getDestinationBucket(bookmark.steps);
                     existingBookmark = updatedBuckets[newCacheBucket];
@@ -392,9 +451,10 @@
                     // The new cache entry will be added in the subsequent update
                     delete stepToDomPoint[originalCacheBucket];
                 }
-            });
+            }
+            affectedBookmarks.forEach(handle);
 
-            Object.keys(updatedBuckets).forEach(function(cacheBucket) {
+            Object.keys(updatedBuckets).forEach(function (cacheBucket) {
                 stepToDomPoint[cacheBucket] = updatedBuckets[cacheBucket];
             });
         };
@@ -415,10 +475,13 @@
      */
     ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter, bucketSize) {
         var rootNode = getRootNode(),
+            /**@type{!StepsCache}*/
             stepsCache = new StepsCache(rootNode, filter, bucketSize),
             domUtils = new core.DomUtils(),
+            /**@type{!core.PositionIterator}*/
             iterator = newIterator(getRootNode()),
-            /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+            /**@const*/
+            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
         /**
          * This evil little check is necessary because someone, not mentioning any names *cough*
@@ -444,8 +507,9 @@
          * @param {!number} steps
          * @return {{node: !Node, offset: !number}}
          */
-        this.convertStepsToDomPoint = function(steps) {
-            var stepsFromRoot,
+        this.convertStepsToDomPoint = function (steps) {
+            var /**@type{!number}*/
+                stepsFromRoot,
                 isWalkable;
 
             if (steps < 0) {
@@ -505,14 +569,16 @@
 
         /**
          * Convert the supplied DOM node & offset pair into it's equivalent steps from root
+         * If the node & offset is not in an accepted location, the
+         * roundDirection delegate is used to choose between rounding up or
+         * rounding down to the nearest step. If not provided, the default
+         * behaviour is to round down.
          * @param {!Node} node
          * @param {!number} offset
-         * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
-         * is not in an accepted location, this delegate is used to choose between rounding up or
-         * rounding down to the nearest step. If not provided, the default behaviour is to round down.
+         * @param {function(!number, !Node, !number):!boolean=} roundDirection
          * @return {!number}
          */
-        this.convertDomPointToSteps = function(node, offset, roundDirection) {
+        this.convertDomPointToSteps = function (node, offset, roundDirection) {
             var stepsFromRoot,
                 beforeRoot,
                 destinationNode,
@@ -523,8 +589,8 @@
             verifyRootNode();
             if (!domUtils.containsNode(rootNode, node)) {
                 beforeRoot = domUtils.comparePoints(rootNode, 0, node, offset) < 0;
-                node = rootNode;
-                offset = beforeRoot ? 0 : rootNode.childNodes.length;
+                node = /**@type{!Node}*/(rootNode);
+                offset = beforeRoot ? 0 : /**@type{!Element}*/(rootNode).childNodes.length;
             }
 
             iterator.setUnfilteredPosition(node, offset);
@@ -560,7 +626,7 @@
         /**
          * Iterates over all available positions starting at the root node and primes the cache
          */
-        this.prime = function() {
+        this.prime = function () {
             var stepsFromRoot,
                 isWalkable;
 
@@ -578,31 +644,42 @@
         /**
          * @param {!{position: !number, length: !number}} eventArgs
          */
-        this.handleStepsInserted = function(eventArgs) {
+        this.handleStepsInserted = function (eventArgs) {
             verifyRootNode();
             // Old position = position
             // New position = position + length
             // E.g., {position: 10, length: 1} indicates 10 => 10, New => 11, 11 => 12, 12 => 13
-            stepsCache.updateCacheAtPoint(eventArgs.position, function(bucket) {
-                bucket.steps += eventArgs.length;
-            });
+            /**
+             * @param {number} steps
+             * @return {number}
+             */
+            function doUpdate(steps) {
+                return steps + eventArgs.length;
+            }
+            stepsCache.updateCacheAtPoint(eventArgs.position, doUpdate);
         };
 
         /**
          * @param {!{position: !number, length: !number}} eventArgs
          */
-        this.handleStepsRemoved = function(eventArgs) {
+        this.handleStepsRemoved = function (eventArgs) {
             verifyRootNode();
             // Old position = position + length
             // New position = position
             // E.g., {position: 10, length: 1} indicates 10 => 10, 11 => 10, 12 => 11
-            stepsCache.updateCacheAtPoint(eventArgs.position, function(bucket) {
-                bucket.steps -= eventArgs.length;
-                if (bucket.steps < 0) {
+            /**
+             * @param {number} steps
+             * @return {number}
+             */
+            function doUpdate(steps) {
+                steps -= eventArgs.length;
+                if (steps < 0) {
                     // Obviously, there can't be negative steps in a document
-                    bucket.steps = 0;
+                    steps = 0;
                 }
-            });
+                return steps;
+            }
+            stepsCache.updateCacheAtPoint(eventArgs.position, doUpdate);
         };
     };
 

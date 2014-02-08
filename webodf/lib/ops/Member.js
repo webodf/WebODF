@@ -26,22 +26,36 @@
 /*global ops, runtime*/
 
 /**
+ * @constructor
+ */
+ops.MemberProperties = function () {
+    "use strict";
+    /**@type{string}*/
+    this.fullName;
+    /**@type{string}*/
+    this.color;
+    /**@type{string}*/
+    this.imageUrl;
+};
+
+/**
  * Class to represent a member in WebODF.
  * A member is uniquely identified by it's memberId,
  * and this class encapsulates various things like
  * the full name and also custom properties that can represent
  * information like the avatar image, color, etc.
+ * Custom properties that may contain some reserved keys such as fullName
+ * (string), imageUrl (string representing a URL) and color (string
+ * representing CSS color value) can be passed.
  * @constructor
  * @param {!string} memberId The unique identifier of this member.
- * @param {?Object.<!string, !string>} properties Custom properties
- * that may contain some reserved keys such as fullName (string),
- * imageUrl (string representing a URL) and color (string representing
- * CSS color value).
+ * @param {!ops.MemberProperties} properties
  */
 ops.Member = function Member(memberId, properties) {
     "use strict";
 
-    var props = {};
+    var /**@type{!ops.MemberProperties}*/
+        props = new ops.MemberProperties();
 
     /**
      * Returns the member ID of the member
@@ -53,7 +67,7 @@ ops.Member = function Member(memberId, properties) {
     /**
      * Returns the properties of the member
      * (including fullName, color, and imageUrl)
-     * @return {Object}
+     * @return {!ops.MemberProperties}
      */
     function getProperties() {
         return props;
@@ -74,16 +88,13 @@ ops.Member = function Member(memberId, properties) {
      * 'fullName', 'color', and 'imageUrl' are not
      * removable, they will be filtered out of 
      * removedProperties if found.
-     * @param {!Object} removedProperties
+     * @param {!Object.<string,string>} removedProperties
      * @return {undefined}
      */
     function removeProperties(removedProperties) {
-        delete removedProperties.fullName;
-        delete removedProperties.color;
-        delete removedProperties.imageUrl;
-
         Object.keys(removedProperties).forEach(function (key) {
-            if (props.hasOwnProperty(key)) {
+            if (key !== "fullName" && key !== "color" && key !== "imageUrl"
+                    && props.hasOwnProperty(key)) {
                 delete props[key];
             }
         });

@@ -49,7 +49,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     "use strict";
 
     var self = this,
+        /**@type{!odf.OdfUtils}*/
         odfUtils,
+        /**@type{!core.DomUtils}*/
         domUtils,
         /**!Object.<!ops.OdtCursor>*/
         cursors = {},
@@ -80,6 +82,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@const*/
         FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter,
+        /**@type{!ops.StepsTranslator}*/
         stepsTranslator,
         lastEditingOp,
         unsupportedMetadataRemoved = false;
@@ -118,6 +121,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return initialDoc;
     };
 
+    /**
+     * @param {!Element} documentElement
+     */
     this.setDocumentElement = function (documentElement) {
         var odfContainer = odfCanvas.odfContainer();
         // TODO Replace with a neater hack for reloading the Odt tree
@@ -321,7 +327,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             node = iterator.container(),
             lastTextNode,
             nodeOffset = 0,
-            cursorNode = null;
+            cursorNode = null,
+            text;
 
         if (node.nodeType === Node.TEXT_NODE) {
             // Iterator has stopped within an existing text node, to put that up as a possible target node
@@ -385,16 +392,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         // After the above cursor adjustments, if the lastTextNode
         // has a text node previousSibling, merge them and make the result the lastTextNode
         while (lastTextNode.previousSibling && lastTextNode.previousSibling.nodeType === Node.TEXT_NODE) {
-            lastTextNode.previousSibling.appendData(lastTextNode.data);
-            nodeOffset = /**@type{!number}*/(lastTextNode.previousSibling.length);
-            lastTextNode = /**@type{!Text}*/(lastTextNode.previousSibling);
+            text = /**@type{!Text}*/(lastTextNode.previousSibling);
+            text.appendData(lastTextNode.data);
+            nodeOffset = text.length;
+            lastTextNode = text;
             lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
         }
 
         // Empty text nodes can be left on either side of the split operations that have occurred
         while (lastTextNode.nextSibling && lastTextNode.nextSibling.nodeType === Node.TEXT_NODE) {
-            lastTextNode.appendData(lastTextNode.nextSibling.data);
-            lastTextNode.parentNode.removeChild(lastTextNode.nextSibling);
+            text = /**@type{!Text}*/(lastTextNode.nextSibling);
+            lastTextNode.appendData(text.data);
+            lastTextNode.parentNode.removeChild(text);
         }
 
         return {textNode: lastTextNode, offset: nodeOffset };
@@ -505,8 +514,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return space;
     }
 
+    /**
+     * @param {!number} position
+     */
     function upgradeWhitespacesAtPosition(position) {
         var iterator = getIteratorAtPosition(position),
+            /**@type{!Node}*/
             container,
             offset,
             i;
@@ -520,7 +533,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             offset = iterator.unfilteredDomOffset();
             if (container.nodeType === Node.TEXT_NODE
                     && container.data[offset] === ' '
-                    && odfUtils.isSignificantWhitespace(container, offset)) {
+                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset)) {
                 container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
                 // Reset the iterator position to be after the newly created space character
                 iterator.moveToEndOfNode(container);
@@ -542,6 +555,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     this.downgradeWhitespacesAtPosition = function (position) {
         var iterator = getIteratorAtPosition(position),
+            /**@type{!Node}*/
             container,
             offset,
             firstSpaceElementChild,
@@ -549,18 +563,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
         container = iterator.container();
         offset = iterator.unfilteredDomOffset();
-        while (!odfUtils.isSpaceElement(container) && container.childNodes[offset]) {
+        while (!odfUtils.isSpaceElement(container) && container.childNodes.item(offset)) {
             // iterator.container will likely return a paragraph element with a non-zero offset
             // easiest way to translate this is to keep diving into child nodes until the either
             // an odf character element is encountered, or there are no more children
-            container = container.childNodes[offset];
+            container = /**@type{!Node}*/(container.childNodes.item(offset));
             offset = 0;
         }
         if (container.nodeType === Node.TEXT_NODE) {
             // a space element cannot be a text node. Perhaps it's parent is
             // this would be hit if iterator.container returns a text node or the previous loop dives
             // all the way down without finding any odf character elements
-            container = container.parentNode;
+            container = /**@type{!Node}*/(container.parentNode);
         }
         if (odfUtils.isDowngradableSpaceElement(container)) {
             firstSpaceElementChild = container.firstChild;
@@ -607,7 +621,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!Node}
      */
     function paragraphOrRoot(container, offset, root) {
-        var node = container.childNodes[offset] || container,
+        var node = container.childNodes.item(offset) || container,
             paragraph = getParagraphElement(node);
         if (paragraph && domUtils.containsNode(root, paragraph)) {
             // Only return the paragraph if it is contained within the destination root
@@ -691,7 +705,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string} memberid
      * @return {{position: !number, length: !number}}
      */
-    this.getCursorSelection = function(memberid) {
+    this.getCursorSelection = function (memberid) {
         var cursor = cursors[memberid],
             focusPosition = 0,
             anchorPosition = 0;
@@ -767,7 +781,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!Array.<string>}
      */
     this.getMemberIds = function () {
-        var list = [], i;
+        var list = [],
+            /**@type{string}*/
+            i;
         for (i in cursors) {
             if (cursors.hasOwnProperty(i)) {
                 list.push(cursors[i].getMemberId());
@@ -864,7 +880,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {string|!Node} inputMemberId
-     * @reurn {!RootFilter}
+     * @return {!RootFilter}
      */
     this.createRootFilter = function (inputMemberId) {
         return new RootFilter(inputMemberId);
@@ -874,7 +890,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.close = function(callback) {
+    this.close = function (callback) {
         // TODO: check if anything needs to be cleaned up
         callback();
     };
@@ -883,7 +899,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         callback();
     };
 
