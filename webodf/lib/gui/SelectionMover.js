@@ -39,7 +39,11 @@
 /*global Node, NodeFilter, runtime, core, gui, odf*/
 
 /**@typedef{{
-  countSteps:function(number,!core.PositionFilter):number
+  countSteps:function(number,!core.PositionFilter):number,
+  convertForwardStepsBetweenFilters:function(number,!core.PositionFilter,!core.PositionFilter):number,
+  convertBackwardStepsBetweenFilters:function(number,!core.PositionFilter,!core.PositionFilter):number,
+  countLinesSteps:function(number,!core.PositionFilter):number,
+  countStepsToLineBoundary:function(number,!core.PositionFilter):number
 }}*/
 gui.StepCounter;
 

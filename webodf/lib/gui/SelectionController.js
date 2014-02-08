@@ -63,13 +63,21 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
-     * @param {Function} lookup
-     * @return {!function(!Node, !number):!function(!number, !Node, !number):!boolean}
+     * @param {function(!Node):Node} lookup
+     * @return {function(!Node,number):function(number,!Node,number):boolean}
      */
     /*jslint unparam:true*/
     function constrain(lookup) {
+        /**
+         * @param {!Node} originalNode
+         * @return {function(number,!Node,number):boolean}
+         */
         return function (originalNode) {
             var originalContainer = lookup(originalNode);
+            /**
+             * @param {number} step
+             * @param {!Node} node
+             */
             return function (step, node) {
                 return lookup(node) === originalContainer;
             };
@@ -182,13 +190,14 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     function expandToWordBoundaries(range) {
         var alphaNumeric = /[A-Za-z0-9]/,
             iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
-            currentNode, c;
+            currentNode,
+            c;
 
         iterator.setUnfilteredPosition(/**@type{!Node}*/(range.startContainer), range.startOffset);
         while (iterator.previousPosition()) {
             currentNode = iterator.getCurrentNode();
             if (currentNode.nodeType === Node.TEXT_NODE) {
-                c = currentNode.data[iterator.unfilteredDomOffset()];
+                c = /**@type{!Text}*/(currentNode).substringData(iterator.unfilteredDomOffset(), 1);
                 if (!alphaNumeric.test(c)) {
                     break;
                 }
@@ -202,7 +211,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         do {
             currentNode = iterator.getCurrentNode();
             if (currentNode.nodeType === Node.TEXT_NODE) {
-                c = currentNode.data[iterator.unfilteredDomOffset()];
+                c = /**@type{!Text}*/(currentNode).substringData(iterator.unfilteredDomOffset(), 1);
                 if (!alphaNumeric.test(c)) {
                     break;
                 }
@@ -288,9 +297,11 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter(),
             newLength;
         if (lengthAdjust !== 0) {
-            lengthAdjust = (lengthAdjust > 0)
-                ? stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter)
-                : -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter);
+            if (lengthAdjust > 0) {
+                lengthAdjust = stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter);
+            } else {
+                lengthAdjust = -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter);
+            }
 
             newLength = selection.length + lengthAdjust;
             session.enqueue([createOpMoveCursor(selection.position, newLength)]);
@@ -379,7 +390,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToRight() {
-        extendSelection(function(iterator) { return iterator.nextStep(); });
+        extendSelection(function (iterator) { return iterator.nextStep(); });
         return true;
     }
     this.extendSelectionToRight = extendSelectionToRight;
@@ -495,7 +506,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             
             while (node !== rootNode && node !== null && neighboringNode === null) {
                 unfilteredCandidate = (direction < 0) ? node.previousSibling : node.nextSibling;
-                if (nodeFilter.acceptNode(unfilteredCandidate) === NodeFilter.FILTER_ACCEPT) {
+                if (nodeFilter(unfilteredCandidate) === NodeFilter.FILTER_ACCEPT) {
                     neighboringNode = unfilteredCandidate;
                 }
                 node = node.parentNode;
@@ -538,6 +549,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
          */
         this.acceptPosition = function (iterator) {
             var container = iterator.container(),
+                /**@type{Node}*/
                 leftNode = iterator.leftNode(),
                 rightNode = iterator.rightNode(),
                 // For performance reasons, do not calculate the offset inside the dom until it is necessary

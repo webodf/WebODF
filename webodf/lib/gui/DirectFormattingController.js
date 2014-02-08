@@ -64,7 +64,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         /**@type{Object}*/
         directCursorStyleProperties,
         // cached text settings
-        /**@type{!Array.<Object>}*/
+        /**@type{!Array.<Object.<string,Object>>}*/
         selectionAppliedStyles = [],
         /**@type{!gui.StyleSummary}*/
         selectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles);
@@ -254,6 +254,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      */
     this.createCursorStyleOp = function (position, length, useCachedStyle) {
         var styleOp = null,
+            /**@type{Object.<string,Object>}*/
             properties = useCachedStyle ? selectionAppliedStyles[0] : directCursorStyleProperties;
 
         if (properties && properties['style:text-properties']) {
@@ -457,9 +458,9 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     }
 
     /**
-     * @param {!Object.<!string, *>} obj
-     * @param {!string} key
-     * @return {*}
+     * @param {!Object.<string,string>} obj
+     * @param {string} key
+     * @return {string|undefined}
      */
     function getOwnProperty(obj, key) {
         return obj.hasOwnProperty(key) ? obj[key] : undefined;
@@ -475,11 +476,13 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             formatting = odtDocument.getFormatting(),
             operations = [],
             derivedStyleNames = {},
+            /**@type{string|undefined}*/
             defaultStyleName;
 
         paragraphs.forEach(function (paragraph) {
             var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
                 paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
+                /**@type{string|undefined}*/
                 newParagraphStyleName,
                 opAddStyle,
                 opSetParagraphStyle,
@@ -579,15 +582,21 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
 
     /**
      * @param {!number} direction
-     * @param {!Object} paragraphStyle
+     * @param {!Object.<string,Object.<string,string>>} paragraphStyle
      * @return {!Object}
      */
     function modifyParagraphIndent(direction, paragraphStyle) {
         var tabStopDistance = odtDocument.getFormatting().getDefaultTabStopDistance(),
             paragraphProperties = paragraphStyle["style:paragraph-properties"],
-            indentValue = paragraphProperties && paragraphProperties["fo:margin-left"],
-            indent = indentValue && odfUtils.parseLength(indentValue),
+            indentValue,
+            indent,
             newIndent;
+        if (paragraphProperties) {
+            indentValue = paragraphProperties["fo:margin-left"];
+            if (indentValue) {
+                indent = odfUtils.parseLength(indentValue);
+            }
+        }
 
         if (indent && indent.unit === tabStopDistance.unit) {
             newIndent = (indent.value + (direction * tabStopDistance.value)) + indent.unit;
@@ -653,8 +662,8 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             return true;
         }
 
-        textStyle = textStyle['style:text-properties'];
-        paragraphStyle = paragraphStyle['style:text-properties'];
+        textStyle = /**@type{!Object.<string,string>}*/(textStyle['style:text-properties']);
+        paragraphStyle = /**@type{!Object.<string,string>}*/(paragraphStyle['style:text-properties']);
         return !Object.keys(textStyle).every(function (key) {
             return textStyle[key] === paragraphStyle[key];
         });
@@ -664,7 +673,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * TODO: HACK, REMOVE
      * Generates operations that would create and apply the current direct cursor
      * styling to the paragraph at given position.
-     * @param position
+     * @param {number} position
      * @return {!Array.<!ops.Operation>}
      */
     this.createParagraphStyleOps = function (position) {
@@ -682,14 +691,14 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             endNode = cursor.getAnchorNode();
         }
 
-        paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(endNode));
+        paragraphNode = /**@type{!Element}*/(odtDocument.getParagraphElement(endNode));
         runtime.assert(Boolean(paragraphNode), "DirectFormattingController: Cursor outside paragraph");
         if (!isSelectionAtTheEndOfLastParagraph(range, paragraphNode)) {
             return operations;
         }
 
         if (endNode !== startNode) {
-            paragraphNode = /**@type{!Node}*/(odtDocument.getParagraphElement(startNode));
+            paragraphNode = /**@type{!Element}*/(odtDocument.getParagraphElement(startNode));
         }
 
         if (!directCursorStyleProperties && !isTextStyleDifferentFromFirstParagraph(range, paragraphNode)) {
