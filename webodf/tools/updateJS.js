@@ -63,47 +63,6 @@ function Main(cmakeListPath) {
         }
     }
 
-    function addLoop(list, circs, l) {
-        var i;
-        for (i = 1; i < l; i += 1) {
-            add(circs, list[i - 1], list[i]);
-        }
-        add(circs, list[l - 1], list[0]);
-    }
-
-    /**
-     * Function to help find loops/circles in the dependency graph.
-     */
-    function findLoops(v, occs, list, circs, pos) {
-        var i, name, j, l = v.length;
-        for (i = 0; i < l; i += 1) {
-            name = v[i];
-            j = list.lastIndexOf(name, pos);
-            if (j === 0) {
-                addLoop(list, circs, pos);
-            } else if (j === -1 && occs.hasOwnProperty(name)) {
-                list[pos] = name;
-                findLoops(occs[name], occs, list, circs, pos + 1);
-            }
-        }
-    }
-
-    /**
-     * Find loops/circles in the dependency graph.
-     */
-    function findCircles(occs) {
-        var name,
-            list = [],
-            circs = {};
-        for (name in occs) {
-            if (occs.hasOwnProperty(name)) {
-                list[0] = name;
-                findLoops(occs[name], occs, list, circs, 1);
-            }
-        }
-        return circs;
-    }
-
     /**
      * Scan javascript source for the given symbols.
      * @param {string} source
@@ -134,30 +93,24 @@ function Main(cmakeListPath) {
     }
 
     /**
-     * Retrieve all the classes deriving from ops.Operation..
-     */
-    function getOperations(files) {
-        return Object.keys(files).filter(function (key) {
-            return isOperation(files[key]);
-        });
-    }
-
-    /**
      * Print a .dot dependency graph.
      */
-    function print(occs, out, files) {
-        var i, j, m, n, done = {}, d;
-        out.write("digraph webodf {\n");
+    function print(occs, files) {
+        var i, j, m, n, done = {}, d, out;
+        out = "# This is a graphviz file.\n";
+        out += "# dot -Tsvg dependencies.dot > dependencies.svg\n";
+        out += "# dot -Tpng dependencies.dot > dependencies.png\n";
+        out += "digraph webodf {\n";
         for (i in occs) {
             if (occs.hasOwnProperty(i)) {
                 m = occs[i];
                 for (j = 0; j < m.length; j += 1) {
-                    i = isOperation(files[i]) ? "{Operation}" : i;
+                    i = isOperation(files["lib/" + i]) ? "{Operation}" : i;
                     n = m[j];
                     if (occs[n].length) {
-                        n = isOperation(files[n]) ? "{Operation}" : n;
+                        n = isOperation(files["lib/" + n]) ? "{Operation}" : n;
                         if (!done.hasOwnProperty(i) || !done[i].hasOwnProperty(n)) {
-                            out.write('"' + i + '" -> "' + n + '";\n');
+                            out += '"' + i + '" -> "' + n + '";\n';
                             d = done[i] = done[i] || {};
                             d[n] = 1;
                         }
@@ -165,39 +118,9 @@ function Main(cmakeListPath) {
                 }
             }
         }
-        out.write("}\n");
+        out += "}\n";
+        return out;
     }
-
-    function mergeOperations(files, occs) {
-        var ops = getOperations(files), i, j, v;
-        for (i = 0; i < ops.length; i += 1) {
-            v = occs[i];
-            for (j = 0; j < v.length; j += 1) {
-                add(occs, "{Operations}", v[j]);
-            }
-            delete occs[i];
-        }
-    }
-
-    /**
-     * Analyze the given files and create a graphviz dependency graph.
-     */
-    this.analyze = function (files) {
-        var list = Object.keys(files),
-            occs = {},
-            classname,
-            i;
-        for (i = 0; i < list.length; i += 1) {
-            occs[list[i]] = [];
-        }
-        for (i = 0; i < list.length; i += 1) {
-            classname = list[i];
-            findOccurances(classname, [classname], files, occs);
-        }
-        mergeOperations(files, occs);
-        occs = findCircles(occs);
-        print(occs, process.stdout, files);
-    };
 
     /**
      * @param {string} path 
@@ -444,6 +367,8 @@ function Main(cmakeListPath) {
             }
         }
         reduce(deps.lib);
+        saveIfDifferent(pathModule.join(buildDir, "dependencies.dot"),
+                print(deps.lib, files));
         for (i = 0; i < dirs.length; i += 1) {
             d = dirs[i];
             j = deps[d.split(pathModule.sep)[0]];
