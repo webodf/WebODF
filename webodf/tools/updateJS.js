@@ -309,14 +309,15 @@ function Main(cmakeListPath) {
             compiledFiles;
         compiledFiles = Object.keys(lib).filter(function (path) {
             return ignoredFiles.indexOf(path) === -1;
-        });
+        }).sort();
         sortedTyped = createOrderedList(compiledFiles, lib, {});
         createCMakeLists(sortedTyped.map(deNormalizePath));
     }
 
     function updateKarmaConfig(deps) {
         var path = "tools/karma.conf.js",
-            modules = createOrderedList(Object.keys(deps.lib), deps.lib, {});
+            lib = deps.lib,
+            modules = createOrderedList(Object.keys(deps.lib).sort(), lib, {});
         fs.readFile(path, "utf8", function (err, content) {
             if (err) {
                 throw err;
@@ -352,6 +353,37 @@ function Main(cmakeListPath) {
         }
         out += "}";
         return out;
+    }
+
+    /**
+     * Remove dependencies that depend on other dependencies.
+     * @param {!Object.<string,!Array.<string>>} deps
+     */
+    function reduce(deps) {
+        // return true if a depends on b
+        function dependsOn(a, b) {
+            return a === b || deps[b].some(function (c) {
+                return dependsOn(a, c);
+            });
+        }
+        Object.keys(deps).forEach(function (key) {
+            var d = deps[key],
+                i = 0,
+                dep,
+                redundant;
+            function f(a) {
+                return dep !== a && dependsOn(dep, a);
+            }
+            while (i < d.length) {
+                dep = d[i];
+                redundant = d.some(f);
+                if (redundant) {
+                    d.splice(i, 1);
+                } else {
+                    i += 1;
+                }
+            }
+        });
     }
 
     /**
@@ -411,6 +443,7 @@ function Main(cmakeListPath) {
                 d[j] = occs[classname].map(prefixDir).sort();
             }
         }
+        reduce(deps.lib);
         for (i = 0; i < dirs.length; i += 1) {
             d = dirs[i];
             j = deps[d.split(pathModule.sep)[0]];
