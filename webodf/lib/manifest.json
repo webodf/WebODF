@@ -578,6 +578,7 @@
         "ops.OpRemoveText",
         "ops.OpSetParagraphStyle",
         "ops.OpSplitParagraph",
+        "ops.OpUpdateMetadata",
         "ops.OpUpdateParagraphStyle"
     ],
     "ops.OperationTransformer": [

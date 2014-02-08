@@ -140,6 +140,8 @@ function Main(cmakeListPath) {
             "ops/Operation.js",
             "ops/OperationFactory.js",
             "ops/OperationRouter.js",
+            "ops/OperationTransformMatrix.js",
+            "ops/OperationTransformer.js",
             "ops/Server.js",
             "ops/Session.js",
             "ops/StepsTranslator.js",
@@ -383,7 +385,7 @@ function Main(cmakeListPath) {
         return sorted;
     }
 
-    function createCMakeLists(typed, almostTyped, remaining) {
+    function createCMakeLists(typed, almostTyped) {
         var path = cmakeListPath, content;
         content = "set(TYPEDLIBJSFILES\n" +
                 "    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js\n" +
@@ -392,10 +394,7 @@ function Main(cmakeListPath) {
                 "set(UNTYPEDLIBJSFILES" +
                 "\n# These files depend only on files that are 100% typed." +
                 "\n    lib/" +
-                almostTyped.join("\n    lib/") +
-                "\n# These files depend on files that are not 100% typed." +
-                "\n    lib/" +
-                remaining.join("\n    lib/") + "\n)";
+                almostTyped.join("\n    lib/") + "\n)";
         saveIfDifferent(path, content, function () {
             console.log("JS file dependencies were updated.");
             process.exit(1);

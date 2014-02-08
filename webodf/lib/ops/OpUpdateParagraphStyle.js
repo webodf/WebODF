@@ -160,7 +160,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     timestamp:number,
     styleName:string,
     setProperties:Object,
-    removedProperties:Object.<string,{attributes:string}>
+    removedProperties:{attributes:string}
 }}*/
 ops.OpUpdateParagraphStyle.Spec;
 /**@typedef{{

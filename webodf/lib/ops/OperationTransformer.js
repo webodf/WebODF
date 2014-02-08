@@ -36,11 +36,12 @@
 ops.OperationTransformer = function OperationTransformer() {
     "use strict";
 
-    var operationFactory,
+    var /**@type{!ops.OperationFactory}}*/
+        operationFactory,
         operationTransformMatrix = new ops.OperationTransformMatrix();
 
     /**
-     * @param {!Array.<!Object>} opspecs
+     * @param {!Array.<!{optype:string}>} opspecs
      * @return {!Array.<!ops.Operation>}
      */
     function operations(opspecs) {
@@ -55,19 +56,19 @@ ops.OperationTransformer = function OperationTransformer() {
 
     /**
      * TODO: priority could be read from op spec, here be an attribute from-server
-     * @param {!Object} opSpecA op with lower priority in case of tie breaking
-     * @param {!Object} opSpecB op with higher priority in case of tie breaking
-     * @return {?{opSpecsA:!Array.<!Object>,
-     *            opSpecsB:!Array.<!Object>}}
+     * @param {!{optype:string}} opSpecA op with lower priority in case of tie breaking
+     * @param {!{optype:string}} opSpecB op with higher priority in case of tie breaking
+     * @return {?{opSpecsA:!Array.<!{optype:string}>,
+     *            opSpecsB:!Array.<!{optype:string}>}}
      */
     function transformOpVsOp(opSpecA, opSpecB) {
         return operationTransformMatrix.transformOpspecVsOpspec(opSpecA, opSpecB);
     }
 
     /**
-     * @param {!Array.<!Object>} opSpecsA   sequence of ops with lower priority in case of tie breaking
-     * @param {?Object} opSpecB   op with higher priority in case of tie breaking
-     * @return {?{opSpecsA:!Array.<!Object>,
+     * @param {!Array.<!{optype:string}>} opSpecsA   sequence of ops with lower priority in case of tie breaking
+     * @param {?{optype:string}} opSpecB   op with higher priority in case of tie breaking
+     * @return {?{opSpecsA:!Array.<!{optype:string}>,
      *            opSpecsB:!Array.<!Object>}}
      */
     function transformOpListVsOp(opSpecsA, opSpecB) {
@@ -75,8 +76,8 @@ ops.OperationTransformer = function OperationTransformer() {
             transformedOpspecsA = [],
             transformedOpspecsB = [];
 
-        while ((opSpecsA.length > 0) && opSpecB) {
-            transformResult = transformOpVsOp(opSpecsA.shift(), /**@type {!ops.Operation}*/(opSpecB));
+        while (opSpecsA.length > 0 && opSpecB) {
+            transformResult = transformOpVsOp(opSpecsA.shift(), opSpecB);
             // unresolvable operation conflicts?
             if (!transformResult) {
                 return null;
@@ -138,7 +139,7 @@ ops.OperationTransformer = function OperationTransformer() {
 
     /**
      * @param {!Array.<!Object>} opSpecsA   sequence of opspecs with lower priority in case of tie breaking
-     * @param {!Array.<!Object>} opSpecsB   opspecs with higher priority in case of tie breaking
+     * @param {!Array.<!{optype:string}>} opSpecsB   opspecs with higher priority in case of tie breaking
      * @return {?{opsA:Array.<!ops.Operation>,
      *            opsB:Array.<!ops.Operation>}}
      */
