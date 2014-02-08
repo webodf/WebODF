@@ -404,9 +404,9 @@
         /**
          * Update all cached bookmarks starting just beyond the specified step
          * @param {!number} inflectionStep Step beyond which the changes occurs. Bookmarks beyond step+1 will be updated
-         * @param {!function(number):number} doUpdate Callback to update the bookmark
+         * @param {!function(number):number} getUpdatedSteps Callback to get an updated number of bookmark steps
          */
-        this.updateCacheAtPoint = function (inflectionStep, doUpdate) {
+        this.updateCacheAtPoint = function (inflectionStep, getUpdatedSteps) {
             var affectedBookmarks = [],
                 /**@type{!Object.<(string|number),!ParagraphBookmark>}*/
                 updatedBuckets = {},
@@ -435,7 +435,7 @@
                     existingBookmark;
 
                 if (domUtils.containsNode(rootNode, bookmark.node)) {
-                    bookmark.steps = doUpdate(bookmark.steps);
+                    bookmark.steps = getUpdatedSteps(bookmark.steps);
                     // The destination cache bucket might have updated as a result of the bookmark update
                     newCacheBucket = getDestinationBucket(bookmark.steps);
                     existingBookmark = updatedBuckets[newCacheBucket];
