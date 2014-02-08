@@ -647,3 +647,9 @@ HTMLDocument.prototype.currentScript;
  * @type {?Element}
  */
 Document.prototype.activeElement;
+/**
+ * @param {number} x
+ * @param {number} y
+ * @return {Range}
+ */
+Document.prototype.caretRangeFromPoint = function (x, y) {"use strict"; };

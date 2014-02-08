@@ -127,7 +127,7 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
-     * @param {!Object} info
+     * @param {!{memberId:string}} info
      * @return {undefined}
      */
     function ensureLocalCaretVisible(info) {

@@ -222,6 +222,7 @@
         "gui.Caret",
         "gui.CaretManager",
         "gui.EditInfoMarker",
+        "gui.SelectionViewManager",
         "gui.ShadowCursor",
         "ops.EditInfo",
         "ops.Member",
