@@ -48,8 +48,11 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
     "use strict";
 
     var self = this,
+        /**@type{!Element}*/
         editInfoNode,
+        /**@type{!gui.EditInfoHandle}*/
         handle,
+        /**@type{!HTMLDivElement}*/
         marker,
         editinfons = 'urn:webodf:names:editinfo',
         decayTimer0,
@@ -78,10 +81,17 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
         runtime.clearTimeout(timerId);
     }
 
+    /**
+     * @param {string} memberid
+     */
     function setLastAuthor(memberid) {
         marker.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
     }
 
+    /**
+     * @param {string} memberid
+     * @param {!Date} timestamp
+     */
     this.addEdit = function (memberid, timestamp) {
         var age = (Date.now() - timestamp);
 
@@ -153,12 +163,12 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         deleteDecay(decayTimer0);
         deleteDecay(decayTimer1);
         deleteDecay(decayTimer2);
         editInfoNode.removeChild(marker);
-        handle.destroy(function(err) {
+        handle.destroy(function (err) {
             if (err) {
                 callback(err);
             } else {
@@ -171,7 +181,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
         var dom = editInfo.getOdtDocument().getDOMDocument(),
             htmlns = dom.documentElement.namespaceURI;
 
-        marker = dom.createElementNS(htmlns, "div");
+        marker = /**@type{!HTMLDivElement}*/(dom.createElementNS(htmlns, "div"));
         marker.setAttribute("class", "editInfoMarker");
 
         marker.onmouseover = function () {

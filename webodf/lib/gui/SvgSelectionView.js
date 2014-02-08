@@ -57,12 +57,14 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         polygon = doc.createElementNS(svgns, 'polygon'),
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
+        /**@type{boolean}*/
         isVisible = true,
         positionIterator = gui.SelectionMover.createPositionIterator(document.getRootNode()),
         /**@const*/
         FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/
         FILTER_REJECT = NodeFilter.FILTER_REJECT,
+        /**@type{!core.ScheduledTask}*/
         renderTask;
 
     /**
@@ -123,14 +125,22 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     /**
      * Set the range to the last visible selection in the text nodes array
      * @param {!Range} range
-     * @param {!Array.<!Node>} nodes
+     * @param {!Array.<!Element|!Text>} nodes
      * @return {!boolean}
      */
     function lastVisibleRect(range, nodes) {
         var nextNodeIndex = nodes.length - 1,
             node = nodes[nextNodeIndex],
-            startOffset = range.endContainer === node ? range.endOffset : (node.length || node.childNodes.length),
-            endOffset = startOffset;
+            startOffset,
+            endOffset;
+        if (range.endContainer === node) {
+            startOffset = range.endOffset;
+        } else if (node.nodeType === Node.TEXT_NODE) {
+            startOffset = node.length;
+        } else {
+            startOffset = node.childNodes.length;
+        }
+        endOffset = startOffset;
         range.setStart(node, startOffset);
         range.setEnd(node, endOffset);
         while (!isRangeVisible(range)) {
@@ -158,7 +168,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     /**
      * Set the range to the first visible selection in the text nodes array
      * @param {!Range} range
-     * @param {!Array.<!Node>} nodes
+     * @param {!Array.<!Element|!Text>} nodes
      * @return {!boolean}
      */
     function firstVisibleRect(range, nodes) {
@@ -299,6 +309,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             grownRect = null,
             currentRect,
             range = doc.createRange(),
+            /**@type{!core.PositionFilter}*/
             rootFilter,
             odfNodeFilter = new odf.OdfNodeFilter(),
             treeWalker;
@@ -390,7 +401,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         } else if (firstSibling.nodeType === Node.TEXT_NODE) {
             currentNode = firstSibling;
             range.setStart(currentNode, firstOffset);
-            range.setEnd(currentNode, currentNode === lastSibling ? lastOffset : currentNode.length);
+            range.setEnd(currentNode, currentNode === lastSibling ? lastOffset : /**@type{!Text}*/(currentNode).length);
             currentRect = range.getBoundingClientRect();
             grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
         } else {
@@ -404,7 +415,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             currentNode = treeWalker.currentNode = firstNode;
             while (currentNode && currentNode !== lastNode) {
                 range.setStart(currentNode, firstOffset);
-                range.setEnd(currentNode, currentNode.length);
+                range.setEnd(currentNode, /**@type{!Text}*/(currentNode).length);
 
                 currentRect = range.getBoundingClientRect();
                 grownRect = checkAndGrowOrCreateRect(grownRect, currentRect);
@@ -449,7 +460,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
 
                 currentNode = treeWalker.previousNode();
                 if (currentNode) {
-                    lastOffset = currentNode.length;
+                    lastOffset = /**@type{!Text}*/(currentNode).length;
                 }
             }
         }
@@ -462,6 +473,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * collapses the rect to the left or right edge, and returns it
      * @param {!Range} range
      * @param {boolean} useRightEdge
+     * @return {{width:number,top:number,bottom:number,height:number,left:number,right:number}}
      */
     function getCollapsedRectOfTextRange(range, useRightEdge) {
         var clientRect = range.getBoundingClientRect(),
@@ -589,7 +601,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     /**
      * @inheritDoc
      */
-    this.rerender = function() {
+    this.rerender = function () {
         if (isVisible) {
             renderTask.trigger();
         }
@@ -598,7 +610,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     /**
      * @inheritDoc
      */
-    this.show = function() {
+    this.show = function () {
         isVisible = true;
         renderTask.trigger();
     };
@@ -612,7 +624,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     };
 
     /**
-     * @param movedCursor {!gui.ShadowCursor|ops.OdtCursor}
+     * @param {!gui.ShadowCursor|ops.OdtCursor} movedCursor
      * @return {undefined}
      */
     function handleCursorMove(movedCursor) {
@@ -621,6 +633,9 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         }
     }
 
+    /**
+     * @param {function(!Object=)} callback
+     */
     function destroy(callback) {
         root.removeChild(overlay);
         cursor.getDocument().unsubscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
@@ -629,6 +644,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
 
     /**
      * @inheritDoc
+     * @param {function(!Object=)} callback
      */
     this.destroy = function (callback) {
         async.destroyAll([renderTask.destroy, destroy], callback);

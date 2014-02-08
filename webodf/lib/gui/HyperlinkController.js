@@ -93,7 +93,9 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
             removeEntireLink = selectedRange.collapsed && links.length === 1,
             domRange = odtDocument.getDOMDocument().createRange(),
             operations = [],
-            cursorRange, firstLink, lastLink, offset, op;
+            /**@type{{position: !number, length: number}}*/
+            cursorRange,
+            firstLink, lastLink, offset, op;
 
         if (links.length === 0) {
             return;
@@ -131,11 +133,11 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
                 });
                 if (cursorRange.length > 0) {
                     op = new ops.OpApplyHyperlink();
-                    op.init({
+                    /**@type{!ops.OpApplyHyperlink}*/(op).init({
                         memberid: inputMemberId,
                         position: cursorRange.position,
                         length: cursorRange.length,
-                        hyperlink: odfUtils.getHyperlinkTarget(firstLink)
+                        hyperlink: odfUtils.getHyperlinkTarget(firstLink) || ""
                     });
                     operations.push(op);
                 }
@@ -154,11 +156,11 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
                 });
                 if (cursorRange.length > 0) {
                     op = new ops.OpApplyHyperlink();
-                    op.init({
+                    /**@type{!ops.OpApplyHyperlink}*/(op).init({
                         memberid: inputMemberId,
                         position: cursorRange.position,
                         length: cursorRange.length,
-                        hyperlink: odfUtils.getHyperlinkTarget(lastLink)
+                        hyperlink: odfUtils.getHyperlinkTarget(lastLink) || ""
                     });
                     operations.push(op);
                 }

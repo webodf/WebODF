@@ -47,6 +47,11 @@
 gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberId) {
     "use strict";
 
+    /**
+     * @param {!ops.Operation} op
+     * @param {!Object} data
+     * @return {!ops.Operation}
+     */
     function createOp(op, data) {
         op.init(data);
         return op;
@@ -56,14 +61,15 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
      * @param {!string} data
      * @return {!Array.<!ops.Operation>}
      */
-    this.createPasteOps = function(data) {
+    this.createPasteOps = function (data) {
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
+            /**@type{number}*/
             cursorPosition = originalCursorPosition,
             operations = [],
             paragraphs;
 
         paragraphs = data.replace(/\r/g, "").split("\n");
-        paragraphs.forEach(function(text) {
+        paragraphs.forEach(function (text) {
             operations.push(createOp(new ops.OpSplitParagraph(), {
                 memberid: inputMemberId,
                 position: cursorPosition,

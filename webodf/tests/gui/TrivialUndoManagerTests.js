@@ -84,6 +84,9 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         this.removeCursor = noOp2;
         this.subscribe = noOp;
         this.unsubscribe = noOp;
+        this.createRootFilter =  function () {
+            return new core.PositionFilterChain();
+        };
     }
 
     this.setUp = function () {

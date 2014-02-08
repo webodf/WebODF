@@ -769,7 +769,7 @@ odf.OdfUtils = function OdfUtils() {
      *                         content. This includes whitespace only elements
      *                         used in pretty-formatted xml as LibreOffice
      *                         produces in flat ODT files.
-     * @return {!Array.<!Node>}
+     * @return {!Array.<!Element|!Text>}
      */
     function getTextElements(range, includePartial, includeInsignificantWhitespace) {
         var elements;

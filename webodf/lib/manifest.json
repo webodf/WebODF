@@ -238,6 +238,7 @@
     "gui.SvgSelectionView": [
         "core.Async",
         "core.DomUtils",
+        "core.PositionFilter",
         "core.ScheduledTask",
         "gui.SelectionMover",
         "gui.SelectionView",
@@ -355,6 +356,7 @@
     "ops.Canvas": [
     ],
     "ops.Document": [
+        "core.PositionFilter",
         "ops.Canvas"
     ],
     "ops.EditInfo": [

@@ -49,13 +49,6 @@ module.exports = function (config) {
             'lib/odf/OdfNodeFilter.js',
             'lib/xmldom/XPath.js',
             'lib/odf/StyleInfo.js',
-<<<<<<< HEAD
-=======
-            'lib/odf/TextSerializer.js',
-            'lib/ops/OdtCursor.js',
-            'lib/ops/StepsTranslator.js',
-            'lib/ops/TextPositionFilter.js',
->>>>>>> Make some operation classes 100% typed.
             'lib/xmldom/LSSerializer.js',
             'lib/odf/OdfContainer.js',
             'lib/odf/Formatting.js',
@@ -81,11 +74,6 @@ module.exports = function (config) {
             'lib/ops/OpInsertImage.js',
             'lib/ops/OpInsertTable.js',
             'lib/ops/OpInsertText.js',
-<<<<<<< HEAD
-=======
-            'lib/ops/OpMoveCursor.js',
-            'lib/ops/OpRemoveAnnotation.js',
->>>>>>> Make some operation classes 100% typed.
             'lib/ops/OpRemoveBlob.js',
             'lib/ops/OpRemoveCursor.js',
             'lib/ops/OpRemoveHyperlink.js',
