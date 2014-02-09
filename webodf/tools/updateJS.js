@@ -35,6 +35,8 @@
  */
 /*global runtime, process, require, console*/
 
+var exitCode = 0;
+
 function Main(cmakeListPath) {
     "use strict";
     var pathModule = require("path"),
@@ -96,7 +98,7 @@ function Main(cmakeListPath) {
      * Print a .dot dependency graph.
      */
     function print(occs, files) {
-        var i, j, m, n, done = {}, d, out;
+        var i, j, m, n, done = {}, d, out, content;
         out = "# This is a graphviz file.\n";
         out += "# dot -Tsvg dependencies.dot > dependencies.svg\n";
         out += "# dot -Tpng dependencies.dot > dependencies.png\n";
@@ -107,8 +109,10 @@ function Main(cmakeListPath) {
                 for (j = 0; j < m.length; j += 1) {
                     i = isOperation(files["lib/" + i]) ? "{Operation}" : i;
                     n = m[j];
-                    if (occs[n].length) {
-                        n = isOperation(files["lib/" + n]) ? "{Operation}" : n;
+                    content = files["lib/" + n];
+                    // omit leaf nodes unless they are interfaces
+                    if (occs[n].length || content.indexOf("@interface") !== -1) {
+                        n = isOperation(content) ? "{Operation}" : n;
                         if (!done.hasOwnProperty(i) || !done[i].hasOwnProperty(n)) {
                             out += '"' + i + '" -> "' + n + '";\n';
                             d = done[i] = done[i] || {};
@@ -213,7 +217,7 @@ function Main(cmakeListPath) {
                 typed.join("\n    lib/") + "\n)\n";
         saveIfDifferent(path, content, function () {
             console.log("JS file dependencies were updated.");
-            process.exit(1);
+            exitCode = 1;
         });
     }
 
@@ -522,7 +526,7 @@ function Main(cmakeListPath) {
                     console.log(path + ":" + err.line + ":" + err.character +
                           ": error: " + err.reason);
                 }
-                process.exit(1);
+                exitCode = 1;
             }
         });
     }
@@ -565,6 +569,9 @@ function main(f) {
             }
         });
         f.createManifestsAndCMakeLists(files, ["lib" + pathModule.sep, "tests" + pathModule.sep]);
+    });
+    process.on('exit', function () {
+        process.exit(exitCode);
     });
 }
 
