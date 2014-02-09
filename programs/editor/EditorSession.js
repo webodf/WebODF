@@ -584,9 +584,9 @@ define("webodf/editor/EditorSession", [
             odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, onMemberAdded);
             odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, onMemberUpdated);
             odtDocument.unsubscribe(ops.OdtDocument.signalMemberRemoved, onMemberRemoved);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+            odtDocument.unsubscribe(ops.Document.signalCursorAdded, onCursorAdded);
+            odtDocument.unsubscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
+            odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorMoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalCommonStyleCreated, onStyleCreated);
             odtDocument.unsubscribe(ops.OdtDocument.signalCommonStyleDeleted, onStyleDeleted);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
@@ -643,9 +643,9 @@ define("webodf/editor/EditorSession", [
             odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, onMemberAdded);
             odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, onMemberUpdated);
             odtDocument.subscribe(ops.OdtDocument.signalMemberRemoved, onMemberRemoved);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+            odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
+            odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
+            odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorMoved);
             odtDocument.subscribe(ops.OdtDocument.signalCommonStyleCreated, onStyleCreated);
             odtDocument.subscribe(ops.OdtDocument.signalCommonStyleDeleted, onStyleDeleted);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);

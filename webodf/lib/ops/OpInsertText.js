@@ -195,7 +195,7 @@ ops.OpInsertText = function OpInsertText() {
                 // the textnode + cursor reordering logic from OdtDocument's
                 // getTextNodeAtStep.
                 odtDocument.moveCursor(memberid, position + text.length, 0);
-                odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+                odtDocument.emit(ops.Document.signalCursorMoved, cursor);
             }
 
             if (position > 0) {

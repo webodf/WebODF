@@ -228,8 +228,8 @@ gui.CaretManager = function CaretManager(sessionController) {
 
         runtime.clearTimeout(ensureCaretVisibleTimeoutId);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, refreshLocalCaretBlinking);
+        odtDocument.unsubscribe(ops.Document.signalCursorRemoved, removeCaret);
 
         eventManager.unsubscribe("focus", focusLocalCaret);
         eventManager.unsubscribe("blur", blurLocalCaret);
@@ -245,8 +245,8 @@ gui.CaretManager = function CaretManager(sessionController) {
             eventManager = sessionController.getEventManager();
 
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, refreshLocalCaretBlinking);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, removeCaret);
+        odtDocument.subscribe(ops.Document.signalCursorMoved, refreshLocalCaretBlinking);
+        odtDocument.subscribe(ops.Document.signalCursorRemoved, removeCaret);
 
         eventManager.subscribe("focus", focusLocalCaret);
         eventManager.subscribe("blur", blurLocalCaret);

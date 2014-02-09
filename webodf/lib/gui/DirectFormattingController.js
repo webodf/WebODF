@@ -764,9 +764,9 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {undefined}
      */
     this.destroy = function (callback) {
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorEvent);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorEvent);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorEvent);
+        odtDocument.unsubscribe(ops.Document.signalCursorAdded, onCursorEvent);
+        odtDocument.unsubscribe(ops.Document.signalCursorRemoved, onCursorEvent);
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
@@ -782,9 +782,9 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     /*jslint emptyblock: false*/
 
     function init() {
-        odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorEvent);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorEvent);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorEvent);
+        odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorEvent);
+        odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorEvent);
+        odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);

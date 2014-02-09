@@ -100,3 +100,9 @@ ops.Document.prototype.getCanvas = function () { "use strict"; };
  * @return {!core.PositionFilter}
  */
 ops.Document.prototype.createRootFilter = function (inputMemberId) { "use strict"; };
+/**@const*/
+ops.Document.signalCursorAdded =   "cursor/added";
+/**@const*/
+ops.Document.signalCursorRemoved = "cursor/removed";
+/**@const*/
+ops.Document.signalCursorMoved =   "cursor/moved";

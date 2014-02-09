@@ -350,7 +350,7 @@
                         selectionController.expandToParagraphBoundaries(selectionRange.range);
                     }
                     shadowCursor.setSelectedRange(selectionRange.range, selectionRange.hasForwardSelection);
-                    odtDocument.emit(ops.OdtDocument.signalCursorMoved, shadowCursor);
+                    odtDocument.emit(ops.Document.signalCursorMoved, shadowCursor);
                 }
             }
         }
@@ -945,8 +945,8 @@
             eventManager.unsubscribe("click", hyperlinkClickHandler.handleClick);
 
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
+            odtDocument.unsubscribe(ops.Document.signalCursorAdded, inputMethodEditor.registerCursor);
+            odtDocument.unsubscribe(ops.Document.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
 
             callback();
@@ -1028,8 +1028,8 @@
             eventManager.subscribe("click", hyperlinkClickHandler.handleClick);
 
             odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
+            odtDocument.subscribe(ops.Document.signalCursorAdded, inputMethodEditor.registerCursor);
+            odtDocument.subscribe(ops.Document.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
         }
 

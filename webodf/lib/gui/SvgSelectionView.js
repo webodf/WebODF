@@ -639,7 +639,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      */
     function destroy(callback) {
         root.removeChild(overlay);
-        cursor.getDocument().unsubscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
+        cursor.getDocument().unsubscribe(ops.Document.signalCursorMoved, handleCursorMove);
         callback();
     }
 
@@ -658,7 +658,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         renderTask = new core.ScheduledTask(rerender, 0);
         addOverlay();
         overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
-        cursor.getDocument().subscribe(ops.OdtDocument.signalCursorMoved, handleCursorMove);
+        cursor.getDocument().subscribe(ops.Document.signalCursorMoved, handleCursorMove);
     }
 
     init();

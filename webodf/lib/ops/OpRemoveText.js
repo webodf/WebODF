@@ -272,7 +272,7 @@ ops.OpRemoveText = function OpRemoveText() {
 
         if (cursor) {
             cursor.resetSelectionType();
-            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+            odtDocument.emit(ops.Document.signalCursorMoved, cursor);
         }
 
         odtDocument.getOdfCanvas().rerenderAnnotations();
