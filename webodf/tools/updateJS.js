@@ -94,29 +94,53 @@ function Main(cmakeListPath) {
         return (/ \* @implements ops\.Operation\b/).test(fileContent);
     }
 
+    function getStyle(path, content, colors) {
+        var constructor = content.indexOf("@constructor") !== -1,
+            iface = content.indexOf("@interface") !== -1,
+            style = (iface && !constructor) ? "\"\"" : "filled",
+            group = path.split("/"),
+            color;
+        group = group.length > 1 ? group[0] : "";
+        color = colors.indexOf(group);
+        if (color === -1) {
+            color = colors.length;
+            colors.push(group);
+        }
+        return " [color=" + (color + 1) + ", style=" + style + "];\n";
+    }
+
     /**
      * Print a .dot dependency graph.
      */
     function print(occs, files) {
-        var i, j, m, n, done = {}, d, out, content;
+        var i, j, m, n, done = {}, out, content, colors = [];
         out = "# This is a graphviz file.\n";
         out += "# dot -Tsvg dependencies.dot > dependencies.svg\n";
         out += "# dot -Tpng dependencies.dot > dependencies.png\n";
         out += "digraph webodf {\n";
+        out += "node [colorscheme=pastel19]\n"; // pastel19, set312 or accent8
         for (i in occs) {
             if (occs.hasOwnProperty(i)) {
                 m = occs[i];
                 for (j = 0; j < m.length; j += 1) {
-                    i = isOperation(files["lib/" + i]) ? "{Operation}" : i;
+                    content = files["lib/" + i];
+                    i = isOperation(content) ? "{Operation}" : i;
+                    if (!done[i]) {
+                        done[i] = {};
+                        out += '"' + i + '"' + getStyle(i, content, colors);
+                    }
                     n = m[j];
                     content = files["lib/" + n];
                     // omit leaf nodes unless they are interfaces
                     if (occs[n].length || content.indexOf("@interface") !== -1) {
                         n = isOperation(content) ? "{Operation}" : n;
-                        if (!done.hasOwnProperty(i) || !done[i].hasOwnProperty(n)) {
+                        if (!done[i].hasOwnProperty(n)) {
+                            if (!done[n]) {
+                                done[n] = {};
+                                out += '"' + n + '"' + getStyle(n, content, colors);
+                            }
                             out += '"' + i + '" -> "' + n + '";\n';
-                            d = done[i] = done[i] || {};
-                            d[n] = 1;
+                            done[i][n] = 1;
                         }
                     }
                 }
