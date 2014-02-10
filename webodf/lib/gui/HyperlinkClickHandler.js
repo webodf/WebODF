@@ -227,6 +227,15 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer, keyDown
     };
 
     /**
+     * Get the currently active modifier key. This will be equivalent to a value
+     * found in gui.KeyboardHandler.Modifier
+     * @return {!number}
+     */
+    this.getModifier = function() {
+        return activeModifier;
+    };
+    
+    /**
      * Destroy the object.
      * Do not access any member of this object after this call.
      * @param {function(!Object=):undefined} callback

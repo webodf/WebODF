@@ -643,3 +643,22 @@ div.webodf-customScrollbars::-webkit-scrollbar-thumb
     background-color: #444;
     border-radius: 4px;
 }
+
+.webodf-hyperlinkTooltip {
+    display: none;
+    color: white;
+    background-color: black;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px gray;
+    padding: 3px;
+    position: absolute;
+    max-width: 210px;
+    text-align: left;
+    word-break: break-all;
+    z-index: 16;
+}
+
+.webodf-hyperlinkTooltipText {
+    display: block;
+    font-weight: bold;
+}

@@ -93,6 +93,10 @@
     "gui.HyperlinkController": [
         "ops.Session"
     ],
+    "gui.HyperlinkTooltipView": [
+        "gui.KeyboardHandler",
+        "odf.OdfCanvas"
+    ],
     "gui.IOSSafariSupport": [
         "gui.EventManager"
     ],
