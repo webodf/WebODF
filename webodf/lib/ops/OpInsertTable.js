@@ -185,6 +185,9 @@ ops.OpInsertTable = function OpInsertTable() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpInsertTable.Spec}
+     */
     this.spec = function () {
         return {
             optype: "InsertTable",

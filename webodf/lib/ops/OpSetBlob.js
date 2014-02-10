@@ -70,6 +70,9 @@ ops.OpSetBlob = function OpSetBlob() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpSetBlob.Spec}
+     */
     this.spec = function () {
         return {
             optype: "SetBlob",

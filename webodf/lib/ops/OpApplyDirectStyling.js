@@ -106,7 +106,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
      */
     this.execute = function (document) {
         var odtDocument = /**@type{ops.OdtDocument}*/(document),
-            range = /**@type{!Range}*/(odtDocument.convertCursorToDomRange(position, length)),
+            range = odtDocument.convertCursorToDomRange(position, length),
             impactedParagraphs = odfUtils.getParagraphElements(range);
 
         applyStyle(odtDocument, range, setProperties);
@@ -127,6 +127,9 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpApplyDirectStyling.Spec}
+     */
     this.spec = function () {
         return {
             optype: "ApplyDirectStyling",

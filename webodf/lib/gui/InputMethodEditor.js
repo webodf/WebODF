@@ -253,7 +253,7 @@
         }
 
         /**
-         * @param {!Text} e
+         * @param {!CompositionEvent} e
          */
         function compositionEnd(e) {
             lastCompositionData = e.data;

@@ -239,7 +239,7 @@ ops.OpRemoveText = function OpRemoveText() {
         odtDocument.upgradeWhitespacesAtPosition(position + length);
 
         range = odtDocument.convertCursorToDomRange(position, length);
-        domUtils.splitBoundaries(/**@type{!Range}*/(range));
+        domUtils.splitBoundaries(range);
         paragraphElement = odtDocument.getParagraphElement(range.startContainer);
         textNodes = odfUtils.getTextElements(range, false, true);
         paragraphs = odfUtils.getParagraphElements(range);
@@ -280,6 +280,9 @@ ops.OpRemoveText = function OpRemoveText() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveText.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveText",

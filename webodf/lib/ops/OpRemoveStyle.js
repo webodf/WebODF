@@ -78,6 +78,9 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveStyle",

@@ -291,7 +291,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Convert a cursor range to a DOM range
      * @param {!number} position
      * @param {!number} length
-     * @return {Range}
+     * @return {!Range}
      */
     this.convertCursorToDomRange = function (position, length) {
         var range = getDOMDocument().createRange(),
@@ -841,7 +841,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.moveCursor = function (memberid, position, length, selectionType) {
         var cursor = cursors[memberid],
             selectionRange = self.convertCursorToDomRange(position, length);
-        if (cursor && selectionRange) {
+        if (cursor) {
             cursor.setSelectedRange(selectionRange, length >= 0);
             cursor.setSelectionType(selectionType || ops.OdtCursor.RangeSelection);
         }

@@ -103,6 +103,9 @@ ops.OpAddStyle = function OpAddStyle() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpAddStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "AddStyle",

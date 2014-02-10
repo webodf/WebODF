@@ -192,6 +192,9 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpAddAnnotation.Spec}
+     */
     this.spec = function () {
         return {
             optype: "AddAnnotation",

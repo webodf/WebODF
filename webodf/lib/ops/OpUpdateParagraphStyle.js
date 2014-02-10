@@ -143,6 +143,9 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpUpdateParagraphStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "UpdateParagraphStyle",

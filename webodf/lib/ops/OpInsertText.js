@@ -225,6 +225,9 @@ ops.OpInsertText = function OpInsertText() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpInsertText.Spec}
+     */
     this.spec = function () {
         return {
             optype: "InsertText",

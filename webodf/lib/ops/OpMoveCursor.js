@@ -74,12 +74,15 @@ ops.OpMoveCursor = function OpMoveCursor() {
         }
 
         selectedRange = odtDocument.convertCursorToDomRange(position, length);
-        cursor.setSelectedRange(/**@type{!Range}*/(selectedRange), length >= 0);
+        cursor.setSelectedRange(selectedRange, length >= 0);
         cursor.setSelectionType(selectionType);
         odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
         return true;
     };
 
+    /**
+     * @return {!ops.OpMoveCursor.Spec}
+     */
     this.spec = function () {
         return {
             optype: "MoveCursor",

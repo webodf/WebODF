@@ -91,6 +91,9 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpSetParagraphStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "SetParagraphStyle",

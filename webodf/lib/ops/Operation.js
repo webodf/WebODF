@@ -74,6 +74,6 @@ ops.Operation.prototype.group;
 ops.Operation.prototype.execute = function (document) {"use strict"; };
 
 /**
- * @return {!{optype:string,memberid:string,timestamp:number,position:number}}
+ * @return {!{optype:string,memberid:string,timestamp:number}}
  */
 ops.Operation.prototype.spec = function () {"use strict"; };

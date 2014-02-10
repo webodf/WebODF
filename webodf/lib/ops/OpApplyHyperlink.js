@@ -92,7 +92,7 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
     this.execute = function (document) {
         var odtDocument = /**@type{ops.OdtDocument}*/(document),
             ownerDocument = odtDocument.getDOMDocument(),
-            range = /**@type{!Range}*/(odtDocument.convertCursorToDomRange(position, length)),
+            range = odtDocument.convertCursorToDomRange(position, length),
             boundaryNodes = domUtils.splitBoundaries(range),
             /**@type{!Array.<!Element>}*/
             modifiedParagraphs = [],
@@ -133,6 +133,9 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpApplyHyperlink.Spec}
+     */
     this.spec = function () {
         return {
             optype: "ApplyHyperlink",

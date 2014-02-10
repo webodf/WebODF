@@ -61,6 +61,9 @@ ops.OpRemoveMember = function OpRemoveMember() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveMember.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveMember",

@@ -191,6 +191,9 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpSplitParagraph.Spec}
+     */
     this.spec = function () {
         return {
             optype: "SplitParagraph",

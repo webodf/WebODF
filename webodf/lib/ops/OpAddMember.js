@@ -69,6 +69,9 @@ ops.OpAddMember = function OpAddMember() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpAddMember.Spec}
+     */
     this.spec = function () {
         return {
             optype: "AddMember",

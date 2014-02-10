@@ -81,6 +81,9 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveHyperlink.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveHyperlink",

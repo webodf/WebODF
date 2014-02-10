@@ -101,6 +101,9 @@ ops.OpUpdateMember = function OpUpdateMember() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpUpdateMember.Spec}
+     */
     this.spec = function () {
         return {
             optype: "UpdateMember",

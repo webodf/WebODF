@@ -313,6 +313,7 @@ gui.SessionViewOptions = function () {
 
         /**
          * @param {!ops.OdtCursor} cursor
+         * @return {undefined}
          */
         function onCursorAdded(cursor) {
             var memberId = cursor.getMemberId(),
@@ -332,6 +333,7 @@ gui.SessionViewOptions = function () {
 
         /**
          * @param {!ops.OdtCursor} cursor
+         * @return {undefined}
          */
         function onCursorMoved(cursor) {
             var memberId = cursor.getMemberId(),

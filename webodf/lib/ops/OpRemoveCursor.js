@@ -70,6 +70,9 @@ ops.OpRemoveCursor = function OpRemoveCursor() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveCursor.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveCursor",

@@ -114,6 +114,9 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveAnnotation.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveAnnotation",

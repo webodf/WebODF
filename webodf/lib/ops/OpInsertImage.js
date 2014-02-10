@@ -128,6 +128,9 @@ ops.OpInsertImage = function OpInsertImage() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpInsertImage.Spec}
+     */
     this.spec = function () {
         return {
             optype: "InsertImage",

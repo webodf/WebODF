@@ -88,6 +88,9 @@ ops.OpUpdateMetadata = function OpUpdateMetadata() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpUpdateMetadata.Spec}
+     */
     this.spec = function () {
         return {
             optype: "UpdateMetadata",

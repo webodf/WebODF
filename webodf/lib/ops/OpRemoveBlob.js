@@ -68,6 +68,9 @@ ops.OpRemoveBlob = function OpRemoveBlob() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveBlob.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveBlob",

@@ -76,6 +76,9 @@ ops.OpAddCursor = function OpAddCursor() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpAddCursor.Spec}
+     */
     this.spec = function () {
         return {
             optype: "AddCursor",
