@@ -503,18 +503,21 @@
         }
 
         /**
-         * Convert the requested steps from root into the equivalent DOM node & offset pair
+         * Convert the requested steps from root into the equivalent DOM node & offset pair. If the
+         * requested step is before the start or past the end of the document, a RangeError will be thrown.
          * @param {!number} steps
-         * @return {{node: !Node, offset: !number}}
+         * @return {!{node: !Node, offset: !number}}
          */
         this.convertStepsToDomPoint = function (steps) {
             var /**@type{!number}*/
                 stepsFromRoot,
                 isWalkable;
 
+            if (isNaN(steps)) {
+                throw new TypeError("Requested steps is not numeric (" + steps + ")");
+            }
             if (steps < 0) {
-                runtime.log("warn", "Requested steps were negative (" + steps + ")");
-                steps = 0;
+                throw new RangeError("Requested steps is negative (" + steps + ")");
             }
             verifyRootNode();
             stepsFromRoot = stepsCache.setToClosestStep(steps, iterator);
@@ -527,7 +530,7 @@
                 stepsCache.updateCache(stepsFromRoot, iterator.container(), iterator.unfilteredDomOffset(), isWalkable);
             }
             if (stepsFromRoot !== steps) {
-                runtime.log("warn", "Requested " + steps + " steps but only " + stepsFromRoot + " are available");
+                throw new RangeError("Requested steps (" + steps + ") exceeds available steps (" + stepsFromRoot + ")");
             }
             return {
                 node: iterator.container(),
