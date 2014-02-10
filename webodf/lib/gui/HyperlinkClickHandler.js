@@ -88,6 +88,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
         var target = e.target || e.srcElement,
             modifierPressed,
             linkElement,
+            /**@type{!string}*/
             url,
             rootNode,
             bookmarks;
@@ -108,7 +109,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
         }
 
         url = odfUtils.getHyperlinkTarget(linkElement);
-        if (!url) {
+        if (url === "") {
             return;
         }
 

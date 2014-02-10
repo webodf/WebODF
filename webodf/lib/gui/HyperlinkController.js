@@ -137,7 +137,7 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
                         memberid: inputMemberId,
                         position: cursorRange.position,
                         length: cursorRange.length,
-                        hyperlink: odfUtils.getHyperlinkTarget(firstLink) || ""
+                        hyperlink: odfUtils.getHyperlinkTarget(firstLink)
                     });
                     operations.push(op);
                 }
@@ -160,7 +160,7 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
                         memberid: inputMemberId,
                         position: cursorRange.position,
                         length: cursorRange.length,
-                        hyperlink: odfUtils.getHyperlinkTarget(lastLink) || ""
+                        hyperlink: odfUtils.getHyperlinkTarget(lastLink)
                     });
                     operations.push(op);
                 }

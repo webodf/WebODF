@@ -140,7 +140,7 @@ odf.OdfUtils = function OdfUtils() {
     /**
      * Gets the href attribute of text:a element
      * @param {!Element} element
-     * @return {?string}
+     * @return {!string}
      */
     this.getHyperlinkTarget = function (element) {
         return element.getAttributeNS(xlinkns, 'href');
