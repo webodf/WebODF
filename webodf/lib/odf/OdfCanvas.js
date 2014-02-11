@@ -204,6 +204,18 @@
         }
     }
     /**
+     * @param {!HTMLStyleElement} style
+     * @return {undefined}
+     */
+    function clearCSSStyleSheet(style) {
+        var stylesheet = /**@type{!CSSStyleSheet}*/(style.sheet),
+            cssRules = stylesheet.cssRules;
+
+        while (cssRules.length) {
+            stylesheet.deleteRule(cssRules.length - 1);
+        }
+    }
+    /**
      * A new styles.xml has been loaded. Update the live document with it.
      * @param {!odf.OdfContainer} odfcontainer
      * @param {!odf.Formatting} formatting
@@ -954,10 +966,13 @@
             showAnnotationRemoveButton = false,
             /**@type{gui.AnnotationViewManager}*/
             annotationViewManager = null,
+            /**@type{!HTMLStyleElement}*/
             webodfcss,
+            /**@type{!HTMLStyleElement}*/
             fontcss,
+            /**@type{!HTMLStyleElement}*/
             stylesxmlcss,
-            /**@type{HTMLStyleElement}*/
+            /**@type{!HTMLStyleElement}*/
             positioncss,
             shadowContent,
             /**@type{number}*/
@@ -1221,7 +1236,14 @@
 
             // synchronize the object a window.odfcontainer with the view
             function callback() {
+                // clean up
+                clearCSSStyleSheet(fontcss);
+                clearCSSStyleSheet(stylesxmlcss);
+                clearCSSStyleSheet(positioncss);
+
                 clear(element);
+
+                // setup
                 element.style.display = "inline-block";
                 var odfnode = odfcontainer.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
@@ -1299,7 +1321,9 @@
          * @return {undefined}
          */
         function load(url) {
+            // clean up
             loadingQueue.clearQueue();
+
             // FIXME: We need to support parametrized strings, because
             // drop-in word replacements are inadequate for translations;
             // see http://techbase.kde.org/Development/Tutorials/Localization/i18n_Mistakes#Pitfall_.232:_Word_Puzzles
