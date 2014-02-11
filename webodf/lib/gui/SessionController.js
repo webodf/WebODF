@@ -941,7 +941,13 @@
          * @return {undefined}
          */
         this.destroy = function (callback) {
-            var destroyCallbacks = [drawShadowCursorTask.destroy, redrawRegionSelectionTask.destroy, directFormattingController.destroy, inputMethodEditor.destroy, destroy];
+            var destroyCallbacks = [
+                drawShadowCursorTask.destroy,
+                redrawRegionSelectionTask.destroy,
+                directFormattingController.destroy,
+                inputMethodEditor.destroy,
+                eventManager.destroy,
+                destroy];
             runtime.clearTimeout(handleMouseClickTimeoutId);
             async.destroyAll(destroyCallbacks, callback);
         };
