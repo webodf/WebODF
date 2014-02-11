@@ -81,6 +81,7 @@
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             /**@type{!core.ScheduledTask}*/
             drawShadowCursorTask,
+            /**@type{!core.ScheduledTask}*/
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, odtDocument, eventManager),
@@ -912,8 +913,35 @@
          * @param {!function(!Object=)} callback passing an error object in case of error
          * @return {undefined}
          */
+        function destroy(callback) {
+            eventManager.unsubscribe("keydown", keyDownHandler.handleEvent);
+            eventManager.unsubscribe("keypress", keyPressHandler.handleEvent);
+            eventManager.unsubscribe("keyup", keyUpHandler.handleEvent);
+            eventManager.unsubscribe("copy", handleCopy);
+            eventManager.unsubscribe("mousedown", handleMouseDown);
+            eventManager.unsubscribe("mousemove", drawShadowCursorTask.trigger);
+            eventManager.unsubscribe("mouseup", handleMouseUp);
+            eventManager.unsubscribe("contextmenu", handleContextMenu);
+            eventManager.unsubscribe("dragstart", handleDragStart);
+            eventManager.unsubscribe("dragend", handleDragEnd);
+            eventManager.unsubscribe("click", hyperlinkClickHandler.handleClick);
+
+            odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
+            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
+            odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
+            odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchStart, saveFocus);
+            odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, restoreFocus);
+
+            callback();
+        }
+
+        /**
+         * @param {!function(!Object=)} callback passing an error object in case of error
+         * @return {undefined}
+         */
         this.destroy = function (callback) {
-            var destroyCallbacks = [drawShadowCursorTask.destroy, directFormattingController.destroy, inputMethodEditor.destroy];
+            var destroyCallbacks = [drawShadowCursorTask.destroy, redrawRegionSelectionTask.destroy, directFormattingController.destroy, inputMethodEditor.destroy, destroy];
             runtime.clearTimeout(handleMouseClickTimeoutId);
             async.destroyAll(destroyCallbacks, callback);
         };
