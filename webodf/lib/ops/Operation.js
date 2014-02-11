@@ -69,7 +69,7 @@ ops.Operation.prototype.group;
 
 /**
  * @param {!ops.Document} document
- * @return {!boolean}
+ * @return {!boolean} true if the operation was executed
  */
 ops.Operation.prototype.execute = function (document) {"use strict"; };
 

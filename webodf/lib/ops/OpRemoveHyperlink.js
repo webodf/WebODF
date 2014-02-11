@@ -64,11 +64,11 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
     this.execute = function (document) {
         var odtDocument = /**@type{ops.OdtDocument}*/(document),
             range = odtDocument.convertCursorToDomRange(position, length),
-            links = odfUtils.getHyperlinkElements(/**@type{!Range}*/(range)),
+            links = odfUtils.getHyperlinkElements(range),
             node;
 
         runtime.assert(links.length === 1, "The given range should only contain a single link.");
-        node = domUtils.mergeIntoParent(links[0]);
+        node = domUtils.mergeIntoParent(/**@type{!Node}*/(links[0]));
         range.detach();
 
         odtDocument.getOdfCanvas().refreshSize();

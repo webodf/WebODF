@@ -165,7 +165,7 @@ gui.EventManager = function EventManager(odtDocument) {
         var onVariant = "on" + eventType,
             bound = false;
         if (eventTarget.attachEvent) {
-            // unsupported from IE 11
+            // attachEvent is only supported in Internet Explorer < 11
             eventTarget.attachEvent(onVariant, eventHandler);
             bound = true; // assume it was bound, missing @return in externs.js
         }

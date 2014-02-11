@@ -100,17 +100,16 @@ ops.OpRemoveText = function OpRemoveText() {
     function CollapsingRules(rootNode) {
         /**
          * Returns true if the given node is an odf node
-         * @param {?Node} node
+         * @param {!Node} node
          * @return {!boolean}
          */
         function isOdfNode(node) {
-            return node !== null
-                && odfNodeNamespaceMap.hasOwnProperty(node.namespaceURI);
+            return odfNodeNamespaceMap.hasOwnProperty(node.namespaceURI);
         }
 
         /**
          * Returns true if a given node is odf node or a text node that has a odf parent.
-         * @param {?Node} node
+         * @param {!Node} node
          * @return {!boolean}
          */
         function shouldRemove(node) {
@@ -157,18 +156,18 @@ ops.OpRemoveText = function OpRemoveText() {
         /**
          * Merge all child nodes into the node's parent and remove the node entirely
          * @param {!Node} targetNode Node to merge into parent
-         * @return {!Node} Final parent node collapsing ended at
+         * @return {?Node} Final parent node collapsing ended at
          */
         function mergeChildrenIntoParent(targetNode) {
             var parent;
             if (targetNode.nodeType === Node.TEXT_NODE) {
-                parent = /**@type{!Node}*/(targetNode.parentNode);
+                parent = targetNode.parentNode;
                 parent.removeChild(targetNode);
             } else {
                 // removes all odf nodes
-                parent = /**@type{!Node}*/(domUtils.removeUnwantedNodes(targetNode, shouldRemove));
+                parent = domUtils.removeUnwantedNodes(targetNode, shouldRemove);
             }
-            if (isCollapsibleContainer(parent)) {
+            if (parent && isCollapsibleContainer(parent)) {
                 return mergeChildrenIntoParent(parent);
             }
             return parent;

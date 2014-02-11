@@ -396,12 +396,12 @@
          * @param {!Event} e
          */
         function handleMouseDown(e) {
-            var target = /**@type{!Node}*/(getTarget(e)),
+            var target = getTarget(e),
                 cursor = odtDocument.getCursor(inputMemberId);
             clickStartedWithinCanvas = target !== null && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
             if (clickStartedWithinCanvas) {
                 isMouseMoved = false;
-                mouseDownRootFilter = odtDocument.createRootFilter(target);
+                mouseDownRootFilter = odtDocument.createRootFilter(/**@type{!Node}*/(target));
                 clickCount = e.detail;
                 if (cursor && e.shiftKey) {
                     // Firefox seems to get rather confused about the window selection when shift+extending it.
