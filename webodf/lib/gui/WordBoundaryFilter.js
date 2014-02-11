@@ -76,7 +76,7 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitesp
         ELEMENT_NODE = Node.ELEMENT_NODE,
         odfUtils = new odf.OdfUtils(),
         // Sourced from http://apps.timwhitlock.info/js/regex, including all punctuation components
-        boundary = /[!-#%-*,-\/:-;?-@\[-\]_{}¡«·»¿;·՚-՟։-֊־׀׃׆׳-״؉-؊،-؍؛؞-؟٪-٭۔܀-܍߷-߹।-॥॰෴๏๚-๛༄-༒༺-༽྅࿐-࿔၊-၏჻፡-፨᙭-᙮᚛-᚜᛫-᛭᜵-᜶។-៖៘-៚᠀-᠊᥄-᥅᧞-᧟᨞-᨟᭚-᭠᰻-᰿᱾-᱿\u2000-\u206e⁽-⁾₍-₎〈-〉❨-❵⟅-⟆⟦-⟯⦃-⦘⧘-⧛⧼-⧽⳹-⳼⳾-⳿⸀-\u2e7e\u3000-\u303f゠・꘍-꘏꙳꙾꡴-꡷꣎-꣏꤮-꤯꥟꩜-꩟﴾-﴿︐-︙︰-﹒﹔-﹡﹣﹨﹪-﹫！-＃％-＊，-／：-；？-＠［-］＿｛｝｟-･]|\ud800[\udd00-\udd01\udf9f\udfd0]|\ud802[\udd1f\udd3f\ude50-\ude58]|\ud809[\udc00-\udc7e]/,
+        punctuation = /[!-#%-*,-\/:-;?-@\[-\]_{}¡«·»¿;·՚-՟։-֊־׀׃׆׳-״؉-؊،-؍؛؞-؟٪-٭۔܀-܍߷-߹।-॥॰෴๏๚-๛༄-༒༺-༽྅࿐-࿔၊-၏჻፡-፨᙭-᙮᚛-᚜᛫-᛭᜵-᜶។-៖៘-៚᠀-᠊᥄-᥅᧞-᧟᨞-᨟᭚-᭠᰻-᰿᱾-᱿\u2000-\u206e⁽-⁾₍-₎〈-〉❨-❵⟅-⟆⟦-⟯⦃-⦘⧘-⧛⧼-⧽⳹-⳼⳾-⳿⸀-\u2e7e\u3000-\u303f゠・꘍-꘏꙳꙾꡴-꡷꣎-꣏꤮-꤯꥟꩜-꩟﴾-﴿︐-︙︰-﹒﹔-﹡﹣﹨﹪-﹫！-＃％-＊，-／：-；？-＠［-］＿｛｝｟-･]|\ud800[\udd00-\udd01\udf9f\udfd0]|\ud802[\udd1f\udd3f\ude50-\ude58]|\ud809[\udc00-\udc7e]/,
         spacing = /\s/,
         /**@const*/
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
@@ -90,11 +90,11 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitesp
          * @enum {number}
          */
         NeighborType = {
-            EDGE:         0,
-            SPACING:      1,
-            PUNCTUATION:  2,
-            WORDCHAR:     3,
-            OTHER:        4
+            NO_NEIGHBOUR:       0,
+            SPACE_CHAR:         1,
+            PUNCTUATION_CHAR:   2,
+            WORD_CHAR:          3,
+            OTHER:              4
         };
 
     /**
@@ -130,21 +130,21 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitesp
         var neighboringChar;
 
         if (node === null) {
-            return NeighborType.EDGE;
+            return NeighborType.NO_NEIGHBOUR;
         }
         if (odfUtils.isCharacterElement(node)) {
-            return NeighborType.SPACING;
+            return NeighborType.SPACE_CHAR;
         }
         if (node.nodeType === TEXT_NODE || odfUtils.isTextSpan(node) || odfUtils.isHyperlink(node)) {
             neighboringChar = node.textContent.charAt(getOffset());
 
             if (spacing.test(neighboringChar)) {
-                return NeighborType.SPACING;
+                return NeighborType.SPACE_CHAR;
             }
-            if (boundary.test(neighboringChar)) {
-                return NeighborType.PUNCTUATION;
+            if (punctuation.test(neighboringChar)) {
+                return NeighborType.PUNCTUATION_CHAR;
             }
-            return NeighborType.WORDCHAR;
+            return NeighborType.WORD_CHAR;
         }
         return NeighborType.OTHER;
     }
@@ -190,10 +190,12 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitesp
         //            is between two punctuation marks OR
         //            (if including trailing space) is before a spacing and not behind the edge (word ending)
         //            (if excluding trailing space) is before an edge (word start) and not behind the spacing
-        if ((leftNeighborType === NeighborType.WORDCHAR    && rightNeighborType === NeighborType.WORDCHAR) ||
-            (leftNeighborType === NeighborType.PUNCTUATION && rightNeighborType === NeighborType.PUNCTUATION) ||
-            (includeWhitespace === TRAILING && leftNeighborType !== NeighborType.EDGE && rightNeighborType === NeighborType.SPACING) ||
-            (includeWhitespace === LEADING && leftNeighborType === NeighborType.SPACING && rightNeighborType !== NeighborType.EDGE)) {
+        if ((leftNeighborType === NeighborType.WORD_CHAR    && rightNeighborType === NeighborType.WORD_CHAR) ||
+            (leftNeighborType === NeighborType.PUNCTUATION_CHAR && rightNeighborType === NeighborType.PUNCTUATION_CHAR) ||
+            (includeWhitespace === TRAILING &&
+                leftNeighborType !== NeighborType.NO_NEIGHBOUR && rightNeighborType === NeighborType.SPACE_CHAR) ||
+            (includeWhitespace === LEADING &&
+                leftNeighborType === NeighborType.SPACE_CHAR && rightNeighborType !== NeighborType.NO_NEIGHBOUR)) {
             return FILTER_REJECT;
         }
         return FILTER_ACCEPT;
