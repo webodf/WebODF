@@ -40,6 +40,7 @@
 
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!Element} container
  * @param {!ops.OdtDocument} odtDocument
  */

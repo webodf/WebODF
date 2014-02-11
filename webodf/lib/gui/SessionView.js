@@ -85,6 +85,7 @@ gui.SessionViewOptions = function () {
      * be matched with the memberids for which CSS is generated, to generate the same CSS
      * for shadow cursors.
      * @constructor
+     * @implements {core.Destroyable}
      * @param {!gui.SessionViewOptions} viewOptions
      * @param {string} localMemberId
      * @param {!ops.Session} session

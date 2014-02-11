@@ -41,6 +41,7 @@
 
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator

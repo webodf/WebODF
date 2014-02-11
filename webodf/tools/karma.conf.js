@@ -27,6 +27,7 @@ module.exports = function (config) {
             'lib/core/CSSUnits.js',
             'lib/core/DomUtils.js',
             'lib/core/Cursor.js',
+            'lib/core/Destroyable.js',
             'lib/core/EventNotifier.js',
             'lib/core/LoopWatchDog.js',
             'lib/core/PositionIterator.js',

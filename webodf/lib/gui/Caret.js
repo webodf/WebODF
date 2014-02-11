@@ -43,6 +43,7 @@
  * Blinking is done by switching the color of the border from transparent to
  * the member color and back.
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.OdtCursor} cursor
  * @param {boolean} avatarInitiallyVisible Sets the initial visibility of the caret's avatar
  * @param {boolean} blinkOnRangeSelect Specify that the caret should blink if a non-collapsed range is selected

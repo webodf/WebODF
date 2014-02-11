@@ -12,6 +12,8 @@
     "core.Cursor": [
         "core.DomUtils"
     ],
+    "core.Destroyable": [
+    ],
     "core.DomUtils": [
     ],
     "core.EventNotifier": [
@@ -32,6 +34,7 @@
     "core.RawInflate": [
     ],
     "core.ScheduledTask": [
+        "core.Destroyable"
     ],
     "core.StepIterator": [
         "core.PositionFilter",
@@ -48,6 +51,7 @@
         "core.RawInflate"
     ],
     "gui.AnnotationController": [
+        "core.Destroyable",
         "core.EventNotifier",
         "odf.Namespaces",
         "ops.OdtCursor",
@@ -63,9 +67,11 @@
         "odf.OdfUtils"
     ],
     "gui.Avatar": [
+        "core.Destroyable"
     ],
     "gui.Caret": [
         "core.Async",
+        "core.Destroyable",
         "core.DomUtils",
         "core.ScheduledTask",
         "gui.Avatar",
@@ -73,6 +79,7 @@
     ],
     "gui.CaretManager": [
         "core.Async",
+        "core.Destroyable",
         "gui.Caret",
         "gui.SessionController",
         "ops.OdtCursor",
@@ -82,6 +89,7 @@
         "gui.MimeDataExporter"
     ],
     "gui.DirectFormattingController": [
+        "core.Destroyable",
         "core.EventNotifier",
         "core.PositionFilter",
         "core.PositionFilterChain",
@@ -101,8 +109,10 @@
         "ops.StepsTranslator"
     ],
     "gui.EditInfoHandle": [
+        "core.Destroyable"
     ],
     "gui.EditInfoMarker": [
+        "core.Destroyable",
         "gui.EditInfoHandle",
         "ops.EditInfo"
     ],
@@ -137,6 +147,7 @@
     ],
     "gui.InputMethodEditor": [
         "core.Async",
+        "core.Destroyable",
         "core.DomUtils",
         "core.EventNotifier",
         "core.ScheduledTask",
@@ -184,12 +195,14 @@
         "ops.OdtCursor"
     ],
     "gui.SelectionViewManager": [
+        "core.Destroyable",
         "gui.SelectionView",
         "gui.ShadowCursor",
         "ops.OdtCursor"
     ],
     "gui.SessionController": [
         "core.Async",
+        "core.Destroyable",
         "core.DomUtils",
         "core.PositionFilter",
         "core.ScheduledTask",
@@ -219,6 +232,7 @@
         "ops.Session"
     ],
     "gui.SessionView": [
+        "core.Destroyable",
         "gui.Caret",
         "gui.CaretManager",
         "gui.EditInfoMarker",
@@ -238,6 +252,7 @@
     ],
     "gui.SvgSelectionView": [
         "core.Async",
+        "core.Destroyable",
         "core.DomUtils",
         "core.PositionFilter",
         "core.ScheduledTask",
@@ -304,6 +319,7 @@
     ],
     "odf.OdfCanvas": [
         "core.Async",
+        "core.Destroyable",
         "core.DomUtils",
         "core.ScheduledTask",
         "gui.AnnotationViewManager",
@@ -361,6 +377,7 @@
         "ops.Canvas"
     ],
     "ops.EditInfo": [
+        "core.Destroyable",
         "ops.OdtDocument"
     ],
     "ops.Member": [
@@ -372,6 +389,7 @@
         "ops.Document"
     ],
     "ops.OdtDocument": [
+        "core.Destroyable",
         "core.DomUtils",
         "core.EventNotifier",
         "core.PositionFilter",
@@ -589,6 +607,7 @@
     "ops.Server": [
     ],
     "ops.Session": [
+        "core.Destroyable",
         "odf.OdfCanvas",
         "ops.OdtDocument",
         "ops.Operation",

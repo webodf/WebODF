@@ -43,6 +43,7 @@
  * A document that keeps all data related to the mapped document.
  * @constructor
  * @implements {ops.Document}
+ * @implements {core.Destroyable}
  * @param {!odf.OdfCanvas} odfCanvas
  */
 ops.OdtDocument = function OdtDocument(odfCanvas) {

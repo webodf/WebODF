@@ -42,6 +42,7 @@
  * batching up draw requests or other lower-priority or high-volume calls
  *
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!Function} fn The function to execute for this task
  * @param {!number} delay The number of ms to wait after the first call to trigger
  */
