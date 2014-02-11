@@ -40,7 +40,8 @@
  *  A GUI class that attaches to a cursor and renders it's selection
  *  as an SVG polygon.
  * @constructor
- * @implements gui.SelectionView
+ * @implements {core.Destroyable}
+ * @implements {gui.SelectionView}
  * @param {!ops.OdtCursor} cursor
  */
 gui.SvgSelectionView = function SvgSelectionView(cursor) {

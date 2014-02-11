@@ -41,6 +41,7 @@
 
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.EditInfo} editInfo  marker takes ownership
  * @param {boolean} initialVisibility Sets the initial edit info marker visibility
  */

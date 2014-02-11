@@ -51,6 +51,7 @@
      * text as if it occurred via a normal composition event
      *
      * @constructor
+     * @implements {core.Destroyable}
      * @param {!gui.EventManager} eventManager
      */
     function DetectSafariCompositionError(eventManager) {
@@ -106,6 +107,7 @@
      * - On Chrome, using Option+char will include the following keypress in the composition event
      *
      * @constructor
+     * @implements {core.Destroyable}
      * @param {!string} inputMemberId
      * @param {!ops.OdtDocument} odtDocument
      * @param {!gui.EventManager} eventManager

@@ -36,6 +36,7 @@
 /*global gui*/
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!Element} parentElement
  */
 gui.EditInfoHandle = function EditInfoHandle(parentElement) {

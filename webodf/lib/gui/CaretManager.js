@@ -46,6 +46,7 @@
  * caret's current focus, and ensure the caret stays visible after every local
  * operation.
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!gui.SessionController} sessionController
  */
 gui.CaretManager = function CaretManager(sessionController) {

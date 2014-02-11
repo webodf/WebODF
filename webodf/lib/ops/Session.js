@@ -42,6 +42,7 @@
 /**
  * An editing session and what belongs to it.
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!odf.OdfCanvas} odfCanvas
  */
 ops.Session = function Session(odfCanvas) {

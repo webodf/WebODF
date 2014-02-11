@@ -44,11 +44,11 @@
 
     /**
      * @constructor
+     * @implements {core.Destroyable}
      * @param {!ops.Session} session
      * @param {!string} inputMemberId
      * @param {!ops.OdtCursor} shadowCursor
      * @param {!{directParagraphStylingEnabled:boolean}=} args
-     * @return {?}
      */
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
@@ -874,7 +874,7 @@
         /**
          * @return {!gui.TextController}
          */
-        this.getTextController = function() {
+        this.getTextController = function () {
             return textController;
         };
 

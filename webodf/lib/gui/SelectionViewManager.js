@@ -43,6 +43,7 @@
  * The Selection View Manager is responsible for managing SelectionView objects
  * and attaching/detaching them to cursors.
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!function(new:gui.SelectionView, !(ops.OdtCursor|gui.ShadowCursor))} SelectionView
  */
 gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
@@ -133,21 +134,29 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     };
 
     /**
-     * @param {function(string=)} callback
+     * @param {function(!Object=)} callback
      */
     this.destroy = function (callback) {
         var selectionViewArray = getSelectionViews();
 
-        (function destroySelectionView(i, err) {
+        /**
+         * @param {!number} i
+         * @param {!Object=} err
+         * @return {undefined}
+         */
+        function destroySelectionView(i, err) {
             if (err) {
                 callback(err);
             } else {
                 if (i < selectionViewArray.length) {
-                    selectionViewArray[i].destroy(function (err) { destroySelectionView(i + 1, err); });
+                    selectionViewArray[i].destroy(function (err) {
+                        destroySelectionView(i + 1, err);
+                    });
                 } else {
                     callback();
                 }
             }
-        }(0, undefined));
+        }
+        destroySelectionView(0, undefined);
     };
 };

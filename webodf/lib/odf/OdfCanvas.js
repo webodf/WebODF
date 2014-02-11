@@ -89,6 +89,7 @@
     }
     /**
      * @constructor
+     * @implements {core.Destroyable}
      * @param {!HTMLStyleElement} css
      */
     function PageSwitcher(css) {
@@ -153,7 +154,7 @@
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
-        this.destroy = function(callback) {
+        this.destroy = function (callback) {
             css.parentNode.removeChild(css);
             callback();
         };
@@ -928,6 +929,7 @@
      * @constructor
      * @implements {gui.AnnotatableCanvas}
      * @implements {ops.Canvas}
+     * @implements {core.Destroyable}
      * @param {!HTMLElement} element Put and ODF Canvas inside this element.
      */
     odf.OdfCanvas = function OdfCanvas(element) {
