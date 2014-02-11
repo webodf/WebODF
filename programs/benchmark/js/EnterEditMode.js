@@ -102,6 +102,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             });
             session.enqueue([addMember]);
 
+            sessionController.insertLocalCursor();
             sessionController.startEditing();
             sharedState.sessionController = sessionController;
 

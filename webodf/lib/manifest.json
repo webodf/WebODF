@@ -228,6 +228,7 @@
         "ops.OdtCursor",
         "ops.OdtDocument",
         "ops.OpAddCursor",
+        "ops.OpRemoveCursor",
         "ops.Operation",
         "ops.Session"
     ],

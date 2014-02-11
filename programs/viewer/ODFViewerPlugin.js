@@ -144,7 +144,7 @@ function ODFViewerPlugin() {
                         }
                     });
                     session.enqueue([op]);
-                    sessionController.registerLocalCursor();
+                    sessionController.insertLocalCursor();
                 }
 
                 self.onLoad();

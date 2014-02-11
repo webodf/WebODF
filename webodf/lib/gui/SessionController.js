@@ -638,24 +638,36 @@
         }
 
         /**
-         * Adds a local cursor.
+         * Inserts the local cursor.
+         * @return {undefined}
          */
-        function registerLocalCursor() {
+        function insertLocalCursor() {
+            runtime.assert(session.getOdtDocument().getCursor(inputMemberId) === undefined, "Inserting local cursor a second time.");
+
             var op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
             session.enqueue([op]);
         }
-        this.registerLocalCursor = registerLocalCursor;
+        this.insertLocalCursor = insertLocalCursor;
+
+
+        /**
+         * Removes the local cursor.
+         * @return {undefined}
+         */
+        function removeLocalCursor() {
+            runtime.assert(session.getOdtDocument().getCursor(inputMemberId) !== undefined, "Removing local cursor without inserting before.");
+
+            var op = new ops.OpRemoveCursor();
+            op.init({memberid: inputMemberId});
+            session.enqueue([op]);
+        }
+        this.removeLocalCursor = removeLocalCursor;
 
         /**
          * @return {undefined}
          */
         this.startEditing = function () {
-            var localCursor = session.getOdtDocument().getCursor(inputMemberId);
-            if (!localCursor) {
-                registerLocalCursor();
-            }
-
             inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionStart, textController.removeCurrentSelection);
             inputMethodEditor.subscribe(gui.InputMethodEditor.signalCompositionEnd, insertNonEmptyData);
 
