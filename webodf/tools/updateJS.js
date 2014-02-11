@@ -260,7 +260,7 @@ function Main(cmakeListPath) {
             sortedTyped,
             compiledFiles;
         compiledFiles = Object.keys(lib).filter(function (path) {
-            return ignoredFiles.indexOf(path) === -1;
+            return ignoredFiles.indexOf(deNormalizePath(path)) === -1;
         }).sort();
         sortedTyped = createOrderedList(compiledFiles, lib, {});
         createCMakeLists(sortedTyped.map(deNormalizePath));
@@ -277,7 +277,8 @@ function Main(cmakeListPath) {
             var re = new RegExp("// MODULES\n[^!]+!");
             content = content.replace(re,
                 "// MODULES\n            'lib/" +
-                modules.join("',\n            'lib/") + "', // !");
+                modules.map(deNormalizePath)
+                        .join("',\n            'lib/") + "', // !");
             saveIfDifferent(path, content, function () {
                 console.log("karma.conf.js was updated. Rerun the build.");
             });
