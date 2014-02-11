@@ -173,8 +173,8 @@
         "core.DomUtils",
         "core.PositionFilterChain",
         "core.StepIterator",
-        "gui.WordBoundaryFilter",
         "odf.OdfUtils",
+        "odf.WordBoundaryFilter",
         "ops.OdtCursor",
         "ops.OpMoveCursor",
         "ops.Operation",
@@ -291,12 +291,6 @@
     "gui.UndoStateRules": [
         "ops.Operation"
     ],
-    "gui.WordBoundaryFilter": [
-        "core.PositionFilter",
-        "core.PositionIterator",
-        "odf.OdfUtils",
-        "ops.OdtDocument"
-    ],
     "odf.CommandLineTools": [
         "odf.OdfCanvas",
         "odf.OdfContainer"
@@ -375,6 +369,12 @@
         "odf.Formatting",
         "odf.Namespaces",
         "odf.ObjectNameGenerator"
+    ],
+    "odf.WordBoundaryFilter": [
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "odf.OdfUtils",
+        "ops.OdtDocument"
     ],
     "ops.Canvas": [
     ],

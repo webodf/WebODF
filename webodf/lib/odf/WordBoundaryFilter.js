@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, NodeFilter, core, runtime, gui, odf*/
+/*global Node, NodeFilter, core, runtime, odf*/
 
 /**
  * A filter that allows a position if it is in front of a word, picture etc.
@@ -66,11 +66,11 @@
  * @constructor
  * @implements {core.PositionFilter}
  * @param {!ops.OdtDocument} odtDocument
- * @param {!gui.WordBoundaryFilter.IncludeWhitespace} includeWhitespace Specify the type of whitespace to include within
+ * @param {!odf.WordBoundaryFilter.IncludeWhitespace} includeWhitespace Specify the type of whitespace to include within
  *  the word boundary. TRAILING causes the accepted position to be after the whitespace trailing a word, while LEADING
  *  causes the accepted position to be just after the word boundary (but before the trailing whitespace).
  */
-gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitespace) {
+odf.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitespace) {
     "use strict";
     var TEXT_NODE = Node.TEXT_NODE,
         ELEMENT_NODE = Node.ELEMENT_NODE,
@@ -83,9 +83,9 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitesp
         /**@const*/
         FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         /**@const*/
-        TRAILING = gui.WordBoundaryFilter.IncludeWhitespace.TRAILING,
+        TRAILING = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
         /**@const*/
-        LEADING = gui.WordBoundaryFilter.IncludeWhitespace.LEADING,
+        LEADING = odf.WordBoundaryFilter.IncludeWhitespace.LEADING,
         /**
          * @enum {number}
          */
@@ -206,7 +206,7 @@ gui.WordBoundaryFilter = function WordBoundaryFilter(odtDocument, includeWhitesp
  * Type of whitespace to include within the word boundary
  * @enum {!number}
  */
-gui.WordBoundaryFilter.IncludeWhitespace = {
+odf.WordBoundaryFilter.IncludeWhitespace = {
     /**@const*/None: 0,
     /**@const*/TRAILING: 1,
     /**@const*/LEADING: 2
@@ -214,5 +214,5 @@ gui.WordBoundaryFilter.IncludeWhitespace = {
 
 (function() {
     "use strict";
-    return gui.WordBoundaryFilter;
+    return odf.WordBoundaryFilter;
 }());

@@ -48,8 +48,8 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         baseFilter = odtDocument.getPositionFilter(),
         keyboardMovementsFilter = new core.PositionFilterChain(),
         rootFilter = odtDocument.createRootFilter(inputMemberId),
-        TRAILING_SPACE = gui.WordBoundaryFilter.IncludeWhitespace.TRAILING,
-        LEADING_SPACE = gui.WordBoundaryFilter.IncludeWhitespace.LEADING;
+        TRAILING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
+        LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING;
 
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
@@ -67,11 +67,11 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * Create a new step iterator that will iterate by word boundaries
      * @param {!Node} node
      * @param {!number} offset
-     * @param {!gui.WordBoundaryFilter.IncludeWhitespace} includeWhitespace
+     * @param {!odf.WordBoundaryFilter.IncludeWhitespace} includeWhitespace
      * @return {!core.StepIterator}
      */
     function createWordBoundaryStepIterator(node, offset, includeWhitespace) {
-        var wordBoundaryFilter = new gui.WordBoundaryFilter(odtDocument, includeWhitespace);
+        var wordBoundaryFilter = new odf.WordBoundaryFilter(odtDocument, includeWhitespace);
         return odtDocument.createStepIterator(node, offset, [baseFilter, rootFilter, wordBoundaryFilter],
             odtDocument.getRootElement(node));
     }
